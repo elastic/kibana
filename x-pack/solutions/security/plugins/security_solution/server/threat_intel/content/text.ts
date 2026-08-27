@@ -467,8 +467,9 @@ const localName = (name: string): string => name.slice(name.lastIndexOf(':') + 1
  * Only peels a wrapper that is the sole meaningful child, so a wrapper sitting alongside
  * real content is left in place. Depth-bounded because the loop is driven by input shape.
  */
-const peelFeedWrappers = (nodes: ParsedNode[]): ParsedNode[] => {
+const peelFeedWrappers = (nodes: ParsedNode[]): { nodes: ParsedNode[]; peeled: boolean } => {
   let current = nodes;
+  let peeled = false;
 
   for (let depth = 0; depth < 8; depth++) {
     // Comments and directives are not content, and excluding them matters for the common
@@ -486,15 +487,45 @@ const peelFeedWrappers = (nodes: ParsedNode[]): ParsedNode[] => {
       isElement(only) &&
       FEED_WRAPPER_NAMES.has(localName(elementName(only)));
 
-    if (!isWrapper || only === undefined) return current;
+    if (!isWrapper || only === undefined) return { nodes: current, peeled };
     current = childrenOf(only);
+    peeled = true;
   }
 
-  return current;
+  return { nodes: current, peeled };
 };
 
-const carriesOwnMarkup = (nodes: ParsedNode[]): boolean =>
-  peelFeedWrappers(nodes).some((node) => isElement(node) || node.type === 'cdata');
+const payloadCarriesMarkup = (payload: ParsedNode[]): boolean =>
+  payload.some((node) => isElement(node) || node.type === 'cdata');
+
+/**
+ * Whether a decoded result should be parsed a second time.
+ *
+ * One gate rather than the two that had drifted apart in `stripHtml` and
+ * `htmlToStructured`. Two conditions, and the second is what makes a wrapper worth
+ * detecting:
+ *
+ * Markup of its own disqualifies the input, because escaped markup inside a real document
+ * is content the author chose to display and re-parsing it deleted the indicator the report
+ * was published to communicate.
+ *
+ * Otherwise a residual closing tag is the signal, *or* the payload arrived inside a
+ * transparent feed wrapper. A closing tag alone missed valid encoded bodies that have none:
+ * void elements never close, so
+ * `<description>evil.com&lt;br/&gt;bad.net&lt;img src="…"&gt;</description>` kept both tags
+ * and the image URL in `body_text`, where the URL is not visible text and became a false
+ * indicator. A body truncated by the parse cap before its close tag failed the same way. The
+ * wrapper is enough context on its own: a `<description>` whose only child is text is that
+ * feed's encoded body, closing tag or not.
+ *
+ * A bare payload with no wrapper still needs the closing tag, which is what keeps prose
+ * discussing `use &lt;br/&gt; carefully` from being reparsed and eaten.
+ */
+const shouldReparse = (nodes: ParsedNode[], decoded: string, inWrapper = false): boolean => {
+  const { nodes: payload, peeled } = peelFeedWrappers(nodes);
+  if (payloadCarriesMarkup(payload)) return false;
+  return peeled || inWrapper || RESIDUAL_CLOSING_TAG.test(decoded);
+};
 
 /** Stack entry: a node still to visit, or literal output to append after its subtree. */
 type WalkStep =
@@ -584,10 +615,17 @@ const rawTextOf = (nodes: ParsedNode[]): string => {
  */
 const parseCdataPayload = (raw: string): ParsedNode[] => {
   const nodes = parseTopLevelNodes(raw);
-  if (carriesOwnMarkup(nodes)) return nodes;
+  const { nodes: payload } = peelFeedWrappers(nodes);
 
-  const decoded = inlineTextOf(nodes, false);
-  return RESIDUAL_CLOSING_TAG.test(decoded) ? parseTopLevelNodes(decoded) : nodes;
+  // Checked before anything decodes the payload. `inlineTextOf` walks CDATA nodes by calling
+  // back into this function, so computing the decoded text first turned the pair into
+  // unbounded mutual recursion: the walker's depth bound lives on its stack and does not
+  // reach this path. `'<![CDATA['.repeat(1000)` hung outright.
+  if (payloadCarriesMarkup(payload)) return nodes;
+
+  // No closing tag required, because the CDATA section is itself the context: its payload is
+  // the feed's body whether or not that body happens to contain one.
+  return parseTopLevelNodes(inlineTextOf(nodes, false));
 };
 
 const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
@@ -667,7 +705,7 @@ export const stripHtml = (html: string | undefined | null): string => {
   if (!html) return '';
   const nodes = parseTopLevelNodes(capToParseBytes(html));
   const first = inlineTextOf(nodes, false);
-  const reparse = RESIDUAL_CLOSING_TAG.test(first) && !carriesOwnMarkup(nodes);
+  const reparse = shouldReparse(nodes, first);
   return collapseWhitespace(reparse ? extractPlainText(first) : first);
 };
 
@@ -860,7 +898,7 @@ export const htmlToStructured = (html: string | undefined | null): string => {
   if (!html) return '';
   const capped = capToParseBytes(html);
   const first = renderStructured(capped);
-  const reparse = RESIDUAL_CLOSING_TAG.test(first) && !carriesOwnMarkup(parseTopLevelNodes(capped));
+  const reparse = shouldReparse(parseTopLevelNodes(capped), first);
   return reparse ? renderStructured(first) : first;
 };
 

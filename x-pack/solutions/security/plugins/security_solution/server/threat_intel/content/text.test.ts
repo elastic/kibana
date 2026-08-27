@@ -1388,3 +1388,68 @@ describe('raw-text openers in non-markup context', () => {
     expect(elapsedMs).toBeLessThan(400);
   });
 });
+
+/**
+ * A transparent feed wrapper is context in its own right, so its payload is eligible for
+ * re-parse without a closing tag.
+ *
+ * Requiring one missed valid encoded bodies that have none. Void elements never close, so
+ * `<description>evil.com&lt;br/&gt;bad.net&lt;img src="…"&gt;</description>` kept both tags
+ * and the image URL in body_text, where the URL is not visible text and became a false
+ * indicator. A body truncated by the parse cap before its close tag failed the same way.
+ */
+describe('encoded feed bodies without a closing tag', () => {
+  it('re-parses an encoded body of only void elements', () => {
+    const result = stripHtml(
+      '<description>evil.com&lt;br/&gt;bad.net&lt;img src="https://false-ioc.test"&gt;</description>'
+    );
+
+    expect(result).toBe('evil.com bad.net');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('re-parses an encoded body truncated before its closing tag', () => {
+    expect(stripHtml('<description>&lt;p&gt;evil.com</description>')).toBe('evil.com');
+  });
+
+  it('re-parses through the full rss nesting', () => {
+    const result = stripHtml(
+      '<?xml version="1.0"?><rss><channel><item><description>' +
+        'evil.com&lt;img src="https://false-ioc.test"&gt;' +
+        '</description></item></channel></rss>'
+    );
+
+    expect(result).toBe('evil.com');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('re-parses a CDATA payload of only void elements', () => {
+    expect(stripHtml('<![CDATA[evil.com&lt;br/&gt;bad.net]]>')).toBe('evil.com bad.net');
+  });
+
+  it('applies structured boundaries to a void-only encoded body', () => {
+    expect(htmlToStructured('<description>evil.com&lt;br/&gt;bad.net</description>')).toBe(
+      'evil.com\nbad.net'
+    );
+  });
+
+  // Without a wrapper there is no context, so the closing tag is still required. This is
+  // what keeps prose discussing markup from being reparsed and eaten.
+  it.each([
+    ['a bare void element', 'evil.com&lt;br/&gt;bad.net', 'evil.com<br/>bad.net'],
+    ['prose mentioning a tag', 'use &lt;br/&gt; carefully', 'use <br/> carefully'],
+    ['a snippet displayed in code', '<code>&lt;br/&gt;</code>', '<br/>'],
+  ])('leaves %s alone', (_label, html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  // The walker reaches this path through `inlineTextOf`, which walks CDATA by calling back
+  // into it, so decoding before the markup check made the pair unboundedly recursive.
+  it('does not recurse on nested CDATA', () => {
+    const started = process.hrtime.bigint();
+    expect(() => stripHtml(`${'<![CDATA['.repeat(1000)}x]]>`)).not.toThrow();
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(2000);
+  });
+});
