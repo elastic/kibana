@@ -665,7 +665,7 @@ function setupMocks({
   staticKeys = undefined as { access_key_id: string; secret_access_key: string } | undefined,
   globalRegion = 'us-east-1',
   pkgVersion = '2.0.0',
-  deployAndDetectStep = {} as Record<string, unknown>,
+  detectAndReviewStep = {} as Record<string, unknown>,
   instances = undefined as
     | Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>
     | undefined,
@@ -675,21 +675,21 @@ function setupMocks({
   staticKeys?: { access_key_id: string; secret_access_key: string };
   globalRegion?: string;
   pkgVersion?: string;
-  deployAndDetectStep?: Record<string, unknown>;
+  detectAndReviewStep?: Record<string, unknown>;
   instances?: Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>;
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
     authenticateAndDeployStep: { connectorId, staticKeys },
-    deployAndDetectStep: {
+    detectAndReviewStep: {
       isDeploying: false,
       serviceStatuses: {},
       policyIdsByInstance: {},
       failedInstances: [],
-      ...deployAndDetectStep,
+      ...detectAndReviewStep,
     },
     awsServicesMap: (useAwsServicesMap as jest.Mock)(),
-    updateDeployAndDetectStep: jest.fn(),
+    updateDetectAndReviewStep: jest.fn(),
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
     registerDeployHandler: jest.fn(),
   });
@@ -726,13 +726,13 @@ describe('useDeploy', () => {
     expect(result.current.failedInstances).toEqual([]);
   });
 
-  it('initializes failedInstances from persisted deployAndDetectStep state (survives remount)', () => {
+  it('initializes failedInstances from persisted detectAndReviewStep state (survives remount)', () => {
     // Simulate the post-Back/Next remount: session storage still has a failure from a prior deploy,
     // but deployAttempted and local failedInstances are both reset to their initial values.
     // The hook must seed from the persisted store so the error callout remains visible.
     setupMocks({
       selectedServiceIds: ['ec2'],
-      deployAndDetectStep: {
+      detectAndReviewStep: {
         serviceStatuses: { ec2: 'error' },
         failedInstances: ['ec2'],
       },
@@ -866,7 +866,7 @@ describe('useDeploy', () => {
   it('navigates without resubmitting when all selected instances are already deployed', async () => {
     setupMocks({
       selectedServiceIds: ['ec2'],
-      deployAndDetectStep: { serviceStatuses: { ec2: 'receiving' } },
+      detectAndReviewStep: { serviceStatuses: { ec2: 'receiving' } },
     });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -882,7 +882,7 @@ describe('useDeploy', () => {
   it('navigates without resubmitting when deploy is in progress for all selected instances', async () => {
     setupMocks({
       selectedServiceIds: ['ec2'],
-      deployAndDetectStep: { isDeploying: true, serviceStatuses: { ec2: 'instantiating' } },
+      detectAndReviewStep: { isDeploying: true, serviceStatuses: { ec2: 'instantiating' } },
     });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -901,7 +901,7 @@ describe('useDeploy', () => {
     // trimmed to only the untracked member (lambda) — ec2 must not be re-included.
     setupMocks({
       selectedServiceIds: ['ec2', 'lambda'],
-      deployAndDetectStep: { serviceStatuses: { ec2: 'instantiating' } },
+      detectAndReviewStep: { serviceStatuses: { ec2: 'instantiating' } },
     });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -970,7 +970,7 @@ describe('useDeploy', () => {
     setupMocks({
       selectedServiceIds: ['ec2'],
       instances,
-      deployAndDetectStep: {
+      detectAndReviewStep: {
         serviceStatuses: {
           ec2: 'receiving',
           'ec2__dup-1': 'receiving',
@@ -1054,7 +1054,7 @@ describe('useDeploy', () => {
     it('is false when serviceStatuses is empty', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
-        deployAndDetectStep: { serviceStatuses: {} },
+        detectAndReviewStep: { serviceStatuses: {} },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
@@ -1063,7 +1063,7 @@ describe('useDeploy', () => {
     it('is false when status is instantiating (deploy in flight)', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
-        deployAndDetectStep: { serviceStatuses: { ec2: 'instantiating' } },
+        detectAndReviewStep: { serviceStatuses: { ec2: 'instantiating' } },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
@@ -1072,7 +1072,7 @@ describe('useDeploy', () => {
     it('is false when status is error', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
-        deployAndDetectStep: { serviceStatuses: { ec2: 'error' } },
+        detectAndReviewStep: { serviceStatuses: { ec2: 'error' } },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
@@ -1081,7 +1081,7 @@ describe('useDeploy', () => {
     it('is true when all members have status receiving', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
-        deployAndDetectStep: { serviceStatuses: { ec2: 'receiving' } },
+        detectAndReviewStep: { serviceStatuses: { ec2: 'receiving' } },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(true);
@@ -1090,7 +1090,7 @@ describe('useDeploy', () => {
     it('is true when all members have status detecting', () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
-        deployAndDetectStep: { serviceStatuses: { ec2: 'detecting' } },
+        detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(true);
@@ -1107,9 +1107,9 @@ describe('useDeploy', () => {
       await result.current.handleDeploy();
     });
 
-    const updateDeployAndDetectStep = mockUseOnboardingFlow.mock.results[0].value
-      .updateDeployAndDetectStep as jest.Mock;
-    const initialUpdate = updateDeployAndDetectStep.mock.calls[0][0];
+    const updateDetectAndReviewStep = mockUseOnboardingFlow.mock.results[0].value
+      .updateDetectAndReviewStep as jest.Mock;
+    const initialUpdate = updateDetectAndReviewStep.mock.calls[0][0];
 
     // Both services appear in the initial status update
     expect(initialUpdate.serviceStatuses.ec2).toBe('instantiating');

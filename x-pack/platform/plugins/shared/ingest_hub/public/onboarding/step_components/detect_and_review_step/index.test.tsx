@@ -9,16 +9,16 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../onboarding_flow_context', () => ({
+jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
 
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
-import { useOnboardingFlow } from '../onboarding_flow_context';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { DeployAndDetectStep } from './deploy_and_detect_step';
-import { AWS_SERVICES_MAP } from '../aws_service_matrix';
+import { DetectAndReviewStep } from '.';
+import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
@@ -30,7 +30,7 @@ function setupMocks({
     | undefined,
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
-    deployAndDetectStep: {
+    detectAndReviewStep: {
       serviceStatuses,
       policyIdsByInstance: {},
     },
@@ -45,12 +45,12 @@ function setupMocks({
 function renderStep(props: { onContinue?: () => void; onBack?: () => void } = {}) {
   return render(
     <I18nProvider>
-      <DeployAndDetectStep onContinue={props.onContinue ?? jest.fn()} onBack={props.onBack} />
+      <DetectAndReviewStep onContinue={props.onContinue ?? jest.fn()} onBack={props.onBack} />
     </I18nProvider>
   );
 }
 
-describe('DeployAndDetectStep', () => {
+describe('DetectAndReviewStep', () => {
   beforeEach(() => jest.clearAllMocks());
 
   describe('chip labels', () => {
@@ -126,7 +126,7 @@ describe('DeployAndDetectStep', () => {
 
       const onContinue = jest.fn();
       renderStep({ onContinue });
-      const btn = screen.getByTestId('deployAndDetectStep-continueButton');
+      const btn = screen.getByTestId('detectAndReviewStep-continueButton');
       expect(btn).toBeInTheDocument();
       fireEvent.click(btn);
       expect(onContinue).toHaveBeenCalledTimes(1);
@@ -136,7 +136,7 @@ describe('DeployAndDetectStep', () => {
       setupMocks({ serviceStatuses: {} });
 
       renderStep();
-      expect(screen.queryByTestId('deployAndDetectStep-continueButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('detectAndReviewStep-continueButton')).not.toBeInTheDocument();
     });
   });
 });

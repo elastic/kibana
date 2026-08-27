@@ -20,7 +20,7 @@ export interface AuthenticateAndDeployStepState {
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
 
-export interface DeployAndDetectStepState {
+export interface DetectAndReviewStepState {
   isDeploying: boolean;
   serviceStatuses: Record<string, ServiceChipState>;
   policyIdsByInstance: Record<string, string>;
@@ -43,7 +43,7 @@ interface PersistedServicesStep {
   selectedServiceIds: string[];
 }
 
-interface PersistedDeployAndDetectStep {
+interface PersistedDetectAndReviewStep {
   serviceStatuses: Record<string, ServiceChipState>;
   policyIdsByInstance: Record<string, string>;
   failedInstances: string[];
@@ -58,8 +58,8 @@ interface OnboardingFlowState {
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
-  deployAndDetectStep: DeployAndDetectStepState;
-  updateDeployAndDetectStep: (update: Partial<DeployAndDetectStepState>) => void;
+  detectAndReviewStep: DetectAndReviewStepState;
+  updateDetectAndReviewStep: (update: Partial<DetectAndReviewStepState>) => void;
   removeDeployInstance: (instanceId: string) => void;
   getLatestFailedInstances: () => string[];
   registerDeployHandler: (fn: (instanceIds?: string[]) => void) => void;
@@ -121,8 +121,10 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [persistedServices, setPersistedServices]
   );
 
-  const [persistedDeployAndDetectStep, setPersistedDeployAndDetectStep] =
-    useSessionStorage<PersistedDeployAndDetectStep>(
+  // Note: session key deliberately kept as 'deployAndDetectStep' — no migration needed
+  // (sessionStorage, one tab, dies on close, behind off-by-default feature flag).
+  const [persistedDetectAndReviewStep, setPersistedDetectAndReviewStep] =
+    useSessionStorage<PersistedDetectAndReviewStep>(
       getOnboardingSessionKey('aws', 'deployAndDetectStep'),
       {
         serviceStatuses: {},
@@ -137,20 +139,20 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const deployHandlerRef = useRef<((instanceIds?: string[]) => void) | null>(null);
 
-  // Ref always holds the latest persisted value so updateDeployAndDetectStep
+  // Ref always holds the latest persisted value so updateDetectAndReviewStep
   // reads current state even when called after an await (stale closure prevention).
-  const persistedDeployAndDetectStepRef = useRef(persistedDeployAndDetectStep);
-  persistedDeployAndDetectStepRef.current = persistedDeployAndDetectStep;
+  const persistedDetectAndReviewStepRef = useRef(persistedDetectAndReviewStep);
+  persistedDetectAndReviewStepRef.current = persistedDetectAndReviewStep;
 
-  const updateDeployAndDetectStep = useCallback(
-    (update: Partial<DeployAndDetectStepState>) => {
+  const updateDetectAndReviewStep = useCallback(
+    (update: Partial<DetectAndReviewStepState>) => {
       if (update.isDeploying !== undefined) {
         setIsDeploying(update.isDeploying);
       }
       const { isDeploying: _, ...rest } = update;
       if (Object.keys(rest).length > 0) {
-        const prev = persistedDeployAndDetectStepRef.current;
-        setPersistedDeployAndDetectStep({
+        const prev = persistedDetectAndReviewStepRef.current;
+        setPersistedDetectAndReviewStep({
           serviceStatuses: { ...(prev?.serviceStatuses ?? {}), ...(rest.serviceStatuses ?? {}) },
           policyIdsByInstance: {
             ...(prev?.policyIdsByInstance ?? {}),
@@ -162,17 +164,17 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         });
       }
     },
-    [setPersistedDeployAndDetectStep]
+    [setPersistedDetectAndReviewStep]
   );
 
   const removeDeployInstance = useCallback(
     (instanceId: string) => {
-      const prev = persistedDeployAndDetectStepRef.current;
+      const prev = persistedDetectAndReviewStepRef.current;
       const nextStatuses = { ...(prev?.serviceStatuses ?? {}) };
       delete nextStatuses[instanceId];
       const nextPolicyIds = { ...(prev?.policyIdsByInstance ?? {}) };
       delete nextPolicyIds[instanceId];
-      setPersistedDeployAndDetectStep({
+      setPersistedDetectAndReviewStep({
         serviceStatuses: nextStatuses,
         policyIdsByInstance: nextPolicyIds,
         failedInstances: (prev?.failedInstances ?? []).filter((id) => id !== instanceId),
@@ -181,11 +183,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ),
       });
     },
-    [setPersistedDeployAndDetectStep]
+    [setPersistedDetectAndReviewStep]
   );
 
   const getLatestFailedInstances = useCallback(
-    () => persistedDeployAndDetectStepRef.current?.failedInstances ?? [],
+    () => persistedDetectAndReviewStepRef.current?.failedInstances ?? [],
     []
   );
 
@@ -222,9 +224,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     staticKeys,
   };
 
-  const deployAndDetectStep: DeployAndDetectStepState = {
+  const detectAndReviewStep: DetectAndReviewStepState = {
     isDeploying,
-    ...persistedDeployAndDetectStep,
+    ...persistedDetectAndReviewStep,
   };
 
   return (
@@ -235,8 +237,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         setStaticKeys,
         servicesStep,
         setSelectedServiceIds,
-        deployAndDetectStep,
-        updateDeployAndDetectStep,
+        detectAndReviewStep,
+        updateDetectAndReviewStep,
         removeDeployInstance,
         getLatestFailedInstances,
         registerDeployHandler,

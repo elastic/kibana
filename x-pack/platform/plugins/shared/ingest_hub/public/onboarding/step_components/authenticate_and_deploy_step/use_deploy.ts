@@ -36,8 +36,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   const {
     servicesStep,
     authenticateAndDeployStep,
-    deployAndDetectStep,
-    updateDeployAndDetectStep,
+    detectAndReviewStep: deployAndDetectStep,
+    updateDetectAndReviewStep: updateDeployAndDetectStep,
     getLatestFailedInstances,
     registerDeployHandler,
     awsServicesMap: servicesMap,

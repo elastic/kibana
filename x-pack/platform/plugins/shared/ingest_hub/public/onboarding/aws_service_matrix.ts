@@ -21,7 +21,8 @@ export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
 
 /**
  * Log type identifiers used by the ECF CloudFormation templates.
- * Services with `ecfLogType` set are deployed via the "Launch CloudFormation" button in Step 4.
+ * Services with `ecfLogType` set are deployed via the "Launch CloudFormation" button in the
+ * Authenticate & Deploy step (step 3 in the wizard).
  * @see https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
  */
 export type EcfLogType = 'vpcflow' | 'cloudtrail' | 'waf';

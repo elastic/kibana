@@ -21,15 +21,15 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
-import { AWS_SERVICES_MAP } from '../aws_service_matrix';
-import { useOnboardingFlow } from '../onboarding_flow_context';
-import type { ServiceChipState } from '../onboarding_flow_context';
+import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
+import type { ServiceChipState } from '../../onboarding_flow_context';
 import {
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceInstance,
   type ServiceSettingsPersistedState,
-} from './service_settings_step/use_service_settings';
-import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
+} from '../service_settings_step/use_service_settings';
+import { useEcfDeployment, EcfDeploymentSection } from '../ecf_deployment_section';
 
 const CHIP_COLORS: Record<ServiceChipState, string> = {
   instantiating: 'default',
@@ -44,15 +44,15 @@ const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   serviceVars: {},
 };
 
-interface DeployAndDetectStepProps {
+interface DetectAndReviewStepProps {
   onContinue: () => void;
   onBack?: () => void;
 }
 
-export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
+export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { deployAndDetectStep } = useOnboardingFlow();
-  const { serviceStatuses } = deployAndDetectStep;
+  const { detectAndReviewStep } = useOnboardingFlow();
+  const { serviceStatuses } = detectAndReviewStep;
 
   // Read service settings (global region + per-instance vars + instances) from session storage.
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -110,7 +110,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div data-test-subj="onboardingStep-deploy-and-detect">
+    <div data-test-subj="onboardingStep-detect-and-review">
       {/* ── ECF section ─────────────────────────────────────────────────── */}
       {hasAnyEcf && <EcfDeploymentSection {...sectionProps} />}
       {hasAnyEcf && hasStarted && <EuiHorizontalRule />}
@@ -119,7 +119,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
       {hasStarted && (
         <>
           <EuiSpacer size="m" />
-          <EuiFlexGroup wrap gutterSize="s" data-test-subj="deployAndDetectStep-serviceChips">
+          <EuiFlexGroup wrap gutterSize="s" data-test-subj="detectAndReviewStep-serviceChips">
             {agentlessStatuses.map(([instanceId, state]) => (
               <EuiFlexItem grow={false} key={instanceId}>
                 <EuiBadge color={CHIP_COLORS[state]}>{getChipLabel(instanceId)}</EuiBadge>
@@ -138,7 +138,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
               {onBack && (
                 <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
                   <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.backButton"
+                    id="xpack.ingestHub.detectAndReviewStep.backButton"
                     defaultMessage="Back"
                   />
                 </EuiButtonEmpty>
@@ -149,10 +149,10 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                 <EuiButton
                   fill
                   onClick={onContinue}
-                  data-test-subj="deployAndDetectStep-continueButton"
+                  data-test-subj="detectAndReviewStep-continueButton"
                 >
                   <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.continueButton"
+                    id="xpack.ingestHub.detectAndReviewStep.continueButton"
                     defaultMessage="AWS Overview"
                   />
                 </EuiButton>
