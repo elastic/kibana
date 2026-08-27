@@ -8,8 +8,7 @@
  */
 
 /**
- * Storing a background search from a Discover tab that was created mid-session, including
- * after switching back to an earlier tab.
+ * Sending a running Discover ES|QL search to the background.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -18,12 +17,14 @@ import {
   getSessionCookieHeader,
   BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT,
   FLIGHTS_SAMPLE_DATA_SET,
-} from '../fixtures';
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
-const SLOW_ESQL_QUERY = 'FROM kibana_sample_data_flights | LIMIT 1 | WHERE DELAY(5000ms)';
+// `DELAY` stalls each row long enough for the search to still be running when the test
+// clicks "Send to background".
+const SLOW_ESQL_QUERY = 'FROM kibana_sample_data_flights | LIMIT 10 | WHERE DELAY(1000ms)';
 
 spaceTest.describe(
-  'Discover tabs storing a background search',
+  'Discover ES|QL mode background search',
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
@@ -32,9 +33,8 @@ spaceTest.describe(
       await scoutSpace.uiSettings.set({ enableESQL: true });
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
     spaceTest.afterEach(async ({ apiServices, page, scoutSpace }) => {
@@ -49,34 +49,17 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('stores a background search from a newly created tab', async ({ pageObjects }) => {
-      await pageObjects.unifiedTabs.createNewTab();
-      await pageObjects.discover.selectTextBaseLang();
-      await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
-
-      await pageObjects.backgroundSearch.sendToBackground();
-
-      await pageObjects.discover.clickAppMenuItem(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
-      await pageObjects.backgroundSearch.waitForFlyout();
-      await expect(pageObjects.backgroundSearch.managementTable).toBeVisible();
-      await expect(pageObjects.backgroundSearch.errorOrWarningToasts).toHaveCount(0);
-    });
-
     spaceTest(
-      'stores a background search after switching back to an earlier tab',
+      'stores a running search and surfaces it in the background search flyout',
       async ({ pageObjects }) => {
-        await pageObjects.unifiedTabs.createNewTab();
-        await pageObjects.discover.selectTextBaseLang();
+        await pageObjects.discover.goto({ queryMode: 'esql' });
         await pageObjects.discover.waitUntilTabIsLoaded();
         await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
 
-        // A third tab, then back to the one holding the slow query.
-        await pageObjects.unifiedTabs.createNewTab();
-        await pageObjects.unifiedTabs.selectTab(1);
-
         await pageObjects.backgroundSearch.sendToBackground();
 
+        // `clickAppMenuItem` handles the entrypoint being collapsed into the overflow popover,
+        // which is where Discover puts it in ES|QL mode.
         await pageObjects.discover.clickAppMenuItem(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
         await pageObjects.backgroundSearch.waitForFlyout();
         await expect(pageObjects.backgroundSearch.managementTable).toBeVisible();

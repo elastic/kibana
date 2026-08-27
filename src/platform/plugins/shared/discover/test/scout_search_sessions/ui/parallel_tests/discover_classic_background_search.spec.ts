@@ -22,7 +22,7 @@ import {
   DISCOVER_DEFAULT_KBN_ARCHIVE,
   LOGSTASH_TIME_RANGE,
   STALLING_DSL_FILTER,
-} from '../fixtures';
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
 spaceTest.describe(
   'Discover classic mode background search',

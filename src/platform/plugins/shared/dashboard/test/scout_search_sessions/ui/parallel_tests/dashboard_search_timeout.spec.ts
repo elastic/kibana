@@ -16,7 +16,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, findLoadedDashboardId, DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE } from '../fixtures';
+import {
+  spaceTest,
+  findLoadedDashboardId,
+  DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
 const TIMED_OUT_DASHBOARD_TITLE = 'Delayed 15s';
 // Holds four panels: one undelayed, one delayed 5s and two delayed 15s.

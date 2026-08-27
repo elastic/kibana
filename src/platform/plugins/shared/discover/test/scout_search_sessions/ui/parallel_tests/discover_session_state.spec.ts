@@ -18,7 +18,7 @@ import {
   BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT,
   DISCOVER_DEFAULT_KBN_ARCHIVE,
   LOGSTASH_TIME_RANGE,
-} from '../fixtures';
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
 const FAKE_SEARCH_SESSION_ID = '__test__';
 

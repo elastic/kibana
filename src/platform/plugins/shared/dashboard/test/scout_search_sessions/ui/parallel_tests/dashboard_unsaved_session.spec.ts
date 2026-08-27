@@ -14,7 +14,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, getSessionCookieHeader, FLIGHTS_SAMPLE_DATA_SET } from '../fixtures';
+import {
+  spaceTest,
+  getSessionCookieHeader,
+  FLIGHTS_SAMPLE_DATA_SET,
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
 const SAVED_SEARCH_TITLE = 'Unsaved dashboard slow query';
 const SLOW_ESQL_QUERY = 'FROM kibana_sample_data_flights | LIMIT 1 | WHERE DELAY(1500ms)';

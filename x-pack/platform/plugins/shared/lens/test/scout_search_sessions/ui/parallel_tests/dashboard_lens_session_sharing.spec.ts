@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -18,7 +16,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, LENS_BASIC_KBN_ARCHIVE, LOGSTASH_TIME_RANGE } from '../fixtures';
+import {
+  spaceTest,
+  LENS_BASIC_KBN_ARCHIVE,
+  LOGSTASH_TIME_RANGE,
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
 const LENS_TITLE = 'Artistpreviouslyknownaslens';
 

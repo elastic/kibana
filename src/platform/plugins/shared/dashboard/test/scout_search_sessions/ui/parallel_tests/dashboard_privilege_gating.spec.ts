@@ -21,7 +21,7 @@ import {
   findLoadedDashboardId,
   LOGSTASH_MONTH_TIME_RANGE,
   SESSION_IN_ANOTHER_SPACE_KBN_ARCHIVE,
-} from '../fixtures';
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
 const DELAYED_DASHBOARD_TITLE = 'A Dashboard in another space + Delay 5s';
 const PLAIN_DASHBOARD_TITLE = 'A Dashboard in another space';

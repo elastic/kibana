@@ -26,7 +26,7 @@ import {
   LOGSTASH_MONTH_TIME_RANGE,
   SESSION_IN_ANOTHER_SPACE_KBN_ARCHIVE,
   STALLING_DSL_FILTER,
-} from '../fixtures';
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
 /** Role with full Discover access in one space, scoped to `logstash-*`. */
 const discoverAllRole = (spaceId: string): KibanaRole => ({

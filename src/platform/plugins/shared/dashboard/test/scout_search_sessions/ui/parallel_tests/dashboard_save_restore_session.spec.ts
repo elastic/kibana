@@ -22,7 +22,7 @@ import {
   getSessionCookieHeader,
   findLoadedDashboardId,
   DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
-} from '../fixtures';
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
 const UNDELAYED_DASHBOARD_TITLE = 'Not Delayed';
 const DELAYED_DASHBOARD_TITLE = 'Delayed 5s';

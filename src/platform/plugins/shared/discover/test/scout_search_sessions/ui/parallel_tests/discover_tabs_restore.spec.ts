@@ -27,7 +27,7 @@ import {
   FLIGHTS_SAMPLE_DATA_SET,
   LOGSTASH_TIME_RANGE,
   STALLING_DSL_FILTER,
-} from '../fixtures';
+} from '@kbn/data-plugin/test/scout_search_sessions/ui/fixtures';
 
 const CLASSIC_BACKGROUND_SEARCH_NAME = 'Classic background search';
 const ESQL_BACKGROUND_SEARCH_NAME = 'ESQL background search';
