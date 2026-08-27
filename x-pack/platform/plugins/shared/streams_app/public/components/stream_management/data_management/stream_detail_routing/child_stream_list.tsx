@@ -191,7 +191,6 @@ export function ChildStreamList({ availableStreams = [] }: { availableStreams?: 
             idSelected={selectedChildStreamMode}
             onChange={handleModeChange}
             buttonSize="compressed"
-            color="primary"
             data-test-subj="streamsAppChildStreamTypeSelector"
           />
         </div>
