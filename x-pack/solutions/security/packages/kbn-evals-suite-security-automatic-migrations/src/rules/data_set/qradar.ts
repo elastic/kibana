@@ -30,4 +30,12 @@ export const qradarPrebuiltRules: PrebuiltRuleFixture[] = [
       'Detects successful Microsoft Entra ID interactive sign-ins for the same user from two geographically separated locations within a 90-minute window, where the implied travel speed between the two points exceeds what is physically possible (>=800 km/h, faster than modern commercial airliners) and the geographic separation is at least 500 km. This pattern indicates either VPN/proxy use or an adversary signing in to a compromised account from a different location than the legitimate user. Non-interactive sign-in categories are excluded because backend token refresh activity routinely egresses through cloud regions unrelated to the user. This activity is often observed from AiTM phishing kits or successful phishing campaigns.',
     mitreAttackIds: ['T1078', 'T1078.004', 'T1528', 'T1557'],
   },
+  {
+    // qradar-prebuilt-match-003
+    ruleId: 'b240bfb8-26b7-4e5e-924e-218144a3fa71',
+    name: 'Spike in Network Traffic',
+    description:
+      'A machine learning job detected an unusually large spike in network traffic. Such a burst of traffic, if not caused by a surge in business activity, can be due to suspicious or malicious activity. Large-scale data exfiltration may produce a burst of network traffic; this could also be due to unusually large amounts of reconnaissance or enumeration traffic. Denial-of-service attacks or traffic floods may also produce such a surge in traffic.',
+    mitreAttackIds: ['T1041', 'T1046', 'T1498', 'T1595'],
+  },
 ];

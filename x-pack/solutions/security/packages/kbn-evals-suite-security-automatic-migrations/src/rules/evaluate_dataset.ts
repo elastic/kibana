@@ -12,7 +12,7 @@ import type {
   EvalsExecutorClient,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { RuleExample, RuleInput } from '../../datasets/rules/types';
+import type { RuleExample, RuleInput, RuleVendor } from '../../datasets/rules/types';
 import type { RuleMigrationClient, RuleMigrationResult } from './migration_client';
 import {
   createCustomQueryAccuracyEvaluator,
@@ -95,7 +95,7 @@ export function createRuleEvaluateDataset({
   vendor,
 }: {
   dataset: EvaluationDataset<RuleExample>;
-  vendor: 'splunk' | 'qradar';
+  vendor: RuleVendor;
 }) => Promise<void> {
   const sharedEvaluators: Array<Evaluator<RuleExample, RuleMigrationResult>> = [
     createCustomQueryAccuracyEvaluator(),
@@ -109,7 +109,10 @@ export function createRuleEvaluateDataset({
     createHallucinationDetectionEvaluator(evaluators),
   ];
 
-  const qradarEvaluators: Array<Evaluator<RuleExample, RuleMigrationResult>> = [
+  // QRadar and Sentinel both route through the agent's NL-interpretation branch (see
+  // `isNlInterpretationVendor` in the rule-migration `graph_v2.ts`), so the faithfulness of that
+  // intermediate description is only meaningful — and only measurable — for those two vendors.
+  const nlInterpretationEvaluators: Array<Evaluator<RuleExample, RuleMigrationResult>> = [
     createNlDescriptionFaithfulnessEvaluator(evaluators),
   ];
 
@@ -118,10 +121,10 @@ export function createRuleEvaluateDataset({
     vendor,
   }: {
     dataset: EvaluationDataset<RuleExample>;
-    vendor: 'splunk' | 'qradar';
+    vendor: RuleVendor;
   }): Promise<void> {
     const allEvaluators =
-      vendor === 'qradar' ? [...sharedEvaluators, ...qradarEvaluators] : sharedEvaluators;
+      vendor === 'splunk' ? sharedEvaluators : [...sharedEvaluators, ...nlInterpretationEvaluators];
 
     let totalExamples = 0;
     let succeeded = 0;

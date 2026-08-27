@@ -6,15 +6,18 @@
  */
 
 import { qradarPrebuiltRules } from './qradar';
+import { sentinelPrebuiltRules } from './sentinel';
 import { splunkPrebuiltRules } from './splunk';
 import type { PrebuiltRuleFixture } from './types';
 
 export type { PrebuiltRuleFixture } from './types';
 export { splunkPrebuiltRules } from './splunk';
 export { qradarPrebuiltRules } from './qradar';
+export { sentinelPrebuiltRules } from './sentinel';
 
 /** Every vendor's prebuilt-rule fixtures, in a single list for `loadPrebuiltRules`. */
 export const prebuiltRules: PrebuiltRuleFixture[] = [
   ...splunkPrebuiltRules,
   ...qradarPrebuiltRules,
+  ...sentinelPrebuiltRules,
 ];
