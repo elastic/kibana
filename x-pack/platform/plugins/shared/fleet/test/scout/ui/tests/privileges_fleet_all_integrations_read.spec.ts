@@ -65,9 +65,8 @@ test.describe(
       await integrationHome.navigateTo();
       await integrationHome.waitForPageToLoad();
 
-      // Scroll to and click the Apache integration
-      await integrationHome.scrollToIntegration('apache');
-      await integrationHome.clickIntegrationCard('apache');
+      // Navigate directly to the Apache detail page to verify the button state based on privileges
+      await integrationHome.navigateToDetailPage('apache');
 
       // Verify the Add Integration button is disabled
       await expect(integrationHome.getAddIntegrationPolicyButton()).toBeDisabled();

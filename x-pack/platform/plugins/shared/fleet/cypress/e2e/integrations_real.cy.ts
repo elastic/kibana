@@ -132,7 +132,7 @@ describe('Add Integration - Real API', () => {
     cy.getBySel(LOADING_SPINNER).should('not.exist');
     cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
     cy.getBySel(getIntegrationCard(integration)).click();
-    addIntegration();
+    addIntegration({ skipButtonClick: true });
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
     cy.getBySel(AGENT_POLICY_NAME_LINK).contains('Agent policy 1');
   });
@@ -290,7 +290,7 @@ describe.skip('Dashboards link for installed integration - Real API', () => {
     cy.getBySel(LOADING_SPINNER).should('not.exist');
     cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
     cy.getBySel(getIntegrationCard(integration)).click();
-    addIntegration();
+    addIntegration({ skipButtonClick: true });
     cy.visit('/app/integrations/installed');
     cy.getBySel(INSTALLED_INTEGRATIONS_TABLE_ROW)
       .contains('Apache')

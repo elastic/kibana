@@ -91,9 +91,8 @@ test.describe('When the user has Editor built-in role', { tag: tags.stateful.cla
     await integrationHome.navigateTo();
     await integrationHome.waitForPageToLoad();
 
-    // Scroll to and click the Apache integration
-    await integrationHome.scrollToIntegration('apache');
-    await integrationHome.clickIntegrationCard('apache');
+    // Navigate directly to the Apache detail page to verify the button state based on privileges
+    await integrationHome.navigateToDetailPage('apache');
 
     // Verify the Add Integration button is NOT disabled (enabled)
     await expect(integrationHome.getAddIntegrationPolicyButton()).toBeEnabled();
