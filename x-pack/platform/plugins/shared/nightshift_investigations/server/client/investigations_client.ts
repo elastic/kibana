@@ -136,10 +136,7 @@ function toSubjectReference(
   input: Record<string, unknown> | undefined
 ): InvestigationSubjectReference {
   const ctx = isPlainObject(input?.context) ? input.context : undefined;
-  const summary =
-    asNonEmptyText(ctx?.subject_summary) ??
-    asNonEmptyText(ctx?.summary) ??
-    asNonEmptyText(ctx?.name);
+  const summary = asNonEmptyText(ctx?.subject_summary);
 
   return summary ? { ...subject, summary } : subject;
 }

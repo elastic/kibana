@@ -265,51 +265,13 @@ describe('NightshiftInvestigationsClient.get()', () => {
       });
     });
 
-    it('prefers the declared summary over the legacy context keys', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: {
-              context: {
-                source: 'alert',
-                alert_id: 'alert-99',
-                subject_summary: 'Declared',
-                summary: 'Legacy summary',
-                name: 'Legacy name',
-              },
-            },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject?.summary).toBe('Declared');
-    });
-
-    it.each([
-      ['summary', { summary: 'Legacy summary' }, 'Legacy summary'],
-      ['name', { name: 'Legacy name' }, 'Legacy name'],
-    ])(
-      'falls back to context.%s for investigations started before the field was declared',
-      async (_label, legacyContext, expected) => {
-        mockManagement.getWorkflowExecution.mockResolvedValue(
-          makeExecution({
-            context: {
-              inputs: { context: { source: 'alert', alert_id: 'alert-99', ...legacyContext } },
-            },
-          })
-        );
-        const result = await makeClient().get('inv-1');
-        expect(result.subject?.summary).toBe(expected);
-      }
-    );
-
-    it('omits the summary rather than surfacing the generic message start() synthesizes', async () => {
+    it('omits the summary when the caller declared none', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           context: {
             inputs: {
               message: 'Investigation requested for alert alert-99',
-              context: { source: 'alert', alert_id: 'alert-99' },
+              context: { source: 'alert', alert_id: 'alert-99', summary: 'Not a declared summary' },
             },
           },
         })
