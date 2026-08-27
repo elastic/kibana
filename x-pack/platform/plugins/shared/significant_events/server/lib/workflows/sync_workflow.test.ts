@@ -57,4 +57,9 @@ describe('sync.yaml managed workflow definition', () => {
   it('continues the sweep when a single stream fails to reconcile', () => {
     assertYamlContains('iteration-on-failure:\n          continue: true');
   });
+
+  it('closes stale events after reconciling knowledge indicators', () => {
+    assertYamlContains("name: 'Significant Events Cleanup'");
+    assertYamlContains('/internal/significant_events/events/_cleanup');
+  });
 });

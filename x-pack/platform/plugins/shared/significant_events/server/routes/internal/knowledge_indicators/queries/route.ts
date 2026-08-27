@@ -41,6 +41,7 @@ import type { PersistQueriesResult } from '../../../../lib/significant_events/pe
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
 import type { PromoteQueriesResult } from '../../../../lib/knowledge_indicators';
+import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cleanup_stale_events';
 
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
@@ -307,6 +308,25 @@ const bulkDeleteQueriesRoute = createServerRoute({
             `queryIds=[${queryIds.join(',')}]${orphanContext}`
         );
         failed += queryIds.length;
+      }
+    }
+
+    const candidateRuleIds = [
+      ...new Set(queryLinks.flatMap((link) => (link.rule_id ? [link.rule_id] : []))),
+    ];
+    if (candidateRuleIds.length > 0) {
+      try {
+        const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+        await cleanupStaleEvents({
+          eventClient: scopedClients.getEventClient(),
+          rulesClient,
+          candidateRuleIds,
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        sigEventsLogger.error(
+          `Failed to clean up significant events after bulk query deletion: ${errorMessage}`
+        );
       }
     }
 

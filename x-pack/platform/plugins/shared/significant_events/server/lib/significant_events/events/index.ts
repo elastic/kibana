@@ -11,3 +11,8 @@ export type { SignificantEvent, StoredEvent } from './data_stream';
 export { EventClient } from './event_client';
 export type { EventDataStreamClient } from './event_client';
 export { EventService } from './event_service';
+export {
+  cleanupStaleEvents,
+  STALE_EVENT_ASSESSMENT_NOTE,
+  type CleanupStaleEventsResult,
+} from './cleanup_stale_events';

@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
+import type { EventClient } from './event_client';
+import { updateSignificantEventStatus } from './update_event_status';
+
+const EVENTS_PAGE_SIZE = 1000;
+
+export const STALE_EVENT_ASSESSMENT_NOTE =
+  'Automatically closed because none of its backing rules exist.';
+
+export interface CleanupStaleEventsResult {
+  scanned: number;
+  closed: number;
+  kept: number;
+  skipped: number;
+}
+
+const getBackingRuleIds = (event: SignificantEventResponse): string[] => [
+  ...new Set(
+    (event.signals ?? []).flatMap((signal) =>
+      signal.type === 'detection' && signal.metadata.rule_uuid ? [signal.metadata.rule_uuid] : []
+    )
+  ),
+];
+
+export const cleanupStaleEvents = async ({
+  eventClient,
+  rulesClient,
+  candidateRuleIds,
+}: {
+  eventClient: EventClient;
+  rulesClient: IRulesManagementClient;
+  candidateRuleIds?: string[];
+}): Promise<CleanupStaleEventsResult> => {
+  const uniqueCandidateRuleIds = candidateRuleIds
+    ? [...new Set(candidateRuleIds)].filter(Boolean)
+    : undefined;
+
+  if (uniqueCandidateRuleIds?.length === 0) {
+    return { scanned: 0, closed: 0, kept: 0, skipped: 0 };
+  }
+
+  const events: SignificantEventResponse[] = [];
+  let page = 1;
+  let total = 0;
+
+  do {
+    const result = await eventClient.findLatestByCurrentStatePaginated({
+      status: ['open'],
+      ruleUuids: uniqueCandidateRuleIds,
+      page,
+      perPage: EVENTS_PAGE_SIZE,
+    });
+    events.push(...result.hits);
+    total = result.total;
+    page += 1;
+    if (result.hits.length === 0) {
+      break;
+    }
+  } while (events.length < total);
+
+  const eventsWithRuleIds = events.map((event) => ({
+    event,
+    ruleIds: getBackingRuleIds(event),
+  }));
+  const allRuleIds = [...new Set(eventsWithRuleIds.flatMap(({ ruleIds }) => ruleIds))];
+
+  if (allRuleIds.length === 0) {
+    return { scanned: events.length, closed: 0, kept: 0, skipped: events.length };
+  }
+
+  // Resolve every rule before writing anything. A lookup failure must leave all events untouched.
+  const existingRuleIds = new Set(await rulesClient.findExistingRuleIds(allRuleIds));
+  const staleEvents = eventsWithRuleIds.filter(
+    ({ ruleIds }) => ruleIds.length > 0 && ruleIds.every((ruleId) => !existingRuleIds.has(ruleId))
+  );
+
+  let closed = 0;
+  for (const { event } of staleEvents) {
+    const result = await updateSignificantEventStatus({
+      eventClient,
+      eventUuid: event.event_uuid,
+      status: 'closed',
+      assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
+      expectedCurrentStatus: 'open',
+      expectedCurrentEventUuid: event.event_uuid,
+    });
+    closed += result.updated;
+  }
+
+  const skipped = eventsWithRuleIds.filter(({ ruleIds }) => ruleIds.length === 0).length;
+  return {
+    scanned: events.length,
+    closed,
+    kept: events.length - closed - skipped,
+    skipped,
+  };
+};

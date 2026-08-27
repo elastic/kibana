@@ -17,6 +17,7 @@ const mockFetchQueryLinks = jest.fn();
 const mockComputeOccurrences = jest.fn();
 const mockGetQueryOccurrences = jest.fn();
 const mockGenerateKIQueries = jest.fn();
+const mockCleanupStaleEvents = jest.fn();
 
 jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alerts', () => ({
   fetchQueryLinks: (...args: unknown[]) => mockFetchQueryLinks(...args),
@@ -35,6 +36,10 @@ jest.mock('../../../../lib/significant_events/ki_queries_generation_service', ()
   generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
 }));
 
+jest.mock('../../../../lib/significant_events/events/cleanup_stale_events', () => ({
+  cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+}));
+
 jest.mock('../../../../lib/significant_events/create_significant_events_traced_es_client', () => ({
   createSignificantEventsTracedEsClient: jest.fn().mockReturnValue({}),
 }));
@@ -43,6 +48,7 @@ const route = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile
 const discoveryQueriesRoute = internalKIQueriesRoutes['GET /internal/streams/_queries'];
 const discoveryOccurrencesRoute =
   internalKIQueriesRoutes['GET /internal/streams/_queries/_occurrences'];
+const bulkDeleteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_bulk_delete'];
 const RECONCILE_MAX_STREAMS = 10;
 
 type HandlerParams = Parameters<typeof route.handler>[0];
@@ -223,6 +229,45 @@ describe('pause guard on rule-touching query routes', () => {
     await expectPausedBeforeRuleWork(generateRoute.handler, {
       path: { streamName: 'logs.test' },
       body: null,
+    });
+  });
+});
+
+describe('bulkDeleteQueriesRoute', () => {
+  it('triggers stale event cleanup for deleted backing rules', async () => {
+    const eventClient = {};
+    const rulesClient = {};
+    const deleteQueries = jest.fn().mockResolvedValue(undefined);
+    const handlerParams = {
+      params: { body: { queryIds: ['q1'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+          deleteQueries,
+        }),
+        getEventClient: () => eventClient,
+        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
+      }),
+      server: makeServer(),
+      logger: {
+        warn: jest.fn(),
+        get: jest.fn().mockReturnValue({ error: jest.fn() }),
+      },
+    } as never;
+
+    await expect(bulkDeleteRoute.handler(handlerParams)).resolves.toEqual({
+      succeeded: 1,
+      failed: 0,
+      skipped: 0,
+    });
+    expect(deleteQueries).toHaveBeenCalled();
+    expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
+      eventClient,
+      rulesClient,
+      candidateRuleIds: ['rule-q1'],
     });
   });
 });

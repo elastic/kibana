@@ -110,6 +110,21 @@ describe('updateSignificantEventStatus', () => {
     expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
   });
 
+  it('records an assessment note with an automated status change', async () => {
+    const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    await updateSignificantEventStatus({
+      eventClient: client,
+      eventUuid: 'event-1',
+      status: 'closed',
+      assessmentNote: 'Automatically closed by cleanup.',
+    });
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    expect(callArg.documents[0].assessment_note).toBe('Automatically closed by cleanup.');
+  });
+
   it('ignores when the event is not found', async () => {
     const { client, dataStreamClient } = createEventClient([]);
 
@@ -136,6 +151,41 @@ describe('updateSignificantEventStatus', () => {
       eventClient: client,
       eventUuid: 'event-1',
       status: 'closed',
+    });
+
+    expect(result).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'closed' });
+    expect(dataStreamClient.create).not.toHaveBeenCalled();
+  });
+
+  it('ignores when the current status no longer matches the expected status', async () => {
+    const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'dismissed' });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    const result = await updateSignificantEventStatus({
+      eventClient: client,
+      eventUuid: 'event-1',
+      status: 'closed',
+      expectedCurrentStatus: 'open',
+    });
+
+    expect(result).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'closed' });
+    expect(dataStreamClient.create).not.toHaveBeenCalled();
+  });
+
+  it('ignores when a newer event version appeared after the caller read it', async () => {
+    const stale = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+    const latest = createSignificantEvent({
+      event_uuid: 'event-2',
+      previous_event_uuid: 'event-1',
+      status: 'open',
+    });
+    const { client, dataStreamClient } = createEventClient([stale], [stale, latest]);
+
+    const result = await updateSignificantEventStatus({
+      eventClient: client,
+      eventUuid: 'event-1',
+      status: 'closed',
+      expectedCurrentEventUuid: 'event-1',
     });
 
     expect(result).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'closed' });

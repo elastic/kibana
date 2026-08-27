@@ -1,10 +1,11 @@
-# Knowledge Indicator (KI) sync (groundedness) sweep workflow.
+# Significant Events cleanup workflow.
 #
 # Runs on its own schedule, independent of the continuous-extraction toggle, and
-# reconciles every stream that has knowledge indicators:
+# performs the daily cleanup sweep:
 #   1. Fetches all streams with KIs from the _streams_with_indicators endpoint.
 #   2. For each stream, calls the per-stream _reconcile route (groundedness check,
 #      expiry-driven tombstoning, orphan Streams-owned rule cleanup).
+#   3. Closes open significant events whose backing rules no longer exist.
 #
 # Per-stream failures do not abort the sweep (iteration-on-failure: continue),
 # and each _reconcile call retries transient failures on its own.
@@ -15,9 +16,9 @@
 # its own schedule, independent of extraction.
 
 version: '1'
-name: 'KI Sync'
+name: 'Significant Events Cleanup'
 enabled: false
-description: 'This workflow is used by the system and should not be modified.'
+description: 'Daily reconciliation and stale event cleanup managed by Significant Events.'
 tags:
   - observability
   - streams
@@ -75,3 +76,17 @@ steps:
                 max-attempts: 3
                 delay: '5s'
                 strategy: exponential
+
+  # Step 3: Close events that no longer have a live backing rule.
+  - name: cleanup_stale_events
+    type: kibana.request
+    with:
+      method: POST
+      path: '/internal/significant_events/events/_cleanup'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '5s'
+        strategy: exponential

@@ -14,10 +14,16 @@ export const updateSignificantEventStatus = async ({
   eventClient,
   eventUuid,
   status,
+  assessmentNote,
+  expectedCurrentStatus,
+  expectedCurrentEventUuid,
 }: {
   eventClient: EventClient;
   eventUuid: string;
   status: SignificantEventStatus;
+  assessmentNote?: string;
+  expectedCurrentStatus?: SignificantEventStatus;
+  expectedCurrentEventUuid?: string;
 }): Promise<{
   event_uuid: string;
   updated: number;
@@ -40,7 +46,11 @@ export const updateSignificantEventStatus = async ({
   const { hits: lineageHits } = await eventClient.findByEventId(referenced.event_id);
   const latest = lineageHits[lineageHits.length - 1] ?? referenced;
 
-  if (latest.status === status) {
+  if (
+    latest.status === status ||
+    (expectedCurrentStatus !== undefined && latest.status !== expectedCurrentStatus) ||
+    (expectedCurrentEventUuid !== undefined && latest.event_uuid !== expectedCurrentEventUuid)
+  ) {
     return { event_uuid: eventUuid, updated: 0, ignored: 1, status };
   }
 
@@ -52,6 +62,7 @@ export const updateSignificantEventStatus = async ({
     event_uuid: nextEventUuid,
     previous_event_uuid: latest.event_uuid,
     status,
+    ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
   };
 
   // `wait_for` ensures the write is searchable before this resolves, so an immediate
