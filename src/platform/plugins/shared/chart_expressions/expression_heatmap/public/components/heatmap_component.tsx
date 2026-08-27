@@ -431,9 +431,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );
 
+    const isDateX = xAxisMeta?.type === 'date';
+
     // Convert date strings to timestamps for ES|QL time data
     // This needs to happen before x scale logic so both interval computation and rendering work correctly
-    if (xAxisColumn?.id && xAxisMeta?.type === 'date') {
+    if (xAxisColumn?.id && isDateX) {
       const firstXValue = chartData[0]?.[xAxisColumn.id];
       if (typeof firstXValue === 'string') {
         chartData = chartData.map((row) => {
@@ -450,8 +452,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
     }
 
+    // Query Result Type should win over stale xScaleType
+    const xScaleType = isDateX ? ScaleType.Time : args.gridConfig.xScaleType;
+
     const { scale: xScale, intervalMs: xIntervalMs } = computeXScale(
-      args.gridConfig.xScaleType,
+      xScaleType,
       isTimeBasedSwimLane,
       chartData,
       xAxisColumn,
@@ -993,7 +998,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               valueFormatter={valueFormatter}
               xScale={xScale}
               xSortPredicate={
-                !isTimeBasedSwimLane && xAxisColumn
+                xAxisColumn && !isDateX
                   ? getSortPredicate(xAxisColumn, args.gridConfig.xSortPredicate)
                   : undefined
               }
