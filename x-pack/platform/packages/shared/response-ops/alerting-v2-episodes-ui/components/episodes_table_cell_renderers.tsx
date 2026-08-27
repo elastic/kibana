@@ -183,15 +183,7 @@ export const EpisodeRuleCell = ({
           {(copy) => (
             // EuiLink without href renders a plain button we can attach the copy action to
             // eslint-disable-next-line @elastic/eui/require-href-for-link
-            <EuiLink
-              color="subdued"
-              onClick={(event: React.MouseEvent) => {
-                // Keep the click from reaching the data grid row.
-                event.stopPropagation();
-                copy();
-              }}
-              data-test-subj="episodeRuleCellCopyRuleId"
-            >
+            <EuiLink color="subdued" onClick={copy} data-test-subj="episodeRuleCellCopyRuleId">
               <EuiCode
                 css={css`
                   /* Inline flex so the chip keeps its own formatting context and the link's hover
