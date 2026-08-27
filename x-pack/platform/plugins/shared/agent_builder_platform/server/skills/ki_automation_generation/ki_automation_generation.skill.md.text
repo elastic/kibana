@@ -299,10 +299,10 @@ Retrieve the 1–3 generated KIs by running `FROM <backing index of the AI index
 
 Ask yourself:
 - Is the output the expected structure?
-- are the access patterns correct? Run each `esql_example` with `platform.core.execute_esql` —
+- Are the access patterns correct? Run each `esql_example` with `platform.core.execute_esql` —
   the ES|QL verifier only parses, so a query can pass verification yet fail on unknown fields
   at execution time.
-- would I, as an Agent, find this context useful?
+- Would I, as an Agent, find this context useful?
 - If any two KIs have similar titles, query for one of them specifically and confirm it out-ranks its near-duplicate siblings. If it doesn't, the `description` is not carrying enough differentiating signal — fix that before expanding. Only do this query > improve description test once, and move on after.
 
 If not, repeat this step, adjusting the pilot workflow accordingly.
