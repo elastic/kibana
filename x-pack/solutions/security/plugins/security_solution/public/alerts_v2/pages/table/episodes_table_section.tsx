@@ -10,6 +10,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
@@ -170,6 +171,8 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   );
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
 
+  const { openDocumentFlyoutFromHit, openRuleFlyout } = useFlyoutApi();
+
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': EpisodeStatusCell,
@@ -178,18 +181,29 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
       'user.name': UserNameCell,
       'source.ip': NetworkIpCell,
       'destination.ip': NetworkIpCell,
+      // rule.id is a v2 rule UUID: show the resolved rule name and open the rule flyout on click.
       'rule.id': ({ row }) => {
         const ruleId = String(row.flattened['rule.id'] ?? '');
+        if (!ruleId) {
+          return <>{'—'}</>;
+        }
         const name = rulesCache[ruleId]?.metadata?.name ?? ruleId;
-        return <span title={name}>{name || '—'}</span>;
+        return (
+          <EuiLink
+            title={name}
+            data-test-subj="alertsV2RuleNameLink"
+            onClick={() => openRuleFlyout({ ruleId })}
+          >
+            {name}
+          </EuiLink>
+        );
       },
     }),
-    [rulesCache]
+    [rulesCache, openRuleFlyout]
   );
 
   // Row action: open the document flyout on the v2 alert. The episode row already is a
   // DataTableRecord, so we hand it straight to the flyout (no `_id`/`_index` re-fetch).
-  const { openDocumentFlyoutFromHit } = useFlyoutApi();
   const rowAdditionalLeadingControls = useMemo<RowControlColumn[]>(
     () => [
       {
