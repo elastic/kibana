@@ -24,12 +24,13 @@ import {
   CONNECTOR_ID,
   CONNECTOR_ID_SYSTEM,
   CONNECTOR_NAME,
+  CONNECTOR_SECRET_TOKEN_PATTERN,
   ConfigSchema,
   ParamsSchema,
+  SecretsSchema,
 } from '@kbn/connector-schemas/http';
 import { AuthType } from '@kbn/connector-schemas/common/auth';
 import { z } from '@kbn/zod/v4';
-import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
 import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
 import { safeJsonStringify } from '@kbn/std';
 import type {
@@ -55,6 +56,7 @@ import {
 } from './errors';
 
 const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
+const REDACTED_SECRET_VALUE = '[REDACTED]';
 
 // connector type definition
 
@@ -248,6 +250,62 @@ function serializeHttpRequestBody(body: unknown): string {
   }) as string; // will return a string or throw an error if it fails
 }
 
+function resolveConnectorSecretParams(
+  value: unknown,
+  secretParams: Record<string, string>
+): unknown {
+  if (typeof value === 'string') {
+    return value.replace(CONNECTOR_SECRET_TOKEN_PATTERN, (_, key: string) => {
+      if (!Object.hasOwn(secretParams, key)) {
+        throw new Error(`Secret parameter "${key}" is not configured on this HTTP connector`);
+      }
+      return secretParams[key];
+    });
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => resolveConnectorSecretParams(item, secretParams));
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key,
+        resolveConnectorSecretParams(item, secretParams),
+      ])
+    );
+  }
+  return value;
+}
+
+function getSecretValues(...records: unknown[]): string[] {
+  const values = records.flatMap((record) =>
+    record && typeof record === 'object' ? Object.values(record) : []
+  );
+  return [
+    ...new Set(values.filter((value): value is string => typeof value === 'string' && !!value)),
+  ].sort((a, b) => b.length - a.length);
+}
+
+function redactSecretValues<T>(value: T, secretValues: string[]): T {
+  if (typeof value === 'string') {
+    return secretValues.reduce(
+      (redacted, secret) => redacted.replaceAll(secret, REDACTED_SECRET_VALUE),
+      value
+    ) as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => redactSecretValues(item, secretValues)) as T;
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        redactSecretValues(key, secretValues),
+        redactSecretValues(item, secretValues),
+      ])
+    ) as T;
+  }
+  return value;
+}
+
 function checkFormDataMaxSize(formData: HttpFormDataField, maxSize: number | undefined): void {
   if (maxSize != null) {
     let total = 0;
@@ -325,6 +383,21 @@ export async function executor(
     services,
     signal,
   } = execOptions;
+  const secretValues = getSecretValues(
+    execOptions.secrets.secretHeaders,
+    execOptions.secrets.secretQueryParams,
+    execOptions.secrets.secretParams
+  );
+
+  let resolvedParams: ActionParamsType;
+  try {
+    resolvedParams = resolveConnectorSecretParams(
+      params,
+      execOptions.secrets.secretParams ?? {}
+    ) as ActionParamsType;
+  } catch (error) {
+    return errorResultInvalid(actionId, error.message);
+  }
 
   const {
     method,
@@ -334,10 +407,10 @@ export async function executor(
     query,
     headers: paramsHeaders,
     fetcher,
-  } = params;
+  } = resolvedParams;
 
   // params always takes precedence over config
-  const baseUrl = params.url || config.url;
+  const baseUrl = resolvedParams.url || config.url;
   if (!baseUrl) {
     return errorResultInvalid(actionId, 'URL is required');
   }
@@ -456,12 +529,17 @@ export async function executor(
 
   if (isOk(result)) {
     const { status, statusText } = result.value;
-    logger.debug(`response from http action "${actionId}": [HTTP ${status}] ${statusText}`);
+    const redactedStatusText = redactSecretValues(statusText, secretValues);
+    logger.debug(`response from http action "${actionId}": [HTTP ${status}] ${redactedStatusText}`);
 
     const headers = processResponseHeaders(result.value.headers);
     const data = processBufferResponse(result.value.data, headers);
 
-    return { status: 'ok', actionId, data: { status, statusText, headers, data } };
+    return {
+      status: 'ok',
+      actionId,
+      data: redactSecretValues({ status, statusText, headers, data }, secretValues),
+    };
   } else {
     const { error } = result;
     if (error.response) {
@@ -479,7 +557,10 @@ export async function executor(
 
       const responseMessage = getErrorResponseMessage(error);
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
-      const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
+      const message = redactSecretValues(
+        `[${status}] ${statusText}${responseMessageAsSuffix}`,
+        secretValues
+      );
       logger.error(`error on ${actionId} http event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
@@ -505,11 +586,11 @@ export async function executor(
 
       return errorResult;
     } else if (error.code) {
-      const message = `[${error.code}] ${error.message}`;
+      const message = redactSecretValues(`[${error.code}] ${error.message}`, secretValues);
       logger.error(`error on ${actionId} http event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     } else if (error.isAxiosError) {
-      const message = `${error.message}`;
+      const message = redactSecretValues(`${error.message}`, secretValues);
       logger.error(`error on ${actionId} http event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     }

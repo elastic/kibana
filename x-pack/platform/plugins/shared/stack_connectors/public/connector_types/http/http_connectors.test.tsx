@@ -19,8 +19,10 @@ jest.mock('../../common/auth/auth_config', () => ({
   default: () => <div data-test-subj="authConfigMock">Auth</div>,
 }));
 
-jest.mock('../../common/auth/use_secret_query_params', () => ({
+const mockUseSecretParams = jest.fn();
+jest.mock('../../common/auth/use_secret_keys', () => ({
   useSecretQueryParams: () => ({ isLoading: false, isFetching: false, data: [] }),
+  useSecretParams: (...args: unknown[]) => mockUseSecretParams(...args),
 }));
 
 describe('HttpActionConnectorFields', () => {
@@ -43,12 +45,14 @@ describe('HttpActionConnectorFields', () => {
       clientSecret: null,
       secretHeaders: null,
       secretQueryParams: null,
+      secretParams: null,
     },
     isDeprecated: false,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseSecretParams.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
   });
 
   it('renders base URL field and proxy switch', async () => {
@@ -211,5 +215,59 @@ describe('HttpActionConnectorFields', () => {
     });
     expect(screen.getByTestId('httpQueryParamValueInput')).toBeInTheDocument();
     expect(screen.getByTestId('httpAddQueryParamButton')).toBeInTheDocument();
+  });
+
+  it('shows secret parameter fields when toggle is enabled', async () => {
+    render(
+      <ConnectorFormTestProvider
+        connector={connector}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
+        <HttpActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={jest.fn()}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await userEvent.click(await screen.findByTestId('httpSecretParamsSwitch'));
+    expect(await screen.findByTestId('httpSecretParamKeyInput')).toBeInTheDocument();
+    expect(screen.getByTestId('httpSecretParamValueInput')).toBeInTheDocument();
+  });
+
+  it('hydrates existing secret parameters without adding or reordering rows', async () => {
+    mockUseSecretParams.mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      data: ['client_id', 'client_secret'],
+    });
+    render(
+      <ConnectorFormTestProvider
+        connector={connector}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
+        <HttpActionConnectorFields
+          readOnly={false}
+          isEdit={true}
+          registerPreSubmitValidator={jest.fn()}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const toggle = await screen.findByTestId('httpSecretParamsSwitch');
+    await waitFor(() => expect(toggle).toBeChecked());
+    await waitFor(() => expect(screen.getAllByTestId('httpSecretParamKeyInput')).toHaveLength(2));
+
+    const [firstKey] = screen.getAllByTestId('httpSecretParamKeyInput');
+    await userEvent.type(firstKey, '_updated');
+    expect(screen.getAllByTestId('httpSecretParamKeyInput')).toHaveLength(2);
+
+    const deleteButtons = screen.getAllByTestId('httpRemoveSecretParamButton');
+    await userEvent.click(deleteButtons[0]);
+    await waitFor(() => expect(screen.getAllByTestId('httpSecretParamKeyInput')).toHaveLength(1));
+    expect(screen.getByTestId('httpSecretParamKeyInput')).toHaveValue('client_secret');
   });
 });

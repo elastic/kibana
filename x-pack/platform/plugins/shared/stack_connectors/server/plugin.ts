@@ -21,6 +21,7 @@ import {
   getWellKnownEmailServiceRoute,
   getWebhookSecretHeadersKeyRoute,
   getHttpSecretQueryParamsKeyRoute,
+  getHttpSecretParamsKeyRoute,
 } from './routes';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -84,6 +85,7 @@ export class StackConnectorsPlugin
     getWellKnownEmailServiceRoute(router, awsSesConfig);
     getWebhookSecretHeadersKeyRoute(router, core.getStartServices);
     getHttpSecretQueryParamsKeyRoute(router, core.getStartServices);
+    getHttpSecretParamsKeyRoute(router, core.getStartServices);
 
     registerConnectorTypes({
       actions,

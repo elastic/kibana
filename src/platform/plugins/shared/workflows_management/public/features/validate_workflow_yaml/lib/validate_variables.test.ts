@@ -113,6 +113,55 @@ describe('validateVariables', () => {
     expect(mockValidateVariable).toHaveBeenCalledTimes(3);
   });
 
+  it('normally validates connector secrets outside an HTTP step with block', () => {
+    const workflowDefinition = {
+      ...mockWorkflowDefinition,
+      steps: [
+        {
+          name: 'http-step',
+          type: 'http',
+          'connector-id': 'connector-123',
+          with: { method: 'GET' },
+        },
+        {
+          name: 'slack-step',
+          type: 'slack',
+          'connector-id': 'connector-456',
+          with: { text: '{{ connector.secrets.client_secret }}' },
+        },
+      ],
+    } as WorkflowYaml;
+    const variables = [
+      createVariableItem({
+        key: 'connector.secrets.client_secret',
+        yamlPath: ['steps', 0, 'name'],
+      }),
+      createVariableItem({
+        key: 'connector.secrets.client_secret',
+        yamlPath: ['steps', 1, 'with', 'text'],
+      }),
+    ];
+    mockValidateVariable.mockImplementation(
+      (variableItem) =>
+        ({
+          ...variableItem,
+          message: 'Unknown variable',
+          severity: 'error',
+          owner: 'variable-validation',
+          hoverMessage: null,
+        } as YamlValidationResult)
+    );
+
+    const result = validateVariables(
+      variables,
+      WorkflowGraph.fromWorkflowDefinition(workflowDefinition),
+      workflowDefinition
+    );
+
+    expect(result.map(({ message }) => message)).toEqual(['Unknown variable', 'Unknown variable']);
+    expect(mockValidateVariable).toHaveBeenCalledTimes(2);
+  });
+
   it('should collect errors from variable validation', () => {
     const variables = [
       createVariableItem({ key: 'validVar' }),

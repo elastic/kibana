@@ -415,3 +415,44 @@ export const QUERY_PARAM_VALUE_TOO_LONG = (max: number) =>
     values: { max },
     defaultMessage: 'Value must be {max} characters or fewer',
   });
+
+export const SECRET_PARAMS_TITLE = i18n.translate(
+  'xpack.stackConnectors.components.auth.secretParamsTitle',
+  { defaultMessage: 'Secret parameters' }
+);
+
+export const SECRET_PARAMS_SUBTITLE = i18n.translate(
+  'xpack.stackConnectors.components.auth.secretParamsSubtitle',
+  {
+    defaultMessage: 'Store encrypted values for insertion into requests.',
+  }
+);
+
+export const ADD_SECRET_PARAM_BUTTON = i18n.translate(
+  'xpack.stackConnectors.components.auth.addSecretParamButton',
+  { defaultMessage: 'Add secret parameter' }
+);
+
+export const DELETE_SECRET_PARAM_BUTTON = i18n.translate(
+  'xpack.stackConnectors.components.auth.deleteSecretParamButton',
+  { defaultMessage: 'Delete secret parameter' }
+);
+
+export const SAME_SECRET_PARAM_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.sameSecretParamKeyError',
+  { defaultMessage: 'This name is already used by another secret parameter' }
+);
+
+export const SECRET_PARAM_INVALID_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.secretParamInvalidKeyError',
+  {
+    defaultMessage:
+      'Use letters, numbers, and underscores; the name must start with a letter or underscore',
+  }
+);
+
+export const MAX_SECRET_PARAMS_LIMIT = (max: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.maxSecretParams', {
+    values: { max },
+    defaultMessage: 'Maximum number of {max} secret parameters reached.',
+  });

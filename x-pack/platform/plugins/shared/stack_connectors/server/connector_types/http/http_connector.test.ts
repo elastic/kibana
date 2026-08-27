@@ -106,6 +106,7 @@ const emptySecrets: ConnectorTypeSecretsType = {
   clientSecret: null,
   secretHeaders: null,
   secretQueryParams: null,
+  secretParams: null,
   proxyUsername: null,
   proxyPassword: null,
 };
@@ -164,6 +165,18 @@ describe('secrets validation', () => {
     expect(validateSecrets(connectorType, emptySecrets, { configurationUtilities })).toEqual(
       emptySecrets
     );
+  });
+
+  test('rejects empty and blank secret parameter values', () => {
+    for (const value of ['', '   ']) {
+      expect(() =>
+        validateSecrets(
+          connectorType,
+          { ...emptySecrets, secretParams: { client_secret: value } },
+          { configurationUtilities }
+        )
+      ).toThrow('error validating connector type secrets');
+    }
   });
 
   test('succeeds when secrets contains a certificate and keyfile', () => {
@@ -1043,6 +1056,114 @@ describe('execute()', () => {
     });
 
     expect(requestMock.mock.calls[0][0].data).toBe(JSON.stringify(body));
+  });
+
+  test('resolves workflow connector secret parameters immediately before sending', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+      hasAuth: false,
+    };
+    requestMock.mockResolvedValueOnce({
+      status: 200,
+      statusText: 'configured-secret OK',
+      data: Buffer.from(
+        JSON.stringify({
+          authorization: 'Bearer configured-secret',
+          clientId: 'configured-client',
+          headerSecret: 'header-secret',
+          querySecret: 'query-secret',
+          'echo-configured-secret': true,
+        }),
+        'utf-8'
+      ),
+      headers: {
+        'content-type': 'application/json',
+        'x-echo-secret': 'configured-secret',
+      },
+      config: {},
+    });
+
+    const result = await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        ...emptySecrets,
+        secretParams: {
+          client_id: 'configured-client',
+          client_secret: 'configured-secret',
+        },
+        secretHeaders: { 'X-API-Key': 'header-secret' },
+        secretQueryParams: { token: 'query-secret' },
+      },
+      params: {
+        method: 'POST',
+        path: '/oauth/__KBN_WORKFLOW_CONNECTOR_SECRET_PARAM__client_id__',
+        headers: {
+          Authorization: 'Bearer __KBN_WORKFLOW_CONNECTOR_SECRET_PARAM__client_secret__',
+        },
+        body: {
+          credentials: [
+            '__KBN_WORKFLOW_CONNECTOR_SECRET_PARAM__client_id__',
+            '__KBN_WORKFLOW_CONNECTOR_SECRET_PARAM__client_secret__',
+          ],
+        },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0]).toMatchObject({
+      url: 'https://abc.def/oauth/configured-client?token=query-secret',
+      headers: {
+        Authorization: 'Bearer configured-secret',
+        'X-API-Key': 'header-secret',
+      },
+      data: JSON.stringify({
+        credentials: ['configured-client', 'configured-secret'],
+      }),
+    });
+    expect(result?.data).toEqual({
+      status: 200,
+      statusText: '[REDACTED] OK',
+      headers: {
+        'content-type': 'application/json',
+        'x-echo-secret': '[REDACTED]',
+      },
+      data: {
+        authorization: 'Bearer [REDACTED]',
+        clientId: '[REDACTED]',
+        headerSecret: '[REDACTED]',
+        querySecret: '[REDACTED]',
+        'echo-[REDACTED]': true,
+      },
+    });
+  });
+
+  test('fails without sending when a referenced secret parameter is missing', async () => {
+    const result = await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config: { ...emptyConfig, url: 'https://abc.def', hasAuth: false },
+      secrets: emptySecrets,
+      params: {
+        method: 'POST',
+        body: '__KBN_WORKFLOW_CONNECTOR_SECRET_PARAM__missing_key__',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'error',
+        serviceMessage: expect.stringContaining('Secret parameter "missing_key" is not configured'),
+      })
+    );
+    expect(requestMock).not.toHaveBeenCalled();
   });
 
   test('execute stringifies array body before sending', async () => {
@@ -2480,6 +2601,42 @@ describe('execute()', () => {
       expect(result?.status).toBe('error');
       expect(result?.serviceMessage).toBe(
         '[400] Bad Request: Invalid client or Invalid client credentials'
+      );
+    });
+
+    it('redacts connector secret parameters from errors and logs', async () => {
+      requestMock.mockRejectedValueOnce({
+        tag: 'err',
+        isAxiosError: true,
+        message: 'Request failed with status code 400',
+        response: {
+          status: 400,
+          statusText: 'Bad Request',
+          headers: { 'content-type': 'application/json' },
+          data: Buffer.from(
+            JSON.stringify({ message: 'Rejected Bearer configured-secret' }),
+            'utf-8'
+          ),
+        },
+      } as unknown as Error);
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: { ...emptyConfig, url: 'https://abc.def' },
+        secrets: {
+          ...emptySecrets,
+          secretParams: { client_secret: 'configured-secret' },
+        },
+        params: { method: 'POST', path: '/my-endpoint' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.serviceMessage).toBe('[400] Bad Request: Rejected Bearer [REDACTED]');
+      expect(mockedLogger.error).toHaveBeenCalledWith(
+        'error on some-id http event: [400] Bad Request: Rejected Bearer [REDACTED]'
       );
     });
 

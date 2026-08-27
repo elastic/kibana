@@ -23,3 +23,16 @@ export const getHttpSecretQueryParamsKeyRoute = (
     secretField: 'secretQueryParams',
   });
 };
+
+export const getHttpSecretParamsKeyRoute = (
+  router: IRouter,
+  getStartServices: StartServicesAccessor<ConnectorsPluginsStart, unknown>
+) => {
+  registerSecretKeysRoute({
+    router,
+    getStartServices,
+    path: 'secret_params',
+    allowedConnectorTypes: ['.http'],
+    secretField: 'secretParams',
+  });
+};

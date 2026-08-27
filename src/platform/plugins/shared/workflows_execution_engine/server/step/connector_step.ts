@@ -8,6 +8,10 @@
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import {
+  CONNECTOR_SECRET_TOKEN_PATTERN,
+  getConnectorSecretToken,
+} from '@kbn/connector-schemas/http';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -32,6 +36,38 @@ const CONNECTOR_TYPES_WITH_LAYER_1 = new Set<string>(['http']);
 // Axios internal error message format — no typed error code is exposed for this case,
 // so regex matching is the only reliable detection method.
 const ACTIONS_MAX_CONTENT_LENGTH_ERROR_PATTERN = /maxContentLength size of (\d+) exceeded/;
+const CONNECTOR_SECRET_REFERENCE_PATTERN =
+  /\{\{\s*connector\.secrets\.([A-Za-z_][A-Za-z0-9_]*)\s*\}\}/g;
+
+const transformNestedStrings = (value: unknown, transform: (input: string) => string): unknown => {
+  if (typeof value === 'string') {
+    return transform(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => transformNestedStrings(item, transform));
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, transformNestedStrings(item, transform)])
+    );
+  }
+  return value;
+};
+
+const tokenizeConnectorSecretReferences = (value: unknown): unknown =>
+  transformNestedStrings(value, (input) =>
+    input.replace(CONNECTOR_SECRET_REFERENCE_PATTERN, (_, key: string) =>
+      getConnectorSecretToken(key)
+    )
+  );
+
+const restoreConnectorSecretReferences = (value: unknown): unknown =>
+  transformNestedStrings(value, (input) =>
+    input.replace(
+      CONNECTOR_SECRET_TOKEN_PATTERN,
+      (_, key: string) => `{{ connector.secrets.${key} }}`
+    )
+  );
 
 const getActionsMaxContentLengthLimit = (errorMessage: string): number | undefined => {
   const match = errorMessage.match(ACTIONS_MAX_CONTENT_LENGTH_ERROR_PATTERN);
@@ -81,6 +117,8 @@ export interface ConnectorStep extends BaseStep {
 }
 
 export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorStep> {
+  private protectedHttpInput?: Record<string, unknown>;
+
   constructor(
     step: ConnectorStep,
     stepExecutionRuntime: StepExecutionRuntime,
@@ -92,9 +130,16 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
   }
 
   public getInput() {
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-      this.step.with || {}
-    );
+    const input = this.step.with || {};
+    if (this.step.type !== 'http') {
+      return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(input);
+    }
+    const protectedInput = tokenizeConnectorSecretReferences(input);
+    this.protectedHttpInput =
+      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+        protectedInput
+      ) as Record<string, unknown>;
+    return restoreConnectorSecretReferences(this.protectedHttpInput) as Record<string, unknown>;
   }
 
   public async _run(withInputs: Record<string, unknown>): Promise<RunStepResult> {
@@ -124,12 +169,14 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       }
 
       // Build final rendered inputs
+      const executionInputs =
+        step.type === 'http' ? this.protectedHttpInput ?? withInputs : withInputs;
       let renderedInputs = isSubAction
         ? {
-            subActionParams: withInputs,
+            subActionParams: executionInputs,
             subAction: subActionName,
           }
-        : withInputs;
+        : executionInputs;
 
       // For connector types with Layer 1 support, inject max_content_length
       // so axios can abort mid-stream (Layer 1 OOM prevention).

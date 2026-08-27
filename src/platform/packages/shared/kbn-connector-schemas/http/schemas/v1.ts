@@ -17,6 +17,31 @@ export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 
 export const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 
+const SecretParamsSchema = lazySchema(() =>
+  z
+    .record(
+      z
+        .string()
+        .min(1)
+        .max(256)
+        .regex(/^[A-Za-z_][A-Za-z0-9_]*$/, {
+          message: 'Secret parameter names must be valid Liquid identifiers',
+        }),
+      z
+        .string()
+        .min(1)
+        .max(2048)
+        .refine((value) => value.trim().length > 0, {
+          message: 'Secret parameter values cannot be blank',
+        })
+    )
+    .nullable()
+    .default(null)
+    .refine((secretParams) => !secretParams || Object.keys(secretParams).length <= 20, {
+      message: 'A maximum of 20 secret parameters is allowed',
+    })
+);
+
 export const ConfigSchema = lazySchema(() =>
   z
     .object({
@@ -45,6 +70,7 @@ export const SecretsSchema = lazySchema(() =>
       proxyUsername: z.string().nullable().default(null),
       proxyPassword: z.string().nullable().default(null),
       secretQueryParams: z.record(z.string(), z.string()).nullable().default(null),
+      secretParams: SecretParamsSchema,
     })
     .strict()
     .superRefine((secrets, ctx) => {

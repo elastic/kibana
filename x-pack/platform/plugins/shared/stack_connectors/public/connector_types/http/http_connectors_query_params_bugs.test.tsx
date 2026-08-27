@@ -20,8 +20,9 @@ jest.mock('../../common/auth/auth_config', () => ({
 }));
 
 const mockUseSecretQueryParams = jest.fn();
-jest.mock('../../common/auth/use_secret_query_params', () => ({
+jest.mock('../../common/auth/use_secret_keys', () => ({
   useSecretQueryParams: (...args: unknown[]) => mockUseSecretQueryParams(...args),
+  useSecretParams: () => ({ isLoading: false, isFetching: false, data: [] }),
 }));
 
 const connectorWithExistingQueryParams = {

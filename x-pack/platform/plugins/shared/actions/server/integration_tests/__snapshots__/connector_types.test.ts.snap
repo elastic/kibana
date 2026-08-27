@@ -1368,6 +1368,28 @@ Object {
       ],
       "default": null,
     },
+    "secretParams": Object {
+      "anyOf": Array [
+        Object {
+          "additionalProperties": Object {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string",
+          },
+          "propertyNames": Object {
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+            "type": "string",
+          },
+          "type": "object",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
     "secretQueryParams": Object {
       "anyOf": Array [
         Object {

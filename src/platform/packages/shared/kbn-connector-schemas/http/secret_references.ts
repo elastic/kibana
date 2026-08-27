@@ -6,14 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-export * from './constants';
 
-export { ConfigSchema, ParamsSchema, SecretsSchema, HTTP_METHODS } from './schemas/latest';
-export { CONNECTOR_SECRET_TOKEN_PATTERN, getConnectorSecretToken } from './secret_references';
+export const CONNECTOR_SECRET_TOKEN_PREFIX = '__KBN_WORKFLOW_CONNECTOR_SECRET_PARAM__';
+export const CONNECTOR_SECRET_TOKEN_PATTERN =
+  /__KBN_WORKFLOW_CONNECTOR_SECRET_PARAM__([A-Za-z_][A-Za-z0-9_]*)__/g;
 
-export type {
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
-  ActionParamsType,
-  HttpMethod,
-} from './types/latest';
+export const getConnectorSecretToken = (key: string): string =>
+  `${CONNECTOR_SECRET_TOKEN_PREFIX}${key}__`;

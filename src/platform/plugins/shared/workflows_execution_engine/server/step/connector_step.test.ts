@@ -108,6 +108,115 @@ describe('ConnectorStepImpl', () => {
     );
   });
 
+  it('persists connector secret references while tokenizing only the execution input', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+    connectorExecutor.execute.mockResolvedValue({ status: 'ok', data: { result: 'success' } });
+    const step = {
+      name: 'http-step',
+      stepId: 'http-step',
+      type: 'http',
+      'connector-id': 'conn-123',
+      with: {
+        body: {
+          clientId: '{{ connector.secrets.client_id }}',
+          authorization: 'Bearer {{ connector.secrets.client_secret }}',
+        },
+      },
+    };
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    await impl.run();
+
+    expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith(step.with);
+    expect(connectorExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorType: 'http',
+        connectorNameOrId: 'conn-123',
+        input: expect.objectContaining({
+          body: {
+            clientId: '__KBN_WORKFLOW_CONNECTOR_SECRET_PARAM__client_id__',
+            authorization: 'Bearer __KBN_WORKFLOW_CONNECTOR_SECRET_PARAM__client_secret__',
+          },
+        }),
+      })
+    );
+  });
+
+  it('does not tokenize connector secret references for non-HTTP connector steps', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+    connectorExecutor.execute.mockResolvedValue({ status: 'ok', data: { result: 'success' } });
+    const step = {
+      name: 'slack-step',
+      stepId: 'slack-step',
+      type: 'slack',
+      'connector-id': 'conn-123',
+      with: {
+        text: '{{ connector.secrets.client_secret }}',
+      },
+    };
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    await impl.run();
+
+    expect(connectorExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorType: 'slack',
+        input: {
+          text: '{{ connector.secrets.client_secret }}',
+        },
+      })
+    );
+  });
+
+  it('does not treat a connector secret expression introduced by rendered input as a secret', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+    connectorExecutor.execute.mockResolvedValue({ status: 'ok', data: { result: 'success' } });
+    stepExecutionRuntime.contextManager.renderValueAccordingToContext.mockReturnValue({
+      body: { value: '{{ connector.secrets.client_secret }}' },
+    });
+    const step = {
+      name: 'http-step',
+      stepId: 'http-step',
+      type: 'http',
+      'connector-id': 'conn-123',
+      with: {
+        body: { value: '{{ inputs.user_value }}' },
+      },
+    };
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    await impl.run();
+
+    expect(connectorExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          body: { value: '{{ connector.secrets.client_secret }}' },
+        }),
+      })
+    );
+  });
+
   it('forwards email attachment inputs unchanged to the connector executor', async () => {
     const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
       createMocks();

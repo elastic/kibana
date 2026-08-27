@@ -140,3 +140,10 @@ export const QUERY_PARAMS_SWITCH = i18n.translate(
     defaultMessage: 'Add query parameters',
   }
 );
+
+export const SECRET_PARAMS_SWITCH = i18n.translate(
+  'xpack.stackConnectors.components.http.viewSecretParamsSwitch',
+  {
+    defaultMessage: 'Add secret parameters',
+  }
+);
