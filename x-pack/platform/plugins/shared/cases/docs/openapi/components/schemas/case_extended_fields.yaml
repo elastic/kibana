@@ -1,6 +1,6 @@
 title: Case extended fields
 type: object
-x-state: Technical preview
+x-state: Technical preview; added in 9.5.0
 description: >
   Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>`
   convention (for example `priority_as_keyword`) and map to the owner's global
