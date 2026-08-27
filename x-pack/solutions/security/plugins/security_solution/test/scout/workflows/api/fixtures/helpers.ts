@@ -88,7 +88,7 @@ export const waitForExecution = async (
     if (Date.now() > deadline) {
       throw new Error(
         `Execution ${workflowExecutionId} did not terminate within ${POLL_TIMEOUT_MS}ms ` +
-        `(last status: ${execution.status})`
+          `(last status: ${execution.status})`
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
