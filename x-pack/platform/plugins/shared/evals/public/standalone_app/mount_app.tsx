@@ -13,9 +13,9 @@ import { KibanaContextProvider, reactRouterNavigate } from '@kbn/kibana-react-pl
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { PLUGIN_NAME } from '../../common';
 import type { EvalsStartDependencies } from '../types';
 import { EvalsApp } from '../application';
+import { APP_TITLE } from '../translations';
 
 interface MountAppParams {
   coreStart: CoreStart;
@@ -30,7 +30,7 @@ export const mountStandaloneApp = async ({
   element,
   history,
 }: MountAppParams) => {
-  coreStart.chrome.docTitle.change(PLUGIN_NAME);
+  coreStart.chrome.docTitle.change(APP_TITLE);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -47,7 +47,7 @@ export const mountStandaloneApp = async ({
   });
   const setBreadcrumbs = (breadcrumbs: ChromeBreadcrumb[]) => {
     const trailingBreadcrumbs = breadcrumbs.map(wrapBreadcrumb);
-    const rootBreadcrumb = wrapBreadcrumb({ text: PLUGIN_NAME, href: getHref('/') });
+    const rootBreadcrumb = wrapBreadcrumb({ text: APP_TITLE, href: getHref('/') });
 
     coreStart.chrome.setBreadcrumbs([rootBreadcrumb, ...trailingBreadcrumbs], {
       project: { value: trailingBreadcrumbs },
