@@ -48,9 +48,9 @@ const useSecretKeys = (
     [config.queryKey, connectorId],
     async () =>
       await http.get<string[]>(
-        `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/${encodeURIComponent(connectorId ?? '')}/${
-          config.path
-        }`
+        `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/${encodeURIComponent(
+          connectorId ?? ''
+        )}/${encodeURIComponent(config.path)}`
       ),
     {
       enabled: isEdit && Boolean(connectorId),
