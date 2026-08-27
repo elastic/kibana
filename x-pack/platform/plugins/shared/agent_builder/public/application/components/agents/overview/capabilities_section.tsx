@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIllustration, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { handshake, projectsFolder } from '@elastic/eui-illustrations';
 import { labels } from '../../../utils/i18n';
 import { CapabilityCard } from './capability_card';
 import skillsImage from './assets/connected-power-plug.svg';
-import pluginsImage from './assets/projects-folder.svg';
 import toolsImage from './assets/wrench_gear.svg';
-import connectorsImage from './assets/handshake.svg';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -81,7 +80,9 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
             title={overviewLabels.pluginsLabel(pluginsCountLoading ? 0 : pluginsCount)}
             description={overviewLabels.pluginsDescription}
             emptyDescription={overviewLabels.pluginsOnboardingDescription}
-            image={pluginsImage}
+            illustration={
+              <EuiIllustration type={projectsFolder} alt="" style={{ maxInlineSize: 96 }} />
+            }
             href={pluginsCountLoading ? undefined : pluginsHref}
             onClick={pluginsCountLoading ? undefined : onNavigateToPlugins}
             isCountLoading={pluginsCountLoading}
@@ -95,7 +96,7 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
             title={overviewLabels.connectorsLabel(connectorsCount)}
             description={overviewLabels.connectorsDescription}
             emptyDescription={overviewLabels.connectorsOnboardingDescription}
-            image={connectorsImage}
+            illustration={<EuiIllustration type={handshake} alt="" style={{ maxInlineSize: 96 }} />}
             href={connectorsHref}
             onClick={onNavigateToConnectors}
           />

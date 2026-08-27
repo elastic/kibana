@@ -47,6 +47,22 @@ describe('CapabilityCard', () => {
     expect(img).toHaveAttribute('src', 'https://example.com/skill.svg');
   });
 
+  it('renders zero state with an EuiIllustration node', () => {
+    render(
+      <CapabilityCard
+        dataTestSubj="testCapabilityCardIllustration"
+        count={0}
+        title="Plugins"
+        description="Functional copy."
+        emptyDescription="No plugins yet."
+        illustration={<span data-test-subj="customIllustration">illustration</span>}
+      />
+    );
+
+    expect(screen.getByText('No plugins yet.')).toBeInTheDocument();
+    expect(screen.getByTestId('customIllustration')).toBeInTheDocument();
+  });
+
   it('renders loading state with skeleton and spinner', () => {
     render(
       <CapabilityCard

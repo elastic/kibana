@@ -13,10 +13,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIllustration,
   EuiLink,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import { projectsFolder } from '@elastic/eui-illustrations';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -26,7 +28,6 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { CustomizeLandingEmptyState } from '../common/customize_landing_empty_state';
-import pluginsIllustration from '../overview/assets/projects-folder.svg';
 import { PluginAddMenuPanel } from './plugin_add_menu_panel';
 
 export interface PluginsCustomizeEmptyStateProps {
@@ -119,7 +120,7 @@ export const PluginsCustomizeEmptyState: React.FC<PluginsCustomizeEmptyStateProp
   return (
     <CustomizeLandingEmptyState
       dataTestSubj="agentPluginsCustomizeEmptyState"
-      illustrationSrc={pluginsIllustration}
+      illustration={<EuiIllustration type={projectsFolder} alt="" />}
       title={labels.agentPlugins.emptyStateTitle}
       description={description}
       learnMoreHref={docLinksService.agentBuilderPlugins}
