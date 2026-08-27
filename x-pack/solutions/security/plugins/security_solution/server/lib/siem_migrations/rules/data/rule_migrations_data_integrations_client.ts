@@ -13,6 +13,7 @@ import {
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
+import { ElserPopulateError } from '../../common/data/elser_populate_error';
 
 const INTEGRATION_WEIGHTS = [
   // These integrations should be boosted because in many cases they are used as fallback.
@@ -183,9 +184,11 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         )
         .then((response) => {
           if (response.errors) {
-            // use the first error to throw
-            const reason = response.items.find((item) => item.update?.error)?.update?.error?.reason;
-            throw new Error(reason ?? 'Unknown error');
+            // use the first error to throw, preserving the ES error type for classification.
+            // Bulk item errors carry `type` + `reason` but no HTTP status; classification
+            // keys on the stable `type`.
+            const itemError = response.items.find((item) => item.update?.error)?.update?.error;
+            throw new ElserPopulateError(itemError?.reason ?? 'Unknown error', itemError?.type);
           }
         })
         .catch((error) => {
