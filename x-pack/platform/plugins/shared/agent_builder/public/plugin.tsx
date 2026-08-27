@@ -271,7 +271,6 @@ export class AgentBuilderPlugin
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
       },
-      openConversationMetadata: handleOpenConversationMetadata,
     };
 
     this.internalServices = internalServices;

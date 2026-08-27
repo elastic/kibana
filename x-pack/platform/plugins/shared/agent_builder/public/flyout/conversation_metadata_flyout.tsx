@@ -215,6 +215,7 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
       size="s"
       type="push"
       paddingSize="m"
+      role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationMetadataFlyout-live"
     >

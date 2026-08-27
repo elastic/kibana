@@ -38,7 +38,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
     return (
       <EuiText size="xs">
-        <h3
+        <h4
           id={ariaLabelledBy}
           css={css`
             font-weight: ${euiTheme.font.weight.semiBold};
@@ -46,7 +46,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
           data-test-subj="agentBuilderConversationTitle"
         >
           {displayedTitle}
-        </h3>
+        </h4>
       </EuiText>
     );
   }
