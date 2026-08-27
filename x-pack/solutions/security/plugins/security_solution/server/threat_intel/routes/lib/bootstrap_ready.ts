@@ -8,7 +8,7 @@
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 
 /**
- * Gate for handlers that touch the plugin-owned `.kibana-threat-*` indices.
+ * Gate for handlers that touch the plugin-owned threat intel indices.
  *
  * Bootstrap (index templates, mapping migrations, catalog seeding) runs
  * detached at plugin start so it cannot block Kibana startup. Routes are
