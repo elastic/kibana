@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  FlyoutTemplateConfigProvider,
-  useFlyoutTemplateConfig,
-  resolveZoneTestSubj,
-} from './config_context';
-export type { FlyoutTemplateConfig } from './config_context';
-export { FlyoutTabsProvider, useFlyoutTabs } from './tabs_context';
-export type { FlyoutTabsState } from './tabs_context';
-export { FlyoutHeaderCollapseProvider, useFlyoutHeaderCollapse } from './collapse_context';
+import type { HeaderTabPartDescriptor } from './types';
+import { headerAssembly } from '../../assembly';
+
+/** Part name used for identifying `Header.Tab` children. */
+export const TAB_PART_NAME = 'tab';
+
+/** Part factory for `FlyoutTemplate.Header.Tab`. Resolves to a `HeaderTabPartDescriptor`. */
+export const tabPart = headerAssembly.definePart<
+  Record<string, never>,
+  HeaderTabPartDescriptor,
+  void
+>({
+  name: TAB_PART_NAME,
+});

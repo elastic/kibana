@@ -17,6 +17,9 @@ export const partsOf = (items: ParsedItem[], partName: string): ParsedPart[] =>
 /** Parses top-level `FlyoutTemplate` zones. */
 export const flyoutAssembly = defineAssembly({ name: 'FlyoutTemplate' });
 
+/** Parses `FlyoutTemplate.Header` parts. */
+export const headerAssembly = defineAssembly({ name: 'FlyoutTemplateHeader' });
+
 /** Parses `FlyoutTemplate.Body` parts and passthrough children. */
 export const bodyAssembly = defineAssembly({ name: 'FlyoutTemplateBody' });
 
