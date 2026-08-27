@@ -120,13 +120,12 @@ const FlyoutTemplateRoot = ({
   // Parsed here rather than in `HeaderZone` so tab state lives at this level;
   // `HeaderZone` renders the same items, so the children are only walked once.
   const headerItems = useMemo(
-    () =>
-      headerAttrs?.children
-        ? headerAssembly.parseChildren(headerAttrs.children)
-        : [],
+    () => (headerAttrs?.children ? headerAssembly.parseChildren(headerAttrs.children) : []),
     [headerAttrs?.children]
   );
 
+  // The header is the sole source of truth for which tabs exist: a tab whose panel is absent is
+  // still rendered, because consumers may supply only the selected panel and mount it on demand.
   const tabs = useMemo<HeaderTabDescriptor[]>(() => {
     const tabParts = partsOf(headerItems, TAB_PART_NAME);
     const descriptors: HeaderTabDescriptor[] = [];
@@ -150,10 +149,27 @@ const FlyoutTemplateRoot = ({
     [bodyAttrs?.children]
   );
 
-  const hasTabPanels = useMemo(
-    () => partsOf(bodyItems, TAB_PANEL_PART_NAME).length > 0,
+  const panelTabIds = useMemo(
+    () => new Set(partsOf(bodyItems, TAB_PANEL_PART_NAME).map((p) => p.attributes.tabId as string)),
     [bodyItems]
   );
+  const hasTabPanels = panelTabIds.size > 0;
+
+  // A panel with no matching tab can never be reached; warn. A tab with no panel may be on-demand.
+  const orphanPanelKey = useMemo(() => {
+    const declaredTabIds = new Set(tabs.map((tab) => tab.id));
+    return [...panelTabIds].filter((panelId) => !declaredTabIds.has(panelId)).join(', ');
+  }, [tabs, panelTabIds]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return;
+    if (orphanPanelKey) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[FlyoutTemplate] <FlyoutTemplate.Body.TabPanel> with no matching <FlyoutTemplate.Header.Tab>: ${orphanPanelKey}. These panels are not rendered.`
+      );
+    }
+  }, [orphanPanelKey]);
 
   const isControlled = controlledSelectedTabId !== undefined;
 

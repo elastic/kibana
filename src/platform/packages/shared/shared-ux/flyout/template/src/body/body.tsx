@@ -51,7 +51,7 @@ export const BodyZone = ({ items, 'data-test-subj': dataTestSubj }: BodyZoneProp
   const { scrollContainerRef } = useFlyoutHeaderCollapse();
 
   const tabPanelItems = partsOf(items, TAB_PANEL_PART_NAME);
-  const isTabbedMode = tabPanelItems.length > 0;
+  const isTabbedMode = tabPanelItems.length > 0 && tabs.length > 0;
 
   const bodyTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body');
 
@@ -69,6 +69,8 @@ export const BodyZone = ({ items, 'data-test-subj': dataTestSubj }: BodyZoneProp
       (panel) => (panel.attributes.tabId as string) === activeTab?.id
     );
 
+    // Reached when the selected tab's panel has not been supplied; consumers that mount panels on
+    // demand pass through this state on every switch, so it renders empty rather than warning.
     if (!activeTab || !activePanel) {
       return (
         <EuiFlyoutBody data-test-subj={bodyTestSubj} scrollContainerRef={scrollContainerRef} />
