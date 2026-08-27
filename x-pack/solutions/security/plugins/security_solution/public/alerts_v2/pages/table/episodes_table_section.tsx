@@ -38,7 +38,9 @@ import { useEpisodesTableData } from './use_episodes_table_data';
 import { HostNameCell } from './host_name_cell';
 import { UserNameCell } from './user_name_cell';
 import { NetworkIpCell } from './network_ip_cell';
+import { useInvestigateEpisodeInTimeline } from './use_investigate_episode_in_timeline';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { useEsqlAvailability } from '../../../common/hooks/esql/use_esql_availability';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertsV2.episodesTable.title', {
   defaultMessage: 'Episodes',
@@ -71,6 +73,10 @@ const SORT_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableSort';
 const VIEW_DETAILS_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.episodesTable.viewDetails',
   { defaultMessage: 'View details' }
+);
+const INVESTIGATE_IN_TIMELINE_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.investigateInTimeline',
+  { defaultMessage: 'Investigate in Timeline' }
 );
 
 /** Human-readable column headers, mirroring the v1 alerts table labels. */
@@ -202,10 +208,13 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     [rulesCache, openRuleFlyout]
   );
 
-  // Row action: open the document flyout on the v2 alert. The episode row already is a
-  // DataTableRecord, so we hand it straight to the flyout (no `_id`/`_index` re-fetch).
-  const rowAdditionalLeadingControls = useMemo<RowControlColumn[]>(
-    () => [
+  // Row actions. "View details" hands the episode DataTableRecord straight to the document flyout
+  // (no `_id`/`_index` re-fetch). "Investigate in Timeline" opens Timeline's ES|QL tab scoped to the
+  // episode id — only offered when the ES|QL advanced setting (which gates that tab) is on.
+  const investigateEpisodeInTimeline = useInvestigateEpisodeInTimeline();
+  const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
+  const rowAdditionalLeadingControls = useMemo<RowControlColumn[]>(() => {
+    const controls: RowControlColumn[] = [
       {
         id: 'openDocumentFlyout',
         render: (Control, { record }) => (
@@ -218,9 +227,28 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
           />
         ),
       },
-    ],
-    [openDocumentFlyoutFromHit]
-  );
+    ];
+    if (isEsqlAdvancedSettingEnabled) {
+      controls.push({
+        id: 'investigateInTimeline',
+        render: (Control, { record }) => (
+          <Control
+            data-test-subj="alertsV2InvestigateInTimeline"
+            iconType="timeline"
+            label={INVESTIGATE_IN_TIMELINE_LABEL}
+            tooltipContent={INVESTIGATE_IN_TIMELINE_LABEL}
+            onClick={() =>
+              investigateEpisodeInTimeline({
+                episodeId: String(record.flattened['episode.id'] ?? ''),
+                timestamp: String(record.flattened['@timestamp'] ?? ''),
+              })
+            }
+          />
+        ),
+      });
+    }
+    return controls;
+  }, [openDocumentFlyoutFromHit, isEsqlAdvancedSettingEnabled, investigateEpisodeInTimeline]);
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertsV2EpisodesTableSection">
