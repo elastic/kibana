@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock } from '../../client/mocks';
 import { getAttachmentsTool } from './get_attachments_tool';
@@ -27,13 +27,15 @@ const buildToolContext = (): ToolHandlerContext =>
 describe('getAttachmentsTool', () => {
   it('has the correct tool id', () => {
     const casesClient = createCasesClientMock();
-    const tool = getAttachmentsTool(jest.fn().mockResolvedValue(casesClient));
+    const coreSetup = coreMock.createSetup();
+    const tool = getAttachmentsTool(coreSetup, jest.fn().mockResolvedValue(casesClient));
     expect(tool.id).toBe('platform.core.cases.get_attachments');
   });
 
   it('has read-only annotations', () => {
     const casesClient = createCasesClientMock();
-    const tool = getAttachmentsTool(jest.fn().mockResolvedValue(casesClient));
+    const coreSetup = coreMock.createSetup();
+    const tool = getAttachmentsTool(coreSetup, jest.fn().mockResolvedValue(casesClient));
     expect(tool.annotations).toEqual({
       title: 'Get Case Attachments',
       readOnlyHint: true,
@@ -45,7 +47,8 @@ describe('getAttachmentsTool', () => {
 
   it('schema requires only case_id', () => {
     const casesClient = createCasesClientMock();
-    const tool = getAttachmentsTool(jest.fn().mockResolvedValue(casesClient));
+    const coreSetup = coreMock.createSetup();
+    const tool = getAttachmentsTool(coreSetup, jest.fn().mockResolvedValue(casesClient));
     const shape = tool.schema.shape;
     expect(shape).toHaveProperty('case_id');
     expect(Object.keys(shape)).toEqual(['case_id']);
@@ -56,10 +59,53 @@ describe('getAttachmentsTool', () => {
     const mockAttachments = [{ id: '1', type: 'user', comment: 'hello' }];
     casesClient.attachments.getAll.mockResolvedValue(mockAttachments as never);
 
-    const tool = getAttachmentsTool(jest.fn().mockResolvedValue(casesClient));
+    const coreSetup = coreMock.createSetup();
+    const tool = getAttachmentsTool(coreSetup, jest.fn().mockResolvedValue(casesClient));
     const result = await tool.handler({ case_id: 'case-1' } as never, buildToolContext());
 
     expect(casesClient.attachments.getAll).toHaveBeenCalled();
     expect(result).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: availability
+// ---------------------------------------------------------------------------
+
+describe('getAttachmentsTool availability', () => {
+  const makeCore = (solution: string | undefined) => {
+    const coreSetup = coreMock.createSetup();
+    const pluginsStart = {
+      spaces: {
+        spacesService: {
+          getActiveSpace: jest.fn().mockResolvedValue({ solution }),
+        },
+      },
+    };
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), pluginsStart, {}]);
+    return coreSetup;
+  };
+
+  it('returns unavailable for es solution', async () => {
+    const coreSetup = makeCore('es');
+    const tool = getAttachmentsTool(coreSetup, jest.fn());
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as any);
+    expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
+  });
+
+  it('returns available for classic solution', async () => {
+    const coreSetup = makeCore('classic');
+    const tool = getAttachmentsTool(coreSetup, jest.fn());
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as any);
+    expect(result).toEqual({ status: 'available' });
+  });
+
+  it('cacheMode is space', () => {
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
+    const tool = getAttachmentsTool(coreSetup, jest.fn());
+    expect(tool.availability?.cacheMode).toBe('space');
   });
 });

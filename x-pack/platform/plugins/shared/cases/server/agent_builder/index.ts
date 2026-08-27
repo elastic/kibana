@@ -49,7 +49,7 @@ export function registerCasesAgentBuilderTools(
 ): void {
   agentBuilder.tools.register(searchCasesTool(coreSetup, getCasesClient));
   agentBuilder.tools.register(manageCasesTool(coreSetup, getCasesClient, templatesEnabled));
-  agentBuilder.tools.register(getAttachmentsTool(getCasesClient));
+  agentBuilder.tools.register(getAttachmentsTool(coreSetup, getCasesClient));
   agentBuilder.tools.register(
     manageAttachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
