@@ -1577,7 +1577,7 @@ describe('Output Service', () => {
       ).resolves.toBeDefined();
     });
 
-    it('allows create when elasticsearch hosts match the private endpoint in serverless', async () => {
+    it('rejects create when elasticsearch hosts match private endpoint in serverless (non-preconfigured output)', async () => {
       const soClient = makeSoClientWithServerlessOutputs();
       await expect(
         outputService.create(soClient, esClientMock, {
@@ -1587,7 +1587,9 @@ describe('Output Service', () => {
           type: 'elasticsearch',
           hosts: [PRIVATE_HOST],
         })
-      ).resolves.toBeDefined();
+      ).rejects.toThrow(
+        `Elasticsearch output host must have default URL in serverless: ${DEFAULT_HOST}`
+      );
     });
 
     it('rejects create when hosts are arbitrary and private endpoint SO is absent', async () => {
@@ -1613,6 +1615,27 @@ describe('Output Service', () => {
         })
       ).rejects.toThrow(
         `Elasticsearch output host must have default URL in serverless: ${DEFAULT_HOST}`
+      );
+    });
+
+    it('rejects update when hosts match private endpoint but output is not the preconfigured private output', async () => {
+      const soClient = makeSoClientWithServerlessOutputs();
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-default-output', {
+          hosts: [PRIVATE_HOST],
+        })
+      ).rejects.toThrow(
+        `Elasticsearch output host must have default URL in serverless: ${DEFAULT_HOST}`
+      );
+    });
+
+    it('allows update when hosts match private endpoint and output is the preconfigured private output', async () => {
+      const soClient = makeSoClientWithServerlessOutputs();
+      await outputService.update(soClient, esClientMock, SERVERLESS_PRIVATE_OUTPUT_ID, {
+        hosts: [PRIVATE_HOST],
+      });
+      expect(mockedLogger.debug).toHaveBeenCalledWith(
+        `Updated output ${SERVERLESS_PRIVATE_OUTPUT_ID}`
       );
     });
   });
