@@ -551,7 +551,22 @@ export const EntitiesListView = ({
           });
         }
       } else {
-        result.push({ kind: 'panel', category: descriptor.id, rows });
+        // Cloud scoped to a single service (EC2 / Lambda / S3): label the
+        // panel by the service type instead of the generic "Cloud" so the
+        // header (and the ElasticOn data grid's metric bucket) reflect the
+        // service the page is scoped to.
+        const single = rows[0];
+        if (descriptor.id === 'cloud' && single?.subType) {
+          result.push({
+            kind: 'panel',
+            category: 'cloud',
+            subTypeLabel: single.type,
+            nested: true,
+            rows,
+          });
+        } else {
+          result.push({ kind: 'panel', category: descriptor.id, rows });
+        }
       }
     }
     return result;

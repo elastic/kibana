@@ -1680,7 +1680,20 @@ const BucketMetricControlsFlyout = ({
 // Headers
 // ---------------------------------------------------------------------------
 
-const CategoryHeader = ({ category, total }: { category: EntityCategoryId; total: number }) => {
+const CategoryHeader = ({
+  category,
+  total,
+  label,
+}: {
+  category: EntityCategoryId;
+  total: number;
+  /**
+   * Overrides the category label. Used when a card is scoped to a single
+   * sub-type (e.g. a Cloud page filtered to just EC2) so the header reads
+   * "AWS EC2 instance" instead of the generic "Cloud".
+   */
+  label?: string;
+}) => {
   const descriptor = getCategoryDescriptor(category);
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -1691,7 +1704,7 @@ const CategoryHeader = ({ category, total }: { category: EntityCategoryId; total
       ) : null}
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs">
-          <h4>{descriptor?.label ?? category}</h4>
+          <h4>{label ?? descriptor?.label ?? category}</h4>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -2149,6 +2162,24 @@ const CategoryCard = ({
       />
     );
   }
+  // Cloud is a container of services; when a page is scoped to a single
+  // service (EC2 / Lambda / S3 / …) all rows share one `.type`, so key the
+  // card on that type instead of the generic `cloud` bucket. This restores
+  // the service label in the header *and* the service-specific metric catalog
+  // (CLOUD_AWS_EC2_METRICS, …) — matching what a sub-type row would show in
+  // the unscoped multi-service view.
+  const single = entities[0];
+  if (category === 'cloud' && single.subType) {
+    return (
+      <CategoryCardInner
+        bucketKey={bucketKeyFor(category, single.type)}
+        category={category}
+        entities={entities}
+        onSelectEntity={onSelectEntity}
+        labelOverride={single.type}
+      />
+    );
+  }
   const bucketKey = bucketKeyFor(category);
   return (
     <CategoryCardInner
@@ -2165,6 +2196,8 @@ interface CategoryCardInnerProps {
   readonly category: EntityCategoryId;
   readonly entities: readonly Entity[];
   readonly onSelectEntity: (entityName: string) => void;
+  /** Header/label override for single sub-type scoping (e.g. Cloud → EC2). */
+  readonly labelOverride?: string;
 }
 
 /**
@@ -2177,11 +2210,12 @@ const CategoryCardInner = ({
   category,
   entities,
   onSelectEntity,
+  labelOverride,
 }: CategoryCardInnerProps) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
   const metric = findMetric(bucketKey, selection.metricId) ?? getBucketMetrics(bucketKey)[0];
-  const categoryLabel = getCategoryDescriptor(category)?.label ?? category;
+  const categoryLabel = labelOverride ?? getCategoryDescriptor(category)?.label ?? category;
   const { coloring } = selection;
   // Steps no longer needs persisted rules to be active — unedited buckets
   // derive defaults from the metric (see `effectiveStepRules`).
@@ -2203,7 +2237,7 @@ const CategoryCardInner = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <CategoryHeader category={category} total={entities.length} />
+          <CategoryHeader category={category} total={entities.length} label={labelOverride} />
         </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
