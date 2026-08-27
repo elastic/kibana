@@ -211,21 +211,21 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
       <div css={reviewTabContentAreaStyles} data-test-subj="datasetWizardReviewSummaryScroll">
         <EuiFlexGroup alignItems="flexStart">
           <EuiFlexItem grow={1}>
-            <EuiTitle size="xxs">
+            <EuiTitle size="xs">
               <h4>{datasetWizardStrings.reviewLogisticsSectionTitle()}</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
             <SummaryDescriptionList rows={logisticsRows} testSubj="datasetWizardReviewLogistics" />
           </EuiFlexItem>
           <EuiFlexItem grow={useTwoColumnSettings ? 2 : 1}>
-            <EuiTitle size="xxs">
+            <EuiTitle size="xs">
               <h4>{datasetWizardStrings.reviewSettingsSectionTitle()}</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
             <SettingsSummarySection rows={settingsRows} />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
-            <EuiTitle size="xxs">
+            <EuiTitle size="xs">
               <h4>{datasetWizardStrings.reviewSchemaMappingsSectionTitle()}</h4>
             </EuiTitle>
             <EuiSpacer size="s" />

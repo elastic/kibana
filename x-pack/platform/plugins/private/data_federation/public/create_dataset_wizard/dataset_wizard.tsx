@@ -713,7 +713,6 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                   {isLastStep ? (
                     <EuiButton
                       fill
-                      iconType={isFlow3 ? 'check' : undefined}
                       data-test-subj="datasetWizardSubmit"
                       isLoading={isSaving}
                       disabled={isSaving}
