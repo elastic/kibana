@@ -26,6 +26,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
 import type { SloClient } from './client';
 
@@ -54,6 +55,7 @@ export interface SLOPluginSetupDependencies {
   sloShared: SloSharedPluginSetup;
   embeddable: EmbeddableSetup;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface SLOPluginStartDependencies {

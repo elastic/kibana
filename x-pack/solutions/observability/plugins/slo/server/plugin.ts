@@ -20,6 +20,7 @@ import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin
 import { SLO_ALERTING_FEATURES } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
+import { registerAgentBuilder } from './agent_builder/register_agent_builder';
 import { registerDataProviders } from './agent_builder/register_data_provider';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
@@ -173,6 +174,14 @@ export class SLOPlugin
         isServerless: this.isServerless,
         getIsCpsEnabled: () => this.isCpsEnabled,
       },
+    });
+
+    registerAgentBuilder({
+      core,
+      plugins,
+      getScopedClients,
+      config: { isServerless: this.isServerless, getIsCpsEnabled: () => this.isCpsEnabled },
+      logger: this.logger,
     });
 
     registerServerRoutes({
