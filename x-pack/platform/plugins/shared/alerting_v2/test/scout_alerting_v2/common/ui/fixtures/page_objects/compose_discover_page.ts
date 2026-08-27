@@ -135,7 +135,6 @@ export class ComposeDiscoverPage {
   }
 
   async clickSwitchToEsql() {
-    await this.switchToEsqlToggle.waitFor({ state: 'visible', timeout: 10_000 });
     await this.switchToEsqlToggle.locator('[data-test-subj="esql"]').click();
   }
 
