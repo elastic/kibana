@@ -23,7 +23,8 @@ So the rule is: **don't enable a feature flag in `default/` unless it's also on 
 - **Is your set minimal?** Import the closest existing config (usually `default/`) and override only the args you need, instead of copying a whole config.
 - **Can you skip Cloud coverage?** A custom set doesn't run in the Scout Elastic Cloud pipeline (server overrides can't be applied there). It still runs on merge, and selectively on PRs. That's fine for most suites, but if you specifically need Cloud coverage, a custom set won't give it to you.
 
-None of this is forever: once a suite's settings are on by default, its tests can move back to `default` and the custom set can be retired.
+> [!NOTE]
+> Once a suite's settings are on by default, its tests can move back to `default` and the custom set can be retired.
 
 ## Learn more
 
