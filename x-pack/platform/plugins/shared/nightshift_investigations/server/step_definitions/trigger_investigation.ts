@@ -64,9 +64,9 @@ export const triggerInvestigationStepDefinition = (
         subject: {
           type: input.subject_type,
           id: input.subject_id,
+          summary: input.summary,
         },
         trigger_type: input.trigger_type ?? 'automatic',
-        summary: input.summary,
         concurrency_key: input.concurrency_key,
         context: input.context,
       });

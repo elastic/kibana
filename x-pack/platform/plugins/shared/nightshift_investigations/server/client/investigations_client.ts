@@ -166,7 +166,6 @@ export class NightshiftInvestigationsClient {
   async start({
     subject,
     trigger_type,
-    summary,
     message,
     stream_names,
     concurrency_key,
@@ -205,7 +204,7 @@ export class NightshiftInvestigationsClient {
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
-        ...(summary ? { summary } : {}),
+        ...(subject.summary ? { summary: subject.summary } : {}),
       },
     };
 

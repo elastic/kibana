@@ -33,8 +33,8 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
       subject: z.object({
         type: z.enum(INVESTIGATION_SUBJECT_TYPES),
         id: z.string().min(1).max(500),
+        summary: z.string().max(MAX_TEXT_LENGTH).optional(),
       }),
-      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
       concurrency_key: z.string().max(500).optional(),
       context: z
         .record(z.string().max(128), z.unknown())

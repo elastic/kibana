@@ -612,13 +612,12 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('persists a declared summary into the workflow context', async () => {
+  it('persists the subject summary into the workflow context', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
     await makeClient().start({
-      subject: { type: 'alert', id: 'alert-1' },
-      summary: 'CPU saturation on checkout-api',
+      subject: { type: 'alert', id: 'alert-1', summary: 'CPU saturation on checkout-api' },
     });
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
