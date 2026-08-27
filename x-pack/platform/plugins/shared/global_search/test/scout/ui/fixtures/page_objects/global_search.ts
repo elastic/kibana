@@ -11,8 +11,8 @@ export class GlobalSearch {
   constructor(private readonly page: ScoutPage) {}
 
   public get resultLabels(): Locator {
-    return this.page
-      .locator('.navSearch__panel')
+    return this.page.testSubj
+      .locator('chromeNextSearchModal')
       .locator('.euiSelectableTemplateSitewide__listItemTitle');
   }
 
@@ -20,18 +20,27 @@ export class GlobalSearch {
     await this.page.gotoApp('home');
   }
 
+  async openSearch() {
+    const modal = this.page.testSubj.locator('chromeNextSearchModal');
+    if (await modal.isVisible()) {
+      return;
+    }
+    await this.page.testSubj.click('chromeNextGlobalHeaderSearchButton');
+    await modal.waitFor({ state: 'visible' });
+  }
+
   async focus() {
+    await this.openSearch();
     await this.page.testSubj.click('nav-search-input');
   }
 
   async blur() {
-    // Click help menu button twice to close the search popover
-    await this.page.testSubj.click('helpMenuButton');
-    await this.page.testSubj.click('helpMenuButton');
-    await this.page.locator('.navSearch__panel').waitFor({ state: 'hidden', timeout: 5000 });
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator('chromeNextSearchModal').waitFor({ state: 'hidden' });
   }
 
   async searchFor(term: string, { clear = true }: { clear?: boolean } = {}) {
+    await this.openSearch();
     if (clear) {
       await this.clearField();
     }
@@ -47,7 +56,7 @@ export class GlobalSearch {
   }
 
   async isPopoverDisplayed() {
-    return await this.page.locator('.navSearch__panel').isVisible();
+    return await this.page.testSubj.locator('chromeNextSearchModal').isVisible();
   }
 
   async clickOnOption(index: number) {

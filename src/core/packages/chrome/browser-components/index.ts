@@ -18,7 +18,3 @@ export { Sidebar } from './src/sidebar';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
 export { useHasInlineAppHeader } from './src/shared/chrome_hooks';
 export { HeaderActionButton, type HeaderActionButtonProps } from './src/chrome_next/global_header';
-export {
-  ClassicHeaderButtonColorMode,
-  ClassicHeaderPopoverColorMode,
-} from './src/shared/header_color_mode';

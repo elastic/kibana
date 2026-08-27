@@ -7,18 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiHeader,
-  EuiHeaderSection,
-  EuiHeaderSectionItem,
-  htmlIdGenerator,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
-import type { ReactNode } from 'react';
-import React, { createRef, useMemo, useState } from 'react';
+import React, { createRef, useState } from 'react';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderLogo } from './header_logo';
@@ -27,12 +19,11 @@ import { HeaderAppMenu } from '../shared/header_app_menu';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
+import { HeaderNavControls } from '../shared/header_nav_controls';
 import {
   useClassicBreadcrumbs,
-  useContextSwitcher,
   useHasAppMenuConfig,
   useHasInlineAppHeader,
-  useProjectPicker,
   useUserMenu,
 } from '../shared/chrome_hooks';
 import { SearchButton } from '../chrome_next/global_header/search_button';
@@ -41,57 +32,13 @@ import { HelpButton } from '../chrome_next/global_header/help_button';
 import { GlobalHeaderRightGroup } from '../chrome_next/global_header/global_header_shell';
 import { ClassicHeaderDarkColorMode } from '../shared/header_color_mode';
 
-const maybeItem = (node: ReactNode, key: string) =>
-  node ? <EuiHeaderSectionItem key={key}>{node}</EuiHeaderSectionItem> : null;
-
-const invert = (node: ReactNode) =>
-  node ? <ClassicHeaderDarkColorMode>{node}</ClassicHeaderDarkColorMode> : null;
-
-const useClassicHeaderStyles = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return useMemo(
-    () => css`
-      .header__firstBar {
-        .euiHeaderSection {
-          align-items: center;
-        }
-      }
-
-      .header__secondBar {
-        .euiHeaderSection {
-          align-items: center;
-        }
-
-        .euiHeaderSectionItem {
-          padding-block: 0;
-          padding-inline: 0;
-        }
-
-        .header__toggleNavButtonSection {
-          padding-inline: ${euiTheme.size.s} ${euiTheme.size.xs};
-        }
-
-        .euiHeaderBreadcrumbs {
-          margin: 0;
-          padding-inline-start: ${euiTheme.size.s};
-        }
-      }
-    `,
-    [euiTheme]
-  );
-};
-
 export const ClassicHeader = React.memo(() => {
   const breadcrumbs = useClassicBreadcrumbs();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const hasAppMenuConfig = useHasAppMenuConfig();
   const hasInlineAppHeader = useHasInlineAppHeader();
-  const contextSwitcher = useContextSwitcher();
-  const projectPicker = useProjectPicker();
   const userMenu = useUserMenu();
-  const styles = useClassicHeaderStyles();
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
@@ -101,29 +48,31 @@ export const ClassicHeader = React.memo(() => {
   return (
     <>
       <header className={className} data-test-subj="headerGlobalNav">
-        <div id="globalHeaderBars" className="header__bars" css={styles}>
-          <EuiHeader
-            theme="dark"
-            position={'static'}
-            className="header__firstBar"
-            sections={[
-              {
-                items: [<HeaderPageAnnouncer breadcrumbs={breadcrumbs} />, <HeaderLogo />],
-              },
-              {
-                items: [invert(<SearchButton layout="expanded" />)],
-              },
-              {
-                items: [
-                  <GlobalHeaderRightGroup
-                    help={invert(<HelpButton />)}
-                    actions={<AiButtonSlot />}
-                    userMenu={invert(userMenu)}
-                  />,
-                ],
-              },
-            ]}
-          />
+        <div id="globalHeaderBars" className="header__bars">
+          <ClassicHeaderDarkColorMode>
+            <EuiHeader
+              theme="dark"
+              position={'static'}
+              className="header__firstBar"
+              sections={[
+                {
+                  items: [<HeaderPageAnnouncer breadcrumbs={breadcrumbs} />, <HeaderLogo />],
+                },
+                {
+                  items: [<SearchButton layout="expanded" />],
+                },
+                {
+                  items: [
+                    <GlobalHeaderRightGroup
+                      help={<HelpButton />}
+                      actions={<AiButtonSlot />}
+                      userMenu={userMenu}
+                    />,
+                  ],
+                },
+              ]}
+            />
+          </ClassicHeaderDarkColorMode>
 
           <EuiHeader position={'static'} className="header__secondBar">
             <EuiHeaderSection grow={false}>
@@ -149,8 +98,7 @@ export const ClassicHeader = React.memo(() => {
                   }
                 />
               </EuiHeaderSectionItem>
-              {maybeItem(contextSwitcher, 'contextSwitcher')}
-              {maybeItem(projectPicker, 'projectPicker')}
+              <HeaderNavControls position="left" />
             </EuiHeaderSection>
 
             <BreadcrumbsWithExtensionsWrapper>{Breadcrumbs}</BreadcrumbsWithExtensionsWrapper>

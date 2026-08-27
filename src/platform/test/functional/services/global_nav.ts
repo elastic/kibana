@@ -106,10 +106,15 @@ export class GlobalNavService extends FtrService {
   }
 
   public async clickNewsfeed(): Promise<void> {
-    if (await this.isNextProjectChrome()) {
-      return unsupportedInNextChrome('clickNewsfeed');
+    if (!(await this.testSubjects.exists('helpMenuWhatsNewButton', { timeout: 0 }))) {
+      const helpButton = (await this.testSubjects.exists('chromeNextGlobalHeaderHelpButton', {
+        timeout: 0,
+      }))
+        ? 'chromeNextGlobalHeaderHelpButton'
+        : 'helpMenuButton';
+      await this.testSubjects.click(helpButton);
     }
-    return await this.testSubjects.click('headerGlobalNav > ^newsfeed');
+    return await this.testSubjects.click('helpMenuWhatsNewButton');
   }
 
   public async getFirstBreadcrumb(): Promise<string> {

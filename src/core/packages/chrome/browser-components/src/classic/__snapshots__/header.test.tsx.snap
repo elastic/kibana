@@ -6,7 +6,7 @@ exports[`Header renders 1`] = `
   data-test-subj="headerGlobalNav"
 >
   <div
-    class="header__bars css-ckid2m-useClassicHeaderStyles"
+    class="header__bars"
     id="globalHeaderBars"
   >
     <div
