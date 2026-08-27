@@ -7,6 +7,4 @@
 
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 
-export const MigrationId = NonEmptyString.describe(
-  'The id of a rule migration or a dashboard migration.'
-);
+export const MigrationId = NonEmptyString.describe('The id of the rule migration.');

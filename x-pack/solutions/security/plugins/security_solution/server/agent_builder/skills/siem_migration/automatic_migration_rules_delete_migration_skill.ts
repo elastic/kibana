@@ -28,7 +28,7 @@ export const automaticMigrationRulesDeleteMigrationSkill = defineSkillType({
   basePath: 'skills/security/siem_migrations',
   description: `Permanently delete an Automatic Rule Migration and all its associated rule items and resources.
 
-This action is irreversible. The skill resolves the migration by name, checks it is not currently running, and requires explicit user confirmation before deleting.`,
+This action is irreversible. The skill resolves the migration by name, checks it is not currently running, then deletes it.`,
   content: `
 # Delete an Automatic Rule Migration
 
@@ -53,7 +53,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
   also used as a pasted-id fallback (see Name→ID block).
 - \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` — stop a running migration before deletion.
 - \`${SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID}\` — permanently delete the migration and all its
-  rule items. Destructive and irreversible; user confirmation is requested automatically.
+  rule items. Destructive and irreversible.
 
 ## Workflow
 

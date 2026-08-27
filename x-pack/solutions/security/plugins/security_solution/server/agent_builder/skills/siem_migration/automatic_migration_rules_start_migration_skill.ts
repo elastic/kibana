@@ -31,7 +31,7 @@ export const automaticMigrationRulesStartMigrationSkill = defineSkillType({
   basePath: 'skills/security/siem_migrations',
   description: `Start, reprocess, or resume an Automatic Rule Migration translation run.
 
-Resolves the inference endpoint (AI connector), confirms the mutating action with the user, and picks the right request body (START vs REPROCESS vs RESUME) from the rule migration state.`,
+Resolves the inference endpoint (AI connector) and picks the right request body (START vs REPROCESS vs RESUME) from the rule migration state.`,
   content: `
 # Start / Reprocess / Resume an Automatic Rule Migration
 
@@ -164,7 +164,7 @@ between them.
 | \`finished\` | 0 | \`rules.failed > 0\` | **REPROCESS failed** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "failed" }\` |
 | \`finished\` | 0 | \`rules.success.result.partial > 0\` OR \`untranslatable > 0\` | **REPROCESS not_fully_translated** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "not_fully_translated" }\` |
 | \`finished\` | 0 | User-selected rules, including rules with mixed statuses | **REPROCESS selected** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "selected", selection: { ids } }\` |
-| \`finished\` | 0 | \`rules.success.installable > 0\` | Route to **install-automatic-migration-rules** (do not start) | — |
+| \`finished\` | 0 | \`rules.success.installable > 0\` | Tell the user their rules are ready to install and direct them to **LaunchPad → Manage Automatic Migrations** in the UI (do not start) | — |
 | \`stopped\` or \`interrupted\` | \`items.pending > 0\` | any | **RESUME** (continue the run) | \`{ settings: { connector_id } }\` (no \`retry\`, no \`selection\`) |
 | \`running\` | any | any | Do nothing — tell the user it's already running | — |
 
@@ -210,8 +210,7 @@ Never skip step 2 — you must resolve titles to item ids; titles are not accept
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
-If the user asks to install rules, delete a migration, or update an index
-pattern, route them to the relevant sibling skill — this skill only starts/reprocesses/resumes.
+If the user asks to delete a migration, route them to the **${RULE_MIGRATION_SKILLS.DELETE}** sibling skill — this skill only starts/reprocesses/resumes.
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,

@@ -22,12 +22,12 @@ import {
 import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesUpdateMigrationSkill = defineSkillType({
-  id: 'automatic-migration-rules-update-migration',
+  id: RULE_MIGRATION_SKILLS.UPDATE,
   name: RULE_MIGRATION_SKILLS.UPDATE,
   basePath: 'skills/security/siem_migrations',
   description: `Rename an Automatic Rule Migration.
 
-Prompts for the new name, confirms with the user, and applies the change. Use when the user wants to rename a migration.`,
+Prompts for the new name and applies the change. Use when the user wants to rename a migration.`,
   content: `
 # Update an Automatic Rule Migration
 
@@ -49,8 +49,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 - \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` — resolve a migration name to its id.
 - \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — fetch stats for a single migration by id;
   also used as a pasted-id fallback (see Name→ID block).
-- \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` — update \`name\` only. Mutating; user
-  confirmation is required before the tool executes.
+- \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` — update \`name\` only. Mutating.
 
 ## Scope Limit — What This Skill Can and Cannot Update
 
@@ -80,12 +79,9 @@ Do NOT call \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` for those reques
 3. **Scope check**: if the user's intent is to change an index pattern or rewrite placeholder
    patterns in translated rules, route them to the Automatic Migration UI and stop — do not call
    the update tool.
-4. **State and pause**: echo the migration's **exact full name**, the field being changed, and the
-   new value. Then end your turn. Do NOT call \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` in the same turn — wait
-   for the user to explicitly confirm in their next message.
-5. **Execute (confirmed turn only)**: once the user affirms, call \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` with
-   the resolved migration id and the new \`name\`.
-6. **Report**: always echo the migration's full resolved name verbatim (e.g. "Migration 'Splunk Q3'
+4. **Execute**: echo the migration's **exact full name** and the new value, then call
+   \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` with the resolved migration id and the new \`name\`.
+5. **Report**: always echo the migration's full resolved name verbatim (e.g. "Migration 'Splunk Q3'
    has been renamed to 'Splunk Q3 - reviewed'"). The tool returns only \`{ ok: true, migration_id }\`;
    use the name from step 1, never the id.
 

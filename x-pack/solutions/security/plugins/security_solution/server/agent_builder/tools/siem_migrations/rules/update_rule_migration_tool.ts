@@ -13,6 +13,8 @@ import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { MigrationId } from '../common/schemas';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
@@ -21,7 +23,7 @@ import { createToolErrorResult, createMissingPrivilegeError } from '../common/to
 import { SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
-  migration_id: NonEmptyString.describe('The id of the rule migration to update.'),
+  migration_id: MigrationId,
   name: NonEmptyString.describe('The new name for the rule migration.'),
 });
 
@@ -47,10 +49,11 @@ export const updateRuleMigrationTool = (
       openWorldHint: false,
     },
     confirmation: { askUser: 'always' },
-    description: `Update a rule migration's name.
+    description: `Update a rule migration's name. Mutating.
 
 Accepts { name }. Returns { ok: true, migration_id }.
-Mutating — confirms with the user before executing.`,
+
+See the ${RULE_MIGRATION_SKILLS.UPDATE} skill for the full workflow.`,
 
     schema,
     tags: ['security', 'siem-migration', 'rules'],

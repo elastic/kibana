@@ -27,6 +27,7 @@ import {
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
   SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
 } from './tool_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
 
 // Reuse the endpoint's request body schema and add the path param, so the tool input
 // stays in lockstep with the API model (no schema drift). `.extend` on a lazySchema
@@ -73,11 +74,11 @@ export const startRuleMigrationTool = (
     },
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     confirmation: { askUser: 'once' },
-    description: `Start or reprocess a SIEM rule migration.
+    description: `Start or reprocess a SIEM rule migration. Mutating.
 
-Mutating — confirms with the user and resolves the inference endpoint (AI connector) via ${platformCoreTools.listInferenceEndpoints} first.
+Resolves the inference endpoint (AI connector) via ${platformCoreTools.listInferenceEndpoints} first.
 
-See the automatic-migration-rules-start-migration skill for the START vs REPROCESS vs RESUME decision policy.`,
+See the ${RULE_MIGRATION_SKILLS.START} skill for the START vs REPROCESS vs RESUME decision policy.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {

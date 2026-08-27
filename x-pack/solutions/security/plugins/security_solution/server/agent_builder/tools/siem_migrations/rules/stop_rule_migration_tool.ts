@@ -12,7 +12,6 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_STOP_PATH } from '../../../../../common/siem_migrations/constants';
 import type { StopRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
@@ -20,9 +19,11 @@ import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
 import { SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID } from './tool_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { MigrationId } from '../common/schemas';
 
 const schema = z.object({
-  migration_id: NonEmptyString.describe('The id of the rule migration to stop.'),
+  migration_id: MigrationId,
 });
 
 const buildPath = (migrationId: string): string =>
@@ -47,11 +48,11 @@ export const stopRuleMigrationTool = (
       openWorldHint: false,
     },
     confirmation: { askUser: 'once' },
-    description: `Stop a running Automatic Rule Migration.
+    description: `Stop a running Automatic Rule Migration. Mutating.
 
-Returns { stopped: boolean }. Mutating — confirms with the user before executing.
+Returns { stopped: boolean }.
 
-See the automatic-migration-rules-stop-migration skill for the full workflow.`,
+See the ${RULE_MIGRATION_SKILLS.STOP} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {

@@ -22,12 +22,12 @@ import {
 import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesStopMigrationSkill = defineSkillType({
-  id: 'automatic-migration-rules-stop-migration',
+  id: RULE_MIGRATION_SKILLS.STOP,
   name: RULE_MIGRATION_SKILLS.STOP,
   basePath: 'skills/security/siem_migrations',
   description: `Stop a running Automatic Rule Migration translation run.
 
-Resolves the migration by name, confirms the action with the user, and stops the run. Use when the user wants to pause a migration that is currently translating rules.`,
+Resolves the migration by name and stops the run. Use when the user wants to pause a migration that is currently translating rules.`,
   content: `
 # Stop an Automatic Rule Migration
 
@@ -50,8 +50,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
   check its current status.
 - \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — fetch stats for a single migration by id;
   also used as a pasted-id fallback (see Name→ID block).
-- \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` — stop the migration. Mutating; user confirmation
-  is requested automatically before this tool executes.
+- \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` — stop the migration. Mutating.
 
 ## Workflow
 
@@ -59,8 +58,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
    If the user pastes an id, verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
 2. **Check status**: if the migration is not currently \`running\`, tell the user — there is nothing
    to stop. Do NOT call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` on a non-running migration.
-3. **Confirm**: state the migration name and that the running translation will be paused. The
-   platform will prompt the user for confirmation before the tool executes.
+3. **Report intent**: state the migration's exact full name and that the running translation will be paused.
 4. **Execute**: call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` with the resolved migration id.
 5. **Report**: show the returned \`{ stopped: boolean }\`. If \`stopped: false\`, tell the user the
    migration may have already finished or stopped on its own.

@@ -11,7 +11,6 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
-import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
@@ -19,9 +18,11 @@ import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
 import { SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID } from './tool_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { MigrationId } from '../common/schemas';
 
 const schema = z.object({
-  migration_id: NonEmptyString.describe('The id of the rule migration to delete.'),
+  migration_id: MigrationId,
 });
 
 const buildPath = (migrationId: string): string =>
@@ -46,11 +47,11 @@ export const deleteRuleMigrationTool = (
       openWorldHint: false,
     },
     confirmation: { askUser: 'always' },
-    description: `Delete a rule migration and all its associated rule items. This is destructive and irreversible.
+    description: `Delete a rule migration and all its associated rule items. Destructive and irreversible.
 
-Returns { ok: true, migration_id }. Mutating — confirms with the user before executing.
+Returns { ok: true, migration_id }.
 
-See the automatic-migration-rules-delete-migration skill for the full workflow.`,
+See the ${RULE_MIGRATION_SKILLS.DELETE} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {
