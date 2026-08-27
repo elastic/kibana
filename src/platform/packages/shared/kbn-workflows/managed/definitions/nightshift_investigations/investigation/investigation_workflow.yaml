@@ -115,7 +115,7 @@ steps:
         (aggregation, window, and threshold). Read them before concluding that a spike is
         anomalous — a short window or a tight threshold can fire on normal variation, and "the
         rule is too sensitive" is a legitimate conclusion supported by the data.
-        {% elsif inputs.context %}
+        {% elsif inputs.context and inputs.context.size > 0 %}
         Additional context: {{ inputs.context | json }}
         {% endif %}
       # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema
