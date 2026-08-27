@@ -28,7 +28,5 @@ So the rule is: **don't enable a feature flag in `default/` unless it's also on 
 
 ## Learn more
 
-Don't copy the docs into here: just read them.
-
 - [Feature flags](https://www.elastic.co/docs/extend/kibana/testing/feature-flags)
 - [Scout best practices](https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices)
