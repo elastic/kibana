@@ -43,7 +43,14 @@ export const getSampleDocs = async ({
             function_score: {
               functions: [
                 {
-                  random_score: {},
+                  // static seed + a doc-value field gives the same "random" ordering on every
+                  // request (as long as the underlying documents don't change), so repeated
+                  // calls against the same index return identical samples and keep the prompts
+                  // built from them cacheable across separate tool invocations.
+                  random_score: {
+                    seed: 10,
+                    field: '_seq_no',
+                  },
                 },
               ],
             },
