@@ -16,12 +16,14 @@ export {
   causalFeatureSchema,
   signalEntrySchema,
   severitySchema,
+  SIGNAL_VERDICTS,
   SEVERITY_OPTIONS,
   SEVERITY_CONTRACT_RULE,
   getSeverityLabel,
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
+  type SignalVerdict,
   type Severity,
 } from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';
@@ -56,6 +58,8 @@ export {
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
   MAX_HYPOTHESIS_EVIDENCE,
+  MAX_RECOMMENDATIONS,
+  MAX_BLIND_SPOTS,
   MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
   MAX_SIGNIFICANT_EVENT_UPDATES,
   significantEventUpdateSchema,
@@ -64,6 +68,9 @@ export {
   type InvestigationEvidence,
   type InvestigationEvidenceCode,
   type InvestigationHypothesis,
+  type InvestigationRecommendation,
+  type InvestigationBlindSpot,
+  type InvestigationRunStatus,
   type InvestigationState,
 } from './investigation_state';
 export {

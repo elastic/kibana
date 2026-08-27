@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { isBoom } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { platformStreamsMemoryTools } from './tool_ids';
 import type { MemoryToolsOptions } from './types';
+import type { MemoryEntry } from '../../lib/memory';
 
 const memoryReadSchema = z.object({
   name: z
@@ -76,15 +78,15 @@ const extractHeadingSection = (content: string, heading: string): string | undef
 
 export const createMemoryReadTool = ({
   getMemoryService,
-}: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryReadSchema> => ({
+}: MemoryToolsOptions): BuiltinSkillBoundedTool<typeof memoryReadSchema> => ({
   id: platformStreamsMemoryTools.memoryRead,
   type: ToolType.builtin,
   description:
     'Read a specific memory page by name or ID. Supports targeted reads: ' +
     'request a specific heading section or a line range to avoid loading the full document. ' +
-    'Always returns the list of headings and total line count for navigation.',
+    'Always returns the list of headings and total line count for navigation. ' +
+    'When both name and id are available, provide both so a stale ID can fall back to the name.',
   schema: memoryReadSchema,
-  tags: ['memory'],
   handler: async ({ name, id, heading, offset, limit }, context) => {
     const memoryService = getMemoryService(context.esClient.asCurrentUser);
 
@@ -99,9 +101,17 @@ export const createMemoryReadTool = ({
     }
 
     try {
-      const entry = id
-        ? await memoryService.get({ id })
-        : await memoryService.getByName({ name: name! });
+      let entry: MemoryEntry | undefined;
+      if (id) {
+        try {
+          entry = await memoryService.get({ id });
+        } catch (error) {
+          if (!name || !(isBoom(error) && error.output.statusCode === 404)) throw error;
+          entry = await memoryService.getByName({ name });
+        }
+      } else {
+        entry = await memoryService.getByName({ name: name! });
+      }
 
       if (!entry) {
         return {

@@ -21,9 +21,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
-
-import { parseEpisodeDataJson } from '../utils/episode_grouping_data';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { AlertEpisodeTags } from './actions/tags';

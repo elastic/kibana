@@ -172,6 +172,13 @@ export const createUpdateStreamTool = ({
     - For a child query stream, the esql FROM clause must reference the parent stream (or its ES|QL view). Use ${INSPECT_STREAMS} on the parent first if unsure of the source.
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Update Stream',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   schema: updateStreamSchema,
   confirmation: {
     askUser: 'always',

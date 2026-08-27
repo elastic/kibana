@@ -172,6 +172,7 @@ export const Dropbox: ConnectorSpec = {
 
     createSharedLink: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a shared link for a file or folder in Dropbox. Returns a shareable URL. ' +
         'Use paths from search or listFolder results. ' +
@@ -214,6 +215,7 @@ export const Dropbox: ConnectorSpec = {
 
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Call any tool on the Dropbox MCP server directly by name. Use this as an escape hatch for tools not yet ' +
         'exposed as named actions (such as create_file, create_folder, copy, move, delete, or restore_file_revision). Use ' +

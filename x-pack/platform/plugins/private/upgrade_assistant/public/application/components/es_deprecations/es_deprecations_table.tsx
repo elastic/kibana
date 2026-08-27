@@ -21,10 +21,10 @@ import {
   EuiFlexItem,
   EuiTableBody,
   EuiTablePagination,
-  EuiCallOut,
   EuiTableRowCell,
   Pager,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { EnrichedDeprecationInfo } from '../../../../common/types';
 import { useAppContext } from '../../app_context';
 import {
@@ -341,12 +341,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
         <div data-test-subj="invalidSearchQueryMessage">
           <EuiSpacer size="l" />
 
-          <EuiCallOut
-            announceOnMount
-            iconType="warning"
-            color="danger"
-            title={`Invalid search: ${searchError.message}`}
-          />
+          <KbnDangerCallout announceOnMount title={`Invalid search: ${searchError.message}`} />
         </div>
       )}
 

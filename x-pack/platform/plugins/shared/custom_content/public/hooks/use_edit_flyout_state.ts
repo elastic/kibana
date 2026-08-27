@@ -6,13 +6,13 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import type { EuiThemeColorModeStandard } from '@elastic/eui';
+import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { getServices } from '../services';
 import { fetchEsqlData, type EsqlDataResult } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
-import { prepareHtml } from '../utils/prepare_html';
+import { sanitizeHtml, applyHtmlTheme } from '../utils/prepare_html';
 import { flyoutReducer } from './flyout_reducer';
 
 export interface EditFlyoutState {
@@ -26,7 +26,6 @@ export interface EditFlyoutState {
   esqlDataError: string | null;
   handleFetchData: () => Promise<void>;
   isRenderLoading: boolean;
-  hasPreviewedCurrentDraft: boolean;
   handleRender: () => Promise<void>;
 }
 
@@ -35,6 +34,7 @@ export interface UseEditFlyoutStateParams {
   template: string | undefined;
   timeRange: TimeRange | undefined;
   colorMode: EuiThemeColorModeStandard;
+  euiTheme: EuiThemeComputed;
   isApproximate: boolean;
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
@@ -47,6 +47,7 @@ export const useEditFlyoutState = ({
   template,
   timeRange,
   colorMode,
+  euiTheme,
   isApproximate,
   projectRouting,
   query,
@@ -60,7 +61,6 @@ export const useEditFlyoutState = ({
     esqlData: null,
     esqlDataError: null,
     isRenderLoading: false,
-    hasPreviewedCurrentDraft: false,
   });
 
   const abortRef = useRef<AbortController | undefined>(undefined);
@@ -172,8 +172,7 @@ export const useEditFlyoutState = ({
         rawHtml = state.draftTemplate;
       }
       if (!controller.signal.aborted && draftVersionRef.current === snapVersion) {
-        dispatch({ type: 'RENDER_SUCCESS' });
-        onRunPreview(prepareHtml(rawHtml, colorMode));
+        onRunPreview(applyHtmlTheme(sanitizeHtml(rawHtml), colorMode, euiTheme));
       }
     } catch (err) {
       if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {
@@ -199,6 +198,7 @@ export const useEditFlyoutState = ({
     core.uiSettings,
     search,
     colorMode,
+    euiTheme,
     onRunPreview,
   ]);
 
@@ -213,7 +213,6 @@ export const useEditFlyoutState = ({
     esqlDataError: state.esqlDataError,
     handleFetchData,
     isRenderLoading: state.isRenderLoading,
-    hasPreviewedCurrentDraft: state.hasPreviewedCurrentDraft,
     handleRender,
   };
 };

@@ -7,6 +7,7 @@
 
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 interface EntitySource {
   entity?: {
@@ -23,4 +24,21 @@ export const getEntityFields = (doc: DataTableRecord) => {
     entityName: entity?.name,
     entityId: entity?.id,
   };
+};
+
+/** True when a bool query has any top-level must/filter/should/must_not clause. */
+export const hasActiveTopLevelBoolClauses = (
+  filterQuery: ESBoolQuery | undefined | null
+): filterQuery is ESBoolQuery => {
+  if (!filterQuery?.bool) {
+    return false;
+  }
+  const { must, filter, should, must_not } = filterQuery.bool;
+  const hasClauses = (clause: unknown): boolean => {
+    if (clause == null) {
+      return false;
+    }
+    return Array.isArray(clause) ? clause.length > 0 : true;
+  };
+  return hasClauses(must) || hasClauses(filter) || hasClauses(should) || hasClauses(must_not);
 };

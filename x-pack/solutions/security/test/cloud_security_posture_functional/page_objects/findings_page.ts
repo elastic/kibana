@@ -342,7 +342,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
         throw new Error(`Unknown group selector option: "${value}"`);
       }
       await testSubjects.click(optionTestSubj);
-      return await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+      await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+      // 'None' renders a flat table, not accordion rows — skip the accordion wait.
+      if (value !== 'None') {
+        await testSubjects.existOrFail('grouping-accordion', { timeout: 5000 });
+      }
     },
     async openDropDown() {
       const element = await this.getElement();

@@ -21,6 +21,25 @@ const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 // Temporary: remove once dataset filtering is enabled by default in ES
 const DATASET_FILTERING_FEATURE_FLAG_KEY = 'esql.datasetFilteringEnabled';
 
+// ANTLR ALL(*) adaptive-prediction cost grows super-linearly with parenthesis nesting depth.
+// Reject deep queries before touching the parser to prevent event-loop stalls (DoS via a single
+// small request from a low-privileged account).
+const MAX_NESTING_DEPTH = 50;
+
+const getMaxNestingDepth = (query: string): number => {
+  let max = 0;
+  let depth = 0;
+  for (const ch of query) {
+    if (ch === '(' || ch === '[') {
+      depth++;
+      if (depth > max) max = depth;
+    } else if (ch === ')' || ch === ']') {
+      depth--;
+    }
+  }
+  return max;
+};
+
 const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
   Boolean(result.fields && result.fields['@timestamp']);
 
@@ -211,6 +230,13 @@ export const registerGetTimeFieldRoute = (
     },
     async (requestHandlerContext, request, response) => {
       const { query } = request.body;
+
+      if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
+        return response.badRequest({
+          body: 'Query nesting depth exceeds the maximum allowed limit',
+        });
+      }
+
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
       // Temporary: remove once dataset filtering is enabled by default in ES

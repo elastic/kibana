@@ -1,5 +1,8 @@
 {
   "sha1": "c519b8040283fad4c95df4660a3f64cd5c993bc4",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "c887513255f65ab-00151542cf1ad59",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/ui/tests/esql_async_polling.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 33,
+        "column": 13
       }
     }
   ]

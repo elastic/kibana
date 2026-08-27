@@ -20,6 +20,7 @@ import type {
   RuleId,
 } from '../types';
 import { createMatcherContext } from './utils/matcher_context';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 /**
  * Suppresses episodes whose `last_event_timestamp` falls within an active
@@ -36,7 +37,10 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
     private readonly maintenanceWindowService: MaintenanceWindowServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { dispatchable = [], suppressed = [], rules = new Map<RuleId, Rule>() } = state;
     if (dispatchable.length === 0) {
       return { type: 'continue' };

@@ -51,6 +51,7 @@ steps:
     with:
       message: "Hello from Scout API test 2"
 `;
+
 spaceTest.describe(
   'Workflow execution concurrency control',
   { tag: tags.deploymentAgnostic },
@@ -59,7 +60,11 @@ spaceTest.describe(
       await apiServices.workflowsApi.deleteAll();
     });
 
-    async function runConcurrencyWorkflow(workflowsApi: WorkflowsApiService, workflowId: string) {
+    async function runConcurrencyWorkflow(
+      workflowsApi: WorkflowsApiService,
+      workflowId: string,
+      { waitTimeout = 20_000 }: { waitTimeout?: number } = {}
+    ) {
       const events = [
         { env: 'dev', problem: 'issue-1' },
         { env: 'prod', problem: 'issue-2' },
@@ -85,6 +90,7 @@ spaceTest.describe(
           workflowsApi
             .waitForTermination({
               workflowExecutionId: scheduledExecution.workflowExecutionId,
+              timeout: waitTimeout,
             })
             .then((execution) => ({
               execution,
@@ -168,6 +174,53 @@ spaceTest.describe(
           expect(completedExecution).toHaveLength(1);
           expect(completedExecution.at(0)?.status).toBe(ExecutionStatus.COMPLETED);
           expect(completedExecution.at(0)?.stepExecutions).toHaveLength(4);
+        });
+      }
+    );
+
+    spaceTest(
+      'queue strategy queues new executions and runs them sequentially until all complete',
+      async ({ apiServices }) => {
+        // Scout's default test timeout is 60s. Queue serialises 3 ~10s runs for
+        // the same key (~30s) plus ~6s of inter-run delays, so 120s leaves CI headroom.
+        spaceTest.setTimeout(120_000);
+
+        const createdWorkflow = await apiServices.workflowsApi.create(
+          getConcurrencyWorkflowYaml('queue')
+        );
+
+        // The queue strategy serialises executions per concurrency key. With 3 queued
+        // dev/issue-1 runs each taking ~10s, the last one finishes at ~30s. We use a
+        // 60s timeout so waitForTermination does not expire prematurely.
+        const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
+          apiServices.workflowsApi,
+          createdWorkflow.id,
+          { waitTimeout: 60_000 }
+        );
+
+        Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
+          expect(executions.length).toBeGreaterThan(0);
+
+          // All executions must complete — none are skipped or cancelled
+          executions.forEach((execution) => {
+            expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+            expect(execution?.stepExecutions).toHaveLength(4);
+          });
+
+          // Executions must be strictly sequential: no two runs for the same
+          // concurrency key may overlap in time. Sort by startedAt and verify
+          // that each run began only after the previous one finished.
+          const sortedByStart = [...executions].sort(
+            (a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime()
+          );
+
+          for (let i = 1; i < sortedByStart.length; i++) {
+            const prev = sortedByStart[i - 1];
+            const curr = sortedByStart[i];
+            expect(new Date(curr.startedAt).getTime()).toBeGreaterThanOrEqual(
+              new Date(prev.finishedAt).getTime()
+            );
+          }
         });
       }
     );

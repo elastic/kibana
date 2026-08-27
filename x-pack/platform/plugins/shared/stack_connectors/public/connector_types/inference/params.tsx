@@ -12,7 +12,8 @@ import {
   type ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
-import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect, EuiCallOut } from '@elastic/eui';
+import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
 import type { ActionVariable } from '@kbn/alerting-types';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -82,18 +83,17 @@ const InferenceServiceParamsFields: React.FunctionComponent<
 
   if (!isEndpointExists) {
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount={false}
         title="Missing configuration"
-        color="warning"
-        iconType="warning"
-      >
-        <FormattedMessage
-          id="xpack.stackConnectors.components.inference.loadingErrorText"
-          defaultMessage={'Inference Endpoint by ID {inferenceId} does not exist!'}
-          values={{ inferenceId }}
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.stackConnectors.components.inference.loadingErrorText"
+            defaultMessage={'Inference Endpoint by ID {inferenceId} does not exist!'}
+            values={{ inferenceId }}
+          />
+        }
+      />
     );
   }
 
