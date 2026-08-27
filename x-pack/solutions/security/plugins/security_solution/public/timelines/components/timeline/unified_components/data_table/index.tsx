@@ -310,11 +310,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               },
             },
           });
-          telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-            location: timelineId,
-            panel: 'right',
-          });
         }
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+          location: timelineId,
+          panel: 'right',
+        });
       },
       [
         enableNewFlyout,
