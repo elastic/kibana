@@ -10,7 +10,7 @@ import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { Map as MapApi } from '@kbn/mapbox-gl';
 import type { AnyAction } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk-v2';
-import maplibregl from 'maplibre-gl';
+import { maplibregl } from '@kbn/mapbox-gl';
 import { MapAdapter, VectorTileAdapter } from '../inspector';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
 import type { MapStoreState } from './store';
@@ -265,7 +265,7 @@ export function fitMapToBounds(bounds: MapExtent) {
       return;
     }
 
-    // clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
+    // clamping to -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
     const lnLatBounds = new maplibregl.LngLatBounds(
       new maplibregl.LngLat(clampToLonBounds(bounds.minLon), clampToLatBounds(bounds.minLat)),
       new maplibregl.LngLat(clampToLonBounds(bounds.maxLon), clampToLatBounds(bounds.maxLat))
