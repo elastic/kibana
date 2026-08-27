@@ -217,6 +217,39 @@ class ConversationClientImpl implements ConversationClient {
             buildReadAccessFilter({ user: this.user, agentIds }),
             // Hide sub-agent conversations from the nav list - hardcoded until we need to do better
             { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
+            // Hide empty events-native placeholders (docs whose creation completed but
+            // whose first round never landed anything on the timeline — e.g. the client
+            // aborted before the atomic create finished). Legacy docs without a
+            // `schema_version` are unaffected. New docs seed the timeline atomically
+            // with `user_message`, so this is defense in depth against already-leaked
+            // placeholders and any future path that could create a doc before events
+            // land on it.
+            {
+              bool: {
+                must_not: [
+                  {
+                    bool: {
+                      must: [
+                        { exists: { field: 'schema_version' } },
+                        {
+                          bool: {
+                            must_not: [
+                              {
+                                nested: {
+                                  path: 'events',
+                                  query: { match_all: {} },
+                                  ignore_unmapped: true,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           ],
         },
       },

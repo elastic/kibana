@@ -209,51 +209,20 @@ export const updateConversation$ = ({
 };
 
 /**
- * Ensures the conversation document exists, creating it with a placeholder title if the caller
- * is on the CREATE branch. Swallows the "already exists" race so eager creates don't fail when
- * another writer wins.
- */
-const ensureConversationCreated = async ({
-  conversation,
-  conversationClient,
-}: {
-  conversation: ConversationWithOperation;
-  conversationClient: ConversationClient;
-}): Promise<void> => {
-  if (conversation.operation !== 'CREATE') {
-    return;
-  }
-  const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
-  const hasResolvedParentUser = Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
-  try {
-    await conversationClient.create({
-      id: conversation.id,
-      title: DEFAULT_CONVERSATION_TITLE,
-      agent_id: conversation.agent_id,
-      access_control: conversation.access_control,
-      origin: conversation.origin,
-      read_only: conversation.read_only,
-      rounds: [],
-      ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
-      ...(conversation.parent_conversation
-        ? { parent_conversation: conversation.parent_conversation }
-        : {}),
-    });
-  } catch (error) {
-    // Someone else won the eager-create race; the doc exists, keep going.
-    if (!isConversationAlreadyExistsError(error)) {
-      throw error;
-    }
-  }
-};
-
-/**
  * Receipt-time input write.
  *
- * Ensures the conversation document exists and appends a single `user_message` timeline event
- * for the round about to run. This is the first write in the two-phase persistence path — it
- * runs before the agent execution starts, so the input is persisted regardless of the run's
- * fate (failure, abort, or completion).
+ * Persists a single `user_message` timeline event for the round about to run. This is the
+ * first write in the two-phase persistence path — it runs before the agent execution starts,
+ * so the input is persisted regardless of the run's fate (failure, abort, or completion).
+ *
+ * CREATE branch: the doc is created atomically with the `user_message` seeded into its
+ * timeline in a single `_index?op_type=create` call. This eliminates a window where a
+ * separate "create empty doc, then append event" sequence could leave a headless
+ * placeholder if the second write failed or the request was torn down between the two.
+ * If another writer wins the eager-create race, we fall back to `appendEvents` so the
+ * event still lands on the winning doc.
+ *
+ * UPDATE branch: the doc already exists; only the `appendEvents` write is dispatched.
  *
  * Emits nothing on the outward chat stream (side-effect only). The final `conversationCreated`
  * / `conversationUpdated` event still fires at round-end via {@link appendRoundTerminated$}.
@@ -286,7 +255,6 @@ export const persistRoundInput$ = ({
   return from(
     inFlightWrites.track(
       (async () => {
-        await ensureConversationCreated({ conversation, conversationClient });
         // `ConverseInput.message` is optional but `RoundInput.message` is required —
         // default to an empty string for the receipt-time snapshot. The overwrite at
         // round-end replaces this with the processed input which always has a message.
@@ -303,6 +271,41 @@ export const persistRoundInput$ = ({
           },
           conversation
         );
+
+        if (conversation.operation === 'CREATE') {
+          const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
+          const hasResolvedParentUser =
+            Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
+          try {
+            await conversationClient.create({
+              id: conversation.id,
+              title: DEFAULT_CONVERSATION_TITLE,
+              agent_id: conversation.agent_id,
+              access_control: conversation.access_control,
+              origin: conversation.origin,
+              read_only: conversation.read_only,
+              rounds: [],
+              // Seed the timeline atomically with the create so an abort mid-write
+              // can never leave the doc empty. `createRequestToEs` uses this list
+              // verbatim when `rounds` is empty.
+              events: [event],
+              ...(isPersistentSubagentCreate && hasResolvedParentUser
+                ? { user: conversation.user }
+                : {}),
+              ...(conversation.parent_conversation
+                ? { parent_conversation: conversation.parent_conversation }
+                : {}),
+            });
+            return;
+          } catch (error) {
+            // Someone else won the eager-create race — the doc exists, so add the
+            // event to whatever doc landed rather than dropping the input.
+            if (!isConversationAlreadyExistsError(error)) {
+              throw error;
+            }
+          }
+        }
+
         await conversationClient.appendEvents(
           { id: conversation.id, events: [event] },
           { access: 'converse' }

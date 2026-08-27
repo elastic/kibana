@@ -600,6 +600,9 @@ describe('handleAgentExecution', () => {
         'conversation-1',
         'round-1'
       );
+      // On UPDATE we keep prior rounds — only the failed round's execution-derived
+      // events are swept. The doc itself is preserved.
+      expect(conversationClient.delete).not.toHaveBeenCalled();
     });
 
     it('waits for the in-flight start write to settle before discarding, so a late write cannot resurrect events', async () => {
@@ -671,6 +674,73 @@ describe('handleAgentExecution', () => {
         'conversation-1',
         'round-1'
       );
+      expect(conversationClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('hard-deletes the whole doc on CREATE when the first round fails before completing', async () => {
+      // No conversationId + no origin → getConversation returns a placeholder with
+      // operation === 'CREATE'. This is the first-round-of-a-fresh-doc case.
+      const conversationClient = createConversationClientMock();
+      conversationClient.create.mockResolvedValue(
+        createEmptyConversation({ id: 'new-conversation' })
+      );
+      conversationClient.appendEvents.mockResolvedValue(
+        createEmptyConversation({ id: 'new-conversation' })
+      );
+      conversationClient.delete.mockResolvedValue(true);
+
+      const roundStartedEvent = {
+        type: ChatEventType.roundStarted,
+        data: {
+          round_id: 'round-1',
+          input: { message: 'Hello' },
+          started_at: '2024-01-01T00:00:00.000Z',
+        },
+      } as RoundStartedEvent;
+      executeAgentMock.mockReturnValue(
+        timer(0).pipe(
+          mergeMap(() =>
+            concat(
+              of<ChatAgentEvent>(roundStartedEvent),
+              throwError(() => new Error('agent exploded'))
+            )
+          ),
+          shareReplay()
+        )
+      );
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps: createDeps({ conversationClient }),
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+
+      await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
+      // Cleanup waits for in-flight writes to settle first — flush the microtask chain.
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // On CREATE we own the doc end-to-end. Rather than leave a headless
+      // placeholder in the user's conversation list, delete it wholesale.
+      // uuid mock at the top of the file pins the receipt-time roundId to 'round-1',
+      // and the placeholder conversation id also comes from uuidv4 so it lands on the
+      // same mocked value.
+      expect(conversationClient.delete).toHaveBeenCalledTimes(1);
+      // discardRoundEvents is skipped on CREATE — the doc is gone, so there's nothing
+      // to sweep events out of.
+      expect(conversationClient.discardRoundEvents).not.toHaveBeenCalled();
     });
   });
 });

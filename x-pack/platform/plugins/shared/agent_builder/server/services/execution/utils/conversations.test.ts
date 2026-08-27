@@ -425,7 +425,7 @@ describe('conversations utils', () => {
       await inFlightWrites.settled();
     };
 
-    it('creates the conversation doc and appends a single user_message on CREATE', async () => {
+    it('atomically creates the conversation doc with the user_message seeded on CREATE (single write, no separate append)', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(
         createEmptyConversation({ id: 'conv-1', agent_id: 'agent-1' }),
@@ -439,20 +439,22 @@ describe('conversations utils', () => {
         author: { id: 'u1', username: 'u1' },
       });
 
+      // Single ES write: the doc is created atomically with the user_message inside
+      // it, so an abort mid-write cannot leave an empty placeholder.
       expect(conversationClient.create).toHaveBeenCalledTimes(1);
       const [createArgs] = conversationClient.create.mock.calls[0];
       expect(createArgs.id).toBe('conv-1');
       expect(createArgs.title).toBe(DEFAULT_CONVERSATION_TITLE);
-
-      // Only the user_message is appended — no execution_started at receipt time.
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
-      expect(appendArgs.events).toHaveLength(1);
-      expect(appendArgs.events[0]).toMatchObject({
+      expect(createArgs.rounds).toEqual([]);
+      expect(createArgs.events).toHaveLength(1);
+      expect(createArgs.events![0]).toMatchObject({
         id: 'round-1::user_message',
         type: TimelineEventType.userMessage,
         data: { message: 'raw input' },
       });
+
+      // No separate append on the happy CREATE path — the event is inside the create.
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
     it('skips create for UPDATE but still appends the user_message', async () => {
@@ -465,7 +467,7 @@ describe('conversations utils', () => {
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('swallows conversationAlreadyExists on CREATE (race with another writer) and still appends', async () => {
+    it('falls back to appendEvents when CREATE races another writer (conversationAlreadyExists)', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
       conversationClient.create.mockRejectedValueOnce(
@@ -474,7 +476,14 @@ describe('conversations utils', () => {
 
       await runReceipt({ conversation, conversationClient });
 
+      // The race loser still has to land the user_message on the winning doc.
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
+      expect(appendArgs.events).toHaveLength(1);
+      expect(appendArgs.events[0]).toMatchObject({
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+      });
     });
 
     it('propagates unexpected create errors', async () => {

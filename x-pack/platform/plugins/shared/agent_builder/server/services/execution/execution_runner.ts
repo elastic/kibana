@@ -629,22 +629,35 @@ const buildPersistenceEvents = ({
     return concat(input$, merge(stepStream$, twoPhase$)).pipe(
       finalize(() => {
         // Fires on completion, error, and unsubscription (cancel/abort).
-        // If the round never reached a terminal event, clean up its execution-derived
-        // events (execution_started + steps). The receipt-time `user_message` is kept
-        // intentionally — the input is on the timeline as an orphan and `eventsToRounds`
-        // drops it from the rounds projection until a paired execution_started + terminal
-        // event lands.
+        // Cleanup strategy depends on which branch we're on:
+        //   - CREATE (fresh doc): the doc was eagerly created with only the
+        //     receipt-time `user_message` inside it. If the first round never
+        //     terminated, the doc has no completed rounds to preserve, so we
+        //     hard-delete it rather than leave a headless placeholder in the
+        //     user's conversation list.
+        //   - UPDATE (existing doc with prior rounds): only sweep the current
+        //     round's execution-derived events (execution_started + steps).
+        //     The receipt-time `user_message` is kept as an intentional orphan;
+        //     `eventsToRounds` drops it from the rounds projection until a
+        //     paired execution_started + terminal event lands.
         if (roundReachedTerminal) {
           return;
         }
-        inFlightWrites
-          .settled()
-          .then(() => conversationClient.discardRoundEvents(conversation.id, roundId))
-          .catch((error) => {
-            logger.warn(
-              `Failed to discard events of failed round ${roundId} in conversation ${conversation.id}: ${error.message}`
-            );
-          });
+        const cleanup = async () => {
+          await inFlightWrites.settled();
+          if (conversation.operation === 'CREATE') {
+            // `delete()` treats 404 as success, so a doc that never actually
+            // got created (e.g. the input write itself failed) is a no-op.
+            await conversationClient.delete(conversation.id);
+            return;
+          }
+          await conversationClient.discardRoundEvents(conversation.id, roundId);
+        };
+        cleanup().catch((error) => {
+          logger.warn(
+            `Failed to clean up aborted round ${roundId} in conversation ${conversation.id}: ${error.message}`
+          );
+        });
       })
     );
   }

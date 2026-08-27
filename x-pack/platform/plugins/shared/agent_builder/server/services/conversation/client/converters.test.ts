@@ -1330,7 +1330,7 @@ describe('conversation model converters', () => {
       expect(serialized.events).toEqual([]);
     });
 
-    it('derives events from rounds on create (never trusts a supplied events array)', () => {
+    it('derives events from rounds on create when no explicit events are supplied', () => {
       const conversation: Parameters<typeof createRequestToEs>[0]['conversation'] = {
         agent_id: 'agent_id',
         title: 'conv_title',
@@ -1367,6 +1367,36 @@ describe('conversation model converters', () => {
         'round-seed::execution_started',
         'round-seed::execution_terminated',
       ]);
+    });
+
+    it('seeds the timeline from a caller-supplied events array when rounds is empty (atomic create-with-event path)', () => {
+      // This is the receipt-time input persistence contract: `persistRoundInput$`
+      // creates the conversation doc atomically with a pre-built user_message event
+      // in a single ES op. `createRequestToEs` must honor that seed rather than
+      // clobber it with the empty round-derived projection.
+      const seedEvent: TimelineEvent = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'hello', attachment_refs: [] },
+      };
+      const conversation: Parameters<typeof createRequestToEs>[0]['conversation'] = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        events: [seedEvent],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      // Caller-supplied events win over the empty round-derived projection.
+      expect(serialized.events?.map((event) => event.id)).toEqual(['round-1::user_message']);
     });
   });
 

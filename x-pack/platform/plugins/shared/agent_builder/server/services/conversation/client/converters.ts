@@ -509,7 +509,11 @@ export const createRequestToEs = ({
   const createdAt = creationDate.toISOString();
 
   // The initial timeline is derived from the rounds being created, using the same user that
-  // gets persisted so `user_message` actors match the stored ownership.
+  // gets persisted so `user_message` actors match the stored ownership. Callers that seed
+  // the doc with pre-built timeline events (e.g. receipt-time input persistence, where the
+  // conversation is created with an empty `rounds` array plus a single `user_message` event)
+  // take precedence: their event list is used verbatim rather than the empty round-derived
+  // projection.
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
@@ -520,7 +524,10 @@ export const createRequestToEs = ({
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events = roundsToEvents(forEvents);
+  const events =
+    conversation.events && conversation.events.length > 0
+      ? conversation.events
+      : roundsToEvents(forEvents);
 
   return {
     agent_id: conversation.agent_id,

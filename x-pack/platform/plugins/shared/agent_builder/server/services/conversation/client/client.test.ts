@@ -299,6 +299,35 @@ describe('ConversationClient', () => {
                 },
                 // Hide sub-agent conversations from the nav list
                 { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
+                // Hide empty events-native placeholders — docs whose creation completed
+                // but whose first round never landed anything on the timeline. Legacy
+                // docs without schema_version are unaffected.
+                {
+                  bool: {
+                    must_not: [
+                      {
+                        bool: {
+                          must: [
+                            { exists: { field: 'schema_version' } },
+                            {
+                              bool: {
+                                must_not: [
+                                  {
+                                    nested: {
+                                      path: 'events',
+                                      query: { match_all: {} },
+                                      ignore_unmapped: true,
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -538,6 +567,34 @@ describe('ConversationClient', () => {
       ).rejects.toBe(error);
     });
 
+    it('seeds the timeline with caller-supplied events when rounds is empty (atomic create-with-event)', async () => {
+      // This is the receipt-time input persistence contract: the doc is created
+      // in a single ES op that already carries the user_message on its timeline,
+      // so an abort mid-write cannot leave an empty placeholder.
+      const seedEvent: TimelineEvent = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'raw input', attachment_refs: [] },
+      };
+
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+        events: [seedEvent],
+      });
+
+      const { document: indexedDoc } = mockEsClient.index.mock.calls[0][0] as {
+        document: Record<string, unknown>;
+      };
+      // Caller-supplied events win over the empty round-derived projection.
+      expect(indexedDoc.events).toEqual([seedEvent]);
+      expect(indexedDoc.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+    });
+
     it('serializes caller-supplied TOGGLE and NUMBER metadata to strings before indexing', async () => {
       // Regression for: caller passes boolean/number, raw value lands in ES, and
       // deserializeMetadataValue('true' === <boolean>) → wrong type on read-back.
@@ -568,6 +625,39 @@ describe('ConversationClient', () => {
       // Values must be stored as strings so the flattened field stays string-only.
       expect((indexedDoc.metadata as Record<string, unknown>).flag).toBe('true');
       expect((indexedDoc.metadata as Record<string, unknown>).count).toBe('42');
+    });
+  });
+
+  describe('list filter — empty placeholders', () => {
+    it('applies a nested-events filter that hides events-native placeholder docs', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [] },
+      });
+
+      await client.list();
+
+      // Extract the filter array so we can find the placeholder-hide clause. The
+      // deeply nested structure would be brittle to assert positionally; look for
+      // the tell-tale `exists: { field: 'schema_version' }` clause underneath a
+      // must_not/bool/must chain.
+      const [call] = mockEsClient.search.mock.calls;
+      const filterList: unknown[] = (call[0] as { query: { bool: { filter: unknown[] } } }).query
+        .bool.filter;
+
+      const placeholderFilter = filterList.find((f) => {
+        const filter = f as { bool?: { must_not?: unknown[] } };
+        const mustNot = filter?.bool?.must_not?.[0] as { bool?: { must?: unknown[] } };
+        const must = mustNot?.bool?.must;
+        return (
+          Array.isArray(must) &&
+          must.some((m) => {
+            const clause = m as { exists?: { field?: string } };
+            return clause?.exists?.field === 'schema_version';
+          })
+        );
+      });
+
+      expect(placeholderFilter).toBeDefined();
     });
   });
 
