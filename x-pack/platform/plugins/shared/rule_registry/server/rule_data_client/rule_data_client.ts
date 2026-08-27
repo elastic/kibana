@@ -39,6 +39,26 @@ export interface RuleDataClientConstructorOptions {
 
 export type WaitResult = Either<Error, ElasticsearchClient>;
 
+// Version conflicts (409) are an expected, benign outcome when the same alert is
+// written concurrently. They set the top-level `errors` flag on a bulk response
+// even though every other item succeeded, so they must not trigger ERROR logging.
+// This mirrors the `errorAggregator(..., [409])` contract used by callers.
+const IGNORED_BULK_ERROR_STATUS_CODES = [409];
+
+const hasNonIgnorableBulkError = (response: estypes.BulkResponse): boolean => {
+  if (!response.errors) {
+    return false;
+  }
+
+  return (response.items ?? []).some((item) =>
+    Object.values(item).some(
+      (operation) =>
+        operation?.error != null &&
+        !IGNORED_BULK_ERROR_STATUS_CODES.includes(operation.status)
+    )
+  );
+};
+
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
   private _isWriterCacheEnabled: boolean = true;
@@ -233,7 +253,12 @@ export class RuleDataClient implements IRuleDataClient {
               meta: true,
             });
 
-            if (!response.body.errors) {
+            // Only log at ERROR when there are real failures. A bulk response sets its
+            // top-level `errors` flag whenever any item failed, including benign version
+            // conflicts (409) that occur when the same alert is written concurrently.
+            // Logging those as errors is pure noise, so short-circuit unless a
+            // non-ignorable item-level error is present.
+            if (!hasNonIgnorableBulkError(response.body)) {
               return response;
             }
 
