@@ -13,10 +13,7 @@ import {
   useRunCaseWorkflow,
 } from './use_run_case_workflow';
 import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
-import {
-  CaseCreatedTriggerId,
-  CaseUpdatedTriggerId,
-} from '../../../common/workflows/triggers';
+import { CaseCreatedTriggerId, CaseUpdatedTriggerId } from '../../../common/workflows/triggers';
 import { basicCase } from '../../containers/mock';
 
 // ---- module mocks ----
@@ -133,7 +130,9 @@ describe('useRunCaseWorkflow', () => {
       const { useCasesWorkflowExecutor } = jest.requireMock('./use_cases_workflow_executor');
       renderHookWithDefaults();
       expect(useCasesWorkflowExecutor).toHaveBeenCalledWith(
-        expect.objectContaining({ origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, id: basicCase.id } })
+        expect.objectContaining({
+          origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: basicCase.id },
+        })
       );
     });
   });

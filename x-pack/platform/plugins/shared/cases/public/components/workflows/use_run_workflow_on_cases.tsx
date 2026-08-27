@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ToMountPointParams } from '@kbn/react-kibana-mount';
-import { useCallback } from 'react';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
-import { useToasts, useAppUrl, useKibana } from '../../common/lib/kibana';
+import { useToasts, useAppUrl, useKibana, useHttp } from '../../common/lib/kibana';
 import type { CasesUI } from '../../containers/types';
-import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import { runCaseWorkflow } from './api';
-import { useHttp } from '../../common/lib/kibana';
 import * as i18n from './translations';
 
 /**
@@ -59,8 +56,6 @@ export const useRunWorkflowOnCases = ({ cases }: { cases: CasesUI }): RunWorkflo
   return useCallback(
     async ({ workflowId, inputs }) => {
       const caseIds = cases.map(({ id }) => id);
-      // origin.id must be a member of caseIds — the server validates this.
-      const origin = { type: CASE_WORKFLOW_ORIGIN_TYPE, id: caseIds[0] };
 
       const response = await runCaseWorkflow({
         http,
@@ -68,7 +63,6 @@ export const useRunWorkflowOnCases = ({ cases }: { cases: CasesUI }): RunWorkflo
         body: {
           caseIds,
           inputs,
-          origin,
         },
       });
 

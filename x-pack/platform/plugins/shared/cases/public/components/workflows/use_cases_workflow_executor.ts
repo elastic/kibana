@@ -31,7 +31,6 @@ export const useCasesWorkflowExecutor = ({
 }: UseCasesWorkflowExecutorParams): RunWorkflowExecutor => {
   const http = useHttp();
   const toasts = useToasts();
-  const { type: originType, id: originId } = origin;
 
   return useCallback(
     async ({ workflowId, inputs }) => {
@@ -41,7 +40,7 @@ export const useCasesWorkflowExecutor = ({
         body: {
           caseIds: [caseId],
           inputs,
-          origin: { type: originType, id: originId },
+          origin,
         },
       });
 
@@ -51,6 +50,6 @@ export const useCasesWorkflowExecutor = ({
 
       return { workflowExecutionId: response.workflowExecutionId };
     },
-    [caseId, http, originId, originType, toasts]
+    [caseId, http, origin, toasts]
   );
 };

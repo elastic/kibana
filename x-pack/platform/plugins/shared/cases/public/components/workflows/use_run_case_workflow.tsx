@@ -151,7 +151,7 @@ export const useRunCaseWorkflow = ({
   );
 
   const origin = useMemo(
-    () => ({ type: CASE_WORKFLOW_ORIGIN_TYPE, id: caseData.id }),
+    () => ({ type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: caseData.id }),
     [caseData.id]
   );
 

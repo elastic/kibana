@@ -8,7 +8,6 @@
 import { renderHook, act } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
-import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import { basicCase } from '../../containers/mock';
 import type { CaseUI } from '../../containers/types';
 import { useRunWorkflowOnCases } from './use_run_workflow_on_cases';
@@ -56,7 +55,6 @@ describe('useRunWorkflowOnCases', () => {
       body: {
         caseIds: ['case-a'],
         inputs: {},
-        origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, id: 'case-a' },
       },
     });
   });
@@ -79,7 +77,6 @@ describe('useRunWorkflowOnCases', () => {
       body: {
         caseIds: ['case-a', 'case-b'],
         inputs: {},
-        origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, id: 'case-a' },
       },
     });
   });

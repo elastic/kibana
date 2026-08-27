@@ -33,7 +33,7 @@ describe('useCasesWorkflowExecutor', () => {
     renderHook(() =>
       useCasesWorkflowExecutor({
         caseId: 'case-1',
-        origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, id: 'case-1' },
+        origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' },
       })
     );
 
@@ -55,7 +55,7 @@ describe('useCasesWorkflowExecutor', () => {
       body: {
         caseIds: ['case-1'],
         inputs: { foo: 'bar' },
-        origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, id: 'case-1' },
+        origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' },
       },
     });
     expect(response).toEqual({ workflowExecutionId: 'exec-abc' });
