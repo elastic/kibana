@@ -1117,7 +1117,10 @@ describe('entity-encoded bodies inside feed wrappers', () => {
     ['description', `<description>${ENCODED}</description>`],
     ['content:encoded', `<content:encoded>${ENCODED}</content:encoded>`],
     ['namespaced description', `<media:description>${ENCODED}</media:description>`],
-    ['atom summary', `<summary>${ENCODED}</summary>`],
+    // `type="html"` is what makes an Atom summary an encoded wrapper. This case originally
+    // omitted the attribute, which per RFC 4287 means literal text, so the expectation was
+    // wrong rather than the code.
+    ['atom summary', `<summary type="html">${ENCODED}</summary>`],
     ['item around description', `<item><description>${ENCODED}</description></item>`],
     [
       'full rss nesting',
@@ -1451,5 +1454,66 @@ describe('encoded feed bodies without a closing tag', () => {
     const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
 
     expect(elapsedMs).toBeLessThan(2000);
+  });
+});
+
+/**
+ * Atom text constructs declare their own content type, and only `html` means the content is
+ * entity-encoded markup.
+ *
+ * RFC 4287 gives `title`, `summary`, `content`, `rights` and `subtitle` a `type` of `text`,
+ * `html` or `xhtml`, defaulting to `text`. Treating them as encoded wrappers on name alone
+ * reparsed literal text as live markup and deleted report content:
+ * `<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>` came out as
+ * `Exploit uses`, losing the sentence and the indicator in it.
+ */
+describe('Atom text constructs respect their type attribute', () => {
+  const LITERAL = 'Exploit uses &lt;script&gt; and c2.evil.test';
+  const DECODED = 'Exploit uses <script> and c2.evil.test';
+
+  it.each([
+    ['an explicit text type', `<summary type="text">${LITERAL}</summary>`],
+    ['an omitted type, which defaults to text', `<summary>${LITERAL}</summary>`],
+    ['an uppercase TEXT type', `<summary TYPE="TEXT">${LITERAL}</summary>`],
+    ['an xhtml type, whose content is real markup', `<summary type="xhtml">${LITERAL}</summary>`],
+    ['a text-typed title', `<title type="text">${LITERAL}</title>`],
+    [
+      'a text-typed summary inside an entry',
+      `<entry><summary type="text">${LITERAL}</summary></entry>`,
+    ],
+  ])('preserves literal text with %s', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe(DECODED);
+    expect(result).toContain('c2.evil.test');
+  });
+
+  it.each([
+    ['summary', '<summary type="html">&lt;p&gt;evil.com&lt;/p&gt;</summary>'],
+    ['uppercase HTML', '<summary type="HTML">&lt;p&gt;evil.com&lt;/p&gt;</summary>'],
+    ['content', '<content type="html">&lt;p&gt;evil.com&lt;/p&gt;</content>'],
+    [
+      'summary inside an entry',
+      '<entry><summary type="html">&lt;p&gt;evil.com&lt;/p&gt;</summary></entry>',
+    ],
+  ])('still re-parses an html-typed %s', (_label, html) => {
+    expect(stripHtml(html)).toBe('evil.com');
+  });
+
+  // RSS carries no type attribute and is encoded HTML by convention, so those wrappers stay
+  // unconditional. Narrowing the Atom names must not narrow these.
+  it.each([
+    ['description', '<description>&lt;p&gt;evil.com&lt;/p&gt;</description>'],
+    ['content:encoded', '<content:encoded>&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>'],
+  ])('still re-parses an RSS %s', (_label, html) => {
+    expect(stripHtml(html)).toBe('evil.com');
+  });
+
+  it('keeps structured boundaries for an html-typed summary', () => {
+    expect(
+      htmlToStructured(
+        '<summary type="html">&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;</summary>'
+      )
+    ).toBe('evil.com\nbad.net');
   });
 });

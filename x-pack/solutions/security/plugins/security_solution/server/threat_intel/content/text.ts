@@ -448,9 +448,6 @@ const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*(?=[\s/>])/i;
 const FEED_WRAPPER_NAMES = new Set([
   'description',
   'encoded',
-  'content',
-  'summary',
-  'title',
   'value',
   'item',
   'entry',
@@ -458,6 +455,29 @@ const FEED_WRAPPER_NAMES = new Set([
   'feed',
   'rss',
 ]);
+
+/**
+ * Atom text constructs, which declare their own content type.
+ *
+ * RFC 4287 gives `title`, `summary`, `content`, `rights` and `subtitle` a `type` attribute
+ * of `text`, `html` or `xhtml`, defaulting to `text`. Only `html` means the content is
+ * entity-encoded markup. Treating these as wrappers on name alone reparsed literal text as
+ * live markup and deleted report content:
+ * `<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>` came out as
+ * `Exploit uses`, losing the sentence and the indicator in it.
+ *
+ * `xhtml` is excluded along with `text`, since its content is real markup rather than
+ * encoded markup and needs no second parse. RSS `<description>` and `content:encoded` carry
+ * no type attribute and are encoded HTML by convention, so they stay unconditional above.
+ */
+const ATOM_TEXT_CONSTRUCTS = new Set(['title', 'summary', 'content', 'rights', 'subtitle']);
+
+const isEncodedHtmlWrapper = (node: ParsedNode): boolean => {
+  const name = localName(elementName(node));
+  if (FEED_WRAPPER_NAMES.has(name)) return true;
+  if (!ATOM_TEXT_CONSTRUCTS.has(name)) return false;
+  return (node.attribs?.type ?? '').toLowerCase() === 'html';
+};
 
 const localName = (name: string): string => name.slice(name.lastIndexOf(':') + 1);
 
@@ -485,7 +505,7 @@ const peelFeedWrappers = (nodes: ParsedNode[]): { nodes: ParsedNode[]; peeled: b
       meaningful.length === 1 &&
       only !== undefined &&
       isElement(only) &&
-      FEED_WRAPPER_NAMES.has(localName(elementName(only)));
+      isEncodedHtmlWrapper(only);
 
     if (!isWrapper || only === undefined) return { nodes: current, peeled };
     current = childrenOf(only);
