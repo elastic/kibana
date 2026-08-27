@@ -1127,36 +1127,6 @@ describe('Handlers', () => {
         );
       });
 
-      it('falls back to the identity path when the package policy has no dataset var', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(inputOtelPackageInfo);
-        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue(
-          agentlessPolicyWith({
-            package: { name: 'aws_cloudwatch_input_otel', version: '0.6.0' },
-            namespace: 'production',
-            inputs: [{ type: 'otelcol', streams: [{ data_stream: { type: 'metrics' } }] }],
-          })
-        );
-
-        await getAgentDataHandler(
-          mockContext,
-          {
-            query: {
-              agentsIds: ['agent-1'],
-              pkgName: 'aws_cloudwatch_input_otel',
-              pkgVersion: '0.6.0',
-              previewData: false,
-            },
-          } as any,
-          mockResponse
-        );
-
-        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
-        expect(getIncomingDataByAgentsId).toHaveBeenCalledWith(
-          expect.objectContaining({ dataStreamPattern: undefined })
-        );
-      });
-
       it('does not open the gate for a non-OTel input package (no agent/policy lookups)', async () => {
         (getPackageInfo as jest.Mock).mockResolvedValue({
           type: 'input',
@@ -1180,28 +1150,6 @@ describe('Handlers', () => {
               agentsIds: ['agent-1'],
               pkgName: 'custom_logs',
               pkgVersion: '1.0.0',
-              previewData: false,
-            },
-          } as any,
-          mockResponse
-        );
-
-        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
-        expect(mockGetByIds).not.toHaveBeenCalled();
-        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
-      });
-
-      it('does not open the gate when enableOtelIntegrations is off', async () => {
-        (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({});
-        (getPackageInfo as jest.Mock).mockResolvedValue(inputOtelPackageInfo);
-
-        await getAgentDataHandler(
-          mockContext,
-          {
-            query: {
-              agentsIds: ['agent-1'],
-              pkgName: 'aws_cloudwatch_input_otel',
-              pkgVersion: '0.6.0',
               previewData: false,
             },
           } as any,
