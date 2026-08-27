@@ -5,16 +5,16 @@ exports[`Select Flow Direction rendering it renders the basic group button for u
   class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
 >
   <div
-    class="euiFilterButton__wrapper css-1anz60t-wrapper-withNext-hasToggle"
+    class="euiFilterButton__wrapper css-1tpygcs-wrapper-withNext-hasToggle"
   >
     <button
       aria-pressed="true"
-      class="euiButtonGroupButton euiButtonGroupButton-isSelected euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-fill-text-euiFilterButton-hasActiveFilters-toggle"
+      class="euiButtonGroupButton euiButtonGroupButton-isSelected euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-s-isSelected-empty-text-euiFilterButton-hasActiveFilters-toggle"
       data-test-subj="uniDirectional"
       type="button"
     >
       <span
-        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
+        class="emotion-euiButtonDisplayContent-euiFilterButton__content"
       >
         <span
           class="euiFilterButton__text emotion-euiFilterButton__text"
@@ -27,16 +27,16 @@ exports[`Select Flow Direction rendering it renders the basic group button for u
     </button>
   </div>
   <div
-    class="euiFilterButton__wrapper css-1nn8k4u-wrapper-hasToggle"
+    class="euiFilterButton__wrapper css-1elc3kl-wrapper-hasToggle"
   >
     <button
       aria-pressed="false"
-      class="euiButtonGroupButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-empty-text-euiFilterButton-toggle"
+      class="euiButtonGroupButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-s-empty-text-euiFilterButton-toggle"
       data-test-subj="biDirectional"
       type="button"
     >
       <span
-        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
+        class="emotion-euiButtonDisplayContent-euiFilterButton__content"
       >
         <span
           class="euiFilterButton__text emotion-euiFilterButton__text"
