@@ -11,6 +11,7 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/man
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InvestigationStatus } from '../../common';
+import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   InvalidInvestigationContextError,
@@ -629,7 +630,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
       ['a query string', 'abc?expand=true'],
       ['a fragment', 'abc#frag'],
       ['an empty string', ''],
-      ['a non-string', { nested: true }],
     ])('rejects a significant event context whose event_uuid carries %s', async (_label, uuid) => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
@@ -640,6 +640,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
         })
       ).rejects.toThrow(InvalidInvestigationContextError);
       expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    // A non-string cannot travel through `start`'s typed signature, so it is asserted against the
+    // schema directly. This is the shape an untyped caller sends: a JSON body, or a workflow step
+    // whose input schema is a record of unknown.
+    it('rejects an event_uuid that is not a string at all', () => {
+      expect(freeFormContextSchema.safeParse({ event_uuid: { nested: true } }).success).toBe(false);
     });
 
     it('accepts the uuid shape the significant events plugin actually sends', async () => {
