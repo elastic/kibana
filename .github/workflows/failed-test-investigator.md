@@ -178,8 +178,8 @@ Before classifying a UI failure as test-side, read the application code that ren
 Set `classification` based on where the evidence points:
 
 - **`test-needs-update`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
-- **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
-- **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
+- **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference). A stale/empty read after a write is *not* this: if a usable readiness signal exists and the test isn't waiting on it, that's `test-needs-update`; if none exists, or the product returns stale where it should be consistent, that's `application`.
+- **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug, or a stale/empty read after a write that should be read-your-writes consistent — a cache not invalidated, a missing convergence signal the test would need, or a transient error such as "unknown index" surfaced to the user).
 - **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
 - **`inconclusive`**: evidence does not support a defensible call.
 
@@ -189,7 +189,7 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 
 - Propose a fix only when you can point to a likely file or code area.
 - Prefer the smallest change that resolves the root cause **and** brings the test in line with our best practices — not a narrower band-aid that leaves the anti-pattern in place. Best practices are the north star for the fix.
-- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
+- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change. For a race/timeout/stale-element flake, that means naming **the terminal readiness signal the failing assertion reads and the step that actually raced** (often not where the error surfaced); the fix guardrails below cover how to wait on it.
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
 
@@ -231,7 +231,8 @@ An engineer can still request a fix for any issue by adding `ai:fix-flaky` manua
 Add `failure:fix-did-not-hold` (in addition to the classification label) when your investigation shows a **fix was already merged for this same failure and the failure came back** — regardless of who wrote it (a human contributor or an automation such as the flaky-test fixer). This label tracks fixes that regressed, so apply it only when **both** of the following hold:
 
 - a prior PR that **fixed this issue was merged** (from the issue timeline / reopen history you already reviewed, corroborated by `git log`/`git blame` when ambiguous); and
-- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold.
+- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold; and
+- the **failing run actually contained the fix**. A Cloud image trails `main`, so a failure reported soon after the fix merged may have run a checkout that predates it. Resolve the run's `Build hash` and check `gh api repos/elastic/kibana/compare/<fix-merge-sha>...<build-hash> --jq '.status'` — `ahead`/`identical` means the build has the fix; `behind`/`diverged` means it predates the fix (see the `flaky-test-investigator` skill's pipelines reference). A failure whose build predates the fix is propagation lag, not a regression — classify it `ci-environment` and do not add this label.
 
 Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite.
 
@@ -253,7 +254,7 @@ This issue may have been investigated before (for example, it was reopened after
 When the verdict is that no change to this repository is needed, close the issue with the `close-issue` tool. Close only when **all** of the following hold:
 
 - the classification is `ci-environment` and `confidence` is `medium` or `high`: the failure came from a transient, external, or one-off cause with nothing test- or product-related to fix;
-- the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open;
+- the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open. **Exception:** pre-fix CI lag (the run's `Build hash` predates the fix — see the `flaky-test-investigator` skill's pipelines reference) is closable **even if it repeats**, because repeated lag is expected until the Cloud image catches up with `main`, not a problem to escalate;
 - you did not add `failure:ai-fixable` or `ai:fix-flaky`, and no fix PR referencing this issue is open.
 
 Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it. Instead, make the close visible in the verdict comment with a note block right after (and outside) the `<details>` block:
@@ -262,6 +263,8 @@ Call the tool at most once, only after posting the verdict comment, and do not a
 > [!NOTE]
 > Closing this issue: {one-sentence reason}. It will reopen automatically if the test fails again.
 ```
+
+For pre-fix CI lag, make the reason verifiable by naming the commit — e.g. "the failing run used Kibana `<short-sha>`, which predates the fix, so it ran pre-fix code, not a recurrence".
 
 When in doubt, leave the issue open.
 
