@@ -15,6 +15,7 @@ import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import type { RouteInitialization, SystemRouteDeps } from '../types';
 import { getLazyMlNodeCount, getMlNodeCount } from '../lib/node_utils';
+import { getIsMlCpsEnabled } from '../lib/cps_utils';
 
 /**
  * System routes
@@ -198,6 +199,11 @@ export function systemRoutes(
             isMlAutoscalingEnabled = lazyMlNodeCount > 0;
           }
 
+          let isMlCpsEnabled = await getIsMlCpsEnabled(client);
+
+          // remove this after testing
+          isMlCpsEnabled = true;
+
           return response.ok({
             body: {
               ...body,
@@ -205,6 +211,7 @@ export function systemRoutes(
               isCloudTrial,
               cloudUrl: cloud.baseUrl,
               isMlAutoscalingEnabled,
+              isMlCpsEnabled,
               showNodeInfo: !serverless.isServerless,
               showLicenseInfo: !serverless.isServerless,
             },
