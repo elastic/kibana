@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
-        "line": 138,
-        "column": 7
+        "line": 152,
+        "column": 11
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_cookie.spec.ts",
-        "line": 26,
-        "column": 41
+        "line": 36,
+        "column": 8
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_cookie.spec.ts",
-        "line": 38,
-        "column": 21
+        "line": 49,
+        "column": 8
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_cookie.spec.ts",
-        "line": 44,
-        "column": 20
+        "line": 62,
+        "column": 8
       }
     },
     {
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
-        "line": 79,
+        "line": 81,
         "column": 1
       }
     },
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
-        "line": 103,
-        "column": 27
+        "line": 109,
+        "column": 5
       }
     }
   ]
