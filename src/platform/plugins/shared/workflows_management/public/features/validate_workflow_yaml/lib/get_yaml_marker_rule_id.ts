@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+export type YamlMarkerRuleId = 'schemaViolation' | 'yamlSyntaxError';
 
-export function getZodObjectProperty(schema: z.ZodType, property: string): z.ZodType | null {
-  if (schema instanceof z.ZodObject) {
-    // Own-property check so `__proto__` cannot resolve to Object.prototype.
-    return Object.hasOwn(schema.shape, property) ? schema.shape[property] ?? null : null;
-  }
-  return null;
-}
+/** Maps Monaco YAML marker provenance to the semantic rule that produced it. */
+export const getYamlMarkerRuleId = (source?: string): YamlMarkerRuleId =>
+  source?.startsWith('yaml-schema:') ? 'schemaViolation' : 'yamlSyntaxError';
