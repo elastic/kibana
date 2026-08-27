@@ -23,10 +23,12 @@ import {
   restrictedLabel,
 } from './conversation_share_i18n';
 
-const AccessModeOption: React.FC<{
+interface AccessModeOptionProps {
   label: string;
   helpText: string;
-}> = ({ label, helpText }) => (
+}
+
+const AccessModeOption: React.FC<AccessModeOptionProps> = ({ label, helpText }) => (
   <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
     <EuiFlexItem>
       <EuiText size="s">
@@ -54,11 +56,17 @@ const accessModeOptions = [
   },
 ];
 
-export const ConversationAccessModeSelect: React.FC<{
+interface ConversationAccessModeSelectProps {
   accessMode: ConversationAccessControlMode;
   isSaving: boolean;
   onAccessModeChange: (nextAccessMode: ConversationAccessControlMode) => void;
-}> = ({ accessMode, isSaving, onAccessModeChange }) => {
+}
+
+export const ConversationAccessModeSelect: React.FC<ConversationAccessModeSelectProps> = ({
+  accessMode,
+  isSaving,
+  onAccessModeChange,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (

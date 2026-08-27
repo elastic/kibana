@@ -22,11 +22,17 @@ import { useConversationPermissions } from '../../../../hooks/use_conversation';
 import { useInviteMembersSummary } from '../../../../hooks/use_conversation_access_control';
 import { extraMembersLabel, inviteLabel, sharingLabel } from './conversation_share_i18n';
 
-const ConversationShareTriggerButton: React.FC<{
+interface ConversationShareTriggerButtonProps {
   ariaLabel: string;
   children: React.ReactNode;
   onClick: () => void;
-}> = ({ ariaLabel, children, onClick }) => {
+}
+
+const ConversationShareTriggerButton: React.FC<ConversationShareTriggerButtonProps> = ({
+  ariaLabel,
+  children,
+  onClick,
+}) => {
   return (
     <EuiButtonEmpty
       size="s"
@@ -45,9 +51,11 @@ const ConversationShareTriggerButton: React.FC<{
   );
 };
 
-const InviteMembersButton: React.FC<{
+interface InviteMembersButtonProps {
   onClick: () => void;
-}> = ({ onClick }) => {
+}
+
+const InviteMembersButton: React.FC<InviteMembersButtonProps> = ({ onClick }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -66,12 +74,19 @@ const InviteMembersButton: React.FC<{
   );
 };
 
-const InviteMembersSummaryButton: React.FC<{
+interface InviteMembersSummaryButtonProps {
   canUpdateAccessControl: boolean;
   extraCount: number;
   onClick: () => void;
   profiles: UserProfileWithAvatar[];
-}> = ({ canUpdateAccessControl, extraCount, onClick, profiles }) => {
+}
+
+const InviteMembersSummaryButton: React.FC<InviteMembersSummaryButtonProps> = ({
+  canUpdateAccessControl,
+  extraCount,
+  onClick,
+  profiles,
+}) => {
   const { euiTheme } = useEuiTheme();
   const avatarStyles = css`
     border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.emptyShade};
@@ -130,9 +145,13 @@ const InviteMembersSummaryButton: React.FC<{
   );
 };
 
-export const ConversationSharePopoverButton: React.FC<{
+interface ConversationSharePopoverButtonProps {
   onClick: () => void;
-}> = ({ onClick }) => {
+}
+
+export const ConversationSharePopoverButton: React.FC<ConversationSharePopoverButtonProps> = ({
+  onClick,
+}) => {
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const { profiles, extraCount, shouldShowSummary } = useInviteMembersSummary();
 

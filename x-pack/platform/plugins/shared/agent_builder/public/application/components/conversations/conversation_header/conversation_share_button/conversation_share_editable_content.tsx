@@ -27,9 +27,11 @@ import { ConversationAccessModeSelect } from './conversation_access_mode_select'
 import { ConversationParticipantsList } from './conversation_participants_list';
 import { currentMembersLabel, searchUsersLabel } from './conversation_share_i18n';
 
-const UserSearchOption: React.FC<{
+interface UserSearchOptionProps {
   profile: UserProfileWithAvatar;
-}> = ({ profile }) => {
+}
+
+const UserSearchOption: React.FC<UserSearchOptionProps> = ({ profile }) => {
   const displayName = getUserDisplayName(profile.user);
   const secondary = profile.user.email ?? profile.user.username;
   const showSecondary = secondary && secondary !== displayName;
@@ -51,27 +53,39 @@ const UserSearchOption: React.FC<{
   );
 };
 
-export const ConversationShareEditableContent: React.FC<{
-  access: {
-    mode: ConversationAccessControlMode;
-    errorMessage?: string;
-    isSaving: boolean;
-    onChange: (nextAccessMode: ConversationAccessControlMode) => void;
-  };
-  members: {
-    ownerProfile?: UserProfileWithAvatar;
-    profiles: UserProfileWithAvatar[];
-    onRemove: (id: string) => void;
-  };
-  userSearch: {
-    memberIds: string[];
-    ownerId?: string;
-    suggestedProfiles: UserProfileWithAvatar[];
-    isSearching: boolean;
-    onAdd: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
-    onSearch: (value: string) => void;
-  };
-}> = ({ access, members, userSearch }) => {
+interface ConversationShareAccessProps {
+  mode: ConversationAccessControlMode;
+  errorMessage?: string;
+  isSaving: boolean;
+  onChange: (nextAccessMode: ConversationAccessControlMode) => void;
+}
+
+interface ConversationShareMembersProps {
+  ownerProfile?: UserProfileWithAvatar;
+  profiles: UserProfileWithAvatar[];
+  onRemove: (id: string) => void;
+}
+
+interface ConversationShareUserSearchProps {
+  memberIds: string[];
+  ownerId?: string;
+  suggestedProfiles: UserProfileWithAvatar[];
+  isSearching: boolean;
+  onAdd: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
+  onSearch: (value: string) => void;
+}
+
+interface ConversationShareEditableContentProps {
+  access: ConversationShareAccessProps;
+  members: ConversationShareMembersProps;
+  userSearch: ConversationShareUserSearchProps;
+}
+
+export const ConversationShareEditableContent: React.FC<ConversationShareEditableContentProps> = ({
+  access,
+  members,
+  userSearch,
+}) => {
   const isPublic = access.mode === ConversationAccessControlMode.Public;
   const excludedIds = new Set([userSearch.ownerId, ...userSearch.memberIds].filter(Boolean));
   const suggestedProfileByUid = new Map(

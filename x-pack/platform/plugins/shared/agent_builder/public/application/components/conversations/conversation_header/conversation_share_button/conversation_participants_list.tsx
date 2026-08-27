@@ -24,13 +24,21 @@ import {
 import { useConversationPermissions } from '../../../../hooks/use_conversation';
 import { authorLabel, removeMemberLabel } from './conversation_share_i18n';
 
-const UserAccessRow: React.FC<{
+interface UserAccessRowProps {
   profile: UserProfileWithAvatar;
   badge?: string;
   onRemove?: () => void;
   isDisabled?: boolean;
   hasBottomBorder?: boolean;
-}> = ({ profile, badge, onRemove, isDisabled, hasBottomBorder = true }) => {
+}
+
+const UserAccessRow: React.FC<UserAccessRowProps> = ({
+  profile,
+  badge,
+  onRemove,
+  isDisabled,
+  hasBottomBorder = true,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -85,12 +93,19 @@ const UserAccessRow: React.FC<{
   );
 };
 
-export const ConversationParticipantsList: React.FC<{
+interface ConversationParticipantsListProps {
   ownerProfile?: UserProfileWithAvatar;
   memberProfiles: UserProfileWithAvatar[];
   isSaving: boolean;
   onRemoveUser: (id: string) => void;
-}> = ({ ownerProfile, memberProfiles, isSaving, onRemoveUser }) => {
+}
+
+export const ConversationParticipantsList: React.FC<ConversationParticipantsListProps> = ({
+  ownerProfile,
+  memberProfiles,
+  isSaving,
+  onRemoveUser,
+}) => {
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
 
   return (

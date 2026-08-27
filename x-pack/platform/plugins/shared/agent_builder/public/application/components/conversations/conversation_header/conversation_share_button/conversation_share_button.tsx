@@ -70,9 +70,11 @@ export const ConversationShareButton: React.FC = () => {
   return <ConversationSharePopover conversation={conversation} />;
 };
 
-const ConversationSharePopover: React.FC<{
+interface ConversationSharePopoverProps {
   conversation: Conversation;
-}> = ({ conversation }) => {
+}
+
+const ConversationSharePopover: React.FC<ConversationSharePopoverProps> = ({ conversation }) => {
   const { euiTheme } = useEuiTheme();
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
