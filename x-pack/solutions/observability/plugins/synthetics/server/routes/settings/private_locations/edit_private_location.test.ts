@@ -195,44 +195,22 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
   });
 
   it('returns forbidden when turning sharding off and a monitor belongs to an unauthorized space', async () => {
-    const response = httpServerMock.createResponseFactory();
+    const edit = stubRepo({ isAgentSharding: false }, { isAgentSharding: true });
+    const { routeContext, response } = makeRouteContext({ isAgentSharding: false });
     const forbidden = { statusCode: 403 };
     response.forbidden.mockReturnValue(forbidden as any);
-    const edit = jest.spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation');
-    jest.spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation').mockResolvedValue({
-      id: 'location-1',
-      namespaces: ['default'],
-      attributes: {
-        id: 'location-1',
-        label: 'Loc',
-        agentPolicyId: 'agent-policy-1',
-        isServiceManaged: false,
-        isAgentSharding: true,
-      },
-    } as any);
-
-    const result = await editPrivateLocationRoute().handler({
-      request: { params: { locationId: 'location-1' }, body: { isAgentSharding: false } },
-      response,
-      savedObjectsClient: {},
-      monitorConfigRepository: {
-        findDecryptedMonitors: jest
+    routeContext.monitorConfigRepository.findDecryptedMonitors.mockResolvedValue([
+      { namespaces: ['default', 'restricted-space'] },
+    ]);
+    routeContext.server.security = {
+      authz: {
+        checkSavedObjectsPrivilegesWithRequest: jest
           .fn()
-          .mockResolvedValue([{ namespaces: ['default', 'restricted-space'] }]),
+          .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: false })),
       },
-      server: {
-        coreStart: {
-          savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
-        },
-        security: {
-          authz: {
-            checkSavedObjectsPrivilegesWithRequest: jest
-              .fn()
-              .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: false })),
-          },
-        },
-      },
-    } as any);
+    };
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
 
     expect(result).toBe(forbidden);
     expect(edit).not.toHaveBeenCalled();
