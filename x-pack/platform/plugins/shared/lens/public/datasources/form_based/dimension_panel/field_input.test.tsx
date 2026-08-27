@@ -157,7 +157,9 @@ describe('FieldInput', () => {
   });
 
   it('should expose the Lens-committed field on the combobox for functional tests', () => {
-    const { unmount } = renderFieldInput();
+    const { unmount } = renderFieldInput({
+      selectedColumn: getStringBasedOperationColumn(),
+    });
     expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
       'data-selected-field',
       'source'
