@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE, readEsqlQuery } from '@kbn/custom-content-common';
 import type { MaterializedPanelInput } from './panel_creation';
 import { applyCustomContentTemplates, mergeAndResolveCustomContentEdit } from './panel_creation';
 
@@ -123,43 +123,41 @@ describe('mergeAndResolveCustomContentEdit', () => {
   });
 
   it('uses editConfig.prompt when provided', async () => {
-    await mergeAndResolveCustomContentEdit(
-      { prompt: 'New prompt' },
-      { prompt: 'Old prompt' },
-      resolveTemplate
-    );
+    await mergeAndResolveCustomContentEdit({ prompt: 'New prompt' }, {}, resolveTemplate);
 
     expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ prompt: 'New prompt' }));
   });
 
-  it('falls back to existing.prompt when editConfig.prompt is undefined', async () => {
+  it('resolves from the existing template when the edit carries no prompt', async () => {
     const result = await mergeAndResolveCustomContentEdit(
-      {},
-      { prompt: 'Old prompt' },
+      { esqlQuery: 'FROM metrics-*' },
+      { template: '<div>old</div>' },
       resolveTemplate
     );
 
-    expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ prompt: 'Old prompt' }));
-    expect(result.prompt).toBe('Old prompt');
+    expect(resolveTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ prompt: '', existingTemplate: '<div>old</div>' })
+    );
+    expect(result).not.toHaveProperty('prompt');
   });
 
   it('keeps the existing esqlQuery in the result without re-sampling it', async () => {
     const result = await mergeAndResolveCustomContentEdit(
       { prompt: 'Updated' },
-      { prompt: 'Old', esqlQuery: 'FROM logs-*' },
+      { esql_query: ['FROM logs-*'] },
       resolveTemplate
     );
 
     expect(resolveTemplate).toHaveBeenCalledWith(
       expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
     );
-    expect(result.esqlQuery).toBe('FROM logs-*');
+    expect(readEsqlQuery(result)).toBe('FROM logs-*');
   });
 
   it('clears esqlQuery when editConfig.esqlQuery is null', async () => {
     await mergeAndResolveCustomContentEdit(
       { esqlQuery: null },
-      { prompt: 'Old', esqlQuery: 'FROM logs-*' },
+      { esql_query: ['FROM logs-*'] },
       resolveTemplate
     );
 
@@ -169,7 +167,7 @@ describe('mergeAndResolveCustomContentEdit', () => {
   it('uses the new esqlQuery and samples it when editConfig.esqlQuery is a string', async () => {
     await mergeAndResolveCustomContentEdit(
       { esqlQuery: 'FROM metrics-*' },
-      { prompt: 'Old', esqlQuery: 'FROM logs-*' },
+      { esql_query: ['FROM logs-*'] },
       resolveTemplate
     );
 
@@ -181,7 +179,7 @@ describe('mergeAndResolveCustomContentEdit', () => {
   it('passes existingTemplate through to resolveTemplate', async () => {
     await mergeAndResolveCustomContentEdit(
       { prompt: 'Updated' },
-      { prompt: 'Old', template: '<div>old template</div>' },
+      { template: '<div>old template</div>' },
       resolveTemplate
     );
 
@@ -193,13 +191,12 @@ describe('mergeAndResolveCustomContentEdit', () => {
   it('returns the merged state with the resolved template', async () => {
     const result = await mergeAndResolveCustomContentEdit(
       { prompt: 'New prompt', esqlQuery: 'FROM logs-*' },
-      { prompt: 'Old prompt' },
+      {},
       resolveTemplate
     );
 
     expect(result).toEqual({
-      prompt: 'New prompt',
-      esqlQuery: 'FROM logs-*',
+      esql_query: ['FROM logs-*'],
       template: '<div>resolved</div>',
     });
   });

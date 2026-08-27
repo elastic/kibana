@@ -25,8 +25,8 @@ interface CustomContentComponentProps {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  onErrorChange?: (error: string | undefined) => void;
   previewHtml: string | null;
+  onLoadingChange: (isLoading: boolean) => void;
   onGenerateWithChat?: () => void;
 }
 
@@ -59,8 +59,8 @@ export const CustomContentComponent = ({
   projectRouting,
   query,
   filters,
-  onErrorChange,
   previewHtml,
+  onLoadingChange,
   onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
@@ -81,9 +81,7 @@ export const CustomContentComponent = ({
   const { agentBuilder } = getServices();
   const isAiAvailable = Boolean(agentBuilder);
 
-  useEffect(() => {
-    onErrorChange?.(error);
-  }, [error, onErrorChange]);
+  useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
 
   const wrapperCss = useMemo(
     () =>
@@ -99,7 +97,7 @@ export const CustomContentComponent = ({
   );
 
   return (
-    <div css={wrapperCss} data-test-subj="customContentPanel">
+    <div css={wrapperCss} data-shared-item data-test-subj="customContentPanel">
       {error && (
         <KbnDangerCallout
           title={i18n.translate('xpack.customContent.error.title', {

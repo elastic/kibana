@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
@@ -56,9 +57,11 @@ Reach for custom content only when nothing above fits:
 - Plain explanatory text with no data → use markdown.
 - The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
 
+**ES|QL for custom content:** set \`config.esqlQuery\` yourself when the panel needs live data — omitting it renders static content with no data, it does not get generated for you. Build the query with \`${platformCoreTools.generateEsql}\` rather than writing it directly, or use one the user supplied verbatim. The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails that panel and returns an error naming the reason — correct the query and retry rather than proceeding.
+
 **Creating a custom content panel:**
 - Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` — it is generated server-side from the prompt.
-- Optionally set \`config.esqlQuery\` when the panel needs live data.
+- Set \`config.esqlQuery\` when the panel needs live data.
 
 **Editing a custom content panel:**
 - Use \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) and set \`panelId\` to the target panel.

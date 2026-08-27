@@ -56,11 +56,11 @@ export const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
 export const SystemConnectorsMap = new Map<string, string>([['.http', '.http-system']]);
 
 /**
- * Workflow attachment and SML types used by the agent builder integration.
+ * Workflow attachment types used by the agent builder integration.
+ * The matching KI type id is `WORKFLOW_KI_TYPE` in `@kbn/agent-builder-elastic-ai-index-ki-types`.
  */
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
-export const WORKFLOW_SML_TYPE = 'workflow';
 
 /**
  * UI event broadcast on the agent builder events bus when a workflow YAML

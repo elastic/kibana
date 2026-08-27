@@ -236,8 +236,11 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  newJobCaps(indexPatternTitle: string, isRollup: boolean = false) {
-    const query = isRollup === true ? { rollup: true } : {};
+  newJobCaps(indexPatternTitle: string, isRollup: boolean = false, projectRouting?: string) {
+    const query = {
+      ...(isRollup === true ? { rollup: true } : {}),
+      ...(projectRouting ? { projectRouting } : {}),
+    };
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_caps/${indexPatternTitle}`,
       method: 'GET',

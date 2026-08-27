@@ -81,7 +81,6 @@ export const EditCustomContentFlyout = ({
     esqlDataError,
     handleFetchData,
     isRenderLoading,
-    hasPreviewedCurrentDraft,
     handleRender,
   } = useEditFlyoutState({
     esqlQuery,
@@ -260,9 +259,9 @@ export const EditCustomContentFlyout = ({
                     defaultMessage: 'Copy template',
                   })}
                   disableScreenReaderOutput
+                  anchorProps={{ css: copyButtonCss }}
                 >
                   <EuiButtonIcon
-                    css={copyButtonCss}
                     iconType="copy"
                     aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
                       defaultMessage: 'Copy template',
@@ -311,12 +310,12 @@ export const EditCustomContentFlyout = ({
                   color="success"
                   iconType="play"
                   isLoading={isRenderLoading}
-                  disabled={!hasChanges || hasPreviewedCurrentDraft}
+                  disabled={!draftTemplate.trim()}
                   onClick={handleRender}
                   data-test-subj="customContentRunPreviewButton"
                 >
                   {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
-                    defaultMessage: 'Run Preview',
+                    defaultMessage: 'Run preview',
                   })}
                 </EuiButton>
               </EuiFlexItem>
