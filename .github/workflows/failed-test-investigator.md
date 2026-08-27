@@ -231,7 +231,8 @@ An engineer can still request a fix for any issue by adding `ai:fix-flaky` manua
 Add `failure:fix-did-not-hold` (in addition to the classification label) when your investigation shows a **fix was already merged for this same failure and the failure came back** — regardless of who wrote it (a human contributor or an automation such as the flaky-test fixer). This label tracks fixes that regressed, so apply it only when **both** of the following hold:
 
 - a prior PR that **fixed this issue was merged** (from the issue timeline / reopen history you already reviewed, corroborated by `git log`/`git blame` when ambiguous); and
-- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold.
+- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold; and
+- the **failing run actually contained the fix**. A Cloud image trails `main`, so a failure reported soon after the fix merged may have run a checkout that predates it. Resolve the run's `Build hash` and confirm the fix's merge commit is an ancestor of it (see the `flaky-test-investigator` skill's pipelines reference). A failure whose build predates the fix is propagation lag, not a regression — classify it `ci-environment` and do not add this label.
 
 Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite.
 
