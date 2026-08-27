@@ -26,6 +26,12 @@ const majorThroughputAlert = {
   alertEvaluationThreshold: ML_ANOMALY_THRESHOLD.MAJOR,
 } as const;
 
+const warningLowCountAlert = {
+  severity: ML_ANOMALY_SEVERITY.WARNING,
+  detectorType: AnomalyDetectorType.txLowCount,
+  alertEvaluationThreshold: ML_ANOMALY_THRESHOLD.WARNING,
+} as const;
+
 const criticalLatencyTitle = formatAnomalyCalloutTitle({
   alertSeverity: criticalLatencyAlert.severity,
   detectorType: criticalLatencyAlert.detectorType,
@@ -38,6 +44,10 @@ const majorThroughputTitle = formatAnomalyCalloutTitle({
   detectorType: majorThroughputAlert.detectorType,
 });
 const majorThresholdBody = formatAnomalyCalloutBody(majorThroughputAlert.alertEvaluationThreshold);
+const warningLowCountTitle = formatAnomalyCalloutTitle({
+  alertSeverity: warningLowCountAlert.severity,
+  detectorType: warningLowCountAlert.detectorType,
+});
 
 const renderComponent = (props: React.ComponentProps<typeof AnomalyAlertCallout>) =>
   render(
@@ -60,5 +70,12 @@ describe('AnomalyAlertCallout', () => {
 
     expect(screen.getByText(majorThroughputTitle)).toBeInTheDocument();
     expect(screen.getByText(majorThresholdBody)).toBeInTheDocument();
+  });
+
+  it('renders low transaction count detector in the title', () => {
+    renderComponent(warningLowCountAlert);
+
+    expect(screen.getByText(warningLowCountTitle)).toBeInTheDocument();
+    expect(screen.getByText(warningThresholdBody)).toBeInTheDocument();
   });
 });

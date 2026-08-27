@@ -25,8 +25,32 @@ import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { AppLeaveContext } from '../app_leave_context';
+import { useEffectiveSpaceDefaultAgent } from '../../hooks/use_space_default_agent';
+import { RedirectLoading } from '../../components/redirects/redirect_loading';
 
 const noopOnAppLeave = () => {};
+
+/**
+ * Pins restricted (non-`manageAgents`) users to their space's default agent.
+ */
+export const PinnedConversationProvider: React.FC<
+  React.PropsWithChildren<{ baseValue: NonNullable<React.ContextType<typeof ConversationContext>> }>
+> = ({ baseValue, children }) => {
+  const { effectiveDefaultAgentId, isRestricted, isReady } = useEffectiveSpaceDefaultAgent();
+  const value = useMemo(
+    () =>
+      isRestricted && effectiveDefaultAgentId
+        ? { ...baseValue, agentId: effectiveDefaultAgentId }
+        : baseValue,
+    [baseValue, isRestricted, effectiveDefaultAgentId]
+  );
+  return (
+    <ConversationContext.Provider value={value}>
+      <ConversationChangeNotifier />
+      {isReady ? children : <RedirectLoading />}
+    </ConversationContext.Provider>
+  );
+};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
 }
@@ -272,10 +296,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
           <AgentBuilderServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
               <StreamingProvider>
-                <ConversationContext.Provider value={conversationContextValue}>
-                  <ConversationChangeNotifier />
+                <PinnedConversationProvider baseValue={conversationContextValue}>
                   {children}
-                </ConversationContext.Provider>
+                </PinnedConversationProvider>
               </StreamingProvider>
             </AppLeaveContext.Provider>
           </AgentBuilderServicesContext.Provider>
