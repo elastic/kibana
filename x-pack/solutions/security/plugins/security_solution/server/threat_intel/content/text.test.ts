@@ -1008,3 +1008,94 @@ describe('truncate never splits a surrogate pair', () => {
     expect(truncate('a\u{1F600}b', 3)).toBe('a…');
   });
 });
+
+/**
+ * A raw-text close tag has to end at a tag boundary.
+ *
+ * Matching any `</script` prefix meant `</scriptfoo>` looked like the close, so the scan
+ * resumed inside a body the parser still considers open and a later `<script/>` there was
+ * rewritten, letting the suffix escape as a false IOC again. Trailing junk after the name
+ * is legal and does close the element, so the test is the character after the name.
+ */
+describe('raw-text close tags must end at a tag boundary', () => {
+  it('does not accept a longer element name as the close tag', () => {
+    const result = stripHtml(
+      '<script>const x="</scriptfoo><script/>"; fetch("https://false-ioc.test")</script><p>safe</p>'
+    );
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('does not accept a longer style name either', () => {
+    const result = stripHtml(
+      '<style>a{c:"</stylefoo><style/>"} .x{background:url(https://false-ioc.test/a.png)}</style><p>safe</p>'
+    );
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  // Per spec a close tag may carry trailing junk and still close the element, so the
+  // stricter check must not reject these.
+  it.each([
+    ['trailing attribute junk', '<script>a=1</script foo><p>safe</p>'],
+    ['tab before the bracket', '<script>a=1</script\t><p>safe</p>'],
+    ['slash before the bracket', '<script>a=1</script/><p>safe</p>'],
+  ])('still treats %s as a close tag', (_label, html) => {
+    expect(stripHtml(html)).toBe('safe');
+  });
+
+  // The rejection path searches forward, so it must not become quadratic.
+  it('stays linear over many non-closing prefix matches', () => {
+    const input = `<script>${'</scriptfoo>'.repeat(320000)}`;
+    const started = process.hrtime.bigint();
+    stripHtml(input);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(1500);
+  });
+});
+
+/**
+ * htmlparser2 ends an end tag at the first `>` and rejects a trailing slash, where the
+ * spec and parse5 both read the junk and close the element. Both divergences lost or
+ * leaked content, so the normalizer rewrites a junk-carrying raw-text end tag to its
+ * plain form before parsing. Semantically free, since the junk is ignored either way.
+ */
+describe('raw-text end tags carrying junk', () => {
+  // `</script foo="a>URL">` closed at the `>` inside the attribute value, spilling the
+  // rest of the end tag into body_text with an attacker-chosen URL in it.
+  it.each([
+    ['double-quoted attribute', '<script>a=1</script foo="a>https://false-ioc.test/x"><p>safe</p>'],
+    ['single-quoted attribute', "<script>a=1</script foo='a>https://false-ioc.test/y'><p>safe</p>"],
+    ['style element', '<style>a{b:1}</style foo="a>https://false-ioc.test/s"><p>safe</p>'],
+  ])('does not end the tag at a > inside a quoted attribute: %s', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  // `</script/>` kept the element open and swallowed the remainder of the document.
+  it.each([
+    ['trailing slash', '<script>a=1</script/><p>safe</p>'],
+    ['space then slash', '<script>a=1</script /><p>safe</p>'],
+    ['style trailing slash', '<style>a{b:1}</style/><p>safe</p>'],
+  ])('still closes the element: %s', (_label, html) => {
+    expect(stripHtml(html)).toBe('safe');
+  });
+
+  it('leaves an ordinary close tag untouched', () => {
+    expect(stripHtml('<p>a</p><script>x</script><p>b</p><script>y</script><p>c</p>')).toBe('a b c');
+  });
+
+  it('stays linear over many junk-carrying end tags', () => {
+    const input = '<script>a</script foo="x">'.repeat(150000);
+    const started = process.hrtime.bigint();
+    stripHtml(input);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(1500);
+  });
+});

@@ -135,6 +135,29 @@ const RAW_TEXT_TAG_NAMES = ['script', 'style'] as const;
  * `>` inside an attribute value cannot end a tag early, and an unterminated tag runs to
  * end of input and is left for the parser to read per spec, which is the safe direction.
  */
+/**
+ * Index of the `>` that terminates the tag starting at `from`, or -1 if the tag never
+ * terminates. Quote-aware, so a `>` inside an attribute value does not end it early.
+ */
+const tagEndFrom = (html: string, from: number): number => {
+  let scan = from;
+  let quote = '';
+
+  while (scan < html.length) {
+    const char = html[scan];
+    if (quote !== '') {
+      if (char === quote) quote = '';
+    } else if (char === '"' || char === "'") {
+      quote = char;
+    } else if (char === '>') {
+      return scan;
+    }
+    scan += 1;
+  }
+
+  return -1;
+};
+
 export const normalizeSelfClosedRawText = (html: string): string => {
   const lower = html.toLowerCase();
   const pieces: string[] = [];
@@ -151,41 +174,68 @@ export const normalizeSelfClosedRawText = (html: string): string => {
     // A tag boundary has to follow the name, or `<scriptfoo` would be treated as one.
     const isTagStart =
       afterName !== -1 && (afterName >= html.length || /[\s/>]/.test(html[afterName]));
+    const tagEnd = isTagStart ? tagEndFrom(html, afterName) : -1;
 
     if (open === -1) {
       cursor = html.length;
     } else if (!isTagStart) {
       cursor = open + 1;
+    } else if (tagEnd === -1) {
+      cursor = html.length;
+    } else if (html[tagEnd - 1] === '/') {
+      // The self-closed open tag this function exists for.
+      pieces.push(html.slice(copiedTo, tagEnd - 1), `></${name}>`);
+      copiedTo = tagEnd + 1;
+      cursor = tagEnd + 1;
     } else {
-      let scan = afterName;
-      let quote = '';
-      while (scan < html.length && !(quote === '' && html[scan] === '>')) {
-        const char = html[scan];
-        if (quote !== '') {
-          if (char === quote) quote = '';
-        } else if (char === '"' || char === "'") {
-          quote = char;
+      // A real open tag, so everything up to the matching close is raw text as far as the
+      // parser is concerned, and a `<script/>` sitting in a JavaScript string literal is
+      // not a tag at all. Rewriting it inserted a close tag *inside* the outer body,
+      // ending that element early and spilling the rest of the script into `body_text`.
+      // That is a false-IOC injection primitive rather than cosmetic noise:
+      // `const x="<script/>"; fetch("https://attacker.test")` published the attacker's URL
+      // as an extractable indicator. Skip the body instead.
+      //
+      // The close tag's name has to end at a tag boundary. A bare prefix match accepted
+      // `</scriptfoo>`, which resumed the scan inside a body the parser still considers
+      // open and let a later `<script/>` there escape the same way. Trailing junk after
+      // the name is legal and does close the element, so the test is the character after
+      // the name, not the absence of one.
+      const closeTag = `</${name}`;
+      let searchFrom = tagEnd + 1;
+      let closeAt = -1;
+      while (closeAt === -1 && searchFrom < html.length) {
+        const found = lower.indexOf(closeTag, searchFrom);
+        const after = found === -1 ? -1 : found + closeTag.length;
+        if (found === -1) {
+          searchFrom = html.length;
+        } else if (after >= html.length || /[\s/>]/.test(html[after])) {
+          closeAt = found;
+        } else {
+          searchFrom = found + 1;
         }
-        scan += 1;
       }
 
-      if (scan >= html.length) {
+      if (closeAt === -1) {
         cursor = html.length;
-      } else if (html[scan - 1] === '/') {
-        pieces.push(html.slice(copiedTo, scan - 1), `></${name}>`);
-        copiedTo = scan + 1;
-        cursor = scan + 1;
       } else {
-        // A real open tag, so everything up to the matching close is raw text as far as
-        // the parser is concerned, and a `<script/>` sitting in a JavaScript string
-        // literal is not a tag at all. Rewriting it inserted a close tag *inside* the
-        // outer body, ending that element early and spilling the rest of the script into
-        // `body_text`. That is a false-IOC injection primitive rather than cosmetic
-        // noise: `const x="<script/>"; fetch("https://attacker.test")` published the
-        // attacker's URL as an extractable indicator. Skip the body instead.
-        const closeTag = `</${name}`;
-        const closeAt = lower.indexOf(closeTag, scan + 1);
-        cursor = closeAt === -1 ? html.length : closeAt + closeTag.length;
+        // htmlparser2 ends an end tag at the first `>` and rejects a trailing slash, where
+        // the spec and parse5 both read the junk and close the element. Two content
+        // failures followed: `</script/>` kept the element open and swallowed the rest of
+        // the document, and `</script foo="a>URL">` closed at the `>` inside the attribute
+        // value, spilling the remainder of the end tag into `body_text` as a false IOC with
+        // an attacker-chosen URL. Rewriting any junk-carrying end tag to its plain form is
+        // the same job as the open-tag case above: make a raw-text tag parse the way a
+        // browser reads it. Semantically free, since the junk is ignored either way.
+        const junkFrom = closeAt + closeTag.length;
+        const closeEnd = tagEndFrom(html, junkFrom);
+        if (closeEnd !== -1 && closeEnd > junkFrom) {
+          pieces.push(html.slice(copiedTo, closeAt), `</${name}>`);
+          copiedTo = closeEnd + 1;
+          cursor = closeEnd + 1;
+        } else {
+          cursor = junkFrom;
+        }
       }
     }
   }

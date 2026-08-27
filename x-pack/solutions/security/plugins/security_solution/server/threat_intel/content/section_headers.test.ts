@@ -76,3 +76,47 @@ describe('classifyHeader', () => {
     expect(classifyHeader('Threat Indicators Explained')).toBe('prose');
   });
 });
+
+/**
+ * The vocabulary was written in whichever number each heading usually appears in, so the
+ * other spelling silently classified as prose and dropped href-only indicators beneath it.
+ * `matchesTerm` covers the class; the internal-plural phrase is listed explicitly.
+ */
+describe('singular and plural heading spellings', () => {
+  it.each([
+    ['Indicator of Compromise', 'ioc'],
+    ['Indicators of Compromise', 'ioc'],
+    ['Indicator', 'ioc'],
+    ['Indicators', 'ioc'],
+    ['IOC', 'ioc'],
+    ['IOCs', 'ioc'],
+    ['Observable', 'ioc'],
+    ['Observables', 'ioc'],
+    ['Observation', 'ioc'],
+    ['Observations', 'ioc'],
+    ['Reference', 'references'],
+    ['References', 'references'],
+    ['Source', 'references'],
+    ['Sources', 'references'],
+    ['Comment', 'references'],
+    ['Comments', 'references'],
+    ['Acknowledgement', 'references'],
+    ['Acknowledgements', 'references'],
+    ['Author', 'references'],
+    ['Authors', 'references'],
+  ])('classifies %s as %s', (heading, expected) => {
+    expect(classifyHeader(heading)).toBe(expected);
+  });
+
+  // The tolerance must not start swallowing ordinary prose headings.
+  it.each([['Indication'], ['Analysis'], ['Overview'], ['Summary'], ['Timeline']])(
+    'leaves %s as prose',
+    (heading) => {
+      expect(classifyHeader(heading)).toBe('prose');
+    }
+  );
+
+  it('still applies the trailing parenthetical strip to the singular form', () => {
+    expect(classifyHeader('Indicator of Compromise (IOC)')).toBe('ioc');
+  });
+});
