@@ -39,6 +39,8 @@ const mockTelemetry = {
   trackGenerateWithChatClicked: jest.fn(),
 };
 
+jest.mock('../telemetry', () => ({ getTelemetry: () => mockTelemetry }));
+
 const baseFlyoutState = {
   draftEsqlQuery: '',
   setDraftEsqlQuery: jest.fn(),
@@ -70,7 +72,7 @@ const defaultProps = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseEditFlyoutState.mockReturnValue(baseFlyoutState);
-  (getServices as jest.Mock).mockReturnValue({ telemetry: mockTelemetry });
+  (getServices as jest.Mock).mockReturnValue({});
 });
 
 describe('EditCustomContentFlyout', () => {

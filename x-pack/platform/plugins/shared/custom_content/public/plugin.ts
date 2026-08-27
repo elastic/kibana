@@ -17,7 +17,6 @@ import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_
 import { customContentContextAttachmentUiDefinition } from './attachment_types/custom_content_context';
 import { setServices } from './services';
 import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../common/constants';
-import { registerCustomContentAnalyticsEvents, CustomContentTelemetryService } from './telemetry';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -31,7 +30,10 @@ interface StartDeps {
 
 export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup, { embeddable }: SetupDeps) {
-    registerCustomContentAnalyticsEvents(core.analytics);
+    void import('./telemetry/events_registration').then(
+      ({ registerCustomContentAnalyticsEvents }) =>
+        registerCustomContentAnalyticsEvents(core.analytics)
+    );
     embeddable.registerEmbeddablePublicDefinition(CUSTOM_CONTENT_EMBEDDABLE_TYPE, async () => {
       const { customContentEmbeddableFactory } = await import('./async_services');
       return customContentEmbeddableFactory;
@@ -39,13 +41,7 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
   }
 
   start(core: CoreStart, { data, uiActions, agentBuilder }: StartDeps) {
-    setServices(
-      core,
-      data.search.search,
-      data.dataViews,
-      agentBuilder,
-      new CustomContentTelemetryService(core.analytics)
-    );
+    setServices(core, data.search.search, data.dataViews, agentBuilder);
 
     uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_CONTENT_ACTION_ID, async () => {
       const { getAddCustomContentAction } = await import('./actions/add_custom_content_action');

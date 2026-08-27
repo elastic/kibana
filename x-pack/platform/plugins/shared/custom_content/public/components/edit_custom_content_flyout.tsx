@@ -31,7 +31,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
-import { getServices } from '../services';
+import { getTelemetry } from '../telemetry';
 
 const EDITOR_DEFAULT_HEIGHT = 400;
 // Intentionally overestimated (header + footer + body padding + template label row + spacers + help text)
@@ -97,7 +97,7 @@ export const EditCustomContentFlyout = ({
   });
 
   const handleGenerateWithChat = useCallback(() => {
-    getServices().telemetry.trackGenerateWithChatClicked({
+    getTelemetry().trackGenerateWithChatClicked({
       triggerSource: 'flyout',
       hasExistingTemplate: Boolean(draftTemplate),
     });
@@ -107,7 +107,7 @@ export const EditCustomContentFlyout = ({
   const hasChanges = draftEsqlQuery !== (esqlQuery ?? '') || draftTemplate !== (template ?? '');
 
   const handleSave = useCallback(() => {
-    getServices().telemetry.trackPanelSaved({
+    getTelemetry().trackPanelSaved({
       isNewPanel: isNewPanel ?? false,
       hasTemplate: Boolean(draftTemplate),
       hasEsqlQuery: Boolean(draftEsqlQuery),

@@ -105,12 +105,13 @@ const mockTelemetry = {
   trackAgentUpdateApplied: jest.fn(),
 };
 
+jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
+
 jest.mock('./services', () => ({
   getServices: () => ({
     agentBuilder: mockAgentBuilder,
     core: { http: {} },
     search: jest.fn(),
-    telemetry: mockTelemetry,
   }),
 }));
 

@@ -52,6 +52,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getServices } from './services';
+import { getTelemetry } from './telemetry';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
@@ -137,8 +138,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           defaultMessage: 'Custom content',
         }),
       onEdit: async ({ isNewPanel, returnFocus } = {}) => {
-        const { core, telemetry } = getServices();
-        telemetry.trackEditFlyoutOpened({
+        const { core } = getServices();
+        getTelemetry().trackEditFlyoutOpened({
           isNewPanel: isNewPanel ?? false,
           hasTemplate: Boolean(template$.getValue()),
           hasEsqlQuery: Boolean(esqlQuery$.getValue()),
@@ -245,7 +246,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             (isNewPanel ?? false) &&
             apiIsPresentationContainer(parentApi);
           if (!hasSaved) {
-            getServices().telemetry.trackEditCancelled({
+            getTelemetry().trackEditCancelled({
               isNewPanel: isNewPanel ?? false,
               panelRemoved,
             });
@@ -385,7 +386,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
                 template$.next(data.panel_template);
                 esqlQuery$.next(data.esql_query);
-                getServices().telemetry.trackAgentUpdateApplied({
+                getTelemetry().trackAgentUpdateApplied({
                   hasEsqlQuery: Boolean(data.esql_query),
                   templateSizeBytes: data.panel_template.length,
                 });
@@ -401,9 +402,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }, []);
 
         const handleGenerateWithChat = useCallback(() => {
-          const { agentBuilder, telemetry } = getServices();
+          const { agentBuilder } = getServices();
           if (!agentBuilder) return;
-          telemetry.trackGenerateWithChatClicked({
+          getTelemetry().trackGenerateWithChatClicked({
             triggerSource: 'empty_panel',
             hasExistingTemplate: false,
           });

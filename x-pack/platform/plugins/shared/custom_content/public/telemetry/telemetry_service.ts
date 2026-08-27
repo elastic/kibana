@@ -13,7 +13,7 @@ import {
   CUSTOM_CONTENT_EDIT_CANCELLED,
   CUSTOM_CONTENT_GENERATE_WITH_CHAT_CLICKED,
   CUSTOM_CONTENT_AGENT_UPDATE_APPLIED,
-} from './events_registration';
+} from './event_types';
 
 export class CustomContentTelemetryService {
   constructor(private readonly _analytics: AnalyticsServiceStart) {}

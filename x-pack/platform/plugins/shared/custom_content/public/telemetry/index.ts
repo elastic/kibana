@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { registerCustomContentAnalyticsEvents } from './events_registration';
 export { CustomContentTelemetryService } from './telemetry_service';
+export { getTelemetry } from './get_telemetry';

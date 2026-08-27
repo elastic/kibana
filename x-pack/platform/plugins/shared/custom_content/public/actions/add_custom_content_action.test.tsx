@@ -18,10 +18,8 @@ jest.mock('@kbn/presentation-publishing', () => ({
 
 const mockTrackPanelAdded = jest.fn();
 
-jest.mock('../services', () => ({
-  getServices: () => ({
-    telemetry: { trackPanelAdded: mockTrackPanelAdded },
-  }),
+jest.mock('../telemetry', () => ({
+  getTelemetry: () => ({ trackPanelAdded: mockTrackPanelAdded }),
 }));
 
 const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.MockedFunction<

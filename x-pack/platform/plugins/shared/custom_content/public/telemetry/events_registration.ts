@@ -8,13 +8,14 @@
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { once } from 'lodash';
 
-export const CUSTOM_CONTENT_PANEL_ADDED = 'custom_content.panel_added';
-export const CUSTOM_CONTENT_EDIT_FLYOUT_OPENED = 'custom_content.edit_flyout_opened';
-export const CUSTOM_CONTENT_PANEL_SAVED = 'custom_content.panel_saved';
-export const CUSTOM_CONTENT_EDIT_CANCELLED = 'custom_content.edit_cancelled';
-export const CUSTOM_CONTENT_GENERATE_WITH_CHAT_CLICKED =
-  'custom_content.generate_with_chat_clicked';
-export const CUSTOM_CONTENT_AGENT_UPDATE_APPLIED = 'custom_content.agent_update_applied';
+import {
+  CUSTOM_CONTENT_PANEL_ADDED,
+  CUSTOM_CONTENT_EDIT_FLYOUT_OPENED,
+  CUSTOM_CONTENT_PANEL_SAVED,
+  CUSTOM_CONTENT_EDIT_CANCELLED,
+  CUSTOM_CONTENT_GENERATE_WITH_CHAT_CLICKED,
+  CUSTOM_CONTENT_AGENT_UPDATE_APPLIED,
+} from './event_types';
 
 export const registerCustomContentAnalyticsEvents = once((analytics: AnalyticsServiceSetup) => {
   analytics.registerEventType({
