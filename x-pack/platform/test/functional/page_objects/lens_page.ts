@@ -248,9 +248,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const field = opts.field;
       if (field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
-        // Field label must be in the combobox before close, or close discards the transition.
-        // Ignore aria-invalid: a just-selected remote field (e.g. average over a CCS data view)
-        // can be transiently invalid even after the value has committed.
+        // Close too early discards the operation→field transition. The input label is a proxy
+        // for that click; Lens layer state (sourceField / clearing incompleteColumns) updates
+        // asynchronously and has no test hook. Skip aria-invalid: FieldSelect ORs
+        // incompleteOperation into it, so the combo stays "invalid" until that async update
+        // lands. A field already in the dropdown is a valid option — invalid here means
+        // "dimension not finished yet", which is slow to clear on CCS (ftr-remote:logstash-*).
         await retry.waitFor('field selection to commit', async () => {
           const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
           return await comboBox.isOptionSelected(fieldCombo, field, { requireValid: false });
