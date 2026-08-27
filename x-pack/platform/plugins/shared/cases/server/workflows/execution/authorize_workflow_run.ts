@@ -11,7 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { WriteOperations } from '../../authorization';
 import type { OperationDetails } from '../../authorization';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { createCaseError, createCaseErrorFromSOError, isSOError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import type { Authorization } from '../../authorization/authorization';
 import type { CasesService } from '../../services/cases';
 
