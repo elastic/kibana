@@ -51,7 +51,7 @@ export const InputSchema = z.object({
     .optional()
     .describe(
       i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.schema.maxLength', {
-        defaultMessage: 'Approximate maximum length (positive integer).',
+        defaultMessage: 'Approximate maximum summary length in characters (positive integer).',
       })
     ),
   temperature: z
