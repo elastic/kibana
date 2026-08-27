@@ -15,8 +15,10 @@ import type {
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
+  BY_REF_SCHEMA_META,
 } from '@kbn/presentation-publishing-schemas';
 import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
+import { vegaSpecSchema } from '../api/schema';
 
 export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return (
@@ -25,21 +27,7 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
         ...serializedTitlesSchema.shape,
         ...serializedTimeRangeSchema.shape,
         ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
-        spec: z
-          .discriminatedUnion('format', [
-            z.object({
-              format: z.literal('hjson'),
-              value: z.string().min(1),
-            }),
-            z.object({
-              format: z.literal('json'),
-              value: z.looseObject({}),
-            }),
-          ])
-          .meta({
-            description:
-              'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
-          }),
+        spec: vegaSpecSchema,
       })
       // Strip unknown keys for forward-compatible additive changes in this public contract.
       .strip()
@@ -58,3 +46,15 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
  */
 export type VegaByValueState = z.output<ReturnType<typeof getVegaEmbeddableSchema>> &
   SerializedDrilldowns;
+
+export const vegaByReferenceStateSchema = z
+  .object({
+    ...serializedTitlesSchema.shape,
+    ref_id: z.string().meta({
+      description: 'The unique identifier of the Vega library item.',
+    }),
+  })
+  .strip()
+  .meta(BY_REF_SCHEMA_META);
+
+export type VegaByReferenceState = z.output<typeof vegaByReferenceStateSchema>;
