@@ -74,6 +74,8 @@ export type DocumentsDisplayMode = 'table' | 'json';
 export interface JsonModeSettings extends SerializableRecord {
   hideNulls?: boolean;
   wrapLines?: boolean;
+  /** How many nested levels of every JSON cell are expanded by default (0 = fully collapsed). */
+  expandedLevels?: number;
 }
 
 export type CustomBulkActions = Array<

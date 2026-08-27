@@ -398,4 +398,67 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       expect(onChangeJsonModeSettings).toHaveBeenCalledWith({ hideNulls: true, wrapLines: true });
     });
   });
+
+  describe('expandedLevels', () => {
+    const renderJsonMode = (props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}) =>
+      renderDisplaySettings({
+        sourceDisplayMode: 'json',
+        onChangeSourceDisplayMode: jest.fn(),
+        onChangeJsonModeSettings: jest.fn(),
+        ...props,
+      });
+
+    const getExpandedLevelsInput = () => screen.getByTestId('unifiedDataTableExpandedLevelsInput');
+
+    it('is not rendered in summary mode', () => {
+      renderJsonMode({ sourceDisplayMode: 'summary' });
+
+      expect(screen.queryByTestId('unifiedDataTableExpandedLevelsInput')).not.toBeInTheDocument();
+    });
+
+    it('renders first, above the Hide nulls control', () => {
+      renderJsonMode();
+
+      const input = getExpandedLevelsInput();
+      const hideNulls = screen.getByTestId('unifiedDataTableHideNullsSettings');
+      // The two controls are separate, non-nested rows, so this is exactly FOLLOWING when the
+      // expanded-levels input comes first.
+      expect(input.compareDocumentPosition(hideNulls)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('defaults to 0 when unset', () => {
+      renderJsonMode({ jsonModeSettings: {} });
+
+      expect(screen.getByText('Expanded levels')).toBeVisible();
+      expect(getExpandedLevelsInput()).toHaveValue(0);
+    });
+
+    it('reflects the provided expandedLevels', () => {
+      renderJsonMode({ jsonModeSettings: { expandedLevels: 3 } });
+
+      expect(getExpandedLevelsInput()).toHaveValue(3);
+    });
+
+    it('propagates a change, preserving the other JSON settings', async () => {
+      const onChangeJsonModeSettings = jest.fn();
+      renderJsonMode({ jsonModeSettings: { hideNulls: true }, onChangeJsonModeSettings });
+
+      await replaceNumberInputValue(getExpandedLevelsInput(), '2');
+
+      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({
+        hideNulls: true,
+        expandedLevels: 2,
+      });
+    });
+
+    it('clamps values above the maximum before propagating', async () => {
+      const onChangeJsonModeSettings = jest.fn();
+      renderJsonMode({ jsonModeSettings: {}, onChangeJsonModeSettings });
+
+      await replaceNumberInputValue(getExpandedLevelsInput(), '9');
+
+      expect(getExpandedLevelsInput()).toHaveValue(5);
+      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ expandedLevels: 5 });
+    });
+  });
 });

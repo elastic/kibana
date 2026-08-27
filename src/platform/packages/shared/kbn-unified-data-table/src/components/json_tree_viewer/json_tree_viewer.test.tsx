@@ -11,7 +11,12 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard } from '@elastic/eui';
-import { JsonTreeViewer, type FormatValue, type TreeExpansionState } from './json_tree_viewer';
+import {
+  JsonTreeViewer,
+  type FormatValue,
+  type GetLeafActions,
+  type TreeExpansionState,
+} from './json_tree_viewer';
 import { ROOT_ID, getNodeId } from './tree_model';
 
 jest.mock('@elastic/eui', () => ({
@@ -22,6 +27,7 @@ const copyToClipboardMock = jest.mocked(copyToClipboard);
 
 const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
 const copyTestId = (path: string) => `jsonTreeViewerCopy-${getNodeId(path.split('.'))}`;
+const lockTestId = (path: string) => `jsonTreeViewerLock-${getNodeId(path.split('.'))}`;
 const pagerTestId = (collectionId: string = ROOT_ID) => `jsonTreeViewerPager-${collectionId}`;
 const moreTestId = (collectionId: string = ROOT_ID) => `jsonTreeViewerMore-${collectionId}`;
 const fewerTestId = (collectionId: string = ROOT_ID) => `jsonTreeViewerFewer-${collectionId}`;
@@ -119,6 +125,45 @@ describe('JsonTreeViewer', () => {
     expect(pager).toHaveFocus();
   });
 
+  it('labels the pager with how many more of the total fields will be shown', () => {
+    const doc = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`field_${i}`, i]));
+    render(<JsonTreeViewer json={doc} />);
+
+    expect(screen.getByTestId(moreTestId())).toHaveTextContent('Show 2 more of 12 fields');
+  });
+
+  describe('recursive expand', () => {
+    it('expands the whole subtree on Cmd/Ctrl-click', async () => {
+      const user = userEvent.setup();
+      render(<JsonTreeViewer json={{ user: { address: { city: 'Berlin' } } }} />);
+
+      // Collapsed: only the top-level `user` row is visible.
+      expect(screen.queryByTestId(rowTestId('user.address'))).not.toBeInTheDocument();
+
+      await user.keyboard('{Control>}');
+      await user.click(screen.getByTestId(rowTestId('user')));
+      await user.keyboard('{/Control}');
+
+      expect(screen.getByTestId(rowTestId('user.address'))).toBeVisible();
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+    });
+
+    it('keeps each expanded level capped at the pager limit', async () => {
+      const user = userEvent.setup();
+      // A nested collection of 12 must still page at 10 after a recursive expand (no DOM explosion).
+      const doc = { logs: Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`f${i}`, i])) };
+      render(<JsonTreeViewer json={doc} />);
+
+      await user.keyboard('{Control>}');
+      await user.click(screen.getByTestId(rowTestId('logs')));
+      await user.keyboard('{/Control}');
+
+      expect(screen.getByTestId(rowTestId('logs.f0'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('logs.f11'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(moreTestId(getNodeId(['logs'])))).toBeVisible();
+    });
+  });
+
   describe('keyboard navigation', () => {
     it('steps from a leaf row into its copy-value button with ArrowRight', async () => {
       render(<JsonTreeViewer json={{ message: 'hello' }} />);
@@ -130,7 +175,7 @@ describe('JsonTreeViewer', () => {
     });
 
     it('steps from a pager row into its first button with ArrowRight', async () => {
-      // 12 fields capped at 10 renders a "Show 2 more fields" pager row.
+      // 12 fields capped at 10 renders a "Show 2 more of 12 fields" pager row.
       const doc = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`field_${i}`, i]));
       render(<JsonTreeViewer json={doc} />);
 
@@ -155,7 +200,7 @@ describe('JsonTreeViewer', () => {
     });
 
     it('moves between the two pager buttons with the Right and Left arrows', async () => {
-      // 25 fields: after one reveal the pager row shows both "Show 5 more" and "Show fewer".
+      // 25 fields: after one reveal the pager row shows both "Show 5 more of 25 fields" and "Show fewer".
       const doc = Object.fromEntries(Array.from({ length: 25 }, (_, i) => [`field_${i}`, i]));
       render(<JsonTreeViewer json={doc} />);
       await userEvent.click(screen.getByTestId(moreTestId()));
@@ -186,6 +231,27 @@ describe('JsonTreeViewer', () => {
       await userEvent.keyboard('{ArrowUp}');
 
       expect(screen.getByTestId('jsonTreeViewerExpandAll')).toHaveFocus();
+    });
+
+    it('moves between the header controls with the Right and Left arrows', async () => {
+      render(<JsonTreeViewer json={{ user: { city: 'Berlin' } }} />);
+
+      screen.getByTestId('jsonTreeViewerExpandAll').focus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('jsonTreeViewerCopyAll')).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(screen.getByTestId('jsonTreeViewerExpandAll')).toHaveFocus();
+    });
+
+    it('steps from the first row up to Copy all when there is no Expand all control', async () => {
+      // A flat document has no expandable collections, so Copy all is the only header control.
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      screen.getByTestId(rowTestId('message')).focus();
+      await userEvent.keyboard('{ArrowUp}');
+
+      expect(screen.getByTestId('jsonTreeViewerCopyAll')).toHaveFocus();
     });
   });
 
@@ -331,6 +397,203 @@ describe('JsonTreeViewer', () => {
     });
   });
 
+  describe('getLeafActions', () => {
+    const twoActions =
+      (onFilterFor: () => void, onFilterOut: () => void): GetLeafActions =>
+      ({ path }) =>
+        [
+          {
+            id: 'filterFor',
+            iconType: 'plusCircle',
+            label: 'Filter for',
+            'data-test-subj': `treeFilterFor-${path.join('.')}`,
+            onClick: onFilterFor,
+          },
+          {
+            id: 'filterOut',
+            iconType: 'minusCircle',
+            label: 'Filter out',
+            'data-test-subj': `treeFilterOut-${path.join('.')}`,
+            onClick: onFilterOut,
+          },
+        ];
+
+    it('renders the host actions after the copy button on a leaf row', () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          getLeafActions={twoActions(jest.fn(), jest.fn())}
+        />
+      );
+
+      const actions = within(screen.getByTestId(rowTestId('message')));
+      expect(actions.getByTestId(copyTestId('message'))).toBeInTheDocument();
+      expect(actions.getByTestId('treeFilterFor-message')).toBeInTheDocument();
+      expect(actions.getByTestId('treeFilterOut-message')).toBeInTheDocument();
+    });
+
+    it('invokes an action onClick when the button is clicked', async () => {
+      const onFilterFor = jest.fn();
+      const onFilterOut = jest.fn();
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          getLeafActions={twoActions(onFilterFor, onFilterOut)}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('treeFilterFor-message'));
+      expect(onFilterFor).toHaveBeenCalledTimes(1);
+      expect(onFilterOut).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByTestId('treeFilterOut-message'));
+      expect(onFilterOut).toHaveBeenCalledTimes(1);
+    });
+
+    it('moves focus across the copy and action buttons with Right/Left arrows, back to the row at the edges', async () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          getLeafActions={twoActions(jest.fn(), jest.fn())}
+        />
+      );
+
+      const row = screen.getByTestId(rowTestId('message'));
+      row.focus();
+
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('treeFilterFor-message')).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('treeFilterOut-message')).toHaveFocus();
+
+      // Past the last action, focus returns to the row.
+      await userEvent.keyboard('{ArrowRight}');
+      expect(row).toHaveFocus();
+
+      // And Left from the first action returns to the row too.
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(row).toHaveFocus();
+    });
+  });
+
+  describe('pinned leaves', () => {
+    it('does not render a lock button unless the host can toggle pins', () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      expect(screen.queryByTestId(lockTestId('message'))).not.toBeInTheDocument();
+    });
+
+    it('renders a lock button after the copy and host actions on a leaf', () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          onTogglePinnedPath={jest.fn()}
+          getLeafActions={() => [
+            {
+              id: 'filterFor',
+              iconType: 'plusCircle',
+              label: 'Filter for',
+              'data-test-subj': 'treeFilterFor-message',
+              onClick: jest.fn(),
+            },
+          ]}
+        />
+      );
+
+      const actions = within(screen.getByTestId(rowTestId('message')));
+      expect(actions.getByTestId(copyTestId('message'))).toBeInTheDocument();
+      expect(actions.getByTestId('treeFilterFor-message')).toBeInTheDocument();
+      expect(actions.getByTestId(lockTestId('message'))).toBeInTheDocument();
+    });
+
+    it('toggles pinning with the leaf path when the lock is clicked', async () => {
+      const onTogglePinnedPath = jest.fn();
+      render(
+        <JsonTreeViewer json={{ message: 'hello' }} onTogglePinnedPath={onTogglePinnedPath} />
+      );
+
+      await userEvent.click(screen.getByTestId(lockTestId('message')));
+
+      expect(onTogglePinnedPath).toHaveBeenCalledTimes(1);
+      expect(onTogglePinnedPath.mock.calls[0][0]).toEqual(['message']);
+    });
+
+    it('expands ancestors so a pinned nested leaf is visible', () => {
+      render(
+        <JsonTreeViewer
+          json={{ user: { address: { city: 'Berlin' } }, org: { name: 'Acme' } }}
+          pinnedNodeIds={new Set([getNodeId(['user', 'address', 'city'])])}
+        />
+      );
+
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+      expect(screen.queryByTestId(rowTestId('org.name'))).not.toBeInTheDocument();
+    });
+
+    it('reveals a pinned leaf hidden past the collection pager budget', () => {
+      const nestedDoc = {
+        logs: Object.fromEntries(
+          Array.from({ length: 15 }, (_, i) => [`field_${i}`, `value_${i}`])
+        ),
+      };
+      render(
+        <JsonTreeViewer
+          json={nestedDoc}
+          pinnedNodeIds={new Set([getNodeId(['logs', 'field_12'])])}
+        />
+      );
+
+      expect(screen.getByTestId(rowTestId('logs.field_12'))).toHaveTextContent('"value_12"');
+    });
+
+    it('marks the lock as pressed when that leaf is pinned', () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          pinnedNodeIds={new Set([getNodeId(['message'])])}
+          onTogglePinnedPath={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId(lockTestId('message'))).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
+
+  describe('copy all', () => {
+    beforeEach(() => copyToClipboardMock.mockClear());
+
+    it('copies the whole document as pretty-printed JSON', async () => {
+      const doc = { user: { name: 'Alice' }, count: 5 };
+      render(<JsonTreeViewer json={doc} />);
+
+      await userEvent.click(screen.getByTestId('jsonTreeViewerCopyAll'));
+
+      expect(copyToClipboardMock).toHaveBeenCalledWith(JSON.stringify(doc, null, 2));
+    });
+
+    it('renders even when there are no expandable collections', () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      expect(screen.getByTestId('jsonTreeViewerCopyAll')).toBeVisible();
+      expect(screen.queryByTestId('jsonTreeViewerExpandAll')).not.toBeInTheDocument();
+    });
+
+    it('confirms the copy by swapping the icon to a success check', async () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+      const button = screen.getByTestId('jsonTreeViewerCopyAll');
+      expect(button.querySelector('[data-euiicon-type="copy"]')).toBeInTheDocument();
+
+      await userEvent.click(button);
+
+      expect(button.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
+      expect(button.querySelector('[data-euiicon-type="copy"]')).not.toBeInTheDocument();
+    });
+  });
+
   describe('wrapLines', () => {
     it('applies distinct container styling when wrapping is disabled', () => {
       const { rerender } = render(<JsonTreeViewer json={{ message: 'hello' }} wrapLines />);
@@ -340,6 +603,91 @@ describe('JsonTreeViewer', () => {
       const noWrapClassName = screen.getByRole('tree').parentElement?.className;
 
       expect(noWrapClassName).not.toEqual(wrappingClassName);
+    });
+  });
+
+  describe('defaultExpandedLevels', () => {
+    const nested = { user: { address: { city: 'Berlin' } } };
+
+    it('leaves everything collapsed by default', () => {
+      render(<JsonTreeViewer json={nested} />);
+
+      expect(screen.queryByTestId(rowTestId('user.address'))).not.toBeInTheDocument();
+    });
+
+    it('seeds a fresh cell opened to the requested number of levels', () => {
+      render(<JsonTreeViewer json={nested} defaultExpandedLevels={1} />);
+
+      // Level 1 opens the top-level `user`, revealing `address` — which itself stays collapsed.
+      expect(screen.getByTestId(rowTestId('user.address'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('user.address.city'))).not.toBeInTheDocument();
+    });
+
+    it('opens deeper nesting as the level increases', () => {
+      render(<JsonTreeViewer json={nested} defaultExpandedLevels={2} />);
+
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+    });
+
+    it('re-seeds an already-rendered cell when the level changes', () => {
+      const { rerender } = render(<JsonTreeViewer json={nested} defaultExpandedLevels={0} />);
+      expect(screen.queryByTestId(rowTestId('user.address'))).not.toBeInTheDocument();
+
+      rerender(<JsonTreeViewer json={nested} defaultExpandedLevels={2} />);
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+    });
+
+    it('tags the mirrored state with the level it was seeded at', () => {
+      let lastState: TreeExpansionState | undefined;
+      render(
+        <JsonTreeViewer
+          json={nested}
+          defaultExpandedLevels={1}
+          onStateChange={(state) => (lastState = state)}
+        />
+      );
+
+      expect(lastState?.seedLevel).toBe(1);
+    });
+
+    it('restores the user’s expansions on remount when the seed level is unchanged', async () => {
+      const doc = { user: { name: 'Alice' }, org: { name: 'Acme' } };
+      let lastState: TreeExpansionState | undefined;
+      const { unmount } = render(
+        <JsonTreeViewer
+          json={doc}
+          defaultExpandedLevels={0}
+          onStateChange={(state) => (lastState = state)}
+        />
+      );
+
+      // The level-0 seed leaves `org` closed; the user opens it manually.
+      await userEvent.click(screen.getByTestId(rowTestId('org')));
+      expect(lastState?.seedLevel).toBe(0);
+
+      // A fresh instance at the same level restores that manual expansion.
+      unmount();
+      render(<JsonTreeViewer json={doc} defaultExpandedLevels={0} initialState={lastState} />);
+      expect(screen.getByTestId(rowTestId('org.name'))).toHaveTextContent('"Acme"');
+    });
+
+    it('ignores stored state seeded at a different level and re-seeds', () => {
+      const staleState: TreeExpansionState = {
+        expanded: new Set(),
+        revealed: new Map(),
+        seedLevel: 0,
+      };
+
+      render(
+        <JsonTreeViewer
+          json={{ user: { name: 'Alice' } }}
+          defaultExpandedLevels={1}
+          initialState={staleState}
+        />
+      );
+
+      // The level-1 seed wins over the stale (collapsed) state.
+      expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
     });
   });
 });

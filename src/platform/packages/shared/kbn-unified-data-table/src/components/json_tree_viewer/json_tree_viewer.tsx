@@ -7,17 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useMemo, type ReactNode } from 'react';
+import React, { memo, useCallback, useMemo, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from '@elastic/eui';
 import {
   buildNodes,
   buildRows,
   collectExpandableIds,
+  MAX_EXPANDED_ROWS,
+  rootToJsonString,
   type FormatValue,
+  type GetLeafActions,
   type JsonValue,
 } from './tree_model';
-import { collectSearchMatches, EMPTY_SEARCH_MATCHES } from './doc_scan';
+import {
+  collectPinnedMatches,
+  collectSearchMatches,
+  EMPTY_SEARCH_MATCHES,
+  mergeSearchMatches,
+} from './doc_scan';
 import {
   useRovingTreeNavigation,
   useTreeExpansion,
@@ -25,13 +33,14 @@ import {
 } from './use_tree_interaction';
 import {
   ClosingBracketRow,
+  CopyAllButton,
   EmptyRootPlaceholder,
   NodeRowView,
   PagerRowView,
   treeStyles,
 } from './tree_rows';
 
-export type { FormatValue, JsonValue } from './tree_model';
+export type { FormatValue, GetLeafActions, JsonTreeRowAction, JsonValue } from './tree_model';
 export type { TreeExpansionState } from './use_tree_interaction';
 
 export interface JsonTreeViewerProps {
@@ -49,10 +58,21 @@ export interface JsonTreeViewerProps {
    * Function called for each leaf node to render its value. Used by highlighting.
    */
   formatValue?: FormatValue;
+  /** Actions appended after the copy button at each leaf node. */
+  getLeafActions?: GetLeafActions;
   /** Optional extra content rendered in the tree's header row, next to the expand/collapse control. */
   extraHeaderContent?: ReactNode;
   /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
   wrapLines?: boolean;
+  /** Nested levels opened when a fresh cell is seeded (0 = fully collapsed). Defaults to 0. */
+  defaultExpandedLevels?: number;
+  /**
+   * Node ids whose path should stay expanded/revealed (e.g. leaves locked across every table row).
+   * Unioned with search-driven expansion; not persisted as the user's own expand/collapse state.
+   */
+  pinnedNodeIds?: ReadonlySet<string>;
+  /** When set, each leaf renders a lock button that toggles pinning that field's path. */
+  onTogglePinnedPath?: (path: readonly string[]) => void;
 }
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
@@ -61,28 +81,50 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   onStateChange,
   expandNodesContainingTerm,
   formatValue,
+  getLeafActions,
   extraHeaderContent,
   wrapLines = true,
+  defaultExpandedLevels = 0,
+  pinnedNodeIds,
+  onTogglePinnedPath,
 }: JsonTreeViewerProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
 
   const nodes = useMemo(() => buildNodes(json), [json]);
+
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
+  // The subset opened when seeding a fresh cell: the same budgeted, breadth-first set capped to
+  // `defaultExpandedLevels` nested levels.
+  const seedExpandedIds = useMemo(
+    () => collectExpandableIds(nodes, MAX_EXPANDED_ROWS, defaultExpandedLevels),
+    [nodes, defaultExpandedLevels]
+  );
 
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
   const searchMatches = useMemo(
     () => (searchTermLower ? collectSearchMatches(nodes, searchTermLower) : EMPTY_SEARCH_MATCHES),
     [nodes, searchTermLower]
   );
+  const pinnedMatches = useMemo(
+    () => (pinnedNodeIds?.size ? collectPinnedMatches(nodes, pinnedNodeIds) : EMPTY_SEARCH_MATCHES),
+    [nodes, pinnedNodeIds]
+  );
+  const autoMatches = useMemo(
+    () => mergeSearchMatches(searchMatches, pinnedMatches),
+    [searchMatches, pinnedMatches]
+  );
 
   const expansion = useTreeExpansion({
     initialState,
     onStateChange,
-    expandedBySearchNodes: searchMatches.containers,
+    expandedBySearchNodes: autoMatches.containers,
     expandableIds,
+    seedExpandedIds,
+    defaultExpandedLevels,
   });
 
   const rootType = useMemo(() => (Array.isArray(json) ? 'array' : 'object'), [json]);
+  const copyAllText = useCallback(() => rootToJsonString(nodes, rootType), [nodes, rootType]);
 
   const rows = useMemo(
     () =>
@@ -91,49 +133,69 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
         rootType,
         expansion.effectiveExpanded,
         expansion.revealed,
-        searchMatches.reveals
+        autoMatches.reveals
       ),
-    [nodes, rootType, expansion.effectiveExpanded, expansion.revealed, searchMatches.reveals]
+    [nodes, rootType, expansion.effectiveExpanded, expansion.revealed, autoMatches.reveals]
   );
 
   const nav = useRovingTreeNavigation(rows, expansion);
 
-  const { hasControls, isAllExpanded, expandAll, collapseAll, toggle, revealMore, showFewer } =
-    expansion;
-  const { activeRowId, setActive, registerRow, onRowKeyDown, onControlKeyDown, expandAllRef } = nav;
+  const {
+    hasControls,
+    isAllExpanded,
+    expandAll,
+    collapseAll,
+    toggle,
+    expandIds,
+    revealMore,
+    showFewer,
+  } = expansion;
+  const { activeRowId, setActive, registerRow, onRowKeyDown, onControlKeyDown, firstControlRef } =
+    nav;
 
   return (
     <>
-      {(hasControls || extraHeaderContent) && (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          {hasControls && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                buttonRef={expandAllRef}
-                flush="left"
-                iconType={isAllExpanded ? 'fold' : 'unfold'}
-                iconSize="s"
-                onClick={isAllExpanded ? collapseAll : expandAll}
-                onKeyDown={onControlKeyDown}
-                size="xs"
-                color="text"
-                data-test-subj="jsonTreeViewerExpandAll"
-              >
-                {isAllExpanded
-                  ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {
-                      defaultMessage: 'Collapse all',
-                    })
-                  : i18n.translate('unifiedDataTable.jsonTreeViewer.expandAll', {
-                      defaultMessage: 'Expand all',
-                    })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          {extraHeaderContent && <EuiFlexItem grow={false}>{extraHeaderContent}</EuiFlexItem>}
-        </EuiFlexGroup>
-      )}
+      <EuiFlexGroup
+        className="jsonTreeViewerHeader"
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+      >
+        {hasControls && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              buttonRef={firstControlRef}
+              className="jsonTreeViewerHeaderControl"
+              flush="left"
+              iconType={isAllExpanded ? 'fold' : 'unfold'}
+              iconSize="s"
+              onClick={isAllExpanded ? collapseAll : expandAll}
+              onKeyDown={onControlKeyDown}
+              size="xs"
+              color="text"
+              data-test-subj="jsonTreeViewerExpandAll"
+            >
+              {isAllExpanded
+                ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {
+                    defaultMessage: 'Collapse all',
+                  })
+                : i18n.translate('unifiedDataTable.jsonTreeViewer.expandAll', {
+                    defaultMessage: 'Expand all',
+                  })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <CopyAllButton
+            getText={copyAllText}
+            onKeyDown={onControlKeyDown}
+            buttonRef={hasControls ? undefined : firstControlRef}
+          />
+        </EuiFlexItem>
+        {extraHeaderContent && <EuiFlexItem grow={false}>{extraHeaderContent}</EuiFlexItem>}
+      </EuiFlexGroup>
 
-      <div css={[styles.wrapper, !wrapLines && styles.noWrap]}>
+      <div css={[styles.wrapper, wrapLines ? styles.wrap : styles.noWrap]}>
         <div
           role="tree"
           aria-label={i18n.translate('unifiedDataTable.jsonTreeViewer.treeAriaLabel', {
@@ -168,10 +230,21 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                   row={row}
                   isActive={row.node.id === activeRowId}
                   rowRef={registerRow(row.node.id)}
-                  onActivate={() => row.hasChildren && toggle(row.node.id)}
+                  onActivate={(event) => {
+                    if (!row.hasChildren) return;
+                    // Cmd/Ctrl-click expands the whole subtree
+                    if (event.metaKey || event.ctrlKey) {
+                      expandIds(collectExpandableIds([row.node]));
+                    } else {
+                      toggle(row.node.id);
+                    }
+                  }}
                   onFocus={() => setActive(row.node.id)}
                   onKeyDown={(event) => onRowKeyDown(event, row)}
                   formatValue={formatValue}
+                  getLeafActions={getLeafActions}
+                  pinnedNodeIds={pinnedNodeIds}
+                  onTogglePinnedPath={onTogglePinnedPath}
                 />
               );
             })

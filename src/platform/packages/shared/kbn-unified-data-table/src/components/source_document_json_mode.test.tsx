@@ -8,16 +8,27 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableColumnsMeta, EsHitRecord } from '@kbn/discover-utils/types';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { SourceDocumentJsonMode } from './source_document_json_mode';
+import { UnifiedDataTableContext } from '../table_context';
+import { dataTableContextMock } from '../../__mocks__/table_context';
+import { getNodeId } from './json_tree_viewer/tree_model';
 import type { JsonModeSettings } from '../types';
 import { MAX_TREE_VALUES } from '../utils/build_document_tree';
+import { resetJsonTreePins } from './json_tree_viewer/pin_store';
+
+const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
+const filterForTestId = (path: string) => `jsonTreeViewerFilterFor-${path}`;
+const filterOutTestId = (path: string) => `jsonTreeViewerFilterOut-${path}`;
+const lockTestId = (path: string) => `jsonTreeViewerLock-${getNodeId(path.split('.'))}`;
 
 const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
@@ -34,18 +45,26 @@ const renderCell = (
     inTableSearch,
     jsonModeSettings,
     selectedColumns,
+    onFilter,
+    hideFilteringOnComputedColumns,
+    columnsMeta,
+    isPlainRecord,
   }: {
     shouldShowFieldHandler?: (fieldName: string) => boolean;
     inTableSearch?: { term: string; isCounting: boolean };
     jsonModeSettings?: JsonModeSettings;
     selectedColumns?: string[];
+    onFilter?: DocViewFilterFn;
+    hideFilteringOnComputedColumns?: boolean;
+    columnsMeta?: DataTableColumnsMeta;
+    isPlainRecord?: boolean;
   } = {}
 ) => {
-  const cell = (
+  let cell = (
     <SourceDocumentJsonMode
       row={buildDataTableRecord(hit, dataViewMock)}
       dataView={dataViewMock}
-      columnsMeta={undefined}
+      columnsMeta={columnsMeta}
       shouldShowFieldHandler={shouldShowFieldHandler}
       fieldFormats={fieldFormats}
       jsonModeSettings={jsonModeSettings}
@@ -53,20 +72,39 @@ const renderCell = (
     />
   );
 
-  return renderWithI18n(
-    inTableSearch ? (
+  if (inTableSearch) {
+    cell = (
       <InTableSearchCellContext.Provider
         value={{ inTableSearchTerm: inTableSearch.term, isCounting: inTableSearch.isCounting }}
       >
         {cell}
       </InTableSearchCellContext.Provider>
-    ) : (
-      cell
-    )
-  );
+    );
+  }
+
+  if (onFilter) {
+    cell = (
+      <UnifiedDataTableContext.Provider
+        value={{
+          ...dataTableContextMock,
+          dataView: dataViewMock,
+          onFilter,
+          hideFilteringOnComputedColumns,
+          isPlainRecord,
+        }}
+      >
+        {cell}
+      </UnifiedDataTableContext.Provider>
+    );
+  }
+
+  return renderWithI18n(cell);
 };
 
 describe('SourceDocumentJsonMode', () => {
+  beforeEach(() => {
+    resetJsonTreePins();
+  });
   it('warns when the document is too large and gets truncated', () => {
     // One field past the budget forces flattenedToNestedDocument to cap the document.
     const fields = Object.fromEntries(
@@ -110,6 +148,223 @@ describe('SourceDocumentJsonMode', () => {
 
     expect(container.textContent).toContain('present');
     expect(container.textContent).not.toContain('empty');
+  });
+
+  describe('expandedLevels setting', () => {
+    const nestedHit: EsHitRecord = {
+      _id: '1',
+      _index: 'test',
+      _source: { user: { name: 'Alice' } },
+    };
+
+    it('seeds the tree expanded to the configured number of levels', () => {
+      renderCell(nestedHit, { jsonModeSettings: { expandedLevels: 1 } });
+
+      expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
+    });
+
+    it('leaves nested collections collapsed when the setting is unset', () => {
+      renderCell(nestedHit);
+
+      expect(screen.getByTestId(rowTestId('user'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
+    });
+  });
+
+  describe('filter for / filter out leaf actions', () => {
+    it('renders filter buttons on a filterable leaf and calls onFilter with the field, value and mode', async () => {
+      const onFilter = jest.fn();
+      renderCell({ _id: '1', _index: 'test', _source: { bytes: 100 } }, { onFilter });
+
+      await userEvent.click(screen.getByTestId(filterForTestId('bytes')));
+      expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 100, '+');
+
+      await userEvent.click(screen.getByTestId(filterOutTestId('bytes')));
+      expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 100, '-');
+    });
+
+    it('does not render filter buttons for a non-filterable field', () => {
+      // `message` is not searchable in the mock data view, so it is not filterable.
+      renderCell(
+        { _id: '1', _index: 'test', _source: { message: 'hello' } },
+        { onFilter: jest.fn() }
+      );
+
+      expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+      expect(screen.queryByTestId(filterForTestId('message'))).not.toBeInTheDocument();
+      expect(screen.queryByTestId(filterOutTestId('message'))).not.toBeInTheDocument();
+    });
+
+    it('does not render filter buttons for a field that is absent from the data view', () => {
+      renderCell(
+        { _id: '1', _index: 'test', _source: { unknownField: 'x' } },
+        { onFilter: jest.fn() }
+      );
+
+      expect(screen.queryByTestId(filterForTestId('unknownField'))).not.toBeInTheDocument();
+    });
+
+    it('does not render filter buttons when no onFilter is provided', () => {
+      renderCell({ _id: '1', _index: 'test', _source: { bytes: 100 } });
+
+      expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+      expect(screen.queryByTestId(filterForTestId('bytes'))).not.toBeInTheDocument();
+    });
+
+    it('filters on the exact clicked element of a multi-value field', async () => {
+      const onFilter = jest.fn();
+      renderCell({ _id: '1', _index: 'test', _source: { bytes: [100, 200] } }, { onFilter });
+
+      await userEvent.click(screen.getByTestId(rowTestId('bytes')));
+
+      await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
+      expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 200, '+');
+    });
+
+    it('wraps a multi-value element as an array in ES|QL so the query builder can use MV_CONTAINS', async () => {
+      const onFilter = jest.fn();
+      renderCell(
+        { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
+        { onFilter, isPlainRecord: true }
+      );
+
+      await userEvent.click(screen.getByTestId(rowTestId('bytes')));
+
+      await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
+      expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), [200], '+');
+    });
+
+    it('renders filter buttons for an ES|QL computed column resolved from column meta', async () => {
+      const onFilter: jest.MockedFunction<DocViewFilterFn> = jest.fn();
+      renderCell(
+        { _id: '1', _index: 'test', _source: { computedField: 42 } },
+        { onFilter, columnsMeta: { computedField: { type: 'number' } } }
+      );
+
+      expect(screen.getByTestId(filterForTestId('computedField'))).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId(filterForTestId('computedField')));
+      const [, value, mode] = onFilter.mock.calls[0];
+      expect(value).toBe(42);
+      expect(mode).toBe('+');
+    });
+
+    it('suppresses filter buttons on a computed column when hideFilteringOnComputedColumns is set', () => {
+      renderCell(
+        { _id: '1', _index: 'test', _source: { computedField: 42 } },
+        {
+          onFilter: jest.fn(),
+          columnsMeta: { computedField: { type: 'number' } },
+          hideFilteringOnComputedColumns: true,
+        }
+      );
+
+      expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+      expect(screen.queryByTestId(filterForTestId('computedField'))).not.toBeInTheDocument();
+    });
+  });
+
+  describe('lock expansion across rows', () => {
+    it('renders a lock button on every leaf, including fields that cannot be filtered', () => {
+      renderCell({ _id: '1', _index: 'test', _source: { message: 'hello' } });
+
+      expect(screen.getByTestId(lockTestId('message'))).toBeInTheDocument();
+    });
+
+    it('expands a nested leaf in every rendered cell when it is locked', async () => {
+      const hitA: EsHitRecord = {
+        _id: 'a',
+        _index: 'test',
+        _source: { user: { city: 'Berlin' } },
+      };
+      const hitB: EsHitRecord = {
+        _id: 'b',
+        _index: 'test',
+        _source: { user: { city: 'Paris' } },
+      };
+
+      renderWithI18n(
+        <>
+          <div data-test-subj="cell-a">
+            <SourceDocumentJsonMode
+              row={buildDataTableRecord(hitA, dataViewMock)}
+              dataView={dataViewMock}
+              columnsMeta={undefined}
+              shouldShowFieldHandler={() => true}
+              fieldFormats={fieldFormats}
+            />
+          </div>
+          <div data-test-subj="cell-b">
+            <SourceDocumentJsonMode
+              row={buildDataTableRecord(hitB, dataViewMock)}
+              dataView={dataViewMock}
+              columnsMeta={undefined}
+              shouldShowFieldHandler={() => true}
+              fieldFormats={fieldFormats}
+            />
+          </div>
+        </>
+      );
+
+      const cellA = screen.getByTestId('cell-a');
+      const cellB = screen.getByTestId('cell-b');
+
+      expect(within(cellB).queryByTestId(rowTestId('user.city'))).not.toBeInTheDocument();
+
+      await userEvent.click(within(cellA).getByTestId(rowTestId('user')));
+      await userEvent.click(within(cellA).getByTestId(lockTestId('user.city')));
+
+      expect(within(cellB).getByTestId(rowTestId('user.city'))).toHaveTextContent('"Paris"');
+      expect(within(cellA).getByTestId(lockTestId('user.city'))).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
+
+    it('collapses the pinned path in other rows when the lock is released', async () => {
+      const hitA: EsHitRecord = {
+        _id: 'a',
+        _index: 'test',
+        _source: { user: { city: 'Berlin' } },
+      };
+      const hitB: EsHitRecord = {
+        _id: 'b',
+        _index: 'test',
+        _source: { user: { city: 'Paris' } },
+      };
+
+      renderWithI18n(
+        <>
+          <div data-test-subj="cell-a">
+            <SourceDocumentJsonMode
+              row={buildDataTableRecord(hitA, dataViewMock)}
+              dataView={dataViewMock}
+              columnsMeta={undefined}
+              shouldShowFieldHandler={() => true}
+              fieldFormats={fieldFormats}
+            />
+          </div>
+          <div data-test-subj="cell-b">
+            <SourceDocumentJsonMode
+              row={buildDataTableRecord(hitB, dataViewMock)}
+              dataView={dataViewMock}
+              columnsMeta={undefined}
+              shouldShowFieldHandler={() => true}
+              fieldFormats={fieldFormats}
+            />
+          </div>
+        </>
+      );
+
+      const cellA = screen.getByTestId('cell-a');
+      const cellB = screen.getByTestId('cell-b');
+
+      await userEvent.click(within(cellA).getByTestId(rowTestId('user')));
+      await userEvent.click(within(cellA).getByTestId(lockTestId('user.city')));
+      await userEvent.click(within(cellA).getByTestId(lockTestId('user.city')));
+
+      expect(within(cellB).queryByTestId(rowTestId('user.city'))).not.toBeInTheDocument();
+    });
   });
 
   describe('in-table search counting pass', () => {

@@ -32,6 +32,9 @@ export interface TreeExpansionState {
   expanded: ReadonlySet<string>;
   // User clicked show more to see more hidden siblings.
   revealed: ReadonlyMap<string, number>;
+  // The `defaultExpandedLevels` this state was seeded at. A virtualization remount at the same level
+  // restores the user's own expansions; a changed setting re-seeds instead of restoring.
+  seedLevel?: number;
 }
 
 interface UseTreeExpansionArgs {
@@ -39,6 +42,10 @@ interface UseTreeExpansionArgs {
   onStateChange?: (state: TreeExpansionState) => void;
   expandedBySearchNodes: ReadonlySet<string>;
   expandableIds: string[];
+  // Collections to open when seeding a fresh cell (every collection up to `defaultExpandedLevels`).
+  seedExpandedIds: string[];
+  // How many nested levels to open by default; also tags the mirrored state so a change re-seeds.
+  defaultExpandedLevels: number;
 }
 
 export interface TreeExpansion {
@@ -49,6 +56,7 @@ export interface TreeExpansion {
   isAllExpanded: boolean;
   toggle: (id: string) => void;
   setExpandedFor: (id: string, shouldExpand: boolean) => void;
+  expandIds: (ids: string[]) => void;
   revealMore: (id: string) => void;
   showFewer: (id: string) => void;
   expandAll: () => void;
@@ -60,20 +68,42 @@ export const useTreeExpansion = ({
   onStateChange,
   expandedBySearchNodes,
   expandableIds,
+  seedExpandedIds,
+  defaultExpandedLevels,
 }: UseTreeExpansionArgs): TreeExpansion => {
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(
-    () => initialState?.expanded ?? new Set()
+  // Restore the stored state only when it was seeded at the current level (a virtualization remount);
+  // otherwise seed a fresh tree opened to `defaultExpandedLevels`.
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() =>
+    initialState && initialState.seedLevel === defaultExpandedLevels
+      ? initialState.expanded
+      : new Set(seedExpandedIds)
   );
-  const [revealed, setRevealed] = useState<ReadonlyMap<string, number>>(
-    () => initialState?.revealed ?? new Map()
+  const [revealed, setRevealed] = useState<ReadonlyMap<string, number>>(() =>
+    initialState && initialState.seedLevel === defaultExpandedLevels
+      ? initialState.revealed
+      : new Map()
   );
 
-  // Mirror expand/reveal state to the host on every change so it can restore the tree after a remount.
+  // Mirror expand/reveal state to the host on every change so it can restore the tree after a remount,
+  // tagged with the level it was seeded at (read via a ref so the tag never drives the effect itself).
   const onStateChangeRef = useRef(onStateChange);
   onStateChangeRef.current = onStateChange;
+  const seedLevelRef = useRef(defaultExpandedLevels);
+  seedLevelRef.current = defaultExpandedLevels;
   useEffect(() => {
-    onStateChangeRef.current?.({ expanded, revealed });
+    onStateChangeRef.current?.({ expanded, revealed, seedLevel: seedLevelRef.current });
   }, [expanded, revealed]);
+
+  // Snap every cell to the new depth when the setting changes: re-seed expansion (discarding manual
+  // expand/collapse). The ref guards the initial mount and re-renders where the level is unchanged
+  // (e.g. toggling "Hide nulls" rebuilds the tree but must not wipe the user's expansions).
+  const appliedLevelRef = useRef(defaultExpandedLevels);
+  useEffect(() => {
+    if (appliedLevelRef.current === defaultExpandedLevels) return;
+    appliedLevelRef.current = defaultExpandedLevels;
+    setExpanded(new Set(seedExpandedIds));
+    setRevealed(new Map());
+  }, [defaultExpandedLevels, seedExpandedIds]);
 
   // The user's own expansion unioned with the search-driven set. The search set is never persisted
   // (the write-through effect above only mirrors `expanded`/`revealed`), so a query never pollutes
@@ -98,6 +128,19 @@ export const useTreeExpansion = ({
     (id: string) => setExpandedFor(id, !effectiveExpanded.has(id)),
     [effectiveExpanded, setExpandedFor]
   );
+
+  const expandIds = useCallback((ids: string[]) => {
+    setExpanded((prev) => {
+      let next: Set<string> | undefined;
+      for (const id of ids) {
+        if (!prev.has(id)) {
+          next = next ?? new Set(prev);
+          next.add(id);
+        }
+      }
+      return next ?? prev;
+    });
+  }, []);
 
   const revealMore = useCallback((id: string) => {
     setRevealed((prev) => {
@@ -129,6 +172,7 @@ export const useTreeExpansion = ({
     isAllExpanded,
     toggle,
     setExpandedFor,
+    expandIds,
     revealMore,
     showFewer,
     expandAll,
@@ -139,7 +183,6 @@ export const useTreeExpansion = ({
 // The slice of `TreeExpansion` the keyboard model drives (so the whole expansion object can be
 // passed straight in).
 interface RovingNavActions {
-  hasControls: boolean;
   toggle: (id: string) => void;
   setExpandedFor: (id: string, shouldExpand: boolean) => void;
 }
@@ -150,12 +193,14 @@ export interface RovingNav {
   registerRow: (id: string) => (element: HTMLDivElement | null) => void;
   onRowKeyDown: (event: KeyboardEvent<HTMLDivElement>, row: NodeRow | PagerRow) => void;
   onControlKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
-  expandAllRef: MutableRefObject<HTMLButtonElement | null>;
+  // The first header control (Expand/Collapse-all when present, otherwise Copy all): the target
+  // when ArrowUp steps up out of the first row.
+  firstControlRef: MutableRefObject<HTMLButtonElement | null>;
 }
 
 export const useRovingTreeNavigation = (
   rows: RenderRow[],
-  { hasControls, toggle, setExpandedFor }: RovingNavActions
+  { toggle, setExpandedFor }: RovingNavActions
 ): RovingNav => {
   const orderedIds = useMemo(() => rows.filter(isFocusable).map(rowKey), [rows]);
   const orderedIdSet = useMemo(() => new Set(orderedIds), [orderedIds]);
@@ -166,7 +211,7 @@ export const useRovingTreeNavigation = (
 
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
   const refCallbacks = useRef(new Map<string, (element: HTMLDivElement | null) => void>());
-  const expandAllRef = useRef<HTMLButtonElement | null>(null);
+  const firstControlRef = useRef<HTMLButtonElement | null>(null);
 
   // A stable ref callback per row id, so React doesn't detach/attach the node every render.
   const registerRow = useCallback((id: string) => {
@@ -202,8 +247,8 @@ export const useRovingTreeNavigation = (
           break;
         case 'ArrowUp':
           claim();
-          // From the first row, step up to the Expand/Collapse-all control above the tree.
-          if (index === 0 && hasControls) expandAllRef.current?.focus();
+          // From the first row, step up to the first header control above the tree.
+          if (index === 0) firstControlRef.current?.focus();
           else focusRow(orderedIds[index - 1]);
           break;
         case 'Home':
@@ -225,10 +270,10 @@ export const useRovingTreeNavigation = (
           } else if (row.hasChildren && row.isExpanded) {
             focusRow(orderedIds[index + 1]);
           } else {
-            // Leaf row: step into its copy-value button, if it has one.
+            // Leaf row: step into its first trailing action (copy, then any host-defined actions).
             rowRefs.current
               .get(rowKey(row))
-              ?.querySelector<HTMLElement>('.jsonTreeViewerCopyButton')
+              ?.querySelector<HTMLElement>('.jsonTreeViewerRowAction')
               ?.focus();
           }
           break;
@@ -254,14 +299,25 @@ export const useRovingTreeNavigation = (
           break;
       }
     },
-    [orderedIds, focusRow, setExpandedFor, toggle, hasControls]
+    [orderedIds, focusRow, setExpandedFor, toggle]
   );
 
-  // The Expand/Collapse-all control joins the tree's keyboard navigation: ArrowDown steps into the
-  // first row, Escape returns to the grid cell, and its keys never leak to the grid's cell nav.
+  // The header controls join the tree's keyboard navigation: Left/Right move between them, ArrowDown
+  // steps into the first row, Escape returns to the grid cell, and their keys never leak to the
+  // grid's cell nav.
   const onControlKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
-      if (event.key.startsWith('Arrow')) {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        event.stopPropagation();
+        const header = event.currentTarget.closest<HTMLElement>('.jsonTreeViewerHeader');
+        const controls = header
+          ? Array.from(header.querySelectorAll<HTMLElement>('.jsonTreeViewerHeaderControl'))
+          : [];
+        const index = controls.indexOf(event.currentTarget);
+        const next = event.key === 'ArrowRight' ? controls[index + 1] : controls[index - 1];
+        next?.focus();
+      } else if (event.key.startsWith('Arrow')) {
         event.preventDefault();
         event.stopPropagation();
         if (event.key === 'ArrowDown') focusRow(orderedIds[0]);
@@ -278,6 +334,6 @@ export const useRovingTreeNavigation = (
     registerRow,
     onRowKeyDown,
     onControlKeyDown,
-    expandAllRef,
+    firstControlRef,
   };
 };

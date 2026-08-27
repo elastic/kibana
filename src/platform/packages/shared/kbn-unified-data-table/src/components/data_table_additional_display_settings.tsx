@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiRangeProps } from '@elastic/eui';
-import { EuiButtonGroup, EuiFormRow, EuiHorizontalRule, EuiRange, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFieldNumber,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiRange,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import type { RowHeightSettingsProps } from './row_height_settings';
@@ -21,6 +28,9 @@ export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
 export const RANGE_MIN_SAMPLE_SIZE = 10; // it's necessary to be able to use `step={10}` configuration for EuiRange
 export const RANGE_STEP_SAMPLE_SIZE = 10;
+
+export const MIN_EXPANDED_LEVELS = 0;
+export const MAX_EXPANDED_LEVELS = 5;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   rowHeight: RowHeightSettingsProps['rowHeight'];
@@ -149,6 +159,61 @@ const OnOffButtonGroup = ({
   );
 };
 
+const clampExpandedLevels = (value: number) =>
+  Math.min(Math.max(Math.round(value), MIN_EXPANDED_LEVELS), MAX_EXPANDED_LEVELS);
+
+const ExpandedLevelsSetting = ({
+  expandedLevels,
+  onChangeExpandedLevels,
+}: {
+  expandedLevels: number;
+  onChangeExpandedLevels: (levels: number) => void;
+}) => {
+  const [activeLevels, setActiveLevels] = useState<number | ''>(expandedLevels);
+
+  useEffect(() => {
+    setActiveLevels(expandedLevels); // reset local state when the stored value changes
+  }, [expandedLevels]);
+
+  const debouncedOnChange = useMemo(
+    () => debounce(onChangeExpandedLevels, 300, { leading: false, trailing: true }),
+    [onChangeExpandedLevels]
+  );
+
+  const onChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      if (value === '') {
+        setActiveLevels(''); // allow clearing the field mid-edit without committing
+        return;
+      }
+      const clamped = clampExpandedLevels(Number(value));
+      setActiveLevels(clamped);
+      debouncedOnChange(clamped);
+    },
+    [debouncedOnChange]
+  );
+
+  const expandedLevelsLabel = i18n.translate('unifiedDataTable.expandedLevelsLabel', {
+    defaultMessage: 'Expanded levels',
+  });
+
+  return (
+    <EuiFormRow label={expandedLevelsLabel} display="columnCompressed">
+      <EuiFieldNumber
+        compressed
+        fullWidth
+        min={MIN_EXPANDED_LEVELS}
+        max={MAX_EXPANDED_LEVELS}
+        step={1}
+        value={activeLevels}
+        onChange={onChange}
+        data-test-subj="unifiedDataTableExpandedLevelsInput"
+      />
+    </EuiFormRow>
+  );
+};
+
 const JsonModeDisplaySettings = ({
   jsonModeSettings,
   onChangeJsonModeSettings,
@@ -158,6 +223,7 @@ const JsonModeDisplaySettings = ({
 }) => {
   const hideNulls = jsonModeSettings.hideNulls ?? false;
   const wrapLines = jsonModeSettings.wrapLines ?? true;
+  const expandedLevels = jsonModeSettings.expandedLevels ?? 1;
 
   const hideNullsLabel = i18n.translate('unifiedDataTable.hideNullsLabel', {
     defaultMessage: 'Hide nulls',
@@ -167,8 +233,22 @@ const JsonModeDisplaySettings = ({
     defaultMessage: 'Wrap lines',
   });
 
+  // Keep a stable callback that always merges into the latest settings, so the debounced number
+  // input never fires with a stale `jsonModeSettings`.
+  const settingsRef = useRef(jsonModeSettings);
+  settingsRef.current = jsonModeSettings;
+  const onChangeExpandedLevels = useCallback(
+    (levels: number) =>
+      onChangeJsonModeSettings?.({ ...settingsRef.current, expandedLevels: levels }),
+    [onChangeJsonModeSettings]
+  );
+
   return (
     <>
+      <ExpandedLevelsSetting
+        expandedLevels={expandedLevels}
+        onChangeExpandedLevels={onChangeExpandedLevels}
+      />
       <OnOffButtonGroup
         label={hideNullsLabel}
         checked={hideNulls}

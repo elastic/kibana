@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDocumentText, collectSearchMatches } from './doc_scan';
+import {
+  getDocumentText,
+  collectSearchMatches,
+  collectPinnedMatches,
+  mergeSearchMatches,
+} from './doc_scan';
 import { buildNodes, getNodeId, ROOT_ID } from './tree_model';
 
 describe('getDocumentText', () => {
@@ -77,5 +82,61 @@ describe('collectSearchMatches', () => {
   it('does not treat array indexes as searchable keys', () => {
     const nodes = buildNodes({ tags: ['error', 'warn'] });
     expect(collectSearchMatches(nodes, '0').containers.size).toBe(0);
+  });
+});
+
+describe('collectPinnedMatches', () => {
+  it('expands every ancestor of a pinned nested leaf', () => {
+    const nodes = buildNodes({ user: { address: { city: 'Berlin' } }, org: { name: 'Acme' } });
+    const matches = collectPinnedMatches(nodes, new Set([getNodeId(['user', 'address', 'city'])]));
+
+    expect([...matches.containers]).toEqual([getNodeId(['user', 'address']), getNodeId(['user'])]);
+  });
+
+  it('returns an empty plan when nothing is pinned', () => {
+    const nodes = buildNodes({ user: { city: 'Berlin' } });
+    expect(collectPinnedMatches(nodes, new Set()).containers.size).toBe(0);
+  });
+
+  it('reveals past the pager budget when a pinned leaf sits deeper than INITIAL_CHILDREN', () => {
+    const nodes = buildNodes({
+      logs: Object.fromEntries(Array.from({ length: 15 }, (_, i) => [`field_${i}`, `value_${i}`])),
+    });
+    const matches = collectPinnedMatches(nodes, new Set([getNodeId(['logs', 'field_12'])]));
+    const logsId = getNodeId(['logs']);
+
+    expect([...matches.containers]).toEqual([logsId]);
+    expect(matches.reveals.get(logsId)).toBe(13);
+  });
+});
+
+describe('mergeSearchMatches', () => {
+  it('unions containers and takes the larger reveal at each collection', () => {
+    const a = {
+      containers: new Set(['geo']),
+      reveals: new Map([['geo', 12]]),
+    };
+    const b = {
+      containers: new Set(['user']),
+      reveals: new Map([
+        ['geo', 15],
+        ['user', 11],
+      ]),
+    };
+    const merged = mergeSearchMatches(a, b);
+
+    expect([...merged.containers].sort()).toEqual(['geo', 'user']);
+    expect(merged.reveals.get('geo')).toBe(15);
+    expect(merged.reveals.get('user')).toBe(11);
+  });
+
+  it('returns the other plan unchanged when one side is empty', () => {
+    const matches = {
+      containers: new Set(['geo']),
+      reveals: new Map([['geo', 12]]),
+    };
+    expect(mergeSearchMatches(matches, { containers: new Set(), reveals: new Map() })).toBe(
+      matches
+    );
   });
 });
