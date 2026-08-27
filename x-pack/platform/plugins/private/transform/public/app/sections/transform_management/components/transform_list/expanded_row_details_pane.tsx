@@ -146,7 +146,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
       ...(isDefined(item.config.source.project_routing)
         ? [
             {
-              title: 'project_routing'
+              title: 'project_routing',
               description: item.config.source.project_routing,
             },
           ]
