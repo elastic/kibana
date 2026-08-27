@@ -2001,12 +2001,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@119.1.0":
+"@elastic/eui@file:./eui_119.1.0_buttongroup_redesign_002.tgz":
   version "119.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-119.1.0.tgz#fe950711b75ad95a3b733fff43e97b9ef8659d51"
-  integrity sha512-655h0HmMSqcWcdF1BYaFgx35/OmHgRTdlHAYwlt4MEYfRo4PJgxwXM8xfQ7crNl/9jXYF6cbt2RM/azkpEChRg==
+  resolved "file:./eui_119.1.0_buttongroup_redesign_002.tgz#9527b3ac796c45c0a8bd6bc3a573f7c2f361cbac"
   dependencies:
-    "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
