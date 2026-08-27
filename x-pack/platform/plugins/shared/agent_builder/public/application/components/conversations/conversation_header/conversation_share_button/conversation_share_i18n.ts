@@ -70,10 +70,6 @@ export const authorLabel = i18n.translate('xpack.agentBuilder.conversationSharin
   defaultMessage: 'Author',
 });
 
-export const memberLabel = i18n.translate('xpack.agentBuilder.conversationSharing.member', {
-  defaultMessage: 'Member',
-});
-
 export const removeMemberLabel = i18n.translate(
   'xpack.agentBuilder.conversationSharing.removeMember',
   {
