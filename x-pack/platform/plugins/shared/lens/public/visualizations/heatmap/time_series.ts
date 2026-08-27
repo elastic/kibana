@@ -11,3 +11,10 @@ type OperationLike = Pick<OperationMetadata, 'dataType' | 'scale'>;
 
 export const isTimeSeriesOperation = (operation?: OperationLike | null): boolean =>
   operation?.dataType === 'date' && operation?.scale === 'interval';
+
+/**
+ * Returns true if the axis is time based, either by the operation or the column type (query result type).
+ */
+export function isTimeBasedAxis(operation?: OperationLike | null, actualColumnType?: string) {
+  return actualColumnType === 'date' || isTimeSeriesOperation(operation);
+}
