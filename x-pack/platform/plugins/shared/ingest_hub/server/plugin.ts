@@ -6,40 +6,17 @@
  */
 
 import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
-import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 
 import type { IngestHubServerSetupDeps, IngestHubServerStartDeps } from './types';
-import { registerIamPermissionsRoute } from './routes/iam_permissions';
 
 export class IngestHubPlugin
   implements Plugin<void, void, IngestHubServerSetupDeps, IngestHubServerStartDeps>
 {
-  private fleetStart: FleetStartContract | undefined;
-  private readonly initializerContext: PluginInitializerContext;
+  constructor(initializerContext: PluginInitializerContext) {}
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.initializerContext = initializerContext;
-  }
+  public setup(core: CoreSetup<IngestHubServerStartDeps, void>): void {}
 
-  public setup(core: CoreSetup<IngestHubServerStartDeps, void>): void {
-    const logger = this.initializerContext.logger.get();
-    const router = core.http.createRouter();
-
-    registerIamPermissionsRoute(
-      router,
-      () => {
-        if (!this.fleetStart) {
-          throw new Error('IngestHub: Fleet start contract not available');
-        }
-        return this.fleetStart;
-      },
-      logger
-    );
-  }
-
-  public start(_core: CoreStart, plugins: IngestHubServerStartDeps): void {
-    this.fleetStart = plugins.fleet;
-  }
+  public start(_core: CoreStart, plugins: IngestHubServerStartDeps): void {}
 
   public stop(): void {}
 }

@@ -12,14 +12,10 @@ import React from 'react';
 
 import { getErrorBoundaryLabels } from '../../lib';
 import { useErrorBoundary } from '../services';
+import type { BaseErrorBoundaryState, BaseErrorBoundaryProps } from '../../types';
 import { FatalPrompt, RecoverablePrompt } from './message_components';
-import {
-  BaseErrorBoundary,
-  type BaseErrorBoundaryState,
-  type BaseErrorBoundaryProps,
-} from './base_error_boundary';
 
-class ErrorBoundaryInternal extends BaseErrorBoundary<
+class ErrorBoundaryInternal extends React.Component<
   React.PropsWithChildren<BaseErrorBoundaryProps>,
   BaseErrorBoundaryState
 > {
@@ -40,16 +36,13 @@ class ErrorBoundaryInternal extends BaseErrorBoundary<
     console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
     console.error(error); // eslint-disable-line no-console
 
-    // Enqueue the error instead of registering it immediately
-    const enqueuedError = this.props.services.errorService.enqueueError(error, errorInfo);
-    const { id: errorId, isFatal, name } = enqueuedError;
+    const { isFatal, name } = this.props.services.errorService.enqueueError(error, errorInfo);
 
     this.setState({
       error,
       errorInfo,
       componentName: name,
       isFatal,
-      errorId,
     });
   }
 

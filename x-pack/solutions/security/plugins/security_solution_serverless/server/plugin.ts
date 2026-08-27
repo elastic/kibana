@@ -16,6 +16,7 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  ALERTING_V2_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import {
@@ -103,6 +104,15 @@ export class SecuritySolutionServerlessPlugin
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
     const projectSettings = [...SECURITY_PROJECT_SETTINGS];
+    const isSearchAiLakeTier = this.config.productTypes.some(
+      ({ product_tier: productTier }) => productTier === ProductTier.searchAiLake
+    );
+
+    // Search AI Lake disables maintenance windows, which is a required dependency
+    // of Alerting V2. Avoid allowlisting a setting that is not registered there.
+    if (!isSearchAiLakeTier) {
+      projectSettings.push(ALERTING_V2_ENABLED_SETTING_ID);
+    }
 
     // Registered unconditionally in ESS (`security_solution/server/ui_settings.ts`), so it
     // must be allowlisted unconditionally here too. Ideally this would be conditional on the

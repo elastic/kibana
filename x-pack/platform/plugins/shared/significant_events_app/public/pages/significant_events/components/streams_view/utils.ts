@@ -15,6 +15,10 @@ import {
   isRootStreamDefinition,
   Streams,
 } from '@kbn/streams-schema';
+import {
+  RUN_STREAM_ONBOARDING_BUTTON_LABEL,
+  RUN_STREAM_ONBOARDING_CROSS_PROJECT_TOOLTIP,
+} from './translations';
 
 const SORTABLE_FIELDS = ['nameSortKey'] as const;
 
@@ -147,6 +151,27 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
   });
 
   return trees;
+}
+
+/**
+ * Tooltip for the per-row onboard-stream action. `activityBlockTooltip` (loading, error, or
+ * pause) always wins, since onboarding cannot run in that state regardless of CPS scope.
+ * Otherwise, the cross-project disclosure is appended once CPS has linked projects, since
+ * onboarding is exactly the KI generation step that reads across all of them.
+ */
+export function getOnboardStreamTooltip({
+  activityBlockTooltip,
+  isCpsMultiProject,
+}: {
+  activityBlockTooltip: string | undefined;
+  isCpsMultiProject: boolean | undefined;
+}): string {
+  if (activityBlockTooltip) {
+    return activityBlockTooltip;
+  }
+  return isCpsMultiProject
+    ? RUN_STREAM_ONBOARDING_CROSS_PROJECT_TOOLTIP
+    : RUN_STREAM_ONBOARDING_BUTTON_LABEL;
 }
 
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {

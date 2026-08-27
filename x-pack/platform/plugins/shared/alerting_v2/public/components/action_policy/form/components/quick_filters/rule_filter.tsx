@@ -21,6 +21,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -39,14 +40,7 @@ interface RuleSelectableMeta {
   rule: RuleResponse | null;
 }
 
-const kindLabel = (kind: RuleResponse['kind']): string =>
-  kind === 'alert'
-    ? i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.rule.kind.alert', {
-        defaultMessage: 'Alert',
-      })
-    : i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.rule.kind.signal', {
-        defaultMessage: 'Signal',
-      });
+const kindLabel = (kind: RuleResponse['kind']): string => RULE_KIND_LABELS[kind];
 
 export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);

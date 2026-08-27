@@ -6,13 +6,17 @@
  */
 
 import { BuildGroupsStep, buildActionGroups } from './build_groups_step';
+import { RuleCatalog } from '../state';
 import {
+  createActionPolicy,
   createAlertEpisode,
   createDispatcherPipelineState,
   createMatchedPair,
-  createActionPolicy,
   createRule,
+  createStepLogger,
 } from '../fixtures/test_utils';
+
+const logger = createStepLogger();
 
 describe('BuildGroupsStep', () => {
   const step = new BuildGroupsStep();
@@ -30,7 +34,7 @@ describe('BuildGroupsStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -42,7 +46,7 @@ describe('BuildGroupsStep', () => {
   it('returns empty groups when no matched pairs', async () => {
     const state = createDispatcherPipelineState({ matched: [] });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -312,7 +316,7 @@ describe('buildActionGroups', () => {
       }),
     ];
 
-    const groups = buildActionGroups(matched, rules);
+    const groups = buildActionGroups(matched, RuleCatalog.of(rules));
 
     expect(groups[0].rules).toEqual({
       r1: { name: 'CPU spike' },
@@ -334,7 +338,7 @@ describe('buildActionGroups', () => {
       }),
     ];
 
-    const groups = buildActionGroups(matched, rules);
+    const groups = buildActionGroups(matched, RuleCatalog.of(rules));
 
     expect(groups[0].rules).toEqual({ r1: { name: 'CPU spike' } });
     expect(groups[1].rules).toEqual({});
