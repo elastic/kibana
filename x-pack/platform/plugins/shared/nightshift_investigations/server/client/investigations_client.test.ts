@@ -134,7 +134,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.subject).toMatchObject({ type: 'significant_event', id: 'se-42' });
+      expect(result.subject).toEqual({ type: 'significant_event', id: 'se-42' });
     });
 
     it('recovers significant_event subject from direct workflow input', async () => {
@@ -144,7 +144,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.subject).toMatchObject({ type: 'significant_event', id: 'event-42' });
+      expect(result.subject).toEqual({ type: 'significant_event', id: 'event-42' });
     });
 
     it('recovers alert subject from context.inputs', async () => {
@@ -154,7 +154,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.subject).toMatchObject({ type: 'alert', id: 'alert-99' });
+      expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
     });
 
     it('prefers the stable event_id over significant_event_id when both are present', async () => {
@@ -172,7 +172,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.subject).toMatchObject({
+      expect(result.subject).toEqual({
         type: 'significant_event',
         id: 'checkout-latency-breach',
       });
@@ -224,12 +224,11 @@ describe('NightshiftInvestigationsClient.get()', () => {
   });
 
   describe('subject reference', () => {
-    it('adds the summary and the event flyout deep link to a significant_event subject', async () => {
+    it('adds the summary to a significant_event subject', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           context: {
             inputs: {
-              message: 'Checkout p99 latency breach',
               context: {
                 source: 'significant_event',
                 event_id: 'event-42',
@@ -244,36 +243,15 @@ describe('NightshiftInvestigationsClient.get()', () => {
         type: 'significant_event',
         id: 'event-42',
         summary: 'Latency breached the SLO on checkout',
-        url: '/app/significant_events/significant_events?selectedEvent=event-42',
       });
     });
 
-    it('builds the url from the same id the subject reports', async () => {
+    it('adds the summary to an alert subject', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           context: {
             inputs: {
-              context: {
-                source: 'significant_event',
-                event_id: 'event-42',
-                significant_event_id: 'uuid-1',
-              },
-            },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject?.url).toBe(
-        `/app/significant_events/significant_events?selectedEvent=${result.subject?.id}`
-      );
-    });
-
-    it('links an alert subject to its details page and encodes the id', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: {
-              context: { source: 'alert', alert_id: 'alert/99?x=1', summary: 'CPU saturation' },
+              context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
             },
           },
         })
@@ -281,9 +259,8 @@ describe('NightshiftInvestigationsClient.get()', () => {
       const result = await makeClient().get('inv-1');
       expect(result.subject).toEqual({
         type: 'alert',
-        id: 'alert/99?x=1',
+        id: 'alert-99',
         summary: 'CPU saturation',
-        url: `/app/observability/alerts/${encodeURIComponent('alert/99?x=1')}`,
       });
     });
 
@@ -311,11 +288,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({
-        type: 'alert',
-        id: 'alert-99',
-        url: '/app/observability/alerts/alert-99',
-      });
+      expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
     });
 
     it('caps long summaries', async () => {

@@ -21,14 +21,13 @@ export interface InvestigationSubject {
 }
 
 /**
- * The subject as returned by reads, carrying what a consumer needs to render the triggering item
- * inline and navigate back to it. Both fields are derived server-side from the workflow inputs
- * persisted at start time, never model-generated. `url` is a relative Kibana app path, so
- * consumers prepend the basePath.
+ * The subject as returned by reads, carrying the text a consumer needs to render the triggering
+ * item inline. Derived server-side from the workflow inputs persisted at start time, never
+ * model-generated. Linking back to the item is left to consumers, which resolve `type` and `id`
+ * through the owning app's locator.
  */
 export interface InvestigationSubjectReference extends InvestigationSubject {
   summary?: string;
-  url?: string;
 }
 
 export interface InvestigationContext {

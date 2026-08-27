@@ -126,21 +126,6 @@ function recoverTriggerTypeFromInput(
     : undefined;
 }
 
-/**
- * App paths are duplicated here rather than imported, because neither owner can be depended on
- * from this plugin: `observability` is a private solution module and this is a platform module,
- * and `significant_events` already depends on this plugin, so importing its
- * `SIGNIFICANT_EVENTS_APP_ROUTE` back would close a cycle. Sharing them properly means promoting
- * both routes into a platform-visible package such as `@kbn/deeplinks-observability`.
- *
- * `selectedEvent` is the significant events app's addressable deep-link param (it also appears in
- * `SignificantEventsAppLocatorParams`): it filters the list to that event server-side, bypassing
- * the time range, and the app then opens the flyout itself. `openEvent` is internal flyout state
- * and only resolves against the already-loaded page of results.
- */
-const SIGNIFICANT_EVENT_URL_PATH = '/app/significant_events/significant_events';
-const ALERT_DETAILS_URL_PATH = '/app/observability/alerts';
-
 /** Summaries render inline next to an investigation; cap them so callers cannot bloat responses. */
 const MAX_SUBJECT_SUMMARY_LENGTH = 200;
 
@@ -154,8 +139,13 @@ function asBriefText(value: unknown): string | undefined {
 }
 
 /**
- * Adds what a consumer needs to render the triggering item inline and navigate back to it, taken
- * from the same persisted inputs the subject itself came from. URLs are relative app paths.
+ * Adds the text a consumer needs to render the triggering item inline, taken from the same
+ * persisted inputs the subject itself came from.
+ *
+ * Deliberately no URL: linking back to the item is presentation, and the apps that own those
+ * routes expose locators (e.g. `SIGNIFICANT_EVENTS_APP_LOCATOR_ID`) that only resolve on the
+ * client. Building the path here would duplicate another app's routing with nothing to catch a
+ * rename. Consumers resolve `type` + `id` through the locator instead.
  *
  * The summary deliberately does not fall back to `inputs.message`: callers that supply no summary
  * also supply no message, so the message is the generic prompt `start` synthesizes, and surfacing
@@ -167,12 +157,8 @@ function toSubjectReference(
 ): InvestigationSubjectReference {
   const ctx = isPlainObject(input?.context) ? input.context : undefined;
   const summary = asBriefText(ctx?.summary) ?? asBriefText(ctx?.name);
-  const url =
-    subject.type === 'significant_event'
-      ? `${SIGNIFICANT_EVENT_URL_PATH}?selectedEvent=${encodeURIComponent(subject.id)}`
-      : `${ALERT_DETAILS_URL_PATH}/${encodeURIComponent(subject.id)}`;
 
-  return { ...subject, ...(summary ? { summary } : {}), url };
+  return summary ? { ...subject, summary } : subject;
 }
 
 export interface NightshiftInvestigationsClientDeps {
