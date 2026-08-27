@@ -8,7 +8,7 @@
 import type { z } from '@kbn/zod/v4';
 import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
 import { validateExtendedFields } from './validate_extended_fields';
-import type { FieldSchema } from './fields';
+import type { FieldSchema, InlineField } from './fields';
 import { FieldType } from './fields';
 
 type FieldSchemaType = z.infer<typeof FieldSchema>;
@@ -353,6 +353,105 @@ describe('validateExtendedFields', () => {
         onClose: true,
       });
       expect(errors).toContain('Field "Summary" is required');
+    });
+  });
+
+  describe('hintFields — global key suggestions in template pass', () => {
+    it('suggests a global storage key when the user sends the field name without the suffix', () => {
+      // Template-only field set (no global keys). The request sends "priority" which is close to
+      // the global field "priority_as_keyword". Without hintFields the error cannot point at the
+      // global key; with hintFields it can.
+      const templateField = makeInputTextField({ name: 'summary', label: 'Summary', type: 'keyword' });
+      const globalField = makeSelectField(); // name: 'priority', key: 'priority_as_keyword'
+      const errors = validateExtendedFields(
+        { priority: 'high' },
+        [templateField],
+        { hintFields: [globalField] as InlineField[] }
+      );
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toContain('priority_as_keyword');
+    });
+
+    it('uses only the validated field set for "Available keys" when hintFields have no match', () => {
+      const templateField = makeInputTextField({ name: 'summary', label: 'Summary', type: 'keyword' });
+      const globalField = makeSelectField(); // unrelated — "completely_different_as_keyword"
+      const errors = validateExtendedFields(
+        { totally_unknown: 'value' },
+        [templateField],
+        { hintFields: [globalField] as InlineField[] }
+      );
+      expect(errors).toHaveLength(1);
+      // Falls through to the "Available keys" branch — should list both sets.
+      expect(errors[0]).toContain('Unknown extended field key');
+    });
+  });
+
+  describe('CHECKBOX_GROUP / USER_PICKER condition evaluation', () => {
+    it('treats an empty CHECKBOX_GROUP ("[]") as empty for required_when', () => {
+      // The controlling field is a CHECKBOX_GROUP. Its serialized empty value is '[]', not ''.
+      // Without a fieldControlMap, evaluateScalarRule would see '[]' as non-empty and wrongly
+      // make the dependent field required.
+      const controlField = makeCheckboxGroupField({ name: 'systems', label: 'Systems' });
+      const dependentField = makeInputTextField({
+        name: 'escalation_reason',
+        label: 'Escalation reason',
+        type: 'keyword',
+        validation: {
+          required_when: { field: 'systems', operator: 'not_empty' },
+        },
+      });
+      // Empty CHECKBOX_GROUP → dependent field should NOT be required.
+      expect(
+        validateExtendedFields(
+          { systems_as_keyword: '[]', escalation_reason_as_keyword: '' },
+          [controlField, dependentField]
+        )
+      ).toEqual([]);
+      // Non-empty CHECKBOX_GROUP → dependent field IS required.
+      expect(
+        validateExtendedFields(
+          { systems_as_keyword: '["api"]', escalation_reason_as_keyword: '' },
+          [controlField, dependentField]
+        )
+      ).toContain('Field "Escalation reason" is required');
+    });
+
+    it('hides a field when its show_when controller is an empty CHECKBOX_GROUP', () => {
+      const controlField = makeCheckboxGroupField({ name: 'systems', label: 'Systems' });
+      const dependentField = makeInputTextField({
+        name: 'escalation_reason',
+        label: 'Escalation reason',
+        type: 'keyword',
+        validation: { required: true },
+        display: {
+          show_when: { field: 'systems', operator: 'not_empty' },
+        },
+      });
+      // Empty CHECKBOX_GROUP → dependent field is hidden → not required.
+      expect(
+        validateExtendedFields(
+          { systems_as_keyword: '[]', escalation_reason_as_keyword: '' },
+          [controlField, dependentField]
+        )
+      ).toEqual([]);
+    });
+
+    it('treats an empty USER_PICKER ("[]") as empty for required_when', () => {
+      const controlField = makeUserPickerField({ name: 'assignee', label: 'Assignee' });
+      const dependentField = makeInputTextField({
+        name: 'assignment_reason',
+        label: 'Assignment reason',
+        type: 'keyword',
+        validation: {
+          required_when: { field: 'assignee', operator: 'not_empty' },
+        },
+      });
+      expect(
+        validateExtendedFields(
+          { assignee_as_keyword: '[]', assignment_reason_as_keyword: '' },
+          [controlField, dependentField]
+        )
+      ).toEqual([]);
     });
   });
 

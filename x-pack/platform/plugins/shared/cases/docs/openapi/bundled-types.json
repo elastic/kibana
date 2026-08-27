@@ -3527,7 +3527,7 @@
         "title": "Case extended fields",
         "type": "object",
         "x-state": "Technical preview",
-        "description": "Case field values keyed by storage key. Requires the `xpack.cases.templates.enabled` setting. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).\n",
+        "description": "Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).\n",
         "additionalProperties": {
           "type": "string",
           "maxLength": 30000
@@ -4346,7 +4346,7 @@
           "extended_fields": {
             "type": "object",
             "x-state": "Technical preview",
-            "description": "The case's stored field values, keyed by storage key (for example `priority_as_keyword`). Requires the `xpack.cases.templates.enabled` setting.\n",
+            "description": "The case's stored field values, keyed by storage key (for example `priority_as_keyword`).\n",
             "additionalProperties": {
               "type": "string"
             }

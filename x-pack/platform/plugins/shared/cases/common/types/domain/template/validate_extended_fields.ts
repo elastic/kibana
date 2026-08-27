@@ -199,6 +199,7 @@ export const validateExtendedFields = (
     partial = false,
     onClose = false,
     requiredOnly = false,
+    hintFields,
   }: {
     partial?: boolean;
     onClose?: boolean;
@@ -210,6 +211,13 @@ export const validateExtendedFields = (
      * unlinked legacy fields are expected and their values are validated elsewhere.
      */
     requiredOnly?: boolean;
+    /**
+     * Extra fields included as suggestion candidates in unknown-key error messages but not
+     * validated against. Pass global fields here when validating a template-only subset so that
+     * a user who sends a global field name (e.g. `priority`) receives the correct storage key
+     * (`priority_as_keyword`) in the error rather than a list of template-only keys.
+     */
+    hintFields?: InlineField[];
   } = {}
 ): string[] => {
   let errors: string[] = [];
@@ -224,9 +232,18 @@ export const validateExtendedFields = (
 
   // 2. Unknown keys + value-size backstop (skipped in requiredOnly mode — see option docs above)
   if (!requiredOnly) {
+    // Merge hint fields into the suggestion pool so that global field keys are suggested even when
+    // validating only the template-specific subset of the request.
+    const suggestionInlineFields = hintFields
+      ? [...inlineFields, ...hintFields.filter((f) => !isDisplayOnlyField(f))]
+      : inlineFields;
+    const suggestionDisplayOnlyFields = hintFields
+      ? [...displayOnlyFields, ...hintFields.filter(isDisplayOnlyField)]
+      : displayOnlyFields;
+
     for (const key of Object.keys(extendedFields)) {
       if (!validKeys.has(key)) {
-        errors.push(buildUnknownKeyError(key, inlineFields, displayOnlyFields));
+        errors.push(buildUnknownKeyError(key, suggestionInlineFields, suggestionDisplayOnlyFields));
       }
     }
     errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
@@ -235,16 +252,18 @@ export const validateExtendedFields = (
   // 3. Build helper maps
   const fieldValues: Record<string, string | undefined> = {};
   const fieldTypeMap: Record<string, string> = {};
+  const fieldControlMap: Record<string, string> = {};
   for (const field of inlineFields) {
     fieldValues[field.name] = extendedFields[getFieldSnakeKey(field.name, field.type)];
     fieldTypeMap[field.name] = field.type;
+    fieldControlMap[field.name] = field.control;
   }
 
   // 4. Per-field validation
   for (const field of inlineFields) {
     const isHidden =
       field.display?.show_when != null &&
-      !evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap);
+      !evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap, fieldControlMap);
 
     // In partial-update mode, skip fields not present in the request — the server
     // merges them so an absent key retains its existing stored value.
@@ -258,7 +277,7 @@ export const validateExtendedFields = (
       const isRequired =
         field.validation?.required === true ||
         (field.validation?.required_when
-          ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap)
+          ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap, fieldControlMap)
           : false) ||
         (onClose && field.validation?.required_on_close === true);
 

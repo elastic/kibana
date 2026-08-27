@@ -398,6 +398,7 @@ export const validateCaseExtendedFields = async ({
   );
   const templateErrors = validateExtendedFields(templateOnlyFields, templateNonGlobalFields, {
     partial,
+    hintFields: globalFields,
   });
   if (templateErrors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${templateErrors.join('; ')}`);
@@ -507,13 +508,9 @@ export const resolveTemplateFieldsForClose = async ({
  * bulk operations can deduplicate SO fetches across cases sharing the same template.
  *
  * NOTE: We intentionally do not delegate to the common validateExtendedFields({ onClose: true })
- * here, even though that option was added in the same PR, because:
- *   1. The common function is designed for client-side real-time preview (no SO access; caller
- *      provides a flat extendedFields map). Here we operate on the caller-provided final state.
- *   2. This implementation passes fieldControlMap to evaluateCondition for correct
- *      CHECKBOX_GROUP / USER_PICKER show_when evaluation — the common function omits it
- *      (pre-existing gap). If the common function gains fieldControlMap support, this can
- *      be revisited.
+ * here, even though that option was added in the same PR, because the common function is designed
+ * for client-side real-time preview (no SO access; caller provides a flat extendedFields map),
+ * whereas this function operates on the caller-provided final state.
  */
 export const validateExtendedFieldsOnClose = ({
   caseId,
