@@ -63,7 +63,7 @@ export const AgentShardingField = ({
               <p>
                 <FormattedMessage
                   id="xpack.synthetics.monitorManagement.agentShardingCalloutDescription"
-                  defaultMessage="Enroll multiple agents into this single policy. Kibana distributes monitors across them with a per-monitor host condition, so each monitor runs on exactly one agent and moves to a healthy agent on failover."
+                  defaultMessage="Enroll multiple agents into this single policy. Kibana distributes monitors across them with a per-monitor agent condition, so each monitor runs on exactly one agent and moves to a healthy agent on failover."
                 />
               </p>
             }
