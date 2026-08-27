@@ -7,23 +7,11 @@
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { observablesTool } from './observable_tools';
-
-const makeCore = (solution: string | undefined) => {
-  const coreSetup = coreMock.createSetup();
-  const pluginsStart = {
-    spaces: {
-      spacesService: {
-        getActiveSpace: jest.fn().mockResolvedValue({ solution }),
-      },
-    },
-  };
-  coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), pluginsStart, {}]);
-  return coreSetup;
-};
+import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 
 describe('observablesTool availability', () => {
   it('returns unavailable for es solution', async () => {
-    const coreSetup = makeCore('es');
+    const coreSetup = makeCoreWithSolution('es');
     const tool = observablesTool(coreSetup, jest.fn(), loggingSystemMock.createLogger());
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as any);
@@ -31,7 +19,7 @@ describe('observablesTool availability', () => {
   });
 
   it('returns available for security solution', async () => {
-    const coreSetup = makeCore('security');
+    const coreSetup = makeCoreWithSolution('security');
     const tool = observablesTool(coreSetup, jest.fn(), loggingSystemMock.createLogger());
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as any);

@@ -11,6 +11,7 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { attachmentsTool } from './attachment_tools';
+import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 
 const buildMockAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
@@ -151,23 +152,10 @@ describe('attachmentsTool (deprecated)', () => {
 // ---------------------------------------------------------------------------
 
 describe('attachmentsTool availability', () => {
-  const makeCore = (solution: string | undefined) => {
-    const coreSetup = coreMock.createSetup();
-    const pluginsStart = {
-      spaces: {
-        spacesService: {
-          getActiveSpace: jest.fn().mockResolvedValue({ solution }),
-        },
-      },
-    };
-    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), pluginsStart, {}]);
-    return coreSetup;
-  };
-
   const emptyRegistry = buildRegistry([]);
 
   it('returns unavailable for es solution', async () => {
-    const coreSetup = makeCore('es');
+    const coreSetup = makeCoreWithSolution('es');
     const tool = attachmentsTool(
       coreSetup,
       jest.fn(),
@@ -181,7 +169,7 @@ describe('attachmentsTool availability', () => {
   });
 
   it('returns available for oblt solution', async () => {
-    const coreSetup = makeCore('oblt');
+    const coreSetup = makeCoreWithSolution('oblt');
     const tool = attachmentsTool(
       coreSetup,
       jest.fn(),

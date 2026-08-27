@@ -10,6 +10,7 @@ import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import { searchCasesTool } from './search_cases';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -340,21 +341,8 @@ describe('searchCasesTool handler — search mode', () => {
 // ---------------------------------------------------------------------------
 
 describe('searchCasesTool availability', () => {
-  const makeCore = (solution: string | undefined) => {
-    const coreSetup = coreMock.createSetup();
-    const pluginsStart = {
-      spaces: {
-        spacesService: {
-          getActiveSpace: jest.fn().mockResolvedValue({ solution }),
-        },
-      },
-    };
-    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), pluginsStart, {}]);
-    return coreSetup;
-  };
-
   it('returns unavailable for es solution', async () => {
-    const coreSetup = makeCore('es');
+    const coreSetup = makeCoreWithSolution('es');
     const getCasesClientFn = jest.fn();
     const tool = searchCasesTool(coreSetup, getCasesClientFn, loggingSystemMock.createLogger());
     const request = httpServerMock.createKibanaRequest();
@@ -363,7 +351,7 @@ describe('searchCasesTool availability', () => {
   });
 
   it('returns available for classic solution', async () => {
-    const coreSetup = makeCore('classic');
+    const coreSetup = makeCoreWithSolution('classic');
     const getCasesClientFn = jest.fn();
     const tool = searchCasesTool(coreSetup, getCasesClientFn, loggingSystemMock.createLogger());
     const request = httpServerMock.createKibanaRequest();

@@ -11,6 +11,7 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { manageAttachmentsTool } from './manage_attachments_tool';
+import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 
 const buildMockAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
@@ -159,21 +160,8 @@ describe('manageAttachmentsTool', () => {
 // ---------------------------------------------------------------------------
 
 describe('manageAttachmentsTool availability', () => {
-  const makeCore = (solution: string | undefined) => {
-    const coreSetup = coreMock.createSetup();
-    const pluginsStart = {
-      spaces: {
-        spacesService: {
-          getActiveSpace: jest.fn().mockResolvedValue({ solution }),
-        },
-      },
-    };
-    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), pluginsStart, {}]);
-    return coreSetup;
-  };
-
   it('returns unavailable for es solution', async () => {
-    const coreSetup = makeCore('es');
+    const coreSetup = makeCoreWithSolution('es');
     const tool = manageAttachmentsTool(
       coreSetup,
       jest.fn(),
@@ -187,7 +175,7 @@ describe('manageAttachmentsTool availability', () => {
   });
 
   it('returns available for security solution', async () => {
-    const coreSetup = makeCore('security');
+    const coreSetup = makeCoreWithSolution('security');
     const tool = manageAttachmentsTool(
       coreSetup,
       jest.fn(),

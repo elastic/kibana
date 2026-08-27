@@ -7,50 +7,38 @@
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getCasesToolAvailability } from './get_cases_tool_availability';
-
-const makeCore = (solution: string | undefined) => {
-  const coreSetup = coreMock.createSetup();
-  const pluginsStart = {
-    spaces: {
-      spacesService: {
-        getActiveSpace: jest.fn().mockResolvedValue({ solution }),
-      },
-    },
-  };
-  coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), pluginsStart, {}]);
-  return coreSetup;
-};
+import { makeCoreWithSolution } from './mock_core_with_solution';
 
 const request = httpServerMock.createKibanaRequest();
 const logger = loggingSystemMock.createLogger();
 
 describe('getCasesToolAvailability', () => {
   it('returns unavailable for es solution', async () => {
-    const core = makeCore('es');
+    const core = makeCoreWithSolution('es');
     const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 
   it('returns available for classic solution', async () => {
-    const core = makeCore('classic');
+    const core = makeCoreWithSolution('classic');
     const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
 
   it('returns available for oblt solution', async () => {
-    const core = makeCore('oblt');
+    const core = makeCoreWithSolution('oblt');
     const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
 
   it('returns available for security solution', async () => {
-    const core = makeCore('security');
+    const core = makeCoreWithSolution('security');
     const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
 
   it('returns available when solution is undefined (stateful, no space gating)', async () => {
-    const core = makeCore(undefined);
+    const core = makeCoreWithSolution(undefined);
     const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
