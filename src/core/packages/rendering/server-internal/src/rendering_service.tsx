@@ -295,7 +295,7 @@ export class RenderingService {
       locale: effectiveLocale,
       setCookieHeader,
       browserPreferredLocale,
-      configOverride,
+      source: localeSource,
     } = resolveLocale({
       request,
       userSettingLocale,
@@ -383,7 +383,8 @@ export class RenderingService {
           availableLocales: availableLocales.map(({ id, label }) => ({ id, label })),
           locale: effectiveLocale,
           browserPreferredLocale,
-          configOverride,
+          localeSource,
+          configDefaultLocale: configLocale,
         },
         theme: {
           darkMode,

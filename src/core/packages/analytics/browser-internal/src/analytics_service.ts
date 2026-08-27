@@ -177,8 +177,14 @@ export class AnalyticsService {
     });
   }
 
+  /**
+   * Enriches the events with the display language this page was rendered in and how it was chosen.
+   * @param injectedMetadata The injected metadata service.
+   * @internal
+   */
   private registerDisplayLanguageContext(injectedMetadata: InternalInjectedMetadataSetup) {
-    const { locale, browserPreferredLocale, configOverride } = injectedMetadata.getI18nInfo();
+    const { locale, browserPreferredLocale, localeSource, configDefaultLocale } =
+      injectedMetadata.getI18nInfo();
     this.analyticsClient.registerContextProvider({
       name: 'display language',
       context$: of({
@@ -186,7 +192,8 @@ export class AnalyticsService {
         ...(browserPreferredLocale !== undefined
           ? { display_language_browser_preference: browserPreferredLocale }
           : {}),
-        display_language_config_override: configOverride,
+        display_language_source: localeSource,
+        display_language_config_default: configDefaultLocale,
       }),
       schema: {
         display_language: {
@@ -198,15 +205,19 @@ export class AnalyticsService {
           _meta: {
             optional: true,
             description:
-              'The Kibana locale id the browser’s Accept-Language header would resolve to, regardless of what actually won (profile/cookie/config). Absent when no configured locale can be served.',
+              "The normalized locale the browser's Accept-Language header resolves to, regardless of what the display language resolved to. Absent when the browser's preference cannot be served.",
           },
         },
-        display_language_config_override: {
-          type: 'boolean',
+        display_language_source: {
+          type: 'keyword',
           _meta: {
             description:
-              'True when this deployment forces a non-English i18n.defaultLocale, overriding browser detection.',
+              'Which step of the resolution chain chose `display_language`: profile, cookie, config, browser, or default.',
           },
+        },
+        display_language_config_default: {
+          type: 'keyword',
+          _meta: { description: "The deployment's configured `i18n.defaultLocale`." },
         },
       },
     });

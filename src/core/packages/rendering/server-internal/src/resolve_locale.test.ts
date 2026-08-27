@@ -306,7 +306,7 @@ describe('resolveLocale', () => {
       expect(result.browserPreferredLocale).toBe('ja-JP');
     });
 
-    it('is undefined when no configured locale can be served from Accept-Language', () => {
+    it('is undefined when the browser preference cannot be served', () => {
       const result = resolveLocale(
         baseArgs({
           request: buildRequest({ acceptLanguage: 'es-ES,pt-BR;q=0.5' }),
@@ -316,15 +316,41 @@ describe('resolveLocale', () => {
     });
   });
 
-  describe('configOverride', () => {
-    it('is false when configLocale is the default en', () => {
-      const result = resolveLocale(baseArgs({ configLocale: 'en' }));
-      expect(result.configOverride).toBe(false);
+  describe('source', () => {
+    it('is `profile` when the user profile setting wins', () => {
+      const result = resolveLocale(baseArgs({ userSettingLocale: 'ja-JP' }));
+      expect(result.source).toBe('profile');
     });
 
-    it('is true when configLocale is a non-default value', () => {
-      const result = resolveLocale(baseArgs({ configLocale: 'fr-FR' }));
-      expect(result.configOverride).toBe(true);
+    it('is `cookie` when the KBN_LOCALE cookie wins', () => {
+      const result = resolveLocale(
+        baseArgs({ request: buildRequest({ cookie: `${KBN_LOCALE_COOKIE_NAME}=fr-FR` }) })
+      );
+      expect(result.source).toBe('cookie');
+    });
+
+    it('is `config` when a non-default configLocale wins', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
+          request: buildRequest({ acceptLanguage: 'ja-JP' }),
+        })
+      );
+      expect(result.source).toBe('config');
+    });
+
+    it('is `browser` when Accept-Language wins', () => {
+      const result = resolveLocale(
+        baseArgs({ request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }) })
+      );
+      expect(result.locale).toBe('ja-JP');
+      expect(result.source).toBe('browser');
+    });
+
+    it('is `default` when nothing else applies and the built-in en is used', () => {
+      const result = resolveLocale(baseArgs());
+      expect(result.locale).toBe('en');
+      expect(result.source).toBe('default');
     });
   });
 

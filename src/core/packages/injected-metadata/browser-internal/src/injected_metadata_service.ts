@@ -97,8 +97,9 @@ export class InjectedMetadataService {
       },
 
       getI18nInfo: () => {
-        const { locale, browserPreferredLocale, configOverride } = this.state.i18n;
-        return { locale, browserPreferredLocale, configOverride };
+        const { locale, browserPreferredLocale, localeSource, configDefaultLocale } =
+          this.state.i18n;
+        return { locale, browserPreferredLocale, localeSource, configDefaultLocale };
       },
 
       getCustomBranding: () => {

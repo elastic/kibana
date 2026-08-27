@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { LocaleSource } from '@kbn/core-injected-metadata-common-internal';
 import { EN_LOCALE } from '@kbn/i18n';
 
 /**
@@ -48,13 +49,13 @@ export interface ResolveLocaleResult {
    */
   setCookieHeader: string;
   /**
-   * What the Accept-Language header resolves to against the configured locale list,
-   * regardless of which priority step actually won. Undefined when nothing the
-   * browser asked for can be served.
+   * The normalized locale the browser's Accept-Language header resolves to,
+   * regardless of what the display language resolved to. Undefined when the
+   * browser's preference cannot be served.
    */
   browserPreferredLocale: string | undefined;
-  /** True when `i18n.defaultLocale` is set to anything other than `en`. */
-  configOverride: boolean;
+  /** Which step of the priority chain produced {@link locale}. */
+  source: LocaleSource;
 }
 
 /**
@@ -76,41 +77,42 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     allowLocaleCookie,
   } = args;
 
-  // Compute unconditionally so the value is available regardless of which
-  // priority step wins. This is the authoritative browser-side preference for
-  // telemetry — derived from the real Accept-Language header the server sees
-  // rather than navigator.languages, which Chrome reduces before sending.
+  // Computed for every render so telemetry sees the browser preference even when
+  // a higher-priority step wins.
   const browserPreferredLocale = pickFromAcceptLanguage(
     getHeader(request, 'accept-language'),
     configuredLocales,
     translationHashes
   );
-  const configOverride = configLocale !== EN_LOCALE;
 
-  const win = (locale: string): ResolveLocaleResult => ({
+  const resolved = (locale: string, source: LocaleSource): ResolveLocaleResult => ({
     ...finalize(locale, request, serverBasePath),
     browserPreferredLocale,
-    configOverride,
+    source,
   });
 
   if (userSettingLocale && translationHashes[userSettingLocale]) {
-    return win(userSettingLocale);
+    return resolved(userSettingLocale, 'profile');
   }
 
   if (allowLocaleCookie) {
     const cookieLocale = readCookie(getHeader(request, 'cookie'), KBN_LOCALE_COOKIE_NAME);
     if (cookieLocale && translationHashes[cookieLocale]) {
-      return win(cookieLocale);
+      return resolved(cookieLocale, 'cookie');
     }
   }
 
   // An explicitly-configured default locale (any value other than the built-in
   // EN_LOCALE) outranks Accept-Language detection.
-  if (configOverride) {
-    return win(configLocale);
+  if (configLocale !== EN_LOCALE) {
+    return resolved(configLocale, 'config');
   }
 
-  return win(browserPreferredLocale ?? configLocale);
+  if (browserPreferredLocale) {
+    return resolved(browserPreferredLocale, 'browser');
+  }
+
+  return resolved(configLocale, 'default');
 };
 
 const getHeader = (request: KibanaRequest, name: string): string => {

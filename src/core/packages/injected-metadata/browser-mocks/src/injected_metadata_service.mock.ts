@@ -27,7 +27,8 @@ const createSetupContractMock = () => {
     getI18nInfo: jest.fn().mockReturnValue({
       locale: 'en',
       browserPreferredLocale: undefined,
-      configOverride: false,
+      localeSource: 'default',
+      configDefaultLocale: 'en',
     }),
     getCspConfig: jest.fn().mockReturnValue({ warnLegacyBrowsers: true }),
     getExternalUrlConfig: jest.fn().mockReturnValue({ policy: [] }),
