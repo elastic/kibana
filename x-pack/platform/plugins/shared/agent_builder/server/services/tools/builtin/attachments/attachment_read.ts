@@ -40,6 +40,7 @@ export const createAttachmentReadTool = ({
     'Read the content of a conversation attachment by ID. Use this to retrieve data you previously stored or to check the current state of an attachment.',
   schema: attachmentReadSchema,
   tags: ['attachment'],
+  excludeFromMcp: true,
   handler: async ({ attachment_id: attachmentId, version }) => {
     const attachment = attachmentManager.get(attachmentId, {
       version,
