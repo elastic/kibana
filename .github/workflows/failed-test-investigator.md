@@ -80,6 +80,22 @@ tools:
   web-fetch:
   bash: true
 
+steps:
+  - name: Detect fix PRs already in flight
+    # Shortlist the `flaky-test-fixer` PRs whose `failed-test` issue is owned by the same team
+    # as this issue, so the agent can spot a fix that already covers this root cause instead of
+    # requesting a redundant one. Non-fatal: a detection failure must not block the
+    # investigation — the agent treats a missing file as "nothing in flight".
+    uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    with:
+      script: |
+        const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
+        try {
+          await writeDuplicateCandidates({ github, core, issueNumber: Number(process.env.ISSUE_NUMBER) });
+        } catch (err) {
+          core.warning(`Fix-in-flight detection failed: ${err.message}`);
+        }
+
 network:
   allowed:
     - defaults
@@ -143,6 +159,64 @@ safe-outputs:
     target: *issue_number
     required-labels: [failed-test]
     state-reason: not_planned
+  jobs:
+    # Adds this issue to the `Fixes` list of a fix PR that is already in flight for the same
+    # root cause, so it closes with that PR instead of waiting for a fix nobody needs to write.
+    link-issue-to-existing-pr:
+      description: 'Add a `Fixes #<this issue>` reference to an open PR that already fixes this issue''s root cause, so this issue closes when that PR merges. Pass that PR''s number in `pr`. Call at most once, and only for a PR you confirmed against its diff (see "Fix already in flight").'
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+        issues: write
+        pull-requests: write
+      inputs:
+        pr:
+          description: 'Number of the open PR that already fixes this root cause (digits only).'
+          required: true
+          type: string
+      env:
+        GH_AW_ISSUE_NUMBER: *issue_number
+      steps:
+        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+          with:
+            persist-credentials: false
+            sparse-checkout: .github/scripts/link_issues_to_fix_pr.js
+            sparse-checkout-cone-mode: false
+            fetch-depth: 1
+        - name: Add this issue to the in-flight fix PR
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const fs = require('fs');
+              const { linkIssuesToFixPr } = require('./.github/scripts/link_issues_to_fix_pr.js');
+              const issueNumber = Number(process.env.GH_AW_ISSUE_NUMBER);
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              if (!Number.isInteger(issueNumber) || !outputPath || !fs.existsSync(outputPath)) {
+                core.info('Missing issue number or agent output; nothing to do.');
+                return;
+              }
+              // Custom safe-jobs read their inputs from the agent output file, not the job inputs context.
+              const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+              const entry = items.find((item) => item.type === 'link_issue_to_existing_pr');
+              const prNumber = Number(String(entry?.pr ?? '').trim().replace(/^#/, ''));
+              if (!Number.isInteger(prNumber) || prNumber <= 0) {
+                core.info('No in-flight PR supplied; nothing to do.');
+                return;
+              }
+              try {
+                // The investigation comment already names the PR, so don't comment again.
+                await linkIssuesToFixPr({
+                  github,
+                  core,
+                  prNumber,
+                  issueNumbers: [issueNumber],
+                  notifyIssues: false,
+                });
+              } catch (err) {
+                // Non-fatal: the investigation comment still points the reader at the fix.
+                core.warning(`Could not link #${issueNumber} to #${prNumber}: ${err.status || ''} ${err.message}`);
+              }
 
 strict: false
 timeout-minutes: 35
@@ -199,6 +273,16 @@ Every fix you propose is held to the same guardrails as the fixer and verifier w
 
 {{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
 
+## Fix already in flight
+
+Many `failed-test` issues share one root cause, so the fix this issue needs is often already open in someone else's PR. Requesting another one wastes a fix run and leaves this issue open after that PR merges. Check before you request a fix:
+
+- A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json` (`{ team, candidates }`): `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to this issue's team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`. A missing file means "nothing in flight". Add to it any PR the issue timeline already links.
+- A candidate whose `linkedIssues` already contains issue #${{ env.ISSUE_NUMBER }} is a **confirmed** match with no diff to read — an earlier run already linked this issue to it.
+- Same team is a shortlist, not a match: open the candidate's diff and accept it only when it fixes the **same root cause** as this failure — the same failure signature in the code it changes, typically a shared helper, page object, or fixture this spec also calls. The same team, the same file, or a similar-looking error is not enough. When you can't confirm it, treat it as no match.
+- On a confirmed match with an **open** PR: skip the `ai:fix-flaky` label, name that PR in the note block (see "Comment format"), and call the `link_issue_to_existing_pr` tool with its number so this issue joins its `Fixes` list and closes when it merges. Don't call the tool for a merged PR — its body can no longer close anything; say in the note that the fix has already landed and this issue should stop failing.
+- Say which PR you matched and on what evidence in the investigation section, so a reader can check the claim. A wrong match closes a live flake as fixed.
+
 ## Labels
 
 ### Classification label
@@ -222,7 +306,7 @@ Only request an automatic fix for a failure that has **recurred** — a test tha
 - **Recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** also add `ai:fix-flaky` to request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
 - **First-time failure (`failCount` is 1, no recurrence):** do **not** add `ai:fix-flaky` yet, even if a fix is available — a single failure is likely a one-off and not worth a fix run. Still add `failure:ai-fixable` if a fix exists (so the signal is recorded) and leave the issue open. When the test fails again the reporter reopens the issue or posts a new-failure comment; either re-triggers this investigation at `failCount` 2, which requests the fix then.
 
-**Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate.
+**Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR is already up (open, in draft, or in review) in the Kibana repository, whether it links this issue or fixes the same root cause under another one (see [Fix already in flight](#fix-already-in-flight)); you already check for one when writing the note block below, so don't request a duplicate.
 
 An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate.
 
@@ -301,7 +385,7 @@ Use `> [!TIP]` only when the callout suggests the reader add a label; use `> [!N
 > Marked "AI-fixable": fix PR incoming within ~20-30 min.
 ```
 
-If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the note instead of the automatic-request sentence.
+If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the note instead of the automatic-request sentence. When it is a same-root-cause PR filed under another issue (see [Fix already in flight](#fix-already-in-flight)), say so and that this issue now closes with it, e.g. `> Covered by the in-flight fix in #285227, which this issue is now linked to.`
 
 **Fix held** — you added `failure:ai-fixable` without `ai:fix-flaky` because this is a first-time failure (`failCount` is 1). This suggests a label, so use a tip:
 

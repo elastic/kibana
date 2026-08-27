@@ -24,6 +24,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const { linkedIssuesFromBody } = require('./link_issues_to_fix_pr');
+
 const OWNER = 'elastic';
 const REPO = 'kibana';
 const FIXER_LABEL = 'flaky-test-fixer';
@@ -33,14 +35,6 @@ const MERGED_LOOKBACK_DAYS = 30;
 // Bounds the team-issue search back from the oldest in-flight PR: wide enough to cover every
 // issue our PRs link, tight enough to stay under GitHub search's 1000-hit cap.
 const TEAM_ISSUE_BUFFER_DAYS = 14;
-
-const linkedIssuesFromBody = (body) => [
-  ...new Set(
-    [...(body || '').matchAll(/(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi)].map(
-      (match) => Number(match[1])
-    )
-  ),
-];
 
 const searchIssues = async (github, q) =>
   github.paginate(github.rest.search.issuesAndPullRequests, { q, per_page: 100 });
