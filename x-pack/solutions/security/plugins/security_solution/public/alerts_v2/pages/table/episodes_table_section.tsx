@@ -54,7 +54,11 @@ const TITLE_ID = 'alertsV2EpisodesTableTitle';
  * The ECS columns are extracted from `data` by the data hook.
  */
 const DEFAULT_COLUMNS = [
-  '@timestamp',
+  // `first_timestamp` (episode start) rather than `@timestamp`: the view's `@timestamp` is
+  // `MAX(@timestamp)` over rule-events, which jumps to "now" when a lifecycle action (resolve/
+  // unresolve) appends a synthetic rule-event. `first_timestamp` is `MIN(@timestamp)`, so it stays
+  // pinned to when the alert actually fired — matching what Security users expect.
+  'first_timestamp',
   'episode.status',
   'rule.id',
   'severity',
@@ -67,9 +71,10 @@ const DEFAULT_COLUMNS = [
 ];
 const SAMPLE_SIZE = 100;
 const GRID_HEIGHT = 500;
-const DEFAULT_SORT: SortOrder[] = [['@timestamp', 'desc']];
-const COLUMNS_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableColumns';
-const SORT_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableSort';
+const DEFAULT_SORT: SortOrder[] = [['first_timestamp', 'desc']];
+// Bumped to v2 so the `@timestamp` → `first_timestamp` default takes effect over any persisted state.
+const COLUMNS_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableColumns.v2';
+const SORT_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableSort.v2';
 const VIEW_DETAILS_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.episodesTable.viewDetails',
   { defaultMessage: 'View details' }
@@ -92,9 +97,10 @@ const NOTES_LABEL = i18n.translate('xpack.securitySolution.alertsV2.episodesTabl
 
 /** Human-readable column headers, mirroring the v1 alerts table labels. */
 const COLUMN_DISPLAY_NAMES: Record<string, string> = {
-  '@timestamp': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.timestamp', {
-    defaultMessage: 'Last seen',
-  }),
+  first_timestamp: i18n.translate(
+    'xpack.securitySolution.alertsV2.episodesTable.columns.triggered',
+    { defaultMessage: 'Triggered' }
+  ),
   'episode.status': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.status', {
     defaultMessage: 'Status',
   }),
@@ -288,7 +294,8 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
             onClick={() =>
               investigateEpisodeInTimeline({
                 episodeId: String(record.flattened['episode.id'] ?? ''),
-                timestamp: String(record.flattened['@timestamp'] ?? ''),
+                startTimestamp: String(record.flattened.first_timestamp ?? ''),
+                endTimestamp: String(record.flattened['@timestamp'] ?? ''),
               })
             }
           />

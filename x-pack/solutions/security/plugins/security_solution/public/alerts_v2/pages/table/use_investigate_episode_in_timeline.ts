@@ -23,11 +23,16 @@ export interface InvestigateEpisodeParams {
   /** The episode id, used to isolate the single row in the ES|QL query. */
   episodeId: string;
   /**
-   * The episode's `@timestamp`. Used to center the Timeline ES|QL tab's time picker on a buffer
-   * around it so the row is always in range. Optional — when absent/unparseable the picker is left
-   * as-is.
+   * Episode start (`first_timestamp`) — the low end of the time window, so the window frames when
+   * the alert actually fired (mirroring how v1 centers the timeline on the alert's trigger time).
    */
-  timestamp?: string;
+  startTimestamp?: string;
+  /**
+   * Episode's latest activity (`@timestamp` = `last_timestamp`) — the high end of the window. The
+   * ES|QL tab returns the collapsed episode row whose `@timestamp` is this max, so the picker must
+   * reach it or the row falls out of range. Optional — with neither bound the picker is left as-is.
+   */
+  endTimestamp?: string;
 }
 
 /**
@@ -63,20 +68,26 @@ export const useInvestigateEpisodeInTimeline = (): ((params: InvestigateEpisodeP
   const { setDiscoverAppState } = useDiscoverState();
 
   return useCallback(
-    ({ episodeId, timestamp }: InvestigateEpisodeParams) => {
+    ({ episodeId, startTimestamp, endTimestamp }: InvestigateEpisodeParams) => {
       if (!episodeId) {
         return;
       }
       const esql = buildEpisodeEsql(episodeId);
 
-      const anchor = timestamp ? new Date(timestamp).getTime() : NaN;
-      const timeRange = Number.isNaN(anchor)
-        ? undefined
-        : {
-            from: new Date(anchor - TIME_BUFFER_MS).toISOString(),
-            to: new Date(anchor + TIME_BUFFER_MS).toISOString(),
-            mode: 'absolute' as const,
-          };
+      // Bracket the episode's activity span with a buffer on each side: low bound = trigger time
+      // (first_timestamp), high bound = latest activity (@timestamp = last_timestamp). For a
+      // single-event episode both collapse to the same point, i.e. ±buffer around it.
+      const times = [startTimestamp, endTimestamp]
+        .map((value) => (value ? new Date(value).getTime() : NaN))
+        .filter((ms) => !Number.isNaN(ms));
+      const timeRange =
+        times.length === 0
+          ? undefined
+          : {
+              from: new Date(Math.min(...times) - TIME_BUFFER_MS).toISOString(),
+              to: new Date(Math.max(...times) + TIME_BUFFER_MS).toISOString(),
+              mode: 'absolute' as const,
+            };
 
       // Seed the security-side Discover app state so the next mount of the ES|QL tab picks up our
       // query (the tab reads this slice as its initial state). Also push to the live state container
