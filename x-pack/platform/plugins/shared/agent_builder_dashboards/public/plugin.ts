@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
-  OPEN_DASHBOARD_PRETTIFY_ACTION_ID,
+  PRETTIFY_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
@@ -63,13 +63,11 @@ export class AgentBuilderDashboardsPlugin
         );
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
       });
-      plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_PRETTIFY_ACTION_ID, async () => {
+      plugins.uiActions.registerActionAsync(PRETTIFY_DASHBOARD_ACTION_ID, async () => {
         const { createPrettifyDashboardAction } = await import(
           './prettify/prettify_dashboard_action'
         );
-        const { captureDashboardElementPng } = await import(
-          './prettify/capture_dashboard_element'
-        );
+        const { captureDashboardElementPng } = await import('./prettify/capture_dashboard_element');
         const { createChatImageFilesClient, uploadChatImage } = await import(
           './prettify/upload_chat_image'
         );

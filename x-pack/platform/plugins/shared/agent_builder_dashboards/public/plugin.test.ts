@@ -8,7 +8,7 @@
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
-  OPEN_DASHBOARD_PRETTIFY_ACTION_ID,
+  PRETTIFY_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
@@ -75,7 +75,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
       expect.any(Function)
     );
     expect(registerActionAsync).toHaveBeenCalledWith(
-      OPEN_DASHBOARD_PRETTIFY_ACTION_ID,
+      PRETTIFY_DASHBOARD_ACTION_ID,
       expect.any(Function)
     );
 
@@ -91,10 +91,10 @@ describe('AgentBuilderDashboardsPlugin', () => {
     expect(openChat).toHaveBeenCalled();
 
     const prettifyFactory = registerActionAsync.mock.calls.find(
-      ([id]: [string]) => id === OPEN_DASHBOARD_PRETTIFY_ACTION_ID
+      ([id]: [string]) => id === PRETTIFY_DASHBOARD_ACTION_ID
     )?.[1];
     const prettifyAction = await prettifyFactory();
-    expect(prettifyAction.id).toBe(OPEN_DASHBOARD_PRETTIFY_ACTION_ID);
+    expect(prettifyAction.id).toBe(PRETTIFY_DASHBOARD_ACTION_ID);
   });
 
   it('does not register dashboard Chat entry points without Agent Builder capabilities', () => {

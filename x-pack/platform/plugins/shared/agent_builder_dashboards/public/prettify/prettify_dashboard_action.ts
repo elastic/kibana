@@ -13,8 +13,8 @@ import {
   dashboardStateToAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import {
-  OPEN_DASHBOARD_PRETTIFY_ACTION_ID,
-  type OpenDashboardPrettifyActionContext,
+  PRETTIFY_DASHBOARD_ACTION_ID,
+  type PrettifyDashboardActionContext,
 } from '@kbn/dashboard-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import {
@@ -44,13 +44,13 @@ export const createPrettifyDashboardAction = ({
   uploadImage: (blob: Blob) => Promise<ImageAttachmentData>;
   toasts?: Pick<ToastsStart, 'addDanger'>;
   waitForPaint?: typeof waitForDashboardPaint;
-}): ActionDefinition<OpenDashboardPrettifyActionContext> => ({
-  id: OPEN_DASHBOARD_PRETTIFY_ACTION_ID,
-  type: OPEN_DASHBOARD_PRETTIFY_ACTION_ID,
+}): ActionDefinition<PrettifyDashboardActionContext> => ({
+  id: PRETTIFY_DASHBOARD_ACTION_ID,
+  type: PRETTIFY_DASHBOARD_ACTION_ID,
   order: 0,
   getDisplayName: () =>
-    i18n.translate('xpack.agentBuilderDashboards.prettify.buttonLabel', {
-      defaultMessage: 'Prettify',
+    i18n.translate('xpack.agentBuilderDashboards.prettifyDashboard.buttonLabel', {
+      defaultMessage: 'Enhance this dashboard',
     }),
   getIconType: () => 'sparkles',
   isCompatible: async ({ dashboardApi }) => {

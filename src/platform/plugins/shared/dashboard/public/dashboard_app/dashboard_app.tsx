@@ -39,7 +39,7 @@ import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
 import { startSyncingExpandedPanelState } from './url';
 import type { DashboardInternalApi } from '../dashboard_api/types';
-import { DashboardPrettifyFab } from './prettify/dashboard_prettify_fab';
+import { PrettifyDashboardButton } from './prettify/prettify_dashboard_button';
 
 export interface DashboardAppProps {
   history: History;
@@ -195,6 +195,12 @@ export function DashboardApp({
             dashboardApi={dashboardApi}
             dashboardInternalApi={dashboardInternalApi}
           />
+          {!embedSettings && (
+            <PrettifyDashboardButton
+              dashboardApi={dashboardApi}
+              dashboardInternalApi={dashboardInternalApi}
+            />
+          )}
         </>
       )}
 
@@ -220,12 +226,6 @@ export function DashboardApp({
         showPlainSpinner={showPlainSpinner}
         getCreationOptions={getCreationOptions}
       />
-      {dashboardApi && dashboardInternalApi && !embedSettings && (
-        <DashboardPrettifyFab
-          dashboardApi={dashboardApi}
-          dashboardInternalApi={dashboardInternalApi}
-        />
-      )}
     </>
   );
 }

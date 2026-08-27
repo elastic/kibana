@@ -108,6 +108,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
+  - '@kbn/core-chrome-layout-constants'
   - '@kbn/cps'
   - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'

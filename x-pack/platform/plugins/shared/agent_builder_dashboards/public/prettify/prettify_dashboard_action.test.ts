@@ -12,7 +12,7 @@ import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common'
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   type DashboardInternalApi,
-  type OpenDashboardPrettifyActionContext,
+  type PrettifyDashboardActionContext,
 } from '@kbn/dashboard-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
@@ -73,7 +73,7 @@ const createInternalApi = (element: HTMLElement | null = document.createElement(
 const context = (
   dashboardApi: DashboardApi,
   dashboardInternalApi: DashboardInternalApi = createInternalApi()
-): OpenDashboardPrettifyActionContext => ({
+): PrettifyDashboardActionContext => ({
   dashboardApi,
   dashboardInternalApi,
 });
@@ -101,12 +101,12 @@ describe('createPrettifyDashboardAction', () => {
     toasts.addDanger.mockClear();
   });
 
-  it('uses the sparkles icon and Prettify label', () => {
+  it('uses the sparkles icon and Enhance this dashboard label', () => {
     const action = createAction();
     const ctx = context(createDashboardApi());
 
     expect(action.getIconType?.(ctx)).toBe('sparkles');
-    expect(action.getDisplayName?.(ctx)).toBe('Prettify');
+    expect(action.getDisplayName?.(ctx)).toBe('Enhance this dashboard');
   });
 
   it('is compatible in edit mode when the user can write and the dashboard has a visualization', async () => {

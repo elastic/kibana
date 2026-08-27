@@ -9,9 +9,9 @@
 
 import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 
-export const OPEN_DASHBOARD_PRETTIFY_ACTION_ID = 'openDashboardPrettify';
+export const PRETTIFY_DASHBOARD_ACTION_ID = 'prettifyDashboard';
 
-export interface OpenDashboardPrettifyActionContext {
+export interface PrettifyDashboardActionContext {
   dashboardApi: DashboardApi;
   dashboardInternalApi: DashboardInternalApi;
 }
