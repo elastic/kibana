@@ -231,7 +231,7 @@ export const UX_PRODUCT_TOUR_STEPS: UxTourStep[] = [
   {
     stepId: 'countryMap',
     location: 'overview',
-    anchorPosition: 'upLeft',
+    anchorPosition: 'downLeft',
     title: i18n.translate('xpack.ux.tour.countryMapTitle', {
       defaultMessage: 'Visitors by country',
     }),

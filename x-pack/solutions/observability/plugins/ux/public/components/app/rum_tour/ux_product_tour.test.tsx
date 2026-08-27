@@ -131,6 +131,9 @@ describe('UX product tour', () => {
       'scheduleEmail',
       'alerts',
     ]);
+    expect(UX_PRODUCT_TOUR_STEPS.find((step) => step.stepId === 'countryMap')?.anchorPosition).toBe(
+      'downLeft'
+    );
   });
 
   it('maps feature tabs to in-app path suffixes', () => {
