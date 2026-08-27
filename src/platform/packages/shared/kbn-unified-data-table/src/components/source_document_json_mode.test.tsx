@@ -16,6 +16,7 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
 import { SourceDocumentJsonMode } from './source_document_json_mode';
+import type { JsonModeSettings } from '../types';
 import { MAX_TREE_VALUES } from '../utils/build_document_tree';
 
 const fieldFormats = fieldFormatsServiceMock.createStartContract();
@@ -31,10 +32,12 @@ const renderCell = (
   {
     shouldShowFieldHandler = () => true,
     inTableSearch,
+    jsonModeSettings,
     selectedColumns,
   }: {
     shouldShowFieldHandler?: (fieldName: string) => boolean;
     inTableSearch?: { term: string; isCounting: boolean };
+    jsonModeSettings?: JsonModeSettings;
     selectedColumns?: string[];
   } = {}
 ) => {
@@ -45,6 +48,7 @@ const renderCell = (
       columnsMeta={undefined}
       shouldShowFieldHandler={shouldShowFieldHandler}
       fieldFormats={fieldFormats}
+      jsonModeSettings={jsonModeSettings}
       selectedColumns={selectedColumns}
     />
   );
@@ -98,6 +102,14 @@ describe('SourceDocumentJsonMode', () => {
 
     expect(screen.queryByTestId('sourceDocumentTruncatedWarning')).not.toBeInTheDocument();
     expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+  });
+
+  it('hides null fields when the hideNulls setting is enabled', () => {
+    const hit: EsHitRecord = { _id: '1', _index: 'test', _source: { present: 'x', empty: null } };
+    const { container } = renderCell(hit, { jsonModeSettings: { hideNulls: true } });
+
+    expect(container.textContent).toContain('present');
+    expect(container.textContent).not.toContain('empty');
   });
 
   describe('in-table search counting pass', () => {
