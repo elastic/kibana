@@ -70,6 +70,7 @@
     "@kbn/inference-plugin",
     "@kbn/security-plugin",
     "@kbn/cloud-plugin",
+    "@kbn/cps",
     "@kbn/scout",
     "@kbn/core-http-server-mocks",
     "@kbn/apm-utils",
@@ -77,6 +78,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/cps-server-utils",
     "@kbn/inference-prompt-utils",
+    "@kbn/esql-utils",
     "@kbn/nightshift-investigations-plugin",
   ]
 }

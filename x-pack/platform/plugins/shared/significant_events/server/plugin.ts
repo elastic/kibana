@@ -134,6 +134,10 @@ export class SignificantEventsPlugin
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
     const { streams: streamsSetup } = plugins;
+    // `SET project_routing` is serverless-only preview syntax, and `cps.cpsEnabled` is only
+    // settable on serverless, so this is the gate that keeps the directive out of rule queries
+    // everywhere else.
+    const cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
 
     this.getScopedClients = async ({
       request,
@@ -155,11 +159,11 @@ export class SignificantEventsPlugin
       // they model all data available to a stream - so extraction must always read across every
       // linked project.
       //
-      // This currently splits generation from detection: rule execution still follows the
-      // space's project routing expression, so a rule can be blind to data its knowledge
-      // indicator was derived from. That split is transitional: once alerting v2 supports
-      // per-rule project routing, significant events rules will opt into all linked projects
-      // too, and both scopes will match.
+      // Detection matches that scope when CPS is enabled: rules compiled from these indicators
+      // carry a `SET project_routing` directive across all linked projects (see
+      // `withAllProjectsRouting`), which takes precedence over the space routing Alerting v2
+      // applies to the rule execution client. Without it a rule would be blind to data its
+      // knowledge indicator was derived from.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
         projectRouting: 'expression',
@@ -208,6 +212,7 @@ export class SignificantEventsPlugin
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
+          cpsEnabled,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>

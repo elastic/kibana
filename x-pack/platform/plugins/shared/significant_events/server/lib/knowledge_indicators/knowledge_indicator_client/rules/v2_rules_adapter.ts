@@ -8,6 +8,7 @@
 import { isBoom } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
+import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
   METRIC_SERIES_GROUPING_FIELDS,
   METRIC_SERIES_RULE_TAG,
@@ -22,6 +23,14 @@ import {
 } from './rules_management_client';
 
 const FIND_PAGE_SIZE = 500;
+
+export interface RulesAdapterV2Options {
+  /**
+   * Whether Cross-Project Search is enabled. When it is, compiled breach queries carry a
+   * `SET project_routing` directive scoping them across every linked project.
+   */
+  cpsEnabled: boolean;
+}
 
 /**
  * Internal getTags size for ownership-tag enumeration. The HTTP tags route stays
@@ -39,11 +48,14 @@ const OWNED_STREAM_TAGS_SIZE = 10000;
  * (SigEvents uses default space), matching the former HTTP client behavior.
  */
 export class RulesAdapterV2 implements IRulesManagementClient {
-  constructor(private readonly rulesClient: RulesClientApi) {}
+  constructor(
+    private readonly rulesClient: RulesClientApi,
+    private readonly options: RulesAdapterV2Options
+  ) {}
 
   async createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(definition), options: { id } })
+      .createRule({ data: toV2CreateBody(definition, this.options), options: { id } })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
           return this.updateRule(id, definition);
@@ -53,12 +65,14 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
-    await this.rulesClient.updateRule({ id, data: toV2UpdateBody(definition) }).catch((error) => {
-      if (isBoom(error) && error.output.statusCode === 404) {
-        return this.createRuleWithoutFallback(id, definition);
-      }
-      throw error;
-    });
+    await this.rulesClient
+      .updateRule({ id, data: toV2UpdateBody(definition, this.options) })
+      .catch((error) => {
+        if (isBoom(error) && error.output.statusCode === 404) {
+          return this.createRuleWithoutFallback(id, definition);
+        }
+        throw error;
+      });
   }
 
   async bulkDeleteRules(ids: string[]): Promise<void> {
@@ -118,7 +132,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     definition: SignificantEventsRuleDefinition
   ): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(definition), options: { id } })
+      .createRule({ data: toV2CreateBody(definition, this.options), options: { id } })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
           return;
@@ -128,11 +142,19 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 }
 
-function toV2BreachQuery(esqlQuery: string, timestampField: string): string {
-  return compileMatchCountBreachQuery(esqlQuery, timestampField);
+function toV2BreachQuery(
+  esqlQuery: string,
+  timestampField: string,
+  { cpsEnabled }: RulesAdapterV2Options
+): string {
+  const compiled = compileMatchCountBreachQuery(esqlQuery, timestampField);
+  return cpsEnabled ? withAllProjectsRouting(compiled) : compiled;
 }
 
-function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
+function toV2CommonBody(
+  definition: SignificantEventsRuleDefinition,
+  options: RulesAdapterV2Options
+) {
   const { every, lookback } = getMetricSeriesRuleSchedule();
   return {
     metadata: {
@@ -147,15 +169,20 @@ function toV2CommonBody(definition: SignificantEventsRuleDefinition) {
     grouping: { fields: [...METRIC_SERIES_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,
-      breach: { query: toV2BreachQuery(definition.esqlQuery, definition.timestampField) },
+      breach: {
+        query: toV2BreachQuery(definition.esqlQuery, definition.timestampField, options),
+      },
     },
   };
 }
 
-function toV2CreateBody(definition: SignificantEventsRuleDefinition) {
+function toV2CreateBody(
+  definition: SignificantEventsRuleDefinition,
+  options: RulesAdapterV2Options
+) {
   return {
     kind: 'signal' as const,
-    ...toV2CommonBody(definition),
+    ...toV2CommonBody(definition, options),
   };
 }
 

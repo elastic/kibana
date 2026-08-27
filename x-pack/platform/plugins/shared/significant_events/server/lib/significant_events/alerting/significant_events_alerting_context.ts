@@ -26,6 +26,11 @@ export interface SignificantEventsAlertingContext {
 
 export interface ResolveSignificantEventsAlertingContextParams {
   getAlertingV2RulesClient: () => Promise<RulesClientApi>;
+  /**
+   * Whether Cross-Project Search is enabled. Rules compiled while it is on scope their
+   * queries across every linked project instead of the space's routing expression.
+   */
+  cpsEnabled: boolean;
 }
 
 export interface RuleBackedQueryCandidate {
@@ -61,7 +66,7 @@ export function createSignificantEventsAlertingContextResolver(
       const alertingV2RulesClient = await params.getAlertingV2RulesClient();
       return {
         alertsReader: ALERTS_READER_V2,
-        rulesClient: new RulesAdapterV2(alertingV2RulesClient),
+        rulesClient: new RulesAdapterV2(alertingV2RulesClient, { cpsEnabled: params.cpsEnabled }),
         alertingV2RulesClient,
       };
     })();

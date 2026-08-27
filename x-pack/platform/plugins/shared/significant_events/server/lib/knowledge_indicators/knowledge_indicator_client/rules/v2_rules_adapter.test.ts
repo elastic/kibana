@@ -6,8 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import { Parser } from '@elastic/esql';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { RulesAdapterV2 } from './v2_rules_adapter';
+import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
+import { RulesAdapterV2, type RulesAdapterV2Options } from './v2_rules_adapter';
 import {
   STREAMS_RULE_STREAM_TAG_PREFIX,
   type SignificantEventsRuleDefinition,
@@ -29,8 +31,11 @@ function makeRulesClientMock() {
   };
 }
 
-function makeAdapter(mock: ReturnType<typeof makeRulesClientMock>) {
-  return new RulesAdapterV2(mock as unknown as RulesClientApi);
+function makeAdapter(
+  mock: ReturnType<typeof makeRulesClientMock>,
+  options: RulesAdapterV2Options = { cpsEnabled: false }
+) {
+  return new RulesAdapterV2(mock as unknown as RulesClientApi, options);
 }
 
 function lastCreateCall(mock: ReturnType<typeof makeRulesClientMock>) {
@@ -160,6 +165,61 @@ describe('RulesAdapterV2', () => {
       };
       expect(data.time_field).toBe('event.ingested');
       expect(data.query.breach.query).toContain('BUCKET(event.ingested, 1 minute)');
+    });
+  });
+
+  describe('CPS project routing', () => {
+    const SET_DIRECTIVE = `SET project_routing="${PROJECT_ROUTING_ALL}";`;
+
+    it('omits the project routing directive when CPS is disabled', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { cpsEnabled: false });
+      await adapter.createRule('rule-1', createDefinition);
+
+      const data = lastCreateCall(mock).data as { query: { breach: { query: string } } };
+      expect(data.query.breach.query).not.toContain('SET project_routing');
+    });
+
+    it('scopes the create breach query across all linked projects when CPS is enabled', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
+      await adapter.createRule('rule-1', createDefinition);
+
+      const { query } = (lastCreateCall(mock).data as { query: { breach: { query: string } } })
+        .query.breach;
+
+      // The directive is a header: it has to lead the query, ahead of the source command.
+      expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
+      expectMetricSeriesBreach(query);
+    });
+
+    it('scopes the update breach query across all linked projects when CPS is enabled', async () => {
+      const mock = makeRulesClientMock();
+      mock.updateRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
+      await adapter.updateRule('rule-1', updateDefinition);
+
+      const { query } = (lastUpdateCall(mock).data as { query: { breach: { query: string } } })
+        .query.breach;
+
+      expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
+      expectMetricSeriesBreach(query);
+    });
+
+    it('emits a query Alerting v2 rule validation accepts', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
+      await adapter.createRule('rule-1', createDefinition);
+
+      const { query } = (lastCreateCall(mock).data as { query: { breach: { query: string } } })
+        .query.breach;
+
+      // `Parser.parseErrors` is exactly what alerting_v2's `validateEsqlQuery` runs on the rule
+      // body, so this is the guard against the SET header 400ing rule creation.
+      expect(Parser.parseErrors(query)).toEqual([]);
     });
   });
 
