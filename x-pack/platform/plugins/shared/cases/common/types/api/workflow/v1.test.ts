@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { MAX_CASES_PER_WORKFLOW_RUN } from '../../../constants';
 import {
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   CASES_WORKFLOW_EXECUTION_SOURCE,
-  CasesWorkflowExecutionMetadataSchema,
-} from './v1';
+  MAX_CASES_PER_WORKFLOW_RUN,
+} from '../../../constants';
+import { CasesWorkflowExecutionMetadataSchema } from './v1';
 
 const validMetadata = {
   schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
@@ -18,13 +18,18 @@ const validMetadata = {
   caseIds: ['case-1'],
   origin: {
     type: 'cases.case' as const,
-    id: 'case-1',
+    caseId: 'case-1',
   },
 };
 
 describe('CasesWorkflowExecutionMetadataSchema', () => {
   it('accepts valid Cases workflow execution metadata for a single case', () => {
     expect(CasesWorkflowExecutionMetadataSchema.parse(validMetadata)).toEqual(validMetadata);
+  });
+
+  it('accepts metadata with no origin (list-surface / bulk run)', () => {
+    const { origin: _omitted, ...withoutOrigin } = validMetadata;
+    expect(CasesWorkflowExecutionMetadataSchema.parse(withoutOrigin)).toEqual(withoutOrigin);
   });
 
   it(`accepts metadata with up to ${MAX_CASES_PER_WORKFLOW_RUN} case ids (the cap)`, () => {
@@ -38,13 +43,20 @@ describe('CasesWorkflowExecutionMetadataSchema', () => {
 
   it.each([
     ['schema version', { ...validMetadata, schemaVersion: 2 }],
-    ['source', { ...validMetadata, source: 'securitySolution' }],
+    ['source namespace', { ...validMetadata, source: 'securitySolution' }],
     ['empty caseIds array', { ...validMetadata, caseIds: [] }],
     [
       'origin type',
       {
         ...validMetadata,
-        origin: { type: 'cases.comment', id: 'comment-1' },
+        origin: { type: 'cases.comment', caseId: 'comment-1' },
+      },
+    ],
+    [
+      'legacy origin id field',
+      {
+        ...validMetadata,
+        origin: { type: 'cases.case', id: 'case-1' },
       },
     ],
   ])('rejects an invalid %s', (_, metadata) => {

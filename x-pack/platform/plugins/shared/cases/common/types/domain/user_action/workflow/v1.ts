@@ -34,7 +34,7 @@ export const WorkflowOriginRt = rt.exact(
         rt.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
         rt.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
       ]),
-      /** The primary identifier: caseId, observableId, alertId, commentId, or attachmentId. */
+      /** The primary identifier: caseId, observableId, or alertId. */
       id: rt.string,
     }),
     rt.partial({
@@ -48,10 +48,12 @@ export const WorkflowOriginRt = rt.exact(
   ])
 );
 
-export const WorkflowUserActionPayloadRt = rt.strict({
-  workflow: WorkflowPayloadRt,
-  origin: WorkflowOriginRt,
-});
+export const WorkflowUserActionPayloadRt = rt.exact(
+  rt.intersection([
+    rt.type({ workflow: WorkflowPayloadRt }),
+    rt.partial({ origin: WorkflowOriginRt }),
+  ])
+);
 
 export const WorkflowUserActionRt = rt.strict({
   type: rt.literal(UserActionTypes.workflow),

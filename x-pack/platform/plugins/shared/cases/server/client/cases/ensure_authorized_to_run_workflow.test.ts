@@ -9,9 +9,9 @@ import { WriteOperations } from '../../authorization';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { ensureAuthorizedToUpdate } from './ensure_authorized_to_update';
+import { ensureAuthorizedToRunWorkflow } from './ensure_authorized_to_run_workflow';
 
-describe('ensureAuthorizedToUpdate', () => {
+describe('ensureAuthorizedToRunWorkflow', () => {
   const clientArgs = createCasesClientMockArgs();
   const caseA = mockCases[0];
   const caseB = mockCases[1];
@@ -25,7 +25,7 @@ describe('ensureAuthorizedToUpdate', () => {
       saved_objects: [caseA],
     });
 
-    await ensureAuthorizedToUpdate({ ids: [caseA.id] }, clientArgs);
+    await ensureAuthorizedToRunWorkflow({ ids: [caseA.id] }, clientArgs);
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
       // The operation reuses WriteOperations.UpdateCase as the privilege name so the
@@ -47,7 +47,7 @@ describe('ensureAuthorizedToUpdate', () => {
       saved_objects: [caseA, caseB],
     });
 
-    await ensureAuthorizedToUpdate({ ids: [caseA.id, caseB.id] }, clientArgs);
+    await ensureAuthorizedToRunWorkflow({ ids: [caseA.id, caseB.id] }, clientArgs);
 
     expect(clientArgs.services.caseService.getCases).toHaveBeenCalledTimes(1);
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
@@ -67,7 +67,7 @@ describe('ensureAuthorizedToUpdate', () => {
     });
     clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('not authorized'));
 
-    await expect(ensureAuthorizedToUpdate({ ids: [caseA.id] }, clientArgs)).rejects.toThrow(
+    await expect(ensureAuthorizedToRunWorkflow({ ids: [caseA.id] }, clientArgs)).rejects.toThrow(
       'not authorized'
     );
   });
@@ -87,9 +87,9 @@ describe('ensureAuthorizedToUpdate', () => {
 
     // ensureAuthorized({ entities: [] }) passes vacuously — the explicit guard rejects
     // with 403 before calling ensureAuthorized, so the authorization mock is never called.
-    await expect(ensureAuthorizedToUpdate({ ids: ['missing-case'] }, clientArgs)).rejects.toThrow(
-      'Unauthorized to run workflow on case'
-    );
+    await expect(
+      ensureAuthorizedToRunWorkflow({ ids: ['missing-case'] }, clientArgs)
+    ).rejects.toThrow('Unauthorized to run workflow on case');
     expect(clientArgs.authorization.ensureAuthorized).not.toHaveBeenCalled();
   });
 
@@ -108,7 +108,7 @@ describe('ensureAuthorizedToUpdate', () => {
     } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.getCases>>);
 
     await expect(
-      ensureAuthorizedToUpdate({ ids: [caseA.id, 'missing-case'] }, clientArgs)
+      ensureAuthorizedToRunWorkflow({ ids: [caseA.id, 'missing-case'] }, clientArgs)
     ).rejects.toThrow();
     // Authorization was called first (with the valid case), before the 404.
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);

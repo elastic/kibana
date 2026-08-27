@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-export const CASE_WORKFLOW_ORIGIN_TYPE = 'cases.case' as const;
-export const OBSERVABLE_WORKFLOW_ORIGIN_TYPE = 'cases.observable' as const;
-export const ALERT_WORKFLOW_ORIGIN_TYPE = 'cases.alert' as const;
-export const ALERTS_WORKFLOW_ORIGIN_TYPE = 'cases.alerts' as const;
-
-/** Origins the run API and the persisted user action both accept. */
-export const CASE_WORKFLOW_RUN_ORIGIN_TYPES = [
+import {
+  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  ALERT_WORKFLOW_ORIGIN_TYPE,
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-  ALERT_WORKFLOW_ORIGIN_TYPE,
+  CASE_WORKFLOW_RUN_ORIGIN_TYPES,
+} from '../../../../constants/workflow';
+
+export {
   ALERTS_WORKFLOW_ORIGIN_TYPE,
-] as const;
+  ALERT_WORKFLOW_ORIGIN_TYPE,
+  CASE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  CASE_WORKFLOW_RUN_ORIGIN_TYPES,
+};
 
 export type CaseWorkflowRunOriginType = (typeof CASE_WORKFLOW_RUN_ORIGIN_TYPES)[number];

@@ -37,7 +37,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type {
@@ -105,6 +109,7 @@ export interface CaseRequestContext {
 export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
   cases: CaseRequestContext;
   alerting: AlertingApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
 }>;
 
 export type CasesRouter = IRouter<CasesRequestHandlerContext>;

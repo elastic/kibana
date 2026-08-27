@@ -25,7 +25,7 @@ export const WorkflowOriginSchema = z.object({
 
 export const WorkflowUserActionPayloadSchema = z.object({
   workflow: WorkflowPayloadSchema,
-  origin: WorkflowOriginSchema,
+  origin: WorkflowOriginSchema.optional(),
 });
 
 export const WorkflowUserActionSchema = z.object({

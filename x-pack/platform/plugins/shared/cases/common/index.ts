@@ -128,6 +128,6 @@ export {
   ALERTS_WORKFLOW_ORIGIN_TYPE,
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-} from './types/api/workflow/v1';
+} from './constants';
 
 export { UserActionTypes } from './types/domain';

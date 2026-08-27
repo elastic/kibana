@@ -1946,7 +1946,7 @@ export const PayloadWorkflow = lazySchema(() =>
          */
         type: z.enum(['cases.case', 'cases.observable', 'cases.alert', 'cases.alerts']),
         /**
-         * The primary identifier (caseId, observableId, alertId, commentId, or attachmentId).
+         * The primary identifier (caseId, observableId, or alertId).
          */
         id: z.string(),
         /**

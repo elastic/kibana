@@ -34,7 +34,7 @@ export const WORKFLOW_RUN_AUTHZ_OPERATION: OperationDetails = {
   savedObjectType: CASE_SAVED_OBJECT,
 };
 
-export interface EnsureAuthorizedToUpdateParams {
+export interface EnsureAuthorizedToRunWorkflowParams {
   ids: string[];
 }
 
@@ -46,8 +46,8 @@ export interface EnsureAuthorizedToUpdateParams {
  * `delete.ts`/`bulk_update.ts`: authorization runs before not-found errors are surfaced so an
  * unauthorized caller cannot learn which IDs exist.
  */
-export const ensureAuthorizedToUpdate = async (
-  { ids }: EnsureAuthorizedToUpdateParams,
+export const ensureAuthorizedToRunWorkflow = async (
+  { ids }: EnsureAuthorizedToRunWorkflowParams,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -86,13 +86,13 @@ export const ensureAuthorizedToUpdate = async (
       if (isSOError(theCase)) {
         throw createCaseErrorFromSOError(
           theCase.error,
-          `Failed to authorize update for case ids: ${ids.join(', ')}`
+          `Failed to authorize workflow run for case ids: ${ids.join(', ')}`
         );
       }
     }
   } catch (error) {
     throw createCaseError({
-      message: `Failed to authorize update for case ids: ${ids.join(', ')}: ${error}`,
+      message: `Failed to authorize workflow run for case ids: ${ids.join(', ')}: ${error}`,
       error,
       logger,
     });

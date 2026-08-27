@@ -91,6 +91,14 @@ describe('WorkflowUserActionPayloadRt', () => {
     });
   });
 
+  it('accepts a payload without an origin for list-surface runs', () => {
+    const payload = { workflow: defaultWorkflow };
+    expect(WorkflowUserActionPayloadRt.decode(payload)).toStrictEqual({
+      _tag: 'Right',
+      right: payload,
+    });
+  });
+
   it('removes foo:bar attributes from payload', () => {
     expect(WorkflowUserActionPayloadRt.decode({ ...defaultPayload, foo: 'bar' })).toStrictEqual({
       _tag: 'Right',
