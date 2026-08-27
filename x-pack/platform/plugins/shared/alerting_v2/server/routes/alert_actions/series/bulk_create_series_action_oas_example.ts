@@ -58,7 +58,7 @@ export const bulkCreateSeriesActionOasExamples = (): AlertingOasOperationObject 
     responses: {
       200: {
         name: 'bulkCreateSeriesActionResponse',
-        summary: 'Two actions processed, one series not found',
+        summary: 'Two actions processed, one series not found.',
         value: BULK_CREATE_SERIES_ACTION_RESPONSE,
       },
       400: INVALID_BULK_CREATE_SERIES_ACTION_RESPONSE,

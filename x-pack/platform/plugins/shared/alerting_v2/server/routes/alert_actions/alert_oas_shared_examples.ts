@@ -19,7 +19,7 @@ export const SAMPLE_EPISODE_ID = 'episode-1';
 
 /** Shared 400 body for series-level alert-action routes (missing path params). */
 export const INVALID_SERIES_ACTION_PARAMS_RESPONSE = invalidResponseExample({
-  summary: 'Path is missing required group_hash',
+  summary: 'Path is missing required group_hash.',
   message: 'group_hash: Required',
   details: { errors: { group_hash: ['Required'] } },
 });
