@@ -133,8 +133,10 @@ export const setSignalsStatusRoute = (
                 );
                 previousStatuses.push(...fetched);
                 prefetchedHits = hits;
-              } catch {
-                logger.warn('Failed to pre-fetch previous alert statuses for workflow trigger');
+              } catch (err) {
+                logger.warn(
+                  `Failed to pre-fetch previous alert statuses for workflow trigger: ${err}`
+                );
               }
             }
 
@@ -209,8 +211,8 @@ export const setSignalsStatusRoute = (
                   runtimeMappings,
                   status
                 ));
-              } catch {
-                logger.warn('Failed to pre-fetch alert IDs for workflow trigger');
+              } catch (err) {
+                logger.warn(`Failed to pre-fetch alert IDs for workflow trigger: ${err}`);
               }
             }
 

@@ -102,8 +102,8 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
               }
             }
             prefetchSucceeded = true;
-          } catch {
-            logger.warn('Failed to pre-fetch previous alert statuses for workflow trigger');
+          } catch (err) {
+            logger.warn(`Failed to pre-fetch previous alert statuses for workflow trigger: ${err}`);
           }
         }
 

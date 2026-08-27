@@ -14,11 +14,8 @@ import {
 } from '../../../../../../common/workflows/triggers';
 import type { WorkflowStatus } from '../../../../../../common/workflows/triggers';
 import { isAttackDiscoveryIndex } from './is_attack_discovery_index';
-
-export interface PreviousStatus {
-  id: string;
-  previousStatus: WorkflowStatus;
-}
+import type { PreviousStatus } from '../../../../../events/types';
+export type { PreviousStatus } from '../../../../../events/types';
 
 export interface FoundHit {
   id: string;

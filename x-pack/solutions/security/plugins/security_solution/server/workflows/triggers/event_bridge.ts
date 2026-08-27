@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   createWorkflowTriggerForwarder,
   type WorkflowsExtensionsServerPluginStart,
@@ -33,35 +33,41 @@ export const registerSecurityWorkflowEventBridge = (
 
   const forward = createWorkflowTriggerForwarder(workflowsExtensions, logger);
 
+  const forwardEvent = (triggerId: string, payload: unknown, request: KibanaRequest) => {
+    forward(triggerId, payload, request).catch((err: unknown) => {
+      logger.warn(`Failed to forward workflow trigger event [${triggerId}]: ${err}`);
+    });
+  };
+
   eventBus.onAlertStatusChanged((event) => {
-    void forward(AlertStatusChangedTriggerId, event.payload, event.request);
+    forwardEvent(AlertStatusChangedTriggerId, event.payload, event.request);
   });
 
   eventBus.onAlertTagsChanged((event) => {
-    void forward(AlertTagsChangedTriggerId, event.payload, event.request);
+    forwardEvent(AlertTagsChangedTriggerId, event.payload, event.request);
   });
 
   eventBus.onAlertAssigneesChanged((event) => {
-    void forward(AlertAssigneesChangedTriggerId, event.payload, event.request);
+    forwardEvent(AlertAssigneesChangedTriggerId, event.payload, event.request);
   });
 
   eventBus.onAttackStatusChanged((event) => {
-    void forward(AttackStatusChangedTriggerId, event.payload, event.request);
+    forwardEvent(AttackStatusChangedTriggerId, event.payload, event.request);
   });
 
   eventBus.onAttackTagsChanged((event) => {
-    void forward(AttackTagsChangedTriggerId, event.payload, event.request);
+    forwardEvent(AttackTagsChangedTriggerId, event.payload, event.request);
   });
 
   eventBus.onAttackAssigneesChanged((event) => {
-    void forward(AttackAssigneesChangedTriggerId, event.payload, event.request);
+    forwardEvent(AttackAssigneesChangedTriggerId, event.payload, event.request);
   });
 
   eventBus.onNoteCreated((event) => {
-    void forward(NoteCreatedTriggerId, event.payload, event.request);
+    forwardEvent(NoteCreatedTriggerId, event.payload, event.request);
   });
 
   eventBus.onNoteUpdated((event) => {
-    void forward(NoteUpdatedTriggerId, event.payload, event.request);
+    forwardEvent(NoteUpdatedTriggerId, event.payload, event.request);
   });
 };
