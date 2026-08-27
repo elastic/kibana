@@ -32,7 +32,6 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const templateName = templateDisplay?.name;
   const templateIcon = templateDisplay?.icon;
 
-  // No popover for unsaved conversations — just show the title
   if (!hasPersistedConversation) {
     const displayedTitle = isLoadingTitle ? '' : conversation?.title || labels.newConversation;
 

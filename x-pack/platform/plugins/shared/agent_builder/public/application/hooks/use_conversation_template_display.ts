@@ -12,10 +12,6 @@ import { useConversation } from './use_conversation';
 
 export const DEFAULT_CONVERSATION_ICON: IconType = 'comment';
 
-/**
- * Icon for a conversation, resolved from its template's UI definition. Falls back to the
- * default comment icon for untemplated conversations and templates without an icon.
- */
 export const getConversationTemplateIcon = (
   conversationTemplatesService: ConversationTemplatesService,
   templateId: string | undefined
@@ -34,9 +30,6 @@ export interface ConversationTemplateDisplay {
   icon?: IconType;
 }
 
-/**
- * Display info for the active conversation's template, resolved from the conversation template UI registry.
- */
 export const useConversationTemplateDisplay = (): ConversationTemplateDisplay | undefined => {
   const { conversationTemplatesService } = useAgentBuilderServices();
   const { conversation } = useConversation();

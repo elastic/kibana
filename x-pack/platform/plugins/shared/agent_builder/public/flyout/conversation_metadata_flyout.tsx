@@ -47,13 +47,10 @@ const buildTabs = (
     ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)
     : undefined;
 
-  // Builtin tabs always render after the template's tabs; there is no reordering mechanism yet.
   const builtinTabIds: readonly string[] = BUILTIN_TAB_IDS;
   const templateTabIds = (definition?.tabs ?? []).filter((id) => !builtinTabIds.includes(id));
   const tabIds = [...templateTabIds, ...builtinTabIds];
 
-  // Resolve at render time so registration order across plugins does not matter;
-  // ids with no registered tab are skipped.
   return tabIds.flatMap((id) => {
     const tab = conversationTemplatesService.getTab(id);
     return tab ? [{ id, ...tab }] : [];
@@ -69,8 +66,7 @@ interface FlyoutFrameProps {
 const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
   const { euiTheme } = useEuiTheme();
 
-  // EUI's documented flyout-tabs pattern: pull the tabs down over the header's bottom
-  // padding and border so the selected-tab underline sits on the header's full-width rule.
+  // Align the selected-tab underline with the flyout header border.
   const tabsStyles = css`
     margin-block-end: calc(-${euiTheme.size.base} - ${euiTheme.border.width.thin});
   `;
@@ -98,7 +94,7 @@ export interface ConversationMetadataFlyoutContentProps {
   titleId: string;
 }
 
-/** Pure presenter — renders whatever conversation it is given; owns no data fetching. */
+/** Presenational only — renders whatever conversation it is given; not responsible for data fetching. */
 export const ConversationMetadataFlyoutContent: React.FC<
   ConversationMetadataFlyoutContentProps
 > = ({ conversation, conversationTemplatesService, titleId }) => {
@@ -114,8 +110,7 @@ export const ConversationMetadataFlyoutContent: React.FC<
   );
   const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.id;
   const selectedTab = tabs.find((entry) => entry.id === effectiveSelectedTabId);
-  // Registered tab content may use hooks, so it must render as a component — not be
-  // invoked as a plain function inside this component's own render.
+  // Render as a component so registered tabs can use hooks.
   const SelectedTabContent = selectedTab?.content;
 
   return (
@@ -145,11 +140,7 @@ export interface ConversationMetadataFlyoutSnapshotProps {
   titleId: string;
 }
 
-/**
- * Public-contract variant: fetches the conversation once when the flyout opens and renders a
- * point-in-time snapshot. It does NOT live-update — it runs in an isolated per-open QueryClient
- * outside the Agent Builder React tree; reopen the flyout to get fresh data.
- */
+/** Snapshot variant backed by an isolated, per-open query cache. */
 export const ConversationMetadataFlyoutSnapshot: React.FC<
   ConversationMetadataFlyoutSnapshotProps
 > = ({ conversationId, conversationsService, conversationTemplatesService, titleId }) => {
@@ -158,8 +149,6 @@ export const ConversationMetadataFlyoutSnapshot: React.FC<
     isLoading,
     isError,
   } = useQuery({
-    // Inline key: this query lives in an isolated per-open QueryClient, so it can never
-    // collide with (or be invalidated by) the app's shared query keys.
     queryKey: ['conversation-metadata-flyout-snapshot', conversationId],
     queryFn: () => conversationsService.get({ conversationId }),
   });
@@ -195,11 +184,7 @@ export interface ConversationMetadataFlyoutProps {
   onClose: () => void;
 }
 
-/**
- * In-chat variant: bound to the active conversation via useConversation(), so the flyout content
- * updates automatically whenever the cached conversation changes — round-end refetch (which is
- * how agent-driven metadata updates land), rename, template apply, or switching conversations.
- */
+/** Live variant backed by the active conversation cache. */
 export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProps> = ({
   onClose,
 }) => {
