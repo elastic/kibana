@@ -627,10 +627,20 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     }
 
                     const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
-                    const existingShard = get(
+                    // Read the LEGACY bare key too: `policyHasPack` matches it,
+                    // which is how a pre-space-key block enters this write set in
+                    // the first place. Canonical-only would leave `existingShard`
+                    // undefined and let an empty target intersection fall through
+                    // to DEFAULT_PACK_SHARD, resetting a deliberate 25 to 100 —
+                    // the exact drift this branch exists to repair.
+                    const existingShard = (get(
                       draft,
                       `inputs[0].config.osquery.value.packs.${pk}.shard`
-                    ) as number | undefined;
+                    ) ??
+                      get(
+                        draft,
+                        `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}.shard`
+                      )) as number | undefined;
                     removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
                     set(
                       draft,

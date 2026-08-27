@@ -175,6 +175,27 @@ const DEFAULT_PACK_ENTRY = {
   },
 };
 
+/**
+ * A pack SO entry whose `attrs.name` matches the name it is keyed under.
+ * `buildPackSOFindResult` spreads `attrs` after `name`, so reusing
+ * DEFAULT_PACK_ENTRY (named `reconcile-pack`) under a different key would
+ * clobber the name and fail the reconciler's exact-match re-check.
+ */
+const MYPACK_ENTRY = {
+  id: 'pack-1',
+  attrs: {
+    name: 'mypack',
+    enabled: true,
+    created_at: '2026-01-01T00:00:00.000Z',
+    queries: [{ id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-q1' }],
+  },
+};
+
+/** Minimal structural view for reaching into a built policy's pack blocks. */
+interface PackagePolicyShape {
+  inputs: Array<{ config: { osquery: { value: { packs: Record<string, WirePackBlock> } } } }>;
+}
+
 describe('reconcileScheduleIdsToWire', () => {
   test('picks the exactly-named pack SO when the analyzed-text filter returns fuzzy matches', async () => {
     // `osquery-pack.attributes.name` is mapped as analyzed `text`, so a filter
@@ -674,12 +695,14 @@ describe('reconcileScheduleIdsToWire', () => {
     ).toBe('sched-B');
   });
 
-  test('a policy with no spaceIds falls back to the default space', async () => {
+  test('a policy with no spaceIds and a bare-named key falls back to the default space', async () => {
     // Space awareness disabled (or a pre-migration policy) leaves `spaceIds`
     // undefined; the block must still resolve rather than land in a space
-    // whose scoped client would 404 the write.
+    // whose scoped client would 404 the write. This pins the DEFAULT half of
+    // the fallback only — see the `security--` tests below for the half that
+    // must NOT collapse to `default`.
     const { spaceIds: _omit, ...policyWithoutSpaceIds } = {
-      ...buildPackagePolicy(),
+      ...buildPackagePolicy('reconcile-pack'),
       spaceIds: undefined,
     } as Record<string, unknown>;
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
@@ -741,11 +764,13 @@ describe('reconcileScheduleIdsToWire', () => {
     ).toEqual(['space-a--reconcile-pack']);
   });
 
-  test('a block whose key space disagrees with the policy space is skipped, not mis-written', async () => {
-    // e.g. a `default--`-keyed block sitting on a space-a policy. We trust
-    // `spaceIds`, so the SO is looked up in space-a and legitimately not found:
-    // warn and skip. It must NOT fall back to the key's space and write a block
-    // built from another space's pack.
+  test('a block whose key space disagrees with a DECLARED policy space is skipped, not mis-written', async () => {
+    // e.g. a `default--`-keyed block sitting on a space-a policy. `spaceIds` is
+    // SET here, so it is authoritative: the SO is looked up in space-a and
+    // legitimately not found — warn and skip. It must NOT fall back to the key's
+    // space and write a block built from another space's pack.
+    // (The inverse — `spaceIds` UNSET, where the key IS the only evidence and
+    // must be trusted — is pinned by the `security--` tests below.)
     const policy = { ...buildPackagePolicy(), spaceIds: ['space-a'] };
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
     // Only the default-space client knows this pack; space-a's find returns none.
@@ -771,6 +796,309 @@ describe('reconcileScheduleIdsToWire', () => {
     // An absent SO is not a transient fault, so the one-shot still completes.
     expect(result.hadFailures).toBe(false);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no pack SO found for key'));
+  });
+
+  test('a pre-migration policy (spaceIds unset) resolves the space from the block key', async () => {
+    // Fleet space awareness needs `useSpaceAwareness` AND a successful migration;
+    // until then every Fleet read gates `spaceIds` off and it arrives undefined.
+    // osquery keys blocks off the KIBANA active space regardless, so a
+    // `security--`-keyed block must resolve to `security`, not `default`.
+    // Collapsing to `default` writes `default--mypack` beside the untouched
+    // `security--mypack` (removePackFromPolicy only unsets canonical + bare),
+    // leaving the agent running a DUPLICATED schedule.
+    const { spaceIds: _omit, ...policyWithoutSpaceIds } = {
+      ...buildPackagePolicy('security--mypack', 'pack-1'),
+      spaceIds: undefined,
+    } as Record<string, unknown>;
+    // The block is modern (carries `pack_name`), so the name lookup succeeds in
+    // whichever space we scope to — which is exactly why a wrong space is silent.
+    (
+      (policyWithoutSpaceIds as unknown as PackagePolicyShape).inputs[0].config.osquery.value.packs[
+        'security--mypack'
+      ] as WirePackBlock
+    ).pack_name = 'mypack';
+
+    const scopedClient = createMockScopedClient({ mypack: MYPACK_ENTRY });
+    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const core = createMockCoreStart(scopedClient);
+    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policyWithoutSpaceIds]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(false);
+    expect(String(getScopedClient.mock.calls[0][0].spaceId)).toBe('security');
+    // Exactly ONE key survives — no `default--mypack` duplicate alongside it.
+    const writtenPacks = packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs;
+    expect(Object.keys(writtenPacks)).toEqual(['security--mypack']);
+    expect(writtenPacks['security--mypack'].queries.q1.schedule_id).toBe('sched-q1');
+  });
+
+  test('a pre-migration policy does not adopt a namesake pack from the default space', async () => {
+    // Worst case of the above: a pack named `mypack` also exists in `default`.
+    // Scoping to `default` would write THAT pack's pack_id/queries under
+    // `default--mypack` while `security--mypack` survives untouched.
+    const { spaceIds: _omit, ...policyWithoutSpaceIds } = {
+      ...buildPackagePolicy('security--mypack', 'pack-SECURITY'),
+      spaceIds: undefined,
+    } as Record<string, unknown>;
+    (
+      (policyWithoutSpaceIds as unknown as PackagePolicyShape).inputs[0].config.osquery.value.packs[
+        'security--mypack'
+      ] as WirePackBlock
+    ).pack_name = 'mypack';
+
+    // Only ONE client is handed out by the mock, so if the reconciler scoped to
+    // the wrong space it would still find this SO — the pack_id assertion is
+    // what catches the mis-attribution.
+    const scopedClient = createMockScopedClient({
+      mypack: { id: 'pack-DEFAULT-SPACE-COPY', attrs: { ...MYPACK_ENTRY.attrs } },
+    });
+    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const core = createMockCoreStart(scopedClient);
+    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policyWithoutSpaceIds]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(String(getScopedClient.mock.calls[0][0].spaceId)).toBe('security');
+    const writtenPacks = packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs;
+    expect(Object.keys(writtenPacks)).toEqual(['security--mypack']);
+    expect(writtenPacks['default--mypack']).toBeUndefined();
+  });
+
+  test('a pre-migration LEGACY bare-key block resolves its space and name from the key', async () => {
+    // Legacy block: no `pack_name`, so the name comes from the key. With
+    // `spaceIds` unset, stripping only a `default--` prefix leaves the WHOLE key
+    // as the pack name — the lookup for a pack literally named
+    // `security--mypack` finds nothing and the block never repairs.
+    const { spaceIds: _omit, ...policyWithoutSpaceIds } = {
+      ...buildPackagePolicy('security--mypack', 'pack-1'),
+      spaceIds: undefined,
+    } as Record<string, unknown>;
+
+    const scopedClient = createMockScopedClient({ mypack: MYPACK_ENTRY });
+    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const core = createMockCoreStart(scopedClient);
+    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policyWithoutSpaceIds]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(false);
+    // The ambiguous key is probed by candidate: the bare whole-key reading is
+    // tried first (the common shape), then the `security`/`mypack` split that a
+    // real pack SO actually backs. What matters is that the STRIPPED name is
+    // probed at all — pinning call order would just pin the probe order.
+    const probedFilters = scopedClient.find.mock.calls.map(
+      (call: [{ filter: string }]) => call[0].filter
+    );
+    expect(probedFilters.some((filter: string) => filter.includes('"mypack"'))).toBe(true);
+    // The write client is scoped to the space the evidence resolved to.
+    const writeScopes = getScopedClient.mock.calls.map((call: [{ spaceId?: unknown }]) =>
+      String(call[0].spaceId)
+    );
+    expect(writeScopes).toContain('security');
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+    expect(
+      packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs['security--mypack']
+        .queries.q1.schedule_id
+    ).toBe('sched-q1');
+  });
+
+  test('an all-spaces policy (spaceIds ["*"]) collapses to the default space', async () => {
+    // The drain requests `spaceIds: ['*']`, so an all-spaces policy is directly
+    // reachable. Using the sentinel verbatim scopes the write client to the
+    // literal space `*` and writes a junk `*--mypack` key. Fleet's own
+    // `getValidSpaceId` maps `*` to the default space; we mirror that.
+    const policy = { ...buildPackagePolicy('default--mypack', 'pack-1'), spaceIds: ['*'] };
+    (
+      (policy as unknown as PackagePolicyShape).inputs[0].config.osquery.value.packs[
+        'default--mypack'
+      ] as WirePackBlock
+    ).pack_name = 'mypack';
+
+    const scopedClient = createMockScopedClient({ mypack: MYPACK_ENTRY });
+    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const core = createMockCoreStart(scopedClient);
+    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policy]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(false);
+    expect(String(getScopedClient.mock.calls[0][0].spaceId)).toBe('default');
+    expect(
+      Object.keys(packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs)
+    ).toEqual(['default--mypack']);
+  });
+
+  test('a DASHED space id resolves exactly when the block carries pack_name', async () => {
+    // The Spaces UI slugifies "Prod - EU" to `prod---eu`, and the pack is named
+    // `my--pack` — so `--` appears in BOTH halves of `prod---eu--my--pack`.
+    // Splitting on any single `--` mis-attributes the block; `pack_name` pins
+    // the boundary exactly, so the space is recovered without guessing.
+    const { spaceIds: _omit, ...policy } = {
+      ...buildPackagePolicy('prod---eu--my--pack', 'pack-1'),
+      spaceIds: undefined,
+    } as Record<string, unknown>;
+    (
+      (policy as unknown as PackagePolicyShape).inputs[0].config.osquery.value.packs[
+        'prod---eu--my--pack'
+      ] as WirePackBlock
+    ).pack_name = 'my--pack';
+
+    const scopedClient = createMockScopedClient({
+      'my--pack': {
+        id: 'pack-1',
+        attrs: {
+          name: 'my--pack',
+          enabled: true,
+          created_at: '2026-01-01T00:00:00.000Z',
+          queries: [
+            { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-q1' },
+          ],
+        },
+      },
+    });
+    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const core = createMockCoreStart(scopedClient);
+    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policy]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(false);
+    expect(String(getScopedClient.mock.calls[0][0].spaceId)).toBe('prod---eu');
+    // The original key is repaired in place — no `prod--...` duplicate appears.
+    expect(
+      Object.keys(packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs)
+    ).toEqual(['prod---eu--my--pack']);
+  });
+
+  test('an ambiguous legacy key resolves to the candidate split a real pack SO backs', async () => {
+    // Legacy block: no `pack_name`, dashes on both sides, `spaceIds` unset — the
+    // boundary is unknowable from the key alone. Rather than commit to a blind
+    // split, each candidate is probed and only the one matching an actual pack
+    // is used, so the correct `prod---eu` / `my--pack` reading wins over the
+    // `prod` / `-eu--my--pack` one.
+    const { spaceIds: _omit, ...policy } = {
+      ...buildPackagePolicy('prod---eu--my--pack', 'pack-1'),
+      spaceIds: undefined,
+    } as Record<string, unknown>;
+
+    const scopedClient = createMockScopedClient({
+      'my--pack': {
+        id: 'pack-1',
+        attrs: {
+          name: 'my--pack',
+          enabled: true,
+          created_at: '2026-01-01T00:00:00.000Z',
+          queries: [
+            { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-q1' },
+          ],
+        },
+      },
+    });
+    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const core = createMockCoreStart(scopedClient);
+    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policy]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(false);
+    const writeScopes = getScopedClient.mock.calls.map((call: [{ spaceId?: unknown }]) =>
+      String(call[0].spaceId)
+    );
+    expect(writeScopes).toContain('prod---eu');
+    expect(
+      Object.keys(packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs)
+    ).toEqual(['prod---eu--my--pack']);
+  });
+
+  test('a transient fault while probing an ambiguous legacy key re-arms the one-shot', async () => {
+    // The probe issues its own `find`s, so a 503 there must set hadFailures
+    // rather than fall through to the blind default split — and it must not be
+    // swallowed by the "no pack blocks found" early return.
+    const { spaceIds: _omit, ...policy } = {
+      ...buildPackagePolicy('prod---eu--my--pack', 'pack-1'),
+      spaceIds: undefined,
+    } as Record<string, unknown>;
+
+    const scopedClient = {
+      find: jest.fn().mockRejectedValue(new Error('es_rejected_execution_exception')),
+      update: jest.fn().mockResolvedValue({}),
+      bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+    };
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const logger = createMockLogger();
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: createMockCoreStart(scopedClient),
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policy]),
+        update: packagePolicyUpdate,
+      }),
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(true);
+    expect(packagePolicyUpdate).not.toHaveBeenCalled();
   });
 
   test('a legacy bare-key block whose name itself contains "--" is not truncated', async () => {

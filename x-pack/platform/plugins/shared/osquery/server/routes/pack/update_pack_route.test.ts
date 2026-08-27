@@ -3772,6 +3772,123 @@ describe('updatePackRoute', () => {
       expect(writtenBlock.shard).toBe(25);
     });
 
+    it('edit-only save preserves a deliberate shard on a LEGACY bare-keyed block', async () => {
+      // `policyHasPack` matches the bare `my-pack` key too, which is how a
+      // pre-space-key block enters the write set. Reading `existingShard` from
+      // the canonical key only would leave it undefined, and an empty target
+      // intersection then falls through to DEFAULT_PACK_SHARD — resetting a
+      // deliberate 25 to 100 while the SO still reads 25.
+      const currentSO = {
+        ...basePackSO,
+        references: [{ id: 'policy-a', name: 'policy-a', type: 'ingest-agent-policies' }],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [
+            { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-q1' },
+          ],
+          shards: [{ key: 'policy-a', value: 25 }],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      // The drifted package policy carries the block under the LEGACY bare key
+      // with the deliberate 25, and hosts only policy-b — a co-tenant the pack
+      // does not target. So its target intersection is EMPTY and only the wire
+      // shard can save the 25 from DEFAULT_PACK_SHARD.
+      const legacyPolicy = buildWirePolicyWithPack('package-policy-legacy', ['policy-b']);
+      const legacyPacks = legacyPolicy.inputs[0].config.osquery.value.packs as Record<
+        string,
+        unknown
+      >;
+      delete legacyPacks['default--my-pack'];
+      legacyPacks['my-pack'] = {
+        shard: 25,
+        pack_id: 'pack-id',
+        default_native_schedule: { interval: 60 },
+        queries: {},
+      };
+      // A second, block-less package policy hosts policy-a so the pack's own
+      // shard key validates (`getInitialPolicies` intersects against ALL drained
+      // policy_ids) without putting policy-a on the drifted policy above.
+      const siblingPolicy = buildWirePolicyWithPack('package-policy-sibling', ['policy-a']);
+      delete (siblingPolicy.inputs[0].config.osquery.value.packs as Record<string, unknown>)[
+        'default--my-pack'
+      ];
+      const packagePolicyList = jest
+        .fn()
+        .mockResolvedValue({ items: [legacyPolicy, siblingPolicy] });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-a', name: 'policy-a' }]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only over a legacy bare-keyed block' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      // Both are written: the drifted policy via the wire scan, the sibling via
+      // the reference-resolved half of the union (attach-on-edit).
+      const legacyWrite = packagePolicyUpdate.mock.calls.find(
+        (call) => call[2] === 'package-policy-legacy'
+      );
+      if (!legacyWrite) throw new Error('drifted package policy was not written');
+      const writtenPacks = legacyWrite[3].inputs[0].config.osquery.value.packs;
+      // Migrated to the canonical key, and the legacy 25 survived the move.
+      expect(writtenPacks['default--my-pack'].shard).toBe(25);
+      expect(writtenPacks['my-pack']).toBeUndefined();
+    });
+
     it('edit-only reference heal does NOT invent targeting from a co-tenant on a shared package policy', async () => {
       // The edit form prefills policy_ids from the response, so inventing
       // policy-b here would persist as an explicit retarget on the next save.

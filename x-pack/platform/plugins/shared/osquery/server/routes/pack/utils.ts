@@ -778,7 +778,7 @@ export const policyHasPack = (
   packName: string,
   spaceId: string
 ): boolean =>
-  has(packagePolicy, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`) ||
+  has(packagePolicy, `inputs[0].config.osquery.value.packs.${makePackKey(packName, spaceId)}`) ||
   has(packagePolicy, `inputs[0].config.osquery.value.packs.${packName}`);
 
 export const removePackFromPolicy = (
@@ -786,11 +786,19 @@ export const removePackFromPolicy = (
   packName: string,
   spaceId: string
 ): void => {
-  unset(draft, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`);
+  unset(draft, `inputs[0].config.osquery.value.packs.${makePackKey(packName, spaceId)}`);
   unset(draft, `inputs[0].config.osquery.value.packs.${packName}`);
 };
 
-export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--${packName}`;
+/**
+ * Separator between a pack block's space id and pack name on the wire. Both
+ * halves can contain it, so it is only ever used to BUILD a key or to strip a
+ * known prefix — never to split an arbitrary key into two parts.
+ */
+export const PACK_KEY_SEPARATOR = '--';
+
+export const makePackKey = (packName: string, spaceId: string) =>
+  `${spaceId}${PACK_KEY_SEPARATOR}${packName}`;
 
 /**
  * Drain ALL osquery package policies via keyset `fetchAllItems`. Shared by the
