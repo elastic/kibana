@@ -122,8 +122,9 @@ export class SearchExamplesPage {
 
   /**
    * Temporary until Apps DX supports replace-without-clear on comboBox.
-   * Select by typing + exact option click (no clear). Always runs the select
-   * path so unexpected state surfaces as a failure.
+   * Select by typing + exact option click (no clear). Skip when the value is
+   * already selected — EUI hides that option ("You've selected all available
+   * options") and a click wait times out.
    */
   private async selectSingleComboOption(
     testSubj: string,
@@ -132,6 +133,12 @@ export class SearchExamplesPage {
   ): Promise<void> {
     const normalizedLabel = label.trim();
     const root = this.page.testSubj.locator(testSubj);
+    await root.locator('[data-test-subj="comboBoxInput"]').waitFor({ state: 'visible' });
+
+    if ((await this.getSingleComboSelectedLabel(root)) === normalizedLabel) {
+      return;
+    }
+
     await root.locator('[data-test-subj="comboBoxInput"]').click();
     const searchInput = root.locator('[data-test-subj="comboBoxSearchInput"]');
     await searchInput.fill(label);
@@ -142,5 +149,17 @@ export class SearchExamplesPage {
     await option.waitFor({ state: 'visible', timeout });
     await option.click();
     await listbox.waitFor({ state: 'hidden', timeout });
+  }
+
+  private async getSingleComboSelectedLabel(root: Locator): Promise<string | undefined> {
+    const pills = root.locator('[data-test-subj="euiComboBoxPill"]');
+    if ((await pills.count()) === 1) {
+      return (await pills.innerText()).trim();
+    }
+
+    const inputValue = (
+      await root.locator('[data-test-subj="comboBoxSearchInput"]').inputValue()
+    ).trim();
+    return inputValue || undefined;
   }
 }
