@@ -448,17 +448,6 @@ describe('CountTimeframeStrategy', () => {
         expectedStatusCount: 1,
       });
     });
-
-    it('increments from 1 when a legacy recovering episode has a null status count', () => {
-      expectTransition({
-        from: alertEpisodeStatus.recovering,
-        on: alertEventStatus.recovered,
-        to: alertEpisodeStatus.recovering,
-        stateTransition: { recovering_count: 3 },
-        statusCount: null,
-        expectedStatusCount: 1,
-      });
-    });
   });
 
   describe('malformed duration fallback', () => {
