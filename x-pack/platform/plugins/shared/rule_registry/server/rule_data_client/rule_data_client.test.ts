@@ -499,6 +499,104 @@ describe('RuleDataClient', () => {
           expect(ruleDataClient.isWriteEnabled()).toBe(true);
         });
 
+        test('does not log error when the only failures are version conflicts (409)', async () => {
+          scopedClusterClient.bulk.mockResponseOnce({
+            took: 486,
+            errors: true,
+            items: [
+              {
+                create: {
+                  _index: 'test',
+                  _id: '3',
+                  _version: 1,
+                  result: 'created',
+                  _shards: { total: 2, successful: 1, failed: 0 },
+                  status: 201,
+                  _seq_no: 2,
+                  _primary_term: 3,
+                },
+              },
+              {
+                create: {
+                  _index: 'index1',
+                  _id: '7',
+                  status: 409,
+                  error: {
+                    type: 'version_conflict_engine_exception',
+                    reason:
+                      '[7]: version conflict, document already exists (current version [1])',
+                  },
+                },
+              },
+            ],
+          });
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+          const writer = await ruleDataClient.getWriter();
+
+          // Previously, a delay between calling getWriter() and using a writer function
+          // would cause an Unhandled promise rejection if there were any errors getting a writer
+          // Adding this delay in the tests to ensure this does not pop up again.
+          await delay();
+
+          const bulkWriteResponse = await writer.bulk({});
+          expect(bulkWriteResponse?.body.errors).toBe(true);
+          expect(logger.error).not.toHaveBeenCalled();
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+        });
+
+        test('logs error when there is a non-409 failure alongside version conflicts', async () => {
+          scopedClusterClient.bulk.mockResponseOnce({
+            took: 486,
+            errors: true,
+            items: [
+              {
+                create: {
+                  _index: 'index1',
+                  _id: '7',
+                  status: 409,
+                  error: {
+                    type: 'version_conflict_engine_exception',
+                    reason:
+                      '[7]: version conflict, document already exists (current version [1])',
+                  },
+                },
+              },
+              {
+                create: {
+                  _index: 'index1',
+                  _id: '8',
+                  status: 400,
+                  error: {
+                    type: 'mapper_parsing_exception',
+                    reason: 'failed to parse field [foo] of type [keyword]',
+                  },
+                },
+              },
+            ],
+          });
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+          const writer = await ruleDataClient.getWriter();
+
+          // Previously, a delay between calling getWriter() and using a writer function
+          // would cause an Unhandled promise rejection if there were any errors getting a writer
+          // Adding this delay in the tests to ensure this does not pop up again.
+          await delay();
+
+          const bulkWriteResponse = await writer.bulk({});
+          expect(logger.error).toHaveBeenNthCalledWith(
+            1,
+            // @ts-expect-error
+            new errors.ResponseError(bulkWriteResponse)
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+        });
+
         test('waits until cluster client is ready before calling bulk', async () => {
           scopedClusterClient.bulk.mockResolvedValueOnce(
             elasticsearchClientMock.createSuccessTransportRequestPromise(
