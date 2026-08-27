@@ -8,6 +8,7 @@
  */
 
 import type { monaco, ParsedRequest } from '@kbn/monaco';
+import { isInsideConsoleString } from '@kbn/monaco/src/languages/console/utils';
 import type { EditorRequest } from '../../types';
 import { startsWithMethodRegex } from '../constants';
 import { parseLine } from '../tokens_utils';
@@ -40,10 +41,24 @@ export const getRequestEndLineNumber = ({
   startLineNumber: number;
 }): number => {
   let endLineNumber: number;
+
   if (parsedRequest.endOffset) {
     // if the parser set an end offset for this request, then find the line number for it
     endLineNumber = model.getPositionAt(parsedRequest.endOffset).lineNumber;
   } else {
+    const requestStartLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber;
+    const isInsideUnfinishedString = (lineNumber: number): boolean => {
+      const contentBeforeLine: string[] = [];
+      for (
+        let currentLineNumber = requestStartLineNumber;
+        currentLineNumber < lineNumber;
+        currentLineNumber++
+      ) {
+        contentBeforeLine.push(model.getLineContent(currentLineNumber));
+      }
+      return isInsideConsoleString(contentBeforeLine.join('\n'));
+    };
+
     // if no end offset, try to find the line before the next request starts
     if (nextRequest) {
       const nextRequestStartLine = model.getPositionAt(nextRequest.startOffset).lineNumber;
@@ -51,11 +66,14 @@ export const getRequestEndLineNumber = ({
         nextRequestStartLine > startLineNumber ? nextRequestStartLine - 1 : startLineNumber;
     } else {
       // if there is no next request, find the end of the text or the line that starts with a method
-      let nextLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber + 1;
+      let nextLineNumber = requestStartLineNumber + 1;
       let nextLineContent: string;
       while (nextLineNumber <= model.getLineCount()) {
         nextLineContent = model.getLineContent(nextLineNumber).trim();
-        if (nextLineContent.match(startsWithMethodRegex)) {
+        if (
+          nextLineContent.match(startsWithMethodRegex) &&
+          !isInsideUnfinishedString(nextLineNumber)
+        ) {
           // found a line that starts with a method, stop iterating
           break;
         }

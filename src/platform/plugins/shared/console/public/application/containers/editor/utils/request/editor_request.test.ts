@@ -78,6 +78,46 @@ describe('editor_request', () => {
       });
       expect(result).toEqual(3);
     });
+
+    it('keeps request-like lines inside an unfinished triple-quoted value in the request', () => {
+      const content = ['POST _query', '{', '  "script": """', '  GET _all', '  {', '', '  }'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(7);
+
+      expect(
+        getRequestEndLineNumber({
+          parsedRequest,
+          model,
+          startLineNumber: 4,
+        })
+      ).toEqual(7);
+    });
+
+    it('still detects the next request after a completed triple-quoted value', () => {
+      const content = ['POST _query', '{', '  "script": """done"""', '}', 'GET _search'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(4);
+    });
   });
 
   describe('getRequestFromEditor', () => {
