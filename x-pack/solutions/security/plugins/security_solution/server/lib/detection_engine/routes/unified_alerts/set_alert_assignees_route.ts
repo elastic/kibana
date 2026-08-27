@@ -71,13 +71,24 @@ export const setUnifiedAlertsAssigneesRoute = (
         const alertIds: string[] = [];
         const attackIds: string[] = [];
 
-        // Compute valid assignees once so we can use them for both no-op filtering and emission.
-        const validAssigneesToAdd = assignees.add
-          .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-          .slice(0, MAX_ASSIGNEES_PER_OPERATION);
-        const validAssigneesToRemove = assignees.remove
-          .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-          .slice(0, MAX_ASSIGNEES_PER_OPERATION);
+        // All length-valid UIDs — used for no-op detection so that UIDs beyond the payload cap
+        // still trigger an emit when they would actually change a document.
+        const allValidAssigneesToAdd = assignees.add.filter(
+          (uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH
+        );
+        const allValidAssigneesToRemove = assignees.remove.filter(
+          (uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH
+        );
+        // Payload arrays are capped to MAX_ASSIGNEES_PER_OPERATION; when the full arrays are
+        // larger the mutation applied more than the event reports, so truncated is set below.
+        const validAssigneesToAdd = allValidAssigneesToAdd.slice(0, MAX_ASSIGNEES_PER_OPERATION);
+        const validAssigneesToRemove = allValidAssigneesToRemove.slice(
+          0,
+          MAX_ASSIGNEES_PER_OPERATION
+        );
+        const operationTruncated =
+          allValidAssigneesToAdd.length > MAX_ASSIGNEES_PER_OPERATION ||
+          allValidAssigneesToRemove.length > MAX_ASSIGNEES_PER_OPERATION;
 
         if (eventBus) {
           try {
@@ -91,10 +102,11 @@ export const setUnifiedAlertsAssigneesRoute = (
                   ? (hit.source[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[])
                   : []
               );
-              // Only emit for documents where the operation would actually change the assignees.
+              // Use allValid* (not the capped arrays) so a UID beyond position 100 that would
+              // actually change the document still triggers the event.
               if (
-                validAssigneesToAdd.some((uid) => !currentAssignees.has(uid)) ||
-                validAssigneesToRemove.some((uid) => currentAssignees.has(uid))
+                allValidAssigneesToAdd.some((uid) => !currentAssignees.has(uid)) ||
+                allValidAssigneesToRemove.some((uid) => currentAssignees.has(uid))
               ) {
                 if (isAttackDiscoveryIndex(hit.index)) {
                   attackIds.push(hit.id);
@@ -116,7 +128,7 @@ export const setUnifiedAlertsAssigneesRoute = (
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 assigneesToAdd: validAssigneesToAdd,
                 assigneesToRemove: validAssigneesToRemove,
-                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
+                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
@@ -124,7 +136,7 @@ export const setUnifiedAlertsAssigneesRoute = (
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 assigneesToAdd: validAssigneesToAdd,
                 assigneesToRemove: validAssigneesToRemove,
-                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
+                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
           }

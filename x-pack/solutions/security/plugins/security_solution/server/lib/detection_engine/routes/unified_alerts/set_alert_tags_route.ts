@@ -71,13 +71,17 @@ export const setUnifiedAlertsTagsRoute = (
         const alertIds: string[] = [];
         const attackIds: string[] = [];
 
-        // Compute valid tags once so we can use them for both no-op filtering and emission.
-        const validTagsToAdd = tags.tags_to_add
-          .filter((t) => t.length <= MAX_TAG_LENGTH)
-          .slice(0, MAX_TAGS_PER_OPERATION);
-        const validTagsToRemove = tags.tags_to_remove
-          .filter((t) => t.length <= MAX_TAG_LENGTH)
-          .slice(0, MAX_TAGS_PER_OPERATION);
+        // All length-valid tags — used for no-op detection so that tags beyond the payload cap
+        // still trigger an emit when they would actually change a document.
+        const allValidTagsToAdd = tags.tags_to_add.filter((t) => t.length <= MAX_TAG_LENGTH);
+        const allValidTagsToRemove = tags.tags_to_remove.filter((t) => t.length <= MAX_TAG_LENGTH);
+        // Payload arrays are capped to MAX_TAGS_PER_OPERATION; when the full arrays are larger
+        // the mutation applied more than the event reports, so truncated is set below.
+        const validTagsToAdd = allValidTagsToAdd.slice(0, MAX_TAGS_PER_OPERATION);
+        const validTagsToRemove = allValidTagsToRemove.slice(0, MAX_TAGS_PER_OPERATION);
+        const operationTruncated =
+          allValidTagsToAdd.length > MAX_TAGS_PER_OPERATION ||
+          allValidTagsToRemove.length > MAX_TAGS_PER_OPERATION;
 
         if (eventBus) {
           try {
@@ -91,10 +95,11 @@ export const setUnifiedAlertsTagsRoute = (
                   ? (hit.source[ALERT_WORKFLOW_TAGS] as string[])
                   : []
               );
-              // Only emit for documents where the operation would actually change the tags.
+              // Use allValid* (not the capped arrays) so a tag beyond position 100 that would
+              // actually change the document still triggers the event.
               if (
-                validTagsToAdd.some((t) => !currentTags.has(t)) ||
-                validTagsToRemove.some((t) => currentTags.has(t))
+                allValidTagsToAdd.some((t) => !currentTags.has(t)) ||
+                allValidTagsToRemove.some((t) => currentTags.has(t))
               ) {
                 if (isAttackDiscoveryIndex(hit.index)) {
                   attackIds.push(hit.id);
@@ -116,7 +121,7 @@ export const setUnifiedAlertsTagsRoute = (
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 tagsToAdd: validTagsToAdd,
                 tagsToRemove: validTagsToRemove,
-                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
+                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
@@ -124,7 +129,7 @@ export const setUnifiedAlertsTagsRoute = (
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 tagsToAdd: validTagsToAdd,
                 tagsToRemove: validTagsToRemove,
-                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
+                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
           }

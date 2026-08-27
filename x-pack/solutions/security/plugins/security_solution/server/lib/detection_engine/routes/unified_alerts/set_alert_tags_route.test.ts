@@ -481,5 +481,64 @@ describe('set unified alerts tags', () => {
         expect.objectContaining({ alertIds: ['alert-2'] })
       );
     });
+
+    test('emits when only a tag beyond the payload cap (position 101) would change a document', async () => {
+      // First 100 tags are already present; tag at position 101 is new → should still emit.
+      const existingTags = Array.from(
+        { length: MAX_ALERTS_PER_TRIGGER },
+        (_, i) => `tag-${i}`
+      ).slice(0, 100);
+      const tagsToAdd = [...existingTags, 'tag-new-101'];
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': existingTags },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1'],
+          tags: { tags_to_add: tagsToAdd, tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alert-1'] })
+      );
+    });
+
+    test('sets truncated=true when tags_to_add exceeds MAX_TAGS_PER_OPERATION', async () => {
+      const tagsToAdd = Array.from({ length: 101 }, (_, i) => `tag-${i}`);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1'],
+          tags: { tags_to_add: tagsToAdd, tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ truncated: true })
+      );
+    });
   });
 });

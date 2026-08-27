@@ -449,5 +449,61 @@ describe('set unified alerts assignees', () => {
         expect.objectContaining({ alertIds: ['alert-2'] })
       );
     });
+
+    test('emits when only a UID beyond the payload cap (position 101) would change a document', async () => {
+      // First 100 UIDs are already present; UID at position 101 is new → should still emit.
+      const existingUids = Array.from({ length: 100 }, (_, i) => `user-${i}`);
+      const uidsToAdd = [...existingUids, 'user-new-101'];
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': existingUids },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1'],
+          assignees: { add: uidsToAdd, remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alert-1'] })
+      );
+    });
+
+    test('sets truncated=true when assignees.add exceeds MAX_ASSIGNEES_PER_OPERATION', async () => {
+      const uidsToAdd = Array.from({ length: 101 }, (_, i) => `user-${i}`);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1'],
+          assignees: { add: uidsToAdd, remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ truncated: true })
+      );
+    });
   });
 });
