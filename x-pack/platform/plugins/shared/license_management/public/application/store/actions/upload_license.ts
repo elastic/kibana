@@ -7,11 +7,10 @@
 
 import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
-import type { Dispatch } from 'redux-v4';
 import { addLicense } from './add_license';
 import { putLicense, type PutLicenseResponse } from '../../lib/es';
 import { addUploadErrorMessage } from './add_error_message';
-import type { UploadStatusState, AppThunkAction, ThunkServices } from '../types';
+import type { UploadStatusState, AppDispatch, AppThunkAction, ThunkServices } from '../types';
 
 const extractErrorReason = (err: unknown): string | undefined => {
   if (typeof err !== 'object' || err === null || !('responseJSON' in err)) {
@@ -69,7 +68,7 @@ const genericUploadError = i18n.translate(
 
 const dispatchFromResponse = async (
   response: PutLicenseResponse,
-  dispatch: Dispatch,
+  dispatch: AppDispatch,
   currentLicenseType: string,
   newLicenseType: string,
   { history, licensing }: Pick<ThunkServices, 'history' | 'licensing'>

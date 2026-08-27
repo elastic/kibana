@@ -11,13 +11,14 @@ import { handleActions } from 'redux-actions';
 import { trialStatusLoaded } from '../actions/start_trial';
 import type { TrialStatusState } from '../types';
 
-export const trialStatus = handleActions<TrialStatusState, boolean>(
-  {
-    [String(trialStatusLoaded)](state: TrialStatusState, { payload }: Action<boolean>) {
-      return {
-        canStartTrial: payload,
-      };
+export const getTrialStatusReducer = (initialState: TrialStatusState = {}) =>
+  handleActions<TrialStatusState, boolean>(
+    {
+      [String(trialStatusLoaded)](state: TrialStatusState, { payload }: Action<boolean>) {
+        return {
+          canStartTrial: payload,
+        };
+      },
     },
-  },
-  {}
-);
+    initialState
+  );

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getReducer } from './index_management';
+export { getReducer, type IndexManagementAction } from './index_management';

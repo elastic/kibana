@@ -11,11 +11,12 @@ import type { ILicense } from '@kbn/licensing-types';
 
 import { addLicense } from '../actions/add_license';
 
-export const license = handleActions<ILicense | null, ILicense>(
-  {
-    [String(addLicense)](_state: ILicense | null, { payload }: Action<ILicense>) {
-      return payload;
+export const getLicenseReducer = (initialState: ILicense | null = null) =>
+  handleActions<ILicense | null, ILicense>(
+    {
+      [String(addLicense)](_state: ILicense | null, { payload }: Action<ILicense>) {
+        return payload;
+      },
     },
-  },
-  null
-);
+    initialState
+  );

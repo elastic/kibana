@@ -8,11 +8,14 @@
 import { combineReducers } from 'redux-v4';
 import { indices } from './indices';
 import { rowStatus } from './row_status';
-import { tableState } from './table_state';
+import { getTableStateReducer } from './table_state';
+import type { TableState } from '../types';
 
-export const getReducer = () =>
+export const getReducer = (initialTableState?: TableState) =>
   combineReducers({
     indices,
     rowStatus,
-    tableState,
+    tableState: getTableStateReducer(initialTableState),
   });
+
+export type IndexManagementAction = Parameters<ReturnType<typeof getReducer>>[1];

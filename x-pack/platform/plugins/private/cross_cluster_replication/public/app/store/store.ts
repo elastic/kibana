@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Store, StoreEnhancer } from 'redux-v4';
 import { applyMiddleware, compose, createStore } from 'redux-v4';
+import type { Store, StoreEnhancer } from 'redux-v4';
 import thunk from 'redux-thunk-v2';
 
-import { ccr, type CcrState } from './reducers';
+import { ccr, type CcrState, type CcrAction } from './reducers';
 
 declare global {
   interface Window {
@@ -17,17 +17,17 @@ declare global {
   }
 }
 
-export function createCrossClusterReplicationStore(
-  initialState: Partial<CcrState> = {}
-): Store<CcrState> {
-  const middleware = applyMiddleware(thunk);
+export type CcrStore = Store<CcrState, CcrAction>;
+
+export function createCrossClusterReplicationStore(): CcrStore {
+  const middleware: StoreEnhancer = applyMiddleware(thunk);
   const devtools =
     typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION__
       ? window.__REDUX_DEVTOOLS_EXTENSION__()
       : undefined;
-  const enhancer = devtools ? compose(middleware, devtools) : middleware;
+  const enhancer: StoreEnhancer = devtools ? compose(middleware, devtools) : middleware;
 
-  return createStore(ccr, initialState, enhancer);
+  return createStore(ccr, undefined, enhancer);
 }
 
 // Singleton for production use

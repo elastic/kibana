@@ -64,7 +64,6 @@
 @types/estree@1.0.8
 @types/glob@7.2.0
 @types/hast@2.3.1
-@types/hoist-non-react-statics@3.3.1
 @types/json-schema@7.0.11
 @types/lodash@4.17.0
 @types/mdast@3.0.3
@@ -75,7 +74,6 @@
 @types/parse5@5.0.3
 @types/prismjs@1.16.3
 @types/prop-types@15.7.5
-@types/react-redux@7.1.24
 @types/react-window@1.8.8
 @types/react@18.2.79
 @types/refractor@3.4.1
@@ -390,8 +388,7 @@ react-focus-on@3.9.1
 react-is@16.13.1
 react-is@17.0.2
 react-is@18.1.0
-react-redux@7.2.8
-react-redux@9.2.0
+react-redux@9.3.0
 react-remove-scroll-bar@2.3.4
 react-remove-scroll@2.5.7
 react-router-dom@5.3.4
@@ -419,7 +416,6 @@ repeat-string@1.6.1
 require-from-string@2.0.2
 requires-port@1.0.0
 reselect@4.1.8
-reselect@5.1.0
 reselect@5.2.0
 resolve-from@4.0.0
 resolve-pathname@2.2.0

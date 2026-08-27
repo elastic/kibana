@@ -10,11 +10,12 @@ import { handleActions } from 'redux-actions';
 
 import { addUploadErrorMessage } from '../actions/add_error_message';
 
-export const uploadErrorMessage = handleActions<string, string>(
-  {
-    [String(addUploadErrorMessage)](_state: string, { payload }: Action<string>) {
-      return payload;
+export const getUploadErrorMessageReducer = (initialState = '') =>
+  handleActions<string, string>(
+    {
+      [String(addUploadErrorMessage)](_state: string, { payload }: Action<string>) {
+        return payload;
+      },
     },
-  },
-  ''
-);
+    initialState
+  );

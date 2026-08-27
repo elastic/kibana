@@ -11,17 +11,18 @@ import { handleActions } from 'redux-actions';
 import { startBasicLicenseStatus, cancelStartBasicLicense } from '../actions/start_basic';
 import type { StartBasicStatusState } from '../types';
 
-export const startBasicStatus = handleActions<StartBasicStatusState, StartBasicStatusState>(
-  {
-    [String(startBasicLicenseStatus)](
-      state: StartBasicStatusState,
-      { payload }: Action<StartBasicStatusState>
-    ) {
-      return payload;
+export const getStartBasicStatusReducer = (initialState: StartBasicStatusState = {}) =>
+  handleActions<StartBasicStatusState, StartBasicStatusState>(
+    {
+      [String(startBasicLicenseStatus)](
+        state: StartBasicStatusState,
+        { payload }: Action<StartBasicStatusState>
+      ) {
+        return payload;
+      },
+      [String(cancelStartBasicLicense)]() {
+        return {};
+      },
     },
-    [String(cancelStartBasicLicense)]() {
-      return {};
-    },
-  },
-  {}
-);
+    initialState
+  );

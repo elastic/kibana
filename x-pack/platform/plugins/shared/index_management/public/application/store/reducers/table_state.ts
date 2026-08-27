@@ -31,63 +31,66 @@ export const defaultTableState: TableState = {
   toggleNameToVisibleMap: {},
 };
 
-export const tableState = handleActions<TableState, TableStatePayload>(
-  {
-    [String(filterChanged)](state, action) {
-      if (!('filter' in action.payload)) {
-        return state;
-      }
-      const { filter } = action.payload;
-      return {
-        ...state,
-        filter,
-        currentPage: 0,
-      };
-    },
-    [String(toggleChanged)](state, action) {
-      if (!('toggleName' in action.payload)) {
-        return state;
-      }
-      const { toggleName, toggleValue } = action.payload;
-      const toggleNameToVisibleMap = { ...state.toggleNameToVisibleMap };
-      toggleNameToVisibleMap[toggleName] = toggleValue;
-      return {
-        ...state,
-        toggleNameToVisibleMap,
-      };
-    },
-    [String(sortChanged)](state, action) {
-      if (!('sortField' in action.payload)) {
-        return state;
-      }
-      const { sortField, isSortAscending } = action.payload;
+export const getTableStateReducer = (initialState: TableState = defaultTableState) =>
+  handleActions<TableState, TableStatePayload>(
+    {
+      [String(filterChanged)](state, action) {
+        if (!('filter' in action.payload)) {
+          return state;
+        }
+        const { filter } = action.payload;
+        return {
+          ...state,
+          filter,
+          currentPage: 0,
+        };
+      },
+      [String(toggleChanged)](state, action) {
+        if (!('toggleName' in action.payload)) {
+          return state;
+        }
+        const { toggleName, toggleValue } = action.payload;
+        const toggleNameToVisibleMap = { ...state.toggleNameToVisibleMap };
+        toggleNameToVisibleMap[toggleName] = toggleValue;
+        return {
+          ...state,
+          toggleNameToVisibleMap,
+        };
+      },
+      [String(sortChanged)](state, action) {
+        if (!('sortField' in action.payload)) {
+          return state;
+        }
+        const { sortField, isSortAscending } = action.payload;
 
-      return {
-        ...state,
-        sortField,
-        isSortAscending,
-      };
+        return {
+          ...state,
+          sortField,
+          isSortAscending,
+        };
+      },
+      [String(pageChanged)](state, action) {
+        if (!('pageNumber' in action.payload)) {
+          return state;
+        }
+        const { pageNumber } = action.payload;
+        return {
+          ...state,
+          currentPage: pageNumber,
+        };
+      },
+      [String(pageSizeChanged)](state, action) {
+        if (!('pageSize' in action.payload)) {
+          return state;
+        }
+        const { pageSize } = action.payload;
+        return {
+          ...state,
+          pageSize,
+        };
+      },
     },
-    [String(pageChanged)](state, action) {
-      if (!('pageNumber' in action.payload)) {
-        return state;
-      }
-      const { pageNumber } = action.payload;
-      return {
-        ...state,
-        currentPage: pageNumber,
-      };
-    },
-    [String(pageSizeChanged)](state, action) {
-      if (!('pageSize' in action.payload)) {
-        return state;
-      }
-      const { pageSize } = action.payload;
-      return {
-        ...state,
-        pageSize,
-      };
-    },
-  },
-  defaultTableState
-);
+    initialState
+  );
+
+export const tableState = getTableStateReducer();

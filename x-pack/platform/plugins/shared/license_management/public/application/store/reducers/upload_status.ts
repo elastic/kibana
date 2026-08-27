@@ -11,14 +11,15 @@ import { handleActions } from 'redux-actions';
 import { uploadLicenseStatus } from '../actions/upload_license';
 import type { UploadStatusState } from '../types';
 
-export const uploadStatus = handleActions<UploadStatusState, UploadStatusState>(
-  {
-    [String(uploadLicenseStatus)](
-      state: UploadStatusState,
-      { payload }: Action<UploadStatusState>
-    ) {
-      return payload;
+export const getUploadStatusReducer = (initialState: UploadStatusState = {}) =>
+  handleActions<UploadStatusState, UploadStatusState>(
+    {
+      [String(uploadLicenseStatus)](
+        state: UploadStatusState,
+        { payload }: Action<UploadStatusState>
+      ) {
+        return payload;
+      },
     },
-  },
-  {}
-);
+    initialState
+  );

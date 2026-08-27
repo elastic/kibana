@@ -11,24 +11,25 @@ import { capitalize } from 'lodash';
 import { createSelector } from 'reselect-v4';
 
 import moment from 'moment-timezone';
-import { license } from './license';
-import { uploadStatus } from './upload_status';
-import { startBasicStatus } from './start_basic_license_status';
-import { uploadErrorMessage } from './upload_error_message';
-import { trialStatus } from './trial_status';
-import { permissions } from './permissions';
+import { getLicenseReducer } from './license';
+import { getUploadStatusReducer } from './upload_status';
+import { getStartBasicStatusReducer } from './start_basic_license_status';
+import { getUploadErrorMessageReducer } from './upload_error_message';
+import { getTrialStatusReducer } from './trial_status';
+import { getPermissionsReducer } from './permissions';
 import type { LicenseManagementState } from '../types';
 
 export const WARNING_THRESHOLD_IN_DAYS = 25;
 
-export const licenseManagement = combineReducers({
-  license,
-  uploadStatus,
-  uploadErrorMessage,
-  trialStatus,
-  startBasicStatus,
-  permissions,
-});
+export const getLicenseManagementReducer = (initialState: Partial<LicenseManagementState> = {}) =>
+  combineReducers({
+    license: getLicenseReducer(initialState.license),
+    uploadStatus: getUploadStatusReducer(initialState.uploadStatus),
+    uploadErrorMessage: getUploadErrorMessageReducer(initialState.uploadErrorMessage),
+    trialStatus: getTrialStatusReducer(initialState.trialStatus),
+    startBasicStatus: getStartBasicStatusReducer(initialState.startBasicStatus),
+    permissions: getPermissionsReducer(initialState.permissions),
+  });
 
 export const getPermission = (state: LicenseManagementState) => {
   return state.permissions.hasPermission;

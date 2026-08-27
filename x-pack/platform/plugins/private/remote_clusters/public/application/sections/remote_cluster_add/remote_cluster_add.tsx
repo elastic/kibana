@@ -18,7 +18,7 @@ import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle } from '../components';
 import { RemoteClusterWizard } from './wizard_form';
 
-interface Props {
+export interface Props {
   addCluster: (cluster: ClusterPayload) => void;
   isAddingCluster: boolean;
   addClusterError?: RequestError;

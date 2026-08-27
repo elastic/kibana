@@ -24,7 +24,7 @@ import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
 const FORM_MAX_WIDTH = 850;
 
-interface Props {
+export interface Props {
   isLoading: boolean;
   cluster: Cluster | undefined;
   startEditingCluster: (clusterName: string) => void;
