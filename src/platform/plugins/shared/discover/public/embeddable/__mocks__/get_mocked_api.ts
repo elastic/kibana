@@ -22,7 +22,7 @@ import type {
   SortOrder,
   DataGridDensity,
   JsonModeSettings,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
 
 export const getMockedSearchApi = ({
@@ -61,8 +61,8 @@ export const getMockedSearchApi = ({
       rowsPerPage: new BehaviorSubject<number | undefined>(savedSearch.rowsPerPage),
       sampleSize: new BehaviorSubject<number | undefined>(savedSearch.sampleSize),
       density: new BehaviorSubject<DataGridDensity | undefined>(savedSearch.density),
-      sourceDisplayMode: new BehaviorSubject<SourceDisplayMode | undefined>(
-        savedSearch.sourceDisplayMode
+      documentsDisplayMode: new BehaviorSubject<DocumentsDisplayMode | undefined>(
+        savedSearch.documentsDisplayMode
       ),
       jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(
         savedSearch.jsonModeSettings

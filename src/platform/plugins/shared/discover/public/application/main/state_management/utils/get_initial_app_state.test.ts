@@ -175,6 +175,7 @@ describe('getInitialAppState', () => {
           "type": "dataView",
         },
         "density": undefined,
+        "documentsDisplayMode": undefined,
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
@@ -198,7 +199,6 @@ describe('getInitialAppState', () => {
             "desc",
           ],
         ],
-        "sourceDisplayMode": undefined,
         "viewMode": undefined,
       }
     `);
@@ -224,6 +224,7 @@ describe('getInitialAppState', () => {
           "type": "dataView",
         },
         "density": undefined,
+        "documentsDisplayMode": undefined,
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
@@ -242,7 +243,6 @@ describe('getInitialAppState', () => {
         "sampleSize": undefined,
         "savedQuery": undefined,
         "sort": Array [],
-        "sourceDisplayMode": undefined,
         "viewMode": undefined,
       }
     `);

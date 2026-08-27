@@ -77,8 +77,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const styles = useEuiMemoizedStyles(treeStyles);
 
   const nodes = useMemo(() => buildNodes(json), [json]);
-  // Bulk expansion (Expand all + isAllExpanded) is budgeted so a deeply nested document can't
-  // explode the DOM.
+
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
   // The subset opened when seeding a fresh cell: the same budgeted, breadth-first set capped to
   // `defaultExpandedLevels` nested levels.
@@ -174,7 +173,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
         {extraHeaderContent && <EuiFlexItem grow={false}>{extraHeaderContent}</EuiFlexItem>}
       </EuiFlexGroup>
 
-      <div css={[styles.wrapper, !wrapLines && styles.noWrap]}>
+      <div css={[styles.wrapper, wrapLines ? styles.wrap : styles.noWrap]}>
         <div
           role="tree"
           aria-label={i18n.translate('unifiedDataTable.jsonTreeViewer.treeAriaLabel', {
@@ -211,8 +210,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                   rowRef={registerRow(row.node.id)}
                   onActivate={(event) => {
                     if (!row.hasChildren) return;
-                    // Cmd/Ctrl-click expands the whole subtree, budgeted so a deep subtree can't
-                    // explode the DOM.
+                    // Cmd/Ctrl-click expands the whole subtree
                     if (event.metaKey || event.ctrlKey) {
                       expandIds(collectExpandableIds([row.node]));
                     } else {

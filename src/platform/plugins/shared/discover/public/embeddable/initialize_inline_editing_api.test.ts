@@ -16,7 +16,7 @@ import type {
   SortOrder,
   DataGridDensity,
   JsonModeSettings,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
 import { createDiscoverServicesMock } from '../__mocks__/services';
@@ -50,7 +50,7 @@ const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => (
   sort: new BehaviorSubject<SortOrder[] | undefined>(undefined),
   viewMode: new BehaviorSubject<VIEW_MODE | undefined>(undefined),
   density: new BehaviorSubject<DataGridDensity | undefined>(undefined),
-  sourceDisplayMode: new BehaviorSubject<SourceDisplayMode | undefined>(undefined),
+  documentsDisplayMode: new BehaviorSubject<DocumentsDisplayMode | undefined>(undefined),
   jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(undefined),
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),

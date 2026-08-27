@@ -173,8 +173,8 @@ export const SCHEMA_DISCOVER_SESSION_V14 = SCHEMA_DISCOVER_SESSION_V13.extends({
 });
 
 const SCHEMA_TAB_ATTRIBUTES_V15 = SCHEMA_TAB_ATTRIBUTES_V14.extends({
-  sourceDisplayMode: schema.maybe(
-    schema.oneOf([schema.literal('summary'), schema.literal('json')])
+  documentsDisplayMode: schema.maybe(
+    schema.oneOf([schema.literal('table'), schema.literal('json')])
   ),
   jsonModeSettings: schema.maybe(
     schema.object({

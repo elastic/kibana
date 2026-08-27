@@ -29,7 +29,7 @@ import type {
   GrantApiKeysOpts,
   InvalidationTarget,
 } from './api_key_strategy';
-import { markApiKeysForInvalidation } from './api_key_strategy';
+import { markApiKeysForInvalidation, recordTaskRunCredentialUsage } from './api_key_strategy';
 import {
   UIAM_LOGS_CREDENTIALS_TAGS,
   UIAM_LOGS_GRANT_TAGS,
@@ -275,9 +275,13 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
   }
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined {
+    const { userScope, apiKey, uiamApiKey } = taskInstance;
+    const record = recordTaskRunCredentialUsage(taskInstance);
+
     if (this.typeToUse === ApiKeyType.UIAM) {
-      if (taskInstance.uiamApiKey) {
-        return getUiamApiKeySecret(taskInstance.uiamApiKey);
+      if (uiamApiKey) {
+        record('uiam_api_key', userScope?.apiKeyCreatedByUser ? 'user_created_key' : 'provisioned');
+        return getUiamApiKeySecret(uiamApiKey);
       }
 
       // No UIAM key available even though the strategy is configured to use UIAM.
@@ -287,21 +291,24 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       // tracked via the `kibana.task_manager.task_run.uiam_api_key_fallback.count`
       // OTel counter instead, which is broken down per project.
       // Mirrors the alerting rule loader behavior (see PR #264434).
-      const { userScope, apiKey } = taskInstance;
       if (apiKey) {
         if (userScope?.apiKeyCreatedByUser) {
+          record('es_api_key', 'user_created_key');
           taskManagerUiamTelemetry.recordUiamApiKeyFallback('user_created_key');
           this.logger.debug(
             'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
             { tags: UIAM_LOGS_USAGE_TAGS }
           );
         } else {
+          record('es_api_key', 'fallback_unexpected');
           taskManagerUiamTelemetry.recordUiamApiKeyFallback('unexpected');
           this.logger.debug(
             'UIAM API key is not provided to create a fake request, falling back to regular API key.',
             { tags: UIAM_LOGS_USAGE_TAGS }
           );
         }
+      } else {
+        record('none', 'not_set');
       }
       return apiKey;
     }
@@ -310,15 +317,21 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // strategy's `typeToUse` is ES (`grant_uiam_api_keys=true` while `api_key_type`
     // defaults to `es`). Fall back to the UIAM key so the task can still authenticate
     // at run time instead of yielding an undefined credential.
-    if (!taskInstance.apiKey && taskInstance.uiamApiKey) {
+    if (!apiKey && uiamApiKey) {
+      record('uiam_api_key', userScope?.apiKeyCreatedByUser ? 'user_created_key' : 'provisioned');
       this.logger.debug(
         'ES API key is not provided to create a fake request, falling back to UIAM API key.',
         { tags: UIAM_LOGS_USAGE_TAGS }
       );
-      return getUiamApiKeySecret(taskInstance.uiamApiKey);
+      return getUiamApiKeySecret(uiamApiKey);
     }
 
-    return taskInstance.apiKey;
+    if (apiKey) {
+      record('es_api_key', 'config');
+    } else {
+      record('none', 'not_set');
+    }
+    return apiKey;
   }
 
   getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[] {

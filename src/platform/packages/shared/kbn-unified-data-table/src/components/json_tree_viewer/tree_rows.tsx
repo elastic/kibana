@@ -42,7 +42,11 @@ import {
 } from './tree_model';
 
 const LABEL_TEXT_CLASS = 'jsonTreeViewerLabelText';
+const LEAF_LABEL_CLASS = 'jsonTreeViewerLeafLabel';
 const VALUE_CLASS = 'jsonTreeViewerValue';
+
+// After this many lines, the value will be truncated.
+const MAX_WRAP_VALUE_LINES = 100;
 
 // ---- Row view components (one per render-row kind) ----
 
@@ -224,12 +228,12 @@ const KeyPrefix = memo(function KeyPrefix({
   const styles = useEuiMemoizedStyles(treeStyles);
   if (isArrayItem) return null;
   return (
-    <>
+    <span css={styles.keyPrefix}>
       <span css={styles.punctuation}>{'"'}</span>
       <span css={styles.key}>{name}</span>
       <span css={styles.punctuation}>{'"'}</span>
       <span css={styles.punctuation}>:</span>{' '}
-    </>
+    </span>
   );
 });
 
@@ -437,7 +441,7 @@ const NodeLabel = memo(function NodeLabel({
       getLeafActions?.({ value: node.value, path: node.path, isArrayItem: node.isArrayItem }) ?? [];
     return (
       <span css={styles.label}>
-        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
+        <span className={`${LABEL_TEXT_CLASS} ${LEAF_LABEL_CLASS}`} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <PrimitiveValue
             primitiveType={node.primitiveType}
@@ -657,6 +661,7 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
   }),
   label: css({ display: 'flex', alignItems: 'center', minWidth: 0 }),
   labelText: css({ minWidth: 0 }),
+  keyPrefix: css({ flexShrink: 0 }),
   key: css({ color: euiTheme.colors.textPrimary }),
   punctuation: css({ color: euiTheme.colors.textSubdued }),
   bracket: css({ color: euiTheme.colors.textParagraph }),
@@ -671,6 +676,21 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     '&:focus-visible': { opacity: 1 },
   }),
   value: css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
+  wrap: css({
+    [`& .${LEAF_LABEL_CLASS}`]: {
+      display: 'flex',
+      minWidth: 0,
+      alignItems: 'flex-start',
+    },
+    [`& .${VALUE_CLASS}`]: css`
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: ${MAX_WRAP_VALUE_LINES};
+      overflow: hidden;
+      min-width: 0;
+      flex: 0 1 auto;
+    `,
+  }),
   noWrap: css({
     [`& .${LABEL_TEXT_CLASS}`]: {
       display: 'block',

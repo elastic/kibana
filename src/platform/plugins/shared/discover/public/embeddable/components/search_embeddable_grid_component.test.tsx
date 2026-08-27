@@ -21,7 +21,7 @@ import type {
   SortOrder,
   DataGridDensity,
   JsonModeSettings,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { FetchContext } from '@kbn/presentation-publishing';
@@ -51,7 +51,7 @@ const createStateManager = (): SearchEmbeddableStateManager => ({
   sort: new BehaviorSubject<SortOrder[] | undefined>(undefined),
   viewMode: new BehaviorSubject<VIEW_MODE | undefined>(undefined),
   density: new BehaviorSubject<DataGridDensity | undefined>(undefined),
-  sourceDisplayMode: new BehaviorSubject<SourceDisplayMode | undefined>(undefined),
+  documentsDisplayMode: new BehaviorSubject<DocumentsDisplayMode | undefined>(undefined),
   jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(undefined),
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
