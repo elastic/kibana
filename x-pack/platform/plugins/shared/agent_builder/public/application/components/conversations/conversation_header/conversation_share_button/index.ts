@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './packs_table';
+export { ConversationShareButton } from './conversation_share_button';

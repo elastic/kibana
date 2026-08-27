@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useChromeService } from '@kbn/core-chrome-browser-context';
-
-/**
- * Always `true`. Kept so existing call sites do not need to change.
- * Combine with `useChromeStyle` to check classic vs project.
- */
-export function useIsNextChrome(): boolean {
-  const chrome = useChromeService();
-  return chrome.next.isEnabled;
-}
+export const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'Content-Type': 'application/json;charset=UTF-8',
+};
