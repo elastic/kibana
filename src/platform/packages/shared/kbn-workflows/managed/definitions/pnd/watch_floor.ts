@@ -19,7 +19,7 @@ export const PND_WATCH_FLOOR_WORKFLOW = {
   id: PND_WATCH_FLOOR_WORKFLOW_ID,
   management: PND_WATCH_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 1,
   yamlTemplate: ({ settingsVersion, autonomyLevel }: PndWatchTemplateValues): string =>
     WATCH_FLOOR_YAML.replaceAll('__WATCH_SETTINGS_VERSION__', String(settingsVersion)).replaceAll(
       '__WATCH_AUTONOMY_LEVEL__',

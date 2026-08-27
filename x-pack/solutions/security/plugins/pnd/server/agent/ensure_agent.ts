@@ -7,7 +7,7 @@
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { createAgentRequest, PND_THIN_AGENT_ID } from './agent';
+import { createAgentRequest, ALERTZERO_THIN_AGENT_ID } from './agent';
 
 interface EnsureAgentParams {
   agentBuilder: AgentBuilderPluginStart;
@@ -46,7 +46,7 @@ export const ensureAgentSafe = async ({
     await ensureAgent({ agentBuilder, spaceId });
   } catch (error) {
     logger.error(
-      `Failed to ensure PND default agent "${PND_THIN_AGENT_ID}" in space "${spaceId}": ${
+      `Failed to ensure AlertZero default agent "${ALERTZERO_THIN_AGENT_ID}" in space "${spaceId}": ${
         error instanceof Error ? error.message : String(error)
       }`
     );

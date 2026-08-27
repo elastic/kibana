@@ -81,7 +81,13 @@ export const fetchWatchWorkflows = async (
       }
     );
     allResults.push(...result.results);
-    if (allResults.length >= result.total || allResults.length >= WORKFLOW_MAX_RESULTS) break;
+    if (
+      result.results.length === 0 ||
+      allResults.length >= result.total ||
+      allResults.length >= WORKFLOW_MAX_RESULTS
+    ) {
+      break;
+    }
     page++;
   }
 

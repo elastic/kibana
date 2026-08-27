@@ -9,20 +9,20 @@ import { AgentAccessControlMode, type AgentCreateRequest } from '@kbn/agent-buil
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
-import { PND_THIN_AGENT_ID } from '@kbn/pnd-common';
+import { ALERTZERO_THIN_AGENT_ID } from '@kbn/pnd-common';
 
-export { PND_THIN_AGENT_ID };
+export { ALERTZERO_THIN_AGENT_ID };
 
-export const PND_THIN_AGENT_TYPE_ID = `${internalNamespaces.security}.pnd-type` as const;
+export const ALERTZERO_THIN_AGENT_TYPE_ID =
+  `${internalNamespaces.security}.alertzero-type` as const;
 
-export const PND_THIN_AGENT_NAME = 'Project NotDaybreak Agent';
+export const ALERTZERO_THIN_AGENT_NAME = 'Alert Zero Agent';
 
-export const PND_THIN_AGENT_DESCRIPTION =
-  'Shared thin base agent for NotDaybreak Watch Orchestrator and Worker ai.agent steps. ';
+export const ALERTZERO_THIN_AGENT_DESCRIPTION = 'Shared thin base agent for Alert Zero Workers. ';
 
-export const PND_THIN_AGENT_LABELS = ['security', 'pnd', 'watch'] as const;
+export const ALERTZERO_THIN_AGENT_LABELS = ['security', 'alertzero', 'watch'] as const;
 
-export const PND_THIN_AGENT_AVATAR_SYMBOL = 'PND';
+export const ALERTZERO_THIN_AGENT_AVATAR_SYMBOL = 'AZ';
 
 /**
  * Thin PND agent type: empty skill floor, elastic capabilities off.
@@ -30,9 +30,9 @@ export const PND_THIN_AGENT_AVATAR_SYMBOL = 'PND';
  * Type updates ship with code deploys without rewriting the persisted agent document.
  */
 export const agentType = {
-  id: PND_THIN_AGENT_TYPE_ID,
-  name: PND_THIN_AGENT_NAME,
-  description: PND_THIN_AGENT_DESCRIPTION,
+  id: ALERTZERO_THIN_AGENT_TYPE_ID,
+  name: ALERTZERO_THIN_AGENT_NAME,
+  description: ALERTZERO_THIN_AGENT_DESCRIPTION,
   avatar_icon: 'logoSecurity',
   baseConfiguration: {
     // TODO - add custom instructions for this agent type
@@ -48,14 +48,13 @@ export const registerAgentType = (agentBuilder: AgentBuilderPluginSetup): void =
 };
 
 export const createAgentRequest = (): AgentCreateRequest => ({
-  id: PND_THIN_AGENT_ID,
-  type: PND_THIN_AGENT_TYPE_ID,
-  name: PND_THIN_AGENT_NAME,
-  description: PND_THIN_AGENT_DESCRIPTION,
-  labels: [...PND_THIN_AGENT_LABELS],
-  avatar_symbol: PND_THIN_AGENT_AVATAR_SYMBOL,
-  // Public until managed / non-user-editable agents exist
-  access_control: { access_mode: AgentAccessControlMode.Public },
+  id: ALERTZERO_THIN_AGENT_ID,
+  type: ALERTZERO_THIN_AGENT_TYPE_ID,
+  name: ALERTZERO_THIN_AGENT_NAME,
+  description: ALERTZERO_THIN_AGENT_DESCRIPTION,
+  labels: [...ALERTZERO_THIN_AGENT_LABELS],
+  avatar_symbol: ALERTZERO_THIN_AGENT_AVATAR_SYMBOL,
+  access_control: { access_mode: AgentAccessControlMode.Shared },
   configuration: {
     tools: [],
     skill_ids: [],

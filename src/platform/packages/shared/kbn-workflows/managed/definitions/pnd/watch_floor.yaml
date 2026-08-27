@@ -30,7 +30,7 @@ consts:
 steps:
   - name: triage_alerts
     type: ai.agent
-    agent-id: pnd-thin-agent
+    agent-id: alertzero-thin-agent
     timeout: "10m"
     create-conversation: true
     with:
