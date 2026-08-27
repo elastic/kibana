@@ -86,6 +86,9 @@ const SESSION_VIEW_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.episodesTable.openSessionView',
   { defaultMessage: 'Open Session View' }
 );
+const NOTES_LABEL = i18n.translate('xpack.securitySolution.alertsV2.episodesTable.notes', {
+  defaultMessage: 'Add note',
+});
 
 /** Human-readable column headers, mirroring the v1 alerts table labels. */
 const COLUMN_DISPLAY_NAMES: Record<string, string> = {
@@ -185,7 +188,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   );
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
 
-  const { openDocumentFlyoutFromHit, openRuleFlyout, openAnalyzer, openSessionView } =
+  const { openDocumentFlyoutFromHit, openRuleFlyout, openAnalyzer, openSessionView, openNotes } =
     useFlyoutApi();
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
@@ -260,6 +263,18 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
           />
         ),
       },
+      {
+        id: 'openNotes',
+        render: (Control, { record }) => (
+          <Control
+            data-test-subj="alertsV2OpenNotes"
+            iconType="comment"
+            label={NOTES_LABEL}
+            tooltipContent={NOTES_LABEL}
+            onClick={() => openNotes({ hit: record })}
+          />
+        ),
+      },
     ];
     if (isEsqlAdvancedSettingEnabled) {
       controls.push({
@@ -285,6 +300,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     openDocumentFlyoutFromHit,
     openAnalyzer,
     openSessionView,
+    openNotes,
     isEsqlAdvancedSettingEnabled,
     investigateEpisodeInTimeline,
   ]);
