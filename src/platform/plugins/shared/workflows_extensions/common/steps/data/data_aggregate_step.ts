@@ -23,7 +23,7 @@ const MetricSchema = z.object({
   operation: z.enum(['count', 'sum', 'avg', 'min', 'max']).describe(
     i18n.translate('workflowsExtensions.dataAggregateStep.schema.metric.operation', {
       defaultMessage:
-        'Aggregation operation. count is the number of items in each group and does not need a field; sum, avg, min, and max do (min/max work on numbers and dates).',
+        'Aggregation operation. count returns the number of items in each group and does not need a field; sum, avg, min, and max require a numeric field.',
     })
   ),
   field: z
