@@ -13,6 +13,7 @@ import {
   PND_PROPOSAL_RESPOND_URL_TEMPLATE,
   RespondToProposalRequestBody,
   RespondToProposalRequestParams,
+  resolvePndWatchDefinitionId,
   type RespondToProposalResponse,
 } from '@kbn/pnd-common';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -20,13 +21,12 @@ import { WorkflowExecutionInvalidStatusError } from '@kbn/workflows/common/error
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { PND_API_PRIVILEGE_PROPOSALS_RESPOND } from '../../../../common/constants';
-import { isSystemSecurityWatchId } from '../../../lib/is_system_security_watch_id';
 import { parseProposalSourceId } from '../../../lib/proposal_source_id';
 import type { RouteDependencies } from '../../register_routes';
 import { detectionChangeSignalEvidenceConversationKind } from './helpers/detection_change_signal_evidence_conversation_kind';
 import { emitDetectionChangeSignal } from './helpers/emit_detection_change_signal';
 import { emitIncidentClosed } from './helpers/emit_incident_closed';
-import { resolveRespondTarget } from './helpers/resolve_respond_target';
+import { resolveRespondTarget } from './helpers/resolve_respond';
 import { shouldEmitDetectionChangeSignal } from './helpers/should_emit_detection_change_signal';
 import { shouldEmitIncidentClosed } from './helpers/should_emit_incident_closed';
 import { warnUnlessEmitted } from './helpers/warn_unless_emitted';
@@ -119,9 +119,12 @@ export const registerRespondToProposalRoute = ({
           return response.badRequest({ body: { message: `Malformed sourceId "${sourceId}"` } });
         }
 
+        const spaceId = getSpaceId(request);
+
         // Fast reject on the untrusted claimed workflow id (S1 allow-list) before any
-        // I/O. The authoritative re-derivation still runs in resolveRespondTarget.
-        if (!isSystemSecurityWatchId(parsed.workflowId)) {
+        // I/O. Accepts the catalog id or this space's document id. The authoritative
+        // re-derivation still runs in resolveRespondTarget.
+        if (resolvePndWatchDefinitionId(parsed.workflowId, spaceId) == null) {
           return response.badRequest({
             body: { message: `Workflow "${parsed.workflowId}" is not an allow-listed PND watch` },
           });
@@ -136,7 +139,6 @@ export const registerRespondToProposalRoute = ({
         }
 
         try {
-          const spaceId = getSpaceId(request);
           const target = await resolveRespondTarget({ managementClient, parsed, spaceId });
 
           if (target.status === 'not_found') {

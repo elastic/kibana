@@ -227,6 +227,10 @@ export {
 } from './impl/schemas';
 
 export {
+  pndWatchDocumentId,
+  resolvePndWatchDefinitionId,
+} from './impl/watches/pnd_watch_document_id';
+export {
   compareWatchesForDisplay,
   coverageFromSchedule,
   createCatalogWatchPlaceholder,

@@ -130,6 +130,7 @@ export const readPendingProposalRows = async ({
     attackDiscoveryIdByRunId,
     readableAttackDiscoveryAlertIds,
     reasoningByStepId,
+    spaceId,
     steps: results,
   });
 

@@ -200,4 +200,18 @@ describe('buildProposalRows', () => {
 
     expect(row.threadConversationId).toBeUndefined();
   });
+
+  it('projects the catalog definition id when the step carries the per-space document id', () => {
+    const documentId = `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-default`;
+    const [row] = buildProposalRows({
+      attackDiscoveryIdByRunId: new Map(),
+      readableAttackDiscoveryAlertIds: new Set(),
+      reasoningByStepId: new Map(),
+      spaceId: 'default',
+      steps: [openInvestigationStep({ workflowId: documentId })],
+    });
+
+    expect(row.workflowId).toEqual(SYSTEM_SECURITY_WATCH_FLOOR_ID);
+    expect(row.sourceId).toEqual(`${documentId}:run-1:step-exec-1`);
+  });
 });

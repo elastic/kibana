@@ -6,9 +6,11 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { getGateDefinition, type PndGateDefinition } from '@kbn/pnd-common';
-
-import { isSystemSecurityWatchId } from '../../../../../lib/is_system_security_watch_id';
+import {
+  getGateDefinition,
+  resolvePndWatchDefinitionId,
+  type PndGateDefinition,
+} from '@kbn/pnd-common';
 import type { ParsedProposalSourceId } from '../../../../../lib/proposal_source_id';
 import type { WatchWorkflowsManagementClient } from '../../../../../services/watches/watch_workflows_management_client';
 
@@ -60,9 +62,9 @@ export const resolveRespondTarget = async ({
     return { status: 'not_found' };
   }
 
-  // The real S1 allow-list: reject unless the run belongs to a managed PND watch,
-  // regardless of what workflow id the source id claimed.
-  if (!isSystemSecurityWatchId(execution.workflowId)) {
+  // The real S1 allow-list: reject unless the run belongs to a managed PND watch
+  // (catalog id or this space's document id), regardless of what the source id claimed.
+  if (resolvePndWatchDefinitionId(execution.workflowId, spaceId) == null) {
     return { status: 'forbidden_workflow' };
   }
 
@@ -71,7 +73,7 @@ export const resolveRespondTarget = async ({
     return { status: 'not_found' };
   }
 
-  const gate = getGateDefinition(execution.workflowId, step.stepId);
+  const gate = getGateDefinition(execution.workflowId, step.stepId, spaceId);
   if (gate == null) {
     return { status: 'unknown_gate' };
   }

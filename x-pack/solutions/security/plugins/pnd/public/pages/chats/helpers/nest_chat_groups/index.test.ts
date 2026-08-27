@@ -157,4 +157,18 @@ describe('nestChatGroups', () => {
       expect.arrayContaining([tuning.id])
     );
   });
+
+  it('carries the parent conversation updatedAt so the header can date it', () => {
+    const [group] = nestChatGroups({ conversations: all, kind: 'incident' });
+
+    expect(group.parent.updatedAt).toEqual(incident.updatedAt);
+  });
+
+  it('carries each nested conversation updatedAt so a child row can date it', () => {
+    const [group] = nestChatGroups({ conversations: all, kind: 'incident' });
+
+    expect(group.children.find(({ id }) => id === containThread.id)?.updatedAt).toEqual(
+      containThread.updatedAt
+    );
+  });
 });

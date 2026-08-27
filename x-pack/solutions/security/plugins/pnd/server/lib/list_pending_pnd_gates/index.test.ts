@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
@@ -18,6 +19,7 @@ import type { WatchWorkflowsManagementClient } from '../../services/watches/watc
 import { listPendingPndGates, PND_PENDING_GATES_MAX_RUNS } from '.';
 
 const SPACE_ID = 'agent-3';
+const floorDocumentId = `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-${SPACE_ID}`;
 
 const parkedRun = (overrides: Record<string, unknown> = {}) => ({
   id: 'run-1',
@@ -55,7 +57,7 @@ const reasoningStep = (overrides: Record<string, unknown> = {}) => ({
  * (`'*'`) managed watch: the execution documents carry the emitting space, so they resolve normally.
  */
 const createManagementClient = ({
-  runsByWatchId = { [SYSTEM_SECURITY_WATCH_FLOOR_ID]: [parkedRun()] },
+  runsByWatchId = { [floorDocumentId]: [parkedRun()] },
   stepExecutions = [reasoningStep(), waitingStep()],
   context = { event: { correlationId: 'ad-1' } },
 }: {
@@ -144,9 +146,42 @@ describe('listPendingPndGates', () => {
     await invoke(managementClient, { watchIds: [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID] });
 
     expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
-      expect.objectContaining({ workflowId: SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID }),
+      expect.objectContaining({
+        workflowId: `${SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID}-${SPACE_ID}`,
+      }),
       SPACE_ID
     );
+  });
+
+  it('queries the per-space document id, not the catalog definition id', async () => {
+    const managementClient = createManagementClient();
+
+    await invoke(managementClient, { watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID] });
+
+    expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowId: `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-${SPACE_ID}` }),
+      SPACE_ID
+    );
+    expect(managementClient.getWorkflowExecutions).not.toHaveBeenCalledWith(
+      expect.objectContaining({ workflowId: SYSTEM_SECURITY_WATCH_FLOOR_ID }),
+      SPACE_ID
+    );
+  });
+
+  it('lists a pending gate whose step.workflowId is the per-space document id', async () => {
+    const documentId = `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-${SPACE_ID}`;
+    const managementClient = createManagementClient({
+      runsByWatchId: { [documentId]: [parkedRun({ workflowId: documentId })] },
+      stepExecutions: [waitingStep({ workflowId: documentId })],
+    });
+
+    const { results } = await invoke(managementClient, {
+      watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID],
+    });
+
+    expect(results).toEqual([
+      expect.objectContaining({ id: 'step-exec-1', workflowId: documentId }),
+    ]);
   });
 
   it('reads each parked run with its step inputs so the gate prompt survives', async () => {
@@ -183,7 +218,7 @@ describe('listPendingPndGates', () => {
   it("drops watch_officer's unregistered await_approval gate (D4)", async () => {
     const managementClient = createManagementClient({
       runsByWatchId: {
-        [SYSTEM_SECURITY_WATCH_OFFICER_ID]: [
+        [`${SYSTEM_SECURITY_WATCH_OFFICER_ID}-${SPACE_ID}`]: [
           parkedRun({ workflowId: SYSTEM_SECURITY_WATCH_OFFICER_ID }),
         ],
       },
@@ -240,7 +275,7 @@ describe('listPendingPndGates', () => {
   it('de-duplicates step executions that appear under more than one listed run', async () => {
     const managementClient = createManagementClient({
       runsByWatchId: {
-        [SYSTEM_SECURITY_WATCH_FLOOR_ID]: [parkedRun(), parkedRun({ id: 'run-1' })],
+        [floorDocumentId]: [parkedRun(), parkedRun({ id: 'run-1' })],
       },
     });
 
@@ -332,11 +367,44 @@ describe('listPendingPndGates', () => {
       parkedRun({ id: `run-${index}` })
     );
     const managementClient = createManagementClient({
-      runsByWatchId: { [SYSTEM_SECURITY_WATCH_FLOOR_ID]: runs },
+      runsByWatchId: { [floorDocumentId]: runs },
     });
 
     await invoke(managementClient);
 
     expect(managementClient.getWorkflowExecution).toHaveBeenCalledTimes(PND_PENDING_GATES_MAX_RUNS);
+  });
+
+  it('does not thread a request into execution reads when none was provided', async () => {
+    const managementClient = createManagementClient();
+
+    await invoke(managementClient);
+
+    expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.any(Object),
+      SPACE_ID
+    );
+    expect(managementClient.getWorkflowExecution).toHaveBeenCalledWith('run-1', SPACE_ID, {
+      includeInput: true,
+      includeOutput: true,
+    });
+  });
+
+  it('forwards the caller request into execution reads so managed-execution authz can assert', async () => {
+    const managementClient = createManagementClient();
+    const request = httpServerMock.createKibanaRequest();
+
+    await invoke(managementClient, { request, watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID] });
+
+    expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.any(Object),
+      SPACE_ID,
+      request
+    );
+    expect(managementClient.getWorkflowExecution).toHaveBeenCalledWith('run-1', SPACE_ID, {
+      includeInput: true,
+      includeOutput: true,
+      request,
+    });
   });
 });

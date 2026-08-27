@@ -174,4 +174,64 @@ describe('ThreadGroupCard', () => {
 
     expect(screen.getAllByLabelText('Risk score 94')[0]).toBeInTheDocument();
   });
+
+  describe('last updated', () => {
+    const now = '2026-08-27T18:00:00.000Z';
+
+    beforeAll(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(now));
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    it('shows a compact last-updated indicator on the parent conversation', () => {
+      renderWithPndProviders(
+        <ThreadGroupCard
+          {...defaultProps}
+          parent={{ ...parent, updatedAt: '2026-08-27T17:00:00.000Z' }}
+        />
+      );
+
+      expect(
+        screen.getByTestId('pndQueueThreadGroupHeader').querySelector('time')
+      ).toHaveTextContent('1h');
+    });
+
+    it('shows a compact last-updated indicator on a pending sub-conversation', () => {
+      renderWithPndProviders(
+        <ThreadGroupCard
+          {...defaultProps}
+          pendingChildren={[{ ...pending[0], updatedAt: '2026-08-27T17:59:00.000Z' }]}
+          resolvedChildren={[]}
+        />
+      );
+
+      expect(
+        screen.getByTestId('pndQueueThreadGroupChildRow').querySelector('time')
+      ).toHaveTextContent('1m');
+    });
+
+    it('shows a compact last-updated indicator on a resolved sub-conversation', () => {
+      renderWithPndProviders(
+        <ThreadGroupCard
+          {...defaultProps}
+          pendingChildren={[pending[0]]}
+          resolvedChildren={[{ ...resolved[0], updatedAt: '2026-08-26T18:00:00.000Z' }]}
+        />
+      );
+
+      expect(
+        screen.getByTestId('pndQueueThreadGroupResolvedRow').querySelector('time')
+      ).toHaveTextContent('1d');
+    });
+
+    it('renders no last-updated indicator when the conversation has no updatedAt', () => {
+      renderWithPndProviders(<ThreadGroupCard {...defaultProps} />);
+
+      expect(screen.queryByTestId('pndQueueRelativeUpdatedAt')).not.toBeInTheDocument();
+    });
+  });
 });

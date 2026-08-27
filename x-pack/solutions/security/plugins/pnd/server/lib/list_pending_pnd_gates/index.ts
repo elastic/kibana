@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { readCorrelationIdFromExecutionContext } from '@kbn/workflows/managed';
-import { getGateDefinition, PND_WATCH_WORKFLOW_IDS } from '@kbn/pnd-common';
+import { getGateDefinition, PND_WATCH_WORKFLOW_IDS, pndWatchDocumentId } from '@kbn/pnd-common';
 
 import type { WatchWorkflowsManagementClient } from '../../services/watches/watch_workflows_management_client';
 
@@ -25,6 +25,12 @@ export interface ListPendingPndGatesParams {
   includeReasoning?: boolean;
   logger: Logger;
   managementClient: WatchWorkflowsManagementClient;
+  /**
+   * When provided, threaded into `getWorkflowExecutions` / `getWorkflowExecution` so the projection
+   * asserts managed-execution read from `request.authzResult`. Omit on paths that must not inherit
+   * that gate (eager `_ensure` from a Task Manager API key).
+   */
+  request?: KibanaRequest;
   /** Upper bound on parked runs read; defaults to {@link PND_PENDING_GATES_MAX_RUNS}. */
   size?: number;
   /** Space resolved from the request (security finding S9); never a client value, never `'*'`. */
@@ -61,8 +67,8 @@ const isPendingWait = (step: WorkflowStepExecutionDto): boolean =>
  * here makes "a result is a registered gate" an invariant of this helper rather than something each
  * consumer must re-establish, which is what let the superset reach callers before.
  */
-const isRegisteredPndGate = (step: WorkflowStepExecutionDto): boolean =>
-  getGateDefinition(step.workflowId, step.stepId) != null;
+const isRegisteredPndGate = (step: WorkflowStepExecutionDto, spaceId: string): boolean =>
+  getGateDefinition(step.workflowId, step.stepId, spaceId) != null;
 
 /** Pull a plain-object `reasoning` value out of a step output, when present. */
 const extractReasoning = (output: unknown): Record<string, unknown> | undefined => {
@@ -156,6 +162,7 @@ export const listPendingPndGates = async ({
   includeReasoning = false,
   logger,
   managementClient,
+  request,
   size = PND_PENDING_GATES_MAX_RUNS,
   spaceId,
   watchIds = PND_WATCH_WORKFLOW_IDS,
@@ -165,8 +172,14 @@ export const listPendingPndGates = async ({
   const perWatch = await Promise.all(
     watchIds.map(async (workflowId): Promise<WorkflowExecutionListItemDto[]> => {
       const { results } = await managementClient.getWorkflowExecutions(
-        { page: 1, size, statuses: [ExecutionStatus.WAITING_FOR_INPUT], workflowId },
-        spaceId
+        {
+          page: 1,
+          size,
+          statuses: [ExecutionStatus.WAITING_FOR_INPUT],
+          workflowId: pndWatchDocumentId(workflowId, spaceId),
+        },
+        spaceId,
+        ...(request != null ? [request] : [])
       );
       return results;
     })
@@ -197,11 +210,12 @@ export const listPendingPndGates = async ({
         const execution = await managementClient.getWorkflowExecution(runId, spaceId, {
           includeInput: true,
           includeOutput: true,
+          ...(request != null ? { request } : {}),
         });
         const stepExecutions = execution?.stepExecutions ?? [];
         // D4: a pending wait is only a PND gate if the registry knows it — see isRegisteredPndGate.
         const pending = stepExecutions.filter(
-          (step) => isPendingWait(step) && isRegisteredPndGate(step)
+          (step) => isPendingWait(step) && isRegisteredPndGate(step, spaceId)
         );
 
         return {

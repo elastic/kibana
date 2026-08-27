@@ -57,7 +57,7 @@ export const resolvePendingGateStepExecutionIds = async ({
     });
 
     return results.reduce<Map<string, readonly string[]>>((byRunId, step) => {
-      if (getGateDefinition(step.workflowId, step.stepId) == null) {
+      if (getGateDefinition(step.workflowId, step.stepId, spaceId) == null) {
         return byRunId;
       }
       return byRunId.set(step.workflowRunId, [...(byRunId.get(step.workflowRunId) ?? []), step.id]);

@@ -30,6 +30,29 @@ export const ENABLED_SWITCH_LABEL = i18n.translate('xpack.pnd.watches.settings.e
   defaultMessage: 'Enabled',
 });
 
+export const ENABLE_REMAINING_TITLE = i18n.translate(
+  'xpack.pnd.watches.settings.enableRemaining.title',
+  { defaultMessage: 'Enable the other watches in this space?' }
+);
+
+export const ENABLE_REMAINING_BODY = i18n.translate(
+  'xpack.pnd.watches.settings.enableRemaining.body',
+  {
+    defaultMessage:
+      'This watch is on. Enable the remaining catalog watches in this space too? You can still turn each one off later.',
+  }
+);
+
+export const ENABLE_REMAINING_CONFIRM = i18n.translate(
+  'xpack.pnd.watches.settings.enableRemaining.confirm',
+  { defaultMessage: 'Enable remaining watches' }
+);
+
+export const ENABLE_REMAINING_CANCEL = i18n.translate(
+  'xpack.pnd.watches.settings.enableRemaining.cancel',
+  { defaultMessage: 'Not now' }
+);
+
 /* -------------------------------------------------------------------------- */
 /* Draft, save and discard                                                    */
 /* -------------------------------------------------------------------------- */

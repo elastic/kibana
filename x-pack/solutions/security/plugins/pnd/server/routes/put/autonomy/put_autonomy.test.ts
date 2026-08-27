@@ -11,17 +11,25 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { PND_AUTONOMY_URL, SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_AUTONOMY_WRITE } from '../../../../common/constants';
 import type { RouteDependencies } from '../../register_routes';
+import { WorkflowsManagedReadForbiddenError } from '../../../services/watches/workflows_read_authz';
+import { getAutonomyWriteRouteAuthz } from '../../watches/watch_route_security';
 import { registerPutAutonomyRoute } from './put_autonomy';
 
-const createDeps = () => {
-  const router = mockRouter.create();
-  const get = jest.fn().mockResolvedValue({
+const createDeps = ({
+  get = jest.fn().mockResolvedValue({
     settings: { autonomy: 'manual', watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID },
     settingsRevision: null,
-  });
-  const update = jest.fn().mockResolvedValue({ outcome: 'updated' });
+  }),
+  update = jest.fn().mockResolvedValue({ outcome: 'updated' }),
+  useMockData = false,
+}: {
+  get?: jest.Mock;
+  update?: jest.Mock;
+  useMockData?: boolean;
+} = {}) => {
+  const router = mockRouter.create();
   const deps = {
-    config: { enabled: true, ui: { useMockData: false } },
+    config: { enabled: true, ui: { useMockData } },
     getSpaceId: jest.fn().mockReturnValue('agent-3'),
     getWatchesService: jest.fn().mockReturnValue({ get, update }),
     logger: loggerMock.create(),
@@ -48,8 +56,18 @@ const invoke = async (
 };
 
 describe('registerPutAutonomyRoute', () => {
-  it('registers the route gated on the dedicated autonomy-write privilege', () => {
+  it('requires Workflows managed-read on live writes so get-before-write can populate authzResult', () => {
     const { deps } = createDeps();
+
+    registerPutAutonomyRoute(deps);
+
+    expect(deps.router.versioned.getRoute('put', PND_AUTONOMY_URL).config.security).toEqual({
+      authz: getAutonomyWriteRouteAuthz(false),
+    });
+  });
+
+  it('keeps mock-mode writes on autonomy-write only', () => {
+    const { deps } = createDeps({ useMockData: true });
 
     registerPutAutonomyRoute(deps);
 
@@ -125,6 +143,19 @@ describe('registerPutAutonomyRoute', () => {
       expect(update).not.toHaveBeenCalled();
     }
   );
+
+  it('maps a managed-read forbidden error to 403 rather than a retried 500', async () => {
+    const { deps, get } = createDeps();
+    get.mockRejectedValue(new WorkflowsManagedReadForbiddenError());
+    registerPutAutonomyRoute(deps);
+
+    const response = await invoke(getHandler(deps.router), {
+      autonomyLevel: 'assisted',
+      watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+    });
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 403 }));
+  });
 
   it('returns a 500 when the write throws', async () => {
     const { deps, update } = createDeps();

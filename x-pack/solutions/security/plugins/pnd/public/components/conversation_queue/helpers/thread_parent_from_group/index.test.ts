@@ -209,4 +209,22 @@ describe('threadParentFromGroup', () => {
 
     expect(parent.summary).toEqual(ALERT_A);
   });
+
+  it('carries the conversation updatedAt so the header can date it', () => {
+    const parent = threadParentFromGroup({
+      conversations: [
+        investigationConversation({
+          correlationId: ALERT_A,
+          title: 'Beaconing from host-1',
+        }),
+      ],
+      investigationGroup: {
+        correlationId: ALERT_A,
+        key: ALERT_A,
+        proposals: [],
+      },
+    });
+
+    expect(parent.updatedAt).toEqual('2026-08-18T11:30:00.000Z');
+  });
 });

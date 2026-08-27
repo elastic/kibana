@@ -11,16 +11,23 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { PND_AUTONOMY_URL, SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_READ } from '../../../../common/constants';
 import type { RouteDependencies } from '../../register_routes';
+import { WorkflowsManagedReadForbiddenError } from '../../../services/watches/workflows_read_authz';
+import { getWatchRouteAuthz } from '../../watches/watch_route_security';
 import { registerGetAutonomyRoute } from './get_autonomy';
 
-const createDeps = () => {
-  const router = mockRouter.create();
-  const get = jest.fn().mockResolvedValue({
+const createDeps = ({
+  get = jest.fn().mockResolvedValue({
     settings: { autonomy: 'assisted', watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID },
     settingsRevision: null,
-  });
+  }),
+  useMockData = false,
+}: {
+  get?: jest.Mock;
+  useMockData?: boolean;
+} = {}) => {
+  const router = mockRouter.create();
   const deps = {
-    config: { enabled: true, ui: { useMockData: false } },
+    config: { enabled: true, ui: { useMockData } },
     getSpaceId: jest.fn().mockReturnValue('agent-3'),
     getWatchesService: jest.fn().mockReturnValue({ get }),
     logger: loggerMock.create(),
@@ -44,8 +51,18 @@ const invoke = async (handler: ReturnType<typeof getHandler>, query: { watchId: 
 };
 
 describe('registerGetAutonomyRoute', () => {
-  it('registers the route gated on only the low read privilege', () => {
+  it('declares live Workflows managed-read so get() can populate authzResult', () => {
     const { deps } = createDeps();
+
+    registerGetAutonomyRoute(deps);
+
+    expect(deps.router.versioned.getRoute('get', PND_AUTONOMY_URL).config.security).toEqual({
+      authz: getWatchRouteAuthz(false),
+    });
+  });
+
+  it('keeps mock-mode get on PND-read only', () => {
+    const { deps } = createDeps({ useMockData: true });
 
     registerGetAutonomyRoute(deps);
 
@@ -109,6 +126,18 @@ describe('registerGetAutonomyRoute', () => {
 
     expect(response.badRequest).toHaveBeenCalledTimes(1);
     expect(get).not.toHaveBeenCalled();
+  });
+
+  it('maps a managed-read forbidden error to 403 rather than a retried 500', async () => {
+    const { deps, get } = createDeps();
+    get.mockRejectedValue(new WorkflowsManagedReadForbiddenError());
+    registerGetAutonomyRoute(deps);
+
+    const response = await invoke(getHandler(deps.router), {
+      watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+    });
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 403 }));
   });
 
   it('returns a 500 when reading settings throws', async () => {

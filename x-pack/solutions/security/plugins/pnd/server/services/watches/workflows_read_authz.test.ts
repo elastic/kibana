@@ -16,6 +16,7 @@ import {
   canReadManagedWorkflowExecutions,
   canReadManagedWorkflows,
   canReadWorkflowExecutions,
+  httpStatusFromWatchError,
 } from './workflows_read_authz';
 
 const requestWith = (authzResult: Record<string, boolean>): KibanaRequest =>
@@ -154,6 +155,16 @@ describe('workflows_read_authz', () => {
   describe('WorkflowsManagedReadForbiddenError', () => {
     it('carries a 403 statusCode', () => {
       expect(new WorkflowsManagedReadForbiddenError().statusCode).toBe(403);
+    });
+  });
+
+  describe('httpStatusFromWatchError', () => {
+    it('maps a managed-read forbidden error to 403', () => {
+      expect(httpStatusFromWatchError(new WorkflowsManagedReadForbiddenError())).toBe(403);
+    });
+
+    it('maps an unexpected error to 500', () => {
+      expect(httpStatusFromWatchError(new Error('boom'))).toBe(500);
     });
   });
 });

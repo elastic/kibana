@@ -77,5 +77,6 @@ export const threadParentFromGroup = ({
         ? conversation?.title.trim() || i18n.UNNAMED_INCIDENT
         : titles.get(correlationId) ?? i18n.UNNAMED_INVESTIGATION,
     ...(riskScore == null ? {} : { riskScore }),
+    ...(conversation?.updatedAt == null ? {} : { updatedAt: conversation.updatedAt }),
   };
 };

@@ -102,7 +102,9 @@ describe('findPndProposalRow', () => {
 
     expect(managementClient.getWorkflowExecutions).toHaveBeenCalledTimes(1);
     expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
-      expect.objectContaining({ workflowId: SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID }),
+      expect.objectContaining({
+        workflowId: `${SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID}-agent-1`,
+      }),
       'agent-1'
     );
   });

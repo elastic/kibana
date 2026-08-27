@@ -30,6 +30,7 @@ export interface QueueEvent {
   readonly riskScore?: number;
   readonly threadConversationId?: string;
   readonly title: string;
+  readonly updatedAt?: string;
 }
 
 /** A recorded decision. Present ⇒ the primary action hides and result text shows. */
@@ -46,6 +47,7 @@ export interface QueueParent {
   readonly riskScore?: number;
   readonly summary: string;
   readonly title: string;
+  readonly updatedAt?: string;
 }
 
 export const QUEUE_GROUP_MODES = ['type', 'type-thread', 'thread'] as const;

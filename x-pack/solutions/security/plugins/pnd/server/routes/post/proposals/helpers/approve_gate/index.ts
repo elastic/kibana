@@ -52,7 +52,7 @@ export const approveGate = async (
   gate: ApproveGateInput,
   ctx: ApproveGateContext
 ): Promise<void> => {
-  const definition = getGateDefinition(gate.workflowId, gate.stepId);
+  const definition = getGateDefinition(gate.workflowId, gate.stepId, ctx.spaceId);
 
   if (definition == null || definition.alwaysGate || definition.autoApproveResponse == null) {
     throw new Error(

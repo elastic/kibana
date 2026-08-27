@@ -12,33 +12,35 @@ import {
   GetAutonomyRequestQuery,
 } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PND_API_PRIVILEGE_READ } from '../../../../common/constants';
 import type { RouteDependencies } from '../../register_routes';
 import { asWatchAutonomyLevel } from '../../../lib/as_watch_autonomy_level';
 import { buildAutonomyResponse } from '../../../lib/build_autonomy_response';
 import { isSystemSecurityWatchId } from '../../../lib/is_system_security_watch_id';
+import { httpStatusFromWatchError } from '../../../services/watches/workflows_read_authz';
+import { getWatchRouteAuthz } from '../../watches/watch_route_security';
 
 /**
- * `GET /internal/pnd/autonomy` — the orchestrators' read path.
+ * `GET /internal/pnd/autonomy` — the dial UI's read path.
  *
- * Gated on the narrowest PND privilege ({@link PND_API_PRIVILEGE_READ}) so the
- * Task Manager API key that drives the watch (which carries the scheduling
- * user's privileges, NOT the autonomy-write privilege) can still read the dial.
- * The level is the per-space template value. An uninstalled watch returns the
- * default `manual` without installing.
+ * YAML no longer calls this route; autonomy is evaluated at approval time. The
+ * handler still re-reads via `get()`, which asserts Workflows managed-read from
+ * `request.authzResult`, so live authz is the same pair as the watch catalog
+ * ({@link getWatchRouteAuthz}). Mock mode stays on PND-read only. An uninstalled
+ * watch returns the default `manual` without installing.
  */
 export const registerGetAutonomyRoute = ({
-  router,
-  logger,
+  config,
   getSpaceId,
   getWatchesService,
+  logger,
+  router,
 }: RouteDependencies) => {
   router.versioned
     .get({
       path: PND_AUTONOMY_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PND_API_PRIVILEGE_READ] },
+        authz: getWatchRouteAuthz(config.ui.useMockData),
       },
       summary: "Get a PND watch's autonomy level",
     })
@@ -70,7 +72,7 @@ export const registerGetAutonomyRoute = ({
         } catch (error) {
           logger.error(`Failed to get autonomy for watch "${watchId}": ${error}`);
           return response.customError({
-            statusCode: 500,
+            statusCode: httpStatusFromWatchError(error),
             body: { message: 'Failed to get autonomy' },
           });
         }

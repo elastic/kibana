@@ -29,6 +29,7 @@ export const queueEventFromConversation = ({
     return {
       ...queueEventFromProposal({ proposal }),
       id: conversation.id,
+      updatedAt: conversation.updatedAt,
     };
   }
 
@@ -39,5 +40,6 @@ export const queueEventFromConversation = ({
     id: conversation.id,
     ...(conversation.kind === 'thread' ? { threadConversationId: conversation.id } : {}),
     title: conversation.title,
+    updatedAt: conversation.updatedAt,
   };
 };

@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { PND_WATCH_WORKFLOW_IDS } from '@kbn/pnd-common';
+import { PND_WATCH_WORKFLOW_IDS, pndWatchDocumentId } from '@kbn/pnd-common';
 import type { HitlWaitStepType } from '@kbn/workflows';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows-management-plugin/common';
 
@@ -66,7 +66,11 @@ export const buildActivityQuery = ({
         filter: [
           { term: { spaceId } },
           { term: { stepType: PND_GATE_STEP_TYPE } },
-          { terms: { workflowId: [...PND_WATCH_WORKFLOW_IDS] } },
+          {
+            terms: {
+              workflowId: PND_WATCH_WORKFLOW_IDS.map((id) => pndWatchDocumentId(id, spaceId)),
+            },
+          },
           { terms: { stepId: [...PND_ACTIVITY_STEP_IDS] } },
           // The window's own oldest hour rather than a literal `now-24h`: the two differ by less
           // than an hour, and starting on a boundary is what keeps the histogram at 24 buckets.

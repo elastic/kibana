@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { readCorrelationIdFromExecutionContext } from '@kbn/workflows/managed';
-import { getGateDefinition, PND_WATCH_WORKFLOW_IDS } from '@kbn/pnd-common';
+import { getGateDefinition, PND_WATCH_WORKFLOW_IDS, pndWatchDocumentId } from '@kbn/pnd-common';
 
 import type { WatchWorkflowsManagementClient } from '../../services/watches/watch_workflows_management_client';
 import { extractGateAnswer, type GateAnswer } from '../extract_gate_answer';
@@ -44,8 +44,8 @@ export interface ListAnsweredPndGatesResult {
 }
 
 /** Whether a step is one of the gates in `PND_GATE_REGISTRY`, keyed by `(workflowId, stepId)`. */
-const isRegisteredPndGate = (step: WorkflowStepExecutionDto): boolean =>
-  getGateDefinition(step.workflowId, step.stepId) != null;
+const isRegisteredPndGate = (step: WorkflowStepExecutionDto, spaceId: string): boolean =>
+  getGateDefinition(step.workflowId, step.stepId, spaceId) != null;
 
 /** Pull a plain-object `reasoning` value out of a step output, when present. */
 const extractReasoning = (output: unknown): Record<string, unknown> | undefined => {
@@ -134,7 +134,7 @@ export const listAnsweredPndGates = async ({
   const perWatch = await Promise.all(
     watchIds.map(async (workflowId): Promise<WorkflowExecutionListItemDto[]> => {
       const { results } = await managementClient.getWorkflowExecutions(
-        { page: 1, size, workflowId },
+        { page: 1, size, workflowId: pndWatchDocumentId(workflowId, spaceId) },
         spaceId
       );
       return results;
@@ -173,7 +173,7 @@ export const listAnsweredPndGates = async ({
 
         const answered = stepExecutions.flatMap(
           (step): Array<[WorkflowStepExecutionDto, GateAnswer]> => {
-            if (!isRegisteredPndGate(step)) {
+            if (!isRegisteredPndGate(step, spaceId)) {
               return [];
             }
             const answer = extractGateAnswer(step);

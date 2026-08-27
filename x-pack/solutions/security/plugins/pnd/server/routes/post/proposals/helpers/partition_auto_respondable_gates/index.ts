@@ -6,7 +6,11 @@
  */
 
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { getGateDefinition, isGateAutoAcceptable } from '@kbn/pnd-common';
+import {
+  getGateDefinition,
+  isGateAutoAcceptable,
+  resolvePndWatchDefinitionId,
+} from '@kbn/pnd-common';
 import type { PndGateDefinition, WatchAutonomyLevel } from '@kbn/pnd-common';
 
 /** A pending gate `_auto_respond` will accept, addressed for `approveGate`. */
@@ -20,6 +24,8 @@ export interface AutoRespondableGate {
 
 export interface PartitionAutoRespondableGatesParams {
   autonomyLevel: WatchAutonomyLevel;
+  /** Space the steps were listed in, used to resolve per-space document ids. */
+  spaceId: string;
   /** Pending `waitForInput` steps in the space (from `listPendingPndGates`). */
   steps: WorkflowStepExecutionDto[];
   /** The managed watch id being auto-responded (already allow-listed by the route). */
@@ -50,13 +56,14 @@ export interface PartitionedGates {
  */
 export const partitionAutoRespondableGates = ({
   autonomyLevel,
+  spaceId,
   steps,
   watchId,
 }: PartitionAutoRespondableGatesParams): PartitionedGates => {
   const gates = steps
-    .filter((step) => step.workflowId === watchId)
+    .filter((step) => resolvePndWatchDefinitionId(step.workflowId, spaceId) === watchId)
     .flatMap((step) => {
-      const gate = getGateDefinition(step.workflowId, step.stepId);
+      const gate = getGateDefinition(step.workflowId, step.stepId, spaceId);
       return gate == null ? [] : [{ gate, step }];
     });
 
@@ -64,7 +71,7 @@ export const partitionAutoRespondableGates = ({
     if (
       gate.alwaysGate ||
       gate.autoApproveResponse == null ||
-      !isGateAutoAcceptable(step.workflowId, step.stepId, autonomyLevel)
+      !isGateAutoAcceptable(gate.workflowId, step.stepId, autonomyLevel)
     ) {
       return [];
     }
@@ -74,7 +81,7 @@ export const partitionAutoRespondableGates = ({
         autoApproveResponse: gate.autoApproveResponse,
         stepExecutionId: step.id,
         stepId: step.stepId,
-        workflowId: step.workflowId,
+        workflowId: gate.workflowId,
         workflowRunId: step.workflowRunId,
       },
     ];
