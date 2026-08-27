@@ -14,7 +14,7 @@ export {
 export {
   PostValidateRequestBody,
   PostValidateResponse,
-} from './routes/post/validate/post_validate.gen';
+} from './routes/post/validate/post_validate';
 
 export { AttackDiscoveryApiAlert } from './attack_discovery/attack_discovery_api_alert.gen';
 
