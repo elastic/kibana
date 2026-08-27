@@ -23,31 +23,21 @@ import {
 
 export const UpdateRuleStepId = 'security.updateRule' as const;
 
-// A plain union rather than a discriminated one, mirroring the PATCH API where `type` is
-// optional (the endpoint resolves it from the existing rule). Typing `type` explicitly still
-// narrows editor completion and validation to that rule type's fields, because every other
-// branch fails its `type` literal; leaving it out skips the narrowing but remains valid. A
-// discriminated union would additionally pre-fill `type` in the step scaffold, wrongly
-// suggesting the field is required or changeable. `.extend()` also materializes each lazySchema
-// proxy into a real ZodObject, which the editor's instanceof-based machinery requires.
+// "type" property is optional, but if you provide it in the editor,
+// it'll narrow the editor completion and validation to that rule type's fields.
+// The "exactly one of `id` / `rule_id`" rule is enforced by the detection engine API on both
+// the read and the patch call, so it is deliberately not restated here or in the handler.
 export const updateRuleInputSchema = z.object({
-  rule: z
-    .union([
-      EqlRulePatchProps.extend({ type: z.literal('eql').optional() }),
-      QueryRulePatchProps.extend({ type: z.literal('query').optional() }),
-      SavedQueryRulePatchProps.extend({ type: z.literal('saved_query').optional() }),
-      ThresholdRulePatchProps.extend({ type: z.literal('threshold').optional() }),
-      ThreatMatchRulePatchProps.extend({ type: z.literal('threat_match').optional() }),
-      MachineLearningRulePatchProps.extend({ type: z.literal('machine_learning').optional() }),
-      NewTermsRulePatchProps.extend({ type: z.literal('new_terms').optional() }),
-      EsqlRulePatchProps.extend({ type: z.literal('esql').optional() }),
-    ])
-    // Stripped before Monaco JSON Schema generation, so the constraint surfaces at workflow
-    // validation time rather than in the YAML editor; the step handler enforces it at run time.
-    .refine((value) => (value.id === undefined) !== (value.rule_id === undefined), {
-      message: 'Provide exactly one of `id` or `rule_id`',
-      path: ['id'],
-    }),
+  rule: z.union([
+    EqlRulePatchProps.extend({ type: z.literal('eql').optional() }),
+    QueryRulePatchProps.extend({ type: z.literal('query').optional() }),
+    SavedQueryRulePatchProps.extend({ type: z.literal('saved_query').optional() }),
+    ThresholdRulePatchProps.extend({ type: z.literal('threshold').optional() }),
+    ThreatMatchRulePatchProps.extend({ type: z.literal('threat_match').optional() }),
+    MachineLearningRulePatchProps.extend({ type: z.literal('machine_learning').optional() }),
+    NewTermsRulePatchProps.extend({ type: z.literal('new_terms').optional() }),
+    EsqlRulePatchProps.extend({ type: z.literal('esql').optional() }),
+  ]),
 });
 
 export const updateRuleOutputSchema = RuleResponse;

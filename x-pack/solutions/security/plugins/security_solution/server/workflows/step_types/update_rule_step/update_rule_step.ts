@@ -18,23 +18,20 @@ type UpdateRuleOutput = z.infer<typeof updateRuleOutputSchema>;
 export const updateRuleStepDefinition = createServerStepDefinition({
   ...updateRuleStepCommonDefinition,
   handler: async (context) => {
-    // Inputs passed as a single expression (`rule: "${{ ... }}"`) bypass input schema
-    // validation entirely, so the selector and the `type` discriminator are re-checked here.
     const { rule } = context.input;
     const { id, rule_id: ruleId } = rule;
-    if ((id === undefined) === (ruleId === undefined)) {
-      throw new ExecutionError({
-        type: 'ValidationError',
-        message: 'Provide exactly one of "id" or "rule_id" to identify the rule to update.',
-      });
-    }
 
     let existingRule: UpdateRuleOutput;
     try {
+      // The read endpoint enforces "exactly one of id / rule_id", so the selectors are
+      // forwarded as-is rather than re-validated here.
       ({ body: existingRule } = await context.contextManager.callKibanaApi<UpdateRuleOutput>({
         method: 'GET',
         path: DETECTION_ENGINE_RULES_URL,
-        query: id !== undefined ? { id } : { rule_id: ruleId },
+        query: {
+          ...(id !== undefined && { id }),
+          ...(ruleId !== undefined && { rule_id: ruleId }),
+        },
       }));
     } catch (error) {
       throw toApiExecutionError(error, 'read detection rule before update');

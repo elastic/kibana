@@ -120,18 +120,37 @@ describe('updateRuleStepDefinition', () => {
     expect(mockContextManager.callKibanaApi).toHaveBeenCalledTimes(1);
   });
 
+  // The "exactly one of id / rule_id" rule is enforced by the read endpoint, so the handler
+  // forwards only the provided selectors and surfaces the API's rejection.
   it.each([
-    ['neither id nor rule_id', { type: 'query', query: 'host.name: *' }],
-    ['both id and rule_id', { id: RULE_ID, rule_id: 'my-rule', type: 'query' }],
-  ])('throws a ValidationError when %s is provided', async (_case, rule) => {
+    ['neither id nor rule_id', { type: 'query' }, {}],
+    [
+      'both id and rule_id',
+      { id: RULE_ID, rule_id: 'my-rule', type: 'query' },
+      { id: RULE_ID, rule_id: 'my-rule' },
+    ],
+  ])('forwards the selectors as-is when %s is provided', async (_case, rule, expectedQuery) => {
+    mockContextManager.callKibanaApi.mockRejectedValueOnce(
+      new KibanaApiCallError({
+        status: 400,
+        headers: {},
+        body: { message: 'either "id" or "rule_id" must be set' },
+        message: 'HTTP 400: either "id" or "rule_id" must be set',
+      })
+    );
+
     const error = await updateRuleStepDefinition
       .handler(buildContext(rule as InputRule))
       .then(() => undefined)
       .catch((e) => e);
 
+    expect(mockContextManager.callKibanaApi).toHaveBeenCalledWith({
+      method: 'GET',
+      path: DETECTION_ENGINE_RULES_URL,
+      query: expectedQuery,
+    });
     expect(error).toBeInstanceOf(ExecutionError);
-    expect(error).toMatchObject({ type: 'ValidationError' });
-    expect(mockContextManager.callKibanaApi).not.toHaveBeenCalled();
+    expect(error).toMatchObject({ type: 'ApiError' });
   });
 
   it('routes read failures through toApiExecutionError and skips the PATCH', async () => {

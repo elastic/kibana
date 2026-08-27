@@ -51,16 +51,14 @@ describe('updateRuleInputSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects a rule with neither id nor rule_id', () => {
-    const result = updateRuleInputSchema.safeParse({ rule: { type: 'query', query: 'x' } });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects a rule with both id and rule_id', () => {
-    const result = updateRuleInputSchema.safeParse({
-      rule: { type: 'query', id: RULE_ID, rule_id: 'r-1' },
-    });
-    expect(result.success).toBe(false);
+  // The "exactly one of id / rule_id" rule is left to the detection engine API, which
+  // enforces it on both the read and the patch call with clear error messages.
+  it('leaves id/rule_id selector validation to the API', () => {
+    expect(updateRuleInputSchema.safeParse({ rule: { type: 'query' } }).success).toBe(true);
+    expect(
+      updateRuleInputSchema.safeParse({ rule: { type: 'query', id: RULE_ID, rule_id: 'r-1' } })
+        .success
+    ).toBe(true);
   });
 
   it('strips fields that do not belong to the declared type', () => {
