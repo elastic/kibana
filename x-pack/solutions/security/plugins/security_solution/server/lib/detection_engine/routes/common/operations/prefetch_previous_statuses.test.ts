@@ -166,6 +166,48 @@ describe('prefetchPreviousStatusesByIds', () => {
     expect(previousStatuses).toEqual([]);
   });
 
+  it('sets hasStatusField=true for a doc with a recognized modern status', async () => {
+    esClient.search.mockResolvedValue(makeSearchResponse([{ _id: 'id1', status: 'open' }], 1));
+    const { hits } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
+    expect(hits[0].hasStatusField).toBe(true);
+  });
+
+  it('sets hasStatusField=true for a doc with an unrecognized non-null modern status', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [
+          { _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: 'triaged' } },
+        ],
+      },
+    });
+    const { hits } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
+    expect(hits[0].hasStatusField).toBe(true);
+    expect(hits[0].previousStatus).toBeUndefined();
+  });
+
+  it('sets hasStatusField=false for a doc with no status fields', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [{ _id: 'id1', _index: 'test-index', _source: {} }],
+      },
+    });
+    const { hits } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
+    expect(hits[0].hasStatusField).toBe(false);
+  });
+
+  it('sets hasStatusField=false when the modern field is null', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [{ _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: null } }],
+      },
+    });
+    const { hits } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
+    expect(hits[0].hasStatusField).toBe(false);
+  });
+
   it('calls search with a string index as-is and an ids query', async () => {
     await prefetchPreviousStatusesByIds(esClient, 'my-index', ['id1']);
 

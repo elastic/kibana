@@ -39,6 +39,7 @@ describe('attackStatusChanged trigger', () => {
         attackIds: [],
         status: 'invalid',
         previousStatuses: [],
+        truncated: false,
         spaceId: 'default',
       })
     ).toThrow();

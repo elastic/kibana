@@ -261,7 +261,7 @@ export const setAttacksStatusRoute = (
               nonAdPreviousStatuses.filter((ps) => ps.previousStatus === status).map((ps) => ps.id)
             );
             const changingRelatedIds = nonAdRelatedHits
-              .filter((h) => !noOpRelatedIds.has(h.id))
+              .filter((h) => h.hasStatusField && !noOpRelatedIds.has(h.id))
               .map((h) => h.id);
             const changingRelated = nonAdPreviousStatuses.filter(
               (ps) => ps.previousStatus !== status

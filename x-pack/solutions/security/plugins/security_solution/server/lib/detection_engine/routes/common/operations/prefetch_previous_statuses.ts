@@ -21,6 +21,10 @@ export interface FoundHit {
   id: string;
   index: string;
   previousStatus?: WorkflowStatus;
+  // True when a status field exists in the document (even if its value is unrecognised).
+  // The update script only mutates documents whose status field is non-null, so hits with
+  // hasStatusField=false will not transition and must not be emitted as workflow events.
+  hasStatusField: boolean;
 }
 
 export interface IdIndexPair {
@@ -39,6 +43,21 @@ const resolveIndex = (index: string | string[]): string =>
 
 const isWorkflowStatus = (v: unknown): v is WorkflowStatus =>
   typeof v === 'string' && (WORKFLOW_STATUS_VALUES as readonly string[]).includes(v);
+
+// Returns true when the document contains any non-null status field. Mirrors the update
+// script guards: modern field (kibana.alert.workflow_status != null) and legacy field
+// (signal.status != null). If neither is true, the script will not mutate the document.
+const hasAnyStatusField = (source: unknown): boolean => {
+  if (typeof source !== 'object' || source === null) return false;
+  const s = source as Record<string, unknown>;
+  if (s[ALERT_WORKFLOW_STATUS] != null) return true;
+  const signal = s.signal;
+  return (
+    typeof signal === 'object' &&
+    signal !== null &&
+    (signal as Record<string, unknown>).status != null
+  );
+};
 
 export const extractWorkflowStatus = (source: unknown): WorkflowStatus | undefined => {
   if (typeof source !== 'object' || source === null) return undefined;
@@ -99,7 +118,12 @@ export const prefetchPreviousStatusesByIds = async (
         idToIndex.set(hit._id, hit._index);
         // Collect each (id, index) pair individually so callers can handle
         // cross-index _id collisions (ES only guarantees uniqueness within an index).
-        hits.push({ id: hit._id, index: hit._index, previousStatus });
+        hits.push({
+          id: hit._id,
+          index: hit._index,
+          previousStatus,
+          hasStatusField: hasAnyStatusField(hit._source),
+        });
       }
     }
   }

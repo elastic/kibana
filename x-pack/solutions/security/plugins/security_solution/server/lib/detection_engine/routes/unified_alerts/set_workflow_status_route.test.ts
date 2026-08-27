@@ -631,5 +631,35 @@ describe('set unified alerts workflow status', () => {
       expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
       expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
     });
+
+    test('does not emit for docs that have no status field (script cannot mutate them)', async () => {
+      // A doc with no kibana.alert.workflow_status and no signal.status won't be updated
+      // by the Painless script (both guards check != null), so it must not trigger an event.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          {
+            _id: 'no-status-doc',
+            _index: '.alerts-security.alerts-default',
+            _source: {}, // no status fields at all
+          },
+          {
+            _id: 'has-status-doc',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'open' },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: typicalSetStatusSignalByIdsPayload(), // status: 'closed'
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+
+      const call = (mockEventBus.emitAlertStatusChanged as jest.Mock).mock.calls[0][1];
+      expect(call.alertIds).not.toContain('no-status-doc');
+      expect(call.alertIds).toContain('has-status-doc');
+    });
   });
 });

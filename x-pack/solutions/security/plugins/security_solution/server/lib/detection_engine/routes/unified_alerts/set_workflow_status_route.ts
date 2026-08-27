@@ -88,17 +88,29 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
             // _id collisions are handled correctly — ES only guarantees _id
             // uniqueness within an index, not across indices.
             for (const hit of hits) {
-              // Only emit for IDs that are actually changing status
-              const isNoOp = hit.previousStatus !== undefined && hit.previousStatus === status;
-              if (!isNoOp) {
-                if (isAttackDiscoveryIndex(hit.index)) {
-                  attackIds.push(hit.id);
-                  if (hit.previousStatus !== undefined)
-                    attackPreviousStatuses.push({ id: hit.id, previousStatus: hit.previousStatus });
-                } else {
-                  alertIds.push(hit.id);
-                  if (hit.previousStatus !== undefined)
-                    alertPreviousStatuses.push({ id: hit.id, previousStatus: hit.previousStatus });
+              // Exclude documents with no status field: the update script guards on
+              // `!= null`, so status-less docs are not mutated and must not emit events.
+              // A hit with hasStatusField=true but previousStatus=undefined has an
+              // unrecognized non-null value (e.g. "triaged") and IS updated by the script.
+              if (hit.hasStatusField) {
+                // Only emit for IDs that are actually changing status
+                const isNoOp = hit.previousStatus !== undefined && hit.previousStatus === status;
+                if (!isNoOp) {
+                  if (isAttackDiscoveryIndex(hit.index)) {
+                    attackIds.push(hit.id);
+                    if (hit.previousStatus !== undefined)
+                      attackPreviousStatuses.push({
+                        id: hit.id,
+                        previousStatus: hit.previousStatus,
+                      });
+                  } else {
+                    alertIds.push(hit.id);
+                    if (hit.previousStatus !== undefined)
+                      alertPreviousStatuses.push({
+                        id: hit.id,
+                        previousStatus: hit.previousStatus,
+                      });
+                  }
                 }
               }
             }

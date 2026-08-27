@@ -152,8 +152,9 @@ export const setSignalsStatusRoute = (
             const changingSignals = previousStatuses.filter((ps) => ps.previousStatus !== status);
             // Use hits (all found docs) rather than previousStatuses (recognized-status docs only)
             // so alerts with an unrecognized stored status (e.g. "triaged") are included.
+            // Exclude status-less docs: the update script guards on != null so they are not mutated.
             const changingIds = prefetchedHits
-              .filter((h) => h.previousStatus !== status)
+              .filter((h) => h.hasStatusField && h.previousStatus !== status)
               .map((h) => h.id)
               .slice(0, MAX_ALERTS_PER_TRIGGER);
             if (changingIds.length > 0) {
