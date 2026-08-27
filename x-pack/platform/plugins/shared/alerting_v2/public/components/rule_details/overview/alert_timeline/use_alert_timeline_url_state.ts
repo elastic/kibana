@@ -12,7 +12,6 @@ import {
   Storage,
   type IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
-import deepEqual from 'fast-deep-equal';
 import {
   readActivityTimeRangeFromStorage,
   readActivityTimeRangeFromUrl,
@@ -27,7 +26,7 @@ export type { AlertTimelineTimeRange };
 
 /**
  * Two-way sync for the Alert activity time range. Hydrates from URL, then
- * localStorage, then the given default. User changes write both stores so the
+ * localStorage, then the default. User changes write both stores so the
  * range survives rule-to-rule navigation and is shareable via URL.
  *
  * Precedence on load (and on re-sync from browser Back/Forward): URL > localStorage > default.
@@ -62,13 +61,15 @@ export const useAlertTimelineUrlState = (
       readActivityTimeRangeFromUrl(urlStateStorage),
       DEFAULT_ACTIVITY_TIME_RANGE
     );
-    setTimeRangeInternal((prev) => (deepEqual(prev, next) ? prev : next));
+    setTimeRangeInternal((prev) => (prev.from === next.from && prev.to === next.to ? prev : next));
   }, [location.search, resolvedStorage, urlStateStorage]);
 
   const persistRange = useCallback(
     (next: AlertTimelineTimeRange) => {
       writeActivityTimeRangeToStorage(resolvedStorage, next);
-      void writeActivityTimeRangeToUrl(urlStateStorage, next);
+      void writeActivityTimeRangeToUrl(urlStateStorage, next).catch(() => {
+        // URL persistence is best-effort; localStorage already has the range.
+      });
     },
     [resolvedStorage, urlStateStorage]
   );
