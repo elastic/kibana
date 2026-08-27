@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppMountParameters, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider, reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -70,9 +70,10 @@ export const mountStandaloneApp = async ({
     </QueryClientProvider>
   );
 
-  ReactDOM.render(coreStart.rendering.addContext(<App />), element);
+  const root = createRoot(element);
+  root.render(coreStart.rendering.addContext(<App />));
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
