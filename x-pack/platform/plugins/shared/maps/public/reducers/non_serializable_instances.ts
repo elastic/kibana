@@ -18,6 +18,7 @@ import { MAP_EXTENT_CHANGED } from '../actions';
 import type { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
 import { clampToLatBounds, clampToLonBounds } from '../../common/elasticsearch_util';
 import type { MapViewContext } from './map';
+import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
 const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
@@ -236,9 +237,19 @@ export function jumpTo({ lat, lon, zoom }: MapCenterAndZoom) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
+    const prevMapCenter = getMapCenter(getState());
+    const prevZoom = getMapZoom(getState());
+
+    if (lat === prevMapCenter.lat && lon === prevMapCenter.lon && zoom === prevZoom) {
+      // map already at jumpTo location
+      return;
+    }
+
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapViewContext: {
+        // Clear buffer when jumping to new zoom so mapExtentChanged action recomputes it on moveend.
+        ...(prevZoom !== zoom && { buffer: undefined }),
         center: { lat, lon },
         zoom,
       } as Pick<MapViewContext, 'center' | 'zoom'>,
