@@ -143,6 +143,39 @@ const stripQuotes = (value: string): string => {
 // Tokenizer + recursive-descent parser
 // ---------------------------------------------------------------------------
 
+/**
+ * KQL allows whitespace around the field/value colon (`application : "x"`),
+ * but our whitespace-delimited tokenizer would otherwise read `application`,
+ * `:` and `"x"` as three separate clauses — turning the field match into a
+ * free-text search that matches nothing. Collapse spaces immediately around
+ * any *unquoted* colon so `field : value` becomes `field:value`. Colons inside
+ * quotes are left untouched.
+ */
+const normalizeColons = (input: string): string => {
+  let out = '';
+  let inQuotes = false;
+  for (let i = 0; i < input.length; i += 1) {
+    const char = input[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+      out += char;
+      continue;
+    }
+    if (!inQuotes && char === ':') {
+      // Drop the whitespace we just appended before the colon...
+      out = out.replace(/[ \t\n]+$/, '');
+      out += ':';
+      // ...and skip any whitespace that follows it.
+      let j = i + 1;
+      while (j < input.length && /[ \t\n]/.test(input[j])) j += 1;
+      i = j - 1;
+      continue;
+    }
+    out += char;
+  }
+  return out;
+};
+
 type Token =
   | { readonly kind: 'and' }
   | { readonly kind: 'or' }
@@ -287,7 +320,7 @@ export const compileEntityKql = (query: string): EntityPredicate => {
   const trimmed = query.trim();
   if (!trimmed) return MATCH_ALL;
   try {
-    return new Parser(tokenize(trimmed)).parse();
+    return new Parser(tokenize(normalizeColons(trimmed))).parse();
   } catch {
     return MATCH_ALL;
   }
