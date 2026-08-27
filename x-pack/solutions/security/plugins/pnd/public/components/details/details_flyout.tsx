@@ -8,9 +8,9 @@
 import React, { memo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
+import { ConversationDetailsFlyoutHeader } from './flyout_header';
 import type { BaseActionsProps } from '../actions';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
-import { ConversationDetailsFlyoutHeader } from './flyout_header';
 import { ConversationDetailsFlyoutBody } from './flyout_body';
 import { ConversationDetailsFlyoutFooter } from './flyout_footer';
 import { DETAILS_FLYOUT_LABELS } from './translations';
@@ -32,20 +32,9 @@ export const ConversationDetailsFlyout = memo<ConversationDetailsFlyoutProps>(
         paddingSize="m"
         onClose={onClose}
         ownFocus={false}
-        flyoutMenuProps={{
-          trailingActions: [
-            {
-              iconType: 'share',
-              ['aria-label']: DETAILS_FLYOUT_LABELS.header.flyoutMenuAriaLabel,
-              onClick: () => {
-                // TODO: Implement if needed
-                return;
-              },
-            },
-          ],
-        }}
+        hideCloseButton
       >
-        <ConversationDetailsFlyoutHeader />
+        <ConversationDetailsFlyoutHeader onClose={onClose} />
         <ConversationDetailsFlyoutBody investigation={investigation} />
         <ConversationDetailsFlyoutFooter
           investigation={investigation}

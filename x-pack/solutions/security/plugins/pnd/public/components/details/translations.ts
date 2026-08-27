@@ -29,9 +29,14 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
         defaultMessage: 'Since {time} ',
         values: { time },
       }),
-    flyoutMenuAriaLabel: i18n.translate('xpack.pnd.detailsFlyout.header.flyoutMenuAriaLabel', {
-      defaultMessage: 'Share',
-    }),
+    flyoutMenu: {
+      share: i18n.translate('xpack.pnd.detailsFlyout.header.flyoutMenuAriaLabel', {
+        defaultMessage: 'Share',
+      }),
+      close: i18n.translate('xpack.pnd.detailsFlyout.header.closeButtonAriaLabel', {
+        defaultMessage: 'Close',
+      }),
+    },
     criticalityBadge: (priorityScore: number) =>
       i18n.translate('xpack.pnd.detailsFlyout.criticalityBadge.priorityScore', {
         defaultMessage: 'Criticality · {priorityScore}',
