@@ -63,10 +63,16 @@ You have full read **and write** access to Elastic cases across Security, Observ
 
 | Tool | Operations |
 |------|------------|
-| \`${platformCoreTools.cases}\` | get by ID, bulk get, search/filter, find similar, find by alert ID |
+| \`${
+      platformCoreTools.cases
+    }\` | get by ID, bulk get, search/filter, find similar, find by alert ID |
 | \`${platformCoreCasesTools.manage}\` | ${buildManageModesCell(isTemplatesEnabled)} |
-| \`${platformCoreCasesTools.getAttachments}\` | Retrieves all comments, alerts, and events for a case |
-| \`${platformCoreCasesTools.manageAttachments}\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\` |
+| \`${
+      platformCoreCasesTools.getAttachments
+    }\` | Retrieves all comments, alerts, and events for a case |
+| \`${
+      platformCoreCasesTools.manageAttachments
+    }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\` |
 | \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |${
       isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''
     }
@@ -113,7 +119,9 @@ Domain note: \`assignees\` are user profile UIDs, not usernames. \`status\` flow
 
 ## Pagination
 
-\`${platformCoreTools.cases}\` search/filter: default \`perPage\` **10**, max **50**. \`similar\` mode: default **20**. Bulk-get \`case_ids\`: keep ≤ **10**. Use \`page\` (1-indexed) for more. Don't preemptively page through every result.
+\`${
+      platformCoreTools.cases
+    }\` search/filter: default \`perPage\` **10**, max **50**. \`similar\` mode: default **20**. Bulk-get \`case_ids\`: keep ≤ **10**. Use \`page\` (1-indexed) for more. Don't preemptively page through every result.
 
 ## Output: render attachments inline
 
@@ -136,26 +144,32 @@ When in doubt, render — a missing render loses information, a redundant one is
 
 ### Tools that don't emit a case attachment (no tag to emit)
 
-- \`${platformCoreCasesTools.getAttachments}\` — returns the discriminated attachments array; summarize them.
+- \`${
+      platformCoreCasesTools.getAttachments
+    }\` — returns the discriminated attachments array; summarize them.
 - \`${platformCoreCasesTools.manage}\` mode \`delete\` — case is gone.
 - \`${platformCoreCasesTools.observables}\` mode \`delete\` — only IDs returned.
 
 ## Comments and discussion
 
-Cases tools return metadata only — comments and attachments are never included. To analyze discussion, call \`${platformCoreCasesTools.getAttachments}\` with the case ID; filter to \`type === "user"\` for comments.
+Cases tools return metadata only — comments and attachments are never included. To analyze discussion, call \`${
+      platformCoreCasesTools.getAttachments
+    }\` with the case ID; filter to \`type === "user"\` for comments.
 
 Only fetch when the user explicitly asks for: a case summary that includes discussion, a summary or quote of comments, or the list of alerts/events attached to a specific case. Never preemptively fetch for cases in a list.
 
 ## Adding attachments
 
-Use \`${platformCoreCasesTools.manageAttachments}\` for all write operations on attachments. Prefer the typed modes — \`add_comment\`, \`add_alerts\`, \`add_events\` — for those specific attachment types. Use \`add_attachments\` for a bulk call or for other supported types beyond comments and alerts — e.g. saved-object attachments such as dashboards, lens visualizations, maps, and discover sessions. It is not limited to comments and alerts; check the tool's \`attachments\` field for the supported \`type\` values. Each item is discriminated by \`type\` and \`owner\` is derived from the case.
+Use \`${
+      platformCoreCasesTools.manageAttachments
+    }\` for all write operations on attachments. Prefer the typed modes — \`add_comment\`, \`add_alerts\`, \`add_events\` — for those specific attachment types. Use \`add_attachments\` for a bulk call or for other supported types beyond comments and alerts — e.g. saved-object attachments such as dashboards, lens visualizations, maps, and discover sessions. It is not limited to comments and alerts; check the tool's \`attachments\` field for the supported \`type\` values. Each item is discriminated by \`type\` and \`owner\` is derived from the case.
 `,
 
-  getRegistryTools: () => [
-    platformCoreTools.cases,
-    platformCoreCasesTools.manage,
-    platformCoreCasesTools.getAttachments,
-    platformCoreCasesTools.manageAttachments,
-    platformCoreCasesTools.observables,
-  ],
-});
+    getRegistryTools: () => [
+      platformCoreTools.cases,
+      platformCoreCasesTools.manage,
+      platformCoreCasesTools.getAttachments,
+      platformCoreCasesTools.manageAttachments,
+      platformCoreCasesTools.observables,
+    ],
+  });
