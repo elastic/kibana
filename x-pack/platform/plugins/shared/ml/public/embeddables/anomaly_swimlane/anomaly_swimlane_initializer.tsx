@@ -203,7 +203,6 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                 <EuiButtonGroup
                   id="selectSwimlaneType"
                   name="selectSwimlaneType"
-                  color="primary"
                   isFullWidth
                   legend={i18n.translate(
                     'xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel',
