@@ -63,7 +63,7 @@ const getPndHeroTitle = ({
 
   if (hasNeedsAction) {
     return i18n.translate('xpack.pnd.hero.needsActionTitle', {
-      defaultMessage: '{eventCount, plural, one {# event needs you} other {# events need you}}',
+      defaultMessage: '{eventCount, plural, one {# action needs you} other {# actions need you}}',
       values: {
         eventCount,
       },
