@@ -10,7 +10,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
@@ -62,7 +62,16 @@ jest.mock('./components/dangling_task_warning/dangling_task_warning', () => ({
 }));
 
 jest.mock('./components/transform_list', () => ({
-  TransformList: () => <div data-test-subj="mockedTransformList" />,
+  TransformList: ({ transforms }: { transforms: Array<{ id: string }> }) =>
+    transforms.length === 0 ? (
+      <div data-test-subj="transformNoTransformsFound">
+        <button type="button" data-test-subj="transformButtonCreate">
+          Create your first transform
+        </button>
+      </div>
+    ) : (
+      <div data-test-subj="mockedTransformList" />
+    ),
 }));
 
 const renderSection = () => {
@@ -141,7 +150,14 @@ describe('Transform: <TransformManagementSection />', () => {
     renderSection();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
-    expect(screen.queryByTestId('transformButtonCreate')).not.toBeInTheDocument();
+    expect(
+      within(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).queryByTestId(
+        'transformButtonCreate'
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('transformNoTransformsFound')).getByTestId('transformButtonCreate')
+    ).toBeInTheDocument();
   });
 
   test('shows Create as the AppHeader primary action when transforms exist', () => {

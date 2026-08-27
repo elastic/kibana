@@ -22,6 +22,11 @@ export function createCapabilityFailureMessage(
         defaultMessage: 'You do not have permission to create transforms.',
       });
       break;
+    case 'canPreviewTransform':
+      message = i18n.translate('xpack.transform.capability.noPermission.previewTransformTooltip', {
+        defaultMessage: 'You do not have permission to preview transforms.',
+      });
+      break;
     case 'canCreateTransformAlerts':
       message = i18n.translate(
         'xpack.transform.capability.noPermission.canCreateTransformAlertsTooltip',

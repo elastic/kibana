@@ -97,5 +97,42 @@ describe('Transform: Transform List <CreateTransformButton />', () => {
 
     expect(primaryActionItem.disableButton).toBe(true);
     expect(primaryActionItem.testId).toBe('transformButtonCreate');
+    expect(primaryActionItem.tooltipContent).toBe(
+      'There are no transform nodes available. Please contact your administrator.'
+    );
+  });
+
+  test('reports missing preview permission when the AppHeader create action is disabled', () => {
+    const primaryActionItem = getCreateTransformPrimaryActionItem({
+      onClick: jest.fn(),
+      transformNodes: 1,
+      capabilities: {
+        canCreateTransform: true,
+        canPreviewTransform: false,
+        canStartStopTransform: true,
+      },
+    });
+
+    expect(primaryActionItem.disableButton).toBe(true);
+    expect(primaryActionItem.tooltipContent).toBe(
+      'You do not have permission to preview transforms. Please contact your administrator.'
+    );
+  });
+
+  test('reports missing start/stop permission when the AppHeader create action is disabled', () => {
+    const primaryActionItem = getCreateTransformPrimaryActionItem({
+      onClick: jest.fn(),
+      transformNodes: 1,
+      capabilities: {
+        canCreateTransform: true,
+        canPreviewTransform: true,
+        canStartStopTransform: false,
+      },
+    });
+
+    expect(primaryActionItem.disableButton).toBe(true);
+    expect(primaryActionItem.tooltipContent).toBe(
+      'You do not have permission to start or stop transforms. Please contact your administrator.'
+    );
   });
 });

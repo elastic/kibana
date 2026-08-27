@@ -61,11 +61,45 @@ const isCreateTransformDisabled = (
     'canCreateTransform' | 'canPreviewTransform' | 'canStartStopTransform'
   >,
   transformNodes: number
-): boolean =>
-  !capabilities.canCreateTransform ||
-  !capabilities.canPreviewTransform ||
-  !capabilities.canStartStopTransform ||
-  transformNodes === 0;
+): boolean => getCreateTransformDisabledReason(capabilities, transformNodes) !== undefined;
+
+const getCreateTransformDisabledReason = (
+  capabilities: Pick<
+    TransformCapabilities,
+    'canCreateTransform' | 'canPreviewTransform' | 'canStartStopTransform'
+  >,
+  transformNodes: number
+):
+  | 'noTransformNodes'
+  | 'canCreateTransform'
+  | 'canPreviewTransform'
+  | 'canStartStopTransform'
+  | undefined => {
+  if (transformNodes === 0) {
+    return 'noTransformNodes';
+  }
+  if (!capabilities.canCreateTransform) {
+    return 'canCreateTransform';
+  }
+  if (!capabilities.canPreviewTransform) {
+    return 'canPreviewTransform';
+  }
+  if (!capabilities.canStartStopTransform) {
+    return 'canStartStopTransform';
+  }
+  return undefined;
+};
+
+const getCreateTransformFailureMessage = (
+  capabilities: Pick<
+    TransformCapabilities,
+    'canCreateTransform' | 'canPreviewTransform' | 'canStartStopTransform'
+  >,
+  transformNodes: number
+): string | undefined => {
+  const reason = getCreateTransformDisabledReason(capabilities, transformNodes);
+  return reason === undefined ? undefined : createCapabilityFailureMessage(reason);
+};
 
 export const getCreateTransformPrimaryActionItem = ({
   onClick,
@@ -80,9 +114,7 @@ export const getCreateTransformPrimaryActionItem = ({
   >;
 }): NonNullable<AppHeaderMenu['primaryActionItem']> => {
   const disabled = isCreateTransformDisabled(capabilities, transformNodes);
-  const tooltipContent = disabled
-    ? createCapabilityFailureMessage(transformNodes > 0 ? 'canCreateTransform' : 'noTransformNodes')
-    : undefined;
+  const tooltipContent = getCreateTransformFailureMessage(capabilities, transformNodes);
 
   if (disabled) {
     return {
@@ -166,9 +198,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
     return (
       <EuiToolTip
         position="top"
-        content={createCapabilityFailureMessage(
-          transformNodes > 0 ? 'canCreateTransform' : 'noTransformNodes'
-        )}
+        content={getCreateTransformFailureMessage(capabilities, transformNodes)}
       >
         {createTransformButton}
       </EuiToolTip>
