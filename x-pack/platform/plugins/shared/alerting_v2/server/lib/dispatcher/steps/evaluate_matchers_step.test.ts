@@ -12,7 +12,6 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import {
   createActionPolicy,
   createAlertEpisode,
-  createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createRule,
   createRuleScopedActionPolicy,
@@ -46,10 +45,8 @@ describe('EvaluateMatchersStep', () => {
       dispatchable,
       rules,
       policies,
-      logger: loggerService,
-      input: createDispatcherPipelineInput({ logger: loggerService }),
     });
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
     if (result.type !== 'continue') {
       throw new Error(`expected step output 'continue', got '${result.type}'`);
     }

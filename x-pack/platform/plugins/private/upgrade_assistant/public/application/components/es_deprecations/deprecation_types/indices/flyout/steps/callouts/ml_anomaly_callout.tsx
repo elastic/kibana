@@ -9,7 +9,8 @@ import type { FunctionComponent } from 'react';
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useAppContext } from '../../../../../../../app_context';
 
 export const MlAnomalyCallout: FunctionComponent = () => {
@@ -20,27 +21,28 @@ export const MlAnomalyCallout: FunctionComponent = () => {
   } = useAppContext();
   return (
     <Fragment>
-      <EuiCallOut
+      <KbnInfoCallout
         title={i18n.translate(
           'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleMlAnomalyIndexTitle',
           { defaultMessage: 'ML anomaly index detected' }
         )}
-      >
-        <FormattedMessage
-          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleMlAnomalyIndexText"
-          defaultMessage="Anomaly result indices that were created in 7.x must be either reindexed, set to read-only, or deleted before upgrading to 9.x. {learnMore}."
-          values={{
-            learnMore: (
-              <EuiLink target="_blank" href={docLinks.links.ml.anomalyMigrationGuide}>
-                {i18n.translate(
-                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleMlAnomalyIndexText.learnMore',
-                  { defaultMessage: 'Learn more' }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleMlAnomalyIndexText"
+            defaultMessage="Anomaly result indices that were created in 7.x must be either reindexed, set to read-only, or deleted before upgrading to 9.x. {learnMore}."
+            values={{
+              learnMore: (
+                <EuiLink target="_blank" href={docLinks.links.ml.anomalyMigrationGuide}>
+                  {i18n.translate(
+                    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleMlAnomalyIndexText.learnMore',
+                    { defaultMessage: 'Learn more' }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      />
       <EuiSpacer size="m" />
     </Fragment>
   );

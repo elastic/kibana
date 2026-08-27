@@ -7,7 +7,6 @@
 
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom-v5-compat';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
@@ -18,7 +17,7 @@ import { LoggedOutPage } from './logged_out_page';
 describe('LoggedOutPage', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
-      value: { href: 'https://some-host' },
+      value: { href: 'https://some-host', search: '' },
       writable: true,
     });
   });
@@ -27,9 +26,7 @@ describe('LoggedOutPage', () => {
     const basePathMock = coreMock.createStart({ basePath: '/mock-base-path' }).http.basePath;
     const customBranding = customBrandingServiceMock.createStartContract();
     const wrapper = mountWithIntl(
-      <BrowserRouter>
-        <LoggedOutPage basePath={basePathMock} customBranding={customBranding} />
-      </BrowserRouter>
+      <LoggedOutPage basePath={basePathMock} customBranding={customBranding} />
     );
 
     expect(wrapper.find(EuiButton).prop('href')).toBe('/mock-base-path/');
@@ -39,13 +36,12 @@ describe('LoggedOutPage', () => {
     window.location.href = `https://host.com/mock-base-path/security/logged_out?next=${encodeURIComponent(
       '/mock-base-path/app/home#/?_g=()'
     )}`;
+    window.location.search = `?next=${encodeURIComponent('/mock-base-path/app/home#/?_g=()')}`;
 
     const customBranding = customBrandingServiceMock.createStartContract();
     const basePathMock = coreMock.createStart({ basePath: '/mock-base-path' }).http.basePath;
     const wrapper = mountWithIntl(
-      <BrowserRouter>
-        <LoggedOutPage basePath={basePathMock} customBranding={customBranding} />
-      </BrowserRouter>
+      <LoggedOutPage basePath={basePathMock} customBranding={customBranding} />
     );
 
     expect(wrapper.find(EuiButton).prop('href')).toBe('/mock-base-path/app/home#/?_g=()');

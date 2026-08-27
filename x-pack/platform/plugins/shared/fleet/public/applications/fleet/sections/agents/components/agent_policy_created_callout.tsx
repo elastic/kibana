@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnSuccessCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 export enum CREATE_STATUS {
   INITIAL = 'initial',
@@ -29,7 +30,7 @@ export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ crea
     <>
       <EuiSpacer size="m" />
       {createState.status === CREATE_STATUS.CREATED ? (
-        <EuiCallOut
+        <KbnSuccessCallout
           announceOnMount
           data-test-subj="agentPolicyCreateStatusCallOut"
           title={
@@ -38,11 +39,9 @@ export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ crea
               defaultMessage="Agent policy created"
             />
           }
-          color="success"
-          iconType="check"
         />
       ) : (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           data-test-subj="agentPolicyCreateStatusCallOut"
           title={
@@ -51,11 +50,9 @@ export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ crea
               defaultMessage="Agent policy creation failed"
             />
           }
-          color="danger"
-          iconType="cross"
         >
           {createState.errorMessage ?? null}
-        </EuiCallOut>
+        </KbnDangerCallout>
       )}
     </>
   );

@@ -6,12 +6,14 @@
  */
 
 import { EuiProgress, useEuiTheme } from '@elastic/eui';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
+import { getServices } from '../services';
+import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 
 interface CustomContentComponentProps {
   embeddableId: string;
@@ -23,8 +25,9 @@ interface CustomContentComponentProps {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  onErrorChange?: (error: string | undefined) => void;
   previewHtml: string | null;
+  onLoadingChange: (isLoading: boolean) => void;
+  onGenerateWithChat?: () => void;
 }
 
 const iframeContainerCss = css({
@@ -42,6 +45,10 @@ const iframeCss = css({
   background: 'transparent',
 });
 
+const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
+  defaultMessage: 'Custom content panel',
+});
+
 export const CustomContentComponent = ({
   embeddableId,
   esqlQuery,
@@ -52,8 +59,9 @@ export const CustomContentComponent = ({
   projectRouting,
   query,
   filters,
-  onErrorChange,
   previewHtml,
+  onLoadingChange,
+  onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { html, isLoading, error, noContent } = useCustomContentHtml({
@@ -70,9 +78,10 @@ export const CustomContentComponent = ({
     filters,
   });
 
-  useEffect(() => {
-    onErrorChange?.(error);
-  }, [error, onErrorChange]);
+  const { agentBuilder } = getServices();
+  const isAiAvailable = Boolean(agentBuilder);
+
+  useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
 
   const wrapperCss = useMemo(
     () =>
@@ -88,7 +97,7 @@ export const CustomContentComponent = ({
   );
 
   return (
-    <div css={wrapperCss}>
+    <div css={wrapperCss} data-shared-item>
       {error && (
         <KbnDangerCallout
           title={i18n.translate('xpack.customContent.error.title', {
@@ -101,29 +110,21 @@ export const CustomContentComponent = ({
         </KbnDangerCallout>
       )}
       {!error && noContent && !isLoading && previewHtml == null && (
-        <KbnWarningCallout
-          announceOnMount
-          title={i18n.translate('xpack.customContent.noContent.title', {
-            defaultMessage: 'Content not yet generated',
-          })}
-          style={{ margin: euiTheme.size.base }}
-        >
-          {i18n.translate('xpack.customContent.noContent.body', {
-            defaultMessage:
-              'This panel has no content. Use the AI chat to refine it, or edit the panel to generate content.',
-          })}
-        </KbnWarningCallout>
+        <CustomContentEmptyPrompt
+          isAiAvailable={isAiAvailable}
+          onGenerateWithChat={onGenerateWithChat}
+        />
       )}
       {previewHtml != null ? (
         <div css={iframeContainerCss}>
-          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title="Custom content panel" />
+          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title={IFRAME_TITLE} />
         </div>
       ) : (
         !error &&
         !noContent &&
         html && (
           <div css={iframeContainerCss}>
-            <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+            <iframe css={iframeCss} srcDoc={html} sandbox="" title={IFRAME_TITLE} />
           </div>
         )
       )}

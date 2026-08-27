@@ -48,6 +48,7 @@ export {
   type NaturalLanguageSearchResponse,
   runSearchTool,
   type TopSnippetsConfig,
+  setDefaultEsqlCacheKey,
 } from './tools';
 export {
   resolveResourceForEsqlWithSamplingStats,

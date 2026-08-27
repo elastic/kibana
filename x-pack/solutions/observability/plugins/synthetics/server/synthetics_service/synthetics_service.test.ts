@@ -101,6 +101,7 @@ describe('SyntheticsService', () => {
       manifestUrl: 'https://test-manifest.com',
     },
     enabled: true,
+    rebalancePrivateLocationShardsTaskEnabled: true,
   };
 
   mockLicense();
@@ -189,6 +190,7 @@ describe('SyntheticsService', () => {
         password: '12345',
       },
       enabled: true,
+      rebalancePrivateLocationShardsTaskEnabled: true,
     };
     const service = new SyntheticsService(serverMock);
 

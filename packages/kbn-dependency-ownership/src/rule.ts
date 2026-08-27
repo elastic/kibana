@@ -26,6 +26,7 @@ export function ruleFilter(rule: RenovatePackageRule) {
     'typescript', // These updates are always handled manually
     'puppeteer', // These updates are always handled manually
     'undici', // These updates are always handled manually, and only with Node.js upgrades
+    'webpack', // These updates are always handled manually
   ];
   // Rules that use custom managers are not supported by this tool, and are ignored.
   const rulesWithCustomManagers = ['chainguard', 'chainguard-fips', 'gh-aw'];

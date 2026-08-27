@@ -20,10 +20,10 @@ import {
   EuiIcon,
   EuiToolTip,
   copyToClipboard,
+  useEuiMemoizedStyles,
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
   CHILDREN_INCREMENT,
   CLOSE_BRACKET,
@@ -38,6 +38,9 @@ import {
   type PagerRow,
   type PrimitiveType,
 } from './tree_model';
+
+const LABEL_TEXT_CLASS = 'jsonTreeViewerLabelText';
+const VALUE_CLASS = 'jsonTreeViewerValue';
 
 // ---- Row view components (one per render-row kind) ----
 
@@ -63,7 +66,7 @@ export const NodeRowView = memo(function NodeRowView({
   onKeyDown,
   formatValue,
 }: NodeRowViewProps) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
   const { node, hasChildren, isExpanded } = row;
   return (
@@ -113,7 +116,7 @@ export const PagerRowView = memo(function PagerRowView({
   onShowMore,
   onShowFewer,
 }: PagerRowViewProps) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
   const showMore = row.hiddenCount > 0;
 
@@ -183,7 +186,7 @@ export const PagerRowView = memo(function PagerRowView({
 });
 
 export const ClosingBracketRow = memo(function ClosingBracketRow({ row }: { row: ClosingRow }) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -210,7 +213,7 @@ const KeyPrefix = memo(function KeyPrefix({
   name: string;
   isArrayItem: boolean;
 }) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   if (isArrayItem) return null;
   return (
     <>
@@ -231,10 +234,10 @@ const PrimitiveValue = memo(function PrimitiveValue({
   value: JsonPrimitive;
   formatted?: React.ReactNode;
 }) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   if (primitiveType === 'string') {
     return (
-      <span css={[styles.value, styles.valueString]}>
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueString]}>
         {'"'}
         {formatted ?? String(value)}
         {'"'}
@@ -242,13 +245,21 @@ const PrimitiveValue = memo(function PrimitiveValue({
     );
   }
   if (primitiveType === 'number' || primitiveType === 'boolean') {
-    return <span css={[styles.value, styles.valueScalar]}>{formatted ?? String(value)}</span>;
+    return (
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueScalar]}>
+        {formatted ?? String(value)}
+      </span>
+    );
   }
-  return <span css={[styles.value, styles.valueNull]}>null</span>;
+  return (
+    <span className={VALUE_CLASS} css={[styles.value, styles.valueNull]}>
+      null
+    </span>
+  );
 });
 
 const Comma = memo(function Comma() {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   return <span css={styles.punctuation}>,</span>;
 });
 
@@ -262,7 +273,7 @@ const CopyButton = function CopyButton({
   label: string;
   nodeId: string;
 }) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   const [copied, setCopied] = useState(false);
   const resetTimer = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => clearTimeout(resetTimer.current), []);
@@ -338,13 +349,13 @@ const NodeLabel = memo(function NodeLabel({
   row: NodeRow;
   formatValue?: FormatValue;
 }) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
   const { node, isExpanded, hasChildren, trailingComma } = row;
 
   if (node.kind === 'leaf') {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <PrimitiveValue
             primitiveType={node.primitiveType}
@@ -365,7 +376,7 @@ const NodeLabel = memo(function NodeLabel({
   if (!hasChildren) {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{`${open}${close}`}</span>
           {trailingComma && <Comma />}
@@ -379,7 +390,7 @@ const NodeLabel = memo(function NodeLabel({
   if (isExpanded) {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{open}</span>
         </span>
@@ -391,15 +402,43 @@ const NodeLabel = memo(function NodeLabel({
   // Collapsed: a one-line preview, e.g. `"user": { 2 fields }`.
   return (
     <span css={styles.label}>
-      <span css={styles.labelText}>
+      <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
         <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
         <span css={styles.bracket}>{open}</span>
-        <span css={styles.count}>{collectionCountLabel(node)}</span>
+        <span css={styles.count}>
+          {collectionCountLabel(node.collectionType, node.children.length)}
+        </span>
         <span css={styles.bracket}>{close}</span>
         {trailingComma && <Comma />}
       </span>
       <SubtreeCopyButton node={node} />
     </span>
+  );
+});
+
+/** Root placeholder when the document has no visible fields (e.g. hide-nulls left an empty object). */
+export const EmptyRootPlaceholder = memo(function EmptyRootPlaceholder({
+  collectionType,
+}: {
+  collectionType: CollectionType;
+}) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={styles.row}
+      style={{ paddingInlineStart: rowPaddingInlineStart(euiTheme, 0) }}
+      data-test-subj="jsonTreeViewerEmpty"
+    >
+      <span css={styles.caret} aria-hidden />
+      <span css={styles.label}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
+          <span css={styles.bracket}>{OPEN_BRACKET[collectionType]}</span>
+          <span css={styles.count}>{collectionCountLabel(collectionType, 0)}</span>
+          <span css={styles.bracket}>{CLOSE_BRACKET[collectionType]}</span>
+        </span>
+      </span>
+    </div>
   );
 });
 
@@ -432,9 +471,8 @@ const pagerButtonKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
 };
 
 // ---- i18n labels ----
-const collectionCountLabel = (node: CollectionNode) => {
-  const count = node.children.length;
-  return node.collectionType === 'array'
+const collectionCountLabel = (collectionType: CollectionType, count: number) =>
+  collectionType === 'array'
     ? i18n.translate('unifiedDataTable.jsonTreeViewer.itemCount', {
         defaultMessage: '{count, plural, one {# item} other {# items}}',
         values: { count },
@@ -443,7 +481,6 @@ const collectionCountLabel = (node: CollectionNode) => {
         defaultMessage: '{count, plural, one {# field} other {# fields}}',
         values: { count },
       });
-};
 
 const showMoreLabel = (collectionType: CollectionType, count: number) =>
   collectionType === 'array'
@@ -466,79 +503,82 @@ const showFewerLabel = (collectionType: CollectionType) =>
       });
 
 // ---- Styles ----
-const treeStyles = {
-  wrapper: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontFamily: euiTheme.font.familyCode,
-      fontSize: euiTheme.font.scale.xs * euiTheme.base,
-      margin: 0,
-      padding: 0,
-    }),
-  row: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      alignItems: 'center',
-      gap: euiTheme.size.xs,
-      minHeight: euiTheme.size.base,
-      paddingInlineEnd: euiTheme.size.xs,
-      borderRadius: euiTheme.border.radius.small,
-      cursor: 'default',
-      '&:hover': {
-        backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-      },
-      '&:focus-visible': {
-        outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
-        outlineOffset: `-${euiTheme.focus.width}`,
-      },
-      '&:hover .jsonTreeViewerCopyButton, &:focus-within .jsonTreeViewerCopyButton': {
-        opacity: 1,
-      },
-    }),
-  expandableRow: () => css({ cursor: 'pointer' }),
-  pagerRow: () => css({ '&:hover': { backgroundColor: 'transparent' } }),
-  pagerButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      blockSize: euiTheme.size.base,
-      minBlockSize: euiTheme.size.base,
-      margin: `${euiTheme.size.xs} 0`,
-    }),
-  closingRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      alignItems: 'center',
-      gap: euiTheme.size.xs,
-      minHeight: euiTheme.size.base,
-    }),
-  caret: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      width: euiTheme.size.base,
-      display: 'inline-flex',
-      justifyContent: 'center',
-      color: euiTheme.colors.textSubdued,
-    }),
-  label: () => css({ display: 'flex', alignItems: 'center', minWidth: 0 }),
-  labelText: () => css({ minWidth: 0 }),
-  key: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textPrimary }),
-  punctuation: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textSubdued }),
-  bracket: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textParagraph }),
-  count: ({ euiTheme }: UseEuiTheme) =>
-    css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
-  copyButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      blockSize: euiTheme.size.base,
-      inlineSize: euiTheme.size.base,
-      flexShrink: 0,
-      opacity: 0,
-      marginInlineStart: euiTheme.size.xs,
-      '&:focus-visible': { opacity: 1 },
-    }),
-  value: () => css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
-  valueString: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textDanger }),
-  valueScalar: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textAccent }),
-  valueNull: ({ euiTheme }: UseEuiTheme) =>
-    css({ color: euiTheme.colors.textSubdued, fontStyle: 'italic' }),
-};
+const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
+  wrapper: css({
+    fontFamily: euiTheme.font.familyCode,
+    fontSize: euiTheme.font.scale.xs * euiTheme.base,
+    margin: 0,
+    padding: 0,
+  }),
+  row: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: euiTheme.size.xs,
+    minHeight: euiTheme.size.base,
+    paddingInlineEnd: euiTheme.size.xs,
+    borderRadius: euiTheme.border.radius.small,
+    cursor: 'default',
+    '&:hover': {
+      backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+    },
+    '&:focus-visible': {
+      outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
+      outlineOffset: `-${euiTheme.focus.width}`,
+    },
+    '&:hover .jsonTreeViewerCopyButton, &:focus-within .jsonTreeViewerCopyButton': {
+      opacity: 1,
+    },
+  }),
+  expandableRow: css({ cursor: 'pointer' }),
+  pagerRow: css({ '&:hover': { backgroundColor: 'transparent' } }),
+  pagerButton: css({
+    blockSize: euiTheme.size.base,
+    minBlockSize: euiTheme.size.base,
+    margin: `${euiTheme.size.xs} 0`,
+  }),
+  closingRow: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: euiTheme.size.xs,
+    minHeight: euiTheme.size.base,
+  }),
+  caret: css({
+    flexShrink: 0,
+    width: euiTheme.size.base,
+    display: 'inline-flex',
+    justifyContent: 'center',
+    color: euiTheme.colors.textSubdued,
+  }),
+  label: css({ display: 'flex', alignItems: 'center', minWidth: 0 }),
+  labelText: css({ minWidth: 0 }),
+  key: css({ color: euiTheme.colors.textPrimary }),
+  punctuation: css({ color: euiTheme.colors.textSubdued }),
+  bracket: css({ color: euiTheme.colors.textParagraph }),
+  count: css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
+  copyButton: css({
+    blockSize: euiTheme.size.base,
+    inlineSize: euiTheme.size.base,
+    flexShrink: 0,
+    opacity: 0,
+    marginInlineStart: euiTheme.size.xs,
+    '&:focus-visible': { opacity: 1 },
+  }),
+  value: css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
+  noWrap: css({
+    [`& .${LABEL_TEXT_CLASS}`]: {
+      display: 'block',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+    [`& .${VALUE_CLASS}`]: {
+      whiteSpace: 'nowrap',
+    },
+  }),
+  valueString: css({ color: euiTheme.colors.textDanger }),
+  valueScalar: css({ color: euiTheme.colors.textAccent }),
+  valueNull: css({ color: euiTheme.colors.textSubdued, fontStyle: 'italic' }),
+});
 
 const rowPaddingInlineStart = (euiTheme: UseEuiTheme['euiTheme'], depth: number) =>
   `calc(${euiTheme.size.s} + ${depth} * ${euiTheme.size.base})`;

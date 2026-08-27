@@ -472,6 +472,45 @@ describe('updateAlertsStatus', () => {
     });
   });
 
+  describe('executeAggregations', () => {
+    const aggregationBuilders = [
+      {
+        getName: () => 'hosts',
+        build: () => ({ hosts_total: { cardinality: { field: 'host.id' } } }),
+        formatResponse: () => ({}),
+      },
+    ];
+
+    it('searches unique alert ids and indices with ignore_unavailable', async () => {
+      const aggregations = { hosts_total: { value: 2 } };
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations,
+      });
+
+      const res = await alertService.executeAggregations({
+        aggregationBuilders,
+        alerts: [
+          { id: 'alert-1', index: '.alerts-security.alerts-default' },
+          { id: 'alert-2', index: '.alerts-security.alerts-default' },
+          { id: 'alert-3', index: '.alerts-observability.alerts-default' },
+        ],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: ['.alerts-security.alerts-default', '.alerts-observability.alerts-default'],
+        ignore_unavailable: true,
+        query: { ids: { values: ['alert-1', 'alert-2', 'alert-3'] } },
+        size: 0,
+        aggregations: { hosts_total: { cardinality: { field: 'host.id' } } },
+      });
+      expect(res).toEqual(aggregations);
+    });
+  });
+
   describe('getAlerts', () => {
     const docs = [
       {
@@ -658,6 +697,139 @@ describe('updateAlertsStatus', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing cases test-case-1,test-case-2 for all alerts: An error'
+      );
+    });
+  });
+
+  describe('ensureAlertsAuthorized', () => {
+    const alerts = [
+      {
+        id: 'alert-1',
+        index: '.alerts-security.alerts-default',
+      },
+    ];
+
+    it('authorizes local alerts', async () => {
+      alertsClient.ensureAllAlertsAuthorizedRead.mockResolvedValueOnce(undefined);
+
+      await expect(alertService.ensureAlertsAuthorized({ alerts })).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({ alerts });
+    });
+
+    it('throws without calling ensureAllAlertsAuthorizedRead when the index belongs to a linked project (CPS)', async () => {
+      await expect(
+        alertService.ensureAlertsAuthorized({
+          alerts: [{ id: 'alert-1', index: 'my-linked-project:.alerts-security.alerts-default' }],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws without calling ensureAllAlertsAuthorizedRead when the index is a remote-cluster (CCS) reference', async () => {
+      await expect(
+        alertService.ensureAlertsAuthorized({
+          alerts: [{ id: 'alert-1', index: 'my-remote-cluster:.alerts-security.alerts-default' }],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('does not call ensureAllAlertsAuthorizedRead when there are no non-empty alerts', async () => {
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts: [{ id: '', index: '' }] })
+      ).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('wraps and rethrows authorization errors', async () => {
+      alertsClient.ensureAllAlertsAuthorizedRead.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(alertService.ensureAlertsAuthorized({ alerts })).rejects.toThrow(
+        /Failed to authorize alerts/
+      );
+    });
+  });
+
+  describe('ensureDocumentsExist', () => {
+    const alerts = [
+      {
+        id: 'event-1',
+        index: '.ds-logs-endpoint.events.process-default',
+      },
+    ];
+
+    it('does not throw when the document exists', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            _index: '.ds-logs-endpoint.events.process-default',
+            _id: 'event-1',
+            found: true,
+            _source: {},
+          },
+        ],
+      });
+
+      await expect(alertService.ensureDocumentsExist({ alerts })).resolves.not.toThrow();
+    });
+
+    it('throws when the document is not found', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            _index: '.ds-logs-endpoint.events.process-default',
+            _id: 'event-1',
+            found: false,
+          },
+        ],
+      });
+
+      await expect(alertService.ensureDocumentsExist({ alerts })).rejects.toThrow(
+        /Referenced event\(s\) not found: event-1/
+      );
+    });
+
+    it('throws without calling mget when the index belongs to a linked project (CPS)', async () => {
+      await expect(
+        alertService.ensureDocumentsExist({
+          alerts: [
+            { id: 'event-1', index: 'my-linked-project:.ds-logs-endpoint.events.process-default' },
+          ],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('throws without calling mget when the index is a remote-cluster (CCS) reference', async () => {
+      await expect(
+        alertService.ensureDocumentsExist({
+          alerts: [
+            { id: 'event-1', index: 'my-remote-cluster:.ds-logs-endpoint.events.process-default' },
+          ],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('does not call mget when there are no non-empty alerts', async () => {
+      await expect(
+        alertService.ensureDocumentsExist({ alerts: [{ id: '', index: '' }] })
+      ).resolves.not.toThrow();
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('wraps and rethrows mget errors', async () => {
+      esClient.mget.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(alertService.ensureDocumentsExist({ alerts })).rejects.toThrow(
+        /Failed to verify referenced events exist/
       );
     });
   });
