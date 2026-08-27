@@ -12,6 +12,7 @@ import { EvaluationIndices } from '@kbn/evals-common';
 const onlineScoresDataStreamMappings = {
   properties: {
     '@timestamp': { type: 'date' },
+    space_ids: { type: 'keyword' },
     monitor: {
       type: 'object',
       properties: {
@@ -44,7 +45,7 @@ const onlineScoresDataStreamMappings = {
 
 export const onlineScoresDataStreamDefinition: DataStreamDefinition<MappingsDefinition> = {
   name: EvaluationIndices.ONLINE_SCORES,
-  version: 1,
+  version: 2,
   hidden: true,
   template: {
     lifecycle: {

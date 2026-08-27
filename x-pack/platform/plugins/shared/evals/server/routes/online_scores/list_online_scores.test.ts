@@ -20,6 +20,7 @@ describe('GET /internal/evals/online_scores', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
+    const getSpaceId = jest.fn().mockResolvedValue('space-a');
     registerListOnlineScoresRoute({
       router,
       logger,
@@ -28,6 +29,7 @@ describe('GET /internal/evals/online_scores', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getSpaceId,
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -45,7 +47,7 @@ describe('GET /internal/evals/online_scores', () => {
       } as any,
     });
 
-    return { handler, context, onlineScoreService, logger };
+    return { handler, context, onlineScoreService, logger, getSpaceId };
   };
 
   const makeRequest = ({
@@ -68,7 +70,7 @@ describe('GET /internal/evals/online_scores', () => {
     });
 
   it('returns online scores list from service', async () => {
-    const { handler, context, onlineScoreService } = setup();
+    const { handler, context, onlineScoreService, getSpaceId } = setup();
     onlineScoreService.list.mockResolvedValueOnce({
       total: 1,
       data: [
@@ -82,13 +84,16 @@ describe('GET /internal/evals/online_scores', () => {
       ],
     });
 
-    const response = await handler(context as any, makeRequest(), kibanaResponseFactory);
+    const request = makeRequest();
+    const response = await handler(context as any, request, kibanaResponseFactory);
 
     expect(onlineScoreService.list).toHaveBeenCalledWith({
       monitorId: 'workflow-1',
+      spaceId: 'space-a',
       page: 2,
       perPage: 25,
     });
+    expect(getSpaceId).toHaveBeenCalledWith(request);
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       total: 1,

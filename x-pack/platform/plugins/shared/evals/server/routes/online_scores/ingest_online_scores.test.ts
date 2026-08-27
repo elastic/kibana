@@ -68,6 +68,7 @@ describe('POST /internal/evals/online_scores', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
+    const getSpaceId = jest.fn().mockResolvedValue('space-a');
     registerIngestOnlineScoresRoute({
       router,
       logger,
@@ -76,6 +77,7 @@ describe('POST /internal/evals/online_scores', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getSpaceId,
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -93,7 +95,7 @@ describe('POST /internal/evals/online_scores', () => {
       } as any,
     });
 
-    return { handler, context, onlineScoreService, logger };
+    return { handler, context, onlineScoreService, logger, getSpaceId };
   };
 
   const makeRequest = (body: IngestOnlineScoresRequestBodyInput) =>
@@ -104,16 +106,14 @@ describe('POST /internal/evals/online_scores', () => {
     });
 
   it('expands one document per score and counts failed evaluators', async () => {
-    const { handler, context, onlineScoreService } = setup();
+    const { handler, context, onlineScoreService, getSpaceId } = setup();
+    const request = makeRequest(getBasePayload());
 
-    const response = await handler(
-      context as any,
-      makeRequest(getBasePayload()),
-      kibanaResponseFactory
-    );
+    const response = await handler(context as any, request, kibanaResponseFactory);
 
     expect(onlineScoreService.bulkCreate).toHaveBeenCalledWith([
       {
+        space_ids: ['space-a'],
         monitor: { id: 'workflow-1', name: 'Online Eval Workflow' },
         trace_id: 'trace-1',
         connector_id: 'connector-1',
@@ -127,6 +127,7 @@ describe('POST /internal/evals/online_scores', () => {
         },
       },
       {
+        space_ids: ['space-a'],
         monitor: { id: 'workflow-1', name: 'Online Eval Workflow' },
         trace_id: 'trace-1',
         connector_id: 'connector-1',
@@ -140,6 +141,7 @@ describe('POST /internal/evals/online_scores', () => {
         },
       },
     ]);
+    expect(getSpaceId).toHaveBeenCalledWith(request);
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ created: 2, skipped: 0, failed_evaluators: 1 });
   });

@@ -20,7 +20,7 @@ export const ListOnlineScoresRequestQuery = lazySchema(() =>
   z.object({
     monitor_id: z.string().max(1024),
     page: z.coerce.number().int().min(1).optional().default(1),
-    per_page: z.coerce.number().int().min(1).max(1000).optional().default(50),
+    per_page: z.coerce.number().int().min(1).max(100).optional().default(50),
   })
 );
 export type ListOnlineScoresRequestQuery = z.infer<typeof ListOnlineScoresRequestQuery>;

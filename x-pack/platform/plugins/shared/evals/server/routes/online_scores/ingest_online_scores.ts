@@ -11,9 +11,10 @@ import {
   INTERNAL_API_ACCESS,
   IngestOnlineScoresRequestBody,
 } from '@kbn/evals-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import type { OnlineScoreDocument } from '../../storage/online_score_service';
+import type { OnlineScoreDocument } from '../../storage/scores/online_score_service';
 import type { RouteDependencies } from '../register_routes';
 
 const ONLINE_SCORE_INGEST_PAYLOAD_CAP_BYTES = 5 * 1024 * 1024;
@@ -26,7 +27,11 @@ const getErrorMessage = (error: unknown): string => {
   return String(error);
 };
 
-export const registerIngestOnlineScoresRoute = ({ router, logger }: RouteDependencies) => {
+export const registerIngestOnlineScoresRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .post({
       path: EVALS_ONLINE_SCORES_URL,
@@ -53,6 +58,7 @@ export const registerIngestOnlineScoresRoute = ({ router, logger }: RouteDepende
       async (context, request, response) => {
         try {
           const { monitor, trace_id: traceId, connector_id: connectorId, results } = request.body;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
 
           const failedEvaluators = results.filter((result) => result.status === 'error').length;
@@ -63,6 +69,7 @@ export const registerIngestOnlineScoresRoute = ({ router, logger }: RouteDepende
               }
 
               return result.scores.map((score) => ({
+                space_ids: [spaceId],
                 monitor,
                 trace_id: traceId,
                 connector_id: connectorId,

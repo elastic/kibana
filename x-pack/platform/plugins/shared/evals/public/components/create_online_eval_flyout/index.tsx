@@ -237,6 +237,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
         {combinedErrorMessage ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.evals.onlineEvaluations.createFlyout.errorCalloutTitle',
                 {

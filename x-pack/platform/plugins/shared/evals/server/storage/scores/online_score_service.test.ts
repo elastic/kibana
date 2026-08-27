@@ -36,6 +36,7 @@ const createDataStreamsMock = () => {
 };
 
 const getBaseDocument = (): Omit<OnlineScoreDocument, '@timestamp'> => ({
+  space_ids: ['space-a'],
   monitor: {
     id: 'workflow-1',
     name: 'Online Eval Workflow',
@@ -87,13 +88,14 @@ describe('OnlineScoreService', () => {
       refresh: 'wait_for',
     });
     expect(capturedDocuments.map(({ _id }) => _id)).toEqual([
-      'workflow-1-trace-1-correctness-factuality',
+      'space-a-workflow-1-trace-1-correctness-factuality',
     ]);
     expect(computeOnlineScoreDocumentId(capturedDocuments[0])).toBe(
-      'workflow-1-trace-1-correctness-factuality'
+      'space-a-workflow-1-trace-1-correctness-factuality'
     );
     expect(capturedDocuments[0]).toMatchObject({
       '@timestamp': expect.any(String),
+      space_ids: ['space-a'],
       monitor: {
         id: 'workflow-1',
         name: 'Online Eval Workflow',
@@ -124,6 +126,61 @@ describe('OnlineScoreService', () => {
       created: 0,
       skipped: 1,
       errors: [],
+    });
+  });
+
+  it('filters lists by monitor and space and excludes unbounded score metadata', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const document = getBaseDocument();
+    const { coreDataStreams, search } = createDataStreamsMock();
+    const { metadata: _, ...boundedScore } = document.score;
+
+    search.mockResolvedValue({
+      hits: {
+        total: { value: 1 },
+        hits: [
+          {
+            _source: {
+              '@timestamp': '2026-07-03T12:00:00.000Z',
+              ...document,
+              score: boundedScore,
+            },
+          },
+        ],
+      },
+    });
+
+    const service = new OnlineScoreService(logger, coreDataStreams);
+    const result = await service.list({
+      monitorId: 'workflow-1',
+      spaceId: 'space-a',
+      page: 2,
+      perPage: 25,
+    });
+
+    expect(search).toHaveBeenCalledWith({
+      from: 25,
+      size: 25,
+      _source_excludes: ['score.metadata'],
+      sort: [{ '@timestamp': { order: 'desc' } }],
+      query: {
+        bool: {
+          filter: [{ term: { 'monitor.id': 'workflow-1' } }, { term: { space_ids: 'space-a' } }],
+        },
+      },
+    });
+    expect(result).toEqual({
+      total: 1,
+      data: [
+        {
+          '@timestamp': '2026-07-03T12:00:00.000Z',
+          monitor: document.monitor,
+          trace_id: document.trace_id,
+          connector_id: document.connector_id,
+          evaluator: document.evaluator,
+          score: boundedScore,
+        },
+      ],
     });
   });
 });

@@ -21,6 +21,7 @@ import {
   EuiPageSection,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -150,19 +151,28 @@ export const OnlineEvalsListPage: React.FC = () => {
       }),
       width: '60px',
       align: 'right',
-      render: (item: OnlineEvalWorkflowListItem) => (
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.evals.onlineEvaluations.list.deleteButton.ariaLabel', {
+      render: (item: OnlineEvalWorkflowListItem) => {
+        const deleteButtonLabel = i18n.translate(
+          'xpack.evals.onlineEvaluations.list.deleteButton.ariaLabel',
+          {
             defaultMessage: 'Delete workflow {name}',
             values: { name: item.name },
-          })}
-          iconType="trash"
-          color="danger"
-          isDisabled={!canManage || deleteOnlineEvalWorkflow.isLoading}
-          onClick={() => setWorkflowPendingDelete(item)}
-          data-test-subj={`deleteOnlineEvalButton-${item.id}`}
-        />
-      ),
+          }
+        );
+
+        return (
+          <EuiToolTip content={deleteButtonLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              aria-label={deleteButtonLabel}
+              iconType="trash"
+              color="danger"
+              isDisabled={!canManage || deleteOnlineEvalWorkflow.isLoading}
+              onClick={() => setWorkflowPendingDelete(item)}
+              data-test-subj={`deleteOnlineEvalButton-${item.id}`}
+            />
+          </EuiToolTip>
+        );
+      },
     },
   ];
 
@@ -188,6 +198,7 @@ export const OnlineEvalsListPage: React.FC = () => {
         {!canManage ? (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={i18n.translate('xpack.evals.onlineEvaluations.list.permissionsCallout.title', {
                 defaultMessage: 'You need additional privileges to manage online evaluations',
               })}
@@ -289,6 +300,7 @@ export const OnlineEvalsListPage: React.FC = () => {
                 </p>
                 {hasNoLlmConnectors ? (
                   <EuiCallOut
+                    announceOnMount={false}
                     title={i18n.translate(
                       'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutTitle',
                       {
@@ -366,6 +378,9 @@ export const OnlineEvalsListPage: React.FC = () => {
       </EuiPageSection>
       {workflowPendingDelete ? (
         <EuiConfirmModal
+          aria-label={i18n.translate('xpack.evals.onlineEvaluations.list.deleteModal.ariaLabel', {
+            defaultMessage: 'Delete online evaluation',
+          })}
           title={i18n.translate('xpack.evals.onlineEvaluations.list.deleteModal.title', {
             defaultMessage: 'Delete online evaluation',
           })}
@@ -398,7 +413,14 @@ export const OnlineEvalsListPage: React.FC = () => {
         </EuiConfirmModal>
       ) : null}
       {isCreateFlyoutOpen ? (
-        <EuiFlyout onClose={() => setIsCreateFlyoutOpen(false)} ownFocus size="m">
+        <EuiFlyout
+          aria-label={i18n.translate('xpack.evals.onlineEvaluations.list.createFlyout.ariaLabel', {
+            defaultMessage: 'Create online evaluation',
+          })}
+          onClose={() => setIsCreateFlyoutOpen(false)}
+          ownFocus
+          size="m"
+        >
           <CreateOnlineEvalFlyout onClose={() => setIsCreateFlyoutOpen(false)} />
         </EuiFlyout>
       ) : null}

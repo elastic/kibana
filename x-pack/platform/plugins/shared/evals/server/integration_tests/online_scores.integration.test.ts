@@ -24,8 +24,11 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { createEvaluatorRegistry } from '../evaluators/registry';
-import { onlineScoresDataStreamDefinition } from '../storage/online_scores_index_template';
-import { computeOnlineScoreDocumentId, OnlineScoreService } from '../storage/online_score_service';
+import { onlineScoresDataStreamDefinition } from '../storage/scores/online_scores_index_template';
+import {
+  computeOnlineScoreDocumentId,
+  OnlineScoreService,
+} from '../storage/scores/online_score_service';
 import { registerIngestOnlineScoresRoute } from '../routes/online_scores/ingest_online_scores';
 import { registerListOnlineScoresRoute } from '../routes/online_scores/list_online_scores';
 
@@ -107,6 +110,7 @@ describe('online scores ingestion and listing integration', () => {
   >['versions'][typeof API_VERSIONS.internal.v1]['handler'];
   let originalSetTimeout: typeof global.setTimeout;
   let originalClearTimeout: typeof global.clearTimeout;
+  let activeSpaceId = 'space-a';
 
   beforeAll(async () => {
     jest.useRealTimers();
@@ -138,6 +142,7 @@ describe('online scores ingestion and listing integration', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getSpaceId: async () => activeSpaceId,
     });
     registerListOnlineScoresRoute({
       router,
@@ -147,6 +152,7 @@ describe('online scores ingestion and listing integration', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getSpaceId: async () => activeSpaceId,
     });
     const versionedRouter = router.versioned as MockedVersionedRouter;
     ingestHandler = versionedRouter.getRoute('post', EVALS_ONLINE_SCORES_URL).versions[
@@ -166,6 +172,7 @@ describe('online scores ingestion and listing integration', () => {
 
   beforeEach(async () => {
     jest.useRealTimers();
+    activeSpaceId = 'space-a';
     if (esClient) {
       await cleanupOnlineScoresStorage(esClient);
       await initializeDataStreamClient();
@@ -178,7 +185,7 @@ describe('online scores ingestion and listing integration', () => {
     }
   });
 
-  it('ingests one document per score and is idempotent on re-ingest', async () => {
+  it('isolates score ingestion and listing by space while remaining idempotent', async () => {
     const payload = getPayload();
     const context = {
       evals: Promise.resolve({
@@ -218,6 +225,7 @@ describe('online scores ingestion and listing integration', () => {
     const expectedIds = ['factuality', 'relevance', 'sequence_accuracy']
       .map((scoreName) =>
         computeOnlineScoreDocumentId({
+          space_ids: ['space-a'],
           monitor: payload.monitor,
           trace_id: payload.trace_id,
           evaluator: payload.results[0].evaluator,
@@ -264,5 +272,59 @@ describe('online scores ingestion and listing integration', () => {
     expect(
       listResponse.payload.data.map((doc: { score: { name: string } }) => doc.score.name).sort()
     ).toEqual(['factuality', 'relevance', 'sequence_accuracy']);
+    expect(listResponse.payload.data[0]).not.toHaveProperty('space_ids');
+    expect(listResponse.payload.data[0].score).not.toHaveProperty('metadata');
+
+    activeSpaceId = 'space-b';
+    const crossSpaceListResponse = await listHandler(
+      context as Parameters<typeof listHandler>[0],
+      httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_ONLINE_SCORES_URL,
+        query: {
+          monitor_id: payload.monitor.id,
+          page: 1,
+          per_page: 10,
+        },
+      }) as Parameters<typeof listHandler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(crossSpaceListResponse.status).toBe(200);
+    expect(crossSpaceListResponse.payload).toEqual({ total: 0, data: [] });
+
+    const secondSpaceIngestResponse = await ingestHandler(
+      context,
+      httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_ONLINE_SCORES_URL,
+        body: payload,
+      }) as Parameters<typeof ingestHandler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(secondSpaceIngestResponse.status).toBe(200);
+    expect(secondSpaceIngestResponse.payload).toEqual({
+      created: 3,
+      skipped: 0,
+      failed_evaluators: 1,
+    });
+
+    await expect(
+      onlineScoreService.list({
+        monitorId: payload.monitor.id,
+        spaceId: 'space-b',
+        page: 1,
+        perPage: 10,
+      })
+    ).resolves.toMatchObject({ total: 3 });
+    await expect(
+      onlineScoreService.list({
+        monitorId: payload.monitor.id,
+        spaceId: 'space-a',
+        page: 1,
+        perPage: 10,
+      })
+    ).resolves.toMatchObject({ total: 3 });
   });
 });

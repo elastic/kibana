@@ -11,11 +11,16 @@ import {
   INTERNAL_API_ACCESS,
   ListOnlineScoresRequestQuery,
 } from '@kbn/evals-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-export const registerListOnlineScoresRoute = ({ router, logger }: RouteDependencies) => {
+export const registerListOnlineScoresRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_ONLINE_SCORES_URL,
@@ -36,9 +41,11 @@ export const registerListOnlineScoresRoute = ({ router, logger }: RouteDependenc
       },
       async (context, request, response) => {
         try {
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
           const result = await evalsContext.onlineScoreService.list({
             monitorId: request.query.monitor_id,
+            spaceId,
             page: request.query.page,
             perPage: request.query.per_page,
           });

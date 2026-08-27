@@ -18,7 +18,7 @@ import type { DatasetService } from './storage/datasets/dataset_service';
 import type { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
 import type { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import type { EvaluatorOrigin, EvaluatorRegistry } from './evaluators/types';
-import type { OnlineScoreService } from './storage/online_score_service';
+import type { OnlineScoreService } from './storage/scores/online_score_service';
 import type { EvalsTaskProvider } from './task_providers/types';
 
 export interface EvalsPluginSetup {

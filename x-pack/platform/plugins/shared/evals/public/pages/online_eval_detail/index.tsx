@@ -32,6 +32,7 @@ import {
   EuiTextArea,
   EuiTitle,
   EuiSwitch,
+  EuiToolTip,
   useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -575,19 +576,29 @@ export const OnlineEvalDetailPage: React.FC = () => {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.evals.onlineEvaluations.detail.deleteButton.ariaLabel',
+                <EuiToolTip
+                  disableScreenReaderOutput
+                  content={i18n.translate(
+                    'xpack.evals.onlineEvaluations.detail.deleteButton.tooltip',
                     {
                       defaultMessage: 'Delete online evaluation',
                     }
                   )}
-                  iconType="trash"
-                  color="danger"
-                  isDisabled={!canManage || deleteWorkflow.isLoading}
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  data-test-subj="deleteOnlineEvalDetailButton"
-                />
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.evals.onlineEvaluations.detail.deleteButton.ariaLabel',
+                      {
+                        defaultMessage: 'Delete online evaluation',
+                      }
+                    )}
+                    iconType="trash"
+                    color="danger"
+                    isDisabled={!canManage || deleteWorkflow.isLoading}
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    data-test-subj="deleteOnlineEvalDetailButton"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -596,6 +607,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
         {!canManage ? (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={i18n.translate(
                 'xpack.evals.onlineEvaluations.detail.permissionsCallout.title',
                 {
@@ -612,6 +624,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
         {workflow.enabled && draftState.saved ? (
           <>
             <EuiCallOut
+              announceOnMount={false}
               color="success"
               iconType="check"
               title={i18n.translate('xpack.evals.onlineEvaluations.detail.activeCalloutTitle', {
@@ -626,6 +639,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
         {editorErrorMessage ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.evals.onlineEvaluations.detail.editorErrorCalloutTitle',
                 {
@@ -1267,6 +1281,9 @@ export const OnlineEvalDetailPage: React.FC = () => {
       ) : null}
       {isDeleteModalOpen ? (
         <EuiConfirmModal
+          aria-label={i18n.translate('xpack.evals.onlineEvaluations.detail.deleteModalAriaLabel', {
+            defaultMessage: 'Delete online evaluation',
+          })}
           title={i18n.translate('xpack.evals.onlineEvaluations.detail.deleteModalTitle', {
             defaultMessage: 'Delete online evaluation',
           })}

@@ -22,19 +22,24 @@ export interface BulkCreateOnlineScoresResult {
   errors: OnlineScoreIngestFailure[];
 }
 
-export type OnlineScoreDocument = ListOnlineScoresResponse['data'][number];
+type OnlineScore = ListOnlineScoresResponse['data'][number];
+export type OnlineScoreDocument = OnlineScore & { space_ids: string[] };
 type DataStreamSearchResponse = Awaited<ReturnType<AnyIDataStreamClient['search']>>;
+
+const ONLINE_SCORE_SOURCE_EXCLUDES = ['score.metadata'] as const;
 
 export interface ListOnlineScoresParams {
   monitorId: string;
+  spaceId: string;
   page: number;
   perPage: number;
 }
 
 export const computeOnlineScoreDocumentId = (
-  document: Pick<OnlineScoreDocument, 'monitor' | 'trace_id' | 'evaluator' | 'score'>
+  document: Pick<OnlineScoreDocument, 'space_ids' | 'monitor' | 'trace_id' | 'evaluator' | 'score'>
 ): string => {
   return [
+    ...document.space_ids,
     document.monitor.id,
     document.trace_id,
     document.evaluator.name,
@@ -129,6 +134,7 @@ export class OnlineScoreService {
 
   public async list({
     monitorId,
+    spaceId,
     page,
     perPage,
   }: ListOnlineScoresParams): Promise<ListOnlineScoresResponse> {
@@ -136,10 +142,11 @@ export class OnlineScoreService {
     const response = await this.search({
       from,
       size: perPage,
+      _source_excludes: [...ONLINE_SCORE_SOURCE_EXCLUDES],
       sort: [{ '@timestamp': { order: 'desc' } }],
       query: {
-        term: {
-          'monitor.id': monitorId,
+        bool: {
+          filter: [{ term: { 'monitor.id': monitorId } }, { term: { space_ids: spaceId } }],
         },
       },
     });
@@ -155,7 +162,9 @@ export class OnlineScoreService {
         if (!hit._source) {
           return [];
         }
-        return [hit._source as OnlineScoreDocument];
+
+        const { space_ids: _, ...onlineScore } = hit._source as OnlineScoreDocument;
+        return [onlineScore];
       }),
     };
   }
