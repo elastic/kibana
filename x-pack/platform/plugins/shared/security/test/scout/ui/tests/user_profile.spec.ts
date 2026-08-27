@@ -5,91 +5,97 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { type EsClient, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 
 const TEST_USERNAME = 'test_user_profile';
 const TEST_PASSWORD = 'changeme';
+const UPDATED_PASSWORD = 'changeme2';
+
+const upsertTestUser = async (esClient: EsClient): Promise<void> => {
+  await esClient.security.putUser({
+    username: TEST_USERNAME,
+    password: TEST_PASSWORD,
+    // Profile details save uses asCurrentUser.putUser, which needs manage_security.
+    roles: ['superuser'],
+    full_name: 'test user',
+    email: '',
+  });
+};
 
 test.describe('User Profile Page', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esClient }) => {
-    await esClient.security.putUser({
-      username: TEST_USERNAME,
-      password: TEST_PASSWORD,
-      roles: ['superuser'],
-      full_name: 'test user',
-      email: '',
-    });
+    await upsertTestUser(esClient);
   });
 
-  test.beforeEach(async ({ page, kbnUrl, pageObjects }) => {
-    await page.goto(kbnUrl.get('/login'));
-    await page.testSubj.locator('loginUsername').fill(TEST_USERNAME);
-    await page.testSubj.locator('loginPassword').fill(TEST_PASSWORD);
-    await page.testSubj.locator('loginSubmit').click();
-    await page.waitForURL(/\/app\//);
+  test.beforeEach(async ({ pageObjects }) => {
+    await pageObjects.login.loginWithUsernamePassword(TEST_USERNAME, TEST_PASSWORD);
     await pageObjects.userProfile.goto();
   });
 
+  test.afterEach(async ({ uiSettings, esClient }) => {
+    await uiSettings.unset('theme:darkMode');
+    await upsertTestUser(esClient);
+  });
+
   test.afterAll(async ({ esClient }) => {
-    await esClient.security.deleteUser({ username: TEST_USERNAME }).catch(() => {});
+    await esClient.security.deleteUser({ username: TEST_USERNAME }, { ignore: [404] });
   });
 
-  test('details: should set the full name', async ({ page, pageObjects }) => {
-    const { userProfile } = pageObjects;
+  test('details: should set the full name', async ({ pageObjects }) => {
+    const { userProfile, toasts } = pageObjects;
 
-    await userProfile.fullNameInput.fill('Test User 2');
-    await userProfile.saveProfileChangesButton.click();
-    await expect(page.testSubj.locator('globalToastList')).toContainText('Profile updated');
-    await page.testSubj.locator('toastCloseButton').click();
+    await test.step('set full name', async () => {
+      await userProfile.setFullName('Test User 2');
+      await userProfile.saveChanges();
+      await toasts.waitForToastWithText('Profile updated');
+      await toasts.closeAll();
+    });
 
-    await userProfile.fullNameInput.fill('test user');
-    await userProfile.saveProfileChangesButton.click();
-    await expect(page.testSubj.locator('globalToastList')).toContainText('Profile updated');
-    await page.testSubj.locator('toastCloseButton').click();
+    await test.step('reset full name', async () => {
+      await userProfile.setFullName('test user');
+      await userProfile.saveChanges();
+      await toasts.waitForToastWithText('Profile updated');
+      await toasts.closeAll();
+    });
   });
 
-  test('details: should set the email', async ({ page, pageObjects }) => {
-    const { userProfile } = pageObjects;
+  test('details: should set the email', async ({ pageObjects }) => {
+    const { userProfile, toasts } = pageObjects;
 
-    await userProfile.emailInput.fill('test@test.com');
-    await userProfile.saveProfileChangesButton.click();
-    await expect(page.testSubj.locator('globalToastList')).toContainText('Profile updated');
-    await page.testSubj.locator('toastCloseButton').click();
+    await test.step('set email', async () => {
+      await userProfile.setEmail('test@test.com');
+      await userProfile.saveChanges();
+      await toasts.waitForToastWithText('Profile updated');
+      await toasts.closeAll();
+    });
 
-    await userProfile.emailInput.fill('');
-    await userProfile.saveProfileChangesButton.click();
-    await expect(page.testSubj.locator('globalToastList')).toContainText('Profile updated');
-    await page.testSubj.locator('toastCloseButton').click();
+    await test.step('clear email', async () => {
+      await userProfile.clearEmail();
+      await userProfile.saveChanges();
+      await toasts.waitForToastWithText('Profile updated');
+      await toasts.closeAll();
+    });
   });
 
   test('change password: should set the current password and enter a new password, then submit', async ({
-    page,
     pageObjects,
   }) => {
-    const { userProfile } = pageObjects;
+    const { userProfile, toasts } = pageObjects;
 
-    await userProfile.changePasswordButton.click();
-    await userProfile.changePasswordCurrentInput.pressSequentially(TEST_PASSWORD);
-    await userProfile.changePasswordNewInput.pressSequentially('changeme2');
-    await userProfile.changePasswordConfirmInput.pressSequentially('changeme2');
-    await userProfile.changePasswordSubmitButton.click();
-    await expect(page.testSubj.locator('globalToastList')).toContainText(
-      'Password successfully changed'
-    );
-    await page.testSubj.locator('toastCloseButton').click();
+    await test.step('change to a new password', async () => {
+      await userProfile.changePassword(TEST_PASSWORD, UPDATED_PASSWORD);
+      await toasts.waitForToastWithText('Password successfully changed');
+      await toasts.closeAll();
+    });
 
-    await userProfile.changePasswordButton.click();
-    await userProfile.changePasswordCurrentInput.pressSequentially('changeme2');
-    await userProfile.changePasswordNewInput.pressSequentially(TEST_PASSWORD);
-    await userProfile.changePasswordConfirmInput.pressSequentially(TEST_PASSWORD);
-    await userProfile.changePasswordSubmitButton.click();
-    await expect(page.testSubj.locator('globalToastList')).toContainText(
-      'Password successfully changed'
-    );
-    await page.testSubj.locator('toastCloseButton').click();
+    await test.step('change back using the new password', async () => {
+      await userProfile.changePassword(UPDATED_PASSWORD, TEST_PASSWORD);
+      await toasts.waitForToastWithText('Password successfully changed');
+      await toasts.closeAll();
+    });
   });
 
   test('theme: should change theme based on the User Profile Theme control with default Adv. Settings value (light)', async ({
@@ -100,13 +106,13 @@ test.describe('User Profile Page', { tag: tags.stateful.classic }, () => {
     await expect(userProfile.themeKeypadMenu).toBeVisible();
 
     await userProfile.changeTheme('dark');
-    expect(await userProfile.getThemeTag()).toBe('borealisdark');
+    await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
 
     await userProfile.changeTheme('light');
-    expect(await userProfile.getThemeTag()).toBe('borealislight');
+    await expect.poll(() => userProfile.getThemeTag()).toBe('borealislight');
 
     await userProfile.changeTheme('space_default');
-    expect(await userProfile.getThemeTag()).toBe('borealislight');
+    await expect.poll(() => userProfile.getThemeTag()).toBe('borealislight');
   });
 
   test('theme: should change theme based on the User Profile Theme control with default Adv. Settings value set to dark', async ({
@@ -118,17 +124,15 @@ test.describe('User Profile Page', { tag: tags.stateful.classic }, () => {
     await uiSettings.set({ 'theme:darkMode': 'enabled' });
     await userProfile.goto();
 
-    expect(await userProfile.getThemeTag()).toBe('borealisdark');
+    await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
 
     await userProfile.changeTheme('light');
-    expect(await userProfile.getThemeTag()).toBe('borealislight');
+    await expect.poll(() => userProfile.getThemeTag()).toBe('borealislight');
 
     await userProfile.changeTheme('dark');
-    expect(await userProfile.getThemeTag()).toBe('borealisdark');
+    await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
 
     await userProfile.changeTheme('space_default');
-    expect(await userProfile.getThemeTag()).toBe('borealisdark');
-
-    await uiSettings.unset('theme:darkMode');
+    await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
   });
 });

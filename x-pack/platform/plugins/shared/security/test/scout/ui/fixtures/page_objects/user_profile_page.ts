@@ -38,15 +38,39 @@ export class UserProfilePage {
     this.windowReloadButton = page.testSubj.locator('windowReloadButton');
   }
 
-  async goto() {
+  async goto(): Promise<void> {
     await this.page.gotoApp('security_account');
+  }
+
+  async setFullName(fullName: string): Promise<void> {
+    await this.fullNameInput.fill(fullName);
+  }
+
+  async setEmail(email: string): Promise<void> {
+    await this.emailInput.fill(email);
+  }
+
+  async clearEmail(): Promise<void> {
+    await this.emailInput.clear();
+  }
+
+  async saveChanges(): Promise<void> {
+    await this.saveProfileChangesButton.click();
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await this.changePasswordButton.click();
+    await this.changePasswordCurrentInput.pressSequentially(currentPassword);
+    await this.changePasswordNewInput.pressSequentially(newPassword);
+    await this.changePasswordConfirmInput.pressSequentially(newPassword);
+    await this.changePasswordSubmitButton.click();
   }
 
   themeKeypadButton(mode: ThemeMode): Locator {
     return this.page.testSubj.locator(`themeKeyPadItem${mode}`);
   }
 
-  async changeTheme(mode: ThemeMode) {
+  async changeTheme(mode: ThemeMode): Promise<void> {
     await this.themeKeypadButton(mode).click();
     await this.saveProfileChangesButton.click();
     await this.windowReloadButton.waitFor({ state: 'visible' });
