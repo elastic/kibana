@@ -7,18 +7,15 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import type { ApprovalModalTone } from './types';
 
 export interface ApprovalToneTokens {
   headerBackground: string;
   avatarBackground: string;
   warningLabelColor: string;
-  iconColor: string;
   headerBorder: string;
-  buttonColor: 'primary' | 'danger';
 }
 
-export const useApprovalTone = (tone: ApprovalModalTone): ApprovalToneTokens => {
+export const useApprovalTone = (tone: 'primary' | 'danger'): ApprovalToneTokens => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
@@ -28,8 +25,6 @@ export const useApprovalTone = (tone: ApprovalModalTone): ApprovalToneTokens => 
         headerBorder: euiTheme.colors.backgroundLightDanger,
         avatarBackground: euiTheme.colors.backgroundFilledDanger,
         warningLabelColor: euiTheme.colors.textDanger,
-        iconColor: euiTheme.colors.backgroundFilledDanger,
-        buttonColor: 'danger',
       };
     }
     return {
@@ -37,8 +32,6 @@ export const useApprovalTone = (tone: ApprovalModalTone): ApprovalToneTokens => 
       headerBorder: euiTheme.colors.backgroundLightPrimary,
       avatarBackground: euiTheme.colors.backgroundFilledPrimary,
       warningLabelColor: euiTheme.colors.textPrimary,
-      iconColor: euiTheme.colors.backgroundFilledPrimary,
-      buttonColor: 'primary',
     };
   }, [tone, euiTheme]);
 };

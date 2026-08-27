@@ -31,7 +31,6 @@ import { BlastRadius } from '../../components/filters/blast_radius';
 import { AssignActionModal, BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
 import { ApprovalModal } from '../../components/modals/approval_modal';
 import { ConversationDetailsFlyout } from '../../components/details';
-import { getActionButtonIconProps } from '../../components/helpers';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -88,18 +87,10 @@ export const ConversationsPage: React.FC = () => {
     [conversations, selectedIdForRecommendedAction]
   );
 
-  const selectedDetailsConversation = useMemo(
+  const selectedDetailsConversation: Investigation | undefined = useMemo(
     () =>
       selectedIdForDetails ? conversations.find((c) => c.id === selectedIdForDetails) : undefined,
     [conversations, selectedIdForDetails]
-  );
-
-  const recommendedActionIconProps = useMemo(
-    () =>
-      selectedRecommendedActionConversation
-        ? getActionButtonIconProps(selectedRecommendedActionConversation)
-        : { type: 'gear' as const, color: 'primary' as const },
-    [selectedRecommendedActionConversation]
   );
 
   const sortedConversations = useMemo(
@@ -152,13 +143,7 @@ export const ConversationsPage: React.FC = () => {
     >
       {selectedIdForRecommendedAction && selectedRecommendedActionConversation && (
         <ApprovalModal
-          tone={recommendedActionIconProps.color === 'danger' ? 'danger' : 'primary'}
-          iconType={recommendedActionIconProps.type}
-          title={selectedRecommendedActionConversation.primaryActionLabel ?? ''}
-          blastRadius={{
-            variant: 'description',
-            description: selectedRecommendedActionConversation.summary,
-          }}
+          selectedRecommendedActionConversation={selectedRecommendedActionConversation}
           onConfirm={() =>
             // TODO: use action API call hook
             setSelectedIdForRecommendedAction(undefined)

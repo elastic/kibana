@@ -6,12 +6,3 @@
  */
 
 export { ApprovalModal } from './approval_modal';
-export type {
-  ApprovalModalProps,
-  ApprovalModalTone,
-  ApprovalActor,
-  ApprovalAlwaysAllowOption,
-  BlastRadiusContent,
-  BlastRadiusItem,
-  BlastRadiusItemStatus,
-} from './types';

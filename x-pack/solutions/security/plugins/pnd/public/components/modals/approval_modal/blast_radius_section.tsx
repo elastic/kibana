@@ -8,12 +8,13 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
-import type { BlastRadiusContent } from './types';
-import { BlastRadiusItem } from './blast_radius_item';
+import { BlastRadiusItem, type BlastRadiusItemProps } from './blast_radius_item';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 interface BlastRadiusSectionProps {
-  content: BlastRadiusContent;
+  content:
+    | { variant: 'list'; items: BlastRadiusItemProps['item'][] }
+    | { variant: 'description'; description: React.ReactNode };
   defaultItemIconColor?: string;
 }
 

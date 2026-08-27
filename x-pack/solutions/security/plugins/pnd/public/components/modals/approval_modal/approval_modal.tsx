@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -15,32 +15,56 @@ import {
   EuiModalFooter,
   useEuiTheme,
 } from '@elastic/eui';
-import type { ApprovalModalProps } from './types';
+import type { Investigation } from '@kbn/pnd-common';
 import { ApprovalModalHeader } from './approval_modal_header';
 import { BlastRadiusSection } from './blast_radius_section';
 import { ApprovalActorRow } from './approval_actor_row';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
-import { useApprovalTone } from './use_approval_tone';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
+import { getActionButtonIconProps } from '../../helpers';
 
 const TITLE_ID = 'approvalModalTitle';
 
+export interface ApprovalModalProps {
+  alwaysAllow?: {
+    id: string;
+    label: React.ReactNode;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+  };
+  selectedRecommendedActionConversation?: Investigation;
+  onConfirm: () => void;
+  onClose: () => void;
+  'data-test-subj'?: string;
+}
+
 export const ApprovalModal = memo<ApprovalModalProps>(
   ({
-    tone = 'primary',
-    iconType,
-    warningLabel,
-    title,
-    blastRadius,
-    actor,
     alwaysAllow,
+    selectedRecommendedActionConversation,
     onConfirm,
-    cancelLabel,
     onClose,
     'data-test-subj': dataTestSubj,
   }) => {
-    const { buttonColor, iconColor } = useApprovalTone(tone);
     const { euiTheme } = useEuiTheme();
+
+    const title = selectedRecommendedActionConversation?.primaryActionLabel ?? '';
+
+    const recommendedActionIconProps = useMemo(
+      () =>
+        selectedRecommendedActionConversation
+          ? getActionButtonIconProps(selectedRecommendedActionConversation)
+          : { type: 'gear' as const, color: 'primary' as const },
+      [selectedRecommendedActionConversation]
+    );
+
+    const { buttonColor, iconColor } = useMemo(
+      () =>
+        recommendedActionIconProps.color === 'danger'
+          ? { buttonColor: 'danger' as const, iconColor: euiTheme.colors.danger }
+          : { buttonColor: 'primary' as const, iconColor: euiTheme.colors.primary },
+      [recommendedActionIconProps.color, euiTheme.colors.danger, euiTheme.colors.primary]
+    );
 
     return (
       <EuiModal
@@ -50,16 +74,22 @@ export const ApprovalModal = memo<ApprovalModalProps>(
         data-test-subj={dataTestSubj}
       >
         <ApprovalModalHeader
-          tone={tone}
-          iconType={iconType}
-          warningLabel={warningLabel ?? APPROVAL_MODAL_TRANSLATIONS.warningLabel}
+          tone={recommendedActionIconProps.color === 'danger' ? 'danger' : 'primary'}
+          iconType={recommendedActionIconProps.type}
+          warningLabel={APPROVAL_MODAL_TRANSLATIONS.warningLabel}
           title={title}
           titleId={TITLE_ID}
         />
 
         <EuiModalBody css={css({ padding: `${euiTheme.size.m} 0` })}>
-          <BlastRadiusSection content={blastRadius} defaultItemIconColor={iconColor} />
-          {actor && <ApprovalActorRow actor={actor} />}
+          <BlastRadiusSection
+            content={{
+              variant: 'description',
+              description: selectedRecommendedActionConversation?.summary ?? '',
+            }}
+            defaultItemIconColor={iconColor}
+          />
+          <ApprovalActorRow />
         </EuiModalBody>
 
         {alwaysAllow && (
@@ -80,7 +110,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
             fill
             size="s"
             color={buttonColor}
-            iconType={iconType}
+            iconType={recommendedActionIconProps.type}
             onClick={onConfirm}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-confirm` : undefined}
           >
@@ -92,7 +122,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
             onClick={onClose}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-cancel` : undefined}
           >
-            {cancelLabel ?? APPROVAL_MODAL_TRANSLATIONS.cancel}
+            {APPROVAL_MODAL_TRANSLATIONS.cancel}
           </EuiButtonEmpty>
         </EuiModalFooter>
       </EuiModal>

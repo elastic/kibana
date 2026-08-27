@@ -8,20 +8,30 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import { ApprovalModal } from './approval_modal';
-import type { ApprovalModalProps } from './types';
+import type { Investigation } from '@kbn/pnd-common';
+import { ApprovalModal, type ApprovalModalProps } from './approval_modal';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiProvider>{children}</EuiProvider>
 );
 
+const mockInvestigation: Investigation = {
+  id: 'inv-1',
+  title: 'test proposal',
+  template_id: 'investigation',
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
+  watch_id: 'watch-1',
+  watch_execution_id: 'exec-1',
+  pendingProposalCount: 0,
+  events: [],
+  primaryActionLabel: 'Apply monitored exception',
+  summary: 'This action suppresses qualys-scan on the DMZ scan pool only.',
+  recommendedAction: 'investigate',
+};
+
 const baseProps: ApprovalModalProps = {
-  iconType: 'gear',
-  title: 'Apply monitored exception',
-  blastRadius: {
-    variant: 'description',
-    description: 'This action suppresses qualys-scan on the DMZ scan pool only.',
-  },
+  selectedRecommendedActionConversation: mockInvestigation,
   onConfirm: jest.fn(),
   onClose: jest.fn(),
   'data-test-subj': 'approvalModal',
@@ -41,40 +51,11 @@ describe('ApprovalModal', () => {
     expect(screen.getByText(/approval required/i)).toBeInTheDocument();
   });
 
-  it('renders a custom warningLabel when supplied', () => {
-    renderModal({ warningLabel: 'Custom label' });
-    expect(screen.getAllByText('Custom label').length).toBeGreaterThan(0);
-  });
-
-  it('renders the description variant', () => {
+  it('renders the description from the investigation summary', () => {
     renderModal();
     expect(
       screen.getByText('This action suppresses qualys-scan on the DMZ scan pool only.')
     ).toBeInTheDocument();
-  });
-
-  it('renders the list variant with item text', () => {
-    renderModal({
-      blastRadius: {
-        variant: 'list',
-        items: [
-          {
-            id: 'item-1',
-            iconType: 'user',
-            text: <span>Kills 3 active sessions</span>,
-          },
-          {
-            id: 'item-2',
-            iconType: 'check',
-            text: <strong>Reversible</strong>,
-            status: { label: 'safe', color: 'success' },
-          },
-        ],
-      },
-    });
-    expect(screen.getByText('Kills 3 active sessions')).toBeInTheDocument();
-    expect(screen.getByText('Reversible')).toBeInTheDocument();
-    expect(screen.getByText('safe')).toBeInTheDocument();
   });
 
   it('renders the blast radius section label', () => {
@@ -82,20 +63,9 @@ describe('ApprovalModal', () => {
     expect(screen.getByText('Blast radius')).toBeInTheDocument();
   });
 
-  it('does not render the actor row when actor is omitted', () => {
+  it('always renders the actor row', () => {
     renderModal();
-    expect(screen.queryByText('Senior Analyst')).not.toBeInTheDocument();
-  });
-
-  it('renders the actor row when actor is supplied', () => {
-    renderModal({
-      actor: {
-        name: 'You',
-        detail: 'Senior Analyst · identity actions permitted',
-      },
-    });
     expect(screen.getByText('You')).toBeInTheDocument();
-    // detail is a sibling text node to <strong>, so match as substring
     expect(screen.getByText(/Senior Analyst/)).toBeInTheDocument();
   });
 
@@ -144,17 +114,12 @@ describe('ApprovalModal', () => {
     expect(baseProps.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a custom cancel label', () => {
-    renderModal({ cancelLabel: 'No thanks' });
-    expect(screen.getByTestId('approvalModal-cancel')).toHaveTextContent('No thanks');
-  });
-
-  it('renders the default cancel label when cancelLabel is omitted', () => {
+  it('renders the cancel label', () => {
     renderModal();
     expect(screen.getByTestId('approvalModal-cancel')).toHaveTextContent('Cancel');
   });
 
-  it('renders the confirm button with the modal title as its label', () => {
+  it('renders the confirm button with the investigation primaryActionLabel as its label', () => {
     renderModal();
     expect(screen.getByTestId('approvalModal-confirm')).toHaveTextContent(
       'Apply monitored exception'

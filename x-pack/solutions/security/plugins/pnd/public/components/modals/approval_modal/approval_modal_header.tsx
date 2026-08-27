@@ -17,12 +17,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import type { ApprovalModalTone } from './types';
 import { useApprovalTone } from './use_approval_tone';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 interface ApprovalModalHeaderProps {
-  tone: ApprovalModalTone;
+  tone: 'primary' | 'danger';
   iconType: IconType;
   warningLabel: string;
   title: string;

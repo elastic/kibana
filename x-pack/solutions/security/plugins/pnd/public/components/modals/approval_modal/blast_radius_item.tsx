@@ -7,10 +7,22 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
-import type { BlastRadiusItem as BlastRadiusItemType } from './types';
+import type { IconColor, IconType } from '@elastic/eui';
 
-interface BlastRadiusItemProps {
-  item: BlastRadiusItemType;
+export interface BlastRadiusItemProps {
+  item: {
+    id: string;
+    iconType: IconType;
+    /** Defaults to the modal tone's icon color */
+    iconColor?: IconColor;
+    /** Rich text — caller composes <strong>, <EuiCode>, <FormattedMessage>, etc. */
+    text: React.ReactNode;
+    status?: {
+      label: string;
+      iconType?: IconType;
+      color?: 'success' | 'warning' | 'danger';
+    };
+  };
   defaultIconColor?: string;
 }
 

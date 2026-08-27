@@ -6,34 +6,18 @@
  */
 
 import React, { memo } from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import type { ApprovalActor } from './types';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiIcon, EuiText } from '@elastic/eui';
 
-interface ApprovalActorRowProps {
-  actor: ApprovalActor;
-}
-
-export const ApprovalActorRow = memo<ApprovalActorRowProps>(({ actor }) => {
-  const { euiTheme } = useEuiTheme();
-  const { iconType = 'bullseye', name, detail } = actor;
+export const ApprovalActorRow = memo(() => {
+  // TODO fetch user profile and use that info here
+  const { name, detail } = { name: 'You', detail: 'Senior Analyst' };
 
   return (
     <>
-      <EuiHorizontalRule
-        margin="m"
-        css={css({ borderTopStyle: 'dashed', borderTopColor: euiTheme.colors.borderBasePlain })}
-      />
+      <EuiHorizontalRule margin="m" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} color="subdued" size="m" aria-hidden />
+          <EuiIcon type="radar" color="subdued" size="m" aria-hidden />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">

@@ -8,11 +8,15 @@
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiCheckbox, EuiPanel, useEuiTheme } from '@elastic/eui';
-import type { ApprovalAlwaysAllowOption } from './types';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 interface AlwaysAllowCheckboxProps {
-  option: ApprovalAlwaysAllowOption;
+  option: {
+    id: string;
+    label: React.ReactNode;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+  };
   'data-test-subj'?: string;
 }
 
