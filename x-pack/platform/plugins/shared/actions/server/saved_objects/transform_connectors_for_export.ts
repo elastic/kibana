@@ -17,10 +17,21 @@ export async function transformConnectorsForExport(
   return Promise.all(
     connectors.map(async (savedObject) => {
       const connector = savedObject as SavedObject<RawAction>;
-      const { actionType, specId, connectorSpec } = actionTypeRegistry.resolveActionType(
+      const resolution = actionTypeRegistry.tryResolveActionType(
         connector.attributes.specId ?? connector.attributes.actionTypeId,
         connector.attributes.specVersion
       );
+      if (!resolution) {
+        return {
+          ...connector,
+          attributes: {
+            ...connector.attributes,
+            secrets: {},
+            isMissingSecrets: true,
+          },
+        };
+      }
+      const { actionType, specId, connectorSpec } = resolution;
       const connectorValidation =
         connectorSpec?.version && actionType.getConnectorValidation
           ? await actionType.getConnectorValidation(connectorSpec.version, specId)

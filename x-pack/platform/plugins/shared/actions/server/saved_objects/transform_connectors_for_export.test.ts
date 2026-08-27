@@ -222,7 +222,7 @@ describe('transform connector for export', () => {
   ];
 
   it('should not change connectors without secrets', async () => {
-    actionTypeRegistry.resolveActionType.mockReturnValue({
+    actionTypeRegistry.tryResolveActionType.mockReturnValue({
       registeredActionTypeId: connectorType.id,
       actionType: connectorType,
     });
@@ -250,7 +250,7 @@ describe('transform connector for export', () => {
         },
       },
     };
-    actionTypeRegistry.resolveActionType.mockReturnValue({
+    actionTypeRegistry.tryResolveActionType.mockReturnValue({
       registeredActionTypeId: connectorType.id,
       actionType: connectorTypeWithRequiredSecrets,
     });
@@ -296,7 +296,7 @@ describe('transform connector for export', () => {
         },
       },
     };
-    actionTypeRegistry.resolveActionType.mockReturnValue({
+    actionTypeRegistry.tryResolveActionType.mockReturnValue({
       registeredActionTypeId: '.declarative',
       actionType: genericActionType,
       connectorSpec,
@@ -330,5 +330,34 @@ describe('transform connector for export', () => {
       '1.0.0',
       '.declarative-http'
     );
+  });
+
+  it('redacts secrets when a pinned connector specification is unavailable', async () => {
+    actionTypeRegistry.tryResolveActionType.mockReturnValue(undefined);
+    const connector = {
+      id: 'declarative-connector',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.declarative',
+        specId: '.declarative-http',
+        specVersion: '1.0.0',
+        name: 'HTTP',
+        isMissingSecrets: false,
+        config: {},
+        secrets: 'encrypted',
+      },
+      references: [],
+    };
+
+    await expect(transformConnectorsForExport([connector], actionTypeRegistry)).resolves.toEqual([
+      {
+        ...connector,
+        attributes: {
+          ...connector.attributes,
+          secrets: {},
+          isMissingSecrets: true,
+        },
+      },
+    ]);
   });
 });

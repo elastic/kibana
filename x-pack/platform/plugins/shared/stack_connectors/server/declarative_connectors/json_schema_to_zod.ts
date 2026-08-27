@@ -23,7 +23,7 @@ const withCommonOptions = (zodSchema: z.ZodType, definition: DeclarativeJsonSche
     result = result.meta(definition.xUi);
   }
   if (definition.default !== undefined) {
-    result = result.default(definition.default);
+    result = z.preprocess((value) => (value === undefined ? definition.default : value), result);
   }
   return result;
 };

@@ -38,6 +38,27 @@ const relativeAssetPathSchema = z
     'Asset paths must be relative to the connector definition.'
   );
 
+const matchesSchemaType = (value: unknown, type: DeclarativeJsonSchema['type']): boolean => {
+  switch (type) {
+    case 'object':
+      return value !== null && typeof value === 'object' && !Array.isArray(value);
+    case 'string':
+      return typeof value === 'string';
+    case 'number':
+      return typeof value === 'number' && Number.isFinite(value);
+    case 'integer':
+      return typeof value === 'number' && Number.isInteger(value);
+    case 'boolean':
+      return typeof value === 'boolean';
+    case 'array':
+      return Array.isArray(value);
+    default: {
+      const exhaustiveCheck: never = type;
+      throw new Error(`Unsupported declarative schema type: ${exhaustiveCheck}`);
+    }
+  }
+};
+
 const jsonSchema: z.ZodType<DeclarativeJsonSchema> = z.lazy(() =>
   z
     .object({
@@ -52,7 +73,10 @@ const jsonSchema: z.ZodType<DeclarativeJsonSchema> = z.lazy(() =>
       maximum: z.number().optional(),
       minLength: z.number().int().nonnegative().optional(),
       maxLength: z.number().int().nonnegative().optional(),
-      enum: z.array(z.union([z.string(), z.number(), z.boolean()])).optional(),
+      enum: z
+        .array(z.union([z.string(), z.number(), z.boolean()]))
+        .min(1)
+        .optional(),
       additionalProperties: z.boolean().optional(),
       xUi: z
         .object({
@@ -71,6 +95,62 @@ const jsonSchema: z.ZodType<DeclarativeJsonSchema> = z.lazy(() =>
         .optional(),
     })
     .strict()
+    .superRefine((definition, context) => {
+      const reportUnsupportedField = (
+        field: keyof DeclarativeJsonSchema,
+        supportedType: string
+      ) => {
+        if (definition[field] !== undefined && definition.type !== supportedType) {
+          context.addIssue({
+            code: 'custom',
+            path: [field],
+            message: `"${field}" is only supported for ${supportedType} schemas.`,
+          });
+        }
+      };
+      const properties = definition.properties ?? {};
+      if (definition.type === 'object') {
+        for (const name of definition.required ?? []) {
+          if (!(name in properties)) {
+            context.addIssue({
+              code: 'custom',
+              path: ['required'],
+              message: `Required field "${name}" has no property definition.`,
+            });
+          }
+        }
+      }
+      reportUnsupportedField('properties', 'object');
+      reportUnsupportedField('required', 'object');
+      reportUnsupportedField('additionalProperties', 'object');
+      reportUnsupportedField('items', 'array');
+      reportUnsupportedField('format', 'string');
+      reportUnsupportedField('minLength', 'string');
+      reportUnsupportedField('maxLength', 'string');
+      if (definition.type !== 'number' && definition.type !== 'integer') {
+        reportUnsupportedField('minimum', 'number or integer');
+        reportUnsupportedField('maximum', 'number or integer');
+      }
+      if (
+        definition.default !== undefined &&
+        !matchesSchemaType(definition.default, definition.type)
+      ) {
+        context.addIssue({
+          code: 'custom',
+          path: ['default'],
+          message: `Default value must match type "${definition.type}".`,
+        });
+      }
+      for (const [index, value] of (definition.enum ?? []).entries()) {
+        if (!matchesSchemaType(value, definition.type)) {
+          context.addIssue({
+            code: 'custom',
+            path: ['enum', index],
+            message: `Enum value must match type "${definition.type}".`,
+          });
+        }
+      }
+    })
 );
 
 const retrySchema = z

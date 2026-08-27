@@ -7,9 +7,10 @@
 
 import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
 import { compare, valid } from 'semver';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
+import { validateConfig, validateSecrets } from '../../../../lib';
 import type { RawAction } from '../../../../types';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import type { Connector } from '../../types';
@@ -111,7 +112,10 @@ export async function upgrade({
   try {
     connectorValidation.config?.schema.parse(config);
     connectorValidation.secrets?.schema.parse(secrets);
-  } catch {
+  } catch (error) {
+    if (!(error instanceof z.ZodError)) {
+      throw error;
+    }
     return { status: 'reconfiguration_required', fromVersion, toVersion, connector };
   }
 
@@ -120,11 +124,8 @@ export async function upgrade({
   validateConfig(actionTypeForValidation, config, { configurationUtilities });
   validateSecrets(actionTypeForValidation, secrets, { configurationUtilities });
 
-  try {
-    if (actionTypeForValidation.validate.connector) {
-      validateConnector(actionTypeForValidation, { config, secrets });
-    }
-  } catch {
+  const connectorValidationError = actionTypeForValidation.validate.connector?.(config, secrets);
+  if (connectorValidationError !== undefined && connectorValidationError !== null) {
     return { status: 'reconfiguration_required', fromVersion, toVersion, connector };
   }
 

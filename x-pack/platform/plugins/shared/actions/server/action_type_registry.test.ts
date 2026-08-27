@@ -90,6 +90,7 @@ describe('actionTypeRegistry', () => {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
               cost: TaskCost.Tiny,
+              taskTypeGroup: 'actions',
               title: 'My connector type',
             },
           },
@@ -380,8 +381,8 @@ describe('actionTypeRegistry', () => {
       expect(() => actionTypeRegistry.list()).toThrow(
         'Connector type ".registered" conflicts with another action type.'
       );
-      expect(actionTypeRegistry.resolveActionType('.registered').registeredActionTypeId).toBe(
-        '.registered'
+      expect(() => actionTypeRegistry.resolveActionType('.registered')).toThrow(
+        'Connector type ".registered" conflicts with another action type.'
       );
     });
 

@@ -125,4 +125,42 @@ handler: console.log
       )
     ).toThrow('Asset paths must be relative');
   });
+
+  it('rejects required fields without property definitions', () => {
+    expect(() =>
+      parseDeclarativeConnectorSpec(
+        ABUSE_IPDB_SPEC_FIXTURE.replace('required: [baseUrl]', 'required: [missing]')
+      )
+    ).toThrow('Required field "missing" has no property definition.');
+  });
+
+  it('rejects defaults that do not match their schema type', () => {
+    expect(() =>
+      parseDeclarativeConnectorSpec(
+        ABUSE_IPDB_SPEC_FIXTURE.replace(
+          'type: string\n      format: uri\n      default: http://127.0.0.1:8090',
+          'type: integer\n      default: http://127.0.0.1:8090'
+        )
+      )
+    ).toThrow('Default value must match type "integer".');
+  });
+
+  it('validates defaults against schema constraints', () => {
+    const parsed = parseDeclarativeConnectorSpec(
+      ABUSE_IPDB_SPEC_FIXTURE.replace('default: http://127.0.0.1:8090', 'default: not-a-valid-url')
+    );
+
+    expect(() => materializeDeclarativeConnectorSpec(parsed).schema?.parse({})).toThrow();
+  });
+
+  it('rejects type-specific fields on other schema types', () => {
+    expect(() =>
+      parseDeclarativeConnectorSpec(
+        ABUSE_IPDB_SPEC_FIXTURE.replace(
+          'type: string\n      format: uri',
+          'type: integer\n      minLength: 1'
+        ).replace('default: http://127.0.0.1:8090', 'default: 1')
+      )
+    ).toThrow('"minLength" is only supported for string schemas.');
+  });
 });

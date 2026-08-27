@@ -10,7 +10,6 @@ import {
   rawConnectorSchemaV1,
   rawConnectorSchemaV2,
   rawConnectorSchemaV3,
-  rawConnectorSchemaV4,
 } from '../schemas/raw_connector';
 
 export const connectorModelVersions: SavedObjectsModelVersionMap = {
@@ -42,35 +41,6 @@ export const connectorModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       create: rawConnectorSchemaV3,
       forwardCompatibility: rawConnectorSchemaV3.extends({}, { unknowns: 'ignore' }),
-    },
-  },
-  '4': {
-    changes: [
-      {
-        type: 'data_backfill',
-        backfillFn: (doc) => {
-          const { actionTypeId, specId } = doc.attributes;
-          if (
-            typeof actionTypeId === 'string' &&
-            actionTypeId.startsWith('.declarative-') &&
-            !specId
-          ) {
-            return {
-              ...doc,
-              attributes: {
-                ...doc.attributes,
-                actionTypeId: '.declarative',
-                specId: actionTypeId,
-              },
-            };
-          }
-          return doc;
-        },
-      },
-    ],
-    schemas: {
-      create: rawConnectorSchemaV4,
-      forwardCompatibility: rawConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
     },
   },
 };

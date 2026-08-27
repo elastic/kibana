@@ -113,6 +113,35 @@ describe('executeDeclarativeRequest', () => {
     expect(requestMock).toHaveBeenCalledWith(expect.objectContaining({ headers: {} }));
   });
 
+  it('rejects unresolved embedded templates', async () => {
+    await expect(
+      executeDeclarativeRequest({
+        context: createContext(jest.fn()),
+        connector,
+        request: {
+          method: 'GET',
+          url: 'https://example.test/users/{{ input.userId }}',
+        },
+        input: {},
+      })
+    ).rejects.toThrow('Declarative template "input.userId" did not resolve to a value.');
+  });
+
+  it('rejects missing configured response paths', async () => {
+    await expect(
+      executeDeclarativeRequest({
+        context: createContext(jest.fn().mockResolvedValue(response({}))),
+        connector,
+        request: {
+          method: 'GET',
+          url: 'https://example.test/users',
+          response: { dataPath: 'data.users' },
+        },
+        input: {},
+      })
+    ).rejects.toThrow('Declarative response path "data.users" did not resolve to a value.');
+  });
+
   it('follows same-origin Link headers up to the configured page bound', async () => {
     const requestMock = jest
       .fn()

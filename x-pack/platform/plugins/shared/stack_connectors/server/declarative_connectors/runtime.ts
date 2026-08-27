@@ -65,14 +65,21 @@ const resolveTemplatePath = (path: string, context: TemplateContext): unknown =>
   return getPath(context[root], segments.join('.'));
 };
 
+const resolveRequiredTemplatePath = (path: string, context: TemplateContext): unknown => {
+  const resolved = resolveTemplatePath(path, context);
+  if (resolved === undefined || resolved === null) {
+    throw new Error(`Declarative template "${path}" did not resolve to a value.`);
+  }
+  return resolved;
+};
+
 const renderValue = (value: unknown, context: TemplateContext): unknown => {
   if (typeof value === 'string') {
     const exactMatch = value.match(EXACT_TEMPLATE);
     if (exactMatch) return resolveTemplatePath(exactMatch[1], context);
-    return value.replace(EMBEDDED_TEMPLATE, (_, path: string) => {
-      const resolved = resolveTemplatePath(path, context);
-      return resolved === undefined || resolved === null ? '' : String(resolved);
-    });
+    return value.replace(EMBEDDED_TEMPLATE, (_, path: string) =>
+      String(resolveRequiredTemplatePath(path, context))
+    );
   }
   if (Array.isArray(value)) {
     return value.map((item) => renderValue(item, context));
@@ -85,6 +92,24 @@ const renderValue = (value: unknown, context: TemplateContext): unknown => {
     );
   }
   return value;
+};
+
+const toHeaderRecord = (value: unknown): Record<string, string> => {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Declarative request headers must be an object.');
+  }
+  return Object.fromEntries(
+    Object.entries(value).map(([name, headerValue]) => {
+      if (
+        typeof headerValue !== 'string' &&
+        typeof headerValue !== 'number' &&
+        typeof headerValue !== 'boolean'
+      ) {
+        throw new Error(`Declarative request header "${name}" must resolve to a scalar value.`);
+      }
+      return [name, String(headerValue)];
+    })
+  );
 };
 
 const buildUrl = (request: DeclarativeRequest, templateContext: TemplateContext): string => {
@@ -160,7 +185,7 @@ const buildRequestConfig = ({
   const renderedQuery = renderValue(request.query ?? {}, templateContext);
   const renderedBody = renderValue(request.body, templateContext);
   const headers = {
-    ...(renderedHeaders as Record<string, string>),
+    ...toHeaderRecord(renderedHeaders),
     ...buildAuthHeaders(connector, context),
   };
 
@@ -338,7 +363,11 @@ export const executeDeclarativeRequest = async ({
     };
   }
 
-  const selected = getPath(response.data, request.response?.dataPath);
+  const dataPath = request.response?.dataPath;
+  const selected = getPath(response.data, dataPath);
+  if (dataPath && selected === undefined) {
+    throw new Error(`Declarative response path "${dataPath}" did not resolve to a value.`);
+  }
   return {
     ...toResultObject(selected, request.response?.outputKey),
     ...(rateLimit ? { _meta: { rateLimit } } : {}),

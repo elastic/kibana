@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
@@ -278,6 +279,7 @@ export class ActionTypeRegistry {
           title: actionType.name,
           maxAttempts,
           cost: TaskCost.Tiny,
+          taskTypeGroup: TaskTypeGroup.Actions,
           createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
         },
       });
@@ -316,6 +318,11 @@ export class ActionTypeRegistry {
   public tryResolveActionType(id: string, version?: string): ResolvedActionType | undefined {
     const actionType = this.actionTypes.get(id);
     if (actionType) {
+      for (const candidate of this.actionTypes.values()) {
+        if (candidate.getConnectorSpecsForDiscovery?.().some((spec) => spec.metadata.id === id)) {
+          throw new Error(`Connector type "${id}" conflicts with another action type.`);
+        }
+      }
       const currentSpec = actionType.getConnectorSpec?.();
       const connectorSpec = version
         ? currentSpec?.version === version

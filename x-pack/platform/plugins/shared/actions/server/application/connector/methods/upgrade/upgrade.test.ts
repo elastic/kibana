@@ -280,4 +280,21 @@ describe('upgrade()', () => {
     );
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
+
+  it('does not classify connector validator exceptions as schema incompatibility', async () => {
+    setActiveVersion('2.0.0');
+    getConnectorValidation.mockResolvedValueOnce({
+      config: { schema: z.object({ endpoint: z.url() }).strict() },
+      secrets: { schema: z.object({ token: z.string() }).strict() },
+      params: { schema: z.object({}) },
+      connector: () => {
+        throw new Error('connector validator failed unexpectedly');
+      },
+    });
+
+    await expect(upgrade({ context, id })).rejects.toThrow(
+      'connector validator failed unexpectedly'
+    );
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
 });
