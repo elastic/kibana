@@ -8,6 +8,11 @@
 import { getUniqueName, processImageFile } from './upload_image';
 import { AttachmentType, MAX_IMAGE_BYTES } from '@kbn/agent-builder-common/attachments';
 
+// jsdom doesn't implement createImageBitmap; stub it to resolve like a real decode would.
+(global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap = jest
+  .fn()
+  .mockResolvedValue({ close: jest.fn() });
+
 // ---------------------------------------------------------------------------
 // getUniqueName
 // ---------------------------------------------------------------------------
@@ -48,12 +53,19 @@ const makeFilesClient = (overrides?: Record<string, unknown>) => ({
 const makeAddErrorToast = () => jest.fn();
 
 describe('processImageFile', () => {
+  afterEach(() => {
+    (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap.mockReset();
+    (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap.mockResolvedValue({
+      close: jest.fn(),
+    });
+  });
+
   it('calls create then upload then upsertAttachments on success', async () => {
     const filesClient = makeFilesClient();
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
-    await processImageFile({
+    const result = await processImageFile({
       file: makeFile('shot.png', 'image/png', 100),
       name: 'shot.png',
       filesClient: filesClient as never,
@@ -72,6 +84,30 @@ describe('processImageFile', () => {
       },
     ]);
     expect(addErrorToast).not.toHaveBeenCalled();
+    expect(result).toBe(true);
+  });
+
+  it('shows an error toast and returns false when the file does not actually decode as an image', async () => {
+    (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap.mockRejectedValue(
+      new Error('not an image')
+    );
+    const filesClient = makeFilesClient();
+    const upsertAttachments = jest.fn();
+    const addErrorToast = makeAddErrorToast();
+
+    // Renamed .mp4 with a spoofed image/jpeg type — should still be rejected.
+    const result = await processImageFile({
+      file: makeFile('video.jpg', 'image/jpeg', 100),
+      name: 'video.jpg',
+      filesClient: filesClient as never,
+      upsertAttachments,
+      addErrorToast,
+    });
+
+    expect(filesClient.create).not.toHaveBeenCalled();
+    expect(upsertAttachments).not.toHaveBeenCalled();
+    expect(addErrorToast).toHaveBeenCalledTimes(1);
+    expect(result).toBe(false);
   });
 
   it('shows an error toast and skips upload for unsupported mime type', async () => {
@@ -79,7 +115,7 @@ describe('processImageFile', () => {
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
-    await processImageFile({
+    const result = await processImageFile({
       file: makeFile('image.gif', 'image/gif', 100),
       name: 'image.gif',
       filesClient: filesClient as never,
@@ -90,6 +126,7 @@ describe('processImageFile', () => {
     expect(filesClient.create).not.toHaveBeenCalled();
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).toHaveBeenCalledTimes(1);
+    expect(result).toBe(false);
   });
 
   it('shows an error toast and skips upload when file is too large', async () => {
@@ -97,7 +134,7 @@ describe('processImageFile', () => {
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
-    await processImageFile({
+    const result = await processImageFile({
       file: makeFile('big.png', 'image/png', MAX_IMAGE_BYTES + 1),
       name: 'big.png',
       filesClient: filesClient as never,
@@ -108,6 +145,7 @@ describe('processImageFile', () => {
     expect(filesClient.create).not.toHaveBeenCalled();
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).toHaveBeenCalledTimes(1);
+    expect(result).toBe(false);
   });
 
   it('skips upsertAttachments and does not toast when aborted', async () => {
@@ -124,7 +162,7 @@ describe('processImageFile', () => {
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
-    await processImageFile({
+    const result = await processImageFile({
       file: makeFile('shot.png', 'image/png', 100),
       name: 'shot.png',
       filesClient: filesClient as never,
@@ -135,6 +173,7 @@ describe('processImageFile', () => {
 
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).not.toHaveBeenCalled();
+    expect(result).toBe(true);
   });
 
   it('shows an error toast when upload rejects for a non-abort reason', async () => {
@@ -145,7 +184,7 @@ describe('processImageFile', () => {
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
-    await processImageFile({
+    const result = await processImageFile({
       file: makeFile('shot.png', 'image/png', 100),
       name: 'shot.png',
       filesClient: filesClient as never,
@@ -155,5 +194,6 @@ describe('processImageFile', () => {
 
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).toHaveBeenCalledTimes(1);
+    expect(result).toBe(false);
   });
 });

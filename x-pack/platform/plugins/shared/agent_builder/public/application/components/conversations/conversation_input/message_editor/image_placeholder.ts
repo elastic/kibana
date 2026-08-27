@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { insertNodeAtCursor, insertSpaceAfter, placeCursorAfter } from './utils';
+
 export const IMAGE_PLACEHOLDER_ATTRIBUTE = 'data-image-placeholder';
 export const IMAGE_PLACEHOLDER_ICON_ATTRIBUTE = 'data-image-placeholder-icon';
 export const IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE = 'data-image-placeholder-remove';
@@ -78,6 +80,21 @@ export const createImagePlaceholderElement = (label: string): HTMLSpanElement =>
   span.appendChild(progressTrack);
 
   return span;
+};
+
+/**
+ * Creates a placeholder chip for `label`, inserts it at the current cursor position,
+ * and moves the caret to just after it (via a trailing non-breaking space).
+ */
+export const insertImagePlaceholderChip = (label: string): void => {
+  const chipEl = createImagePlaceholderElement(label);
+  chipEl.setAttribute('data-uploading', 'true');
+  insertNodeAtCursor(chipEl);
+  const sel = window.getSelection();
+  if (sel) {
+    const space = insertSpaceAfter(chipEl, chipEl.parentNode as HTMLElement);
+    placeCursorAfter(space, sel);
+  }
 };
 
 export const isElementImagePlaceholder = (element: HTMLElement): boolean =>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { ToastInput } from '@kbn/core/public';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
@@ -48,11 +48,8 @@ export const useImageUpload = ({
   const [uploadingNames, setUploadingNames] = useState<Set<string>>(new Set());
   const uploadControllers = useRef<Map<string, AbortController>>(new Map());
 
-  // Keep a ref so callbacks read fresh attachments without stale closure
   const attachmentsRef = useRef(attachments);
-  useEffect(() => {
-    attachmentsRef.current = attachments;
-  });
+  attachmentsRef.current = attachments;
 
   const handlePasteFile = useCallback(
     (file: File): string | undefined => {
@@ -80,17 +77,23 @@ export const useImageUpload = ({
         upsertAttachments,
         addErrorToast,
         abortSignal: controller.signal,
-      }).finally(() => {
-        uploadControllers.current.delete(name);
-        setUploadingNames((prev) => {
-          const next = new Set(prev);
-          next.delete(name);
-          return next;
+      })
+        .then((success) => {
+          if (!success) {
+            messageEditorController.removePlaceholderByName(name);
+          }
+        })
+        .finally(() => {
+          uploadControllers.current.delete(name);
+          setUploadingNames((prev) => {
+            const next = new Set(prev);
+            next.delete(name);
+            return next;
+          });
         });
-      });
       return name;
     },
-    [upsertAttachments, filesClient, addErrorToast, uploadingNames]
+    [upsertAttachments, filesClient, addErrorToast, uploadingNames, messageEditorController]
   );
 
   const handleAfterInput = useCallback(() => {

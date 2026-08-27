@@ -44,7 +44,9 @@ export const getUniqueName = (originalName: string, existingNames: Set<string>):
 
 /**
  * Validates a File, uploads it to the Files service, and calls upsertAttachments.
- * On abort the promise resolves silently. On other errors an error toast is shown.
+ * Returns whether the attachment was created — `false` tells the caller to remove
+ * the inline editor placeholder, since no attachment now backs it.
+ * On abort the promise resolves `true` silently (the caller already removed the placeholder).
  */
 export const processImageFile = async ({
   file,
@@ -60,16 +62,31 @@ export const processImageFile = async ({
   upsertAttachments: (attachments: ConversationAttachment[]) => void;
   addErrorToast: (input: ToastInput) => void;
   abortSignal?: AbortSignal;
-}): Promise<void> => {
+}): Promise<boolean> => {
   if (!(SUPPORTED_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) {
+    console.log('Invalid MIME type:', file.type)
     addErrorToast({ title: labels.invalidType });
-    return;
+    return false;
+  }
+
+  const isRealImage = await createImageBitmap(file).then(
+    (bitmap) => {
+      bitmap.close();
+      return true;
+    },
+    () => false
+  );
+  if (!isRealImage) {
+    addErrorToast({ title: labels.invalidType });
+    return false;
   }
 
   if (file.size > MAX_IMAGE_BYTES) {
+    console.log('File size too large:', file.size)
     addErrorToast({ title: labels.tooLarge });
-    return;
+    return false;
   }
+  console.log('Processing file:', file)
 
   try {
     const { file: fileEntry } = await filesClient.create({ name, mimeType: file.type });
@@ -81,7 +98,7 @@ export const processImageFile = async ({
       selfDestructOnAbort: true,
     });
 
-    if (abortSignal?.aborted) return;
+    if (abortSignal?.aborted) return true;
 
     upsertAttachments([
       {
@@ -89,8 +106,10 @@ export const processImageFile = async ({
         data: { file_id: fileEntry.id, name, mime_type: file.type },
       } as ConversationAttachment,
     ]);
+    return true;
   } catch (err: unknown) {
-    if (abortSignal?.aborted) return;
+    if (abortSignal?.aborted) return true;
     addErrorToast({ title: labels.uploadError });
+    return false;
   }
 };

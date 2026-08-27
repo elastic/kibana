@@ -212,6 +212,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
             insertImagePlaceholderOnPaste,
             editorRef: ref,
             onChange,
+            onAfterInput,
           })
         }
         onCopy={(event) => {

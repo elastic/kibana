@@ -121,10 +121,8 @@ const useMessageEditorInstance = ({
         commandRange.insertNode(badge);
         ensureCaretTargetBeforeFirstBadge(ref.current);
 
-        const space = insertSpaceAfter(badge);
-        if (space) {
-          placeCursorAfter(space, sel);
-        }
+        const space = insertSpaceAfter(badge, ref.current);
+        placeCursorAfter(space, sel);
 
         syncIsEmpty();
         dismissCommandMenu();

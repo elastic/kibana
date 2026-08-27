@@ -7,14 +7,8 @@
 
 import type { RefObject } from 'react';
 import { COMMAND_BADGE_ATTRIBUTE, isElementCommandBadge } from './command_badge';
-import { createImagePlaceholderElement } from './image_placeholder';
-import {
-  createTextFragment,
-  ensureCaretTargetBeforeFirstBadge,
-  insertNodeAtCursor,
-  insertSpaceAfter,
-  placeCursorAfter,
-} from './utils';
+import { insertImagePlaceholderChip } from './image_placeholder';
+import { createTextFragment, ensureCaretTargetBeforeFirstBadge, insertNodeAtCursor } from './utils';
 
 const stringContainsBadge = (html: string): boolean => html.includes(COMMAND_BADGE_ATTRIBUTE);
 
@@ -53,6 +47,7 @@ export interface HandleEditorPasteOpts {
   insertImagePlaceholderOnPaste: boolean;
   editorRef: RefObject<HTMLDivElement>;
   onChange: () => void;
+  onAfterInput?: () => void;
 }
 
 /** Handles the image-file branch of a paste event. Returns true if consumed. */
@@ -70,17 +65,7 @@ const handleImageFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts
   if (file) {
     const label = onPasteFile(file);
     if (insertImagePlaceholderOnPaste && label) {
-      const chipEl = createImagePlaceholderElement(label);
-      // Mark uploading immediately; the useEffect will clear it once upload finishes.
-      chipEl.setAttribute('data-uploading', 'true');
-      insertNodeAtCursor(chipEl);
-      const sel = window.getSelection();
-      if (sel) {
-        const space = insertSpaceAfter(chipEl);
-        if (space) {
-          placeCursorAfter(space, sel);
-        }
-      }
+      insertImagePlaceholderChip(label);
       onChange();
     }
   }
@@ -115,6 +100,9 @@ const handleTextOrBadgePaste = (event: ClipboardEvent, opts: HandleEditorPasteOp
  * Dispatches to image-file paste or text/badge paste based on clipboard content.
  */
 export const handleEditorPaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): void => {
-  if (handleImageFilePaste(event, opts)) return;
-  handleTextOrBadgePaste(event, opts);
+  const handledAsImage = handleImageFilePaste(event, opts);
+  if (!handledAsImage) {
+    handleTextOrBadgePaste(event, opts);
+  }
+  opts.onAfterInput?.(); // to sync with the pills
 };

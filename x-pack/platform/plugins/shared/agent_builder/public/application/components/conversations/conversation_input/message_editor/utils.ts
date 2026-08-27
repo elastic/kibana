@@ -15,9 +15,6 @@ import type { ActiveCommand } from './command_menu';
  */
 export const ZERO_WIDTH_SPACE = '\u200B';
 
-/** Non-breaking space used as a visible gap after inline non-editable elements. */
-export const NON_BREAKING_SPACE = '\u00A0';
-
 /**
  * Converts a plain text string into a DocumentFragment, preserving line breaks
  * as <br> elements. Text nodes alone cannot render \n in a contenteditable div.
@@ -56,16 +53,12 @@ export const createCommandRange = (
 };
 
 /**
- * Inserts a non-breaking space text node immediately after `node`.
+ * Inserts a non-breaking space text node immediately after `node` within `container`.
  * Uses NBSP (\u00A0) because browsers collapse trailing regular spaces in contenteditable.
- * Returns undefined if node has no parent (detached); callers must guard before placing the caret.
  */
-export const insertSpaceAfter = (node: Node): Text | undefined => {
-  if (!node.parentNode) {
-    return undefined;
-  }
-  const space = document.createTextNode(NON_BREAKING_SPACE);
-  node.parentNode.insertBefore(space, node.nextSibling);
+export const insertSpaceAfter = (node: Node, container: HTMLElement): Text => {
+  const space = document.createTextNode('\u00A0');
+  container.insertBefore(space, node.nextSibling);
   return space;
 };
 
