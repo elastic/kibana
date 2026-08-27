@@ -14,8 +14,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BottomBarActions, Prompt, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import React, { useCallback, useEffect, useState } from 'react';
+import { BottomBarActions, Prompt } from '@kbn/observability-shared-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { AppHeader } from '@kbn/app-header';
@@ -33,7 +33,7 @@ import { MLConfigurationPanel } from './ml_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { inventoryTitle, settingsTitle } from '../../../translations';
+import { settingsTitle } from '../../../translations';
 import { useMetricsAppHeaderMenu } from '../header/use_metrics_app_header_menu';
 
 interface SourceConfigurationSettingsProps {
@@ -55,17 +55,6 @@ export const SourceConfigurationSettings = ({
   );
 
   const { menu, flyouts } = useMetricsAppHeaderMenu();
-  const inventoryLinkProps = useLinkProps({
-    app: 'metrics',
-    pathname: 'inventory',
-  });
-  const inventoryBack = useMemo(
-    () => ({
-      href: inventoryLinkProps.href ?? '/app/metrics/inventory',
-      label: inventoryTitle,
-    }),
-    [inventoryLinkProps.href]
-  );
 
   const [numberOfInfraRules, setNumberOfInfraRules] = useState(0);
 
@@ -132,7 +121,7 @@ export const SourceConfigurationSettings = ({
 
   return (
     <PageTemplate data-test-subj="sourceConfigurationContent" paddingSize="none">
-      <AppHeader title={settingsTitle} back={inventoryBack} menu={menu} spacing="standard" />
+      <AppHeader title={settingsTitle} menu={menu} spacing="standard" />
       {flyouts}
       <EuiPageSection restrictWidth paddingSize="l">
         {showLoading ? (

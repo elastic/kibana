@@ -11,7 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { SourceConfigurationSettings } from './source_configuration_settings';
-import { inventoryTitle, settingsTitle } from '../../../translations';
+import { settingsTitle } from '../../../translations';
 
 interface MockMetricsSource {
   configuration: { metricAlias?: string };
@@ -38,7 +38,6 @@ const mockSourceContext: {
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   Prompt: () => null,
   BottomBarActions: () => null,
-  useLinkProps: () => ({ href: '/app/metrics/inventory' }),
 }));
 
 jest.mock('../../../hooks/use_metrics_breadcrumbs', () => ({
@@ -114,26 +113,19 @@ describe('SourceConfigurationSettings', () => {
     mockSourceContext.isLoading = false;
   });
 
-  it('renders AppHeader with Settings title and Inventory back when the source is loaded', async () => {
+  it('renders AppHeader with Settings title and no back when the source is loaded', async () => {
     renderSettings();
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
       settingsTitle
     );
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
-      'href',
-      '/app/metrics/inventory'
-    );
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
-      'aria-label',
-      `Back to ${inventoryTitle}`
-    );
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
     expect(screen.getByTestId('nameConfigurationPanel')).toBeInTheDocument();
     expect(screen.getByTestId('indicesConfigurationPanel')).toBeInTheDocument();
     expect(screen.queryByTestId('sourceLoadingPage')).not.toBeInTheDocument();
   });
 
-  it('keeps AppHeader and back while source configuration is loading', async () => {
+  it('keeps AppHeader without back while source configuration is loading', async () => {
     mockSourceContext.isLoading = true;
     mockSourceContext.source = undefined;
 
@@ -142,14 +134,7 @@ describe('SourceConfigurationSettings', () => {
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
       settingsTitle
     );
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
-      'href',
-      '/app/metrics/inventory'
-    );
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
-      'aria-label',
-      `Back to ${inventoryTitle}`
-    );
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
     expect(screen.getByTestId('sourceLoadingPage')).toBeInTheDocument();
     expect(screen.queryByTestId('nameConfigurationPanel')).not.toBeInTheDocument();
   });
