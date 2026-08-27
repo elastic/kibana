@@ -31,6 +31,12 @@ import {
   EpisodeStatusCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import {
+  createAckAction,
+  createUnackAction,
+  createResolveAction,
+  createUnresolveAction,
+} from '@kbn/alerting-v2-episodes-ui/actions';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
@@ -39,6 +45,7 @@ import { HostNameCell } from './host_name_cell';
 import { UserNameCell } from './user_name_cell';
 import { NetworkIpCell } from './network_ip_cell';
 import { useInvestigateEpisodeInTimeline } from './use_investigate_episode_in_timeline';
+import { EpisodeStatusMenu } from './episode_status_menu';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useEsqlAvailability } from '../../../common/hooks/esql/use_esql_availability';
 
@@ -166,11 +173,23 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   const sort = storedSort ?? DEFAULT_SORT;
   const onSort = useCallback((nextSort: SortOrder[]) => setStoredSort(nextSort), [setStoredSort]);
 
-  const { rows, columnsMeta, dataView, isLoading, error, inspect } = useEpisodesTableData(
+  const { rows, columnsMeta, dataView, isLoading, error, inspect, refetch } = useEpisodesTableData(
     query,
     timeRange,
     sort
   );
+
+  // v2 status actions (ack/unack, resolve/unresolve): the RnA factories post to `.alert-actions`.
+  // They only need http + notifications; on success we refetch (the view is eventually consistent).
+  const statusActions = useMemo(() => {
+    const deps = { http: services.http, notifications: services.notifications };
+    return [
+      createAckAction(deps),
+      createUnackAction(deps),
+      createResolveAction(deps),
+      createUnresolveAction(deps),
+    ];
+  }, [services.http, services.notifications]);
 
   const tableServices = useMemo(
     () => ({
@@ -233,6 +252,17 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
   const rowAdditionalLeadingControls = useMemo<RowControlColumn[]>(() => {
     const controls: RowControlColumn[] = [
+      {
+        id: 'episodeStatus',
+        render: (Control, { record }) => (
+          <EpisodeStatusMenu
+            Control={Control}
+            record={record}
+            actions={statusActions}
+            onSuccess={refetch}
+          />
+        ),
+      },
       {
         id: 'openDocumentFlyout',
         render: (Control, { record }) => (
@@ -304,6 +334,8 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     }
     return controls;
   }, [
+    statusActions,
+    refetch,
     openDocumentFlyoutFromHit,
     openAnalyzer,
     openSessionView,

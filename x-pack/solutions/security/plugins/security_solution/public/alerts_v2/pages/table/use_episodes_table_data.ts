@@ -27,7 +27,12 @@ export interface UseEpisodesTableDataResult {
   isLoading: boolean;
   error: Error | null;
   inspect: EsqlInspect | null;
+  /** Re-runs the current query — used to refresh after an episode action mutates `.alert-actions`. */
+  refetch: () => void;
 }
+
+/** Internal fetch state (everything the hook returns except the imperative `refetch`). */
+type TableDataState = Omit<UseEpisodesTableDataResult, 'refetch'>;
 
 const PAGE_SIZE = 100;
 
@@ -73,7 +78,7 @@ const buildEpisodesTableQuery = (baseEsql: string, sort: SortOrder[]): string =>
   );
 };
 
-const INITIAL_STATE: UseEpisodesTableDataResult = {
+const INITIAL_STATE: TableDataState = {
   rows: [],
   columnsMeta: {},
   dataView: undefined,
@@ -97,7 +102,7 @@ export const useEpisodesTableData = (
     services: { data, dataViews, http },
   } = useKibana();
 
-  const [state, setState] = useState<UseEpisodesTableDataResult>(INITIAL_STATE);
+  const [state, setState] = useState<TableDataState>(INITIAL_STATE);
   const abortRef = useRef<AbortController>();
 
   const run = useCallback(
@@ -163,5 +168,9 @@ export const useEpisodesTableData = (
     run(query.esql, timeRange, sort);
   }, [run, query, timeRange, sort]);
 
-  return state;
+  const refetch = useCallback(() => {
+    run(query.esql, timeRange, sort);
+  }, [run, query, timeRange, sort]);
+
+  return { ...state, refetch };
 };
