@@ -1,3 +1,8 @@
+/**
+ * @jest-environment node
+ */
+
+/* eslint-disable @kbn/eslint/require-license-header */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
