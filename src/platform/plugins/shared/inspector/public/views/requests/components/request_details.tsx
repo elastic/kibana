@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
-import type { DetailViewData, InspectorKibanaServices } from './types';
-import { getNextTab } from './get_next_tab';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useEffect, useState } from 'react';
 import type { Request } from '../../../../common/adapters/request/types';
+import { getNextTab } from './get_next_tab';
+import type { DetailViewData, InspectorKibanaServices } from './types';
 
 import {
   ClustersView,
@@ -75,27 +75,24 @@ export function RequestDetails(props: Props) {
   const isCpsMultiProject = useIsCpsMultiProject(services.cpsManager) === true;
 
   useEffect(() => {
-    const nextAvailableDetails = DETAILS.filter((detail: DetailViewData) => {
-      // "Projects" replaces "Clusters and shards" when the deployment has linked CPS projects
-      if (detail.name === (isCpsMultiProject ? 'Clusters' : 'Projects')) {
-        return false;
-      }
-
-      return detail.component.shouldShow?.(props.request);
-    });
+    const nextAvailableDetails = DETAILS.filter((detail: DetailViewData) =>
+      detail.component.shouldShow?.(props.request, isCpsMultiProject)
+    );
 
     setAvailableDetails(nextAvailableDetails);
 
-    // If the previously selected detail is still available we want to stay
-    // on this tab and not set another selectedDetail.
-    if (selectedDetail && nextAvailableDetails.find(({ name }) => name === selectedDetail.name)) {
-      return;
-    }
+    setSelectedDetail((prevSelectedDetail) => {
+      // If the previously selected detail is still available we want to stay
+      // on this tab and not set another selectedDetail.
+      if (
+        prevSelectedDetail &&
+        nextAvailableDetails.find(({ name }) => name === prevSelectedDetail.name)
+      ) {
+        return prevSelectedDetail;
+      }
 
-    setSelectedDetail(getNextTab(selectedDetail, nextAvailableDetails, props.initialTabs));
-
-    // do not re-run on selectedDetail change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      return getNextTab(prevSelectedDetail, nextAvailableDetails, props.initialTabs);
+    });
   }, [props.initialTabs, props.request, isCpsMultiProject]);
 
   return selectedDetail ? (

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PROJECT_ROUTING, useFetchProjects } from '@kbn/cps-utils';
+import { useFetchProjects } from '@kbn/cps-utils';
 import type { Request } from '../../../../../../common/adapters/request/types';
 import type { InspectorKibanaServices } from '../../types';
 import type { DetailViewProps } from '../types';
@@ -35,10 +35,16 @@ export const ProjectsView = ({ request }: DetailViewProps) => {
   const cpsManager = services.cpsManager;
   const [query, setQuery] = useState<Query | undefined>();
 
+  const effectiveRouting = useMemo(() => {
+    return cpsManager?.getProjectRouting() ?? cpsManager?.getDefaultProjectRouting();
+  }, [cpsManager]);
+
   const fetchProjects = useCallback(
-    async () => (cpsManager ? cpsManager.fetchProjects(PROJECT_ROUTING.ALL) : null),
-    [cpsManager]
+    async () =>
+      effectiveRouting && cpsManager ? cpsManager.fetchProjects(effectiveRouting) : null,
+    [cpsManager, effectiveRouting]
   );
+
   // resolves to empty projects on missing privileges (null) or fetch errors,
   // in which case the table renders unenriched cluster rows
   const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
@@ -133,5 +139,7 @@ export const ProjectsView = ({ request }: DetailViewProps) => {
   );
 };
 
-// A project row is derived from the same per-cluster response details as the Clusters view
-ProjectsView.shouldShow = (request: Request) => ClustersView.shouldShow(request);
+// A project row is derived from the same per-cluster response details as the Clusters view,
+// to avoid recreating the logic at the moment we want to show the projects view when the clusters view is not shown
+ProjectsView.shouldShow = (request: Request, isCpsMultiProject?: boolean) =>
+  !!isCpsMultiProject && !ClustersView.shouldShow(request, isCpsMultiProject);

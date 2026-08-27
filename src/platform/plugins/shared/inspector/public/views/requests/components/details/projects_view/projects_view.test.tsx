@@ -91,8 +91,8 @@ function createCpsManager(fetchResult: Promise<ProjectsData | null>) {
 }
 
 describe('shouldShow', () => {
-  test('should mirror the Clusters view gating', () => {
-    expect(ProjectsView.shouldShow(request)).toBe(true);
+  test('is true if isCpsMultiProject is true', () => {
+    expect(ProjectsView.shouldShow(request, true)).toBe(true);
     expect(
       ProjectsView.shouldShow({ response: { json: { rawResponse: {} } } } as unknown as Request)
     ).toBe(false);

@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { CPSProject } from '@kbn/cps-utils';
 import { getCSPLabel, getProjectTags } from '@kbn/cps-utils';
 import { LOCAL_CLUSTER_KEY } from '../clusters_view/local_cluster';
+import type { ClusterHealthStatus } from '../clusters_view/clusters_health';
 
 // Cluster key Elasticsearch uses for the origin project in CPS responses
 export const ORIGIN_CLUSTER_KEY = '_origin';
@@ -18,7 +19,7 @@ export const ORIGIN_CLUSTER_KEY = '_origin';
 export interface ProjectClusterItem {
   key: string;
   name: string;
-  status: Exclude<estypes.ClusterSearchStatus, 'running'>;
+  status: ClusterHealthStatus;
   responseTime?: number;
   isOrigin: boolean;
   project?: CPSProject;
@@ -49,7 +50,7 @@ export function joinClustersToProjects(
     return {
       key,
       name: project?._alias ?? key,
-      status: clusterDetails.status as Exclude<estypes.ClusterSearchStatus, 'running'>,
+      status: clusterDetails.status as ClusterHealthStatus,
       responseTime: clusterDetails.took ?? undefined,
       isOrigin: isOriginKey || (project !== undefined && project === originProject),
       project,
