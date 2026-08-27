@@ -178,8 +178,8 @@ Before classifying a UI failure as test-side, read the application code that ren
 Set `classification` based on where the evidence points:
 
 - **`test-needs-update`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
-- **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
-- **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
+- **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference). A stale/empty read after a write is *not* this: if a usable readiness signal exists and the test isn't waiting on it, that's `test-needs-update`; if none exists, or the product returns stale where it should be consistent, that's `application`.
+- **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug, or a stale/empty read after a write that should be read-your-writes consistent — a cache not invalidated, a missing convergence signal the test would need, or a transient error such as "unknown index" surfaced to the user).
 - **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
 - **`inconclusive`**: evidence does not support a defensible call.
 
@@ -189,7 +189,7 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 
 - Propose a fix only when you can point to a likely file or code area.
 - Prefer the smallest change that resolves the root cause **and** brings the test in line with our best practices — not a narrower band-aid that leaves the anti-pattern in place. Best practices are the north star for the fix.
-- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
+- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change. For a race/timeout/stale-element flake, that means naming **the terminal readiness signal the failing assertion reads and the step that actually raced** (often not where the error surfaced); the fix guardrails below cover how to wait on it.
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
 
