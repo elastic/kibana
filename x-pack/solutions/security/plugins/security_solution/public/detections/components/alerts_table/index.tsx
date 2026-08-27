@@ -144,8 +144,6 @@ const sort: GetSecurityAlertsTableProp<'sort'> = [
 const casesConfiguration = {
   featureId: CASES_FEATURE_ID,
   owner: [APP_ID],
-  syncAlerts: true,
-  extractObservables: true,
 };
 const emptyInputFilters: Filter[] = [];
 

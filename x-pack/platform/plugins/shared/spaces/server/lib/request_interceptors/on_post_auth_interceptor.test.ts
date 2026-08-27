@@ -225,7 +225,30 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
   });
 
   describe('GET /spaces/enter', () => {
-    it('updates lastSelectedSpaceId when user opted in', async () => {
+    it('sets rememberSelectedSpace to true by default for a user that has the value unset and persists the current space id', async () => {
+      getSpaceId.mockReturnValue('foo');
+      getCurrent.mockResolvedValue({
+        uid: 'uid-1',
+        data: {
+          userSettings: {},
+        },
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        path: ENTER_SPACE_PATH,
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+      await flushMicrotasks();
+
+      expect(update).toHaveBeenCalledWith('uid-1', {
+        userSettings: { lastSelectedSpaceId: 'foo', rememberSelectedSpace: true },
+      });
+      expect(toolkit.next).toHaveBeenCalled();
+    });
+
+    it('it updates lastSelectedSpaceId when user is denoted as opted in', async () => {
       getSpaceId.mockReturnValue('foo');
       getCurrent.mockResolvedValue({
         uid: 'uid-1',

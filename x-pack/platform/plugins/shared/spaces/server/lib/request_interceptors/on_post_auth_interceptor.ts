@@ -93,14 +93,19 @@ export function initSpacesOnPostAuthRequestInterceptor({
           dataPath: 'userSettings',
         })
         .then((profile) => {
-          if (profile?.uid && profile?.data?.userSettings?.rememberSelectedSpace) {
+          const profileSettings = profile?.data?.userSettings ?? {};
+
+          if (profile?.uid && profileSettings?.rememberSelectedSpace !== false) {
             return userProfileService.update(profile.uid, {
-              userSettings: { lastSelectedSpaceId: spaceId },
+              userSettings: {
+                lastSelectedSpaceId: spaceId,
+                ...(!profileSettings?.rememberSelectedSpace ? { rememberSelectedSpace: true } : {}),
+              },
             });
           } else if (
             profile?.uid &&
-            profile?.data?.userSettings?.rememberSelectedSpace === false &&
-            profile?.data?.userSettings?.lastSelectedSpaceId !== null
+            profileSettings?.rememberSelectedSpace === false &&
+            profileSettings?.lastSelectedSpaceId !== null
           ) {
             return userProfileService.update(profile.uid, {
               userSettings: { lastSelectedSpaceId: null },
