@@ -70,6 +70,7 @@ describe('toSavedSearch', () => {
         "controlGroupJson": undefined,
         "density": undefined,
         "description": "",
+        "documentsDisplayMode": undefined,
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
@@ -77,6 +78,7 @@ describe('toSavedSearch', () => {
         "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
+        "jsonModeSettings": undefined,
         "managed": false,
         "references": Array [
           Object {
@@ -208,6 +210,7 @@ describe('toSavedSearch', () => {
         "controlGroupJson": undefined,
         "density": undefined,
         "description": "",
+        "documentsDisplayMode": undefined,
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
@@ -215,6 +218,7 @@ describe('toSavedSearch', () => {
         "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
+        "jsonModeSettings": undefined,
         "managed": false,
         "references": Array [
           Object {
