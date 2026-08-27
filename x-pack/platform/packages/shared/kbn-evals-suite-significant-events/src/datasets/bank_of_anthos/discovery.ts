@@ -391,6 +391,34 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
   ],
 };
 
+/**
+ * Same confirmed impact as the isolated balancereader failure, but a seeded memory page documents
+ * the exact mechanism as known/transient background
+ */
+const BALANCE_READER_KNOWN_CHRONIC_EVENT: Partial<SignificantEvent> = {
+  ...BALANCE_READER_ISOLATED_EVENT,
+  event_id: 'frontend__balancereader-connection-refused-known-chronic',
+  severity: '40-medium',
+  confidence: 0.6,
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      verdict: 'confirms',
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+      evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det-chronic',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+  ],
+};
+
 export const discovery: DatasetConfig['discovery'] = [
   {
     input: {
@@ -514,6 +542,67 @@ export const discovery: DatasetConfig['discovery'] = [
       difficulty: 'hard',
       failure_domain: 'balancereader',
       failure_mode: 'weak_detection_strong_evidence',
+    },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
+  },
+  {
+    input: {
+      scenario_id: 'ledger-balancereader-known-chronic',
+      stream_name: 'logs',
+      detections: toInputDetections([BALANCE_READER_KNOWN_CHRONIC_EVENT]),
+    },
+    memoryPages: [
+      {
+        name: 'frontend-balancereader-connection-refused',
+        title: 'Frontend → Balance Reader connection refused — known transient background',
+        content: [
+          '## Failure Pattern',
+          'Connection refused from frontend to balancereader:8080 on /balances ("Error getting balance"). This is a long-running, already-tracked background condition on the balance-lookup path; operators are aware of it and it recovers without intervention.',
+          '',
+          '## Normal transient behavior',
+          'Connection-refused bursts recur at a steady background rate without representing a new failure state. This is known ongoing background, not a dismissal or false-positive. When the exact rule fires again and current evidence confirms the failure, keep the event open and cap severity at 40-medium. The balancereader service recovers on its own.',
+          '',
+          '## Detection history',
+          '- rule_uuid: 3c4bf4f9-9ed9-567f-be35-332eb79ee76a (Frontend → Balance Reader Connection Failures)',
+          '- 2026-06-25: rule_uuid 3c4bf4f9-9ed9-567f-be35-332eb79ee76a → status ongoing (known background; current confirmed occurrences remain open at 40-medium)',
+        ].join('\n'),
+        categories: ['services'],
+      },
+    ],
+    output: {
+      expected_ground_truth:
+        'open 40-medium event — grounding confirms the balance-lookup connection refused, but memory documents this exact mechanism as known/transient background, so the known-chronic cap applies',
+      expected_confirmed_rule_uuids: {
+        [BALANCE_READER_KNOWN_CHRONIC_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
+      },
+      expected_significant_events: [BALANCE_READER_KNOWN_CHRONIC_EVENT],
+      criteria: [
+        {
+          id: 'known-chronic-cap',
+          text: 'Sets status=open with severity=40-medium because memory documents this exact frontend→balancereader connection-refused mechanism as already-known/transient background. Does not emit 60-high or 80-critical despite confirmed failure rows.',
+          score: 3,
+        },
+        {
+          id: 'chronic-current-state-verification',
+          text: 'Still runs a current-state ES|QL verification for the detection and stamps the signal verdict from its own query result — memory alone never decides status or verdict.',
+          score: 2,
+        },
+        {
+          id: 'chronic-assessment-note',
+          text: 'States the known/ongoing context in summary and records in assessment_note that the event is a candidate for operator muting or dismissal, without citing memory page names.',
+          score: 2,
+        },
+        {
+          id: 'chronic-not-dismissed',
+          text: 'Keeps the event open rather than dismissing or closing it — failure rows are confirmed, so the known-chronic cap lowers severity, not the lifecycle.',
+          score: 1,
+        },
+      ],
+    },
+    metadata: {
+      difficulty: 'hard',
+      failure_domain: 'balancereader',
+      failure_mode: 'known_chronic',
     },
     snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
   },

@@ -6,6 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 // DOMPurify requires a real DOM — pass-through in Jest
 jest.mock('dompurify', () => ({
@@ -55,7 +56,7 @@ const mockEuiTheme = {
     danger: '#BD271E',
     borderBasePlain: '#D3DAE6',
   },
-} as any;
+} as unknown as EuiThemeComputed;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -91,6 +92,25 @@ describe('useCustomContentHtml', () => {
       expect(result.current.isLoading).toBe(false);
       expect(result.current.html).toBe('');
       expect(result.current.noContent).toBe(true);
+    });
+
+    it('treats a whitespace-only template as no content rather than rendering a blank panel', () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...baseParams, savedTemplate: '   \n  ' })
+      );
+      expect(result.current.noContent).toBe(true);
+      expect(result.current.html).toBe('');
+    });
+
+    it('does not fetch ES|QL for a whitespace-only template', () => {
+      renderHook(() =>
+        useCustomContentHtml({
+          ...baseParams,
+          savedTemplate: '   ',
+          esqlQuery: 'FROM logs | LIMIT 10',
+        })
+      );
+      expect(mockFetchEsqlData).not.toHaveBeenCalled();
     });
 
     it('clears a stale error and html when savedTemplate transitions to undefined', async () => {
