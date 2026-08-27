@@ -29,31 +29,15 @@ export interface Props {
 export const NewsfeedNavButton = ({ newsfeedApi, isOpen$, onToggle }: Props) => {
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const tooltipRef = useRef<EuiToolTipRef>(null);
 
   const hasNew = useMemo(() => {
     return newsFetchResult ? newsFetchResult.hasNew : false;
   }, [newsFetchResult]);
 
-  // Restoring focus inside setIsOpen fires synchronously with the close; a useEffect fires
-  // after re-render, when the sidebar has already moved focus away.
   useEffect(() => {
-    const sub = isOpen$.subscribe((open) => {
-      setIsOpen((prev) => {
-        if (prev && !open) {
-          let shouldRestoreFocus = true;
-          try {
-            shouldRestoreFocus = document.activeElement?.matches(':focus-visible') ?? true;
-          } catch {
-            // :focus-visible unsupported — restore focus unconditionally
-          }
-          if (shouldRestoreFocus) buttonRef.current?.focus();
-        }
-        return open;
-      });
-    });
-    return () => sub.unsubscribe();
+    const subscription = isOpen$.subscribe(setIsOpen);
+    return () => subscription.unsubscribe();
   }, [isOpen$]);
 
   useEffect(() => {
@@ -68,14 +52,9 @@ export const NewsfeedNavButton = ({ newsfeedApi, isOpen$, onToggle }: Props) => 
     onToggle();
   }, [onToggle]);
 
-  // Always mounted: a conditional mount changes the element type here, remounting the button
-  // and dropping its ref.
   return (
     <EuiToolTip ref={tooltipRef} content={whatsNewLabel} disableScreenReaderOutput>
       <EuiHeaderSectionItemButton
-        ref={(node: HTMLButtonElement | null) => {
-          buttonRef.current = node;
-        }}
         data-test-subj={hasNew ? 'newsfeedHasUnread' : 'newsfeedAllRead'}
         aria-expanded={isOpen}
         aria-label={
