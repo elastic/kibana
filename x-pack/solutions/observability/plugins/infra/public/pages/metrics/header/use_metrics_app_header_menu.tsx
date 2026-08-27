@@ -220,7 +220,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
       }
     }
 
-    if (settingsLinkProps.href) {
+    if (visibility.showSettings && settingsLinkProps.href) {
       items.push({
         id: 'settings',
         label: SETTINGS_LABEL,
@@ -279,6 +279,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
     settingsLinkProps.href,
     visibility.showAnomalyDetection,
     visibility.showHostsOnboarding,
+    visibility.showSettings,
   ]);
 
   const flyouts = (

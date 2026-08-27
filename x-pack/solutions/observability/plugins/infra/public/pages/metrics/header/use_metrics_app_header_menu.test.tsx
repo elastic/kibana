@@ -186,6 +186,12 @@ describe('useMetricsAppHeaderMenu', () => {
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({ category: undefined });
   });
 
+  it('omits the Settings overflow item on the Settings page', () => {
+    const settings = renderMenuHook('/settings');
+    expect(findItem(settings.result.current.menu.items, 'settings')).toBeUndefined();
+    expect(findItem(settings.result.current.menu.items, 'alerts')).toBeDefined();
+  });
+
   it('omits anomaly detection on Explorer and uses host onboarding on Hosts', () => {
     const explorer = renderMenuHook('/explorer');
     expect(findItem(explorer.result.current.menu.items, 'anomalyDetection')).toBeUndefined();

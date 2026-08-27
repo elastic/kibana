@@ -12,6 +12,7 @@ describe('getMetricsHeaderMenuVisibility', () => {
     expect(getMetricsHeaderMenuVisibility('/inventory')).toEqual({
       showAnomalyDetection: true,
       showHostsOnboarding: false,
+      showSettings: true,
     });
   });
 
@@ -19,6 +20,7 @@ describe('getMetricsHeaderMenuVisibility', () => {
     expect(getMetricsHeaderMenuVisibility('/hosts')).toEqual({
       showAnomalyDetection: true,
       showHostsOnboarding: true,
+      showSettings: true,
     });
   });
 
@@ -26,6 +28,7 @@ describe('getMetricsHeaderMenuVisibility', () => {
     expect(getMetricsHeaderMenuVisibility('/detail/host/web-01')).toEqual({
       showAnomalyDetection: true,
       showHostsOnboarding: true,
+      showSettings: true,
     });
   });
 
@@ -33,10 +36,12 @@ describe('getMetricsHeaderMenuVisibility', () => {
     expect(getMetricsHeaderMenuVisibility('/explorer')).toEqual({
       showAnomalyDetection: false,
       showHostsOnboarding: false,
+      showSettings: true,
     });
     expect(getMetricsHeaderMenuVisibility('/settings')).toEqual({
       showAnomalyDetection: false,
       showHostsOnboarding: false,
+      showSettings: false,
     });
   });
 
@@ -44,6 +49,7 @@ describe('getMetricsHeaderMenuVisibility', () => {
     expect(getMetricsHeaderMenuVisibility('/detail/container/abc')).toEqual({
       showAnomalyDetection: false,
       showHostsOnboarding: false,
+      showSettings: true,
     });
   });
 });
