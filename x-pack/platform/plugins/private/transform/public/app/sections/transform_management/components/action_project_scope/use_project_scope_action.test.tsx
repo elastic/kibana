@@ -36,14 +36,18 @@ const mockUseUpdateTransformsProjectScope = useUpdateTransformsProjectScope as j
   typeof useUpdateTransformsProjectScope
 >;
 
-const transformItem = {
-  id: 'transform-1',
-  config: {
-    id: 'transform-1',
-    source: { index: ['source-index'], project_routing: PROJECT_ROUTING.ORIGIN },
-    dest: { index: 'dest-index' },
-  },
-} as unknown as TransformListRow;
+const createTransformItem = (id: string) =>
+  ({
+    id,
+    config: {
+      id,
+      source: { index: ['source-index'], project_routing: PROJECT_ROUTING.ORIGIN },
+      dest: { index: 'dest-index' },
+    },
+  } as unknown as TransformListRow);
+
+const transformItem = createTransformItem('transform-1');
+const secondTransformItem = createTransformItem('transform-2');
 
 describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
   const updateTransformsProjectScope = jest.fn();
@@ -109,11 +113,39 @@ describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
       });
     });
 
-    expect(onUpdateSuccess).toHaveBeenCalledTimes(1);
+    expect(onUpdateSuccess).toHaveBeenCalledWith([transformItem]);
     expect(result.current.items).toEqual([]);
   });
 
   it('keeps the selection callback untouched when any update fails', () => {
+    const onUpdateSuccess = jest.fn();
+    const { result } = renderHook(() => useProjectScopeAction({ onUpdateSuccess }));
+
+    act(() => {
+      result.current.openFlyout([transformItem, secondTransformItem]);
+    });
+    act(() => {
+      result.current.openModal(PROJECT_ROUTING.ALL);
+    });
+    act(() => {
+      result.current.confirmAndCloseModal();
+    });
+
+    act(() => {
+      updateTransformsProjectScope.mock.calls[0][1].onSuccess({
+        [transformItem.id]: { success: true },
+        [secondTransformItem.id]: {
+          error: { reason: 'Could not update transform' },
+          success: false,
+        },
+      });
+    });
+
+    expect(onUpdateSuccess).not.toHaveBeenCalled();
+    expect(result.current.items).toEqual([transformItem, secondTransformItem]);
+  });
+
+  it('does not clear a newer action selection when an earlier update succeeds', () => {
     const onUpdateSuccess = jest.fn();
     const { result } = renderHook(() => useProjectScopeAction({ onUpdateSuccess }));
 
@@ -126,17 +158,16 @@ describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
     act(() => {
       result.current.confirmAndCloseModal();
     });
-
+    act(() => {
+      result.current.openFlyout([secondTransformItem]);
+    });
     act(() => {
       updateTransformsProjectScope.mock.calls[0][1].onSuccess({
-        [transformItem.id]: {
-          error: { reason: 'Could not update transform' },
-          success: false,
-        },
+        [transformItem.id]: { success: true },
       });
     });
 
-    expect(onUpdateSuccess).not.toHaveBeenCalled();
-    expect(result.current.items).toEqual([transformItem]);
+    expect(result.current.items).toEqual([secondTransformItem]);
+    expect(onUpdateSuccess).toHaveBeenCalledWith([transformItem]);
   });
 });

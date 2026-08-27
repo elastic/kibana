@@ -39,10 +39,22 @@ const getInitialProjectRouting = (
 };
 
 interface UseProjectScopeActionArgs {
-  onUpdateSuccess?: () => void;
+  onUpdateSuccess?: (submittedItems: TransformListRow[]) => void;
 }
 
 export type ProjectScopeAction = ReturnType<typeof useProjectScopeAction>;
+
+const haveSameTransformIds = (
+  firstItems: TransformListRow[],
+  secondItems: TransformListRow[]
+): boolean => {
+  if (firstItems.length !== secondItems.length) {
+    return false;
+  }
+
+  const secondItemIds = new Set(secondItems.map(({ id }) => id));
+  return firstItems.every(({ id }) => secondItemIds.has(id));
+};
 
 export const useProjectScopeAction = ({ onUpdateSuccess }: UseProjectScopeActionArgs = {}) => {
   const { cps } = useAppDependencies();
@@ -160,18 +172,21 @@ export const useProjectScopeAction = ({ onUpdateSuccess }: UseProjectScopeAction
       return;
     }
 
+    const submittedItems = items;
     updateTransformsProjectScope(
       {
         projectRouting: targetProjectRouting,
-        transformsInfo: items.map(({ id }) => ({ id })),
+        transformsInfo: submittedItems.map(({ id }) => ({ id })),
       },
       {
         onSuccess: (results) => {
           const didAllTransformsUpdate = Object.values(results).every((result) => result.success);
 
           if (didAllTransformsUpdate) {
-            setItems([]);
-            onUpdateSuccess?.();
+            setItems((currentItems) =>
+              haveSameTransformIds(currentItems, submittedItems) ? [] : currentItems
+            );
+            onUpdateSuccess?.(submittedItems);
           }
         },
       }

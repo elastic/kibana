@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
@@ -75,6 +75,18 @@ import { StopActionModal } from '../action_stop/stop_action_modal';
 
 type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
+const haveSameTransformIds = (
+  firstItems: TransformListRow[],
+  secondItems: TransformListRow[]
+): boolean => {
+  if (firstItems.length !== secondItems.length) {
+    return false;
+  }
+
+  const secondItemIds = new Set(secondItems.map(({ id }) => id));
+  return firstItems.every(({ id }) => secondItemIds.has(id));
+};
+
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
   transforms: TransformListRow[],
@@ -125,6 +137,7 @@ export const TransformList: FC<TransformListProps> = ({
   const [searchError, setSearchError] = useState<string | undefined>();
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
+  const transformSelectionRef = useRef<TransformListRow[]>([]);
   const [selectionResetCounter, setSelectionResetCounter] = useState(0);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const bulkStartAction = useStartAction(false, transformNodes);
@@ -133,7 +146,12 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkResetAction = useResetAction(false);
   const bulkStopAction = useStopAction(false);
   const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
-  const clearTransformSelection = useCallback(() => {
+  const clearTransformSelection = useCallback((submittedItems: TransformListRow[]) => {
+    if (!haveSameTransformIds(transformSelectionRef.current, submittedItems)) {
+      return;
+    }
+
+    transformSelectionRef.current = [];
     setTransformSelection([]);
     setSelectionResetCounter((counter) => counter + 1);
   }, []);
@@ -384,7 +402,10 @@ export const TransformList: FC<TransformListProps> = ({
   };
 
   const selection = {
-    onSelectionChange: (selected: TransformListRow[]) => setTransformSelection(selected),
+    onSelectionChange: (selected: TransformListRow[]) => {
+      transformSelectionRef.current = selected;
+      setTransformSelection(selected);
+    },
   };
 
   return (
