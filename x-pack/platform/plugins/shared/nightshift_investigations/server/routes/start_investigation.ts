@@ -58,8 +58,12 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
+    // User-initiated starts are always manual.
     try {
-      return await client.start(params.body);
+      return await client.start({
+        ...params.body,
+        trigger_type: 'manual',
+      });
     } catch (err) {
       // Route validation rejects a bad context before this, so reaching here means the client
       // found something the route schema let through. A 500 would be the wrong answer.

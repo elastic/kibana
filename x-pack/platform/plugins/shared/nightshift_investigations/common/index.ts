@@ -6,6 +6,15 @@
  */
 
 import type { InvestigationState } from '@kbn/significant-events-schema';
+import type { InvestigationTriggerType } from './workflows/triggers';
+
+export {
+  INVESTIGATION_SUBJECT_TYPES,
+  type InvestigationSubjectType,
+  INVESTIGATION_TRIGGER_TYPES,
+  DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+  type InvestigationTriggerType,
+} from './workflows/triggers';
 
 /**
  * The alert-facing types are derived from the zod schemas in `./schemas`, so the validation a
@@ -18,7 +27,6 @@ export type {
   AlertSnapshotGroup,
   InvestigationContext,
   InvestigationSubject,
-  InvestigationSubjectType,
 } from './schemas';
 
 export {
@@ -37,6 +45,10 @@ import type {
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
+  /**
+   * What initiated the investigation. Defaults to "manual" when omitted.
+   */
+  trigger_type?: InvestigationTriggerType;
   /**
    * Caller-supplied prompt for the investigation agent. Falls back to a generic
    * message derived from the subject when omitted.
@@ -71,7 +83,9 @@ export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 
 export interface GetInvestigationResponse {
   investigation_id: string;
-  subject: InvestigationSubject;
+  /** Undefined for runs initiated without a subject (e.g. a bare manual workflow run). */
+  subject?: InvestigationSubject;
+  trigger_type?: InvestigationTriggerType;
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
@@ -121,3 +135,14 @@ export interface ListInvestigationsResponse {
   size: number;
   total: number;
 }
+
+export {
+  INVESTIGATION_STARTED_TRIGGER_ID,
+  INVESTIGATION_COMPLETED_TRIGGER_ID,
+  INVESTIGATION_FAILED_TRIGGER_ID,
+  type InvestigationsTriggerId,
+  type InvestigationsTriggerPayloadMap,
+  type InvestigationsTriggerBasePayload,
+  type InvestigationCompletedTriggerPayload,
+  type InvestigationFailedTriggerPayload,
+} from './workflows/triggers';

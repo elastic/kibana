@@ -22,14 +22,19 @@ import type {
   InvestigationContext,
   InvestigationStatus,
   InvestigationSubject,
+  InvestigationTriggerType,
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
-import { alertInvestigationContextSchema, freeFormContextSchema } from '../../common';
-
+import {
+  alertInvestigationContextSchema,
+  DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+  freeFormContextSchema,
+  INVESTIGATION_TRIGGER_TYPES,
+} from '../../common';
 import { buildInvestigationMessage } from './build_investigation_message';
 import { InvalidInvestigationContextError, InvestigationNotFoundError } from './errors';
 import { InvestigationUnavailableError } from './investigation_unavailable_error';
@@ -114,12 +119,25 @@ function recoverSubjectFromInput(
   const ctx = input?.context;
   if (!isPlainObject(ctx)) return undefined;
   if (ctx.source === 'significant_event') {
-    return { type: 'significant_event', id: String(ctx.significant_event_id ?? '') };
+    const id = asString(ctx.event_id) ?? asString(ctx.significant_event_id);
+    return id ? { type: 'significant_event', id } : undefined;
   }
   if (ctx.source === 'alert') {
-    return { type: 'alert', id: String(ctx.alert_id ?? '') };
+    const id = asString(ctx.alert_id);
+    return id ? { type: 'alert', id } : undefined;
   }
   return undefined;
+}
+
+function recoverTriggerTypeFromInput(
+  input: Record<string, unknown> | undefined
+): InvestigationTriggerType | undefined {
+  const ctx = input?.context;
+  if (!isPlainObject(ctx)) return undefined;
+  const valid: readonly string[] = INVESTIGATION_TRIGGER_TYPES;
+  return valid.includes(String(ctx.trigger_type))
+    ? (ctx.trigger_type as InvestigationTriggerType)
+    : undefined;
 }
 
 export interface NightshiftInvestigationsClientDeps {
@@ -194,6 +212,7 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    trigger_type,
     message,
     stream_names,
     concurrency_key,
@@ -233,6 +252,7 @@ export class NightshiftInvestigationsClient {
         ...prepared.context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
+        trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
       },
     };
 
@@ -299,10 +319,12 @@ export class NightshiftInvestigationsClient {
     })();
 
     const subject = recoverSubjectFromInput(rawInput);
+    const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
 
     return {
       investigation_id: investigationId,
-      subject: subject ?? { type: 'significant_event', id: '' },
+      subject,
+      trigger_type: recoveredTriggerType,
       status,
       started_at: execution.startedAt,
       completed_at: isTerminal ? execution.finishedAt : undefined,

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { INVESTIGATION_SUBJECT_TYPES } from './workflows/triggers';
 
 /**
  * The single declaration of what an investigation's context may contain. The route validates
@@ -24,7 +25,7 @@ export const MAX_ALERTS_PER_INVESTIGATION = 20;
 // array rather than a realistic rule.
 const MAX_EVALUATION_ENTRIES = 20;
 
-export const investigationSubjectTypeSchema = z.enum(['significant_event', 'alert']);
+export const investigationSubjectTypeSchema = z.enum(INVESTIGATION_SUBJECT_TYPES);
 
 export const investigationSubjectSchema = z.object({
   type: investigationSubjectTypeSchema,
@@ -154,7 +155,6 @@ export const freeFormContextSchema = z
     message: 'context has a key longer than 128 characters',
   });
 
-export type InvestigationSubjectType = z.infer<typeof investigationSubjectTypeSchema>;
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
 export type AlertSnapshotGroup = z.infer<typeof alertSnapshotGroupSchema>;
 export type AlertSnapshotEvaluation = z.infer<typeof alertSnapshotEvaluationSchema>;
