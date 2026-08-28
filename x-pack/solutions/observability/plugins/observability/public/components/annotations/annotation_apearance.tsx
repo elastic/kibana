@@ -14,7 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { IconSelect, LineStyleSettings } from '@kbn/visualization-ui-components';
 import React from 'react';
 import { Select } from './components/forward_refs';
@@ -24,9 +24,9 @@ import { FillOptions } from './components/fill_option';
 import { iconsSet } from './icon_set';
 
 export function AnnotationAppearance() {
-  const { control, watch } = useFormContext<Annotation>();
+  const { control } = useFormContext<Annotation>();
 
-  const eventEnd = watch('event.end');
+  const eventEnd = useWatch({ control, name: 'event.end' });
 
   return (
     <>

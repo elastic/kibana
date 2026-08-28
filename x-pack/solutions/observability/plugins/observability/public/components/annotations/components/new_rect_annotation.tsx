@@ -9,7 +9,7 @@ import { RectAnnotation } from '@elastic/charts';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { AnnotationTooltip } from './annotation_tooltip';
@@ -22,17 +22,16 @@ export function NewRectAnnotation({
   isCreateOpen: boolean;
   slo?: SLOWithSummaryResponse;
 }) {
-  const { watch, getValues } = useFormContext<CreateAnnotationParams>();
-  const timestamp = watch('@timestamp');
-  const eventEnd = watch('event.end');
+  const { control, getValues } = useFormContext<CreateAnnotationParams>();
+  const timestamp = useWatch({ control, name: '@timestamp' });
+  const eventEnd = useWatch({ control, name: 'event.end' });
+  const annotationStyle = useWatch({ control, name: 'annotation.style' });
+  const annotationType = useWatch({ control, name: 'annotation.type' });
 
   if (!timestamp || !eventEnd || !isCreateOpen) {
     return null;
   }
   const values = getValues();
-
-  const annotationStyle = watch('annotation.style');
-  const annotationType = watch('annotation.type');
 
   return (
     <ObsRectAnnotation
