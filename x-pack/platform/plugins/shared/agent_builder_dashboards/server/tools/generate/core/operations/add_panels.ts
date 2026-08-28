@@ -34,7 +34,8 @@ export const addPanelsOperation = defineOperation({
       await applyCustomContentTemplates(
         materialized,
         context.resolveCustomContentTemplate,
-        context.failures
+        context.failures,
+        context.customContentEnabled ?? false
       );
     }
 

@@ -50,6 +50,7 @@ interface PrepareOperationExecutionParams {
   failures: OperationExecutionContext['failures'];
   panelAuthoringNotes: OperationExecutionContext['panelAuthoringNotes'];
   resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
+  customContentEnabled?: OperationExecutionContext['customContentEnabled'];
   resolveCustomContentTemplate?: OperationExecutionContext['resolveCustomContentTemplate'];
 }
 
@@ -59,6 +60,7 @@ export const prepareOperationExecution = async ({
   failures,
   panelAuthoringNotes,
   resolvePanelContent,
+  customContentEnabled,
   resolveCustomContentTemplate,
 }: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
   const resolvedPanelCreationRequests = await resolvePanelCreationRequests({
@@ -72,6 +74,7 @@ export const prepareOperationExecution = async ({
     panelAuthoringNotes,
     resolvedPanelCreationRequests,
     resolvePanelContent,
+    customContentEnabled,
     resolveCustomContentTemplate,
   };
 };

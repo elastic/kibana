@@ -229,10 +229,14 @@ export const createPanelInputMaterializer = ({
   };
 };
 
+export const CUSTOM_CONTENT_DISABLED_ERROR =
+  'Custom content panels are disabled. Use a Lens, Vega, or markdown panel instead.';
+
 export const applyCustomContentTemplates = async (
   materialized: Array<{ panel: MaterializedPanelInput | undefined }>,
   resolveTemplate: ResolveCustomContentTemplate,
-  failures: PanelFailure[]
+  failures: PanelFailure[],
+  customContentEnabled: boolean
 ): Promise<void> => {
   await Promise.all(
     materialized.map(async (entry) => {
@@ -241,6 +245,17 @@ export const applyCustomContentTemplates = async (
       if (panel.panelContent.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) return;
       const { prompt, esqlQuery, ...persistedConfig } = panel.panelContent
         .config as CustomContentPanelConfig & CustomContentState;
+
+      if (!customContentEnabled) {
+        failures.push({
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
+          identifier: prompt ?? CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          error: CUSTOM_CONTENT_DISABLED_ERROR,
+        });
+        entry.panel = undefined;
+        return;
+      }
+
       if (!prompt || persistedConfig.template) return;
 
       try {

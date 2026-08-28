@@ -22,7 +22,7 @@ import {
   type EditPanelItem,
   type EditPanelRequestInput,
 } from './panels';
-import { mergeAndResolveCustomContentEdit } from './panel_creation';
+import { CUSTOM_CONTENT_DISABLED_ERROR, mergeAndResolveCustomContentEdit } from './panel_creation';
 import { defineOperation } from './types';
 
 /** An edit that passed validation, always carrying the existing panel snapshot. */
@@ -86,6 +86,11 @@ export const editPanelsOperation = defineOperation({
       }
 
       if (panelInput.source === 'config') {
+        if (panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE && !context.customContentEnabled) {
+          recordFailure(panelInput.panelId, CUSTOM_CONTENT_DISABLED_ERROR);
+          continue;
+        }
+
         const validation = PANEL_TYPE_DEFINITIONS[panelInput.type].validateConfigEdit?.(
           existingPanel
         ) ?? { ok: true };

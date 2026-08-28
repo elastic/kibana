@@ -27,6 +27,8 @@ export interface OperationExecutionContext {
   panelAuthoringNotes: PanelAuthoringNote[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   resolvePanelContent?: ResolvePanelContent;
+  /** When false, custom content panel inputs are rejected instead of applied. */
+  customContentEnabled?: boolean;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
 }
 
