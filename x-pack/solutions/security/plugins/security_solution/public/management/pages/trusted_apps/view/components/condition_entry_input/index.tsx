@@ -303,12 +303,22 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           <InputItem gridArea="feedback">
             <ValueFeedback>
               {visibleErrors.map((error, index) => (
-                <EuiText key={`error-${index}`} color="danger" size="xs">
+                <EuiText
+                  key={`error-${index}`}
+                  color="danger"
+                  size="xs"
+                  data-test-subj={getTestId('valueError')}
+                >
                   {error}
                 </EuiText>
               ))}
               {warnings.map((warning, index) => (
-                <EuiText key={`warning-${index}`} color="warning" size="xs">
+                <EuiText
+                  key={`warning-${index}`}
+                  color="warning"
+                  size="xs"
+                  data-test-subj={getTestId('valueWarning')}
+                >
                   {warning}
                 </EuiText>
               ))}

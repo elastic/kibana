@@ -163,10 +163,16 @@ describe('Trusted apps form', () => {
     return renderResult.getByTestId(`${dataTestSub}-conditionsBuilder-group1-andConnector`);
   };
   const getAllValidationErrors = (): HTMLElement[] => {
-    return Array.from(renderResult.container.querySelectorAll('.euiFormErrorText'));
+    return Array.from(
+      renderResult.container.querySelectorAll(
+        '.euiFormErrorText, [data-test-subj$="-valueError"]'
+      )
+    );
   };
   const getAllValidationWarnings = (): HTMLElement[] => {
-    return Array.from(renderResult.container.querySelectorAll('.euiFormHelpText'));
+    return Array.from(
+      renderResult.container.querySelectorAll('.euiFormHelpText, [data-test-subj$="-valueWarning"]')
+    );
   };
 
   const getAdvancedModeToggle = (): HTMLButtonElement => {
