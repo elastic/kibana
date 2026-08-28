@@ -8,7 +8,7 @@
  */
 
 import { esql, Parser, BasicPrettyPrinter, isOptionNode } from '@elastic/esql';
-import type { ESQLCommand } from '@elastic/esql/types';
+import type { ESQLAstQueryExpression, ESQLCommand } from '@elastic/esql/types';
 import { findStatsCommand, findByOption, parseBucketNode } from './ast_utils';
 import {
   buildTrendlineBucketExpression,
@@ -19,7 +19,7 @@ import {
   getBucketResultColumnForField,
 } from './bucket';
 import { commandsHaveStats, flattenForkCommands } from './fork';
-import { preserveColumnInKeepCommands, applyRenamesToColumn } from './column_tracking';
+import { walkTrackedColumn } from './scope_walker';
 
 export { buildTrendlineBucketExpression } from './bucket';
 
@@ -39,14 +39,19 @@ export const queryHasTsSourceCommand = (esqlQuery: string): boolean => {
 };
 
 /**
- * Appends a BUCKET time-bucketing clause to an ES|QL query for trendline use.
- *
- * Uses `@elastic/esql` AST parsing and manipulation for correct handling of
- * complex queries with proper field name escaping (e.g. dotted field names
- * are backtick-quoted).
- *
- * The query is parsed into an AST, the BUCKET expression is appended to the
- * appropriate STATS/BY clause, and the result is printed back to a string.
+ * Resolves the result column name after a given command by walking renames in
+ * the remaining pipeline segment.
+ */
+const resolveAfterCommand = (
+  root: ESQLAstQueryExpression,
+  command: ESQLCommand,
+  resultColumn: string
+): string =>
+  walkTrackedColumn(root.commands.slice(root.commands.indexOf(command) + 1), resultColumn).name;
+
+/**
+ * Applies the trendline time-bucketing rewrite to a parsed query AST in place
+ * and returns the final time result column of the rewritten query.
  *
  * Handles regular source queries as follows:
  * - Query has `STATS ... BY ...` → appends BUCKET to the existing BY clause
@@ -66,31 +71,25 @@ export const queryHasTsSourceCommand = (esqlQuery: string): boolean => {
  *
  * Queries with a top-level FORK are first reduced to the branch that produces
  * the metric columns (see `flattenForkCommands`) before the rewrite applies.
+ *
+ * Because the rewrite and the time-column resolution operate on the same AST
+ * in a single pass, the returned column name is correct by construction for
+ * the query the rewrite produced.
  */
-export const appendTimeBucketToEsqlQuery = (
-  esqlQuery: string,
+const rewriteTrendlineAst = (
+  root: ESQLAstQueryExpression,
   timeField: string,
   metricFields?: string[],
   groupByFields: string[] = []
 ): string => {
-  const bucketExpr = buildTrendlineBucketExpression(timeField);
-  const bucketNode = parseBucketNode(bucketExpr);
-
-  const { root } = Parser.parse(esqlQuery);
-
   if (root.commands.length === 0) {
     throw new Error('Cannot append time bucket to an empty ES|QL query');
   }
 
   flattenForkCommands(root.commands, metricFields);
 
+  const bucketExpr = buildTrendlineBucketExpression(timeField);
   const tsStatsCommand = findFirstStatsAfterTs(root.commands);
-
-  // TBUCKET is also valid with non-TS source commands (e.g. FROM); an existing
-  // TBUCKET grouping already time-buckets the results, so no BUCKET may be added.
-  if (!tsStatsCommand && findStatsWithTbucket(root.commands)) {
-    return BasicPrettyPrinter.print(root);
-  }
 
   if (tsStatsCommand) {
     if (!getTbucketResultColumn(tsStatsCommand)) {
@@ -104,7 +103,18 @@ export const appendTimeBucketToEsqlQuery = (
         tsStatsCommand.args.push(findByOption(findStatsCommand(helperAst.commands)));
       }
     }
-    return BasicPrettyPrinter.print(root);
+    const tbucketColumn =
+      getTbucketResultColumn(tsStatsCommand) ?? buildTrendlineTbucketExpression();
+    return resolveAfterCommand(root, tsStatsCommand, tbucketColumn);
+  }
+
+  // TBUCKET is also valid with non-TS source commands (e.g. FROM); an existing
+  // TBUCKET grouping already time-buckets the results, so no BUCKET may be added.
+  const tbucketStatsCommand = findStatsWithTbucket(root.commands);
+  if (tbucketStatsCommand) {
+    const tbucketColumn =
+      getTbucketResultColumn(tbucketStatsCommand) ?? buildTrendlineTbucketExpression();
+    return resolveAfterCommand(root, tbucketStatsCommand, tbucketColumn);
   }
 
   const statsCmd = root.commands.findLast((c): c is ESQLCommand<'stats'> => c.name === 'stats');
@@ -114,7 +124,7 @@ export const appendTimeBucketToEsqlQuery = (
 
     if (byOption && !getBucketResultColumnForField(statsCmd, timeField)) {
       // STATS ... BY ... → append to existing BY
-      byOption.args.push(bucketNode);
+      byOption.args.push(parseBucketNode(bucketExpr));
     } else if (!byOption) {
       // STATS without BY → extract a typed BY option node from a helper parse
       const { root: byHelper } = Parser.parse(`FROM _x | STATS _x BY ${bucketExpr}`);
@@ -126,22 +136,41 @@ export const appendTimeBucketToEsqlQuery = (
     // KEEP commands after STATS only see the BUCKET result column.
     const statsIndex = root.commands.indexOf(statsCmd);
     const timeResultColumn = getBucketResultColumnForField(statsCmd, timeField) ?? bucketExpr;
-    preserveColumnInKeepCommands(root.commands.slice(0, statsIndex), timeField);
-    preserveColumnInKeepCommands(root.commands.slice(statsIndex + 1), timeResultColumn);
-  } else {
-    preserveColumnInKeepCommands(root.commands, timeField);
-    // No STATS → append full STATS <agg> BY BUCKET(...) command.
-    // Use AVG(<field>) for each provided metric field, or COUNT(*) as fallback.
-    const statsExprs =
-      metricFields && metricFields.length > 0
-        ? metricFields.map((f) => `AVG(${esql.col(f)})`).join(', ')
-        : 'COUNT(*)';
-    const effectiveGroupByFields = groupByFields.filter((field) => field !== timeField);
-    const groupByExprs = [...effectiveGroupByFields.map((f) => esql.col(f)), bucketExpr].join(', ');
-    const { root: helperAst } = Parser.parse(`FROM _x | STATS ${statsExprs} BY ${groupByExprs}`);
-    root.commands.push(findStatsCommand(helperAst.commands));
+    walkTrackedColumn(root.commands.slice(0, statsIndex), timeField, { ensureKept: true });
+    return walkTrackedColumn(root.commands.slice(statsIndex + 1), timeResultColumn, {
+      ensureKept: true,
+    }).name;
   }
 
+  walkTrackedColumn(root.commands, timeField, { ensureKept: true });
+  // No STATS → append full STATS <agg> BY BUCKET(...) command.
+  // Use AVG(<field>) for each provided metric field, or COUNT(*) as fallback.
+  const statsExprs =
+    metricFields && metricFields.length > 0
+      ? metricFields.map((f) => `AVG(${esql.col(f)})`).join(', ')
+      : 'COUNT(*)';
+  const effectiveGroupByFields = groupByFields.filter((field) => field !== timeField);
+  const groupByExprs = [...effectiveGroupByFields.map((f) => esql.col(f)), bucketExpr].join(', ');
+  const { root: helperAst } = Parser.parse(`FROM _x | STATS ${statsExprs} BY ${groupByExprs}`);
+  root.commands.push(findStatsCommand(helperAst.commands));
+  return bucketExpr;
+};
+
+/**
+ * Appends a BUCKET time-bucketing clause to an ES|QL query for trendline use.
+ *
+ * Uses `@elastic/esql` AST parsing and manipulation for correct handling of
+ * complex queries with proper field name escaping (e.g. dotted field names
+ * are backtick-quoted). See `rewriteTrendlineAst` for rewrite semantics.
+ */
+export const appendTimeBucketToEsqlQuery = (
+  esqlQuery: string,
+  timeField: string,
+  metricFields?: string[],
+  groupByFields: string[] = []
+): string => {
+  const { root } = Parser.parse(esqlQuery);
+  rewriteTrendlineAst(root, timeField, metricFields, groupByFields);
   return BasicPrettyPrinter.print(root);
 };
 
@@ -157,6 +186,9 @@ export interface TrendlineQueryWithMetricFieldMap {
  * When the source query has no STATS command, the trendline query adds AVG(<field>)
  * aggregations for the provided metric fields. The returned map keeps Lens column
  * fieldNames aligned with those generated ES|QL result columns.
+ *
+ * The rewritten query and its time result column come from the same rewrite
+ * pass over a single AST (see `rewriteTrendlineAst`).
  */
 export const buildTrendlineQueryWithMetricFieldMap = (
   esqlQuery: string,
@@ -165,70 +197,29 @@ export const buildTrendlineQueryWithMetricFieldMap = (
   groupByFields: string[] = []
 ): TrendlineQueryWithMetricFieldMap => {
   const { root } = Parser.parse(esqlQuery);
+
+  if (root.commands.length === 0) {
+    throw new Error('Cannot append time bucket to an empty ES|QL query');
+  }
+
   flattenForkCommands(root.commands, metricFields);
-  const flattenedQuery = BasicPrettyPrinter.print(root);
+  const sourceQueryHasStats = commandsHaveStats(root.commands);
 
-  const sourceQueryHasStats = queryHasStatsCommand(flattenedQuery);
   const metricFieldMap = new Map<string, string>();
-  const tbucketStatsCommand = findStatsWithTbucket(root.commands);
-  const tsStatsCommand = findFirstStatsAfterTs(root.commands);
-  const statsCommand = root.commands.findLast(
-    (command): command is ESQLCommand<'stats'> => command.name === 'stats'
-  );
-
   if (!sourceQueryHasStats) {
     metricFields.forEach((field) => metricFieldMap.set(field, `AVG(${esql.col(field)})`));
   }
 
+  const timeResultColumn = rewriteTrendlineAst(
+    root,
+    timeField,
+    !sourceQueryHasStats ? metricFields : undefined,
+    !sourceQueryHasStats ? groupByFields : undefined
+  );
+
   return {
-    query: appendTimeBucketToEsqlQuery(
-      flattenedQuery,
-      timeField,
-      !sourceQueryHasStats ? metricFields : undefined,
-      !sourceQueryHasStats ? groupByFields : undefined
-    ),
+    query: BasicPrettyPrinter.print(root),
     metricFieldMap,
-    timeField: resolveTimeResultColumn({
-      commands: root.commands,
-      tsStatsCommand,
-      tbucketStatsCommand,
-      statsCommand,
-      timeField,
-    }),
+    timeField: timeResultColumn,
   };
-};
-
-/**
- * Resolves the final time result column of the trendline query, tracking the
- * bucket column through RENAME commands after the aggregating STATS command.
- */
-const resolveTimeResultColumn = ({
-  commands,
-  tsStatsCommand,
-  tbucketStatsCommand,
-  statsCommand,
-  timeField,
-}: {
-  commands: ESQLCommand[];
-  tsStatsCommand: ESQLCommand<'stats'> | undefined;
-  tbucketStatsCommand: ESQLCommand<'stats'> | undefined;
-  statsCommand: ESQLCommand<'stats'> | undefined;
-  timeField: string;
-}): string => {
-  const bucketStatsCommand = tsStatsCommand ?? tbucketStatsCommand ?? statsCommand;
-  const bucketColumn = tsStatsCommand
-    ? getTbucketResultColumn(tsStatsCommand)
-    : (tbucketStatsCommand && getTbucketResultColumn(tbucketStatsCommand)) ??
-      (statsCommand && getBucketResultColumnForField(statsCommand, timeField));
-
-  if (bucketColumn && bucketStatsCommand) {
-    return applyRenamesToColumn(
-      commands.slice(commands.indexOf(bucketStatsCommand) + 1),
-      bucketColumn
-    );
-  }
-
-  return tsStatsCommand
-    ? buildTrendlineTbucketExpression()
-    : buildTrendlineBucketExpression(timeField);
 };
