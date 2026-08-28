@@ -19,10 +19,8 @@ test.describe(
       await browserAuth.loginWithCustomRole(getFleetNoneIntegrationsAllRole());
       const { integrationHome } = pageObjects;
 
-      await integrationHome.navigateTo();
-      await integrationHome.waitForPageToLoad();
-
-      // Navigate directly to the Apache detail page to verify the button state based on privileges
+      // Apache is now grouped into a collection tile, so navigate directly to its detail
+      // page instead of browsing and clicking through the collection.
       await integrationHome.navigateToDetailPage('apache');
 
       // Verify the Add Integration button is disabled

@@ -204,6 +204,8 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
 export const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
 export const DATA_SOURCES_CACHE_KEY = 'dataSources';
 export const HISTORY_STARRED_ITEMS_CACHE_KEY = 'historyStarredItems';
+export const JOIN_INDICES_CACHE_KEY = 'joinIndices';
+export const TIMESERIES_INDICES_CACHE_KEY = 'timeseriesIndices';
 
 export const clearCacheWhenOld = (cache: MapCache, key: string) => {
   if (cache.has(key)) {
