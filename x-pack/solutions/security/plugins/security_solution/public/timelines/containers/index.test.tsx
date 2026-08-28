@@ -310,7 +310,9 @@ describe('useTimelineEventsHandler', () => {
       );
 
       await waitFor(() => {
-        expect(result.current[0]).toEqual(DataLoadingState.loaded);
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
       });
 
       expect(result.current[1].isPartial).toEqual(false);
@@ -358,7 +360,9 @@ describe('useTimelineEventsHandler', () => {
       );
 
       await waitFor(() => {
-        expect(result.current[0]).toEqual(DataLoadingState.loaded);
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
       });
 
       expect(result.current[1].isPartial).toEqual(true);
