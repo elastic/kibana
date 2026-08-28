@@ -337,7 +337,7 @@ awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", t
 
 - **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
 - **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
-- **Read the timings, not only the counts.** An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing.
+- **Read the timings, not only the counts.** A patch meant to make the test cheaper — an async step removed, a smaller unit under test, heavy children mocked — must show a clearly lower average, not a few percent. An average that barely moves means the expensive work is still there and the patch only changed how the test waits; that is the shape of Jest fix that comes back. An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing. A deliberate timeout bump is the exception: it is not meant to lower the average. Two traps in the durations file — a `0` line means the test name did not match, not a fast run, and a run that crashed adds no line at all, so check you have one line per run.
 - **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
 - **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
 
@@ -508,6 +508,13 @@ Follow this format:
   The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), so there's nothing to patch in this repo. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified.
+- **Pre-fix CI lag** (the reported failure ran a Cloud image that predates the fix — confirm via the `flaky-test-investigator` skill's pipelines reference — so no PR was opened):
+  ```markdown
+  ### 🕒 Pre-fix CI lag, not a regression
+
+  This failure ran on Kibana `<short-sha>`, which doesn't yet include the fix; it should clear once the Cloud image catches up with `main`. cc @<requester-github-handle-here-if-not-a-bot>
+  ```
+  Fill `<short-sha>` with the failing run's `Build hash` (the commit you compared against the fix — see the pipelines reference), abbreviated to 12 chars.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting

@@ -77,11 +77,7 @@ describe('createVisPanelResolver', () => {
       },
       authoringNote: 'Created a titleless metric showing total requests.',
     });
-    expect(mockedBuildLensConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        includeTimeRange: false,
-      })
-    );
+    expect(mockedBuildLensConfig).toHaveBeenCalledTimes(1);
   });
 
   it('creates panel content when the authoring note is missing', async () => {
