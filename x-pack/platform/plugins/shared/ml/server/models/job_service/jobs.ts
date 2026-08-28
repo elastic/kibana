@@ -290,7 +290,6 @@ export function jobsProvider(
 
       if (serverless.cpsEnabled && hasDatafeed) {
         tempJob.projectRouting = job.datafeed_config.project_routing ?? null;
-        // @ts-expect-error cloud_api_key is not yet in the type
         tempJob.isUiamEnabled = job.datafeed_config.authorization?.cloud_api_key?.id !== undefined;
       }
 

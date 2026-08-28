@@ -248,7 +248,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     restartRunningJobs: boolean = true
   ) {
     const [{ datafeeds }, { datafeeds: datafeedStats }] = await Promise.all([
-      mlClient.getDatafeeds(),
+      mlClient.getDatafeeds() as Promise<{ datafeeds: Datafeed[] }>,
       mlClient.getDatafeedStats(),
     ]);
     const datafeedIdsToUpdate = new Set<string>();
@@ -292,9 +292,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     if (autoDetectDatafeeds === true) {
       for (const df of datafeeds) {
         if (
-          // @ts-expect-error @elastic-elasticsearch datafeed_config type incorrect, missing project_routing
           (df.project_routing === undefined || df.project_routing === '') &&
-          // @ts-expect-error @elastic-elasticsearch datafeed_config type incorrect, missing cloud_api_key
           df.authorization?.cloud_api_key?.id === undefined
         ) {
           datafeedIdsToUpdate.add(df.datafeed_id);
