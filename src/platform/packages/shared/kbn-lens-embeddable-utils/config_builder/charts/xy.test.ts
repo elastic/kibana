@@ -150,7 +150,6 @@ test('generates xy chart config', async () => {
             "mode": "full",
             "upperBound": undefined,
           },
-          "yTitle": "",
         },
       },
       "title": "test",
@@ -335,13 +334,34 @@ describe('y-axis title', () => {
     expect(visualization.yTitle).toBe('Avg');
   });
 
-  it('defaults to an empty y-axis title when yTitle is not provided', async () => {
+  it('omits yTitle from the visualization state when yTitle is not provided', async () => {
     const result = await buildXY(baseConfig, {
       dataViewsAPI: mockDataViewsService() as any,
     });
 
     const visualization = result.state.visualization as XYVisualizationState;
-    expect(visualization.yTitle).toBe('');
+    expect(visualization.yTitle).toBeUndefined();
+  });
+
+  it('sets a custom x-axis title in the visualization state when xTitle is provided', async () => {
+    const result = await buildXY(
+      { ...baseConfig, xTitle: 'Time' },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.xTitle).toBe('Time');
+  });
+
+  it('omits xTitle from the visualization state when xTitle is not provided', async () => {
+    const result = await buildXY(baseConfig, {
+      dataViewsAPI: mockDataViewsService() as any,
+    });
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.xTitle).toBeUndefined();
   });
 });
 
