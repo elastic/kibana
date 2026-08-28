@@ -131,8 +131,9 @@ export class CloudExperimentsPlugin
       void 0, // No Kibana Request to scope the check
       true // Ignore capabilities checks
     );
+    const availableDataViews = await dataViewsService.getIdsWithTitle();
     return {
-      has_data: await dataViewsService.hasUserDataView(),
+      has_data: availableDataViews.length > 0,
     };
   }
 }
