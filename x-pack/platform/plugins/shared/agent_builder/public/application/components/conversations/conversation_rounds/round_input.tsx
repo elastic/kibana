@@ -40,6 +40,7 @@ interface RoundInputProps {
   input: string;
   author?: ConversationRoundAuthor;
   authorProfile?: UserProfileWithAvatar;
+  isCurrentUser: boolean;
   origin?: ConversationRoundOrigin;
   startedAt: string;
   attachmentRefs?: AttachmentVersionRef[];
@@ -51,6 +52,7 @@ export const RoundInput = ({
   input,
   author,
   authorProfile,
+  isCurrentUser,
   origin,
   startedAt,
   attachmentRefs,
@@ -62,15 +64,19 @@ export const RoundInput = ({
 
   const inputContainerStyles = css`
     width: 100%;
-    background: ${euiTheme.colors.backgroundLightPrimary};
+    background: ${isCurrentUser
+      ? euiTheme.colors.backgroundLightPrimary
+      : euiTheme.colors.emptyShade};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
-    border-radius: 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+    border-radius: ${isCurrentUser
+      ? `0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px`
+      : `${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0`};
     padding: ${euiTheme.size.m} ${euiTheme.size.base};
   `;
 
   const inputContentStyles = css`
-    align-self: end;
+    align-self: ${isCurrentUser ? 'end' : 'start'};
     inline-size: min(640px, 90%);
   `;
 
@@ -78,7 +84,7 @@ export const RoundInput = ({
     <EuiFlexGroup
       direction="column"
       gutterSize="s"
-      alignItems="flexEnd"
+      alignItems={isCurrentUser ? 'flexEnd' : 'flexStart'}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
@@ -117,7 +123,7 @@ export const RoundInput = ({
           conversationAttachments={conversationAttachments}
           fallbackAttachments={fallbackAttachments}
           actorFilter={[ATTACHMENT_REF_ACTOR.user]}
-          justifyContent="flexEnd"
+          justifyContent={isCurrentUser ? 'flexEnd' : 'flexStart'}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
