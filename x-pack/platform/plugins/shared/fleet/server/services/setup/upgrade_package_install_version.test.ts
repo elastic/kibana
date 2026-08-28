@@ -186,6 +186,36 @@ describe('upgradePackageInstallVersion', () => {
     expect(logger.error).not.toBeCalled();
   });
 
+  it('should not log at error level when stamping the current version fails (e.g. read-only cluster)', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+
+    mockedReinstallPackageForInstallation.mockRejectedValue(
+      new PackageNotFoundError('Cannot reinstall: test1, bundled package not found')
+    );
+    soClient.find.mockResolvedValue({
+      total: 1,
+      saved_objects: [
+        {
+          id: 'test1-so-id',
+          attributes: { name: 'test1', install_source: 'bundled' },
+        },
+      ],
+    } as any);
+    soClient.update.mockRejectedValue(new Error('cluster_block_exception'));
+
+    await upgradePackageInstallVersion({
+      esClient,
+      soClient,
+      logger,
+    });
+
+    expect(soClient.update).toBeCalled();
+    expect(logger.warn).toBeCalled();
+    expect(logger.error).not.toBeCalled();
+  });
+
   it('should reinstall a package whose Kibana assets were installed on a different Kibana major.minor version, even when the install format version is up to date', async () => {
     const logger = loggingSystemMock.createLogger();
     const esClient = elasticsearchServiceMock.createInternalClient();

@@ -56,10 +56,20 @@ export async function upgradePackageInstallVersion({
         if (isNonReinstallable) {
           // Package has no matching bundled/uploaded package to reinstall from. Stamp the
           // current version so it doesn't get re-selected (and re-logged) on every setup.
-          await soClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, id, {
-            installed_kibana_version: currentKibanaVersion,
-            install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
-          });
+          // The stamp can fail if the cluster is read-only (e.g. flood-stage watermark); in
+          // that case we still log at warn and return so the failure is not re-thrown and does
+          // not fall through to the error path.
+          try {
+            await soClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, id, {
+              installed_kibana_version: currentKibanaVersion,
+              install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+            });
+          } catch (updateErr) {
+            logger.warn(
+              `Failed to stamp installed_kibana_version for ${installation.name}: ${updateErr}`
+            );
+          }
+
           logger.warn(
             `Package needs to be manually reinstalled ${installation.name}. ${err.message}`
           );
