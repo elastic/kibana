@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ConversationMetadataUpdatedTriggerId } from '@kbn/agent-builder-common';
 
-export const ConversationMetadataUpdatedTriggerId = 'ai.conversation.metadataUpdated' as const;
+export { ConversationMetadataUpdatedTriggerId };
 
 const conversationMetadataUpdatedEventSchema = z.object({
   conversationId: z.string().meta({
@@ -28,9 +29,7 @@ const conversationMetadataUpdatedEventSchema = z.object({
   }),
 });
 
-export type ConversationMetadataUpdatedEvent = z.infer<
-  typeof conversationMetadataUpdatedEventSchema
->;
+export type { ConversationMetadataUpdatedEvent } from '@kbn/agent-builder-common';
 
 export const conversationMetadataUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: ConversationMetadataUpdatedTriggerId,

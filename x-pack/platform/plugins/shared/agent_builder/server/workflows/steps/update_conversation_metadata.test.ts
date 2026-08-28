@@ -6,7 +6,10 @@
  */
 
 import { updateConversationMetadataStepDefinition } from './update_conversation_metadata';
-import { createStepHandlerContext, createConversationClientMock } from './test_utils';
+import {
+  createStepHandlerContext,
+  createWorkflowStepConversationClientMock,
+} from '../../test_utils/workflow_steps';
 
 const experimentalEnabled = jest.fn().mockResolvedValue(true);
 const experimentalDisabled = jest.fn().mockResolvedValue(false);
@@ -18,7 +21,7 @@ describe('updateConversationMetadataStepDefinition', () => {
   };
 
   it('creates expected step definition structure', () => {
-    const { getConversationClient } = createConversationClientMock();
+    const { getConversationClient } = createWorkflowStepConversationClientMock();
     const definition = updateConversationMetadataStepDefinition(
       getConversationClient,
       experimentalEnabled
@@ -30,7 +33,7 @@ describe('updateConversationMetadataStepDefinition', () => {
   });
 
   it('calls patchMetadata and returns the changed fields and updated metadata', async () => {
-    const { patchMetadata, getConversationClient } = createConversationClientMock({
+    const { patchMetadata, getConversationClient } = createWorkflowStepConversationClientMock({
       patchMetadata: jest.fn().mockResolvedValue({
         conversation: {
           id: 'conv-1',
@@ -62,7 +65,7 @@ describe('updateConversationMetadataStepDefinition', () => {
   });
 
   it('returns empty changed_fields when the patch is a no-op', async () => {
-    const { getConversationClient } = createConversationClientMock({
+    const { getConversationClient } = createWorkflowStepConversationClientMock({
       patchMetadata: jest.fn().mockResolvedValue({
         conversation: { id: 'conv-1', metadata: { status: 'open' } },
         changedFields: [],
@@ -89,7 +92,7 @@ describe('updateConversationMetadataStepDefinition', () => {
   });
 
   it('returns the error when patchMetadata throws', async () => {
-    const { getConversationClient } = createConversationClientMock({
+    const { getConversationClient } = createWorkflowStepConversationClientMock({
       patchMetadata: jest.fn().mockRejectedValue(new Error('validation failed')),
     });
 
@@ -105,7 +108,7 @@ describe('updateConversationMetadataStepDefinition', () => {
   });
 
   it('rejects an empty updates object', () => {
-    const { getConversationClient } = createConversationClientMock();
+    const { getConversationClient } = createWorkflowStepConversationClientMock();
     const definition = updateConversationMetadataStepDefinition(
       getConversationClient,
       experimentalEnabled
@@ -117,7 +120,7 @@ describe('updateConversationMetadataStepDefinition', () => {
   });
 
   it('rejects input without conversation_id', () => {
-    const { getConversationClient } = createConversationClientMock();
+    const { getConversationClient } = createWorkflowStepConversationClientMock();
     const definition = updateConversationMetadataStepDefinition(
       getConversationClient,
       experimentalEnabled
@@ -127,7 +130,7 @@ describe('updateConversationMetadataStepDefinition', () => {
   });
 
   it('returns an error when experimental features are disabled', async () => {
-    const { getConversationClient } = createConversationClientMock();
+    const { getConversationClient } = createWorkflowStepConversationClientMock();
     const definition = updateConversationMetadataStepDefinition(
       getConversationClient,
       experimentalDisabled

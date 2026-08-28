@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
-import type { ConversationClient } from '../../services/conversation';
+import type { ConversationClient } from '../services/conversation';
 
 interface CreateStepHandlerContextParams {
   input?: unknown;
@@ -46,7 +46,7 @@ export const createStepHandlerContext = ({
   };
 };
 
-export const createConversationClientMock = (
+export const createWorkflowStepConversationClientMock = (
   overrides: Partial<{ get: jest.Mock; patchMetadata: jest.Mock }> = {}
 ) => {
   const get = overrides.get ?? jest.fn();

@@ -19,16 +19,6 @@ const InputSchema = z.object({
 });
 
 const OutputSchema = z.object({
-  conversation_id: z.string().meta({ description: 'The ID of the conversation.' }),
-  template_id: z.string().optional().meta({
-    description: 'The template ID associated with this conversation, if any.',
-  }),
-  parent_id: z.string().optional().meta({
-    description: 'The ID of the parent conversation, if this is a child conversation.',
-  }),
-  parent_relation: z.string().optional().meta({
-    description: 'The relationship type to the parent conversation (e.g. "subagent").',
-  }),
   metadata: z.record(z.string(), z.unknown()).meta({
     description: 'The current metadata key/value pairs for this conversation.',
   }),
@@ -59,7 +49,7 @@ export const getConversationMetadataStepCommonDefinition: CommonStepDefinition<
       'xpack.agentBuilder.workflowSteps.getConversationMetadata.documentation.details',
       {
         defaultMessage:
-          'Reads all metadata key/value pairs attached to a conversation. Returns the conversation ID, optional template ID, and the metadata object. Use this step to inspect field values such as `status`, `decision`, or `severity` before branching your workflow.',
+          'Reads all metadata key/value pairs attached to a conversation. Use this step to inspect field values such as `status`, `decision`, or `severity` before branching your workflow.',
       }
     ),
     examples: [

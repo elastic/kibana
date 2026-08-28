@@ -37,10 +37,6 @@ export const getConversationMetadataStepDefinition = (
 
         return {
           output: {
-            conversation_id: conversation.id,
-            template_id: conversation.template_id,
-            parent_id: conversation.parent_conversation?.id,
-            parent_relation: conversation.parent_conversation?.relation,
             metadata: (conversation.metadata ?? {}) as Record<string, unknown>,
           },
         };
