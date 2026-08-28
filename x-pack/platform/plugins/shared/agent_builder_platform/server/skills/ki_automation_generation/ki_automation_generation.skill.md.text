@@ -295,7 +295,7 @@ calling `generate_workflow` with the existing `attachmentId`, then return to thi
 
 After the user saves and approves, call `platform.core.execute_workflow(attachmentId)`.
 
-Retrieve the 1–3 generated KIs by running `FROM <backing index of the AI index, e.g. ai-index-idx-<ai_index_id>> | SORT @timestamp DESC | LIMIT 3` with `platform.core.execute_esql` (the sort returns this run's KIs, ahead of any earlier run's)
+Retrieve the 1–3 generated KIs by running `FROM <backing index of the AI index, e.g. ai-index-idx-<ai_index_id>> | WHERE @timestamp >= "<execution.started_at>" | SORT @timestamp DESC | LIMIT 3` with `platform.core.execute_esql`, taking `execution.started_at` from the `execute_workflow` response. The filter isolates this run's KIs — a bare sort would pad the rows with earlier runs' KIs when the pilot writes fewer than 3. (It assumes the workflow writes via `createKi`, which refreshes `@timestamp`; `updateKi` keeps the stored one, so merge flows need a different check.)
 
 Ask yourself:
 - Is the output the expected structure?
