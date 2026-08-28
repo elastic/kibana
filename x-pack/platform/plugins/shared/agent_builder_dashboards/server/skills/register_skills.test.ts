@@ -29,6 +29,9 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('read_file');
     expect(skill.content).toContain(`Before calling \`${dashboardTools.generateDashboard}\``);
     expect(skill.content).toContain('every path in `referenced_files`');
+    expect(skill.content.indexOf('## Referenced files')).toBeLessThan(
+      skill.content.indexOf('## When to Use This Skill')
+    );
     expect(skill.content).not.toContain('Dashboard Composition Guidelines');
     expect(skill.referencedContent?.map((ref) => ref.name)).toEqual(
       expect.arrayContaining(['prettify-rules', 'dashboard-design-practices'])
@@ -148,5 +151,8 @@ describe('registerSkills', () => {
 
     const tools = await skill.getInlineTools?.();
     expect(tools?.map((tool) => tool.id)).toEqual([dashboardTools.generateDashboard]);
+    expect(tools?.[0].description).toContain('read_file');
+    expect(tools?.[0].description).toContain('referenced_files');
+    expect(tools?.[0].description).toContain('Do not call this tool until');
   });
 });

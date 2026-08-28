@@ -45,6 +45,8 @@ export const createLoadSkillTool = ({
 Returns the skill content, its referenced files, and the list of tools the skill makes available.
 Loading a skill also dynamically registers its specialized tools so you can use them in subsequent calls.
 
+Referenced file bodies are not included. If the result lists \`referenced_files\`, call \`${internalTools.readFile}\` on each path before using the skill's loaded tools.
+
 The 'skill' parameter accepts the skill name, the full path of the skill's folder, or the full path of the skill's SKILL.md file.`,
   type: ToolType.builtin,
   schema,

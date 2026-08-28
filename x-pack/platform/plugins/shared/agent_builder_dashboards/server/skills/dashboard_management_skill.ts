@@ -19,7 +19,11 @@ export const dashboardManagementSkill = defineSkillType({
   basePath: 'skills/platform/dashboard',
   description:
     'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
-  content: `## When to Use This Skill
+  content: `## Referenced files
+
+\`load_skill\` returns \`referenced_files\` (name + path). Their content is **not** in this skill body. Before calling \`${dashboardTools.generateDashboard}\` — Prettify **or** a normal create/edit — \`${internalTools.readFile}\` every path in \`referenced_files\`. Do not generate until you have read them.
+
+## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing Kibana dashboards.
@@ -30,10 +34,6 @@ Use this skill when:
 Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
-
-## Referenced files
-
-\`load_skill\` returns \`referenced_files\` (name + path). Their content is **not** in this skill body. Before calling \`${dashboardTools.generateDashboard}\` — Prettify **or** a normal create/edit — \`${internalTools.readFile}\` every path in \`referenced_files\`. Do not generate until you have read them.
 
 ${dashboardPrettify.guidance}
 
