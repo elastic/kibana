@@ -175,15 +175,15 @@ export const useManageRegionsState = (onClose: () => void) => {
     setIsCallOutDismissed(true);
   }, []);
 
-  const { clear: clearGeoSelection } = geoSelection;
-  const { clear: clearRegionSelection } = regionTab.regionSelection;
+  const { reset: resetGeoSelection } = geoSelection;
+  const { reset: resetRegionSelection } = regionTab.regionSelection;
   const handleLocationTypeChange = useCallback(
     (next: PolicyMode) => {
       setActiveTab(next);
-      clearGeoSelection();
-      clearRegionSelection();
+      resetGeoSelection();
+      resetRegionSelection();
     },
-    [setActiveTab, clearGeoSelection, clearRegionSelection]
+    [setActiveTab, resetGeoSelection, resetRegionSelection]
   );
 
   const regionTabReturn = useMemo(

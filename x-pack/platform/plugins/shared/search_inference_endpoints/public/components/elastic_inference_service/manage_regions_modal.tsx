@@ -44,8 +44,7 @@ const modalStyles = ({ euiTheme }: UseEuiTheme) => css`
 
 export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
-  const state = useManageRegionsState(onClose);
-  const { common, regionTab, geoTab } = state;
+  const { common, regionTab, geoTab } = useManageRegionsState(onClose);
   const {
     activeTab,
     isLoading,
@@ -193,7 +192,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                 isDisabled={isLoading || isSaving || isDeleting}
                 onChange={handleLocationTypeChange}
               />
-              <EuiSpacer size="m" />
               {selectedTab.content}
             </>
           )}

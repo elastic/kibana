@@ -17,16 +17,16 @@ interface LocationTypeSelectorProps {
   onChange: (mode: PolicyMode) => void;
 }
 
-const LOCATION_TYPE_OPTIONS = [
+const LOCATION_TYPE_OPTIONS: { id: PolicyMode; label: string; 'data-test-subj': string }[] = [
   {
-    id: 'geo' as const,
+    id: 'geo',
     label: i18n.translate('xpack.searchInferenceEndpoints.manageRegions.locationTypeGeoLabel', {
       defaultMessage: 'Geographies',
     }),
     'data-test-subj': 'manageRegionsLocationTypeGeo',
   },
   {
-    id: 'regions' as const,
+    id: 'regions',
     label: i18n.translate('xpack.searchInferenceEndpoints.manageRegions.locationTypeRegionsLabel', {
       defaultMessage: 'Regions',
     }),

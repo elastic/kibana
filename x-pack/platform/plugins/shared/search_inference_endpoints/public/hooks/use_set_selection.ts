@@ -11,6 +11,7 @@ export interface UseSetSelectionResult {
   selected: Set<string>;
   seed: (keys: Set<string>) => void;
   clear: () => void;
+  reset: () => void;
   toggle: (key: string) => void;
   selectAll: () => void;
   isDirty: boolean;
@@ -39,6 +40,10 @@ export const useSetSelection = (allKeys: string[]): UseSetSelectionResult => {
     setSelected(new Set());
   }, []);
 
+  const reset = useCallback(() => {
+    setSelected(new Set(initial));
+  }, [initial]);
+
   const toggle = useCallback((key: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -64,6 +69,7 @@ export const useSetSelection = (allKeys: string[]): UseSetSelectionResult => {
     selected,
     seed,
     clear,
+    reset,
     toggle,
     selectAll,
     isDirty,
