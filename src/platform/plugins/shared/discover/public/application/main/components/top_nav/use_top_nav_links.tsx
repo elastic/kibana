@@ -34,6 +34,7 @@ import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
   getCreateRuleOptionsAppMenuItem,
+  getExportAppMenuItem,
   getNewSearchAppMenuItem,
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
@@ -71,7 +72,6 @@ export interface UseTopNavLinksParams {
   hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
-  hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
   onOpenSaveModal: () => void;
   onOpenSaveAsModal: () => void;
@@ -91,7 +91,6 @@ export const useTopNavLinks = ({
   hasUnsavedChanges,
   isEsqlMode,
   adHocDataViews,
-  hasShareIntegration,
   persistedDiscoverSession,
   onOpenSaveModal,
   onOpenSaveAsModal,
@@ -238,19 +237,27 @@ export const useTopNavLinks = ({
       items.push(openSearchMenuItem);
     }
 
-    const shareAppMenuItem = getShareAppMenuItem({
-      shareAction,
+    const exportAppMenuItem = getExportAppMenuItem({
       discoverParams,
       services,
-      hasIntegrations: hasShareIntegration,
-      hasUnsavedChanges,
       currentTab,
       runtimeStateManager,
       persistedDiscoverSession,
       totalHitsState,
+      hasUnsavedChanges,
+      getState,
       intl,
     });
-    items.push(...shareAppMenuItem);
+
+    if (exportAppMenuItem) {
+      items.push(exportAppMenuItem);
+    }
+
+    const shareAppMenuItem = getShareAppMenuItem({ shareAction });
+
+    if (shareAppMenuItem) {
+      items.push(shareAppMenuItem);
+    }
 
     if (canSwitchLanguageMode) {
       items.push({
@@ -309,7 +316,6 @@ export const useTopNavLinks = ({
     isDataViewMode,
     openInspector,
     persistedDiscoverSession,
-    hasShareIntegration,
     hasUnsavedChanges,
     totalHitsState,
     intl,
