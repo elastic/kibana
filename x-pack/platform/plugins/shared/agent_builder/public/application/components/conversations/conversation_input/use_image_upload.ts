@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ToastInput } from '@kbn/core/public';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
@@ -36,12 +36,25 @@ export const useImageUpload = ({
   messageEditorController,
 }: UseImageUploadParams): UseImageUploadResult => {
   const { filesClient } = useAgentBuilderServices();
-  const { attachments, upsertAttachments, removeAttachment } = useConversationContext();
+  const { attachments, conversationId, upsertAttachments, removeAttachment } =
+    useConversationContext();
   const [uploadingNames, setUploadingNames] = useState<Set<string>>(new Set());
   const uploadControllers = useRef<Map<string, AbortController>>(new Map());
 
   const attachmentsRef = useRef(attachments);
   attachmentsRef.current = attachments;
+
+  // Abort every in-flight upload when navigating away from this conversation
+  useEffect(() => {
+    const controllers = uploadControllers.current;
+    return () => {
+      for (const controller of controllers.values()) {
+        controller.abort();
+      }
+      controllers.clear();
+      setUploadingNames(new Set());
+    };
+  }, [conversationId]);
 
   const handlePasteFile = useCallback(
     (file: File): string | undefined => {
@@ -71,11 +84,13 @@ export const useImageUpload = ({
         abortSignal: controller.signal,
       })
         .then((success) => {
-          if (!success) {
+          // A name can be reused after this upload was aborted and removed.
+          if (!success && uploadControllers.current.get(name) === controller) {
             messageEditorController.removePlaceholderByName(name);
           }
         })
         .finally(() => {
+          if (uploadControllers.current.get(name) !== controller) return;
           uploadControllers.current.delete(name);
           setUploadingNames((prev) => {
             const next = new Set(prev);
