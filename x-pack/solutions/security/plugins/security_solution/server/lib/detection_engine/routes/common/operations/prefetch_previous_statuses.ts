@@ -415,6 +415,21 @@ export const fetchAllAlertIdIndexWithSource = async (
 };
 
 /**
+ * Returns true when applying the requested add/remove to a single document source would
+ * result in at least one actual change: an item to add that isn't already present, or an
+ * item to remove that is present.
+ */
+export const wouldChange = (
+  source: Record<string, unknown>,
+  field: string,
+  toAdd: string[],
+  toRemove: string[]
+): boolean => {
+  const current = new Set<string>(Array.isArray(source[field]) ? (source[field] as string[]) : []);
+  return toAdd.some((item) => !current.has(item)) || toRemove.some((item) => current.has(item));
+};
+
+/**
  * Given a list of document sources fetched before an update, computes which items from
  * the requested add/remove lists would actually change at least one document.
  *

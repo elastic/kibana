@@ -29,6 +29,7 @@ import {
 import {
   fetchAllAlertIdIndexWithSource,
   computeActualDelta,
+  wouldChange,
 } from '../common/operations/prefetch_previous_statuses';
 
 export const setAlertAssigneesRoute = (
@@ -87,17 +88,14 @@ export const setAlertAssigneesRoute = (
             ]);
             // Emit only IDs whose source would actually change; unknown/no-op IDs are excluded.
             changedAlertIds = hits
-              .filter((h) => {
-                const current = new Set<string>(
-                  Array.isArray(h.source[ALERT_WORKFLOW_ASSIGNEE_IDS])
-                    ? (h.source[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[])
-                    : []
-                );
-                return (
-                  cappedAssigneesToAdd.some((uid) => !current.has(uid)) ||
-                  cappedAssigneesToRemove.some((uid) => current.has(uid))
-                );
-              })
+              .filter((h) =>
+                wouldChange(
+                  h.source,
+                  ALERT_WORKFLOW_ASSIGNEE_IDS,
+                  cappedAssigneesToAdd,
+                  cappedAssigneesToRemove
+                )
+              )
               .map((h) => h.id);
             const delta = computeActualDelta(
               hits.map((h) => h.source),

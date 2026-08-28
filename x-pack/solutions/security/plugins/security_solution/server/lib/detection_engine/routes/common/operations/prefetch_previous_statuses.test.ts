@@ -21,6 +21,7 @@ import {
   prefetchPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
   verifyAlertIdsInIndex,
+  wouldChange,
   type FoundHit,
 } from './prefetch_previous_statuses';
 
@@ -991,6 +992,38 @@ describe('collectChangedIdsByFamily', () => {
       changed
     );
     expect(result.attackIds).toEqual(['dup', 'unique']);
+  });
+});
+
+describe('wouldChange', () => {
+  const FIELD = 'kibana.alert.workflow_tags';
+
+  it('returns true when a toAdd item is absent from the source', () => {
+    expect(wouldChange({ [FIELD]: ['existing'] }, FIELD, ['new'], [])).toBe(true);
+  });
+
+  it('returns false when every toAdd item is already in the source', () => {
+    expect(wouldChange({ [FIELD]: ['a', 'b'] }, FIELD, ['a', 'b'], [])).toBe(false);
+  });
+
+  it('returns true when a toRemove item is present in the source', () => {
+    expect(wouldChange({ [FIELD]: ['x'] }, FIELD, [], ['x'])).toBe(true);
+  });
+
+  it('returns false when no toRemove item is present in the source', () => {
+    expect(wouldChange({ [FIELD]: ['x'] }, FIELD, [], ['y'])).toBe(false);
+  });
+
+  it('returns false when both toAdd and toRemove are empty', () => {
+    expect(wouldChange({ [FIELD]: ['a'] }, FIELD, [], [])).toBe(false);
+  });
+
+  it('treats a missing field as an empty array — toAdd items are always absent', () => {
+    expect(wouldChange({}, FIELD, ['a'], [])).toBe(true);
+  });
+
+  it('treats a non-array field value as an empty array', () => {
+    expect(wouldChange({ [FIELD]: 'not-an-array' }, FIELD, ['a'], [])).toBe(true);
   });
 });
 

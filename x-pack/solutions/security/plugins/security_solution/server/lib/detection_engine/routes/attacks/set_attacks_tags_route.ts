@@ -31,6 +31,7 @@ import {
   verifyAlertIdsInIndex,
   fetchAllAlertIdIndexWithSource,
   computeActualDelta,
+  wouldChange,
 } from '../common/operations/prefetch_previous_statuses';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
@@ -130,23 +131,14 @@ export const setAttacksTagsRoute = (
                   verifiedAttackIds = Array.from(
                     new Set(
                       attackDocs.hits.hits
-                        .filter((hit) => {
-                          const current = new Set<string>(
-                            Array.isArray(
-                              (hit._source as Record<string, unknown> | undefined)?.[
-                                ALERT_WORKFLOW_TAGS
-                              ]
-                            )
-                              ? ((hit._source as Record<string, unknown>)[
-                                  ALERT_WORKFLOW_TAGS
-                                ] as string[])
-                              : []
-                          );
-                          return (
-                            validTagsToAdd.some((t) => !current.has(t)) ||
-                            validTagsToRemove.some((t) => current.has(t))
-                          );
-                        })
+                        .filter((hit) =>
+                          wouldChange(
+                            (hit._source ?? {}) as Record<string, unknown>,
+                            ALERT_WORKFLOW_TAGS,
+                            validTagsToAdd,
+                            validTagsToRemove
+                          )
+                        )
                         .map((hit) => hit._id)
                         .filter((id): id is string => id != null)
                     )
@@ -202,21 +194,14 @@ export const setAttacksTagsRoute = (
             const verifiedAttackIds = Array.from(
               new Set(
                 attackDocs.hits.hits
-                  .filter((hit) => {
-                    const current = new Set<string>(
-                      Array.isArray(
-                        (hit._source as Record<string, unknown> | undefined)?.[ALERT_WORKFLOW_TAGS]
-                      )
-                        ? ((hit._source as Record<string, unknown>)[
-                            ALERT_WORKFLOW_TAGS
-                          ] as string[])
-                        : []
-                    );
-                    return (
-                      validTagsToAdd.some((t) => !current.has(t)) ||
-                      validTagsToRemove.some((t) => current.has(t))
-                    );
-                  })
+                  .filter((hit) =>
+                    wouldChange(
+                      (hit._source ?? {}) as Record<string, unknown>,
+                      ALERT_WORKFLOW_TAGS,
+                      validTagsToAdd,
+                      validTagsToRemove
+                    )
+                  )
                   .map((hit) => hit._id)
                   .filter((id): id is string => id != null)
               )
