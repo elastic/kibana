@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/config-schema'
   - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-skill-loader'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
