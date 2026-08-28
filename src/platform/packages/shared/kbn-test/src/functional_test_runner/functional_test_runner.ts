@@ -37,6 +37,23 @@ interface FunctionalTestRunnerRunResult {
   failedTestFiles: string[];
   customTestRunnerResult?: any; // matches main's inferred Promise<any> contract
 }
+export interface SkippedFunctionalTest {
+  file: string;
+  suite: string;
+  test: string;
+}
+
+const getSkippedTestSuite = (test: Test): string => {
+  const suiteTitles: string[] = [];
+  let suite = test.parent;
+
+  while (suite && !suite.root) {
+    suiteTitles.unshift(suite.title);
+    suite = suite.parent;
+  }
+
+  return suiteTitles.join(' > ');
+};
 
 export class FunctionalTestRunner {
   private readonly esVersion: EsVersion;
@@ -268,6 +285,33 @@ export class FunctionalTestRunner {
         }" which doesn't match supplied es version "${this.esVersion.toString()}"`
       );
     }
+  }
+
+  async getSkippedTests(): Promise<SkippedFunctionalTest[]> {
+    return await this.runHarness({ realServices: false }, async (lifecycle, coreProviders) => {
+      const mocha = await setupMocha({
+        lifecycle,
+        log: this.log,
+        config: this.config,
+        providers: this.getStubProviderCollection(coreProviders),
+        skipRootHooks: true,
+        esVersion: this.esVersion,
+        reporter: 'base',
+      });
+      const skippedTests: SkippedFunctionalTest[] = [];
+
+      mocha.suite.eachTest((test: Test) => {
+        if (test.pending) {
+          skippedTests.push({
+            file: test.file ?? '',
+            suite: getSkippedTestSuite(test),
+            test: test.title,
+          });
+        }
+      });
+
+      return skippedTests;
+    });
   }
 
   async getTestStats() {

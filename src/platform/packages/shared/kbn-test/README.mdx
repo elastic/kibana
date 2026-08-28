@@ -35,6 +35,68 @@ Starts Elasticsearch and Kibana servers given a specified config.
 
 Allows users to start another process to run just the tests while keeping the servers running with this method. Start servers _and_ run tests using the same config file ([see how](../../../../../scripts/README.md)).
 
+## Skipped Test Discovery
+
+`node scripts/discover_skipped_tests.js` creates `target/skipped-tests-manifest.json`: a JSON inventory of source-level skips in Scout and FTR. It does not start Kibana or Elasticsearch, open a browser, or execute test and hook bodies.
+
+Pass `--output <path>` to change the destination:
+
+```sh
+node scripts/discover_skipped_tests.js --output target/skipped-tests-manifest.json
+```
+
+The manifest records the checked-out Git revision and one record per framework/config/target combination. Its identity is stable within a repository revision:
+
+```text
+<repository-relative-file>::<suite path>::<test title>
+```
+
+```json
+{
+  "version": 1,
+  "revision": "<git-sha>",
+  "complete": true,
+  "tests": [
+    {
+      "id": "src/core/test/scout/api/tests/status.spec.ts::kibana status api::returns version, status and metrics fields",
+      "framework": "scout",
+      "config": "src/core/test/scout/api/playwright.config.ts",
+      "target": "local",
+      "file": "src/core/test/scout/api/tests/status.spec.ts",
+      "suite": "kibana status api",
+      "test": "returns version, status and metrics fields",
+      "line": 19,
+      "state": "skipped"
+    }
+  ],
+  "unavailableConfigs": []
+}
+```
+
+### Scout collection
+
+The command enumerates every Scout configuration and runs Playwright's native definition-listing mode for each one:
+
+```sh
+node scripts/playwright test --list --reporter=json --config <config>
+```
+
+Playwright evaluates the config and collects test definitions, but does not run tests. The command walks the JSON suite tree and emits only cases whose `expectedStatus` is `"skipped"`. It does not use the JSON result `status`, because `--list` reports unexecuted tests as skipped regardless of their source-level execution policy. Every Playwright project (`local`, `ech`, `mki`, and so on) is recorded as a separate target.
+
+### FTR collection
+
+The command reads all FTR config paths listed in `.buildkite/ftr-manifests/`. For every runnable Mocha config, it loads the config with FTR's stub providers and disabled root hooks, creates the Mocha suite tree, then inspects `mocha.suite.eachTest()` for `test.pending`. This captures direct skips and tests made pending by a skipped parent suite without calling `mocha.run()`.
+
+Manifest entries that are reusable base modules rather than runnable configs are ignored. Configs using custom test runners and journeys are also excluded because they do not expose a Mocha test tree.
+
+### Completeness
+
+`complete` is `false` when a Scout or FTR config cannot be loaded or listed. The failure is retained in `unavailableConfigs` with framework, config path, and error text; it is never silently omitted. A CI consumer must treat an incomplete manifest as unavailable rather than assuming the skip inventory is exhaustive.
+
+The manifest intentionally covers static, source-level skip decisions. Runtime skips such as FTR `this.skip()` depend on the executed environment and are not persistent skip policy.
+
+This command only produces discovery data. It does not evaluate CI failures, publish artifacts, modify test outcomes, or implement quarantine state.
+
 ## Rationale
 
 ### Single config per setup

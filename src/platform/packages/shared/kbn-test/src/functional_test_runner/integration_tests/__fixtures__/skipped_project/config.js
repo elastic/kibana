@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FunctionalTestRunner, type SkippedFunctionalTest } from './functional_test_runner';
-export {
-  readConfigFile,
-  Config,
-  createAsyncInstance,
-  EsVersion,
-  Lifecycle,
-  LifecyclePhase,
-  runCheckFtrConfigsCli,
-  DedicatedTaskRunner,
-} from './lib';
-export * from './cli';
-export * from './lib/docker_servers';
-export * from './public_types';
+import { resolve } from 'path';
+
+export default () => ({
+  testFiles: [resolve(__dirname, 'tests.js')],
+  mochaReporter: {
+    sendToCiStats: false,
+  },
+  servers: {
+    elasticsearch: {
+      port: 1234,
+    },
+  },
+});
