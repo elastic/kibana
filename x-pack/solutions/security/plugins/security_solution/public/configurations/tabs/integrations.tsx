@@ -25,6 +25,7 @@ export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
   ({ useAvailablePackages }) => {
     const { filteredCards, isLoading, searchTerm, setSearchTerm } = useAvailablePackages({
       prereleaseIntegrationsEnabled: true,
+      disableCollectionGrouping: true,
     });
 
     const allowedIntegrations = filteredCards.filter((card) =>
