@@ -14,7 +14,9 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
-import type { ViewMode } from '@kbn/presentation-publishing';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
+import { apiPublishesESQLQuery, type ViewMode } from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaParser } from '../data_model/vega_parser';
@@ -26,6 +28,9 @@ import { vegaEmbeddableFactory } from './vega_embeddable';
 
 jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
 jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
+jest.mock('../lib/extract_index_pattern', () => ({
+  extractIndexPatternsFromSpec: jest.fn(async (): Promise<never[]> => []),
+}));
 
 interface MockVegaVisComponentProps {
   fireEvent: VegaEventHandler;
@@ -69,6 +74,9 @@ describe('vegaEmbeddableFactory', () => {
       mode: 'relative' as const,
     });
     const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
+    const esqlVariables$ = new BehaviorSubject<
+      Array<{ key: string; value: string; type: ESQLVariableType }> | undefined
+    >(undefined);
     const reload$ = new BehaviorSubject<void>(undefined);
     const viewMode$ = new BehaviorSubject<ViewMode>('view');
 
@@ -77,6 +85,7 @@ describe('vegaEmbeddableFactory', () => {
       filters$,
       timeRange$,
       timeslice$,
+      esqlVariables$,
       reload$,
       viewMode$,
       parentApi: {
@@ -87,12 +96,14 @@ describe('vegaEmbeddableFactory', () => {
         reload$,
         timeRange$,
         timeslice$,
+        esqlVariables$,
         viewMode$,
       },
     };
   };
 
-  let { query$, filters$, timeRange$, timeslice$, reload$, viewMode$, parentApi } = createParent();
+  let { query$, filters$, timeRange$, timeslice$, esqlVariables$, reload$, viewMode$, parentApi } =
+    createParent();
 
   // Only forwarded to the request handler and the Vega component, both of which are mocked here.
   const visualizationDependencies = {
@@ -130,7 +141,8 @@ describe('vegaEmbeddableFactory', () => {
     mockCreateVegaRequestHandler.mock.calls[call][1].abortSignal;
 
   beforeEach(() => {
-    ({ query$, filters$, timeRange$, timeslice$, reload$, viewMode$, parentApi } = createParent());
+    ({ query$, filters$, timeRange$, timeslice$, esqlVariables$, reload$, viewMode$, parentApi } =
+      createParent());
     executeTriggerActions.mockReset();
     mockOpenLazyFlyout.mockReset();
     mockReportVegaRender.mockReset();
@@ -384,5 +396,66 @@ describe('vegaEmbeddableFactory', () => {
     content.props.onSave('{ mark: bar }');
 
     expect(api.serializeState().spec).toBe('{ mark: bar }');
+  });
+
+  it('forwards parent esqlVariables into the request handler and refetches on change', async () => {
+    const variables = [{ key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES }];
+    esqlVariables$.next(variables);
+    const { Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+
+    await waitFor(() => {
+      expect(mockVegaRequestHandler).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlVariables: variables })
+      );
+    });
+
+    const updated = [{ key: 'fizzbuzz', value: 'osx', type: ESQLVariableType.VALUES }];
+    esqlVariables$.next(updated);
+
+    await waitFor(() => {
+      expect(mockVegaRequestHandler).toHaveBeenLastCalledWith(
+        expect.objectContaining({ esqlVariables: updated })
+      );
+    });
+  });
+
+  it('publishes a verbatim ES|QL query$ for a single-source spec', async () => {
+    const query = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const { api } = await buildEmbeddable();
+
+    api.applySerializedState({
+      spec: `{ data: { url: { "%type%": "esql", query: "${query}" } } }`,
+      title: 'Initial title',
+    });
+
+    expect(api.query$.getValue()).toEqual({ esql: query });
+    expect(apiPublishesESQLQuery(api)).toBe(true);
+    expect(api).not.toHaveProperty('filters$');
+  });
+
+  it('does not publish an ES|QL query for non-ES|QL specs', async () => {
+    const { api } = await buildEmbeddable();
+
+    expect(api.query$.getValue()).toBeUndefined();
+    expect(apiPublishesESQLQuery(api)).toBe(false);
+  });
+
+  it('updates query$ when the spec changes without waiting for a fetch', async () => {
+    mockVegaRequestHandler.mockImplementation(() => new Promise(() => {}));
+    const { api } = await buildEmbeddable();
+
+    api.applySerializedState({
+      spec: `{ data: { url: { "%type%": "esql", query: "FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz" } } }`,
+      title: 'Initial title',
+    });
+    expect(getESQLQueryVariables(api.query$.getValue()!.esql)).toContain('fizzbuzz');
+
+    api.applySerializedState({
+      spec: `{ data: { url: { "%type%": "esql", query: "FROM logs-* | WHERE color.keyword == ?color" } } }`,
+      title: 'Initial title',
+    });
+    expect(getESQLQueryVariables(api.query$.getValue()!.esql)).toEqual(['color']);
+    expect(getESQLQueryVariables(api.query$.getValue()!.esql)).not.toContain('fizzbuzz');
   });
 });
