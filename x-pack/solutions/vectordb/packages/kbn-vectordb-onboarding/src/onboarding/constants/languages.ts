@@ -12,15 +12,7 @@ import goIcon from '../../assets/go.svg';
 import rustIcon from '../../assets/rust.svg';
 import csharpIcon from '../../assets/csharp.svg';
 import rubyIcon from '../../assets/ruby.svg';
-
-export type Language = 'python' | 'javascript' | 'java' | 'go' | 'rust' | 'csharp' | 'ruby';
-
-export interface LanguageDescriptor {
-  id: Language;
-  label: string;
-  syntax: string;
-  icon: string;
-}
+import type { Language, LanguageDescriptor } from '../types';
 
 export const LANGUAGES: readonly LanguageDescriptor[] = [
   { id: 'python', label: 'Python', syntax: 'python', icon: pythonIcon },
@@ -33,5 +25,3 @@ export const LANGUAGES: readonly LanguageDescriptor[] = [
 ];
 
 export const DEFAULT_LANGUAGE: Language = 'python';
-
-export type SnippetSet = Record<Language, string>;

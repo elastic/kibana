@@ -8,14 +8,7 @@
 export const URL_PLACEHOLDER = 'https://your-elasticsearch-url';
 export const API_KEY_PLACEHOLDER = 'YOUR_API_KEY';
 
-export const fillPlaceholders = (snippet: string, url?: string, apiKey?: string): string => {
-  let result = snippet;
-  if (url) result = result.replaceAll(URL_PLACEHOLDER, url);
-  if (apiKey) result = result.replaceAll(API_KEY_PLACEHOLDER, apiKey);
-  return result;
-};
-
-export const HAVE_VECTORS_INGEST = `# Create an index with a dense_vector field
+export const HAVE_VECTORS_INGEST_CONSOLE_SNIPPET = `# Create an index with a dense_vector field
 PUT my_dense_vectors
 {
   "mappings": {
@@ -35,7 +28,7 @@ POST my_dense_vectors/_bulk
 { "index": {} }
 { "text": "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.", "vector": [0.2, 0.18, 0.32, -0.5, -0.01] }`;
 
-export const HAVE_VECTORS_SEARCH = `# Run a kNN search with your query vector
+export const HAVE_VECTORS_SEARCH_CONSOLE_SNIPPET = `# Run a kNN search with your query vector
 POST my_dense_vectors/_search
 {
   "knn": {
@@ -44,7 +37,7 @@ POST my_dense_vectors/_search
   }
 }`;
 
-export const HAVE_VECTORS_SEARCH_HYBRID = `# Run a hybrid search combining kNN and lexical matches
+export const HAVE_VECTORS_SEARCH_HYBRID_CONSOLE_SNIPPET = `# Run a hybrid search combining kNN and lexical matches
 POST my_dense_vectors/_search
 {
   "retriever": {
@@ -75,7 +68,7 @@ POST my_dense_vectors/_search
   }
 }`;
 
-export const GENERATE_VECTORS_INGEST = `# Create an index that generates vectors automatically
+export const GENERATE_VECTORS_INGEST_CONSOLE_SNIPPET = `# Create an index that generates vectors automatically
 PUT my_semantic_vectors
 {
   "mappings": {
@@ -95,7 +88,7 @@ POST my_semantic_vectors/_bulk
 { "index": {} }
 { "content": "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing." }`;
 
-export const GENERATE_VECTORS_SEARCH = `# Run a semantic search using natural language
+export const GENERATE_VECTORS_SEARCH_CONSOLE_SNIPPET = `# Run a semantic search using natural language
 POST my_semantic_vectors/_search
 {
   "query": {
@@ -103,7 +96,7 @@ POST my_semantic_vectors/_search
   }
 }`;
 
-export const GENERATE_VECTORS_SEARCH_HYBRID = `# Run a hybrid search combining semantic and lexical matches
+export const GENERATE_VECTORS_SEARCH_HYBRID_CONSOLE_SNIPPET = `# Run a hybrid search combining semantic and lexical matches
 POST my_semantic_vectors/_search
 {
   "retriever": {
