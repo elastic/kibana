@@ -50,14 +50,25 @@ const isPrivateLocationLabelChanged = (oldLabel: string, newLabel?: string): new
 const isPrivateLocationShardingChanged = (existing?: boolean, next?: boolean): boolean =>
   typeof next === 'boolean' && next !== Boolean(existing);
 
-const withIntendedSharding = <T extends { id: string; isAgentSharding?: boolean }>(
+const withIntendedLocationEdits = <
+  T extends { id: string; label?: string; isAgentSharding?: boolean }
+>(
   locations: T[],
   locationId: string,
-  isAgentSharding: boolean
+  edits: { label?: string; isAgentSharding?: boolean }
 ): T[] =>
-  locations.map((location) =>
-    location.id === locationId ? { ...location, isAgentSharding } : location
-  );
+  locations.map((location) => {
+    if (location.id !== locationId) {
+      return location;
+    }
+    return {
+      ...location,
+      ...(edits.label !== undefined ? { label: edits.label } : {}),
+      ...(typeof edits.isAgentSharding === 'boolean'
+        ? { isAgentSharding: edits.isAgentSharding }
+        : {}),
+    };
+  });
 
 const isPrivateLocationChanged = ({
   privateLocation,
@@ -178,9 +189,9 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         );
         const shouldSyncMonitors = isLabelChanged || isShardingChanged;
 
-        // Rewrite monitors before persisting the location: generateNewPolicy
-        // reads the in-memory location list, and a failed rewrite must not
-        // leave isAgentSharding flipped with no (or leftover) pins.
+        // Rewrite monitors before persisting: generateNewPolicy reads the
+        // in-memory location list (label and isAgentSharding), so overlay the
+        // intended edits. A failed rewrite must not leave the SO flipped.
         if (shouldSyncMonitors && monitorsInLocation.length) {
           const privilegeResponse = await checkPrivileges({
             routeContext,
@@ -195,10 +206,12 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 
         if (shouldSyncMonitors) {
           const storedLocations = await getPrivateLocations(savedObjectsClient);
-          const allPrivateLocations =
-            isShardingChanged && typeof newIsAgentSharding === 'boolean'
-              ? withIntendedSharding(storedLocations, locationId, newIsAgentSharding)
-              : storedLocations;
+          const allPrivateLocations = withIntendedLocationEdits(storedLocations, locationId, {
+            ...(isLabelChanged ? { label: newLocationLabel } : {}),
+            ...(isShardingChanged && typeof newIsAgentSharding === 'boolean'
+              ? { isAgentSharding: newIsAgentSharding }
+              : {}),
+          });
           await updatePrivateLocationMonitors({
             locationId,
             newLocationLabel: newLocationLabel || existingLocation.attributes.label,

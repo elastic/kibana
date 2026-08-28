@@ -323,4 +323,25 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
       })
     );
   });
+
+  it('passes the new label to monitor rewrite before the saved object is persisted', async () => {
+    (getPrivateLocations as jest.Mock).mockResolvedValue([
+      { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
+      { id: 'loc-2', label: 'Other', agentPolicyId: 'ap-2', isServiceManaged: false },
+    ]);
+    stubRepo({ label: 'Barcelona' });
+    const { routeContext } = makeRouteContext({ label: 'Barcelona' });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newLocationLabel: 'Barcelona',
+        allPrivateLocations: [
+          expect.objectContaining({ id: 'loc-1', label: 'Barcelona' }),
+          expect.objectContaining({ id: 'loc-2', label: 'Other' }),
+        ],
+      })
+    );
+  });
 });
