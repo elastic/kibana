@@ -42,12 +42,16 @@ const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
+  private readonly interactiveSaveMenuItem;
+  private readonly saveButtonSecondary;
   /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
+    this.interactiveSaveMenuItem = this.page.testSubj.locator('interactiveSaveMenuItem');
+    this.saveButtonSecondary = this.page.testSubj.locator('discoverSaveButton-secondary-button');
     this.saveModal = new SavedObjectSaveModal(page);
   }
 
@@ -548,8 +552,8 @@ export class DiscoverApp {
   }
 
   async openSaveSearchAsModal() {
-    await this.page.testSubj.click('discoverSaveButton-secondary-button');
-    await this.page.testSubj.locator('interactiveSaveMenuItem').click();
+    await this.saveButtonSecondary.click();
+    await this.interactiveSaveMenuItem.click();
     await this.saveModal.modal.waitFor({ state: 'visible' });
   }
 

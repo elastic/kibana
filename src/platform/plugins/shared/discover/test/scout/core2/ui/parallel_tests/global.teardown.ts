@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalTeardownHook as baseGlobalTeardownHook, mergeTests } from '@kbn/scout';
-import { synthtraceFixture } from '@kbn/scout-synthtrace';
+import { globalTeardownHook } from '@kbn/scout';
 
-const globalTeardownHookWithSynthtrace = mergeTests(baseGlobalTeardownHook, synthtraceFixture);
+const testRunId = process.env.TEST_RUN_ID;
+if (!testRunId) {
+  throw new Error('TEST_RUN_ID is required for the legacy log stream data namespace');
+}
 
-globalTeardownHookWithSynthtrace(
+const legacyLogStreamDataStream = `logs-synth.discover-${testRunId}`;
+
+globalTeardownHook(
   'Teardown legacy log stream embeddable data',
   { tag: '@local-stateful-classic' },
-  async ({ log, logsSynthtraceEsClient }) => {
-    log.debug('[teardown:legacy_log_stream] cleaning synthtrace logs...');
-    await logsSynthtraceEsClient.clean();
-    log.debug('[teardown:legacy_log_stream] synthtrace logs cleaned');
+  async ({ esClient, log }) => {
+    log.debug(`[teardown:legacy_log_stream] deleting ${legacyLogStreamDataStream}...`);
+    await esClient.indices.deleteDataStream({ name: legacyLogStreamDataStream }, { ignore: [404] });
+    log.debug('[teardown:legacy_log_stream] synthtrace logs deleted');
   }
 );

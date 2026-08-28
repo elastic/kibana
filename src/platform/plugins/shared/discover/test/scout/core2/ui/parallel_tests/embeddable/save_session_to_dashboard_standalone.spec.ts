@@ -74,6 +74,8 @@ spaceTest.describe(
         await dashboard.openNewDashboard();
         await dashboard.addSavedSearch(ORIGINAL_SESSION_TITLE);
         await dashboard.waitForRenderComplete();
+        const [originalRowCount] = await dashboard.getSavedSearchRowCounts();
+        expect(originalRowCount).toBeGreaterThan(0);
         await dashboard.saveDashboard(EXISTING_DASHBOARD_TITLE);
         await dashboard.ensureEditMode();
 
@@ -94,7 +96,12 @@ spaceTest.describe(
           ORIGINAL_SESSION_TITLE,
           SAVED_AS_NEW_SESSION_TITLE,
         ]);
-        await expect.poll(() => dashboard.getSavedSearchRowCount()).toBeGreaterThan(0);
+        await expect
+          .poll(() => dashboard.getSavedSearchRowCounts())
+          .toStrictEqual(expect.arrayContaining([originalRowCount]));
+        await expect
+          .poll(async () => new Set(await dashboard.getSavedSearchRowCounts()).size)
+          .toBe(2);
       }
     );
 

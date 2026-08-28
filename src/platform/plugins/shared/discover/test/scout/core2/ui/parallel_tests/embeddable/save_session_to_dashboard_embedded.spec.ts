@@ -67,7 +67,8 @@ spaceTest.describe(
 
         await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
         await expect.poll(() => dashboard.getSavedSearchRowCount()).not.toBe(initialRowCount);
-        await expect.poll(() => dashboard.getSavedSearchRowCount()).toBeGreaterThan(0);
+        const filteredRowCount = await dashboard.getSavedSearchRowCount();
+        expect(filteredRowCount).toBeGreaterThan(0);
 
         await spaceTest.step(
           'save a copy to a new dashboard without changing the original',
@@ -86,7 +87,9 @@ spaceTest.describe(
               testData.SAVED_SEARCH_TITLE,
               COPIED_SESSION_TITLE,
             ]);
-            await expect.poll(() => dashboard.getSavedSearchRowCount()).toBeGreaterThan(0);
+            await expect
+              .poll(() => dashboard.getSavedSearchRowCounts())
+              .toStrictEqual(expect.arrayContaining([filteredRowCount, initialRowCount]));
           }
         );
       }

@@ -12,6 +12,11 @@ import { globalSetupHookWithSynthtrace } from '@kbn/scout-synthtrace';
 import { log as synthtraceLog, timerange } from '@kbn/synthtrace-client';
 import { DATE_NESTED_ES_ARCHIVE } from '../../../common/ui/fixtures/constants';
 
+const testRunId = process.env.TEST_RUN_ID;
+if (!testRunId) {
+  throw new Error('TEST_RUN_ID is required for the legacy log stream data namespace');
+}
+
 globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) => {
   log.debug('[setup:logstash] loading logstash_functional ES data (only if it does not exist)...');
   await esArchiver.loadIfNeeded(
@@ -91,7 +96,7 @@ globalSetupHookWithSynthtrace(
             .message('This is a log message')
             .timestamp(timestamp)
             .dataset('synth.discover')
-            .namespace('default')
+            .namespace(testRunId)
             .logLevel('info')
             .defaults({
               'service.name': 'synth-discover',

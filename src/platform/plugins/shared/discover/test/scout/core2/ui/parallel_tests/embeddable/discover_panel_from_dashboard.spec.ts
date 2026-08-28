@@ -61,6 +61,8 @@ spaceTest.describe(
         await discover.waitUntilTabIsLoaded();
         await discover.saveAndReturnToEditor();
         await dashboard.waitForRenderComplete();
+        const [originalRowCount] = await dashboard.getSavedSearchRowCounts();
+        expect(originalRowCount).toBeGreaterThan(0);
         await dashboard.saveDashboard(EXISTING_DASHBOARD_TITLE);
         await dashboard.ensureEditMode();
 
@@ -79,7 +81,12 @@ spaceTest.describe(
         await expect(page.testSubj.locator('embeddedSavedSearchDocTable')).toHaveCount(2);
         // The original by-value panel remains untitled; only the saved library session has a title.
         await expect(dashboard.getPanelTitlesLocator()).toHaveText([SAVED_SESSION_TITLE]);
-        await expect.poll(() => dashboard.getSavedSearchRowCount()).toBeGreaterThan(0);
+        await expect
+          .poll(() => dashboard.getSavedSearchRowCounts())
+          .toStrictEqual(expect.arrayContaining([originalRowCount]));
+        await expect
+          .poll(async () => new Set(await dashboard.getSavedSearchRowCounts()).size)
+          .toBe(2);
       }
     );
 
