@@ -25,7 +25,7 @@ const monacoYamlDefaultOptions: MonacoYamlOptions = {
 
 export const configureMonacoYamlSchema = async (
   schemas: MonacoYamlOptions['schemas'],
-  options?: Partial<MonacoYamlOptions>
+  options?: Omit<Partial<MonacoYamlOptions>, 'schemas'>
 ) => {
   const { configureMonacoYaml } = await import(/* webpackChunkName: "monaco-yaml" */ 'monaco-yaml');
 
