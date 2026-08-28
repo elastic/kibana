@@ -166,11 +166,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.3',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.3',
         policy_base_id: 'policy1',
@@ -178,11 +175,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.2',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.2',
         policy_base_id: 'policy1',
@@ -191,6 +185,7 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policy1#8.9',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policy1#8.9',
         policy_base_id: 'policy1',
@@ -209,11 +204,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.4',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.4',
         policy_base_id: 'policy1',
@@ -221,11 +213,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.1',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.1',
         policy_base_id: 'policy1',
@@ -236,25 +225,14 @@ describe('getVersionSpecificPolicies', () => {
   it('should create version specific policies with common agent versions and both package and template level condition', async () => {
     const policies = await getVersionSpecificPolicies(soClient, fleetServerPolicy, {
       id: 'policyBothConditions',
-      inputs: [
-        {
-          meta: { package: { agentVersion: '>=9.3.0' } },
-        },
-        {},
-      ],
+      inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }, {}],
     } as any);
     expect(policies).toEqual([
       {
         data: {
           id: 'policyBothConditions#9.3',
-          inputs: [
-            {
-              meta: { package: { agentVersion: '>=9.3.0' } },
-            },
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }, { type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policyBothConditions#9.3',
         policy_base_id: 'policyBothConditions',
@@ -262,11 +240,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policyBothConditions#9.2',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policyBothConditions#9.2',
         policy_base_id: 'policyBothConditions',
@@ -275,6 +250,7 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policyBothConditions#8.9',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policyBothConditions#8.9',
         policy_base_id: 'policyBothConditions',
