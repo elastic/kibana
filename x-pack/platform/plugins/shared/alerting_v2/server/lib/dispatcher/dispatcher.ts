@@ -206,7 +206,7 @@ export class DispatcherService implements DispatcherServiceContract {
     logger: LoggerServiceContract;
   }): Promise<DispatcherExecutionResult> {
     const { startedAt, eventWatermark, windowEnd } = input;
-    const blockingEpisodes = pipelineResult.finalState.episodes ?? [];
+    const blockingEpisodes = pipelineResult.finalState.scan?.episodes ?? [];
     const lagMs = startedAt.getTime() - eventWatermark.getTime();
 
     if (blockingEpisodes.length === 0) {
@@ -241,7 +241,7 @@ export class DispatcherService implements DispatcherServiceContract {
     // The edge can sit at or behind the watermark (that is what made a truncated
     // tick stuck) — clamp so the watermark never regresses; progress then comes
     // from the dedup marks written below.
-    const truncated = pipelineResult.finalState.truncated ?? false;
+    const truncated = pipelineResult.finalState.scan?.truncated ?? false;
     const lastEpisode = blockingEpisodes[blockingEpisodes.length - 1];
     const escapeTarget = truncated ? new Date(lastEpisode.last_event_timestamp) : windowEnd;
     const clampedEscapeTarget = new Date(
