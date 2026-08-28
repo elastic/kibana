@@ -173,7 +173,7 @@ export const vegaEmbeddableFactory = (
         ...titleComparators,
         ...timeRangeComparators,
         ...drilldownsManager.comparators,
-        spec: 'referenceEquality',
+        spec: 'deepEquality',
       }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
