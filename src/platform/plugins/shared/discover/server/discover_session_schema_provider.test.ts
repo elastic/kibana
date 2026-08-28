@@ -64,6 +64,27 @@ describe('discoverSessionSchemaProvider', () => {
     );
   });
 
+  it('keeps restricted schemas until the feature flag resolves', async () => {
+    const coreStart = coreMock.createStart();
+    let resolveFlag!: (enabled: boolean) => void;
+    coreStart.featureFlags.getBooleanValue.mockReturnValue(
+      new Promise((resolve) => {
+        resolveFlag = resolve;
+      })
+    );
+
+    const initializePromise = discoverSessionSchemaProvider.initialize(coreStart.featureFlags);
+
+    expect(() => parseApiData()).toThrow(/Unrecognized key/);
+
+    resolveFlag(true);
+    await initializePromise;
+
+    expect(parseApiData().tabs[0]).toEqual(
+      expect.objectContaining({ documents_display_mode: 'json' })
+    );
+  });
+
   it('keeps restricted schemas when feature flag resolution fails', async () => {
     const coreStart = coreMock.createStart();
     coreStart.featureFlags.getBooleanValue.mockRejectedValue(new Error('flag service unavailable'));

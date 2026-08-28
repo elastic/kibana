@@ -21,6 +21,8 @@ const createDiscoverSessionSchemaProvider = () => {
     embeddable: getDiscoverSessionEmbeddableSchema(schemaFeatures),
   });
 
+  // Consumers cache whatever these getters return, so they must never throw: the restricted
+  // variants stay active until the flag resolves.
   let activeSchemas = setActiveSchemas({ dataTableJsonView: false });
 
   return {
