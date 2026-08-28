@@ -8,7 +8,7 @@
 import type { DebugState } from '@elastic/charts';
 import { encode as encodeRison } from '@kbn/rison';
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { LOGSTASH_IN_RANGE_DATES } from '../../constants';
+import { LOGSTASH_IN_RANGE_DATES } from '../../../../fixtures/constants';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `LensApp` helpers needed by workspace navigation / formula reading. */
