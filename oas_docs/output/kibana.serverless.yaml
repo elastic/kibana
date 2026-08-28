@@ -99542,6 +99542,11 @@ components:
                             description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
                             type: object
                             properties:
+                              default_rendered_nodes:
+                                description: How many rows each JSON cell renders by default while in JSON mode.
+                                maximum: 200
+                                minimum: 10
+                                type: number
                               hide_nulls:
                                 description: When true, fields with null values are hidden while in JSON mode.
                                 type: boolean
@@ -99664,6 +99669,11 @@ components:
                             description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
                             type: object
                             properties:
+                              default_rendered_nodes:
+                                description: How many rows each JSON cell renders by default while in JSON mode.
+                                maximum: 200
+                                minimum: 10
+                                type: number
                               hide_nulls:
                                 description: When true, fields with null values are hidden while in JSON mode.
                                 type: boolean
@@ -99833,6 +99843,11 @@ components:
                       description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
                       type: object
                       properties:
+                        default_rendered_nodes:
+                          description: How many rows each JSON cell renders by default while in JSON mode.
+                          maximum: 200
+                          minimum: 10
+                          type: number
                         hide_nulls:
                           description: When true, fields with null values are hidden while in JSON mode.
                           type: boolean
