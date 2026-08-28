@@ -190,10 +190,69 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
     },
     {
       description: 'FORK query without metric fields falls back to the first STATS branch',
-      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (WHERE bytes > 0) (STATS avg_bytes = AVG(bytes))`,
+      // the WHERE branch projects to KEEP bytes: counter-typed fields in the TSDB
+      // index otherwise conflict across FORK branch schemas (ES rejects the query)
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (WHERE bytes > 0 | KEEP bytes) (STATS avg_bytes = AVG(bytes))`,
       expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
       expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
       expectedMetricFields: ['avg_bytes'],
+    },
+    {
+      // canonical FORK metric idiom from the ES|QL docs: top-N rows + KPI count branch
+      description: 'FORK query with top-N branch and COUNT KPI branch',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (SORT bytes DESC | LIMIT 5 | KEEP bytes) (STATS total = COUNT(*))`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS total = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['total'],
+      metricFields: ['total'],
+    },
+    {
+      description: 'FORK query with SORT _fork after FORK',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (STATS total = COUNT(*)) (STATS avg_bytes = AVG(bytes)) | SORT _fork`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS total = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['total'],
+      metricFields: ['total'],
+    },
+    {
+      description: 'FORK query with WHERE on the _fork discriminator',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (STATS total = COUNT(*)) (STATS avg_bytes = AVG(bytes)) | WHERE _fork == "fork1"`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS total = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['total'],
+      metricFields: ['total'],
+    },
+    {
+      description: 'FORK query with KEEP including the _fork discriminator',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (STATS total = COUNT(*)) (STATS avg_bytes = AVG(bytes)) | KEEP total, _fork`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS total = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend) | KEEP total, \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\``,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['total'],
+      metricFields: ['total'],
+    },
+    {
+      description: 'FORK query with metric column produced via RENAME inside a branch',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (STATS cnt = COUNT(*) | RENAME cnt AS total) (STATS avg_bytes = AVG(bytes))`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS cnt = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend) | RENAME cnt AS total`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['total'],
+      metricFields: ['total'],
+    },
+    {
+      description: 'FORK query with WHERE-only branches and raw metric fields',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (WHERE bytes > 0) (WHERE bytes <= 0)`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | WHERE bytes > 0 | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['AVG(bytes)'],
+      metricFields: ['bytes'],
+    },
+    {
+      description: 'FORK query with EVAL prefix shared by both branches',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | EVAL kb = bytes / 1024 | FORK (STATS avg_kb = AVG(kb)) (STATS total = COUNT(*))`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | EVAL kb = bytes / 1024 | STATS avg_kb = AVG(kb) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['avg_kb'],
+      metricFields: ['avg_kb'],
     },
   ];
 };

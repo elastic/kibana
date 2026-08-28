@@ -52,6 +52,8 @@ apiTest.describe(
           queryCase.metricFields ? [...queryCase.metricFields] : undefined,
           queryCase.groupByFields ? [...queryCase.groupByFields] : undefined
         );
+        expect(generated.query).toBe(queryCase.expectedQuery);
+        expect(generated.timeField).toBe(queryCase.expectedTimeField);
 
         const executeEsqlQuery = (query: string) =>
           apiClient.post(`${SEARCH_API_BASE_URL}/${ESQL_SEARCH_STRATEGY}`, {
