@@ -255,4 +255,42 @@ describe('getEuidPainlessRuntimeMapping', () => {
       expect(mapping.script.source).toContain(returnScript.slice(0, firstReturn));
     });
   });
+
+  it('threads applyPostAggFilter through to the evaluation', () => {
+    const mapping = getEuidPainlessRuntimeMapping(EntityType.enum.user, {
+      applyPostAggFilter: false,
+    });
+
+    expect(mapping.script.source).toContain(
+      getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false })
+    );
+  });
+});
+
+describe('getEuidPainlessEvaluation postAggFilter gate', () => {
+  // The `entity.id exists` arm is unique to postAggFilter. It is the post-LOOKUP-JOIN
+  // "already in the store" escape hatch and appears nowhere in documentsFilter or the
+  // namespace clauses. `event.kind` does not work as a marker: the cloud-provider
+  // namespace clause references it too.
+  const postAggOnlyMarker = `doc.containsKey('entity.id')`;
+
+  it('gates on postAggFilter by default', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.user);
+
+    expect(script).toContain(postAggOnlyMarker);
+  });
+
+  it('omits the postAggFilter gate when applyPostAggFilter is false', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false });
+
+    expect(script).not.toContain(postAggOnlyMarker);
+  });
+
+  it('keeps the documentsFilter gate when applyPostAggFilter is false', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false });
+
+    // documentsFilter requires event.outcome != failure and at least one user identifier.
+    expect(script).toContain(`doc.containsKey('event.outcome')`);
+    expect(script).toContain(`doc.containsKey('user.name')`);
+  });
 });
