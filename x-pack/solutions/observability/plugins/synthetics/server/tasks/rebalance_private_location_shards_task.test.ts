@@ -22,6 +22,7 @@ import * as getPrivateLocationsModule from '../synthetics_service/get_private_lo
 import * as getAgentInfoModule from '../synthetics_service/private_location/get_agent_info';
 import type { AgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import * as getActiveAgentIdsModule from '../synthetics_service/private_location/get_active_agent_ids';
+import * as syntheticsSettingsModule from '../saved_objects/synthetics_settings';
 import {
   RECOVERY_STABILITY_MS,
   STALE_CHECKIN_MS,
@@ -77,6 +78,11 @@ const agentInfo = (lastCheckin: number, memoryMib: number | null = null): AgentI
 const taskInstance = (state: Record<string, unknown> = {}): ConcreteTaskInstance =>
   ({ id: REBALANCE_SHARDS_TASK_ID, state, params: {} } as unknown as ConcreteTaskInstance);
 
+const dynamicSettings = (over: Partial<Record<string, unknown>> = {}) =>
+  ({ rebalancePrivateLocationShardsEnabled: true, ...over } as unknown as Awaited<
+    ReturnType<typeof syntheticsSettingsModule.getSyntheticsDynamicSettings>
+  >);
+
 const makeTask = () =>
   new RebalancePrivateLocationShardsTask(mockServerSetup, mockSyntheticsMonitorClient);
 
@@ -91,6 +97,9 @@ describe('RebalancePrivateLocationShardsTask', () => {
     jest.useFakeTimers().setSystemTime(NOW);
     setTaskEnabled(true);
     mockRebalanceShards.mockResolvedValue({ total: 0, moved: 0 });
+    jest
+      .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+      .mockResolvedValue(dynamicSettings());
   });
 
   afterEach(() => jest.useRealTimers());
@@ -131,6 +140,24 @@ describe('RebalancePrivateLocationShardsTask', () => {
   });
 
   describe('runTask', () => {
+    it('skips work and returns early when the dynamic rebalance setting is off', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(dynamicSettings({ rebalancePrivateLocationShardsEnabled: false }));
+      const getPrivateLocationsSpy = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
+      const getAgentInfo = jest.spyOn(getAgentInfoModule, 'getAgentInfo');
+
+      const result = await run({ keep: 1 });
+
+      expect(getPrivateLocationsSpy).not.toHaveBeenCalled();
+      expect(getAgentInfo).not.toHaveBeenCalled();
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
+      expect(result.state).toEqual({ keep: 1 });
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('disabled by dynamic setting')
+      );
+    });
+
     it('early-exits and does not read agents when there are no scalable locations', async () => {
       jest
         .spyOn(getPrivateLocationsModule, 'getPrivateLocations')

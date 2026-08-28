@@ -26,7 +26,6 @@ import {
   riskScoreMaintainerScenarioFactory,
   riskScoreMaintainerEntityBuilders,
   waitForEntityScoreResetToZero,
-  waitForEntityStoreEntities,
   indexListOfDocumentsFactory,
   waitForEntityStoreDoc,
   setupMaintainerLogsDataStream,
@@ -226,7 +225,6 @@ export default ({ getService }: FtrProviderContext): void => {
             entityTypes: ['user', 'host'],
             dataViewPattern: testLogsIndex,
           });
-          await waitForEntityStoreEntities({ es, log, count: 1 });
 
           // Set up both modifiers while the maintainer runs freely in the
           // background. Any scoring runs that happen before both modifiers
