@@ -182,6 +182,21 @@ export const graphableNodes = createSelector(resolverTreeResponse, function (tre
   }
 });
 
+export const originTimestamp: (state: DataState) => number | undefined = createSelector(
+  originID,
+  graphableNodes,
+  function (currentOriginID, nodes) {
+    if (currentOriginID === undefined) {
+      return undefined;
+    }
+    const originNode = nodes.find((node) => nodeModel.nodeID(node) === currentOriginID);
+    if (originNode === undefined) {
+      return undefined;
+    }
+    return nodeModel.timestampAsDate(originNode)?.getTime();
+  }
+);
+
 const tree = createSelector(
   graphableNodes,
   originID,
