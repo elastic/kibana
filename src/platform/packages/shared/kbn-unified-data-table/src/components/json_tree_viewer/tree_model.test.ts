@@ -71,7 +71,7 @@ describe('collectExpandableIds', () => {
   });
 });
 
-describe('collectDefaultSeed', () => {
+describe('collectDefaultExpansionSeed', () => {
   it('opens nested collections without lifting any pager for a small document', () => {
     const nodes = buildNodes({ user: { name: 'Alice', address: { city: 'Berlin' } } });
 

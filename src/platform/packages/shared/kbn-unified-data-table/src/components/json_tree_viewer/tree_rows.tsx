@@ -183,6 +183,7 @@ export const PagerRowView = memo(function PagerRowView({
             : clickShowFewer
         }
         onKeyDown={pagerButtonKeyDown}
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
         data-test-subj={
           showMore
             ? `jsonTreeViewerMore-${row.collectionId}`
@@ -199,6 +200,7 @@ export const PagerRowView = memo(function PagerRowView({
           iconType="minus"
           onClick={clickShowFewer}
           onKeyDown={pagerButtonKeyDown}
+          onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
           data-test-subj={`jsonTreeViewerFewer-${row.collectionId}`}
         >
           {showFewerLabel(row.collectionType)}
