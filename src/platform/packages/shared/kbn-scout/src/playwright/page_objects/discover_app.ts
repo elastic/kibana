@@ -1007,8 +1007,9 @@ export class DiscoverApp {
 
   /**
    * Click the histogram breakdown selector and pick `field` (or `"No breakdown"`).
+   * `value` is the selectable item value when it differs from the visible label.
    */
-  async chooseBreakdownField(field: string) {
+  async chooseBreakdownField(field: string, value = field) {
     await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
     await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
       state: 'visible',
@@ -1016,7 +1017,7 @@ export class DiscoverApp {
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
     await this.page
       .locator(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${field}"]`
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${value}"]`
       )
       .click();
     await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
@@ -1043,18 +1044,7 @@ export class DiscoverApp {
    * Clears the histogram breakdown field by selecting the "No breakdown" option.
    */
   async clearBreakdownField() {
-    await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'visible',
-    });
-    await this.page
-      .locator(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="__EMPTY_SELECTOR_OPTION__"]`
-      )
-      .click();
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'hidden',
-    });
+    await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
   }
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
@@ -1148,13 +1138,19 @@ export class DiscoverApp {
   }
 
   async showChart() {
-    await this.page.testSubj.click('dscShowHistogramButton');
-    await this.waitUntilTabIsLoaded();
+    const showButton = this.page.testSubj.locator('dscShowHistogramButton');
+    if (await showButton.isVisible()) {
+      await showButton.click();
+      await this.waitUntilTabIsLoaded();
+    }
   }
 
   async hideChart() {
-    await this.page.testSubj.click('dscHideHistogramButton');
-    await this.waitUntilTabIsLoaded();
+    const hideButton = this.page.testSubj.locator('dscHideHistogramButton');
+    if (await hideButton.isVisible()) {
+      await hideButton.click();
+      await this.waitUntilTabIsLoaded();
+    }
   }
 
   async showTable() {
