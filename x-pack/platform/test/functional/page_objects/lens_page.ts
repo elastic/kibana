@@ -256,7 +256,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await retry.waitFor('field selection to commit', async () => {
           const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
           const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
-          return committedLabel === field.trim();
+          return committedLabel === field;
         });
       }
 

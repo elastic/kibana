@@ -319,13 +319,12 @@ export class LensApp {
     // data-selected-field is the committed display name and updates only after
     // insertOrReplaceColumn. Poll the attribute as data so labels with CSS
     // metacharacters are not interpolated into a selector.
-    const requestedField = field.trim();
     await this.page.waitForFunction(
       (expected) =>
         document
           .querySelector('[data-test-subj="indexPattern-dimension-field"]')
           ?.getAttribute('data-selected-field') === expected,
-      requestedField,
+      field,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }
