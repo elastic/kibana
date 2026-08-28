@@ -9,7 +9,6 @@
 
 import Fs from 'fs';
 import Fsp from 'fs/promises';
-import Path from 'path';
 import * as Rx from 'rxjs';
 
 import { assertAbsolute, mkdirp, fsReadDir$ } from './fs';
@@ -111,11 +110,7 @@ export async function scanCopy(options: Options) {
           flag: 'wx',
         });
       } else {
-        try {
-          await Fsp.copyFile(rec.source.abs, rec.dest.abs, COPY_FLAGS);
-        } catch (error) {
-          throw await annotateCopyError(error, rec.source.abs);
-        }
+        await Fsp.copyFile(rec.source.abs, rec.dest.abs, COPY_FLAGS);
       }
 
       await handleGenericRec(rec);
@@ -128,53 +123,4 @@ export async function scanCopy(options: Options) {
       dest: SomePath.fromAbs(destination),
     }).pipe(Rx.defaultIfEmpty(undefined))
   );
-}
-
-// DEBUG: enrich copy failures with symlink/target info to diagnose the
-// yarn->pnpm build layout (dangling workspace symlinks in node_modules).
-async function annotateCopyError(error: unknown, sourceAbs: string): Promise<unknown> {
-  if (!(error instanceof Error) || !('code' in error)) return error;
-
-  const lines: string[] = [`scanCopy failed to copy source: ${sourceAbs}`];
-  try {
-    const lstat = await Fsp.lstat(sourceAbs);
-    lines.push(
-      `  lstat: isSymbolicLink=${lstat.isSymbolicLink()} isDirectory=${lstat.isDirectory()} isFile=${lstat.isFile()}`
-    );
-    if (lstat.isSymbolicLink()) {
-      const rawTarget = await Fsp.readlink(sourceAbs);
-      const resolvedTarget = Path.resolve(Path.dirname(sourceAbs), rawTarget);
-      lines.push(`  symlink raw target: ${rawTarget}`);
-      lines.push(`  symlink resolved target: ${resolvedTarget}`);
-      lines.push(`  target exists: ${await pathExists(resolvedTarget)}`);
-    }
-  } catch (statError) {
-    lines.push(`  (lstat failed: ${statError instanceof Error ? statError.message : statError})`);
-  }
-
-  try {
-    const parent = Path.dirname(sourceAbs);
-    const siblings = await Fsp.readdir(parent, { withFileTypes: true });
-    lines.push(`  parent dir (${parent}) entries:`);
-    for (const ent of siblings) {
-      const kind = ent.isSymbolicLink() ? 'symlink' : ent.isDirectory() ? 'dir' : 'file';
-      lines.push(`    - ${ent.name} [${kind}]`);
-    }
-  } catch (readError) {
-    lines.push(
-      `  (readdir parent failed: ${readError instanceof Error ? readError.message : readError})`
-    );
-  }
-
-  error.message = `${error.message}\n${lines.join('\n')}`;
-  return error;
-}
-
-async function pathExists(path: string): Promise<boolean> {
-  try {
-    await Fsp.stat(path);
-    return true;
-  } catch {
-    return false;
-  }
 }
