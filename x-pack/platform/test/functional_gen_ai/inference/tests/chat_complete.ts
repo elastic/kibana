@@ -9,8 +9,32 @@ import { lastValueFrom, toArray } from 'rxjs';
 import expect from '@kbn/expect';
 import { supertestToObservable } from '@kbn/sse-utils-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type SuperTest from 'supertest';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { createJudgedIt } from './llm_triage';
+
+const MAX_EVENTS_MESSAGE_CHARS = 2_000;
+
+const describeEvents = (events: unknown[]): string => {
+  const serialized = JSON.stringify(events);
+  return serialized.length > MAX_EVENTS_MESSAGE_CHARS
+    ? `${serialized.slice(0, MAX_EVENTS_MESSAGE_CHARS)}…[truncated]`
+    : serialized;
+};
+
+/**
+ * Collects all SSE events from a chat_complete stream and fails with the full error
+ * payload when the stream reports an error, so failure triage sees the provider
+ * error details instead of a bare assertion message.
+ */
+const readStreamEvents = async (response: SuperTest.Test) => {
+  const events = await lastValueFrom(supertestToObservable(response).pipe(toArray()));
+  const errorEvent = events.find((event) => event?.type === 'error');
+  if (errorEvent) {
+    throw new Error(`chat_complete stream emitted an error event: ${JSON.stringify(errorEvent)}`);
+  }
+  return events;
+};
 
 export const chatCompleteSuite = (
   { id: connectorId, actionTypeId: connectorType }: AvailableConnectorWithId,
@@ -164,13 +188,21 @@ export const chatCompleteSuite = (
           })
           .expect(200);
 
-        const observable = supertestToObservable(response);
+        const events = await readStreamEvents(response);
+        const message = events[events.length - 1];
 
-        const message = await lastValueFrom(observable);
-
-        expect(message.type).to.eql('chatCompletionMessage');
-        expect(message.toolCalls).to.eql([]);
-        expect(message.content).to.contain('4');
+        expect(message.type).to.eql(
+          'chatCompletionMessage',
+          `expected the last event to be a chatCompletionMessage, events: ${describeEvents(events)}`
+        );
+        expect(message.toolCalls).to.eql(
+          [],
+          `expected no tool calls, events: ${describeEvents(events)}`
+        );
+        expect(message.content).to.contain(
+          '4',
+          `expected the message content to contain "4", events: ${describeEvents(events)}`
+        );
       });
 
       judgedIt('executes a tool when explicitly requested', async () => {
@@ -200,11 +232,17 @@ export const chatCompleteSuite = (
           })
           .expect(200);
 
-        const observable = supertestToObservable(response);
+        const events = await readStreamEvents(response);
+        const message = events[events.length - 1];
 
-        const message = await lastValueFrom(observable);
-
-        expect(message.toolCalls.length).to.eql(1);
+        expect(message.type).to.eql(
+          'chatCompletionMessage',
+          `expected the last event to be a chatCompletionMessage, events: ${describeEvents(events)}`
+        );
+        expect(message.toolCalls.length).to.eql(
+          1,
+          `expected exactly one tool call, events: ${describeEvents(events)}`
+        );
         expect(message.toolCalls[0].function.name).to.eql('calculator');
         expect(message.toolCalls[0].function.arguments.formula).to.contain('123');
       });
@@ -220,12 +258,15 @@ export const chatCompleteSuite = (
           })
           .expect(200);
 
-        const observable = supertestToObservable(response);
-
-        const events = await lastValueFrom(observable.pipe(toArray()));
+        const events = await readStreamEvents(response);
         const tokenEvent = events[events.length - 2];
 
-        expect(tokenEvent.type).to.eql('chatCompletionTokenCount');
+        expect(tokenEvent.type).to.eql(
+          'chatCompletionTokenCount',
+          `expected the second-to-last event to be a chatCompletionTokenCount, events: ${describeEvents(
+            events
+          )}`
+        );
         expect(tokenEvent.tokens.prompt).to.be.greaterThan(0);
         expect(tokenEvent.tokens.completion).to.be.greaterThan(0);
         // can include thinking token depending on the model
