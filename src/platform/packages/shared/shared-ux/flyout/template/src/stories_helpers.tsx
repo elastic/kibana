@@ -141,7 +141,7 @@ const METABLOCK_POOL = [
     Dec 3, 2025
   </FlyoutTemplate.Header.MetaBlock>,
   <FlyoutTemplate.Header.MetaBlock key="updatedBy" title="Last updated by">
-    <EuiLink href="#">name@elastic.co</EuiLink>
+    <EuiLink href="#">long-user-name-with-ellipsis@elastic.co</EuiLink>
   </FlyoutTemplate.Header.MetaBlock>,
   <FlyoutTemplate.Header.MetaBlock key="owner" title="Owner">
     Platform
@@ -197,7 +197,7 @@ const INFO_BLOCK_POOL = [
     90
   </FlyoutTemplate.Header.InfoBlock>,
   <FlyoutTemplate.Header.InfoBlock key="env" title="Environment">
-    Production
+    global.prod.long-environment-name-with-ellipsis.elastic.co
   </FlyoutTemplate.Header.InfoBlock>,
   <FlyoutTemplate.Header.InfoBlock key="version" title="Version">
     2.4.1

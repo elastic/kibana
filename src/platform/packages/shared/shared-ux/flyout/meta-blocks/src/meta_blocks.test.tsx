@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import { MetaBlocks } from '..';
 
 describe('MetaBlocks', () => {
@@ -33,6 +34,24 @@ describe('MetaBlocks', () => {
     render(<MetaBlocks items={[{ title: 'Resource', value: resource }]} />);
 
     expect(screen.getByTestId('fullText')).toHaveTextContent(resource);
+  });
+
+  it('truncates link values in the middle, keeping the link itself accessible', () => {
+    const email = 'long-user-name-with-ellipsis@elastic.co';
+    render(
+      <MetaBlocks
+        items={[{ title: 'Last updated by', value: <EuiLink href="#">{email}</EuiLink> }]}
+      />
+    );
+
+    expect(screen.getByRole('link', { name: email })).toBeInTheDocument();
+  });
+
+  it('leaves values that own their layout untruncated', () => {
+    render(<MetaBlocks items={[{ title: 'Severity', value: <EuiBadge>Critical</EuiBadge> }]} />);
+
+    expect(screen.queryByTestId('fullText')).not.toBeInTheDocument();
+    expect(screen.getByText('Critical')).toBeInTheDocument();
   });
 
   it('renders nothing when there are no items', () => {
