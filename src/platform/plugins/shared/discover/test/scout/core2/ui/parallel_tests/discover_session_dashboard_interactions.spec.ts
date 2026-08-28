@@ -8,11 +8,19 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { spaceTest, tags, testData } from '../fixtures';
+
+const FLIGHTS_DATA_VIEW = 'kibana_sample_data_flights';
+const FLIGHTS_TIME_RANGE_DISPLAY = {
+  from: 'Apr 10, 2018 @ 00:00:00.000',
+  to: 'Nov 15, 2018 @ 00:00:00.000',
+};
+const CUSTOM_ROWS_PER_PAGE = 10;
 
 spaceTest.describe('Discover session panel interactions', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
-    await discoverScoutSpace.setupDiscoverDefaults();
+    await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -38,4 +46,57 @@ spaceTest.describe('Discover session panel interactions', { tag: tags.deployment
       /Expected[\S\s]+but "n" found/
     );
   });
+
+  spaceTest(
+    'persists rows per page after saving and reloading a dashboard',
+    async ({ apiServices, discoverScoutSpace, page, pageObjects, scoutSpace }) => {
+      const { dashboard, dataGrid, datePicker } = pageObjects;
+      const savedSearchName = `Paginated Discover session ${scoutSpace.id}`;
+      const dashboardName = `Dashboard with paginated Discover session ${scoutSpace.id}`;
+
+      await apiServices.discover.create(
+        {
+          title: savedSearchName,
+          tabs: [
+            {
+              id: 'flights-data-view',
+              label: 'Flights data view',
+              data_source: {
+                type: 'data_view_reference',
+                ref_id: discoverScoutSpace.getDataViewId(FLIGHTS_DATA_VIEW),
+              },
+              rows_per_page: testData.DEFAULT_ROWS_PER_PAGE,
+            },
+          ],
+        } satisfies DiscoverSessionApiDataInput,
+        scoutSpace.id
+      );
+
+      await dashboard.openNewDashboard();
+      await datePicker.setAbsoluteRange(FLIGHTS_TIME_RANGE_DISPLAY);
+      await dashboard.addSavedSearch(savedSearchName);
+      await dashboard.waitForRenderComplete();
+      await dataGrid.waitForLoad();
+
+      expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
+      expect(await dataGrid.getCurrentRowsPerPage()).toBe(testData.DEFAULT_ROWS_PER_PAGE);
+
+      await dashboard.saveDashboard(dashboardName);
+      await page.reload();
+      await dashboard.waitForRenderComplete();
+      await dataGrid.waitForLoad();
+
+      expect(await dataGrid.getCurrentRowsPerPage()).toBe(testData.DEFAULT_ROWS_PER_PAGE);
+
+      await dataGrid.changeRowsPerPageTo(CUSTOM_ROWS_PER_PAGE);
+      await expect.poll(() => dataGrid.getCurrentRowsPerPage()).toBe(CUSTOM_ROWS_PER_PAGE);
+      await dashboard.saveChangesToExistingDashboard();
+
+      await page.reload();
+      await dashboard.waitForRenderComplete();
+      await dataGrid.waitForLoad();
+
+      expect(await dataGrid.getCurrentRowsPerPage()).toBe(CUSTOM_ROWS_PER_PAGE);
+    }
+  );
 });
