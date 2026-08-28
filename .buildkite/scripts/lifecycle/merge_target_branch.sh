@@ -18,8 +18,16 @@ source .buildkite/scripts/common/util.sh
 # deduplication, and CI metrics are unaffected; only the working tree changes.
 #
 # Opt out per PR with the ci:test-head-only label.
+#
+# Scoped to the kibana-pull-request pipeline: other PR-triggered pipelines
+# (deploy-from-pr, storybooks-from-pr, …) intentionally build the PR head
+# exactly as pushed.
 
 merge_target_branch() {
+  if [[ "${BUILDKITE_PIPELINE_SLUG:-}" != "kibana-pull-request" ]]; then
+    return 0
+  fi
+
   if ! is_pr; then
     return 0
   fi
