@@ -41,6 +41,8 @@ export interface AlertEventProps {
   rule: AlertAttachmentMetadata['rule'];
   savedObjectId: string;
   totalAlerts: number;
+  /** When true the rule name is shown as plain text with no clickable link (CPS / remote alerts). */
+  isRemoteAlert?: boolean;
 }
 
 export const AlertEvent: React.FC<AlertEventProps> = ({
@@ -48,6 +50,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   totalAlerts,
   savedObjectId,
   rule,
+  isRemoteAlert = false,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const enableNewFlyout = useIsNewFlyoutEnabled();
@@ -123,7 +126,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
         label: resolvedRuleName,
         fallbackLabel: i18n.UNKNOWN_RULE,
         dataTestSubj: `alert-rule-link-${savedObjectId}`,
-        onClick: onRuleClick,
+        onClick: isRemoteAlert ? undefined : onRuleClick,
       }}
       dataTestSubj={`alerts-user-action-${savedObjectId}`}
     />
