@@ -7,6 +7,7 @@
 
 import {
   EMPTY,
+  of,
   from,
   concatMap,
   concatWith,
@@ -23,7 +24,9 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import { serializeExecutionError } from '../execution_runner';
+import type { SurfaceProjectionServiceStart } from '../../surface_projection';
 import type { CallbackDeliveryService } from './callback_delivery_service';
+import { getSurfaceProjector, projectRoundForSurface } from './project_round_for_surface';
 
 /**
  * Delivers the execution's events to its configured callback URL, resolving once every
@@ -37,11 +40,13 @@ export const deliverCallbackEvents = ({
   execution,
   events$,
   callbackDeliveryService,
+  surfaceProjection,
   logger,
 }: {
   execution: AgentExecution;
   events$: Observable<ChatEvent>;
   callbackDeliveryService: CallbackDeliveryService;
+  surfaceProjection?: SurfaceProjectionServiceStart;
   logger: Logger;
 }): Promise<void> => {
   const callbackUrl = callbackDeliveryService.getCallbackUrl(execution);
@@ -62,19 +67,32 @@ export const deliverCallbackEvents = ({
 
   const transport = callbackDeliveryService.createTransport(callbackUrl);
 
+  const projector = getSurfaceProjector({ execution, surfaceProjection });
+
   const deliverEvent = (event: ChatEvent) => {
     const isTerminal = isRoundCompleteEvent(event);
-    const delivery = callbackDeliveryService.makeCallbackRequest({
-      payload: {
-        execution_id: execution.executionId,
-        event,
-        ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
-      },
-      transport,
-      retry: isTerminal,
-    });
+    // Projection applies to the terminal reply only; see the surface-projection spike for
+    // why per-message projection needs the external host to post more than once per turn.
+    const payloadEvent$ =
+      isRoundCompleteEvent(event) && projector
+        ? from(projectRoundForSurface({ event, projector, logger }))
+        : of(event);
 
-    return from(delivery).pipe(
+    const delivery = payloadEvent$.pipe(
+      concatMap((deliveredEvent) =>
+        callbackDeliveryService.makeCallbackRequest({
+          payload: {
+            execution_id: execution.executionId,
+            event: deliveredEvent,
+            ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
+          },
+          transport,
+          retry: isTerminal,
+        })
+      )
+    );
+
+    return delivery.pipe(
       catchError((error) => {
         logger.warn(
           `Failed to deliver callback event for execution ${execution.executionId}: ${error.message}`

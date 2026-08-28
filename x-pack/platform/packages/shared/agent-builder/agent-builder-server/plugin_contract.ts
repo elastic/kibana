@@ -12,6 +12,7 @@ import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
+import type { SurfaceProjectorDefinition } from './surface_projection';
 import type { SkillDefinition } from './skills';
 import type { SkillRegistry } from './skills/registry';
 import type {
@@ -93,6 +94,17 @@ export interface RenderersSetup {
    * it will fail to resolve in the UI.
    */
   register(rendererType: RendererTypeDefinition): void;
+}
+
+export interface SurfaceProjectionSetup {
+  /**
+   * Register a projector that rewrites assistant replies for one external surface.
+   *
+   * Called on the callback-delivery path when an execution has a matching origin,
+   * so a headless host (Relay → Slack) receives something renderable instead of
+   * the raw `<render_attachment>` tags the browser would have mounted.
+   */
+  register(projector: SurfaceProjectorDefinition): void;
 }
 
 export interface SkillsSetup {
@@ -259,6 +271,11 @@ export interface AgentBuilderPluginSetup {
    * Renderers setup contract, which can be used to register renderer types.
    */
   renderers: RenderersSetup;
+  /**
+   * Surface projection setup contract, which can be used to register reply projectors
+   * for external surfaces such as Slack.
+   */
+  surfaceProjection: SurfaceProjectionSetup;
   /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */

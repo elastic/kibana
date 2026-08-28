@@ -14,6 +14,7 @@ import type {
   AdaptiveUiPluginStart,
 } from './types';
 import { registerAdaptiveUiViewAttachment } from './attachment_types/adaptive_ui_view';
+import { registerSlackSurfaceProjector } from './surface';
 import { registerAdaptiveUiTools } from './tools';
 import { createAdaptiveUiViewRegistry } from './registered_views';
 import { viewRendererTypeDefinition } from './renderers/view_renderer';
@@ -63,6 +64,7 @@ export class AdaptiveUiPlugin
       getNightshiftInvestigations,
     });
     agentBuilder.renderers.register(viewRendererTypeDefinition);
+    registerSlackSurfaceProjector(agentBuilder);
     registerAdaptiveUiRoutes({
       router: coreSetup.http.createRouter(),
       logger: this.logger,

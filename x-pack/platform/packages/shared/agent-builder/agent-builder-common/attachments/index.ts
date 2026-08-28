@@ -68,6 +68,7 @@ export {
   attachmentDiffSchema,
   isAttachmentGroup,
   getLatestVersion,
+  resolveAttachmentVersion,
   getVersion,
   createVersionId,
   parseVersionId,
