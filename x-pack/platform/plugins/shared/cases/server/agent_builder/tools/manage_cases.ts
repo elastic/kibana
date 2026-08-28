@@ -7,12 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreSetup } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
-import type { CasesServerStartDependencies } from '../../types';
-import { getCasesToolAvailability } from '../utils/get_cases_tool_availability';
 import { createCaseStepCommonDefinition } from '../../../common/workflows/steps/create_case';
 import { updateCaseStepCommonDefinition } from '../../../common/workflows/steps/update_case';
 import { updateCasesStepCommonDefinition } from '../../../common/workflows/steps/update_cases';
@@ -109,10 +105,9 @@ const buildManageCasesSchema = (isTemplatesEnabled: boolean) => {
 type ManageCasesSchema = ReturnType<typeof buildManageCasesSchema>;
 
 export const manageCasesTool = (
-  coreSetup: CoreSetup<CasesServerStartDependencies>,
+  availability: ToolAvailabilityConfig,
   getCasesClientFn: GetCasesClientFn,
-  isTemplatesEnabled: boolean,
-  logger: Logger
+  isTemplatesEnabled: boolean
 ): BuiltinToolDefinition<ManageCasesSchema> => {
   const manageCasesSchema = buildManageCasesSchema(isTemplatesEnabled);
   const createStepDef = createCaseStepDefinition(getCasesClientFn);
@@ -150,11 +145,7 @@ export const manageCasesTool = (
     },
     schema: manageCasesSchema,
     tags: ['cases'],
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) =>
-        getCasesToolAvailability({ core: coreSetup, logger, request }),
-    },
+    availability,
     handler: async (args, toolContext) => {
       const { mode, connector_id, tags_to_add, case_id, assignees, ...rest } = args;
 

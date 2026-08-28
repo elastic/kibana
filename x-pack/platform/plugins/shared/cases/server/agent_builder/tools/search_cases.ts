@@ -33,7 +33,7 @@ import {
   toCaseAttachmentData,
 } from '../attachments/emit_attachments';
 import { CASES_SOLUTION_CONTEXT_INSTRUCTION } from '../utils/tool_instructions';
-import { getCasesToolAvailability } from '../utils/get_cases_tool_availability';
+import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 
 const emitSearchAttachments = async (
   cases: EnhancedCaseData[],
@@ -394,10 +394,6 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
       }
     },
     tags: ['cases'],
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) =>
-        getCasesToolAvailability({ core: coreSetup, logger, request }),
-    },
+    availability: createCasesToolAvailability(coreSetup, logger),
   };
 };

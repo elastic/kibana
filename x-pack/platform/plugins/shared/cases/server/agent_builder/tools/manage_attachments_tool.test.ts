@@ -7,11 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ToolAvailabilityContext, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { manageAttachmentsTool } from './manage_attachments_tool';
 import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
+import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 
 const buildMockAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
@@ -50,13 +51,8 @@ describe('manageAttachmentsTool', () => {
   const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-    return manageAttachmentsTool(
-      coreSetup,
-      jest.fn().mockResolvedValue(casesClient),
-      registry,
-      enabled,
-      loggingSystemMock.createLogger()
-    );
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    return manageAttachmentsTool(availability, jest.fn().mockResolvedValue(casesClient), registry, enabled);
   };
 
   it('has the correct tool id', () => {
@@ -162,42 +158,27 @@ describe('manageAttachmentsTool', () => {
 describe('manageAttachmentsTool availability', () => {
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCoreWithSolution('es');
-    const tool = manageAttachmentsTool(
-      coreSetup,
-      jest.fn(),
-      buildRegistry([]),
-      true,
-      loggingSystemMock.createLogger()
-    );
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = manageAttachmentsTool(availability, jest.fn(), buildRegistry([]), true);
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
+    const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 
   it('returns available for security solution', async () => {
     const coreSetup = makeCoreWithSolution('security');
-    const tool = manageAttachmentsTool(
-      coreSetup,
-      jest.fn(),
-      buildRegistry([]),
-      true,
-      loggingSystemMock.createLogger()
-    );
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = manageAttachmentsTool(availability, jest.fn(), buildRegistry([]), true);
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
+    const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'available' });
   });
 
   it('cacheMode is space', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-    const tool = manageAttachmentsTool(
-      coreSetup,
-      jest.fn(),
-      buildRegistry([]),
-      true,
-      loggingSystemMock.createLogger()
-    );
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = manageAttachmentsTool(availability, jest.fn(), buildRegistry([]), true);
     expect(tool.availability?.cacheMode).toBe('space');
   });
 });

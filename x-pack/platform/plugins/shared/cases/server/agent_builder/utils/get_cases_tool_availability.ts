@@ -11,6 +11,9 @@ import type { Logger } from '@kbn/logging';
 import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { CasesServerStartDependencies } from '../../types';
 
+/** Solutions where Cases is available (undefined = stateful, no gating). */
+const ALLOWED_SOLUTIONS = new Set(['classic', 'oblt', 'security', undefined]);
+
 export async function getCasesToolAvailability({
   core,
   logger,
@@ -23,15 +26,28 @@ export async function getCasesToolAvailability({
   try {
     const [, pluginsStart] = await core.getStartServices();
     const activeSpace = await pluginsStart.spaces?.spacesService.getActiveSpace(request);
-    if (activeSpace?.solution === 'es') {
+    if (!ALLOWED_SOLUTIONS.has(activeSpace?.solution)) {
       return {
         status: 'unavailable',
-        reason: 'Cases is not available in Elasticsearch projects',
+        reason: 'Cases is not available in this project type',
       };
     }
   } catch (error) {
-    // Fail open: if Spaces is absent or any service error occurs, default to available
-    logger.debug(`Cases tool availability check failed, defaulting to available: ${error}`);
+    logger.debug('Cases tool availability check failed, defaulting to available.');
+    logger.debug(error);
   }
   return { status: 'available' };
 }
+
+/**
+ * Returns the availability config object to attach to a Cases tool definition.
+ * Uses cacheMode 'space' so the check runs once per space, not per request.
+ */
+export const createCasesToolAvailability = (
+  core: CoreSetup<CasesServerStartDependencies>,
+  logger: Logger
+) => ({
+  cacheMode: 'space' as const,
+  handler: ({ request }: { request: KibanaRequest }) =>
+    getCasesToolAvailability({ core, logger, request }),
+});

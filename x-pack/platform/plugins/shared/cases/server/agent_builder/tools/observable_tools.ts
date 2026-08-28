@@ -12,7 +12,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { CasesServerStartDependencies } from '../../types';
-import { getCasesToolAvailability } from '../utils/get_cases_tool_availability';
+import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 import { addObservablesStepCommonDefinition } from '../../../common/workflows/steps/add_observables';
 import { updateObservableStepCommonDefinition } from '../../../common/workflows/steps/update_observable';
 import { addObservablesStepDefinition } from '../../workflows/steps/add_observables';
@@ -61,11 +61,7 @@ export const observablesTool = (
       idempotentHint: false,
       openWorldHint: false,
     },
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) =>
-        getCasesToolAvailability({ core: coreSetup, logger, request }),
-    },
+    availability: createCasesToolAvailability(coreSetup, logger),
     schema: observablesSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {

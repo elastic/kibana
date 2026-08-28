@@ -6,10 +6,11 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ToolAvailabilityContext, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock } from '../../client/mocks';
 import { getAttachmentsTool } from './get_attachments_tool';
 import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
+import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 
 const buildToolContext = (): ToolHandlerContext =>
   ({
@@ -25,27 +26,20 @@ const buildToolContext = (): ToolHandlerContext =>
     },
   } as unknown as ToolHandlerContext);
 
+const buildTool = (getCasesClientFn = jest.fn()) => {
+  const coreSetup = coreMock.createSetup();
+  coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
+  const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+  return getAttachmentsTool(availability, getCasesClientFn);
+};
+
 describe('getAttachmentsTool', () => {
   it('has the correct tool id', () => {
-    const casesClient = createCasesClientMock();
-    const coreSetup = coreMock.createSetup();
-    const tool = getAttachmentsTool(
-      coreSetup,
-      jest.fn().mockResolvedValue(casesClient),
-      loggingSystemMock.createLogger()
-    );
-    expect(tool.id).toBe('platform.core.cases.get_attachments');
+    expect(buildTool().id).toBe('platform.core.cases.get_attachments');
   });
 
   it('has read-only annotations', () => {
-    const casesClient = createCasesClientMock();
-    const coreSetup = coreMock.createSetup();
-    const tool = getAttachmentsTool(
-      coreSetup,
-      jest.fn().mockResolvedValue(casesClient),
-      loggingSystemMock.createLogger()
-    );
-    expect(tool.annotations).toEqual({
+    expect(buildTool().annotations).toEqual({
       title: 'Get Case Attachments',
       readOnlyHint: true,
       destructiveHint: false,
@@ -55,14 +49,7 @@ describe('getAttachmentsTool', () => {
   });
 
   it('schema requires only case_id', () => {
-    const casesClient = createCasesClientMock();
-    const coreSetup = coreMock.createSetup();
-    const tool = getAttachmentsTool(
-      coreSetup,
-      jest.fn().mockResolvedValue(casesClient),
-      loggingSystemMock.createLogger()
-    );
-    const shape = tool.schema.shape;
+    const shape = buildTool().schema.shape;
     expect(shape).toHaveProperty('case_id');
     expect(Object.keys(shape)).toEqual(['case_id']);
   });
@@ -72,12 +59,7 @@ describe('getAttachmentsTool', () => {
     const mockAttachments = [{ id: '1', type: 'user', comment: 'hello' }];
     casesClient.attachments.getAll.mockResolvedValue(mockAttachments as never);
 
-    const coreSetup = coreMock.createSetup();
-    const tool = getAttachmentsTool(
-      coreSetup,
-      jest.fn().mockResolvedValue(casesClient),
-      loggingSystemMock.createLogger()
-    );
+    const tool = buildTool(jest.fn().mockResolvedValue(casesClient));
     const result = await tool.handler({ case_id: 'case-1' } as never, buildToolContext());
 
     expect(casesClient.attachments.getAll).toHaveBeenCalled();
@@ -92,24 +74,23 @@ describe('getAttachmentsTool', () => {
 describe('getAttachmentsTool availability', () => {
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCoreWithSolution('es');
-    const tool = getAttachmentsTool(coreSetup, jest.fn(), loggingSystemMock.createLogger());
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = getAttachmentsTool(availability, jest.fn());
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
+    const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 
   it('returns available for classic solution', async () => {
     const coreSetup = makeCoreWithSolution('classic');
-    const tool = getAttachmentsTool(coreSetup, jest.fn(), loggingSystemMock.createLogger());
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = getAttachmentsTool(availability, jest.fn());
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
+    const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'available' });
   });
 
   it('cacheMode is space', () => {
-    const coreSetup = coreMock.createSetup();
-    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-    const tool = getAttachmentsTool(coreSetup, jest.fn(), loggingSystemMock.createLogger());
-    expect(tool.availability?.cacheMode).toBe('space');
+    expect(buildTool().availability?.cacheMode).toBe('space');
   });
 });

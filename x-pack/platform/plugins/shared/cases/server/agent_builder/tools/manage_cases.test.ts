@@ -6,31 +6,34 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ToolAvailabilityContext } from '@kbn/agent-builder-server/tools';
 import { manageCasesTool } from './manage_cases';
 import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
+import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 
 describe('manageCasesTool availability', () => {
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCoreWithSolution('es');
-    const tool = manageCasesTool(coreSetup, jest.fn(), false, loggingSystemMock.createLogger());
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = manageCasesTool(availability, jest.fn(), false);
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
+    const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 
   it('returns available for classic solution', async () => {
     const coreSetup = makeCoreWithSolution('classic');
-    const tool = manageCasesTool(coreSetup, jest.fn(), false, loggingSystemMock.createLogger());
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = manageCasesTool(availability, jest.fn(), false);
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
+    const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'available' });
   });
 
   it('cacheMode is space', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-    const tool = manageCasesTool(coreSetup, jest.fn(), false, loggingSystemMock.createLogger());
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = manageCasesTool(availability, jest.fn(), false);
     expect(tool.availability?.cacheMode).toBe('space');
   });
 });

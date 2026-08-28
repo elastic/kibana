@@ -21,6 +21,7 @@ import { buildCasesSkill } from './skills/cases_skill';
 import { casesAnalyticsSkill } from './skills/cases_analytics_skill';
 import { createCaseAttachmentType } from './attachments/case_attachment_type';
 import { createCasesAttachmentType } from './attachments/cases_attachment_type';
+import { createCasesToolAvailability } from './utils/get_cases_tool_availability';
 
 /**
  * Registers all Cases agent builder tools:
@@ -49,28 +50,20 @@ export function registerCasesAgentBuilderTools(
   }: { analyticsV2Enabled: boolean; attachmentsEnabled: boolean; templatesEnabled: boolean },
   logger: Logger
 ): void {
+  const availability = createCasesToolAvailability(coreSetup, logger);
   agentBuilder.tools.register(searchCasesTool(coreSetup, getCasesClient, logger));
-  agentBuilder.tools.register(manageCasesTool(coreSetup, getCasesClient, templatesEnabled, logger));
-  agentBuilder.tools.register(getAttachmentsTool(coreSetup, getCasesClient, logger));
+  agentBuilder.tools.register(manageCasesTool(availability, getCasesClient, templatesEnabled));
+  agentBuilder.tools.register(getAttachmentsTool(availability, getCasesClient));
   agentBuilder.tools.register(
-    manageAttachmentsTool(
-      coreSetup,
-      getCasesClient,
-      unifiedAttachmentTypeRegistry,
-      attachmentsEnabled,
-      logger
-    )
+    manageAttachmentsTool(availability, getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
   agentBuilder.tools.register(
-    attachmentsTool(
-      coreSetup,
-      getCasesClient,
-      unifiedAttachmentTypeRegistry,
-      attachmentsEnabled,
-      logger
-    )
+    attachmentsTool(availability, getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
   agentBuilder.tools.register(observablesTool(coreSetup, getCasesClient, logger));
+  // TODO: Skills have no availability hook in the current platform API. Until one is added,
+  // casesSkill and casesAnalyticsSkill are registered globally and will appear in es-solution
+  // spaces even though their tools are suppressed. Track: [link to follow-up issue].
   agentBuilder.skills.register(buildCasesSkill(templatesEnabled));
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {
