@@ -33,6 +33,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   BehaviorSubject,
   catchError,
+  combineLatest,
   distinctUntilChanged,
   EMPTY,
   from,
@@ -263,10 +264,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       .subscribe((usesEsql) => usesEsql$.next(usesEsql));
 
     // Important for unified search support — KQL bar and filter builder suggestions.
-    const dataViewsSubscription = esqlQuery$
+    const dataViewsSubscription = combineLatest([esqlQuery$, projectRouting$])
       .pipe(
-        distinctUntilChanged(),
-        switchMap((esqlQueryValue) => {
+        distinctUntilChanged(([q1, r1], [q2, r2]) => q1 === q2 && r1 === r2),
+        switchMap(([esqlQueryValue, routingValue]) => {
           if (!esqlQueryValue) return of(undefined);
           const { core, dataViews } = getServices();
           return from(
@@ -274,6 +275,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               dataViewsService: dataViews,
               query: esqlQueryValue,
               http: core.http,
+              projectRouting: routingValue,
             })
           ).pipe(catchError(() => of(undefined)));
         })
