@@ -173,7 +173,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.connectorExecutor,
           this.workflowRuntime,
-          this.workflowLogger
+          stepExecutionRuntime.stepLogger
         );
       }
     }
