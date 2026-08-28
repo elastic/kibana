@@ -12,6 +12,7 @@ import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
 import { createCommandBadgeElement, deserializeInputSegments } from './command_badge';
 import { serializeEditorContent } from './serialize';
 import {
+  createImagePlaceholderElement,
   getPlaceholderNamesFromElement,
   removePlaceholderByName as removePlaceholderByNameFromDom,
 } from './image_placeholder';
@@ -184,6 +185,8 @@ const useMessageEditorController = ({
             ref.current.appendChild(createTextFragment(segment.value));
           } else if (segment.type === 'badge') {
             ref.current.appendChild(createCommandBadgeElement(segment.data));
+          } else if (segment.type === 'image') {
+            ref.current.appendChild(createImagePlaceholderElement(segment.name));
           }
         }
 
