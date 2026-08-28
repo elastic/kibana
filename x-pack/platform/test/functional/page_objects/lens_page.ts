@@ -880,9 +880,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
-      await retry.waitFor(`name-input value to be "${label}"`, async () => {
-        return (await testSubjects.getAttribute('name-input', 'value')) === label;
+      // NameInput sits in the Appearance block at the bottom of the flyout and
+      // remounts when the column label commits (DebouncedInput key). Wait for it
+      // to exist, then type+assert in one retry so a remount cannot leave the
+      // wait looking at a detached node.
+      await retry.waitFor('name-input to exist', async () =>
+        testSubjects.exists('name-input', { timeout: 1000 })
+      );
+      await retry.try(async () => {
+        await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+        expect(
+          await testSubjects.getAttribute('name-input', 'value', {
+            findTimeout: 2000,
+            tryTimeout: 5000,
+          })
+        ).to.eql(label);
       });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
