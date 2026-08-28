@@ -17,6 +17,7 @@ import type {
   TimefilterContract,
 } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { NavigateToLensContext } from '@kbn/lens-common';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import type { VisGroups } from './vis_groups_enum';
@@ -141,6 +142,12 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
    * make use of ES|QL, so dashboards can react to it (e.g. enabling ES|QL-only controls).
    */
   readonly usesEsql?: (visParams: VisParams) => boolean;
+
+  /**
+   * ES|QL query surface for related-panel highlighting. When the vis uses ES|QL,
+   * return `{ esql }` so `apiPublishesESQLQuery` is true. Leave unset otherwise.
+   */
+  readonly getEsqlQuery?: (visParams: VisParams) => AggregateQuery | undefined;
 
   readonly isAccessible?: boolean;
   /**
