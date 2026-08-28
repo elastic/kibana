@@ -16,6 +16,7 @@ import {
   findStatsWithTbucket,
   getTbucketResultColumn,
   getBucketResultColumnForField,
+  getTimeGroupings,
 } from './bucket';
 
 const parseCommands = (esqlQuery: string): ESQLCommand[] => Parser.parse(esqlQuery).root.commands;
@@ -74,6 +75,33 @@ describe('findStatsWithTbucket', () => {
     expect(
       findStatsWithTbucket(parseCommands('FROM index | STATS AVG(bytes) BY host'))
     ).toBeUndefined();
+  });
+});
+
+describe('getTimeGroupings', () => {
+  it('classifies unaliased BUCKET and TBUCKET groupings', () => {
+    const statsCommand = parseStats(
+      'FROM index | STATS COUNT(*) BY host, BUCKET(@timestamp, 1 hour), TBUCKET(100)'
+    );
+    expect(getTimeGroupings(statsCommand)).toEqual([
+      { kind: 'bucket', field: '@timestamp', resultColumn: 'BUCKET(@timestamp, 1 hour)' },
+      { kind: 'tbucket', field: undefined, resultColumn: 'TBUCKET(100)' },
+    ]);
+  });
+
+  it('uses the alias as result column for assigned groupings', () => {
+    const statsCommand = parseStats(
+      'FROM index | STATS COUNT(*) BY b = BUCKET(@timestamp, 1 hour), t = TBUCKET(100)'
+    );
+    expect(getTimeGroupings(statsCommand)).toEqual([
+      { kind: 'bucket', field: '@timestamp', resultColumn: 'b' },
+      { kind: 'tbucket', field: undefined, resultColumn: 't' },
+    ]);
+  });
+
+  it('ignores non-time groupings and returns empty for STATS without BY', () => {
+    expect(getTimeGroupings(parseStats('FROM index | STATS COUNT(*) BY host'))).toEqual([]);
+    expect(getTimeGroupings(parseStats('FROM index | STATS COUNT(*)'))).toEqual([]);
   });
 });
 
