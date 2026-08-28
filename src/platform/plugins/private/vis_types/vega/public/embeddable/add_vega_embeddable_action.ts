@@ -35,7 +35,7 @@ export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiCont
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const vegaEmbeddable = await embeddable.addNewPanel<VegaByValueState, VegaEmbeddableApi>({
       panelType: VEGA_EMBEDDABLE_TYPE,
-      serializedState: { spec: getDefaultSpec() },
+      serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
     });
     vegaEmbeddable?.onEdit({ isNewPanel: true, returnFocus });
   },
