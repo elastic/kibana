@@ -980,6 +980,15 @@ export class DashboardApp {
     }
   }
 
+  async editLinkedDiscoverPanel(title: string) {
+    await this.clickPanelAction('embeddablePanelAction-editPanel', title);
+    const editInDiscoverLink = this.page.testSubj.locator(
+      'discoverEmbeddableInlineEditEditInDiscoverLink'
+    );
+    await expect(editInDiscoverLink).toBeVisible();
+    await editInDiscoverLink.click();
+  }
+
   /**
    * Clones a panel on the dashboard.
    * The cloned panel becomes a "by value" panel (not linked to library).

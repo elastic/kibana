@@ -547,6 +547,12 @@ export class DiscoverApp {
     }
   }
 
+  async openSaveSearchAsModal() {
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+    await this.page.testSubj.locator('interactiveSaveMenuItem').click();
+    await this.saveModal.modal.waitFor({ state: 'visible' });
+  }
+
   private getStoreTimeWithSearchSwitch() {
     return this.page.testSubj.locator('storeTimeWithSearch');
   }

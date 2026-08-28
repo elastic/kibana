@@ -105,6 +105,13 @@ export class SavedObjectSaveModal {
     await this.page.locator('label[for="add-to-library-option"]').click();
   }
 
+  async setSaveAsNew(saveAsNew: boolean) {
+    const checkbox = this.page.testSubj.locator('saveAsNewCheckbox');
+    if ((await checkbox.isChecked()) !== saveAsNew) {
+      await checkbox.click();
+    }
+  }
+
   async confirm() {
     await this.confirmSaveButton.click();
     await expect(this.modal).toBeHidden();
