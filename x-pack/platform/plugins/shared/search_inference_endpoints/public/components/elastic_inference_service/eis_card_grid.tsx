@@ -7,24 +7,23 @@
 
 import React from 'react';
 
-import { EuiFlexGrid, EuiFlexItem, useCurrentEuiBreakpoint, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, useCurrentEuiBreakpoint, type UseEuiTheme } from '@elastic/eui';
 import { useContentListItems } from '@kbn/content-list-provider';
 import { getItemModelId, toGroupedModel } from '../../utils/eis_content_list_utils';
 import { EisNoModelsPrompt } from './eis_no_models_prompt';
 import { ModelCard } from './model_card';
-import { css } from '@emotion/react';
+
 interface EisCardGridProps {
   onViewModelDetails: (modelId: string) => void;
 }
 
+const cardGridStyles = ({ euiTheme }: UseEuiTheme) => ({
+  paddingTop: euiTheme.size.s,
+});
+
 export const EisCardGrid = ({ onViewModelDetails }: EisCardGridProps) => {
   const { items } = useContentListItems();
   const breakpoint = useCurrentEuiBreakpoint();
-  const { euiTheme } = useEuiTheme();
-
-  const cardGridStyles = css`
-    padding-top: ${euiTheme.size.s};
-  `;
 
   // ContentList owns the initially-empty state, while filtered zero-result
   // queries remain in the ready phase and render this child.
