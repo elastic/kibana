@@ -132,9 +132,7 @@ export interface AgentsSetup {
   registerType: (definition: AgentTypeDefinition) => void;
   /**
    * Register the resolver used to look up details (name, description) for the
-   * AI indices referenced by agent configurations. Expected to be registered by
-   * the `context_engine_agent_builder` bridge plugin; when absent, prompts fall
-   * back to id-only rendering for non-default AI indices.
+   * AI indices referenced by agent configurations.
    */
   registerAiIndexResolver: (resolver: AiIndexResolver) => void;
 }

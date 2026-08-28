@@ -61,7 +61,6 @@ export class AgentsService {
   private typeRegistry: AgentTypeRegistry;
   /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
   private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
-  /** Resolver for AI index details, registered at setup by the CE bridge plugin. */
   private aiIndexResolver?: AiIndexResolver;
 
   private setupDeps?: AgentsServiceSetupDeps;
