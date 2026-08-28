@@ -19,6 +19,14 @@ spaceTest.describe('Console history', { tag: tags.deploymentAgnostic }, () => {
     await pageObjects.console.clearEditorText();
   });
 
+  spaceTest.afterEach(async ({ page }) => {
+    await page.evaluate(() => {
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith('sense:hist_elem_'))
+        .forEach((key) => localStorage.removeItem(key));
+    });
+  });
+
   spaceTest('lists executed requests and clears them', async ({ pageObjects }) => {
     await pageObjects.console.enterText('GET /_search?pretty');
     await pageObjects.console.sendRequest();

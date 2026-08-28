@@ -20,6 +20,10 @@ spaceTest.describe('Console variables', { tag: tags.deploymentAgnostic }, () => 
     await pageObjects.console.openConfigTab();
   });
 
+  spaceTest.afterEach(async ({ page }) => {
+    await page.evaluate(() => localStorage.removeItem('sense:variables'));
+  });
+
   spaceTest('creates and removes a variable', async ({ pageObjects }) => {
     await pageObjects.console.addVariable({ name: 'index1', value: 'test' });
     await expect.poll(() => pageObjects.console.getVariableNames()).toContain('${index1}');

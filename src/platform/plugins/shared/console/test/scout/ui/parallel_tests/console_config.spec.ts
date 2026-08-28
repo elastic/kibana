@@ -19,6 +19,13 @@ spaceTest.describe('Console config', { tag: tags.deploymentAgnostic }, () => {
     await pageObjects.console.clearEditorText();
   });
 
+  spaceTest.afterEach(async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.removeItem('sense:font_size');
+      localStorage.removeItem('sense:is_accessibility_overlay_enabled');
+    });
+  });
+
   spaceTest(
     'shows the accessibility overlay on Escape and hides it once disabled',
     async ({ page, pageObjects }) => {
