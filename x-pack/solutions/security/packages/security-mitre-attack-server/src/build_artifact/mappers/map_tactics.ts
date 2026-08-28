@@ -6,8 +6,8 @@
  */
 
 import type { MitreFramework, MitreTactic } from '@kbn/security-mitre-attack-common';
-import type { StixBundle, StixEntity } from '../types';
-import { getMitreReference, resolveSupersededBy } from './helpers';
+import type { StixBundle } from '../types';
+import { buildRevokedByTargetRefs, getMitreReference, resolveSupersededBy } from './helpers';
 
 /**
  * Maps x-mitre-tactic entities into tactics, positioned by their index in the
@@ -20,31 +20,12 @@ export const mapTactics = (
 ): MitreTactic[] => {
   const { objects } = bundle;
 
-  const entityById = new Map<string, StixEntity>();
-  for (const entity of objects) {
-    entityById.set(entity.id, entity);
-  }
-
-  const revokedByTargetRefs = new Map<string, string[]>();
-  for (const entity of objects) {
-    if (
-      entity.type === 'relationship' &&
-      entity.relationship_type === 'revoked-by' &&
-      entity.source_ref != null &&
-      entity.target_ref != null
-    ) {
-      const existing = revokedByTargetRefs.get(entity.source_ref) ?? [];
-      existing.push(entity.target_ref);
-      revokedByTargetRefs.set(entity.source_ref, existing);
-    }
-  }
+  const entityById = new Map(objects.map((entity) => [entity.id, entity]));
+  const revokedByTargetRefs = buildRevokedByTargetRefs(objects);
 
   const matrixEntity = objects.find((entity) => entity.type === 'x-mitre-matrix');
   const tacticRefs = matrixEntity?.tactic_refs ?? [];
-  const tacticPositionByRef = new Map<string, number>();
-  for (let i = 0; i < tacticRefs.length; i++) {
-    tacticPositionByRef.set(tacticRefs[i], i);
-  }
+  const tacticPositionByRef = new Map(tacticRefs.map((ref, position) => [ref, position]));
 
   return objects
     .filter((entity) => entity.type === 'x-mitre-tactic')

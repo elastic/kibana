@@ -6,8 +6,15 @@
  */
 
 import type { MitreFramework, MitreSubtechnique } from '@kbn/security-mitre-attack-common';
-import type { StixBundle, StixEntity } from '../types';
-import { resolveTacticIds, resolveSupersededBy, getMitreReference } from './helpers';
+import type { StixBundle } from '../types';
+import {
+  buildRevokedByTargetRefs,
+  buildTacticByShortname,
+  isSubtechniqueOfRelationship,
+  resolveTacticIds,
+  resolveSupersededBy,
+  getMitreReference,
+} from './helpers';
 
 /**
  * Maps subtechnique attack-pattern entities into subtechniques, sorted by ATT&CK ID.
@@ -22,33 +29,16 @@ export const mapSubtechniques = (
 ): MitreSubtechnique[] => {
   const { objects } = bundle;
 
-  const entityById = new Map<string, StixEntity>();
-  for (const entity of objects) {
-    entityById.set(entity.id, entity);
-  }
+  const entityById = new Map(objects.map((entity) => [entity.id, entity]));
+  const tacticByShortname = buildTacticByShortname(objects);
+  const revokedByTargetRefs = buildRevokedByTargetRefs(objects);
 
-  // Tactics keyed by x_mitre_shortname for resolving kill_chain_phases.
-  const tacticByShortname = new Map<string, StixEntity>();
-  for (const entity of objects) {
-    if (entity.type === 'x-mitre-tactic' && entity.x_mitre_shortname != null) {
-      tacticByShortname.set(entity.x_mitre_shortname, entity);
-    }
-  }
-
-  const revokedByTargetRefs = new Map<string, string[]>();
   // Maps each subtechnique STIX ID to its parent technique STIX ID.
-  const subtechniqueParentRef = new Map<string, string>();
-  for (const entity of objects) {
-    if (entity.type === 'relationship' && entity.source_ref != null && entity.target_ref != null) {
-      if (entity.relationship_type === 'revoked-by') {
-        const existing = revokedByTargetRefs.get(entity.source_ref) ?? [];
-        existing.push(entity.target_ref);
-        revokedByTargetRefs.set(entity.source_ref, existing);
-      } else if (entity.relationship_type === 'subtechnique-of') {
-        subtechniqueParentRef.set(entity.source_ref, entity.target_ref);
-      }
-    }
-  }
+  const subtechniqueParentRef = new Map(
+    objects
+      .filter(isSubtechniqueOfRelationship)
+      .map((relationship) => [relationship.source_ref, relationship.target_ref])
+  );
 
   const subtechniqueEntities = objects.filter(
     (entity) => entity.type === 'attack-pattern' && entity.x_mitre_is_subtechnique === true

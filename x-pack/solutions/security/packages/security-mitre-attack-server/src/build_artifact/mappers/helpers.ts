@@ -7,6 +7,52 @@
 
 import type { StixEntity } from '../types';
 
+/** A relationship entity with both endpoints present. */
+type StixRelationship = StixEntity & { source_ref: string; target_ref: string };
+
+const isRelationship = (
+  stixEntity: StixEntity,
+  relationshipType: string
+): stixEntity is StixRelationship =>
+  stixEntity.type === 'relationship' &&
+  stixEntity.relationship_type === relationshipType &&
+  stixEntity.source_ref != null &&
+  stixEntity.target_ref != null;
+
+/** True for 'revoked-by' relationships, which point a revoked entity at its replacement. */
+export const isRevokedByRelationship = (stixEntity: StixEntity): stixEntity is StixRelationship =>
+  isRelationship(stixEntity, 'revoked-by');
+
+/** True for 'subtechnique-of' relationships, which point a subtechnique at its parent technique. */
+export const isSubtechniqueOfRelationship = (
+  stixEntity: StixEntity
+): stixEntity is StixRelationship => isRelationship(stixEntity, 'subtechnique-of');
+
+/** True when MITRE has retired the entity, either by revoking or deprecating it. */
+export const isRetired = (stixEntity: StixEntity): boolean =>
+  stixEntity.revoked === true || stixEntity.x_mitre_deprecated === true;
+
+/** Indexes 'revoked-by' relationships as source STIX ID to the STIX IDs replacing it. */
+export const buildRevokedByTargetRefs = (objects: StixEntity[]): Map<string, string[]> => {
+  const revokedByTargetRefs = new Map<string, string[]>();
+
+  for (const relationship of objects.filter(isRevokedByRelationship)) {
+    const existing = revokedByTargetRefs.get(relationship.source_ref) ?? [];
+    existing.push(relationship.target_ref);
+    revokedByTargetRefs.set(relationship.source_ref, existing);
+  }
+
+  return revokedByTargetRefs;
+};
+
+/** Indexes tactics by x_mitre_shortname, the key kill_chain_phases reference them by. */
+export const buildTacticByShortname = (objects: StixEntity[]): Map<string, StixEntity> =>
+  new Map(
+    objects
+      .filter((entity) => entity.type === 'x-mitre-tactic' && entity.x_mitre_shortname != null)
+      .map((entity) => [String(entity.x_mitre_shortname), entity])
+  );
+
 /**
  * Returns the tactic ID(s) a technique or subtechnique belongs to. MITRE links these through
  * kill_chain_phases, which name tactics by shortname, so each phase is looked up to get its
@@ -25,13 +71,10 @@ export const resolveTacticIds = (
     stixEntity.kill_chain_phases?.filter((phase) => phase.kill_chain_name === 'mitre-attack') ?? [];
   if (phases.length === 0) return [];
 
-  const isRevokedOrDeprecated =
-    stixEntity.revoked === true || stixEntity.x_mitre_deprecated === true;
-
   const ids = phases.flatMap((phase) => {
     const tacticEntity = tacticByShortname.get(phase.phase_name);
     if (tacticEntity == null) {
-      if (isRevokedOrDeprecated) {
+      if (isRetired(stixEntity)) {
         return [];
       }
       throw new Error(
