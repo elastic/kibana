@@ -65,10 +65,7 @@ describe('registerHasDataRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const msearchMock = jest.fn().mockResolvedValue({
-      responses: [
-        { hits: { total: { value: 5 } } },
-        { hits: { total: { value: 0 } } },
-      ],
+      responses: [{ hits: { total: { value: 5 } } }, { hits: { total: { value: 0 } } }],
     });
 
     const mockContext = {

@@ -36,10 +36,7 @@ jest.mock('./installed_content', () => ({
 jest.mock('./agent_setup_callout', () => ({
   AgentSetupCallout: () => (
     <div data-test-subj="mock-agent-callout">
-      <button
-        data-test-subj="detectAndReviewStep-agentSetupCallout-dismiss"
-        onClick={() => {}}
-      >
+      <button data-test-subj="detectAndReviewStep-agentSetupCallout-dismiss" onClick={() => {}}>
         Dismiss
       </button>
     </div>
@@ -68,12 +65,20 @@ function setupMocks({
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
-    detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {}, failedInstances: [], deployErrors: {} },
+    detectAndReviewStep: {
+      serviceStatuses: {},
+      policyIdsByInstance: {},
+      failedInstances: [],
+      deployErrors: {},
+    },
     deploymentMethod,
     awsServicesMap: new Map(),
     updateDetectAndReviewStep: jest.fn(),
   });
-  mockUseSessionStorage.mockReturnValue([{ globalRegion: 'us-east-1', serviceVars: {}, instances: [] }, jest.fn()]);
+  mockUseSessionStorage.mockReturnValue([
+    { globalRegion: 'us-east-1', serviceVars: {}, instances: [] },
+    jest.fn(),
+  ]);
   mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: packageData });
   mockUseServiceDataDetection.mockReturnValue({
     statusByInstanceId: {},

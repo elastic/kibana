@@ -35,8 +35,18 @@ describe('useInstalledContent', () => {
     mockUseQuery.mockReturnValue({
       data: {
         items: [
-          { id: 'dash-1', type: 'dashboard', attributes: { title: 'My Dashboard' }, appLink: '/dash' },
-          { id: 'rule-1', type: 'security-rule', attributes: { title: 'My Rule' }, appLink: '/rule' },
+          {
+            id: 'dash-1',
+            type: 'dashboard',
+            attributes: { title: 'My Dashboard' },
+            appLink: '/dash',
+          },
+          {
+            id: 'rule-1',
+            type: 'security-rule',
+            attributes: { title: 'My Rule' },
+            appLink: '/rule',
+          },
           { id: 'lens-1', type: 'lens', attributes: { title: 'Lens Viz' } },
         ],
       },

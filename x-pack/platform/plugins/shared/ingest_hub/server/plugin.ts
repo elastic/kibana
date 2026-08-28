@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
+import type {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
 
 import type { IngestHubServerSetupDeps, IngestHubServerStartDeps } from './types';
 import { registerRoutes } from './routes';

@@ -43,11 +43,7 @@ export function useInstalledContent({
   const kibanaAssetIds = useMemo(
     () =>
       installedKibana
-        .filter(
-          (a) =>
-            a.type === 'dashboard' ||
-            a.type === 'security-rule'
-        )
+        .filter((a) => a.type === 'dashboard' || a.type === 'security-rule')
         .map((a) => ({ id: a.id, type: a.type })),
     [installedKibana]
   );

@@ -16,7 +16,10 @@ const mockUseSessionStorage = useSessionStorage as jest.Mock;
 describe('useDeploymentSummary', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSessionStorage.mockReturnValue([{ globalRegion: 'us-east-1', serviceVars: {} }, jest.fn()]);
+    mockUseSessionStorage.mockReturnValue([
+      { globalRegion: 'us-east-1', serviceVars: {} },
+      jest.fn(),
+    ]);
   });
 
   describe('managed_integration', () => {
@@ -29,7 +32,9 @@ describe('useDeploymentSummary', () => {
 
     it('omits CloudFormation stack when not available', () => {
       const { result } = renderHook(() => useDeploymentSummary('managed_integration'));
-      expect(result.current.find((f) => f.defaultMessage === 'CloudFormation stack')).toBeUndefined();
+      expect(
+        result.current.find((f) => f.defaultMessage === 'CloudFormation stack')
+      ).toBeUndefined();
     });
 
     it('omits Region when globalRegion is empty', () => {
@@ -40,7 +45,9 @@ describe('useDeploymentSummary', () => {
 
     it('does not include Federated Identity Name', () => {
       const { result } = renderHook(() => useDeploymentSummary('managed_integration'));
-      expect(result.current.find((f) => f.defaultMessage.toLowerCase().includes('federated'))).toBeUndefined();
+      expect(
+        result.current.find((f) => f.defaultMessage.toLowerCase().includes('federated'))
+      ).toBeUndefined();
     });
   });
 

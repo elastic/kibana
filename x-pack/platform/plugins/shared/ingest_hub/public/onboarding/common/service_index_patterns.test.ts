@@ -8,9 +8,7 @@
 import { getServiceIndexPatterns } from './service_index_patterns';
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 
-function makeEntry(
-  overrides: Partial<AwsServiceMatrixEntry> = {}
-): AwsServiceMatrixEntry {
+function makeEntry(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsServiceMatrixEntry {
   return {
     id: 'test',
     name: 'Test',
@@ -30,8 +28,20 @@ describe('getServiceIndexPatterns', () => {
   it('returns type-dataset-* patterns for data streams with both fields', () => {
     const entry = makeEntry({
       varDefsByDataStream: {
-        ec2_logs: { type: 'logs', dataset: 'aws.ec2_logs', inputs: [], defaultEnabledInputs: {}, varDefsByInput: {} } as any,
-        ec2_metrics: { type: 'metrics', dataset: 'aws.ec2_metrics', inputs: [], defaultEnabledInputs: {}, varDefsByInput: {} } as any,
+        ec2_logs: {
+          type: 'logs',
+          dataset: 'aws.ec2_logs',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
+        ec2_metrics: {
+          type: 'metrics',
+          dataset: 'aws.ec2_metrics',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
       },
     });
     const patterns = getServiceIndexPatterns(entry);
@@ -41,7 +51,13 @@ describe('getServiceIndexPatterns', () => {
   it('skips data streams missing dataset and falls back to package-level pattern', () => {
     const entry = makeEntry({
       varDefsByDataStream: {
-        ec2_logs: { type: 'logs', dataset: undefined, inputs: [], defaultEnabledInputs: {}, varDefsByInput: {} } as any,
+        ec2_logs: {
+          type: 'logs',
+          dataset: undefined,
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
       },
     });
     const patterns = getServiceIndexPatterns(entry);
@@ -52,7 +68,13 @@ describe('getServiceIndexPatterns', () => {
   it('skips data streams missing type and falls back to package-level pattern', () => {
     const entry = makeEntry({
       varDefsByDataStream: {
-        ec2_logs: { type: undefined, dataset: 'aws.ec2_logs', inputs: [], defaultEnabledInputs: {}, varDefsByInput: {} } as any,
+        ec2_logs: {
+          type: undefined,
+          dataset: 'aws.ec2_logs',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
       },
     });
     const patterns = getServiceIndexPatterns(entry);
@@ -67,8 +89,20 @@ describe('getServiceIndexPatterns', () => {
   it('deduplicates identical patterns', () => {
     const entry = makeEntry({
       varDefsByDataStream: {
-        a: { type: 'logs', dataset: 'aws.vpcflow', inputs: [], defaultEnabledInputs: {}, varDefsByInput: {} } as any,
-        b: { type: 'logs', dataset: 'aws.vpcflow', inputs: [], defaultEnabledInputs: {}, varDefsByInput: {} } as any,
+        a: {
+          type: 'logs',
+          dataset: 'aws.vpcflow',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
+        b: {
+          type: 'logs',
+          dataset: 'aws.vpcflow',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
       },
     });
     expect(getServiceIndexPatterns(entry)).toEqual(['logs-aws.vpcflow-*']);
