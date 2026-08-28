@@ -70,9 +70,9 @@ describe('verify_ki workflow step', () => {
   it('throws when verifiers is not specified', async () => {
     setContextEngineEnabled(true);
 
-    await expect(
-      runHandler({ attributes: { esql: 'FROM logs-* | LIMIT 10' } })
-    ).rejects.toThrow('verifiers must list at least one verifier id');
+    await expect(runHandler({ attributes: { esql: 'FROM logs-* | LIMIT 10' } })).rejects.toThrow(
+      'verifiers must list at least one verifier id'
+    );
   });
 
   it('passes a KI with valid ES|QL', async () => {

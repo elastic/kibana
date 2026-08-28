@@ -31,7 +31,9 @@ export const VerifyKiInputSchema = z.object({
     .array(z.string().min(1).max(100))
     .min(1)
     .max(MAX_VERIFIER_IDS)
-    .describe('Verifier ids to run. At least one id is required; the step fails if none are listed or if an unknown id is specified.'),
+    .describe(
+      'Verifier ids to run. At least one id is required; the step fails if none are listed or if an unknown id is specified.'
+    ),
 });
 
 export const VerifyKiOutputSchema = z.object({

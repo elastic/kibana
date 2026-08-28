@@ -238,7 +238,9 @@ describe('esql-valid-runtime verifier', () => {
 
     it('passes on the second attempt when a transient error clears', async () => {
       esClient.esql.query
-        .mockRejectedValueOnce(esResponseError('es_rejected_execution_exception', 'overloaded', 429))
+        .mockRejectedValueOnce(
+          esResponseError('es_rejected_execution_exception', 'overloaded', 429)
+        )
         .mockResolvedValueOnce({ columns: [], values: [] });
 
       const outcome = await verifier.verify(makeKi(VALID_QUERY), context);
