@@ -50,24 +50,16 @@ const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
 
-// Non-package files whose changes can break the Storybook build without
-// matching any story path. yarn.lock covers external npm dependency changes
-// (webpack/storybook/swc bumps), which the in-repo package graph below cannot
-// see; any install-affecting package.json change also rewrites yarn.lock, so
-// package.json itself is not listed.
+// yarn.lock covers external dependency changes, which the package graph below cannot see.
 const STORYBOOK_BUILD_CRITICAL_PATHS = [
   /^yarn\.lock$/,
   /^\.buildkite\/scripts\/steps\/storybooks\//,
 ];
 
 /**
- * Storybook builds share the webpack/babel/swc toolchain with the rest of the
- * repo, so changes far outside story paths can break them (e.g. a babel-to-swc
- * migration once broke every on-merge Storybook build without touching a
- * single story file). Instead of enumerating toolchain paths in a regex, ask
- * the package dependency graph: if `@kbn/storybook` (or its config package) is
- * in the downstream closure of the changed packages, the Storybook build is
- * potentially affected and must run in this PR.
+ * Runs Storybooks when `@kbn/storybook` (or its config package) is in the
+ * downstream closure of the changed packages, so toolchain changes outside
+ * story paths are still covered.
  */
 const isStorybookBuildAffected = async (): Promise<boolean> => {
   if (await doAnyChangesMatch(STORYBOOK_BUILD_CRITICAL_PATHS)) {
