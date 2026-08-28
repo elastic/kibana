@@ -289,7 +289,7 @@ safe-outputs:
                 core.warning(`Could not enable auto-merge for PR #${prNumber}: ${err.status || ''} ${err.message}`);
               }
     close-as-duplicate:
-      description: 'Close THIS fix PR as a duplicate of an existing canonical fix PR and point to it. Call only in kickoff mode, only once, and only after confirming another `flaky-test-fixer` PR fixes the same root cause (same method/purpose) and is the canonical one to keep (see "Duplicate detection"). Pass the canonical PR number in `canonical_pr`. Never call it alongside `mark_pr_ready`, a `/flaky` run, or `flaky-fix-check:started`.'
+      description: 'Close THIS fix PR as a duplicate of an existing canonical fix PR, point to it, and move the `failed-test` issues this PR closed onto the canonical PR so they still close when it merges. Call only in kickoff mode, only once, and only after confirming another `flaky-test-fixer` PR fixes the same root cause (same method/purpose) and is the canonical one to keep (see "Duplicate detection"). Pass the canonical PR number in `canonical_pr`. Never call it alongside `mark_pr_ready`, a `/flaky` run, or `flaky-fix-check:started`.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       permissions:
@@ -304,11 +304,21 @@ safe-outputs:
       env:
         GH_AW_PR_NUMBER: *pr_number
       steps:
+        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+          with:
+            persist-credentials: false
+            sparse-checkout: .github/scripts/link_issues_to_fix_pr.js
+            sparse-checkout-cone-mode: false
+            fetch-depth: 1
         - name: Close the duplicate fix PR
           uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
           with:
             script: |
               const fs = require('fs');
+              const {
+                linkIssuesToFixPr,
+                linkedIssuesFromBody,
+              } = require('./.github/scripts/link_issues_to_fix_pr.js');
               const prNumber = Number(process.env.GH_AW_PR_NUMBER);
               const outputPath = process.env.GH_AW_AGENT_OUTPUT;
               if (!Number.isInteger(prNumber) || !outputPath || !fs.existsSync(outputPath)) {
@@ -346,6 +356,27 @@ safe-outputs:
               } catch (err) {
                 // Non-fatal: a failure to close must not fail the verification run.
                 core.warning(`Could not close #${prNumber}: ${err.status || ''} ${err.message}`);
+              }
+              // Hand this PR's `failed-test` issues over to the canonical fix: closing the PR
+              // orphans them otherwise — nothing else would close them, and the next engineer
+              // would request a fix for a root cause that is already handled.
+              const canonicalNumber = Number(canonical);
+              if (!Number.isInteger(canonicalNumber) || canonicalNumber <= 0) {
+                core.info('No canonical PR number to hand the linked issues to.');
+                return;
+              }
+              const issueNumbers = linkedIssuesFromBody(pr.body);
+              if (issueNumbers.length === 0) {
+                core.info(`#${prNumber} closed no issues; nothing to hand over.`);
+                return;
+              }
+              try {
+                await linkIssuesToFixPr({ github, core, prNumber: canonicalNumber, issueNumbers });
+              } catch (err) {
+                // Non-fatal: the duplicate is already closed, and its comment points at the canonical PR.
+                core.warning(
+                  `Could not hand ${issueNumbers.map((issue) => `#${issue}`).join(', ')} over to #${canonicalNumber}: ${err.status || ''} ${err.message}`
+                );
               }
 
 strict: false
@@ -392,7 +423,7 @@ The fixer opens one PR per `failed-test` issue, but many issues share a single *
    - if any confirmed duplicate is **merged**, the fix has already landed, so this PR is redundant and the merged one is canonical;
    - otherwise the canonical is the **earliest-created open** PR (compare `createdAt`; the list is sorted oldest-first).
 4. **If this PR is the canonical one** (earliest open, none merged), do **not** close anything — it is the one to keep; continue with the normal kickoff steps. You never close a *different* PR from here: each newer duplicate's own verifier run closes itself against this one, so the group converges without races.
-5. **Otherwise close THIS PR**: call `close_as_duplicate` with `canonical_pr` set to the canonical PR's number. Do not add `flaky-fix-check:started`, do not post a `/flaky` comment, and do not call `mark_pr_ready`. Stop — this PR is done.
+5. **Otherwise close THIS PR**: call `close_as_duplicate` with `canonical_pr` set to the canonical PR's number — the tool also moves the `failed-test` issue(s) this PR closed onto the canonical PR's `Fixes` list, so closing this one doesn't leave them orphaned. Do not add `flaky-fix-check:started`, do not post a `/flaky` comment, and do not call `mark_pr_ready`. Stop — this PR is done.
 
 ## Number of runs
 
@@ -541,7 +572,7 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 - Emit a single `push-to-pull-request-branch` safe output targeting PR #${{ env.PR_NUMBER }}.
 - Keep the change minimal and focused on the root cause. Re-running `/flaky` after the push validates the new commit, since the runner builds from the updated PR head.
 - Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any.
-- **Keep the PR description current.** If your revision changed the approach, the root cause, or what the patch does, also emit one `update-pull-request` safe output correcting the title/body (keep the fixer's format, rewrite only what went stale); if they still describe the fix accurately, emit nothing.
+- **Keep the PR description current.** If your revision changed the approach, the root cause, or what the patch does, also emit one `update-pull-request` safe output correcting the title/body (keep the fixer's format, rewrite only what went stale); if they still describe the fix accurately, emit nothing. That safe output **replaces** the whole body, so carry over every `Fixes #<issue>` reference it already has, including the `<!-- flaky-fix-linked-issues:start -->` block that lists the other `failed-test` issues this fix resolves — dropping one silently un-closes a tracked flake.
 - Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
 
 ## Workflow guardrails

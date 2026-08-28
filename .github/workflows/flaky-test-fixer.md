@@ -215,6 +215,128 @@ safe-outputs:
               }
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
+    # Adds a `Fixes #<issue>` reference to the fix PR for every *other* `failed-test` issue the
+    # same root cause produced, and points each of those issues at the PR. One root cause fans out
+    # into many issues (one per failing test title), so without this the siblings stay open after
+    # the fix merges and the next engineer requests a fix that is already in flight.
+    link-related-issues:
+      description: 'Link the other `failed-test` issues this fix resolves to the PR you just opened: adds a `Fixes #<issue>` reference for each to the PR description (so they all close when it merges) and posts one pointer comment on each of those issues. Pass their numbers in `issues`. Call at most once, only for issues you confirmed share this fix''s root cause, and only if you opened a PR.'
+      runs-on: ubuntu-latest
+      needs: safe_outputs
+      if: needs.safe_outputs.outputs.created_pr_number != ''
+      permissions:
+        contents: read
+        issues: write
+        pull-requests: write
+      inputs:
+        issues:
+          description: "Comma-separated `failed-test` issue numbers this fix also resolves (e.g. `285479, 285603`). Never include this run's own issue — it is already in the PR body."
+          required: true
+          type: string
+      env:
+        GH_AW_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
+        GH_AW_ISSUE_NUMBER: *issue_number
+      steps:
+        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+          with:
+            persist-credentials: false
+            sparse-checkout: .github/scripts/link_issues_to_fix_pr.js
+            sparse-checkout-cone-mode: false
+            fetch-depth: 1
+        - name: Link the related failed-test issues to the fix PR
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const fs = require('fs');
+              const {
+                linkIssuesToFixPr,
+                parseIssueList,
+              } = require('./.github/scripts/link_issues_to_fix_pr.js');
+              const prNumber = Number(process.env.GH_AW_PR_NUMBER);
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              if (!Number.isInteger(prNumber) || !outputPath || !fs.existsSync(outputPath)) {
+                core.info('Missing PR number or agent output; nothing to do.');
+                return;
+              }
+              // The agent's `issues` tool parameter is delivered here (custom safe-jobs read inputs
+              // from GH_AW_AGENT_OUTPUT, not from the job's inputs context).
+              const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+              const entry = items.find((item) => item.type === 'link_related_issues');
+              // This run's own issue is already the PR's first `Fixes` line and gets the outcome
+              // comment, so drop it here rather than pointing it at its own PR twice.
+              const issueNumbers = parseIssueList(entry?.issues).filter(
+                (number) => number !== Number(process.env.GH_AW_ISSUE_NUMBER)
+              );
+              if (issueNumbers.length === 0) {
+                core.info('No other issues to link; nothing to do.');
+                return;
+              }
+              try {
+                await linkIssuesToFixPr({ github, core, prNumber, issueNumbers });
+              } catch (err) {
+                // Non-fatal: the fix PR is already open, so a linking failure must not fail the run.
+                core.warning(`Could not link issues to #${prNumber}: ${err.status || ''} ${err.message}`);
+              }
+    # The mirror image of the job above: this issue's fix is already in flight in someone else's
+    # PR, so add this issue to *that* PR's description instead of opening a duplicate.
+    link-issue-to-existing-pr:
+      description: 'Add a `Fixes #<this issue>` reference to an existing PR that already fixes this issue''s root cause, so this issue closes when that PR merges (the "Existing PR already covers it" outcome). Pass that PR''s number in `pr`. Call at most once, only after confirming the match against its diff, and only when you did not open a PR of your own.'
+      runs-on: ubuntu-latest
+      needs: safe_outputs
+      if: needs.safe_outputs.outputs.created_pr_number == ''
+      permissions:
+        contents: read
+        issues: write
+        pull-requests: write
+      inputs:
+        pr:
+          description: 'Number of the existing PR that already fixes this root cause (digits only).'
+          required: true
+          type: string
+      env:
+        GH_AW_ISSUE_NUMBER: *issue_number
+      steps:
+        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+          with:
+            persist-credentials: false
+            sparse-checkout: .github/scripts/link_issues_to_fix_pr.js
+            sparse-checkout-cone-mode: false
+            fetch-depth: 1
+        - name: Add this issue to the existing fix PR
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const fs = require('fs');
+              const { linkIssuesToFixPr } = require('./.github/scripts/link_issues_to_fix_pr.js');
+              const issueNumber = Number(process.env.GH_AW_ISSUE_NUMBER);
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              if (!Number.isInteger(issueNumber) || !outputPath || !fs.existsSync(outputPath)) {
+                core.info('Missing issue number or agent output; nothing to do.');
+                return;
+              }
+              // Custom safe-jobs read their inputs from the agent output file, not the job inputs context.
+              const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+              const entry = items.find((item) => item.type === 'link_issue_to_existing_pr');
+              const prNumber = Number(String(entry?.pr ?? '').trim().replace(/^#/, ''));
+              if (!Number.isInteger(prNumber) || prNumber <= 0) {
+                core.info('No existing PR supplied; nothing to do.');
+                return;
+              }
+              try {
+                // The outcome comment on this issue already names the PR, so don't comment again.
+                await linkIssuesToFixPr({
+                  github,
+                  core,
+                  prNumber,
+                  issueNumbers: [issueNumber],
+                  notifyIssues: false,
+                });
+              } catch (err) {
+                // Non-fatal: the outcome comment still tells the requester where the fix lives.
+                core.warning(`Could not link #${issueNumber} to #${prNumber}: ${err.status || ''} ${err.message}`);
+              }
     # Requests the author of the PR that introduced the flaky test as a reviewer on the fix PR
     request-fix-review:
       description: 'Request a review on the fix PR from the author of the PR that introduced the flaky test. Only pass a real, non-bot GitHub login.'
@@ -284,8 +406,9 @@ Many `failed-test` issues share a single **root cause**, so the fixer can open s
 
 - A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json` (`{ team, candidates }`): `team` is this issue's owning team (from its `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Read it first.
 - Same team means same owning code area, not the same test — so **open each candidate's diff** and treat it as a real match only when it addresses the **same root cause / same method for the same purpose** as this issue's failing test — not merely the same team, a similar file, or the same file for an unrelated reason (a different method of the same page object is not a duplicate).
+- A candidate whose `linkedIssues` already contains issue #${{ env.ISSUE_NUMBER }} is a **confirmed** match with no diff to read: an earlier run (or the investigator) already established the shared root cause and added this issue to that PR's `Fixes` list.
 - If this issue has no `Team:` label, `candidates` falls back to only the PRs already closing this exact issue.
-- If a real match exists (open, or already merged), **do not open a PR**: post the "Existing PR already covers it" outcome comment naming that PR, remove the `ai:fix-flaky` label (step 9), and stop. If you **cannot confirm** a true duplicate, proceed and open the PR — the downstream Flaky Fix Verifier is the backstop that closes any real duplicate that slips through, whereas a flake you wrongly skip here just goes unfixed.
+- If a real match exists (open, or already merged), **do not open a PR**: call the `link_issue_to_existing_pr` tool with that PR's number if it is still **open**, so this issue joins its `Fixes` list and closes with it (see [Linking the other issues one fix resolves](#linking-the-other-issues-one-fix-resolves)), post the "Existing PR already covers it" outcome comment naming that PR, remove the `ai:fix-flaky` label (step 9), and stop. If you **cannot confirm** a true duplicate, proceed and open the PR — the downstream Flaky Fix Verifier is the backstop that closes any real duplicate that slips through, whereas a flake you wrongly skip here just goes unfixed.
 
 ## Environment
 
@@ -309,7 +432,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 
 ## Steps
 
-1. **Rule out a duplicate.** Before any investigation, run [Duplicate detection](#duplicate-detection). If a fix for this root cause is already in flight (or already merged), **do not open a PR** — skip straight to step 8 (outcome comment) and step 9 (remove label).
+1. **Rule out a duplicate.** Before any investigation, run [Duplicate detection](#duplicate-detection). If a fix for this root cause is already in flight (or already merged), **do not open a PR** — call `link_issue_to_existing_pr` with that PR's number, then skip straight to step 8 (outcome comment) and step 9 (remove label).
 2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8.
 3. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
@@ -320,6 +443,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 9. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 10. **Only if you opened a PR in step 7**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
 11. **Only if you opened a PR in step 7 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
+12. **Only if you opened a PR in step 7 and other `failed-test` issues share its root cause**, call the `link_related_issues` tool with their numbers so they join the PR's `Fixes` list and hear about it — see [Linking the other issues one fix resolves](#linking-the-other-issues-one-fix-resolves). Like `link_fix_pr` it runs after the PR is created.
 
 ## Fix guardrails
 
@@ -413,7 +537,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 The first line attributes the flake:
 - **Introducing PR** (`#<introducing-pr>`): the PR you believe introduced the flake — find the PR that first added the failing test with `git log` / `git blame` on the test file, or prefer a specific PR/commit the investigator implicated as the cause. The `likely` hedge is intentional: this is an informed suspicion, not a proven cause, so keep it. If you can't identify a well-supported candidate, omit the whole `- likely introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
 - **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot (includes `kibanamachine`). Request this same person as a reviewer via the `request_fix_review` tool (see Steps).
-- Add more `Fixes #<issue-number>` references if this fix resolves multiple issues.
+- **Other issues this fix resolves**: don't hand-write extra `Fixes` lines. Claim them with the `link_related_issues` tool instead, which appends them to the body after the PR exists — see [Linking the other issues one fix resolves](#linking-the-other-issues-one-fix-resolves).
 
 Add the following at the very end of the PR description (and outside of the details block):
 
@@ -423,6 +547,22 @@ Add the following at the very end of the PR description (and outside of the deta
 ```
 
 (Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
+
+## Linking the other issues one fix resolves
+
+One root cause fans out into many `failed-test` issues — one per failing test title — so a single fix routinely resolves a dozen of them while only the issue that requested it shows up in the PR. The rest stay open after the fix merges, and the next engineer requests a fix that is already in flight. Two tools close that gap by editing the PR body for you; never write these references by hand:
+
+- **You opened the PR** and other issues share its root cause: call `link_related_issues` once, with their numbers in `issues` (e.g. `285479, 285603`). It adds a `Fixes #<issue-number>` reference for each to the PR description — so they all close when it merges — and posts one pointer comment on each of those issues. Leave out this run's own issue; it is already the body's first `Fixes` line.
+- **An existing PR already covers this issue** (the [Duplicate detection](#duplicate-detection) outcome): call `link_issue_to_existing_pr` with that PR's number in `pr`. It adds `Fixes #${{ env.ISSUE_NUMBER }}` to that PR's description, so this issue closes with the fix instead of being left behind. Only for a PR that is still **open** — a merged PR's body can no longer close anything, so skip the tool and say in the outcome comment that the fix has already landed.
+
+Finding the candidates is cheap: the sibling issues share the failing signature, so search the failure's distinctive frame or helper name against open `failed-test` issues — e.g. `repo:elastic/kibana is:issue is:open label:failed-test "refreshOverview"` — and read the `linkedIssues` of any same-root-cause PR you already confirmed in [Duplicate detection](#duplicate-detection).
+
+Only claim an issue you have **evidence** for:
+
+- The bar is the **same root cause**, judged exactly as in [Duplicate detection](#duplicate-detection): the same failure signature (same error, same throwing frame) in code this patch changes — typically a shared helper, page object, or fixture several specs call. The same team, the same file, or a similar-looking error is not evidence.
+- Confirm it per issue, from that issue's own recorded failure — not by inference from the group. An issue whose failures are on a branch where the patched code differs is **not** covered; leave it out.
+- Say so in the PR's Summary or Context, so a reviewer can check the claim: list each issue you linked, its spec, and the signature you matched. An issue you can't confirm goes there as prose, not as a link — a wrong link closes a live flake as fixed.
+- Found none? Call neither tool. That is the common case; a `Fixes` list is earned, not padded.
 
 ## Release note label
 
@@ -517,8 +657,9 @@ Follow this format:
   ```markdown
   ### 🔁 A fix is already in flight
 
-  #<PR number> already covers this, so no duplicate PR was opened. cc @<requester-github-handle-here-if-not-a-bot>
+  #<PR number> already covers this, so no duplicate PR was opened; this issue is now in its `Fixes` list and closes when it merges. cc @<requester-github-handle-here-if-not-a-bot>
   ```
+  When that PR has **already merged**, swap the second clause for: the fix has already landed, so this issue should stop failing and can be closed once CI confirms it.
 - **No PR opened**:
   ```markdown
   ### ⏭️ No fix PR was opened
