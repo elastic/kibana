@@ -315,6 +315,16 @@ export class LensApp {
       .setSelectedOptions([field], {
         timeout: 10_000,
       });
+    // ComboBox can show the typed option before Lens layer state commits.
+    // data-selected-field is sourceField and updates only after insertOrReplaceColumn.
+    // Tests pass the dropdown label; the document-count field is labeled Records
+    // but stored as ___records___.
+    const optionLabel = field.trim().toLowerCase();
+    const committedField = optionLabel === 'records' ? '___records___' : field.trim();
+    await this.page.testSubj
+      .locator('indexPattern-dimension-field')
+      .and(this.page.locator(`[data-selected-field="${committedField}"]`))
+      .waitFor({ state: 'visible', timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS });
   }
 
   /**
