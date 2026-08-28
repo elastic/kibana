@@ -55,11 +55,7 @@ import { agentPolicyService } from '../agent_policy';
 import { getInstallation, getPackageInfo } from '../epm/packages';
 import { runWithCache } from '../epm/packages/cache';
 import { appContextService, cloudConnectorService } from '..';
-import {
-  FleetError,
-  FleetNotFoundError,
-  PackagePolicyRequestError,
-} from '../../errors';
+import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 } from '../../constants';
 
 import type { PackageInfo } from '../../types';
@@ -1242,7 +1238,9 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       .map((pp) => pp.id);
     if (managedIds.length > 0) {
       throw new FleetError(
-        `Cannot delete managed agentless policies without force: ${managedIds.join(', ')}. Pass force: true to override.`
+        `Cannot delete managed agentless policies without force: ${managedIds.join(
+          ', '
+        )}. Pass force: true to override.`
       );
     }
 
