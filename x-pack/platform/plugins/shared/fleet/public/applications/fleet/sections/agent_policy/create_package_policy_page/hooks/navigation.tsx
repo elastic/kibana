@@ -48,13 +48,13 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
       return routeState.onCancelUrl;
     }
 
-    // The collection flyout navigates via href and appends returnPath/returnAppId as query
-    // params. When present, use them so Cancel returns to the catalog with the flyout open.
+    // External apps (Integrations catalog, Security, Observability Onboarding) append
+    // returnPath/returnAppId as query params so Cancel returns to the originating page.
     const searchParams = new URLSearchParams(search);
     const returnPath = searchParams.get('returnPath');
     const returnAppId = searchParams.get('returnAppId');
-    if (returnPath && returnAppId === 'integrations') {
-      return getUrlForApp(INTEGRATIONS_PLUGIN_ID, { path: returnPath });
+    if (returnPath && returnAppId) {
+      return getUrlForApp(returnAppId, { path: returnPath });
     }
 
     if (from === 'installed-integrations' || from === 'copy-from-installed-integrations') {

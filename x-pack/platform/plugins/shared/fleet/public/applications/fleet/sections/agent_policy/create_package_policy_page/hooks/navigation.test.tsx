@@ -9,8 +9,6 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { renderHook } from '@testing-library/react';
 
-import { INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
-
 import { useCancelAddPackagePolicy } from './navigation';
 
 const mockNavigateToApp = jest.fn();
@@ -59,25 +57,40 @@ describe('useCancelAddPackagePolicy', () => {
   });
 
   describe('cancelUrl', () => {
-    it('uses returnPath/returnAppId query params when present to return to the catalog with flyout open', () => {
+    it('uses returnPath/returnAppId to return to the Integrations catalog with flyout open', () => {
       const { result } = renderWithSearch(
         '?returnAppId=integrations&returnPath=%2Fbrowse%3Fcollection%3Dnginx'
       );
-      expect(mockGetUrlForApp).toHaveBeenCalledWith(INTEGRATIONS_PLUGIN_ID, {
+      expect(mockGetUrlForApp).toHaveBeenCalledWith('integrations', {
         path: '/browse?collection=nginx',
       });
       expect(result.current.cancelUrl).toBe(
-        `http://localhost:5620/app/integrations/browse?collection=nginx`
+        'http://localhost:5620/app/integrations/browse?collection=nginx'
       );
     });
 
-    it('ignores returnPath when returnAppId is not "integrations"', () => {
+    it('uses returnPath/returnAppId to return to Observability Onboarding with collection open', () => {
       const { result } = renderWithSearch(
-        '?returnAppId=fleet&returnPath=%2Fbrowse%3Fcollection%3Dnginx'
+        '?returnAppId=observabilityOnboarding&returnPath=%3Fsearch%3Dng%26collection%3Dnginx'
       );
-      expect(mockGetUrlForApp).not.toHaveBeenCalled();
-      // Falls through to the default: integration_details_overview
-      expect(result.current.cancelUrl).toBe('/detail/nginx-1.3.0/overview');
+      expect(mockGetUrlForApp).toHaveBeenCalledWith('observabilityOnboarding', {
+        path: '?search=ng&collection=nginx',
+      });
+      expect(result.current.cancelUrl).toBe(
+        'http://localhost:5620/app/observabilityOnboarding?search=ng&collection=nginx'
+      );
+    });
+
+    it('uses returnPath/returnAppId to return to Security Solution', () => {
+      const { result } = renderWithSearch(
+        '?returnAppId=securitySolutionUI&returnPath=%2Fget_started'
+      );
+      expect(mockGetUrlForApp).toHaveBeenCalledWith('securitySolutionUI', {
+        path: '/get_started',
+      });
+      expect(result.current.cancelUrl).toBe(
+        'http://localhost:5620/app/securitySolutionUI/get_started'
+      );
     });
 
     it('falls back to integration overview when no query params are present', () => {
