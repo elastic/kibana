@@ -8,35 +8,19 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import {
-  calcAutoIntervalNear,
-  isAbsoluteTimeShift,
-  parseAbsoluteTimeShift,
-  parseTimeShift,
-} from '@kbn/data-plugin/common';
+import { isAbsoluteTimeShift, parseTimeShift } from '@kbn/data-plugin/common';
 import type {
   FormBasedLayer,
   FormBasedPrivateState,
   FramePublicAPI,
   IndexPattern,
   UserMessage,
-  DateRange,
 } from '@kbn/lens-common';
+import type { parseTimeShiftWrapper } from '@kbn/lens-common';
 import { TIMESHIFT_LT_INTERVAL, TIMESHIFT_NOT_MULTIPLE_INTERVAL } from '../../user_messages_ids';
-
-export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
-  if (isAbsoluteTimeShift(timeShiftString.trim())) {
-    return parseAbsoluteTimeShift(timeShiftString, {
-      from: dateRange.fromDate,
-      to: dateRange.toDate,
-    }).value;
-  }
-  return parseTimeShift(timeShiftString);
-}
 
 export const timeShiftOptions = [
   {
@@ -309,44 +293,4 @@ export function getColumnTimeShiftWarnings(
     );
   }
   return warnings;
-}
-
-function closestMultipleOfInterval(duration: number, interval: number) {
-  if (duration % interval === 0) {
-    return duration;
-  }
-  return Math.ceil(duration / interval) * interval;
-}
-
-function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBars: number) {
-  // workout the interval (most probably matching the ES one)
-  const interval = calcAutoIntervalNear(
-    targetBars,
-    moment(dateRange.toDate).diff(moment(dateRange.fromDate))
-  );
-  const duration = parseTimeShiftWrapper(timeShift, dateRange);
-  if (typeof duration !== 'string') {
-    const roundingOffset = timeShift.startsWith('end') ? interval.asMilliseconds() : 0;
-    return `${
-      (closestMultipleOfInterval(duration.asMilliseconds(), interval.asMilliseconds()) -
-        roundingOffset) /
-      1000
-    }s`;
-  }
-}
-
-export function resolveTimeShift(
-  timeShift: string | undefined,
-  dateRange: DateRange,
-  targetBars: number,
-  hasDateHistogram: boolean = false
-) {
-  if (timeShift && isAbsoluteTimeShift(timeShift)) {
-    return roundAbsoluteInterval(timeShift, dateRange, targetBars);
-  }
-  // Translate a relative "previous" shift into an absolute endAt(<current range start timestamp>)
-  if (timeShift && hasDateHistogram && timeShift === 'previous') {
-    return roundAbsoluteInterval(`endAt(${dateRange.fromDate})`, dateRange, targetBars);
-  }
-  return timeShift;
 }
