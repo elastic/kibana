@@ -120,8 +120,8 @@ export async function getVersionSpecificPolicies(
           const versionedInputs = getInputsForVersion(sourceInputs, version);
           const compiledIds = collectCompiledSecretRefIds(versionedInputs);
           const refs: SecretReference[] =
-            (updatedFullPolicy?.secret_references ??
-              (fleetServerPolicy.data?.secret_references as SecretReference[] | undefined)) ??
+            updatedFullPolicy?.secret_references ??
+            (fleetServerPolicy.data?.secret_references as SecretReference[] | undefined) ??
             [];
           return compiledIds ? refs.filter(({ id: refId }) => compiledIds.has(refId)) : refs;
         })(),
