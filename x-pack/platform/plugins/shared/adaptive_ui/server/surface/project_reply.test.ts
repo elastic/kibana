@@ -7,6 +7,7 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { view, text } from '@kbn/adaptive-ui/builders';
+import { sampleInvestigation } from '@kbn/adaptive-ui-adapters';
 import { ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE } from '../../common/constants';
 import { projectReplyToMarkdown } from './project_reply';
 
@@ -160,6 +161,65 @@ describe('projectReplyToMarkdown', () => {
     });
 
     expect(result).toContain('VERSION-ONE');
+  });
+
+  it('renders a native attachment type through its registered adapter', () => {
+    const investigation = {
+      id: 'inv-1',
+      type: 'nightshift.investigation',
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: sampleInvestigation,
+          created_at: '2026-01-01T00:00:00.000Z',
+          content_hash: 'h',
+        },
+      ],
+    } as unknown as VersionedAttachment;
+
+    const result = projectReplyToMarkdown({
+      message: `Here is the investigation.\n\n${tag('inv-1')}`,
+      attachments: [investigation],
+    });
+
+    expect(result).not.toContain('render_attachment');
+    expect(result).not.toContain('not viewable here');
+    expect(result).toContain('Here is the investigation.');
+    // Real adapter output, not an empty shell: the card's own sections come through.
+    expect(result).toContain('payment-service');
+    expect(result).toContain('Root cause');
+  });
+
+  it('rewrites root-relative links to absolute so they resolve off-site', () => {
+    const investigation = {
+      id: 'inv-1',
+      type: 'nightshift.investigation',
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: sampleInvestigation,
+          created_at: '2026-01-01T00:00:00.000Z',
+          content_hash: 'h',
+        },
+      ],
+    } as unknown as VersionedAttachment;
+
+    const withoutOrigin = projectReplyToMarkdown({
+      message: tag('inv-1'),
+      attachments: [investigation],
+    });
+    const withOrigin = projectReplyToMarkdown({
+      message: tag('inv-1'),
+      attachments: [investigation],
+      kibanaUrl: 'https://kibana.example.com',
+    });
+
+    // A bare `/app/...` href is a dead link in Slack.
+    expect(withoutOrigin).toContain('](/app/');
+    expect(withOrigin).not.toContain('](/app/');
+    expect(withOrigin).toContain('](https://kibana.example.com/app/');
   });
 
   it('handles an empty message', () => {

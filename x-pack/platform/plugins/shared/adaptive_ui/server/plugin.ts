@@ -64,7 +64,7 @@ export class AdaptiveUiPlugin
       getNightshiftInvestigations,
     });
     agentBuilder.renderers.register(viewRendererTypeDefinition);
-    registerSlackSurfaceProjector(agentBuilder);
+    registerSlackSurfaceProjector(agentBuilder, { http: coreSetup.http, logger: this.logger });
     registerAdaptiveUiRoutes({
       router: coreSetup.http.createRouter(),
       logger: this.logger,

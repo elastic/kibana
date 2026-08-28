@@ -25,6 +25,7 @@ const createExecution = ({ slackOrigin }: { slackOrigin: boolean }): AgentExecut
   ({
     executionId: 'execution-1',
     executionMode: AgentExecutionMode.conversation,
+    spaceId: 'default',
     agentParams: {
       nextInput: { message: 'hello' },
       callback: { url: callbackUrl },
@@ -105,6 +106,7 @@ describe('projectRoundForSurface', () => {
   it('does not mutate the source event', async () => {
     const event = createRoundCompleteEvent('original');
     const projected = await projectRoundForSurface({
+      execution: createExecution({ slackOrigin: true }),
       event,
       projector: upperCaseProjector,
       logger: loggerMock.create(),
@@ -117,6 +119,7 @@ describe('projectRoundForSurface', () => {
   it('degrades to the original event when the projector throws', async () => {
     const event = createRoundCompleteEvent('original');
     const projected = await projectRoundForSurface({
+      execution: createExecution({ slackOrigin: true }),
       event,
       projector: {
         surface: ConversationOriginType.Slack,
