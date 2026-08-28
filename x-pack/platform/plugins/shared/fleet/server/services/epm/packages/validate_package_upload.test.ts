@@ -927,79 +927,13 @@ describe('validatePackageUpload', () => {
   });
 
   describe('skipUploadPackageValidation escape hatch', () => {
-    beforeEach(() => {
+    it('skips every check without querying the registry, saved objects, or Elasticsearch', async () => {
       mockedGetConfig.mockReturnValue({ internal: { skipUploadPackageValidation: true } });
-    });
 
-    it('allows a registry package name without querying the registry', async () => {
-      mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
-
-      await expect(
-        validateUpload({
-          packageInfo: validPackage,
-          paths: [],
-          savedObjectsClient: soClient,
-        })
-      ).resolves.toBeUndefined();
-
-      expect(mockedFetchLatest).not.toHaveBeenCalled();
-    });
-
-    it('allows an upload that shadows a registry-installed package', async () => {
-      await expect(
-        validateUpload({
-          packageInfo: validPackage,
-          paths: [],
-          savedObjectsClient: soClient,
-          installedPkg: {
-            attributes: { name: 'my_integration', install_source: 'registry' },
-          } as SavedObject<Installation>,
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('allows a prebuilt index template in the archive', async () => {
-      await expect(
-        validateUpload({
-          packageInfo: validPackage,
-          paths: ['my_integration-1.0.0/elasticsearch/index_template/logs.json'],
-          savedObjectsClient: soClient,
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('allows a package name that fails strict name validation', async () => {
-      await expect(
-        validateUpload({
-          packageInfo: { ...validPackage, name: 'My-Integration' },
-          paths: [],
-          savedObjectsClient: soClient,
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('allows a matching unowned live data stream without querying Elasticsearch', async () => {
-      esClient.indices.getDataStream.mockResolvedValue({
-        data_streams: [
-          liveDataStream({
-            name: 'logs-my_integration.logs-default',
-            template: 'logs-my_integration.logs',
-          }),
-        ],
-      });
-
-      await expect(
-        validateUpload({
-          packageInfo: validPackage,
-          paths: [],
-          savedObjectsClient: soClient,
-        })
-      ).resolves.toBeUndefined();
-
-      expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
-    });
-
-    it('allows a dataset owned by another installed package', async () => {
+      // A package that violates every rule at once: invalid name, forbidden archive
+      // asset, shadowing a registry install, registry-existing name, a dataset owned
+      // by another installed package, and a matching unowned live data stream.
+      mockedFetchLatest.mockResolvedValue({ name: 'My-Integration', version: '1.0.0' });
       mockedGetPackageSavedObjects.mockResolvedValue({
         saved_objects: [
           {
@@ -1012,17 +946,32 @@ describe('validatePackageUpload', () => {
           },
         ],
       });
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-nginx.access-default',
+            template: 'logs-nginx.access',
+          }),
+        ],
+      });
 
       await expect(
         validateUpload({
           packageInfo: {
-            name: 'hostile',
+            name: 'My-Integration',
             data_streams: [{ dataset: 'nginx.access', type: 'logs' }],
           },
-          paths: [],
+          paths: ['My-Integration-1.0.0/elasticsearch/index_template/logs.json'],
           savedObjectsClient: soClient,
+          installedPkg: {
+            attributes: { name: 'My-Integration', install_source: 'registry' },
+          } as SavedObject<Installation>,
         })
       ).resolves.toBeUndefined();
+
+      expect(mockedFetchLatest).not.toHaveBeenCalled();
+      expect(mockedGetPackageSavedObjects).not.toHaveBeenCalled();
+      expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
     });
   });
 
