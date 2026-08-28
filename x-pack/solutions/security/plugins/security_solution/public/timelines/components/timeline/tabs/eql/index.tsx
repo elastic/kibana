@@ -40,6 +40,7 @@ import { isTimerangeSame, TIMELINE_NO_SORTING } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { EqlTabHeader } from './header';
+import { PartialResultsCallout } from './partial_results_callout';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
@@ -118,7 +119,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const [
     dataLoadingState,
-    { events, rawEvents, inspect, totalCount, loadNextBatch, refreshedAt, refetch },
+    { events, rawEvents, inspect, totalCount, loadNextBatch, refreshedAt, refetch, isPartial = false },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
@@ -243,6 +244,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const unifiedHeader = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s" direction="column">
+        {isPartial && !isBlankTimeline ? <PartialResultsCallout /> : null}
         <EqlTabHeader
           activeTab={activeTab}
           setTimelineFullScreen={setTimelineFullScreen}
@@ -251,7 +253,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         />
       </EuiFlexGroup>
     ),
-    [activeTab, setTimelineFullScreen, timelineFullScreen, timelineId]
+    [activeTab, isBlankTimeline, isPartial, setTimelineFullScreen, timelineFullScreen, timelineId]
   );
 
   return (

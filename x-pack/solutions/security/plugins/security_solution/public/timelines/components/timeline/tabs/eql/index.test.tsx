@@ -100,8 +100,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof EqlTabContentCompone
   return <EqlTabContentComponent {...testComponentDefaultProps} {...props} />;
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/277361
-describe.skip('EQL Tab', () => {
+describe('EQL Tab', () => {
   const props = {} as EqlTabContentComponentProps;
   const mockOpenFlyout = jest.fn();
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
@@ -125,6 +124,7 @@ describe.skip('EQL Tab', () => {
       {
         events: mockTimelineData.slice(0, 1),
         rawEvents: [],
+        isPartial: false,
         pageInfo: {
           activePage: 0,
           totalPages: 10,
@@ -216,6 +216,57 @@ describe.skip('EQL Tab', () => {
         );
 
         expect(await screen.findByText('No results found')).toBeVisible();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'renders the incomplete results callout when the EQL response is partial',
+      async () => {
+        (useTimelineEvents as jest.Mock).mockReturnValue([
+          false,
+          {
+            events: mockTimelineData.slice(0, 1),
+            rawEvents: [],
+            pageInfo: { activePage: 0, totalPages: 10 },
+            totalCount: 1,
+            isPartial: true,
+          },
+        ]);
+
+        render(
+          <TestProviders store={createMockStore(mockState)}>
+            <TestComponent />
+          </TestProviders>
+        );
+
+        expect(await screen.findByTestId('eql-partial-results-warning')).toBeVisible();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'hides the incomplete results callout when the EQL response is complete',
+      async () => {
+        (useTimelineEvents as jest.Mock).mockReturnValue([
+          false,
+          {
+            events: mockTimelineData.slice(0, 1),
+            rawEvents: [],
+            pageInfo: { activePage: 0, totalPages: 10 },
+            totalCount: 1,
+            isPartial: false,
+          },
+        ]);
+
+        render(
+          <TestProviders store={createMockStore(mockState)}>
+            <TestComponent />
+          </TestProviders>
+        );
+
+        await screen.findByTestId('discoverDocTable');
+        expect(screen.queryByTestId('eql-partial-results-warning')).toBeNull();
       },
       SPECIAL_TEST_TIMEOUT
     );
