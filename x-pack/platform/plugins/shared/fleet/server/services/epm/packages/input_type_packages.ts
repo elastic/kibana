@@ -26,6 +26,8 @@ import {
 } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
 
+import { appContextService } from '../../app_context';
+
 import { dataStreamService } from '../..';
 
 import * as Registry from '../registry';
@@ -80,6 +82,12 @@ function hasUncorroboratedUploadAssets(
   dataStreamType: string,
   datasetName: string
 ): boolean {
+  // Same escape hatch as the upload validator: flagged deployments opt out of
+  // the upload takeover protections entirely.
+  if (appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
+    return false;
+  }
+
   if (installation.install_source !== 'upload') {
     return false;
   }

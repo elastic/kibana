@@ -321,8 +321,9 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
-        // Test/development escape hatch for uploading a package whose name exists in EPR or bundled packages.
-        allowRegistryPackageUploads: schema.boolean({ defaultValue: false }),
+        // Test/development escape hatch that skips all package upload validation, e.g. for
+        // uploading packages whose names exist in EPR or as bundled packages.
+        skipUploadPackageValidation: schema.boolean({ defaultValue: false }),
         registry: schema.object(
           {
             kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),

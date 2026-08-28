@@ -59,6 +59,7 @@ describe('installAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
     jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
     jest.mocked(installIndexTemplatesAndPipelines).mockClear();
+    jest.mocked(appContextService.getConfig).mockReturnValue({} as any);
     const mockedLogger = jest.mocked(appContextService.getLogger());
     mockedLogger.debug.mockClear();
     mockedLogger.error.mockClear();
@@ -451,6 +452,58 @@ describe('installAssetsForInputPackagePolicy', () => {
       name: 'logs-my_dataset',
       _meta: { package: { name: 'uploaded_probe' } },
     } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: true,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+  });
+
+  it('should skip the corroboration guard when skipUploadPackageValidation is set', async () => {
+    jest
+      .mocked(appContextService.getConfig)
+      .mockReturnValue({ internal: { skipUploadPackageValidation: true } } as any);
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'uploaded_probe',
+        version: '1.0.0',
+        install_source: 'upload',
+        installed_es: [],
+      },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      {
+        name: 'logs-my_dataset-default',
+        _meta: { package: { name: 'uploaded_probe' } },
+      },
+    ] as any);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
     const mockedLogger = jest.mocked(appContextService.getLogger());
 

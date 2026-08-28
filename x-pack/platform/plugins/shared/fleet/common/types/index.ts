@@ -88,7 +88,7 @@ export interface FleetConfigType {
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
     retrySetupOnBoot: boolean;
-    allowRegistryPackageUploads?: boolean;
+    skipUploadPackageValidation?: boolean;
     registry: {
       kibanaVersionCheckEnabled: boolean;
       capabilities: string[];
