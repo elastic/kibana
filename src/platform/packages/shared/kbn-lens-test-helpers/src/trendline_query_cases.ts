@@ -172,5 +172,28 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       expectedTimeField: 'd',
       expectedMetricFields: ['avg_bytes'],
     },
+    {
+      description: 'FORK query selecting the KPI branch by metric column',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (STATS total_bytes = SUM(bytes)) (STATS event_count = COUNT(*) BY time_bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend))`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS total_bytes = SUM(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['total_bytes'],
+      metricFields: ['total_bytes'],
+    },
+    {
+      description: 'FORK query selecting the branch with an existing aliased BUCKET',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (STATS total_bytes = SUM(bytes)) (STATS event_count = COUNT(*) BY time_bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend))`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS event_count = COUNT(*) BY time_bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'time_bucket',
+      expectedMetricFields: ['event_count'],
+      metricFields: ['event_count'],
+    },
+    {
+      description: 'FORK query without metric fields falls back to the first STATS branch',
+      sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | FORK (WHERE bytes > 0) (STATS avg_bytes = AVG(bytes))`,
+      expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['avg_bytes'],
+    },
   ];
 };
