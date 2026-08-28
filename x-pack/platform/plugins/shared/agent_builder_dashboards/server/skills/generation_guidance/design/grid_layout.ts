@@ -13,14 +13,14 @@ Every \`add_panels.panels[]\` item and every \`add_section.panels[]\` item requi
 
 ### Grid sizes by chart type
 
-Use these sizes — **do not make metric or gauge panels full-width**:
+Use these sizes — **do not make metric, gauge, or XY panels full-width**:
 
 - **Metric** → \`w: 6, 8, or 12, h: 5–6\`. These are single-number panels — keep them **small**. Fit 4–8 per row.
   - 8 metrics in a row: each \`w: 6, h: 5\`
   - 6 metrics in a row: each \`w: 8, h: 5\`
   - 4 metrics in a row: each \`w: 12, h: 5\`
 - **Gauge** → \`w: 12, h: 8\`. Fit up to 4 per row.
-- **XY (line / area / bar)** → \`w: 24, h: 10\`. Use full-width (\`w: 48\`) for the primary time series.
+- **XY (line / area / bar)** → \`w: 24, h: 10\`. Always half-width — two per row. Never \`w: 48\`.
 - **Heatmap** → \`w: 24, h: 10\`. Needs height for the color matrix.
 - **Tagcloud** → \`w: 24, h: 10\`.
 - **Pie** → \`w: 12, h: 10\`.
@@ -64,7 +64,7 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 - When mixing top-level panels and sections, compute outer \`y\` sequentially: top-level panels advance by \`y + h\`, sections advance by \`y + 1\`.
 - **Inserting above existing sections:** Top-level panels and sections share the same outer grid coordinates. If a section occupies \`y: 0\`, a new top-level panel at \`y: 0\` will collide and be pushed **below** the section. To place a panel above an existing section, first \`remove_section\` (with \`panelAction: "promote"\` or \`"delete"\`) and re-add it via \`add_section\` at a higher \`y\` to make room, then add the panel at the freed \`y\`.
 
-### Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
+### Example: 4 KPI metrics + two rows of half-width XY charts
 
 \`\`\`
 metric  (x:0,  y:0,  w:12, h:5)
@@ -73,5 +73,6 @@ metric  (x:24, y:0,  w:12, h:5)
 metric  (x:36, y:0,  w:12, h:5)
 xy-line (x:0,  y:5,  w:24, h:10)
 xy-line (x:24, y:5,  w:24, h:10)
-xy-bar  (x:0,  y:15, w:48, h:10)
+xy-bar  (x:0,  y:15, w:24, h:10)
+xy-bar  (x:24, y:15, w:24, h:10)
 \`\`\``;

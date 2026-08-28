@@ -38,6 +38,10 @@ describe('registerSkills', () => {
     );
     expect(design?.content).toContain('Dashboard Composition Guidelines');
     expect(design?.content).toContain('Grid Packing Rules');
+    expect(design?.content).toContain('**XY (line / area / bar)** → `w: 24, h: 10`');
+    expect(design?.content).not.toContain(
+      'Use full-width (`w: 48`) for the primary time series'
+    );
     expect(design?.content).toContain('Available chart types');
     expect(design?.content).toContain('- region_map:');
     expect(design?.content).toContain(
@@ -54,16 +58,22 @@ describe('registerSkills', () => {
     expect(skill.content).toContain(
       'Omit the `esql` field on visualization panels unless you received a validated query'
     );
+    expect(skill.content).toContain(
+      '`add_section.panels` creates new panels — never copy existing configs into it'
+    );
+    expect(skill.content).not.toContain(
+      'Use `add_section` with its optional `panels` array when you already know the panels that belong in the new section'
+    );
     expect(skill.content).not.toContain('clear_metric_fill');
     expect(skill.content).not.toContain('metric_trendline');
   });
 
   it('tells the agent to judge a Prettify screenshot itself and apply via generate', async () => {
     expect(skill.content).toContain('look at the screenshot yourself');
-    expect(skill.content).toContain('Hard rule');
-    expect(skill.content).toContain('Creative');
     expect(skill.content).toContain('title-intent vs painted content');
     expect(skill.content).toContain('Prefer modify and expand');
+    expect(skill.content).toContain('plain language');
+    expect(skill.content).toContain('Do not name Hard rule or Creative');
     expect(skill.content).toContain(dashboardTools.generateDashboard);
     expect(skill.content).toContain('Without an image, this is a normal dashboard edit');
     expect(skill.content).not.toContain('Do not call any tools');
@@ -77,6 +87,10 @@ describe('registerSkills', () => {
     const rules = skill.referencedContent?.find((ref) => ref.name === 'prettify-rules');
     expect(rules?.content).toContain('**Hard rule**');
     expect(rules?.content).toContain('**Creative**');
+    expect(rules?.content).toContain('These buckets are for you');
+    expect(rules?.content).toContain('never show them to the user');
+    expect(rules?.content).toContain('plain language');
+    expect(rules?.content).toContain('Do not quote grid units');
     expect(rules?.content).toContain('Title intent vs painted content');
     expect(rules?.content).toContain('Do not invent colors');
     expect(rules?.content).toContain(
@@ -92,11 +106,15 @@ describe('registerSkills', () => {
     expect(rules?.content).toContain('bottom with LIST layout');
     expect(rules?.content).toContain('Always hide axis titles');
     expect(rules?.content).toContain('ALWAYS prefer gradient area fills over solid');
+    expect(rules?.content).toContain('XY charts');
+    expect(rules?.content).toContain('always `w: 24`');
     expect(rules?.content).not.toContain('styling.secondary.label');
     expect(rules?.content).not.toContain('areas.fill');
     expect(rules?.content).not.toContain('Gradient-filled areas are not available yet');
     expect(rules?.content).toContain('Do not remove visualization panels');
     expect(rules?.content).toContain('Describe that wanted edition in `edit_panels.query`');
+    expect(rules?.content).toContain('`add_section` without `panels`');
+    expect(rules?.content).toContain('never copy existing panel configs into `add_section.panels`');
     expect(rules?.content).toContain(
       'If the edition does not need new columns, pass that query on `esql` unchanged'
     );

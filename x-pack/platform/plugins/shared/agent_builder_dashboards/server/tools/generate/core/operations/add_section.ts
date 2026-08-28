@@ -31,7 +31,7 @@ export const addSectionOperation = defineOperation({
       .min(1)
       .optional()
       .describe(
-        'Optional inline panels (source: "config" or source: "request") to create inside the new section. Panel grids are section-relative.'
+        'Optional NEW panels to create inside the section (section-relative grids). Omit when grouping existing panels — pass `id` and move them with update_panel_layouts.sectionId. Copying existing configs here duplicates panels.'
       ),
   }),
   handler: async ({ dashboardData, operation, operationIndex, context }) => {

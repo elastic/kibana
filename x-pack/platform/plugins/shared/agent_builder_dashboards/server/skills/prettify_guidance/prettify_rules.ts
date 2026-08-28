@@ -17,10 +17,12 @@ export const PRETTIFY_RULES_REFERENCE_NAME = 'prettify-rules';
  */
 export const prettifyRulesPrompt = `## Prettify findings
 
-Look at the painted screenshot first. Use the full dashboard attachment for panel ids, ES|QL, chart types, grid, and whether an edit needs new columns. Divide every finding into one of two buckets and say which bucket it is.
+Look at the painted screenshot first. Use the full dashboard attachment for panel ids, ES|QL, chart types, grid, and whether an edit needs new columns. Divide every finding into one of two buckets. These buckets are for you — never show them to the user.
 
 - **Hard rule** — a violation of the rules below. Fix these.
 - **Creative** — something you noticed yourself that would make the dashboard clearer or richer. Title intent vs painted content belongs here. Expand existing charts rather than deleting them.
+
+When you talk to the user, use a few sentences of plain language about what will look different (e.g. "I'll shrink the note at the top and hide the legends on the charts — each has only one series."). Do not quote grid units (\`w\`/\`h\`), Lens fields, ES|QL, or tool operations. Do not list findings you are skipping.
 
 Prefer modify and expand. Do not remove visualization panels. Do not invent broken ES|QL.
 
@@ -31,6 +33,7 @@ Prefer modify and expand. Do not remove visualization panels. Do not invent brok
 - **Grid.** Follow Panel Layout and Grid Packing Rules in referenced \`${DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME}\`. Concrete violations:
   - Three metrics alone on the top row look stretched — use metric \`w: 6–12\`, \`h: 5–6\`, and 4–8 KPIs per row when the data supports it.
   - Charts that are too tall — XY/heatmap around \`h: 10\`, not 20+.
+  - XY charts that span the full row — always \`w: 24\` (half the grid), two per row.
   - Gaps — pack every row; widths in a row sum to 48; side-by-side panels share height.
   - Markdown height should fit its content (\`h: 4–9\`) and never exceed 9.
 - **Chart variety.** A dashboard of one family (all lines, all metrics) is a hard-rule miss. Convert lines to areas when a filled series would read better. Convert a metric to pie/donut when the data is a part-to-whole. Add more charts when the screenshot and ES|QL support a missing breakdown or trend. Do not delete charts to create variety.
@@ -52,8 +55,8 @@ Judge these from the screenshot and the dashboard title. They are not automatic,
 
 When applying, call \`${dashboardTools.generateDashboard}\` once. Typical batch:
 
-1. \`add_section\` when organizing many panels into topics.
-2. \`update_panel_layouts\` only for a packed grid (and section moves). Do not put visual edits on this operation.
+1. \`add_section\` without \`panels\` (pass \`id\`) when organizing existing panels into topics — never copy existing panel configs into \`add_section.panels\` (that duplicates them).
+2. \`update_panel_layouts\` to pack the grid **and move** those panels into the new section via \`sectionId\`. Do not put visual edits on this operation.
 3. \`edit_panels\` (\`source: "request"\`) with a natural-language \`query\` for every visual change and let the visualization author apply the chart-type config rules (metric chrome title, fills, secondary/background, \`chartType\`, gradient, legend, axes, Default palette). Read each panel's existing ES|QL from the dashboard attachment. If the edition does not need new columns, pass that query on \`esql\` unchanged (schema-only). Omit \`esql\` only when a complementary number or different grouping requires new columns.
 4. \`add_panels\` only to add charts for variety or to match title intent. Do not \`remove_panels\` visualization panels.
 5. \`add_controls\` for missing useful filters.`;

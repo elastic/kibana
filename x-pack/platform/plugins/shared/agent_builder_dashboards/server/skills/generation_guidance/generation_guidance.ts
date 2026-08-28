@@ -22,8 +22,8 @@ Every dashboard MUST have a non-empty \`title\`. If the current dashboard's titl
 Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
 
 When a dashboard needs sections, prefer a single batched call:
-1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section. Pass optional \`id\` when a later operation in the same batch must reference the new section (\`update_panel_layouts.sectionId\`).
-2. Use a follow-up \`add_panels\` with per-item \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
+1. To group **existing** panels: \`add_section\` without \`panels\` (pass \`id\`), then \`update_panel_layouts\` with \`sectionId\` to move them. \`add_section.panels\` creates new panels — never copy existing configs into it (that duplicates them and leaves the originals in place).
+2. \`add_section.panels\` only for **brand-new** panels created inside the section. Use a follow-up \`add_panels\` with per-item \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
 
 For a new dashboard:
 - Start with \`set_metadata\` and provide both \`title\` and \`description\`. Only include \`time_range\` when the user explicitly named a specific time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise — a data-aware default is applied automatically.
@@ -33,7 +33,7 @@ For a new dashboard:
 For an existing dashboard:
 - Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
-- Use \`update_panel_layouts\` only to resize, reposition, or move existing panels between top-level and sections. It does not change visualization content.
+- Use \`update_panel_layouts\` to resize, reposition, or **move** existing panels into a section. Do not recreate those panels via \`add_section.panels\` or \`add_panels\`.
 - If a requested change targets presentation or content (chart type, colors, legends, axis titles, metric chrome title, secondary metrics, trendlines, palettes), use \`edit_panels\` with a natural-language \`query\` and let the visualization author decide how to apply it. Do not invent first-class layout flags for those edits.
 
 ## Panel Inputs
