@@ -8087,6 +8087,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/page-render-screenshotting-plugin@link:x-pack/platform/plugins/private/page_render_screenshotting":
+  version "0.0.0"
+  uid ""
+
 "@kbn/painless-lab-plugin@link:x-pack/platform/plugins/private/painless_lab":
   version "0.0.0"
   uid ""

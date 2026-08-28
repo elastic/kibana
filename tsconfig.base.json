@@ -1973,6 +1973,8 @@
       "@kbn/otel-telemetry-collection-plugin/*": ["./x-pack/platform/plugins/private/otel_telemetry_collection/*"],
       "@kbn/paertial-results-example-plugin": ["./examples/partial_results_example"],
       "@kbn/paertial-results-example-plugin/*": ["./examples/partial_results_example/*"],
+      "@kbn/page-render-screenshotting-plugin": ["./x-pack/platform/plugins/private/page_render_screenshotting"],
+      "@kbn/page-render-screenshotting-plugin/*": ["./x-pack/platform/plugins/private/page_render_screenshotting/*"],
       "@kbn/painless-lab-plugin": ["./x-pack/platform/plugins/private/painless_lab"],
       "@kbn/painless-lab-plugin/*": ["./x-pack/platform/plugins/private/painless_lab/*"],
       "@kbn/palettes": ["./src/platform/packages/shared/kbn-palettes"],
