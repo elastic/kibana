@@ -223,7 +223,6 @@ export {
   WatchTriggersSettings,
   WatchWorker,
   WorkflowTriggerType,
-  type TimelineEvent,
 } from './impl/schemas';
 
 export {

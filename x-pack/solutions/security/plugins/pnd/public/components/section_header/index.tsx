@@ -63,8 +63,8 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 
   const dotColors: Readonly<Record<SectionDotColor, string>> = {
     accent: euiTheme.colors.accent,
+    accentSecondary: euiTheme.colors.accentSecondary,
     danger: euiTheme.colors.danger,
-    primary: euiTheme.colors.primary,
     success: euiTheme.colors.success,
     warning: euiTheme.colors.warning,
   };

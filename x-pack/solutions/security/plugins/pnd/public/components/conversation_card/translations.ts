@@ -113,6 +113,28 @@ export const VIEW_LIFECYCLE = i18n.translate('xpack.pnd.brief.viewLifecycle', {
   defaultMessage: 'View lifecycle',
 });
 
+export const CONVERSATION_CARD_LABELS = Object.freeze({
+  inMotion: i18n.translate('xpack.pnd.conversationCard.inMotion', {
+    defaultMessage: 'In motion',
+  }),
+  pendingProposals: (count: number) =>
+    i18n.translate('xpack.pnd.conversationCard.pendingProposals', {
+      defaultMessage: '{count, plural, one {# pending proposal} other {# pending proposals}}',
+      values: { count },
+    }),
+  templateTypes: {
+    incident: i18n.translate('xpack.pnd.conversationCard.templateTypes.incident', {
+      defaultMessage: 'Incident',
+    }),
+    investigation: i18n.translate('xpack.pnd.conversationCard.templateTypes.investigation', {
+      defaultMessage: 'Investigation',
+    }),
+  },
+  watchedBy: i18n.translate('xpack.pnd.conversationCard.watchedBy', {
+    defaultMessage: 'Watched by',
+  }),
+});
+
 export const CONVERSATION_CARD_ACTIONS = Object.freeze({
   default: i18n.translate('xpack.pnd.conversationCard.defaultAction', {
     defaultMessage: 'Review',

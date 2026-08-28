@@ -93,9 +93,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     }));
 
     const blastRadiusDescription =
-      blastRadiusItems.length === 0
-        ? proposal.message ?? proposal.reasoning
-        : undefined;
+      blastRadiusItems.length === 0 ? proposal.message ?? proposal.reasoning : undefined;
 
     const onSubmit = useCallback(() => {
       if (rationale.trim().length === 0) {
@@ -123,6 +121,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
         <EuiModalBody css={css({ padding: `${euiTheme.size.m} 0` })}>
           {errorMessage != null && errorMessage.length > 0 ? (
             <EuiCallOut
+              announceOnMount
               color="danger"
               data-test-subj="hitlActionCardError"
               size="s"
