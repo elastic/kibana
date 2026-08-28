@@ -19,7 +19,7 @@ import { useEnablement } from '../../../../hooks';
 import { CANNOT_PERFORM_ACTION_SYNTHETICS } from '../../../common/components/permissions';
 import { SERVICE_NOT_ALLOWED } from '../disabled_callout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
-import { isMonitorBulkStatusEditable } from './bulk_edit_eligibility';
+import { isMonitorBulkEditable, isMonitorBulkStatusEditable } from './bulk_edit_eligibility';
 
 export type BulkEditAction = 'tags' | 'serviceName' | 'labels';
 
@@ -110,6 +110,17 @@ export const BulkOperations = ({
     ? SERVICE_NOT_ALLOWED
     : undefined;
 
+  // Tags/schedule/locations/etc. still reject project/terraform monitors
+  // (and public locations without the capability). Disable those items when
+  // nothing in the selection could actually be patched, so the menu doesn't
+  // open a flyout that would skip every monitor.
+  const eligibleConfigEditCount = selectedItems.filter((item) =>
+    isMonitorBulkEditable(item, canUsePublicLocations)
+  ).length;
+  const isConfigEditDisabled = isActionDisabled || eligibleConfigEditCount === 0;
+  const configEditTooltip =
+    disabledTooltip ?? (eligibleConfigEditCount === 0 ? NO_ELIGIBLE_TO_EDIT : undefined);
+
   const items: EuiContextMenuPanelItemDescriptor[] = [
     {
       name:
@@ -168,8 +179,8 @@ export const BulkOperations = ({
         defaultMessage: 'Edit tags',
       }),
       icon: 'tag',
-      disabled: isActionDisabled,
-      toolTipContent: disabledTooltip,
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
       'data-test-subj': 'syntheticsBulkEditTagsItem',
       onClick: () => {
         closePopover();
@@ -181,8 +192,8 @@ export const BulkOperations = ({
         defaultMessage: 'Edit service name',
       }),
       icon: 'chartWaterfall',
-      disabled: isActionDisabled,
-      toolTipContent: disabledTooltip,
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
       'data-test-subj': 'syntheticsBulkEditServiceNameItem',
       onClick: () => {
         closePopover();
@@ -194,8 +205,8 @@ export const BulkOperations = ({
         defaultMessage: 'Edit labels',
       }),
       icon: 'list',
-      disabled: isActionDisabled,
-      toolTipContent: disabledTooltip,
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
       'data-test-subj': 'syntheticsBulkEditLabelsItem',
       onClick: () => {
         closePopover();
@@ -226,8 +237,8 @@ export const BulkOperations = ({
         defaultMessage: 'Edit locations',
       }),
       icon: 'globe',
-      disabled: isActionDisabled,
-      toolTipContent: disabledTooltip,
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
       'data-test-subj': 'syntheticsBulkEditLocationsItem',
       onClick: () => {
         closePopover();
@@ -239,8 +250,8 @@ export const BulkOperations = ({
         defaultMessage: 'Edit schedule',
       }),
       icon: 'refreshTime',
-      disabled: isActionDisabled,
-      toolTipContent: disabledTooltip,
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
       'data-test-subj': 'syntheticsBulkEditScheduleItem',
       onClick: () => {
         closePopover();
@@ -252,8 +263,8 @@ export const BulkOperations = ({
         defaultMessage: 'Manage maintenance windows',
       }),
       icon: 'bellSlash',
-      disabled: isActionDisabled,
-      toolTipContent: disabledTooltip,
+      disabled: isConfigEditDisabled,
+      toolTipContent: configEditTooltip,
       'data-test-subj': 'syntheticsBulkMaintenanceWindowsItem',
       onClick: () => {
         closePopover();
@@ -337,3 +348,8 @@ const NO_ELIGIBLE_TO_DISABLE = i18n.translate(
       'None of the selected monitors can be disabled here. Monitors using locations you cannot access are excluded.',
   }
 );
+
+const NO_ELIGIBLE_TO_EDIT = i18n.translate('xpack.synthetics.bulkOperations.noEligibleToEdit', {
+  defaultMessage:
+    'None of the selected monitors can be edited here. Project and Terraform-managed monitors must be updated from their source, and monitors using locations you cannot access are excluded.',
+});

@@ -149,6 +149,38 @@ describe('<BulkOperations />', () => {
     expect(disableItem).not.toBeDisabled();
   });
 
+  it('disables config edits when every selected monitor is project/terraform origin', () => {
+    const { getByTestId } = renderMenu([
+      makeMonitor('project-1', { origin: SourceType.PROJECT, enabled: true }),
+      makeMonitor('project-2', { origin: SourceType.PROJECT, enabled: false }),
+    ]);
+
+    expect(getByTestId('syntheticsBulkEnableMonitorsItem')).not.toBeDisabled();
+    expect(getByTestId('syntheticsBulkDisableMonitorsItem')).not.toBeDisabled();
+    expect(getByTestId('syntheticsBulkDeleteMonitorsItem')).not.toBeDisabled();
+
+    for (const testId of [
+      'syntheticsBulkEditTagsItem',
+      'syntheticsBulkEditServiceNameItem',
+      'syntheticsBulkEditLabelsItem',
+      'syntheticsBulkEditLocationsItem',
+      'syntheticsBulkEditScheduleItem',
+      'syntheticsBulkMaintenanceWindowsItem',
+    ]) {
+      expect(getByTestId(testId)).toBeDisabled();
+    }
+  });
+
+  it('keeps config edits enabled when the selection includes a ui-origin monitor', () => {
+    const { getByTestId } = renderMenu([
+      makeMonitor('ui-1'),
+      makeMonitor('project-1', { origin: SourceType.PROJECT }),
+    ]);
+
+    expect(getByTestId('syntheticsBulkEditTagsItem')).not.toBeDisabled();
+    expect(getByTestId('syntheticsBulkEditLocationsItem')).not.toBeDisabled();
+  });
+
   it('renders a disabled bulk actions button when nothing is selected', () => {
     const { getByTestId } = render(
       <BulkOperations
