@@ -8,18 +8,12 @@
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 
 /**
- * Scopes a rule query across every Cross-Project Search linked project.
+ * Prefixes an ES|QL query with `SET project_routing` across every CPS-linked project.
  *
- * Alerting v2 scopes its rule execution client with `projectRouting: 'space'`, so the CPS
- * request handler injects the space routing expression into the request body. Elasticsearch
- * resolves `default < body < SET`, so this in-query directive is what actually takes effect.
- * Knowledge indicators model all data available to a stream rather than one project, so
- * detection has to match the scope extraction ran at.
- *
- * `SET project_routing` is serverless-only preview syntax. It is applied unconditionally on
- * serverless so every rule is CPS-ready without a sync cycle when Cross-Project Search is
- * toggled on. On a single-project deployment `_alias:*` resolves to just that project — a
- * no-op.
+ * Alerting v2 still injects space routing on the request body, and Elasticsearch prefers
+ * the in-query SET (`default < body < SET`). Serverless-only preview syntax; applied on
+ * every serverless rule so it is CPS-ready without a later sync. `_alias:*` is a no-op
+ * on a single project.
  */
 export const withAllProjectsRouting = (query: string): string =>
   `SET project_routing="${PROJECT_ROUTING_ALL}";\n${query}`;

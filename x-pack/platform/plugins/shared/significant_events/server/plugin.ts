@@ -134,11 +134,6 @@ export class SignificantEventsPlugin
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
     const { streams: streamsSetup } = plugins;
-    // `SET project_routing` is serverless-only preview syntax, so all serverless rules carry
-    // the directive unconditionally. This makes every rule CPS-ready the moment Cross-Project
-    // Search is toggled on, without requiring a sync cycle to rewrite existing breach queries.
-    // On a single-project deployment `_alias:*` resolves to just that project — a no-op.
-    const isServerless = plugins.cloud?.isServerlessEnabled ?? false;
 
     this.getScopedClients = async ({
       request,
@@ -148,6 +143,7 @@ export class SignificantEventsPlugin
       rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
+      const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
       const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
@@ -160,11 +156,7 @@ export class SignificantEventsPlugin
       // they model all data available to a stream - so extraction must always read across every
       // linked project.
       //
-      // Detection matches that scope when CPS is enabled: rules compiled from these indicators
-      // carry a `SET project_routing` directive across all linked projects (see
-      // `withAllProjectsRouting`), which takes precedence over the space routing Alerting v2
-      // applies to the rule execution client. Without it a rule would be blind to data its
-      // knowledge indicator was derived from.
+      // Detection matches that all-projects scope on serverless via `withAllProjectsRouting`.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
         projectRouting: 'expression',

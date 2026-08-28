@@ -24,11 +24,11 @@ import {
 
 const FIND_PAGE_SIZE = 500;
 
-export interface RulesAdapterV2Options {
-  /**
-   * Whether this Kibana instance runs on serverless. Serverless rules unconditionally carry
-   * a `SET project_routing` directive so they are CPS-ready without a sync cycle.
-   */
+export interface RulesAdapterV2Params {
+  rulesClient: Pick<
+    RulesClientApi,
+    'createRule' | 'updateRule' | 'bulkDeleteRules' | 'findRules' | 'getTags'
+  >;
   isServerless: boolean;
 }
 
@@ -48,15 +48,18 @@ const OWNED_STREAM_TAGS_SIZE = 10000;
  * (SigEvents uses default space), matching the former HTTP client behavior.
  */
 export class RulesAdapterV2 implements IRulesManagementClient {
-  constructor(
-    private readonly rulesClient: RulesClientApi,
-    private readonly options: RulesAdapterV2Options
-  ) {}
+  private readonly rulesClient: RulesAdapterV2Params['rulesClient'];
+  private readonly isServerless: boolean;
+
+  constructor({ rulesClient, isServerless }: RulesAdapterV2Params) {
+    this.rulesClient = rulesClient;
+    this.isServerless = isServerless;
+  }
 
   async createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
       .createRule({
-        data: toV2CreateBody({ definition, options: this.options }),
+        data: toV2CreateBody({ definition, isServerless: this.isServerless }),
         options: { id },
       })
       .catch((error) => {
@@ -69,7 +72,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
 
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
-      .updateRule({ id, data: toV2UpdateBody({ definition, options: this.options }) })
+      .updateRule({ id, data: toV2UpdateBody({ definition, isServerless: this.isServerless }) })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 404) {
           return this.createRuleWithoutFallback(id, definition);
@@ -136,7 +139,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   ): Promise<void> {
     await this.rulesClient
       .createRule({
-        data: toV2CreateBody({ definition, options: this.options }),
+        data: toV2CreateBody({ definition, isServerless: this.isServerless }),
         options: { id },
       })
       .catch((error) => {
@@ -150,7 +153,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
 
 interface ToV2BodyParams {
   definition: SignificantEventsRuleDefinition;
-  options: RulesAdapterV2Options;
+  isServerless: boolean;
 }
 
 function toV2BreachQuery({
@@ -166,7 +169,7 @@ function toV2BreachQuery({
   return isServerless ? withAllProjectsRouting(compiled) : compiled;
 }
 
-function toV2CommonBody({ definition, options }: ToV2BodyParams) {
+function toV2CommonBody({ definition, isServerless }: ToV2BodyParams) {
   const { every, lookback } = getMetricSeriesRuleSchedule();
   return {
     metadata: {
@@ -185,17 +188,17 @@ function toV2CommonBody({ definition, options }: ToV2BodyParams) {
         query: toV2BreachQuery({
           esqlQuery: definition.esqlQuery,
           timestampField: definition.timestampField,
-          isServerless: options.isServerless,
+          isServerless,
         }),
       },
     },
   };
 }
 
-function toV2CreateBody({ definition, options }: ToV2BodyParams) {
+function toV2CreateBody({ definition, isServerless }: ToV2BodyParams) {
   return {
     kind: 'signal' as const,
-    ...toV2CommonBody({ definition, options }),
+    ...toV2CommonBody({ definition, isServerless }),
   };
 }
 

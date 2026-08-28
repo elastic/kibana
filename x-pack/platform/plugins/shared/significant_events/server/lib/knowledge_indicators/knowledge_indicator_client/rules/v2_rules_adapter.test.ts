@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { Parser } from '@elastic/esql';
-import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import { RulesAdapterV2, type RulesAdapterV2Options } from './v2_rules_adapter';
+import { RulesAdapterV2, type RulesAdapterV2Params } from './v2_rules_adapter';
 import {
   STREAMS_RULE_STREAM_TAG_PREFIX,
   type SignificantEventsRuleDefinition,
@@ -33,9 +33,9 @@ function makeRulesClientMock() {
 
 function makeAdapter(
   mock: ReturnType<typeof makeRulesClientMock>,
-  options: RulesAdapterV2Options = { isServerless: false }
+  { isServerless }: Pick<RulesAdapterV2Params, 'isServerless'> = { isServerless: false }
 ) {
-  return new RulesAdapterV2(mock as unknown as RulesClientApi, options);
+  return new RulesAdapterV2({ rulesClient: mock, isServerless });
 }
 
 function lastCreateCall(mock: ReturnType<typeof makeRulesClientMock>) {
@@ -177,8 +177,7 @@ describe('RulesAdapterV2', () => {
       const adapter = makeAdapter(mock, { isServerless: false });
       await adapter.createRule('rule-1', createDefinition);
 
-      const data = lastCreateCall(mock).data as { query: { breach: { query: string } } };
-      expect(data.query.breach.query).not.toContain('SET project_routing');
+      expect(lastCreateCall(mock).data.query.breach.query).not.toContain('SET project_routing');
     });
 
     it('scopes the create breach query across all projects on serverless', async () => {
@@ -187,9 +186,7 @@ describe('RulesAdapterV2', () => {
       const adapter = makeAdapter(mock, { isServerless: true });
       await adapter.createRule('rule-1', createDefinition);
 
-      const { query } = (lastCreateCall(mock).data as { query: { breach: { query: string } } })
-        .query.breach;
-
+      const query = lastCreateCall(mock).data.query.breach.query;
       expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
       expectMetricSeriesBreach(query);
     });
@@ -200,9 +197,7 @@ describe('RulesAdapterV2', () => {
       const adapter = makeAdapter(mock, { isServerless: true });
       await adapter.updateRule('rule-1', updateDefinition);
 
-      const { query } = (lastUpdateCall(mock).data as { query: { breach: { query: string } } })
-        .query.breach;
-
+      const query = lastUpdateCall(mock).data.query.breach.query;
       expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
       expectMetricSeriesBreach(query);
     });
@@ -213,10 +208,7 @@ describe('RulesAdapterV2', () => {
       const adapter = makeAdapter(mock, { isServerless: true });
       await adapter.createRule('rule-1', createDefinition);
 
-      const { query } = (lastCreateCall(mock).data as { query: { breach: { query: string } } })
-        .query.breach;
-
-      expect(Parser.parseErrors(query)).toEqual([]);
+      expect(Parser.parseErrors(lastCreateCall(mock).data.query.breach.query)).toEqual([]);
     });
   });
 

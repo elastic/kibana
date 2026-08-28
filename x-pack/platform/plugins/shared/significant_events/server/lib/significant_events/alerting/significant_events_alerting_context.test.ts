@@ -76,7 +76,10 @@ describe('createSignificantEventsAlertingContextResolver', () => {
   it.each([true, false])('forwards isServerless=%s to the rules adapter', async (isServerless) => {
     const createRule = jest.fn().mockResolvedValue({});
     const context = await createSignificantEventsAlertingContextResolver({
-      getAlertingV2RulesClient: async () => ({ createRule } as unknown as RulesClientApi),
+      getAlertingV2RulesClient: async () =>
+        ({
+          createRule,
+        } as unknown as RulesClientApi),
       isServerless,
     })();
 
@@ -88,9 +91,8 @@ describe('createSignificantEventsAlertingContextResolver', () => {
       schedule: { interval: '5m' },
     });
 
-    const { data } = createRule.mock.calls[0][0] as {
-      data: { query: { breach: { query: string } } };
-    };
-    expect(data.query.breach.query.includes('SET project_routing')).toBe(isServerless);
+    expect(
+      createRule.mock.calls[0][0].data.query.breach.query.includes('SET project_routing')
+    ).toBe(isServerless);
   });
 });
