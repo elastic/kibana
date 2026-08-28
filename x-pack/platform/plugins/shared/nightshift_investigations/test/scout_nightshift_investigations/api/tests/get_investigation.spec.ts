@@ -7,27 +7,16 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import type { ApiClientFixture } from '@kbn/scout';
 import {
   apiTest,
-  COMMON_HEADERS,
   INVESTIGATIONS_READ_ROLE,
   NO_AGENT_BUILDER_ROLE,
+  getInvestigation,
   seedInvestigation,
   deleteInvestigation,
 } from '../fixtures';
 
 const TEST_ID = 'get-test-investigation';
-
-const getInvestigation = async (
-  apiClient: ApiClientFixture,
-  cookieHeader: Record<string, string>,
-  id: string
-) =>
-  apiClient.get(`internal/nightshift/investigations/${id}`, {
-    headers: { ...COMMON_HEADERS, ...cookieHeader },
-    responseType: 'json',
-  });
 
 apiTest.describe(
   'GET /internal/nightshift/investigations/{id}',

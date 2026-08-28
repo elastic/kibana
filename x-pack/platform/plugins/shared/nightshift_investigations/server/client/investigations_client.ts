@@ -484,6 +484,29 @@ export class NightshiftInvestigationsClient {
       toListInvestigationItem({ id: so.id, attrs: so.attributes })
     );
 
+    // Cross-check `running` items against the workflow engine (same reconciliation as get(),
+    // page-bounded) so list and get never disagree about a stale status. Failures fall back to
+    // the raw SO status — the list must not fail just because the engine is unreachable.
+    await Promise.all(
+      results
+        .filter((item) => item.status === 'running')
+        .map(async (item) => {
+          const reconciled = await this.reconcileStaleRunningStatus(item.investigation_id).catch(
+            (err) => {
+              this.logger.warn(
+                `Failed to reconcile status for investigation "${item.investigation_id}" in list: ${err.message}`
+              );
+              return undefined;
+            }
+          );
+          if (reconciled) {
+            item.status = reconciled.status;
+            item.completed_at = reconciled.completed_at;
+            item.error = reconciled.error;
+          }
+        })
+    );
+
     return { results, page: result.page, size: result.size, total: result.total };
   }
 }

@@ -6,8 +6,83 @@
  */
 
 import type { KbnClient } from '@kbn/kbn-client';
+import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
+import { COMMON_HEADERS } from './constants';
 
 const SO_TYPE = 'nightshift-investigation';
+
+const INVESTIGATIONS_PATH = 'internal/nightshift/investigations';
+
+const spacePath = (path: string, spaceId?: string): string =>
+  spaceId ? `s/${spaceId}/${path}` : path;
+
+export interface InvestigationRequestOptions {
+  spaceId?: string;
+}
+
+export const getInvestigation = (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  id: string,
+  { spaceId }: InvestigationRequestOptions = {}
+): Promise<ApiClientResponse> =>
+  apiClient.get(spacePath(`${INVESTIGATIONS_PATH}/${id}`, spaceId), {
+    headers: { ...COMMON_HEADERS, ...cookieHeader },
+    responseType: 'json',
+  });
+
+export const listInvestigations = (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  { query = '', spaceId }: InvestigationRequestOptions & { query?: string } = {}
+): Promise<ApiClientResponse> =>
+  apiClient.get(
+    spacePath(query ? `${INVESTIGATIONS_PATH}?${query}` : INVESTIGATIONS_PATH, spaceId),
+    {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    }
+  );
+
+export const updateInvestigation = (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  id: string,
+  body: Record<string, unknown>,
+  { spaceId }: InvestigationRequestOptions = {}
+): Promise<ApiClientResponse> =>
+  apiClient.patch(spacePath(`${INVESTIGATIONS_PATH}/${id}`, spaceId), {
+    headers: { ...COMMON_HEADERS, ...cookieHeader },
+    body,
+    responseType: 'json',
+  });
+
+export const ensureInvestigation = (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  id: string,
+  { spaceId }: InvestigationRequestOptions = {}
+): Promise<ApiClientResponse> =>
+  apiClient.post(spacePath(`${INVESTIGATIONS_PATH}/${id}/_ensure`, spaceId), {
+    headers: { ...COMMON_HEADERS, ...cookieHeader },
+    responseType: 'json',
+  });
+
+export const waitForInvestigation = async (kbnClient: KbnClient, id: string): Promise<void> => {
+  const maxAttempts = 10;
+  const delayMs = 500;
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      await kbnClient.savedObjects.get({ type: SO_TYPE, id });
+      return;
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  throw new Error(
+    `Investigation saved object "${id}" did not appear within ${maxAttempts} attempts`
+  );
+};
 
 export interface SeedInvestigationOptions {
   id: string;
@@ -30,7 +105,7 @@ export interface SeedInvestigationOptions {
 export const seedInvestigation = async (
   kbnClient: KbnClient,
   options: SeedInvestigationOptions
-) => {
+): Promise<void> => {
   const {
     id,
     space,
@@ -59,7 +134,11 @@ export const seedInvestigation = async (
   });
 };
 
-export const deleteInvestigation = async (kbnClient: KbnClient, id: string, space?: string) => {
+export const deleteInvestigation = async (
+  kbnClient: KbnClient,
+  id: string,
+  space?: string
+): Promise<void> => {
   try {
     await kbnClient.savedObjects.delete({ type: SO_TYPE, id, space });
   } catch {

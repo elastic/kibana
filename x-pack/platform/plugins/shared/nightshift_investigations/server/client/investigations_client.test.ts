@@ -306,6 +306,66 @@ describe('NightshiftInvestigationsClient.list()', () => {
     expect(result.results[0]).not.toHaveProperty('conversation_id');
   });
 
+  describe('stale-running reconciliation', () => {
+    const runningListResult = () => ({
+      results: [
+        {
+          id: 'inv-running',
+          type: 'nightshift-investigation',
+          references: [],
+          attributes: makeSoAttrs({ status: 'running', completed_at: undefined }),
+        },
+      ],
+      total: 1,
+      page: 1,
+      size: 20,
+    });
+
+    it('reconciles running items whose workflow has finished', async () => {
+      mockInvestigationSoClient.find.mockResolvedValue(runningListResult());
+      mockManagement.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        finishedAt: '2024-01-01T02:00:00Z',
+      });
+
+      const result = await makeClient().list({});
+
+      expect(result.results[0].status).toBe('completed');
+      expect(result.results[0].completed_at).toBe('2024-01-01T02:00:00Z');
+      expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
+        'inv-running',
+        expect.objectContaining({ status: 'completed' })
+      );
+    });
+
+    it('keeps running items whose workflow is still running', async () => {
+      mockInvestigationSoClient.find.mockResolvedValue(runningListResult());
+      mockManagement.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.RUNNING,
+      });
+
+      const result = await makeClient().list({});
+
+      expect(result.results[0].status).toBe('running');
+      expect(mockInvestigationSoClient.update).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the SO status when the engine lookup fails', async () => {
+      mockInvestigationSoClient.find.mockResolvedValue(runningListResult());
+      mockManagement.getWorkflowExecution.mockRejectedValue(new Error('engine unavailable'));
+
+      const result = await makeClient().list({});
+
+      expect(result.results[0].status).toBe('running');
+    });
+
+    it('does not query the engine when no item is running', async () => {
+      mockInvestigationSoClient.find.mockResolvedValue(makeListResult());
+      await makeClient().list({});
+      expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
   it('source-filters find to list fields', async () => {
     await makeClient().list();
     expect(mockInvestigationSoClient.find).toHaveBeenCalledWith(

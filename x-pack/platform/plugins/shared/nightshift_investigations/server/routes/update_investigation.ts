@@ -9,10 +9,14 @@ import { z } from '@kbn/zod/v4';
 import {
   MAX_BLIND_SPOTS,
   MAX_HYPOTHESES,
-  MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
   MAX_SIGNIFICANT_EVENT_UPDATES,
   MAX_TEXT_LENGTH,
+  investigationBlindSpotSchema,
+  investigationHypothesisSchema,
+  investigationImpactSchema,
+  investigationRecommendationSchema,
+  significantEventUpdateSchema,
 } from '@kbn/significant-events-schema';
 import { UPDATABLE_INVESTIGATION_STATUSES } from '../../common';
 import { MAX_KEYWORD_LENGTH } from '../saved_objects';
@@ -43,20 +47,16 @@ export const updateInvestigationRoute = createNightshiftInvestigationsServerRout
       error: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
       summary: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
       conclusion: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
-      hypotheses: orAbsent(z.array(z.record(z.string(), z.unknown())).max(MAX_HYPOTHESES)),
+      hypotheses: orAbsent(z.array(investigationHypothesisSchema).max(MAX_HYPOTHESES)),
       recommendations: orAbsent(
-        z.array(z.record(z.string(), z.unknown())).max(MAX_RECOMMENDATIONS)
+        z.array(investigationRecommendationSchema).max(MAX_RECOMMENDATIONS)
       ),
-      blind_spots: orAbsent(z.array(z.record(z.string(), z.unknown())).max(MAX_BLIND_SPOTS)),
+      blind_spots: orAbsent(z.array(investigationBlindSpotSchema).max(MAX_BLIND_SPOTS)),
       significant_event_updates: orAbsent(
-        z.array(z.record(z.string(), z.unknown())).max(MAX_SIGNIFICANT_EVENT_UPDATES)
+        z.array(significantEventUpdateSchema).max(MAX_SIGNIFICANT_EVENT_UPDATES)
       ),
       conversation_id: orAbsent(z.string().max(MAX_KEYWORD_LENGTH)),
-      impact: orAbsent(
-        z.object({
-          entities: z.array(z.record(z.string(), z.unknown())).max(MAX_IMPACT_ENTITIES),
-        })
-      ),
+      impact: orAbsent(investigationImpactSchema),
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {

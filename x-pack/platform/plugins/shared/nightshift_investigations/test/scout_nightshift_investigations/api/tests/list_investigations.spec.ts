@@ -7,43 +7,15 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import type { ApiClientFixture } from '@kbn/scout';
 import {
   apiTest,
-  COMMON_HEADERS,
   INVESTIGATIONS_READ_ROLE,
   NO_AGENT_BUILDER_ROLE,
+  listInvestigations,
   seedInvestigation,
   deleteInvestigation,
+  waitForInvestigation,
 } from '../fixtures';
-
-const LIST_PATH = 'internal/nightshift/investigations';
-
-const listInvestigations = async (
-  apiClient: ApiClientFixture,
-  cookieHeader: Record<string, string>,
-  query = ''
-) =>
-  apiClient.get(query ? `${LIST_PATH}?${query}` : LIST_PATH, {
-    headers: { ...COMMON_HEADERS, ...cookieHeader },
-    responseType: 'json',
-  });
-
-async function waitForInvestigation(
-  kbnClient: Parameters<typeof seedInvestigation>[0],
-  id: string
-): Promise<void> {
-  const maxAttempts = 10;
-  const delayMs = 500;
-  for (let i = 0; i < maxAttempts; i++) {
-    try {
-      await kbnClient.savedObjects.get({ type: 'nightshift-investigation', id });
-      return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-  }
-}
 
 apiTest.describe(
   'GET /internal/nightshift/investigations',
@@ -136,7 +108,9 @@ apiTest.describe(
     });
 
     apiTest('filters by status', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, 'statuses=running');
+      const response = await listInvestigations(apiClient, cookieHeader, {
+        query: 'statuses=running',
+      });
       expect(response).toHaveStatusCode(200);
 
       const statuses = response.body.results.map((r: { status: string }) => r.status);
@@ -146,7 +120,9 @@ apiTest.describe(
     });
 
     apiTest('supports pagination with page and size', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, 'page=1&size=1');
+      const response = await listInvestigations(apiClient, cookieHeader, {
+        query: 'page=1&size=1',
+      });
       expect(response).toHaveStatusCode(200);
       expect(response.body.results.length).toBeLessThanOrEqual(1);
       expect(response.body.page).toBe(1);
@@ -154,21 +130,21 @@ apiTest.describe(
     });
 
     apiTest('returns 400 when page exceeds the maximum of 100', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, 'page=101');
+      const response = await listInvestigations(apiClient, cookieHeader, { query: 'page=101' });
       expect(response).toHaveStatusCode(400);
     });
 
     apiTest('returns 400 for an unrecognised status value', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, 'statuses=not_a_status');
+      const response = await listInvestigations(apiClient, cookieHeader, {
+        query: 'statuses=not_a_status',
+      });
       expect(response).toHaveStatusCode(400);
     });
 
     apiTest('returns 400 for an invalid sort_field value', async ({ apiClient }) => {
-      const response = await listInvestigations(
-        apiClient,
-        cookieHeader,
-        'sort_field=unknown_field'
-      );
+      const response = await listInvestigations(apiClient, cookieHeader, {
+        query: 'sort_field=unknown_field',
+      });
       expect(response).toHaveStatusCode(400);
     });
 

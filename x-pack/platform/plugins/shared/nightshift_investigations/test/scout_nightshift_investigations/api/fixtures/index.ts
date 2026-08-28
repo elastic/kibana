@@ -12,4 +12,12 @@ export {
   INVESTIGATIONS_WRITE_ROLE,
   NO_AGENT_BUILDER_ROLE,
 } from './constants';
-export { seedInvestigation, deleteInvestigation } from './helpers';
+export {
+  seedInvestigation,
+  deleteInvestigation,
+  getInvestigation,
+  listInvestigations,
+  updateInvestigation,
+  ensureInvestigation,
+  waitForInvestigation,
+} from './helpers';

@@ -8,6 +8,13 @@
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
+import type {
+  InvestigationBlindSpot,
+  InvestigationHypothesis,
+  InvestigationImpact,
+  InvestigationRecommendation,
+  SignificantEventUpdate,
+} from '@kbn/significant-events-schema';
 import type { InvestigationStatus, PaginatedResponse } from '../../common';
 import {
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -17,11 +24,11 @@ import {
 export interface InvestigationStructuredOutput {
   summary?: string;
   conclusion?: string;
-  hypotheses?: Array<Record<string, unknown>>;
-  recommendations?: Array<Record<string, unknown>>;
-  blind_spots?: Array<Record<string, unknown>>;
-  significant_event_updates?: Array<Record<string, unknown>>;
-  impact?: { entities: Array<Record<string, unknown>> };
+  hypotheses?: InvestigationHypothesis[];
+  recommendations?: InvestigationRecommendation[];
+  blind_spots?: InvestigationBlindSpot[];
+  significant_event_updates?: SignificantEventUpdate[];
+  impact?: InvestigationImpact;
 }
 
 export interface InvestigationSavedObjectUpdateAttributes extends InvestigationStructuredOutput {

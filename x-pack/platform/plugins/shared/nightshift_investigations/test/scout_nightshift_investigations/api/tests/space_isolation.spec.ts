@@ -7,53 +7,18 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import type { ApiClientFixture } from '@kbn/scout';
 import {
   apiTest,
-  COMMON_HEADERS,
   INVESTIGATIONS_WRITE_ROLE,
+  getInvestigation,
+  listInvestigations,
+  updateInvestigation,
   seedInvestigation,
   deleteInvestigation,
 } from '../fixtures';
 
 const SPACE_ID = 'nightshift-inv-space';
 const TEST_ID = 'space-scoped-investigation';
-const GET_PATH = `internal/nightshift/investigations/${TEST_ID}`;
-const LIST_PATH = 'internal/nightshift/investigations';
-
-const spacePath = (path: string, spaceId?: string) => (spaceId ? `s/${spaceId}/${path}` : path);
-
-const getInvestigation = async (
-  apiClient: ApiClientFixture,
-  cookieHeader: Record<string, string>,
-  spaceId?: string
-) =>
-  apiClient.get(spacePath(GET_PATH, spaceId), {
-    headers: { ...COMMON_HEADERS, ...cookieHeader },
-    responseType: 'json',
-  });
-
-const listInvestigations = async (
-  apiClient: ApiClientFixture,
-  cookieHeader: Record<string, string>,
-  spaceId?: string
-) =>
-  apiClient.get(spacePath(LIST_PATH, spaceId), {
-    headers: { ...COMMON_HEADERS, ...cookieHeader },
-    responseType: 'json',
-  });
-
-const updateInvestigation = async (
-  apiClient: ApiClientFixture,
-  cookieHeader: Record<string, string>,
-  body: Record<string, unknown>,
-  spaceId?: string
-) =>
-  apiClient.patch(spacePath(GET_PATH, spaceId), {
-    headers: { ...COMMON_HEADERS, ...cookieHeader },
-    body,
-    responseType: 'json',
-  });
 
 apiTest.describe(
   'investigations are isolated per space',
@@ -89,7 +54,9 @@ apiTest.describe(
     apiTest(
       'GET returns the investigation in the space it was created in',
       async ({ apiClient }) => {
-        const response = await getInvestigation(apiClient, cookieHeader, SPACE_ID);
+        const response = await getInvestigation(apiClient, cookieHeader, TEST_ID, {
+          spaceId: SPACE_ID,
+        });
         expect(response).toHaveStatusCode(200);
         expect(response.body.investigation_id).toBe(TEST_ID);
         expect(response.body.subject).toStrictEqual({ type: 'alert', id: 'alert-space' });
@@ -100,13 +67,13 @@ apiTest.describe(
     apiTest(
       'GET in the default space does not see a space-scoped investigation',
       async ({ apiClient }) => {
-        const response = await getInvestigation(apiClient, cookieHeader);
+        const response = await getInvestigation(apiClient, cookieHeader, TEST_ID);
         expect(response).toHaveStatusCode(404);
       }
     );
 
     apiTest('LIST in the custom space includes the investigation', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, SPACE_ID);
+      const response = await listInvestigations(apiClient, cookieHeader, { spaceId: SPACE_ID });
       expect(response).toHaveStatusCode(200);
 
       const ids = response.body.results.map(
@@ -132,12 +99,15 @@ apiTest.describe(
       const response = await updateInvestigation(
         apiClient,
         cookieHeader,
+        TEST_ID,
         { status: 'completed', summary: 'Finished in space.' },
-        SPACE_ID
+        { spaceId: SPACE_ID }
       );
       expect(response).toHaveStatusCode(200);
 
-      const getResponse = await getInvestigation(apiClient, cookieHeader, SPACE_ID);
+      const getResponse = await getInvestigation(apiClient, cookieHeader, TEST_ID, {
+        spaceId: SPACE_ID,
+      });
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body.status).toBe('completed');
       expect(getResponse.body.summary).toBe('Finished in space.');
@@ -146,12 +116,14 @@ apiTest.describe(
     apiTest(
       'PATCH in the default space does not update a space-scoped investigation',
       async ({ apiClient }) => {
-        const response = await updateInvestigation(apiClient, cookieHeader, {
+        const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
           status: 'failed',
         });
         expect(response).toHaveStatusCode(404);
 
-        const getResponse = await getInvestigation(apiClient, cookieHeader, SPACE_ID);
+        const getResponse = await getInvestigation(apiClient, cookieHeader, TEST_ID, {
+          spaceId: SPACE_ID,
+        });
         expect(getResponse).toHaveStatusCode(200);
         expect(getResponse.body.status).toBe('running');
       }

@@ -7,29 +7,16 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import type { ApiClientFixture } from '@kbn/scout';
 import {
   apiTest,
-  COMMON_HEADERS,
   INVESTIGATIONS_READ_ROLE,
   INVESTIGATIONS_WRITE_ROLE,
   seedInvestigation,
   deleteInvestigation,
+  updateInvestigation,
 } from '../fixtures';
 
 const SO_TYPE = 'nightshift-investigation';
-
-const updateInvestigation = async (
-  apiClient: ApiClientFixture,
-  cookieHeader: Record<string, string>,
-  id: string,
-  body: Record<string, unknown>
-) =>
-  apiClient.patch(`internal/nightshift/investigations/${id}`, {
-    headers: { ...COMMON_HEADERS, ...cookieHeader },
-    body,
-    responseType: 'json',
-  });
 
 apiTest.describe(
   'PATCH /internal/nightshift/investigations/{id}',
