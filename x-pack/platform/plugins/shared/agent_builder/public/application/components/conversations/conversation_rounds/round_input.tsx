@@ -16,8 +16,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { ConversationRoundAuthor, ConversationRoundOrigin } from '@kbn/agent-builder-common';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type {
   Attachment,
   AttachmentVersionRef,
@@ -26,13 +25,11 @@ import type {
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { AB_PANEL_RADIUS } from '../../../../common.styles';
 import { useCurrentUser } from '../../../hooks/use_current_user';
-import { pendingRoundId } from '../../../utils/new_conversation';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { CommandBadgeText } from './command_badge_text';
 import { RoundAuthorHeader } from './round_author_header';
-
-type RoundInputAuthor = ConversationRoundAuthor | UserProfileWithAvatar;
+import { getInputAuthor, isCurrentUserAuthor, type RoundAuthor } from './round_author';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {
@@ -42,7 +39,7 @@ const labels = {
 
 interface RoundInputProps {
   input: string;
-  author?: RoundInputAuthor;
+  author?: RoundAuthor;
   isCurrentRound: boolean;
   roundId: string;
   origin?: ConversationRoundOrigin;
@@ -51,64 +48,6 @@ interface RoundInputProps {
   conversationAttachments?: VersionedAttachment[];
   fallbackAttachments?: Attachment[];
 }
-
-export const getInputAuthor = ({
-  author,
-  currentUser,
-  isCurrentRound,
-  roundId,
-}: {
-  author?: RoundInputAuthor;
-  currentUser: UserProfileWithAvatar | null;
-  isCurrentRound: boolean;
-  roundId: string;
-}): RoundInputAuthor | undefined => {
-  if (author) {
-    return author;
-  }
-
-  if (!isCurrentRound) {
-    return undefined;
-  }
-
-  if (roundId !== pendingRoundId) {
-    return undefined;
-  }
-
-  return currentUser ?? undefined;
-};
-
-const getAuthorId = (author?: RoundInputAuthor): string | undefined => {
-  if (!author) {
-    return undefined;
-  }
-
-  if ('uid' in author) {
-    return author.uid;
-  }
-
-  return author.id;
-};
-
-export const isCurrentUserAuthor = ({
-  author,
-  currentUser,
-}: {
-  author?: RoundInputAuthor;
-  currentUser: UserProfileWithAvatar | null;
-}): boolean => {
-  if (!currentUser) {
-    return false;
-  }
-
-  const authorId = getAuthorId(author);
-
-  if (!authorId) {
-    return false;
-  }
-
-  return authorId === currentUser.uid;
-};
 
 export const RoundInput = ({
   input,

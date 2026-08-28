@@ -8,7 +8,7 @@
 import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { pendingRoundId } from '../../../utils/new_conversation';
-import { getInputAuthor, isCurrentUserAuthor } from './round_input';
+import { getInputAuthor, isCurrentUserAuthor } from './round_author';
 
 const currentUser = {
   uid: 'current-user',

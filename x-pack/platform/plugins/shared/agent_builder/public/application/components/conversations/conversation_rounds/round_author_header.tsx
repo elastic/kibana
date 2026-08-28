@@ -17,19 +17,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  getUserDisplayName,
-  UserAvatar,
-  type UserProfileWithAvatar,
-} from '@kbn/user-profile-components';
-import {
-  ConversationOriginType,
-  type ConversationRoundAuthor,
-  type ConversationRoundOrigin,
-} from '@kbn/agent-builder-common';
+import { UserAvatar } from '@kbn/user-profile-components';
+import { ConversationOriginType, type ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { AgentAvatar } from '../../common/agent_avatar';
+import { getRoundAuthorHeaderName, isUserProfileAuthor, type RoundAuthor } from './round_author';
 
 const labels = {
   agentBadge: i18n.translate('xpack.agentBuilder.roundAuthor.agentBadge', {
@@ -53,16 +46,8 @@ const formatRoundTime = (startedAt: string): string => {
   }).format(date);
 };
 
-const getAuthorName = (author?: ConversationRoundAuthor): string | undefined => {
-  return author?.full_name || author?.username;
-};
-
-const isUserProfileAuthor = (
-  author?: ConversationRoundAuthor | UserProfileWithAvatar
-): author is UserProfileWithAvatar => Boolean(author && 'uid' in author);
-
 interface RoundAuthorHeaderProps {
-  author?: ConversationRoundAuthor | UserProfileWithAvatar;
+  author?: RoundAuthor;
   origin?: ConversationRoundOrigin;
   startedAt: string;
   agent?: AgentDefinition;
@@ -85,13 +70,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
     enabled: shouldResolveAuthorProfile,
   });
   const resolvedAuthorProfile = hasUserProfileAuthor ? author : resolvedAuthorProfiles[0];
-  const name = isAgent
-    ? agent?.name
-    : resolvedAuthorProfile
-    ? getUserDisplayName(resolvedAuthorProfile.user)
-    : !hasUserProfileAuthor
-    ? getAuthorName(author)
-    : undefined;
+  const name = getRoundAuthorHeaderName({ agent, author, resolvedAuthorProfile });
   const showSlackOrigin = !isAgent && origin?.type === ConversationOriginType.Slack;
   const showAgentBadge = isAgent;
   const showSeparatorBeforeTime = Boolean(name) || showAgentBadge || showSlackOrigin;

@@ -17,6 +17,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
+  getConversationRoundAuthorDisplayName,
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
@@ -302,7 +303,14 @@ const formatInputPrefix = ({
 
 const getAuthorLabel = (author?: ConversationRoundAuthor): string | undefined => {
   if (!author) return undefined;
-  return author.username || author.full_name || author.id || undefined;
+
+  const displayName = getConversationRoundAuthorDisplayName(author);
+
+  if (displayName) {
+    return displayName;
+  }
+
+  return author.id;
 };
 
 const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): XmlNode => {
