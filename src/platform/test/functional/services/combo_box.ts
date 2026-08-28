@@ -204,11 +204,10 @@ export class ComboBoxService extends FtrService {
     comboBoxElement: WebElementWrapper,
     filterValue: string
   ): Promise<void> {
-    const input = await comboBoxElement.findByTagName('input');
-
+    // Re-resolve the input on each attempt: combobox re-renders, staling a captured
+    // handle so that retrying type on a fixed reference cannot recover.
     await this.retry.try(async () => {
-      // Wait for the input to not be disabled before typing into it (otherwise
-      // typing will sometimes trigger the global search bar instead)
+      const input = await comboBoxElement.findByTagName('input');
       expect(await input.isEnabled()).to.equal(true);
 
       // Some Kibana comboboxes force state to not be clearable, so we can't use `input.clearValue()`.
