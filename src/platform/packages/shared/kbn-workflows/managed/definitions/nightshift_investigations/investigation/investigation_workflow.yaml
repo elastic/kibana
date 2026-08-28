@@ -41,6 +41,18 @@ triggers:
       additionalProperties: false
 
 steps:
+  # The investigation agent is a per-space document, so it has to exist in whichever space this
+  # execution runs in. Callers going through NightshiftInvestigationsClient.start() install it
+  # themselves, but discovery triggers this workflow with `workflow.executeAsync`, which never
+  # touches that client — as does any hand-written workflow or manual run. Ensuring it here is the
+  # one place that covers every trigger. Idempotent, and it never overwrites admin edits.
+  #
+  # Runs before `emit_investigation_started` so that a failure here does not leave a stale
+  # `running` status with no terminal event. Without `on-failure: continue`, a failure also
+  # cannot leave a pending marker on a significant event for an investigation that will never
+  # produce anything: no `investigations` entry is written, so the next discovery cycle retries.
+  - name: ensure_investigation_agent
+    type: nightshift.ensureInvestigationAgent
   - name: emit_investigation_started
     type: kibana.request
     with:
@@ -52,7 +64,6 @@ steps:
         status: 'running'
     on-failure:
       continue: true
-
   # Records a pending investigation on the Significant Event as soon as the workflow starts,
   # so the UI can show an in-progress indicator before the agent step finishes.
   # Only runs when a sig-event context was supplied (discovery or chat-agent paths).

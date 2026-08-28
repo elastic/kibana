@@ -158,8 +158,7 @@ const IndexPatternsFormComponent = ({
           >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setIndexPatternsWarningCallout"
-              defaultMessage="You’re about to overwrite index patterns for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to
-              apply changes."
+              defaultMessage="You’re about to overwrite index patterns for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to apply changes."
               values={{ rulesCount }}
             />
           </EuiCallOut>
