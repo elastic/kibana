@@ -29,6 +29,7 @@ import {
 import { openLazyFlyout, tracksOverlays } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   BehaviorSubject,
@@ -52,6 +53,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getServices } from './services';
+import { getTelemetry } from './telemetry';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
@@ -82,6 +84,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+    const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[] | undefined>(undefined);
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
@@ -136,8 +139,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom content',
         }),
-      onEdit: async ({ isNewPanel, returnFocus } = {}) => {
+      onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         const { core } = getServices();
+        getTelemetry().trackEditFlyoutOpened({
+          isNewPanel,
+          hasTemplate: Boolean(template$.getValue()),
+          hasEsqlQuery: Boolean(esqlQuery$.getValue()),
+        });
         let hasSaved = false;
         const flyoutRef = openLazyFlyout({
           core,
@@ -192,6 +200,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               const [projectRouting, setProjectRouting] = useState(projectRouting$.getValue());
               const [query, setQuery] = useState(query$.getValue());
               const [filters, setFilters] = useState(filters$.getValue());
+              const [esqlVariablesFlyout, setEsqlVariablesFlyout] = useState(
+                esqlVariables$.getValue()
+              );
 
               useEffect(() => {
                 const subs = [
@@ -202,6 +213,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   projectRouting$.subscribe(setProjectRouting),
                   query$.subscribe(setQuery),
                   filters$.subscribe(setFilters),
+                  esqlVariables$.subscribe(setEsqlVariablesFlyout),
                 ];
                 return () => subs.forEach((s) => s.unsubscribe());
               }, []);
@@ -215,7 +227,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   projectRouting={projectRouting}
                   query={query}
                   filters={filters}
-                  isNewPanel={isNewPanel ?? false}
+                  esqlVariables={esqlVariablesFlyout}
+                  isNewPanel={isNewPanel}
                   ariaLabelledBy={ariaLabelledBy}
                   onSave={handleSave}
                   onClose={handleClose}
@@ -234,7 +247,15 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           },
         });
         flyoutRef.onClose.then(() => {
-          if (!hasSaved && !isRetained && isNewPanel && apiIsPresentationContainer(parentApi)) {
+          const panelRemoved =
+            !hasSaved && !isRetained && isNewPanel && apiIsPresentationContainer(parentApi);
+          if (!hasSaved) {
+            getTelemetry().trackEditCancelled({
+              isNewPanel,
+              panelRemoved,
+            });
+          }
+          if (panelRemoved) {
             parentApi.removePanel(uuid);
           }
           isRetained = false;
@@ -271,6 +292,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       projectRouting$.next(ctx.projectRouting);
       query$.next(ctx.query);
       filters$.next(ctx.filters);
+      esqlVariables$.next(ctx.esqlVariables);
       if (!ctx.isReload) {
         previewHtml$.next(null);
       }
@@ -287,6 +309,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           projectRouting,
           query,
           filters,
+          esqlVariables,
           previewHtml,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
@@ -296,6 +319,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           projectRouting$,
           query$,
           filters$,
+          esqlVariables$,
           previewHtml$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
@@ -369,6 +393,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
                 template$.next(data.panel_template);
                 esqlQuery$.next(data.esql_query);
+                getTelemetry().trackAgentUpdateApplied({
+                  hasEsqlQuery: Boolean(data.esql_query),
+                  templateSizeBytes: data.panel_template.length,
+                });
                 break;
               }
             });
@@ -383,6 +411,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         const handleGenerateWithChat = useCallback(() => {
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
+          getTelemetry().trackGenerateWithChatClicked({
+            triggerSource: 'empty_panel',
+            hasExistingTemplate: false,
+          });
           isRetained = true;
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
@@ -404,6 +436,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             projectRouting={projectRouting}
             query={query}
             filters={filters}
+            esqlVariables={esqlVariables}
             previewHtml={previewHtml}
             onLoadingChange={handleLoadingChange}
             onGenerateWithChat={handleGenerateWithChat}
