@@ -83,15 +83,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.3',
-          inputs: [
-            {
-              meta: {
-                package: {
-                  agentVersion: '>=9.3.0',
-                },
-              },
-            },
-          ],
+          inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.3',
         policy_base_id: 'policy1',
@@ -100,6 +93,7 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policy1#9.2',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policy1#9.2',
         policy_base_id: 'policy1',
@@ -108,6 +102,7 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policy1#8.9',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policy1#8.9',
         policy_base_id: 'policy1',
@@ -121,11 +116,7 @@ describe('getVersionSpecificPolicies', () => {
       fleetServerPolicy,
       {
         id: 'policy1',
-        inputs: [
-          {
-            meta: { package: { agentVersion: '>=9.3.0' } },
-          },
-        ],
+        inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }],
       } as any,
       ['9.4', '9.1']
     );
@@ -133,15 +124,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.4',
-          inputs: [
-            {
-              meta: {
-                package: {
-                  agentVersion: '>=9.3.0',
-                },
-              },
-            },
-          ],
+          inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.4',
         policy_base_id: 'policy1',
@@ -150,6 +134,7 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policy1#9.1',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policy1#9.1',
         policy_base_id: 'policy1',

@@ -109,18 +109,20 @@ export async function getVersionSpecificPolicies(
         // POLICY_CHANGE actions every checkin. See https://github.com/elastic/kibana/issues/276294
         id: versionedPolicyId,
         inputs: getInputsForVersion(updatedFullPolicy?.inputs ?? fullPolicy.inputs, version),
-        // When the policy was rebuilt for this agent version, its `secret_references` was pruned
-        // against the compiled inputs for that version. Re-prune against the final version-filtered
-        // input set from getInputsForVersion: package-level agentVersion conditions can remove an
-        // input (and its placeholders) that still appeared in updatedFullPolicy.inputs.
-        ...(updatedFullPolicy && {
-          secret_references: (() => {
-            const versionedInputs = getInputsForVersion(updatedFullPolicy.inputs ?? [], version);
-            const compiledIds = collectCompiledSecretRefIds(versionedInputs);
-            const refs = updatedFullPolicy.secret_references ?? [];
-            return compiledIds ? refs.filter(({ id: refId }) => compiledIds.has(refId)) : refs;
-          })(),
-        }),
+        // Prune secret_references to match the final version-filtered inputs. Two cases need this:
+        // (a) updatedFullPolicy exists: its refs were pruned against the full recompiled inputs;
+        //     getInputsForVersion may remove additional inputs (package-level agentVersion conditions).
+        // (b) updatedFullPolicy is null: we inherit fleetServerPolicy.data.secret_references but
+        //     getInputsForVersion still strips package-level-gated inputs, so refs must be re-scanned.
+        secret_references: (() => {
+          const sourceInputs = updatedFullPolicy?.inputs ?? fullPolicy.inputs;
+          const versionedInputs = getInputsForVersion(sourceInputs, version);
+          const compiledIds = collectCompiledSecretRefIds(versionedInputs);
+          const refs =
+            (updatedFullPolicy?.secret_references ?? fleetServerPolicy.data?.secret_references) ??
+            [];
+          return compiledIds ? refs.filter(({ id: refId }) => compiledIds.has(refId)) : refs;
+        })(),
       },
     };
     fleetServerPolicies.push(versionSpecificPolicy);
