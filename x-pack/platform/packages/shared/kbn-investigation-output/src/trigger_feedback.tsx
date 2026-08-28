@@ -24,11 +24,11 @@ import { i18n } from '@kbn/i18n';
 import {
   getSeverityLabel,
   type SignificantEventStatus,
-  type TriggerFeedback,
+  type TriggerFeedback as TriggerFeedbackEntry,
 } from '@kbn/significant-events-schema';
 import { EvidenceList, type EvidenceListProps } from './evidence_list';
 
-const FIELD_LABELS: Record<TriggerFeedback['field'], string> = {
+const FIELD_LABELS: Record<TriggerFeedbackEntry['field'], string> = {
   severity: i18n.translate('xpack.investigationOutput.update.field.severity', {
     defaultMessage: 'Severity',
   }),
@@ -54,7 +54,7 @@ const STATUS_LABELS: Record<SignificantEventStatus, string> = {
  * Old/new values as a badge transition, typed per field. Returns `null` for the `summary` field
  * (long free text, rendered as stacked blocks instead of badges).
  */
-const badgeLabels = (update: TriggerFeedback): { from: string; to: string } | null => {
+const badgeLabels = (update: TriggerFeedbackEntry): { from: string; to: string } | null => {
   switch (update.field) {
     case 'severity':
       return { from: getSeverityLabel(update.from), to: getSeverityLabel(update.to) };
@@ -66,7 +66,7 @@ const badgeLabels = (update: TriggerFeedback): { from: string; to: string } | nu
 };
 
 const TriggerFeedbackRow: React.FC<{
-  update: TriggerFeedback;
+  update: TriggerFeedbackEntry;
   getQueryHref?: EvidenceListProps['getQueryHref'];
 }> = ({ update, getQueryHref }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationSignificantEventUpdateEvidence' });
@@ -140,7 +140,7 @@ const TriggerFeedbackRow: React.FC<{
  * when to render it (e.g. only once the investigation is complete).
  */
 export const TriggerFeedback: React.FC<{
-  updates: TriggerFeedback[];
+  updates: TriggerFeedbackEntry[];
   getQueryHref?: EvidenceListProps['getQueryHref'];
 }> = ({ updates, getQueryHref }) => {
   const { euiTheme } = useEuiTheme();

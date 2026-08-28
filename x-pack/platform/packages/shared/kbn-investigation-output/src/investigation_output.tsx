@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigationOutputProps } from './types';
 import { FinalResults } from './final_results';
 import { HypothesisRow } from './hypothesis_row';
-import { TriggerFeedback } from './significant_event_updates';
+import { TriggerFeedback } from './trigger_feedback';
 import { buildHeader } from './utils';
 
 /**

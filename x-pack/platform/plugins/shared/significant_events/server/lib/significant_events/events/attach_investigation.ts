@@ -93,34 +93,21 @@ const fieldsFromTriggerFeedback = (
 export const attachInvestigationToEvent = async ({
   eventClient,
   eventId,
-  eventUuid,
   investigation,
   triggerFeedback,
   logger,
 }: {
   eventClient: EventClient;
-  /** Preferred input for new callers; this avoids a version-to-lineage lookup. */
-  eventId?: string;
-  /** Legacy caller input retained for existing agent-tool callers. */
-  eventUuid?: string;
+  eventId: string;
   investigation: SignificantEventInvestigation;
   triggerFeedback?: SignificantEventTriggerFeedback;
   logger?: Logger;
 }): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
-  const resolvedEventId =
-    eventId ??
-    (eventUuid
-      ? (await eventClient.findByEventUuid(eventUuid)).hits[0]?.event_id
-      : undefined);
-  if (!resolvedEventId) {
-    return { event_uuid: eventUuid ?? '', updated: 0, ignored: 1 };
-  }
-
-  const { hits } = await eventClient.findByEventId(resolvedEventId);
+  const { hits } = await eventClient.findByEventId(eventId);
   const latest = hits[hits.length - 1];
 
   if (!latest) {
-    return { event_uuid: eventUuid ?? resolvedEventId, updated: 0, ignored: 1 };
+    return { event_uuid: eventId, updated: 0, ignored: 1 };
   }
 
   const existing = latest.investigations ?? [];
@@ -142,7 +129,7 @@ export const attachInvestigationToEvent = async ({
 
   const changedFields = pickChangedFields(
     latest,
-    fieldsFromTriggerFeedback(latest, triggerFeedback, resolvedEventId, logger)
+    fieldsFromTriggerFeedback(latest, triggerFeedback, eventId, logger)
   );
 
   // No-op only when neither the investigation list nor any reassessed field actually changed.
