@@ -52,7 +52,12 @@ describe('attachmentsTool (deprecated)', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    return attachmentsTool(availability, jest.fn().mockResolvedValue(casesClient), registry, enabled);
+    return attachmentsTool(
+      availability,
+      jest.fn().mockResolvedValue(casesClient),
+      registry,
+      enabled
+    );
   };
 
   it('has a description that directs agents to the replacement tools', () => {

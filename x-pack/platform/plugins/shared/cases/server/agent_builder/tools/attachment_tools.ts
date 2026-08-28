@@ -7,7 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server/tools';
+import type {
+  BuiltinToolDefinition,
+  ToolAvailabilityConfig,
+} from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { addCommentStepCommonDefinition } from '../../../common/workflows/steps/add_comment';
 import { addAlertsStepCommonDefinition } from '../../../common/workflows/steps/add_alerts';

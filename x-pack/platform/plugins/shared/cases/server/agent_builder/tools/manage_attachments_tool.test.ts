@@ -52,7 +52,12 @@ describe('manageAttachmentsTool', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    return manageAttachmentsTool(availability, jest.fn().mockResolvedValue(casesClient), registry, enabled);
+    return manageAttachmentsTool(
+      availability,
+      jest.fn().mockResolvedValue(casesClient),
+      registry,
+      enabled
+    );
   };
 
   it('has the correct tool id', () => {
