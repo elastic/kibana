@@ -168,6 +168,22 @@ steps:
             type: boolean
         required: [change_type, summary, current_query, proposed_query, exception_condition, rekey_required]
 
+  # These optional rule modes need fields that cannot be conditionally omitted from
+  # a YAML object. Keep their query proposals as explicit analyst handoffs instead of
+  # running a preview that differs from production.
+  - name: record_auto_apply_support
+    type: data.set
+    with:
+      supported: >-
+        ${{ steps.fetch_rule.output.data_view_id == null
+          and steps.fetch_rule.output.timestamp_override == null
+          and steps.fetch_rule.output.alert_suppression == null }}
+      manual_handoff: >-
+        ${{ steps.diagnose_rule.output.structured_output.change_type != 'query'
+          or steps.fetch_rule.output.data_view_id != null
+          or steps.fetch_rule.output.timestamp_override != null
+          or steps.fetch_rule.output.alert_suppression != null }}
+
   # Keep both previews in this execution. Consecutive synchronous child workflows
   # share one immediate-resume task and can strand the proposal in waiting_for_child.
   # Both previews end at the last false positive so the rule's lookback covers the
@@ -177,7 +193,8 @@ steps:
     if: >-
       ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
         and steps.diagnose_rule.output.structured_output.proposed_query != ''
-        and steps.fetch_rule.output.type == 'query' }}
+        and steps.fetch_rule.output.type == 'query'
+        and steps.record_auto_apply_support.output.supported == true }}
     with:
       method: POST
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/preview"
@@ -239,7 +256,8 @@ steps:
     if: >-
       ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
         and steps.diagnose_rule.output.structured_output.proposed_query != ''
-        and steps.fetch_rule.output.type == 'query' }}
+        and steps.fetch_rule.output.type == 'query'
+        and steps.record_auto_apply_support.output.supported == true }}
     with:
       method: POST
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/preview"
@@ -338,7 +356,7 @@ steps:
 
         {{ steps.diagnose_rule.output.structured_output.summary }}
 
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query" and steps.record_auto_apply_support.output.supported %}
         Current query:
         {{ steps.diagnose_rule.output.structured_output.current_query }}
 
@@ -360,6 +378,13 @@ steps:
         rule has not been edited since this diagnosis. Otherwise no rule or alert tags
         change, and a later sweep can retry with current data.
         {% else %}
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        Proposed query:
+        {{ steps.diagnose_rule.output.structured_output.proposed_query }}
+
+        This rule uses a data view, timestamp override, or alert suppression. Apply
+        the query manually so those settings can be validated with it.
+        {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         Proposed exception:
         {{ steps.diagnose_rule.output.structured_output.exception_condition }}
@@ -380,7 +405,8 @@ steps:
     if: >-
       ${{ steps.review_tuning.output.response.approved == true
         and steps.diagnose_rule.output.structured_output.proposed_query != ''
-        and steps.fetch_rule.output.type == 'query' }}
+        and steps.fetch_rule.output.type == 'query'
+        and steps.record_auto_apply_support.output.supported == true }}
     with:
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.rule_id | url_encode }}"
@@ -398,6 +424,7 @@ steps:
         ${{ steps.review_tuning.output.response.approved == true
           and steps.diagnose_rule.output.structured_output.proposed_query != ''
           and steps.fetch_rule.output.type == 'query'
+          and steps.record_auto_apply_support.output.supported == true
           and steps.record_preview_outcome.output.current_succeeded == true
           and steps.record_preview_outcome.output.current_is_aborted == false
           and steps.record_preview_outcome.output.proposed_succeeded == true
@@ -445,12 +472,13 @@ steps:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add: "${{ consts.applied_tags }}"
 
-  # A non-query proposal is a manual handoff, not an applied rule change.
+  # Non-query proposals and query modes that cannot be previewed faithfully are
+  # manual handoffs, not applied rule changes.
   - name: mark_alerts_handoff
     type: security.setAlertTags
     if: >-
       ${{ steps.review_tuning.output.response.approved == true
-        and steps.diagnose_rule.output.structured_output.change_type != 'query' }}
+        and steps.record_auto_apply_support.output.manual_handoff == true }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add: "${{ consts.handoff_tags }}"

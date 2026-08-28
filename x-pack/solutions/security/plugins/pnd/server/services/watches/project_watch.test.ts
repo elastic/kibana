@@ -411,6 +411,23 @@ describe('project watch', () => {
         expect(outcomeInput).toContain('output._shards.failed == 0');
       });
 
+      it('keeps query modes with omitted preview fields as manual handoffs', () => {
+        const support = proposalSteps.find(({ name }) => name === 'record_auto_apply_support')!;
+        const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
+        const condition = String(eligibility.with?.eligible);
+
+        expect(String(support.with?.supported)).toContain(
+          'steps.fetch_rule.output.data_view_id == null'
+        );
+        expect(String(support.with?.supported)).toContain(
+          'steps.fetch_rule.output.timestamp_override == null'
+        );
+        expect(String(support.with?.supported)).toContain(
+          'steps.fetch_rule.output.alert_suppression == null'
+        );
+        expect(condition).toContain('steps.record_auto_apply_support.output.supported == true');
+      });
+
       it('bounds direct proposal inputs', () => {
         const [trigger] = proposal.triggers as unknown as Array<{
           inputs: { properties: Record<string, Record<string, unknown>> };
