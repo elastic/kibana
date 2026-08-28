@@ -106,10 +106,11 @@ The structure of the notification document is defined in [`common/`](./common):
 ### Severity
 
 `severity` is one of `info | warning | error | critical`. It is **optional on submit and
-defaults to `info`**. Severity drives retention in the daily cleanup task; retention is not enforced
-by list queries. A notification can remain visible for up to one cleanup interval after its TTL expires.
-Cleanup expires a notification as a group, deleting every copy through its newest expired copy so
-an older, longer-lived severity cannot resurface. Copies written after that anchor survive.
+defaults to `info`**. Severity drives retention in the daily cleanup task.
+A notification can remain visible for up to one cleanup interval after its TTL expires.
+In the case of duplicate "state" notification IDs with different severity values,
+cleanup expires a notification as a group, deleting every copy through its newest expired copy so
+an older, longer-lived severity cannot resurface.
 
 ### Call-to-action (CTA)
 
