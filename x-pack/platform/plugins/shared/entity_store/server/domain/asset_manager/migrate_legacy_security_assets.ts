@@ -37,7 +37,7 @@ import { getLegacySecurityLatestIndexIngestPipelineId } from './latest_index_ing
 import { getLegacySecurityMetadataComponentTemplateName } from './metadata_component_templates';
 import { getLegacySecurityMetadataIndexTemplateId } from './metadata_index_template';
 import { getLegacySecurityMetadataIndexIngestPipelineId } from './metadata_index_ingest_pipeline';
-import { getLegacySecurityUpdatesIndexTemplateId } from './updates_index_template';
+import { getLegacySecurityUpdatesIndexTemplateId } from './updates_data_stream';
 import { getLegacySecurityHistorySnapshotIndexTemplateId } from './history_snapshot_index_template';
 import {
   getLegacySecurityHistorySnapshotIndexPattern,

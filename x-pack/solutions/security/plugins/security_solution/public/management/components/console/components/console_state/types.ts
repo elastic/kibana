@@ -15,6 +15,7 @@ import type {
   CommandDefinition,
   CommandExecutionComponent,
   CommandArgDefinition,
+  ConsoleApi,
 } from '../../types';
 
 export interface ConsoleDataState {
@@ -34,6 +35,9 @@ export interface ConsoleDataState {
    * List of commands entered by the user and being shown in the UI
    */
   commandHistory: CommandHistoryItem[];
+
+  /** The console external API */
+  consoleApi: ConsoleApi;
 
   sidePanel: {
     show: null | 'help'; // will have other values in the future
@@ -80,10 +84,21 @@ export interface ConsoleDataState {
     history: InputHistoryItem[];
 
     /** Show the input area popover */
-    showPopover: 'input-history' | undefined; // Other values will exist in the future
+    showPopover: 'input-history' | 'command-selector' | undefined; // Other values will exist in the future
 
     /** The state of the input area. Set to `error` if wanting to show it as being in error state */
     visibleState: 'error' | undefined;
+
+    /**
+     * The Suggestion to be presented to the user
+     */
+    suggestion: {
+      /**
+       * Suggestion value to display in the UI. It likely will be a subset (the ending) to
+       * whatever the user already typed
+       */
+      value: string;
+    };
   };
 }
 
@@ -198,6 +213,12 @@ export type ConsoleDataAction =
       type: 'updateInputPlaceholderState';
       payload: {
         placeholder: ConsoleDataState['input']['placeholder'];
+      };
+    }
+  | {
+      type: 'updateInputSuggestionState';
+      payload: {
+        suggestion: ConsoleDataState['input']['suggestion'];
       };
     }
   | {

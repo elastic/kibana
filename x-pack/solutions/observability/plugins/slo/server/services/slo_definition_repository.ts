@@ -168,11 +168,10 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       // We would need to call the _reset api on this SLO.
       version: storedSLO.version ?? 1,
       // settings.preventInitialBackfill was added in 8.15.0
-      // settings.preventCrossProjectSearch was added in 9.6.0
+      // never backfill preventCrossProjectSearch or projectRoutings — absence must stay absence
       settings: merge(
         {
           preventInitialBackfill: false,
-          preventCrossProjectSearch: false,
           syncDelay: '1m',
           frequency: '1m',
         },
