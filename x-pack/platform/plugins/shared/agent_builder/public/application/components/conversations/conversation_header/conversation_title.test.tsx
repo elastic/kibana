@@ -11,6 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ConversationPermissions } from '../../../../../common/http_api/conversations';
 import {
   useConversationPermissions,
+  useConversationReadOnly,
   useConversationTitle,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
@@ -18,6 +19,7 @@ import { ConversationTitle } from './conversation_title';
 
 jest.mock('../../../hooks/use_conversation', () => ({
   useConversationTitle: jest.fn(),
+  useConversationReadOnly: jest.fn(),
   useHasPersistedConversation: jest.fn(),
   useConversationPermissions: jest.fn(),
 }));
@@ -31,6 +33,7 @@ jest.mock('../delete_conversation_modal', () => ({
 }));
 
 const mockUseConversationTitle = jest.mocked(useConversationTitle);
+const mockUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 
@@ -41,8 +44,8 @@ const renderTitle = (
   mockUseConversationTitle.mockReturnValue({
     title: 'My conversation',
     isLoading: false,
-    isReadOnly,
   });
+  mockUseConversationReadOnly.mockReturnValue(isReadOnly);
   mockUseHasPersistedConversation.mockReturnValue(true);
   mockUseConversationPermissions.mockReturnValue({
     rename: false,

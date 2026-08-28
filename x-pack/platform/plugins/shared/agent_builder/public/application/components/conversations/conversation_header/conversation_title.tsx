@@ -23,6 +23,7 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
   useConversationPermissions,
+  useConversationReadOnly,
   useConversationTitle,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
@@ -52,7 +53,8 @@ interface ConversationTitleProps {
 }
 
 export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
-  const { title, isLoading: isLoadingTitle, isReadOnly } = useConversationTitle();
+  const { title, isLoading: isLoadingTitle } = useConversationTitle();
+  const isReadOnly = useConversationReadOnly();
   const hasPersistedConversation = useHasPersistedConversation();
   const { rename: canRename, delete: canDelete } = useConversationPermissions();
   const { euiTheme } = useEuiTheme();
