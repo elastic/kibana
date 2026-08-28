@@ -311,14 +311,6 @@ const useCopyWithFeedback = (getText: () => string, label: string) => {
   } as const;
 };
 
-// A pointer click leaves the button focused, so the row stays `:focus-within` and its actions remain
-// revealed after the pointer leaves. Drop focus so they fade on mouse-out.
-const blurAfterPointerClick = (event: React.MouseEvent) => {
-  if (event.detail !== 0 && event.currentTarget instanceof HTMLElement) {
-    event.currentTarget.blur();
-  }
-};
-
 const CopyButton = function CopyButton({
   getText,
   label,
@@ -344,8 +336,9 @@ const CopyButton = function CopyButton({
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
           copy();
-          blurAfterPointerClick(event);
         }}
+        // Prevent focusing the Datagrid cell so it does not scroll to the top of it.
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
         onKeyDown={rowActionKeyDown}
         size="xs"
       />
@@ -435,8 +428,9 @@ const RowActionButton = memo(function RowActionButton({ action }: { action: Json
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
           action.onClick();
-          blurAfterPointerClick(event);
         }}
+        // Prevent focusing the Datagrid cell so it does not scroll to the top of it.
+        onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
         onKeyDown={rowActionKeyDown}
         size="xs"
       />
