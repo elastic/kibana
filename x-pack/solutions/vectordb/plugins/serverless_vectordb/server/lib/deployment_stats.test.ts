@@ -89,13 +89,18 @@ describe('fetchIndexStats', () => {
 
   const mockVectorStats = (denseCount: number, sparseCount = 0) => {
     client.asInternalUser.indices.stats.mockResolvedValue({
-      _all: {
-        total: {
-          dense_vector: { value_count: denseCount },
-          sparse_vector: { value_count: sparseCount },
+      indices: {
+        vectordb: {
+          shards: {
+            '0': [
+              {
+                dense_vector: { value_count: denseCount },
+                sparse_vector: { value_count: sparseCount },
+              },
+            ],
+          },
         },
       },
-      indices: {},
     } as any);
   };
 
@@ -125,18 +130,39 @@ describe('fetchIndexStats', () => {
     expect(client.asInternalUser.indices.stats).toHaveBeenCalledWith({
       index: ['*', '-.*'],
       expand_wildcards: ['open'],
-      level: 'cluster',
+      level: 'shards',
       metric: ['dense_vector', 'sparse_vector'],
+      filter_path: [
+        'indices.*.shards.*.dense_vector.value_count',
+        'indices.*.shards.*.sparse_vector.value_count',
+      ],
     });
     expect(result.vectorCount).toBe(125);
   });
 
+  it('counts each logical shard once when multiple copies report vectors', async () => {
+    mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
+    client.asInternalUser.indices.stats.mockResolvedValue({
+      indices: {
+        vectordb: {
+          shards: {
+            // the indexing shard and a search shard of the same logical shard
+            '0': [{ dense_vector: { value_count: 100 } }, { dense_vector: { value_count: 90 } }],
+            // a cold shard where only a search copy remains
+            '1': [{ sparse_vector: { value_count: 10 } }],
+          },
+        },
+      },
+    } as any);
+
+    const result = await fetchIndexStats(client, logger);
+
+    expect(result.vectorCount).toBe(110);
+  });
+
   it('treats missing dense/sparse stats as zero', async () => {
     mockMetering([{ name: 'products', num_docs: 10, size_in_bytes: 100 }]);
-    client.asInternalUser.indices.stats.mockResolvedValue({
-      _all: { total: {} },
-      indices: {},
-    } as any);
+    client.asInternalUser.indices.stats.mockResolvedValue({} as any);
 
     const result = await fetchIndexStats(client, logger);
 

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  IndicesStatsIndicesStats,
+  IndicesStatsShardStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 
 interface ApiKeysStats {
@@ -20,15 +24,6 @@ interface MeteringIndexStat {
 interface MeteringStatsResponse {
   _total: { num_docs: number; size_in_bytes: number };
   indices: MeteringIndexStat[];
-}
-
-interface VectorStats {
-  value_count?: number;
-}
-
-interface IndexStatsWithVectors {
-  dense_vector?: VectorStats;
-  sparse_vector?: VectorStats;
 }
 
 interface IndexStats {
@@ -71,22 +66,48 @@ export const hasIndexManagePrivilege = async (
   }
 };
 
+const shardVectorCount = (shard: IndicesStatsShardStats): number =>
+  (shard.dense_vector?.value_count ?? 0) + (shard.sparse_vector?.value_count ?? 0);
+
 /**
- * Counts indexed dense + sparse vectors via `_stats` (operator-only in serverless), aggregated at
- * the cluster level. Excluding dot indices keeps the total scoped to the same indices as the
- * metering-derived index and size counts. `open` is already the default for `expand_wildcards`, but
- * is pinned so hidden indices can't be pulled in by a later edit.
+ * Sums vector counts across indices, counting each logical shard exactly once. Neither of the
+ * `_all` rollups is usable in stateless: `primaries` reports nothing for an index whose indexing
+ * shard has been released as idle, and `total` counts every shard copy of an active index. The max
+ * across a shard's copies tolerates refresh lag between them.
+ */
+const sumVectorCounts = (indices: Record<string, IndicesStatsIndicesStats> | undefined): number => {
+  let count = 0;
+  for (const index of Object.values(indices ?? {})) {
+    for (const copies of Object.values(index.shards ?? {})) {
+      if (copies.length > 0) {
+        count += Math.max(...copies.map(shardVectorCount));
+      }
+    }
+  }
+  return count;
+};
+
+/**
+ * Counts indexed dense + sparse vectors via `_stats` (operator-only in serverless), reported per
+ * shard so `sumVectorCounts` can dedupe shard copies. Excluding dot indices keeps the total scoped
+ * to the same indices as the metering-derived index and size counts. `open` is already the default
+ * for `expand_wildcards`, but is pinned so hidden indices can't be pulled in by a later edit. The
+ * `filter_path` keeps the per-shard response small; shards without vector stats are filtered out
+ * entirely and contribute nothing.
  */
 const countVectors = async (client: IScopedClusterClient): Promise<number> => {
   const stats = await client.asInternalUser.indices.stats({
     index: USER_INDICES_PATTERN,
     expand_wildcards: ['open'],
-    level: 'cluster',
+    level: 'shards',
     metric: ['dense_vector', 'sparse_vector'],
+    filter_path: [
+      'indices.*.shards.*.dense_vector.value_count',
+      'indices.*.shards.*.sparse_vector.value_count',
+    ],
   });
 
-  const total = stats._all?.total as IndexStatsWithVectors | undefined;
-  return (total?.dense_vector?.value_count ?? 0) + (total?.sparse_vector?.value_count ?? 0);
+  return sumVectorCounts(stats.indices);
 };
 
 /**
