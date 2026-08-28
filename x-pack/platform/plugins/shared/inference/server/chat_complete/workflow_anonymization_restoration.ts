@@ -67,12 +67,21 @@ const createProperTokenPrefixes = (
   return { prefixes, maximumLength };
 };
 
+// Minimum tail length before we consider it a potential split token. Single-character
+// matches (e.g. 'E' for EMAIL_, 'I' for IP_) are too common in English text and cause
+// visible streaming gaps by suppressing relay events for those chunks.
+const MIN_PREFIX_HOLDBACK = 2;
+
 const longestPossibleTokenPrefix = (
   value: string,
   prefixes: ReadonlySet<string>,
   maximumLength: number
 ): number => {
-  for (let length = Math.min(value.length, maximumLength); length > 0; length -= 1) {
+  for (
+    let length = Math.min(value.length, maximumLength);
+    length >= MIN_PREFIX_HOLDBACK;
+    length -= 1
+  ) {
     if (prefixes.has(value.slice(-length))) {
       return length;
     }
