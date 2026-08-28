@@ -443,8 +443,8 @@ export const computeActualDelta = (
     }
   }
   return {
-    actualAdded: requestedToAdd.filter((t) => wouldBeAdded.has(t)),
-    actualRemoved: requestedToRemove.filter((t) => wouldBeRemoved.has(t)),
+    actualAdded: [...new Set(requestedToAdd)].filter((item) => wouldBeAdded.has(item)),
+    actualRemoved: [...new Set(requestedToRemove)].filter((item) => wouldBeRemoved.has(item)),
   };
 };
 

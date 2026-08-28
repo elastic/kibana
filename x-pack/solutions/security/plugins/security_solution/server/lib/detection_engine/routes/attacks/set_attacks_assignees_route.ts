@@ -32,6 +32,7 @@ import {
   fetchAllAlertIdIndexWithSource,
   computeActualDelta,
 } from '../common/operations/prefetch_previous_statuses';
+import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
@@ -135,11 +136,28 @@ export const setAttacksAssigneesRoute = (
                       size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
                     },
                   });
-                  // Deduplicate: an attack present in both families returns two hits, and
-                  // emitting the id twice makes a workflow process it repeatedly.
+                  // Emit only IDs that exist AND would actually change; deduplicate across
+                  // families (an _id can appear in both scheduled and adhoc indices).
                   verifiedAttackIds = Array.from(
                     new Set(
                       attackDocs.hits.hits
+                        .filter((hit) => {
+                          const current = new Set<string>(
+                            Array.isArray(
+                              (hit._source as Record<string, unknown> | undefined)?.[
+                                ALERT_WORKFLOW_ASSIGNEE_IDS
+                              ]
+                            )
+                              ? ((hit._source as Record<string, unknown>)[
+                                  ALERT_WORKFLOW_ASSIGNEE_IDS
+                                ] as string[])
+                              : []
+                          );
+                          return (
+                            validAssigneesToAdd.some((uid) => !current.has(uid)) ||
+                            validAssigneesToRemove.some((uid) => current.has(uid))
+                          );
+                        })
                         .map((hit) => hit._id)
                         .filter((id): id is string => id != null)
                     )
@@ -196,11 +214,29 @@ export const setAttacksAssigneesRoute = (
               },
             });
 
-            // Deduplicate: an attack present in both families returns two hits, and emitting
-            // the id twice makes a workflow process it repeatedly.
+            // Emit only attack IDs that would actually change; deduplicate across families.
             const verifiedAttackIds = Array.from(
               new Set(
-                attackDocs.hits.hits.map((hit) => hit._id).filter((id): id is string => id != null)
+                attackDocs.hits.hits
+                  .filter((hit) => {
+                    const current = new Set<string>(
+                      Array.isArray(
+                        (hit._source as Record<string, unknown> | undefined)?.[
+                          ALERT_WORKFLOW_ASSIGNEE_IDS
+                        ]
+                      )
+                        ? ((hit._source as Record<string, unknown>)[
+                            ALERT_WORKFLOW_ASSIGNEE_IDS
+                          ] as string[])
+                        : []
+                    );
+                    return (
+                      validAssigneesToAdd.some((uid) => !current.has(uid)) ||
+                      validAssigneesToRemove.some((uid) => current.has(uid))
+                    );
+                  })
+                  .map((hit) => hit._id)
+                  .filter((id): id is string => id != null)
               )
             );
 
@@ -240,15 +276,21 @@ export const setAttacksAssigneesRoute = (
             if (eventBus && relatedAlertIds.length > 0) {
               try {
                 const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-                const relatedHits = await fetchAllAlertIdIndexWithSource(
+                const rawRelatedHits = await fetchAllAlertIdIndexWithSource(
                   esClient,
                   index,
                   relatedAlertIds,
                   [ALERT_WORKFLOW_ASSIGNEE_IDS]
                 );
-                verifiedRelatedAlertIds = relatedHits.map((h) => h.id);
+                // Exclude Attack Discovery hits: a stale related-alert ID that collides with
+                // an AD doc must not be emitted as a detection-alert event. Deduplicate IDs
+                // so the same alert doesn't consume multiple payload slots.
+                const detectionHits = rawRelatedHits.filter(
+                  (h) => !isAttackDiscoveryIndex(h.index)
+                );
+                verifiedRelatedAlertIds = Array.from(new Set(detectionHits.map((h) => h.id)));
                 relatedAssigneesDelta = computeActualDelta(
-                  relatedHits.map((h) => h.source),
+                  detectionHits.map((h) => h.source),
                   validAssigneesToAdd,
                   validAssigneesToRemove,
                   ALERT_WORKFLOW_ASSIGNEE_IDS
