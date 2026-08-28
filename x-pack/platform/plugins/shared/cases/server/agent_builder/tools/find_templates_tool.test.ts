@@ -96,6 +96,41 @@ describe('findTemplatesTool', () => {
     );
   });
 
+  it('defaults isEnabled to true when omitted, since disabled templates cannot create a case', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [buildTemplate()],
+      page: 1,
+      perPage: 20,
+      total: 1,
+    });
+
+    const tool = buildTool();
+    await tool.handler({ owner: 'securitySolution' } as never, buildToolContext());
+
+    expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+      expect.objectContaining({ isEnabled: true })
+    );
+  });
+
+  it('forwards an explicit isEnabled: false to look up disabled templates', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [buildTemplate({ isEnabled: false })],
+      page: 1,
+      perPage: 20,
+      total: 1,
+    });
+
+    const tool = buildTool();
+    await tool.handler(
+      { owner: 'securitySolution', isEnabled: false } as never,
+      buildToolContext()
+    );
+
+    expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+      expect.objectContaining({ isEnabled: false })
+    );
+  });
+
   it('defaults search to an empty string to list all templates for the owner', async () => {
     casesClient.templates.getAllTemplates.mockResolvedValue({
       templates: [buildTemplate()],
@@ -137,9 +172,58 @@ describe('findTemplatesTool', () => {
           owner: 'securitySolution',
           tags: ['phishing'],
           isEnabled: true,
+          nameMatch: true,
         },
       ],
     });
+  });
+
+  it('flags a single result as needing confirmation when it only matched a field/description, not the name', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [
+        buildTemplate({
+          name: 'SOC Intake',
+          description: 'General intake template',
+          fieldSearchMatches: true,
+        }),
+      ],
+      page: 1,
+      perPage: 20,
+      total: 1,
+    });
+
+    const tool = buildTool();
+    const result = await tool.handler(
+      { owner: 'securitySolution', search: 'phishing' } as never,
+      buildToolContext()
+    );
+
+    const { results } = result as {
+      results: Array<{
+        type: string;
+        data: { templates: Array<{ nameMatch: boolean }>; message?: string };
+      }>;
+    };
+    expect(results[0].data.templates[0].nameMatch).toBe(false);
+    expect(results[0].data.message).toContain('only matched on a field name/label or description');
+  });
+
+  it('does not flag a match when the template name itself contains the search term', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [buildTemplate()],
+      page: 1,
+      perPage: 20,
+      total: 1,
+    });
+
+    const tool = buildTool();
+    const result = await tool.handler(
+      { owner: 'securitySolution', search: 'phishing' } as never,
+      buildToolContext()
+    );
+
+    const { results } = result as { results: Array<{ type: string; data: { message?: string } }> };
+    expect(results[0].data.message).toBeUndefined();
   });
 
   it('returns a helpful message when no templates match', async () => {
@@ -180,6 +264,24 @@ describe('findTemplatesTool', () => {
 
     const { results } = result as { results: Array<{ type: string; data: { message?: string } }> };
     expect(results[0].data.message).toContain('Showing page 1 of 2');
+  });
+
+  it('does not add a pagination hint when already on the last page', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [buildTemplate()],
+      page: 2,
+      perPage: 1,
+      total: 2,
+    });
+
+    const tool = buildTool();
+    const result = await tool.handler(
+      { owner: 'securitySolution', page: 2, perPage: 1, search: 'phishing' } as never,
+      buildToolContext()
+    );
+
+    const { results } = result as { results: Array<{ type: string; data: { message?: string } }> };
+    expect(results[0].data.message).toBeUndefined();
   });
 
   it('clamps perPage to the maximum allowed value', async () => {

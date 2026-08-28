@@ -40,7 +40,9 @@ const findTemplatesSchema = z.object({
   isEnabled: z
     .boolean()
     .optional()
-    .describe('Filter to enabled (true) or disabled (false) templates. Omit for both.'),
+    .describe(
+      'Templates are enabled by default (disabled templates cannot be used to create a case). Pass `false` explicitly to look up disabled templates instead.'
+    ),
   page: z.number().int().min(1).optional().describe('Page number (1-indexed). Default 1.'),
   perPage: z
     .number()
@@ -63,7 +65,9 @@ ${CASES_SOLUTION_CONTEXT_INSTRUCTION}
 
 Use \`search\` with the name the user mentioned — it matches as a case-insensitive substring against the template name (also checks description and field names/labels). Omit \`search\` to list all templates for \`owner\`.
 
-If zero templates match, say so — do not guess an ID. If more than one matches, list the candidates (name + description) and ask the user to confirm which one before calling \`create_from_template\`.${CASES_TOOL_TEXT_INSTRUCTION}`,
+Each result includes \`nameMatch\`: true only when the template's own name contains the search term. A result with \`nameMatch: false\` only matched via its description or a field name/label (e.g. searching "phishing" matching a "phishing_url" field on an unrelated template) — do not treat that as a confident match.
+
+If zero templates match, say so — do not guess an ID. If more than one matches, or the only match has \`nameMatch: false\`, list the candidates (name + description) and ask the user to confirm which one before calling \`create_from_template\`.${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
       title: 'Find Case Templates',
       readOnlyHint: true,
@@ -79,6 +83,11 @@ If zero templates match, say so — do not guess an ID. If more than one matches
         const requestedPage = page ?? 1;
         const requestedPerPage = Math.min(perPage ?? DEFAULT_PER_PAGE, MAX_PER_PAGE);
 
+        // Disabled templates can't actually be used to create a case (see
+        // `resolveTemplateForCreate`), so a caller who doesn't ask for them explicitly should only
+        // ever be offered ones that will work.
+        const effectiveIsEnabled = isEnabled ?? true;
+
         const { templates, total } = await casesClient.templates.getAllTemplates({
           page: requestedPage,
           perPage: requestedPerPage,
@@ -89,9 +98,10 @@ If zero templates match, say so — do not guess an ID. If more than one matches
           author: [],
           owner: [owner],
           isDeleted: false,
-          isEnabled,
+          isEnabled: effectiveIsEnabled,
         });
 
+        const lowerSearch = search?.toLowerCase();
         const results = templates.map((template) => ({
           templateId: template.templateId,
           name: template.name,
@@ -103,6 +113,13 @@ If zero templates match, say so — do not guess an ID. If more than one matches
           fieldCount: template.fieldCount ?? 0,
           usageCount: template.usageCount ?? 0,
           lastUsedAt: template.lastUsedAt ?? null,
+          // `search` also matches on description and field names/labels, not just `name` — a
+          // result can appear here purely because one of its fields happens to share a word with
+          // the search term (e.g. searching "phishing" matching a "phishing_url" field on an
+          // otherwise-unrelated template). `nameMatch` lets the caller tell a genuine name hit
+          // apart from a field/description-only one before treating a single result as certain.
+          nameMatch: lowerSearch === undefined || template.name.toLowerCase().includes(lowerSearch),
+          fieldSearchMatches: template.fieldSearchMatches,
         }));
 
         const totalPages = Math.max(1, Math.ceil(total / requestedPerPage));
@@ -113,6 +130,9 @@ If zero templates match, say so — do not guess an ID. If more than one matches
             : `No templates found for owner "${owner}".`;
         } else if (requestedPage < totalPages) {
           message = `Showing page ${requestedPage} of ${totalPages} (${results.length} of ${total} matches). Pass \`page\` to fetch additional pages.`;
+        } else if (results.length === 1 && !results[0].nameMatch) {
+          message =
+            'The single match only matched on a field name/label or description, not the template name itself — confirm with the user before using this template rather than assuming it is the right one.';
         }
 
         return {

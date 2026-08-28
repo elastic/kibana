@@ -58,9 +58,10 @@ const FIND_TEMPLATES_SECTION = `
 
 \`create_from_template\` (see \`${platformCoreCasesTools.manage}\`) requires a \`case_template_id\`, not a name. If the user names a template (e.g. "create a case from the phishing template") instead of giving you an ID, call \`${platformCoreCasesTools.findTemplates}\` first with \`search\` set to the name they gave and the established \`owner\` — do not guess an ID or invent one.
 
+\`search\` also matches template descriptions and field names/labels, not just the template name — check each result's \`nameMatch\` flag:
 - No matches: tell the user, don't fall back to a plain \`create\`.
-- One match: use its \`templateId\` for \`case_template_id\`.
-- Multiple matches: list the candidates (name + description) and ask the user which one they meant.
+- One match with \`nameMatch: true\`: use its \`templateId\` for \`case_template_id\`.
+- Multiple matches, or the only match has \`nameMatch: false\` (it only matched a field/description, not the name): list the candidates (name + description) and ask the user which one they meant — never auto-pin a field-only match.
 `;
 
 export const buildCasesSkill = (isTemplatesEnabled: boolean) =>
@@ -88,8 +89,8 @@ You have full read **and write** access to Elastic cases across Security, Observ
     }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\` |
 | \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |${
       isTemplatesEnabled ? FIND_TEMPLATES_ROW : ''
-    }${isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''}${
-      isTemplatesEnabled ? FIND_TEMPLATES_SECTION : ''
+    }${isTemplatesEnabled ? FIND_TEMPLATES_SECTION : ''}${
+      isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''
     }
 
 ## Solution context — highest-priority rule
