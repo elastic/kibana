@@ -13,7 +13,7 @@ export enum APIRoutes {
   QUERY_RULES_RULESET_ID = '/internal/search_query_rules/ruleset/{ruleset_id}',
   QUERY_RULES_RULESET_EXISTS = '/internal/search_query_rules/ruleset/{rulesetId}/exists',
   FETCH_INDICES = '/internal/search_query_rules/indices',
-  FETCH_DOCUMENT = '/internal/search_query_rules/document/{indexName}',
+  FETCH_DOCUMENT = '/internal/search_query_rules/document/{indexName}/{documentId}',
   GENERATE_RULE_ID = '/internal/search_query_rules/ruleset/{rulesetId}/generate_rule_id',
   QUERY_RULES_RULESET_RULE = '/internal/search_query_rules/ruleset/{ruleset_id}/rule/{rule_id}',
 }
