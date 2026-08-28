@@ -14,6 +14,8 @@ export const ES_ARCHIVE_PATHS = {
   LONG_WINDOW_LOGSTASH: 'src/platform/test/functional/fixtures/es_archiver/long_window_logstash',
   KIBANA_SAMPLE_DATA_FLIGHTS:
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights',
+  KIBANA_SAMPLE_DATA_LOGS_TSDB:
+    'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb',
 } as const;
 
 export const DATA_VIEW_ID = {
@@ -47,10 +49,22 @@ export const LOGSTASH_IN_RANGE_DATES = {
   to: 'Sep 23, 2015 @ 18:31:44.000',
 } as const;
 
+export const TSDB_ISO_TIME_RANGE = {
+  start: '2023-04-16T00:00:00.000Z',
+  end: '2023-06-16T00:00:00.000Z',
+} as const;
+
+export const TSDB_IN_RANGE_DATES = {
+  from: 'Apr 16, 2023 @ 00:00:00.000',
+  to: 'Jun 16, 2023 @ 00:00:00.000',
+} as const;
+
 export const MULTIPLE_DATA_VIEWS_TIME_RANGE = {
   from: 'Oct 23, 2018 @ 07:00:00.000',
   to: 'Oct 23, 2018 @ 08:00:00.000',
 } as const;
+
+export const KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX = 'kibana_sample_data_logstsdb';
 
 // FTR used `*stash*`. Scout parallel `global.setup` also loads long-window-logstash
 // (`long-window-logstash-0`), which matches `*stash*` and doubles Discover hits /
