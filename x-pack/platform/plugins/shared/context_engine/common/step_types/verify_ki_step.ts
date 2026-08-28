@@ -29,11 +29,9 @@ export const VerifyKiInputSchema = z.object({
     ),
   verifiers: z
     .array(z.string().min(1).max(100))
+    .min(1)
     .max(MAX_VERIFIER_IDS)
-    .optional()
-    .describe(
-      'Verifier ids to run. Required: no verifiers listed means no verification runs. Unknown ids are silently ignored.'
-    ),
+    .describe('Verifier ids to run. At least one id is required; the step fails if none are listed or if an unknown id is specified.'),
 });
 
 export const VerifyKiOutputSchema = z.object({
@@ -67,7 +65,7 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step runs all applicable Context Engine verifiers against a knowledge indicator and returns a pass/fail result per verifier, each identified by the id listed below. Two verifiers apply to ES|QL: `esql-valid-syntax` statically validates each query without contacting the cluster, and `esql-valid-runtime` runs each query against the cluster, bounded by a row limit and using the permissions of the user running the workflow. Both read ES|QL from the attributes listed in `esql_attributes`, defaulting to `attributes.{defaultAttribute}`; a listed attribute the knowledge indicator does not carry is skipped rather than failed. If it carries none of them, no verifier applies and the step passes with empty results. Requires the Context Engine advanced setting.',
+        'The {stepTypeId} step runs the Context Engine verifiers listed in `verifiers` against a knowledge indicator and returns a pass/fail result per verifier. At least one verifier id is required; the step fails if none are listed. Two verifiers apply to ES|QL: `esql-valid-syntax` statically validates each query without contacting the cluster, and `esql-valid-runtime` runs each query against the cluster, bounded by a row limit and using the permissions of the user running the workflow. Both read ES|QL from the attributes listed in `esql_attributes`, defaulting to `attributes.{defaultAttribute}`; a listed attribute the knowledge indicator does not carry is skipped rather than failed. If it carries none of them, no verifier applies and the step passes with empty results. Requires the Context Engine advanced setting.',
       values: { stepTypeId: VERIFY_KI_STEP_TYPE_ID, defaultAttribute: DEFAULT_ESQL_ATTRIBUTE },
     }),
     examples: [
@@ -76,6 +74,9 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
 - name: verify_ki
   type: ${VERIFY_KI_STEP_TYPE_ID}
   with:
+    verifiers:
+      - esql-valid-syntax
+      - esql-valid-runtime
     ki:
       type: detection
       title: Failed login burst
@@ -87,6 +88,9 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
 - name: verify_ki
   type: ${VERIFY_KI_STEP_TYPE_ID}
   with:
+    verifiers:
+      - esql-valid-syntax
+      - esql-valid-runtime
     esql_attributes:
       - aggregation_query
       - sampling_query

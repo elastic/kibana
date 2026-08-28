@@ -29,7 +29,7 @@ const esResponseError = (type: string, reason: string, statusCode = 400) =>
   );
 
 describe('esql-valid-runtime verifier', () => {
-  const verifier = createEsqlValidRuntimeVerifier();
+  const verifier = createEsqlValidRuntimeVerifier(0);
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let context: KiVerifierContext;
 
@@ -98,6 +98,16 @@ describe('esql-valid-runtime verifier', () => {
       const [sent] = sentQueries();
       expect(sent).toContain('LIMIT 1');
       expect(sent.indexOf('LIMIT 1')).toBeLessThan(sent.indexOf('WHERE'));
+    });
+
+    it('executes a time-series data stream query using the TS source command', async () => {
+      const tsQuery = 'TS metrics-* | STATS avg_cpu = AVG(system.cpu.total.pct) BY host.name';
+
+      const outcome = await verifier.verify(makeKi(tsQuery), context);
+
+      expect(outcome).toEqual({ passed: true });
+      const [sent] = sentQueries();
+      expect(sent).toContain('TS metrics-*');
     });
 
     it('refuses partial results and forwards the abort signal', async () => {
@@ -195,11 +205,56 @@ describe('esql-valid-runtime verifier', () => {
       }
     });
 
-    it('propagates a transport failure instead of blaming the KI', async () => {
+    it('propagates a transport failure after retrying instead of blaming the KI', async () => {
       const connectionError = new errors.ConnectionError('socket hang up');
       esClient.esql.query.mockRejectedValue(connectionError);
 
       await expect(verifier.verify(makeKi(VALID_QUERY), context)).rejects.toThrow('socket hang up');
+      expect(esClient.esql.query).toHaveBeenCalledTimes(3);
+    });
+
+    it('propagates an authorization error immediately without retrying', async () => {
+      esClient.esql.query.mockRejectedValue(
+        esResponseError('security_exception', 'unauthorized', 403)
+      );
+
+      await expect(verifier.verify(makeKi(VALID_QUERY), context)).rejects.toThrow();
+      expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries a throttling or server error up to 3 times before propagating', async () => {
+      for (const statusCode of [429, 500, 503]) {
+        esClient.esql.query.mockRejectedValue(
+          esResponseError('es_rejected_execution_exception', 'too many requests', statusCode)
+        );
+
+        await expect(verifier.verify(makeKi(VALID_QUERY), context)).rejects.toThrow();
+        expect(esClient.esql.query).toHaveBeenCalledTimes(3);
+
+        esClient.esql.query.mockReset();
+        esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+      }
+    });
+
+    it('passes on the second attempt when a transient error clears', async () => {
+      esClient.esql.query
+        .mockRejectedValueOnce(esResponseError('es_rejected_execution_exception', 'overloaded', 429))
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      const outcome = await verifier.verify(makeKi(VALID_QUERY), context);
+
+      expect(outcome).toEqual({ passed: true });
+      expect(esClient.esql.query).toHaveBeenCalledTimes(2);
+    });
+
+    it('records a 400 query error as a verifier failure', async () => {
+      esClient.esql.query.mockRejectedValue(
+        esResponseError('verification_exception', 'unknown index [nope]', 400)
+      );
+
+      const outcome = await verifier.verify(makeKi('FROM nope | LIMIT 1'), context);
+
+      expect(outcome.passed).toBe(false);
     });
 
     it('fails non-string and empty esql values without calling the cluster', async () => {

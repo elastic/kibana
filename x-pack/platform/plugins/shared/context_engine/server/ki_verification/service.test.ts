@@ -138,12 +138,10 @@ describe('KiVerificationService', () => {
     expect(summary).toEqual({ passed: true, results: [] });
   });
 
-  it('ignores unknown verifier ids silently', async () => {
+  it('throws when an unknown verifier id is specified', async () => {
     registry.register(makeVerifier('a', { passed: true }));
 
-    const summary = await run('a', 'nonexistent');
-
-    expect(summary.results).toEqual([{ verifier: 'a', passed: true }]);
+    await expect(run('a', 'nonexistent')).rejects.toThrow('Unknown verifier id: "nonexistent"');
   });
 
   it('is a no-op that passes with no results when the feature flag is disabled', async () => {

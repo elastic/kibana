@@ -33,12 +33,12 @@ export class KiVerificationService {
       return { passed: true, results: [] };
     }
 
-    const allowlist = new Set(verifiers);
     const results: KiVerifierResult[] = [];
 
-    for (const verifier of this.registry.getAll()) {
-      if (!allowlist.has(verifier.id)) {
-        continue;
+    for (const id of verifiers) {
+      const verifier = this.registry.get(id);
+      if (!verifier) {
+        throw new Error(`Unknown verifier id: "${id}"`);
       }
 
       if (!verifier.applies(ki, verifierContext)) {
@@ -46,7 +46,7 @@ export class KiVerificationService {
       }
 
       const outcome = await verifier.verify(ki, verifierContext);
-      results.push({ ...outcome, verifier: verifier.id });
+      results.push({ ...outcome, verifier: id });
     }
 
     return { passed: results.every((result) => result.passed), results };

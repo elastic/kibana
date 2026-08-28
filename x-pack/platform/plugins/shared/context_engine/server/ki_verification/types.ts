@@ -35,7 +35,7 @@ export interface KiVerifierContext {
  */
 export interface KiVerificationContext extends KiVerifierContext {
   isEnabled: boolean;
-  /** Verifier ids to run; when absent all applicable verifiers run. */
+  /** Verifier ids to run; when absent or empty no verification runs. */
   verifiers?: string[];
 }
 

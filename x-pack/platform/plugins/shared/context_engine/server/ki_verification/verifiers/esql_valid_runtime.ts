@@ -15,11 +15,14 @@ import {
   hasEsqlAttribute,
   previewQuery,
 } from './esql_attribute';
+import { withRetry } from './retry';
 import type { KiVerifier } from '../types';
 
 export const ESQL_VALID_RUNTIME_VERIFIER_ID = 'esql-valid-runtime';
 
 export const ESQL_EXECUTION_ROW_LIMIT = 1;
+
+const MAX_QUERY_ATTEMPTS = 3;
 
 /** Returns the original query when limit injection cannot parse it. */
 const boundQuery = (query: string): string => {
@@ -40,7 +43,7 @@ const formatEsError = (error: errors.ResponseError): string => {
 };
 
 /** Creates a verifier that executes ES|QL queries against Elasticsearch. */
-export const createEsqlValidRuntimeVerifier = (): KiVerifier => ({
+export const createEsqlValidRuntimeVerifier = (retryDelayMs = 200): KiVerifier => ({
   id: ESQL_VALID_RUNTIME_VERIFIER_ID,
   applies: hasEsqlAttribute,
   async verify(ki, context) {
@@ -62,15 +65,15 @@ export const createEsqlValidRuntimeVerifier = (): KiVerifier => ({
 
       const { source, query } = queryRef;
       try {
-        const { is_partial: isPartial } = await esClient.esql.query(
-          {
-            query: boundQuery(query),
-            // Shard failures come back on a 200 by default, which would pass a
-            // query that did not actually run everywhere.
-            allow_partial_results: false,
-          },
-          { signal: abortSignal }
+        const { is_partial: isPartial } = await withRetry(
+          () =>
+            esClient.esql.query(
+              { query: boundQuery(query), allow_partial_results: false },
+              { signal: abortSignal }
+            ),
+          { maxAttempts: MAX_QUERY_ATTEMPTS, delayMs: retryDelayMs, signal: abortSignal }
         );
+
         // Treat an unexpected partial response as a verification failure.
         if (isPartial) {
           failures.push(
@@ -82,6 +85,11 @@ export const createEsqlValidRuntimeVerifier = (): KiVerifier => ({
       } catch (error) {
         // Re-throw non-response errors such as transport failures and cancellation.
         if (!isResponseError(error)) {
+          throw error;
+        }
+        // Re-throw infrastructure errors: authorization, rate limiting, server errors.
+        // Only 400 query/content errors (parsing_exception, verification_exception) are KI failures.
+        if (error.statusCode !== 400) {
           throw error;
         }
         failures.push(

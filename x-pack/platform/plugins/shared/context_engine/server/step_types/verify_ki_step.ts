@@ -30,6 +30,14 @@ export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logge
         });
       }
 
+      const verifiers = context.input.verifiers as string[] | undefined;
+      if (!verifiers || verifiers.length === 0) {
+        throw new ExecutionError({
+          type: 'InputValidationError',
+          message: 'verifiers must list at least one verifier id.',
+        });
+      }
+
       const esClient = context.contextManager.getScopedEsClient();
       const summary = await service.verifyKi(context.input.ki, {
         isEnabled,
@@ -37,7 +45,7 @@ export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logge
         logger,
         abortSignal: context.abortSignal,
         esqlAttributes: context.input.esql_attributes,
-        verifiers: context.input.verifiers,
+        verifiers,
       });
 
       return { output: summary };

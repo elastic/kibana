@@ -67,15 +67,12 @@ describe('verify_ki workflow step', () => {
 
   const ALL_ESQL_VERIFIERS = [ESQL_VALID_SYNTAX_VERIFIER_ID, ESQL_VALID_RUNTIME_VERIFIER_ID];
 
-  it('runs no verification when verifiers is not specified', async () => {
+  it('throws when verifiers is not specified', async () => {
     setContextEngineEnabled(true);
 
-    const output = await runHandler({
-      attributes: { esql: 'FROM logs-* | LIMIT 10' },
-    });
-
-    expect(output).toEqual({ passed: true, results: [] });
-    expect(esClient.esql.query).not.toHaveBeenCalled();
+    await expect(
+      runHandler({ attributes: { esql: 'FROM logs-* | LIMIT 10' } })
+    ).rejects.toThrow('verifiers must list at least one verifier id');
   });
 
   it('passes a KI with valid ES|QL', async () => {
