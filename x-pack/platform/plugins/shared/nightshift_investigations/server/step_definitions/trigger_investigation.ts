@@ -6,8 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { INVESTIGATION_TRIGGER_TYPES } from '../../common';
 import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
@@ -15,6 +17,15 @@ const inputSchema = z.object({
     .enum(['significant_event', 'alert'])
     .describe('The type of entity being investigated'),
   subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
+  trigger_type: z
+    .enum(INVESTIGATION_TRIGGER_TYPES)
+    .optional()
+    .describe('What initiated this investigation. Defaults to "automatic".'),
+  summary: z
+    .string()
+    .max(MAX_TEXT_LENGTH)
+    .optional()
+    .describe('Short description of the subject, returned on reads as subject.summary'),
   concurrency_key: z
     .string()
     .optional()
@@ -53,7 +64,9 @@ export const triggerInvestigationStepDefinition = (
         subject: {
           type: input.subject_type,
           id: input.subject_id,
+          summary: input.summary,
         },
+        trigger_type: input.trigger_type ?? 'automatic',
         concurrency_key: input.concurrency_key,
         context: input.context,
       });

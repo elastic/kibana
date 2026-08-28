@@ -37,7 +37,6 @@ const mockUseHistory = jest.fn<MockHistory, []>(() => ({
 const mockUseLocation = jest.fn<MockLocation, []>(() => ({
   state: null,
 }));
-const mockChromeNextIsEnabled = jest.fn<boolean, []>(() => false);
 const mockChromeStyle = jest.fn<'classic' | 'project', []>(() => 'classic');
 
 jest.mock('react-router-dom', () => ({
@@ -57,11 +56,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
       },
       chrome: {
         getChromeStyle: () => mockChromeStyle(),
-        next: {
-          get isEnabled() {
-            return mockChromeNextIsEnabled();
-          },
-        },
       },
     },
   }),
@@ -109,7 +103,6 @@ describe('usePageHeader', () => {
     mockUseLocation.mockReturnValue({
       state: null,
     });
-    mockChromeNextIsEnabled.mockReturnValue(false);
     mockChromeStyle.mockReturnValue('classic');
 
     useTabSwitcherContextMock.mockReturnValue({
@@ -223,8 +216,7 @@ describe('usePageHeader', () => {
   });
 
   describe('return breadcrumb visibility', () => {
-    it('should hide the Return breadcrumb when Chrome Next is enabled in the project layout', () => {
-      mockChromeNextIsEnabled.mockReturnValue(true);
+    it('should hide the Return breadcrumb in the project layout', () => {
       mockChromeStyle.mockReturnValue('project');
       mockUseLocation.mockReturnValue({
         state: mockOriginRouteState,
@@ -235,20 +227,7 @@ describe('usePageHeader', () => {
       expect(result.current.breadcrumbs).toEqual([]);
     });
 
-    it('should show the Return breadcrumb in the classic layout when Chrome Next is enabled', () => {
-      mockChromeNextIsEnabled.mockReturnValue(true);
-      mockUseLocation.mockReturnValue({
-        state: mockOriginRouteState,
-      });
-
-      const { result } = renderHook(() => usePageHeader([mockOverviewTab], []));
-
-      expect(result.current.breadcrumbs).toHaveLength(1);
-      expect(result.current.breadcrumbs[0]['data-test-subj']).toBe('infraAssetDetailsReturnButton');
-    });
-
-    it('should show the Return breadcrumb in the project layout when Chrome Next is disabled', () => {
-      mockChromeStyle.mockReturnValue('project');
+    it('should show the Return breadcrumb in the classic layout', () => {
       mockUseLocation.mockReturnValue({
         state: mockOriginRouteState,
       });
