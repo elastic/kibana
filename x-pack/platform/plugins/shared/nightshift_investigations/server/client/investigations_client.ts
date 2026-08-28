@@ -12,6 +12,7 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/man
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { INVESTIGATE_STEP_ID, severitySchema, type Severity } from '@kbn/significant-events-schema';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
   GetInvestigationResponse,
@@ -36,6 +37,30 @@ const SORT_FIELD_MAP: Record<
   created_at: 'createdAt',
   finished_at: 'finishedAt',
 };
+
+/**
+ * Step-execution documents fetched per listed investigation. One run always writes two under the
+ * `investigate` step id — the engine's step-level timeout wrapper shares it with the `ai.agent`
+ * attempt — and each retry adds another, so this is that baseline of 2 plus headroom for two
+ * retries. Runs past the budget lose their severity in the list, which {@link getSeverities} logs.
+ */
+const STEP_EXECUTIONS_PER_INVESTIGATION = 4;
+
+/**
+ * `_source` paths the severity lookup reads. Deliberately narrow: an `investigate` step's full
+ * output holds the summary, every hypothesis with its evidence, and the recommendations, which
+ * runs to megabytes per document and is not worth transferring to read one enum. `stepType` picks
+ * the agent attempt out of the timeout wrapper, `startedAt` orders retries.
+ */
+const SEVERITY_SOURCE_INCLUDES = [
+  'workflowRunId',
+  'startedAt',
+  'stepType',
+  'output.structured_output.severity',
+];
+
+/** `stepType` of the step execution that carries the agent's structured output. */
+const AI_AGENT_STEP_TYPE = 'ai.agent';
 
 function toExecutionStatuses(status: InvestigationStatus): ExecutionStatus[] {
   switch (status) {
@@ -63,6 +88,62 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
+}
+
+function asSeverity(v: unknown, logger: Logger): Severity | undefined {
+  if (v === undefined) return undefined;
+  const parsed = severitySchema.safeParse(v);
+  if (parsed.success) return parsed.data;
+  logger.warn(`Investigation reported an unrecognized severity ${JSON.stringify(v)}, dropping it`);
+  return undefined;
+}
+
+/**
+ * The workflow engine wraps an `ai.agent` step's schema output in a `structured_output` envelope,
+ * so the investigation's fields live at `output.structured_output.*` rather than on `output`.
+ */
+function toStructuredOutput(output: unknown): Record<string, unknown> | undefined {
+  if (!isPlainObject(output)) return undefined;
+  const structured = output.structured_output;
+  return isPlainObject(structured) ? structured : undefined;
+}
+
+interface InvestigateStepExecution {
+  stepId?: string;
+  stepType?: string;
+  startedAt?: string;
+  output?: unknown;
+}
+
+/**
+ * Structured output of the newest `investigate` attempt among these step executions, or undefined
+ * when none produced one.
+ *
+ * The single rule both `get()` and `list()` resolve investigation results with, so the two
+ * endpoints cannot disagree about a run. A run writes several documents under the `investigate`
+ * step id — the step-level timeout wrapper shares it, retries add more — and only the `ai.agent`
+ * attempt carries the agent's output. `startedAt` decides between attempts rather than array
+ * order, which differs between the engine's mget and search read paths. A document that omits
+ * `stepId` or `stepType` is kept rather than skipped, so a payload without them still resolves.
+ */
+function latestInvestigateOutput(
+  stepExecutions: InvestigateStepExecution[] | undefined
+): Record<string, unknown> | undefined {
+  let latest: { startedAt?: string; structured: Record<string, unknown> } | undefined;
+
+  for (const step of stepExecutions ?? []) {
+    if (step.stepId !== undefined && step.stepId !== INVESTIGATE_STEP_ID) continue;
+    if (step.stepType !== undefined && step.stepType !== AI_AGENT_STEP_TYPE) continue;
+
+    const structured = toStructuredOutput(step.output);
+    if (!structured) continue;
+
+    if (!latest || (step.startedAt ?? '') >= (latest.startedAt ?? '')) {
+      latest = { startedAt: step.startedAt, structured };
+    }
+  }
+
+  return latest?.structured;
 }
 
 function toInvestigationStatus(status: ExecutionStatus, logger: Logger): InvestigationStatus {
@@ -249,25 +330,8 @@ export class NightshiftInvestigationsClient {
     const executionInputs = execution.context?.inputs;
     const rawInput = isPlainObject(executionInputs) ? executionInputs : undefined;
 
-    // Step-level output is populated when includeOutput: true. Search in reverse for
-    // the last ai.agent step that produced a conclusion or summary. The workflow engine
-    // wraps the agent's structured schema output in a `structured_output` envelope, so
-    // conclusion/summary live at output.structured_output.{conclusion,summary}, not at
-    // the top-level output object. Confirmed by investigation_workflow.yaml line references
-    // to `steps.investigate.output.structured_output.*`.
-    const conclusionStep = execution.stepExecutions
-      ?.slice()
-      .reverse()
-      .find((s) => {
-        if (!isPlainObject(s.output)) return false;
-        const structured = s.output.structured_output;
-        return isPlainObject(structured) && ('conclusion' in structured || 'summary' in structured);
-      });
-    const rawOutput = (() => {
-      if (!isPlainObject(conclusionStep?.output)) return undefined;
-      const structured = conclusionStep.output.structured_output;
-      return isPlainObject(structured) ? structured : undefined;
-    })();
+    // Step-level output is populated when includeOutput: true.
+    const structuredOutput = latestInvestigateOutput(execution.stepExecutions);
 
     const subject = recoverSubjectFromInput(rawInput);
     const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
@@ -281,8 +345,10 @@ export class NightshiftInvestigationsClient {
       completed_at: isTerminal ? execution.finishedAt : undefined,
       conclusions:
         status === 'completed'
-          ? asString(rawOutput?.conclusion) ?? asString(rawOutput?.summary)
+          ? asString(structuredOutput?.conclusion) ?? asString(structuredOutput?.summary)
           : undefined,
+      severity:
+        status === 'completed' ? asSeverity(structuredOutput?.severity, this.logger) : undefined,
       error: (() => {
         if (status !== 'failed') return undefined;
         if (execution.error?.message) {
@@ -328,19 +394,91 @@ export class NightshiftInvestigationsClient {
       spaceId
     );
 
-    const results: ListInvestigationItem[] = result.results.map((execution) => {
-      const status = toInvestigationStatus(execution.status, this.logger);
-      const isTerminal = isTerminalStatus(status);
-      return {
-        investigation_id: execution.id,
-        status,
-        started_at: execution.startedAt,
-        completed_at: isTerminal ? execution.finishedAt : undefined,
-        concurrency_key: execution.concurrencyGroupKey,
-        executed_by: execution.executedBy,
-      };
-    });
+    const executions = result.results.map((execution) => ({
+      execution,
+      status: toInvestigationStatus(execution.status, this.logger),
+    }));
+
+    const severityById = await this.getSeverities(
+      executions
+        .filter(({ status }) => status === 'completed')
+        .map(({ execution }) => execution.id),
+      spaceId
+    );
+
+    const results: ListInvestigationItem[] = executions.map(({ execution, status }) => ({
+      investigation_id: execution.id,
+      status,
+      started_at: execution.startedAt,
+      completed_at: isTerminalStatus(status) ? execution.finishedAt : undefined,
+      severity: severityById.get(execution.id),
+      concurrency_key: execution.concurrencyGroupKey,
+      executed_by: execution.executedBy,
+    }));
 
     return { results, page: result.page, size: result.size, total: result.total };
+  }
+
+  /**
+   * Severity by investigation id for a page of listed investigations. The execution list carries
+   * no step output — `WorkflowExecutionListItemDto` omits `stepExecutions`, and the execution
+   * document's `context` only ever holds the run inputs — so it takes one extra search over the
+   * `investigate` step executions of exactly these runs, whatever the page size. An investigation
+   * id is the workflow execution id, which the step documents carry as `workflowRunId`.
+   *
+   * Severity is supplementary to a list of investigations, so a failing lookup degrades to no
+   * severities rather than failing the list.
+   */
+  private async getSeverities(
+    investigationIds: string[],
+    spaceId: string
+  ): Promise<Map<string, Severity>> {
+    const severityById = new Map<string, Severity>();
+    if (!this.workflowsManagement || investigationIds.length === 0) {
+      return severityById;
+    }
+
+    const size = investigationIds.length * STEP_EXECUTIONS_PER_INVESTIGATION;
+
+    try {
+      const { results, total } = await this.workflowsManagement.management.searchStepExecutions(
+        {
+          workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+          stepId: INVESTIGATE_STEP_ID,
+          workflowExecutionIds: investigationIds,
+          sourceIncludes: SEVERITY_SOURCE_INCLUDES,
+          size,
+        },
+        spaceId
+      );
+
+      if (total > results.length) {
+        this.logger.warn(
+          `Severity lookup for ${investigationIds.length} investigations read ${results.length} of ${total} matching step executions; the oldest ones on this page report no severity`
+        );
+      }
+
+      const stepsByInvestigation = new Map<string, InvestigateStepExecution[]>();
+      for (const step of results) {
+        const steps = stepsByInvestigation.get(step.workflowRunId) ?? [];
+        steps.push(step);
+        stepsByInvestigation.set(step.workflowRunId, steps);
+      }
+
+      for (const [investigationId, steps] of stepsByInvestigation) {
+        const severity = asSeverity(latestInvestigateOutput(steps)?.severity, this.logger);
+        if (severity) {
+          severityById.set(investigationId, severity);
+        }
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Could not resolve investigation severities, listing without them: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    return severityById;
   }
 }

@@ -220,6 +220,22 @@ export const investigationStateSchema = z.object({
    * investigating. Actionable steps belong in `recommendations`, not here.
    */
   conclusion: z.string().max(MAX_TEXT_LENGTH).optional(),
+  /**
+   * How severe the investigated situation turned out to be, on the significant-event severity
+   * scale (see {@link severitySchema}). It rates the whole situation the investigation uncovered,
+   * while a `significant_event_updates` entry with `field: 'severity'` rates only the single event
+   * that triggered the run — the two match unless the situation reaches past that event.
+   *
+   * Optional for the same reason `conclusion` is: the agent settles it at the end, so the live
+   * progress reports that share this schema carry it only once they reach that point, and
+   * investigations persisted before this field existed still parse. The instructions require the
+   * final output to set it, so an absent severity in a completed result means unrated, not low.
+   */
+  severity: severitySchema
+    .describe(
+      'How severe the investigated situation is, rated on the tier ladder in the investigator instructions from what the investigation confirmed.'
+    )
+    .optional(),
   /** Concrete, actionable steps to resolve or mitigate the issue. */
   recommendations: z.array(investigationRecommendationSchema).max(MAX_RECOMMENDATIONS).optional(),
   /**

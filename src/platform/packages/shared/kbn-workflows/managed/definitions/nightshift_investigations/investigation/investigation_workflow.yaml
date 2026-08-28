@@ -215,6 +215,16 @@ steps:
             description: >
               The mechanism/root-cause narrative, as plain prose — no markdown headings or bullet
               lists. Actionable steps belong in recommendations, not here.
+          severity:
+            type: string
+            enum: ['80-critical', '60-high', '40-medium', '20-low']
+            description: >
+              How severe the investigated situation is, rated on the tier ladder in the agent
+              instructions from what this investigation confirmed — whether the affected operation
+              fails, degrades, or still completes, and how broad that impact is. This rates the
+              whole situation; a significant_event_updates severity entry rates only the single
+              event that triggered the investigation, so the two match unless the situation reaches
+              past that event. Always set it in the final output.
           recommendations:
             type: array
             description: >

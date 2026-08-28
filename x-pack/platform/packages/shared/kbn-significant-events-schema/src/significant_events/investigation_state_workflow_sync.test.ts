@@ -148,6 +148,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       },
     ],
     conclusion: 'Connection pool exhaustion caused by the 14:02 deploy.',
+    severity: '80-critical',
     recommendations: [
       {
         title: 'Revert the pool-size config change',
@@ -401,6 +402,13 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(oversized)).toBe(false);
     expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
+  });
+
+  it('rejects an investigation severity outside the canonical tiers under both schemas', () => {
+    const invalidSeverity = { ...validPayload, severity: 'critical' };
+
+    expect(validate(invalidSeverity)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
   });
 
   it('accepts a minimal recommendation (title only) under both schemas', () => {

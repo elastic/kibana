@@ -428,6 +428,53 @@ describe('WorkflowExecutionQueryService', () => {
       const call = mockEsClient.search.mock.calls[0][0] as any;
       expect(call.query.bool.must.some((clause: any) => clause.range?.startedAt)).toBe(true);
     });
+
+    it('restricts the search to the given workflow execution ids', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', workflowExecutionIds: ['exec-1', 'exec-2'] },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must).toContainEqual({
+        terms: { workflowRunId: ['exec-1', 'exec-2'] },
+      });
+    });
+
+    it('does not filter by workflow execution id when none are given', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions({ workflowId: 'wf-1' }, 'default');
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must.some((clause: any) => clause.terms?.workflowRunId)).toBe(false);
+    });
+
+    it('matches nothing when an explicitly empty id list is given', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', workflowExecutionIds: [] },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must).toContainEqual({ terms: { workflowRunId: [] } });
+    });
+
+    it('returns only the requested source paths when sourceIncludes is set', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', sourceIncludes: ['workflowRunId', 'output.structured_output'] },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call._source).toEqual({ includes: ['workflowRunId', 'output.structured_output'] });
+    });
   });
 
   describe('getStepExecution', () => {

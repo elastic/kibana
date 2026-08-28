@@ -33,6 +33,11 @@ export interface SearchStepExecutionsParams {
   additionalQuery?: estypes.QueryDslQueryContainer;
   spaceId: string;
   sourceExcludes?: string[];
+  /**
+   * When set, only these `_source` paths are returned. Takes precedence over `sourceExcludes`,
+   * for callers that need a couple of fields off documents whose `output` can be megabytes.
+   */
+  sourceIncludes?: string[];
   page?: number;
   size?: number;
   /** Datemath lower bound for filtering by startedAt. */
@@ -93,6 +98,7 @@ export const searchStepExecutions = async ({
   additionalQuery,
   spaceId,
   sourceExcludes,
+  sourceIncludes,
   page,
   size,
   startedAfter,
@@ -119,9 +125,15 @@ export const searchStepExecutions = async ({
     const pageSize = size ?? (isPaginated ? 100 : 1000);
     const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
 
+    const sourceFilter = sourceIncludes?.length
+      ? { includes: sourceIncludes }
+      : sourceExcludes?.length
+      ? { excludes: sourceExcludes }
+      : undefined;
+
     const response = await stepExecutionsDataClient.search({
       query: { bool: { must: mustQueries } },
-      ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
+      ...(sourceFilter ? { _source: sourceFilter } : {}),
       sort: 'startedAt:desc',
       from,
       size: pageSize,

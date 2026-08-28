@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import type { Severity } from '@kbn/significant-events-schema';
 import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
+
+/**
+ * Re-exported so consumers of these responses do not need their own dependency on
+ * `@kbn/significant-events-schema`. Investigations deliberately share the significant-event
+ * severity scale, so a tier added there widens these responses too.
+ */
+export type { Severity } from '@kbn/significant-events-schema';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,
@@ -71,6 +79,12 @@ export interface GetInvestigationResponse {
   started_at?: string;
   completed_at?: string;
   conclusions?: string;
+  /**
+   * The investigation's own severity verdict for the situation it investigated. Absent for runs
+   * that are still going, failed, predate the field, or completed without the agent rating one —
+   * an absent severity means unrated, never low.
+   */
+  severity?: Severity;
   error?: string;
 }
 
@@ -91,6 +105,8 @@ export interface ListInvestigationItem {
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
+  /** See {@link GetInvestigationResponse.severity}. */
+  severity?: Severity;
   concurrency_key?: string;
   executed_by?: string;
 }
