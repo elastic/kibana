@@ -102,7 +102,8 @@ export function VegaSpecEditor({
   useMount(() => {
     let fmt: VegaByValueState['spec']['format'];
     try {
-      fmt = initialFormat ?? (JSON.parse(editorValue), 'json');
+      if (!initialFormat) JSON.parse(editorValue);
+      fmt = initialFormat ?? 'json';
     } catch {
       fmt = 'hjson';
     }
