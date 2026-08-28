@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/285997
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: Fix flattened fields expanding into orphan rows in the document flyout
