@@ -28,7 +28,6 @@ import {
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
 import { searchAlerts } from '../common/operations/search_alerts';
 import {
-  verifyAlertIdsInIndex,
   fetchAllAlertIdIndexWithSource,
   computeActualDelta,
   wouldChange,
@@ -128,7 +127,9 @@ export const setAttacksTagsRoute = (
                   });
                   // Emit only IDs that exist AND would actually change; deduplicate across
                   // families (an _id can appear in both scheduled and adhoc indices).
-                  // Use full valid arrays so over-cap tags that would change a doc still fire the trigger.
+                  // Use the raw request arrays: the mutation applies the original tags
+                  // (including over-length/over-cap values), so the trigger should fire
+                  // whenever the mutation would actually change a document.
                   verifiedAttackIds = Array.from(
                     new Set(
                       attackDocs.hits.hits
@@ -136,8 +137,8 @@ export const setAttacksTagsRoute = (
                           wouldChange(
                             (hit._source ?? {}) as Record<string, unknown>,
                             ALERT_WORKFLOW_TAGS,
-                            allValidTagsToAdd,
-                            allValidTagsToRemove
+                            tags.tags_to_add,
+                            tags.tags_to_remove
                           )
                         )
                         .map((hit) => hit._id)
@@ -199,7 +200,10 @@ export const setAttacksTagsRoute = (
                 attackDocs.hits.hits.map((hit) => hit._id).filter((id): id is string => id != null)
               )
             );
-            // Trigger emission uses only IDs that would actually change per the valid arrays.
+            // Trigger emission uses only IDs that would actually change.
+            // Use the raw request arrays: the mutation applies the original tags
+            // (including over-length/over-cap values), so the trigger should fire
+            // whenever the mutation would actually change a document.
             const verifiedAttackIds = Array.from(
               new Set(
                 attackDocs.hits.hits
@@ -207,8 +211,8 @@ export const setAttacksTagsRoute = (
                     wouldChange(
                       (hit._source ?? {}) as Record<string, unknown>,
                       ALERT_WORKFLOW_TAGS,
-                      allValidTagsToAdd,
-                      allValidTagsToRemove
+                      tags.tags_to_add,
+                      tags.tags_to_remove
                     )
                   )
                   .map((hit) => hit._id)
@@ -272,19 +276,11 @@ export const setAttacksTagsRoute = (
                   ALERT_WORKFLOW_TAGS
                 );
               } catch (err) {
-                // Fall back to verifyAlertIdsInIndex when source fetch fails.
-                try {
-                  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-                  verifiedRelatedAlertIds = await verifyAlertIdsInIndex(
-                    esClient,
-                    index,
-                    relatedAlertIds
-                  );
-                } catch (innerErr) {
-                  logger?.warn(
-                    `Failed to verify related alert IDs for workflow trigger (tags): ${innerErr}`
-                  );
-                }
+                // Source-fetch failed; suppress the fact event for related alerts rather than
+                // emitting request intent as observed fact (delta is unknown).
+                logger?.warn(
+                  `Failed to fetch related alert sources for workflow trigger (tags): ${err}`
+                );
               }
             }
 

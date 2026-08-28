@@ -662,5 +662,112 @@ describe('set attacks tags', () => {
         expect.objectContaining({ tagsAdded: ['new-tag'], tagsRemoved: [] })
       );
     });
+
+    test('non-cascade: emits when the only changed tag exceeds MAX_TAG_LENGTH', async () => {
+      // Encoding WHY: the wouldChange predicate must use the raw request tags, not the
+      // allValid* arrays that strip over-length values. updateAlertsTags applies the original
+      // request, so the trigger should fire whenever the mutation would change a document.
+      const overLengthTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            { _id: 'attack1', _index: SCHEDULED_INDEX, _source: { [ALERT_WORKFLOW_TAGS]: [] } },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          tags: { tags_to_add: [overLengthTag], tags_to_remove: [] },
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack1'] })
+      );
+    });
+
+    test('cascade: emits for attack when the only changed tag exceeds MAX_TAG_LENGTH', async () => {
+      // Encoding WHY: same as non-cascade — the trigger must use raw request arrays so
+      // over-length tags that would change a document still fire the event.
+      const overLengthTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: { [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: [], [ALERT_WORKFLOW_TAGS]: [] },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          tags: { tags_to_add: [overLengthTag], tags_to_remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack1'] })
+      );
+    });
+
+    test('cascade: does not emit alertTagsChanged when related-alert source fetch fails', async () => {
+      // Encoding WHY: when fetchAllAlertIdIndexWithSource throws for related alerts, the delta
+      // is unknown. The previous fallback emitted verifiedRelatedAlertIds with the request
+      // arrays as tagsAdded/tagsRemoved — publishing intent as fact. The fix suppresses the
+      // related-alert event entirely on source-fetch failure.
+      context.core.elasticsearch.client.asCurrentUser.search
+        // Call 1: attack doc fetch (succeeds, returns attack1 with a related alert)
+        .mockResponseOnce({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+            hits: [
+              {
+                _id: 'attack1',
+                _index: SCHEDULED_INDEX,
+                _source: {
+                  [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: ['alertA'],
+                  [ALERT_WORKFLOW_TAGS]: [],
+                },
+              },
+            ],
+          },
+        } as estypes.SearchResponse<unknown>)
+        // Call 2: related alert source fetch (fails)
+        .mockRejectedValueOnce(new Error('ES unavailable'));
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          tags: { tags_to_add: ['new-tag'], tags_to_remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalled();
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+    });
   });
 });
