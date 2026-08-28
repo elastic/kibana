@@ -1,7 +1,7 @@
 {
   "title": "Persona Matrix \u2014 per-prompt proprietary sweep",
   "branch": "main",
-  "lookbackDays": 3,
+  "lookbackDays": 14,
   "scoring": {
     "useVerdictLadder": true,
     "requireEisJudge": true,

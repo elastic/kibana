@@ -154,6 +154,19 @@ export const envFromExportProfile = (
 
   const next: Record<string, string> = {};
 
+  // Score ingest targets EVAL_KBN_*, which otherwise only the datasets profile
+  // sets. Without this an explicit `--export-profile <remote>` silently leaves
+  // scores pointed at the default local Kibana, so a run reports success while
+  // the intended export target receives nothing.
+  if (cfg.evaluationsKbn) {
+    if (isNonEmptyString(cfg.evaluationsKbn.url) && !isPlaceholder(cfg.evaluationsKbn.url)) {
+      next.EVAL_KBN_URL = cfg.evaluationsKbn.url;
+    }
+    if (isNonEmptyString(cfg.evaluationsKbn.apiKey) && !isPlaceholder(cfg.evaluationsKbn.apiKey)) {
+      next.EVAL_KBN_API_KEY = cfg.evaluationsKbn.apiKey;
+    }
+  }
+
   if (isNonEmptyString(cfg.tracingEs?.url) && !isPlaceholder(cfg.tracingEs.url)) {
     next.TRACING_ES_URL = cfg.tracingEs.url;
   }
