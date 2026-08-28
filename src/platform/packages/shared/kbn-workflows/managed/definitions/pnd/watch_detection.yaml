@@ -15,6 +15,11 @@ settings:
     strategy: drop
     max: 1
 triggers:
+  # Per-space Detection Watch owns the tuning cadence and dispatches the global
+  # worker. Its suffixed document id keeps scheduler tasks isolated by space.
+  - type: scheduled
+    with:
+      every: "2h"
   - type: manual
     inputs:
       properties:

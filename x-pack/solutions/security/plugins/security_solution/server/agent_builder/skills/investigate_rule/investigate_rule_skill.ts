@@ -470,16 +470,28 @@ export const createInvestigateRuleSkill = (): SkillDefinition<
           // skill treats as partial results and answers with a fallback query.
           const ids = [...new Set(alertIds)];
           try {
-            const response = await context.esClient.asCurrentUser.search({
+            const response = await context.esClient.asCurrentUser.search<Record<string, unknown>>({
               index: `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`,
               size: ids.length,
               query: { ids: { values: ids } },
               _source: [...ALERTS_BY_IDS_FIELDS, ...(additionalFields ?? [])],
             });
+            if (response.timed_out || response._shards.failed > 0) {
+              return {
+                results: [
+                  {
+                    type: ToolResultType.error,
+                    data: {
+                      message: `Failed to fetch every alert by id: timed_out=${response.timed_out}, failed_shards=${response._shards.failed}`,
+                    },
+                  },
+                ],
+              };
+            }
 
             const alerts = response.hits.hits.map((hit) => ({
               _id: hit._id,
-              ...(hit._source as Record<string, unknown>),
+              ...(hit._source ?? {}),
             }));
 
             return {

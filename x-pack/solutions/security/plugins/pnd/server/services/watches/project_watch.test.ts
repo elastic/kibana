@@ -171,9 +171,10 @@ describe('project watch', () => {
       expect(projected.mandate).toBe('Detection engineering');
     });
 
-    it('projects a manual-only trigger', () => {
-      expect(projected.triggers.map(({ type }) => type)).toEqual(['manual']);
-      expect(projected.schedule.cadence).toBe('manual');
+    it('projects the scheduled sweep and keeps on-demand runs available', () => {
+      expect(projected.triggers.map(({ type }) => type)).toEqual(['schedule', 'manual']);
+      expect(projected.schedule.cadence).toBe('sweep');
+      expect(projected.schedule.onDemand).toBe(true);
     });
 
     it('dispatches to exactly one worker per run', () => {
@@ -302,8 +303,21 @@ describe('project watch', () => {
 
       it('filters the reviewed tag out of the harvest', () => {
         expect(reviewedTag).toEqual(expect.any(String));
-        expect(harvestQuery).toContain('NOT MV_CONTAINS(`kibana.alert.workflow_tags`');
+        expect(harvestQuery).toContain('NOT COALESCE(MV_CONTAINS(`kibana.alert.workflow_tags`');
         expect(harvestQuery).toContain('{{ consts.reviewed_tag }}');
+      });
+
+      it('measures FP rate independently from the unreviewed work queue', () => {
+        expect(harvestQuery).toContain('fp_rate_count = COUNT(*) WHERE is_fp');
+        expect(harvestQuery).toContain('fp_rate_count * 100 >= total_count');
+      });
+
+      it('does not split one rule history when its name changes', () => {
+        const groupClause = harvestQuery
+          .split('\n')
+          .find((line) => line.trimStart().startsWith('BY '));
+
+        expect(groupClause).not.toContain('kibana.alert.rule.name');
       });
 
       // The tag API writes to the alerts index of the space it runs in, so anything the
@@ -333,13 +347,15 @@ describe('project watch', () => {
           expect(step.if).toContain('steps.review_tuning.output.response.approved == true');
         }
         expect(applied.with?.tags_to_add).toBe('${{ consts.applied_tags }}');
-        expect(handoff.with?.tags_to_add).toBe('${{ consts.applied_tags }}');
+        expect(handoff.with?.tags_to_add).toBe('${{ consts.handoff_tags }}');
         expect(reviewed.with?.tags_to_add).toBe('${{ consts.reviewed_only_tags }}');
+        for (const step of tagSteps) {
+          expect(step).not.toHaveProperty('on-failure');
+        }
       });
 
-      // The applied tag must mean "this pipeline changed the rule" (or recorded a manual
-      // handoff); an approved query proposal whose apply was skipped or failed gets the
-      // reviewed-only tag instead.
+      // The applied tag must mean this pipeline changed the rule. Manual handoffs and
+      // approved query proposals that could not be applied use distinct outcomes.
       it('tags applied only when the rule was actually patched', () => {
         const applied = tagSteps.find(({ name }) => name === 'mark_alerts_applied')!;
         const reviewed = tagSteps.find(({ name }) => name === 'mark_alerts_reviewed')!;
@@ -357,10 +373,53 @@ describe('project watch', () => {
       // edit made in the meantime.
       it('re-reads the rule after approval and applies only when it is unchanged', () => {
         const apply = proposalSteps.find(({ name }) => name === 'apply_query_tuning')!;
-        expect(apply.if).toContain(
-          'steps.refetch_rule.output.query == steps.fetch_rule.output.query'
+        const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
+        expect(String(eligibility.with?.eligible)).toContain(
+          'steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at'
+        );
+        expect((apply.with?.body as Record<string, string>).id).toBe(
+          '{{ steps.refetch_rule.output.id }}'
         );
         expect(proposalSteps.some(({ name }) => name === 'refetch_rule')).toBe(true);
+      });
+
+      it('runs both tuning previews inline to avoid child-resume races', () => {
+        expect(proposalSteps.filter(({ type }) => type === 'workflow.execute')).toEqual([]);
+        expect(proposalSteps.map(({ name }) => name)).toEqual(
+          expect.arrayContaining([
+            'preview_current_rule',
+            'count_current_preview_alerts',
+            'preview_proposed_rule',
+            'count_proposed_preview_alerts',
+          ])
+        );
+      });
+
+      it('requires both previews before applying a query change', () => {
+        const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
+        const condition = String(eligibility.with?.eligible);
+
+        expect(condition).toContain('current_succeeded == true');
+        expect(condition).toContain('current_is_aborted == false');
+        expect(condition).toContain('proposed_succeeded == true');
+        expect(condition).toContain('proposed_is_aborted == false');
+      });
+
+      it('bounds direct proposal inputs', () => {
+        const [trigger] = proposal.triggers as unknown as Array<{
+          inputs: { properties: Record<string, Record<string, unknown>> };
+        }>;
+        const { properties } = trigger.inputs;
+
+        expect(properties.alert_ids).toEqual(
+          expect.objectContaining({ minItems: 1, maxItems: 1000 })
+        );
+        expect(properties.analysis_window_days).toEqual(
+          expect.objectContaining({ minimum: 1, maximum: 30 })
+        );
+        expect(properties.preview_invocation_count).toEqual(
+          expect.objectContaining({ minimum: 1, maximum: 10 })
+        );
       });
 
       // The tag API requires an array; only a value that is exactly one `${{ }}`
@@ -376,6 +435,7 @@ describe('project watch', () => {
           expect.objectContaining({
             dismissed_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-dismissed'],
             applied_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-applied'],
+            handoff_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-handoff'],
             reviewed_only_tags: ['detection-watch:tuning-reviewed'],
           })
         );
@@ -384,6 +444,7 @@ describe('project watch', () => {
         for (const tags of [
           tagConsts.dismissed_tags,
           tagConsts.applied_tags,
+          tagConsts.handoff_tags,
           tagConsts.reviewed_only_tags,
         ]) {
           expect(tags).toContain(reviewedTag);
@@ -451,8 +512,10 @@ describe('project watch', () => {
         ])
       );
       expect(workerCallables(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID)).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: 'investigate-rule', kind: 'skill' })])
+      );
+      expect(workerCallables(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID)).not.toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ id: 'investigate-rule', kind: 'skill' }),
           expect.objectContaining({ id: PND_RULE_PREVIEW_WORKFLOW_ID, kind: 'workflow' }),
         ])
       );

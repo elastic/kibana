@@ -15,30 +15,32 @@ settings:
     strategy: drop
     max: 1
 triggers:
-  # `enabled: true` above only marks the installed document as enabled; the managed
-  # install path never registers scheduler tasks, so this trigger stays dormant until
-  # someone saves the workflow through the CRUD path in a space. From then on it
-  # sweeps that space every 2h.
-  - type: scheduled
-    with:
-      every: "2h"
+  # Detection Watch owns the per-space 2h schedule. This global worker stays
+  # manual-only so there is one scheduler authority and no cross-space task collision.
   - type: manual
     inputs:
       properties:
         min_fp_count:
-          type: number
+          type: integer
           # Floor of 2: a single-FP group makes ES|QL return alert_ids as a scalar,
           # which would fail the proposal's array input schema.
           minimum: 2
+          maximum: 1000000
           description: Overrides the minimum unreviewed false-positive alerts a rule needs before it is diagnosed.
         min_fp_rate_pct:
           type: number
+          minimum: 0
+          maximum: 100
           description: Overrides the minimum share of a rule's alerts, in percent, that must be unreviewed false positives.
         analysis_window_days:
-          type: number
+          type: integer
+          minimum: 1
+          maximum: 30
           description: Overrides how many days of alerts feed the analysis.
         preview_invocation_count:
-          type: number
+          type: integer
+          minimum: 1
+          maximum: 10
           description: Overrides the rule executions each backtest preview simulates.
       additionalProperties: false
 outputs:
@@ -68,10 +70,9 @@ steps:
   # (VALUES would buffer every id first), which also keeps the proposal's bulk tag
   # request inside Kibana's payload limit; a rule noisier than that surfaces again
   # on the next sweep.
-  # `total_count` spans every alert the rule produced in the window while the fp_*
-  # aggregations count only unreviewed false positives, so the rate filter compares
-  # actionable noise against the rule's whole output (cross-multiplied to avoid
-  # float division).
+  # `total_count` spans every alert the rule produced in the window. `fp_rate_count`
+  # includes reviewed false positives so processing a batch does not dilute the rule's
+  # measured FP rate; `fp_count` and `alert_ids` include only work still to review.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
@@ -79,17 +80,19 @@ steps:
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
         | WHERE @timestamp >= NOW() - {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days
-        | EVAL is_unreviewed_fp = `kibana.alert.workflow_status` == "closed"
+        | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
             AND `kibana.alert.workflow_reason` == "false_positive"
-            AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+        | EVAL is_unreviewed_fp = is_fp
+            AND NOT COALESCE(MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"), false)
         | STATS total_count = COUNT(*),
+            fp_rate_count = COUNT(*) WHERE is_fp,
             fp_count = COUNT(*) WHERE is_unreviewed_fp,
             last_fp_at = MAX(@timestamp) WHERE is_unreviewed_fp,
             alert_ids = TOP(_id, 1000, "desc") WHERE is_unreviewed_fp
-          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
+          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.rule_id`
         | WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
-          AND fp_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
-        | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
+          AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
+        | KEEP fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
         | SORT fp_count DESC
         | LIMIT 10
     on-failure:
@@ -112,12 +115,10 @@ steps:
         with:
           workflow-id: system-security-rule-tuning-proposal
           inputs:
-            rule_uuid: "{{ foreach.item.0 }}"
-            rule_name: "{{ foreach.item.1 }}"
-            fp_count: "${{ foreach.item.2 }}"
-            rule_id: "{{ foreach.item.3 }}"
-            last_fp_at: "{{ foreach.item.4 }}"
-            alert_ids: "${{ foreach.item.5 }}"
+            fp_count: "${{ foreach.item.0 }}"
+            rule_id: "{{ foreach.item.1 }}"
+            last_fp_at: "{{ foreach.item.2 }}"
+            alert_ids: "${{ foreach.item.3 }}"
             analysis_window_days: "${{ inputs.analysis_window_days | default: consts.analysis_window_days }}"
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"

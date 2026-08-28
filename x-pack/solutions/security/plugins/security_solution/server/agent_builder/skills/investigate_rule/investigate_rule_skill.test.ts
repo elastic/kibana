@@ -192,6 +192,8 @@ describe('investigateRuleSkill', () => {
     it('fetches the requested ids from the space alerts index with the diagnosis fields', async () => {
       const ctx = makeCtx();
       mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
+        timed_out: false,
+        _shards: { failed: 0 },
         hits: {
           hits: [
             {
@@ -251,6 +253,8 @@ describe('investigateRuleSkill', () => {
     it('dedupes repeated ids so found cannot trail requested spuriously', async () => {
       const ctx = makeCtx();
       mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
+        timed_out: false,
+        _shards: { failed: 0 },
         hits: { hits: [{ _id: 'alert-1', _source: {} }] },
       } as never);
 
@@ -266,6 +270,23 @@ describe('investigateRuleSkill', () => {
       expect(searchArgs.size).toBe(1);
       expect(searchArgs.query).toEqual({ ids: { values: ['alert-1'] } });
       expect((result.results[0].data as { requested: number; found: number }).requested).toBe(1);
+    });
+
+    it('returns an error result when Elasticsearch reports partial results', async () => {
+      const ctx = makeCtx();
+      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
+        timed_out: false,
+        _shards: { failed: 1 },
+        hits: { hits: [{ _id: 'alert-1', _source: {} }] },
+      } as never);
+
+      const result = (await tool.handler(
+        { alert_ids: ['alert-1'] },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0].data as { message: string }).message).toContain('failed_shards=1');
     });
 
     it('returns an error result when the search fails', async () => {

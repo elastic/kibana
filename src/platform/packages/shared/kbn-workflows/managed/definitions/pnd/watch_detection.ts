@@ -19,7 +19,7 @@ export const PND_WATCH_DETECTION_WORKFLOW = {
   id: PND_WATCH_DETECTION_WORKFLOW_ID,
   management: PND_WATCH_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yamlTemplate: ({ settingsVersion, autonomyLevel }: PndWatchTemplateValues): string =>
     WATCH_DETECTION_YAML.replaceAll(
       '__WATCH_SETTINGS_VERSION__',
