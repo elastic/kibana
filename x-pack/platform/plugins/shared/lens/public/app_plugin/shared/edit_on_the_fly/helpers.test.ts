@@ -339,7 +339,6 @@ describe('Lens inline editing helpers', () => {
             },
           },
           filters: [],
-          query: { esql: 'FROM index1 | STATS COUNT(*)' },
         },
       };
 

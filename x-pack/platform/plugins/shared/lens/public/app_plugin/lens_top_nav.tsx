@@ -1249,6 +1249,14 @@ export const LensTopNavMenu = ({
         Do not pass dataTestSubj into SearchBar — that prop overrides the query input's
         default `queryInput` test subject (used by FTR/Scout). Keep lnsApp_topNav on a wrapper.
       */}
+      {/*
+        This search bar is the only editing surface for the chart-scoped
+        `state.query` / `state.filters` (persisted with the visualization and
+        AND-ed with dashboard context at render time). The inline flyout editor
+        exposes no equivalent control for form-based charts. In text-based mode
+        the same bar hosts the ES|QL editor instead (dual role of
+        `state.query`, see `LensDocument['state']['query']`).
+      */}
       <div data-test-subj="lnsApp_topNav" className="hide-for-sharing">
         <AggregateQuerySearchBar
           allowSavingQueries
