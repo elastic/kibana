@@ -21,7 +21,7 @@ import {
   FORMULA_ESCAPED_RUNTIME_FIELD,
   KBN_ARCHIVE_PATHS,
   LOGSTASH_IN_RANGE_DATES,
-} from './constants';
+} from '../../fixtures/constants';
 import type { ImportedSavedObject } from './saved_object_helpers';
 
 export type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
