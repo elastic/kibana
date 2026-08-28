@@ -340,6 +340,8 @@ describe('DiscoverDocumentFlyout', () => {
       searchResult: searchResponseFor(outOfResultsHit),
       hits: esHitsMock,
     });
+    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
+    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
@@ -413,6 +415,8 @@ describe('DiscoverDocumentFlyout', () => {
         result: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
       });
     });
+    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
+    documents$.next = jest.fn();
 
     const rowFromResults = documents$
       .getValue()
@@ -434,6 +438,8 @@ describe('DiscoverDocumentFlyout', () => {
   it('keeps flyout pagination populated when the URL reference changes to another document already in the results (e.g. browser back navigation)', async () => {
     const { toolkit } = await setup({ hits: esHitsMock });
     const tabId = toolkit.getCurrentTab().id;
+    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
+    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);

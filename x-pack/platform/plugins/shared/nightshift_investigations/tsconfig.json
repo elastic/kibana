@@ -3,12 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "server/**/*",
-    "public/**/*",
-    "test/scout*/**/*"
-  ],
+  "include": ["common/**/*", "server/**/*", "public/**/*", "test/scout*/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
