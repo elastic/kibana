@@ -1951,3 +1951,106 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-actor-1",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "user" },
+        "id": "user:multi-actor-1@example.com@gcp",
+        "name": "MultiActor1",
+        "source": "manual",
+        "sub_type": "GCP IAM User",
+        "type": "Identity"
+      },
+      "user": { "id": "multi-actor-1@example.com", "name": "MultiActor1" },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-actor-2",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "user" },
+        "id": "user:multi-actor-2@example.com@gcp",
+        "name": "MultiActor2",
+        "source": "manual",
+        "sub_type": "GCP IAM User",
+        "type": "Identity"
+      },
+      "user": { "id": "multi-actor-2@example.com", "name": "MultiActor2" },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-target-service-1",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "service" },
+        "id": "service:TargetMultiService1",
+        "name": "TargetMultiService1",
+        "source": "manual",
+        "sub_type": "GCP Service Account",
+        "type": "Service"
+      },
+      "service": { "name": "TargetMultiService1" },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-target-bucket-1",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "generic" },
+        "id": "projects/your-project-id/buckets/target-bucket-1",
+        "name": "TargetBucket1",
+        "source": "manual",
+        "sub_type": "GCP Storage Bucket",
+        "type": "Storage"
+      },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "multi-target-bucket-2",
+    "index": ".entities.v2.latest.entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": { "Type": "generic" },
+        "id": "projects/your-project-id/buckets/target-bucket-2",
+        "name": "TargetBucket2",
+        "source": "manual",
+        "sub_type": "GCP Storage Bucket",
+        "type": "Storage"
+      },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}

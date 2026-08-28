@@ -9,7 +9,8 @@ import React, { useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { Error } from '../../../../shared_imports';
 import {
@@ -171,7 +172,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
     const repositoryErrorsWarning = Object.keys(errors).length ? (
       <>
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount={false}
           title={
             <FormattedMessage
@@ -179,25 +180,24 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
               defaultMessage="Some repositories contain errors"
             />
           }
-          color="warning"
-          iconType="warning"
           data-test-subj="repositoryErrorsWarning"
-        >
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryWarningDescription"
-            defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
-            values={{
-              repositoryLink: (
-                <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.repositoryWarningLinkText"
-                    defaultMessage="Repositories"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryWarningDescription"
+              defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
+              values={{
+                repositoryLink: (
+                  <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.repositoryWarningLinkText"
+                      defaultMessage="Repositories"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        />
         <EuiSpacer />
       </>
     ) : null;

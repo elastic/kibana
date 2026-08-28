@@ -1,8 +1,7 @@
 {
   "sha1": "a33433c2983800a0256c54af1a7b543909ae7f1a",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_a11y.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 18,
+        "column": 21
       }
     },
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_actions.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 18,
+        "column": 54
       }
     },
     {
@@ -43,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_actions.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 29,
+        "column": 13
       }
     },
     {
@@ -57,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_actions.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 42,
+        "column": 5
       }
     },
     {
@@ -71,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_assign.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 16,
+        "column": 21
       }
     },
     {
@@ -85,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_assign.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 28,
+        "column": 11
       }
     },
     {
@@ -99,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_assign.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 43,
+        "column": 11
       }
     },
     {
@@ -113,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 18,
+        "column": 54
       }
     },
     {
@@ -127,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 29,
+        "column": 11
       }
     },
     {
@@ -141,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 66,
-        "column": 7
+        "line": 47,
+        "column": 11
       }
     },
     {
@@ -155,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 89,
-        "column": 7
+        "line": 66,
+        "column": 8
       }
     },
     {
@@ -169,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 18,
+        "column": 70
       }
     },
     {
@@ -183,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 30,
+        "column": 22
       }
     },
     {
@@ -197,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 54,
-        "column": 7
+        "line": 43,
+        "column": 93
       }
     },
     {
@@ -211,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 69,
-        "column": 7
+        "line": 56,
+        "column": 23
       }
     },
     {
@@ -225,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 86,
-        "column": 7
+        "line": 76,
+        "column": 24
       }
     },
     {
@@ -239,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 112,
-        "column": 7
+        "line": 100,
+        "column": 23
       }
     },
     {
@@ -253,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 129,
-        "column": 7
+        "line": 112,
+        "column": 68
       }
     },
     {
@@ -267,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 48,
+        "column": 23
       }
     },
     {
@@ -281,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 53,
+        "column": 42
       }
     },
     {
@@ -295,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 78,
-        "column": 7
+        "line": 59,
+        "column": 22
       }
     },
     {
@@ -309,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 92,
-        "column": 7
+        "line": 67,
+        "column": 98
       }
     },
     {
@@ -323,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 114,
-        "column": 7
+        "line": 92,
+        "column": 98
       }
     },
     {
@@ -337,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 140,
-        "column": 7
+        "line": 117,
+        "column": 24
       }
     },
     {
@@ -351,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 18,
+        "column": 54
       }
     },
     {
@@ -365,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 25,
+        "column": 21
       }
     },
     {
@@ -379,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 40,
+        "column": 11
       }
     },
     {
@@ -393,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 53,
+        "column": 20
       }
     },
     {
@@ -407,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 102,
-        "column": 7
+        "line": 70,
+        "column": 12
       }
     },
     {
@@ -421,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 123,
-        "column": 7
+        "line": 83,
+        "column": 16
       }
     },
     {
@@ -435,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 92,
+        "column": 24
       }
     },
     {
@@ -448,8 +447,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 152,
-        "column": 7
+        "line": 145,
+        "column": 21
       }
     },
     {
@@ -461,8 +460,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 150,
+        "column": 5
       }
     },
     {
@@ -474,8 +473,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 160,
+        "column": 5
       }
     },
     {
@@ -487,8 +486,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 180,
-        "column": 9
+        "line": 164,
+        "column": 67
       }
     },
     {
@@ -500,8 +499,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 190,
-        "column": 9
+        "line": 171,
+        "column": 65
       }
     },
     {
@@ -513,8 +512,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 198,
-        "column": 9
+        "line": 180,
+        "column": 57
       }
     },
     {
@@ -526,8 +525,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 183,
+        "column": 41
       }
     },
     {
@@ -539,8 +538,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 150,
+        "column": 5
       }
     },
     {
@@ -552,8 +551,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 160,
+        "column": 5
       }
     },
     {
@@ -565,8 +564,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 180,
-        "column": 9
+        "line": 164,
+        "column": 67
       }
     },
     {
@@ -578,8 +577,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 190,
-        "column": 9
+        "line": 171,
+        "column": 65
       }
     },
     {
@@ -591,8 +590,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 198,
-        "column": 9
+        "line": 180,
+        "column": 57
       }
     },
     {
@@ -604,8 +603,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 183,
+        "column": 41
       }
     },
     {
@@ -617,8 +616,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 150,
+        "column": 5
       }
     },
     {
@@ -630,8 +629,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 160,
+        "column": 5
       }
     },
     {
@@ -643,8 +642,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 180,
-        "column": 9
+        "line": 164,
+        "column": 67
       }
     },
     {
@@ -656,8 +655,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 190,
-        "column": 9
+        "line": 171,
+        "column": 65
       }
     },
     {
@@ -669,8 +668,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 198,
-        "column": 9
+        "line": 180,
+        "column": 57
       }
     },
     {
@@ -682,8 +681,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 183,
+        "column": 41
       }
     },
     {
@@ -695,8 +694,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 150,
+        "column": 5
       }
     },
     {
@@ -708,8 +707,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 160,
+        "column": 5
       }
     },
     {
@@ -721,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 180,
-        "column": 9
+        "line": 164,
+        "column": 67
       }
     },
     {
@@ -734,8 +733,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 190,
-        "column": 9
+        "line": 171,
+        "column": 65
       }
     },
     {
@@ -747,8 +746,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 198,
-        "column": 9
+        "line": 180,
+        "column": 57
       }
     },
     {
@@ -760,8 +759,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 183,
+        "column": 41
       }
     },
     {
@@ -774,8 +773,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_listing.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 19,
+        "column": 41
       }
     },
     {
@@ -788,8 +787,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 19,
+        "column": 53
       }
     },
     {
@@ -802,8 +801,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 29,
+        "column": 61
       }
     },
     {
@@ -816,8 +815,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 39,
+        "column": 8
       }
     },
     {
@@ -830,8 +829,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 49,
+        "column": 72
       }
     },
     {
@@ -844,8 +843,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 75,
-        "column": 7
+        "line": 60,
+        "column": 23
       }
     },
     {
@@ -858,8 +857,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 99,
-        "column": 7
+        "line": 83,
+        "column": 23
       }
     },
     {
@@ -872,8 +871,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 19,
+        "column": 41
       }
     },
     {
@@ -886,8 +885,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 34,
+        "column": 23
       }
     },
     {
@@ -900,8 +899,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 39,
+        "column": 18
       }
     },
     {
@@ -914,8 +913,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 48,
+        "column": 11
       }
     },
     {
@@ -928,8 +927,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 94,
-        "column": 7
+        "line": 57,
+        "column": 11
       }
     },
     {
@@ -942,8 +941,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 20,
+        "column": 8
       }
     },
     {
@@ -956,8 +955,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 33,
+        "column": 23
       }
     },
     {
@@ -970,8 +969,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 56,
-        "column": 7
+        "line": 46,
+        "column": 23
       }
     },
     {
@@ -984,8 +983,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 61,
+        "column": 23
       }
     },
     {
@@ -998,8 +997,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 86,
-        "column": 7
+        "line": 75,
+        "column": 23
       }
     },
     {
@@ -1012,7 +1011,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 110,
+        "line": 98,
         "column": 7
       }
     }

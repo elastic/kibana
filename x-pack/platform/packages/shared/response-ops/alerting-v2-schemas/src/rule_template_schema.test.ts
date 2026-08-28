@@ -172,10 +172,10 @@ describe('rule template create-rule schema coupling', () => {
                 },
                 "breach": Object {
                   "additionalProperties": false,
-                  "description": "Breach detection configuration (required).",
+                  "description": "Breach detection configuration. Omit to treat every base row as a breach.",
                   "properties": Object {
                     "segment": Object {
-                      "description": "Appendable ES|QL segment for breach detection (required).",
+                      "description": "A clause appended to the end of the rule's ES|QL query. Required in breach blocks.",
                       "maxLength": 10000,
                       "minLength": 1,
                       "type": "string",
@@ -210,7 +210,6 @@ describe('rule template create-rule schema coupling', () => {
               "required": Array [
                 "format",
                 "base",
-                "breach",
               ],
               "type": "object",
             },
@@ -404,7 +403,7 @@ describe('rule template create-rule schema coupling', () => {
           },
           "properties": Object {
             "artifacts": Object {
-              "description": "Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` carries type-specific fields: a \`runbook\` artifact requires \`data.content\` holding markdown, and a \`dashboard\` artifact requires \`data.dashboardId\` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in \`data\`.",
+              "description": "Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` is a type-specific object (for example a \`runbook\` may carry \`content\`, a \`dashboard\` may carry \`dashboardId\`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.",
               "items": Object {
                 "$ref": "#/definitions/alerting_rule_artifact",
               },
@@ -422,12 +421,12 @@ describe('rule template create-rule schema coupling', () => {
               "anyOf": Array [
                 Object {
                   "const": "alert",
-                  "description": "Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.",
+                  "description": "Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.",
                   "type": "string",
                 },
                 Object {
                   "const": "signal",
-                  "description": "Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.",
+                  "description": "Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.",
                   "type": "string",
                 },
               ],
@@ -450,7 +449,7 @@ describe('rule template create-rule schema coupling', () => {
                 },
                 Object {
                   "const": "recover",
-                  "description": "Forces recovery when no data is present.",
+                  "description": "Resolves the alert episode to inactive on the first no-data run.",
                   "type": "string",
                 },
                 Object {

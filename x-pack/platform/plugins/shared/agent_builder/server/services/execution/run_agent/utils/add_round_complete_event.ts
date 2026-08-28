@@ -24,6 +24,7 @@ import type {
   CompactionStep,
   BackgroundAgentCompleteEvent,
   BackgroundAgentCompleteStep,
+  SubagentRosterUpdatedEvent,
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
@@ -46,6 +47,8 @@ import {
   isReasoningEvent,
   isToolCallStep,
   isBackgroundAgentCompleteEvent,
+  isSubagentRosterUpdatedEvent,
+  createSubagentRosterUpdatedStep,
   isToolUiEvent,
   carriedOverTodos,
   TODOS_UPDATED_UI_EVENT,
@@ -79,6 +82,7 @@ type StepEvents =
   | ReasoningEvent
   | ToolCallEvent
   | BackgroundAgentCompleteEvent
+  | SubagentRosterUpdatedEvent
   | UserQuestionAskedEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
@@ -86,6 +90,7 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
     isReasoningEvent(event) ||
     isToolCallEvent(event) ||
     isBackgroundAgentCompleteEvent(event) ||
+    isSubagentRosterUpdatedEvent(event) ||
     isUserQuestionAskedEvent(event)
   );
 };
@@ -420,6 +425,9 @@ const createRound = ({
     }
     if (isBackgroundAgentCompleteEvent(event)) {
       return [createBackgroundAgentStep(event)];
+    }
+    if (isSubagentRosterUpdatedEvent(event)) {
+      return [createSubagentRosterUpdatedStep({ roster: event.data.roster })];
     }
     if (isUserQuestionAskedEvent(event)) {
       return [

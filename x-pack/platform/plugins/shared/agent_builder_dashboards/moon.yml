@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-presentation'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_dashboards
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/agent-builder-browser'
@@ -24,6 +25,7 @@ dependsOn:
   - '@kbn/agent-builder-visualizations-server'
   - '@kbn/agent-builder-visualizations-common'
   - '@kbn/custom-content-common'
+  - '@kbn/custom-content-server'
   - '@kbn/agent-builder-server'
   - '@kbn/controls-constants'
   - '@kbn/dashboard-plugin'
@@ -38,7 +40,6 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/lens-common'
   - '@kbn/esql-utils'
-  - '@kbn/inference-common'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-query'
   - '@kbn/data-plugin'

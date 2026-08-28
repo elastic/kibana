@@ -65,7 +65,7 @@ export class ElasticAssistantPublicPlugin
         ...startPlugins,
         licensing: dependencies.licensing,
         triggersActionsUi: dependencies.triggersActionsUi,
-        security: dependencies.security,
+        security: { ...coreStart.security, ...dependencies.security },
         telemetry,
         productDocBase: dependencies.productDocBase,
         storage: this.storage,

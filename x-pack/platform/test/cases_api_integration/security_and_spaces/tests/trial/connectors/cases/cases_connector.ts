@@ -459,9 +459,11 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
             // The write-time adapter mirrors customFields into extended_fields when
-            // xpack.cases.templates.enabled is true (set in config_trial.ts).
+            // xpack.cases.templates.enabled is true (set in config_trial.ts). The mirrored
+            // key is the linked definition's label-derived friendly name ("text 1" ->
+            // "text_1"), not the raw v1 custom-field key.
             extended_fields: {
-              first_custom_field_key_as_keyword: 'this is a text field value',
+              text_1_as_keyword: 'this is a text field value',
             },
             description: 'case desc',
             duration: null,

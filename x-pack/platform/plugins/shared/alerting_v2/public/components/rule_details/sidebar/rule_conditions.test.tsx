@@ -252,9 +252,11 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders "Recover" for recover strategy', () => {
+  it('renders "Recover immediately" for recover strategy', () => {
     renderConditions({ ...alertRule, no_data_strategy: 'recover' });
-    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent('Recover');
+    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
+      'Recover immediately'
+    );
   });
 
   it('renders "Do nothing" for none strategy', () => {
