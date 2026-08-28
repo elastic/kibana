@@ -33,15 +33,13 @@ const buildRegistry = (
 ): UnifiedAttachmentTypeRegistry =>
   ({ list: () => entries } as unknown as UnifiedAttachmentTypeRegistry);
 
-// A minimal authorable attachment schema: discriminated by `type`, with an
-// `owner` key the step strips before composing the union.
 const commentSchema = z.object({
   type: z.literal('comment'),
   owner: z.string(),
   data: z.object({ content: z.string() }),
 });
 
-describe('attachmentsTool — add_attachments mode', () => {
+describe('attachmentsTool (deprecated)', () => {
   let casesClient: CasesClientMock;
 
   beforeEach(() => {
@@ -50,6 +48,20 @@ describe('attachmentsTool — add_attachments mode', () => {
 
   const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) =>
     attachmentsTool(jest.fn().mockResolvedValue(casesClient), registry, enabled);
+
+  it('has a description that directs agents to the replacement tools', () => {
+    const tool = buildTool(buildRegistry([]), true);
+    expect(tool.description).toContain('DEPRECATED');
+    expect(tool.description).toContain('platform.core.cases.get_attachments');
+    expect(tool.description).toContain('platform.core.cases.manage_attachments');
+    expect(tool.description).toContain('retrieve attachments');
+    expect(tool.description).toContain('add attachments');
+  });
+
+  it('uses the old tool ID platform.core.cases.attachments', () => {
+    const tool = buildTool(buildRegistry([]), true);
+    expect(tool.id).toBe('platform.core.cases.attachments');
+  });
 
   it('surfaces registered authorable type ids in the attachments field description', () => {
     const dashboardSchema = z.object({ type: z.literal('dashboard'), owner: z.string() });
