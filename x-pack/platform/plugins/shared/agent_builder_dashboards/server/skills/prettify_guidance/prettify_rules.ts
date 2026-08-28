@@ -38,7 +38,7 @@ Prefer modify and expand. Do not remove visualization panels. Do not invent brok
   - Gaps — pack every row; widths in a row sum to 48; side-by-side panels share height.
   - Markdown height should fit its content (\`h: 4–9\`) and never exceed 9.
 - **Chart variety.** A dashboard of one family (all lines, all metrics) is a hard-rule miss. Convert lines to areas when a filled series would read better. Convert a metric to pie/donut when the data is a part-to-whole. Add more charts when the screenshot and ES|QL support a missing breakdown or trend. Do not delete charts to create variety.
-- **Colors.** Do not invent colors. For bar and pie charts use the Default palette. Invented metric static colors and BACKGROUND fills must be removed — always \`edit_panels\` those metrics, even if you are not otherwise changing them.
+- **Colors.** Do not invent colors. Custom colors that do not add meaning must be removed on pie, table, XY, and metric. Use the Default palette. Invented metric static colors and BACKGROUND fills must be removed — always \`edit_panels\` those panels, even if you are not otherwise changing them.
 - **Wrong chart type.** A bar/xy with a single category (one bar) should be a pie.
 
 ## Hard rules — panel

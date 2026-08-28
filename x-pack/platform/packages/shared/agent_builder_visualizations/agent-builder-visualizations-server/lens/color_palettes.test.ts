@@ -23,5 +23,21 @@ describe('getColorPalettesPromptContent', () => {
     expect(prompt).toContain('PIE COLORING RULES');
     expect(prompt).toContain('Omit explicit `color`');
     expect(prompt).toContain('Lens default palette');
+    expect(prompt).toContain('do not preserve invented');
+  });
+
+  it('tells the xy author not to keep invented custom series colors on edit', () => {
+    const prompt = getColorPalettesPromptContent(SupportedChartType.XY);
+
+    expect(prompt).toContain('XY COLORING RULES');
+    expect(prompt).toContain('do not preserve invented');
+    expect(prompt).not.toContain('preserve its existing explicit colors');
+  });
+
+  it('tells the datatable author not to keep invented custom cell colors on edit', () => {
+    const prompt = getColorPalettesPromptContent(SupportedChartType.Datatable);
+
+    expect(prompt).toContain('DATA_TABLE COLORING RULES');
+    expect(prompt).toContain('do not preserve invented');
   });
 });

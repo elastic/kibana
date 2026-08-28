@@ -157,7 +157,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         ],
         coloringRules: [
           'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
-          'When editing an existing XY chart, preserve its existing explicit colors unless the user asks to change them; do not introduce new color overrides.',
+          'When editing an existing XY chart, do not preserve invented or custom series colors from the existing config. Drop explicit `color` overrides that are not the Lens default palette, unless the user explicitly asked for those colors.',
           'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
         ],
       },
@@ -204,6 +204,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           'Datatable placement: prefer `apply_color_to: "badge"`; avoid cell background or text coloring unless the user asks.',
           'Numeric datatable columns: when coloring is useful, use `apply_color_to: "badge"` with `color: { type: "auto" }` so Lens computes stops from table data.',
           'Categorical datatable columns: when coloring is useful, use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }` so Lens assigns colors to actual values.',
+          'When editing an existing table, do not preserve invented custom cell or text colors. Drop explicit `color` that is not `type: "auto"` or a Lens categorical default with empty mapping, unless the user explicitly asked for those colors.',
         ],
         options: {
           coloring: {
@@ -222,6 +223,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       config: {
         coloringRules: [
           'Omit explicit `color` properties and use the Lens default palette. Only add colors when the user explicitly requests them.',
+          'When editing an existing pie, do not preserve invented per-slice or custom colors. Drop explicit `color` and use the Lens default palette, unless the user explicitly asked for those colors.',
         ],
       },
     },

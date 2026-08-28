@@ -109,6 +109,8 @@ describe('registerSkills', () => {
     expect(rules?.content).toContain(
       'Invented metric static colors and BACKGROUND fills must be removed'
     );
+    expect(rules?.content).toContain('pie, table, XY, and metric');
+    expect(rules?.content).toContain('Custom colors that do not add meaning');
     expect(rules?.content).toContain('Default palette');
     expect(rules?.content).toContain('NEVER show the dashboard chrome title on a metric');
     expect(rules?.content).toContain('In most cases, enrich the metric');
