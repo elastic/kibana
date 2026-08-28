@@ -28,6 +28,7 @@ const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.agentBuilderAnnouncementModalSeenBySpaceJson',
   'userSettings.locale',
   'userSettings.rememberSelectedSpace',
+  'userSettings.lastSelectedSpaceId',
 ] as const satisfies readonly UserProfileUpdatePaths[];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
