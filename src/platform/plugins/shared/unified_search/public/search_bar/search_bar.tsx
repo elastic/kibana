@@ -49,7 +49,7 @@ import { SavedQueryManagementList } from '../saved_query_management';
 import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import type { QueryBarTopRowProps, ShowDatePicker } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
@@ -77,7 +77,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryMenu?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
-  showDatePicker?: boolean;
+  // Toggle the datepicker with a boolean, or use `{ disabled: true }` to show it disabled
+  showDatePicker?: ShowDatePicker;
   showAutoRefreshOnly?: boolean;
   /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
