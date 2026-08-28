@@ -17,7 +17,7 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setUnifiedAlertsTagsRoute } from './set_alert_tags_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
+import { MAX_ALERTS_PER_TRIGGER, MAX_TAG_LENGTH } from '../../../../../common/workflows/triggers';
 
 const makeSearchResponse = (
   hits: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }>
@@ -624,6 +624,59 @@ describe('set unified alerts tags', () => {
         expect.anything(),
         expect.objectContaining({ tagsAdded: ['new-tag'], tagsRemoved: [] })
       );
+    });
+
+    test('emits for a detection alert when the only changed tag is over-length — empty payload and truncated=true', async () => {
+      // Encoding WHY: collectChangedIdsByFamily must use raw request arrays, not allValid*.
+      // An over-length-only change must still trigger the event for the correct family; the
+      // length filter applies only to the schema-bounded payload.
+      const overLengthTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: { ids: ['alert-1'], tags: { tags_to_add: [overLengthTag], tags_to_remove: [] } },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alert-1'], tagsAdded: [], truncated: true })
+      );
+      expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits for an attack discovery document when the only changed tag is over-length — empty payload and truncated=true', async () => {
+      const overLengthTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'attack-1',
+            _index: '.alerts-security.attack.discovery.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: { ids: ['attack-1'], tags: { tags_to_add: [overLengthTag], tags_to_remove: [] } },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack-1'], tagsAdded: [], truncated: true })
+      );
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
     });
 
     test('mixed-family: computes independent per-family deltas — attack emit and alert emit do not share sources', async () => {

@@ -13,7 +13,7 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import { setAlertTagsRoute } from './set_alert_tags_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { MAX_TAGS_PER_OPERATION } from '../../../../../common/workflows/triggers';
+import { MAX_TAG_LENGTH, MAX_TAGS_PER_OPERATION } from '../../../../../common/workflows/triggers';
 
 describe('setAlertTagsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -238,6 +238,30 @@ describe('setAlertTagsRoute', () => {
           // All capped tags are already present → capped delta is empty; the over-cap tag
           // that triggered the event cannot appear in the payload due to the cap.
           tagsAdded: [],
+          truncated: true,
+        })
+      );
+    });
+
+    test('emits when the only changed tag is over-length — fires trigger with empty payload and truncated=true', async () => {
+      // Encoding WHY: raw request arrays drive change detection so an over-length tag that
+      // would genuinely change a document still triggers the event; the length filter applies
+      // only to the schema-bounded payload, leaving tagsAdded empty and truncated=true.
+      const overLengthTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
+      // Default beforeEach mock: alert-1 has ['tag-remove'] and not overLengthTag → would change.
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_TAGS_URL,
+        body: getSetAlertTagsRequestMock([overLengthTag], [], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          alertIds: ['alert-1'],
+          tagsAdded: [],
+          tagsRemoved: [],
           truncated: true,
         })
       );

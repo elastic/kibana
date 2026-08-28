@@ -13,7 +13,10 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import { setAlertAssigneesRoute } from './set_alert_assignees_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { MAX_ASSIGNEES_PER_OPERATION } from '../../../../../common/workflows/triggers';
+import {
+  MAX_ASSIGNEE_UID_LENGTH,
+  MAX_ASSIGNEES_PER_OPERATION,
+} from '../../../../../common/workflows/triggers';
 
 describe('setAlertAssigneesRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -254,6 +257,30 @@ describe('setAlertAssigneesRoute', () => {
         expect.objectContaining({
           alertIds: ['alert-1'],
           assigneesAdded: [],
+          truncated: true,
+        })
+      );
+    });
+
+    test('emits when the only changed assignee is over-length — fires trigger with empty payload and truncated=true', async () => {
+      // Encoding WHY: raw request arrays drive change detection so an over-length UID that
+      // would genuinely change a document still triggers the event; the length filter applies
+      // only to the schema-bounded payload, leaving assigneesAdded empty and truncated=true.
+      const overLengthUid = 'x'.repeat(MAX_ASSIGNEE_UID_LENGTH + 1);
+      // Default beforeEach mock: alert-1 has [] — does not have overLengthUid → would change.
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
+        body: getSetAlertAssigneesRequestMock([overLengthUid], [], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          alertIds: ['alert-1'],
+          assigneesAdded: [],
+          assigneesRemoved: [],
           truncated: true,
         })
       );
