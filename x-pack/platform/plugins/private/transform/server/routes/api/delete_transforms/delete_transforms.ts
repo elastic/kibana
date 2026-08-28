@@ -113,7 +113,15 @@ export async function deleteTransforms(
             id: transformId,
             items: transformsInfo,
             action: TRANSFORM_ACTIONS.DELETE,
-            getResult: getDeleteTimeoutResult,
+            getResult: (error, item) =>
+              item.id === transformId
+                ? {
+                    transformDeleted: { success: false, error },
+                    destIndexDeleted,
+                    destDataViewDeleted,
+                    destinationIndex,
+                  }
+                : getDeleteTimeoutResult(error),
           });
         }
         transformDeleted.error = getErrorBody(deleteTransformJobError);

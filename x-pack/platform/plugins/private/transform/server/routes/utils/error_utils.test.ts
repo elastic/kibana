@@ -52,8 +52,23 @@ describe('getErrorBody', () => {
       reason: 'connection reset',
       root_cause: [],
       caused_by: {},
-      response: expect.any(EsErrors.ConnectionError),
+      response: {},
     });
+  });
+
+  it('builds a serializable fallback body for errors with circular fields', () => {
+    const error = new Error('connection reset') as Error & { meta?: Record<string, unknown> };
+    error.meta = {};
+    error.meta.self = error.meta;
+
+    expect(getErrorBody(error)).toEqual({
+      type: 'error',
+      reason: 'connection reset',
+      root_cause: [],
+      caused_by: {},
+      response: {},
+    });
+    expect(() => JSON.stringify(getErrorBody(error))).not.toThrow();
   });
 });
 

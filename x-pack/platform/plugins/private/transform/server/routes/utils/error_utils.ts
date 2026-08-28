@@ -34,7 +34,7 @@ interface Params<TResults extends TimeoutResults> {
   id: string;
   items: TransformIdsSchema;
   action: string;
-  getResult?: (error: TimeoutErrorBody) => TResults[string];
+  getResult?: (error: TimeoutErrorBody, item: TransformIdsSchema[number]) => TResults[string];
 }
 
 // populate a results object with timeout errors for the ids which haven't already been set
@@ -84,7 +84,7 @@ export function fillResultsWithTimeouts<TResults extends TimeoutResults>({
   return items.reduce((accumResults, currentVal) => {
     if (results[currentVal.id] === undefined) {
       accumResults[currentVal.id] =
-        getResult?.(error) ??
+        getResult?.(error, currentVal) ??
         ({
           success: false,
           error,
@@ -121,7 +121,7 @@ export function getErrorBody(error: unknown): NonNullable<ResponseStatus['error'
     reason: getErrorReason(error),
     root_cause: [],
     caused_by: {},
-    response: error,
+    response: {},
   };
 }
 
