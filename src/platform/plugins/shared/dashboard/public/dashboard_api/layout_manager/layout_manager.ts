@@ -159,26 +159,15 @@ export function initializeLayoutManager(
       state.pinned_panels
     );
 
-    layout$.next({ ...layoutToApply });
+    layout$.next({ ...layoutToApply }); // triggers removedPanelCleanupSubscription to purge orphaned children
     currentChildState = { ...childStateToApply };
 
-    let childrenModified = false;
-    const currentChildren = { ...children$.value };
-    for (const uuid of Object.keys(currentChildren)) {
-      if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
-        const child = currentChildren[uuid];
-        const nextChildState = childStateToApply[uuid];
-        if (apiHasSerializableState(child)) {
-          child.applySerializedState(nextChildState);
-        }
-      } else {
-        // if reset resulted in panel removal, we need to update the list of children
-        delete currentChildren[uuid];
-        delete currentChildState[uuid];
-        childrenModified = true;
+    for (const [uuid, child] of Object.entries(children$.value)) {
+      const nextChildState = childStateToApply[uuid];
+      if (apiHasSerializableState(child)) {
+        child.applySerializedState(nextChildState);
       }
     }
-    if (childrenModified) children$.next(currentChildren);
   };
 
   /**
