@@ -152,7 +152,6 @@ import { unenrollForAgentPolicyId } from './agents';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 import {
   buildCurrentRevisionFilter,
-  getCompiledVersionsForAgentPolicy,
   getPackagePolicySavedObjectType,
   packagePolicyService,
 } from './package_policy';
@@ -178,6 +177,7 @@ import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpe
 import {
   getVersionSpecificPolicies,
   getAgentVersionsForVersionSpecificPolicies,
+  getAgentAssignedVersionsForPolicies,
   reassignAgentsFromVersionSpecificPolicies,
 } from './utils/version_specific_policies';
 import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
@@ -1893,6 +1893,26 @@ class AgentPolicyService {
 
         const fleetServerPolicies: FleetServerPolicy[] = [];
 
+        // Hoist the agent-version resolution above the loop so we make one aggregation across all
+        // policies rather than one per policy. This runs only when version-specific policies are
+        // enabled and we are on the create/update path (not the task path that supplies
+        // `options.agentVersions` explicitly).
+        const enableVersionSpecificPolicies =
+          appContextService.getExperimentalFeatures().enableVersionSpecificPolicies;
+        let versionSpecificBoundedSet: string[] = [];
+        let agentVersionsByPolicy = new Map<string, Set<string>>();
+        if (enableVersionSpecificPolicies && !options?.agentVersions) {
+          const versionConditionPolicyIds = agentPolicyIds.filter(
+            (id) => policiesMap[id]?.has_agent_version_conditions
+          );
+          if (versionConditionPolicyIds.length > 0) {
+            [versionSpecificBoundedSet, agentVersionsByPolicy] = await Promise.all([
+              getAgentVersionsForVersionSpecificPolicies(),
+              getAgentAssignedVersionsForPolicies(esClient, versionConditionPolicyIds),
+            ]);
+          }
+        }
+
         for (const fullPolicy of fullPolicies) {
           if (!fullPolicy || !fullPolicy.revision) {
             continue;
@@ -1916,22 +1936,18 @@ class AgentPolicyService {
           if (!options?.agentVersions) {
             fleetServerPolicies.push(fleetServerPolicy);
           }
-          if (
-            appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
-            policy.has_agent_version_conditions
-          ) {
-            let agentVersionsToUse = options?.agentVersions;
-            if (!agentVersionsToUse) {
-              // Create/update path: merge default common versions with any extra versions already
-              // compiled in inputs_for_versions (e.g. 9.1 from an enrolled agent). Without this,
-              // agents on non-default versions would not receive a new .fleet-policies document
-              // when the agent policy is updated, and would be stuck on the old revision.
-              const [defaultVersions, extraVersions] = await Promise.all([
-                getAgentVersionsForVersionSpecificPolicies(),
-                getCompiledVersionsForAgentPolicy(soClient, policy.id),
-              ]);
-              agentVersionsToUse = [...new Set([...defaultVersions, ...extraVersions])];
-            }
+          if (enableVersionSpecificPolicies && policy.has_agent_version_conditions) {
+            // Task path: caller supplies exact versions to deploy (suppresses base doc write above).
+            // Create/update path: use the bounded set plus any version with an enrolled agent, so
+            // a policy update always refreshes every variant that serves a real agent — not just
+            // the three versions in the default bounded set. This is the Half-B fix for
+            // https://github.com/elastic/kibana/issues/283077.
+            const agentVersionsToUse = options?.agentVersions ?? [
+              ...new Set([
+                ...versionSpecificBoundedSet,
+                ...(agentVersionsByPolicy.get(policy.id) ?? []),
+              ]),
+            ];
             const versionSpecificPolicies = await getVersionSpecificPolicies(
               soClient,
               fleetServerPolicy,
