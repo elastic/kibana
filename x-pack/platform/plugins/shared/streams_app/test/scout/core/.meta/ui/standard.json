@@ -1,21 +1,9 @@
 {
   "sha1": "609d87674806fe1522edda90ae4a6532ee9cb1f0",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "fbe5c6bcfe99e83-7132d4e40af07dc",
-      "title": "Teardown environment for streams tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "230fcfe7ad78991-744ce32675c025c",
       "title": "Setup environment for streams tests",
@@ -555,6 +543,17 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
         "line": 177,
         "column": 80
+      }
+    },
+    {
+      "id": "fbe5c6bcfe99e83-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]
