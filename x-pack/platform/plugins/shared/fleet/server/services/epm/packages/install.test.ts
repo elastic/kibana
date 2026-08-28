@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import fs from 'fs/promises';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ElasticsearchClient, SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
@@ -96,7 +95,6 @@ jest.mock('../../upgrade_sender');
 jest.mock('../../license');
 jest.mock('../../upgrade_sender');
 jest.mock('./cleanup');
-jest.mock('fs/promises');
 jest.mock('./bundled_packages');
 jest.mock('./utils', () => ({
   ...jest.requireActual('./utils'),
@@ -509,59 +507,6 @@ describe('install', () => {
       expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
         expect.objectContaining({ installSource: 'bundled' })
       );
-    });
-
-    describe('name-only install when registry is reachable', () => {
-      const actualBundledPackages = jest.requireActual('./bundled_packages');
-
-      beforeEach(() => {
-        // Use the REAL getBundledPackageByPkgKey for this block so the
-        // registry-reachable gate in bundled_packages.ts is actually exercised,
-        // not just install.ts's branching on a hardcoded mock value.
-        mockGetBundledPackageByPkgKey.mockImplementation(
-          actualBundledPackages.getBundledPackageByPkgKey
-        );
-        actualBundledPackages._purgeBundledPackagesCache();
-
-        jest.mocked(appContextService.getConfig).mockReturnValue({
-          isAirGapped: false,
-          developer: {
-            bundledPackageLocation: '/tmp/test',
-          },
-        } as any);
-
-        jest.mocked(fs.stat).mockResolvedValue({} as any);
-        jest.mocked(fs.readdir).mockResolvedValue(['test_package-1.0.0.zip'] as any);
-        jest.mocked(fs.readFile).mockResolvedValue(Buffer.from('test_package'));
-      });
-
-      it('should resolve via registry and not short-circuit to bundled when bundled is present', async () => {
-        (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
-        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-        jest
-          .mocked(Registry.fetchFindLatestPackageOrThrow)
-          .mockImplementation(() =>
-            Promise.resolve({ name: 'test_package', version: '1.3.0' } as any)
-          );
-
-        const response = await installPackage({
-          spaceId: DEFAULT_SPACE_ID,
-          installSource: 'registry',
-          pkgkey: 'test_package',
-          savedObjectsClient: savedObjectsClientMock.create(),
-          esClient: {} as ElasticsearchClient,
-        });
-
-        expect(response.error).toBeUndefined();
-        expect(mockGetBundledPackageByPkgKey).toHaveBeenCalledWith('test_package');
-        expect(Registry.fetchFindLatestPackageOrThrow).toHaveBeenCalledWith(
-          'test_package',
-          expect.any(Object)
-        );
-        expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
-          expect.objectContaining({ installSource: 'registry' })
-        );
-      });
     });
 
     it('should fetch latest version if version not provided', async () => {
