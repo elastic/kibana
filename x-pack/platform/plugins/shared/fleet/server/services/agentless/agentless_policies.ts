@@ -31,9 +31,9 @@ import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
 import {
+  FleetError,
   FleetNotFoundError,
   PackagePolicyRequestError,
-  PackagePolicyRestrictionRelatedError,
 } from '../../errors';
 
 import type { PackageInfo } from '../../types';
@@ -329,8 +329,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       .filter((pp) => pp.is_managed && !options?.force)
       .map((pp) => pp.id);
     if (managedIds.length > 0) {
-      throw new PackagePolicyRestrictionRelatedError(
-        `Cannot delete managed package policies without force: ${managedIds.join(', ')}`
+      throw new FleetError(
+        `Cannot delete managed agentless policies without force: ${managedIds.join(', ')}. Pass force: true to override.`
       );
     }
 
