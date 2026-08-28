@@ -33,6 +33,7 @@ import {
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
+import { createSpaceSettingsService } from './space_settings';
 import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
@@ -276,6 +277,8 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
+    const spaceSettings = createSpaceSettingsService({ savedObjects });
+
     this.internalStart = {
       tools,
       agents,
@@ -297,6 +300,7 @@ export class ServiceManager {
       consumption,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      spaceSettings,
       conversationTemplates: conversationTemplatesStart,
     };
 

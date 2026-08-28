@@ -1,8 +1,7 @@
 {
-  "sha1": "37881d7d22aa9e7e1c25a67b3782544c4df9cdfd",
+  "sha1": "e04b253704ebe8867c865f6f75cae983639255f3",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -927,107 +926,133 @@
       }
     },
     {
-      "id": "a7715b7434eec07-8c781937f72a9fe",
+      "id": "c3c5a4dff951829-0e6d6168c3907cb",
+      "title": "Lens show underlying data from dashboard brings dashboard and visualization context to Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/dashboard.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "c334832918cc1c3-8c781937f72a9fe",
       "title": "Lens show underlying data opens Discover with columns from a compatible saved visualization",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 62,
-        "column": 99
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 42,
+        "column": 14
       }
     },
     {
-      "id": "a7715b7434eec07-6e6d7b171a56f64",
+      "id": "c334832918cc1c3-6e6d7b171a56f64",
       "title": "Lens show underlying data opens Discover when the visualization has an annotation layer",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 79,
-        "column": 20
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 59,
+        "column": 9
       }
     },
     {
-      "id": "a7715b7434eec07-dd1d532280a5bba",
+      "id": "c334832918cc1c3-dd1d532280a5bba",
       "title": "Lens show underlying data opens Discover when the visualization has a reference line layer",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 100,
-        "column": 35
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 84,
+        "column": 18
       }
     },
     {
-      "id": "a7715b7434eec07-94a29e9ef0a338a",
+      "id": "c334832918cc1c3-94a29e9ef0a338a",
       "title": "Lens show underlying data disables Open in Discover when the visualization has multiple data layers",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 130,
-        "column": 25
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 110,
+        "column": 9
       }
     },
     {
-      "id": "a7715b7434eec07-0f814bf75cea388",
+      "id": "c334832918cc1c3-0f814bf75cea388",
       "title": "Lens show underlying data omits terms from the Discover query when Other is enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 141,
-        "column": 17
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 132,
+        "column": 4
       }
     },
     {
-      "id": "a7715b7434eec07-2c55a18f106ff59",
+      "id": "c334832918cc1c3-2c55a18f106ff59",
       "title": "Lens show underlying data opens Discover with a Lucene dimension filter as a filter pill",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 168,
-        "column": 16
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 158,
+        "column": 25
       }
     },
     {
-      "id": "a7715b7434eec07-b190ca2e89c0931",
+      "id": "c334832918cc1c3-b190ca2e89c0931",
       "title": "Lens show underlying data extracts formula KQL filters and columns into Discover",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 196,
-        "column": 18
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 187,
+        "column": 25
       }
     },
     {
-      "id": "a7715b7434eec07-cf0dce8b54a312a",
+      "id": "c334832918cc1c3-cf0dce8b54a312a",
       "title": "Lens show underlying data extracts a formula global filter into Discover",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 243,
-        "column": 9
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 231,
+        "column": 31
+      }
+    },
+    {
+      "id": "90a36ca62c33696-d99c41830e18b70",
+      "title": "Lens show underlying data from ES|QL dashboard panel opens Discover with the Lens ES|QL panel query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/esql_dashboard.spec.ts",
+        "line": 33,
+        "column": 23
       }
     },
     {

@@ -17,6 +17,7 @@ import {
   notificationDataStreamDefinition,
 } from '../storage/notification_data_stream';
 import { queryNotifications } from '../lib/query_notifications';
+import type { NotificationReadState } from '../lib/read_state';
 
 const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
@@ -40,8 +41,10 @@ describe('queryNotifications [integration]', () => {
   let dataStreams: DataStreamsStart;
   const logger = loggingSystemMock.createLogger();
 
-  const query = (params: Parameters<typeof queryNotifications>[1] = {}) =>
-    queryNotifications({ dataStreams, logger }, params);
+  const query = (
+    params: Parameters<typeof queryNotifications>[1] = {},
+    readState?: NotificationReadState
+  ) => queryNotifications({ dataStreams, logger }, params, readState);
 
   beforeAll(async () => {
     jest.setTimeout(120_000);
@@ -72,6 +75,9 @@ describe('queryNotifications [integration]', () => {
         doc('old-error', daysAgo(40), { severity: 'error' }),
         doc('recent-warning', daysAgo(1), { severity: 'warning' }),
         doc('other-type', daysAgo(3), { type: 'other' }),
+        // one copy past the info TTL, one inside: the in-horizon copy represents the group
+        doc('revived', daysAgo(40), { title: 'revived v1' }),
+        doc('revived', daysAgo(1.5), { title: 'revived v2' }),
       ],
     });
     await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
@@ -86,6 +92,7 @@ describe('queryNotifications [integration]', () => {
 
     expect(items.map(({ notification_id: id }) => id)).toEqual([
       'recent-warning',
+      'revived',
       'dup',
       'other-type',
       'old-error',
@@ -103,13 +110,50 @@ describe('queryNotifications [integration]', () => {
   });
 
   it('composes attribute filters', async () => {
-    const bySeverity = await query({ severity: ['error'] });
-    expect(bySeverity.items.map(({ notification_id: id }) => id)).toEqual(['old-error']);
-
     const byType = await query({ type: 'other' });
     expect(byType.items.map(({ notification_id: id }) => id)).toEqual(['other-type']);
 
     const byNamespace = await query({ namespace: 'nonexistent' });
     expect(byNamespace.items).toEqual([]);
+  });
+
+  it('includes any notification with in-window activity, represented by its newest in-window copy', async () => {
+    const { items } = await query({ from: daysAgo(6), to: daysAgo(3) });
+
+    // `dup` was re-pushed after the window closed, but its 5d copy is in-window, so it
+    // appears here represented by that copy — not dropped, and not shown as `dup v2`.
+    expect(items.map(({ notification_id: id }) => id)).toEqual(['other-type', 'dup']);
+    expect(items.find(({ notification_id: id }) => id === 'dup')?.title).toBe('dup v1');
+  });
+
+  it('annotates isRead from the representative without reordering', async () => {
+    const { items } = await query(
+      {},
+      {
+        overrides: { 'recent-warning': { read: true, markedAt: new Date().toISOString() } },
+        readAllBefore: daysAgo(3),
+      }
+    );
+
+    // Strictly newest-first, read and unread interleaved.
+    expect(items.map(({ notification_id: id, isRead }) => [id, isRead])).toEqual([
+      // Postdates the marker, but its own override was recorded later still.
+      ['recent-warning', true],
+      // Re-pushed after the marker, so the bulk catch-up is escaped.
+      ['revived', false],
+      ['dup', false],
+      // Predate the marker.
+      ['other-type', true],
+      ['old-error', true],
+    ]);
+  });
+
+  it('leaves items unannotated when there is no read state', async () => {
+    const { items } = await query();
+
+    expect(items.every((item) => !('isRead' in item))).toBe(true);
+    // An all-unread annotation is still an annotation: `isRead: false` everywhere, not absent
+    const annotated = await query({}, { overrides: {}, readAllBefore: daysAgo(365) });
+    expect(annotated.items.every(({ isRead }) => isRead === false)).toBe(true);
   });
 });

@@ -188,6 +188,8 @@ export default function ({ getService }: FtrProviderContext) {
       ];
 
       describe('and user has YARA write + global artifact management privileges', () => {
+        const dummyRuleWithComment = 'rule dummy { condition: false }  // '; // note: divisible by 3
+
         for (const customYaraSignatureApiCall of createUpdateApiCalls) {
           it(`should error on [${customYaraSignatureApiCall.method}] if invalid entry field is used`, async () => {
             const body = customYaraSignatureApiCall.getBody();
@@ -204,6 +206,75 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           // todo: deeper YARA rules validation is coming soon
+          describe(`YARA rules validation - ${customYaraSignatureApiCall.info}`, () => {
+            describe('Supported modules', () => {
+              const supportedModules: Record<string, string> = {
+                pe: 'pe.is_pe',
+                elf: 'elf.type == elf.ET_NONE',
+                math: 'math.abs(-1) == 1',
+                time: 'time .now() >= 0',
+                string: 'string.length("a") == 1',
+                console: 'console.log("x")',
+                tests: 'tests.foobar(1) == "foo"',
+              };
+
+              for (const [module, condition] of Object.entries(supportedModules)) {
+                it(`accepts rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
+                  const body = customYaraSignatureApiCall.getBody();
+
+                  (body.entries[0] as EntryMatch).value = `
+                import "${module}"
+                rule ${module}Check {
+                  condition:
+                    ${condition}
+                  }`;
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(body)
+                    .expect(200);
+                });
+              }
+            });
+
+            describe('Unsupported modules', () => {
+              const unsupportedModules = [
+                // built-in but not supported YARA modules
+                'hash',
+                'macho',
+                'dotnet',
+                'dex',
+                'magic',
+                'cuckoo',
+
+                // user modules
+                'userModuleWithRandomName',
+              ];
+
+              for (const module of unsupportedModules) {
+                it(`rejects rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
+                  const body = customYaraSignatureApiCall.getBody();
+
+                  (body.entries[0] as EntryMatch).value = `
+                  import "${module}"
+                  rule ${module}Check {
+                    condition:
+                      true
+                  }`;
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(body)
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(anErrorMessageWith(new RegExp(`unknown module "${module}"`)));
+                });
+              }
+            });
+          });
+
           it(`should error on [${customYaraSignatureApiCall.method}] if rule value is empty`, async () => {
             const body = customYaraSignatureApiCall.getBody();
 
@@ -220,7 +291,10 @@ export default function ({ getService }: FtrProviderContext) {
           it(`should accept item on [${customYaraSignatureApiCall.method}] if rule value is ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
             const body = customYaraSignatureApiCall.getBody();
 
-            (body.entries[0] as EntryMatch).value = 'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH);
+            (body.entries[0] as EntryMatch).value =
+              dummyRuleWithComment +
+              'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length);
+
             await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
               customYaraSignatureApiCall.path
             )
@@ -232,9 +306,10 @@ export default function ({ getService }: FtrProviderContext) {
           it(`should error on [${customYaraSignatureApiCall.method}] if rule value is more than ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
             const body = customYaraSignatureApiCall.getBody();
 
-            (body.entries[0] as EntryMatch).value = 'a'.repeat(
-              MAX_YARA_RULE_CONTENT_BYTE_LENGTH + 1
-            );
+            (body.entries[0] as EntryMatch).value =
+              dummyRuleWithComment +
+              'a'.repeat(MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length + 1);
+
             await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
               customYaraSignatureApiCall.path
             )
@@ -248,9 +323,12 @@ export default function ({ getService }: FtrProviderContext) {
           it(`should accept item on [${customYaraSignatureApiCall.method}] if rule value is at the byte limit using multi-byte characters`, async () => {
             const body = customYaraSignatureApiCall.getBody();
             const euroSign = '€'; // takes up 3 bytes
-            const valueAtByteLimit = euroSign.repeat(
-              MAX_YARA_RULE_CONTENT_BYTE_LENGTH / Buffer.byteLength(euroSign)
-            );
+            const valueAtByteLimit =
+              dummyRuleWithComment +
+              euroSign.repeat(
+                (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
+                  Buffer.byteLength(euroSign)
+              );
 
             expect(Buffer.byteLength(valueAtByteLimit, 'utf8')).to.be(
               MAX_YARA_RULE_CONTENT_BYTE_LENGTH
@@ -269,9 +347,13 @@ export default function ({ getService }: FtrProviderContext) {
           it(`should error on [${customYaraSignatureApiCall.method}] if rule value exceeds the byte limit using multi-byte characters`, async () => {
             const body = customYaraSignatureApiCall.getBody();
             const euroSign = '€';
-            const valueOverByteLimit = euroSign.repeat(
-              MAX_YARA_RULE_CONTENT_BYTE_LENGTH / Buffer.byteLength(euroSign) + 1
-            );
+            const valueOverByteLimit =
+              dummyRuleWithComment +
+              euroSign.repeat(
+                (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
+                  Buffer.byteLength(euroSign)
+              ) +
+              'a'; // plus one byte
 
             expect(Buffer.byteLength(valueOverByteLimit, 'utf8')).to.be.greaterThan(
               MAX_YARA_RULE_CONTENT_BYTE_LENGTH

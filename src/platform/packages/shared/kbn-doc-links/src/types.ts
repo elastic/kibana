@@ -624,6 +624,7 @@ export interface DocLinks {
     elasticAgentLogFileRetention: string;
     elasticAgentDownloads: string;
     integrationsReference: string;
+    datastreamsTemplateConflicts: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -726,6 +727,7 @@ export interface DocLinks {
   };
   readonly telemetry: {
     readonly settings: string;
+    readonly securityData: string;
   };
   readonly playground: {
     readonly chatPlayground: string;
