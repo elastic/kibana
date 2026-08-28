@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiResizeObserver,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -29,14 +29,16 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
-import { getServices } from '../services';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
-import { buildCustomContentContextAttachment } from '../utils/chat_integration';
-import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../../common/constants';
+import { getTelemetry } from '../telemetry';
+
+const EDITOR_DEFAULT_HEIGHT = 400;
+// Intentionally overestimated (header + footer + body padding + template label row + spacers + help text)
+// so the computed max-height always prevents a scrollbar regardless of minor layout changes.
+const FLYOUT_FIXED_CHROME_HEIGHT = 380;
 
 export interface EditCustomContentFlyoutProps {
-  embeddableId: string;
   esqlQuery: string | undefined;
   template: string | undefined;
   timeRange: TimeRange | undefined;
@@ -44,15 +46,15 @@ export interface EditCustomContentFlyoutProps {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  panelTitle?: string;
   isNewPanel?: boolean;
+  ariaLabelledBy?: string;
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
   onClose: () => void;
   onRunPreview: (html: string) => void;
+  onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
 }
 
 export const EditCustomContentFlyout = ({
-  embeddableId,
   esqlQuery,
   template,
   timeRange,
@@ -60,14 +62,14 @@ export const EditCustomContentFlyout = ({
   projectRouting,
   query,
   filters,
-  panelTitle,
   isNewPanel,
+  ariaLabelledBy,
   onSave,
   onClose,
   onRunPreview,
+  onGenerateWithChat,
 }: EditCustomContentFlyoutProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { agentBuilder } = getServices();
 
   const {
     draftEsqlQuery,
@@ -80,7 +82,6 @@ export const EditCustomContentFlyout = ({
     esqlDataError,
     handleFetchData,
     isRenderLoading,
-    hasPreviewedCurrentDraft,
     handleRender,
   } = useEditFlyoutState({
     esqlQuery,
@@ -91,34 +92,53 @@ export const EditCustomContentFlyout = ({
     query,
     filters,
     colorMode,
+    euiTheme,
     onRunPreview,
   });
 
   const handleGenerateWithChat = useCallback(() => {
-    if (!agentBuilder) return;
-    agentBuilder.openChat({
-      attachments: [
-        buildCustomContentContextAttachment(
-          draftTemplate,
-          draftEsqlQuery || undefined,
-          embeddableId,
-          panelTitle
-        ),
-      ],
-      sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${embeddableId}`,
+    getTelemetry().trackGenerateWithChatClicked({
+      triggerSource: 'flyout',
+      hasExistingTemplate: Boolean(draftTemplate),
     });
-    onClose();
-  }, [agentBuilder, draftTemplate, draftEsqlQuery, embeddableId, panelTitle, onClose]);
+    onGenerateWithChat?.(draftTemplate, draftEsqlQuery || undefined);
+  }, [onGenerateWithChat, draftTemplate, draftEsqlQuery]);
 
   const hasChanges = draftEsqlQuery !== (esqlQuery ?? '') || draftTemplate !== (template ?? '');
 
   const handleSave = useCallback(() => {
+    getTelemetry().trackPanelSaved({
+      isNewPanel: isNewPanel ?? false,
+      hasTemplate: Boolean(draftTemplate),
+      hasEsqlQuery: Boolean(draftEsqlQuery),
+      templateSizeBytes: draftTemplate.length,
+    });
     onSave(draftEsqlQuery || undefined, draftTemplate || undefined);
-    onClose();
-  }, [draftEsqlQuery, draftTemplate, onSave, onClose]);
+  }, [draftEsqlQuery, draftTemplate, isNewPanel, onSave]);
+
+  const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT);
+  const [maxEditorHeight, setMaxEditorHeight] = useState<number | undefined>(undefined);
+  const editorHeightRef = useRef(EDITOR_DEFAULT_HEIGHT);
+
+  const onEsqlSectionResize = useCallback(({ height }: { width: number; height: number }) => {
+    setMaxEditorHeight(
+      Math.max(EDITOR_DEFAULT_HEIGHT, window.innerHeight - FLYOUT_FIXED_CHROME_HEIGHT - height)
+    );
+  }, []);
+
+  const onEditorContainerResize = useCallback(({ height }: { width: number; height: number }) => {
+    if (height !== editorHeightRef.current) {
+      editorHeightRef.current = height;
+      setEditorHeight(height);
+    }
+  }, []);
 
   const editorContainerCss = css({
     position: 'relative',
+    resize: 'vertical',
+    minHeight: EDITOR_DEFAULT_HEIGHT,
+    height: EDITOR_DEFAULT_HEIGHT,
+    ...(maxEditorHeight !== undefined && { maxHeight: maxEditorHeight }),
     border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
     borderRadius: euiTheme.border.radius.medium,
     overflow: 'hidden',
@@ -128,24 +148,16 @@ export const EditCustomContentFlyout = ({
     position: 'absolute',
     top: euiTheme.size.xs,
     right: euiTheme.size.m,
-    zIndex: 1,
+    zIndex: euiTheme.levels.content,
   });
 
   return (
-    <EuiFlyout
-      type="push"
-      size={600}
-      resizable
-      minWidth={320}
-      paddingSize="m"
-      onClose={onClose}
-      aria-labelledby="edit-custom-panel-flyout-title"
-    >
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id="edit-custom-panel-flyout-title">
+              <h2 id={ariaLabelledBy ?? 'edit-custom-panel-flyout-title'}>
                 {isNewPanel
                   ? i18n.translate('xpack.customContent.editFlyout.createTitle', {
                       defaultMessage: 'Create custom panel',
@@ -201,9 +213,13 @@ export const EditCustomContentFlyout = ({
           {isAiAvailable && (
             <EuiFlexItem grow={false}>
               <AiButton size="s" iconType="sparkles" onClick={handleGenerateWithChat}>
-                {i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
-                  defaultMessage: 'Refine with chat',
-                })}
+                {draftTemplate
+                  ? i18n.translate('xpack.customContent.editFlyout.refineWithChatButton', {
+                      defaultMessage: 'Refine with chat',
+                    })
+                  : i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
+                      defaultMessage: 'Generate with chat',
+                    })}
               </AiButton>
             </EuiFlexItem>
           )}
@@ -214,59 +230,81 @@ export const EditCustomContentFlyout = ({
         <EuiFormRow
           fullWidth
           helpText={i18n.translate('xpack.customContent.editFlyout.templateHelpText', {
-            defaultMessage: 'The HTML template uses Liquid syntax filled with live query data.',
+            defaultMessage:
+              'Liquid template filled with ES|QL results. Each column is an object — use row["col"].value for the raw value and row["col"].pct for its share of the column maximum (0–100, useful for bar widths).',
           })}
         >
-          <div css={editorContainerCss}>
-            <CodeEditor
-              languageId="liquid"
-              value={draftTemplate}
-              onChange={setDraftTemplate}
-              height={240}
-              options={{
-                fontSize: 12,
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                lineNumbers: 'on',
-                folding: true,
-              }}
-            />
-            <EuiToolTip
-              content={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
-                defaultMessage: 'Copy template',
-              })}
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                css={copyButtonCss}
-                iconType="copy"
-                aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
-                  defaultMessage: 'Copy template',
-                })}
-                onClick={() => navigator.clipboard?.writeText(draftTemplate)}
-              />
-            </EuiToolTip>
-          </div>
+          <EuiResizeObserver onResize={onEditorContainerResize}>
+            {(editorResizeRef) => (
+              <div ref={editorResizeRef} css={editorContainerCss}>
+                <CodeEditor
+                  languageId="liquid"
+                  value={draftTemplate}
+                  onChange={setDraftTemplate}
+                  height={editorHeight}
+                  placeholder={
+                    isAiAvailable
+                      ? i18n.translate('xpack.customContent.editFlyout.templatePlaceholderAi', {
+                          defaultMessage:
+                            '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
+                        })
+                      : i18n.translate('xpack.customContent.editFlyout.templatePlaceholderNoAi', {
+                          defaultMessage: '<!-- Write your HTML, CSS, and Liquid here. -->',
+                        })
+                  }
+                  options={{
+                    fontSize: 12,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    lineNumbers: 'on',
+                    folding: true,
+                  }}
+                />
+                <EuiToolTip
+                  content={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
+                    defaultMessage: 'Copy template',
+                  })}
+                  disableScreenReaderOutput
+                  anchorProps={{ css: copyButtonCss }}
+                >
+                  <EuiButtonIcon
+                    iconType="copy"
+                    aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
+                      defaultMessage: 'Copy template',
+                    })}
+                    onClick={() => navigator.clipboard?.writeText(draftTemplate)}
+                    data-test-subj="customContentCopyTemplateButton"
+                  />
+                </EuiToolTip>
+              </div>
+            )}
+          </EuiResizeObserver>
         </EuiFormRow>
 
         <EuiSpacer size="m" />
 
         {/* ES|QL accordion */}
-        <EsqlPreviewSection
-          esqlQuery={draftEsqlQuery}
-          onEsqlQueryChange={setDraftEsqlQuery}
-          isDataLoading={isDataLoading}
-          esqlData={esqlData}
-          esqlDataError={esqlDataError}
-          onFetchData={handleFetchData}
-        />
+        <EuiResizeObserver onResize={onEsqlSectionResize}>
+          {(resizeRef) => (
+            <div ref={resizeRef}>
+              <EsqlPreviewSection
+                esqlQuery={draftEsqlQuery}
+                onEsqlQueryChange={setDraftEsqlQuery}
+                isDataLoading={isDataLoading}
+                esqlData={esqlData}
+                esqlDataError={esqlDataError}
+                onFetchData={handleFetchData}
+              />
+            </div>
+          )}
+        </EuiResizeObserver>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
+            <EuiButtonEmpty onClick={onClose} data-test-subj="customContentCancelButton">
               {i18n.translate('xpack.customContent.editFlyout.cancelButton', {
                 defaultMessage: 'Cancel',
               })}
@@ -279,16 +317,22 @@ export const EditCustomContentFlyout = ({
                   color="success"
                   iconType="play"
                   isLoading={isRenderLoading}
-                  disabled={!hasChanges || hasPreviewedCurrentDraft}
+                  disabled={!draftTemplate.trim()}
                   onClick={handleRender}
+                  data-test-subj="customContentRunPreviewButton"
                 >
                   {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
-                    defaultMessage: 'Run Preview',
+                    defaultMessage: 'Run preview',
                   })}
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={handleSave} disabled={!hasChanges}>
+                <EuiButton
+                  fill
+                  onClick={handleSave}
+                  disabled={!hasChanges}
+                  data-test-subj="customContentApplyButton"
+                >
                   {i18n.translate('xpack.customContent.editFlyout.applyButton', {
                     defaultMessage: 'Apply and close',
                   })}
@@ -298,6 +342,6 @@ export const EditCustomContentFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

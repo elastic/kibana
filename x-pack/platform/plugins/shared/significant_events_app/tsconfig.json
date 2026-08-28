@@ -23,7 +23,13 @@
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/cps",
+    "@kbn/cps-utils",
     "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/es-types",
+    "@kbn/esql-datagrid",
+    "@kbn/esql-utils",
+    "@kbn/expressions-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-management",
     "@kbn/deeplinks-observability",
@@ -55,6 +61,7 @@
     "@kbn/streams-schema",
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/ui-callout"
   ]
 }

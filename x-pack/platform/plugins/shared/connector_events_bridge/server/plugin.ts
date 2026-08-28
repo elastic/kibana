@@ -6,9 +6,14 @@
  */
 
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
-export type ConnectorEventsBridgeSetupDeps = Record<string, never>;
+import { registerWorkflowsConnectorEventEmitter } from './register_workflows_connector_event_emitter';
+
+export interface ConnectorEventsBridgeSetupDeps {
+  actions: ActionsPluginSetupContract;
+}
 
 export interface ConnectorEventsBridgeStartDeps {
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
@@ -23,8 +28,25 @@ export class ConnectorEventsBridgePlugin
     this.logger = initializerContext.logger.get();
   }
 
-  setup(_core: CoreSetup<ConnectorEventsBridgeStartDeps>, _deps: ConnectorEventsBridgeSetupDeps) {
-    this.logger.debug('connectorEventsBridge loaded');
+  setup(
+    core: CoreSetup<ConnectorEventsBridgeStartDeps>,
+    { actions }: ConnectorEventsBridgeSetupDeps
+  ) {
+    const configUtils = actions.getActionsConfigurationUtilities();
+    if (!configUtils.isInboundEventsEnabled()) {
+      return {};
+    }
+
+    this.logger.info('Inbound events enabled; registering connector event emitter');
+    registerWorkflowsConnectorEventEmitter({
+      actions,
+      getWorkflowsExtensionsStart: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.workflowsExtensions;
+      },
+      logger: this.logger.get('workflowsEmitter'),
+    });
+
     return {};
   }
 

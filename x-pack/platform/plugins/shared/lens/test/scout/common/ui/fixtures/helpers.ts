@@ -21,9 +21,9 @@ import {
   FORMULA_ESCAPED_RUNTIME_FIELD,
   KBN_ARCHIVE_PATHS,
   LOGSTASH_IN_RANGE_DATES,
-} from './constants';
+} from '../../fixtures/constants';
 
-type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
+export type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
 /**
  * Creates an ad hoc (temporary) data view from the Lens data panel switcher.
  * Equivalent to FTR `dataViews.createFromSearchBar({ name, adHoc: true })` in the Lens context.

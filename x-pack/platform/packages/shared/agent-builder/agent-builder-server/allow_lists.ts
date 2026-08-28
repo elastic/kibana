@@ -12,6 +12,8 @@ import {
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import type { SkillDefinition } from './skills/type_definition';
+import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -84,6 +86,12 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_readiness.get_quality`,
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
   `${internalNamespaces.security}.siem_readiness.get_retention`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.start_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.get_all_rule_migration_stats`,
+  `${internalNamespaces.security}.siem_migration.get_migration_rules`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration_stats`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration_translation_stats`,
   `${internalNamespaces.security}.alert-triage`,
 
   // Streams
@@ -98,6 +106,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Custom content panels
   'custom_content_update_panel',
+
+  // Platform – Context Engine
+  `${internalNamespaces.platformContextEngine}.save_automation`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -214,6 +225,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'endpoint-forensic-analysis',
   'investigate-rule',
   'siem-readiness',
+  'automatic-migration-rules-start-migration',
+  'automatic-migration-rules-summarize',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
@@ -242,6 +255,12 @@ export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[num
 
 export const isAllowedBuiltinSkill = (skillId: string): skillId is AgentBuilderBuiltinSkill => {
   return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
+};
+
+export const isAllowedSkillRegistration = (
+  skill: Pick<SkillDefinition, 'id' | 'basePath'>
+): boolean => {
+  return isAllowedBuiltinSkill(skill.id) || skill.basePath === ELASTIC_SKILLS_BASE_PATH;
 };
 
 /**
@@ -287,6 +306,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Platform – Workflows
   'workflow.yaml',
   'workflow.yaml.diff',
+
+  // Platform – Context Engine
+  'platform.context_engine.ai_index',
 
   // Platform – Cases
   'case',

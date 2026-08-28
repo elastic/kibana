@@ -13,6 +13,7 @@ import {
   CONNECTORS_APP_PATH,
   CONNECTORS_LIST_SELECTORS,
   closeFlyoutIfOpen,
+  searchConnectors,
 } from '../fixtures';
 
 const TINES_CONFIG = {
@@ -112,10 +113,12 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
   const createdConnectorIds: string[] = [];
   // Connector shared across the test-page tests (created once in beforeAll).
   let testPageConnectorId: string;
+  let testPageConnectorName: string;
 
   test.beforeAll(async ({ apiServices }) => {
+    testPageConnectorName = `scout-tines-test-page-${Date.now()}`;
     const created = await apiServices.alerting.connectors.create({
-      name: `scout-tines-test-page-${Date.now()}`,
+      name: testPageConnectorName,
       connectorTypeId: '.tines',
       config: { url: TINES_CONFIG.url },
       secrets: { email: TINES_CONFIG.email, token: TINES_CONFIG.token },
@@ -302,6 +305,7 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
 
     const reopenTestTab = async () => {
       await closeFlyoutIfOpen(page);
+      await searchConnectors(page, testPageConnectorName);
       await page.testSubj.click(`edit${testPageConnectorId}`);
       await page.testSubj.click('testConnectorTab');
     };

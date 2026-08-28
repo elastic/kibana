@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { EpisodeScan, PolicyCatalog, RuleCatalog } from '../state';
+import { DEFAULT_GROUPING_MODE } from '../constants';
+import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
+  ActionGroup,
   ActionPolicy,
+  ActionPolicyId,
   AlertEpisode,
   AlertEpisodeSuppression,
   DispatchFailure,
@@ -15,28 +22,53 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  ActionGroup,
   Rule,
+  RuleId,
 } from '../types';
-import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
+
+export function createStepLogger(): LoggerServiceContract {
+  return createLoggerService().loggerService;
+}
 
 export function createDispatcherPipelineInput(
   overrides: Partial<DispatcherPipelineInput> = {}
 ): DispatcherPipelineInput {
+  // Default window: eventWatermark=07:30, windowStart=07:20 (−10min overlap),
+  // windowEnd=07:35 (windowStart+15min), consistent with OVERLAP/MAX constants.
   return {
     startedAt: new Date('2026-01-22T08:00:00.000Z'),
-    previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+    eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
+    windowStart: new Date('2026-01-22T07:20:00.000Z'),
+    windowEnd: new Date('2026-01-22T07:35:00.000Z'),
     executionUuid: '00000000-0000-4000-8000-000000000000',
+    signal: new AbortController().signal,
     ...overrides,
   };
 }
 
+/**
+ * Flat overrides for building a pipeline state: value-object fields are given
+ * through their raw source data (`episodes`, `rules`, `policies`) and folded
+ * into the value objects here.
+ */
+export interface DispatcherPipelineStateOverrides
+  extends Omit<Partial<DispatcherPipelineState>, 'input' | 'scan' | 'rules' | 'policies'> {
+  input?: DispatcherPipelineInput;
+  episodes?: AlertEpisode[];
+  rules?: Map<RuleId, Rule>;
+  policies?: Map<ActionPolicyId, ActionPolicy>;
+}
+
 export function createDispatcherPipelineState(
-  state?: Partial<DispatcherPipelineState>
+  state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
+  const { episodes, rules, policies, input, ...rest } = state;
   return {
-    input: createDispatcherPipelineInput(),
-    ...state,
+    ...rest,
+    ...(episodes ? { scan: EpisodeScan.of({ episodes }) } : {}),
+    ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
+    ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
+    input: input ?? createDispatcherPipelineInput(),
   };
 }
 
@@ -86,6 +118,7 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
     tags: [],
+    groupingMode: DEFAULT_GROUPING_MODE,
     ...overrides,
   };
 }
@@ -137,10 +170,13 @@ export function createDispatchFailure(overrides: Partial<DispatchFailure> = {}):
 
 export function createMockDispatcherStep(
   name: string,
-  executeFn: (state: Readonly<DispatcherPipelineState>) => Promise<DispatcherStepOutput>
+  executeFn: (
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ) => Promise<DispatcherStepOutput>
 ): DispatcherStep {
   return {
     name,
-    execute: jest.fn(executeFn),
+    execute: jest.fn((state, logger) => executeFn(state, logger)),
   };
 }

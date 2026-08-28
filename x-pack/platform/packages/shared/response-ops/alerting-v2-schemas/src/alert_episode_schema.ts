@@ -36,12 +36,12 @@ export const alertEpisodeSchema = z
     last_timestamp: z.iso.datetime(),
     duration: z.number(),
     /** ISO timestamp of the first event where episode.status === 'active'. */
-    triggered_at: z.iso.datetime().optional(),
-    last_ack_action: z.enum(['ack', 'unack']).optional(),
+    triggered_at: z.iso.datetime().nullable().optional(),
+    last_ack_action: z.enum(['ack', 'unack']).nullable().optional(),
     last_assignee_uid: z.string().min(1).max(ID_MAX_LENGTH).nullable().optional(),
-    last_snooze_action: z.enum(['snooze', 'unsnooze']).optional(),
-    snooze_expiry: z.iso.datetime().optional(),
-    last_tags: tagsSchema.optional(),
+    last_snooze_action: z.enum(['snooze', 'unsnooze']).nullable().optional(),
+    snooze_expiry: z.iso.datetime().nullable().optional(),
+    last_tags: tagsSchema.nullable().optional(),
     /** JSON string from the latest non-empty alert `data`. */
     episode_data: z.string().nullable().optional(),
     /** Latest top-level `severity` from a breached rule event, when present. */
