@@ -10,6 +10,7 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   actionPolicySavedObjectAttributesSchemaV1,
   actionPolicySavedObjectAttributesSchemaV2,
+  actionPolicySavedObjectAttributesSchemaV3,
 } from '../schemas/action_policy_saved_object_attributes';
 import type { ActionPolicySavedObjectAttributesV1 } from '../schemas/action_policy_saved_object_attributes';
 
@@ -91,6 +92,31 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
         { unknowns: 'ignore' }
       ),
       create: actionPolicySavedObjectAttributesSchemaV2,
+    },
+  },
+  /**
+   * v3 migrates `matcher` from a raw KQL string to a structured object
+   * `{ tags, rules, statuses, expression }`. Existing string matchers are
+   * wrapped in `{ expression: oldMatcher }` so they continue to evaluate
+   * identically via `PolicyMatcher.toKql()`.
+   */
+  '3': {
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const matcher = (doc.attributes as { matcher?: unknown }).matcher;
+          if (!matcher || typeof matcher !== 'string') return { attributes: {} };
+          return { attributes: { matcher: { expression: matcher } } };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV3.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV3,
     },
   },
 };
