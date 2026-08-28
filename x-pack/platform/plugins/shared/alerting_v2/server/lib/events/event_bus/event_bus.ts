@@ -87,7 +87,11 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
     name: ASYNC_RESOURCE_NAME,
   });
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    this.logger = loggerService.forSubsystem('events');
+
     // Per Node's docs, emitting `'error'` with no listener crashes the
     // process. We register a permanent defensive listener so the bus is
     // safe regardless of what is published or what `captureRejections`
@@ -100,8 +104,7 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
   public publish<E extends TEvent>(event: E, ...rest: EventBusContextRest<TContext>): void {
     if (!event || typeof event.type !== 'string') {
       this.logger.debug({
-        message: () =>
-          `[alerting_v2.EventBus] Refused to publish event without a string \`type\` discriminator.`,
+        message: () => 'Refused to publish event without a string type discriminator',
       });
 
       return;
@@ -109,9 +112,7 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
 
     if (RESERVED_EVENT_TYPES.has(event.type)) {
       this.logger.warn({
-        message: () =>
-          `[alerting_v2.EventBus] Refused to publish event with reserved \`type\` "${event.type}". ` +
-          `These names are reserved by Node's EventEmitter.`,
+        message: () => 'Refused to publish event with reserved type',
         code: ALERTING_LOG_CODES.EVENTS_BUS_PUBLISH_SKIPPED,
         labels: { event_type: event.type },
       });
@@ -128,7 +129,7 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
       this.#emitter.emit(event.type, event);
     }
     this.logger.debug({
-      message: () => `[alerting_v2.EventBus] Emitted ${event.type}`,
+      message: () => 'Published domain event',
       labels: { event_type: event.type },
     });
   }
