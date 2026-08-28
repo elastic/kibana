@@ -11,7 +11,6 @@ import type { CaseWorkflowRunOrigin, DocumentResponse } from '../../../common/ty
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
-  CASE_WORKFLOW_ORIGIN_TYPE,
   MAX_ALERTS_PER_CASE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
@@ -21,7 +20,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> => isPlainOb
 const getRecord = (value: unknown): Record<string, unknown> | undefined =>
   isRecord(value) ? value : undefined;
 
-export interface AlertPair {
+interface AlertPair {
   _id: string;
   _index: string;
 }
@@ -96,24 +95,17 @@ export const validateOrigin = ({
   theCase: Case;
   attachedAlerts: DocumentResponse;
 }): void => {
-  // Step 1 — origin-entity membership checks
-  if (origin.type === CASE_WORKFLOW_ORIGIN_TYPE || origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE) {
-    if (origin.caseId !== caseId) {
-      throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
-    }
-  } else if (origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE) {
-    if (origin.caseId !== caseId) {
-      throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
-    }
-    if (!theCase.observables.some(({ id }) => id === origin.observableId)) {
-      throw Boom.badRequest(
-        `Observable "${origin.observableId}" does not belong to case "${caseId}".`
-      );
-    }
-  } else if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE) {
-    if (origin.caseId !== caseId) {
-      throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
-    }
+  // Step 1 — origin-entity membership checks.
+  if (origin.caseId !== caseId) {
+    throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
+  }
+  if (
+    origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE &&
+    !theCase.observables.some(({ id }) => id === origin.observableId)
+  ) {
+    throw Boom.badRequest(
+      `Observable "${origin.observableId}" does not belong to case "${caseId}".`
+    );
   }
 
   // Step 2 — alert-membership check: applied whenever alertIds appear in inputs,

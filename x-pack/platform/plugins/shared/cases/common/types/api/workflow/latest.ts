@@ -5,16 +5,4 @@
  * 2.0.
  */
 
-export type {
-  CasesWorkflowExecutionMetadata,
-  CaseWorkflowRunOrigin,
-  RunCaseWorkflowRequest,
-  RunCaseWorkflowResponse,
-} from './v1';
-
-export {
-  CaseWorkflowRunOriginSchema,
-  CasesWorkflowExecutionMetadataSchema,
-  RunCaseWorkflowRequestSchema,
-  RunCaseWorkflowResponseSchema,
-} from './v1';
+export * from './v1';

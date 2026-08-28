@@ -88,10 +88,9 @@ describe('CasesWorkflowRunService', () => {
       valid: true,
       enabled: true,
     } as Awaited<ReturnType<typeof management.getWorkflow>>);
-    management.runWorkflowWithAlertPreprocessing.mockImplementation(async ({ inputs }) => ({
+    management.runWorkflowWithAlertPreprocessing.mockResolvedValue({
       workflowExecutionId: 'execution-1',
-      inputs,
-    }));
+    });
   });
 
   it('starts the workflow with server-owned metadata', async () => {
@@ -151,7 +150,6 @@ describe('CasesWorkflowRunService', () => {
     );
     management.runWorkflowWithAlertPreprocessing.mockResolvedValue({
       workflowExecutionId: 'execution-1',
-      inputs: { event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] } },
     });
 
     await expect(run(body)).resolves.toEqual({ workflowExecutionId: 'execution-1' });

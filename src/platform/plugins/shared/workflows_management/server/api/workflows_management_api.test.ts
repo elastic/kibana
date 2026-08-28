@@ -732,7 +732,6 @@ steps:
         })
       ).resolves.toEqual({
         workflowExecutionId: 'test-exec-id',
-        inputs: processedInputs,
       });
 
       expect(mockPreprocessAlertInputs).toHaveBeenCalledWith(inputs, context, 'default', logger);
@@ -786,12 +785,8 @@ steps:
         eventOverrides,
       });
 
-      // finalInputs should have the merged event (processedInputs.event + eventOverrides).
-      expect(result.inputs).toEqual({
-        event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }], caseIds: ['case-1'] },
-      });
-
-      // The engine receives the merged event, not the bare preprocessed one.
+      // The engine receives the merged event (processedInputs.event + eventOverrides),
+      // not the bare preprocessed one — caseIds must survive the event replacement.
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         workflow,
         expect.objectContaining({
@@ -799,6 +794,7 @@ steps:
         }),
         mockRequest
       );
+      expect(result).toEqual({ workflowExecutionId: 'test-exec-id' });
     });
   });
 

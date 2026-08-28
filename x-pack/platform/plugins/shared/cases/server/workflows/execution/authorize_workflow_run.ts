@@ -24,7 +24,7 @@ import type { CasesService } from '../../services/cases';
  * to emit `case_workflow_run_authz` (an access event) rather than the misleading `case_update`
  * (a change event) that `Operations.updateCase` produces.
  */
-export const WORKFLOW_RUN_AUTHZ_OPERATION: OperationDetails = {
+const WORKFLOW_RUN_AUTHZ_OPERATION: OperationDetails = {
   ecsType: 'access',
   name: WriteOperations.UpdateCase,
   action: 'case_workflow_run_authz',
@@ -65,21 +65,23 @@ export const ensureAuthorizedToRunWorkflow = async (
   try {
     const { saved_objects: cases } = await caseService.getCases({ caseIds: ids });
 
-    const entities = cases
-      .filter((c) => !isSOError(c))
-      .map((c) => ({
-        id: c.id,
-        owner: (c as Exclude<typeof c, { error: unknown }>).attributes.owner,
-      }));
-
-    // If *any* id failed to load, treat the whole batch as unauthorized. Surfacing a 404 for
-    // the missing id — even after a successful authorize call on the others — would let an
+    // Single pass: collect authorized entities and detect any SO error (not-found, etc.).
+    // Any error in the batch → 403 for the whole request. Surfacing a 404 would let an
     // unprivileged caller enumerate which case ids exist across owners they cannot read.
-    const hasMissingCases = cases.some(isSOError);
+    const entities: Array<{ id: string; owner: string }> = [];
+    let hasMissingCases = false;
+    for (const c of cases) {
+      if (isSOError(c)) {
+        hasMissingCases = true;
+      } else {
+        entities.push({ id: c.id, owner: c.attributes.owner });
+      }
+    }
+
+    // entities.length === 0 is defence-in-depth for non-route callers; the route already
+    // enforces minSize: 1 on caseIds, so this branch is unreachable from the route.
+    // ensureAuthorized({ entities: [] }) would pass vacuously — reject explicitly instead.
     if (entities.length === 0 || hasMissingCases) {
-      // ensureAuthorized({ entities: [] }) passes vacuously because it derives an empty
-      // privilege set from zero owners. Reject explicitly so an unauthorized caller never
-      // receives anything other than 403.
       throw Boom.forbidden('Unauthorized to run workflow on case');
     }
 

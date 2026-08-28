@@ -37,7 +37,6 @@ export * as customFieldsApiV1 from './custom_field/v1';
 export * as observableApiV1 from './observable/v1';
 export * as templateApiV1 from './template/v1';
 export * as fieldDefinitionApiV1 from './field_definition/v1';
-export * as workflowApiV1 from './workflow/v1';
 
 // V2
 export * as attachmentApiV2 from './attachment/v2';

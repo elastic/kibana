@@ -9,8 +9,9 @@ import {
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   CASES_WORKFLOW_EXECUTION_SOURCE,
   MAX_CASES_PER_WORKFLOW_RUN,
+  MAX_WORKFLOW_INPUTS_BYTES,
 } from '../../../constants';
-import { CasesWorkflowExecutionMetadataSchema } from './v1';
+import { CasesWorkflowExecutionMetadataSchema, RunCaseWorkflowRequestSchema } from './v1';
 
 const validMetadata = {
   schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
@@ -82,6 +83,137 @@ describe('CasesWorkflowExecutionMetadataSchema', () => {
   it('rejects unknown fields', () => {
     expect(
       CasesWorkflowExecutionMetadataSchema.safeParse({ ...validMetadata, product: 'cases' }).success
+    ).toBe(false);
+  });
+});
+
+describe('RunCaseWorkflowRequestSchema', () => {
+  const validBody = {
+    caseIds: ['case-1'],
+    inputs: {},
+    origin: { type: 'cases.case' as const, caseId: 'case-1' },
+  };
+
+  it('accepts a valid single-case body', () => {
+    expect(RunCaseWorkflowRequestSchema.safeParse(validBody).success).toBe(true);
+  });
+
+  it('accepts a body with no origin (list-surface / bulk run)', () => {
+    const { origin: _omitted, ...bodyWithoutOrigin } = validBody;
+    expect(RunCaseWorkflowRequestSchema.safeParse(bodyWithoutOrigin).success).toBe(true);
+  });
+
+  it('accepts a body with no origin and multiple caseIds', () => {
+    const { origin: _omitted, ...bodyWithoutOrigin } = validBody;
+    expect(
+      RunCaseWorkflowRequestSchema.safeParse({
+        ...bodyWithoutOrigin,
+        caseIds: ['case-1', 'case-2', 'case-3'],
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts a cases.observable origin', () => {
+    expect(
+      RunCaseWorkflowRequestSchema.safeParse({
+        ...validBody,
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-1' },
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts a cases.alert origin', () => {
+    expect(
+      RunCaseWorkflowRequestSchema.safeParse({
+        ...validBody,
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts a cases.alerts origin', () => {
+    expect(
+      RunCaseWorkflowRequestSchema.safeParse({
+        ...validBody,
+        origin: { type: 'cases.alerts', caseId: 'case-1' },
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects unknown keys on cases.case (strict per-variant)', () => {
+    expect(
+      RunCaseWorkflowRequestSchema.safeParse({
+        ...validBody,
+        origin: { type: 'cases.case', caseId: 'case-1', extraField: 'x' },
+      }).success
+    ).toBe(false);
+  });
+
+  it(`accepts exactly ${MAX_CASES_PER_WORKFLOW_RUN} case ids (the cap)`, () => {
+    const ids = Array.from({ length: MAX_CASES_PER_WORKFLOW_RUN }, (_, i) => `case-${i}`);
+    expect(RunCaseWorkflowRequestSchema.safeParse({ ...validBody, caseIds: ids }).success).toBe(
+      true
+    );
+  });
+
+  it('rejects an empty caseIds array', () => {
+    expect(RunCaseWorkflowRequestSchema.safeParse({ ...validBody, caseIds: [] }).success).toBe(
+      false
+    );
+  });
+
+  it(`rejects more than ${MAX_CASES_PER_WORKFLOW_RUN} case ids`, () => {
+    const ids = Array.from({ length: MAX_CASES_PER_WORKFLOW_RUN + 1 }, (_, i) => `case-${i}`);
+    expect(RunCaseWorkflowRequestSchema.safeParse({ ...validBody, caseIds: ids }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects duplicate case ids', () => {
+    const result = RunCaseWorkflowRequestSchema.safeParse({
+      ...validBody,
+      caseIds: ['case-1', 'case-1'],
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('caseIds must not contain duplicates.');
+    }
+  });
+
+  it('rejects a case id that exceeds the maximum length', () => {
+    expect(
+      RunCaseWorkflowRequestSchema.safeParse({ ...validBody, caseIds: ['a'.repeat(1025)] }).success
+    ).toBe(false);
+  });
+
+  it('rejects oversized workflow inputs', () => {
+    const result = RunCaseWorkflowRequestSchema.safeParse({
+      ...validBody,
+      inputs: { value: 'a'.repeat(MAX_WORKFLOW_INPUTS_BYTES + 1) },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe(
+        `Workflow inputs cannot exceed ${MAX_WORKFLOW_INPUTS_BYTES} bytes.`
+      );
+    }
+  });
+
+  it('rejects unknown origin types', () => {
+    expect(
+      RunCaseWorkflowRequestSchema.safeParse({
+        ...validBody,
+        origin: { type: 'cases.bogus', id: 'x' },
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects unknown top-level body keys', () => {
+    expect(
+      RunCaseWorkflowRequestSchema.safeParse({
+        ...validBody,
+        unexpectedKey: true,
+      }).success
     ).toBe(false);
   });
 });

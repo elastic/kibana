@@ -206,7 +206,6 @@ export interface RunWorkflowWithAlertPreprocessingParams {
   inputs: Record<string, unknown>;
   request: KibanaRequest;
   preprocessingContext: AlertPreprocessingContext;
-  triggeredBy?: string;
   metadata?: Record<string, unknown>;
   /**
    * Fields to merge into `event` *after* alert preprocessing. Use this to inject
@@ -219,7 +218,6 @@ export interface RunWorkflowWithAlertPreprocessingParams {
 
 export interface RunWorkflowWithAlertPreprocessingResult {
   workflowExecutionId: string;
-  inputs: Record<string, unknown>;
 }
 
 const DEFAULT_EXECUTE_WORKFLOW_COMPLETION_TIMEOUT_SEC = 120;
@@ -533,7 +531,6 @@ export class WorkflowsManagementApi {
     inputs,
     request,
     preprocessingContext,
-    triggeredBy,
     metadata,
     eventOverrides,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
@@ -564,11 +561,11 @@ export class WorkflowsManagementApi {
       spaceId,
       finalInputs,
       request,
-      triggeredBy,
+      undefined,
       metadata
     );
 
-    return { workflowExecutionId, inputs: finalInputs };
+    return { workflowExecutionId };
   }
 
   public async executeWorkflow(params: ExecuteWorkflowParams): Promise<ExecuteWorkflowResult> {
