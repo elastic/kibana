@@ -9,7 +9,6 @@ export { registerInstall } from './install';
 export { registerStop } from './stop';
 export { registerStatus } from './status';
 export { registerForceLogExtraction } from './force_log_extraction';
-export { registerForceRemoteExtractToUpdates } from './force_remote_extract_to_updates';
 export { registerForceHistorySnapshot } from './force_history_snapshot';
 export { registerUninstall } from './uninstall';
 export { registerCRUDCreate } from './crud/create';
