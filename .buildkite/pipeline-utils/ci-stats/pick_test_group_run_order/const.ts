@@ -72,7 +72,7 @@ export const CI_STATS_DEFAULTS = {
     defaultMin: 4,
     overheadMin: 0.2,
     warmupMin: 4,
-    concurrency: 3,
+    concurrency: 7,
   },
   JEST_INTEGRATION: {
     defaultMin: 15,
