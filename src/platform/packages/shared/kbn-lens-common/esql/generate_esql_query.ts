@@ -1,35 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { esql } from '@elastic/esql';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/public';
+import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/common';
 import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 import moment from 'moment';
 import { partition } from 'lodash';
+import { calculateAuto } from '@kbn/calculate-auto';
+import type { DateRange, IndexPattern, OriginalColumn } from '../types';
 import type {
   DateHistogramIndexPatternColumn,
-  DateRange,
-  FormBasedLayer,
-  IndexPattern,
-  GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,
-} from '@kbn/lens-common';
-import { calculateAuto } from '@kbn/calculate-auto';
-import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '@kbn/lens-common';
-import { isColumnOfType, isColumnFormatted } from './operations/definitions/helpers';
-import { convertToAbsoluteDateRange } from '../../utils';
-import type { OriginalColumn } from '../../../common/types';
-import { operationDefinitionMap } from './operations';
-import { resolveTimeShift } from './time_shift_utils';
+} from '../datasources/operations';
+import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
+import { isColumnFormatted, isColumnOfType } from '../datasources/form_based/helpers';
+import { AUTO_TARGET_NUMBER_OF_BUCKETS, DEFAULT_STATIC_VALUE } from './constants';
+import { convertToAbsoluteDateRange } from './date_range';
+import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
-import { defaultValue as defaultStaticValue } from './operations/definitions/static_value';
-import { AUTO_INTERVAL, getTimeZoneAndInterval, hasDateRange } from './date_histogram_esql';
+import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
+import {
+  AUTO_INTERVAL,
+  getTimeZoneAndInterval,
+  hasDateRange,
+} from './operations/date_histogram_helpers';
+import type { UiSettingsReader } from './operations/types';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -109,7 +111,7 @@ export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
-  uiSettings: IUiSettingsClient,
+  uiSettings: UiSettingsReader,
   dateRange: DateRange,
   nowInstant: Date,
   columnRoles?: ColumnRoles
@@ -142,7 +144,7 @@ export function generateEsqlQuery(
     );
   }
 
-  const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
+  const histogramBarsTarget = uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
   const absDateRange = convertToAbsoluteDateRange(dateRange, nowInstant);
 
   const hasDateHistogram = esAggEntries.some(([, col]) => col.operationType === 'date_histogram');
@@ -164,7 +166,7 @@ export function generateEsqlQuery(
   const staticValueEvals: string[] = [];
   staticValueEntries.forEach(([colId, col], index) => {
     const staticCol = col as StaticValueIndexPatternColumn;
-    const value = staticCol.params?.value ?? `${defaultStaticValue}`;
+    const value = staticCol.params?.value ?? `${DEFAULT_STATIC_VALUE}`;
 
     // Generate a column name for the static value
     // Priority: 1) semantic role name from visualization, 2) 'static_value' for single, 3) 'static_value_N' for multiple
@@ -197,20 +199,20 @@ export function generateEsqlQuery(
 
   // Process metrics (excluding static_value which is handled above)
   const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col]) => {
-    const def = operationDefinitionMap[col.operationType];
-
     // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'formula') {
       return getEsqlQueryFailedResult('formula_not_supported');
     }
 
-    if (!def.toESQL) {
+    const toESQL = getToEsqlFn(col.operationType);
+    if (!toESQL) {
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
+    const meta = getEsqlOperationMeta(col.operationType);
 
-    const wrapInFilter = Boolean(def.filterable && col.filter?.query);
+    const wrapInFilter = Boolean(meta.filterable && col.filter?.query);
     const wrapInTimeFilter =
-      def.canReduceTimeRange &&
+      meta.canReduceTimeRange &&
       !hasDateHistogram &&
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
@@ -223,13 +225,7 @@ export function generateEsqlQuery(
       // 1. User-configured format in Lens (highest priority)
       (isColumnFormatted(col) ? col.params?.format : undefined) ??
       // 2. Operation-specific format
-      operationDefinitionMap[col.operationType].getSerializedFormat?.(
-        col,
-        col,
-        indexPattern,
-        uiSettings,
-        dateRange
-      ) ??
+      meta.getSerializedFormat?.(col, col, indexPattern, uiSettings, dateRange) ??
       // 3. Field's default format from data view
       ('sourceField' in col
         ? col.sourceField === '___records___'
@@ -237,7 +233,7 @@ export function generateEsqlQuery(
           : undefined
         : undefined);
 
-    const rawResult = def.toESQL(
+    const rawResult = toESQL(
       {
         ...col,
         timeShift: resolveTimeShift(
@@ -308,20 +304,20 @@ export function generateEsqlQuery(
   // Process buckets
   const resolvedBucketExprs = new Map<number, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
-    const def = operationDefinitionMap[col.operationType];
-
     // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'terms') {
       return getEsqlQueryFailedResult('terms_not_supported');
     }
 
-    if (!def.toESQL) {
+    const toESQL = getToEsqlFn(col.operationType);
+    if (!toESQL) {
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
+    const meta = getEsqlOperationMeta(col.operationType);
 
-    const wrapInFilter = Boolean(def.filterable && col.filter?.query);
+    const wrapInFilter = Boolean(meta.filterable && col.filter?.query);
     const wrapInTimeFilter =
-      def.canReduceTimeRange &&
+      meta.canReduceTimeRange &&
       !hasDateHistogram &&
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
@@ -364,7 +360,7 @@ export function generateEsqlQuery(
       }
     }
 
-    const rawResult = def.toESQL(
+    const rawResult = toESQL(
       {
         ...col,
         timeShift: resolveTimeShift(
@@ -392,13 +388,7 @@ export function generateEsqlQuery(
       // 1. User-configured format in Lens (highest priority)
       (isColumnFormatted(col) ? col.params?.format : undefined) ??
       // 2. Operation-specific format
-      operationDefinitionMap[col.operationType].getSerializedFormat?.(
-        col,
-        col,
-        indexPattern,
-        uiSettings,
-        dateRange
-      ) ??
+      meta.getSerializedFormat?.(col, col, indexPattern, uiSettings, dateRange) ??
       // 3. Field's default format from data view (buckets don't need fallback)
       undefined;
 
