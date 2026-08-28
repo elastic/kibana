@@ -137393,7 +137393,6 @@ components:
             parameters:
               oneOf:
                 - description: Dump the entire kernel memory.
-                  type: object
                   properties:
                     type:
                       enum:
@@ -137401,8 +137400,19 @@ components:
                       type: string
                   required:
                     - type
-                - description: Dump the entire memory of a process using the PID.
+                  title: kernel
                   type: object
+                - description: Dump the entire raw memory.
+                  properties:
+                    type:
+                      enum:
+                        - raw
+                      type: string
+                  required:
+                    - type
+                  title: raw
+                  type: object
+                - description: Dump the entire memory of a process using the PID.
                   properties:
                     pid:
                       type: number
@@ -137413,8 +137423,9 @@ components:
                   required:
                     - type
                     - pid
-                - description: Dump the entire memory of a process using the entity ID.
+                  title: Process PID
                   type: object
+                - description: Dump the entire memory of a process using the entity ID.
                   properties:
                     entity_id:
                       maxLength: 256
@@ -137427,6 +137438,8 @@ components:
                   required:
                     - type
                     - entity_id
+                  title: Process Entity ID
+                  type: object
           required:
             - parameters
     Security_Endpoint_Management_API_MetadataListResponse:
