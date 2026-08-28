@@ -8,7 +8,7 @@
  */
 
 import type { Reducer, RefObject } from 'react';
-import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
+import { useRef, useEffect, useLayoutEffect, useReducer, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -80,6 +80,18 @@ export function useExpressionRenderer(
   const hasHandledErrorRef = useRef(false);
   // will call done() in LayoutEffect when done with rendering custom error state
   const errorRenderHandlerRef = useRef<IInterpreterRenderHandlers | null>(null);
+
+  // Drop a stale render error as soon as the expression changes, before the first
+  // paint that would otherwise re-run a custom renderError (which may have side effects).
+  const [prevExpression, setPrevExpression] = useState(expression);
+  const expressionChanged = prevExpression !== expression;
+  if (expressionChanged) {
+    setPrevExpression(expression);
+    hasHandledErrorRef.current = false;
+    if (error) {
+      setState({ error: null });
+    }
+  }
 
   useEffect(() => {
     if (abortController?.signal)
@@ -190,7 +202,7 @@ export function useExpressionRenderer(
   }, [error, hasCustomErrorRenderer]);
 
   return {
-    error,
+    error: expressionChanged ? null : error,
     isEmpty,
     isLoading: isLoading || isDebounced,
   };

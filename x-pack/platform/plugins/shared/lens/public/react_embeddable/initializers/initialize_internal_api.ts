@@ -118,6 +118,7 @@ export function initializeInternalApi(
     resetAllMessages: () => {
       messages$.next([]);
       validationMessages$.next([]);
+      blockingError$.next(undefined);
     },
     updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
     setAsCreated: () => isNewlyCreated$.next(false),

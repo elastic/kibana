@@ -99,6 +99,30 @@ describe('useExpressionRenderer', () => {
     jest.useRealTimers();
   });
 
+  it('should drop a previous render error as soon as the expression changes', () => {
+    expressionLoaderSpy.mockClear();
+    const onRenderError = jest.fn();
+    hook.rerender({ onRenderError, expression: 'legendConfig layout=grid' });
+
+    expect(expressionLoaderSpy).toHaveBeenCalledTimes(1);
+
+    const [[, , loaderParams]] = expressionLoaderSpy.mock.calls;
+    act(() =>
+      loaderParams?.onRenderError?.(
+        document.createElement('div'),
+        new Error('Value grid is not among the allowed options'),
+        { done: jest.fn() } as unknown as IInterpreterRenderHandlers
+      )
+    );
+    expect(hook.result.current.error).toEqual(
+      new Error('Value grid is not among the allowed options')
+    );
+
+    hook.rerender({ onRenderError, expression: 'legendConfig layout=list' });
+
+    expect(hook.result.current.error).toBeNull();
+  });
+
   it('should handle rendering errors', () => {
     expressionLoaderSpy.mockClear();
     const onRenderError = jest.fn();

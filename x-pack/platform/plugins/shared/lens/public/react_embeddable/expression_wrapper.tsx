@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type {
+  ExpressionRenderError,
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
@@ -101,12 +102,14 @@ export function ExpressionWrapper({
           syncCursor={syncCursor}
           executionContext={executionContext}
           abortController={abortController}
-          renderError={(errorMessage, error) => {
-            const messages = getOriginalRequestErrorMessages(error || null);
-            addUserMessages(messages);
-            onRuntimeError(error?.original || new Error(errorMessage ? errorMessage : ''));
-            return <></>; // the embeddable will take care of displaying the messages
-          }}
+          renderError={(errorMessage, error) => (
+            <ReportRuntimeError
+              errorMessage={errorMessage}
+              error={error}
+              addUserMessages={addUserMessages}
+              onRuntimeError={onRuntimeError}
+            />
+          )}
           onEvent={handleEvent}
           hasCompatibleActions={hasCompatibleActions}
           getCompatibleCellValueActions={getCompatibleCellValueActions}
@@ -114,4 +117,24 @@ export function ExpressionWrapper({
       </div>
     </>
   );
+}
+
+function ReportRuntimeError({
+  errorMessage,
+  error,
+  addUserMessages,
+  onRuntimeError,
+}: {
+  errorMessage?: string | null;
+  error?: ExpressionRenderError | null;
+  addUserMessages: (messages: UserMessage[]) => void;
+  onRuntimeError: (error: Error) => void;
+}) {
+  useEffect(() => {
+    const messages = getOriginalRequestErrorMessages(error || null);
+    addUserMessages(messages);
+    onRuntimeError(error?.original || new Error(errorMessage ? errorMessage : ''));
+  }, [addUserMessages, error, errorMessage, onRuntimeError]);
+
+  return null;
 }

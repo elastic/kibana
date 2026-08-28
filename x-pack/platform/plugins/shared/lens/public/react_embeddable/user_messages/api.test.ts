@@ -108,6 +108,18 @@ describe('User Messages API', () => {
       userMessagesApi.resetMessages();
       expect(userMessagesApi.getUserMessages('embeddableBadge').length).toEqual(0);
     });
+
+    it('should clear a runtime blocking error so the panel can recover without remounting', () => {
+      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+      userMessagesApi.updateBlockingErrors(
+        new Error("Value 'grid' is not among the allowed options for argument 'layout': 'list'")
+      );
+      expect(internalApi.blockingError$.getValue()?.message).toContain("Value 'grid'");
+
+      userMessagesApi.resetMessages();
+
+      expect(internalApi.blockingError$.getValue()).toBeUndefined();
+    });
   });
 
   describe('updateValidationErrors', () => {

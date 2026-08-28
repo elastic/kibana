@@ -252,6 +252,53 @@ describe('ExpressionRenderer', () => {
     expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(0);
   });
 
+  it('should drop a previous render error as soon as the expression changes', () => {
+    const dataSubject = new Subject();
+    const data$ = dataSubject.asObservable().pipe(share());
+    const renderSubject = new Subject();
+    const render$ = renderSubject.asObservable().pipe(share());
+    const loadingSubject = new Subject<void>();
+    const loading$ = loadingSubject.asObservable().pipe(share());
+    const renderError = jest.fn((message) => <div data-test-subj={'custom-error'}>{message}</div>);
+
+    let onRenderError: RenderErrorHandlerFnType;
+    (ExpressionLoader as jest.Mock).mockImplementation((...args) => {
+      const params = args[2];
+      onRenderError = params.onRenderError;
+      return {
+        render$,
+        data$,
+        loading$,
+        update: jest.fn(),
+      };
+    });
+
+    const instance = mount(
+      <ReactExpressionRenderer expression="legendConfig layout=grid" renderError={renderError} />
+    );
+
+    act(() => {
+      onRenderError!(
+        instance.getDOMNode(),
+        new Error('Value grid is not among the allowed options'),
+        {
+          done: () => {
+            renderSubject.next(1);
+          },
+        } as IInterpreterRenderHandlers
+      );
+    });
+    instance.update();
+    expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(1);
+
+    renderError.mockClear();
+    instance.setProps({ expression: 'legendConfig layout=list' });
+    instance.update();
+
+    expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(0);
+    expect(renderError).not.toHaveBeenCalled();
+  });
+
   it('should call onData$ prop on every data$ observable emission in loader', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
