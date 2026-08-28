@@ -67,7 +67,7 @@ export const ConfirmRegionSelectionTabs: React.FC<ConfirmRegionSelectionTabsProp
             ),
         append: (
           <EuiNotificationBadge
-            size="xs"
+            size="s"
             color="accent"
             data-test-subj="confirmRegionSelectionSelectedBadge"
           >
