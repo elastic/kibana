@@ -196,7 +196,7 @@ ls .buildkite/pipelines/pull_request/security_solution/
 rg -l '<team-keyword>' .buildkite/pipelines/pull_request/security_solution/
 
 # Post-merge
-grep -n '<team-keyword>' .buildkite/pipelines/on_merge_fanout.yml
+grep -n '<team-keyword>' .buildkite/pipelines/on_merge.yml .buildkite/pipelines/security_solution_on_merge.yml
 
 # Quality gate + periodic
 ls .buildkite/pipelines/security_solution_quality_gate/

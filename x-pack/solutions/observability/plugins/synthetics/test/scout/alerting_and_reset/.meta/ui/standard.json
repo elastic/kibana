@@ -1,8 +1,7 @@
 {
-  "sha1": "5f93a76ecbd148570b610ae078cee896dc83bf63",
+  "sha1": "d50c615fcccbfd0083314f85eb6ff7ded1dc12ba",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -50,14 +49,14 @@
     {
       "id": "728feac9a49403e-cfa2476ff58cabc",
       "title": "CustomStatusAlert creates a custom status alert rule",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_status_alert.spec.ts",
-        "line": 23,
+        "line": 24,
         "column": 7
       }
     },
