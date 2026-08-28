@@ -52,8 +52,8 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
 
     // only platinum or higher may enable ransomware protection
     if (
-      policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-      policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+      policy.windows.ransomware?.supported !== defaults.windows.ransomware.supported ||
+      policy.mac.ransomware?.supported !== defaults.mac.ransomware.supported
     ) {
       return false;
     }
@@ -66,15 +66,15 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
   const defaults = policyFactoryWithoutPaidFeatures();
 
   if (
-    policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-    policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+    policy.windows.ransomware?.supported !== defaults.windows.ransomware.supported ||
+    policy.mac.ransomware?.supported !== defaults.mac.ransomware.supported
   ) {
     return false;
   }
 
   if (
-    policy.windows.ransomware.mode !== defaults.windows.ransomware.mode ||
-    policy.mac.ransomware.mode !== defaults.mac.ransomware.mode
+    policy.windows.ransomware?.mode !== defaults.windows.ransomware.mode ||
+    policy.mac.ransomware?.mode !== defaults.mac.ransomware.mode
   ) {
     return false;
   }
@@ -103,9 +103,10 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
     const defaults = policyFactoryWithSupportedFeatures();
     // only platinum or higher may enable memory protection
     if (
-      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported ||
-      policy.mac.memory_protection.supported !== defaults.mac.memory_protection.supported ||
-      policy.linux.memory_protection.supported !== defaults.linux.memory_protection.supported
+      policy.windows.memory_protection?.supported !==
+        defaults.windows.memory_protection.supported ||
+      policy.mac.memory_protection?.supported !== defaults.mac.memory_protection.supported ||
+      policy.linux.memory_protection?.supported !== defaults.linux.memory_protection.supported
     ) {
       return false;
     }
@@ -120,9 +121,9 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
   const defaults = policyFactoryWithoutPaidFeatures();
 
   if (
-    policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode ||
-    policy.mac.memory_protection.mode !== defaults.mac.memory_protection.mode ||
-    policy.linux.memory_protection.mode !== defaults.linux.memory_protection.mode
+    policy.windows.memory_protection?.mode !== defaults.windows.memory_protection.mode ||
+    policy.mac.memory_protection?.mode !== defaults.mac.memory_protection.mode ||
+    policy.linux.memory_protection?.mode !== defaults.linux.memory_protection.mode
   ) {
     return false;
   }
@@ -148,9 +149,9 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
   }
 
   if (
-    policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported ||
-    policy.mac.memory_protection.supported !== defaults.mac.memory_protection.supported ||
-    policy.linux.memory_protection.supported !== defaults.linux.memory_protection.supported
+    policy.windows.memory_protection?.supported !== defaults.windows.memory_protection.supported ||
+    policy.mac.memory_protection?.supported !== defaults.mac.memory_protection.supported ||
+    policy.linux.memory_protection?.supported !== defaults.linux.memory_protection.supported
   ) {
     return false;
   }
@@ -161,10 +162,10 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
     const defaults = policyFactoryWithSupportedFeatures();
     // only platinum or higher may enable behavior protection
     if (
-      policy.windows.behavior_protection.supported !==
+      policy.windows.behavior_protection?.supported !==
         defaults.windows.behavior_protection.supported ||
-      policy.mac.behavior_protection.supported !== defaults.mac.behavior_protection.supported ||
-      policy.linux.behavior_protection.supported !== defaults.linux.behavior_protection.supported
+      policy.mac.behavior_protection?.supported !== defaults.mac.behavior_protection.supported ||
+      policy.linux.behavior_protection?.supported !== defaults.linux.behavior_protection.supported
     ) {
       return false;
     }
@@ -175,9 +176,9 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
 
   // only platinum or higher may enable behavior_protection
   if (
-    policy.windows.behavior_protection.mode !== defaults.windows.behavior_protection.mode ||
-    policy.mac.behavior_protection.mode !== defaults.mac.behavior_protection.mode ||
-    policy.linux.behavior_protection.mode !== defaults.linux.behavior_protection.mode
+    policy.windows.behavior_protection?.mode !== defaults.windows.behavior_protection.mode ||
+    policy.mac.behavior_protection?.mode !== defaults.mac.behavior_protection.mode ||
+    policy.linux.behavior_protection?.mode !== defaults.linux.behavior_protection.mode
   ) {
     return false;
   }
@@ -208,10 +209,10 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
 
   // only platinum or higher may enable behavior_protection
   if (
-    policy.windows.behavior_protection.supported !==
+    policy.windows.behavior_protection?.supported !==
       defaults.windows.behavior_protection.supported ||
-    policy.mac.behavior_protection.supported !== defaults.mac.behavior_protection.supported ||
-    policy.linux.behavior_protection.supported !== defaults.linux.behavior_protection.supported
+    policy.mac.behavior_protection?.supported !== defaults.mac.behavior_protection.supported ||
+    policy.linux.behavior_protection?.supported !== defaults.linux.behavior_protection.supported
   ) {
     return false;
   }
