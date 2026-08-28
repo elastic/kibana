@@ -48,6 +48,9 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       // Comma-separated remote cluster aliases; honoured only when CCS is on.
       // Empty/absent → every configured cluster.
       remoteNames: schema.maybe(schema.string({ maxLength: 1024 })),
+      // Same contract as Overview/Management: load enabled monitors from every
+      // space the user can read, and drop the CCS remote-branch space gate.
+      showFromAllSpaces: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({
@@ -65,6 +68,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       tags,
       issuers,
       remoteNames,
+      showFromAllSpaces,
       ...queryParams
     } = request.query;
 
@@ -90,6 +94,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
 
     const monitors = await monitorConfigRepository.getAll({
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
+      showFromAllSpaces,
     });
 
     // Without CCS, no local monitors = no certs. With CCS, remote-only
@@ -120,7 +125,35 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       ccsEnabled,
       remoteNames: remoteNameList,
       spaceId,
+      showFromAllSpaces: Boolean(showFromAllSpaces),
     });
-    return { data };
+    return { data: attachCertMonitorSpaces(data, monitors) };
   },
 });
+
+export const attachCertMonitorSpaces = (
+  data: CertResult,
+  monitors: Array<{ attributes?: { config_id?: string }; namespaces?: string[] }>
+): CertResult => {
+  const spacesByConfigId = new Map<string, string[]>();
+  for (const monitor of monitors) {
+    const configId = monitor.attributes?.[ConfigKey.CONFIG_ID];
+    if (!configId || !monitor.namespaces?.length) {
+      continue;
+    }
+    spacesByConfigId.set(configId, monitor.namespaces);
+  }
+  if (spacesByConfigId.size === 0) {
+    return data;
+  }
+  return {
+    ...data,
+    certs: data.certs.map((cert) => ({
+      ...cert,
+      monitors: cert.monitors.map((mon) => {
+        const spaces = mon.configId ? spacesByConfigId.get(mon.configId) : undefined;
+        return spaces ? { ...mon, spaces } : mon;
+      }),
+    })),
+  };
+};
