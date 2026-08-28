@@ -18,15 +18,19 @@ import { ErrorCallout } from '../../error_callout';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import type { OnboardingFlow } from './no_data_config';
 import { getNoDataConfig } from './no_data_config';
+import { resolveInfraPageHasData } from './resolve_infra_page_has_data';
 
 export const InfraPageTemplate = ({
   'data-test-subj': _dataTestSubj,
   dataSourceAvailability,
   onboardingFlow,
+  hasDataOverride,
   ...pageTemplateProps
 }: Omit<LazyObservabilityPageTemplateProps, 'noDataConfig'> & {
   dataSourceAvailability?: EntityTypes | 'all';
   onboardingFlow?: OnboardingFlow;
+  /** Page-owned hasData when the page does not pass onboardingFlow (so this template does not fetch). */
+  hasDataOverride?: boolean;
 }) => {
   const {
     services: {
@@ -56,7 +60,7 @@ export const InfraPageTemplate = ({
     [onboardingFlow, dataSourceAvailability]
   );
 
-  const hasData = !!data?.hasData;
+  const hasData = resolveInfraPageHasData(!!data?.hasData, hasDataOverride);
   const noDataConfig = getNoDataConfig({
     hasData,
     loading: isPending(status),

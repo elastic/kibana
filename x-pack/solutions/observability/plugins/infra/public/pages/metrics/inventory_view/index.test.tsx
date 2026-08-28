@@ -63,10 +63,19 @@ jest.mock('@kbn/shared-ux-page-no-data', () => ({
   NoDataPage: () => <div data-test-subj="kbnNoDataPage" />,
 }));
 
+let lastInfraPageTemplateProps: { hasDataOverride?: boolean } = {};
+
 jest.mock('../../../components/shared/templates/infra_page_template', () => ({
-  InfraPageTemplate: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="infraPageTemplate">{children}</div>
-  ),
+  InfraPageTemplate: ({
+    children,
+    hasDataOverride,
+  }: {
+    children: React.ReactNode;
+    hasDataOverride?: boolean;
+  }) => {
+    lastInfraPageTemplateProps = { hasDataOverride };
+    return <div data-test-subj="infraPageTemplate">{children}</div>;
+  },
 }));
 
 jest.mock('./components/snapshot_container', () => ({
@@ -113,6 +122,7 @@ describe('SnapshotPage', () => {
   beforeEach(() => {
     mockFetcherState.hasData = true;
     mockFetcherState.status = 'success';
+    lastInfraPageTemplateProps = {};
   });
 
   it('renders AppHeader with the inventory title and no back control when metrics exist', async () => {
@@ -124,6 +134,7 @@ describe('SnapshotPage', () => {
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
     expect(screen.getByTestId('inventorySnapshotContainer')).toBeInTheDocument();
     expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 
   it('keeps AppHeader and shows onboarding instead of the waffle when there is no metrics data', async () => {
@@ -137,6 +148,7 @@ describe('SnapshotPage', () => {
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
     expect(screen.getByTestId('kbnNoDataPage')).toBeInTheDocument();
     expect(screen.queryByTestId('inventorySnapshotContainer')).not.toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(false);
   });
 
   it('does not show onboarding while metrics data is loading', async () => {
@@ -150,5 +162,6 @@ describe('SnapshotPage', () => {
     );
     expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
     expect(screen.getByTestId('inventorySnapshotContainer')).toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 });

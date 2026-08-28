@@ -20,9 +20,12 @@ import {
   type MetricsAlertFlyoutType,
 } from '../../../alerting/common/components/metrics_alert_dropdown';
 import { AnomalyDetectionFlyout } from '../../../components/ml/anomaly_detection/anomaly_detection_flyout';
+import { canRenderAnomalyDetectionFlyout } from '../../../components/ml/anomaly_detection/can_render_anomaly_detection_flyout';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { getMetricsHeaderMenuVisibility } from './get_metrics_header_menu_visibility';
 
 const ANOMALY_DETECTION_LABEL = i18n.translate('xpack.infra.ml.anomalyDetectionButton', {
@@ -63,6 +66,9 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
   const visibility = getMetricsHeaderMenuVisibility(pathname);
   const config = usePluginConfig();
   const { isTopbarMenuVisible } = useInfraMLCapabilitiesContext();
+  const { metricsView } = useMetricsDataViewContext();
+  const { space } = useActiveKibanaSpace();
+  const canOpenAnomalyFlyout = canRenderAnomalyDetectionFlyout(metricsView, space);
   const {
     services: { inspector, observability, share, uiSettings, application },
   } = useKibanaContextForPlugin();
@@ -100,7 +106,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
     const alertItems: AppMenuPopoverItem[] = [];
     let order = 0;
 
-    if (visibility.showAnomalyDetection && isTopbarMenuVisible) {
+    if (visibility.showAnomalyDetection && isTopbarMenuVisible && canOpenAnomalyFlyout) {
       items.push({
         id: 'anomalyDetection',
         label: ANOMALY_DETECTION_LABEL,
@@ -237,6 +243,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
     config.featureFlags.metricThresholdAlertRuleEnabled,
     inspector,
     inspectorAdapters,
+    canOpenAnomalyFlyout,
     isInspectorEnabled,
     isTopbarMenuVisible,
     manageRulesLinkProps.href,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { EuiHeaderLink, EuiFlyout } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +16,7 @@ import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabili
 import { MetricHostsModuleProvider } from '../../../containers/ml/modules/metrics_hosts/module';
 import { MetricK8sModuleProvider } from '../../../containers/ml/modules/metrics_k8s/module';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
+import { canRenderAnomalyDetectionFlyout } from './can_render_anomaly_detection_flyout';
 
 interface AnomalyJobSetupParams {
   jobType: 'hosts' | 'kubernetes';
@@ -43,6 +44,13 @@ export const AnomalyDetectionFlyout = ({
   const showFlyout = isControlled ? isOpen : internalOpen;
 
   const { space } = useActiveKibanaSpace();
+  const canRender = canRenderAnomalyDetectionFlyout(metricsView, space);
+
+  useEffect(() => {
+    if (isControlled && isOpen && !canRender) {
+      onClose?.();
+    }
+  }, [canRender, isControlled, isOpen, onClose]);
 
   const openFlyout = useCallback(() => {
     setScreenName('home');
@@ -68,7 +76,7 @@ export const AnomalyDetectionFlyout = ({
     onClose?.();
   }, [isControlled, onClose]);
 
-  if (!metricsView?.indices || !space) {
+  if (!canRender || !metricsView?.indices || !space) {
     return null;
   }
 

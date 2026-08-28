@@ -51,6 +51,7 @@ export const SnapshotPage = (): React.ReactElement => {
             <InventoryTimeRangeMetadataProvider>
               <div className={APP_WRAPPER_CLASS}>
                 <InfraPageTemplate
+                  hasDataOverride={!showOnboarding}
                   pageSectionProps={{
                     paddingSize: 'none',
                     contentProps: {
