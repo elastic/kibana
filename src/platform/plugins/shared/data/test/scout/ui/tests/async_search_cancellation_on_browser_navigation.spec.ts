@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, tags } from '@kbn/scout';
+import { test } from '@kbn/scout';
 
 const LOGSTASH_ARCHIVE = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
 const ESQL_QUERY = 'FROM logstash-* | STATS count = COUNT(*) BY ts = BUCKET(@timestamp, 1 hour)';
@@ -35,7 +35,7 @@ function buildEsqlLensPanel() {
   };
 
   return {
-    type: 'lens',
+    type: 'vis',
     grid: { x: 0, y: 0, w: 24, h: 15 },
     config,
   };
@@ -63,7 +63,7 @@ function buildClassicLensPanel() {
   };
 
   return {
-    type: 'lens',
+    type: 'vis',
     grid: { x: 0, y: 15, w: 24, h: 15 },
     config,
   };
@@ -71,7 +71,7 @@ function buildClassicLensPanel() {
 
 test.describe(
   'Async search cancellation on browser navigation',
-  { tag: tags.deploymentAgnostic },
+  { tag: '@local-stateful-classic' },
   () => {
     test.beforeAll(async ({ esArchiver }) => {
       await esArchiver.loadIfNeeded(LOGSTASH_ARCHIVE);
