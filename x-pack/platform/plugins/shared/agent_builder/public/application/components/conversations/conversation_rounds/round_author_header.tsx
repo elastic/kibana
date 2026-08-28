@@ -23,21 +23,15 @@ import {
   type UserProfileWithAvatar,
 } from '@kbn/user-profile-components';
 import {
-  agentBuilderDefaultAgentId,
   ConversationOriginType,
   type ConversationRoundAuthor,
   type ConversationRoundOrigin,
 } from '@kbn/agent-builder-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { AgentAvatar } from '../../common/agent_avatar';
 
 const labels = {
-  fallbackUser: i18n.translate('xpack.agentBuilder.roundAuthor.fallbackUser', {
-    defaultMessage: 'Me',
-  }),
-  agent: i18n.translate('xpack.agentBuilder.roundAuthor.agent', {
-    defaultMessage: 'Elastic AI Agent',
-  }),
   agentBadge: i18n.translate('xpack.agentBuilder.roundAuthor.agentBadge', {
     defaultMessage: 'Agent',
   }),
@@ -59,8 +53,8 @@ const formatRoundTime = (startedAt: string): string => {
   }).format(date);
 };
 
-const getAuthorName = (author?: ConversationRoundAuthor): string => {
-  return author?.full_name || author?.username || labels.fallbackUser;
+const getAuthorName = (author?: ConversationRoundAuthor): string | undefined => {
+  return author?.full_name || author?.username;
 };
 
 interface RoundAuthorHeaderProps {
@@ -69,6 +63,7 @@ interface RoundAuthorHeaderProps {
   origin?: ConversationRoundOrigin;
   startedAt: string;
   actor: 'user' | 'agent';
+  agent?: AgentDefinition;
 }
 
 export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
@@ -77,6 +72,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   origin,
   startedAt,
   actor,
+  agent,
 }) => {
   const { euiTheme } = useEuiTheme();
   const time = formatRoundTime(startedAt);
@@ -89,11 +85,13 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   const resolvedAuthorProfile = authorProfile ?? resolvedAuthorProfiles[0];
   const name =
     actor === 'agent'
-      ? labels.agent
+      ? agent?.name
       : resolvedAuthorProfile
       ? getUserDisplayName(resolvedAuthorProfile.user)
       : getAuthorName(author);
   const showSlackOrigin = actor === 'user' && origin?.type === ConversationOriginType.Slack;
+  const showAgentBadge = actor === 'agent';
+  const showSeparatorBeforeTime = Boolean(name) || showAgentBadge || showSlackOrigin;
 
   const headerStyles = css`
     line-height: ${euiTheme.size.base};
@@ -127,32 +125,25 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={headerStyles}>
       <EuiFlexItem grow={false}>
-        {actor === 'agent' ? (
-          <AgentAvatar
-            agentId={agentBuilderDefaultAgentId}
-            name={labels.agent}
-            symbol={undefined}
-            color="subdued"
-            size="s"
-            iconPaddingSize="none"
-          />
+        {actor === 'agent' && agent ? (
+          <AgentAvatar agent={agent} size="s" iconPaddingSize="none" />
         ) : resolvedAuthorProfile ? (
           <UserAvatar
             user={resolvedAuthorProfile.user}
             avatar={resolvedAuthorProfile.data?.avatar}
             size="s"
           />
-        ) : (
+        ) : name ? (
           <EuiAvatar size="s" name={name} />
-        )}
+        ) : null}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
           <span css={attributionStyles}>
-            <strong>{name}</strong>
-            {actor === 'agent' && (
+            {name && <strong>{name}</strong>}
+            {showAgentBadge && (
               <>
-                <span css={separatorStyles}>&middot;</span>
+                {name && <span css={separatorStyles}>&middot;</span>}
                 <EuiBadge color="hollow" iconType="productAgent" css={agentBadgeStyles}>
                   {labels.agentBadge}
                 </EuiBadge>
@@ -169,7 +160,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
             )}
             {time && (
               <>
-                <span css={separatorStyles}>&middot;</span>
+                {showSeparatorBeforeTime && <span css={separatorStyles}>&middot;</span>}
                 <span css={metadataStyles}>{time}</span>
               </>
             )}

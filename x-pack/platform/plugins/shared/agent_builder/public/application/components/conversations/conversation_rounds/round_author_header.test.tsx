@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { RoundAuthorHeader } from './round_author_header';
 
@@ -32,6 +33,16 @@ describe('RoundAuthorHeader', () => {
         initials: 'AE',
         color: '#f4d9ff',
       },
+    },
+  };
+  const agent: AgentDefinition = {
+    id: 'agent-1',
+    type: 'chat',
+    name: 'Custom Agent',
+    description: '',
+    readonly: false,
+    configuration: {
+      tools: [],
     },
   };
 
@@ -90,16 +101,18 @@ describe('RoundAuthorHeader', () => {
     expect(screen.getByText('AE')).toBeInTheDocument();
   });
 
-  it('falls back to Me for user-authored rounds without a name', () => {
-    render(<RoundAuthorHeader actor="user" startedAt={startedAt} />);
+  it('does not render user attribution when no user name is available', () => {
+    const { container } = render(<RoundAuthorHeader actor="user" startedAt={startedAt} />);
 
-    expect(screen.getByText('Me')).toBeInTheDocument();
+    expect(screen.queryByText('Me')).not.toBeInTheDocument();
+    expect(container.querySelector('strong')).not.toBeInTheDocument();
   });
 
-  it('renders the agent label', () => {
-    render(<RoundAuthorHeader actor="agent" startedAt={startedAt} />);
+  it('renders the agent name', () => {
+    render(<RoundAuthorHeader actor="agent" startedAt={startedAt} agent={agent} />);
 
-    expect(screen.getByText('Elastic AI Agent')).toBeInTheDocument();
+    expect(screen.getByText('Custom Agent')).toBeInTheDocument();
+    expect(screen.queryByText('Elastic AI Agent')).not.toBeInTheDocument();
     expect(screen.getByText('Agent')).toBeInTheDocument();
   });
 });

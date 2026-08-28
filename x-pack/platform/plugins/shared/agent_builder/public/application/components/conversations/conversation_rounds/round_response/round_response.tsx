@@ -22,6 +22,8 @@ import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
 import { RoundAuthorHeader } from '../round_author_header';
+import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
+import { useAgentId } from '../../../../hooks/use_conversation';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
@@ -48,6 +50,8 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   rawRound,
   startedAt,
 }) => {
+  const agentId = useAgentId();
+  const { agent } = useAgentBuilderAgentById(agentId);
   const hasMessage = Boolean(response.message);
 
   const showStreamingText = isLoading && hasMessage;
@@ -66,7 +70,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       `}
     >
       <EuiFlexItem grow={false}>
-        <RoundAuthorHeader startedAt={startedAt} actor="agent" />
+        <RoundAuthorHeader startedAt={startedAt} actor="agent" agent={agent ?? undefined} />
       </EuiFlexItem>
       <EuiFlexItem>
         {showStreamingText ? (
