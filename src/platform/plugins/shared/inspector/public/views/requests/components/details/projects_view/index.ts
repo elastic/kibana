@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Request } from '../../../../../common/adapters/request/types';
-
-export interface DetailViewProps {
-  request: Request;
-  isCpsMultiProject?: boolean;
-}
+export { ProjectsView } from './projects_view';
