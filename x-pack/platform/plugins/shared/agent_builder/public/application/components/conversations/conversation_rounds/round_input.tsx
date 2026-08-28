@@ -69,22 +69,19 @@ export const RoundInput = ({
       : euiTheme.colors.backgroundBaseSubdued};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
-    border-radius: ${isCurrentUser
-      ? `0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px`
-      : `0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px`};
+    border-radius: 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
     padding: ${euiTheme.size.m} ${euiTheme.size.base};
   `;
 
   const inputContentStyles = css`
-    align-self: ${isCurrentUser ? 'end' : 'start'};
-    inline-size: min(640px, 90%);
+    inline-size: 100%;
   `;
 
   return (
     <EuiFlexGroup
       direction="column"
       gutterSize="s"
-      alignItems={isCurrentUser ? 'flexEnd' : 'flexStart'}
+      alignItems="flexStart"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
@@ -123,7 +120,7 @@ export const RoundInput = ({
           conversationAttachments={conversationAttachments}
           fallbackAttachments={fallbackAttachments}
           actorFilter={[ATTACHMENT_REF_ACTOR.user]}
-          justifyContent={isCurrentUser ? 'flexEnd' : 'flexStart'}
+          justifyContent="flexStart"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
