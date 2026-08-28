@@ -322,6 +322,7 @@ describe('Cases Plugin', () => {
             },
           },
           "getCasesClientWithRequest": [Function],
+          "getCasesEventBus": [Function],
           "getUnifiedAttachmentTypeRegistry": [Function],
         }
       `);
