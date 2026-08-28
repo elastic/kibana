@@ -27,7 +27,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useFetchRules } from '../../../../../hooks/use_fetch_rules';
-import { mergeRuleIdsIntoMatcher, parseRuleIdsFromMatcher } from '../../matcher_quick_filter_utils';
 import {
   ALERT_KIND_RULE_LIST_FILTER,
   POPOVER_PANEL_STYLE,
@@ -57,7 +56,7 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   });
   const items = data?.items;
 
-  const selectedRuleIds = useMemo(() => parseRuleIdsFromMatcher(matcher), [matcher]);
+  const selectedRuleIds = useMemo(() => matcher?.rules ?? [], [matcher]);
   const rulePopoverId = useGeneratedHtmlId({ prefix: 'npQuickFilterRule' });
 
   const ruleOptions = useMemo((): Array<EuiSelectableOption<RuleSelectableMeta>> => {
@@ -93,7 +92,7 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     newOptions: Array<EuiSelectableOption<RuleSelectableMeta>>
   ) => {
     const ids = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
-    onChange(mergeRuleIdsIntoMatcher(matcher, ids));
+    onChange({ ...matcher, rules: ids.length > 0 ? ids : null });
   };
 
   const renderRuleOption = (option: EuiSelectableOption<RuleSelectableMeta>) => {

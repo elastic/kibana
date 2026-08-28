@@ -22,10 +22,6 @@ import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
-import {
-  mergeRuleTagsIntoMatcher,
-  parseRuleTagsFromMatcher,
-} from '../../matcher_quick_filter_utils';
 import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
 
 const TAG_SEARCH_DEBOUNCE_MS = 300;
@@ -47,7 +43,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     kind: 'alert',
     search: debouncedTagSearch || undefined,
   });
-  const selectedTags = useMemo(() => parseRuleTagsFromMatcher(matcher), [matcher]);
+  const selectedTags = useMemo(() => matcher?.tags ?? [], [matcher]);
 
   const tagOptions = useMemo((): Array<EuiSelectableOption<TagSelectableMeta>> => {
     const selectedSet = new Set(selectedTags);
@@ -73,7 +69,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
 
   const handleTagsChange = (newOptions: Array<EuiSelectableOption<TagSelectableMeta>>) => {
     const tags = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
-    onChange(mergeRuleTagsIntoMatcher(matcher, tags));
+    onChange({ ...matcher, tags: tags.length > 0 ? tags : null });
   };
 
   const showCapGuidance = apiTags.length >= TAGS_RESPONSE_LIMIT;

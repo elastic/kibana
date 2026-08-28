@@ -22,11 +22,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { EPISODE_STATUS_FILTER_OPTIONS, type EpisodeStatusFilterOption } from '../../constants';
-import {
-  mergeEpisodeStatusIntoMatcher,
-  parseEpisodeStatusesFromMatcher,
-} from '../../matcher_quick_filter_utils';
 import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
 
 interface StatusSelectableMeta {
@@ -39,7 +36,7 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const statusPopoverId = useGeneratedHtmlId({ prefix: 'npQuickFilterStatus' });
 
-  const selectedStatuses = useMemo(() => parseEpisodeStatusesFromMatcher(matcher), [matcher]);
+  const selectedStatuses = useMemo(() => matcher?.statuses ?? [], [matcher]);
   const recognizedCount = selectedStatuses.filter((s) => KNOWN_STATUS_VALUES.has(s)).length;
 
   const statusOptions = useMemo((): Array<EuiSelectableOption<StatusSelectableMeta>> => {
@@ -52,8 +49,8 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   }, [selectedStatuses]);
 
   const handleStatusChange = (newOptions: Array<EuiSelectableOption<StatusSelectableMeta>>) => {
-    const statuses = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
-    onChange(mergeEpisodeStatusIntoMatcher(matcher, statuses));
+    const statuses = newOptions.filter((o) => o.checked === 'on').map((o) => o.value as AlertEpisodeStatus);
+    onChange({ ...matcher, statuses: statuses.length > 0 ? statuses : null });
   };
 
   const renderStatusOption = (option: EuiSelectableOption<StatusSelectableMeta>) => {
