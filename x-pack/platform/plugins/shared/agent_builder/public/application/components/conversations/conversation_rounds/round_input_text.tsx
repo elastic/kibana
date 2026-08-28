@@ -16,78 +16,54 @@ interface RoundInputTextProps {
   text: string;
 }
 
-/**
- * Renders text with inline command badge and image badge styling.
- * Parses serialized badge and image markdown-links and renders them as styled spans.
- */
-export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
+const useRoundInputTextStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const segments = useMemo(() => deserializeInputSegments(text), [text]);
 
-  const { badgeStyle, commandBadgeWrapperCss, commandBadgeInnerCss } = useMemo(
-    () => ({
-      badgeStyle: css`
-        color: ${euiTheme.colors.textPrimary};
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
-        border-radius: ${euiTheme.border.radius.small};
-        padding: 0 ${euiTheme.size.xs};
-      `,
-      commandBadgeWrapperCss: css`
-        display: inline-flex;
-        align-items: baseline;
-        max-width: ${COMMAND_BADGE_MAX_WIDTH_CH}ch;
-        min-width: 0;
-        vertical-align: baseline;
-        line-height: inherit;
-      `,
-      commandBadgeInnerCss: css`
-        min-width: 0;
-        ${euiTextTruncate('100%')}
-      `,
-    }),
-    [
-      euiTheme.border.radius.small,
-      euiTheme.colors.backgroundLightPrimary,
-      euiTheme.colors.textPrimary,
-      euiTheme.size.xs,
-    ]
-  );
-
-  const imageBadgeWrapperCss = useMemo(
-    () => css`
+  return {
+    badge: css`
+      color: ${euiTheme.colors.textPrimary};
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+      border-radius: ${euiTheme.border.radius.small};
+      padding: 0 ${euiTheme.size.xs};
+    `,
+    commandBadgeWrapper: css`
+      display: inline-flex;
+      align-items: baseline;
+      max-width: ${COMMAND_BADGE_MAX_WIDTH_CH}ch;
+      min-width: 0;
+      vertical-align: baseline;
+      line-height: inherit;
+    `,
+    commandBadgeInner: css`
+      min-width: 0;
+      ${euiTextTruncate('100%')}
+    `,
+    imageBadgeWrapper: css`
       display: inline-flex;
       align-items: center;
-      vertical-align: middle;
       gap: ${euiTheme.size.xs};
       min-width: 0;
       max-width: 24ch;
-      height: ${euiTheme.size.l};
-      line-height: 1;
+      font-size: ${euiTheme.size.base};
+      height: 20px;
       background: ${euiTheme.colors.backgroundFilledPrimary};
       color: ${euiTheme.colors.textInverse};
       border-radius: ${euiTheme.border.radius.small};
       padding: 0 ${euiTheme.size.xs};
-      &:hover .image-badge-label {
-        text-decoration: underline;
+      &:hover {
+        background: ${euiTheme.colors.textPrimary};
       }
     `,
-    [
-      euiTheme.border.radius.small,
-      euiTheme.colors.backgroundFilledPrimary,
-      euiTheme.colors.textInverse,
-      euiTheme.size.l,
-      euiTheme.size.xs,
-    ]
-  );
-
-  const imageBadgeInnerCss = useMemo(
-    () => css`
+    imageBadgeInner: css`
       min-width: 0;
-      line-height: ${euiTheme.size.l};
       ${euiTextTruncate('100%')}
     `,
-    [euiTheme.size.l]
-  );
+  };
+};
+
+export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
+  const segments = useMemo(() => deserializeInputSegments(text), [text]);
+  const styles = useRoundInputTextStyles();
 
   const hasNoBadges = segments.every((s) => s.type === 'text');
   if (hasNoBadges) {
@@ -104,9 +80,9 @@ export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
         if (segment.type === 'image') {
           return (
             <EuiToolTip key={index} content={segment.name} disableScreenReaderOutput>
-              <span css={imageBadgeWrapperCss} tabIndex={0}>
+              <span css={styles.imageBadgeWrapper} tabIndex={0}>
                 <EuiIcon type="image" size="s" aria-hidden={true} />
-                <span className="image-badge-label" css={imageBadgeInnerCss}>
+                <span className="image-badge-label" css={styles.imageBadgeInner}>
                   {segment.name}
                 </span>
               </span>
@@ -118,8 +94,8 @@ export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
         const fullBadgeText = `${sequence}${segment.data.label}`;
         return (
           <EuiToolTip key={index} content={fullBadgeText} disableScreenReaderOutput>
-            <span css={[badgeStyle, commandBadgeWrapperCss]} tabIndex={0}>
-              <span css={commandBadgeInnerCss}>{fullBadgeText}</span>
+            <span css={[styles.badge, styles.commandBadgeWrapper]} tabIndex={0}>
+              <span css={styles.commandBadgeInner}>{fullBadgeText}</span>
             </span>
           </EuiToolTip>
         );

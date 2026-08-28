@@ -18,7 +18,12 @@ import type { AgentBuilderInternalService } from '../../services/types';
 
 const defaultKibanaServices = createStorybookKibanaServices();
 const defaultAgentBuilderServices = createStorybookAgentBuilderServices();
-const defaultQueryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+// refetchOnWindowFocus is disabled because switching stories refocuses the Storybook iframe,
+// which would otherwise refetch every query (e.g. useLoadConnectors) against mocks that don't
+// implement every endpoint's real response shape.
+const defaultQueryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
+});
 
 export interface AgentBuilderStorybookProviderProps {
   children: React.ReactNode;

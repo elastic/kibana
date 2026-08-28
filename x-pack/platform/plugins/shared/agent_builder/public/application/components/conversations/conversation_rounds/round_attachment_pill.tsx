@@ -70,8 +70,8 @@ export const RoundAttachmentPill: React.FC<RoundAttachmentPillProps> = ({
       <EuiToolTip content={title} position="top">
         <div
           css={css`
-            width: 72px;
-            height: 32px;
+            width: 72px; // no token value
+            height: ${euiTheme.size.xl};
             border-radius: ${euiTheme.border.radius.small};
             overflow: hidden;
             flex-shrink: 0;

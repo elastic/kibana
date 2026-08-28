@@ -6,6 +6,7 @@
  */
 
 import { of } from 'rxjs';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { StartServices } from '../hooks/use_kibana';
 
 const noOp = () => {};
@@ -22,6 +23,9 @@ const PLACEHOLDER_IMAGE_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
   PLACEHOLDER_IMAGE_SVG
 )}`;
 const isFilesBlobPath = (path: string) => path.includes('/api/files/');
+
+const getUiSetting = (key: string) =>
+  key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID ? true : undefined;
 
 export const createStorybookKibanaServices = (): StartServices =>
   ({
@@ -64,8 +68,8 @@ export const createStorybookKibanaServices = (): StartServices =>
     },
     settings: {
       client: {
-        get: () => undefined,
-        get$: () => of(undefined),
+        get: getUiSetting,
+        get$: (key: string) => of(getUiSetting(key)),
         set: () => Promise.resolve(true),
         getAll: () => ({}),
       },

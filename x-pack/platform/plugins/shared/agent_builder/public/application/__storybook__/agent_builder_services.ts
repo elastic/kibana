@@ -19,10 +19,16 @@ import { createStorybookKibanaServices } from './kibana_services';
 const noOp = () => {};
 
 let fileIdCounter = 0;
+/** fileId -> object URL of the actually-uploaded blob, so Storybook thumbnails show the real pasted image. */
+const storybookFileBlobUrls = new Map<string, string>();
 /** Fake filesClient — create resolves immediately, upload resolves after 800ms so the spinner is visible in Storybook. */
 const storybookFilesClient = {
   create: () => Promise.resolve({ file: { id: `storybook-file-${++fileIdCounter}` } }),
-  upload: () => new Promise<void>((resolve) => setTimeout(resolve, 800)),
+  upload: ({ id, body }: { id: string; body: Blob }) =>
+    new Promise<void>((resolve) => {
+      storybookFileBlobUrls.set(id, URL.createObjectURL(body));
+      setTimeout(resolve, 800);
+    }),
   list: () => Promise.resolve({ files: [], total: 0 }),
   get: () => Promise.resolve({ file: null }),
   getDownloadHref: () => '',
@@ -45,8 +51,11 @@ const storybookImageAttachmentDefinition: AttachmentUIDefinition<StorybookImageA
   getThumbnail: (attachment) => {
     const { file_id: fileId } = attachment.data;
     if (!fileId) return undefined;
-    return kibanaServices.http.basePath.prepend(
-      `/api/files/files/${CHAT_ATTACHMENT_IMAGES_FILE_KIND}/${fileId}/blob`
+    return (
+      storybookFileBlobUrls.get(fileId) ??
+      kibanaServices.http.basePath.prepend(
+        `/api/files/files/${CHAT_ATTACHMENT_IMAGES_FILE_KIND}/${fileId}/blob`
+      )
     );
   },
 };

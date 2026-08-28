@@ -7,7 +7,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { euiTextTruncate, keys, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  euiTextTruncate,
+  keys,
+  useEuiFontSize,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
 import { CommandMenuContainer } from './command_menu';
@@ -23,7 +29,7 @@ import {
   syncChipsUploadingState,
   IMAGE_PLACEHOLDER_ATTRIBUTE,
 } from './image_placeholder';
-import { useEditorFontStyles, useImagePlaceholderStyles } from './use_editor_styles';
+import { useImagePlaceholderStyles } from './use_editor_styles';
 import { getSelectionRange } from './utils';
 import { handleEditorPaste } from './paste_handler';
 
@@ -77,13 +83,9 @@ interface MessageEditorProps {
   placeholder?: string;
   ariaLabel?: string;
   'data-test-subj'?: string;
-  /** Called with the pasted file. Returns the name used for the placeholder, or undefined to skip. */
   onPasteFile?: (file: File) => string | undefined;
-  /** Called on every editor input event (after onChange). Use to detect placeholder removals. */
   onAfterInput?: () => void;
-  /** Called when the pointer enters or leaves an image placeholder span. */
   onHoveredPlaceholderChange?: (name: string | null) => void;
-  /** Names of images currently uploading — drives the progress bar on inline placeholder chips. */
   uploadingNames?: ReadonlySet<string>;
 }
 
@@ -112,7 +114,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       display: block;
     }
   `;
-  const fontStyles = useEditorFontStyles();
+  const fontStyles = useEuiFontSize('s');
   const imagePlaceholderStyles = useImagePlaceholderStyles();
   const commandBadgeStyles = css`
     [${COMMAND_BADGE_ATTRIBUTE}] {

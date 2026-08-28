@@ -21,24 +21,28 @@ const progressSweep = keyframes`
 /** Returns CSS for the image placeholder chip inside the contenteditable editor. */
 export const useImagePlaceholderStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const xsFontStyles = useEuiFontSize('xs');
+  const xsFontStyles = useEuiFontSize('m');
   return css`
     [${IMAGE_PLACEHOLDER_ATTRIBUTE}] {
       display: inline-flex;
       align-items: center;
       gap: ${euiTheme.size.xs};
       color: ${euiTheme.colors.textPrimary};
-      background-color: ${euiTheme.colors.backgroundLightPrimary};
+      background-color: ${euiTheme.colors.backgroundBasePrimary};
       border-radius: ${euiTheme.size.xs};
       margin: 0 ${euiTheme.size.xs};
       max-width: 24ch;
-      padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} ${euiTheme.size.xs};
+      padding: 0 ${euiTheme.size.s} 0 ${euiTheme.size.xs};
       cursor: default;
       user-select: all;
       vertical-align: baseline;
       white-space: nowrap;
       position: relative;
       overflow: hidden;
+      height: 20px;
+    }
+    [${IMAGE_PLACEHOLDER_ATTRIBUTE}]:hover {
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
     }
     [${IMAGE_PLACEHOLDER_ATTRIBUTE}] > [${IMAGE_PLACEHOLDER_ICON_ATTRIBUTE}] {
       display: inline-flex;
@@ -60,9 +64,6 @@ export const useImagePlaceholderStyles = () => {
     }
     [${IMAGE_PLACEHOLDER_ATTRIBUTE}]:hover > [${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}] {
       display: inline-flex;
-    }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}]:hover > .image-placeholder-label {
-      text-decoration: underline;
     }
     [${IMAGE_PLACEHOLDER_ATTRIBUTE}] > .image-placeholder-label {
       min-width: 0;
@@ -108,13 +109,5 @@ export const useImagePlaceholderStyles = () => {
         animation: ${progressSweep} 1.4s ease-in-out infinite;
       }
     }
-  `;
-};
-
-/** Returns the font size CSS for the editor (matches the `s` variant used by siblings). */
-export const useEditorFontStyles = () => {
-  return css`
-    ${useEuiFontSize('s')}
-    line-height: 26px;
   `;
 };
