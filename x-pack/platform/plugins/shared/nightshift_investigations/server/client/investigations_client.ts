@@ -181,6 +181,11 @@ export class NightshiftInvestigationsClient {
 
     const spaceId = this.getSpaceId();
 
+    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
+    // agent exists wherever an investigation runs. This narrower install stays because the run
+    // below executes the *stored* workflow definition, which predates that step until the managed
+    // install has upgraded it — and that install is fire-and-forget. Deliberately without the
+    // step's visibility retry: the workflow owns that, and this request path should not pay for it.
     await installInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
 
     const workflow = await this.workflowsManagement.management.getWorkflow(
@@ -204,6 +209,7 @@ export class NightshiftInvestigationsClient {
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+        ...(subject.summary ? { summary: subject.summary } : {}),
       },
     };
 
@@ -271,10 +277,12 @@ export class NightshiftInvestigationsClient {
 
     const subject = recoverSubjectFromInput(rawInput);
     const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
+    const rawContext = isPlainObject(rawInput?.context) ? rawInput.context : undefined;
+    const subjectSummary = asString(rawContext?.summary);
 
     return {
       investigation_id: investigationId,
-      subject,
+      subject: subject && subjectSummary ? { ...subject, summary: subjectSummary } : subject,
       trigger_type: recoveredTriggerType,
       status,
       started_at: execution.startedAt,
