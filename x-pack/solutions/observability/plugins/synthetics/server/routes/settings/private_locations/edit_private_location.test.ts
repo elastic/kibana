@@ -36,7 +36,7 @@ const existingLocation = {
   },
 };
 
-const makeRouteContext = (body: Record<string, unknown>) => {
+const makeRouteContext = (body: Record<string, unknown>, { hasEnterprise = false } = {}) => {
   const response = httpServerMock.createResponseFactory();
   const routeContext = {
     request: { params: { locationId: 'loc-1' }, body },
@@ -49,6 +49,15 @@ const makeRouteContext = (body: Record<string, unknown>) => {
       coreStart: {
         savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
       },
+    },
+    context: {
+      licensing: Promise.resolve({
+        license: {
+          isAvailable: true,
+          isActive: true,
+          hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
+        },
+      }),
     },
   } as any;
   return { routeContext, response };
@@ -73,14 +82,32 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
       } as any);
   };
 
-  it('persists isAgentSharding when it is the only change', async () => {
+  it('persists isAgentSharding when it is the only change and the license is Enterprise', async () => {
     const edit = stubRepo({ isAgentSharding: true });
-    const { routeContext } = makeRouteContext({ isAgentSharding: true });
+    const { routeContext } = makeRouteContext({ isAgentSharding: true }, { hasEnterprise: true });
 
     const result = await editPrivateLocationRoute().handler(routeContext);
 
     expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: true }));
     expect(result).toEqual(expect.objectContaining({ isAgentSharding: true }));
+  });
+
+  it('rejects enabling isAgentSharding without an Enterprise license', async () => {
+    const edit = stubRepo();
+    const { routeContext, response } = makeRouteContext({ isAgentSharding: true });
+    response.forbidden.mockReturnValue({ statusCode: 403 } as any);
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(result).toEqual({ statusCode: 403 });
+    expect(response.forbidden).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          message: expect.stringContaining('Enterprise license'),
+        }),
+      })
+    );
+    expect(edit).not.toHaveBeenCalled();
   });
 
   it('overwrites an enabled isAgentSharding flag with false', async () => {
@@ -122,6 +149,11 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
       request: { params: { locationId: 'location-1' }, body: { label: 'New label' } },
       response,
       savedObjectsClient: {},
+      context: {
+        licensing: Promise.resolve({
+          license: { isAvailable: true, isActive: true, hasAtLeast: () => false },
+        }),
+      },
       monitorConfigRepository: {
         findDecryptedMonitors: jest
           .fn()

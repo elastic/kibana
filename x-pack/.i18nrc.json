@@ -97,6 +97,7 @@
     "xpack.monitoring": ["platform/plugins/private/monitoring"],
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.nightshift": "solutions/observability/plugins/nightshift",
+    "xpack.nightshiftInvestigations": ["platform/plugins/shared/nightshift_investigations"],
     "xpack.observabilityAgentBuilder": "solutions/observability/plugins/observability_agent_builder",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_ai_assistant",
