@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { htmlToStructured } from '../content/text';
 import { classifySectionSpans, extractIocs, type ExtractedIoc, type IocTier } from './extract_iocs';
 
 /** Helper: extract IOC values of a specific type from the result. */
@@ -1181,30 +1180,24 @@ describe('extract_iocs — URL tier inherits from host', () => {
 });
 
 // ── Leak test (critical gate) ────────────────────────────────────────────────
-// Exercises the htmlToStructured → extractIocs path (as the route does) and
-// asserts that NO emitted anchor value contains raw markdown artifacts.
-// This is the gate: if a markdown artifact survives into a stored IOC value,
-// it would corrupt anchor matching and downstream correlation.
+// extractIocs consumes bounded *structured text* (`## heading`, `| cell |`,
+// `- item` lines — the shape the RSS adapter produces). Asserts that none of the
+// structural markers leak into a stored IOC value. This is the gate: a markdown
+// artifact surviving into a value corrupts anchor matching and downstream
+// correlation.
 
-describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)', () => {
-  // Import the helper to wire up the same transformation the route uses.
-  // We call it here explicitly to simulate the route's html→structured→extractIocs flow.
-
+describe('extract_iocs — structured-text leak test (markdown artifact gate)', () => {
   const MARKDOWN_ARTIFACT_PATTERN = /[\[\]|`#()]/;
 
-  const extractFromHtml = (html: string) => extractIocs({ text: htmlToStructured(html) });
-
   test('IOC table cells produce clean domain values (no pipe, bracket, hash artifacts)', () => {
-    const html = `
-      <table>
-        <tr><th>Type</th><th>Indicator</th><th>Context</th></tr>
-        <tr><td>Domain</td><td>evil.com</td><td>C2 server</td></tr>
-        <tr><td>Domain</td><td>bad[.]example.net</td><td>Dropper host</td></tr>
-        <tr><td>IP</td><td>192.0.2.55</td><td>Pivot host</td></tr>
-        <tr><td>Hash</td><td>d41d8cd98f00b204e9800998ecf8427e</td><td>Loader</td></tr>
-      </table>
-    `;
-    const r = extractFromHtml(html);
+    const text = [
+      '| Type | Indicator | Context |',
+      '| Domain | evil.com | C2 server |',
+      '| Domain | bad[.]example.net | Dropper host |',
+      '| IP | 192.0.2.55 | Pivot host |',
+      '| Hash | d41d8cd98f00b204e9800998ecf8427e | Loader |',
+    ].join('\n');
+    const r = extractIocs({ text });
 
     // Known good values must be present
     expect(domainValues(r)).toContain('evil.com');
@@ -1222,15 +1215,9 @@ describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)',
     }
   });
 
-  test('heading and list HTML produce clean IOC values', () => {
-    const html = `
-      <h2>Indicators</h2>
-      <ul>
-        <li>Domain: evil2.com</li>
-        <li>IP: 203.0.113.7</li>
-      </ul>
-    `;
-    const r = extractFromHtml(html);
+  test('heading and list lines produce clean IOC values', () => {
+    const text = ['## Indicators', '- Domain: evil2.com', '- IP: 203.0.113.7'].join('\n');
+    const r = extractIocs({ text });
 
     expect(domainValues(r)).toContain('evil2.com');
     expect(valuesOf(r, 'ip')).toContain('203.0.113.7');
@@ -1240,41 +1227,24 @@ describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)',
     }
   });
 
-  test('anchor href URLs in IOC section are extractable and value is clean', () => {
-    // Href-lift is scoped to IOC/References sections — prose hrefs are dropped (citation noise).
-    // A real C2 link that appears in the IOC section should still be extracted.
-    const html = `
-      <h2>Indicators of Compromise</h2>
-      <p>Command-and-control: <a href="https://c2.evil.com/beacon">C2 link</a></p>
-    `;
-    const r = extractFromHtml(html);
+  test('a URL in an IOC section is extractable and its value is clean', () => {
+    const text = [
+      '## Indicators of Compromise',
+      'Command-and-control: C2 link https://c2.evil.com/beacon',
+    ].join('\n');
+    const r = extractIocs({ text });
 
     const urlIoc = r.iocs.find((i) => i.type === 'url' && i.value.includes('c2.evil.com'));
     expect(urlIoc).toBeDefined();
-    // Must NOT be [C2 link](https://c2.evil.com/beacon) markdown form
     expect(urlIoc?.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
     expect(urlIoc?.value).toBe('https://c2.evil.com/beacon');
   });
 
-  test('prose anchor hrefs are dropped (citation noise prevention)', () => {
-    // Prose <a href> links (inline citations, blog references, nav links) are collapsed
-    // to their visible text so they don't flood anchor-eligible extraction.
-    const html = `
-      <p>See <a href="https://learn.microsoft.com/api/docs">the Microsoft docs</a> for details.</p>
-    `;
-    const r = extractFromHtml(html);
-    const domainHit = r.iocs.find((i) => i.value.includes('learn.microsoft.com'));
-    expect(domainHit).toBeUndefined();
-  });
-
-  test('defanged IOC in table cell survives refang and is clean', () => {
-    const html = `
-      <table>
-        <tr><td>C2 Domain</td><td>evil[.]attacker[.]top</td></tr>
-        <tr><td>C2 IP</td><td>198[.]51[.]100[.]99</td></tr>
-      </table>
-    `;
-    const r = extractFromHtml(html);
+  test('defanged IOC in a table cell survives refang and is clean', () => {
+    const text = ['| C2 Domain | evil[.]attacker[.]top |', '| C2 IP | 198[.]51[.]100[.]99 |'].join(
+      '\n'
+    );
+    const r = extractIocs({ text });
 
     expect(domainValues(r)).toContain('evil.attacker.top');
     expect(valuesOf(r, 'ip')).toContain('198.51.100.99');
@@ -1539,29 +1509,25 @@ describe('extract_iocs — section-miner overrides (Part B)', () => {
 // and reference URLs appear under ## Sources:. Validates both halves simultaneously.
 
 describe('extract_iocs — NVISO-style multi-occurrence end-to-end', () => {
-  const NVISO_STYLE_HTML = `
-    <h2>Campaign Overview</h2>
-    <p>
-      NVISO observed three domains used as C2: sfrclak.com, callnrwise.com, and calltan.com.
-      Detection KQL: event.domain : ("sfrclak.com" OR "callnrwise.com" OR "calltan.com").
-    </p>
-    <h2>Indicators of Compromise (IOCs)</h2>
-    <table>
-      <tr><th>Type</th><th>Value</th><th>Context</th></tr>
-      <tr><td>Domain</td><td>sfrclak.com</td><td>Primary C2</td></tr>
-      <tr><td>Domain</td><td>callnrwise.com</td><td>Backup C2</td></tr>
-      <tr><td>Domain</td><td>calltan.com</td><td>Exfil endpoint</td></tr>
-    </table>
-    <h2>Sources:</h2>
-    <ul>
-      <li><a href="https://socket.dev/npm/package/axios">socket.dev report</a></li>
-      <li><a href="https://nviso.eu/blog/axios-analysis">nviso.eu analysis</a></li>
-    </ul>
-  `;
+  // Structured text as the RSS adapter would hand it to extractIocs: C2 domains
+  // in prose first, then in the ## Indicators of Compromise (IOCs) table, and
+  // citation URLs under ## Sources:.
+  const NVISO_STYLE_STRUCTURED = [
+    '## Campaign Overview',
+    'NVISO observed three domains used as C2: sfrclak.com, callnrwise.com, and calltan.com.',
+    'Detection KQL: event.domain : ("sfrclak.com" OR "callnrwise.com" OR "calltan.com").',
+    '## Indicators of Compromise (IOCs)',
+    '| Type | Value | Context |',
+    '| Domain | sfrclak.com | Primary C2 |',
+    '| Domain | callnrwise.com | Backup C2 |',
+    '| Domain | calltan.com | Exfil endpoint |',
+    '## Sources:',
+    '- socket.dev report https://socket.dev/npm/package/axios',
+    '- nviso.eu analysis https://nviso.eu/blog/axios-analysis',
+  ].join('\n');
 
   test('C2 domains in IOC table → discriminating/ioc_section (even though they appear in prose first)', () => {
-    const structured = htmlToStructured(NVISO_STYLE_HTML);
-    const r = extractIocs({ text: structured });
+    const r = extractIocs({ text: NVISO_STYLE_STRUCTURED });
 
     for (const domain of ['sfrclak.com', 'callnrwise.com', 'calltan.com']) {
       const ioc = r.iocs.find((i) => i.value === domain);
@@ -1574,8 +1540,7 @@ describe('extract_iocs — NVISO-style multi-occurrence end-to-end', () => {
   });
 
   test('citation URLs in Sources block → reference/references_section', () => {
-    const structured = htmlToStructured(NVISO_STYLE_HTML);
-    const r = extractIocs({ text: structured });
+    const r = extractIocs({ text: NVISO_STYLE_STRUCTURED });
 
     // socket.dev and nviso.eu are the citation hosts; their extracted domains
     // should be tagged references_section (or vendor_research for nviso.eu).
@@ -1593,8 +1558,7 @@ describe('extract_iocs — NVISO-style multi-occurrence end-to-end', () => {
   });
 
   test('C2 domains are anchor-eligible (not reference or denied)', () => {
-    const structured = htmlToStructured(NVISO_STYLE_HTML);
-    const r = extractIocs({ text: structured });
+    const r = extractIocs({ text: NVISO_STYLE_STRUCTURED });
     const anchors = r.iocs
       .filter((i) => i.tier !== 'reference' && i.tier !== 'denied')
       .map((i) => i.value);
@@ -1681,31 +1645,25 @@ describe('extract_iocs — IOC-section carve-out for content-host/CDN bare domai
 // host. The C2 domains must be promoted; github.com must be carved out.
 
 describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC link)', () => {
-  const ELASTIC_STYLE_HTML = `
-    <h2>Campaign Overview</h2>
-    <p>Elastic observed TOLLBOOTH targeting managed service providers.</p>
-    <h2>Observations</h2>
-    <p>All indicators available at
-      <a href="https://github.com/elastic/labs-releases/tree/main/indicators/tollbooth">
-        labs-releases/tollbooth
-      </a>.
-    </p>
-    <table>
-      <tr><th>Type</th><th>Value</th><th>Context</th></tr>
-      <tr><td>Domain</td><td>c.cseo99.com</td><td>C2 server</td></tr>
-      <tr><td>Domain</td><td>f.fseo99.com</td><td>C2 server</td></tr>
-      <tr><td>Domain</td><td>api.aseo99.com</td><td>Exfil endpoint</td></tr>
-      <tr><td>SHA256</td><td>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2</td><td>Malware loader</td></tr>
-    </table>
-    <h2>References</h2>
-    <ul>
-      <li><a href="https://elastic.co/security-labs/tollbooth">elastic.co blog</a></li>
-    </ul>
-  `;
+  // The GitHub IOC-repo URL sits inside the ## Observations (ioc) section, so its
+  // path-bearing URL is section-scoped but the derived bare github.com host must
+  // still be carved out.
+  const ELASTIC_STYLE_STRUCTURED = [
+    '## Campaign Overview',
+    'Elastic observed TOLLBOOTH targeting managed service providers.',
+    '## Observations',
+    'All indicators available at labs-releases/tollbooth https://github.com/elastic/labs-releases/tree/main/indicators/tollbooth .',
+    '| Type | Value | Context |',
+    '| Domain | c.cseo99.com | C2 server |',
+    '| Domain | f.fseo99.com | C2 server |',
+    '| Domain | api.aseo99.com | Exfil endpoint |',
+    '| SHA256 | a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2 | Malware loader |',
+    '## References',
+    '- elastic.co blog https://elastic.co/security-labs/tollbooth',
+  ].join('\n');
 
   test('real C2 domains in Observations → discriminating/ioc_section', () => {
-    const structured = htmlToStructured(ELASTIC_STYLE_HTML);
-    const r = extractIocs({ text: structured });
+    const r = extractIocs({ text: ELASTIC_STYLE_STRUCTURED });
 
     for (const domain of ['c.cseo99.com', 'f.fseo99.com', 'api.aseo99.com']) {
       const ioc = r.iocs.find((i) => i.value === domain);
@@ -1716,8 +1674,7 @@ describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC l
   });
 
   test('malware hash in Observations → discriminating (hash_high_entropy, ioc_section lift)', () => {
-    const structured = htmlToStructured(ELASTIC_STYLE_HTML);
-    const r = extractIocs({ text: structured });
+    const r = extractIocs({ text: ELASTIC_STYLE_STRUCTURED });
 
     const hashIoc = r.iocs.find(
       (i) => i.value === 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2'
@@ -1727,8 +1684,7 @@ describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC l
   });
 
   test('bare github.com (derived from IOC repo URL in Observations) is NOT discriminating', () => {
-    const structured = htmlToStructured(ELASTIC_STYLE_HTML);
-    const r = extractIocs({ text: structured });
+    const r = extractIocs({ text: ELASTIC_STYLE_STRUCTURED });
 
     const githubIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'github.com');
     if (githubIoc) {
@@ -1741,19 +1697,15 @@ describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC l
 
   test('NVISO regression: sfrclak/callnrwise/calltan still → discriminating/ioc_section', () => {
     // Re-run the NVISO fixture here to confirm the carve-out does not break prior behavior.
-
-    const NVISO_HTML = `
-      <h2>Campaign Overview</h2>
-      <p>NVISO observed C2 at sfrclak.com, callnrwise.com, calltan.com.</p>
-      <h2>Indicators of Compromise (IOCs)</h2>
-      <table>
-        <tr><td>Domain</td><td>sfrclak.com</td><td>Primary C2</td></tr>
-        <tr><td>Domain</td><td>callnrwise.com</td><td>Backup C2</td></tr>
-        <tr><td>Domain</td><td>calltan.com</td><td>Exfil</td></tr>
-      </table>
-    `;
-    const structured = htmlToStructured(NVISO_HTML);
-    const r = extractIocs({ text: structured });
+    const NVISO_STRUCTURED = [
+      '## Campaign Overview',
+      'NVISO observed C2 at sfrclak.com, callnrwise.com, calltan.com.',
+      '## Indicators of Compromise (IOCs)',
+      '| Domain | sfrclak.com | Primary C2 |',
+      '| Domain | callnrwise.com | Backup C2 |',
+      '| Domain | calltan.com | Exfil |',
+    ].join('\n');
+    const r = extractIocs({ text: NVISO_STRUCTURED });
 
     for (const domain of ['sfrclak.com', 'callnrwise.com', 'calltan.com']) {
       const ioc = r.iocs.find((i) => i.value === domain);

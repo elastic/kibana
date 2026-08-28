@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import { type IocType, MAX_URL_LENGTH } from '../../../common/threat_intel';
 import { IANA_TLDS } from '../data/iana_tlds';
 import { IOC_NOISE_DOMAINS } from '../data/ioc_noise_domains';
-import { classifyHeader } from '../content/section_headers';
+import { classifyHeader } from './section_headers';
 import { isNonRoutableIPv4 } from '../lib/ip_ranges';
 
 /** IOC tier for correlation anchoring. */
@@ -742,7 +742,7 @@ export interface SectionSpan {
 }
 
 /**
- * Segment structured text (output of htmlToStructured) into labelled section spans.
+ * Segment structured text into labelled section spans.
  * Only `## <heading>` lines delimit sections; prose blocks have no span entry.
  *
  * Returns only 'ioc' and 'references' spans — other headings are ignored.
