@@ -7,7 +7,12 @@
 
 import type { ToolMessage } from '@langchain/core/messages';
 
-import { createToolResultMessage, extractToolReturn, wrapToolResultContent } from './messages';
+import {
+  createToolResultMessage,
+  createUserMessage,
+  extractToolReturn,
+  wrapToolResultContent,
+} from './messages';
 
 const createMessage = (artifact: unknown, content: string = ''): ToolMessage => {
   return {
@@ -98,6 +103,44 @@ describe('wrapToolResultContent', () => {
     // only the canonical envelope close at the end remains as an unescaped close tag
     expect(wrapped.match(/<\/tool_result\s*>/gi)).toHaveLength(1);
     expect(wrapped.endsWith('</tool_result>')).toBe(true);
+  });
+});
+
+describe('createUserMessage with images', () => {
+  it('produces plain string content when called without images', () => {
+    const message = createUserMessage('hi');
+    expect(typeof message.content).toBe('string');
+    expect(message.content).toBe('hi');
+  });
+
+  it('produces plain string content when called with an empty images array', () => {
+    const message = createUserMessage('hi', { images: [] });
+    expect(typeof message.content).toBe('string');
+    expect(message.content).toBe('hi');
+  });
+
+  it('creates a HumanMessage with a single image_url part in the correct data URL shape', () => {
+    const message = createUserMessage('hello', {
+      images: [{ base64: 'AAA', mimeType: 'image/png' }],
+    });
+    expect(message.content).toEqual([
+      { type: 'text', text: 'hello' },
+      { type: 'image_url', image_url: { url: 'data:image/png;base64,AAA' } },
+    ]);
+  });
+
+  it('creates a HumanMessage with multiple image_url parts, one per image', () => {
+    const message = createUserMessage('hello', {
+      images: [
+        { base64: 'AAA', mimeType: 'image/png' },
+        { base64: 'BBB', mimeType: 'image/jpeg' },
+      ],
+    });
+    expect(message.content).toEqual([
+      { type: 'text', text: 'hello' },
+      { type: 'image_url', image_url: { url: 'data:image/png;base64,AAA' } },
+      { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,BBB' } },
+    ]);
   });
 });
 

@@ -19,6 +19,7 @@ interface KnowledgeIndicatorQueriesGeneratedProps {
   stream_name: string;
   stream_type: StreamType;
   tool_usage: SignificantEventsToolUsage;
+  external_content_tool_continuations: number;
 }
 
 interface KnowledgeIndicatorFeaturesIdentifiedProps {

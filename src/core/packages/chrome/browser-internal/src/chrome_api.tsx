@@ -14,8 +14,6 @@ import type { ChromeAppHeaderConfig, GlobalHeaderAiButton } from '@kbn/core-chro
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
 import type { NavControlsService } from './services/nav_controls';
@@ -39,7 +37,6 @@ export interface ChromeApiDeps {
     projectNavigation: ProjectNavigationStart;
   };
   sidebar: SidebarStart;
-  featureFlags: FeatureFlagsStart;
   componentDeps: InternalChromeStart['componentDeps'];
 }
 
@@ -47,7 +44,6 @@ export function createChromeApi({
   state,
   services,
   sidebar,
-  featureFlags,
   componentDeps,
 }: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
@@ -188,9 +184,6 @@ export function createChromeApi({
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
     next: {
-      get isEnabled() {
-        return isNextChrome(featureFlags);
-      },
       aiButton: {
         get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
         register: (button: GlobalHeaderAiButton) => {

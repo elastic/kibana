@@ -3063,6 +3063,57 @@ describe('Output Service', () => {
     });
   });
 
+  describe('listPreconfigured', () => {
+    it('should return only preconfigured outputs with secret fields stripped', async () => {
+      const soClient = getMockedSoClient();
+      soClient.find.mockResolvedValue({
+        page: 1,
+        per_page: 10000,
+        total: 3,
+        saved_objects: [
+          {
+            score: 0,
+            ...mockOutputSO('preconfigured-es', {
+              type: 'elasticsearch',
+              is_preconfigured: true,
+              ssl: 'encrypted-ciphertext',
+            }),
+          },
+          {
+            score: 0,
+            ...mockOutputSO('non-preconfigured-es', {
+              type: 'elasticsearch',
+              is_preconfigured: false,
+            }),
+          },
+          {
+            score: 0,
+            ...mockOutputSO('preconfigured-kafka', {
+              type: 'kafka',
+              is_preconfigured: true,
+              password: 'encrypted-ciphertext',
+              kibana_api_key: 'encrypted-ciphertext',
+            }),
+          },
+        ],
+      });
+
+      const result = await outputService.listPreconfigured();
+
+      expect(result.items).toHaveLength(2);
+      expect(result.items.map((o) => o.id)).toEqual(
+        expect.arrayContaining(['preconfigured-es', 'preconfigured-kafka'])
+      );
+      expect(result.items.find((o) => o.id === 'non-preconfigured-es')).toBeUndefined();
+
+      for (const item of result.items) {
+        expect(item).not.toHaveProperty('ssl');
+        expect(item).not.toHaveProperty('password');
+        expect(item).not.toHaveProperty('kibana_api_key');
+      }
+    });
+  });
+
   describe('outputSavedObjectToOutput', () => {
     it('should return output object with parsed SSL when SSL is a valid JSON string', () => {
       const so = mockOutputSO('output-test', {

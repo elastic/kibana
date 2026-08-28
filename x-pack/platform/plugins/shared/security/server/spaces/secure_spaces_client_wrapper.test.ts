@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type {
   AuditEvent,
   AuditLogger,
@@ -32,17 +33,17 @@ interface Opts {
 
 const spaces = deepFreeze([
   {
-    id: 'default',
+    id: asSpaceId('default'),
     name: 'Default Space',
     disabledFeatures: [],
   },
   {
-    id: 'marketing',
+    id: asSpaceId('marketing'),
     name: 'Marketing Space',
     disabledFeatures: [],
   },
   {
-    id: 'sales',
+    id: asSpaceId('sales'),
     name: 'Sales Space',
     disabledFeatures: [],
   },
@@ -167,7 +168,7 @@ describe('SecureSpacesClientWrapper', () => {
   describe('#getAll', () => {
     const savedObjects = [
       {
-        id: 'default',
+        id: asSpaceId('default'),
         attributes: {
           name: 'foo-name',
           description: 'foo-description',
@@ -175,7 +176,7 @@ describe('SecureSpacesClientWrapper', () => {
         },
       },
       {
-        id: 'marketing',
+        id: asSpaceId('marketing'),
         attributes: {
           name: 'bar-name',
           description: 'bar-description',
@@ -183,7 +184,7 @@ describe('SecureSpacesClientWrapper', () => {
         },
       },
       {
-        id: 'sales',
+        id: asSpaceId('sales'),
         attributes: {
           name: 'bar-name',
           description: 'bar-description',
@@ -270,7 +271,7 @@ describe('SecureSpacesClientWrapper', () => {
                   .flat(),
               ],
             },
-          } as CheckPrivilegesResponse);
+          } as unknown as CheckPrivilegesResponse);
           authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces: checkPrivileges });
 
           await expect(wrapper.getAll({ purpose: scenario.purpose })).rejects.toThrow('Forbidden');
@@ -306,7 +307,7 @@ describe('SecureSpacesClientWrapper', () => {
                   .flat(),
               ],
             },
-          } as CheckPrivilegesResponse);
+          } as unknown as CheckPrivilegesResponse);
           authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces: checkPrivileges });
 
           const actualSpaces = await wrapper.getAll({ purpose: scenario.purpose });
@@ -362,7 +363,7 @@ describe('SecureSpacesClientWrapper', () => {
             { resource: spaceId, privilege: authorization.actions.login, authorized: false },
           ],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
 
       await expect(wrapper.get(spaceId)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -398,7 +399,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ resource: spaceId, privilege: authorization.actions.login, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
 
       const response = await wrapper.get(spaceId);
@@ -417,7 +418,7 @@ describe('SecureSpacesClientWrapper', () => {
 
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
-        id: spaceId,
+        id: asSpaceId(spaceId),
       });
     });
   });
@@ -435,7 +436,7 @@ describe('SecureSpacesClientWrapper', () => {
       expectNoAuthorizationCheck(authorization);
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
-        id: 'default',
+        id: asSpaceId('default'),
       });
     });
 
@@ -455,7 +456,7 @@ describe('SecureSpacesClientWrapper', () => {
             { resource: spaceId, privilege: authorization.actions.login, authorized: false },
           ],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
 
       await expect(
@@ -486,7 +487,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ resource: spaceId, privilege: authorization.actions.login, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
 
       const response = await wrapper.getPersistedFeatureVisibility(spaceId);
@@ -504,14 +505,14 @@ describe('SecureSpacesClientWrapper', () => {
       });
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
-        id: spaceId,
+        id: asSpaceId(spaceId),
       });
     });
   });
 
   describe('#create', () => {
     const space = Object.freeze({
-      id: 'new_space',
+      id: asSpaceId('new_space'),
       name: 'new space',
       disabledFeatures: [],
     });
@@ -545,7 +546,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await expect(wrapper.create(space)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -580,7 +581,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       const response = await wrapper.create(space);
@@ -606,7 +607,7 @@ describe('SecureSpacesClientWrapper', () => {
 
   describe('#update', () => {
     const space = Object.freeze({
-      id: 'existing_space',
+      id: asSpaceId('existing_space'),
       name: 'existing space',
       disabledFeatures: [],
     });
@@ -640,7 +641,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await expect(wrapper.update(space.id, space)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -675,7 +676,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       const response = await wrapper.update(space.id, space);
@@ -701,7 +702,7 @@ describe('SecureSpacesClientWrapper', () => {
 
   describe('#delete', () => {
     const space = Object.freeze({
-      id: 'existing_space',
+      id: asSpaceId('existing_space'),
       name: 'existing space',
       disabledFeatures: [],
     });
@@ -734,7 +735,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await expect(wrapper.delete(space.id)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -771,7 +772,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await wrapper.delete(space.id);
