@@ -73,7 +73,8 @@ const setUpModule = async (
   end: number | undefined,
   datasetFilter: DatasetFilter,
   { spaceId, sourceId, indices, timestampField, runtimeMappings }: ModuleSourceConfiguration,
-  fetch: HttpHandler
+  fetch: HttpHandler,
+  projectRouting?: string
 ) => {
   const indexNamePattern = indices.join(',');
   const jobOverrides = [
@@ -91,6 +92,7 @@ const setUpModule = async (
           timestampField,
           bucketSpan,
           datasetFilter,
+          projectRouting,
         },
       },
     },
@@ -134,6 +136,7 @@ const setUpModule = async (
       datafeedOverrides,
       query,
       useDedicatedIndex: true,
+      projectRouting,
     },
     fetch
   );

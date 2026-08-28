@@ -39,7 +39,8 @@ export interface ModuleDescriptor<T extends JobType> {
     end: number | undefined,
     datasetFilter: DatasetFilter,
     sourceConfiguration: ModuleSourceConfiguration,
-    fetch: HttpHandler
+    fetch: HttpHandler,
+    projectRouting?: string
   ) => Promise<SetupMlModuleResponsePayload>;
   cleanUpModule: (
     spaceId: string,

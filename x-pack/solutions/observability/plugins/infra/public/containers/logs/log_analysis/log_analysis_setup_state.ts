@@ -29,7 +29,8 @@ type SetupHandler = (
   indices: string[],
   startTime: number | undefined,
   endTime: number | undefined,
-  datasetFilter: DatasetFilter
+  datasetFilter: DatasetFilter,
+  projectRouting?: ProjectRouting
 ) => void;
 
 interface AnalysisSetupStateArguments<T extends JobType> {
@@ -223,12 +224,25 @@ export const useAnalysisSetupState = <T extends JobType>({
   );
 
   const setUp = useCallback(() => {
-    return setUpModule(selectedIndexNames, startTime, endTime, datasetFilter);
-  }, [setUpModule, selectedIndexNames, startTime, endTime, datasetFilter]);
+    return setUpModule(selectedIndexNames, startTime, endTime, datasetFilter, projectRouting);
+  }, [setUpModule, selectedIndexNames, startTime, endTime, datasetFilter, projectRouting]);
 
   const cleanUpAndSetUp = useCallback(() => {
-    return cleanUpAndSetUpModule(selectedIndexNames, startTime, endTime, datasetFilter);
-  }, [cleanUpAndSetUpModule, selectedIndexNames, startTime, endTime, datasetFilter]);
+    return cleanUpAndSetUpModule(
+      selectedIndexNames,
+      startTime,
+      endTime,
+      datasetFilter,
+      projectRouting
+    );
+  }, [
+    cleanUpAndSetUpModule,
+    selectedIndexNames,
+    startTime,
+    endTime,
+    datasetFilter,
+    projectRouting,
+  ]);
 
   // Treating the CPS manager warm-up as "validating" both disables submission and
   // suppresses the transient MISSING_PROJECT_ROUTING error until the default project
