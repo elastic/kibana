@@ -241,10 +241,13 @@ export const validateExtendedFields = (
       ? [...displayOnlyFields, ...hintFields.filter(isDisplayOnlyField)]
       : displayOnlyFields;
 
-    for (const key of Object.keys(extendedFields)) {
-      if (!validKeys.has(key)) {
-        errors.push(buildUnknownKeyError(key, suggestionInlineFields, suggestionDisplayOnlyFields));
-      }
+    const unknownKeys = Object.keys(extendedFields).filter((key) => !validKeys.has(key));
+    const MAX_UNKNOWN_KEY_ERRORS = 10;
+    for (const key of unknownKeys.slice(0, MAX_UNKNOWN_KEY_ERRORS)) {
+      errors.push(buildUnknownKeyError(key, suggestionInlineFields, suggestionDisplayOnlyFields));
+    }
+    if (unknownKeys.length > MAX_UNKNOWN_KEY_ERRORS) {
+      errors.push(`${unknownKeys.length - MAX_UNKNOWN_KEY_ERRORS} more unknown key(s) not shown`);
     }
     errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
   }

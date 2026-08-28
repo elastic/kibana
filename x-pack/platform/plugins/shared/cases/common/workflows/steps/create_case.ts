@@ -83,8 +83,7 @@ export const createCaseStepCommonDefinition: CommonStepDefinition<
       syncAlerts: true
 \`\`\``,
       `## Setting case fields (extended_fields)
-Requires the \`xpack.cases.templates.enabled\` setting. Keys follow the
-\`<field_name>_as_<storage_type>\` convention; discover them with \`GET /api/cases/fields\`.
+Keys follow the \`<field_name>_as_<storage_type>\` convention; discover them with \`GET /api/cases/fields\`.
 \`\`\`yaml
 - name: create_case_with_fields
   type: ${CreateCaseStepTypeId}
