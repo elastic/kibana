@@ -38,7 +38,7 @@ export const patternQualityScoreEvaluator: Evaluator<Example, PatternExtractionR
     const { metrics } = output.output;
 
     if (!metrics) {
-      return { score: 0, reasoning: 'No metrics available' };
+      return { score: 0, explanation: 'No metrics available' };
     }
 
     const issues: string[] = [];
@@ -57,7 +57,7 @@ export const patternQualityScoreEvaluator: Evaluator<Example, PatternExtractionR
         fieldQuality: metrics.fieldQuality,
         fieldCountPenalty: metrics.fieldCountPenalty,
       },
-      reasoning:
+      explanation:
         issues.length > 0
           ? `Issues: ${issues.join('; ')}`
           : `Good quality: ${formatPercent(metrics.overallQuality)}`,

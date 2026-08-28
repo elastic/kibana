@@ -11,6 +11,7 @@ import { act } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import { CopyModeControl } from './copy_mode_control';
@@ -34,7 +35,7 @@ const setup = async (opts: SetupOpts = {}) => {
   const mockSpacesManager = spacesManagerMock.create();
 
   const getActiveSpace = Promise.resolve({
-    id: 'my-active-space',
+    id: asSpaceId('my-active-space'),
     name: 'my active space',
     disabledFeatures: [],
   });
@@ -43,22 +44,22 @@ const setup = async (opts: SetupOpts = {}) => {
   const getSpaces = Promise.resolve(
     opts.mockSpaces || [
       {
-        id: 'space-1',
+        id: asSpaceId('space-1'),
         name: 'Space 1',
         disabledFeatures: [],
       },
       {
-        id: 'space-2',
+        id: asSpaceId('space-2'),
         name: 'Space 2',
         disabledFeatures: [],
       },
       {
-        id: 'space-3',
+        id: asSpaceId('space-3'),
         name: 'Space 3',
         disabledFeatures: [],
       },
       {
-        id: 'my-active-space',
+        id: asSpaceId('my-active-space'),
         name: 'my active space',
         disabledFeatures: [],
       },
@@ -78,7 +79,7 @@ const setup = async (opts: SetupOpts = {}) => {
 
   const savedObjectToCopy = {
     type: 'dashboard',
-    id: 'my-dash',
+    id: asSpaceId('my-dash'),
     namespaces: ['default'],
     icon: 'dashboard',
     title: 'foo',
@@ -140,7 +141,7 @@ describe('CopyToSpaceFlyout', () => {
 
   it('shows a message within an EuiEmptyPrompt when only the active space is available', async () => {
     const { wrapper, onClose } = await setup({
-      mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
+      mockSpaces: [{ id: asSpaceId('my-active-space'), name: '', disabledFeatures: [] }],
     });
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
@@ -194,13 +195,13 @@ describe('CopyToSpaceFlyout', () => {
         errors: [
           {
             type: 'index-pattern',
-            id: 'conflicting-ip',
+            id: asSpaceId('conflicting-ip'),
             error: { type: 'conflict' },
             meta: {},
           },
           {
             type: 'visualization',
-            id: 'my-viz',
+            id: asSpaceId('my-viz'),
             error: { type: 'conflict' },
             meta: {},
           },
@@ -331,26 +332,26 @@ describe('CopyToSpaceFlyout', () => {
           // regular conflict without destinationId
           {
             type: 'index-pattern',
-            id: 'conflicting-ip',
+            id: asSpaceId('conflicting-ip'),
             error: { type: 'conflict' },
             meta: {},
           },
           // regular conflict with destinationId
           {
             type: 'search',
-            id: 'conflicting-search',
+            id: asSpaceId('conflicting-search'),
             error: { type: 'conflict', destinationId: 'another-search' },
             meta: {},
           },
           // ambiguous conflict
           {
             type: 'canvas-workpad',
-            id: 'conflicting-canvas',
+            id: asSpaceId('conflicting-canvas'),
             error: {
               type: 'ambiguous_conflict',
               destinations: [
-                { id: 'another-canvas', title: 'foo', updatedAt: undefined },
-                { id: 'yet-another-canvas', title: 'bar', updatedAt: undefined },
+                { id: asSpaceId('another-canvas'), title: 'foo', updatedAt: undefined },
+                { id: asSpaceId('yet-another-canvas'), title: 'bar', updatedAt: undefined },
               ],
             },
             meta: {},
@@ -358,7 +359,7 @@ describe('CopyToSpaceFlyout', () => {
           // negative test case (skip)
           {
             type: 'visualization',
-            id: 'my-viz',
+            id: asSpaceId('my-viz'),
             error: { type: 'conflict' },
             meta: {},
           },
@@ -431,16 +432,16 @@ describe('CopyToSpaceFlyout', () => {
       {
         'space-1': [],
         'space-2': [
-          { type: 'index-pattern', id: 'conflicting-ip', overwrite: true },
+          { type: 'index-pattern', id: asSpaceId('conflicting-ip'), overwrite: true },
           {
             type: 'search',
-            id: 'conflicting-search',
+            id: asSpaceId('conflicting-search'),
             overwrite: true,
             destinationId: 'another-search',
           },
           {
             type: 'canvas-workpad',
-            id: 'conflicting-canvas',
+            id: asSpaceId('conflicting-canvas'),
             overwrite: true,
             destinationId: 'another-canvas',
           },
@@ -466,26 +467,26 @@ describe('CopyToSpaceFlyout', () => {
           // my-viz-1 just has a missing_references error
           {
             type: 'visualization',
-            id: 'my-viz-1',
+            id: asSpaceId('my-viz-1'),
             error: {
               type: 'missing_references',
-              references: [{ type: 'index-pattern', id: 'missing-index-pattern' }],
+              references: [{ type: 'index-pattern', id: asSpaceId('missing-index-pattern') }],
             },
             meta: {},
           },
           // my-viz-2 has both a missing_references error and a conflict error
           {
             type: 'visualization',
-            id: 'my-viz-2',
+            id: asSpaceId('my-viz-2'),
             error: {
               type: 'missing_references',
-              references: [{ type: 'index-pattern', id: 'missing-index-pattern' }],
+              references: [{ type: 'index-pattern', id: asSpaceId('missing-index-pattern') }],
             },
             meta: {},
           },
           {
             type: 'visualization',
-            id: 'my-viz-2',
+            id: asSpaceId('my-viz-2'),
             error: { type: 'conflict' },
             meta: {},
           },
@@ -548,10 +549,10 @@ describe('CopyToSpaceFlyout', () => {
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       {
         'space-1': [
-          { type: 'dashboard', id: 'my-dash', overwrite: false },
+          { type: 'dashboard', id: asSpaceId('my-dash'), overwrite: false },
           {
             type: 'visualization',
-            id: 'my-viz-1',
+            id: asSpaceId('my-viz-1'),
             overwrite: false,
             ignoreMissingReferences: true,
           },
@@ -580,7 +581,7 @@ describe('CopyToSpaceFlyout', () => {
         errors: [
           {
             type: 'visualization',
-            id: 'my-viz',
+            id: asSpaceId('my-viz'),
             error: { type: 'unknown', message: 'some error message', statusCode: 400 },
             meta: {},
           },
