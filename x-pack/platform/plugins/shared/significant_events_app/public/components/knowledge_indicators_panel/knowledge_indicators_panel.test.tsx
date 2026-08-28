@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KnowledgeIndicatorsPanel } from './knowledge_indicators_panel';
 import { createMockWiredStreamDefinition } from './mocks';
@@ -14,7 +14,7 @@ import { createMockWiredStreamDefinition } from './mocks';
 const mockUseStreamFeatures = jest.fn();
 const mockUseFetchDiscoveryQueries = jest.fn();
 const mockUseSignificantEventsAppRouter = jest.fn();
-const mockUseIsCpsMultiProject = jest.fn();
+const mockUseKibana = jest.fn();
 
 jest.mock('../../hooks/use_stream_features', () => ({
   useStreamFeatures: (...args: unknown[]) => mockUseStreamFeatures(...args),
@@ -32,11 +32,26 @@ jest.mock('../../hooks/use_significant_events_app_router', () => ({
   useSignificantEventsAppRouter: () => mockUseSignificantEventsAppRouter(),
 }));
 
-jest.mock('../../hooks/use_is_cps_multi_project', () => ({
-  useIsCpsMultiProject: () => mockUseIsCpsMultiProject(),
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => mockUseKibana(),
 }));
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+
+const setHasLinkedProjects = (hasLinkedProjects: boolean) => {
+  mockUseKibana.mockReturnValue({
+    dependencies: {
+      start: {
+        cps: {
+          cpsManager: {
+            whenReady: jest.fn().mockResolvedValue(undefined),
+            hasLinkedProjects: jest.fn().mockReturnValue(hasLinkedProjects),
+          },
+        },
+      },
+    },
+  });
+};
 
 describe('KnowledgeIndicatorsPanel', () => {
   const definition = createMockWiredStreamDefinition();
@@ -45,7 +60,7 @@ describe('KnowledgeIndicatorsPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSignificantEventsAppRouter.mockReturnValue({ link });
-    mockUseIsCpsMultiProject.mockReturnValue(false);
+    setHasLinkedProjects(false);
     mockUseStreamFeatures.mockReturnValue({
       features: [{ id: 'feature-1' }, { id: 'feature-2' }],
       featuresLoading: false,
@@ -214,15 +229,17 @@ describe('KnowledgeIndicatorsPanel', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows provenance copy in a multi-project CPS deployment', () => {
-    mockUseIsCpsMultiProject.mockReturnValue(true);
+  it('shows provenance copy in a multi-project CPS deployment', async () => {
+    setHasLinkedProjects(true);
 
     renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
-    expect(
-      screen.getByTestId('significantEventsAppKnowledgeIndicatorsProvenance')
-    ).toHaveTextContent(
-      'Generated from data across all projects linked through cross-project search.'
-    );
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('significantEventsAppKnowledgeIndicatorsProvenance')
+      ).toHaveTextContent(
+        'Generated from data across all projects linked through cross-project search.'
+      );
+    });
   });
 });

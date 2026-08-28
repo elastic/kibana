@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiBadge,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import {
@@ -28,15 +25,17 @@ import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { ConversationQueue } from '../../components/conversation_queue';
+import { type ConversationsActionsGroupProps } from '../../components/conversation_card';
+import { type BaseActionsProps, type CardActionType } from '../../components/actions';
+import { BlastRadius } from '../../components/filters/blast_radius';
+import { AssignActionModal, BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
+import { ApprovalModal } from '../../components/modals/approval_modal';
+import { ConversationDetailsFlyout } from '../../components/details';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
-const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
 
 const isQueueRow = (investigation: Investigation): boolean =>
   QUEUE_STATUSES.has(investigation.status ?? 'open');
-
-const isAutoResolved = (investigation: Investigation): boolean =>
-  AUTO_RESOLVED_STATUSES.has(investigation.status ?? '');
 
 export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -44,8 +43,55 @@ export const ConversationsPage: React.FC = () => {
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   usePndDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
+  const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
+    string | undefined
+  >(undefined);
+
+  const [selectedIdForDetails, setSelectedIdForDetails] = useState<string | undefined>(undefined);
+  const [modalState, setModalState] = useState<{
+    type: CardActionType | null;
+    recordId: Investigation['recordId'] | null;
+    assignee?: string | null;
+  }>({ type: null, recordId: null, assignee: null });
+
   // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
+
+  const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
+    (action, recordId, assignee = null) => {
+      setModalState({ type: action, recordId, assignee });
+    },
+    [setModalState]
+  );
+
+  const onClickCard = useCallback(
+    (id: Investigation['recordId']) => {
+      setSelectedIdForDetails(id);
+    },
+    [setSelectedIdForDetails]
+  );
+
+  const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
+    useCallback(
+      ({ id }) => {
+        setSelectedIdForRecommendedAction(id);
+      },
+      [setSelectedIdForRecommendedAction]
+    );
+
+  const selectedRecommendedActionConversation = useMemo(
+    () =>
+      selectedIdForRecommendedAction
+        ? conversations.find((c) => c.id === selectedIdForRecommendedAction)
+        : undefined,
+    [conversations, selectedIdForRecommendedAction]
+  );
+
+  const selectedDetailsConversation: Investigation | undefined = useMemo(
+    () =>
+      selectedIdForDetails ? conversations.find((c) => c.id === selectedIdForDetails) : undefined,
+    [conversations, selectedIdForDetails]
+  );
 
   const sortedConversations = useMemo(
     () =>
@@ -58,24 +104,6 @@ export const ConversationsPage: React.FC = () => {
       }),
     [conversations]
   );
-
-  const autoResolvedCount = useMemo(
-    () => conversations.filter(isAutoResolved).length,
-    [conversations]
-  );
-
-  const surfaces = useMemo(() => {
-    const seen = new Set<string>();
-    const labels: string[] = [];
-    for (const investigation of sortedConversations) {
-      const surface = investigation.affectedSurface?.trim();
-      if (surface && !seen.has(surface)) {
-        seen.add(surface);
-        labels.push(surface);
-      }
-    }
-    return labels;
-  }, [sortedConversations]);
 
   const filteredQueueItems = useMemo(
     () =>
@@ -104,102 +132,121 @@ export const ConversationsPage: React.FC = () => {
   }, [filteredQueueItems]);
 
   return (
-    <PndPageSection restrictWidth="900px">
-      <PndPageHeader
-        title={
-          <>
-            {QUEUE_PAGE_INFO.greetingPrefix}{' '}
-            <span
-              css={css`
-                font-weight: 700;
-              `}
-            >
-              {QUEUE_PAGE_INFO.greetingEmphasis(sortedConversations.length)}
-            </span>
-          </>
-        }
-        subtitle={
-          autoResolvedCount > 0
-            ? QUEUE_PAGE_INFO.autonomousSubline(autoResolvedCount)
-            : QUEUE_PAGE_INFO.clearSubline
-        }
-      />
+    <PndPageSection
+      contentProps={{
+        css: css`
+          padding-block: ${euiTheme.size.xxl};
+          align-self: center;
+          max-width: 1000px;
+        `,
+      }}
+    >
+      {selectedIdForRecommendedAction && selectedRecommendedActionConversation && (
+        <ApprovalModal
+          selectedRecommendedActionConversation={selectedRecommendedActionConversation}
+          onConfirm={() =>
+            // TODO: use action API call hook
+            setSelectedIdForRecommendedAction(undefined)
+          }
+          onClose={() => setSelectedIdForRecommendedAction(undefined)}
+        />
+      )}
 
-      {surfaces.length > 0 ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup
-            gutterSize="s"
-            wrap
-            responsive={false}
-            alignItems="center"
-            aria-label={QUEUE_PAGE_INFO.affectedSurfaces}
-          >
-            {surfaces.map((surface) => (
-              <EuiFlexItem key={surface} grow={false}>
-                <EuiBadge
-                  style={{
-                    padding: euiTheme.size.s,
-                  }}
-                  color={surfaceFilter === surface ? 'primary' : 'hollow'}
-                  onClick={() =>
-                    setSurfaceFilter((current) => (current === surface ? null : surface))
-                  }
-                  onClickAriaLabel={surface}
-                >
-                  <EuiFlexGroup
-                    gutterSize="s"
-                    alignItems="center"
-                    responsive={false}
-                    direction="row"
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs">{surface}</EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="danger">
-                        {
-                          conversations.filter(
-                            (conversation) => conversation.affectedSurface === surface
-                          ).length
-                        }
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </>
-      ) : null}
+      {selectedIdForDetails && selectedDetailsConversation && (
+        <ConversationDetailsFlyout
+          investigation={selectedDetailsConversation}
+          onClose={() => setSelectedIdForDetails(undefined)}
+          onClickAction={onClickAction}
+          onClickRecommendedAction={onClickRecommendedAction}
+        />
+      )}
 
-      <EuiSpacer size="l" />
+      {modalState.type === 'assign' && modalState.recordId && (
+        <AssignActionModal
+          recordId={modalState.recordId}
+          initialAssignee={modalState.assignee}
+          onClose={() => setModalState({ type: null, recordId: null })}
+          onAssign={() => {
+            // TODO: use assign action API call hook
+            setModalState({ type: null, recordId: null });
+          }}
+        />
+      )}
 
-      {isLoading ? (
-        <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
+      {modalState.type === 'dismiss' && modalState.recordId && (
+        <BaseActionModal
+          type="dismiss"
+          title={MODAL_TRANSLATIONS.dismiss.title}
+          recordId={modalState.recordId}
+          onClose={() => setModalState({ type: null, recordId: null })}
+          rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
+          primaryAction={{
+            color: 'danger',
+            label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
+            onClick: () => {
+              // TODO: use dismiss action API call hook
+              setModalState({ type: null, recordId: null });
+            },
+          }}
+        />
+      )}
+
+      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+        <EuiFlexItem grow={false}>
+          <PndPageHeader
+            isQueueEmpty={sortedConversations.length === 0}
+            eventCount={filteredQueueItems.length}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <BlastRadius
+            investigations={sortedConversations}
+            surfaceFilter={surfaceFilter}
+            onSurfaceFilterChange={setSurfaceFilter}
+          />
+        </EuiFlexItem>
+
+        {isLoading ? (
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" aria-label={QUEUE_PAGE_INFO.loading} />
+            <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="xl" aria-label={QUEUE_PAGE_INFO.loading} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
+        ) : null}
 
-      {error ? (
-        <EuiEmptyPrompt iconType="warning" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
-      ) : null}
+        {error ? (
+          <EuiFlexItem grow={false}>
+            <EuiEmptyPrompt iconType="warning" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
+          </EuiFlexItem>
+        ) : null}
 
-      {!isLoading && !error && filteredQueueItems.length === 0 ? (
-        <EuiEmptyPrompt iconType="chartTagCloud" title={<h2>{QUEUE_PAGE_INFO.emptyQueue}</h2>} />
-      ) : null}
-
-      {!isLoading && !error
-        ? groupedBriefingItems.map((group) => (
-            <ConversationQueue
-              briefingId={group.id}
-              briefingType={group.id as RecommendedAction}
-              briefingList={group.items}
+        {!isLoading && !error && filteredQueueItems.length === 0 ? (
+          <EuiFlexItem grow={false}>
+            <EuiEmptyPrompt
+              iconType="chartTagCloud"
+              title={<h2>{QUEUE_PAGE_INFO.emptyQueue}</h2>}
             />
-          ))
-        : null}
+          </EuiFlexItem>
+        ) : null}
+
+        {!isLoading && !error
+          ? groupedBriefingItems.map((group) => (
+              <EuiFlexItem key={group.id} grow={false}>
+                <ConversationQueue
+                  briefingId={group.id}
+                  briefingType={group.id as RecommendedAction}
+                  briefingList={group.items}
+                  isFiltered={filteredQueueItems.length !== sortedConversations.length}
+                  onClickRecommendedAction={onClickRecommendedAction}
+                  onClickAction={onClickAction}
+                  onClickCard={onClickCard}
+                />
+              </EuiFlexItem>
+            ))
+          : null}
+      </EuiFlexGroup>
     </PndPageSection>
   );
 };

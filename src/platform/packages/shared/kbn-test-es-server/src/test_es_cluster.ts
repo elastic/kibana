@@ -11,7 +11,7 @@ import Path from 'path';
 import { format } from 'url';
 import del from 'del';
 import { v4 as uuidv4 } from 'uuid';
-import globby from 'globby';
+import { glob } from 'fast-glob';
 import createArchiver from 'archiver';
 import Fs from 'fs';
 import { pipeline } from 'stream/promises';
@@ -408,7 +408,7 @@ export function createTestEsCluster<
     }
 
     async captureDebugFiles() {
-      const debugFiles = await globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
+      const debugFiles = await glob([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
         cwd: config.installPath,
         absolute: true,
       });

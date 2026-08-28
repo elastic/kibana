@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -138,7 +139,7 @@ describe('#getAll', () => {
   const savedObjects: Array<SavedObject<unknown>> = [
     {
       // foo has all of the attributes expected by the space interface
-      id: 'foo',
+      id: asSpaceId('foo'),
       type: 'space',
       references: [],
       attributes: {
@@ -155,7 +156,7 @@ describe('#getAll', () => {
     },
     {
       // bar his missing attributes of color and image url
-      id: 'bar',
+      id: asSpaceId('bar'),
       type: 'space',
       references: [],
       attributes: {
@@ -168,7 +169,7 @@ describe('#getAll', () => {
     },
     {
       // baz only has the bare minumum atributes
-      id: 'baz',
+      id: asSpaceId('baz'),
       type: 'space',
       references: [],
       attributes: {
@@ -179,7 +180,7 @@ describe('#getAll', () => {
     },
     {
       // alpha has deprecated disabled features
-      id: 'alpha',
+      id: asSpaceId('alpha'),
       type: 'space',
       references: [],
       attributes: {
@@ -190,7 +191,7 @@ describe('#getAll', () => {
     },
     {
       // beta has deprecated disabled features with specified `replacedBy` on feature level
-      id: 'beta',
+      id: asSpaceId('beta'),
       type: 'space',
       references: [],
       attributes: {
@@ -203,7 +204,7 @@ describe('#getAll', () => {
 
   const expectedSpaces: Space[] = [
     {
-      id: 'foo',
+      id: asSpaceId('foo'),
       name: 'foo-name',
       description: 'foo-description',
       color: '#FFFFFF',
@@ -214,26 +215,26 @@ describe('#getAll', () => {
       _reserved: true,
     },
     {
-      id: 'bar',
+      id: asSpaceId('bar'),
       name: 'bar-name',
       description: 'bar-description',
       initials: 'BA',
       disabledFeatures: [],
     },
     {
-      id: 'baz',
+      id: asSpaceId('baz'),
       name: 'baz-name',
       description: 'baz-description',
       disabledFeatures: [],
     },
     {
-      id: 'alpha',
+      id: asSpaceId('alpha'),
       name: 'alpha-name',
       description: 'alpha-description',
       disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
     },
     {
-      id: 'beta',
+      id: asSpaceId('beta'),
       name: 'beta-name',
       description: 'beta-description',
       disabledFeatures: ['feature_1', 'feature_2'],
@@ -323,7 +324,7 @@ describe('#getAll', () => {
 
 describe('#get', () => {
   const savedObject: SavedObject = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     type: 'space',
     references: [],
     attributes: {
@@ -339,7 +340,7 @@ describe('#get', () => {
   };
 
   const expectedSpace: Space = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     name: 'foo-name',
     description: 'foo-description',
     color: '#FFFFFF',
@@ -431,7 +432,7 @@ describe('#getPersistedFeatureVisibility', () => {
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue({
-      id: 'foo',
+      id: asSpaceId('foo'),
       type: 'space',
       references: [],
       attributes: { name: 'foo', disabledFeatures: ['feature_1', 'feature_2'] },
@@ -458,7 +459,7 @@ describe('#getPersistedFeatureVisibility', () => {
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue({
-      id: 'foo',
+      id: asSpaceId('foo'),
       type: 'space',
       references: [],
       attributes: { name: 'foo' },
@@ -504,7 +505,7 @@ describe('#getPersistedFeatureVisibility', () => {
 });
 
 describe('#create', () => {
-  const id = 'foo';
+  const id = asSpaceId('foo');
   const attributes = {
     name: 'foo-name',
     description: 'foo-description',
@@ -891,14 +892,14 @@ describe('#update', () => {
   };
 
   const spaceToUpdate = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     ...attributes,
     _reserved: false, // will have no affect
     bar: 'foo-bar', // will not make it to the saved object attributes
   };
 
   const savedObject: SavedObject = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     type: 'space',
     references: [],
     attributes: {
@@ -909,7 +910,7 @@ describe('#update', () => {
   };
 
   const expectedReturnedSpace: Space = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     ...attributes,
     _reserved: true,
   };
@@ -1365,7 +1366,7 @@ describe('#update', () => {
 });
 
 describe('#delete', () => {
-  const id = 'foo';
+  const id = asSpaceId('foo');
 
   const reservedSavedObject: SavedObject = {
     id,
@@ -1472,7 +1473,7 @@ describe('projectRouting functionality', () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -1504,7 +1505,7 @@ describe('projectRouting functionality', () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -1536,7 +1537,7 @@ describe('projectRouting functionality', () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -1568,7 +1569,7 @@ describe('projectRouting functionality', () => {
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
       mockCallWithRequestRepository.create.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -1592,7 +1593,7 @@ describe('projectRouting functionality', () => {
       );
 
       const spaceToCreate = {
-        id: 'foo',
+        id: asSpaceId('foo'),
         name: 'foo-name',
         disabledFeatures: [],
         projectRouting: 'project:test-project',
@@ -1631,7 +1632,7 @@ describe('projectRouting functionality', () => {
       );
 
       const spaceToCreate = {
-        id: 'foo',
+        id: asSpaceId('foo'),
         name: 'foo-name',
         disabledFeatures: [],
         projectRouting: 'project:test-project',
@@ -1661,7 +1662,7 @@ describe('projectRouting functionality', () => {
       );
 
       const spaceToCreate = {
-        id: 'foo',
+        id: asSpaceId('foo'),
         name: 'foo-name',
         disabledFeatures: [],
         projectRouting: 'project:test-project',
@@ -1689,7 +1690,7 @@ describe('projectRouting functionality', () => {
       );
 
       const spaceToCreate = {
-        id: 'foo',
+        id: asSpaceId('foo'),
         name: 'foo-name',
         disabledFeatures: [],
         projectRouting: 'project:test-project',
@@ -1705,7 +1706,7 @@ describe('projectRouting functionality', () => {
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
       mockCallWithRequestRepository.create.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -1727,7 +1728,7 @@ describe('projectRouting functionality', () => {
       );
 
       const spaceToCreate = {
-        id: 'foo',
+        id: asSpaceId('foo'),
         name: 'foo-name',
         disabledFeatures: [],
       };
@@ -1747,7 +1748,7 @@ describe('projectRouting functionality', () => {
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.update.mockResolvedValue({} as any);
       mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -1771,7 +1772,7 @@ describe('projectRouting functionality', () => {
       );
 
       const spaceToUpdate = {
-        id: 'foo',
+        id: asSpaceId('foo'),
         name: 'foo-name',
         disabledFeatures: [],
         projectRouting: 'project:updated-project',
@@ -1792,7 +1793,7 @@ describe('projectRouting functionality', () => {
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.update.mockResolvedValue({} as any);
       mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -1816,7 +1817,7 @@ describe('projectRouting functionality', () => {
       );
 
       const spaceToUpdate = {
-        id: 'foo',
+        id: asSpaceId('foo'),
         name: 'foo-name',
         disabledFeatures: [],
         projectRouting: undefined,
@@ -1845,7 +1846,7 @@ describe('projectRouting functionality', () => {
       );
 
       const spaceToUpdate = {
-        id: 'foo',
+        id: asSpaceId('foo'),
         name: 'foo-name',
         disabledFeatures: [],
         projectRouting: 'project:updated-project',
@@ -1872,7 +1873,7 @@ describe('projectRouting functionality', () => {
       );
 
       const spaceToUpdate = {
-        id: 'foo',
+        id: asSpaceId('foo'),
         name: 'foo-name',
         disabledFeatures: [],
         projectRouting: 'project:updated-project',
@@ -1889,7 +1890,7 @@ describe('projectRouting functionality', () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -1921,7 +1922,7 @@ describe('projectRouting functionality', () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -1975,7 +1976,7 @@ describe('projectRouting functionality', () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {
@@ -2004,7 +2005,7 @@ describe('projectRouting functionality', () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
+        id: asSpaceId('foo'),
         type: 'space',
         references: [],
         attributes: {

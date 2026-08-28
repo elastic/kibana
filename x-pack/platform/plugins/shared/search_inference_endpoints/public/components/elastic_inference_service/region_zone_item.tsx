@@ -35,7 +35,7 @@ export const RegionZoneItem: React.FC<RegionZoneItemProps> = ({
     <EuiButtonEmpty
       size="s"
       color="text"
-      iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+      iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
       iconSide="right"
       onClick={() => onToggleExpand(zone.geo, !isOpen)}
       aria-expanded={isOpen}

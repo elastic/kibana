@@ -16,7 +16,9 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: packages/kbn-eslint-plugin-kbn-ui
-dependsOn: []
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/repo-packages'
 tags:
   - shared-common
   - package

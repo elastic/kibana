@@ -6,12 +6,10 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import type { ConnectorEventEmitter } from '@kbn/actions-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
-import type {
-  ActionsHubConnectorEventRegistry,
-  ConnectorEventEmitter,
-} from './actions_hub_contract';
 import {
   getConnectorEventEmitFailureCount,
   registerWorkflowsConnectorEventEmitter,
@@ -26,12 +24,6 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     resetConnectorEventEmitFailureCountForTests();
   });
 
-  const createActionsRegistryMock = (): ActionsHubConnectorEventRegistry & {
-    registerConnectorEventEmitter: jest.Mock;
-  } => ({
-    registerConnectorEventEmitter: jest.fn(),
-  });
-
   const registerAndGetEmitter = ({
     getClient,
     getWorkflowsExtensionsStart,
@@ -42,9 +34,9 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     emitter: ConnectorEventEmitter;
     emitEvent: jest.Mock;
     getClient: jest.Mock;
-    actions: ReturnType<typeof createActionsRegistryMock>;
+    actions: ReturnType<typeof actionsMock.createSetup>;
   } => {
-    const actions = createActionsRegistryMock();
+    const actions = actionsMock.createSetup();
     const emitEvent = jest.fn().mockResolvedValue(undefined);
     const resolvedGetClient = getClient ?? jest.fn().mockResolvedValue({ emitEvent });
 

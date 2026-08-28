@@ -46,6 +46,9 @@
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/content-list",
+    "@kbn/content-list-provider",
+    "@kbn/content-list-toolbar",
     "@kbn/scout",
     "@kbn/search-api-panels",
     "@kbn/usage-collection-plugin",
@@ -54,7 +57,8 @@
     "@kbn/core-http-browser",
     "@kbn/es-errors",
     "@kbn/app-header",
-    "@kbn/core-chrome-browser-context-mocks"
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
