@@ -43,6 +43,7 @@ export const initializeManagedWorkflows = async ({
           error instanceof Error ? error.message : String(error)
         }`
       );
+      break;
     }
   }
 

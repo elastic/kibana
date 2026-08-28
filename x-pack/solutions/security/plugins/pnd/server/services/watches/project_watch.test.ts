@@ -266,7 +266,7 @@ describe('project watch', () => {
 
     // Only `waitForApproval` renders the approve/reject buttons; a `waitForInput` gate
     // makes an analyst hand-author the resume payload as JSON instead.
-    it('gates both workers on an approval step that reads response.approved', () => {
+    it('gates the proposal and creation workers on approval responses', () => {
       for (const id of [PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
         const { steps } = parse(getManagedYaml(id)) as WorkflowYaml;
         const all = flattenSteps(steps as unknown as NestedStep[]);
@@ -320,6 +320,10 @@ describe('project watch', () => {
         expect(groupClause).not.toContain('kibana.alert.rule.name');
       });
 
+      it('excludes hidden building-block alerts from the FP-rate denominator', () => {
+        expect(harvestQuery).toContain('`kibana.alert.building_block_type` IS NULL');
+      });
+
       // The tag API writes to the alerts index of the space it runs in, so anything the
       // harvest reads outside that space could never be marked.
       it('harvests only the space it can tag in', () => {
@@ -337,31 +341,27 @@ describe('project watch', () => {
           'mark_alerts_dismissed',
           'mark_alerts_applied',
           'mark_alerts_handoff',
-          'mark_alerts_reviewed',
         ]);
 
-        const [dismissed, applied, handoff, reviewed] = tagSteps;
+        const [dismissed, applied, handoff] = tagSteps;
         expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
         expect(dismissed.with?.tags_to_add).toBe('${{ consts.dismissed_tags }}');
-        for (const step of [applied, handoff, reviewed]) {
+        for (const step of [applied, handoff]) {
           expect(step.if).toContain('steps.review_tuning.output.response.approved == true');
         }
         expect(applied.with?.tags_to_add).toBe('${{ consts.applied_tags }}');
         expect(handoff.with?.tags_to_add).toBe('${{ consts.handoff_tags }}');
-        expect(reviewed.with?.tags_to_add).toBe('${{ consts.reviewed_only_tags }}');
         for (const step of tagSteps) {
           expect(step).not.toHaveProperty('on-failure');
         }
       });
 
-      // The applied tag must mean this pipeline changed the rule. Manual handoffs and
-      // approved query proposals that could not be applied use distinct outcomes.
+      // The applied tag must mean this pipeline changed the rule. Manual handoffs use a
+      // distinct outcome; failed query applications remain unreviewed for a later retry.
       it('tags applied only when the rule was actually patched', () => {
         const applied = tagSteps.find(({ name }) => name === 'mark_alerts_applied')!;
-        const reviewed = tagSteps.find(({ name }) => name === 'mark_alerts_reviewed')!;
 
         expect(applied.if).toContain('steps.record_outcome.output.rule_patched == true');
-        expect(reviewed.if).toContain('steps.record_outcome.output.rule_patched == false');
 
         const outcome = proposalSteps.find(({ name }) => name === 'record_outcome')!;
         expect(String(outcome.with?.rule_patched)).toContain(
@@ -372,8 +372,10 @@ describe('project watch', () => {
       // The gate can stay open for 72h; a stale approval must not clobber an analyst
       // edit made in the meantime.
       it('re-reads the rule after approval and applies only when it is unchanged', () => {
+        const diagnose = proposalSteps.find(({ name }) => name === 'diagnose_rule')!;
         const apply = proposalSteps.find(({ name }) => name === 'apply_query_tuning')!;
         const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
+        expect(diagnose.if).toContain('steps.fetch_rule.output.id == inputs.rule_uuid');
         expect(String(eligibility.with?.eligible)).toContain(
           'steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at'
         );
@@ -398,11 +400,15 @@ describe('project watch', () => {
       it('requires both previews before applying a query change', () => {
         const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
         const condition = String(eligibility.with?.eligible);
+        const outcome = proposalSteps.find(({ name }) => name === 'record_preview_outcome')!;
+        const outcomeInput = JSON.stringify(outcome.with);
 
         expect(condition).toContain('current_succeeded == true');
         expect(condition).toContain('current_is_aborted == false');
         expect(condition).toContain('proposed_succeeded == true');
         expect(condition).toContain('proposed_is_aborted == false');
+        expect(outcomeInput).toContain('output.timed_out == false');
+        expect(outcomeInput).toContain('output._shards.failed == 0');
       });
 
       it('bounds direct proposal inputs', () => {
@@ -411,6 +417,7 @@ describe('project watch', () => {
         }>;
         const { properties } = trigger.inputs;
 
+        expect(properties.rule_uuid).toEqual(expect.objectContaining({ maxLength: 512 }));
         expect(properties.alert_ids).toEqual(
           expect.objectContaining({ minItems: 1, maxItems: 1000 })
         );
@@ -436,7 +443,6 @@ describe('project watch', () => {
             dismissed_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-dismissed'],
             applied_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-applied'],
             handoff_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-handoff'],
-            reviewed_only_tags: ['detection-watch:tuning-reviewed'],
           })
         );
 
@@ -445,7 +451,6 @@ describe('project watch', () => {
           tagConsts.dismissed_tags,
           tagConsts.applied_tags,
           tagConsts.handoff_tags,
-          tagConsts.reviewed_only_tags,
         ]) {
           expect(tags).toContain(reviewedTag);
         }
@@ -492,6 +497,7 @@ describe('project watch', () => {
 
         expect(launches.map(({ name }) => name)).toEqual(['launch_proposal']);
         expect(launches[0].with?.['workflow-id']).toBe(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID);
+        expect(launches[0]).not.toHaveProperty('on-failure');
         expect(tuningSteps.map(({ type }) => type)).not.toContain('waitForApproval');
 
         const { concurrency } = (proposal as unknown as { settings: Record<string, unknown> })
@@ -502,7 +508,7 @@ describe('project watch', () => {
       });
     });
 
-    it('keeps the skills and the preview worker inside the workers themselves', () => {
+    it('keeps skills and preview behavior inside the workers', () => {
       const workerCallables = (id: string) =>
         projectCallablesFromDefinition(parse(getManagedYaml(id)) as WorkflowYaml, undefined);
 

@@ -31,7 +31,7 @@ triggers:
           type: number
           minimum: 0
           maximum: 100
-          description: Overrides the minimum share of a rule's alerts, in percent, that must be unreviewed false positives.
+          description: Overrides the minimum share of a rule's alerts, in percent, that analysts closed as false positives.
         analysis_window_days:
           type: integer
           minimum: 1
@@ -44,7 +44,7 @@ triggers:
           description: Overrides the rule executions each backtest preview simulates.
       additionalProperties: false
 outputs:
-  - name: rules_examined
+  - name: proposals_requested
     type: number
   - name: harvest_failed
     type: boolean
@@ -54,6 +54,7 @@ consts:
   analysis_window_days: 14
   min_fp_count: 10
   min_fp_rate_pct: 50
+  max_rules_per_sweep: 10
   preview_invocation_count: 2
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
   # empty array. A const is the only way to spell an empty-array fallback.
@@ -80,6 +81,7 @@ steps:
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
         | WHERE @timestamp >= NOW() - {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days
+          AND `kibana.alert.building_block_type` IS NULL
         | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
             AND `kibana.alert.workflow_reason` == "false_positive"
         | EVAL is_unreviewed_fp = is_fp
@@ -92,9 +94,9 @@ steps:
           BY `kibana.alert.rule.uuid`, `kibana.alert.rule.rule_id`
         | WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
           AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
-        | KEEP fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
+        | KEEP `kibana.alert.rule.uuid`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
         | SORT fp_count DESC
-        | LIMIT 10
+        | LIMIT {{ consts.max_rules_per_sweep }}
     on-failure:
       continue: true
 
@@ -109,31 +111,29 @@ steps:
     steps:
       # ES|QL rows arrive as positional arrays in the harvest's KEEP order.
       # `${{ }}` preserves the value's type (numbers, arrays); `{{ }}` stringifies.
-      # `on-failure: continue` so one bad launch cannot abort the remaining rules.
       - name: launch_proposal
         type: workflow.executeAsync
         with:
           workflow-id: system-security-rule-tuning-proposal
           inputs:
-            fp_count: "${{ foreach.item.0 }}"
-            rule_id: "{{ foreach.item.1 }}"
-            last_fp_at: "{{ foreach.item.2 }}"
-            alert_ids: "${{ foreach.item.3 }}"
+            rule_uuid: "{{ foreach.item.0 }}"
+            fp_count: "${{ foreach.item.1 }}"
+            rule_id: "{{ foreach.item.2 }}"
+            last_fp_at: "{{ foreach.item.3 }}"
+            alert_ids: "${{ foreach.item.4 }}"
             analysis_window_days: "${{ inputs.analysis_window_days | default: consts.analysis_window_days }}"
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
-        on-failure:
-          continue: true
 
   # Size is computed on its own because comparison operators cannot follow a filter chain.
-  - name: count_examined_rules
+  - name: count_requested_proposals
     type: data.set
     with:
-      rules_examined: "${{ steps.harvest_fp_alerts_by_rule.output.values | size | default: 0 }}"
+      proposals_requested: "${{ steps.harvest_fp_alerts_by_rule.output.values | size | default: 0 }}"
 
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      rules_examined: "${{ steps.count_examined_rules.output.rules_examined }}"
+      proposals_requested: "${{ steps.count_requested_proposals.output.proposals_requested }}"
       harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"

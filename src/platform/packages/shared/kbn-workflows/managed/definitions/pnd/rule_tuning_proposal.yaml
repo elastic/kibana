@@ -20,6 +20,10 @@ triggers:
   - type: manual
     inputs:
       properties:
+        rule_uuid:
+          type: string
+          maxLength: 512
+          description: Saved-object id of the rule incarnation that produced the alerts.
         rule_id:
           type: string
           maxLength: 512
@@ -63,6 +67,7 @@ triggers:
       # parameters default from consts so the sweep and this workflow can upgrade
       # independently without a one-sided input-validation failure.
       required:
+        - rule_uuid
         - rule_id
         - fp_count
         - last_fp_at
@@ -93,10 +98,7 @@ consts:
   handoff_tags:
     - detection-watch:tuning-reviewed
     - detection-watch:tuning-handoff
-  # For approved query proposals whose change could not be applied: the decision is
-  # recorded (stopping the resweep loop) without claiming a change happened.
-  reviewed_only_tags:
-    - detection-watch:tuning-reviewed
+  no_items: []
 steps:
   - name: fetch_rule
     type: kibana.request
@@ -112,7 +114,10 @@ steps:
 
   - name: diagnose_rule
     type: ai.agent
-    if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.fetch_rule.output.id == inputs.rule_uuid }}
     timeout: "10m"
     create-conversation: true
     with:
@@ -187,8 +192,18 @@ steps:
         query: "{{ steps.fetch_rule.output.query }}"
         language: "{{ steps.fetch_rule.output.language }}"
         index: "${{ steps.fetch_rule.output.index }}"
+        filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+        exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
         severity: "{{ steps.fetch_rule.output.severity }}"
+        severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
         risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+        risk_score_mapping: "${{ steps.fetch_rule.output.risk_score_mapping | default: consts.no_items }}"
+        max_signals: "${{ steps.fetch_rule.output.max_signals }}"
+        threat: "${{ steps.fetch_rule.output.threat | default: consts.no_items }}"
+        tags: "${{ steps.fetch_rule.output.tags | default: consts.no_items }}"
+        author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
+        false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
+        references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
         interval: "{{ steps.fetch_rule.output.interval }}"
         from: "{{ steps.fetch_rule.output.from }}"
         to: "{{ steps.fetch_rule.output.to }}"
@@ -204,6 +219,7 @@ steps:
       index: ".preview.alerts-security.alerts-{{ workflow.spaceId }}"
       size: 0
       track_total_hits: true
+      allow_partial_search_results: false
       query:
         term:
           kibana.alert.rule.uuid: "{{ steps.preview_current_rule.output.previewId }}"
@@ -238,8 +254,18 @@ steps:
         query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
         language: "{{ steps.fetch_rule.output.language }}"
         index: "${{ steps.fetch_rule.output.index }}"
+        filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+        exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
         severity: "{{ steps.fetch_rule.output.severity }}"
+        severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
         risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+        risk_score_mapping: "${{ steps.fetch_rule.output.risk_score_mapping | default: consts.no_items }}"
+        max_signals: "${{ steps.fetch_rule.output.max_signals }}"
+        threat: "${{ steps.fetch_rule.output.threat | default: consts.no_items }}"
+        tags: "${{ steps.fetch_rule.output.tags | default: consts.no_items }}"
+        author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
+        false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
+        references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
         interval: "{{ steps.fetch_rule.output.interval }}"
         from: "{{ steps.fetch_rule.output.from }}"
         to: "{{ steps.fetch_rule.output.to }}"
@@ -255,6 +281,7 @@ steps:
       index: ".preview.alerts-security.alerts-{{ workflow.spaceId }}"
       size: 0
       track_total_hits: true
+      allow_partial_search_results: false
       query:
         term:
           kibana.alert.rule.uuid: "{{ steps.preview_proposed_rule.output.previewId }}"
@@ -275,6 +302,8 @@ steps:
       current_succeeded: >-
         ${{ steps.preview_current_rule.error == null
           and steps.count_current_preview_alerts.error == null
+          and steps.count_current_preview_alerts.output.timed_out == false
+          and steps.count_current_preview_alerts.output._shards.failed == 0
           and steps.collect_current_preview_errors.output.error_text == '' }}
       current_alert_count: "${{ steps.count_current_preview_alerts.output.hits.total.value | default: -1 }}"
       current_is_aborted: "${{ steps.preview_current_rule.output.isAborted | default: false }}"
@@ -282,6 +311,8 @@ steps:
       proposed_succeeded: >-
         ${{ steps.preview_proposed_rule.error == null
           and steps.count_proposed_preview_alerts.error == null
+          and steps.count_proposed_preview_alerts.output.timed_out == false
+          and steps.count_proposed_preview_alerts.output._shards.failed == 0
           and steps.collect_proposed_preview_errors.output.error_text == '' }}
       proposed_alert_count: "${{ steps.count_proposed_preview_alerts.output.hits.total.value | default: -1 }}"
       proposed_is_aborted: "${{ steps.preview_proposed_rule.output.isAborted | default: false }}"
@@ -326,8 +357,8 @@ steps:
         Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         Approving applies the proposed query only if both backtests succeeded and the
-        rule has not been edited since this diagnosis; otherwise approving records
-        the decision without changing the rule.
+        rule has not been edited since this diagnosis. Otherwise no rule or alert tags
+        change, and a later sweep can retry with current data.
         {% else %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         Proposed exception:
@@ -423,18 +454,6 @@ steps:
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add: "${{ consts.handoff_tags }}"
-
-  # Approved query proposal that could not be applied because a backtest failed or
-  # the rule changed during the gate: record the review without claiming a change.
-  - name: mark_alerts_reviewed
-    type: security.setAlertTags
-    if: >-
-      ${{ steps.review_tuning.output.response.approved == true
-        and steps.diagnose_rule.output.structured_output.change_type == 'query'
-        and steps.record_outcome.output.rule_patched == false }}
-    with:
-      alert_ids: "${{ inputs.alert_ids }}"
-      tags_to_add: "${{ consts.reviewed_only_tags }}"
 
   - name: emit_result
     type: workflow.output
