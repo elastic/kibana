@@ -516,7 +516,6 @@ describe('AgentlessPoliciesService', () => {
       deleteAgentlessAgentSpy.mockRestore();
     });
 
-
     it('should throw PackagePolicyRequestError and still call deleteAgentlessAgent when delete has per-item failures', async () => {
       const packagePolicyId = 'orphaned-package-policy-id';
 
