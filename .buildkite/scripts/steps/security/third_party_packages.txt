@@ -64,5 +64,5 @@ reselect-v4
 graphql
 @cfworker/json-schema
 css-tree
-parse5
 @types/css-tree
+@mozilla/readability

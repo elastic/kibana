@@ -198,19 +198,18 @@ const renderedTexts = async (
   sessions: CDPSession[],
   fragments: string[]
 ): Promise<string[]> => {
-  const csp = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">`;
   return Promise.all(
     fragments.map(async (html, index) => {
-      const page = pages[index];
-      await page.goto(`data:text/html,${encodeURIComponent(csp + html)}`, {
-        waitUntil: 'domcontentloaded',
-        timeout: 5_000,
-      });
-      const evaluation = await sessions[index].send('Runtime.evaluate', {
-        expression: 'document.documentElement.innerText',
+      const result = await sessions[index].send('Runtime.evaluate', {
+        expression: `(() => {
+          const container = document.createElement('div');
+          container.innerHTML = ${JSON.stringify(html)};
+          document.body.replaceChildren(container);
+          return container.innerText;
+        })()`,
         returnByValue: true,
       });
-      return typeof evaluation.result.value === 'string' ? evaluation.result.value : '';
+      return typeof result.result.value === 'string' ? result.result.value : '';
     })
   );
 };
@@ -228,6 +227,7 @@ describe('content extraction agrees with Chromium marker visibility', () => {
     pages = await Promise.all(
       Array.from({ length: FRAGMENTS_PER_BATCH }, () => launchedBrowser.newPage())
     );
+    await Promise.all(pages.map((page) => page.context().setOffline(true)));
     sessions = await Promise.all(pages.map((page) => page.context().newCDPSession(page)));
   });
 
@@ -266,9 +266,5 @@ describe('content extraction agrees with Chromium marker visibility', () => {
       }),
       { numRuns: batches, seed: FUZZ_SEED, verbose: true }
     );
-  });
-
-  it('preserves content after an intentionally supported XHTML self-closing raw-text tag', () => {
-    expect(stripHtml('<script src="x.js"/><p>TI_MARKER_VISIBLE</p>')).toBe('TI_MARKER_VISIBLE');
   });
 });

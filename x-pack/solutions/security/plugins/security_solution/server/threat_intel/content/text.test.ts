@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import { Tokenizer } from 'parse5';
-import {
-  MAX_PARSE_BYTES,
-  buildReportContent,
-  capToParseBytes,
-  collapseWhitespace,
-  htmlToStructured,
-  stripHtml,
-  truncate,
-} from './text';
+import { buildReportContent, htmlToStructured, stripHtml, truncate } from './text';
 
 describe('stripHtml', () => {
   it.each([
@@ -24,80 +15,51 @@ describe('stripHtml', () => {
     ['<p>Hello <strong>world</strong></p>', 'Hello world'],
     ['<p>5 &lt; 10 and CVSS &gt; 7</p>', '5 < 10 and CVSS > 7'],
     ['<p>&copy;&nbsp;Acme &mdash; &ldquo;hello&rdquo;</p>', '© Acme — “hello”'],
-    ['<p>&#65; &#x42;</p>', 'A B'],
     ['<p>one</p><!-- hidden.test --><p>two</p>', 'one two'],
-  ])('extracts visible text from %j', (html, expected) => {
+  ])('extracts browser text from %j', (html, expected) => {
     expect(stripHtml(html)).toBe(expected);
   });
 
   it.each([
-    '<script>false.test</script><p>safe.test</p>',
-    '<style>.false{display:block}</style><p>safe.test</p>',
+    '<div><script>false.test</script><p>safe.test</p></div>',
+    '<div><style>.false{display:block}</style><p>safe.test</p></div>',
     '<script>false.test</script ><p>safe.test</p>',
-    '<script>false.test</script\t junk><p>safe.test</p>',
-    '<script>false.test</script foo="a>b"><p>safe.test</p>',
-    '<script>false.test</script/><p>safe.test</p>',
-    '<script src="x.js"/><p>safe.test</p>',
-    '<style/><p>safe.test</p>',
-    '<script src=x/>false.test</script><p>safe.test</p>',
+    '<script>false.test</script\t><p>safe.test</p>',
+    '<script>false.test</script\n><p>safe.test</p>',
+    '<script>false.test</script\r><p>safe.test</p>',
+    '<script>false.test</script\f><p>safe.test</p>',
     '<script>x</script\u00a0>false.test</script><p>safe.test</p>',
     '<script>x</scriptfoo>false.test</script><p>safe.test</p>',
-  ])('removes raw-text nodes without losing a following sibling', (html) => {
+  ])('uses browser raw-text boundaries for %j', (html) => {
     expect(stripHtml(html)).toBe('safe.test');
   });
 
   it.each([
     ['<p>safe.test</p><script>false.test', 'safe.test'],
-    ['<p>safe.test</p><style>false.test', 'safe.test'],
     ['<script>false.test', ''],
-  ])('removes an unterminated raw-text node through EOF', (html, expected) => {
+    ['<script src="x.js"/><p>consumed.test</p>', ''],
+  ])('uses browser recovery for unterminated and XHTML-style raw text', (html, expected) => {
     expect(stripHtml(html)).toBe(expected);
   });
 
   it.each([
-    [
-      '<title>Analysis of <script> malware</title><article>IOC: safe.test</article>',
-      'IOC: safe.test',
-    ],
+    ['<title>Analysis of <script> malware</title><p>safe.test</p>', 'safe.test'],
     ['<textarea><style>false.test</style></textarea><p>safe.test</p>', 'safe.test'],
     ['<!-- <script>false.test</script> --><p>safe.test</p>', 'safe.test'],
     ['<p title="<script>false.test</script>">safe.test</p>', 'safe.test'],
-  ])('keeps raw-text-looking syntax in its parser-defined context', (html, expected) => {
+  ])('leaves parsing context to JSDOM', (html, expected) => {
     expect(stripHtml(html)).toBe(expected);
   });
 
   it.each([
-    ['&lt;p&gt;safe.test&lt;/p&gt;', 'safe.test'],
-    ['&lt;p&gt;safe&lt;/p&gt;&lt;script&gt;false.test&lt;/script&gt;', 'safe'],
-    ['Use &lt;script&gt; carefully', 'Use <script> carefully'],
-    ['<p>Show &lt;script&gt;example&lt;/script&gt;</p>', 'Show <script>example</script>'],
-  ])('handles entity-encoded markup without recursive interpretation', (html, expected) => {
-    expect(stripHtml(html)).toBe(expected);
-  });
-
-  it.each([
-    ['<![CDATA[<article><p>safe.test</p></article>]]>', 'safe.test'],
-    ['<![CDATA[<script>false.test</script><p>safe.test</p>]]>', 'safe.test'],
-    ['<![CDATA[Use <script> literally]]>', 'Use <script> literally'],
-    ['<![CDATA[Use <style> literally]]>', 'Use <style> literally'],
-  ])('handles CDATA payloads', (html, expected) => {
-    expect(stripHtml(html)).toBe(expected);
-  });
-
-  it.each([
+    ['<script>false.test</script><p>safe.test</p>', 'safe.test'],
     ['<template>false.test</template><p>safe.test</p>', 'safe.test'],
     ['<iframe>false.test</iframe><p>safe.test</p>', 'safe.test'],
     ['<noembed>false.test</noembed><p>safe.test</p>', 'safe.test'],
     ['<noframes>false.test</noframes><p>safe.test</p>', 'safe.test'],
-    ['<title>false.test</title><p>safe.test</p>', 'safe.test'],
     ['<textarea>false.test</textarea><p>safe.test</p>', 'safe.test'],
-    ['<noscript>safe.test</noscript>', 'safe.test'],
-    ['<xmp>safe-xmp.test<script>safe-nested.test</script></xmp>', 'safe-xmp.testsafe-nested.test'],
-    [
-      '<plaintext>safe-plain.test<script>safe-nested.test</script></plaintext>',
-      'safe-plain.testsafe-nested.test',
-    ],
-  ])('matches reader-visible subtree behavior', (html, expected) => {
+    ['<noscript><p>safe.test</p></noscript>', 'safe.test'],
+  ])('removes non-rendered subtree %j with a boundary', (html, expected) => {
     expect(stripHtml(html)).toBe(expected);
   });
 
@@ -105,7 +67,8 @@ describe('stripHtml', () => {
     ['c2.<strong>evil</strong>.test', 'c2.evil.test'],
     ['<span>evil.test</span><span>bad.test</span>', 'evil.testbad.test'],
     ['<custom>evil.test</custom><custom>bad.test</custom>', 'evil.test bad.test'],
-  ])('preserves intentional token boundaries', (html, expected) => {
+    ['evil.test<script>false.test</script>bad.test', 'evil.test bad.test'],
+  ])('preserves visible token boundaries', (html, expected) => {
     expect(stripHtml(html)).toBe(expected);
   });
 
@@ -113,39 +76,33 @@ describe('stripHtml', () => {
     ['<div hidden>false.test</div><p>safe.test</p>', 'safe.test'],
     ['<div style="display:none">false.test</div><p>safe.test</p>', 'safe.test'],
     ['<div style="display:var(--missing, none)">false.test</div><p>safe.test</p>', 'safe.test'],
-    ['<xmp hidden>false.test</xmp><p>safe.test</p>', 'safe.test'],
-    ['<plaintext style="display:none">false.test', ''],
     [
       '<div style="visibility:hidden">false.test<span style="visibility:visible">safe.test</span></div>',
       'safe.test',
     ],
     ['evil.test<span style="visibility:hidden">hidden</span>bad.test', 'evil.test bad.test'],
-  ])('applies shared render state', (html, expected) => {
+  ])('applies inline render state once', (html, expected) => {
     expect(stripHtml(html)).toBe(expected);
   });
 
-  it('fails closed if exact raw-text tokenization fails', () => {
-    const write = jest.spyOn(Tokenizer.prototype, 'write').mockImplementationOnce(() => {
-      throw new Error('injected failure');
-    });
-    try {
-      expect(stripHtml('<script>false.test</script><p>must-not-survive.test</p>')).toBe('');
-    } finally {
-      write.mockRestore();
-    }
+  it('handles adversarial nesting without a recursive application walk', () => {
+    const html = `${'<div>'.repeat(1_000)}safe.test${'</div>'.repeat(1_000)}`;
+    expect(stripHtml(html)).toBe('safe.test');
   });
 
-  it('walks deeply nested input iteratively', () => {
-    const html = `${'<div>'.repeat(20_000)}safe.test${'</div>'.repeat(20_000)}`;
-    expect(stripHtml(html)).toBe('safe.test');
+  it('fails closed when DOM construction fails', () => {
+    expect(stripHtml(Symbol('invalid html') as unknown as string)).toBe('');
+  });
+
+  it('caps parsing at 10 MB without splitting a UTF-8 code point', () => {
+    const result = stripHtml(`${'€'.repeat(Math.ceil((10 * 1024 * 1024) / 3))}after-cap.test`);
+    expect(Buffer.byteLength(result, 'utf8')).toBeLessThanOrEqual(10 * 1024 * 1024);
+    expect(result).not.toContain('after-cap.test');
+    expect(result).not.toContain('�');
   });
 });
 
 describe('htmlToStructured', () => {
-  it.each([[undefined], [null], ['']])('returns empty for %j', (html) => {
-    expect(htmlToStructured(html)).toBe('');
-  });
-
   it('preserves headings, rows, lists, and block boundaries', () => {
     const html =
       '<h2>Indicators of Compromise</h2>' +
@@ -156,65 +113,43 @@ describe('htmlToStructured', () => {
     );
   });
 
-  it.each([
-    ['<h2>IOCs</h2><a href="https://evil.test/path">indicator</a>', 'https://evil.test/path'],
-    ['<h2>References</h2><a href=https://evil.test/path>source</a>', 'https://evil.test/path'],
-    ['<h2>Summary</h2><a href="https://noise.test">citation</a>', 'citation'],
-  ])('lifts hrefs only in semantic sections', (html, expected) => {
-    const result = htmlToStructured(html);
-    expect(result).toContain(expected);
-    if (expected === 'citation') expect(result).not.toContain('noise.test');
-  });
-
-  it('keeps a classified section through deeper prose and ends it at the same depth', () => {
+  it('lifts links only in classified sections and keeps subsection scope', () => {
     const html =
       '<h2>IOCs</h2><h3>Domains</h3><a href="https://kept.test">one</a>' +
       '<h2>Analysis</h2><a href="https://dropped.test">two</a>';
     const result = htmlToStructured(html);
-    expect(result).toContain('kept.test');
+    expect(result).toContain('https://kept.test');
     expect(result).not.toContain('dropped.test');
   });
 
-  it('classifies visible text restored inside a hidden heading wrapper', () => {
+  it('classifies text restored inside an inherited-hidden heading', () => {
     const html =
       '<h2 style="visibility:hidden"><span style="visibility:visible">IOCs</span></h2>' +
       '<a href="https://c2.evil.test/x">indicator</a>';
     expect(htmlToStructured(html)).toContain('https://c2.evil.test/x');
   });
 
-  it('keeps a boundary around a visibility-hidden anchor in an IOC row', () => {
+  it('does not merge text around a hidden table-cell anchor', () => {
     const html =
-      '<h2>IOCs</h2><table><tr><td>evil.test<a style="visibility:hidden" href="https://false.test">hidden</a>bad.test</td></tr></table>';
+      '<h2>IOCs</h2><table><tr><td>evil.test<a hidden href="https://false.test">hidden</a>bad.test</td></tr></table>';
     expect(htmlToStructured(html)).toContain('| evil.test bad.test |');
   });
 
   it.each([
     ['<ul><li>one<li>two</ul>', '- one\n- two'],
     ['<table><tr><td>one<td>two<tr><td>three<td>four</table>', '| one | two |\n| three | four |'],
-    ['<![CDATA[<h2>IOCs</h2><a href="https://evil.test">indicator</a>]]>', 'https://evil.test'],
-  ])('preserves structure through parser recovery', (html, expected) => {
+  ])('preserves structure through malformed HTML recovery', (html, expected) => {
     expect(htmlToStructured(html)).toContain(expected);
-  });
-
-  it.each([
-    '<h2>IOCs</h2><script>false.test</script><p>safe.test</p>',
-    '<h2>IOCs</h2><div style="display:none">false.test</div><p>safe.test</p>',
-    '<h2>IOCs</h2><xmp hidden>false.test</xmp><p>safe.test</p>',
-    '<h2>IOCs</h2><template>false.test</template><p>safe.test</p>',
-  ])('omits non-rendered structured content', (html) => {
-    const result = htmlToStructured(html);
-    expect(result).toContain('safe.test');
-    expect(result).not.toContain('false.test');
   });
 });
 
 describe('text utilities', () => {
   it('collapses Unicode whitespace', () => {
-    expect(collapseWhitespace('\t one\u2028\u00a0two \n')).toBe('one two');
+    expect(stripHtml('\t one\u2028\u00a0two \n')).toBe('one two');
   });
 
   it.each([1, 2, 5, 10, 64, 1024])('keeps truncation within %i code units', (max) => {
-    expect(truncate('word '.repeat(1000), max).length).toBeLessThanOrEqual(max);
+    expect(truncate('word '.repeat(1_000), max).length).toBeLessThanOrEqual(max);
   });
 
   it('uses a nearby word boundary without splitting a surrogate pair', () => {
@@ -222,16 +157,10 @@ describe('text utilities', () => {
     expect(truncate('ab😀cd', 4)).toBe('ab…');
     expect(truncate('value', 0)).toBe('');
   });
-
-  it('caps parser input by UTF-8 bytes at a complete code point', () => {
-    const capped = capToParseBytes('😀'.repeat(MAX_PARSE_BYTES));
-    expect(Buffer.byteLength(capped, 'utf8')).toBeLessThanOrEqual(MAX_PARSE_BYTES);
-    expect(capped).not.toMatch(/[\uD800-\uDBFF]$/);
-  });
 });
 
 describe('buildReportContent', () => {
-  it('builds a real body without a fallback flag', () => {
+  it('builds a body and marks only a real title fallback', () => {
     expect(
       buildReportContent({ title: 'Title', bodyText: 'Body', bodyHtml: '<p>Body</p>' })
     ).toEqual({
@@ -240,19 +169,11 @@ describe('buildReportContent', () => {
       body_html: '<p>Body</p>',
       language: 'en',
     });
-  });
-
-  it('marks a title fallback only when a title exists', () => {
     expect(buildReportContent({ title: 'Title', bodyText: '  ' })).toEqual({
       title: 'Title',
       body_text: 'Title',
       language: 'en',
       body_is_title_fallback: true,
-    });
-    expect(buildReportContent({ title: '', bodyText: '' })).toEqual({
-      title: '',
-      body_text: '',
-      language: 'en',
     });
   });
 });

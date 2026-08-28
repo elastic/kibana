@@ -14,26 +14,13 @@ interface CssPropertyValue {
 
 type CustomPropertyValue = CssPropertyValue;
 
-interface InlineStyleState {
+export interface InlineRenderState {
   displayHidden: boolean;
-  visibility?: 'hidden' | 'visible';
-}
-
-interface ElementRenderState {
-  subtreeHidden: boolean;
   visible: boolean;
 }
 
 const CSS_WIDE_KEYWORDS = new Set(['initial', 'inherit', 'unset', 'revert', 'revert-layer']);
 const INHERITED_CSS_WIDE_KEYWORDS = new Set(['inherit', 'unset', 'revert', 'revert-layer']);
-const NON_RENDERED_NAMES = new Set([
-  'iframe',
-  'noembed',
-  'noframes',
-  'template',
-  'textarea',
-  'title',
-]);
 const CSS_WHITESPACE_AT_EDGES = /^[ \t\r\n\f]+|[ \t\r\n\f]+$/g;
 
 interface CssIdentifierCodec {
@@ -141,7 +128,9 @@ const applyProperty = (
   }
 };
 
-const inlineStyleState = (style: string | undefined): InlineStyleState => {
+const inlineStyleState = (
+  style: string | undefined
+): { displayHidden: boolean; visibility?: 'hidden' | 'visible' } => {
   if (!style) return { displayHidden: false };
 
   try {
@@ -207,7 +196,7 @@ const inlineStyleState = (style: string | undefined): InlineStyleState => {
       }
     });
 
-    let visibility: InlineStyleState['visibility'];
+    let visibility: 'hidden' | 'visible' | undefined;
     if (state.visibility?.value === 'hidden' || state.visibility?.value === 'collapse') {
       visibility = 'hidden';
     } else if (state.visibility?.value === 'visible' || state.visibility?.value === 'initial') {
@@ -220,19 +209,12 @@ const inlineStyleState = (style: string | undefined): InlineStyleState => {
   }
 };
 
-/** Resolves the inline render state shared by article scoring and text extraction. */
-export const elementRenderState = (
-  node: {
-    name?: string;
-    attribs?: Record<string, string>;
-  },
+/** Resolves the supported inline render state for one element. */
+export const inlineRenderState = (
+  style: string | undefined,
   parentVisible: boolean
-): ElementRenderState => {
-  const { displayHidden, visibility } = inlineStyleState(node.attribs?.style);
-  const subtreeHidden =
-    NON_RENDERED_NAMES.has(node.name?.toLowerCase() ?? '') ||
-    node.attribs?.hidden !== undefined ||
-    displayHidden;
+): InlineRenderState => {
+  const { displayHidden, visibility } = inlineStyleState(style);
   const visible = visibility === 'hidden' ? false : visibility === 'visible' || parentVisible;
-  return { subtreeHidden, visible };
+  return { displayHidden, visible };
 };

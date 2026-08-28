@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { elementRenderState } from './inline_style';
+import { inlineRenderState } from './inline_style';
 
-const stateFor = (style: string, parentVisible = true) =>
-  elementRenderState({ name: 'div', attribs: { style } }, parentVisible);
+const stateFor = (style: string, parentVisible = true) => inlineRenderState(style, parentVisible);
 
 describe('inline style render state', () => {
   it.each([
@@ -26,12 +25,12 @@ describe('inline style render state', () => {
     ['important custom property', '--state:none!important;--state:block;display:var(--state)'],
     ['escaped custom property name', '--st\\61te:none;display:var(--state)'],
   ])('recognizes hidden display from %s', (_label, style) => {
-    expect(stateFor(style)).toEqual({ subtreeHidden: true, visible: true });
+    expect(stateFor(style)).toEqual({ displayHidden: true, visible: true });
   });
 
   it('ignores an invalid declaration after visibility:hidden', () => {
     expect(stateFor('visibility:hidden;visibility:potato')).toEqual({
-      subtreeHidden: false,
+      displayHidden: false,
       visible: false,
     });
   });
@@ -50,7 +49,7 @@ describe('inline style render state', () => {
     ['cyclic custom property without a fallback', '--state:var(--state);display:var(--state)'],
     ['non-CSS property whitespace', '\u00a0display:none'],
   ])('keeps display visible with %s', (_label, style) => {
-    expect(stateFor(style)).toEqual({ subtreeHidden: false, visible: true });
+    expect(stateFor(style)).toEqual({ displayHidden: false, visible: true });
   });
 
   it('inherits visibility and allows a descendant to restore it', () => {
@@ -58,8 +57,8 @@ describe('inline style render state', () => {
     const child = stateFor('visibility:visible', parent.visible);
 
     expect({ parent, child }).toEqual({
-      parent: { subtreeHidden: false, visible: false },
-      child: { subtreeHidden: false, visible: true },
+      parent: { displayHidden: false, visible: false },
+      child: { displayHidden: false, visible: true },
     });
   });
 
@@ -71,7 +70,7 @@ describe('inline style render state', () => {
     ['unset', false],
   ])('applies the all:%s CSS-wide reset', (keyword, visible) => {
     expect(stateFor(`display:none;all:${keyword}`, false)).toEqual({
-      subtreeHidden: false,
+      displayHidden: false,
       visible,
     });
   });
@@ -80,7 +79,7 @@ describe('inline style render state', () => {
     'inherits a hidden parent after visibility:%s',
     (keyword) => {
       expect(stateFor(`visibility:${keyword}`, false)).toEqual({
-        subtreeHidden: false,
+        displayHidden: false,
         visible: false,
       });
     }
@@ -88,14 +87,14 @@ describe('inline style render state', () => {
 
   it('keeps an important declaration ahead of a later non-important reset', () => {
     expect(stateFor('display:none!important;all:initial')).toEqual({
-      subtreeHidden: true,
+      displayHidden: true,
       visible: true,
     });
   });
 
   it('lets an important reset override an earlier important declaration', () => {
     expect(stateFor('display:none!important;all:initial!important')).toEqual({
-      subtreeHidden: false,
+      displayHidden: false,
       visible: true,
     });
   });
@@ -103,6 +102,6 @@ describe('inline style render state', () => {
   it('falls back to visible content if css-tree cannot parse the style value', () => {
     const style = {} as unknown as string;
 
-    expect(stateFor(style)).toEqual({ subtreeHidden: false, visible: true });
+    expect(stateFor(style)).toEqual({ displayHidden: false, visible: true });
   });
 });

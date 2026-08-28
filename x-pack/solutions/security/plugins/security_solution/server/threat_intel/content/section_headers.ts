@@ -5,90 +5,16 @@
  * 2.0.
  */
 
-/**
- * Shared heading-classification vocabulary used by:
- *   - adapters/text.ts   (htmlToStructured — scopes anchor-href lift to IOC/References sections)
- *   - services/extract_iocs.ts (classifySectionSpans — assigns section tiers to extracted IOCs)
- *
- * Single source of truth so both consumers classify the same heading strings identically.
- * Pure leaf module — no imports from text.ts, extract_iocs.ts, or any other threat_intel
- * module, so it cannot participate in a circular dependency.
- *
- * To add a new vendor heading convention: add the normalized form to IOC_HEADER_TERMS or
- * TERMINATOR_HEADER_TERMS (or add a prefix to TERMINATOR_PREFIXES). Both consumers pick it
- * up automatically. Either spelling of the final word is enough, since lookup tolerates
- * the singular/plural pair.
- */
-
-/**
- * Normalize a raw heading string before classification.
- *
- * Steps (applied in order):
- *   1. lowercase
- *   2. strip trailing punctuation and a trailing parenthetical, repeatedly
- *   3. collapse internal whitespace
- *
- * Step 2 loops because the two can appear in either order and applying each once lets one
- * block the other. Stripping the parenthetical first meant
- * `Indicators of Compromise (IOCs):` kept it, since the trailing colon defeated the
- * anchored match, and the heading then classified as prose and dropped every indicator
- * beneath it. The same held for `IOCs (updated).` and `References (2024):`, all ordinary
- * vendor formatting.
- *
- * Bounded at four passes rather than run to a fixed point, because headings come from
- * attacker-controlled markup and `(a)(a)(a)…` would otherwise cost one pass per group.
- *
- * The inner group is `[^()]*` rather than `[^)]*` so a failed attempt cannot scan past
- * another opening parenthesis. With `[^)]*`, a heading shaped `'('.repeat(n) + ')(ok)'`
- * made every opener scan to the same close and fail the end anchor, which is quadratic:
- * measured 27ms at n=8,000, 403ms at 32,000 and 6.2s at 128,000, and the loop above runs
- * it up to four times. Headings come from `<h2>` content in a page capped at 10MB, so n is
- * not small. Identical output on every well-formed heading.
- */
-const stripTrailingHeaderMarks = (value: string): string => {
-  let end = value.length;
-  while (end > 0) {
-    const char = value[end - 1];
-    if (char !== ':' && char !== '.' && !/\s/.test(char)) break;
-    end -= 1;
-  }
-  return value.slice(0, end);
-};
-
-export const normalizeHeader = (header: string): string => {
-  let normalized = header.toLowerCase();
-
-  for (let pass = 0; pass < 4; pass++) {
-    // Do not include leading whitespace in the parenthetical match. On a long whitespace
-    // run with no following `(`, `\s*` backtracked from every possible start position and
-    // made this quadratic. The next pass strips the whitespace left before a removed group.
-    const stripped = stripTrailingHeaderMarks(normalized).replace(/\([^()]*\)\s*$/, '');
-    if (stripped === normalized) break;
-    normalized = stripped;
-  }
-
-  return stripTrailingHeaderMarks(normalized).replace(/\s+/g, ' ').trim();
-};
-
-/** Normalized header strings that declare an Indicators-of-Compromise block. */
-export const IOC_HEADER_TERMS = new Set([
-  'indicators of compromise',
-  // Listed explicitly because its plural is internal, so the trailing-word tolerance in
-  // `matchesTerm` cannot derive it. Vendors write the singular heading regularly, and it
-  // classified as prose, which dropped every href-only indicator beneath it.
+const IOC_TERMS = new Set([
   'indicator of compromise',
+  'indicators of compromise',
   'ioc',
   'iocs',
   'indicators',
   'observations',
   'observables',
 ]);
-
-/**
- * Normalized header strings that terminate an IOC block and tag contained values
- * as references (post-article boilerplate, nav, citations — all non-intelligence).
- */
-export const TERMINATOR_HEADER_TERMS = new Set([
+const REFERENCE_TERMS = new Set([
   'references',
   'sources',
   'bibliography',
@@ -112,77 +38,48 @@ export const TERMINATOR_HEADER_TERMS = new Set([
   'table of contents',
   'let us keep you up to date',
 ]);
-
-/**
- * startsWith prefixes for nav headers that may carry trailing text after normalization
- * (e.g. "Related Articles: 2024 Edition" → normalized "related articles: 2024 edition"
- * doesn't match the set, but starts with "related ").
- */
-export const TERMINATOR_PREFIXES = [
-  'related',
-  'similar',
-  'share',
-  // `about the author` rather than `about the `, which swept up ordinary report sections:
-  // `About the malware`, `About the campaign` and `About the vulnerability` all classified as
-  // references, so real report content and its indicators were tagged as citation noise.
-  'about the author',
-  'discover',
-];
-
-/**
- * Characters that may follow a prefix, so a prefix cannot match part of a longer word.
- *
- * Trailing spaces used to do this job and only for the entries that had one. `about the author`
- * did not, so `About the authorization bypass` and `About the authoritative DNS server`
- * classified as references, tagging real report prose and its indicators as citation noise.
- * Requiring a delimiter makes every prefix behave the same way and drops the need to remember
- * the trailing space.
- */
-const PREFIX_DELIMITER = /[\s,;:.\-]/;
-
-const matchesPrefix = (normalized: string, prefix: string): boolean => {
-  if (normalized === prefix) return true;
-  if (!normalized.startsWith(prefix)) return false;
-  return PREFIX_DELIMITER.test(normalized.charAt(prefix.length));
-};
+const REFERENCE_PREFIXES = ['related', 'similar', 'share', 'about the author', 'discover'];
+const PREFIX_DELIMITER = /[\s,;:.-]/;
 
 export type SectionKind = 'ioc' | 'references' | 'prose';
 
-/**
- * Membership that accepts either spelling of the term's final word.
- *
- * The vocabulary was written in whichever number each heading usually appears in, so
- * `indicators` was listed and `indicator` was not, `references` but not `reference`,
- * `observables` but not `observable`. Every one of those gaps silently reclassified a
- * section as prose. Rather than doubling the lists by hand and inevitably missing some,
- * the tolerance lives here, so a term only ever needs one spelling.
- *
- * Covers the trailing-`s` and `y`/`ies` forms. A term whose plural is not on the final word
- * still needs both forms listed.
- */
-const matchesTerm = (terms: Set<string>, normalized: string): boolean => {
-  if (terms.has(normalized)) return true;
-  if (normalized.endsWith('s') && terms.has(normalized.slice(0, -1))) return true;
-  if (terms.has(`${normalized}s`)) return true;
-  // `y` to `ies`, because a trailing `s` is not the only way English pluralizes and
-  // `bibliography` was listed while `Bibliographies` classified as prose. Handled as the
-  // class rather than by adding the one word, since the same gap would return for any future
-  // term ending in `y`.
-  if (normalized.endsWith('ies') && terms.has(`${normalized.slice(0, -3)}y`)) return true;
-  return normalized.endsWith('y') && terms.has(`${normalized.slice(0, -1)}ies`);
+const stripTrailingMarks = (value: string): string => {
+  let end = value.length;
+  while (end > 0 && /[:.\s]/.test(value[end - 1])) end -= 1;
+  return value.slice(0, end);
 };
 
-/**
- * Classify a raw heading string into its section kind.
- * Applies normalizeHeader internally — callers pass the raw heading text.
- */
-export const classifyHeader = (raw: string): SectionKind => {
-  const n = normalizeHeader(raw);
-  if (matchesTerm(IOC_HEADER_TERMS, n)) return 'ioc';
+const normalizeHeader = (header: string): string => {
+  let normalized = header.toLowerCase();
+  for (let pass = 0; pass < 4; pass++) {
+    const stripped = stripTrailingMarks(normalized).replace(/\([^()]*\)\s*$/, '');
+    if (stripped === normalized) break;
+    normalized = stripped;
+  }
+  return stripTrailingMarks(normalized).replace(/\s+/g, ' ').trim();
+};
+
+const matchesTerm = (terms: Set<string>, value: string): boolean => {
+  if (terms.has(value)) return true;
+  if (value.endsWith('s') && terms.has(value.slice(0, -1))) return true;
+  if (terms.has(`${value}s`)) return true;
+  if (value.endsWith('ies') && terms.has(`${value.slice(0, -3)}y`)) return true;
+  return value.endsWith('y') && terms.has(`${value.slice(0, -1)}ies`);
+};
+
+const matchesPrefix = (value: string, prefix: string): boolean =>
+  value === prefix ||
+  (value.startsWith(prefix) && PREFIX_DELIMITER.test(value.charAt(prefix.length)));
+
+/** Classifies a raw report heading for section-aware IOC extraction. */
+export const classifyHeader = (header: string): SectionKind => {
+  const normalized = normalizeHeader(header);
+  if (matchesTerm(IOC_TERMS, normalized)) return 'ioc';
   if (
-    matchesTerm(TERMINATOR_HEADER_TERMS, n) ||
-    TERMINATOR_PREFIXES.some((p) => matchesPrefix(n, p))
-  )
+    matchesTerm(REFERENCE_TERMS, normalized) ||
+    REFERENCE_PREFIXES.some((prefix) => matchesPrefix(normalized, prefix))
+  ) {
     return 'references';
+  }
   return 'prose';
 };
