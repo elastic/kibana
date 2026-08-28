@@ -11,19 +11,23 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
   GetInvestigationResponse,
   InvestigationStatus,
   InvestigationSubject,
+  InvestigationTriggerType,
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
-
+import { DEFAULT_INVESTIGATION_TRIGGER_TYPE, INVESTIGATION_TRIGGER_TYPES } from '../../common';
 import { InvestigationNotFoundError } from './errors';
-export { InvestigationNotFoundError };
+import { InvestigationUnavailableError } from './investigation_unavailable_error';
+export { InvestigationNotFoundError, InvestigationUnavailableError };
 
 const SORT_FIELD_MAP: Record<
   NonNullable<ListInvestigationsRequest['sort_field']>,
@@ -100,24 +104,56 @@ function recoverSubjectFromInput(
   const ctx = input?.context;
   if (!isPlainObject(ctx)) return undefined;
   if (ctx.source === 'significant_event') {
-    return { type: 'significant_event', id: String(ctx.significant_event_id ?? '') };
+    const id = asString(ctx.event_id) ?? asString(ctx.significant_event_id);
+    return id ? { type: 'significant_event', id } : undefined;
   }
   if (ctx.source === 'alert') {
-    return { type: 'alert', id: String(ctx.alert_id ?? '') };
+    const id = asString(ctx.alert_id);
+    return id ? { type: 'alert', id } : undefined;
   }
   return undefined;
 }
 
+function recoverTriggerTypeFromInput(
+  input: Record<string, unknown> | undefined
+): InvestigationTriggerType | undefined {
+  const ctx = input?.context;
+  if (!isPlainObject(ctx)) return undefined;
+  const valid: readonly string[] = INVESTIGATION_TRIGGER_TYPES;
+  return valid.includes(String(ctx.trigger_type))
+    ? (ctx.trigger_type as InvestigationTriggerType)
+    : undefined;
+}
+
+export interface NightshiftInvestigationsClientDeps {
+  request: KibanaRequest;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  spaces?: SpacesPluginStart;
+  logger: Logger;
+  /**
+   * Explicit override for contexts where the request cannot carry space info (e.g. workflow step
+   * definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
+   */
+  spaceIdOverride?: string;
+  agentBuilder?: AgentBuilderPluginStart;
+}
+
 export class NightshiftInvestigationsClient {
-  constructor(
-    private readonly request: KibanaRequest,
-    private readonly workflowsManagement: WorkflowsServerPluginSetup | undefined,
-    private readonly spaces: SpacesPluginStart | undefined,
-    private readonly logger: Logger,
-    // Explicit override for contexts where the request cannot carry space info (e.g. workflow step
-    // definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
-    private readonly spaceIdOverride?: string
-  ) {}
+  private readonly request: KibanaRequest;
+  private readonly workflowsManagement: WorkflowsServerPluginSetup | undefined;
+  private readonly spaces: SpacesPluginStart | undefined;
+  private readonly logger: Logger;
+  private readonly spaceIdOverride?: string;
+  private readonly agentBuilder?: AgentBuilderPluginStart;
+
+  constructor(deps: NightshiftInvestigationsClientDeps) {
+    this.request = deps.request;
+    this.workflowsManagement = deps.workflowsManagement;
+    this.spaces = deps.spaces;
+    this.logger = deps.logger;
+    this.spaceIdOverride = deps.spaceIdOverride;
+    this.agentBuilder = deps.agentBuilder;
+  }
 
   private getSpaceId(): string {
     return (
@@ -129,14 +165,24 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    trigger_type,
+    message,
+    stream_names,
     concurrency_key,
     context = {},
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
-      throw new Error('workflowsManagement is not available');
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
+    }
+
+    if (!this.agentBuilder) {
+      throw new InvestigationUnavailableError('agentBuilder is not available');
     }
 
     const spaceId = this.getSpaceId();
+
+    await installInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
+
     const workflow = await this.workflowsManagement.management.getWorkflow(
       SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
       spaceId
@@ -146,16 +192,19 @@ export class NightshiftInvestigationsClient {
       this.logger.error(
         `Investigation workflow "${SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID}" is not installed in space "${spaceId}"`
       );
-      throw new Error('Investigations are not configured in this space');
+      throw new InvestigationUnavailableError('Investigations are not configured in this space');
     }
 
     const inputs = {
-      message: `Investigation requested for ${subject.type} ${subject.id}`,
+      message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
+      stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
+        trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+        ...(subject.summary ? { summary: subject.summary } : {}),
       },
     };
 
@@ -222,10 +271,14 @@ export class NightshiftInvestigationsClient {
     })();
 
     const subject = recoverSubjectFromInput(rawInput);
+    const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
+    const rawContext = isPlainObject(rawInput?.context) ? rawInput.context : undefined;
+    const subjectSummary = asString(rawContext?.summary);
 
     return {
       investigation_id: investigationId,
-      subject: subject ?? { type: 'significant_event', id: '' },
+      subject: subject && subjectSummary ? { ...subject, summary: subjectSummary } : subject,
+      trigger_type: recoveredTriggerType,
       status,
       started_at: execution.startedAt,
       completed_at: isTerminal ? execution.finishedAt : undefined,
