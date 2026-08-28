@@ -60,7 +60,7 @@ export interface JsonTreeViewerProps {
   extraHeaderContent?: ReactNode;
   /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
   wrapLines?: boolean;
-  /** Number of nodes to render by default. This budget is split uniformly between the lists.*/
+  /** How many nodes to render by default (≈ one line each); seeds the initial expansion, split breadth-first across the lists. */
   defaultRenderedNodes?: number;
 }
 
@@ -81,8 +81,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
 
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
 
-  // The initial expand/reveal state for a fresh cell: open collections and pagers breadth-first
-  // until defaultRenderedNodes rows are rendered.
+  // The initial expand/reveal state for a fresh cell: open collections and lift pagers breadth-first
+  // until about `defaultRenderedNodes` nodes are rendered.
   const expansionSeed = useMemo(
     () => collectDefaultExpansionSeed(nodes, Math.min(defaultRenderedNodes, MAX_RENDERED_NODES)),
     [nodes, defaultRenderedNodes]

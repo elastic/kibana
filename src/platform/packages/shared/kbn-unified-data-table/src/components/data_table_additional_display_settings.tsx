@@ -157,7 +157,7 @@ const OnOffButtonGroup = ({
 const clampRenderedNodes = (value: number) =>
   Math.min(Math.max(Math.round(value), MIN_RENDERED_NODES), MAX_DEFAULT_RENDERED_NODES);
 
-const ValuesShownSetting = ({
+const LinesShownSetting = ({
   defaultRenderedNodes,
   onChangeDefaultRenderedNodes,
 }: {
@@ -227,7 +227,7 @@ const JsonModeDisplaySettings = ({
 
   return (
     <>
-      <ValuesShownSetting
+      <LinesShownSetting
         defaultRenderedNodes={defaultRenderedNodes}
         onChangeDefaultRenderedNodes={(value) =>
           onChangeJsonModeSettings?.({ ...jsonModeSettings, defaultRenderedNodes: value })
