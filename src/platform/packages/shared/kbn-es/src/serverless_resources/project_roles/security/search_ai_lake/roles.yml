@@ -125,6 +125,12 @@ _search_ai_lake_soc_manager:
         - ".ml-anomalies-*"
       privileges:
         - "read"
+    # Threat intel indicators. Only the per-space filtered aliases are granted, so the
+    # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
+    - names:
+        - ".threat-intel-indicators-*"
+      privileges:
+        - "read"
   applications:
     - application: "kibana-.kibana"
       privileges:

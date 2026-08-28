@@ -57,7 +57,6 @@ viewer:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -164,7 +163,6 @@ editor:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -261,7 +259,6 @@ t1_analyst:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -350,7 +347,6 @@ t2_analyst:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -444,7 +440,6 @@ t3_analyst:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -554,7 +549,6 @@ threat_intelligence_analyst:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -647,7 +641,6 @@ rule_author:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -745,7 +738,6 @@ soc_manager:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -849,7 +841,6 @@ detections_admin:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -931,7 +922,6 @@ platform_engineer:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -1037,7 +1027,6 @@ endpoint_operations_analyst:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
@@ -1148,7 +1137,6 @@ endpoint_policy_manager:
         - '.threat-intel-indicators-*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
