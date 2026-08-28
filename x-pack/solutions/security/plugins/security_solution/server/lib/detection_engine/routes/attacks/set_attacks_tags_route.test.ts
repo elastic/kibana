@@ -544,6 +544,62 @@ describe('set attacks tags', () => {
       );
     });
 
+    test('cascade: suppresses alert event when all related alerts already have the requested tags', async () => {
+      // Encoding WHY: verifiedRelatedAlertIds must be filtered with wouldChange before
+      // emitting the alert event. Without this, a no-op cascade fires emitAlertTagsChanged
+      // with an empty tagsAdded/tagsRemoved and unchanged IDs consume the 10,000-ID cap,
+      // displacing IDs that actually changed in mixed batches.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: {
+                [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: ['alertA'],
+                [ALERT_WORKFLOW_TAGS]: [],
+              },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      // Related alert already has the tag being added — wouldChange returns false.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'alertA',
+              _index: DETECTION_ALERTS_INDEX,
+              _source: { [ALERT_WORKFLOW_TAGS]: ['already-present'] },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          tags: { tags_to_add: ['already-present'], tags_to_remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      // Attack itself would change (does not have 'already-present') — attack event fires.
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledTimes(1);
+      // Related alert already has 'already-present' — alert event must NOT fire.
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+    });
+
     test('cascade: includes attack in mutation when only over-cap tags would change it', async () => {
       // Encoding WHY: the cascade `verifiedAttackIds` predicate must use full valid arrays
       // so that attacks whose only changes are beyond MAX_TAGS_PER_OPERATION are not silently
