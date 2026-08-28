@@ -74,9 +74,9 @@ describe('MysqlConnector', () => {
       expect(MysqlConnector.metadata.isTechnicalPreview).toBe(true);
     });
 
-    it('supports workflows and agentBuilder features', () => {
-      expect(MysqlConnector.metadata.supportedFeatureIds).toContain('workflows');
+    it('supports agentBuilder feature (workflows added in a follow-up)', () => {
       expect(MysqlConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(MysqlConnector.metadata.supportedFeatureIds).not.toContain('workflows');
     });
   });
 
@@ -140,22 +140,16 @@ describe('MysqlConnector', () => {
   });
 
   describe('query action', () => {
-    it('wraps SELECT in a bounded outer query with the default maxRows', async () => {
+    it('passes SQL to the pool as-is', async () => {
       const { ctx, pool } = makeContextWithPool();
 
-      await MysqlConnector.actions.query.handler(ctx, { sql: 'SELECT * FROM users' });
+      await MysqlConnector.actions.query.handler(ctx, {
+        sql: 'SELECT id, name FROM users ORDER BY name LIMIT 20',
+      });
 
       expect(pool.execute).toHaveBeenCalledWith(
-        'SELECT * FROM (\nSELECT * FROM users\n) AS _q LIMIT 100'
+        'SELECT id, name FROM users ORDER BY name LIMIT 20'
       );
-    });
-
-    it('respects a custom maxRows', async () => {
-      const { ctx, pool } = makeContextWithPool();
-
-      await MysqlConnector.actions.query.handler(ctx, { sql: 'SELECT * FROM users', maxRows: 5 });
-
-      expect(pool.execute).toHaveBeenCalledWith(expect.stringContaining('LIMIT 5'));
     });
 
     it('rejects a write statement before leasing a connection', async () => {

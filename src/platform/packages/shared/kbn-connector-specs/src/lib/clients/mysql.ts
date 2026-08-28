@@ -76,7 +76,7 @@ export const mysqlClientType: ClientTypeSpec<Mysql2Pool> = {
       user: username,
       password,
       waitForConnections: true,
-      connectionLimit: 10,
+      connectionLimit: 5,
       queueLimit: 100,
       connectTimeout: timeout,
       disableEval: true,

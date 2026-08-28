@@ -3,7 +3,7 @@ navigation_title: "MySQL"
 type: reference
 description: "Use the MySQL connector to query, explore schema, and execute SQL against a MySQL database."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
@@ -46,8 +46,7 @@ The MySQL connector has the following actions:
 
 Query
 :   Run a read-only SQL query against the MySQL database.
-    - **sql** (required): The SQL query to run.
-    - **maxRows** (optional): Maximum number of rows to return (1-1000, default: 100).
+    - **sql** (required): The SQL query to run. Include a `LIMIT` clause to bound the result size. Do not include a trailing semicolon.
 
 List Databases
 :   List all databases accessible to the authenticated user.

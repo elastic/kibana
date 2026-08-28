@@ -77,7 +77,7 @@ export const MysqlConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -174,13 +174,11 @@ export const MysqlConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Execute a read-only SQL SELECT query against the MySQL database. Only SELECT and WITH statements are permitted; SHOW, DESCRIBE, INSERT, UPDATE, DELETE, and DDL are blocked. Returns up to maxRows rows (default 100). Use listTables first to discover available tables, and describeTable to inspect column names before writing queries. Prefer WHERE clauses and explicit column lists to keep result size manageable.',
+        'Execute a read-only SQL SELECT query against the MySQL database. Only SELECT and WITH statements are permitted; SHOW, DESCRIBE, INSERT, UPDATE, DELETE, and DDL are blocked. Include a LIMIT clause to bound results (e.g. LIMIT 100). Do not include a trailing semicolon. Use listTables first to discover available tables, and describeTable to inspect column names before writing queries. Prefer WHERE clauses and explicit column lists to keep result size manageable.',
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) => {
         assertReadOnly(input.sql);
-        const maxRows = resolveMaxRows(input.maxRows);
-        const inner = input.sql.replace(/;\s*$/, '');
-        return runSql(ctx, `SELECT * FROM (\n${inner}\n) AS _q LIMIT ${maxRows}`);
+        return runSql(ctx, input.sql);
       },
     },
 
@@ -281,7 +279,8 @@ export const MysqlConnector: ConnectorSpec = {
     '',
     '### Gotchas',
     '- `query` only allows SELECT and WITH — multi-statement and write SQL are rejected; use `executeSql` for writes.',
-    '- `query` and `searchRows` cap results at `maxRows` (default 100, max 1000) — narrow with WHERE clauses rather than relying on a large `maxRows`.',
+    '- Include a `LIMIT` clause in `query` SQL (e.g. `LIMIT 100`) — the query runs as-is, so an unbounded SELECT can return a very large result set.',
+    '- `searchRows` caps results at `maxRows` (default 100, max 1000) — narrow with additional columns or a more specific search term rather than relying on a large `maxRows`.',
     '- Database and table names are case-sensitive on case-sensitive filesystems (the common case on Linux). Use the exact casing returned by `listDatabases` / `listTables`.',
     '- TLS is required by default. Set TLS to disabled only when the MySQL server does not support TLS.',
   ].join('\n'),

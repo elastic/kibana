@@ -20,15 +20,8 @@ export const QueryInputSchema = lazySchema(() =>
       .min(1)
       .max(10000)
       .describe(
-        'Read-only SQL SELECT query to execute (e.g. SELECT id, name FROM users WHERE status = "active" LIMIT 20). Only SELECT statements are permitted.'
+        'Read-only SQL SELECT or WITH query to execute. Include a LIMIT clause to bound results (e.g. SELECT id, name FROM users WHERE status = "active" LIMIT 100). Do not include a trailing semicolon.'
       ),
-    maxRows: z
-      .number()
-      .int()
-      .min(1)
-      .max(1000)
-      .optional()
-      .describe('Maximum number of rows to return (1-1000, default: 100)'),
   })
 );
 export type QueryInput = z.infer<typeof QueryInputSchema>;
