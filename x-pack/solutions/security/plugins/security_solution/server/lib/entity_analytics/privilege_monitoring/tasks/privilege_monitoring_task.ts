@@ -27,7 +27,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
-import { ENTITY_ANALYTICS_SPAN_NAMES, wrapTaskRun } from '../../telemetry/traces';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -229,44 +228,30 @@ const runPrivilegeMonitoringTask = async ({
     return { state: updatedState };
   }
 
-  return wrapTaskRun({
-    spanName: ENTITY_ANALYTICS_SPAN_NAMES.privilegeMonitoringTaskRun,
-    namespace: state.namespace,
-    attributes: {
-      'entity_analytics.task.id': taskInstance.id,
-    },
-    run: async () => {
-      try {
-        logger.info('[Privilege Monitoring] Running privilege monitoring task');
-        const dataClient = await getPrivilegedUserMonitoringDataClient(state.namespace);
-        if (!dataClient) {
-          logger.error('[Privilege Monitoring] error creating data client.');
-          throw Error('No data client was found');
-        }
-        const maxUsersAllowed =
-          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
-        const request = kibanaRequestFactory({
-          headers: {},
-          spaceId: brandSpaceId(state.namespace),
-        });
-        const soClient = core.savedObjects.getScopedClient(request, {
-          includedHiddenTypes: [
-            PrivilegeMonitoringApiKeyType.name,
-            monitoringEntitySourceType.name,
-          ],
-          excludedExtensions: [SECURITY_EXTENSION_ID],
-        });
-        const dataSourcesService = createDataSourcesService(dataClient, soClient, maxUsersAllowed);
-        await dataSourcesService.syncAllSources();
-      } catch (e) {
-        logger.error(
-          `[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`
-        );
-      }
-      logger.info('[Privilege Monitoring] Finished running privilege monitoring task');
-      return { state: updatedState };
-    },
-  });
+  try {
+    logger.info('[Privilege Monitoring] Running privilege monitoring task');
+    const dataClient = await getPrivilegedUserMonitoringDataClient(state.namespace);
+    if (!dataClient) {
+      logger.error('[Privilege Monitoring] error creating data client.');
+      throw Error('No data client was found');
+    }
+    const maxUsersAllowed =
+      config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+    const request = kibanaRequestFactory({
+      headers: {},
+      spaceId: brandSpaceId(state.namespace),
+    });
+    const soClient = core.savedObjects.getScopedClient(request, {
+      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+    const dataSourcesService = createDataSourcesService(dataClient, soClient, maxUsersAllowed);
+    await dataSourcesService.syncAllSources();
+  } catch (e) {
+    logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
+  }
+  logger.info('[Privilege Monitoring] Finished running privilege monitoring task');
+  return { state: updatedState };
 };
 
 export const removePrivilegeMonitoringTask = async ({

@@ -22,7 +22,6 @@ import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_c
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 export const assetCriticalityPublicUpsertRoute = ({
   router,
@@ -67,40 +66,34 @@ export const assetCriticalityPublicUpsertRoute = ({
       ): Promise<IKibanaResponse<CreateAssetCriticalityRecordResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
+          await checkAndInitAssetCriticalityResources(context, logger);
+
           const securitySolution = await context.securitySolution;
-          return await runWithSpan({
-            name: ENTITY_ANALYTICS_SPAN_NAMES.assetCriticalityWrite,
-            namespace: securitySolution.getSpaceId(),
-            cb: async () => {
-              await checkAndInitAssetCriticalityResources(context, logger);
+          const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
 
-              const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
+          const assetCriticalityRecord: AssetCriticalityUpsert = {
+            idField: request.body.id_field,
+            idValue: request.body.id_value,
+            criticalityLevel: request.body.criticality_level,
+          };
 
-              const assetCriticalityRecord: AssetCriticalityUpsert = {
-                idField: request.body.id_field,
-                idValue: request.body.id_value,
-                criticalityLevel: request.body.criticality_level,
-              };
+          const result = await assetCriticalityClient.upsert(
+            assetCriticalityRecord,
+            request.body.refresh
+          );
 
-              const result = await assetCriticalityClient.upsert(
-                assetCriticalityRecord,
-                request.body.refresh
-              );
-
-              securitySolution.getAuditLogger()?.log({
-                message: 'User attempted to assign the asset criticality level for an entity',
-                event: {
-                  action: AssetCriticalityAuditActions.ASSET_CRITICALITY_UPDATE,
-                  category: AUDIT_CATEGORY.DATABASE,
-                  type: AUDIT_TYPE.CREATION,
-                  outcome: AUDIT_OUTCOME.UNKNOWN,
-                },
-              });
-
-              return response.ok({
-                body: result,
-              });
+          securitySolution.getAuditLogger()?.log({
+            message: 'User attempted to assign the asset criticality level for an entity',
+            event: {
+              action: AssetCriticalityAuditActions.ASSET_CRITICALITY_UPDATE,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.CREATION,
+              outcome: AUDIT_OUTCOME.UNKNOWN,
             },
+          });
+
+          return response.ok({
+            body: result,
           });
         } catch (e) {
           const error = transformError(e);

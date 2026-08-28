@@ -37,10 +37,7 @@ export const ENTITY_ANALYTICS_SPAN_NAMES = {
   stageResolution: 'entity_analytics.task.risk_score_maintainer.stage.resolution',
   stageResetToZero: 'entity_analytics.task.risk_score_maintainer.stage.reset_to_zero',
   riskScoreOndemandCalculate: 'entity_analytics.risk_score.on_demand.calculate',
-  assetCriticalityRead: 'entity_analytics.asset_criticality.read',
-  assetCriticalityWrite: 'entity_analytics.asset_criticality.write',
-  assetCriticalityBulk: 'entity_analytics.asset_criticality.bulk',
-  privilegeMonitoringTaskRun: 'entity_analytics.task.privilege_monitoring.run',
+  watchlistTaskRun: 'entity_analytics.task.watchlist.run',
 } as const;
 
 export const runWithSpan = <T>({ name, namespace, attributes = {}, cb }: RunWithSpanParams<T>): T =>

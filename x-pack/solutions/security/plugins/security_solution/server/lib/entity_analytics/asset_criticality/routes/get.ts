@@ -21,7 +21,6 @@ import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_c
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 export const assetCriticalityPublicGetRoute = ({
   config,
@@ -66,36 +65,30 @@ export const assetCriticalityPublicGetRoute = ({
       ): Promise<IKibanaResponse<GetAssetCriticalityRecordResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
+          await checkAndInitAssetCriticalityResources(context, logger);
+
           const securitySolution = await context.securitySolution;
-          return await runWithSpan({
-            name: ENTITY_ANALYTICS_SPAN_NAMES.assetCriticalityRead,
-            namespace: securitySolution.getSpaceId(),
-            cb: async () => {
-              await checkAndInitAssetCriticalityResources(context, logger);
+          const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
+          const record = await assetCriticalityClient.get({
+            idField: request.query.id_field,
+            idValue: request.query.id_value,
+          });
 
-              const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
-              const record = await assetCriticalityClient.get({
-                idField: request.query.id_field,
-                idValue: request.query.id_value,
-              });
+          if (!record) {
+            return response.notFound();
+          }
 
-              if (!record) {
-                return response.notFound();
-              }
-
-              securitySolution.getAuditLogger()?.log({
-                message: 'User accessed the criticality level for an entity',
-                event: {
-                  action: AssetCriticalityAuditActions.ASSET_CRITICALITY_GET,
-                  category: AUDIT_CATEGORY.DATABASE,
-                  type: AUDIT_TYPE.ACCESS,
-                  outcome: AUDIT_OUTCOME.SUCCESS,
-                },
-              });
-
-              return response.ok({ body: record });
+          securitySolution.getAuditLogger()?.log({
+            message: 'User accessed the criticality level for an entity',
+            event: {
+              action: AssetCriticalityAuditActions.ASSET_CRITICALITY_GET,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.ACCESS,
+              outcome: AUDIT_OUTCOME.SUCCESS,
             },
           });
+
+          return response.ok({ body: record });
         } catch (e) {
           const error = transformError(e);
 
