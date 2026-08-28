@@ -9,8 +9,9 @@ import { createBadRequestError } from '@kbn/agent-builder-common';
 import type {
   ConversationTemplate,
   ConversationTemplateFieldDefinition,
-  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
+import { compileFieldSchema } from './compile_schema';
+import { MAX_OBJECT_DEPTH } from './limits';
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/;
 
@@ -54,12 +55,32 @@ const checkType = (
         return `field "${fieldName}" (TEXT_ARRAY): all array items must be strings`;
       }
       break;
+    case 'OBJECT':
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        return `field "${fieldName}" (OBJECT): expected a plain object, got ${Array.isArray(value) ? 'array' : typeof value}`;
+      }
+      break;
+    case 'OBJECT_ARRAY':
+      if (!Array.isArray(value)) {
+        return `field "${fieldName}" (OBJECT_ARRAY): expected an array of objects, got ${typeof value}`;
+      }
+      if (!value.every((item) => typeof item === 'object' && item !== null && !Array.isArray(item))) {
+        return `field "${fieldName}" (OBJECT_ARRAY): all array items must be plain objects`;
+      }
+      break;
+    default:
+      return `field "${fieldName}": unsupported input_type "${(def as ConversationTemplateFieldDefinition).input_type}"`;
   }
   return null;
 };
 
 const checkRequired = (fieldName: string, value: unknown): string | null => {
-  const empty = value === undefined || value === '' || (Array.isArray(value) && value.length === 0);
+  const empty =
+    value === undefined ||
+    value === '' ||
+    (Array.isArray(value) && value.length === 0) ||
+    // Empty object {} has no keys and therefore carries no data — treat as unset.
+    (typeof value === 'object' && value !== null && !Array.isArray(value) && Object.keys(value).length === 0);
   return empty ? `field "${fieldName}": value is required` : null;
 };
 
@@ -78,7 +99,7 @@ const checkSelect = (
 const checkMaxLength = (
   fieldName: string,
   def: ConversationTemplateFieldDefinition,
-  value: SerializedMetadataValue
+  value: string | string[]
 ): string | null => {
   if (def.max_length === undefined) return null;
   const items = Array.isArray(value) ? value : [value];
@@ -179,8 +200,31 @@ export const collectFieldViolations = (
       break;
     }
     case 'TEXT_ARRAY': {
-      const msg = checkMaxLength(fieldName, def, value as SerializedMetadataValue);
+      const msg = checkMaxLength(fieldName, def, value as string | string[]);
       if (msg) violations.push(msg);
+      break;
+    }
+    case 'OBJECT':
+    case 'OBJECT_ARRAY': {
+      // Delegate precise shape validation to the compiled zod schema.
+      // Zod errors are mapped to the existing violation-string format, with the
+      // nested path prepended so the message reads:
+      //   field "indicators[0].type": Invalid enum value...
+      const schema = compileFieldSchema(def);
+      const result = schema.safeParse(value);
+      if (!result.success) {
+        for (const issue of result.error.issues) {
+          const pathStr =
+            issue.path.length > 0
+              ? issue.path
+                  .map((seg) =>
+                    typeof seg === 'number' ? `[${seg}]` : `.${String(seg)}`
+                  )
+                  .join('')
+              : '';
+          violations.push(`field "${fieldName}${pathStr}": ${issue.message}`);
+        }
+      }
       break;
     }
     // TOGGLE and USER have no extra constraints beyond type.
@@ -246,42 +290,101 @@ export const validateTemplateDefaults = (template: ConversationTemplate): void =
 };
 
 /**
- * Validates the template definition itself — ensures every field's constraints
- * are internally consistent so the template will always compile to a usable validator.
+ * Recursive worker for `collectTemplateDefinitionErrors`.
  *
- * Returns an array of error strings (empty = valid template).
+ * @param fields   The record of field definitions to validate.
+ * @param prefix   Dotted path prefix for error messages when validating nested `properties`.
+ * @param depth    Current nesting depth (0 = top level).
  */
-export const collectTemplateDefinitionErrors = (template: ConversationTemplate): string[] => {
+const collectFieldDefinitionErrors = (
+  fields: Record<string, ConversationTemplateFieldDefinition>,
+  prefix: string,
+  depth = 0
+): string[] => {
   const errors: string[] = [];
 
-  for (const [fieldName, def] of Object.entries(template.fields)) {
+  for (const [fieldName, def] of Object.entries(fields)) {
+    const qualifiedName = prefix ? `${prefix}.${fieldName}` : fieldName;
     const { input_type: inputType } = def;
 
     if (inputType === 'SELECT') {
       if (!def.options || def.options.length === 0) {
-        errors.push(`field "${fieldName}" (SELECT): must declare non-empty "options"`);
+        errors.push(`field "${qualifiedName}" (SELECT): must declare non-empty "options"`);
       }
     }
 
     if (def.max_length !== undefined && inputType !== 'TEXT' && inputType !== 'TEXT_ARRAY') {
-      errors.push(`field "${fieldName}": "max_length" is only valid for TEXT and TEXT_ARRAY`);
+      errors.push(
+        `field "${qualifiedName}": "max_length" is only valid for TEXT and TEXT_ARRAY`
+      );
     }
 
     if ((def.min !== undefined || def.max !== undefined) && inputType !== 'NUMBER') {
-      errors.push(`field "${fieldName}": "min"/"max" constraints are only valid for NUMBER`);
+      errors.push(
+        `field "${qualifiedName}": "min"/"max" constraints are only valid for NUMBER`
+      );
     }
 
     if (def.regex !== undefined && inputType !== 'TEXT' && inputType !== 'SELECT') {
-      errors.push(`field "${fieldName}": "regex" constraint is only valid for TEXT and SELECT`);
+      errors.push(
+        `field "${qualifiedName}": "regex" constraint is only valid for TEXT and SELECT`
+      );
     }
 
     if (def.options !== undefined && inputType !== 'SELECT') {
-      errors.push(`field "${fieldName}": "options" is only valid for SELECT`);
+      errors.push(`field "${qualifiedName}": "options" is only valid for SELECT`);
     }
 
-    // Validate default_value type matches input_type
-    if (def.default_value !== undefined) {
-      const msgs = collectFieldViolations(fieldName, def, def.default_value, true);
+    // OBJECT / OBJECT_ARRAY: `properties` is required; all other types must not declare it.
+    if (inputType === 'OBJECT' || inputType === 'OBJECT_ARRAY') {
+      if (!def.properties || Object.keys(def.properties).length === 0) {
+        errors.push(
+          `field "${qualifiedName}" (${inputType}): must declare non-empty "properties"`
+        );
+      } else {
+        // Enforce the maximum nesting depth.
+        if (depth >= MAX_OBJECT_DEPTH) {
+          errors.push(
+            `field "${qualifiedName}": object nesting exceeds the maximum depth of ${MAX_OBJECT_DEPTH}`
+          );
+        } else {
+          // Recurse into nested properties.
+          const nestedErrors = collectFieldDefinitionErrors(
+            def.properties,
+            qualifiedName,
+            depth + 1
+          );
+          errors.push(...nestedErrors);
+        }
+      }
+
+    } else {
+      if (def.properties !== undefined) {
+        errors.push(
+          `field "${qualifiedName}": "properties" is only valid for OBJECT and OBJECT_ARRAY`
+        );
+      }
+    }
+
+    // `max_items` is only valid for OBJECT_ARRAY.
+    if (def.max_items !== undefined && inputType !== 'OBJECT_ARRAY') {
+      errors.push(
+        `field "${qualifiedName}": "max_items" is only valid for OBJECT_ARRAY`
+      );
+    }
+
+    // Nested `default_value` is not supported for any type declared inside `properties`.
+    // Defaults are a top-level concept — a nested default would require deep-merge
+    // semantics and is ambiguous (does a missing key mean "use default" or "leave unset"?).
+    if (depth > 0 && def.default_value !== undefined) {
+      errors.push(
+        `field "${qualifiedName}": "default_value" is not supported inside nested "properties"; set defaults only on top-level fields`
+      );
+    }
+
+    // Validate default_value type matches input_type (only for top-level fields).
+    if (depth === 0 && def.default_value !== undefined) {
+      const msgs = collectFieldViolations(qualifiedName, def, def.default_value, true);
       for (const msg of msgs) {
         errors.push(`(default_value) ${msg}`);
       }
@@ -289,6 +392,16 @@ export const collectTemplateDefinitionErrors = (template: ConversationTemplate):
   }
 
   return errors;
+};
+
+/**
+ * Validates the template definition itself — ensures every field's constraints
+ * are internally consistent so the template will always compile to a usable validator.
+ *
+ * Returns an array of error strings (empty = valid template).
+ */
+export const collectTemplateDefinitionErrors = (template: ConversationTemplate): string[] => {
+  return collectFieldDefinitionErrors(template.fields, /* prefix */ '');
 };
 
 /**

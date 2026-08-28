@@ -1845,6 +1845,126 @@ describe('ConversationClient', () => {
         message: expect.stringContaining('conversation-1'),
       });
     });
+
+    it('stores an OBJECT field as-is (no string coercion)', async () => {
+      const template = makeTemplate('tmpl-obj', {
+        location: {
+          input_type: 'OBJECT',
+          description: 'Location',
+          properties: {
+            city: { input_type: 'TEXT', description: 'City' },
+            zip: { input_type: 'TEXT', description: 'Zip' },
+          },
+        },
+      });
+      getTemplateMock.mockReturnValue(template);
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-obj' })] },
+      });
+
+      const value = { city: 'Berlin', zip: '10115' };
+      await client.patchMetadata('conversation-1', { location: value });
+
+      const written = mockEsClient.index.mock.calls[0][0].document;
+      // Stored verbatim — not coerced to a string.
+      expect(written.metadata.location).toEqual(value);
+      expect(typeof written.metadata.location).toBe('object');
+    });
+
+    it('replaces an OBJECT field wholesale — does not deep-merge with the stored value', async () => {
+      const template = makeTemplate('tmpl-obj', {
+        location: {
+          input_type: 'OBJECT',
+          description: 'Location',
+          properties: {
+            city: { input_type: 'TEXT', description: 'City' },
+            zip: { input_type: 'TEXT', description: 'Zip' },
+          },
+        },
+        status: { input_type: 'TEXT', description: 'Status' },
+      });
+      getTemplateMock.mockReturnValue(template);
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: 'tmpl-obj',
+              // Pre-existing stored state: both keys present.
+              metadata: { location: { city: 'Berlin', zip: '10115' }, status: 'active' },
+            }),
+          ],
+        },
+      });
+
+      // Only update `city` within location — caller must send the full object.
+      await client.patchMetadata('conversation-1', { location: { city: 'Hamburg' } });
+
+      const written = mockEsClient.index.mock.calls[0][0].document;
+      // The full `location` value is replaced, not merged — `zip` is gone.
+      expect(written.metadata.location).toEqual({ city: 'Hamburg' });
+      // Unrelated top-level key is preserved.
+      expect(written.metadata.status).toBe('active');
+    });
+
+    it('stores an OBJECT_ARRAY field as-is and replaces it wholesale', async () => {
+      const template = makeTemplate('tmpl-arr', {
+        indicators: {
+          input_type: 'OBJECT_ARRAY',
+          description: 'Indicators',
+          max_items: 10,
+          properties: {
+            type: { input_type: 'SELECT', description: 'Type', options: ['ip', 'domain'] },
+            value: { input_type: 'TEXT', description: 'Value' },
+          },
+        },
+      });
+      getTemplateMock.mockReturnValue(template);
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: 'tmpl-arr',
+              metadata: {
+                indicators: [{ type: 'ip', value: '1.2.3.4' }],
+              },
+            }),
+          ],
+        },
+      });
+
+      const newIndicators = [
+        { type: 'domain', value: 'evil.example.com' },
+        { type: 'ip', value: '10.0.0.1' },
+      ];
+      await client.patchMetadata('conversation-1', { indicators: newIndicators });
+
+      const written = mockEsClient.index.mock.calls[0][0].document;
+      // Stored verbatim — old array is replaced, not appended to.
+      expect(written.metadata.indicators).toEqual(newIndicators);
+    });
+
+    it('rejects an OBJECT value that violates the declared shape', async () => {
+      const template = makeTemplate('tmpl-obj', {
+        location: {
+          input_type: 'OBJECT',
+          description: 'Location',
+          properties: {
+            city: { input_type: 'SELECT', description: 'City', options: ['Berlin', 'Hamburg'] },
+          },
+        },
+      });
+      getTemplateMock.mockReturnValue(template);
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-obj' })] },
+      });
+
+      await expect(
+        client.patchMetadata('conversation-1', { location: { city: 'Paris' } })
+      ).rejects.toMatchObject({
+        message: expect.stringContaining('location'),
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
   });
 
   describe('create with template', () => {

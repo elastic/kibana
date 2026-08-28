@@ -7,7 +7,10 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type {
+  SerializedMetadataValue,
+  ConversationTemplateFieldDefinition,
+} from '@kbn/agent-builder-common';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import {
   getSkillsInstructions,
@@ -68,10 +71,64 @@ export const getResearchAgentPrompt = async (
   ];
 };
 
+/** Maximum characters to include from a JSON object value in the system prompt. */
+const MAX_OBJECT_VALUE_CHARS = 2_000;
+
 const renderFieldValue = (value: SerializedMetadataValue | undefined): string => {
   if (value === undefined) return '_not yet set_';
-  if (Array.isArray(value)) return `**[${value.join(', ')}]**`;
+  // OBJECT_ARRAY: array of plain objects (not strings)
+  if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+    const json = JSON.stringify(value, null, 2);
+    const truncated =
+      json.length > MAX_OBJECT_VALUE_CHARS
+        ? json.slice(0, MAX_OBJECT_VALUE_CHARS) + '\n… (truncated)'
+        : json;
+    return `\`\`\`json\n${truncated}\n\`\`\``;
+  }
+  // TEXT_ARRAY: array of strings
+  if (Array.isArray(value)) return `**[${(value as string[]).join(', ')}]**`;
+  // OBJECT: plain JSON object
+  if (typeof value === 'object' && value !== null) {
+    const json = JSON.stringify(value, null, 2);
+    const truncated =
+      json.length > MAX_OBJECT_VALUE_CHARS
+        ? json.slice(0, MAX_OBJECT_VALUE_CHARS) + '\n… (truncated)'
+        : json;
+    return `\`\`\`json\n${truncated}\n\`\`\``;
+  }
   return `**${value}**`;
+};
+
+/**
+ * Renders a flat, indented list of nested field properties for OBJECT / OBJECT_ARRAY fields.
+ * The model needs to see the declared property names, types, and constraints to construct
+ * a correctly-shaped object when calling set_conversation_metadata.
+ */
+const renderProperties = (
+  properties: Record<string, ConversationTemplateFieldDefinition>,
+  indent: string
+): string => {
+  return Object.entries(properties)
+    .map(([propName, propDef]) => {
+      const reqStr = propDef.required ? ' *(required)*' : '';
+      const descStr = propDef.description ? ` — ${propDef.description}` : '';
+      const optionsStr =
+        propDef.input_type === 'SELECT' && propDef.options
+          ? ` (options: ${propDef.options.join(' | ')})`
+          : '';
+      const line = `${indent}- \`${propName}\` (${propDef.input_type})${optionsStr}${reqStr}${descStr}`;
+      // Recurse for nested OBJECT / OBJECT_ARRAY properties.
+      if (
+        (propDef.input_type === 'OBJECT' || propDef.input_type === 'OBJECT_ARRAY') &&
+        propDef.properties &&
+        Object.keys(propDef.properties).length > 0
+      ) {
+        const nestedLines = renderProperties(propDef.properties, `${indent}  `);
+        return `${line}\n${nestedLines}`;
+      }
+      return line;
+    })
+    .join('\n');
 };
 
 const getConversationMetadataSection = async (
@@ -92,7 +149,20 @@ const getConversationMetadataSection = async (
       const descStr = def.description ? ` — ${def.description}` : '';
       const optionsStr =
         def.input_type === 'SELECT' && def.options ? ` (options: ${def.options.join(' | ')})` : '';
-      return `- \`${fieldName}\` (${def.input_type})${optionsStr}${descStr}: ${valueStr}`;
+      const line = `- \`${fieldName}\` (${def.input_type})${optionsStr}${descStr}: ${valueStr}`;
+
+      // For OBJECT / OBJECT_ARRAY fields, emit the declared properties so the model
+      // knows exactly what shape to provide when calling set_conversation_metadata.
+      if (
+        (def.input_type === 'OBJECT' || def.input_type === 'OBJECT_ARRAY') &&
+        def.properties &&
+        Object.keys(def.properties).length > 0
+      ) {
+        const propLines = renderProperties(def.properties, '  ');
+        return `${line}\n${propLines}`;
+      }
+
+      return line;
     })
     .join('\n');
 

@@ -124,6 +124,56 @@ describe('deserializeMetadataValue', () => {
       expect(deserializeMetadataValue('user@example.com', 'USER')).toBe('user@example.com');
     });
   });
+
+  describe('OBJECT — stored as-is', () => {
+    it('serialize: returns the object unchanged (no JSON.stringify)', () => {
+      const obj = { ip: '1.2.3.4', confidence: 'high' };
+      // The same reference is returned; no coercion happens.
+      expect(serializeMetadataValue(obj, 'OBJECT')).toBe(obj);
+    });
+
+    it('deserialize: returns the object unchanged', () => {
+      const obj = { ip: '1.2.3.4', active: true, count: 3 };
+      // The same reference is returned.
+      expect(deserializeMetadataValue(obj, 'OBJECT')).toBe(obj);
+    });
+
+    it('round-trips byte-identical — nested booleans and numbers keep their types', () => {
+      const original = { flag: true, score: 9.5, nested: { tags: ['a', 'b'] } };
+      const stored = serializeMetadataValue(original, 'OBJECT');
+      const recovered = deserializeMetadataValue(stored, 'OBJECT');
+      expect(recovered).toEqual(original);
+      expect((recovered as typeof original).flag).toBe(true); // boolean, not string "true"
+      expect((recovered as typeof original).score).toBe(9.5); // number, not string "9.5"
+    });
+  });
+
+  describe('OBJECT_ARRAY — stored as-is', () => {
+    it('serialize: returns the array unchanged', () => {
+      const arr = [{ type: 'ip', value: '1.2.3.4' }];
+      expect(serializeMetadataValue(arr, 'OBJECT_ARRAY')).toBe(arr);
+    });
+
+    it('deserialize: returns the array unchanged', () => {
+      const arr = [{ type: 'ip', value: '1.2.3.4' }];
+      expect(deserializeMetadataValue(arr, 'OBJECT_ARRAY')).toBe(arr);
+    });
+
+    it('round-trips byte-identical — nested types are preserved', () => {
+      const original = [
+        { type: 'ip', value: '1.2.3.4', seen: true },
+        { type: 'domain', value: 'evil.example.com', count: 42 },
+      ];
+      const stored = serializeMetadataValue(original, 'OBJECT_ARRAY');
+      const recovered = deserializeMetadataValue(stored, 'OBJECT_ARRAY');
+      expect(recovered).toEqual(original);
+      // Regression guard: booleans and numbers are NOT coerced to strings.
+      const first = (recovered as typeof original)[0];
+      expect(first.seen).toBe(true); // boolean, not "true"
+      const second = (recovered as typeof original)[1];
+      expect(second.count).toBe(42); // number, not "42"
+    });
+  });
 });
 
 describe('deserializeMetadata', () => {

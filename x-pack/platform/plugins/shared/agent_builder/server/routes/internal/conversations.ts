@@ -23,6 +23,10 @@ import type { ApplyTemplateResponse } from '../../../common/http_api/apply_templ
 import type { PatchConversationMetadataResponse } from '../../../common/http_api/patch_metadata';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
+import {
+  MAX_METADATA_KEYS,
+  assertMetadataValueWithinLimits,
+} from '../../services/conversation/templates/limits';
 
 export function registerInternalConversationRoutes({
   router,
@@ -116,11 +120,26 @@ export function registerInternalConversationRoutes({
               schema.number(),
               schema.boolean(),
               schema.arrayOf(schema.string({ maxLength: 2_000 }), { maxSize: 100 }),
+              // OBJECT fields: accept any plain object. Precise structural validation
+              // (declared `properties`) happens in client.patchMetadata via the compiled
+              // zod schema. The limits guard below enforces depth / total size caps.
+              schema.recordOf(schema.string(), schema.any()),
+              // OBJECT_ARRAY fields: accept an array of plain objects.
+              schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
             ]),
             {
               validate: (record) => {
-                if (Object.keys(record).length > 100) {
-                  return 'metadata may not have more than 100 keys';
+                if (Object.keys(record).length > MAX_METADATA_KEYS) {
+                  return `metadata may not have more than ${MAX_METADATA_KEYS} keys`;
+                }
+                // Structural limits guard: depth, per-field size.
+                // Throws with a descriptive message if any value exceeds the limits.
+                for (const [key, value] of Object.entries(record)) {
+                  try {
+                    assertMetadataValueWithinLimits(key, value);
+                  } catch (err) {
+                    return (err as Error).message;
+                  }
                 }
               },
             }

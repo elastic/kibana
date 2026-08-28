@@ -358,3 +358,191 @@ describe('validateTemplateDefinition', () => {
     expect(errors.length).toBeGreaterThanOrEqual(2);
   });
 });
+
+// ─── OBJECT / OBJECT_ARRAY ────────────────────────────────────────────────────
+
+describe('collectFieldViolations — OBJECT', () => {
+  const objectDef = makeDef({
+    input_type: 'OBJECT',
+    properties: {
+      name: { input_type: 'TEXT', required: true },
+      age: { input_type: 'NUMBER' },
+    },
+  });
+
+  it('returns no violations for a valid object', () => {
+    expect(collectFieldViolations('obj', objectDef, { name: 'Alice', age: 30 })).toHaveLength(0);
+  });
+
+  it('returns a type violation when the value is not a plain object', () => {
+    expect(collectFieldViolations('obj', objectDef, 'string')).not.toHaveLength(0);
+    expect(collectFieldViolations('obj', objectDef, [{ name: 'x' }])).not.toHaveLength(0);
+    expect(collectFieldViolations('obj', objectDef, 42)).not.toHaveLength(0);
+  });
+
+  it('returns a violation when a required nested property is missing', () => {
+    const violations = collectFieldViolations('obj', objectDef, { age: 30 });
+    expect(violations.length).toBeGreaterThan(0);
+  });
+
+  it('returns a violation when an undeclared nested key is present', () => {
+    const violations = collectFieldViolations('obj', objectDef, {
+      name: 'Alice',
+      extra: 'boom',
+    });
+    expect(violations.length).toBeGreaterThan(0);
+  });
+
+  it('returns a required violation for an empty object when the field is required', () => {
+    const requiredDef = makeDef({ input_type: 'OBJECT', required: true, properties: { x: { input_type: 'TEXT' } } });
+    const violations = collectFieldViolations('obj', requiredDef, {});
+    expect(violations.some((v) => v.includes('required'))).toBe(true);
+  });
+
+  it('includes the nested path in violation messages', () => {
+    // `age` must be a number — passing a string causes a nested-type violation.
+    const violations = collectFieldViolations('obj', objectDef, { name: 'Alice', age: 'thirty' });
+    expect(violations.some((v) => v.includes('.age'))).toBe(true);
+  });
+});
+
+describe('collectFieldViolations — OBJECT_ARRAY', () => {
+  const arrayDef = makeDef({
+    input_type: 'OBJECT_ARRAY',
+    max_items: 2,
+    properties: {
+      type: { input_type: 'SELECT', options: ['ip', 'domain'], required: true },
+      value: { input_type: 'TEXT', required: true },
+    },
+  });
+
+  it('returns no violations for a valid array', () => {
+    expect(
+      collectFieldViolations('arr', arrayDef, [{ type: 'ip', value: '1.2.3.4' }])
+    ).toHaveLength(0);
+  });
+
+  it('returns a type violation for non-arrays', () => {
+    expect(collectFieldViolations('arr', arrayDef, { type: 'ip' })).not.toHaveLength(0);
+  });
+
+  it('returns a type violation when array items are not plain objects', () => {
+    expect(collectFieldViolations('arr', arrayDef, ['ip', 'domain'])).not.toHaveLength(0);
+  });
+
+  it('returns a violation when an element fails the compiled schema', () => {
+    const violations = collectFieldViolations('arr', arrayDef, [
+      { type: 'unknown', value: 'x' }, // type is not in ['ip', 'domain']
+    ]);
+    expect(violations.length).toBeGreaterThan(0);
+  });
+
+  it('includes the element index in violation messages', () => {
+    const violations = collectFieldViolations('arr', arrayDef, [
+      { type: 'ip', value: 'x' },
+      { type: 'bad', value: 'y' }, // index [1]
+    ]);
+    expect(violations.some((v) => v.includes('[1]'))).toBe(true);
+  });
+
+  it('returns a violation when max_items is exceeded (via compiled schema)', () => {
+    const big = [
+      { type: 'ip', value: 'a' },
+      { type: 'ip', value: 'b' },
+      { type: 'ip', value: 'c' }, // over the limit of 2
+    ];
+    const violations = collectFieldViolations('arr', arrayDef, big);
+    expect(violations.length).toBeGreaterThan(0);
+  });
+});
+
+describe('collectTemplateDefinitionErrors — OBJECT / OBJECT_ARRAY rules', () => {
+  it('returns no errors for a valid OBJECT field', () => {
+    const template = makeTemplate({
+      payload: {
+        input_type: 'OBJECT',
+        properties: { key: { input_type: 'TEXT' } },
+      },
+    });
+    expect(collectTemplateDefinitionErrors(template)).toHaveLength(0);
+  });
+
+  it('returns no errors for a valid OBJECT_ARRAY field', () => {
+    const template = makeTemplate({
+      items: {
+        input_type: 'OBJECT_ARRAY',
+        max_items: 10,
+        properties: { name: { input_type: 'TEXT' } },
+      },
+    });
+    expect(collectTemplateDefinitionErrors(template)).toHaveLength(0);
+  });
+
+  it('errors when OBJECT has no properties', () => {
+    const template = makeTemplate({
+      empty_obj: { input_type: 'OBJECT' },
+    });
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('properties'))).toBe(true);
+  });
+
+  it('errors when OBJECT has an empty properties map', () => {
+    const template = makeTemplate({
+      empty_obj: { input_type: 'OBJECT', properties: {} },
+    });
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('properties'))).toBe(true);
+  });
+
+  it('errors when max_items is declared on a non-OBJECT_ARRAY field', () => {
+    const template = makeTemplate({
+      score: { input_type: 'NUMBER', max_items: 5 } as ConversationTemplateFieldDefinition,
+    });
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('max_items'))).toBe(true);
+  });
+
+  it('errors when properties is declared on a non-OBJECT field', () => {
+    const template = makeTemplate({
+      score: {
+        input_type: 'NUMBER',
+        properties: { nested: { input_type: 'TEXT' } },
+      } as ConversationTemplateFieldDefinition,
+    });
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('properties'))).toBe(true);
+  });
+
+  it('recurses into nested properties and validates them', () => {
+    // The nested SELECT field is missing options — should be caught.
+    const template = makeTemplate({
+      indicators: {
+        input_type: 'OBJECT_ARRAY',
+        properties: {
+          type: { input_type: 'SELECT' }, // missing options!
+          value: { input_type: 'TEXT' },
+        },
+      },
+    });
+    const errors = collectTemplateDefinitionErrors(template);
+    expect(errors.some((e) => e.includes('options'))).toBe(true);
+    expect(errors.some((e) => e.includes('indicators.type'))).toBe(true);
+  });
+
+  it('errors when a nested field declares default_value', () => {
+    const template = makeTemplate({
+      wrapper: {
+        input_type: 'OBJECT',
+        properties: {
+          score: { input_type: 'NUMBER', default_value: 5 },
+        },
+      },
+    });
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('default_value'))).toBe(true);
+  });
+
+  it('errors when the new default: switch branch is hit (unknown input_type)', () => {
+    const template = makeTemplate({
+      weird: { input_type: 'UNKNOWN_TYPE' as ConversationTemplateFieldDefinition['input_type'] },
+    });
+    // The default: case returns an "unsupported input_type" violation.
+    const violations = collectFieldViolations('weird', template.fields.weird, 'anything');
+    expect(violations.some((v) => v.includes('unsupported'))).toBe(true);
+  });
+});
