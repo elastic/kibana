@@ -35,6 +35,14 @@ const mockMlVisibility = {
   isTopbarMenuVisible: true,
 };
 
+const mockMetricsViewState: { metricsView: { indices?: string } | undefined } = {
+  metricsView: { indices: 'metrics-*' },
+};
+
+const mockActiveSpace: { space: { id: string } | undefined } = {
+  space: { id: 'default' },
+};
+
 jest.mock('../../../containers/plugin_config_context', () => ({
   usePluginConfig: () => ({
     featureFlags: mockFeatureFlags,
@@ -78,6 +86,14 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
 }));
 
+jest.mock('../../../containers/metrics_source', () => ({
+  useMetricsDataViewContext: () => mockMetricsViewState,
+}));
+
+jest.mock('../../../hooks/use_kibana_space', () => ({
+  useActiveKibanaSpace: () => mockActiveSpace,
+}));
+
 jest.mock('../../../components/ml/anomaly_detection/anomaly_detection_flyout', () => ({
   AnomalyDetectionFlyout: () => null,
 }));
@@ -112,6 +128,8 @@ describe('useMetricsAppHeaderMenu', () => {
     mockFeatureFlags.customThresholdAlertsEnabled = true;
     mockCapabilities.infrastructure.save = true;
     mockMlVisibility.isTopbarMenuVisible = true;
+    mockMetricsViewState.metricsView = { indices: 'metrics-*' };
+    mockActiveSpace.space = { id: 'default' };
   });
 
   it('builds Inventory actions with anomaly detection, alerts, overflow settings, and add data', () => {
@@ -128,6 +146,7 @@ describe('useMetricsAppHeaderMenu', () => {
       expect.objectContaining({
         id: 'alerts',
         testId: 'infrastructure-alerts-and-rules',
+        popoverTestId: 'metrics-alert-menu',
       })
     );
     expect(findItem(menu.items, 'settings')).toEqual(
@@ -159,6 +178,13 @@ describe('useMetricsAppHeaderMenu', () => {
 
   it('omits anomaly detection when the ML topbar is hidden', () => {
     mockMlVisibility.isTopbarMenuVisible = false;
+    const { result } = renderMenuHook('/inventory');
+    expect(findItem(result.current.menu.items, 'anomalyDetection')).toBeUndefined();
+  });
+
+  it('omits anomaly detection when the flyout cannot render', () => {
+    mockMetricsViewState.metricsView = undefined;
+    mockActiveSpace.space = undefined;
     const { result } = renderMenuHook('/inventory');
     expect(findItem(result.current.menu.items, 'anomalyDetection')).toBeUndefined();
   });

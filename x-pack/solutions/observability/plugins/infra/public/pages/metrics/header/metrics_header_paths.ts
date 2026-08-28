@@ -8,6 +8,7 @@
 export const METRICS_INVENTORY_PATH = '/inventory';
 export const METRICS_HOSTS_PATH = '/hosts';
 export const METRICS_EXPLORER_PATH = '/explorer';
+export const METRICS_EXPLORER_ALIAS_PATH = '/metrics-explorer';
 export const METRICS_SETTINGS_PATH = '/settings';
 export const METRICS_DETAIL_PATH = '/detail';
 

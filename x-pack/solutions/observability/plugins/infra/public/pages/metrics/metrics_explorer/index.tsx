@@ -50,6 +50,13 @@ export const MetricsExplorerPage = (): React.ReactElement => {
   return (
     <div className={APP_WRAPPER_CLASS}>
       <InfraPageTemplate
+        hasDataOverride={!showOnboarding}
+        header={
+          <>
+            <AppHeader title={metricsExplorerTitle} menu={menu} spacing="standard" />
+            {flyouts}
+          </>
+        }
         pageSectionProps={{
           paddingSize: 'none',
           contentProps: {
@@ -65,8 +72,6 @@ export const MetricsExplorerPage = (): React.ReactElement => {
           },
         }}
       >
-        <AppHeader title={metricsExplorerTitle} menu={menu} spacing="standard" />
-        {flyouts}
         {showOnboarding ? (
           <ExplorerOnboardingPage />
         ) : (

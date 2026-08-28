@@ -67,10 +67,26 @@ jest.mock('@kbn/shared-ux-page-no-data', () => ({
   NoDataPage: () => <div data-test-subj="kbnNoDataPage" />,
 }));
 
+let lastInfraPageTemplateProps: { hasDataOverride?: boolean } = {};
+
 jest.mock('../../../components/shared/templates/infra_page_template', () => ({
-  InfraPageTemplate: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="infraPageTemplate">{children}</div>
-  ),
+  InfraPageTemplate: ({
+    children,
+    hasDataOverride,
+    header,
+  }: {
+    children: React.ReactNode;
+    hasDataOverride?: boolean;
+    header?: React.ReactNode;
+  }) => {
+    lastInfraPageTemplateProps = { hasDataOverride };
+    return (
+      <div data-test-subj="infraPageTemplate">
+        {header}
+        {children}
+      </div>
+    );
+  },
 }));
 
 jest.mock('../../../containers/metrics_explorer/with_metrics_explorer_options_url_state', () => ({
@@ -141,6 +157,7 @@ describe('MetricsExplorerPage', () => {
   beforeEach(() => {
     mockFetcherState.hasData = true;
     mockFetcherState.status = 'success';
+    lastInfraPageTemplateProps = {};
   });
 
   it('renders AppHeader with the explorer title and no back control when metrics exist', async () => {
@@ -154,6 +171,7 @@ describe('MetricsExplorerPage', () => {
     expect(screen.getByTestId('metricsExplorerSavedViews')).toBeInTheDocument();
     expect(screen.getByTestId('metricsExplorerCharts')).toBeInTheDocument();
     expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 
   it('keeps AppHeader and shows onboarding instead of toolbar and charts when there is no metrics data', async () => {
@@ -169,6 +187,7 @@ describe('MetricsExplorerPage', () => {
     expect(screen.queryByTestId('metricsExplorerToolbar')).not.toBeInTheDocument();
     expect(screen.queryByTestId('metricsExplorerSavedViews')).not.toBeInTheDocument();
     expect(screen.queryByTestId('metricsExplorerCharts')).not.toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(false);
   });
 
   it('does not show onboarding while metrics data is loading', async () => {
@@ -183,5 +202,6 @@ describe('MetricsExplorerPage', () => {
     expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
     expect(screen.getByTestId('metricsExplorerToolbar')).toBeInTheDocument();
     expect(screen.getByTestId('metricsExplorerCharts')).toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 });

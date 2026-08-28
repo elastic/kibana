@@ -16,6 +16,7 @@ describe('isMetricsHeaderPortalExcluded', () => {
   it('excludes Explorer once that route consumes AppHeader', () => {
     expect(isMetricsHeaderPortalExcluded('/explorer')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/explorer/extra')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/metrics-explorer')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/inventory')).toBe(false);
     expect(isMetricsHeaderPortalExcluded('/hosts')).toBe(false);
     expect(isMetricsHeaderPortalExcluded('/detail/host/web-01')).toBe(false);
