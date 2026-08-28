@@ -44,7 +44,7 @@ Prefer modify and expand. Do not remove visualization panels. Do not invent brok
 ## Hard rules — panel
 
 - **Metric.** NEVER show the dashboard chrome title on a metric. A lone number on white is a miss. In most cases, enrich the metric from the same ES|QL (secondary metric with dynamic coloring and/or a background chart). If the secondary is a trend, it must not have a title. Invented static colors and BACKGROUND fills must be removed. Describe that wanted edition in \`edit_panels.query\` and let the visualization author apply it. Do not invent a second index.
-- **XY.** ALWAYS prefer gradient area fills over solid. Hide the legend when there is one series; otherwise put it at the bottom with LIST layout and useful stats. Always hide axis titles. Describe that wanted edition in \`edit_panels.query\` and let the visualization author apply it.
+- **XY.** ALWAYS prefer gradient area fills over solid. Hide the legend when there is one series; otherwise put it at the bottom as a grid with useful stats. Always hide axis titles. Describe that wanted edition in \`edit_panels.query\` and let the visualization author apply it.
 - **Table.** Set width from the number of columns (\`w: 24–48\`). More columns → closer to 48. Never shrink a table below 24.
 
 ## Creative inventions

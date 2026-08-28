@@ -26,14 +26,16 @@ describe('getChartTypeConfigPromptContent', () => {
     expect(prompt).toContain('secondary metric with dynamic coloring');
   });
 
-  it('tells the xy author to use gradient fills, list legends, and hide a one-series legend', () => {
+  it('tells the xy author to use gradient fills, a default grid legend, and hide a one-series legend', () => {
     const prompt = getChartTypeConfigPromptContent(SupportedChartType.XY);
 
     expect(prompt).toContain('CHART-SPECIFIC RULES FOR XY');
     expect(prompt).toContain('styling.areas.fill: "gradient"');
     expect(prompt).toContain('legend.visibility: "hidden"');
-    expect(prompt).toContain('layout: { type: "list" }');
+    expect(prompt).toContain('Omit `legend.layout.type`');
     expect(prompt).toContain('legend.statistics');
     expect(prompt).toContain('axis title visibility to false');
+    expect(prompt).not.toContain('type: "list"');
+    expect(prompt).not.toContain('type: "grid"');
   });
 });

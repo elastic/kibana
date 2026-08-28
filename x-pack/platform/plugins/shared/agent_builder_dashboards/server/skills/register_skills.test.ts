@@ -118,7 +118,8 @@ describe('registerSkills', () => {
     expect(rules?.content).toContain('If the secondary is a trend');
     expect(rules?.content).toContain('it must not have a title');
     expect(rules?.content).toContain('background chart');
-    expect(rules?.content).toContain('bottom with LIST layout');
+    expect(rules?.content).toContain('bottom as a grid');
+    expect(rules?.content).not.toContain('LIST layout');
     expect(rules?.content).toContain('Always hide axis titles');
     expect(rules?.content).toContain('ALWAYS prefer gradient area fills over solid');
     expect(rules?.content).toContain('XY charts');
