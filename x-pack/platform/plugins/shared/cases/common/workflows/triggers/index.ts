@@ -210,6 +210,7 @@ triggers:
       ),
     ],
   },
+  snippets: { condition: 'event.changedFields: "priority_as_keyword"' },
 };
 
 export const CommentsAddedTriggerId = 'cases.commentsAdded' as const;
@@ -294,7 +295,7 @@ This trigger fires when extended fields change via any write path, including a c
 Values for USER_PICKER and similar multi-value controls are JSON-encoded strings (e.g. '["alice","bob"]'). Compare them in steps, not in trigger conditions.
 
 **Self-feeding chains**
-A workflow step that writes extended fields will re-emit this trigger. The chain is bounded by eventDriven.maxChainDepth (default 10).`,
+A workflow step that writes extended fields will re-emit this trigger. The chain is bounded by eventDriven.maxChainDepth (default 10). To prevent the workflow from triggering itself, add \`on.workflowEvents: ignore\` to the trigger block.`,
       }
     ),
     examples: [
@@ -329,4 +330,5 @@ triggers:
       ),
     ],
   },
+  snippets: { condition: 'event.changedFields: "priority_as_keyword"' },
 };

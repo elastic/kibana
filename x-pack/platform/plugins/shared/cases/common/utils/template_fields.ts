@@ -342,10 +342,6 @@ export const pickExtendedFieldsDifferingFromDefaults = (
 export interface ExtendedFieldsDiff {
   /** Sorted list of keys whose values changed (added, removed, or modified). */
   changedFields: string[];
-  /** New values for changed keys only. An absent key was cleared. */
-  extendedFields: Record<string, string>;
-  /** Previous values for changed keys only. An absent key was newly added. */
-  previousExtendedFields: Record<string, string>;
 }
 
 /**
@@ -368,8 +364,6 @@ export const diffExtendedFields = (
   const allKeys = Array.from(new Set([...Object.keys(prev), ...Object.keys(nxt)])).sort();
 
   const changedFields: string[] = [];
-  const extendedFields: Record<string, string> = {};
-  const previousExtendedFields: Record<string, string> = {};
 
   for (const key of allKeys) {
     const hasPrev = Object.prototype.hasOwnProperty.call(prev, key) && prev[key] !== undefined;
@@ -380,16 +374,10 @@ export const diffExtendedFields = (
 
     if (prevVal !== nextVal) {
       changedFields.push(key);
-      if (nextVal !== undefined) {
-        extendedFields[key] = nextVal;
-      }
-      if (prevVal !== undefined) {
-        previousExtendedFields[key] = prevVal;
-      }
     }
   }
 
-  return { changedFields, extendedFields, previousExtendedFields };
+  return { changedFields };
 };
 
 // ---------------------------------------------------------------------------
