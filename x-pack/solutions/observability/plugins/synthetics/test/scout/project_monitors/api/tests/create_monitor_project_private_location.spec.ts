@@ -170,6 +170,7 @@ apiTest.describe(
       'filter_journeys.tags': [],
       form_monitor_type: 'multistep',
       ignore_https_errors: false,
+      certificate_error_spki_allowlist: [],
       journey_id: journeyId,
       locations: [privateLocationResult()],
       name: 'check if title is present',

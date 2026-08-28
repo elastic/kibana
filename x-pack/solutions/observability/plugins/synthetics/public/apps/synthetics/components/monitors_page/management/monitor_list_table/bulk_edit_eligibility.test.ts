@@ -7,7 +7,11 @@
 
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
-import { isMonitorBulkEditable, monitorUsesPublicLocations } from './bulk_edit_eligibility';
+import {
+  isMonitorBulkEditable,
+  isMonitorBulkStatusEditable,
+  monitorUsesPublicLocations,
+} from './bulk_edit_eligibility';
 
 const makeMonitor = ({
   origin = SourceType.UI,
@@ -49,6 +53,36 @@ describe('bulk edit eligibility', () => {
 
     it('allows ui monitors on public locations when the user has the permission', () => {
       expect(isMonitorBulkEditable(makeMonitor({ serviceManaged: true }), true)).toBe(true);
+    });
+  });
+
+  describe('isMonitorBulkStatusEditable', () => {
+    it('allows non-ui monitors (project/terraform can be enabled/disabled in bulk)', () => {
+      expect(isMonitorBulkStatusEditable(makeMonitor({ origin: SourceType.PROJECT }), true)).toBe(
+        true
+      );
+    });
+
+    it('allows non-ui monitors on private locations without public-location permission', () => {
+      expect(
+        isMonitorBulkStatusEditable(
+          makeMonitor({ origin: SourceType.PROJECT, serviceManaged: false }),
+          false
+        )
+      ).toBe(true);
+    });
+
+    it('excludes monitors on public locations when the user lacks the permission', () => {
+      expect(
+        isMonitorBulkStatusEditable(
+          makeMonitor({ origin: SourceType.PROJECT, serviceManaged: true }),
+          false
+        )
+      ).toBe(false);
+    });
+
+    it('allows monitors on public locations when the user has the permission', () => {
+      expect(isMonitorBulkStatusEditable(makeMonitor({ serviceManaged: true }), true)).toBe(true);
     });
   });
 });

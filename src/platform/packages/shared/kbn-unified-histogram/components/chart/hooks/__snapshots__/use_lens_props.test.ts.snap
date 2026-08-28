@@ -256,10 +256,6 @@ Object {
         },
       },
       "filters": Array [],
-      "query": Object {
-        "esql": "FROM logs* | WHERE ??field >= ?otherVar
-| STATS results = COUNT(*) BY timestamp = BUCKET(timestamp, 10 minute)",
-      },
       "visualization": Object {
         "gridConfig": Object {
           "isCellLabelVisible": false,
