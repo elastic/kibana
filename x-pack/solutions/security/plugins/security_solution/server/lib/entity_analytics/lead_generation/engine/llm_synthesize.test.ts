@@ -7,8 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { LeadEntity, Observation } from '../types';
-import type { ScoredEntityInput } from './llm_synthesize';
+import type { LeadEntity, Observation, RelatedEntity, ScoredEntity } from '../types';
 
 let mockChainInvokeResult: unknown;
 
@@ -34,7 +33,7 @@ const { llmSynthesizeBatch, __testables } = jest.requireActual('./llm_synthesize
   llmSynthesizeBatch: typeof import('./llm_synthesize').llmSynthesizeBatch;
   __testables: typeof import('./llm_synthesize').__testables;
 };
-const { formatLeadsPayload, formatRiskEscalation } = __testables;
+const { formatLeadsPayload, formatRiskEscalation, formatRelatedEntities } = __testables;
 
 const createMockEntity = (name: string, type = 'user'): LeadEntity => {
   const id = `${type}:${name}`;
@@ -64,13 +63,15 @@ const createMockObservation = (
 const createScoredEntity = (
   name: string,
   priority: number,
-  obsOverrides?: Partial<Observation>[]
-): ScoredEntityInput => {
+  obsOverrides?: Partial<Observation>[],
+  topRelatedEntities: RelatedEntity[] = [],
+  relatedEntityCounts: Record<string, number> = {}
+): ScoredEntity => {
   const entity = createMockEntity(name);
   const observations = obsOverrides
     ? obsOverrides.map((o) => createMockObservation(entity, o))
     : [createMockObservation(entity)];
-  return { entity, priority, observations };
+  return { entity, priority, observations, topRelatedEntities, relatedEntityCounts };
 };
 
 describe('llmSynthesizeBatch', () => {
@@ -88,10 +89,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('throws when LLM returns wrong number of items', async () => {
-    const entities: ScoredEntityInput[] = [
-      createScoredEntity('alice', 8),
-      createScoredEntity('bob', 6),
-    ];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8), createScoredEntity('bob', 6)];
 
     mockChainInvokeResult = [
       {
@@ -108,7 +106,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('throws when LLM returns a non-array', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = { title: 'not an array' };
 
@@ -118,7 +116,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('throws when LLM returns malformed item with missing title', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -134,7 +132,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('throws when LLM returns malformed item with non-array tags', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -151,7 +149,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('truncates titles longer than 10 words', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -170,7 +168,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('keeps hypothesis-style titles up to 9 words intact', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -188,7 +186,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('renders peer context in the payload when cohort is provided', async () => {
-    const entities: ScoredEntityInput[] = [
+    const entities: ScoredEntity[] = [
       createScoredEntity('alice', 8, [{ type: 'risk_escalation_24h' }]),
     ];
 
@@ -213,7 +211,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('throws when LLM returns malformed item with missing byline', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -230,7 +228,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('returns the byline and strips markdown formatting from it', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -249,7 +247,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('strips markdown formatting from descriptions', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -271,7 +269,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('filters MITRE ATT&CK IDs from tags', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -291,7 +289,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('caps tags at 6 and recommendations at 5', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -310,7 +308,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('handles a multi-lead batch correctly preserving order', async () => {
-    const entities: ScoredEntityInput[] = [
+    const entities: ScoredEntity[] = [
       createScoredEntity('alice', 9),
       createScoredEntity('bob', 7),
       createScoredEntity('carol', 5),
@@ -349,7 +347,7 @@ describe('llmSynthesizeBatch', () => {
   });
 
   it('coerces non-string tag values via String()', async () => {
-    const entities: ScoredEntityInput[] = [createScoredEntity('alice', 8)];
+    const entities: ScoredEntity[] = [createScoredEntity('alice', 8)];
 
     mockChainInvokeResult = [
       {
@@ -375,6 +373,27 @@ describe('formatLeadsPayload', () => {
 
     expect(payload).toContain('signal_strength=80/100');
     expect(payload).not.toMatch(/[^_]score=\d+\/100/);
+  });
+
+  it('omits the Related entities section entirely when the entity has none', () => {
+    const entities = [createScoredEntity('alice', 8)];
+
+    const payload = formatLeadsPayload(entities);
+
+    expect(payload).not.toContain('Related entities');
+  });
+
+  it('includes the Related entities section when the entity has related entities', () => {
+    const entities = [
+      createScoredEntity('alice', 8, undefined, [
+        { id: 'host:web-01', type: 'host', name: 'web-01', kinds: ['administers'] },
+      ]),
+    ];
+
+    const payload = formatLeadsPayload(entities);
+
+    expect(payload).toContain('Related entities:');
+    expect(payload).toContain('administers host "web-01"');
   });
 });
 
@@ -449,5 +468,102 @@ describe('formatRiskEscalation', () => {
     ]);
 
     expect(formatRiskEscalation(entity)).toBe('');
+  });
+});
+
+describe('formatRelatedEntities', () => {
+  it('returns an empty string when there are no related entities', () => {
+    const entity = createScoredEntity('alice', 8);
+
+    expect(formatRelatedEntities(entity)).toBe('');
+  });
+
+  it('renders kind, type, name, criticality, risk, and interaction count in a compact line', () => {
+    const entity = createScoredEntity('alice', 8, undefined, [
+      {
+        id: 'host:web-01',
+        type: 'host',
+        name: 'web-01',
+        kinds: ['administers'],
+        criticality: 'extreme_impact',
+        riskLevel: 'High',
+      },
+    ]);
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toContain('Related entities:');
+    expect(section).toContain(
+      '  - administers host "web-01" (criticality: extreme_impact, risk: High)'
+    );
+  });
+
+  it('renders interactedWithAtLeast as a lower-bound phrase', () => {
+    const entity = createScoredEntity('alice', 8, undefined, [
+      {
+        id: 'host:build-3',
+        type: 'host',
+        name: 'build-3',
+        kinds: ['accesses_infrequently'],
+        interactedWithAtLeast: 4,
+      },
+    ]);
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toContain('interacted with: at least 4 entities');
+  });
+
+  it('joins multiple kinds for the same entity', () => {
+    const entity = createScoredEntity('alice', 8, undefined, [
+      {
+        id: 'host:shared',
+        type: 'host',
+        name: 'shared',
+        kinds: ['administers', 'communicates_with'],
+      },
+    ]);
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toContain('  - administers, communicates_with host "shared"');
+  });
+
+  it('omits the parenthetical when there is no criticality, risk, or interaction count', () => {
+    const entity = createScoredEntity('alice', 8, undefined, [
+      { id: 'host:bare', type: 'host', name: 'bare', kinds: ['owns'] },
+    ]);
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toBe('  Related entities:\n  - owns host "bare"');
+  });
+
+  it('appends a note when relatedEntityCounts shows more exist for a kind than are shown', () => {
+    const entity = createScoredEntity(
+      'alice',
+      8,
+      undefined,
+      [{ id: 'host:a', type: 'host', name: 'a', kinds: ['accesses_frequently'] }],
+      { accesses_frequently: 22 }
+    );
+
+    const section = formatRelatedEntities(entity);
+
+    expect(section).toBe(
+      '  Related entities:\n  - accesses_frequently host "a"\n  (not shown: 21 more accesses_frequently relationships)'
+    );
+  });
+
+  it('does not append a note when relatedEntityCounts matches what was shown', () => {
+    const entity = createScoredEntity(
+      'alice',
+      8,
+      undefined,
+      [{ id: 'host:a', type: 'host', name: 'a', kinds: ['owns'] }],
+      { owns: 1 }
+    );
+
+    expect(formatRelatedEntities(entity)).not.toContain('not shown');
   });
 });

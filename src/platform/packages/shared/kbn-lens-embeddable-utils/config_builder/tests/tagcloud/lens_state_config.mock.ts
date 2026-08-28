@@ -276,7 +276,7 @@ export const tagcloudESQLAttributes = {
         colorMode: { type: 'categorical' },
       },
     },
-    query: { esql: 'FROM kibana_sample_data_logs| STATS AVG(bytes) BY geo.dest' },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {

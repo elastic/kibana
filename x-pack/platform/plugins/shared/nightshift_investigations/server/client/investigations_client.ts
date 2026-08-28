@@ -204,6 +204,7 @@ export class NightshiftInvestigationsClient {
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+        ...(subject.summary ? { summary: subject.summary } : {}),
       },
     };
 
@@ -271,10 +272,12 @@ export class NightshiftInvestigationsClient {
 
     const subject = recoverSubjectFromInput(rawInput);
     const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
+    const rawContext = isPlainObject(rawInput?.context) ? rawInput.context : undefined;
+    const subjectSummary = asString(rawContext?.summary);
 
     return {
       investigation_id: investigationId,
-      subject,
+      subject: subject && subjectSummary ? { ...subject, summary: subjectSummary } : subject,
       trigger_type: recoveredTriggerType,
       status,
       started_at: execution.startedAt,
