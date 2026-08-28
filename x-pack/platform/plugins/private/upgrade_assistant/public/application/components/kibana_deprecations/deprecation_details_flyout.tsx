@@ -21,13 +21,13 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
-  EuiCallOut,
   EuiSpacer,
   EuiMarkdownFormat,
   getDefaultEuiMarkdownPlugins,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 
 import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
@@ -184,15 +184,12 @@ export const DeprecationDetailsFlyout = ({
       <EuiFlyoutBody>
         {deprecationResolutionState?.resolveDeprecationStatus === 'fail' && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18nTexts.quickResolveErrorTitle}
-              color="danger"
-              iconType="warning"
               data-test-subj="quickResolveError"
-            >
-              {deprecationResolutionState.resolveDeprecationError}
-            </EuiCallOut>
+              text={deprecationResolutionState.resolveDeprecationError}
+            />
             <EuiSpacer />
           </>
         )}
@@ -236,11 +233,9 @@ export const DeprecationDetailsFlyout = ({
           <div data-test-subj="resolveSection">
             {correctiveActions.api && (
               <>
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount={false}
                   title={i18nTexts.quickResolveCalloutTitle}
-                  color="primary"
-                  iconType="info"
                   data-test-subj="quickResolveCallout"
                 />
 

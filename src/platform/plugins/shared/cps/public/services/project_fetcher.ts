@@ -8,6 +8,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { Logger } from '@kbn/logging';
 import type { ProjectTagsResponse, ProjectsData } from '@kbn/cps-utils';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -31,8 +32,13 @@ export interface ProjectFetcher {
  * - Concurrent calls with the same `projectRouting` share a single HTTP round-trip.
  * - Successful responses are cached for {@link CACHE_TTL_MS}; subsequent calls within that
  *   window return the cached result without a network request.
- * - Errors are never cached — the next call always retries.
+ * - A 403 means the user lacks the `read_project_routing` cluster privilege; it resolves
+ *   to `null` (no retries) and is cached like a successful response.
+ * - Other errors are never cached — the next call always retries.
  */
+const isForbiddenError = (error: unknown): boolean =>
+  isHttpFetchError(error) && error.response?.status === 403;
+
 export function createProjectFetcher(http: HttpSetup, logger: Logger): ProjectFetcher {
   const inFlightRequests = new Map<ProjectRouting | undefined, Promise<ProjectsData | null>>();
   const cache = new Map<ProjectRouting | undefined, CacheEntry>();
@@ -56,6 +62,16 @@ export function createProjectFetcher(http: HttpSetup, logger: Logger): ProjectFe
             : [],
         };
       } catch (error) {
+        if (isForbiddenError(error)) {
+          // The user lacks the read_project_routing cluster privilege. This is a
+          // stable condition, not a transient failure: report "no projects" so CPS
+          // UI features hide themselves, and cache it to avoid hammering the API.
+          logger.debug(
+            'User is not authorized to fetch project tags; the project picker will be hidden and searches will use the default project routing for the space'
+          );
+          return null;
+        }
+
         lastError = error instanceof Error ? error : new Error(String(error));
         logger.error(`Failed to fetch projects (attempt ${attempt + 1}/${MAX_RETRIES + 1})`, {
           error,

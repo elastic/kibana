@@ -18,8 +18,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React from 'react';
 import { useFetchDiscoveryQueries } from '../../hooks/use_fetch_discovery_queries';
+import { useKibana } from '../../hooks/use_kibana';
 import { useStreamFeatures } from '../../hooks/use_stream_features';
 import { useStreamOnboardingStatus } from '../../hooks/use_stream_onboarding_status';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
@@ -84,6 +86,12 @@ function KnowledgeIndicatorCount({
 
 export function KnowledgeIndicatorsPanel({ streamName }: KnowledgeIndicatorsPanelProps) {
   const router = useSignificantEventsAppRouter();
+  const {
+    dependencies: {
+      start: { cps },
+    },
+  } = useKibana();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
   const streamOnboardingResult = useStreamOnboardingStatus(streamName);
 
   const {
@@ -172,6 +180,21 @@ export function KnowledgeIndicatorsPanel({ streamName }: KnowledgeIndicatorsPane
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {isCpsMultiProject && (
+        <EuiText
+          size="xs"
+          color="subdued"
+          data-test-subj="significantEventsAppKnowledgeIndicatorsProvenance"
+        >
+          <p>
+            {i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.provenance', {
+              defaultMessage:
+                'Generated from data across all projects linked through cross-project search.',
+            })}
+          </p>
+        </EuiText>
+      )}
 
       <EuiSpacer size="m" />
 

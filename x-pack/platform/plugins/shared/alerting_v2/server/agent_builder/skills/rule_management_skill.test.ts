@@ -24,6 +24,10 @@ const createDeps = () => ({
 });
 
 describe('createRuleManagementSkill', () => {
+  it('generates schema docs without throwing', () => {
+    expect(() => createRuleManagementSkill(createDeps())).not.toThrow();
+  });
+
   it('registers the skill under the stable rule-management id and name', () => {
     const skill = createRuleManagementSkill(createDeps());
 

@@ -1,5 +1,8 @@
 {
-  "sha1": "c3cde34141f121054df1582b1f1c8e9269948897",
+  "sha1": "4421311fc2261397d7e60e8acbbc3951df6ebe63",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "614e6351a14a9bc-7eda28ec0661f6a",
@@ -10,21 +13,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/intercepts/test/scout/ui/tests/product_intercept_standard.spec.ts",
-        "line": 16,
-        "column": 7
+        "line": 15,
+        "column": 14
       }
     },
     {
-      "id": "614e6351a14a9bc-fb21f585e9899e0",
-      "title": "Standard Product intercept survey link on the completion step includes CSAT responses as URL params",
+      "id": "614e6351a14a9bc-b7d7c4f350d8cdb",
+      "title": "Standard Product intercept participate button on the completion step links to the User Interviews opt-in form",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/intercepts/test/scout/ui/tests/product_intercept_standard.spec.ts",
-        "line": 55,
-        "column": 7
+        "line": 28,
+        "column": 24
       }
     },
     {
@@ -36,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/intercepts/test/scout/ui/tests/product_intercept_standard.spec.ts",
-        "line": 92,
+        "line": 64,
         "column": 7
       }
     },
@@ -49,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/intercepts/test/scout/ui/tests/product_intercepts_upgrade.spec.ts",
-        "line": 22,
-        "column": 7
+        "line": 17,
+        "column": 27
       }
     }
   ]

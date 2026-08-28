@@ -15,6 +15,7 @@ export type {
   ExperimentalFeatures,
   SubAgentExecutor,
   SubAgentExecution,
+  ConversationClient,
 } from './provider';
 export type {
   RunAgentFn,

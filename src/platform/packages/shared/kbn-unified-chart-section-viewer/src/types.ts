@@ -11,7 +11,7 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { MetricsGridSettings } from '@kbn/discover-utils';
+import type { MetricsGridSettings, MetricsGridSort } from '@kbn/discover-utils';
 import type { ValuesType } from 'utility-types';
 import type { ExternalServices } from './context/external_services';
 import type { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from './common/constants';
@@ -56,6 +56,17 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * (e.g. Discover's persistent profile state).
    */
   onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  /**
+   * Current grid sort selection, sourced from the host (e.g. Discover's
+   * persistent profile state). Falls back to `METRICS_GRID_SORT_DEFAULTS` when
+   * not provided.
+   */
+  metricsSort?: MetricsSort;
+  /**
+   * Callback used to push sort changes back to the host (e.g. Discover's
+   * persistent profile state, which is restored on page reload).
+   */
+  onMetricsSortChange?: (sort: MetricsSort) => void;
   /**
    * Loads the list of recently explored metrics, falls back to A->Z.
    */
@@ -143,4 +154,4 @@ export interface Metric {
 
 export type MetricsSortBy = ValuesType<typeof METRICS_SORT_BY>;
 export type MetricsSortDirection = ValuesType<typeof METRICS_SORT_DIRECTION>;
-export type MetricsSort = readonly [MetricsSortBy, MetricsSortDirection];
+export type MetricsSort = MetricsGridSort;

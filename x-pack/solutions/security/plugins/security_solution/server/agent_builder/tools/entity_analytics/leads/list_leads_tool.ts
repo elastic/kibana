@@ -52,6 +52,13 @@ export const listLeadsTool = (
       'Leads are sorted by priority (highest first) by default.',
     schema,
     tags: ['security', 'entity-analytics', 'leads'],
+    annotations: {
+      title: 'List Leads',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>
@@ -69,7 +76,7 @@ export const listLeadsTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (!privileges.adhoc.has_read_permissions || !privileges.scheduled.has_read_permissions) {
+        if (!privileges.has_read_permissions) {
           success = false;
           errorMessage = 'You do not have permission to read leads in this space.';
           return {

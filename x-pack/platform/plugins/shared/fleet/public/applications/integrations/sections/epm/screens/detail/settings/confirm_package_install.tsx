@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -51,8 +52,7 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
       }
       defaultFocusedButton="confirm"
     >
-      <EuiCallOut
-        iconType="info"
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.fleet.integrations.settings.confirmInstallModal.installCalloutTitle"
