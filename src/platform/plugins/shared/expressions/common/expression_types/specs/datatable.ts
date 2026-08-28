@@ -25,6 +25,8 @@ export enum DimensionType {
   SPLIT_ROW = 'splitRow',
 }
 
+const MAX_DATATABLE_CELLS = 500_000;
+
 const name = 'datatable';
 
 /**
@@ -248,6 +250,9 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
   },
   deserialize: (table) => {
     const { columns, rows } = table;
+    if (columns.length * rows.length > MAX_DATATABLE_CELLS) {
+      throw new Error(`Datatable exceeds maximum allowed size of ${MAX_DATATABLE_CELLS} cells.`);
+    }
     return {
       ...table,
       rows: rows.map((row) => {
