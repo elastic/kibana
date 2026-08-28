@@ -45,7 +45,8 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 
 describe('investigation lifecycle contracts', () => {
   it('emits lifecycle events and fails unsuccessful executions', () => {
-    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(9);
+    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(10);
+    expect(investigation.steps[0].name).toBe('ensure_investigation_agent');
 
     const expectedStatuses: Record<string, string> = {
       emit_investigation_started: 'running',
@@ -65,19 +66,19 @@ describe('investigation lifecycle contracts', () => {
     });
   });
 
-  it('persists the investigation saved object as the first step, retrying then failing the run', () => {
-    const [firstStep] = investigation.steps;
+  it('persists the investigation saved object before emit, retrying then failing the run', () => {
+    expect(investigation.steps[1].name).toBe('persist_investigation_started');
+    const persistStarted = requireStep('persist_investigation_started');
 
-    expect(firstStep.name).toBe('persist_investigation_started');
-    expect(firstStep.type).toBe('kibana.request');
-    expect(firstStep.with?.method).toBe('POST');
-    expect(firstStep.with?.path).toBe(
+    expect(persistStarted.type).toBe('kibana.request');
+    expect(persistStarted.with?.method).toBe('POST');
+    expect(persistStarted.with?.path).toBe(
       '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/_ensure'
     );
     // Retry absorbs transient failures (e.g. the execution document not yet readable right at
     // startup); no `continue`, so a run whose record cannot be persisted fails rather than
     // proceeding invisibly — every run that gets past this step is visible to the API.
-    expect(firstStep['on-failure']).toEqual({
+    expect(persistStarted['on-failure']).toEqual({
       retry: { 'max-attempts': 3, delay: '5s', strategy: 'exponential' },
     });
   });

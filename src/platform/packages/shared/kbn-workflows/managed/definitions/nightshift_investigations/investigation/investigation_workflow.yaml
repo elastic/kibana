@@ -41,8 +41,21 @@ triggers:
       additionalProperties: false
 
 steps:
+  # The investigation agent is a per-space document, so it has to exist in whichever space this
+  # execution runs in. Callers going through NightshiftInvestigationsClient.start() install it
+  # themselves, but discovery triggers this workflow with `workflow.executeAsync`, which never
+  # touches that client — as does any hand-written workflow or manual run. Ensuring it here is the
+  # one place that covers every trigger. Idempotent, and it never overwrites admin edits.
+  #
+  # Runs before persist / emit so that a failure here does not leave a stale `running` saved
+  # object or lifecycle event. Without `on-failure: continue`, a failure also cannot leave a
+  # pending marker on a significant event for an investigation that will never produce anything:
+  # no `investigations` entry is written, so the next discovery cycle retries.
+  - name: ensure_investigation_agent
+    type: nightshift.ensureInvestigationAgent
+
   # Creates the nightshift-investigation saved object for this run if it does not exist yet.
-  # Runs first so any run that proceeds past this step is guaranteed to be visible to the
+  # Runs before emit so any run that proceeds past this step is guaranteed to be visible to the
   # investigations API regardless of how it was triggered (start endpoint,
   # nightshift.triggerInvestigation step, or a direct workflow execution). Retries transient
   # failures (e.g. the execution document not yet readable right at startup), then fails the
@@ -72,7 +85,6 @@ steps:
         status: 'running'
     on-failure:
       continue: true
-
   # Records a pending investigation on the Significant Event as soon as the workflow starts,
   # so the UI can show an in-progress indicator before the agent step finishes.
   # Only runs when a sig-event context was supplied (discovery or chat-agent paths).
