@@ -96,6 +96,7 @@ import {
   ALLOWED_SCHEDULES_IN_SECONDS,
 } from '../constants';
 import { getDefaultFormFields } from './defaults';
+import { parsePemCertificateEntries } from './parse_pem_certificate_entries';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
@@ -1480,12 +1481,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       readOnly,
       value: Array.isArray(field?.value) ? field.value.join('\n\n') : field?.value || '',
       onChange: (event) => {
-        const raw = event.target.value;
-        const entries = raw
-          .split(/(?=-----BEGIN CERTIFICATE-----)/)
-          .map((entry) => entry.trim())
-          .filter((entry) => entry.startsWith('-----BEGIN CERTIFICATE-----'));
-        setValue(ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST, entries);
+        setValue(
+          ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+          parsePemCertificateEntries(event.target.value)
+        );
       },
       placeholder: '-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----',
     }),
