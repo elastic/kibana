@@ -194,6 +194,7 @@ define-properties@1.2.1
 del@4.1.1
 des.js@1.0.0
 detect-node-es@1.1.0
+diff-match-patch@1.0.5
 diffie-hellman@5.0.3
 domain-browser@4.22.0
 dunder-proto@1.0.1
@@ -463,7 +464,6 @@ tabbable@5.3.3
 tapable@2.3.0
 terser-webpack-plugin@5.3.17
 terser@5.40.0
-text-diff@1.0.1
 timers-browserify@2.0.6
 tiny-invariant@1.3.3
 tiny-warning@1.0.3
