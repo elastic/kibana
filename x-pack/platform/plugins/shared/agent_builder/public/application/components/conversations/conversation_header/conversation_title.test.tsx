@@ -102,4 +102,16 @@ describe('ConversationTitle', () => {
       'Read-Only'
     );
   });
+
+  it('renders the read-only chip after the title menu button', () => {
+    renderTitle({ rename: true, delete: true }, { isReadOnly: true });
+
+    const titleButton = screen.getByTestId('agentBuilderConversationTitleButton');
+    const readOnlyBadge = screen.getByTestId('agentBuilderConversationReadOnlyBadge');
+
+    expect(titleButton).not.toContainElement(readOnlyBadge);
+    expect(titleButton.compareDocumentPosition(readOnlyBadge)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
 });

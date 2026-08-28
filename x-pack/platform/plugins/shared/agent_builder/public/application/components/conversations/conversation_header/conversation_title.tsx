@@ -72,6 +72,10 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     gap: ${euiTheme.size.xs};
   `;
 
+  const titleActionsWrapperStyles = css`
+    min-width: 0;
+  `;
+
   const titleTextStyles = css`
     min-width: 0;
     overflow: hidden;
@@ -81,9 +85,13 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
   const readOnlyBadge = isReadOnly ? (
     <EuiBadge
-      color="hollow"
-      iconType="readOnly"
+      color={euiTheme.colors.lightShade}
+      iconType="lock"
       data-test-subj="agentBuilderConversationReadOnlyBadge"
+      css={css`
+        border-radius: 999px;
+        color: ${euiTheme.colors.text};
+      `}
     >
       {labels.readOnly}
     </EuiBadge>
@@ -186,23 +194,33 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
         <span id={ariaLabelledBy} css={titleTextStyles}>
           {displayedTitle}
         </span>
-        {readOnlyBadge}
       </span>
     </EuiButtonEmpty>
   );
 
   return (
     <>
-      <EuiPopover
-        button={titleButton}
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-        aria-label={labels.openTitleMenu}
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+        css={titleActionsWrapperStyles}
       >
-        <EuiContextMenuPanel items={menuItems} />
-      </EuiPopover>
+        <EuiFlexItem grow={false} css={titleTextStyles}>
+          <EuiPopover
+            button={titleButton}
+            isOpen={isPopoverOpen}
+            closePopover={() => setIsPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downCenter"
+            aria-label={labels.openTitleMenu}
+          >
+            <EuiContextMenuPanel items={menuItems} />
+          </EuiPopover>
+        </EuiFlexItem>
+
+        {readOnlyBadge && <EuiFlexItem grow={false}>{readOnlyBadge}</EuiFlexItem>}
+      </EuiFlexGroup>
 
       <RenameConversationModal
         isOpen={isRenameModalOpen}
