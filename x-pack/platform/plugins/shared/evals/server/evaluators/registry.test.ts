@@ -76,7 +76,7 @@ describe('createEvaluatorRegistry', () => {
     });
 
     it('declares compare polarity so ingested scores do not fall back to the name heuristic', async () => {
-      const { scoped } = createRegistry();
+      const { scoped } = createRegistry([storedDefinition()]);
       const listed = await scoped.list();
       const directionByName = Object.fromEntries(
         listed.map(({ name, direction }) => [name, direction])
@@ -90,6 +90,7 @@ describe('createEvaluatorRegistry', () => {
           input_tokens: 'minimize',
           output_tokens: 'minimize',
           tool_calls: 'neutral',
+          tone: 'maximize',
         })
       );
     });
@@ -135,6 +136,7 @@ describe('createEvaluatorRegistry', () => {
           kind: 'llm',
           origin: 'user_defined',
           description: 'Judges tone',
+          direction: 'maximize',
           evaluate: expect.any(Function),
         })
       );

@@ -48,7 +48,7 @@ export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   kind: 'llm' | 'code';
   origin: EvaluatorOrigin;
   description: string;
-  direction?: Direction;
+  direction: Direction;
   referenceDataSchema?: z.ZodType<ReferenceData>;
   evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;

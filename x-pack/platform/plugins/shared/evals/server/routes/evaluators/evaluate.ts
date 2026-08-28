@@ -223,7 +223,7 @@ export const registerEvaluateRoute = ({
             name: definition.name,
             version: definition.version,
             kind: definition.kind,
-            ...(definition.direction ? { direction: definition.direction } : {}),
+            direction: definition.direction,
           };
           if (definition.kind !== 'llm' || !config.connector_id) {
             return base;

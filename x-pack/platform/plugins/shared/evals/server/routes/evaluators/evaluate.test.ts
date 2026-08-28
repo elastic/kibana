@@ -51,7 +51,7 @@ describe('POST /internal/evals/_evaluate', () => {
     name = 'groundedness',
     version = '1.0.0',
     kind = 'llm',
-    direction,
+    direction = 'maximize',
     evaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
     }),
@@ -61,7 +61,7 @@ describe('POST /internal/evals/_evaluate', () => {
     kind,
     origin: 'built_in',
     description: `${name} evaluator`,
-    ...(direction ? { direction } : {}),
+    direction,
     evaluate,
   });
 
@@ -896,6 +896,7 @@ describe('POST /internal/evals/_evaluate', () => {
           name: 'groundedness',
           version: '1.0.0',
           kind: 'llm',
+          direction: 'maximize',
         },
         error: { message: 'Error: failed badly' },
       },
@@ -917,6 +918,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const latency = buildEvaluator({
       name: 'latency',
       kind: 'code',
+      direction: 'minimize',
       evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
     });
     const getConnectorById = jest.fn().mockImplementation(async (connectorId: string) => ({
@@ -961,15 +963,17 @@ describe('POST /internal/evals/_evaluate', () => {
         name: 'groundedness',
         version: '1.0.0',
         kind: 'llm',
+        direction: 'maximize',
         model: { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
       },
       {
         name: 'correctness',
         version: '1.0.0',
         kind: 'llm',
+        direction: 'maximize',
         model: { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' },
       },
-      { name: 'latency', version: '1.0.0', kind: 'code' },
+      { name: 'latency', version: '1.0.0', kind: 'code', direction: 'minimize' },
     ]);
   });
 
