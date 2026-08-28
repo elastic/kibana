@@ -54,7 +54,7 @@ apiTest.describe(
     apiTest('is not rejected when running an investigation guide query', async ({ apiClient }) => {
       const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
         headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
-        body: testData.getMinimalLiveQuery({ saved_query_id: savedQueryId }),
+        body: testData.getSavedQueryLiveQuery(savedQueryId),
         responseType: 'json',
       });
 
@@ -74,5 +74,39 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(403);
     });
+
+    apiTest(
+      'returns 403 when an alert id is supplied but no investigation guide justifies the query',
+      async ({ apiClient }) => {
+        // An alert reference only justifies a query that appears in that alert's
+        // investigation guide. An alert that cannot be read, or whose rule carries no
+        // guide, provides no justification and must not fall through to dispatch.
+        const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
+          headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
+          body: testData.getMinimalLiveQuery({
+            query: 'select 42 as leaked;',
+            alert_ids: ['non-existent-alert-id'],
+          }),
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest(
+      'returns 403 when smuggling a custom query behind the saved query id',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
+          headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
+          body: testData.getSavedQueryLiveQuery(savedQueryId, {
+            query: 'select 42 as leaked;',
+          }),
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
   }
 );

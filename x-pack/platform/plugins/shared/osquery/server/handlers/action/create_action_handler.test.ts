@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createActionHandler } from './create_action_handler';
 import { createDynamicQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { packSavedObjectType } from '../../../common/types';
 
 jest.mock('./create_queries');
 jest.mock('../../lib/parse_agent_groups');
@@ -164,5 +166,31 @@ describe('createActionHandler', () => {
 
     expect(bulkCreate).toHaveBeenCalledTimes(1);
     expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('does not dispatch anything when the referenced pack cannot be read', async () => {
+    // Unresolvable references are rejected by the authorization layer before reaching the
+    // handler; if one still gets here it must fail without queuing a Fleet action rather
+    // than falling through to dispatch the caller's own query.
+    mockedGetInternalSOClient.mockReturnValue({
+      get: jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(packSavedObjectType, 'missing-pack')
+        ),
+    } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
+    const { context, bulkCreate, bulk, reportEvent } = buildOsqueryContext();
+
+    await expect(
+      createActionHandler(
+        context,
+        { pack_id: 'missing-pack', query: 'SELECT 42 AS leaked;', agent_ids: [TEST_AGENT] },
+        { space: { id: 'production' } }
+      )
+    ).rejects.toThrow();
+
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(bulk).not.toHaveBeenCalled();
+    expect(reportEvent).not.toHaveBeenCalled();
   });
 });

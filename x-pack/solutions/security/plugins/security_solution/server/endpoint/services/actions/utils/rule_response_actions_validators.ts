@@ -40,6 +40,12 @@ type RuleResponseActions = Pick<RuleResponse, 'response_actions'>;
 export type CheckOsqueryResponseActionAuthz = (actionParams: {
   saved_query_id?: string;
   pack_id?: string;
+  /**
+   * Caller-supplied osquery SQL. Forwarded so that a rule author holding only
+   * `runSavedQueries` cannot attach arbitrary SQL behind a saved query reference.
+   */
+  query?: string;
+  queries?: Array<{ query?: string }>;
 }) => Promise<void>;
 
 export interface ValidateRuleResponseActionsOptions<
@@ -182,7 +188,11 @@ export const validateRuleResponseActions = async <
       if (checkOsqueryResponseActionAuthz) {
         const params = actionData.params;
         // Params may be snake_case (from API payload: OsqueryResponseAction) or
-        // camelCase (from existing rule in ES: RuleResponseOsqueryAction)
+        // camelCase (from existing rule in ES: RuleResponseOsqueryAction).
+        // `query`/`queries` must be forwarded too: at rule-run time the action is
+        // dispatched as the internal user with no further authorization check, so this
+        // is the only boundary preventing a runSavedQueries-only author from attaching
+        // arbitrary osquery SQL behind a saved query reference.
         await checkOsqueryResponseActionAuthz({
           saved_query_id:
             ('saved_query_id' in params ? params.saved_query_id : undefined) ??
@@ -190,13 +200,20 @@ export const validateRuleResponseActions = async <
           pack_id:
             ('pack_id' in params ? params.pack_id : undefined) ??
             ('packId' in params ? params.packId : undefined),
+          query: 'query' in params ? params.query : undefined,
+          queries: 'queries' in params ? params.queries : undefined,
+          ecs_mapping:
+            ('ecs_mapping' in params ? params.ecs_mapping : undefined) ??
+            ('ecsMapping' in params ? params.ecsMapping : undefined),
         });
       } else {
-        logger.debug(
-          () =>
-            `Skipping osquery response action validation - no osquery authz checker provided: ${stringify(
-              actionData
-            )}`
+        // Not an expected state: every rule-management route binds the checker. If it is
+        // missing, an osquery response action is being persisted without any privilege
+        // validation, so surface it above debug rather than letting it pass silently.
+        logger.warn(
+          `Skipping osquery response action validation - no osquery authz checker provided: ${stringify(
+            actionData
+          )}`
         );
       }
     } else {

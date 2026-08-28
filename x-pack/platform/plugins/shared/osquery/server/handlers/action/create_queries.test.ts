@@ -10,6 +10,11 @@ import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { SavedObjectsClient } from '@kbn/core/server';
+import { savedQuerySavedObjectType } from '../../../common/types';
+
+jest.mock('../../routes/saved_query/utils', () => ({
+  isSavedQueryPrebuilt: jest.fn().mockResolvedValue(false),
+}));
 
 describe('create queries', () => {
   const spaceId = 'default';
@@ -131,6 +136,29 @@ describe('create queries', () => {
       expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
       expect(queries[0].agents).toContain(TEST_AGENT);
       expect(queries[0].error).toBe(undefined);
+    });
+
+    it('derives query and ecs_mapping from the saved query when the caller omitted them', async () => {
+      const get = jest.fn().mockResolvedValue({
+        attributes: {
+          query: 'select 1;',
+          ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+        },
+      });
+
+      const queries = await createDynamicQueries({
+        params: { saved_query_id: 'sq-1', agent_ids: [TEST_AGENT] },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: { get } as unknown as SavedObjectsClient,
+      });
+
+      expect(get).toHaveBeenCalledWith(savedQuerySavedObjectType, 'sq-1');
+      expect(queries[0].query).toBe('select 1;');
+      expect(queries[0].ecs_mapping).toEqual({ 'host.name': { field: 'name' } });
     });
   });
 });

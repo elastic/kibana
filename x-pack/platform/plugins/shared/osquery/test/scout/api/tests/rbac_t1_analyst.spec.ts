@@ -43,13 +43,57 @@ apiTest.describe(
     apiTest('is not rejected when running a saved query via live query', async ({ apiClient }) => {
       const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
         headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
-        body: testData.getMinimalLiveQuery({ saved_query_id: savedQueryId }),
+        body: testData.getSavedQueryLiveQuery(savedQueryId),
         responseType: 'json',
       });
 
       // Permission check passes — NOT 403. Without enrolled agents the server may return 500
       // (cannot dispatch), but the RBAC boundary is what we're testing.
       expect(response.statusCode).not.toBe(403);
+    });
+
+    apiTest(
+      'returns 403 when smuggling a custom query behind a saved query id',
+      async ({ apiClient }) => {
+        // The saved query id is a reference to resolve, not a capability token: supplying
+        // SQL that differs from the stored query is a privilege escalation attempt.
+        const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
+          headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
+          body: testData.getSavedQueryLiveQuery(savedQueryId, {
+            query: 'select 42 as leaked;',
+          }),
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest(
+      'returns 403 when smuggling a queries array behind a saved query id',
+      async ({ apiClient }) => {
+        // `queries[]` takes precedence over `saved_query_id` when the action is built, so
+        // it must not be accepted on the strength of an accompanying reference.
+        const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
+          headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
+          body: testData.getSavedQueryLiveQuery(savedQueryId, {
+            queries: [{ id: 'smuggled', query: 'select 42 as leaked;' }],
+          }),
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest('returns 403 when the saved query id does not resolve', async ({ apiClient }) => {
+      const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
+        headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
+        body: testData.getSavedQueryLiveQuery(' ', { query: 'select 42 as leaked;' }),
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
     });
 
     apiTest('returns 403 when running a custom query from scratch', async ({ apiClient }) => {

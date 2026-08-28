@@ -31,6 +31,15 @@ import type { createActionService } from './handlers/action/create_action_servic
 export interface CheckResponseActionAuthzParams {
   saved_query_id?: string;
   pack_id?: string;
+  /**
+   * Caller-supplied query payload. Callers authorized only by `runSavedQueries` may not
+   * supply their own osquery SQL - the dispatched query is derived from the referenced
+   * saved object instead. These fields are inspected so such an attempt is rejected
+   * rather than silently ignored.
+   */
+  query?: string;
+  queries?: Array<{ query?: string }>;
+  ecs_mapping?: Record<string, unknown>;
 }
 
 export interface OsqueryPluginSetup {

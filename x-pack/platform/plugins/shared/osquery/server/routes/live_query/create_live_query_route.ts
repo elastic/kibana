@@ -35,7 +35,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         authz: {
           enabled: false,
           reason:
-            'We do the check for 2 different scenarios below (const isInvalid): writeLiveQueries and runSavedQueries with saved_query_id, or pack_id',
+            'Authorization depends on the request body: writeLiveQueries permits arbitrary SQL, while runSavedQueries only permits running a saved_query_id or pack_id that resolves to a real saved object. See isOsqueryResponseActionAuthorized below.',
         },
       },
     })
@@ -59,57 +59,86 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       async (context, request, response) => {
         const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
-        const isInvalid = !(await isOsqueryResponseActionAuthorized(coreStartServices, request, {
-          saved_query_id: request.body.saved_query_id,
-          pack_id: request.body.pack_id,
-        }));
+        const space = await osqueryContext.service.getActiveSpace(request);
+
+        const isInvalid = !(await isOsqueryResponseActionAuthorized(
+          coreStartServices,
+          request,
+          {
+            saved_query_id: request.body.saved_query_id,
+            pack_id: request.body.pack_id,
+            query: request.body.query,
+            queries: request.body.queries,
+            ecs_mapping: request.body.ecs_mapping,
+          },
+          space?.id
+        ));
 
         const client = await osqueryContext.service
           .getRuleRegistryService()
           ?.getRacClientWithRequest(request);
 
-        const alertData = request.body.alert_ids?.length
-          ? ((await client?.get({ id: request.body.alert_ids[0] })) as ParsedTechnicalFields & {
-              _index: string;
-            })
-          : undefined;
+        // An unreadable or non-existent alert must not surface as a 500 on the deny path -
+        // an unauthorized caller referencing an alert they cannot read is a 403.
+        let alertData: (ParsedTechnicalFields & { _index: string }) | undefined;
+        try {
+          alertData = request.body.alert_ids?.length
+            ? ((await client?.get({ id: request.body.alert_ids[0] })) as ParsedTechnicalFields & {
+                _index: string;
+              })
+            : undefined;
+        } catch (error) {
+          if (isInvalid) {
+            return response.forbidden();
+          }
+
+          throw error;
+        }
 
         if (isInvalid) {
-          if (request.body.alert_ids?.length) {
-            try {
-              if (alertData?.['kibana.alert.rule.note']) {
-                const parsedAlertInvestigationGuide = unified()
-                  .use([[markdown, {}], OsqueryParser])
-                  .parse(alertData?.['kibana.alert.rule.note']);
+          // The only justification for an otherwise-unauthorized request is that the query
+          // appears in the referenced alert's investigation guide. Absence of a guide is
+          // absence of justification, not absence of a constraint - so it must deny.
+          if (!request.body.alert_ids?.length) {
+            return response.forbidden();
+          }
 
-                const osqueryQueries = filter(parsedAlertInvestigationGuide?.children as object, [
-                  'type',
-                  'osquery',
-                ]);
+          try {
+            const justifyingAlert = alertData;
+            const investigationGuide = justifyingAlert?.['kibana.alert.rule.note'];
 
-                const requestQueryExistsInTheInvestigationGuide = some(
-                  osqueryQueries,
-                  (payload: {
-                    configuration: { query: string; ecs_mapping: ECSMappingOrUndefined };
-                  }) => {
-                    const { result: replacedConfigurationQuery } = replaceParamsQuery(
-                      payload.configuration.query,
-                      alertData
-                    );
-
-                    return (
-                      replacedConfigurationQuery === request.body.query &&
-                      deepEqual(payload.configuration.ecs_mapping, request.body.ecs_mapping)
-                    );
-                  }
-                );
-
-                if (!requestQueryExistsInTheInvestigationGuide) throw new Error();
-              }
-            } catch (error) {
+            if (!justifyingAlert || !investigationGuide) {
               return response.forbidden();
             }
-          } else {
+
+            const parsedAlertInvestigationGuide = unified()
+              .use([[markdown, {}], OsqueryParser])
+              .parse(investigationGuide);
+
+            const osqueryQueries = filter(parsedAlertInvestigationGuide?.children as object, [
+              'type',
+              'osquery',
+            ]);
+
+            const requestQueryExistsInTheInvestigationGuide = some(
+              osqueryQueries,
+              (payload: {
+                configuration: { query: string; ecs_mapping: ECSMappingOrUndefined };
+              }) => {
+                const { result: replacedConfigurationQuery } = replaceParamsQuery(
+                  payload.configuration.query,
+                  justifyingAlert
+                );
+
+                return (
+                  replacedConfigurationQuery === request.body.query &&
+                  deepEqual(payload.configuration.ecs_mapping, request.body.ecs_mapping)
+                );
+              }
+            );
+
+            if (!requestQueryExistsInTheInvestigationGuide) throw new Error();
+          } catch (error) {
             return response.forbidden();
           }
         }
@@ -123,7 +152,6 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           });
           const username = currentUser?.username ?? undefined;
           const userProfileUid = currentUser?.profile_uid ?? undefined;
-          const space = await osqueryContext.service.getActiveSpace(request);
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,

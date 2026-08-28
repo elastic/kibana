@@ -41,6 +41,19 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 ## 9.6.0 [kibana-9.6.0-breaking-changes]
 
+$$$kibana-osquery-saved-query-authz$$$
+::::{dropdown} Osquery live queries no longer accept caller-supplied SQL from `runSavedQueries`-only callers
+**Details**<br> `POST /api/osquery/live_queries` now derives the dispatched SQL from the referenced saved query or pack. A caller who holds only the osquery `runSavedQueries` privilege (and not `writeLiveQueries`) can no longer supply a `query` or `queries` array. A mismatched query, an unresolvable `saved_query_id` / `pack_id`, or a `queries` array on that persona returns HTTP 403 Forbidden. Callers who hold `writeLiveQueries` are unchanged.
+
+The same rules apply when attaching an osquery response action to a detection rule (create, update, patch, import, and bulk duplicate).
+
+**Impact**<br> API clients that posted `{ saved_query_id, query }` with SQL that differed from the saved object — or that used a placeholder id to run ad-hoc SQL — now receive 403. No Kibana UI flow produces that payload: the saved-query picker requires `readSavedQueries`, and the query editor is read-only without `writeLiveQueries`.
+
+**Action**<br> For `runSavedQueries`-only callers, send a resolvable `saved_query_id` or `pack_id` and omit `query` / `queries`. To run arbitrary SQL, grant `writeLiveQueries`.
+
+View the Osquery saved-query authorization fix (PR number to be filled when the pull request opens).
+::::
+
 $$$kibana-285645$$$
 ::::{dropdown} Workflow execution detail routes now require the `read` privilege in addition to `readExecution`
 **Details**<br> The following Workflows API routes previously accepted callers holding only the `workflowsManagement:readExecution` privilege (the **Read Workflow Execution** sub-feature privilege, `workflow_execution_read`). Execution documents include a YAML snapshot of the workflow definition, so those callers could retrieve a workflow definition without holding the `workflowsManagement:read` privilege (**Read**, `workflow_read`). Reading execution data now requires both privileges. This applies to every execution read route, including the list and search routes:

@@ -598,6 +598,9 @@ describe('Rules Endpoint response actions validators', () => {
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
         saved_query_id: undefined,
         pack_id: undefined,
+        query: 'SELECT * FROM processes',
+        queries: undefined,
+        ecs_mapping: undefined,
       });
     });
 
@@ -616,6 +619,9 @@ describe('Rules Endpoint response actions validators', () => {
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
         saved_query_id: 'test-saved-query',
         pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: undefined,
       });
     });
 
@@ -634,6 +640,9 @@ describe('Rules Endpoint response actions validators', () => {
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
         saved_query_id: undefined,
         pack_id: 'test-pack',
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: undefined,
       });
     });
 
@@ -670,6 +679,9 @@ describe('Rules Endpoint response actions validators', () => {
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
         saved_query_id: 'existing-saved-query',
         pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: undefined,
       });
     });
 
@@ -685,6 +697,9 @@ describe('Rules Endpoint response actions validators', () => {
       expect(mockOsqueryAuthz).toHaveBeenCalledWith({
         saved_query_id: undefined,
         pack_id: 'existing-pack',
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: undefined,
       });
     });
 
