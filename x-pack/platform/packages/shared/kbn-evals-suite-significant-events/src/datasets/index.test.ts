@@ -11,7 +11,7 @@ import {
   OTEL_DEMO_NAMESPACE,
   QUARKUS_SUPER_HEROES_NAMESPACE,
 } from '../constants';
-import { resolveRequestedDatasetIds } from '.';
+import { hasExplicitDatasetSelection, resolveRequestedDatasetIds } from '.';
 
 const DEFAULT_DATASET_IDS = [
   OTEL_DEMO_NAMESPACE,
@@ -24,17 +24,20 @@ describe('dataset selection', () => {
   it.each([undefined, '', '   '])(
     'selects the default datasets when the selection is %j',
     (selectedDatasets) => {
+      expect(hasExplicitDatasetSelection(selectedDatasets)).toBe(false);
       expect(resolveRequestedDatasetIds(selectedDatasets)).toEqual(DEFAULT_DATASET_IDS);
     }
   );
 
   it('selects incidents when explicitly requested', () => {
+    expect(hasExplicitDatasetSelection(INCIDENTS_NAMESPACE)).toBe(true);
     expect(resolveRequestedDatasetIds(INCIDENTS_NAMESPACE)).toEqual([INCIDENTS_NAMESPACE]);
   });
 
   it.each(['all', `${INCIDENTS_NAMESPACE},all,${OTEL_DEMO_NAMESPACE}`])(
     'selects every registered dataset when the selection is %j',
     (selectedDatasets) => {
+      expect(hasExplicitDatasetSelection(selectedDatasets)).toBe(true);
       expect(resolveRequestedDatasetIds(selectedDatasets)).toEqual(ALL_DATASET_IDS);
     }
   );
@@ -42,6 +45,7 @@ describe('dataset selection', () => {
   it('trims, preserves order, and deduplicates explicit dataset ids', () => {
     const selectedDatasets = ` ${INCIDENTS_NAMESPACE}, ${QUARKUS_SUPER_HEROES_NAMESPACE}, ${INCIDENTS_NAMESPACE}, ${OTEL_DEMO_NAMESPACE} `;
 
+    expect(hasExplicitDatasetSelection(selectedDatasets)).toBe(true);
     expect(resolveRequestedDatasetIds(selectedDatasets)).toEqual([
       INCIDENTS_NAMESPACE,
       QUARKUS_SUPER_HEROES_NAMESPACE,

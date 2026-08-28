@@ -63,6 +63,24 @@ run(
       throw new Error(`No dataset selected. Pass --dataset <id[,id]>, "all", or "list".`);
     }
 
+    const datasetConfigs = datasetsToProbe.map((id) => {
+      const datasetConfig = getDatasetById(id);
+      if (!datasetConfig) {
+        throw new Error(`Dataset "${id}" is registered but has no config`);
+      }
+      return datasetConfig;
+    });
+    const unsupportedDatasetIds = datasetConfigs
+      .filter(({ replayMode }) => replayMode === 'managed-stream')
+      .map(({ id }) => id);
+    if (unsupportedDatasetIds.length > 0) {
+      throw new Error(
+        `probe_eval_snapshot does not support datasets with replayMode "managed-stream": ${unsupportedDatasetIds.join(
+          ', '
+        )}.`
+      );
+    }
+
     const scenario = String(flags.scenario || '');
     if (!scenario) {
       throw new Error(
@@ -97,12 +115,8 @@ run(
     log.info(`Datasets: ${datasetsToProbe.join(', ')} | Scenario: ${scenario}`);
     log.info(`ES|QL probes: ${esqlProbes.length} | Modes: ${modes.join(', ') || '(none)'}`);
 
-    for (const id of datasetsToProbe) {
-      const datasetConfig = getDatasetById(id);
-      if (!datasetConfig) {
-        throw new Error(`Dataset "${id}" is registered but has no config`);
-      }
-
+    for (const datasetConfig of datasetConfigs) {
+      const { id } = datasetConfig;
       const gcs: GcsConfig = datasetConfig.gcs;
       const available = await listAvailableSnapshots(esClient, log, gcs);
       if (!available.includes(scenario)) {

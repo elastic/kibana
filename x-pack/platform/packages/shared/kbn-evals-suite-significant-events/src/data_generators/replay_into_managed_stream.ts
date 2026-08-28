@@ -111,10 +111,10 @@ const getLogsIndicesFromSnapshot = async ({
   // matters: `.startsWith('.ds-logs')` would also match sibling streams like `logs.ecs`
   // (`.ds-logs.ecs-…`), which the discovery eval does not target — and restoring those extra backing
   // indices is what trips `index_not_found` at reindex. The agent reads `FROM logs`, so only `logs`.
-  // Incident captures (see `scripts/capture_incident/`) store plain indices under their original
-  // data-stream names (`logs-<dataset>-<namespace>`, no `.ds-` prefix) — those are only accepted
-  // when the caller opts in via `includeOriginalNameIndices`, so demo-snapshot replays keep their
-  // strict filter; the dash keeps sibling streams like `logs.ecs` excluded either way.
+  // Archived incident snapshots store plain indices under their original data-stream names
+  // (`logs-<dataset>-<namespace>`, no `.ds-` prefix). Callers must opt in through
+  // `includeOriginalNameIndices`, so demo-snapshot replays keep their strict filter; the dash keeps
+  // sibling streams like `logs.ecs` excluded either way.
   const logsIndices = (snapshot.indices ?? []).filter(
     (indexName) =>
       indexName.startsWith('.ds-logs-') ||

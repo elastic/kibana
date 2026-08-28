@@ -18,7 +18,8 @@ For general information about writing evaluation tests, configuration, and usage
 
 ### Snapshot data
 
-Evaluations replay Elasticsearch snapshots from a GCS bucket (`significant-events-datasets`). The bucket is structured as:
+Evaluations replay Elasticsearch snapshots from a GCS bucket (`significant-events-datasets`).
+Most datasets use a run-scoped path:
 
 ```
 significant-events-datasets/
@@ -26,6 +27,10 @@ significant-events-datasets/
     <dataset>/
       <scenario-snapshot>
 ```
+
+Archived incident scenarios use fixed paths such as
+`significant-events-datasets/customer0-incidents/incident-3048`, so
+`SIGEVENTS_SNAPSHOT_RUN` does not affect them.
 
 Set `GCS_CREDENTIALS` before starting Scout so Elasticsearch can access the GCS repository:
 
@@ -36,7 +41,7 @@ export GCS_CREDENTIALS='{"type":"service_account",...}'
 The default run ID is pinned in code (`SIGEVENTS_SNAPSHOT_RUN`). Override it at runtime:
 
 ```bash
-SIGEVENTS_SNAPSHOT_RUN=2026-02-25 node scripts/evals run --suite significant-events --judge gemini-3-pro
+SIGEVENTS_SNAPSHOT_RUN=2026-03-27 node scripts/evals run --suite significant-events --judge gemini-3-pro
 ```
 
 ### Tracing setup (optional — for token and latency metrics)
@@ -103,6 +108,9 @@ node scripts/scout.js start-server --arch stateful --domain classic --serverConf
 
 When `SIGEVENTS_DATASET` is unset or empty, the suite runs `otel-demo`, `bank-of-anthos`, and `quarkus-super-heroes`.
 
+Implicit default runs may skip missing snapshots. Any non-empty `SIGEVENTS_DATASET` value is an
+explicit selection and fails when a selected snapshot is missing.
+
 ```bash
 node scripts/evals run \
   --suite significant-events \
@@ -112,7 +120,7 @@ node scripts/evals run \
 
 ### Run every registered dataset
 
-Set `SIGEVENTS_DATASET=all` to include datasets marked as explicit-only, such as `incidents`.
+Set `SIGEVENTS_DATASET=all` to include opt-in datasets such as `incidents`.
 
 ```bash
 SIGEVENTS_DATASET=all node scripts/evals run \
@@ -123,12 +131,18 @@ SIGEVENTS_DATASET=all node scripts/evals run \
 
 ### Run a specific dataset
 
+Before running archived customer-0 datasets, confirm data-governance approval for the data sent to
+the selected task model and judges.
+
 ```bash
 SIGEVENTS_DATASET=otel-demo node scripts/evals run \
   --suite significant-events \
   --project <connector-id> \
   --judge <gemini-3-pro-connector-id>
 ```
+
+The generic probe and replay scripts do not support fixed-path datasets that use
+`replayMode: 'managed-stream'`. Run those datasets through their evaluation spec.
 
 ### Run a specific spec file
 
@@ -155,7 +169,7 @@ node scripts/evals run \
 
 | Variable                                | Description                                                                 | Default                    |
 | --------------------------------------- | --------------------------------------------------------------------------- | -------------------------- |
-| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-03-27`               |
+| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder for run-scoped GCS snapshots; fixed incident paths ignore it | `2026-03-27`               |
 | `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `otel-demo`, `bank-of-anthos`, and `quarkus-super-heroes` |
 | `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `canonical`                |
 | `KI_QUERY_GENERATION_SCENARIOS`         | Comma-separated KI query generation scenario ids to run (focused local runs); unset runs every scenario | `all`                      |

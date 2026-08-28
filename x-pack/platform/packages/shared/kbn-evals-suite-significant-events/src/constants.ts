@@ -15,8 +15,4 @@ export const BANK_OF_ANTHOS_GCS_BASE_PATH_PREFIX = BANK_OF_ANTHOS_NAMESPACE;
 export const QUARKUS_SUPER_HEROES_NAMESPACE = 'quarkus-super-heroes';
 export const QUARKUS_SUPER_HEROES_GCS_BASE_PATH_PREFIX = QUARKUS_SUPER_HEROES_NAMESPACE;
 export const INCIDENTS_NAMESPACE = 'incidents';
-/**
- * Incident snapshots are captured once per incident (see `scripts/capture_incident/`)
- * and live at a run-independent path: `customer0-incidents/incident-<id>`.
- */
 export const INCIDENTS_GCS_BASE_PATH_PREFIX = 'customer0-incidents';

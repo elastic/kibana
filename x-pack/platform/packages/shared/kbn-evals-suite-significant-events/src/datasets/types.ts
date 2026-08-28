@@ -148,9 +148,9 @@ export interface DatasetConfig {
    *   `logs` data-stream backing indices (`.ds-logs-*`) and reindexes them into a local
    *   `logs` data stream. Used by demo-app snapshots captured from a managed `logs` stream.
    * - `'managed-stream'`: `replayIntoManagedStream` — reindexes all `logs-*` indices in the
-   *   snapshot into the managed `logs` stream. Required for incident snapshots
-   *   (`scripts/capture_incident/`), which store plain indices under their original
-   *   data-stream names (`logs-<dataset>-<namespace>`) instead of `.ds-*` backing indices.
+   *   snapshot into the managed `logs` stream. Required for archived incident snapshots, which
+   *   store plain indices under their original data-stream names (`logs-<dataset>-<namespace>`)
+   *   instead of `.ds-*` backing indices.
    */
   replayMode?: 'managed-stream';
   kiQueryGeneration: KIQueryGenerationScenario[];

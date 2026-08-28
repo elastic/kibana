@@ -10,21 +10,14 @@ import { Client } from '@elastic/elasticsearch';
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
-  replayIntoManagedStream,
   replaySignificantEventsSnapshot,
-  resolveBasePath,
   listAvailableSnapshots,
   loadKIFeaturesFromSnapshot,
   loadKnowledgeIndicatorsFromSnapshot,
   loadDiscoveriesFromSnapshot,
   loadDetectionsFromSnapshot,
 } from '../../src/data_generators/replay';
-import {
-  getAllDatasetIds,
-  getDatasetById,
-  getDefaultDatasetIds,
-  resolveScenarioSnapshotSource,
-} from '../../src/datasets';
+import { getAllDatasetIds, getDatasetById, getDefaultDatasetIds } from '../../src/datasets';
 import { readKibanaConfig } from '../lib/kibana';
 
 const MANAGED_STREAM_SEARCH_PATTERN = 'logs*';
@@ -141,6 +134,11 @@ run(
           'Use --dataset list to see available datasets.'
       );
     }
+    if (datasetConfig.replayMode === 'managed-stream') {
+      throw new Error(
+        `replay_eval_snapshot does not support dataset "${datasetId}" because it uses replayMode "managed-stream".`
+      );
+    }
 
     const scenario = String(flags.scenario || '');
     if (!scenario) {
@@ -166,21 +164,11 @@ run(
       auth: { username, password },
     });
 
-    // Scenarios may override the snapshot source (name and/or GCS base path) —
-    // e.g. incident scenarios point at a per-incident, run-independent path.
-    const scenarioConfig =
-      scenario === 'list'
-        ? undefined
-        : datasetConfig.kiFeatureExtraction.find((s) => s.input.scenario_id === scenario);
-    const { snapshotName, gcs } = resolveScenarioSnapshotSource({
-      scenarioId: scenario,
-      datasetGcs: datasetConfig.gcs,
-      snapshotSource: scenarioConfig?.snapshot_source,
-    });
+    const gcs = datasetConfig.gcs;
 
     log.info(`Run: ${SIGEVENTS_SNAPSHOT_RUN} | ES: ${esUrl}`);
     log.info(`Dataset: ${datasetConfig.id} — ${datasetConfig.description}`);
-    log.info(`GCS: ${gcs.bucket}/${resolveBasePath(gcs)}`);
+    log.info(`GCS: ${gcs.bucket}/${SIGEVENTS_SNAPSHOT_RUN}/${gcs.basePathPrefix}`);
 
     const available = await listAvailableSnapshots(esClient, log, gcs);
 
@@ -189,24 +177,18 @@ run(
       return;
     }
 
-    if (!available.includes(snapshotName)) {
+    if (!available.includes(scenario)) {
       throw new Error(
-        `Snapshot "${snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}". ` +
+        `Snapshot "${scenario}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}". ` +
           `Available: ${available.join(', ')}`
       );
     }
 
-    log.info(`Scenario: ${scenario} (snapshot: ${snapshotName})`);
+    log.info(`Scenario: ${scenario}`);
     log.info('');
 
     log.info('Step 1/3 — Replaying log data (same path as ki_feature_extraction eval spec)...');
-    if (datasetConfig.replayMode === 'managed-stream') {
-      await replayIntoManagedStream(esClient, log, snapshotName, gcs, {
-        includeOriginalNameIndices: true,
-      });
-    } else {
-      await replaySignificantEventsSnapshot(esClient, log, snapshotName, gcs);
-    }
+    await replaySignificantEventsSnapshot(esClient, log, scenario, gcs);
     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
     log.info('');
@@ -218,7 +200,7 @@ run(
     const knowledgeIndicators = await loadKnowledgeIndicatorsFromSnapshot(
       esClient,
       log,
-      snapshotName,
+      scenario,
       gcs
     );
     const queries = knowledgeIndicators.filter(
@@ -230,7 +212,7 @@ run(
     // Newer snapshots also carry features inside the raw KI index — fall back to those, reshaping
     // the stored KI doc (flat id/title/description/evidence + nested feature.{type,subtype,...})
     // back into the flat `Feature` shape `formatFeature` expects.
-    let features = await loadKIFeaturesFromSnapshot(esClient, log, snapshotName, gcs, streamName);
+    let features = await loadKIFeaturesFromSnapshot(esClient, log, scenario, gcs, streamName);
     if (features.length === 0) {
       features = knowledgeIndicators
         .filter(
@@ -240,8 +222,8 @@ run(
         )
         .map((ki) => toFeature(ki as StoredKiFeature));
     }
-    const discoveries = await loadDiscoveriesFromSnapshot(esClient, log, snapshotName, gcs);
-    const detections = await loadDetectionsFromSnapshot(esClient, log, snapshotName, gcs);
+    const discoveries = await loadDiscoveriesFromSnapshot(esClient, log, scenario, gcs);
+    const detections = await loadDetectionsFromSnapshot(esClient, log, scenario, gcs);
 
     log.info('');
     log.info('Step 3/3 — Data summary');

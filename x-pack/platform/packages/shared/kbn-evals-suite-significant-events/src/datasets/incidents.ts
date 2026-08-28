@@ -8,14 +8,6 @@
 import { GCS_BUCKET, INCIDENTS_GCS_BASE_PATH_PREFIX, INCIDENTS_NAMESPACE } from '../constants';
 import type { DatasetConfig } from './types';
 
-/**
- * Real-world incident snapshots ("customer 0") captured with
- * `scripts/capture_incident/` (see the capture README there). Each incident is a
- * one-off capture stored at `customer0-incidents/incident-<id>` in GCS —
- * run-independent (`runScoped: false`) and replayed via the managed-stream path
- * because the captured indices keep their original data-stream names
- * (`logs-<dataset>-<namespace>`) as plain indices.
- */
 export const incidentsDataset: DatasetConfig = {
   id: INCIDENTS_NAMESPACE,
   description: 'Real-world incident snapshots captured from customer 0 clusters',

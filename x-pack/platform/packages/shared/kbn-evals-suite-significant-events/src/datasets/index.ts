@@ -40,6 +40,9 @@ export const getAllDatasetIds = (): string[] => Object.keys(DATASETS);
 
 export const getDefaultDatasetIds = (): string[] => [...DEFAULT_DATASET_IDS];
 
+export const hasExplicitDatasetSelection = (selectedDatasetIds: string | undefined): boolean =>
+  Boolean(selectedDatasetIds?.trim());
+
 export const resolveRequestedDatasetIds = (selectedDatasetIds: string | undefined): string[] => {
   const normalizedSelectedDatasetIds = selectedDatasetIds?.trim();
 
