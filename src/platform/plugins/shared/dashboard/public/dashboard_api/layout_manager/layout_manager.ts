@@ -159,7 +159,7 @@ export function initializeLayoutManager(
       state.pinned_panels
     );
 
-    layout$.next({ ...layoutToApply }); // triggers removedPanelCleanupSubscription to purge orphaned children
+    layout$.next({ ...layoutToApply }); // triggers removeOrphanedChildrenSubscription to purge orphaned children
     currentChildState = { ...childStateToApply };
 
     for (const [uuid, child] of Object.entries(children$.value)) {
@@ -171,10 +171,10 @@ export function initializeLayoutManager(
   };
 
   /**
-   * When panels are removed from the layout (e.g. a section with panels is deleted),
-   * remove their APIs from children$ so downstream consumers don't hold stale references.
+   * When panels are removed from the layout (e.g. a section with panels is deleted, layout is reset),
+   * remove their APIs from children$.
    */
-  const removedPanelCleanupSubscription = layout$.subscribe((layout) => {
+  const removeOrphanedChildrenSubscription = layout$.subscribe((layout) => {
     const currentChildren = children$.value;
     const removedUuids = Object.keys(currentChildren).filter(
       (uuid) => !layout.panels[uuid] && !layout.pinnedPanels[uuid]
@@ -700,7 +700,7 @@ export function initializeLayoutManager(
     cleanup: () => {
       childrenChangesSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
-      removedPanelCleanupSubscription.unsubscribe();
+      removeOrphanedChildrenSubscription.unsubscribe();
     },
   };
 }
