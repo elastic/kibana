@@ -12,6 +12,8 @@ import { AttachmentType, MAX_IMAGE_BYTES } from '@kbn/agent-builder-common/attac
 (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap = jest
   .fn()
   .mockResolvedValue({ close: jest.fn() });
+const mockCreateImageBitmap = (global as unknown as { createImageBitmap: jest.Mock })
+  .createImageBitmap;
 
 // ---------------------------------------------------------------------------
 // getUniqueName
@@ -146,6 +148,7 @@ describe('processImageFile', () => {
     expect(upsertAttachments).not.toHaveBeenCalled();
     expect(addErrorToast).toHaveBeenCalledTimes(1);
     expect(result).toBe(false);
+    expect(mockCreateImageBitmap).not.toHaveBeenCalled();
   });
 
   it('skips upsertAttachments and does not toast when aborted', async () => {

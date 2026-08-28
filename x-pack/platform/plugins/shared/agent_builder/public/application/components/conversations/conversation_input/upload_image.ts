@@ -68,6 +68,11 @@ export const processImageFile = async ({
     return false;
   }
 
+  if (file.size > MAX_IMAGE_BYTES) {
+    addErrorToast({ title: labels.tooLarge });
+    return false;
+  }
+
   const isRealImage = await createImageBitmap(file).then(
     (bitmap) => {
       bitmap.close();
@@ -77,11 +82,6 @@ export const processImageFile = async ({
   );
   if (!isRealImage) {
     addErrorToast({ title: labels.invalidType });
-    return false;
-  }
-
-  if (file.size > MAX_IMAGE_BYTES) {
-    addErrorToast({ title: labels.tooLarge });
     return false;
   }
 
