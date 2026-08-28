@@ -109,13 +109,22 @@ const shouldUpdateMetaValues = (
   currentLicenseUUID: string,
   currentIsServerlessEnabled: boolean
 ) => {
+  // `meta` can be `undefined` at runtime for partial/bulk package policy updates
+  // that only send changed fields, even though the `PolicyConfig` type declares it
+  // as required. Treat a missing `meta` as "needs update" so the values get populated
+  // below instead of throwing when reading its properties.
+  const { meta } = endpointPackagePolicy;
+  if (!meta) {
+    return true;
+  }
+
   return (
-    endpointPackagePolicy.meta.license !== currentLicenseType ||
-    endpointPackagePolicy.meta.cloud !== currentCloudInfo ||
-    endpointPackagePolicy.meta.cluster_name !== currentClusterName ||
-    endpointPackagePolicy.meta.cluster_uuid !== currentClusterUUID ||
-    endpointPackagePolicy.meta.license_uuid !== currentLicenseUUID ||
-    endpointPackagePolicy.meta.serverless !== currentIsServerlessEnabled
+    meta.license !== currentLicenseType ||
+    meta.cloud !== currentCloudInfo ||
+    meta.cluster_name !== currentClusterName ||
+    meta.cluster_uuid !== currentClusterUUID ||
+    meta.license_uuid !== currentLicenseUUID ||
+    meta.serverless !== currentIsServerlessEnabled
   );
 };
 
@@ -334,12 +343,18 @@ export const getPackagePolicyUpdateCallback = (
         cloud?.isServerlessEnabled
       )
     ) {
-      newEndpointPackagePolicy.meta.license = licenseService.getLicenseType();
-      newEndpointPackagePolicy.meta.cloud = cloud?.isCloudEnabled;
-      newEndpointPackagePolicy.meta.cluster_name = esClientInfo.cluster_name;
-      newEndpointPackagePolicy.meta.cluster_uuid = esClientInfo.cluster_uuid;
-      newEndpointPackagePolicy.meta.license_uuid = licenseService.getLicenseUID();
-      newEndpointPackagePolicy.meta.serverless = cloud?.isServerlessEnabled;
+      // `meta` may be missing at runtime for partial/bulk updates; spread any existing
+      // values (to preserve optional fields such as `billable`) and set the derived
+      // values so we never dereference an `undefined` `meta`.
+      newEndpointPackagePolicy.meta = {
+        ...newEndpointPackagePolicy.meta,
+        license: licenseService.getLicenseType(),
+        cloud: cloud?.isCloudEnabled,
+        cluster_name: esClientInfo.cluster_name,
+        cluster_uuid: esClientInfo.cluster_uuid,
+        license_uuid: licenseService.getLicenseUID(),
+        serverless: cloud?.isServerlessEnabled,
+      };
 
       endpointIntegrationData.inputs[0].config.policy.value = newEndpointPackagePolicy;
     }
