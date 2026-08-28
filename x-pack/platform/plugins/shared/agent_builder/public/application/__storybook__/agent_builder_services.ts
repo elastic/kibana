@@ -89,9 +89,19 @@ const defaultServices: AgentBuilderInternalService = {
   docLinksService: {} as never,
   navigationService: {} as never,
   toolsService: {} as never,
-  skillsService: {} as never,
-  smlService: {} as never,
-  spaceSettingsService: {} as never,
+  skillsService: {
+    list: () => Promise.resolve([]),
+    listByAgent: () => Promise.resolve([]),
+    get: () => Promise.resolve(null),
+  } as never,
+  smlService: {
+    autocomplete: () => Promise.resolve({ results: [] }),
+    search: () => Promise.resolve({ results: [] }),
+  } as never,
+  spaceSettingsService: {
+    get: () => Promise.resolve({ default_agent_id: null }),
+    set: (defaultAgentId: string | null) => Promise.resolve({ default_agent_id: defaultAgentId }),
+  } as never,
   pluginsService: {} as never,
   oauthClientsService: {} as never,
   startDependencies: {} as never,

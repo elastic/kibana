@@ -24,6 +24,8 @@ const PLACEHOLDER_IMAGE_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
 )}`;
 const isFilesBlobPath = (path: string) => path.includes('/api/files/');
 
+const INFERENCE_CONNECTORS_PATH = '/internal/search_inference_endpoints/connectors';
+
 const getUiSetting = (key: string) =>
   key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID ? true : undefined;
 
@@ -54,7 +56,10 @@ export const createStorybookKibanaServices = (): StartServices =>
       remove: () => Promise.resolve(true),
     },
     http: {
-      get: noOpAsync,
+      get: (path: string) =>
+        path === INFERENCE_CONNECTORS_PATH
+          ? Promise.resolve({ connectors: [], soEntryFound: false })
+          : noOpAsync(),
       post: noOpAsync,
       put: noOpAsync,
       delete: noOpAsync,
