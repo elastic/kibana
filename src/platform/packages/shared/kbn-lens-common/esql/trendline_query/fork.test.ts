@@ -108,6 +108,39 @@ describe('appendTimeBucketToEsqlQuery with FORK', () => {
     );
   });
 
+  it('drops a WHERE that filters on the synthetic _fork column', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | WHERE _fork == "fork1"',
+      'timestamp',
+      ['a']
+    );
+    expect(result).toBe(
+      'FROM index | STATS a = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
+
+  it('removes the synthetic _fork column from a SORT after FORK', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | SORT _fork',
+      'timestamp',
+      ['a']
+    );
+    expect(result).toBe(
+      'FROM index | STATS a = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
+
+  it('selects the branch whose metric column is produced via RENAME inside the branch', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'FROM index | FORK (STATS x = COUNT(*) | RENAME x AS a) (STATS b = COUNT(*))',
+      'timestamp',
+      ['a']
+    );
+    expect(result).toBe(
+      'FROM index | STATS x = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend) | RENAME x AS a'
+    );
+  });
+
   it('drops a KEEP that only referenced the synthetic _fork column', () => {
     const result = appendTimeBucketToEsqlQuery(
       'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | KEEP _fork',
