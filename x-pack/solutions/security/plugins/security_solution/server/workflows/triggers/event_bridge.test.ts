@@ -78,11 +78,11 @@ describe('registerSecurityWorkflowEventBridge', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: ['a'],
-          tagsToAdd: ['t'],
-          tagsToRemove: [],
+          tagsAdded: ['t'],
+          tagsRemoved: [],
           truncated: false,
         }),
-      expectedPayload: { alertIds: ['a'], tagsToAdd: ['t'], tagsToRemove: [], truncated: false },
+      expectedPayload: { alertIds: ['a'], tagsAdded: ['t'], tagsRemoved: [], truncated: false },
     },
     {
       name: 'alertAssigneesChanged',
@@ -90,14 +90,14 @@ describe('registerSecurityWorkflowEventBridge', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitAlertAssigneesChanged(mockRequest, {
           alertIds: ['a'],
-          assigneesToAdd: ['uid'],
-          assigneesToRemove: [],
+          assigneesAdded: ['uid'],
+          assigneesRemoved: [],
           truncated: false,
         }),
       expectedPayload: {
         alertIds: ['a'],
-        assigneesToAdd: ['uid'],
-        assigneesToRemove: [],
+        assigneesAdded: ['uid'],
+        assigneesRemoved: [],
         truncated: false,
       },
     },
@@ -124,14 +124,14 @@ describe('registerSecurityWorkflowEventBridge', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitAttackTagsChanged(mockRequest, {
           attackIds: ['a'],
-          tagsToAdd: ['t'],
-          tagsToRemove: [],
+          tagsAdded: ['t'],
+          tagsRemoved: [],
           truncated: false,
         }),
       expectedPayload: {
         attackIds: ['a'],
-        tagsToAdd: ['t'],
-        tagsToRemove: [],
+        tagsAdded: ['t'],
+        tagsRemoved: [],
         truncated: false,
       },
     },
@@ -141,14 +141,14 @@ describe('registerSecurityWorkflowEventBridge', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitAttackAssigneesChanged(mockRequest, {
           attackIds: ['a'],
-          assigneesToAdd: ['uid'],
-          assigneesToRemove: [],
+          assigneesAdded: ['uid'],
+          assigneesRemoved: [],
           truncated: false,
         }),
       expectedPayload: {
         attackIds: ['a'],
-        assigneesToAdd: ['uid'],
-        assigneesToRemove: [],
+        assigneesAdded: ['uid'],
+        assigneesRemoved: [],
         truncated: false,
       },
     },

@@ -236,8 +236,8 @@ describe('set unified alerts assignees', () => {
         expect.anything(),
         expect.objectContaining({
           alertIds: ['alert-1', 'alert-2'],
-          assigneesToAdd: ['user-1'],
-          assigneesToRemove: [],
+          assigneesAdded: ['user-1'],
+          assigneesRemoved: [],
           truncated: false,
         })
       );
@@ -264,8 +264,8 @@ describe('set unified alerts assignees', () => {
         expect.anything(),
         expect.objectContaining({
           attackIds: ['attack-1'],
-          assigneesToAdd: ['user-1'],
-          assigneesToRemove: [],
+          assigneesAdded: ['user-1'],
+          assigneesRemoved: [],
           truncated: false,
         })
       );

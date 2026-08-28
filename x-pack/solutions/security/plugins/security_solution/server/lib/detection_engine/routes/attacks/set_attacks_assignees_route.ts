@@ -150,8 +150,8 @@ export const setAttacksAssigneesRoute = (
               if (eventBus && verifiedAttackIds.length > 0) {
                 void eventBus.emitAttackAssigneesChanged(request, {
                   attackIds: verifiedAttackIds,
-                  assigneesToAdd: validAssigneesToAdd,
-                  assigneesToRemove: validAssigneesToRemove,
+                  assigneesAdded: validAssigneesToAdd,
+                  assigneesRemoved: validAssigneesToRemove,
                   truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
                 });
               }
@@ -230,16 +230,16 @@ export const setAttacksAssigneesRoute = (
             if (verifiedAttackIds.length > 0) {
               void eventBus?.emitAttackAssigneesChanged(request, {
                 attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: validAssigneesToAdd,
-                assigneesToRemove: validAssigneesToRemove,
+                assigneesAdded: validAssigneesToAdd,
+                assigneesRemoved: validAssigneesToRemove,
                 truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (verifiedRelatedAlertIds.length > 0) {
               void eventBus?.emitAlertAssigneesChanged(request, {
                 alertIds: verifiedRelatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: validAssigneesToAdd,
-                assigneesToRemove: validAssigneesToRemove,
+                assigneesAdded: validAssigneesToAdd,
+                assigneesRemoved: validAssigneesToRemove,
                 truncated:
                   verifiedRelatedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });

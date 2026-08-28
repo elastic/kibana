@@ -75,8 +75,8 @@ export const setAlertTagsRoute = (
           const result = await updateAlertsTags({ context, index, ids, tags });
           void eventBus?.emitAlertTagsChanged(request, {
             alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-            tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
-            tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
+            tagsAdded: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
+            tagsRemoved: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
             truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
           });
           return result;

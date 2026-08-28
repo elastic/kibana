@@ -25,8 +25,8 @@ describe('attackAssigneesChanged trigger', () => {
     expect(() =>
       schema.parse({
         attackIds: ['a'],
-        assigneesToAdd: ['uid'],
-        assigneesToRemove: [],
+        assigneesAdded: ['uid'],
+        assigneesRemoved: [],
         truncated: false,
       })
     ).not.toThrow();

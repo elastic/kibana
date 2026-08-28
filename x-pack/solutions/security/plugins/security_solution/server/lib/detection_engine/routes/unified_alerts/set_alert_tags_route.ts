@@ -118,16 +118,16 @@ export const setUnifiedAlertsTagsRoute = (
             if (attackIds.length > 0) {
               void eventBus.emitAttackTagsChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: validTagsToAdd,
-                tagsToRemove: validTagsToRemove,
+                tagsAdded: validTagsToAdd,
+                tagsRemoved: validTagsToRemove,
                 truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertTagsChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: validTagsToAdd,
-                tagsToRemove: validTagsToRemove,
+                tagsAdded: validTagsToAdd,
+                tagsRemoved: validTagsToRemove,
                 truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }

@@ -131,8 +131,8 @@ describe('setAlertTagsRoute', () => {
         expect.anything(),
         expect.objectContaining({
           alertIds: ['alert-1'],
-          tagsToAdd: ['tag-add'],
-          tagsToRemove: ['tag-remove'],
+          tagsAdded: ['tag-add'],
+          tagsRemoved: ['tag-remove'],
           truncated: false,
         })
       );

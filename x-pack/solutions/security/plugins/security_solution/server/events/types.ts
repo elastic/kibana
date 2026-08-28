@@ -22,15 +22,15 @@ export interface AlertStatusChangedPayload {
 
 export interface AlertTagsChangedPayload {
   readonly alertIds: string[];
-  readonly tagsToAdd: string[];
-  readonly tagsToRemove: string[];
+  readonly tagsAdded: string[];
+  readonly tagsRemoved: string[];
   readonly truncated: boolean;
 }
 
 export interface AlertAssigneesChangedPayload {
   readonly alertIds: string[];
-  readonly assigneesToAdd: string[];
-  readonly assigneesToRemove: string[];
+  readonly assigneesAdded: string[];
+  readonly assigneesRemoved: string[];
   readonly truncated: boolean;
 }
 
@@ -43,15 +43,15 @@ export interface AttackStatusChangedPayload {
 
 export interface AttackTagsChangedPayload {
   readonly attackIds: string[];
-  readonly tagsToAdd: string[];
-  readonly tagsToRemove: string[];
+  readonly tagsAdded: string[];
+  readonly tagsRemoved: string[];
   readonly truncated: boolean;
 }
 
 export interface AttackAssigneesChangedPayload {
   readonly attackIds: string[];
-  readonly assigneesToAdd: string[];
-  readonly assigneesToRemove: string[];
+  readonly assigneesAdded: string[];
+  readonly assigneesRemoved: string[];
   readonly truncated: boolean;
 }
 

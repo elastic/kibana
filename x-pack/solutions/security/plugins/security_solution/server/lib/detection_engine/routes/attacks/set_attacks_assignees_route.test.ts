@@ -355,8 +355,8 @@ describe('set attacks assignees', () => {
           expect.anything(),
           expect.objectContaining({
             attackIds: ['attack1', 'attack2'],
-            assigneesToAdd: ['user1'],
-            assigneesToRemove: [],
+            assigneesAdded: ['user1'],
+            assigneesRemoved: [],
             truncated: false,
           })
         );
