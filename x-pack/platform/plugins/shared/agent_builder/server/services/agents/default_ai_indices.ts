@@ -12,8 +12,6 @@ export interface DefaultAiIndex {
   /** The ES|QL `FROM` target: the index or data stream to query. */
   esqlTarget: string;
   description: string;
-  /** Extra prompt advice for this index, printed after the description. */
-  guidance?: string;
 }
 
 /**
@@ -27,8 +25,5 @@ export const defaultAiIndices: Record<string, DefaultAiIndex> = {
   [agentBuilderDefaultAiIndexId]: {
     esqlTarget: smlIndexName,
     description: smlAiIndexDescription,
-    guidance:
-      "Entries can be attached to the conversation, which loads an entry's full specification; " +
-      'querying the index returns only its summary. Attach an entry before acting on it.',
   },
 };

@@ -13,7 +13,6 @@ const defaultCatalog: AiIndexCatalogEntry[] = [
     id: 'elastic',
     esqlTarget: 'sml-main',
     description: 'Summaries of Kibana resources such as dashboards and connectors.',
-    guidance: 'Attach an entry before acting on it.',
   },
 ];
 
@@ -66,7 +65,7 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('continue with other relevant data or tools');
   });
 
-  it('renders each catalog entry with its ES|QL target, description and guidance', () => {
+  it('renders each catalog entry with its ES|QL target and description', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       catalog: defaultCatalog,
@@ -75,8 +74,7 @@ describe('getAiIndicesInstructions', () => {
 
     expect(instructions).toContain('Available to this agent:');
     expect(instructions).toContain(
-      '- `sml-main` — Summaries of Kibana resources such as dashboards and connectors. ' +
-        'Attach an entry before acting on it.'
+      '- `sml-main` — Summaries of Kibana resources such as dashboards and connectors.'
     );
   });
 

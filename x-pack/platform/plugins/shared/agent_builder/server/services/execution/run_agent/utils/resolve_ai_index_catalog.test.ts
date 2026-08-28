@@ -18,7 +18,7 @@ describe('resolveAiIndexCatalog', () => {
     expect(await resolveAiIndexCatalog({ aiIndices: [], request })).toEqual([]);
   });
 
-  it('describes default AI indices from the static map, including guidance', async () => {
+  it('describes default AI indices from the static map', async () => {
     const catalog = await resolveAiIndexCatalog({
       aiIndices: [agentBuilderDefaultAiIndexId],
       request,
@@ -29,7 +29,6 @@ describe('resolveAiIndexCatalog', () => {
       id: agentBuilderDefaultAiIndexId,
       esqlTarget: smlIndexName,
       description: expect.any(String),
-      guidance: expect.stringContaining('Attach an entry before acting on it.'),
     });
   });
 

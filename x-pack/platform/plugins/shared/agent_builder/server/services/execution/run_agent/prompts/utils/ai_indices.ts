@@ -31,10 +31,9 @@ export const getAiIndicesInstructions = ({
   // Unresolved entries are omitted: the id is not a valid `FROM` target.
   const entries = catalog
     .filter(({ esqlTarget }) => esqlTarget !== undefined)
-    .map(({ esqlTarget, description, guidance }) =>
-      [`- \`${esqlTarget}\`${description ? ` — ${description}` : ''}`, guidance]
-        .filter(Boolean)
-        .join(' ')
+    .map(
+      ({ esqlTarget, description }) =>
+        `- \`${esqlTarget}\`${description ? ` — ${description}` : ''}`
     );
   const catalogSection =
     entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';

@@ -17,8 +17,6 @@ export interface AiIndexCatalogEntry {
    */
   esqlTarget?: string;
   description?: string;
-  /** Extra prompt advice for this index, printed after the description. */
-  guidance?: string;
 }
 
 export interface ResolvedConfiguration {
