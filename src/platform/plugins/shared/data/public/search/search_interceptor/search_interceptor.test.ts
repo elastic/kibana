@@ -2338,20 +2338,7 @@ describe('SearchInterceptor', () => {
     });
 
     describe('cancel on browser navigation (beforeunload)', () => {
-      let originalFetch: typeof global.fetch;
-      let mockFetch: jest.Mock;
-
-      beforeEach(() => {
-        originalFetch = global.fetch;
-        mockFetch = jest.fn().mockResolvedValue({} as Response);
-        global.fetch = mockFetch;
-      });
-
-      afterEach(() => {
-        global.fetch = originalFetch;
-      });
-
-      test('should send DELETE via fetch with keepalive when beforeunload fires during active async search', async () => {
+      test('should send DELETE via http.delete with keepalive when beforeunload fires during active async search', async () => {
         const responses = [
           {
             time: 10,
@@ -2383,25 +2370,13 @@ describe('SearchInterceptor', () => {
 
         window.dispatchEvent(new Event('beforeunload'));
 
-        // Filter to calls for our specific search ID only (other stale handlers may also fire)
-        const callsForOurSearch = (mockFetch.mock.calls as Array<[string, RequestInit]>).filter(
-          ([url]) => url.includes('async-id-1')
-        );
-        expect(callsForOurSearch).toHaveLength(1);
-        expect(callsForOurSearch[0]).toEqual([
+        expect(mockCoreSetup.http.delete).toHaveBeenCalledWith(
           '/internal/search/ese/async-id-1',
-          expect.objectContaining({
-            method: 'DELETE',
-            keepalive: true,
-            headers: expect.objectContaining({
-              'kbn-xsrf': 'true',
-              'elastic-api-version': '1',
-            }),
-          }),
-        ]);
+          expect.objectContaining({ keepalive: true })
+        );
       });
 
-      test('should not send DELETE via fetch if search completes before beforeunload', async () => {
+      test('should not send DELETE via http.delete if search completes before beforeunload', async () => {
         const responses = [
           {
             time: 10,
@@ -2424,13 +2399,12 @@ describe('SearchInterceptor', () => {
 
         window.dispatchEvent(new Event('beforeunload'));
 
-        const callsForOurSearch = (mockFetch.mock.calls as Array<[string, RequestInit]>).filter(
-          ([url]) => url.includes('async-id-2')
-        );
+        const calls = (mockCoreSetup.http.delete as jest.Mock).mock.calls as Array<[string]>;
+        const callsForOurSearch = calls.filter(([path]) => path.includes('async-id-2'));
         expect(callsForOurSearch).toHaveLength(0);
       });
 
-      test('should not send DELETE via fetch for searches saved to background', async () => {
+      test('should not send DELETE via http.delete for searches saved to background', async () => {
         const sessionId = 'session-bg-1';
         sessionService.isCurrentSession.mockImplementation(
           (_sessionId) => _sessionId === sessionId
@@ -2459,13 +2433,12 @@ describe('SearchInterceptor', () => {
 
         window.dispatchEvent(new Event('beforeunload'));
 
-        const callsForOurSearch = (mockFetch.mock.calls as Array<[string, RequestInit]>).filter(
-          ([url]) => url.includes('async-id-3')
-        );
+        const calls = (mockCoreSetup.http.delete as jest.Mock).mock.calls as Array<[string]>;
+        const callsForOurSearch = calls.filter(([path]) => path.includes('async-id-3'));
         expect(callsForOurSearch).toHaveLength(0);
       });
 
-      test('should send DELETE via fetch for active searches when stop() is called', async () => {
+      test('should send DELETE via http.delete with keepalive for active searches when stop() is called', async () => {
         const responses = [
           {
             time: 10,
@@ -2497,17 +2470,10 @@ describe('SearchInterceptor', () => {
 
         searchInterceptor.stop();
 
-        const callsForOurSearch = (mockFetch.mock.calls as Array<[string, RequestInit]>).filter(
-          ([url]) => url.includes('async-id-4')
-        );
-        expect(callsForOurSearch).toHaveLength(1);
-        expect(callsForOurSearch[0]).toEqual([
+        expect(mockCoreSetup.http.delete).toHaveBeenCalledWith(
           '/internal/search/ese/async-id-4',
-          expect.objectContaining({
-            method: 'DELETE',
-            keepalive: true,
-          }),
-        ]);
+          expect.objectContaining({ keepalive: true })
+        );
       });
     });
   });

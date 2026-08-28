@@ -80,6 +80,7 @@ export function registerSearchRoute(
           approximation,
           ...searchRequest
         } = request.body;
+
         const { strategy, id } = request.params;
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 

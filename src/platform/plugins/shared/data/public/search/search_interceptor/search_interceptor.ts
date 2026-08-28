@@ -220,23 +220,19 @@ export class SearchInterceptor {
     this.cancelAllActiveSearches();
   }
 
+  private sendCancelRequest(searchId: string, strategy: string): Promise<unknown> {
+    return Promise.resolve(
+      this.deps.http.delete(
+        buildPath('/internal/search/{strategy}/{id}', { strategy, id: searchId }),
+        { version: '1', keepalive: true }
+      )
+    );
+  }
+
   private cancelAllActiveSearches(): void {
-    const basePath = this.deps.http.basePath.get();
-
     for (const [searchId, strategy] of this.activeAsyncSearches) {
-      const path = `/internal/search/${strategy}/${searchId}`;
-      const url = `${basePath}${path}`;
-
-      fetch(url, {
-        method: 'DELETE',
-        keepalive: true,
-        headers: {
-          'kbn-xsrf': 'true',
-          'elastic-api-version': '1',
-        },
-      }).catch(() => {}); // Fire-and-forget
+      this.sendCancelRequest(searchId, strategy).catch(() => {}); // Fire-and-forget
     }
-
     this.activeAsyncSearches.clear();
   }
 
@@ -452,15 +448,7 @@ export class SearchInterceptor {
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(
-        buildPath('/internal/search/{strategy}/{id}', {
-          strategy: strategyToString(strategy),
-          id: id as string,
-        }),
-        {
-          version: '1',
-        }
-      )
+      this.sendCancelRequest(id as string, strategyToString(strategy))
     );
 
     const cancel = async () => {
