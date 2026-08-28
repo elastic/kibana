@@ -37,5 +37,6 @@ describe('RoundAuthorHeader', () => {
     render(<RoundAuthorHeader actor="agent" startedAt={startedAt} />);
 
     expect(screen.getByText('Elastic AI Agent')).toBeInTheDocument();
+    expect(screen.getByText('Agent')).toBeInTheDocument();
   });
 });

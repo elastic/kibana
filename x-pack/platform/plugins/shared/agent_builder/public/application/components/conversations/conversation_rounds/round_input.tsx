@@ -62,7 +62,7 @@ export const RoundInput = ({
     background: ${euiTheme.colors.backgroundLightPrimary};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
-    border-radius: ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 ${AB_PANEL_RADIUS}px;
+    border-radius: 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
     padding: ${euiTheme.size.m} ${euiTheme.size.base};
   `;
 

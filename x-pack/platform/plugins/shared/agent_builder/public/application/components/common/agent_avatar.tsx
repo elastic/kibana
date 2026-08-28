@@ -32,13 +32,13 @@ const getIconSize = ({ size }: { size: 's' | 'm' | 'l' | 'xl' | undefined }) => 
 interface BaseAgentAvatarProps {
   /** Size that will be used if the avatar is rendered as an icon. By default uses 1 size larger than `size` prop. */
   iconSize?: EuiAvatarProps['size'];
+  iconPaddingSize?: EuiPanelProps['paddingSize'];
   size: EuiAvatarProps['size'];
   shape?: 'circle' | 'square';
 }
 
 interface AgentAvatarWithAgentProps extends BaseAgentAvatarProps {
   agent: AgentDefinition;
-  iconPaddingSize?: EuiPanelProps['paddingSize'];
   name?: never;
   symbol?: never;
   color?: 'subdued' | AgentDefinition['avatar_color'];
@@ -82,6 +82,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
         symbol: props.symbol,
         color: props.color,
         readonly: false,
+        iconPaddingSize: props.iconPaddingSize,
       };
 
   const { euiTheme } = useEuiTheme();

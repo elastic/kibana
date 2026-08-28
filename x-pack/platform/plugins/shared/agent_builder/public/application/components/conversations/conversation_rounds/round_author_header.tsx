@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,6 +31,9 @@ const labels = {
   }),
   agent: i18n.translate('xpack.agentBuilder.roundAuthor.agent', {
     defaultMessage: 'Elastic AI Agent',
+  }),
+  agentBadge: i18n.translate('xpack.agentBuilder.roundAuthor.agentBadge', {
+    defaultMessage: 'Agent',
   }),
   viaSlack: i18n.translate('xpack.agentBuilder.roundAuthor.viaSlack', {
     defaultMessage: 'via Slack',
@@ -68,16 +79,33 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
     line-height: ${euiTheme.size.base};
   `;
 
+  const attributionStyles = css`
+    display: inline-flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+    flex-wrap: wrap;
+  `;
+
   const metadataStyles = css`
     display: inline-flex;
     align-items: center;
     gap: ${euiTheme.size.xs};
-    margin-inline-start: ${euiTheme.size.xs};
     color: ${euiTheme.colors.textSubdued};
   `;
 
+  const separatorStyles = css`
+    color: ${euiTheme.colors.textSubdued};
+  `;
+
+  const agentBadgeStyles = css`
+    background-color: #f2e6ff;
+    color: #5e2ca5;
+    border: none;
+    box-shadow: none;
+  `;
+
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false} css={headerStyles}>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={headerStyles}>
       <EuiFlexItem grow={false}>
         {actor === 'agent' ? (
           <AgentAvatar
@@ -86,6 +114,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
             symbol={undefined}
             color="subdued"
             size="s"
+            iconPaddingSize="none"
           />
         ) : (
           <EuiAvatar size="s" name={name} />
@@ -93,22 +122,32 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
-          <strong>{name}</strong>
-          {showSlackOrigin && (
-            <span css={metadataStyles}>
-              <EuiIcon type="logoSlack" size="s" aria-hidden={true} />
-              {labels.viaSlack}
-            </span>
-          )}
-          {time && (
-            <div
-              css={css`
-                color: ${euiTheme.colors.textSubdued};
-              `}
-            >
-              {time}
-            </div>
-          )}
+          <span css={attributionStyles}>
+            <strong>{name}</strong>
+            {actor === 'agent' && (
+              <>
+                <span css={separatorStyles}>&middot;</span>
+                <EuiBadge color="hollow" iconType="productAgent" css={agentBadgeStyles}>
+                  {labels.agentBadge}
+                </EuiBadge>
+              </>
+            )}
+            {showSlackOrigin && (
+              <>
+                <span css={separatorStyles}>&middot;</span>
+                <span css={metadataStyles}>
+                  <EuiIcon type="logoSlack" size="s" aria-hidden={true} />
+                  {labels.viaSlack}
+                </span>
+              </>
+            )}
+            {time && (
+              <>
+                <span css={separatorStyles}>&middot;</span>
+                <span css={metadataStyles}>{time}</span>
+              </>
+            )}
+          </span>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
