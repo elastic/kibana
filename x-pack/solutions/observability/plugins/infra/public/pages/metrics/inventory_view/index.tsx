@@ -52,6 +52,12 @@ export const SnapshotPage = (): React.ReactElement => {
               <div className={APP_WRAPPER_CLASS}>
                 <InfraPageTemplate
                   hasDataOverride={!showOnboarding}
+                  header={
+                    <>
+                      <AppHeader title={inventoryTitle} menu={menu} spacing="standard" />
+                      {flyouts}
+                    </>
+                  }
                   pageSectionProps={{
                     paddingSize: 'none',
                     contentProps: {
@@ -67,8 +73,6 @@ export const SnapshotPage = (): React.ReactElement => {
                     },
                   }}
                 >
-                  <AppHeader title={inventoryTitle} menu={menu} spacing="standard" />
-                  {flyouts}
                   {showOnboarding ? (
                     <InventoryOnboardingPage />
                   ) : (

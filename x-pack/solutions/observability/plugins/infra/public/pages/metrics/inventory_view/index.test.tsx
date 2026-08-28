@@ -69,12 +69,19 @@ jest.mock('../../../components/shared/templates/infra_page_template', () => ({
   InfraPageTemplate: ({
     children,
     hasDataOverride,
+    header,
   }: {
     children: React.ReactNode;
     hasDataOverride?: boolean;
+    header?: React.ReactNode;
   }) => {
     lastInfraPageTemplateProps = { hasDataOverride };
-    return <div data-test-subj="infraPageTemplate">{children}</div>;
+    return (
+      <div data-test-subj="infraPageTemplate">
+        {header}
+        {children}
+      </div>
+    );
   },
 }));
 
