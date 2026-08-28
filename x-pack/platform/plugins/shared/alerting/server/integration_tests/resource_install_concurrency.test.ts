@@ -13,18 +13,23 @@
  * per-(context x namespace) fan-out can retain enough of them at once to OOM
  * the Kibana node (see https://github.com/elastic/kibana/issues/277498).
  *
- * This test drives a storm shaped like the real failure — `.alerts-*` indices
- * whose `index.mapping.total_fields.limit` sits below the resolved mapping's
- * field count (as after an ECS field bump), so every install crawls the limit
- * up against a real Elasticsearch — through the real
- * `createResourceInstallationHelper`, triggered both via `add` (startup) and
- * `retry` (rule-execution-driven), and asserts the number of in-flight
+ * This test drives a multi-space x multi-context install storm — every
+ * `.alerts-*` index needing a settings update and a mapping update resolved
+ * from its (component) templates against a real Elasticsearch — through the
+ * real `createResourceInstallationHelper`, triggered both via `add` (startup)
+ * and `retry` (rule-execution-driven), and asserts the number of in-flight
  * installs never exceeds the bound. Bounded in-flight installs mean bounded
  * live mappings, which is what keeps peak heap flat regardless of how many
  * spaces/contexts need installing. The storm is deliberately kept small (the
  * bound saturates just as well at small scale) so the suite stays cheap in CI;
  * only Elasticsearch is booted — no Kibana server — so the logged peak heap
  * reflects the install path rather than an in-process Kibana.
+ *
+ * Unlike on newer branches, the field-limit crawl is not exercised here:
+ * Elasticsearch on this branch rejects index-template PUTs whose composed
+ * explicit mappings exceed the template's own total_fields.limit, and the
+ * crawl rewrites the template with each incremental limit, so an over-limit
+ * template cannot be staged in a test.
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -33,7 +38,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { Logger } from '@kbn/core/server';
-import { updateIndexMappingsAndSettings } from '../alerts_service/lib/create_concrete_write_index';
+import { updateIndexMappings } from '../alerts_service/lib/create_concrete_write_index';
 import {
   createResourceInstallationHelper,
   successResult,
@@ -44,11 +49,12 @@ import type { IRuleTypeAlerts } from '../types';
 const NUM_CONTEXTS = 3;
 const NUM_SPACES = 4; // => 12 (context x space) indices
 
-// The indices start at this limit; the resolved mapping carries more fields
-// (as after an ECS bump), so each first install crawls the limit up in small
-// increments — holding its mapping the whole time.
+// The indices start at this limit; each install raises it to TOTAL_FIELDS_LIMIT
+// and applies the template-resolved mapping — holding that mapping in memory
+// for the whole install.
 const STARTING_FIELD_LIMIT = 370;
 const FIELDS_PER_MAPPING = 400;
+const TOTAL_FIELDS_LIMIT = FIELDS_PER_MAPPING + 10;
 
 interface IndexRef {
   index: string;
@@ -95,8 +101,12 @@ describe('alerting resource-install concurrency bound', () => {
   });
 
   it('keeps in-flight installs (and their in-memory mappings) bounded during a multi-space x multi-context storm', async () => {
-    // Build the pool of under-limit indices, each with its own index template
-    // (the field-limit crawl updates the template alongside the index).
+    // Build the pool of indices, each with its own component + index template
+    // pair carrying the full mapping — the shape production alerting resources
+    // use. On this branch the install path resolves the mapping from the
+    // templates via simulateIndexTemplate. The indices are created BEFORE the
+    // templates and start at a lower field limit, so each install has real
+    // settings + mapping work to do.
     const refs: IndexRef[] = [];
     for (let c = 0; c < NUM_CONTEXTS; c++) {
       for (let s = 0; s < NUM_SPACES; s++) {
@@ -108,14 +118,6 @@ describe('alerting resource-install concurrency bound', () => {
 
     await Promise.all(
       refs.map(async (r) => {
-        await esClient.indices.putIndexTemplate({
-          name: `${r.alias}-index-template`,
-          index_patterns: [`.internal.${r.alias.slice(1)}-*`],
-          template: {
-            settings: { 'index.mapping.total_fields.limit': STARTING_FIELD_LIMIT },
-            mappings: { dynamic: false },
-          },
-        });
         await esClient.indices.create({
           index: r.index,
           aliases: { [r.alias]: { is_write_index: true, is_hidden: true } },
@@ -126,6 +128,19 @@ describe('alerting resource-install concurrency bound', () => {
           },
           mappings: { dynamic: false },
         });
+        await esClient.cluster.putComponentTemplate({
+          name: `${r.alias}-mappings`,
+          template: { mappings: buildMapping(FIELDS_PER_MAPPING) },
+        });
+        await esClient.indices.putIndexTemplate({
+          name: `${r.alias}-index-template`,
+          index_patterns: [`.internal.${r.alias.slice(1)}-*`],
+          composed_of: [`${r.alias}-mappings`],
+          template: {
+            settings: { 'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT },
+            mappings: { dynamic: false },
+          },
+        });
       })
     );
 
@@ -135,8 +150,9 @@ describe('alerting resource-install concurrency bound', () => {
     let maxConcurrent = 0;
     let peakHeapUsed = 0;
 
-    // One install: build its own resolved mapping (held for the whole run, as
-    // in production) and drive the real update path against real ES.
+    // One install: resolve the mapping from the index template (held in memory
+    // for the whole run, as in production) and drive the real update path
+    // against real ES.
     const installFn = async (context: IRuleTypeAlerts, namespace: string) => {
       const ref = indexByKey.get(`${context.context}_${namespace}`);
       if (!ref) {
@@ -146,12 +162,11 @@ describe('alerting resource-install concurrency bound', () => {
       maxConcurrent = Math.max(maxConcurrent, inFlight);
       peakHeapUsed = Math.max(peakHeapUsed, process.memoryUsage().heapUsed);
       try {
-        await updateIndexMappingsAndSettings({
+        await updateIndexMappings({
           logger: makeSilentLogger(),
           esClient,
-          totalFieldsLimit: STARTING_FIELD_LIMIT,
+          totalFieldsLimit: TOTAL_FIELDS_LIMIT,
           concreteIndices: [ref],
-          simulatedMapping: buildMapping(FIELDS_PER_MAPPING),
         });
       } catch (e) {
         if (firstErrors.length < 3) {
