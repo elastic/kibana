@@ -8,7 +8,6 @@
 import React from 'react';
 
 import {
-  EuiAvatar,
   EuiBadge,
   EuiBadgeGroup,
   EuiFlexGroup,
@@ -16,7 +15,6 @@ import {
   EuiCard,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -40,7 +38,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
 
   return (
     <EuiCard
-      icon={<EuiIcon type={provider?.icon ?? 'machineLearningApp'} size="l" />}
+      icon={<EuiIcon type={provider?.icon ?? 'machineLearningApp'} size="l" aria-hidden={true} />}
       title={modelName}
       titleSize="xs"
       textAlign="left"
