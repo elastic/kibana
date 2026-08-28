@@ -112,7 +112,7 @@ Watch definitions are `dynamic` + `auto` + `restorable`. They are installed on e
 
 The prototype rule workflows remain static global installs and are not advertised to workflow selector UIs. A Watch reaches them with `workflow.execute`, and they surface on the Watch detail page as callables of kind `workflow`:
 
-- `system-security-rule-tuning` — called by Detection Watch on its scheduled sweep
+- `system-security-rule-tuning` — the tuning sweep; carries its own 2h scheduled trigger (dormant until the workflow is saved through the CRUD path) and is also callable by Detection Watch
 - `system-security-rule-tuning-proposal` — launched per noisy rule by the tuning sweep (`workflow.executeAsync`), each run holding its own approval gate
 - `system-security-rule-creation` — called by Detection Watch when a caller supplies an ATT&CK technique
 - `system-security-rule-preview` — called by the proposal and creation workers

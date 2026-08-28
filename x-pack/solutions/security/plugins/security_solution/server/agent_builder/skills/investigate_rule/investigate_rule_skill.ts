@@ -17,12 +17,15 @@ import {
   SecurityAgentBuilderAttachments,
 } from '../../../../common/constants';
 
-export const ALERTS_BY_IDS_MAX = 100;
+// Most ids one get_alerts_by_ids call accepts. The rule tuning proposal workflow
+// (kbn-workflows managed definitions) slices its harvested ids to this value.
+const ALERTS_BY_IDS_MAX = 100;
 
-/** The fields Step 2's confirmed-dispositions analysis names, resolved deterministically. */
+/** Fields the confirmed-dispositions analysis in SKILL_CONTENT asks for, fetched as a fixed list. */
 const ALERTS_BY_IDS_FIELDS = [
   '@timestamp',
   'message',
+  'kibana.alert.reason',
   'kibana.alert.workflow_status',
   'kibana.alert.workflow_reason',
   'kibana.alert.workflow_user',
@@ -463,11 +466,14 @@ export const createInvestigateRuleSkill = (): SkillDefinition<
         handler: async (args, context) => {
           const { alert_ids: alertIds, additional_fields: additionalFields } =
             alertsByIdsSchema.parse(args);
+          // Deduped so a repeated id cannot make `found < requested`, which the
+          // skill treats as partial results and answers with a fallback query.
+          const ids = [...new Set(alertIds)];
           try {
             const response = await context.esClient.asCurrentUser.search({
               index: `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`,
-              size: alertIds.length,
-              query: { ids: { values: alertIds } },
+              size: ids.length,
+              query: { ids: { values: ids } },
               _source: [...ALERTS_BY_IDS_FIELDS, ...(additionalFields ?? [])],
             });
 
@@ -481,7 +487,7 @@ export const createInvestigateRuleSkill = (): SkillDefinition<
                 {
                   type: ToolResultType.other,
                   data: {
-                    requested: alertIds.length,
+                    requested: ids.length,
                     found: alerts.length,
                     alerts,
                   },

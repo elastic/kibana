@@ -79,7 +79,9 @@ describe('investigateRuleSkill', () => {
     beforeEach(async () => {
       jest.clearAllMocks();
       const inlineTools = await investigateRuleSkill.getInlineTools?.();
-      tool = inlineTools![0] as BuiltinSkillBoundedTool;
+      tool = inlineTools!.find(
+        ({ id }) => id === 'investigate-rule.resolve_rule_attachment'
+      ) as BuiltinSkillBoundedTool;
     });
 
     interface AttachmentResultData {
@@ -180,7 +182,9 @@ describe('investigateRuleSkill', () => {
     beforeEach(async () => {
       jest.clearAllMocks();
       const inlineTools = await investigateRuleSkill.getInlineTools?.();
-      tool = inlineTools![1] as BuiltinSkillBoundedTool;
+      tool = inlineTools!.find(
+        ({ id }) => id === 'investigate-rule.get_alerts_by_ids'
+      ) as BuiltinSkillBoundedTool;
     });
 
     const makeCtx = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
@@ -242,6 +246,26 @@ describe('investigateRuleSkill', () => {
         'host.name': 'ci-runner',
         'kibana.alert.workflow_reason': 'false_positive',
       });
+    });
+
+    it('dedupes repeated ids so found cannot trail requested spuriously', async () => {
+      const ctx = makeCtx();
+      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
+        hits: { hits: [{ _id: 'alert-1', _source: {} }] },
+      } as never);
+
+      const result = (await tool.handler(
+        { alert_ids: ['alert-1', 'alert-1'] },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      const searchArgs = mockEsClient.asCurrentUser.search.mock.calls[0][0] as {
+        size: number;
+        query: unknown;
+      };
+      expect(searchArgs.size).toBe(1);
+      expect(searchArgs.query).toEqual({ ids: { values: ['alert-1'] } });
+      expect((result.results[0].data as { requested: number; found: number }).requested).toBe(1);
     });
 
     it('returns an error result when the search fails', async () => {

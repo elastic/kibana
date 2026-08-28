@@ -15,8 +15,10 @@ settings:
     strategy: drop
     max: 1
 triggers:
-  # Inert until the workflow is enabled through the workflow CRUD path: the
-  # managed install writes the document without registering the scheduler task.
+  # `enabled: true` above only marks the installed document as enabled; the managed
+  # install path never registers scheduler tasks, so this trigger stays dormant until
+  # someone saves the workflow through the CRUD path in a space. From then on it
+  # sweeps that space every 2h.
   - type: scheduled
     with:
       every: "2h"
@@ -25,6 +27,9 @@ triggers:
       properties:
         min_fp_count:
           type: number
+          # Floor of 2: a single-FP group makes ES|QL return alert_ids as a scalar,
+          # which would fail the proposal's array input schema.
+          minimum: 2
           description: Overrides the minimum unreviewed false-positive alerts a rule needs before it is diagnosed.
         min_fp_rate_pct:
           type: number
@@ -59,11 +64,14 @@ steps:
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
   # `allow_partial_results: false` because a partial aggregation would both undercount
   # fp_count and return a short alert_ids list, leaving alerts that drove a decision
-  # untagged. The 1000-id slice keeps the bulk tag request inside Kibana's payload
-  # limit; a rule noisier than that surfaces again on the next sweep.
+  # untagged. TOP bounds the per-rule id collection at 1000 inside the aggregation
+  # (VALUES would buffer every id first), which also keeps the proposal's bulk tag
+  # request inside Kibana's payload limit; a rule noisier than that surfaces again
+  # on the next sweep.
   # `total_count` spans every alert the rule produced in the window while the fp_*
   # aggregations count only unreviewed false positives, so the rate filter compares
-  # actionable noise against the rule's whole output.
+  # actionable noise against the rule's whole output (cross-multiplied to avoid
+  # float division).
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
@@ -77,11 +85,10 @@ steps:
         | STATS total_count = COUNT(*),
             fp_count = COUNT(*) WHERE is_unreviewed_fp,
             last_fp_at = MAX(@timestamp) WHERE is_unreviewed_fp,
-            fp_alert_ids = VALUES(_id) WHERE is_unreviewed_fp
+            alert_ids = TOP(_id, 1000, "desc") WHERE is_unreviewed_fp
           BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
         | WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
           AND fp_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
-        | EVAL alert_ids = MV_SLICE(fp_alert_ids, 0, 999)
         | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
         | SORT fp_count DESC
         | LIMIT 10
@@ -98,6 +105,8 @@ steps:
     foreach: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows }}"
     steps:
       # ES|QL rows arrive as positional arrays in the harvest's KEEP order.
+      # `${{ }}` preserves the value's type (numbers, arrays); `{{ }}` stringifies.
+      # `on-failure: continue` so one bad launch cannot abort the remaining rules.
       - name: launch_proposal
         type: workflow.executeAsync
         with:
@@ -112,6 +121,8 @@ steps:
             analysis_window_days: "${{ inputs.analysis_window_days | default: consts.analysis_window_days }}"
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
+        on-failure:
+          continue: true
 
   # Size is computed on its own because comparison operators cannot follow a filter chain.
   - name: count_examined_rules

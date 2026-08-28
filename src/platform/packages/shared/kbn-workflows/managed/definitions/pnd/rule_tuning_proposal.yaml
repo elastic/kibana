@@ -40,8 +40,8 @@ triggers:
           items:
             type: string
           description: >-
-            Document ids of the harvested false positives. Ground the diagnosis (the
-            agent retrieves them by id) and are tagged once the gate resolves.
+            Document ids of the harvested false positives. The agent retrieves these by
+            id to ground the diagnosis; they are tagged once the gate resolves.
         analysis_window_days:
           type: number
           description: Days of alerts the sweep analyzed. Shown to the diagnosing agent.
@@ -50,7 +50,12 @@ triggers:
           description: Rule executions each backtest preview simulates.
         parent_run_id:
           type: string
-          description: Execution id of the sweep that launched this proposal. Empty on a standalone run.
+          description: >-
+            Execution id of the sweep that launched this proposal. Recorded for
+            traceability only; no step reads it. Empty on a standalone run.
+      # Only the rule identity and alert evidence are required. The operational
+      # parameters default from consts so the sweep and this workflow can upgrade
+      # independently without a one-sided input-validation failure.
       required:
         - rule_uuid
         - rule_name
@@ -58,8 +63,6 @@ triggers:
         - fp_count
         - last_fp_at
         - alert_ids
-        - analysis_window_days
-        - preview_invocation_count
       additionalProperties: false
 outputs:
   - name: rule_id
@@ -69,20 +72,30 @@ outputs:
   - name: applied
     type: boolean
 consts:
+  # Fallbacks for the optional operational inputs; keep in sync with the sweep's
+  # consts in rule_tuning.yaml.
+  analysis_window_days: 14
+  preview_invocation_count: 2
   # Written onto every alert that reached a decision, and filtered out by the sweep's
-  # harvest, so a later sweep cannot rediagnose the same alerts into the same proposal.
+  # harvest (consts.reviewed_tag in rule_tuning.yaml must match the shared
+  # detection-watch:tuning-reviewed entry), so a later sweep cannot rediagnose the
+  # same alerts into the same proposal.
   dismissed_tags:
     - detection-watch:tuning-reviewed
     - detection-watch:tuning-dismissed
   applied_tags:
     - detection-watch:tuning-reviewed
     - detection-watch:tuning-applied
+  # For approved query proposals whose change could not be applied: the decision is
+  # recorded (stopping the resweep loop) without claiming a change happened.
+  reviewed_only_tags:
+    - detection-watch:tuning-reviewed
 steps:
   - name: fetch_rule
     type: kibana.request
     with:
       method: GET
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.rule_id }}"
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.rule_id | url_encode }}"
       headers:
         kbn-xsrf: string
         elastic-api-version: "2023-10-31"
@@ -96,12 +109,14 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      # The 100-id cap must match ALERTS_BY_IDS_MAX in the security_solution skill
+      # (investigate_rule_skill.ts), the most ids one get_alerts_by_ids call accepts.
       message: |-
         Use the [/investigate-rule](skill://investigate-rule) skill to investigate
         rule_id "{{ inputs.rule_id }}" ({{ inputs.rule_name }}).
 
         {{ inputs.fp_count }} alerts from this rule were closed as false positives
-        during the last {{ inputs.analysis_window_days }} days. Their document ids
+        during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
         {%- if inputs.alert_ids.size > 100 %} (first 100 of {{ inputs.alert_ids.size }}){%- endif %}:
         ["{{ inputs.alert_ids | slice: 0, 100 | join: '", "' }}"]
 
@@ -111,9 +126,9 @@ steps:
         re-derive the closed set. Return one structured tuning proposal.
 
         Run the alert queries with time_window_hours set to
-        {{ inputs.analysis_window_days | times: 24 | at_most: 168 }} — the analysis
+        {{ inputs.analysis_window_days | default: consts.analysis_window_days | times: 24 | at_most: 168 }} — the analysis
         window above, capped at the tool maximum. The false-positive ids span the
-        full {{ inputs.analysis_window_days }} days, so call out any totals that
+        full {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days, so call out any totals that
         cover a shorter window than the ids.
 
         This pipeline backtests and applies query changes directly, so prefer
@@ -166,7 +181,7 @@ steps:
           interval: "{{ steps.fetch_rule.output.interval }}"
           from: "{{ steps.fetch_rule.output.from }}"
           to: "{{ steps.fetch_rule.output.to }}"
-          invocationCount: "${{ inputs.preview_invocation_count }}"
+          invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
           timeframeEnd: "{{ inputs.last_fp_at }}"
 
   - name: preview_proposed_query
@@ -191,9 +206,11 @@ steps:
           interval: "{{ steps.fetch_rule.output.interval }}"
           from: "{{ steps.fetch_rule.output.from }}"
           to: "{{ steps.fetch_rule.output.to }}"
-          invocationCount: "${{ inputs.preview_invocation_count }}"
+          invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
           timeframeEnd: "{{ inputs.last_fp_at }}"
 
+  # A timeout fails this run before the tag steps, so the alerts stay unreviewed
+  # and the next sweep proposes the rule again with a fresh diagnosis.
   - name: review_tuning
     type: waitForApproval
     if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
@@ -203,7 +220,8 @@ steps:
       rejectLabel: Dismiss
       message: |-
         Rule tuning proposal for {{ inputs.rule_name }}
-        {{ inputs.fp_count }} alerts were closed as false positives.
+        {{ inputs.fp_count }} alerts were closed as false positives in the last
+        {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.
 
         {{ steps.diagnose_rule.output.structured_output.summary }}
 
@@ -214,7 +232,9 @@ steps:
         Proposed query:
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
 
-        Backtest:
+        Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }},
+        lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive
+        {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover):
         current {% if steps.preview_current_query.output.succeeded and steps.preview_current_query.output.is_aborted == false %}{{ steps.preview_current_query.output.alert_count }}{% else %}inconclusive{% endif %},
         proposed {% if steps.preview_proposed_query.output.succeeded and steps.preview_proposed_query.output.is_aborted == false %}{{ steps.preview_proposed_query.output.alert_count }}{% else %}inconclusive{% endif %}.
         {% if steps.preview_current_query.output.error_text != '' %}
@@ -223,6 +243,9 @@ steps:
         {% if steps.preview_proposed_query.output.error_text != '' %}
         Proposed query preview errors: {{ steps.preview_proposed_query.output.error_text }}
         {% endif %}
+        Approving applies the proposed query only if its backtest succeeded and the
+        rule has not been edited since this diagnosis; otherwise approving records
+        the decision without changing the rule.
         {% else %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         Proposed exception:
@@ -234,8 +257,26 @@ steps:
         {% endif %}
 
         {% if steps.diagnose_rule.output.conversation_id %}
-        Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
+        Continue investigation: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
         {% endif %}
+
+  # The gate can stay open for 72h; re-read the rule so an analyst edit made in the
+  # meantime is not clobbered by a stale proposal.
+  - name: refetch_rule
+    type: kibana.request
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.diagnose_rule.output.structured_output.proposed_query != ''
+        and steps.fetch_rule.output.type == 'query' }}
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.rule_id | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
 
   - name: apply_query_tuning
     type: kibana.request
@@ -244,7 +285,9 @@ steps:
         and steps.diagnose_rule.output.structured_output.proposed_query != ''
         and steps.fetch_rule.output.type == 'query'
         and steps.preview_proposed_query.output.succeeded == true
-        and steps.preview_proposed_query.output.is_aborted == false }}
+        and steps.preview_proposed_query.output.is_aborted == false
+        and steps.refetch_rule.error == null
+        and steps.refetch_rule.output.query == steps.fetch_rule.output.query }}
     with:
       method: PATCH
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
@@ -255,6 +298,21 @@ steps:
       body:
         id: "{{ inputs.rule_uuid }}"
         query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+
+  # Mirrors apply_query_tuning's condition plus its error check, so the tag steps
+  # and the `applied` output cannot claim a change that never landed.
+  - name: record_outcome
+    type: data.set
+    with:
+      rule_patched: >-
+        ${{ steps.review_tuning.output.response.approved == true
+          and steps.diagnose_rule.output.structured_output.proposed_query != ''
+          and steps.fetch_rule.output.type == 'query'
+          and steps.preview_proposed_query.output.succeeded == true
+          and steps.preview_proposed_query.output.is_aborted == false
+          and steps.refetch_rule.error == null
+          and steps.refetch_rule.output.query == steps.fetch_rule.output.query
+          and steps.apply_query_tuning.error == null }}
 
   - name: mark_alerts_dismissed
     type: security.setAlertTags
@@ -267,10 +325,40 @@ steps:
 
   - name: mark_alerts_applied
     type: security.setAlertTags
-    if: "${{ steps.review_tuning.output.response.approved == true }}"
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'query'
+        and steps.record_outcome.output.rule_patched == true }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add: "${{ consts.applied_tags }}"
+    on-failure:
+      continue: true
+
+  # Approving a non-query proposal records the manual handoff, so it carries the
+  # applied tag even though this workflow changed nothing itself.
+  - name: mark_alerts_handoff
+    type: security.setAlertTags
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.diagnose_rule.output.structured_output.change_type != 'query' }}
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      tags_to_add: "${{ consts.applied_tags }}"
+    on-failure:
+      continue: true
+
+  # Approved query proposal that could not be applied (failed backtest, rule edited
+  # during the gate, or PATCH error): record the review without claiming a change.
+  - name: mark_alerts_reviewed
+    type: security.setAlertTags
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'query'
+        and steps.record_outcome.output.rule_patched == false }}
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      tags_to_add: "${{ consts.reviewed_only_tags }}"
     on-failure:
       continue: true
 
@@ -280,10 +368,4 @@ steps:
     with:
       rule_id: "{{ inputs.rule_id }}"
       approved: "${{ steps.review_tuning.output.response.approved == true }}"
-      applied: >-
-        ${{ steps.review_tuning.output.response.approved == true
-          and steps.diagnose_rule.output.structured_output.proposed_query != ''
-          and steps.fetch_rule.output.type == 'query'
-          and steps.preview_proposed_query.output.succeeded == true
-          and steps.preview_proposed_query.output.is_aborted == false
-          and steps.apply_query_tuning.error == null }}
+      applied: "${{ steps.record_outcome.output.rule_patched }}"

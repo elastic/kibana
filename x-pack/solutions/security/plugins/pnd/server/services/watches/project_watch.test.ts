@@ -24,6 +24,14 @@ import {
   projectWorkflowToWatch,
 } from './project_watch';
 
+const DETECTION_WORKFLOW_IDS = [
+  PND_WATCH_DETECTION_WORKFLOW_ID,
+  PND_RULE_TUNING_WORKFLOW_ID,
+  PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
+  PND_RULE_CREATION_WORKFLOW_ID,
+  PND_RULE_PREVIEW_WORKFLOW_ID,
+];
+
 const getManagedYaml = (workflowId: string): string => {
   const definition = getManagedWorkflowDefinition(workflowId);
   if (!definition) throw new Error(`Missing managed workflow definition for "${workflowId}"`);
@@ -202,15 +210,7 @@ describe('project watch', () => {
     // `| default: []` silently resolves to undefined because Liquid has no array
     // literal, which breaks any foreach whose source step produced no rows.
     it('never falls back to a bare [] literal in the detection workflows', () => {
-      const ids = [
-        PND_WATCH_DETECTION_WORKFLOW_ID,
-        PND_RULE_TUNING_WORKFLOW_ID,
-        PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
-        PND_RULE_CREATION_WORKFLOW_ID,
-        PND_RULE_PREVIEW_WORKFLOW_ID,
-      ];
-
-      for (const id of ids) {
+      for (const id of DETECTION_WORKFLOW_IDS) {
         const withoutComments = getManagedYaml(id)
           .split('\n')
           .filter((line) => !line.trimStart().startsWith('#'))
@@ -223,15 +223,7 @@ describe('project watch', () => {
     // Liquid cannot group a condition with parentheses; it raises a tokenization error
     // that fails the step at runtime, long after the definition installs cleanly.
     it('groups no step condition with parentheses', () => {
-      const ids = [
-        PND_WATCH_DETECTION_WORKFLOW_ID,
-        PND_RULE_TUNING_WORKFLOW_ID,
-        PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
-        PND_RULE_CREATION_WORKFLOW_ID,
-        PND_RULE_PREVIEW_WORKFLOW_ID,
-      ];
-
-      const conditions = ids.flatMap((id) => {
+      const conditions = DETECTION_WORKFLOW_IDS.flatMap((id) => {
         const { steps } = parse(getManagedYaml(id)) as WorkflowYaml;
         return flattenSteps(steps as unknown as NestedStep[]).flatMap(
           ({ name, if: stepIf, condition }) =>
@@ -248,15 +240,7 @@ describe('project watch', () => {
     // A legacy `type: array` output is compiled to an array of scalars, so emitting
     // objects through one fails output validation at runtime.
     it('declares no array outputs in the detection workflows', () => {
-      const ids = [
-        PND_WATCH_DETECTION_WORKFLOW_ID,
-        PND_RULE_TUNING_WORKFLOW_ID,
-        PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
-        PND_RULE_CREATION_WORKFLOW_ID,
-        PND_RULE_PREVIEW_WORKFLOW_ID,
-      ];
-
-      for (const id of ids) {
+      for (const id of DETECTION_WORKFLOW_IDS) {
         const { outputs } = parse(getManagedYaml(id)) as WorkflowYaml;
         const declared = Array.isArray(outputs) ? (outputs as Array<{ type?: string }>) : [];
 
@@ -338,13 +322,45 @@ describe('project watch', () => {
         expect(tagSteps.map(({ name }) => name)).toEqual([
           'mark_alerts_dismissed',
           'mark_alerts_applied',
+          'mark_alerts_handoff',
+          'mark_alerts_reviewed',
         ]);
 
-        const [dismissed, applied] = tagSteps;
+        const [dismissed, applied, handoff, reviewed] = tagSteps;
         expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
         expect(dismissed.with?.tags_to_add).toBe('${{ consts.dismissed_tags }}');
-        expect(applied.if).toContain('steps.review_tuning.output.response.approved == true');
+        for (const step of [applied, handoff, reviewed]) {
+          expect(step.if).toContain('steps.review_tuning.output.response.approved == true');
+        }
         expect(applied.with?.tags_to_add).toBe('${{ consts.applied_tags }}');
+        expect(handoff.with?.tags_to_add).toBe('${{ consts.applied_tags }}');
+        expect(reviewed.with?.tags_to_add).toBe('${{ consts.reviewed_only_tags }}');
+      });
+
+      // The applied tag must mean "this pipeline changed the rule" (or recorded a manual
+      // handoff); an approved query proposal whose apply was skipped or failed gets the
+      // reviewed-only tag instead.
+      it('tags applied only when the rule was actually patched', () => {
+        const applied = tagSteps.find(({ name }) => name === 'mark_alerts_applied')!;
+        const reviewed = tagSteps.find(({ name }) => name === 'mark_alerts_reviewed')!;
+
+        expect(applied.if).toContain('steps.record_outcome.output.rule_patched == true');
+        expect(reviewed.if).toContain('steps.record_outcome.output.rule_patched == false');
+
+        const outcome = proposalSteps.find(({ name }) => name === 'record_outcome')!;
+        expect(String(outcome.with?.rule_patched)).toContain(
+          'steps.apply_query_tuning.error == null'
+        );
+      });
+
+      // The gate can stay open for 72h; a stale approval must not clobber an analyst
+      // edit made in the meantime.
+      it('re-reads the rule after approval and applies only when it is unchanged', () => {
+        const apply = proposalSteps.find(({ name }) => name === 'apply_query_tuning')!;
+        expect(apply.if).toContain(
+          'steps.refetch_rule.output.query == steps.fetch_rule.output.query'
+        );
+        expect(proposalSteps.some(({ name }) => name === 'refetch_rule')).toBe(true);
       });
 
       // The tag API requires an array; only a value that is exactly one `${{ }}`
@@ -355,14 +371,30 @@ describe('project watch', () => {
         }
       });
 
-      it('declares dismissed and applied tag sets', () => {
+      it('declares the decision tag sets, each carrying the reviewed tag the harvest filters', () => {
         expect(proposal.consts).toEqual(
           expect.objectContaining({
             dismissed_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-dismissed'],
             applied_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-applied'],
+            reviewed_only_tags: ['detection-watch:tuning-reviewed'],
           })
         );
-        expect(proposal.consts).not.toHaveProperty('reviewed_only_tags');
+
+        const tagConsts = proposal.consts as Record<string, string[]>;
+        for (const tags of [
+          tagConsts.dismissed_tags,
+          tagConsts.applied_tags,
+          tagConsts.reviewed_only_tags,
+        ]) {
+          expect(tags).toContain(reviewedTag);
+        }
+      });
+
+      // The diagnose prompt names a security_solution inline tool by its string id; a
+      // skill-side rename would silently degrade the agent back to re-deriving alerts.
+      it('pins the get_alerts_by_ids tool id the diagnose prompt depends on', () => {
+        const diagnose = proposalSteps.find(({ name }) => name === 'diagnose_rule')!;
+        expect(String(diagnose.with?.message)).toContain('investigate-rule.get_alerts_by_ids');
       });
 
       it('does not use classify_proposal or can_apply', () => {
