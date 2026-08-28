@@ -29,14 +29,12 @@ export const isDestinationStream = (detail: StreamListItem): detail is ClassicSt
  * model. Fields without a backend yet come from mock metadata.
  */
 export const streamToDestination = (detail: ClassicStreamDetail): Destination => {
-  const { description, tags, isInternal, isManaged } = getDestinationMockMetadata(
-    detail.stream.name
-  );
+  const { tags, isInternal, isManaged } = getDestinationMockMetadata(detail.stream.name);
 
   return {
     name: detail.stream.name,
     type: 'elasticsearch',
-    description,
+    description: detail.stream.description,
     tags,
     isInternal,
     isManaged,

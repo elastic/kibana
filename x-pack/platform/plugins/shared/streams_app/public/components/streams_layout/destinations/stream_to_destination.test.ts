@@ -120,7 +120,6 @@ describe('streamToDestination', () => {
     const first = streamToDestination(classicDetail);
     const second = streamToDestination(classicDetail);
 
-    expect(first.description).not.toHaveLength(0);
     expect(first.tags.length).toBeGreaterThanOrEqual(1);
     expect(first).toEqual(second);
   });

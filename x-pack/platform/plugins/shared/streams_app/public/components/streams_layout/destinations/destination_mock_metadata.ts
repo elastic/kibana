@@ -12,7 +12,6 @@
 const TAG_POOL = ['tag1', 'tag2', 'tag3'] as const;
 
 export interface DestinationMockMetadata {
-  description: string;
   isInternal: boolean;
   isManaged: boolean;
   tags: string[];
@@ -22,7 +21,6 @@ export const getDestinationMockMetadata = (destinationName: string): Destination
   const seed = [...destinationName].reduce((sum, char) => sum + char.charCodeAt(0), 0);
 
   return {
-    description: 'This is a description of the destination',
     isInternal: seed % 5 !== 0,
     isManaged: seed % 2 === 0,
     tags: TAG_POOL.slice(0, (seed % TAG_POOL.length) + 1),

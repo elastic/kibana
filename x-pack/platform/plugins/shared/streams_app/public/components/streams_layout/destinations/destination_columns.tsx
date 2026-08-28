@@ -380,9 +380,11 @@ function DestinationNameCell({
       >
         <EuiHighlight search={searchText}>{destination.name}</EuiHighlight>
       </EuiLink>
-      <EuiText size="xs" color="subdued">
-        {destination.description}
-      </EuiText>
+      {destination.description && (
+        <EuiText size="xs" color="subdued">
+          {destination.description}
+        </EuiText>
+      )}
       <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
         <EuiBadge color="hollow">
           {destination.isInternal ? INTERNAL_BADGE_LABEL : EXTERNAL_BADGE_LABEL}
