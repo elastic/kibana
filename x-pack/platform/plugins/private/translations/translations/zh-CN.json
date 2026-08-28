@@ -42758,7 +42758,6 @@
     "xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.textareaPlaceholderText": "在此处输入数据",
     "xpack.securitySolution.consoleCommandsDefinition.killProcess.sentinelOne.instructions": "输入要执行的进程名称",
     "xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported": "当前主机操作系统类型 ({osType}) 不支持 \"{type}\" 内存转储类型",
-    "xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel": "“pid”和“entityId”参数不支持“kernel”内存转储",
     "xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdRequiredForProcess": "“pid”或“entityId”参数对于“进程”内存转储是必需的",
     "xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.inputParamsArg": "所选脚本的输入参数",
     "xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArg": "要运行的脚本（从弹出列表中选择）",
