@@ -120,11 +120,11 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
-  const addDataHref = onboardingLocator?.getRedirectUrl({
-    category: visibility.showHostsOnboarding ? 'host' : undefined,
-  });
 
   const menu = useMemo<AppHeaderMenu>(() => {
+    const addDataHref = onboardingLocator?.getRedirectUrl({
+      category: visibility.showHostsOnboarding ? 'host' : undefined,
+    });
     const items: NonNullable<AppHeaderMenu['items']> = [];
     const alertItems: AppMenuPopoverItem[] = [];
     let order = 0;
@@ -248,7 +248,6 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
         : undefined,
     };
   }, [
-    addDataHref,
     canCreateAlerts,
     config.featureFlags.alertsAndRulesDropdownEnabled,
     config.featureFlags.customThresholdAlertsEnabled,
@@ -258,9 +257,11 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
     inspectorAdapters,
     isInspectorEnabled,
     isTopbarMenuVisible,
+    onboardingLocator,
     manageRulesLinkProps.href,
     settingsLinkProps.href,
     visibility.showAnomalyDetection,
+    visibility.showHostsOnboarding,
   ]);
 
   const flyouts = (
