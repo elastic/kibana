@@ -7,10 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
-import type {
-  BuiltinToolDefinition,
-  ToolAvailabilityConfig,
-} from '@kbn/agent-builder-server/tools';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { addCommentStepCommonDefinition } from '../../../common/workflows/steps/add_comment';
 import { addAlertsStepCommonDefinition } from '../../../common/workflows/steps/add_alerts';
@@ -97,7 +94,6 @@ const getAuthorableTypeIds = (registry: UnifiedAttachmentTypeRegistry): string[]
     .sort();
 
 export const manageAttachmentsTool = (
-  availability: ToolAvailabilityConfig,
   getCasesClientFn: GetCasesClientFn,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
   isCasesAttachmentsEnabled: boolean
@@ -137,7 +133,6 @@ export const manageAttachmentsTool = (
     },
     schema,
     tags: ['cases'],
-    availability,
     handler: async (args, toolContext) => {
       const { mode, case_id, attachments, ...rest } = args;
 

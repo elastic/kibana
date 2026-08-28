@@ -15,7 +15,7 @@ describe('manageCasesTool availability', () => {
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCoreWithSolution('es');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = manageCasesTool(availability, jest.fn(), false);
+    const tool = { ...manageCasesTool(jest.fn(), false), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
@@ -24,7 +24,7 @@ describe('manageCasesTool availability', () => {
   it('returns available for classic solution', async () => {
     const coreSetup = makeCoreWithSolution('classic');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = manageCasesTool(availability, jest.fn(), false);
+    const tool = { ...manageCasesTool(jest.fn(), false), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'available' });
@@ -34,7 +34,7 @@ describe('manageCasesTool availability', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = manageCasesTool(availability, jest.fn(), false);
+    const tool = { ...manageCasesTool(jest.fn(), false), availability };
     expect(tool.availability?.cacheMode).toBe('space');
   });
 });

@@ -50,15 +50,7 @@ describe('attachmentsTool (deprecated)', () => {
   });
 
   const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) => {
-    const coreSetup = coreMock.createSetup();
-    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    return attachmentsTool(
-      availability,
-      jest.fn().mockResolvedValue(casesClient),
-      registry,
-      enabled
-    );
+    return attachmentsTool(jest.fn().mockResolvedValue(casesClient), registry, enabled);
   };
 
   it('has a description that directs agents to the replacement tools', () => {
@@ -159,7 +151,7 @@ describe('attachmentsTool availability', () => {
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCoreWithSolution('es');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = attachmentsTool(availability, jest.fn(), emptyRegistry, true);
+    const tool = { ...attachmentsTool(jest.fn(), emptyRegistry, true), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
@@ -168,7 +160,7 @@ describe('attachmentsTool availability', () => {
   it('returns available for oblt solution', async () => {
     const coreSetup = makeCoreWithSolution('oblt');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = attachmentsTool(availability, jest.fn(), emptyRegistry, true);
+    const tool = { ...attachmentsTool(jest.fn(), emptyRegistry, true), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'available' });
@@ -178,7 +170,7 @@ describe('attachmentsTool availability', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = attachmentsTool(availability, jest.fn(), emptyRegistry, true);
+    const tool = { ...attachmentsTool(jest.fn(), emptyRegistry, true), availability };
     expect(tool.availability?.cacheMode).toBe('space');
   });
 });

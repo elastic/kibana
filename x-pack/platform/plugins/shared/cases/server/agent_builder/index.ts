@@ -51,21 +51,24 @@ export function registerCasesAgentBuilderTools(
   logger: Logger
 ): void {
   const availability = createCasesToolAvailability(coreSetup, logger);
-  agentBuilder.tools.register(searchCasesTool(availability, coreSetup, getCasesClient));
-  agentBuilder.tools.register(manageCasesTool(availability, getCasesClient, templatesEnabled));
-  agentBuilder.tools.register(getAttachmentsTool(availability, getCasesClient));
-  agentBuilder.tools.register(
-    manageAttachmentsTool(
-      availability,
-      getCasesClient,
-      unifiedAttachmentTypeRegistry,
-      attachmentsEnabled
-    )
-  );
-  agentBuilder.tools.register(
-    attachmentsTool(availability, getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
-  );
-  agentBuilder.tools.register(observablesTool(availability, getCasesClient));
+  agentBuilder.tools.register({
+    ...searchCasesTool(coreSetup, getCasesClient),
+    availability,
+  });
+  agentBuilder.tools.register({
+    ...manageCasesTool(getCasesClient, templatesEnabled),
+    availability,
+  });
+  agentBuilder.tools.register({ ...getAttachmentsTool(getCasesClient), availability });
+  agentBuilder.tools.register({
+    ...manageAttachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled),
+    availability,
+  });
+  agentBuilder.tools.register({
+    ...attachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled),
+    availability,
+  });
+  agentBuilder.tools.register({ ...observablesTool(getCasesClient), availability });
   agentBuilder.skills.register({ ...buildCasesSkill(templatesEnabled), availability });
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {

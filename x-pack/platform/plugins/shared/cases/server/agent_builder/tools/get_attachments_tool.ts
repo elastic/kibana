@@ -7,10 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
-import type {
-  BuiltinToolDefinition,
-  ToolAvailabilityConfig,
-} from '@kbn/agent-builder-server/tools';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { getAllAttachmentsStepDefinition } from '../../workflows/steps/get_all_attachments';
 import type { CasesClient } from '../../client';
@@ -27,7 +24,6 @@ const getAttachmentsSchema = z.object({
 });
 
 export const getAttachmentsTool = (
-  availability: ToolAvailabilityConfig,
   getCasesClientFn: GetCasesClientFn
 ): BuiltinToolDefinition<typeof getAttachmentsSchema> => {
   const getAllAttachmentsStepDef = getAllAttachmentsStepDefinition(getCasesClientFn);
@@ -45,7 +41,6 @@ export const getAttachmentsTool = (
     },
     schema: getAttachmentsSchema,
     tags: ['cases'],
-    availability,
     handler: async (args, toolContext) => {
       const { case_id } = args;
       return invokeStepHandler(getAllAttachmentsStepDef, { case_id }, toolContext);

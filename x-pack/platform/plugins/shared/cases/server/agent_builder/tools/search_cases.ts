@@ -7,11 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import type {
-  BuiltinToolDefinition,
-  ToolAvailabilityConfig,
-  ToolHandlerContext,
-} from '@kbn/agent-builder-server/tools';
+import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup } from '@kbn/core/server';
@@ -154,7 +150,6 @@ function enhanceCases(
 }
 
 export const searchCasesTool = (
-  availability: ToolAvailabilityConfig,
   coreSetup: CoreSetup<CasesServerStartDependencies>,
   getCasesClientFn: (request: KibanaRequest) => Promise<CasesClient>
 ): BuiltinToolDefinition<typeof casesSchema> => {
@@ -397,6 +392,5 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
       }
     },
     tags: ['cases'],
-    availability,
   };
 };

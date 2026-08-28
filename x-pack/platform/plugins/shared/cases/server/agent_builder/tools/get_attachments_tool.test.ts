@@ -28,10 +28,7 @@ const buildToolContext = (): ToolHandlerContext =>
   } as unknown as ToolHandlerContext);
 
 const buildTool = (getCasesClientFn = jest.fn()) => {
-  const coreSetup = coreMock.createSetup();
-  coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-  const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-  return getAttachmentsTool(availability, getCasesClientFn);
+  return getAttachmentsTool(getCasesClientFn);
 };
 
 describe('getAttachmentsTool', () => {
@@ -76,7 +73,7 @@ describe('getAttachmentsTool availability', () => {
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCoreWithSolution('es');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = getAttachmentsTool(availability, jest.fn());
+    const tool = { ...getAttachmentsTool(jest.fn()), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
@@ -85,13 +82,17 @@ describe('getAttachmentsTool availability', () => {
   it('returns available for classic solution', async () => {
     const coreSetup = makeCoreWithSolution('classic');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = getAttachmentsTool(availability, jest.fn());
+    const tool = { ...getAttachmentsTool(jest.fn()), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'available' });
   });
 
   it('cacheMode is space', () => {
-    expect(buildTool().availability?.cacheMode).toBe('space');
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = { ...getAttachmentsTool(jest.fn()), availability };
+    expect(tool.availability?.cacheMode).toBe('space');
   });
 });

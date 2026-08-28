@@ -7,10 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
-import type {
-  BuiltinToolDefinition,
-  ToolAvailabilityConfig,
-} from '@kbn/agent-builder-server/tools';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createCaseStepCommonDefinition } from '../../../common/workflows/steps/create_case';
 import { updateCaseStepCommonDefinition } from '../../../common/workflows/steps/update_case';
@@ -108,7 +105,6 @@ const buildManageCasesSchema = (isTemplatesEnabled: boolean) => {
 type ManageCasesSchema = ReturnType<typeof buildManageCasesSchema>;
 
 export const manageCasesTool = (
-  availability: ToolAvailabilityConfig,
   getCasesClientFn: GetCasesClientFn,
   isTemplatesEnabled: boolean
 ): BuiltinToolDefinition<ManageCasesSchema> => {
@@ -148,7 +144,6 @@ export const manageCasesTool = (
     },
     schema: manageCasesSchema,
     tags: ['cases'],
-    availability,
     handler: async (args, toolContext) => {
       const { mode, connector_id, tags_to_add, case_id, assignees, ...rest } = args;
 

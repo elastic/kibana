@@ -15,7 +15,7 @@ describe('observablesTool availability', () => {
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCoreWithSolution('es');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = observablesTool(availability, jest.fn());
+    const tool = { ...observablesTool(jest.fn()), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
@@ -24,7 +24,7 @@ describe('observablesTool availability', () => {
   it('returns available for security solution', async () => {
     const coreSetup = makeCoreWithSolution('security');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = observablesTool(availability, jest.fn());
+    const tool = { ...observablesTool(jest.fn()), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'available' });
@@ -34,7 +34,7 @@ describe('observablesTool availability', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = observablesTool(availability, jest.fn());
+    const tool = { ...observablesTool(jest.fn()), availability };
     expect(tool.availability?.cacheMode).toBe('space');
   });
 });
