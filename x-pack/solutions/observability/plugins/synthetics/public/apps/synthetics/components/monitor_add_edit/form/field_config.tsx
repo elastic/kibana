@@ -1484,7 +1484,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         const entries = raw
           .split(/(?=-----BEGIN CERTIFICATE-----)/)
           .map((entry) => entry.trim())
-          .filter(Boolean);
+          .filter((entry) => entry.startsWith('-----BEGIN CERTIFICATE-----'));
         setValue(ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST, entries);
       },
       placeholder: '-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----',
