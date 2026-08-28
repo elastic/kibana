@@ -84,7 +84,7 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
         {
           id: 'createFromFile',
           label: createFromFileLabel,
-          iconType: 'importAction',
+          iconType: 'download',
           overflow: true,
           run: openUploadFlyout,
           testId: 'workflowLibraryCreateFromFileButton',

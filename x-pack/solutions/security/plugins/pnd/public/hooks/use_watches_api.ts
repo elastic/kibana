@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type { IToasts } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { API_VERSIONS, PND_WATCHES_URL, buildWatchUrl } from '@kbn/pnd-common';
 import type {
   GetWatchResponse,
@@ -22,9 +25,44 @@ export const retryOnTransientError = (failureCount: number, error: unknown): boo
     return false;
   }
   if (isHttpFetchError(error)) {
-    return !error.response?.status || error.response.status >= 500;
+    const status = error.response?.status;
+    if (status === 501) {
+      return false;
+    }
+    return !status || status >= 500;
   }
   return true;
+};
+
+const WATCH_SETTINGS_CONFLICT_MESSAGE = i18n.translate(
+  'xpack.pnd.watchSettingsConflictErrorMessage',
+  { defaultMessage: 'Watch settings changed; reload and try again' }
+);
+
+const WATCH_SETTINGS_FORBIDDEN_MESSAGE = i18n.translate(
+  'xpack.pnd.watchSettingsForbiddenErrorMessage',
+  { defaultMessage: 'You do not have permission to update this watch' }
+);
+
+const WATCH_UPDATE_ERROR_TITLE = i18n.translate('xpack.pnd.watchUpdateErrorMessage', {
+  defaultMessage: 'Unable to update the watch',
+});
+
+/**
+ * 409/403 are expected outcomes — warning/danger without a stack. Everything else is addError.
+ */
+export const notifyWatchUpdateError = (toasts: IToasts, error: unknown): void => {
+  const status = isHttpFetchError(error) ? error.response?.status : undefined;
+  if (status === 409) {
+    toasts.addWarning(WATCH_SETTINGS_CONFLICT_MESSAGE);
+    return;
+  }
+  if (status === 403) {
+    toasts.addDanger(WATCH_SETTINGS_FORBIDDEN_MESSAGE);
+    return;
+  }
+  const cause = error instanceof Error ? error : new Error(String(error));
+  toasts.addError(cause, { title: WATCH_UPDATE_ERROR_TITLE });
 };
 
 export const useWatches = () => {
@@ -71,13 +109,29 @@ export const useUpdateWatch = (watchId: string) => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.watches.detail(watchId);
+  const mutationQueue = useRef<Promise<void>>(Promise.resolve());
 
   return useMutation({
-    mutationFn: async (patch: UpdateWatchRequestBody): Promise<UpdateWatchResponse> =>
-      services.http!.patch<UpdateWatchResponse>(buildWatchUrl(watchId), {
-        version: API_VERSIONS.internal.v1,
-        body: JSON.stringify(patch),
-      }),
+    mutationFn: (patch: UpdateWatchRequestBody): Promise<UpdateWatchResponse> => {
+      const execute = async (): Promise<UpdateWatchResponse> => {
+        const current = queryClient.getQueryData<GetWatchResponse>(queryKey);
+        const body = touchesSettings(patch)
+          ? { ...patch, settingsRevision: current?.settingsRevision ?? null }
+          : patch;
+        const response = await services.http!.patch<UpdateWatchResponse>(buildWatchUrl(watchId), {
+          version: API_VERSIONS.internal.v1,
+          body: JSON.stringify(body),
+        });
+        queryClient.setQueryData(queryKey, response);
+        return response;
+      };
+      const operation = mutationQueue.current.then(execute, execute);
+      mutationQueue.current = operation.then(
+        () => undefined,
+        () => undefined
+      );
+      return operation;
+    },
     onMutate: async (patch) => {
       await queryClient.cancelQueries({ queryKey });
 
@@ -87,10 +141,11 @@ export const useUpdateWatch = (watchId: string) => {
       }
       return { previous };
     },
-    onError: (_error, _patch, context) => {
+    onError: (error, _patch, context) => {
       if (context?.previous) {
         queryClient.setQueryData(queryKey, context.previous);
       }
+      notifyWatchUpdateError(services.notifications!.toasts, error);
     },
     onSuccess: (data) => {
       queryClient.setQueryData(queryKey, data);
@@ -120,6 +175,7 @@ const applyWatchPatch = (
   }
 
   return {
+    ...current,
     watch,
     settings: {
       ...settings,
@@ -179,34 +235,20 @@ const applyWatchPatch = (
   };
 };
 
+const touchesSettings = ({
+  autonomyLevel,
+  triggers,
+  scopeRouting,
+  approvalGate,
+  worker,
+  skill,
+}: UpdateWatchRequestBody): boolean =>
+  autonomyLevel != null ||
+  triggers != null ||
+  scopeRouting != null ||
+  approvalGate != null ||
+  worker != null ||
+  skill != null;
+
 const applySelect = <T extends { selectedId: string }>(setting: T, selectedId?: string): T =>
   selectedId == null ? setting : { ...setting, selectedId };
-
-/** POC stub — custom watch creation lands in a follow-up PR. */
-export const useCreateWatch = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (): Promise<GetWatchResponse> => {
-      throw new Error('Custom watch creation is not available in this foundation PR');
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.list() });
-    },
-  });
-};
-
-/** POC stub — custom watch deletion lands in a follow-up PR. */
-export const useDeleteWatch = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (_watchId: string): Promise<void> => {
-      throw new Error('Custom watch deletion is not available in this foundation PR');
-    },
-    onSuccess: async (_data, watchId) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.list() });
-      await queryClient.removeQueries({ queryKey: queryKeys.watches.detail(watchId) });
-    },
-  });
-};
