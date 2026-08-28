@@ -14,6 +14,7 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { paths } from '../../constants';
@@ -215,13 +216,5 @@ export const ActionPolicyCanvasContent = ({
   );
 };
 
-/**
- * Extracts a rule ID from a KQL matcher string if it contains a `rule.id` clause.
- * Supports both quoted (`rule.id: "abc"`) and unquoted (`rule.id: abc`) values.
- * Returns `undefined` when the matcher is absent or doesn't reference `rule.id`.
- */
-const extractRuleIdFromMatcher = (matcher: string | null | undefined): string | undefined => {
-  if (!matcher) return undefined;
-  const match = matcher.match(/rule\.id\s*:\s*"?([^"\s]+)"?/);
-  return match?.[1];
-};
+const extractRuleIdFromMatcher = (matcher: PolicyMatcher | null | undefined): string | undefined =>
+  matcher?.rules?.[0];

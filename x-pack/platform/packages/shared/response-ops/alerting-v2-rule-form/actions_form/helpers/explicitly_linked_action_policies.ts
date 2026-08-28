@@ -5,129 +5,42 @@
  * 2.0.
  */
 
-import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { fromKueryExpression, type KueryNode } from '@kbn/es-query';
+import type { ActionPolicyResponse, PolicyMatcher } from '@kbn/alerting-v2-schemas';
 
-const RULE_ID_FIELD = 'rule.id';
-
-const getIsFieldAndValue = (node: KueryNode): { field: string; value: string } | null => {
-  if (node.type !== 'function' || node.function !== 'is') {
-    return null;
-  }
-
-  const args = node.arguments as KueryNode[];
-  if (args.length < 2) {
-    return null;
-  }
-
-  const fieldArg = args[0];
-  const valueArg = args[1];
-  if (fieldArg?.type !== 'literal' || typeof fieldArg.value !== 'string') {
-    return null;
-  }
-  if (valueArg?.type !== 'literal' || typeof valueArg.value !== 'string') {
-    return null;
-  }
-
-  return {
-    field: fieldArg.value,
-    value: valueArg.value,
-  };
-};
-
-const isRuleIdEqualsNode = (node: KueryNode, ruleId: string): boolean => {
-  const parsed = getIsFieldAndValue(node);
-  return parsed?.field === RULE_ID_FIELD && parsed.value === ruleId;
-};
-
-const containsPositiveRuleIdMatch = (
-  node: KueryNode,
-  ruleId: string,
-  negated: boolean
-): boolean => {
-  if (node.type !== 'function') {
-    return false;
-  }
-
-  switch (node.function) {
-    case 'is':
-      return !negated && isRuleIdEqualsNode(node, ruleId);
-    case 'and':
-    case 'or':
-      return (node.arguments as KueryNode[]).some((arg) =>
-        containsPositiveRuleIdMatch(arg, ruleId, negated)
-      );
-    case 'not':
-      return containsPositiveRuleIdMatch(node.arguments[0], ruleId, !negated);
-    case 'nested':
-      return containsPositiveRuleIdMatch(node.arguments[1], ruleId, negated);
-    default:
-      return false;
-  }
-};
-
-const unwrapSingleAndChain = (node: KueryNode): KueryNode => {
-  if (node.type !== 'function' || node.function !== 'and') {
-    return node;
-  }
-
-  const args = node.arguments as KueryNode[];
-  if (args.length !== 1) {
-    return node;
-  }
-
-  return unwrapSingleAndChain(args[0]);
-};
-
-const parseMatcherAst = (matcher: string): KueryNode | null => {
-  const trimmed = matcher.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    return fromKueryExpression(trimmed);
-  } catch {
-    return null;
-  }
+const hasOnlyRuleId = (matcher: PolicyMatcher, ruleId: string): boolean => {
+  const { tags, rules, statuses, expression } = matcher;
+  const hasOtherCriteria =
+    (tags != null && tags.length > 0) ||
+    (statuses != null && statuses.length > 0) ||
+    (expression != null && expression.trim() !== '');
+  const hasExactlyOneRule = rules != null && rules.length === 1 && rules[0] === ruleId;
+  return hasExactlyOneRule && !hasOtherCriteria;
 };
 
 /**
- * Returns true when the matcher contains a positive `rule.id` clause equal to `ruleId`.
+ * Returns true when the matcher contains a positive `rule.id` match for `ruleId`.
  */
 export const isExplicitlyLinkedToRule = (
-  matcher: string | null | undefined,
+  matcher: PolicyMatcher | null | undefined,
   ruleId: string
 ): boolean => {
-  if (!matcher?.trim() || !ruleId) {
+  if (!matcher || !ruleId) {
     return false;
   }
-
-  const ast = parseMatcherAst(matcher);
-  if (!ast) {
-    return false;
-  }
-
-  return containsPositiveRuleIdMatch(ast, ruleId, false);
+  return (matcher.rules ?? []).includes(ruleId);
 };
 
 /**
  * True when the matcher is explicitly linked to the rule and contains no filters beyond `rule.id`.
  */
 export const isRuleScopedCatchAllMatcher = (
-  matcher: string | null | undefined,
+  matcher: PolicyMatcher | null | undefined,
   ruleId: string
 ): boolean => {
-  if (!isExplicitlyLinkedToRule(matcher, ruleId) || !matcher?.trim()) {
+  if (!matcher || !ruleId) {
     return false;
   }
-
-  const ast = parseMatcherAst(matcher);
-  if (!ast) {
-    return false;
-  }
-
-  return isRuleIdEqualsNode(unwrapSingleAndChain(ast), ruleId);
+  return hasOnlyRuleId(matcher, ruleId);
 };
 
 export interface LinkedActionPolicySummary {

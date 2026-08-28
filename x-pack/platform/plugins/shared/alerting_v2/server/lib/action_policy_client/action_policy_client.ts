@@ -13,6 +13,7 @@ import type {
   CreateActionPolicyDataInput,
   MatchedActionPolicy,
   MatcherContext,
+  PolicyMatcher,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_EPISODE_STATUS,
@@ -76,6 +77,18 @@ import {
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
+
+const policyMatcherToKql = (matcher: PolicyMatcher | null | undefined): string | null => {
+  if (!matcher) return null;
+  const { tags, rules, statuses, expression } = matcher;
+  const parts: string[] = [];
+  if (tags && tags.length > 0) parts.push(tags.map((t) => `kibana.alert.rule.tags: "${t}"`).join(' OR '));
+  if (rules && rules.length > 0) parts.push(rules.map((r) => `rule.id: "${r}"`).join(' OR '));
+  if (statuses && statuses.length > 0) parts.push(statuses.map((s) => `kibana.alert.workflow_status: "${s}"`).join(' OR '));
+  if (expression && expression.trim()) parts.push(`(${expression.trim()})`);
+  if (parts.length === 0) return null;
+  return parts.map((p) => `(${p})`).join(' AND ');
+};
 
 /**
  * Concurrency cap for {@link ActionPolicyClient.bulkUpdateActionPoliciesApiKey}.
@@ -424,14 +437,15 @@ export class ActionPolicyClient {
 
     const allPolicies = await this.findActionPolicies({ perPage: 100 });
     for (const actionPolicy of allPolicies.items) {
-      if (!actionPolicy.matcher || actionPolicy.matcher.trim() === '') {
+      const matcherKql = policyMatcherToKql(actionPolicy.matcher);
+      if (matcherKql === null) {
         items.push({ actionPolicy, category: 'global' });
         continue;
       }
 
       let isMatch = false;
       try {
-        isMatch = evaluateKql(actionPolicy.matcher, context);
+        isMatch = evaluateKql(matcherKql, context);
       } catch {
         this.logger.warn({
           message: 'Policy matcher failed to evaluate; treating as no-match',

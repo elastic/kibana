@@ -38,7 +38,7 @@ const optionalLabel = (
 export const ActionPolicyForm = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
   const matcher = useWatch({ control, name: 'matcher' });
-  const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
+  const { data: dataFieldNames } = useFetchRuleEventFields(matcher?.expression ?? undefined);
 
   return (
     <>
@@ -173,8 +173,10 @@ export const ActionPolicyForm = () => {
                   fullWidth
                 >
                   <MatcherInput
-                    value={field.value}
-                    onChange={field.onChange}
+                    value={field.value?.expression ?? ''}
+                    onChange={(expr) =>
+                      field.onChange({ ...field.value, expression: expr || null })
+                    }
                     fullWidth
                     data-test-subj="matcherInput"
                     dataFieldNames={dataFieldNames}

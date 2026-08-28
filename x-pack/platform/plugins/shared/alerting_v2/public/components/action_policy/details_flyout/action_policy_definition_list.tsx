@@ -15,7 +15,7 @@ import {
   EuiText,
   type EuiDescriptionListProps,
 } from '@elastic/eui';
-import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse, PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
@@ -24,6 +24,15 @@ import { PopoverItems } from '../../popover_items';
 import { DestinationRow } from './destination_row';
 
 const EMPTY_VALUE = '-';
+
+const formatMatcherDisplay = (matcher: PolicyMatcher): string => {
+  if (matcher.expression?.trim()) return matcher.expression.trim();
+  const parts: string[] = [];
+  if (matcher.tags?.length) parts.push(`tags: ${matcher.tags.join(', ')}`);
+  if (matcher.rules?.length) parts.push(`rules: ${matcher.rules.join(', ')}`);
+  if (matcher.statuses?.length) parts.push(`statuses: ${matcher.statuses.join(', ')}`);
+  return parts.join(' | ') || '{}';
+};
 
 export interface ActionPolicyDefinitionListProps {
   policy: Partial<ActionPolicyResponse>;
@@ -89,7 +98,7 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
         defaultMessage: 'Matcher',
       }),
       description: matcher ? (
-        <EuiCode>{matcher}</EuiCode>
+        <EuiCode>{formatMatcherDisplay(matcher)}</EuiCode>
       ) : (
         <EuiText size="s" color="subdued">
           <FormattedMessage

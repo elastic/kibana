@@ -14,6 +14,7 @@ import {
   ACTION_POLICY_ATTACHMENT_TYPE,
   actionPolicyAttachmentDataSchema,
   type ActionPolicyAttachmentData,
+  type PolicyMatcher,
 } from '@kbn/alerting-v2-schemas';
 import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
@@ -24,6 +25,15 @@ interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
 }
+
+const formatMatcher = (m: PolicyMatcher): string => {
+  if (m.expression?.trim()) return `expression: "${m.expression.trim()}"`;
+  const parts: string[] = [];
+  if (m.tags?.length) parts.push(`tags: ${m.tags.join(', ')}`);
+  if (m.rules?.length) parts.push(`rules: ${m.rules.join(', ')}`);
+  if (m.statuses?.length) parts.push(`statuses: ${m.statuses.join(', ')}`);
+  return parts.join(' | ') || '{}';
+};
 
 const formatActionPolicyDescription = (
   attachmentId: string,
@@ -36,7 +46,7 @@ const formatActionPolicyDescription = (
     workflowIds.length > 0
       ? `${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`
       : 'none';
-  const matcherSnippet = data.matcher ? `"${data.matcher}"` : 'match all (catch-all)';
+  const matcherSnippet = data.matcher ? formatMatcher(data.matcher) : 'match all (catch-all)';
   const grouping = data.grouping_mode ?? 'per_episode';
   const throttle = data.throttle?.strategy ?? 'none';
 
