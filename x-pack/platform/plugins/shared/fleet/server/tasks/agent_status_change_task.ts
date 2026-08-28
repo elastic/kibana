@@ -15,7 +15,10 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors, type estypes } from '@elastic/elasticsearch';
 
-import { AGENT_STATUS_CHANGE_DATA_STREAM } from '../../common/constants/agent';
+import {
+  AGENT_STATUS_CHANGE_DATA_STREAM,
+  AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
+} from '../../common/constants/agent';
 import { agentPolicyService, appContextService } from '../services';
 import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
 import type { Agent } from '../types';
@@ -299,18 +302,17 @@ export class AgentStatusChangeTask {
     policyNamespaceMap: Map<string, string> | undefined
   ) => {
     const bulkBody = agentsToUpdate.flatMap((agent) => {
-      const namespace = (agent.policy_id && policyNamespaceMap?.get(agent.policy_id)) || 'default';
+      const policyNamespace =
+        (agent.policy_id && policyNamespaceMap?.get(agent.policy_id)) || 'default';
       const body = {
         '@timestamp': new Date().toISOString(),
-        data_stream: {
-          ...AGENT_STATUS_CHANGE_DATA_STREAM,
-          namespace,
-        },
+        data_stream: AGENT_STATUS_CHANGE_DATA_STREAM,
         agent: {
           id: agent.id,
         },
         status: agent.status,
         policy_id: agent.policy_id,
+        policy_namespace: policyNamespace,
         space_id: agent.namespaces,
         hostname: agent.local_metadata?.host?.hostname,
         agentless: (agent.policy_id && agentlessPolicies?.includes(agent.policy_id)) ?? false,
@@ -320,7 +322,6 @@ export class AgentStatusChangeTask {
         {
           create: {
             _id: uuidv4(),
-            _index: `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-${namespace}`,
           },
         },
         body,
@@ -328,6 +329,7 @@ export class AgentStatusChangeTask {
     });
 
     await esClient.bulk({
+      index: AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
       operations: bulkBody,
     });
   };

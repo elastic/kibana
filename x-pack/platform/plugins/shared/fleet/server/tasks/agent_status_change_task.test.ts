@@ -222,11 +222,11 @@ describe('AgentStatusChangeTask', () => {
       );
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
+          index: 'logs-elastic_agent.status_change-default',
           operations: expect.arrayContaining([
             expect.objectContaining({
               create: {
                 _id: expect.any(String),
-                _index: 'logs-elastic_agent.status_change-default',
               },
             }),
             expect.objectContaining({
@@ -242,13 +242,13 @@ describe('AgentStatusChangeTask', () => {
               },
               hostname: 'host1',
               policy_id: 'agentless-policy-1',
+              policy_namespace: 'default',
               space_id: ['default'],
               status: 'unhealthy',
             }),
             expect.objectContaining({
               create: {
                 _id: expect.any(String),
-                _index: 'logs-elastic_agent.status_change-default',
               },
             }),
             expect.objectContaining({
@@ -264,6 +264,7 @@ describe('AgentStatusChangeTask', () => {
               },
               hostname: 'host2',
               policy_id: 'agent-policy-2',
+              policy_namespace: 'default',
               space_id: ['space1'],
               status: 'online',
             }),
@@ -272,7 +273,7 @@ describe('AgentStatusChangeTask', () => {
       );
     });
 
-    it('should explicitly assert data_stream.namespace in doc body matches target index name for bulk operation', async () => {
+    it('should set policy_namespace field to the resolved policy namespace while always writing to the default data stream', async () => {
       const agents = [
         {
           id: 'agent-prod',
@@ -290,18 +291,15 @@ describe('AgentStatusChangeTask', () => {
       await runTask();
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('logs-elastic_agent.status_change-default');
       const operations = bulkCall.operations as any[];
-      const header = operations[0];
       const doc = operations[1];
 
-      expect(header.create._index).toBe('logs-elastic_agent.status_change-production');
-      expect(doc.data_stream.namespace).toBe('production');
-      expect(header.create._index).toBe(
-        `logs-elastic_agent.status_change-${doc.data_stream.namespace}`
-      );
+      expect(doc.policy_namespace).toBe('production');
+      expect(doc.data_stream.namespace).toBe('default');
     });
 
-    it('should fallback namespace to default for agent with no policy_id', async () => {
+    it('should fallback policy_namespace to default for agent with no policy_id', async () => {
       const agents = [
         {
           id: 'agent-no-policy',
@@ -318,15 +316,15 @@ describe('AgentStatusChangeTask', () => {
       await runTask();
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('logs-elastic_agent.status_change-default');
       const operations = bulkCall.operations as any[];
-      const header = operations[0];
       const doc = operations[1];
 
-      expect(header.create._index).toBe('logs-elastic_agent.status_change-default');
+      expect(doc.policy_namespace).toBe('default');
       expect(doc.data_stream.namespace).toBe('default');
     });
 
-    it('should fallback namespace to default when policy_id cannot be resolved', async () => {
+    it('should fallback policy_namespace to default when policy_id cannot be resolved', async () => {
       const agents = [
         {
           id: 'agent-deleted-policy',
@@ -344,15 +342,15 @@ describe('AgentStatusChangeTask', () => {
       await runTask();
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('logs-elastic_agent.status_change-default');
       const operations = bulkCall.operations as any[];
-      const header = operations[0];
       const doc = operations[1];
 
-      expect(header.create._index).toBe('logs-elastic_agent.status_change-default');
+      expect(doc.policy_namespace).toBe('default');
       expect(doc.data_stream.namespace).toBe('default');
     });
 
-    it('should send multiple agents on different-namespace policies in the same batch to their respective namespace-specific indices', async () => {
+    it('should send multiple agents on different-namespace policies in the same batch to the default status_change data stream while recording their respective policy_namespace', async () => {
       const agents = [
         {
           id: 'agent-prod',
@@ -377,13 +375,14 @@ describe('AgentStatusChangeTask', () => {
       await runTask();
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('logs-elastic_agent.status_change-default');
       const operations = bulkCall.operations as any[];
 
-      expect(operations[0].create._index).toBe('logs-elastic_agent.status_change-production');
-      expect(operations[1].data_stream.namespace).toBe('production');
+      expect(operations[1].policy_namespace).toBe('production');
+      expect(operations[1].data_stream.namespace).toBe('default');
 
-      expect(operations[2].create._index).toBe('logs-elastic_agent.status_change-staging');
-      expect(operations[3].data_stream.namespace).toBe('staging');
+      expect(operations[3].policy_namespace).toBe('staging');
+      expect(operations[3].data_stream.namespace).toBe('default');
     });
 
     it('should do nothing when no agents changed status', async () => {
