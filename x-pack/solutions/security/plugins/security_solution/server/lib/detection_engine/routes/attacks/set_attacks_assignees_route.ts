@@ -28,7 +28,6 @@ import {
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
 import { searchAlerts } from '../common/operations/search_alerts';
 import {
-  verifyAlertIdsInIndex,
   fetchAllAlertIdIndexWithSource,
   computeActualDelta,
   wouldChange,
@@ -139,7 +138,9 @@ export const setAttacksAssigneesRoute = (
                   });
                   // Emit only IDs that exist AND would actually change; deduplicate across
                   // families (an _id can appear in both scheduled and adhoc indices).
-                  // Use full valid arrays so over-cap assignees that would change a doc still fire the trigger.
+                  // Use the raw request arrays for the predicate: the mutation applies the
+                  // original assignees (including over-length/over-cap values), so the
+                  // trigger should fire whenever the mutation would actually change a doc.
                   verifiedAttackIds = Array.from(
                     new Set(
                       attackDocs.hits.hits
@@ -147,8 +148,8 @@ export const setAttacksAssigneesRoute = (
                           wouldChange(
                             (hit._source ?? {}) as Record<string, unknown>,
                             ALERT_WORKFLOW_ASSIGNEE_IDS,
-                            allValidAssigneesToAdd,
-                            allValidAssigneesToRemove
+                            assignees.add,
+                            assignees.remove
                           )
                         )
                         .map((hit) => hit._id)
@@ -215,7 +216,10 @@ export const setAttacksAssigneesRoute = (
                 attackDocs.hits.hits.map((hit) => hit._id).filter((id): id is string => id != null)
               )
             );
-            // Trigger emission uses only IDs that would actually change per the valid arrays.
+            // Trigger emission uses only IDs that would actually change.
+            // Use the raw request arrays: the mutation applies the original assignees
+            // (including over-length/over-cap values), so the trigger should fire
+            // whenever the mutation would actually change a document.
             const verifiedAttackIds = Array.from(
               new Set(
                 attackDocs.hits.hits
@@ -223,8 +227,8 @@ export const setAttacksAssigneesRoute = (
                     wouldChange(
                       (hit._source ?? {}) as Record<string, unknown>,
                       ALERT_WORKFLOW_ASSIGNEE_IDS,
-                      allValidAssigneesToAdd,
-                      allValidAssigneesToRemove
+                      assignees.add,
+                      assignees.remove
                     )
                   )
                   .map((hit) => hit._id)
@@ -288,19 +292,11 @@ export const setAttacksAssigneesRoute = (
                   ALERT_WORKFLOW_ASSIGNEE_IDS
                 );
               } catch (err) {
-                // Fall back to verifyAlertIdsInIndex when source fetch fails.
-                try {
-                  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-                  verifiedRelatedAlertIds = await verifyAlertIdsInIndex(
-                    esClient,
-                    index,
-                    relatedAlertIds
-                  );
-                } catch (innerErr) {
-                  logger?.warn(
-                    `Failed to verify related alert IDs for workflow trigger (assignees): ${innerErr}`
-                  );
-                }
+                // Source-fetch failed; suppress the fact event for related alerts rather than
+                // emitting request intent as observed fact (delta is unknown).
+                logger?.warn(
+                  `Failed to fetch related alert sources for workflow trigger (assignees): ${err}`
+                );
               }
             }
 

@@ -675,5 +675,116 @@ describe('set attacks assignees', () => {
         expect.objectContaining({ assigneesAdded: ['new-uid'], assigneesRemoved: [] })
       );
     });
+
+    test('non-cascade: emits when the only changed assignee exceeds MAX_ASSIGNEE_UID_LENGTH', async () => {
+      // Encoding WHY: the wouldChange predicate must use the raw request assignees, not the
+      // allValid* arrays that strip over-length UIDs. updateAlertsAssignees applies the original
+      // request, so the trigger should fire whenever the mutation would change a document.
+      const overLengthUid = 'x'.repeat(MAX_ASSIGNEE_UID_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: { [ALERT_WORKFLOW_ASSIGNEE_IDS]: [] },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({ ids: ['attack1'], assignees: { add: [overLengthUid], remove: [] } }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack1'] })
+      );
+    });
+
+    test('cascade: emits for attack when the only changed assignee exceeds MAX_ASSIGNEE_UID_LENGTH', async () => {
+      // Encoding WHY: same as non-cascade — the trigger must use raw request arrays so
+      // over-length UIDs that would change a document still fire the event.
+      const overLengthUid = 'x'.repeat(MAX_ASSIGNEE_UID_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: {
+                [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: [],
+                [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
+              },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          assignees: { add: [overLengthUid], remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack1'] })
+      );
+    });
+
+    test('cascade: does not emit alertAssigneesChanged when related-alert source fetch fails', async () => {
+      // Encoding WHY: when fetchAllAlertIdIndexWithSource throws for related alerts, the delta
+      // is unknown. The previous fallback emitted verifiedRelatedAlertIds with the request
+      // arrays as assigneesAdded/assigneesRemoved — publishing intent as fact. The fix
+      // suppresses the related-alert event entirely on source-fetch failure.
+      context.core.elasticsearch.client.asCurrentUser.search
+        // Call 1: attack doc fetch (succeeds, returns attack1 with a related alert)
+        .mockResponseOnce({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+            hits: [
+              {
+                _id: 'attack1',
+                _index: SCHEDULED_INDEX,
+                _source: {
+                  [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: ['alertA'],
+                  [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
+                },
+              },
+            ],
+          },
+        } as estypes.SearchResponse<unknown>)
+        // Call 2: related alert source fetch (fails)
+        .mockRejectedValueOnce(new Error('ES unavailable'));
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          assignees: { add: ['new-uid'], remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalled();
+      expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
+    });
   });
 });

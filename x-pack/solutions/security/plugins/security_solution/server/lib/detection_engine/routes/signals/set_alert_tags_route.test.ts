@@ -242,5 +242,22 @@ describe('setAlertTagsRoute', () => {
         })
       );
     });
+
+    test('does not emit when the prefetch fails', async () => {
+      // Encoding WHY: if fetchAllAlertIdIndexWithSource throws, the actual delta is unknown.
+      // Emitting the capped request arrays as tagsAdded/tagsRemoved would publish intent
+      // as observed fact, violating the fact-style payload contract. Suppress the event instead.
+      context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValueOnce(
+        new Error('ES unavailable')
+      );
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_TAGS_URL,
+        body: getSetAlertTagsRequestMock(['new-tag'], [], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+    });
   });
 });

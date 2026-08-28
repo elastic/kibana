@@ -80,8 +80,9 @@ export const setAlertTagsRoute = (
 
         const cappedTagsToAdd = tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION);
         const cappedTagsToRemove = tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION);
-        // Falls back to the full requested IDs/arrays if the prefetch fails.
-        let changedAlertIds = ids;
+        // Suppress the event if the prefetch fails: the delta is unknown and emitting
+        // request intent as an observed fact violates the fact-style payload contract.
+        let changedAlertIds: string[] = [];
         let tagsActuallyAdded = cappedTagsToAdd;
         let tagsActuallyRemoved = cappedTagsToRemove;
         if (eventBus) {
@@ -107,7 +108,7 @@ export const setAlertTagsRoute = (
             tagsActuallyAdded = delta.actualAdded;
             tagsActuallyRemoved = delta.actualRemoved;
           } catch {
-            // prefetch failure is non-blocking; emit with requested arrays as fallback
+            // prefetch failure is non-blocking; changedAlertIds stays empty, suppressing the event
           }
         }
 
