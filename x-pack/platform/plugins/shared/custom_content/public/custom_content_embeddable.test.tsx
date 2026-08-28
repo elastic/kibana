@@ -96,8 +96,23 @@ jest.mock('@kbn/presentation-util', () => ({
 
 let mockAgentBuilder: unknown;
 
+const mockTelemetry = {
+  trackPanelAdded: jest.fn(),
+  trackEditFlyoutOpened: jest.fn(),
+  trackPanelSaved: jest.fn(),
+  trackEditCancelled: jest.fn(),
+  trackGenerateWithChatClicked: jest.fn(),
+  trackAgentUpdateApplied: jest.fn(),
+};
+
+jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
+
 jest.mock('./services', () => ({
-  getServices: () => ({ agentBuilder: mockAgentBuilder, core: { http: {} }, search: jest.fn() }),
+  getServices: () => ({
+    agentBuilder: mockAgentBuilder,
+    core: { http: {} },
+    search: jest.fn(),
+  }),
 }));
 
 const baseState: CustomContentEmbeddableState = {
@@ -124,6 +139,7 @@ const buildEmbeddable = async (
 
 describe('customContentEmbeddableFactory', () => {
   afterEach(() => {
+    jest.clearAllMocks();
     mockAgentBuilder = undefined;
     capturedComponentProps = undefined;
     capturedFlyoutProps = undefined;
@@ -260,6 +276,11 @@ describe('customContentEmbeddableFactory', () => {
 
       await act(async () => embeddable.api.onEdit());
       expect(capturedOpenLazyFlyoutArgs?.flyoutProps?.focusedPanelId).toBe('test-uuid');
+      expect(mockTelemetry.trackEditFlyoutOpened).toHaveBeenCalledWith({
+        isNewPanel: false,
+        hasTemplate: true,
+        hasEsqlQuery: true,
+      });
 
       await renderFlyoutContent();
       expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument();
@@ -304,6 +325,10 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => capturedFlyoutProps!.onClose());
       await act(async () => mockFlyoutOnClose);
       expect(removePanel).toHaveBeenCalledWith('test-uuid');
+      expect(mockTelemetry.trackEditCancelled).toHaveBeenCalledWith({
+        isNewPanel: true,
+        panelRemoved: true,
+      });
     });
 
     it('dismissing a new panel via ESC/X removes it from the parent', async () => {
@@ -331,6 +356,10 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => capturedFlyoutProps!.onClose());
       await act(async () => mockFlyoutOnClose);
       expect(removePanel).not.toHaveBeenCalled();
+      expect(mockTelemetry.trackEditCancelled).toHaveBeenCalledWith({
+        isNewPanel: false,
+        panelRemoved: false,
+      });
     });
 
     it('saving a new panel does not remove it', async () => {
@@ -464,6 +493,10 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => chatEvents$.next(roundCompleteEvent));
 
       expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
+      expect(mockTelemetry.trackAgentUpdateApplied).toHaveBeenCalledWith({
+        hasEsqlQuery: false,
+        templateSizeBytes: '<p>agent result</p>'.length,
+      });
     });
 
     it('applies its own update when other attachments were updated in the same round', async () => {
@@ -663,6 +696,10 @@ describe('customContentEmbeddableFactory', () => {
           newConversation: true,
         })
       );
+      expect(mockTelemetry.trackGenerateWithChatClicked).toHaveBeenCalledWith({
+        triggerSource: 'empty_panel',
+        hasExistingTemplate: false,
+      });
     });
 
     it('clears overlays (closes edit flyout) before opening the agent builder', async () => {

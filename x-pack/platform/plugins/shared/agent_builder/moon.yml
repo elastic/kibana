@@ -145,6 +145,7 @@ dependsOn:
   - '@kbn/embeddable-plugin'
   - '@kbn/storybook'
   - '@kbn/context-engine-plugin'
+  - '@kbn/files-plugin'
   - '@kbn/ui-callout'
 tags:
   - plugin
