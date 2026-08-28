@@ -119,11 +119,19 @@ export async function getVersionSpecificPolicies(
           const versionedInputs = getInputsForVersion(sourceInputs, version);
           const strippedInputs = sourceInputs.filter((inp) => !versionedInputs.includes(inp));
           const strippedIds = collectCompiledSecretRefIds(strippedInputs);
+          // A secret placeholder can appear in both a stripped input and a retained input (e.g. one
+          // var compiles into two inputs with different agentVersion gates). Only remove an id when
+          // it appears in stripped inputs AND is absent from the retained inputs.
+          const versionedIds = collectCompiledSecretRefIds(versionedInputs);
           const refs: SecretReference[] =
             updatedFullPolicy?.secret_references ??
             (fleetServerPolicy.data?.secret_references as SecretReference[] | undefined) ??
             [];
-          return strippedIds ? refs.filter(({ id: refId }) => !strippedIds.has(refId)) : refs;
+          return strippedIds
+            ? refs.filter(
+                ({ id: refId }) => !strippedIds.has(refId) || !!versionedIds?.has(refId)
+              )
+            : refs;
         })(),
       },
     };
