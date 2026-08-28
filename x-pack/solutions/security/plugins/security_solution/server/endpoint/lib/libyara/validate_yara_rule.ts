@@ -36,6 +36,16 @@ export const setYaraLogger = (nextLogger: Logger | undefined): void => {
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
   const started = performance.now();
   const mod = await loadYaraValidateModule();
+
+  /**
+   * WASM heap address of the C string returned by `validate_yara`.
+   *
+   * In Emscripten this is not a JS object: `ptr` is an integer byte offset into
+   * the module's linear memory (a large ArrayBuffer). C `malloc` returns such
+   * an offset; `0` is C's NULL (allocation failed — nothing to free).
+   * `UTF8ToString(ptr)` copies the bytes at that offset into a JS string;
+   * `validate_yara_free` must then release the allocation.
+   */
   let ptr = 0;
 
   try {
@@ -111,7 +121,24 @@ export const getYaraEngineVersion = async (): Promise<string> => {
  * Generated JS lives next to this package under wasm/dist/.
  */
 interface YaraValidateModule {
+  /**
+   * Calls a compiled C function from JavaScript by name.
+   * See https://emscripten.org/docs/api_reference/preamble.js.html#ccall
+   *
+   * @param ident - C function name (e.g. `'validate_yara'`)
+   * @param returnType - `'number'`, `'string'`, or `null` for void
+   * @param argTypes - type of each argument (`'number'` or `'string'`)
+   * @param args - argument values as native JavaScript values
+   */
   ccall: <T>(ident: string, returnType: string | null, argTypes: string[], args: unknown[]) => T;
+  /**
+   * Given a pointer `ptr` to a null-terminated UTF-8 C string in WASM linear
+   * memory, returns a copy of that string as a JavaScript `string`.
+   * See https://emscripten.org/docs/api_reference/preamble.js.html#UTF8ToString
+   *
+   * @param ptr - integer byte offset into WASM memory (the C `char*` address),
+   *   not a JavaScript object
+   */
   UTF8ToString: (ptr: number) => string;
 }
 
