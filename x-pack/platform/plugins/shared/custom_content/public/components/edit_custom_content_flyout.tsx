@@ -31,6 +31,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
+import { getTelemetry } from '../telemetry';
 
 const EDITOR_DEFAULT_HEIGHT = 400;
 // Intentionally overestimated (header + footer + body padding + template label row + spacers + help text)
@@ -96,14 +97,24 @@ export const EditCustomContentFlyout = ({
   });
 
   const handleGenerateWithChat = useCallback(() => {
+    getTelemetry().trackGenerateWithChatClicked({
+      triggerSource: 'flyout',
+      hasExistingTemplate: Boolean(draftTemplate),
+    });
     onGenerateWithChat?.(draftTemplate, draftEsqlQuery || undefined);
   }, [onGenerateWithChat, draftTemplate, draftEsqlQuery]);
 
   const hasChanges = draftEsqlQuery !== (esqlQuery ?? '') || draftTemplate !== (template ?? '');
 
   const handleSave = useCallback(() => {
+    getTelemetry().trackPanelSaved({
+      isNewPanel: isNewPanel ?? false,
+      hasTemplate: Boolean(draftTemplate),
+      hasEsqlQuery: Boolean(draftEsqlQuery),
+      templateSizeBytes: draftTemplate.length,
+    });
     onSave(draftEsqlQuery || undefined, draftTemplate || undefined);
-  }, [draftEsqlQuery, draftTemplate, onSave]);
+  }, [draftEsqlQuery, draftTemplate, isNewPanel, onSave]);
 
   const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT);
   const [maxEditorHeight, setMaxEditorHeight] = useState<number | undefined>(undefined);
