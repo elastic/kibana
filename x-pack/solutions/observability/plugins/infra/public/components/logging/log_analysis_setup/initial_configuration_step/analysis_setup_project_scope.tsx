@@ -17,21 +17,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import type { ProjectRoutingValidationError } from './validation';
 
 const projectScopeLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeLabel', {
   defaultMessage: 'Project scope',
 });
 
 const allProjectsLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeAllProjectsLabel', {
-  defaultMessage: 'All projects',
-});
-
-const thisProjectLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeThisProjectLabel', {
-  defaultMessage: 'This project',
-});
-
-const defaultScopeLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeDefaultLabel', {
-  defaultMessage: 'Default',
+  defaultMessage: 'All',
 });
 
 const loadingLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeLoadingLabel', {
@@ -41,6 +34,17 @@ const loadingLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeLoadi
 const unavailableLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeUnavailableLabel', {
   defaultMessage: 'Project scope unavailable',
 });
+
+const noneLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeNoneLabel', {
+  defaultMessage: 'None',
+});
+
+const missingProjectScopeLabel = i18n.translate(
+  'xpack.infra.analysisSetup.projectScopeMissingLabel',
+  {
+    defaultMessage: 'Select an explicit project scope for the job.',
+  }
+);
 
 const getCustomProjectScopeLabel = (selectedCount: number, totalCount: number): string =>
   i18n.translate('xpack.infra.analysisSetup.projectScopeCustomProjectsLabel', {
@@ -61,15 +65,11 @@ const getProjectScopeButtonLabel = ({
   totalProjectCount: number;
 }): string => {
   if (projectRouting === undefined) {
-    return defaultScopeLabel;
+    return noneLabel;
   }
 
   if (projectRouting === PROJECT_ROUTING.ALL) {
     return allProjectsLabel;
-  }
-
-  if (projectRouting === PROJECT_ROUTING.ORIGIN) {
-    return thisProjectLabel;
   }
 
   return getCustomProjectScopeLabel(selectedProjectCount, totalProjectCount);
@@ -81,18 +81,24 @@ export interface LoadedProjectScopeProjects {
 }
 
 export interface AnalysisSetupProjectScopeProps {
+  isCpsEnabled: boolean;
+  isCpsManagerReady: boolean;
   projectRouting: ProjectRouting;
   onOpenProjectScope: (projects: LoadedProjectScopeProjects) => void;
+  validationErrors?: ProjectRoutingValidationError[];
 }
 
-interface AnalysisSetupProjectScopeButtonProps extends AnalysisSetupProjectScopeProps {
+interface AnalysisSetupProjectScopeButtonProps
+  extends Omit<AnalysisSetupProjectScopeProps, 'isCpsEnabled'> {
   cpsManager: ICPSManager;
 }
 
 const AnalysisSetupProjectScopeButton: FC<AnalysisSetupProjectScopeButtonProps> = ({
   cpsManager,
+  isCpsManagerReady,
   onOpenProjectScope,
   projectRouting,
+  validationErrors = [],
 }) => {
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
@@ -126,9 +132,12 @@ const AnalysisSetupProjectScopeButton: FC<AnalysisSetupProjectScopeButtonProps> 
     onOpenProjectScope({ originProject, linkedProjects });
   }, [linkedProjects, onOpenProjectScope, originProject]);
 
-  if (!isProjectScopeLoading && !hasError && !hasLinkedProjects) {
+  if (!isProjectScopeLoading && !hasError && !hasLinkedProjects && validationErrors.length === 0) {
     return null;
   }
+
+  const isButtonLoading = isProjectScopeLoading || !isCpsManagerReady;
+  const isButtonDisabled = isButtonLoading || hasError;
 
   return (
     <EuiFlexGroup direction="column">
@@ -144,26 +153,28 @@ const AnalysisSetupProjectScopeButton: FC<AnalysisSetupProjectScopeButtonProps> 
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.infra.analysisSetup.projectScopeSelectionDescription"
-            defaultMessage="By default, Machine Learning analyzes log messages in linked projects according to the default project scope for the space. You can configure a different project scope to control which projects are analyzed. Regardless of project scope, analysis results live exclusively in the current project. Keep in mind that, once the job is created, updating the project scope will require re-creating it."
+            defaultMessage="By default, Machine Learning analyzes log messages in linked projects according to the default project scope for the space. You can configure a different project scope to control which projects are analyzed. Regardless of project scope, analysis results live exclusively in the current project."
           />
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFormRow
-          error={hasError ? unavailableLabel : undefined}
-          isInvalid={hasError}
+          error={[
+            ...(hasError ? [unavailableLabel] : []),
+            ...validationErrors.map(formatValidationError),
+          ]}
+          isInvalid={hasError || validationErrors.length > 0}
           label={projectScopeLabel}
         >
           <EuiButton
             color="text"
             data-test-subj="infraLogAnalysisSetupProjectScopeButton"
             iconType="crossProjectSearch"
-            isDisabled={isProjectScopeLoading || hasError}
-            isLoading={isProjectScopeLoading}
+            isDisabled={isButtonDisabled}
+            isLoading={isButtonLoading}
             onClick={openProjectScope}
-            size="m"
           >
-            {hasError ? unavailableLabel : isProjectScopeLoading ? loadingLabel : buttonLabel}
+            {hasError ? unavailableLabel : isButtonLoading ? loadingLabel : buttonLabel}
           </EuiButton>
         </EuiFormRow>
       </EuiFlexItem>
@@ -171,24 +182,36 @@ const AnalysisSetupProjectScopeButton: FC<AnalysisSetupProjectScopeButtonProps> 
   );
 };
 
+const formatValidationError = (validationError: ProjectRoutingValidationError): string => {
+  switch (validationError.error) {
+    case 'MISSING_PROJECT_ROUTING':
+      return missingProjectScopeLabel;
+  }
+};
+
 export const AnalysisSetupProjectScopeForm: FC<AnalysisSetupProjectScopeProps> = ({
+  isCpsEnabled,
+  isCpsManagerReady,
   onOpenProjectScope,
   projectRouting,
+  validationErrors,
 }) => {
   const {
     services: { cps },
   } = useKibanaContextForPlugin();
   const cpsManager = cps?.cpsManager;
 
-  if (!cps?.isTierEligible || !cpsManager) {
+  if (!isCpsEnabled || !cpsManager) {
     return null;
   }
 
   return (
     <AnalysisSetupProjectScopeButton
       cpsManager={cpsManager}
+      isCpsManagerReady={isCpsManagerReady}
       onOpenProjectScope={onOpenProjectScope}
       projectRouting={projectRouting}
+      validationErrors={validationErrors}
     />
   );
 };

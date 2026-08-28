@@ -18,11 +18,16 @@ import { AnalysisSetupProjectScopeForm } from './analysis_setup_project_scope';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
 import type {
   AvailableIndex,
+  ProjectRoutingValidationError,
   TimeRangeValidationError,
   ValidationIndicesError,
   ValidationUIError,
 } from './validation';
-import { timeRangeValidationErrorRT, validationIndicesErrorRT } from './validation';
+import {
+  projectRoutingValidationErrorRT,
+  timeRangeValidationErrorRT,
+  validationIndicesErrorRT,
+} from './validation';
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
@@ -35,6 +40,8 @@ interface InitialConfigurationStepProps {
   setValidatedIndices: (selectedIndices: AvailableIndex[]) => void;
   validationErrors?: ValidationUIError[];
   previousQualityWarnings?: QualityWarning[];
+  isCpsEnabled?: boolean;
+  isCpsManagerReady?: boolean;
   projectRouting?: ProjectRouting;
   onOpenProjectScope?: (projects: LoadedProjectScopeProjects) => void;
 }
@@ -57,23 +64,30 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setValidatedIndices,
   validationErrors = [],
   previousQualityWarnings = [],
+  isCpsEnabled = false,
+  isCpsManagerReady = false,
   projectRouting,
   onOpenProjectScope,
 }: InitialConfigurationStepProps) => {
   const disabled = useMemo(() => !editableFormStatus.includes(setupStatus.type), [setupStatus]);
 
-  const [indexValidationErrors, timeRangeValidationErrors, globalValidationErrors] = useMemo(
-    () => partitionValidationErrors(validationErrors),
-    [validationErrors]
-  );
+  const [
+    indexValidationErrors,
+    timeRangeValidationErrors,
+    projectRoutingValidationErrors,
+    globalValidationErrors,
+  ] = useMemo(() => partitionValidationErrors(validationErrors), [validationErrors]);
 
   return (
     <EuiForm>
       {onOpenProjectScope ? (
         <>
           <AnalysisSetupProjectScopeForm
+            isCpsEnabled={isCpsEnabled}
+            isCpsManagerReady={isCpsManagerReady}
             projectRouting={projectRouting}
             onOpenProjectScope={onOpenProjectScope}
+            validationErrors={projectRoutingValidationErrors}
           />
           <EuiSpacer size="xl" />
         </>
@@ -161,16 +175,23 @@ const formatValidationError = (error: ValidationUIError): React.ReactNode => {
 
 const partitionValidationErrors = (validationErrors: ValidationUIError[]) =>
   validationErrors.reduce<
-    [ValidationIndicesError[], TimeRangeValidationError[], ValidationUIError[]]
+    [
+      ValidationIndicesError[],
+      TimeRangeValidationError[],
+      ProjectRoutingValidationError[],
+      ValidationUIError[]
+    ]
   >(
-    ([indicesErrors, timeRangeErrors, otherErrors], error) => {
+    ([indicesErrors, timeRangeErrors, projectRoutingErrors, otherErrors], error) => {
       if (validationIndicesErrorRT.is(error)) {
-        return [[...indicesErrors, error], timeRangeErrors, otherErrors];
+        return [[...indicesErrors, error], timeRangeErrors, projectRoutingErrors, otherErrors];
       } else if (timeRangeValidationErrorRT.is(error)) {
-        return [indicesErrors, [...timeRangeErrors, error], otherErrors];
+        return [indicesErrors, [...timeRangeErrors, error], projectRoutingErrors, otherErrors];
+      } else if (projectRoutingValidationErrorRT.is(error)) {
+        return [indicesErrors, timeRangeErrors, [...projectRoutingErrors, error], otherErrors];
       } else {
-        return [indicesErrors, timeRangeErrors, [...otherErrors, error]];
+        return [indicesErrors, timeRangeErrors, projectRoutingErrors, [...otherErrors, error]];
       }
     },
-    [[], [], []]
+    [[], [], [], []]
   );

@@ -19,6 +19,8 @@ export const LogEntryRateSetupView: React.FC<{
   const {
     cleanUpAndSetUp,
     endTime,
+    isCpsEnabled,
+    isCpsManagerReady,
     isValidating,
     lastSetupErrorMessages,
     moduleDescriptor,
@@ -51,6 +53,8 @@ export const LogEntryRateSetupView: React.FC<{
         setupStatus,
         setValidatedIndices,
         validationErrors,
+        isCpsEnabled,
+        isCpsManagerReady,
         projectRouting,
         onOpenProjectScope,
       }),
@@ -66,6 +70,8 @@ export const LogEntryRateSetupView: React.FC<{
     [
       cleanUpAndSetUp,
       endTime,
+      isCpsEnabled,
+      isCpsManagerReady,
       isValidating,
       lastSetupErrorMessages,
       onOpenProjectScope,

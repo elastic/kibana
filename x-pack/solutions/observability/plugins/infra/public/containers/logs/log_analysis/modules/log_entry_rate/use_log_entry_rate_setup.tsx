@@ -23,6 +23,8 @@ export const useLogEntryRateSetup = () => {
   const {
     cleanUpAndSetUp,
     endTime,
+    isCpsEnabled,
+    isCpsManagerReady,
     isValidating,
     projectRouting,
     setEndTime,
@@ -43,6 +45,8 @@ export const useLogEntryRateSetup = () => {
   return {
     cleanUpAndSetUp,
     endTime,
+    isCpsEnabled,
+    isCpsManagerReady,
     isValidating,
     lastSetupErrorMessages,
     moduleDescriptor,

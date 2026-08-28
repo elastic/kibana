@@ -25,6 +25,8 @@ export const useLogEntryCategoriesSetup = () => {
   const {
     cleanUpAndSetUp,
     endTime,
+    isCpsEnabled,
+    isCpsManagerReady,
     isValidating,
     projectRouting,
     setEndTime,
@@ -47,6 +49,8 @@ export const useLogEntryCategoriesSetup = () => {
     cleanUpAndSetUp,
     endTime,
     fetchJobStatus,
+    isCpsEnabled,
+    isCpsManagerReady,
     isValidating,
     lastSetupErrorMessages,
     moduleDescriptor,

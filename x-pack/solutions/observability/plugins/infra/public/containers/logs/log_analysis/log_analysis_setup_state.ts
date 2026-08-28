@@ -50,9 +50,24 @@ export const useAnalysisSetupState = <T extends JobType>({
   const { services } = useKibanaContextForPlugin();
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
-  // SPIKE: draft CPS project scope for the jobs about to be created. Not yet wired
-  // into validation, dataset discovery, or the module setup call.
+
+  const isCpsEnabled = Boolean(services.cps?.isTierEligible && services.cps?.cpsManager);
   const [projectRouting, setProjectRouting] = useState<ProjectRouting>(undefined);
+  const [isCpsManagerReady, setIsCpsManagerReady] = useState(false);
+
+  useEffect(() => {
+    if (!isCpsEnabled) return;
+    let cancelled = false;
+    services.cps?.cpsManager?.whenReady().then(() => {
+      if (!cancelled) {
+        setProjectRouting(services.cps?.cpsManager?.getDefaultProjectRouting());
+        setIsCpsManagerReady(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isCpsEnabled, services.cps]);
 
   const isTimeRangeValid = useMemo(
     () => (startTime != null && endTime != null ? startTime < endTime : true),
@@ -213,9 +228,15 @@ export const useAnalysisSetupState = <T extends JobType>({
     return cleanUpAndSetUpModule(selectedIndexNames, startTime, endTime, datasetFilter);
   }, [cleanUpAndSetUpModule, selectedIndexNames, startTime, endTime, datasetFilter]);
 
+  // Treating the CPS manager warm-up as "validating" both disables submission and
+  // suppresses the transient MISSING_PROJECT_ROUTING error until the default project
+  // routing has been seeded.
   const isValidating = useMemo(
-    () => validateIndicesRequest.state === 'pending' || validateDatasetsRequest.state === 'pending',
-    [validateDatasetsRequest.state, validateIndicesRequest.state]
+    () =>
+      validateIndicesRequest.state === 'pending' ||
+      validateDatasetsRequest.state === 'pending' ||
+      (isCpsEnabled && !isCpsManagerReady),
+    [validateDatasetsRequest.state, validateIndicesRequest.state, isCpsManagerReady, isCpsEnabled]
   );
 
   const validationErrors = useMemo<ValidationUIError[]>(() => {
@@ -239,6 +260,10 @@ export const useAnalysisSetupState = <T extends JobType>({
       ...(selectedIndexNames.length === 0 ? [{ error: 'TOO_FEW_SELECTED_INDICES' as const }] : []),
       // time range
       ...(!isTimeRangeValid ? [{ error: 'INVALID_TIME_RANGE' as const }] : []),
+      // project scope must be explicit when CPS is available
+      ...(isCpsEnabled && projectRouting === undefined
+        ? [{ error: 'MISSING_PROJECT_ROUTING' as const }]
+        : []),
     ];
   }, [
     isValidating,
@@ -247,6 +272,8 @@ export const useAnalysisSetupState = <T extends JobType>({
     validatedIndices,
     selectedIndexNames,
     isTimeRangeValid,
+    isCpsEnabled,
+    projectRouting,
   ]);
 
   const prevStartTime = usePrevious(startTime);
@@ -288,6 +315,8 @@ export const useAnalysisSetupState = <T extends JobType>({
     cleanUpAndSetUp,
     datasetFilter,
     endTime,
+    isCpsEnabled,
+    isCpsManagerReady,
     isValidating,
     projectRouting,
     selectedIndexNames,
