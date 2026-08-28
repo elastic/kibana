@@ -80,7 +80,7 @@ export function DeploymentSummary({
 
   const listItems = summaryFields.map((f) => ({
     title: (
-      <EuiText color="subdued">
+      <EuiText color="subdued" size="s">
         <FormattedMessage id={f.labelId} defaultMessage={f.defaultMessage} />
       </EuiText>
     ),
@@ -127,7 +127,7 @@ export function DeploymentSummary({
                 <EuiFlexGroup direction="row" gutterSize="xl" responsive={false}>
                   {listItems.map((item) => (
                     <EuiFlexItem grow={false} key={item.description}>
-                      <EuiStat title={item.description} description={item.title} titleSize="xxs" />
+                      <EuiStat title={item.description} description={item.title} titleSize="xs" />
                     </EuiFlexItem>
                   ))}
                 </EuiFlexGroup>

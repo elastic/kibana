@@ -21,8 +21,8 @@ interface ServiceTileProps {
 
 export function ServiceTile({ name, status, entry, deploymentMethod }: ServiceTileProps) {
   return (
-    <EuiPanel paddingSize="xl" hasBorder data-test-subj={`serviceTile-${entry.id}`}>
-      <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
+    <EuiPanel paddingSize="m" hasBorder data-test-subj={`serviceTile-${entry.id}`}>
+      <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiIcon type="checkCircle" size="l" aria-hidden color="success" />
         </EuiFlexItem>

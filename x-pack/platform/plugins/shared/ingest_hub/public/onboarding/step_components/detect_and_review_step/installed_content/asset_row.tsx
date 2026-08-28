@@ -8,6 +8,8 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface AssetRowProps {
   id: string;
@@ -18,8 +20,11 @@ interface AssetRowProps {
 }
 
 export function AssetRow({ id, title, appLink, action }: AssetRowProps) {
-  const nameNode = appLink ? (
-    <EuiLink href={appLink} target="_blank" data-test-subj={`assetRow-link-${id}`}>
+  const { services } = useKibana<CoreStart>();
+  const href = appLink ? services.http.basePath.prepend(appLink) : undefined;
+
+  const nameNode = href ? (
+    <EuiLink href={href} target="_blank" data-test-subj={`assetRow-link-${id}`}>
       {title}
     </EuiLink>
   ) : (

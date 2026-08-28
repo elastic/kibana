@@ -39,7 +39,7 @@ export function AssetCategory({ categoryId, titleId, defaultTitle, assets }: Ass
   return (
     <EuiAccordion
       id={`assetCategory-${categoryId}`}
-      initialIsOpen={true}
+      initialIsOpen={false}
       extraAction={
         <EuiText size="xs" color="subdued">
           {installedLabel}
