@@ -24,6 +24,7 @@ import { withSiemErrorHandling } from '../with_siem_error_handling';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   MAX_ALERTS_PER_TRIGGER,
+  MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
 import { prefetchChangedListFieldIds } from '../common/operations/prefetch_previous_statuses';
@@ -66,12 +67,22 @@ export const setAlertAssigneesRoute = (
         const spaceId = securitySolution?.getSpaceId() ?? 'default';
         const index = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
+        const allValidAssigneesToAdd = assignees.add.filter(
+          (uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH
+        );
+        const allValidAssigneesToRemove = assignees.remove.filter(
+          (uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH
+        );
+        const cappedAssigneesToAdd = allValidAssigneesToAdd.slice(0, MAX_ASSIGNEES_PER_OPERATION);
+        const cappedAssigneesToRemove = allValidAssigneesToRemove.slice(
+          0,
+          MAX_ASSIGNEES_PER_OPERATION
+        );
         const operationTruncated =
-          assignees.add.length > MAX_ASSIGNEES_PER_OPERATION ||
-          assignees.remove.length > MAX_ASSIGNEES_PER_OPERATION;
-
-        const cappedAssigneesToAdd = assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION);
-        const cappedAssigneesToRemove = assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION);
+          allValidAssigneesToAdd.length !== assignees.add.length ||
+          allValidAssigneesToRemove.length !== assignees.remove.length ||
+          allValidAssigneesToAdd.length > MAX_ASSIGNEES_PER_OPERATION ||
+          allValidAssigneesToRemove.length > MAX_ASSIGNEES_PER_OPERATION;
         // Suppress the event if the prefetch fails: the delta is unknown and emitting
         // request intent as an observed fact violates the fact-style payload contract.
         let changedAlertIds: string[] = [];

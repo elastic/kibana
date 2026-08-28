@@ -84,6 +84,8 @@ export const setUnifiedAlertsTagsRoute = (
         const validTagsToAdd = allValidTagsToAdd.slice(0, MAX_TAGS_PER_OPERATION);
         const validTagsToRemove = allValidTagsToRemove.slice(0, MAX_TAGS_PER_OPERATION);
         const operationTruncated =
+          allValidTagsToAdd.length !== tags.tags_to_add.length ||
+          allValidTagsToRemove.length !== tags.tags_to_remove.length ||
           allValidTagsToAdd.length > MAX_TAGS_PER_OPERATION ||
           allValidTagsToRemove.length > MAX_TAGS_PER_OPERATION;
 
@@ -108,11 +110,11 @@ export const setUnifiedAlertsTagsRoute = (
                   ? (source[ALERT_WORKFLOW_TAGS] as string[])
                   : []
               );
-              // Use allValid* (not the capped arrays) so a tag beyond position 100 that would
-              // actually change the document still triggers the event.
+              // Use the raw request arrays so over-length tags that would change a document
+              // still trigger the event; allValid* is only used for the schema-bounded payload.
               return (
-                allValidTagsToAdd.some((t) => !currentTags.has(t)) ||
-                allValidTagsToRemove.some((t) => currentTags.has(t))
+                tags.tags_to_add.some((t) => !currentTags.has(t)) ||
+                tags.tags_to_remove.some((t) => currentTags.has(t))
               );
             }));
             // Compute independent per-family deltas: a tag already present on every attack doc

@@ -97,6 +97,8 @@ export const setAttacksAssigneesRoute = (
           MAX_ASSIGNEES_PER_OPERATION
         );
         const operationTruncated =
+          allValidAssigneesToAdd.length !== assignees.add.length ||
+          allValidAssigneesToRemove.length !== assignees.remove.length ||
           allValidAssigneesToAdd.length > MAX_ASSIGNEES_PER_OPERATION ||
           allValidAssigneesToRemove.length > MAX_ASSIGNEES_PER_OPERATION;
 

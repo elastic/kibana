@@ -86,6 +86,8 @@ export const setAttacksTagsRoute = (
         const validTagsToAdd = allValidTagsToAdd.slice(0, MAX_TAGS_PER_OPERATION);
         const validTagsToRemove = allValidTagsToRemove.slice(0, MAX_TAGS_PER_OPERATION);
         const operationTruncated =
+          allValidTagsToAdd.length !== tags.tags_to_add.length ||
+          allValidTagsToRemove.length !== tags.tags_to_remove.length ||
           allValidTagsToAdd.length > MAX_TAGS_PER_OPERATION ||
           allValidTagsToRemove.length > MAX_TAGS_PER_OPERATION;
 
