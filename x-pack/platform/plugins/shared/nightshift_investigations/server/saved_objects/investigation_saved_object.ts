@@ -66,6 +66,7 @@ const investigationAttributesSchemaV1 = schema.object({
     },
   }),
   subject_id: schema.string({ maxLength: MAX_KEYWORD_LENGTH }),
+  subject_summary: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
   trigger_type: schema.string({
     maxLength: MAX_KEYWORD_LENGTH,
     validate: (value) => {
@@ -110,6 +111,7 @@ export interface NightshiftInvestigationAttributes {
   status: InvestigationStatus;
   subject_type: InvestigationSubjectType;
   subject_id: string;
+  subject_summary?: string;
   trigger_type: InvestigationTriggerType;
   concurrency_key?: string;
   created_at: string;
@@ -138,6 +140,7 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Nightshift
         status: { type: 'keyword', ignore_above: 1024 },
         subject_type: { type: 'keyword', ignore_above: 1024 },
         subject_id: { type: 'keyword', ignore_above: 1024 },
+        subject_summary: { type: 'text' },
         trigger_type: { type: 'keyword', ignore_above: 1024 },
         concurrency_key: { type: 'keyword', ignore_above: 1024 },
         created_at: { type: 'date' },

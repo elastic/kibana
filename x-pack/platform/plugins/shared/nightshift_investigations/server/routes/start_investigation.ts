@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { INVESTIGATION_SUBJECT_TYPES } from '../../common';
 import { MAX_KEYWORD_LENGTH } from '../saved_objects';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -33,6 +34,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
       subject: z.object({
         type: z.enum(INVESTIGATION_SUBJECT_TYPES),
         id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+        summary: z.string().max(MAX_TEXT_LENGTH).optional(),
       }),
       concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
       context: z

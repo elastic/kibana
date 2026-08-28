@@ -60,6 +60,7 @@ const LIST_SO_FIELDS = [
   'executed_by',
   'status',
   'subject_id',
+  'subject_summary',
   'subject_type',
   'summary',
   'trigger_type',
@@ -71,6 +72,21 @@ export interface UpdateInvestigationRequest extends InvestigationStructuredOutpu
   conversation_id?: string;
 }
 
+function toSubject({
+  subjectType,
+  subjectId,
+  subjectSummary,
+}: {
+  subjectType: InvestigationSubjectType;
+  subjectId: string;
+  subjectSummary?: string;
+}): InvestigationSubject {
+  if (subjectSummary) {
+    return { type: subjectType, id: subjectId, summary: subjectSummary };
+  }
+  return { type: subjectType, id: subjectId };
+}
+
 function toListInvestigationItem({
   id,
   attrs,
@@ -80,7 +96,11 @@ function toListInvestigationItem({
 }): ListInvestigationItem {
   return {
     investigation_id: id,
-    subject: { type: attrs.subject_type, id: attrs.subject_id },
+    subject: toSubject({
+      subjectType: attrs.subject_type,
+      subjectId: attrs.subject_id,
+      subjectSummary: attrs.subject_summary,
+    }),
     trigger_type: attrs.trigger_type,
     status: attrs.status,
     started_at: attrs.created_at,
@@ -177,7 +197,14 @@ function parseExecutionInvestigationMetadata(
   if (isSubjectType(rawSource)) {
     const rawSubjectId = inputContext?.[`${rawSource}_id`];
     if (typeof rawSubjectId === 'string' && rawSubjectId.length > 0) {
-      subject = { type: rawSource, id: rawSubjectId };
+      const rawSummary = inputContext?.summary;
+      const subjectSummary =
+        typeof rawSummary === 'string' && rawSummary.length > 0 ? rawSummary : undefined;
+      subject = toSubject({
+        subjectType: rawSource,
+        subjectId: rawSubjectId,
+        subjectSummary,
+      });
     }
   }
 
@@ -270,6 +297,7 @@ export class NightshiftInvestigationsClient {
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+        ...(subject.summary ? { summary: subject.summary } : {}),
       },
     };
 
@@ -342,6 +370,7 @@ export class NightshiftInvestigationsClient {
           status: 'running',
           subject_type: subject.type,
           subject_id: subject.id,
+          ...(subject.summary ? { subject_summary: subject.summary } : {}),
           trigger_type: triggerType,
           concurrency_key: concurrencyKey,
           executed_by: execution.executedBy,

@@ -34,6 +34,7 @@ apiTest.describe(
         status: 'completed',
         subject_type: 'alert',
         subject_id: 'alert-42',
+        subject_summary: 'Checkout API latency threshold',
         trigger_type: 'automatic',
         executed_by: 'test-user',
         created_at: '2024-06-01T10:00:00Z',
@@ -59,7 +60,11 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
 
       expect(response.body.investigation_id).toBe(TEST_ID);
-      expect(response.body.subject).toStrictEqual({ type: 'alert', id: 'alert-42' });
+      expect(response.body.subject).toStrictEqual({
+        type: 'alert',
+        id: 'alert-42',
+        summary: 'Checkout API latency threshold',
+      });
       expect(response.body.trigger_type).toBe('automatic');
       expect(response.body.status).toBe('completed');
       expect(response.body.started_at).toBe('2024-06-01T10:00:00Z');

@@ -137,6 +137,31 @@ describe('NightshiftInvestigationsClient.get()', () => {
     });
   });
 
+  it('returns subject.summary from the SO subject_summary attribute', async () => {
+    const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
+    mockInvestigationSoClient.get.mockResolvedValue(
+      makeSoAttrs({
+        subject_type: 'significant_event',
+        subject_id: 'event-42',
+        subject_summary: long,
+      })
+    );
+
+    const result = await makeClient().get('inv-1');
+
+    expect(result.subject).toEqual({
+      type: 'significant_event',
+      id: 'event-42',
+      summary: long,
+    });
+  });
+
+  it('omits subject.summary when subject_summary is absent', async () => {
+    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs());
+    const result = await makeClient().get('inv-1');
+    expect(result.subject).toEqual({ type: 'alert', id: 'alert-42' });
+  });
+
   it('does not call workflow execution when SO is found with terminal status', async () => {
     mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs());
     await makeClient().get('inv-1');
@@ -306,6 +331,29 @@ describe('NightshiftInvestigationsClient.list()', () => {
     expect(result.results[0]).not.toHaveProperty('conversation_id');
   });
 
+  it('includes subject.summary on list items when subject_summary is stored', async () => {
+    mockInvestigationSoClient.find.mockResolvedValue({
+      results: [
+        {
+          id: 'inv-42',
+          type: 'nightshift-investigation',
+          references: [],
+          attributes: makeSoAttrs({ subject_summary: 'CPU saturation' }),
+        },
+      ],
+      total: 1,
+      page: 1,
+      size: 20,
+    });
+
+    const result = await makeClient().list({});
+    expect(result.results[0].subject).toEqual({
+      type: 'alert',
+      id: 'alert-42',
+      summary: 'CPU saturation',
+    });
+  });
+
   describe('stale-running reconciliation', () => {
     const runningListResult = () => ({
       results: [
@@ -370,7 +418,7 @@ describe('NightshiftInvestigationsClient.list()', () => {
     await makeClient().list();
     expect(mockInvestigationSoClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
-        fields: expect.arrayContaining(['status', 'summary', 'error']),
+        fields: expect.arrayContaining(['status', 'summary', 'error', 'subject_summary']),
       })
     );
     const { fields } = mockInvestigationSoClient.find.mock.calls[0][0];
@@ -434,6 +482,28 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
+  });
+
+  it('persists the subject summary into the workflow context', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1', summary: 'CPU saturation on checkout-api' },
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context.summary).toBe('CPU saturation on checkout-api');
+  });
+
+  it('omits the context summary when none was supplied', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context).not.toHaveProperty('summary');
   });
 
   it('includes concurrency_key in inputs when provided', async () => {
@@ -626,6 +696,36 @@ describe('NightshiftInvestigationsClient.ensureSavedObject()', () => {
         executed_by: 'workflow-user',
         created_at: '2024-01-01T00:00:00Z',
       },
+    });
+  });
+
+  it('persists context.summary as subject_summary on the saved object', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeExecution({
+        context: {
+          inputs: {
+            message: 'Investigate this',
+            concurrency_key: 'key-1',
+            context: {
+              source: 'alert',
+              alert_id: 'alert-42',
+              trigger_type: 'automatic',
+              summary: 'CPU saturation on checkout-api',
+            },
+          },
+        },
+      })
+    );
+
+    await makeClient().ensureSavedObject(EXECUTION_ID);
+
+    expect(mockInvestigationSoClient.create).toHaveBeenCalledWith({
+      id: EXECUTION_ID,
+      attributes: expect.objectContaining({
+        subject_type: 'alert',
+        subject_id: 'alert-42',
+        subject_summary: 'CPU saturation on checkout-api',
+      }),
     });
   });
 

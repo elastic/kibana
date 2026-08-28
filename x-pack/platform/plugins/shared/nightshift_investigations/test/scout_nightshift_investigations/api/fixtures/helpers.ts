@@ -99,6 +99,7 @@ export interface SeedInvestigationOptions {
   summary?: string;
   conclusion?: string;
   conversation_id?: string;
+  subject_summary?: string;
   impact?: { entities: Array<Record<string, unknown>> };
 }
 
