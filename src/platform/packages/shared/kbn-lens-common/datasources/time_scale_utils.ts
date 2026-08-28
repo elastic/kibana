@@ -1,15 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TimeScaleUnit } from '@kbn/lens-common';
-import { unitSuffixesLong } from '../../../../common/suffix_formatter';
+import type { TimeScaleUnit } from '../types';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
+
+export const unitSuffixes: Record<TimeScaleUnit, string> = {
+  s: i18n.translate('xpack.lens.fieldFormats.suffix.s', { defaultMessage: '/s' }),
+  m: i18n.translate('xpack.lens.fieldFormats.suffix.m', { defaultMessage: '/m' }),
+  h: i18n.translate('xpack.lens.fieldFormats.suffix.h', { defaultMessage: '/h' }),
+  d: i18n.translate('xpack.lens.fieldFormats.suffix.d', { defaultMessage: '/d' }),
+};
+
+export const unitSuffixesLong: Record<TimeScaleUnit, string> = {
+  s: i18n.translate('xpack.lens.fieldFormats.longSuffix.s', { defaultMessage: 'per second' }),
+  m: i18n.translate('xpack.lens.fieldFormats.longSuffix.m', { defaultMessage: 'per minute' }),
+  h: i18n.translate('xpack.lens.fieldFormats.longSuffix.h', { defaultMessage: 'per hour' }),
+  d: i18n.translate('xpack.lens.fieldFormats.longSuffix.d', { defaultMessage: 'per day' }),
+};
 
 function getSuffix(
   scale: TimeScaleUnit | undefined,
