@@ -29,7 +29,7 @@ const SEARCH_REQUEST = { endpoint: '/internal/search/ese', method: 'POST' };
 
 // A cache hit shows up as nothing happening, so the by-value step has to give a late request a
 // window to arrive before it can conclude none did.
-const SETTLE_MS = 3_000;
+const SETTLE_MS = 1_000;
 
 spaceTest.describe(
   'Dashboard search session sharing with Lens',
