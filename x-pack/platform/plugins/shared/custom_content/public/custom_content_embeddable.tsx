@@ -137,10 +137,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom content',
         }),
-      onEdit: async ({ isNewPanel, returnFocus } = {}) => {
+      onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         const { core } = getServices();
         getTelemetry().trackEditFlyoutOpened({
-          isNewPanel: isNewPanel ?? false,
+          isNewPanel,
           hasTemplate: Boolean(template$.getValue()),
           hasEsqlQuery: Boolean(esqlQuery$.getValue()),
         });
@@ -221,7 +221,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   projectRouting={projectRouting}
                   query={query}
                   filters={filters}
-                  isNewPanel={isNewPanel ?? false}
+                  isNewPanel={isNewPanel}
                   ariaLabelledBy={ariaLabelledBy}
                   onSave={handleSave}
                   onClose={handleClose}
@@ -241,13 +241,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         });
         flyoutRef.onClose.then(() => {
           const panelRemoved =
-            !hasSaved &&
-            !isRetained &&
-            (isNewPanel ?? false) &&
-            apiIsPresentationContainer(parentApi);
+            !hasSaved && !isRetained && isNewPanel && apiIsPresentationContainer(parentApi);
           if (!hasSaved) {
             getTelemetry().trackEditCancelled({
-              isNewPanel: isNewPanel ?? false,
+              isNewPanel,
               panelRemoved,
             });
           }
