@@ -34,13 +34,19 @@ export const COLUMN_SAMPLE_SIZE = i18n.translate(
   }
 );
 
-export const COLUMN_MEAN_A = i18n.translate('xpack.evals.compareExperiments.columns.meanA', {
-  defaultMessage: 'Mean target',
-});
+export const COLUMN_MEAN_BASELINE = i18n.translate(
+  'xpack.evals.compareExperiments.columns.meanBaseline',
+  {
+    defaultMessage: 'Mean baseline',
+  }
+);
 
-export const COLUMN_MEAN_B = i18n.translate('xpack.evals.compareExperiments.columns.meanB', {
-  defaultMessage: 'Mean baseline',
-});
+export const COLUMN_MEAN_TARGET = i18n.translate(
+  'xpack.evals.compareExperiments.columns.meanTarget',
+  {
+    defaultMessage: 'Mean target',
+  }
+);
 
 export const COLUMN_DIFF = i18n.translate('xpack.evals.compareExperiments.columns.diff', {
   defaultMessage: 'Diff',
@@ -149,15 +155,15 @@ export const FLYOUT_COLUMN_EXAMPLE = i18n.translate(
   { defaultMessage: 'Example' }
 );
 
-export const FLYOUT_COLUMN_SCORE_A = i18n.translate(
-  'xpack.evals.compareExperiments.flyout.columnScoreA',
+export const FLYOUT_COLUMN_SCORE_BASELINE = i18n.translate(
+  'xpack.evals.compareExperiments.flyout.columnScoreBaseline',
   {
     defaultMessage: 'Score baseline',
   }
 );
 
-export const FLYOUT_COLUMN_SCORE_B = i18n.translate(
-  'xpack.evals.compareExperiments.flyout.columnScoreB',
+export const FLYOUT_COLUMN_SCORE_TARGET = i18n.translate(
+  'xpack.evals.compareExperiments.flyout.columnScoreTarget',
   {
     defaultMessage: 'Score target',
   }
@@ -286,13 +292,19 @@ export const BADGE_OLDER = i18n.translate('xpack.evals.compareExperiments.badgeO
   defaultMessage: 'Older',
 });
 
-export const FLYOUT_TRACE_A = i18n.translate('xpack.evals.compareExperiments.flyoutTraceA', {
-  defaultMessage: 'View trace (baseline)',
-});
+export const FLYOUT_TRACE_BASELINE = i18n.translate(
+  'xpack.evals.compareExperiments.flyoutTraceBaseline',
+  {
+    defaultMessage: 'View trace (baseline)',
+  }
+);
 
-export const FLYOUT_TRACE_B = i18n.translate('xpack.evals.compareExperiments.flyoutTraceB', {
-  defaultMessage: 'View trace (target)',
-});
+export const FLYOUT_TRACE_TARGET = i18n.translate(
+  'xpack.evals.compareExperiments.flyoutTraceTarget',
+  {
+    defaultMessage: 'View trace (target)',
+  }
+);
 
 export const EXPORT_CSV = i18n.translate('xpack.evals.compareExperiments.exportCsv', {
   defaultMessage: 'Copy as CSV',
