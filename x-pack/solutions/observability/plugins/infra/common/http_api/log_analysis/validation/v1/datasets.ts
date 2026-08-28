@@ -16,13 +16,18 @@ export const LOG_ANALYSIS_VALIDATE_DATASETS_PATH =
  * Request types
  */
 export const validateLogEntryDatasetsRequestPayloadRT = rt.type({
-  data: rt.type({
-    indices: LimitedSizeArray({ codec: rt.string, maxSize: MAX_VALIDATION_INDICES }),
-    timestampField: rt.string,
-    startTime: rt.number,
-    endTime: rt.number,
-    runtimeMappings: rt.UnknownRecord,
-  }),
+  data: rt.intersection([
+    rt.type({
+      indices: LimitedSizeArray({ codec: rt.string, maxSize: MAX_VALIDATION_INDICES }),
+      timestampField: rt.string,
+      startTime: rt.number,
+      endTime: rt.number,
+      runtimeMappings: rt.UnknownRecord,
+    }),
+    rt.partial({
+      projectRouting: rt.string,
+    }),
+  ]),
 });
 
 export type ValidateLogEntryDatasetsRequestPayload = rt.TypeOf<

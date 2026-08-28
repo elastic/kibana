@@ -26,14 +26,19 @@ export type ValidationIndicesFieldSpecification = rt.TypeOf<
 >;
 
 export const validationIndicesRequestPayloadRT = rt.type({
-  data: rt.type({
-    fields: LimitedSizeArray({
-      codec: validationIndicesFieldSpecificationRT,
-      maxSize: MAX_VALIDATION_FIELDS,
+  data: rt.intersection([
+    rt.type({
+      fields: LimitedSizeArray({
+        codec: validationIndicesFieldSpecificationRT,
+        maxSize: MAX_VALIDATION_FIELDS,
+      }),
+      indices: LimitedSizeArray({ codec: rt.string, maxSize: MAX_VALIDATION_INDICES }),
+      runtimeMappings: rt.record(rt.string, mappingRuntimeFieldRT),
     }),
-    indices: LimitedSizeArray({ codec: rt.string, maxSize: MAX_VALIDATION_INDICES }),
-    runtimeMappings: rt.record(rt.string, mappingRuntimeFieldRT),
-  }),
+    rt.partial({
+      projectRouting: rt.string,
+    }),
+  ]),
 });
 
 export type ValidationIndicesRequestPayload = rt.TypeOf<typeof validationIndicesRequestPayloadRT>;

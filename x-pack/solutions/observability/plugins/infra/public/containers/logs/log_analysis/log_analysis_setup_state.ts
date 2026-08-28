@@ -183,7 +183,8 @@ export const useAnalysisSetupState = <T extends JobType>({
           sourceConfiguration.indices,
           sourceConfiguration.timestampField,
           sourceConfiguration.runtimeMappings,
-          services.http.fetch
+          services.http.fetch,
+          projectRouting
         );
       },
       onResolve: ({ data: { errors } }) => {
@@ -193,7 +194,7 @@ export const useAnalysisSetupState = <T extends JobType>({
         setValidatedIndices([]);
       },
     },
-    [sourceConfiguration.indices, sourceConfiguration.timestampField]
+    [sourceConfiguration.indices, sourceConfiguration.timestampField, projectRouting]
   );
 
   const [validateDatasetsRequest, validateDatasets] = useTrackedPromise(
@@ -210,14 +211,15 @@ export const useAnalysisSetupState = <T extends JobType>({
           startTime ?? 0,
           endTime ?? Date.now(),
           sourceConfiguration.runtimeMappings,
-          services.http.fetch
+          services.http.fetch,
+          projectRouting
         );
       },
       onResolve: ({ data: { datasets } }) => {
         updateIndicesWithAvailableDatasets(datasets);
       },
     },
-    [validIndexNames, sourceConfiguration.timestampField, startTime, endTime]
+    [validIndexNames, sourceConfiguration.timestampField, startTime, endTime, projectRouting]
   );
 
   const setUp = useCallback(() => {
@@ -279,33 +281,43 @@ export const useAnalysisSetupState = <T extends JobType>({
   const prevStartTime = usePrevious(startTime);
   const prevEndTime = usePrevious(endTime);
   const prevValidIndexNames = usePrevious(validIndexNames);
+  const prevProjectRouting = usePrevious(projectRouting);
+
+  // Hold off validation until the CPS manager has seeded the default project routing,
+  // so the first request already carries the correct scope instead of being clamped to
+  // the origin project and immediately refetched.
+  const isAwaitingProjectRouting = isCpsEnabled && !isCpsManagerReady;
 
   useEffect(() => {
-    if (!isTimeRangeValid) {
+    if (!isTimeRangeValid || isAwaitingProjectRouting) {
       return;
     }
 
     validateIndices();
-  }, [isTimeRangeValid, validateIndices]);
+  }, [isTimeRangeValid, isAwaitingProjectRouting, validateIndices]);
 
   useEffect(() => {
-    if (!isTimeRangeValid) {
+    if (!isTimeRangeValid || isAwaitingProjectRouting) {
       return;
     }
 
     if (
       startTime !== prevStartTime ||
       endTime !== prevEndTime ||
+      projectRouting !== prevProjectRouting ||
       !isEqual(validIndexNames, prevValidIndexNames)
     ) {
       validateDatasets();
     }
   }, [
     endTime,
+    isAwaitingProjectRouting,
     isTimeRangeValid,
     prevEndTime,
+    prevProjectRouting,
     prevStartTime,
     prevValidIndexNames,
+    projectRouting,
     startTime,
     validIndexNames,
     validateDatasets,
