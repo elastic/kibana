@@ -13,39 +13,33 @@ import Path from 'path';
 import { REPO_ROOT } from '../../lib/paths.mjs';
 
 const WORKSPACE_PATH = Path.resolve(REPO_ROOT, 'pnpm-workspace.yaml');
+const XPACK_DIR = 'x-pack';
 
-// We own the packages: block (derived from kibana.jsonc discovery) and the
-// fenced overrides block (derived from package.json#resolutions). The rest of
-// pnpm-workspace.yaml — install settings, allowBuilds, pnpm-only override pins —
-// is authored by hand and left untouched. Keep these markers in sync with
-// render_pnpm_workspace.ts.
+// Markers fence the two regions we regenerate (packages + overrides); the rest of
+// pnpm-workspace.yaml is authored by hand. Keep in sync with render_pnpm_workspace.ts.
 const PACKAGES_START = '# START GENERATED PACKAGES';
 const PACKAGES_END = '# END GENERATED PACKAGES';
 const OVERRIDES_START = '# START GENERATED OVERRIDES';
 const OVERRIDES_END = '# END GENERATED OVERRIDES';
 
-// Resolutions intentionally not generated as broad selectors, each mapped to the
-// authored override that covers it (value sync is verified below).
-// `@elastic/elasticsearch/@elastic/transport` as `@elastic/elasticsearch>@elastic/transport`
-// would also match the `elasticsearch-8.x` npm: alias (pnpm matches real package
-// names) and force a v9 transport under the v8 client.
+// Kept out of generation: a broad `@elastic/elasticsearch>@elastic/transport` selector
+// would also hit the `elasticsearch-8.x` npm: alias and force v9 transport under the v8
+// client, so it maps to an authored override (value sync verified in renderOverrides).
 const AUTHORED_EQUIVALENTS = new Map([
   ['@elastic/elasticsearch/@elastic/transport', '@elastic/elasticsearch@9>@elastic/transport'],
 ]);
 
 /**
- * Writes pnpm-workspace.yaml and synthesizes a minimal package.json for any
- * package that doesn't ship one. Kibana packages are identified by kibana.jsonc,
- * but pnpm workspaces need a package.json with a matching `name` per package, so
- * we generate the missing ones (gitignored) from the manifest id + root version.
+ * Regenerates the fenced blocks of pnpm-workspace.yaml and synthesizes gitignored
+ * package.json files for packages that only ship a kibana.jsonc (pnpm needs a named
+ * package.json per workspace member).
  *
  * @param {import('@kbn/repo-packages').Package[]} pkgs
- * @param {string} rootVersion
  * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  */
-export async function regeneratePnpmWorkspace(pkgs, rootVersion, log) {
+export async function regeneratePnpmWorkspace(pkgs, log) {
   await writeWorkspaceFile(pkgs, await readResolutions(), log);
-  await synthesizeMissingPackageJsons(pkgs, rootVersion, log);
+  await synthesizeMissingPackageJsons(pkgs, log);
 }
 
 async function writeWorkspaceFile(pkgs, resolutions, log) {
@@ -159,43 +153,29 @@ function parseAuthoredOverrides(content, overridesRe) {
   return entries;
 }
 
-/** @returns {Promise<string[]>} repo-relative paths of packages we generated a package.json for */
-async function synthesizeMissingPackageJsons(pkgs, rootVersion, log) {
-  const generatedRepoRels = [];
+async function synthesizeMissingPackageJsons(pkgs, log) {
   let written = 0;
   await Promise.all(
     pkgs.map(async (p) => {
-      // A package "ships" its own package.json only if it's a real, source-controlled one.
-      // Files we previously generated carry a sentinel and must be (re)managed by us.
-      if (p.pkg && !isGeneratedManifest(p.pkg)) return;
-      generatedRepoRels.push(p.normalizedRepoRelativeDir);
+      // Only (re)manage files we generated (kbnGenerated sentinel); leave real ones.
+      if (p.pkg && p.pkg.kbnGenerated !== true) return;
       const path = Path.resolve(p.directory, 'package.json');
-      const contents = generatedPackageJson(
-        p.id,
-        '1.0.0',
-        p.normalizedRepoRelativeDir.startsWith('x-pack/')
-      );
-      if (!(await readIfExists(path))) {
-        await Fsp.writeFile(path, contents);
-        written += 1;
-      }
+      if (await readIfExists(path)) return;
+      const isXpack = p.normalizedRepoRelativeDir.startsWith(XPACK_DIR + '/');
+      await Fsp.writeFile(path, generatedPackageJson(p.id, isXpack));
+      written += 1;
     })
   );
   if (written) {
     log.warning(`generated ${written} package.json file(s) for workspace packages`);
   }
-  return generatedRepoRels.sort();
 }
 
-function isGeneratedManifest(pkg) {
-  return !!pkg && pkg.kbnGenerated === true;
-}
-
-function generatedPackageJson(id, version, isXpack) {
+function generatedPackageJson(id, isXpack) {
   return `${JSON.stringify(
     {
       name: id,
-      version,
+      version: '1.0.0',
       private: true,
       license: isXpack ? 'Elastic License 2.0' : 'Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0',
       kbnGenerated: true,

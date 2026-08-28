@@ -20,7 +20,6 @@ import { regeneratePnpmWorkspace } from './regenerate_pnpm_workspace.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 import { bootstrapBuildkite } from './buildkite.mjs';
-import { getRootVersion } from './root_version.mjs';
 
 const IS_CI = process.env.CI?.match(/(1|true)/i);
 
@@ -69,7 +68,6 @@ export const command = {
     const skipPrebuilt =
       args.getBooleanValue('prebuilt') === false || !!process.env.KBN_BOOTSTRAP_NO_PREBUILT;
 
-    const rootVersion = await getRootVersion();
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
     // generate the package map and update package.json file, if necessary
@@ -87,7 +85,7 @@ export const command = {
         await updatePackageJson(packages, log);
       }),
       time('regenerate pnpm workspace', async () => {
-        await regeneratePnpmWorkspace(packages, rootVersion, log);
+        await regeneratePnpmWorkspace(packages, log);
       }),
       time('regenerate tsconfig.base.json', async () => {
         await regenerateBaseTsconfig(packages, log);
