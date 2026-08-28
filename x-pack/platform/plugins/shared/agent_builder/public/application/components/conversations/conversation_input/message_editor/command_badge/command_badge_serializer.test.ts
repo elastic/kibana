@@ -281,6 +281,12 @@ describe('deserializeInputSegments', () => {
     expect(segments).toEqual([{ type: 'image', name: 'Screenshot (1).png' }]);
   });
 
+  it('preserves an image link with malformed percent-encoding as text', () => {
+    const segments = deserializeInputSegments('[x](image://bad%.png)');
+
+    expect(segments).toEqual([{ type: 'text', value: '[x](image://bad%.png)' }]);
+  });
+
   it('parses image segment mixed with text', () => {
     const segments = deserializeInputSegments('See [photo.png](image://photo.png) here');
 

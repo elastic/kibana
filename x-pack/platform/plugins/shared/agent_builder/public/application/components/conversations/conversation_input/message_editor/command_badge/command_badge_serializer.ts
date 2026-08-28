@@ -100,7 +100,12 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
     const [_, displayText, scheme, path, queryString] = match;
 
     if (scheme === IMAGE_ATTACHMENT_SCHEME) {
-      segments.push({ type: 'image', name: decodeURIComponent(path) });
+      try {
+        segments.push({ type: 'image', name: decodeURIComponent(path) });
+      } catch {
+        // Malformed percent-encoding, preserve as text
+        segments.push({ type: 'text', value: match[0] });
+      }
     } else {
       const commandDefinition = getCommandDefinitionByScheme(scheme);
 
