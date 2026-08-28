@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
@@ -39,13 +40,9 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
 
   return (
     <EuiCard
-      title={<EuiAvatar
-        name={modelCreator}
-        iconType={provider?.icon ?? 'machineLearningApp'}
-        color="plain"
-        size="l"
-        type="space"
-      />}
+      icon={<EuiIcon type={provider?.icon ?? 'machineLearningApp'} size="l" />}
+      title={modelName}
+      titleSize="xs"
       textAlign="left"
       paddingSize="m"
       data-test-subj={`eisModelCard-${modelName}`}
@@ -55,10 +52,6 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{modelName}</h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.supports', {
               defaultMessage: 'Supports {taskTypes}',
