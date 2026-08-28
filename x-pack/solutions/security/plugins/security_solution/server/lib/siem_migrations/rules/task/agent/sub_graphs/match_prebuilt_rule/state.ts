@@ -15,10 +15,10 @@ import type {
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 /**
- * Max model invocations per subgraph run; caps the agent/tools loop so the model can't search forever.
- * The matching guidelines in `./prompts.ts` tell the model this limit so it doesn't waste its last turn on a search.
+ * Max `searchPrebuiltRules` calls per subgraph run. Enforced by `matchPrebuiltRuleRouter` and
+ * stated in the matching guidelines so the model answers JSON instead of burning a discarded extra search.
  */
-export const MAX_TOOL_CALL_ATTEMPTS = 4;
+export const MAX_TOOL_CALL_ATTEMPTS = 3;
 
 export const NO_MATCH_SUMMARY =
   '## Prebuilt Rule Matching Summary\nNo related prebuilt rule found.';

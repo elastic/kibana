@@ -162,7 +162,7 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
   });
 
   it('lists every query tried so the model can measure its own usage against the stated cap', async () => {
-    // On the last allowed turn the query list has MAX_TOOL_CALL_ATTEMPTS - 1 entries, so the model
+    // On the last allowed turn the query list has MAX_TOOL_CALL_ATTEMPTS entries, so the model
     // can see the cap is reached by comparing the list to the number in the guidelines — no turn
     // counting required, and nothing in the node has to detect this turn specially.
     const priorMessages = [

@@ -167,13 +167,13 @@ Call searchPrebuiltRules with a meaningfully different query — not a light rew
  * `MAX_TOOL_CALL_ATTEMPTS` so the model knows it has not exhausted the cap.
  *
  * Only ever injected on `previousSearchAttempts.length === 1` (the caller's guard), so
- * `remainingSearches` is always `MAX_TOOL_CALL_ATTEMPTS - 2`.
+ * `remainingSearches` is always `MAX_TOOL_CALL_ATTEMPTS - 1`.
  */
 export const formatRetrySearchNudgePrompt = (
   previousSearchAttempts: PreviousSearchAttempt[]
 ): string => {
   const triedQuery = `"${previousSearchAttempts[0].query}"`;
-  const remainingSearches = MAX_TOOL_CALL_ATTEMPTS - 1 - previousSearchAttempts.length;
+  const remainingSearches = MAX_TOOL_CALL_ATTEMPTS - previousSearchAttempts.length;
   return (
     'Your first search returned candidates but none were a match. ' +
     'Before concluding there is no matching prebuilt rule, try one more search from a ' +

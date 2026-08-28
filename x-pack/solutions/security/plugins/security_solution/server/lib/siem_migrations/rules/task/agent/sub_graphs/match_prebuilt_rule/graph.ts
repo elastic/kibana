@@ -13,7 +13,11 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { SearchPrebuiltRulesTool } from '../../tools/prebuilt_rules_search';
-import { matchPrebuiltRuleState, type MatchPrebuiltRuleState } from './state';
+import {
+  MAX_TOOL_CALL_ATTEMPTS,
+  matchPrebuiltRuleState,
+  type MatchPrebuiltRuleState,
+} from './state';
 import { getFinalizeMatchNode, getMatchPrebuiltRuleAgentNode } from './nodes';
 
 interface GetMatchPrebuiltRuleGraphParams {
@@ -65,15 +69,18 @@ const matchPrebuiltRuleRouter = (state: MatchPrebuiltRuleState) => {
   ).length;
   const lastMessage = messages.at(-1);
   const hasToolCalls = AIMessage.isInstance(lastMessage) && Boolean(lastMessage.tool_calls?.length);
-  const maxSearches = 3;
 
-  if (hasToolCalls && searchCount <= maxSearches) {
+  if (hasToolCalls && searchCount <= MAX_TOOL_CALL_ATTEMPTS) {
     return 'tools';
   }
   // Retry once more from a different keyword angle when the model found candidates but none matched.
   // Skip when the last search was empty — the agent node already handles that via the query prompt.
   const matchResult = state.match_prebuilt_rules_result;
-  if (matchResult !== undefined && !matchResult.match?.trim() && searchCount < maxSearches) {
+  if (
+    matchResult !== undefined &&
+    !matchResult.match?.trim() &&
+    searchCount < MAX_TOOL_CALL_ATTEMPTS
+  ) {
     const lastToolMessage = [...messages].reverse().find(ToolMessage.isInstance);
     const lastSearchHadCandidates =
       lastToolMessage !== undefined &&

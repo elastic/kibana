@@ -16,6 +16,7 @@ import { MockSiemMigrationTelemetryClient } from '../__mocks__/mocks';
 import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks';
 import { MockRuleMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getRuleMigrationAgentV2 } from './graph_v2';
+import { MAX_TOOL_CALL_ATTEMPTS } from './sub_graphs/match_prebuilt_rule/state';
 import { getRulesMigrationTools } from './tools';
 import { createRuleMigrationsDataClientMock } from '../../data/__mocks__/mocks';
 
@@ -274,7 +275,7 @@ describe('getRuleMigrationAgentV2', () => {
       expect(response.translation_result).toEqual('untranslatable');
     });
 
-    it('gives up after MAX_TOOL_CALL_ATTEMPTS agent turns if the model keeps calling the tool', async () => {
+    it('gives up after MAX_TOOL_CALL_ATTEMPTS searches if the model keeps calling the tool', async () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockIncorrectRuleName]);
       const graph = await setupAgent([
         { nodeId: 'createSemanticQuery', response: mockSemanticQueryResponse },
@@ -289,11 +290,10 @@ describe('getRuleMigrationAgentV2', () => {
         original_rule: mockOriginalRule,
         resources: {},
       });
-      // MAX_TOOL_CALL_ATTEMPTS (4) agent-node turns total, but the router forces the 4th straight
-      // to `finalize` regardless of its tool call, so only the first 3 turns' searches actually
-      // run (see `matchPrebuiltRuleRouter` in `../sub_graphs/match_prebuilt_rule/graph.ts`).
-      expect(fakeLLM.getNodeCallCount('agent')).toBe(4);
-      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(3);
+      // After the last executed search, tools → agent one more time. That extra tool call is
+      // discarded (`searchCount` exceeds MAX_TOOL_CALL_ATTEMPTS), so only that many searches run.
+      expect(fakeLLM.getNodeCallCount('agent')).toBe(MAX_TOOL_CALL_ATTEMPTS + 1);
+      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(MAX_TOOL_CALL_ATTEMPTS);
       expect(response.elastic_rule?.prebuilt_rule_id).toBeUndefined();
       expect(response.translation_result).toEqual('untranslatable');
     });
