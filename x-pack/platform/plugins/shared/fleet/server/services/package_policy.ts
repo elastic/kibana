@@ -2621,7 +2621,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
         await this.bumpAgentPoliciesRevision(
           { soClient, esClient },
-          agentPolicies.filter(Boolean).map((p) => p.id),
+          agentPolicies.map((p) => p.id),
           {
             user: options?.user,
             asyncDeploy: options?.asyncDeploy,
