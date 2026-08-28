@@ -1,5 +1,5 @@
 {
-  "sha1": "3f67ed9cce7cc777d3306a29766463b7cad92e09",
+  "sha1": "7dc64e1b364dec24708eb48e269bdc346211b6da",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -596,6 +596,70 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
         "line": 130,
         "column": 13
+      }
+    },
+    {
+      "id": "5a26de1931ab3a5-be0896f70545849",
+      "title": "Agent Builder — chat API converse (/api/chat) converse returns the conversation with its events timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
+        "line": 99,
+        "column": 40
+      }
+    },
+    {
+      "id": "5a26de1931ab3a5-4257ca0cb38be62",
+      "title": "Agent Builder — chat API converse (/api/chat) multi-round converse accumulates the timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
+        "line": 123,
+        "column": 22
+      }
+    },
+    {
+      "id": "5a26de1931ab3a5-951e46f459bffc8",
+      "title": "Agent Builder — chat API converse (/api/chat) streaming converse responds with an event stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
+        "line": 156,
+        "column": 19
+      }
+    },
+    {
+      "id": "5a26de1931ab3a5-a5fad68cdf3d422",
+      "title": "Agent Builder — chat API converse (/api/chat) invalid converse payload returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
+        "line": 182,
+        "column": 55
       }
     },
     {
@@ -2114,8 +2178,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 163,
-        "column": 5
+        "line": 160,
+        "column": 8
       }
     },
     {
@@ -2128,7 +2192,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 176,
+        "line": 173,
         "column": 17
       }
     },
@@ -2142,8 +2206,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 193,
-        "column": 16
+        "line": 190,
+        "column": 40
       }
     },
     {
@@ -2156,8 +2220,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 215,
-        "column": 28
+        "line": 214,
+        "column": 13
       }
     },
     {
@@ -2170,8 +2234,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 224,
-        "column": 14
+        "line": 219,
+        "column": 4
       }
     },
     {
@@ -2184,8 +2248,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 226,
-        "column": 29
+        "line": 223,
+        "column": 30
       }
     },
     {
@@ -2198,8 +2262,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 236,
-        "column": 29
+        "line": 234,
+        "column": 14
       }
     },
     {
@@ -2212,8 +2276,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 243,
-        "column": 14
+        "line": 238,
+        "column": 4
       }
     },
     {
@@ -2227,7 +2291,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
         "line": 248,
-        "column": 7
+        "column": 27
       }
     },
     {
@@ -2240,8 +2304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 265,
-        "column": 7
+        "line": 263,
+        "column": 14
       }
     },
     {
@@ -2254,8 +2318,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 281,
-        "column": 7
+        "line": 278,
+        "column": 14
       }
     },
     {
