@@ -10,8 +10,12 @@ import {
   KSPM_POLICY_TEMPLATE,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+  CDR_METERING_STATE_INDEX,
 } from '@kbn/cloud-security-posture-common';
 import { CNVM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-plugin/common/constants';
+
+export { CDR_METERING_STATE_INDEX };
+
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
 export const AGGREGATION_PRECISION_THRESHOLD = 40000;
 export const ASSETS_SAMPLE_GRANULARITY = '24h';
@@ -66,3 +70,8 @@ export const BILLABLE_ASSETS_CONFIG = {
     values: ['Node', 'node'],
   },
 };
+
+// GCP compute instance duration-based metering: only instances with at least
+// this many hours of attested running time are billable (security-team#17662).
+export const GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS = 24;
+export const GCP_COMPUTE_INSTANCE_SUB_TYPE = 'gcp-compute-instance';
