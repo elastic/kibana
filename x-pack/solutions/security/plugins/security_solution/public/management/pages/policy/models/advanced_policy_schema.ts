@@ -2949,4 +2949,37 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.alerts.reputation_requests_transparency',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.reputation_requests_transparency',
+      {
+        defaultMessage:
+          "Log all messages sent to Elastic reputation service, Personally Identifiable Information stripped, at desired log level. Log the PII filter during configuration. Allowed values are 'info' and 'debug'. Default: none (disabled).",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.reputation_requests_transparency',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.reputation_requests_transparency',
+      {
+        defaultMessage:
+          "Log all messages sent to Elastic reputation service, Personally Identifiable Information stripped, at desired log level. Log the PII filter during configuration. Allowed values are 'info' and 'debug'. Default: none (disabled).",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.reputation_requests_transparency',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.reputation_requests_transparency',
+      {
+        defaultMessage:
+          "Log all messages sent to Elastic reputation service, Personally Identifiable Information stripped, at desired log level. Log the PII filter during configuration. Allowed values are 'info' and 'debug'. Default: none (disabled).",
+      }
+    ),
+  },
 ];
