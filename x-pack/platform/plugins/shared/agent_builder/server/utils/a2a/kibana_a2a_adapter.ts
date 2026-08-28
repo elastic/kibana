@@ -36,11 +36,16 @@ const isStreamingMethod = (body: unknown): boolean => {
   return typeof method === 'string' && STREAMING_METHODS.has(method);
 };
 
-const isAsyncGenerator = (
-  value: unknown
-): value is AsyncGenerator<JSONRPCResponse, void, undefined> =>
-  typeof (value as { [Symbol.asyncIterator]?: unknown } | null)?.[Symbol.asyncIterator] ===
-  'function';
+/**
+ * The A2A SDK's `JsonRpcTransportHandler.handle()` returns either a Promise
+ * (for `message/send` etc.) or an AsyncGenerator (for `message/stream` /
+ * `tasks/resubscribe`). We only need to detect the streaming shape, and any
+ * async-iterable is sufficient for `for await`; hence this checks the general
+ * iterable protocol rather than an AsyncGenerator specifically.
+ */
+const isAsyncIterable = (value: unknown): value is AsyncIterable<JSONRPCResponse> =>
+  value !== null &&
+  typeof (value as { [Symbol.asyncIterator]?: unknown })[Symbol.asyncIterator] === 'function';
 
 const statusCodeForError = (error: unknown): number => {
   if (isAgentBuilderError(error) && typeof error.meta?.statusCode === 'number') {
@@ -90,7 +95,11 @@ export class KibanaA2AAdapter {
   private async createA2AComponents(
     kibanaRequest: KibanaRequest,
     agentId: string,
-    { blocking = true, isStreaming = false }: { blocking?: boolean; isStreaming?: boolean } = {}
+    {
+      blocking = true,
+      isStreaming = false,
+      abortSignal,
+    }: { blocking?: boolean; isStreaming?: boolean; abortSignal?: AbortSignal } = {}
   ) {
     // Get agent and create agent card
     const { agents, tools } = this.getInternalServices();
@@ -111,14 +120,15 @@ export class KibanaA2AAdapter {
     // with the ES-persisted execution document (rather than in-memory) makes that safe.
     const taskStore = new KibanaTaskStore(this.getInternalServices, kibanaRequest);
 
-    const agentExecutor = new KibanaAgentExecutor(
-      this.logger,
-      this.getInternalServices,
-      kibanaRequest,
+    const agentExecutor = new KibanaAgentExecutor({
+      logger: this.logger,
+      getInternalServices: this.getInternalServices,
+      request: kibanaRequest,
       agentId,
       blocking,
-      isStreaming
-    );
+      isStreaming,
+      abortSignal,
+    });
 
     const requestHandler = new DefaultRequestHandler(
       agentCard as AgentCard,
@@ -180,17 +190,21 @@ export class KibanaA2AAdapter {
 
       const streaming = isStreamingMethod(req.body);
 
+      // Created up-front so the abort signal reaches BOTH the executor (which
+      // hands it to executeAgent to cancel the LLM/tool round when the client
+      // disconnects) AND the SSE helper (which stops writing frames).
+      const abortController = new AbortController();
+      const abortSub = req.events.aborted$.subscribe(() => abortController.abort());
+
       const { jsonRpcHandler } = await this.createA2AComponents(req, agentId, {
         blocking: isBlockingRequest(req.body),
         isStreaming: streaming,
+        abortSignal: abortController.signal,
       });
 
       const result = await jsonRpcHandler.handle(req.body);
 
-      if (isAsyncGenerator(result)) {
-        const abortController = new AbortController();
-        req.events.aborted$.subscribe(() => abortController.abort());
-
+      if (isAsyncIterable(result)) {
         const body = asyncGeneratorToA2ASSE(result, {
           logger: this.logger,
           signal: abortController.signal,
@@ -198,12 +212,15 @@ export class KibanaA2AAdapter {
           isCloudEnabled: this.isCloudEnabled,
         });
 
+        body.on('close', () => abortSub.unsubscribe());
+
         return res.ok({
           headers: getSSEResponseHeaders(),
           body,
         });
       }
 
+      abortSub.unsubscribe();
       return res.ok({
         headers: { 'Content-Type': 'application/json' },
         body: result,

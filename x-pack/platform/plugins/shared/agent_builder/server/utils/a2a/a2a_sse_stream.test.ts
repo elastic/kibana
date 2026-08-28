@@ -105,6 +105,26 @@ describe('asyncGeneratorToA2ASSE', () => {
     expect(body).toMatch(/\n: 0{100,}/);
   });
 
+  it('pads only once per throttle window when multiple small frames arrive in a burst', async () => {
+    const events = [
+      buildResponse(1, { a: 1 }),
+      buildResponse(1, { b: 2 }),
+      buildResponse(1, { c: 3 }),
+    ];
+    const controller = new AbortController();
+    const output = asyncGeneratorToA2ASSE(runGenerator(events), {
+      logger: buildLogger(),
+      signal: controller.signal,
+      isCloudEnabled: true,
+    });
+
+    const body = await collect(output);
+    // The generator yields synchronously; all frames are written within the
+    // same millisecond, so the throttled padding should fire exactly once.
+    const padMatches = body.match(/\n: 0{100,}\n\n/g) ?? [];
+    expect(padMatches).toHaveLength(1);
+  });
+
   it('does NOT pad frames when isCloudEnabled is false', async () => {
     const events = [buildResponse(1, { tiny: 1 })];
     const controller = new AbortController();
@@ -116,6 +136,23 @@ describe('asyncGeneratorToA2ASSE', () => {
 
     const body = await collect(output);
     expect(body).not.toMatch(/\n: 0{100,}/);
+  });
+
+  it('ends the stream immediately when the signal is already aborted at entry, without consuming the source', async () => {
+    const gen = jest.fn(async function* (): AsyncGenerator<JSONRPCResponse, void, undefined> {
+      yield buildResponse(1, { shouldNotBeSeen: true });
+    });
+    const controller = new AbortController();
+    controller.abort();
+
+    const output = asyncGeneratorToA2ASSE(gen(), {
+      logger: buildLogger(),
+      signal: controller.signal,
+    });
+
+    const body = await collect(output);
+    expect(body).toBe('');
+    expect(output.writableEnded).toBe(true);
   });
 
   it('ends the stream when the abort signal fires mid-generation', async () => {

@@ -15,7 +15,6 @@ import type {
   Message,
   TaskStatusUpdateEvent,
   TaskArtifactUpdateEvent,
-  Task,
   TaskState,
 } from '@a2a-js/sdk';
 import {
@@ -28,7 +27,6 @@ import {
   isToolResultEvent,
   isReasoningEvent,
   isPromptRequestEvent,
-  isUserQuestionAskedEvent,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import type { ChatEvent } from '@kbn/agent-builder-common';
@@ -64,20 +62,80 @@ interface StreamContext {
    * know to emit subsequent chunks with `append: true`.
    */
   seenArtifactIds: Set<string>;
+  /**
+   * Artifacts that have received chunks but no closing `lastChunk: true` yet.
+   * On any terminal path we synthesize a closing `artifact-update` for each so
+   * conforming clients don't treat the artifact as perpetually growing.
+   */
+  openArtifactIds: Set<string>;
+}
+
+/**
+ * Build closing `artifact-update` events for any artifact that received chunks
+ * but was never closed (`message_complete` missing on a terminal path).
+ * Clears the open set as a side effect.
+ */
+const buildOpenArtifactCloses = (ctx: StreamContext): TaskArtifactUpdateEvent[] => {
+  const closes: TaskArtifactUpdateEvent[] = [];
+  for (const artifactId of ctx.openArtifactIds) {
+    closes.push({
+      kind: 'artifact-update',
+      taskId: ctx.taskId,
+      contextId: ctx.contextId,
+      append: true,
+      lastChunk: true,
+      artifact: { artifactId, parts: [] },
+    });
+  }
+  ctx.openArtifactIds.clear();
+  return closes;
+};
+
+export interface KibanaAgentExecutorDeps {
+  logger: Logger;
+  getInternalServices: () => InternalStartServices;
+  request: KibanaRequest;
+  agentId: string;
+  blocking?: boolean;
+  isStreaming?: boolean;
+  /**
+   * Aborted when the client disconnects. Propagated into `executeAgent` so the
+   * underlying LLM/tool round is canceled, and observed by the streaming loop
+   * so we finish the event bus promptly instead of hanging on the source
+   * observable until it naturally terminates.
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**
  * Agent executor that bridges A2A requests to Kibana's agentBuilder system
  */
 export class KibanaAgentExecutor implements AgentExecutor {
-  constructor(
-    private logger: Logger,
-    private getInternalServices: () => InternalStartServices,
-    private kibanaRequest: KibanaRequest,
-    private agentId: string,
-    private blocking: boolean = true,
-    private isStreaming: boolean = false
-  ) {}
+  private readonly logger: Logger;
+  private readonly getInternalServices: () => InternalStartServices;
+  private readonly kibanaRequest: KibanaRequest;
+  private readonly agentId: string;
+  private readonly blocking: boolean;
+  private readonly isStreaming: boolean;
+  private readonly abortSignal?: AbortSignal;
+
+  constructor({
+    logger,
+    getInternalServices,
+    request,
+    agentId,
+    blocking = true,
+    isStreaming = false,
+    abortSignal,
+  }: KibanaAgentExecutorDeps) {
+    this.logger = logger;
+    this.getInternalServices = getInternalServices;
+    this.kibanaRequest = request;
+    this.agentId = agentId;
+    this.blocking = blocking;
+    this.isStreaming = isStreaming;
+    this.abortSignal = abortSignal;
+  }
 
   async execute(requestContext: RequestContext, eventBus: ExecutionEventBus): Promise<void> {
     const { taskId, userMessage, contextId } = requestContext;
@@ -86,6 +144,20 @@ export class KibanaAgentExecutor implements AgentExecutor {
       this.logger.debug(
         `A2A: Starting task ${taskId} (contextId=${contextId}, streaming=${this.isStreaming}, blocking=${this.blocking})`
       );
+
+      // Publish the initial Task frame BEFORE executeAgent so the stream always
+      // opens with a Task, even if executeAgent throws (auth/resolver/ES). The
+      // catch below then adds the terminal failed status-update.
+      if (this.isStreaming) {
+        eventBus.publish({
+          id: taskId,
+          contextId,
+          kind: 'task',
+          status: { state: 'working', timestamp: new Date().toISOString() },
+          history: [],
+          artifacts: [],
+        });
+      }
 
       const userText = userMessage.parts
         .filter((part: Part): part is TextPart => part.kind === 'text')
@@ -101,6 +173,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
         request: this.kibanaRequest,
         useTaskManager: !this.blocking,
         executionId: this.blocking ? undefined : taskId,
+        abortSignal: this.abortSignal,
         // Persisted so KibanaTaskStore can echo the same contextId back on `tasks/get` polls.
         metadata: { a2aContextId: contextId },
         params: {
@@ -223,30 +296,39 @@ export class KibanaAgentExecutor implements AgentExecutor {
     taskId: string;
     contextId: string;
   }): Promise<void> {
-    const ctx: StreamContext = { taskId, contextId, seenArtifactIds: new Set() };
-
-    // Publish an initial Task event so the client sees the task lifecycle start.
-    const initialTask: Task = {
-      id: taskId,
+    const ctx: StreamContext = {
+      taskId,
       contextId,
-      kind: 'task',
-      status: { state: 'submitted', timestamp: new Date().toISOString() },
-      history: [],
-      artifacts: [],
+      seenArtifactIds: new Set(),
+      openArtifactIds: new Set(),
     };
-    eventBus.publish(initialTask);
+    const signal = this.abortSignal;
 
     return new Promise((resolve) => {
       let terminated = false;
       // eslint-disable-next-line prefer-const
       let subscription: { unsubscribe: () => void } | undefined;
+
+      const onAbort = () => {
+        if (terminated) return;
+        this.logger.debug(`A2A: Task ${taskId} aborted by client`);
+        finish();
+      };
+
       const finish = () => {
         if (terminated) return;
         terminated = true;
+        signal?.removeEventListener('abort', onAbort);
         subscription?.unsubscribe();
         eventBus.finished();
         resolve();
       };
+
+      if (signal?.aborted) {
+        onAbort();
+        return;
+      }
+      signal?.addEventListener('abort', onAbort, { once: true });
 
       subscription = events$.subscribe({
         next: (event: ChatEvent) => {
@@ -267,6 +349,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
           if (terminated) return;
           const message = err instanceof Error ? err.message : String(err);
           this.logger.error(`A2A: Task ${taskId} stream error: ${message}`);
+          for (const close of buildOpenArtifactCloses(ctx)) eventBus.publish(close);
           eventBus.publish(
             buildStatusUpdate({
               taskId,
@@ -281,6 +364,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
         complete: () => {
           if (terminated) return;
           // Underlying stream completed without a terminal A2A event; emit one.
+          for (const close of buildOpenArtifactCloses(ctx)) eventBus.publish(close);
           eventBus.publish(
             buildStatusUpdate({ taskId, contextId, state: 'completed', final: true })
           );
@@ -307,6 +391,7 @@ export const translateAgentBuilderEvent = (
     const artifactId = messageId;
     const append = ctx.seenArtifactIds.has(artifactId);
     ctx.seenArtifactIds.add(artifactId);
+    ctx.openArtifactIds.add(artifactId);
     return [
       {
         kind: 'artifact-update',
@@ -327,8 +412,11 @@ export const translateAgentBuilderEvent = (
     const artifactId = messageId;
     const alreadyStreamed = ctx.seenArtifactIds.has(artifactId);
     ctx.seenArtifactIds.add(artifactId);
+    ctx.openArtifactIds.delete(artifactId);
     if (alreadyStreamed) {
-      // The full text was already streamed via chunks; just mark the artifact closed.
+      // The full text was already streamed via chunks; close the artifact with
+      // no additional parts. Clients that reject unknown parts (or render empty
+      // text as trailing whitespace) benefit from the empty array.
       return [
         {
           kind: 'artifact-update',
@@ -336,10 +424,7 @@ export const translateAgentBuilderEvent = (
           contextId,
           append: true,
           lastChunk: true,
-          artifact: {
-            artifactId,
-            parts: [{ kind: 'text', text: '' } as TextPart],
-          },
+          artifact: { artifactId, parts: [] },
         },
       ];
     }
@@ -404,26 +489,17 @@ export const translateAgentBuilderEvent = (
   }
 
   if (isPromptRequestEvent(event)) {
-    return [buildInputRequiredFromPrompt({ taskId, contextId, prompt: event.data.prompt })];
-  }
-
-  if (isUserQuestionAskedEvent(event)) {
-    // Reuse the ask-user-question prompt formatter for consistency.
     return [
-      buildInputRequiredFromPrompt({
-        taskId,
-        contextId,
-        prompt: {
-          type: AgentPromptType.ask_user_question,
-          id: event.data.prompt_id,
-          questions: event.data.questions,
-        } as PromptRequest,
-      }),
+      ...buildOpenArtifactCloses(ctx),
+      buildInputRequiredFromPrompt({ taskId, contextId, prompt: event.data.prompt }),
     ];
   }
 
   if (isRoundCompleteEvent(event)) {
-    return [buildStatusUpdate({ taskId, contextId, state: 'completed', final: true })];
+    return [
+      ...buildOpenArtifactCloses(ctx),
+      buildStatusUpdate({ taskId, contextId, state: 'completed', final: true }),
+    ];
   }
 
   return [];

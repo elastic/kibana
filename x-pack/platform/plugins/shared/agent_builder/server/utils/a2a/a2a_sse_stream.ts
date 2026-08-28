@@ -13,6 +13,11 @@ import { cloudProxyBufferSize } from '@kbn/sse-utils-server';
 
 const KEEP_ALIVE_INTERVAL_MS = 10_000;
 
+/**
+ * Minimum time between cloud-proxy padding writes.
+ */
+const CLOUD_PAD_THROTTLE_MS = 100;
+
 interface AsyncGeneratorToA2ASSEOptions {
   logger: Pick<Logger, 'debug' | 'error'>;
   signal: AbortSignal;
@@ -33,7 +38,7 @@ async function pumpEventsToFrames({
   requestId,
   logger,
 }: {
-  stream: AsyncGenerator<JSONRPCResponse, void, undefined>;
+  stream: AsyncIterable<JSONRPCResponse>;
   writeFrame: (frame: string) => void;
   signal: AbortSignal;
   requestId: string | number | null;
@@ -76,7 +81,7 @@ async function pumpEventsToFrames({
  * line to force the Cloud proxy (which buffers ~4KB) to flush promptly.
  */
 export const asyncGeneratorToA2ASSE = (
-  stream: AsyncGenerator<JSONRPCResponse, void, undefined>,
+  stream: AsyncIterable<JSONRPCResponse>,
   { logger, signal, requestId = null, isCloudEnabled = false }: AsyncGeneratorToA2ASSEOptions
 ): PassThrough => {
   const output = new PassThrough();
@@ -87,11 +92,18 @@ export const asyncGeneratorToA2ASSE = (
     }
   };
 
+  let lastPadAt = 0;
   const writeFrame = (frame: string) => {
     write(frame);
-    // Force downstream proxy buffers to flush small frames promptly.
+    // Force downstream proxy buffers to flush small frames promptly, but at
+    // most once per throttle window so a burst of frames doesn't emit one
+    // padding chunk per frame.
     if (isCloudEnabled && frame.length <= cloudProxyBufferSize) {
-      write(`: ${'0'.repeat(cloudProxyBufferSize * 2)}\n\n`);
+      const now = Date.now();
+      if (now - lastPadAt >= CLOUD_PAD_THROTTLE_MS) {
+        write(`: ${'0'.repeat(cloudProxyBufferSize * 2)}\n\n`);
+        lastPadAt = now;
+      }
     }
   };
 
@@ -116,6 +128,10 @@ export const asyncGeneratorToA2ASSE = (
   }
   signal.addEventListener('abort', onAbort, { once: true });
 
+  // `pumpEventsToFrames` handles source errors inline (by emitting an
+  // `event: error` frame) and does not reject. The `.catch` is belt-and-
+  // suspenders against a future refactor introducing a rejection path;
+  // without it we'd trip `@typescript-eslint/no-floating-promises`.
   pumpEventsToFrames({ stream, writeFrame, signal, requestId, logger })
     .catch((err) => logger.error(`A2A SSE: unhandled pump error: ${err}`))
     .finally(() => {
