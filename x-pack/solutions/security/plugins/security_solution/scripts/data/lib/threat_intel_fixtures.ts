@@ -248,8 +248,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario> = {
       'admin. The same actor dismisses secret scanning alerts, bypasses branch protection, and ' +
       'completes fork-triggered workflows while minting fine-grained PATs. Hunt ATT&CK T1567, ' +
       'T1098, and T1195 in github.audit telemetry.',
-    articleUrl:
-      'https://www.elastic.co/security-labs/axios-supply-chain-compromise-detections',
+    articleUrl: 'https://www.elastic.co/security-labs/axios-supply-chain-compromise-detections',
     joinIocs: [
       { type: 'ip', value: '192.0.2.70', defanged: '192[.]0[.]2[.]70' },
       { type: 'email', value: 'dev-contractor-42@corp.example' },
