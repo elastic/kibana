@@ -16,7 +16,7 @@ import { ConversationMetadataFlyoutSnapshot } from './conversation_metadata_flyo
 
 const generateTitleId = htmlIdGenerator('agentBuilderConversationMetadataFlyoutTitle');
 
-export interface OpenConversationMetadataFlyoutOptions {
+export interface OpenConversationDetailsFlyoutOptions {
   core: CoreStart;
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
@@ -24,13 +24,13 @@ export interface OpenConversationMetadataFlyoutOptions {
   onClose?: () => void;
 }
 
-export const openConversationMetadataFlyout = async ({
+export const openConversationDetailsFlyout = async ({
   core,
   conversationsService,
   conversationTemplatesService,
   conversationId,
   onClose,
-}: OpenConversationMetadataFlyoutOptions): Promise<() => void> => {
+}: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
 

@@ -57,7 +57,7 @@ import type {
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
-  OpenConversationMetadataOptions,
+  OpenConversationDetailsOptions,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type {
@@ -228,14 +228,14 @@ export class AgentBuilderPlugin
       return { chatRef: sidebarRef };
     };
 
-    const handleOpenConversationMetadata = async ({
+    const openConversationDetails = async ({
       conversationId,
       onClose,
-    }: OpenConversationMetadataOptions): Promise<() => void> => {
-      const { openConversationMetadataFlyout } = await import(
+    }: OpenConversationDetailsOptions): Promise<() => void> => {
+      const { openConversationDetailsFlyout } = await import(
         './flyout/open_conversation_metadata_flyout'
       );
-      return openConversationMetadataFlyout({
+      return openConversationDetailsFlyout({
         core,
         conversationsService,
         conversationTemplatesService,
@@ -392,7 +392,7 @@ export class AgentBuilderPlugin
       },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
-      openConversationMetadata: handleOpenConversationMetadata,
+      openConversationDetails,
     };
 
     if (hasAgentBuilder) {

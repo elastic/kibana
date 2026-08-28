@@ -146,9 +146,9 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 }
 
 /**
- * Options passed when opening the conversation metadata flyout.
+ * Options passed when opening conversation details.
  */
-export interface OpenConversationMetadataOptions {
+export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
 }
@@ -305,5 +305,5 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
-  openConversationMetadata: (options: OpenConversationMetadataOptions) => Promise<() => void>;
+  openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

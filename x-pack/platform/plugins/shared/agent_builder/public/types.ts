@@ -40,7 +40,7 @@ export type {
   ConversationTemplateUIDefinition,
   ConversationTemplateServiceStartContract,
   OpenConversationSidebarReturn,
-  OpenConversationMetadataOptions,
+  OpenConversationDetailsOptions,
   PublicEmbeddableConversationProps,
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,

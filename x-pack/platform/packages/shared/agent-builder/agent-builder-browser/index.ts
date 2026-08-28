@@ -43,7 +43,7 @@ export type {
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
   OpenConversationSidebarOptions,
-  OpenConversationMetadataOptions,
+  OpenConversationDetailsOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
 } from './plugin_contract';
