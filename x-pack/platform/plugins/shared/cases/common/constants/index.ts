@@ -400,6 +400,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesTableColumns: 'cases.list.tableColumns',
   casesListFields: 'cases.list.fields',
+  casesGlobalFieldColumns: 'cases.list.globalFieldColumns',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesViewMode: 'cases.list.viewMode',
   casesTableState: 'cases.list.state',

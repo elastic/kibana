@@ -66,15 +66,18 @@ import {
 } from '../cases_analytics_v2';
 import { CasesEventBus } from '../events/event_bus';
 
-const createCasesEventBusMock = (): CasesEventBus => {
+export const createCasesEventBusMock = (): CasesEventBus => {
   return {
     ...new CasesEventBus(),
     emitCaseCreated: jest.fn(),
     emitCaseUpdated: jest.fn(),
     emitAttachmentsAdded: jest.fn(),
+    emitAlertStatusChanged: jest.fn(),
     onCaseCreated: jest.fn(),
     onCaseUpdated: jest.fn(),
     onAttachmentsAdded: jest.fn(),
+    onAlertStatusChanged: jest.fn(),
+    hasAlertStatusChangedListeners: jest.fn().mockReturnValue(false),
   };
 };
 

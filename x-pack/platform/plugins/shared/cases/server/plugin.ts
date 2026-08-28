@@ -521,6 +521,12 @@ export class CasePlugin
     return {
       getCasesClientWithRequest: this.getCasesClientWithRequest(core, 'plugin_contract'),
       getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
+      getCasesEventBus: () => {
+        if (!this.casesEventBus) {
+          throw new Error('getCasesEventBus called before casesEventBus was initialized');
+        }
+        return this.casesEventBus;
+      },
       config: this.caseConfig,
     };
   }
