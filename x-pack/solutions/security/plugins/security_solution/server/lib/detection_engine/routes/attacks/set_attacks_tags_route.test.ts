@@ -384,6 +384,48 @@ describe('set attacks tags', () => {
           expect.objectContaining({ attackIds: ['attack1'] })
         );
       });
+
+      test('non-cascade: emits when the only changed tag is beyond the operation cap', async () => {
+        // Encoding WHY: the non-cascade `verifiedAttackIds` predicate must use the full valid
+        // arrays (not capped) so attacks whose only change is an over-cap tag still fire the
+        // trigger. Without this fix the trigger is silently suppressed even though the
+        // mutation ran and changed the document.
+        const existingTags = Array.from({ length: MAX_TAGS_PER_OPERATION }, (_, i) => `tag-${i}`);
+        const overCapTag = `tag-${MAX_TAGS_PER_OPERATION}`;
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+            hits: [
+              {
+                _id: 'attack1',
+                _index: SCHEDULED_INDEX,
+                _source: { [ALERT_WORKFLOW_TAGS]: existingTags },
+              },
+            ],
+          },
+        } as estypes.SearchResponse<unknown>);
+        await server.inject(
+          getRequest({
+            ids: ['attack1'],
+            tags: { tags_to_add: [...existingTags, overCapTag], tags_to_remove: [] },
+          }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            attackIds: ['attack1'],
+            tagsAdded: [],
+            truncated: true,
+          })
+        );
+      });
     });
 
     test('emits attackTagsChanged and alertTagsChanged for cascade update', async () => {

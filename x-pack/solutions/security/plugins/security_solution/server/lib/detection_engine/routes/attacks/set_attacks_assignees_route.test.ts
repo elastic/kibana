@@ -389,6 +389,51 @@ describe('set attacks assignees', () => {
           expect.objectContaining({ attackIds: ['attack1'] })
         );
       });
+
+      test('non-cascade: emits when the only changed assignee is beyond the operation cap', async () => {
+        // Encoding WHY: the non-cascade `verifiedAttackIds` predicate must use the full valid
+        // arrays (not capped) so attacks whose only change is an over-cap assignee still fire
+        // the trigger. Without this fix the trigger is silently suppressed even though the
+        // mutation ran and changed the document.
+        const existingUids = Array.from(
+          { length: MAX_ASSIGNEES_PER_OPERATION },
+          (_, i) => `uid-${i}`
+        );
+        const overCapUid = `uid-${MAX_ASSIGNEES_PER_OPERATION}`;
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+            hits: [
+              {
+                _id: 'attack1',
+                _index: SCHEDULED_INDEX,
+                _source: { [ALERT_WORKFLOW_ASSIGNEE_IDS]: existingUids },
+              },
+            ],
+          },
+        } as estypes.SearchResponse<unknown>);
+        await server.inject(
+          getRequest({
+            ids: ['attack1'],
+            assignees: { add: [...existingUids, overCapUid], remove: [] },
+          }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            attackIds: ['attack1'],
+            assigneesAdded: [],
+            truncated: true,
+          })
+        );
+      });
     });
 
     test('emits attackAssigneesChanged and alertAssigneesChanged for cascade update', async () => {
