@@ -203,6 +203,9 @@ export const parseBody = (value: string): string[] => {
     // optionally there is E notation
     if (isENotation(char)) {
       next();
+      if (isPlusSign(char) || isMinusSign(char)) {
+        next();
+      }
       // needs at least 1 digit after e or E
       if (!isDigit(char)) {
         throw new Error('Missing digits after E notation');
@@ -544,6 +547,9 @@ const isNumberStartChar = (char: string): boolean => {
 };
 const isMinusSign = (char: string): boolean => {
   return char === '-';
+};
+const isPlusSign = (char: string): boolean => {
+  return char === '+';
 };
 const isDigit = (char: string): boolean => {
   return digitRegex.test(char);
