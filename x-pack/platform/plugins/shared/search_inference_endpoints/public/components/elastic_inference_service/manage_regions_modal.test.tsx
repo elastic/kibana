@@ -432,7 +432,7 @@ describe('ManageRegionsModal', () => {
       });
     });
 
-    it('shows region checkboxes directly without expanding (zones always expanded)', async () => {
+    it('shows zone count and checkboxes without requiring expand', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -451,6 +451,7 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       await waitFor(() => {
+        expect(screen.getByTestId('manageRegionsZoneCount-us')).toBeInTheDocument();
         expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeInTheDocument();
       });
     });
