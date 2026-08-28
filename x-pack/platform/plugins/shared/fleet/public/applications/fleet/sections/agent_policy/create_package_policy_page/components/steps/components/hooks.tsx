@@ -12,6 +12,7 @@ import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../c
 import type { NewPackagePolicy } from '../../../../../../../../../common/types';
 import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
+import { inferVarGroupSelections } from '../../../../../../../../../common/services';
 import { useGetOutputs, useLicense } from '../../../../../../hooks';
 
 import {
@@ -87,6 +88,14 @@ interface UseVarGroupSelectionsParams {
    * computing default selections.
    */
   hideInVarGroupOptions?: Record<string, string[]>;
+  /**
+   * Optional: whether the form is editing an existing policy. When true and the
+   * policy has no stored var_group_selections (it predates the package's
+   * var_groups), selections are inferred from the policy's populated vars instead
+   * of blindly falling back to the first visible option, so an existing
+   * configuration is not presented as a different one.
+   */
+  isEditPage?: boolean;
 }
 
 /**
@@ -101,26 +110,40 @@ export function useVarGroupSelections({
   onSelectionsChange,
   packagePolicy,
   hideInVarGroupOptions,
+  isEditPage = false,
 }: UseVarGroupSelectionsParams) {
-  // Derive current selections from saved or compute defaults
+  // Derive selections when none are saved: defaults for new policies; on the edit
+  // page, prefer inference from the policy's populated vars (policies created before
+  // the package introduced var_groups have no stored selections, and the first
+  // visible option may not match their actual configuration).
+  const deriveSelections = useCallback((): VarGroupSelection => {
+    const defaults = computeDefaultVarGroupSelections(
+      varGroups,
+      isAgentlessEnabled,
+      hideInVarGroupOptions
+    );
+    if (!isEditPage) {
+      return defaults;
+    }
+    const inferred = inferVarGroupSelections(varGroups, packagePolicy?.vars);
+    return inferred ? { ...defaults, ...inferred } : defaults;
+  }, [varGroups, isAgentlessEnabled, hideInVarGroupOptions, isEditPage, packagePolicy?.vars]);
+
+  // Derive current selections from saved or compute them
   const selections = useMemo((): VarGroupSelection => {
     if (savedSelections) return savedSelections;
-    return computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled, hideInVarGroupOptions);
-  }, [savedSelections, varGroups, isAgentlessEnabled, hideInVarGroupOptions]);
+    return deriveSelections();
+  }, [savedSelections, deriveSelections]);
 
-  // Initialize with defaults on mount if not already set
+  // Initialize on mount if not already set
   useEffect(() => {
     if (varGroups && varGroups.length > 0 && !savedSelections) {
-      const defaults = computeDefaultVarGroupSelections(
-        varGroups,
-        isAgentlessEnabled,
-        hideInVarGroupOptions
-      );
-      if (Object.keys(defaults).length > 0) {
-        onSelectionsChange({ var_group_selections: defaults });
+      const derived = deriveSelections();
+      if (Object.keys(derived).length > 0) {
+        onSelectionsChange({ var_group_selections: derived });
       }
     }
-  }, [varGroups, isAgentlessEnabled, savedSelections, onSelectionsChange, hideInVarGroupOptions]);
+  }, [varGroups, savedSelections, onSelectionsChange, deriveSelections]);
 
   // Handle selection change with policy effects computation
   const handleSelectionChange = useCallback(
