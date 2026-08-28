@@ -8,6 +8,11 @@
 > changes**: the analysis below shows that the high-value sweeps are gated on
 > upstream branding work (see [Dependencies](#dependencies)), so each sweep
 > should land as its own scoped PR once its dependency is in.
+>
+> **Status update (post [#279200](https://github.com/elastic/kibana/pull/279200)):**
+> `Space.id: SpaceId` has landed on `main`. The event-log `activeSpace.id`
+> rebrand is now removable; remaining gating is US-3.1.3 (task-params) and the
+> P1/P2 contract sweeps themselves.
 
 ## (A) What counts as a “public contract”
 
@@ -41,7 +46,7 @@ explicitly decided against.
 | File | Kind | Removable? |
 |---|---|---|
 | `core/packages/spaces/common/src/spaces_url_parser.ts` (×2) | URL parse / build boundary | ❌ legitimate |
-| `triggers_actions_ui/.../event_log/event_log_list_cell_renderer.tsx` (×2) | brands `spaceIds: string[]` prop + `activeSpace.id` | ⚠️ after `Space.id: SpaceId` |
+| `triggers_actions_ui/.../event_log/event_log_list_cell_renderer.tsx` | brands `linkedSpaceId` (from `spaceIds?: string[]` event metadata) + `activeSpace.id` | ⚠️ half-done: `activeSpace.id` rebrand is removable after [#279200](https://github.com/elastic/kibana/pull/279200); `linkedSpaceId` stays (unbranded event-metadata string) |
 | `task_manager/server/task_running/fake_request_factory.ts` | fake request from task `spaceId` | ❌ legitimate |
 | `alerting/server/task_runner/task_runner.ts` | task-params load boundary | ✅ handled by US-3.1.3 |
 | `alerting/server/task_runner/rule_loader.ts` | SO load boundary | ❌ legitimate |
@@ -64,9 +69,10 @@ explicitly decided against.
 | `core/packages/http/browser-internal/src/http_service.ts` | URL/space boundary | ❌ legitimate |
 | `core/packages/http/router-server-mocks/src/router.mock.ts` | mock | – |
 
-**Takeaway:** ~2 of 25 sites are removable, and both are gated on `Space.id: SpaceId`.
-The rest are correct trust boundaries. A literal FR-2 sweep would fight the
-non-goal and the no-validate-on-read decision.
+**Takeaway:** of the ~25 sites, only the event-log `activeSpace.id` rebrand is
+newly removable after `Space.id: SpaceId` (#279200). The rest are correct trust
+boundaries (or gated on US-3.1.3 / contract sweeps). A literal FR-2 sweep would
+fight the non-goal and the no-validate-on-read decision.
 
 ## (B) Public `spaceId: string` contracts, prioritized
 
@@ -108,17 +114,20 @@ Newer surfaces; brand as they stabilize.
 
 The removable rebrands and the P1/P2 sweeps are **not independent**:
 
-1. **`Space.id: SpaceId`** (separate in-flight branch). On `main`, `Space.id` is
-   still `string`, so branding consumer contracts (e.g. the event-log renderer)
-   would just move the `brandSpaceId` upstream, not remove it. Sweep after this lands.
-2. **US-3.1.3 task params** (branded `RuleTaskInstance.params.spaceId`). Already
-   removes the redundant re-brand in `alerting` `task_runner.ts`.
+1. **`Space.id: SpaceId`** — ✅ landed in [#279200](https://github.com/elastic/kibana/pull/279200).
+   Unblocks dropping `brandSpaceId(activeSpace.id)` in the event-log renderer
+   (and any other UI that re-branded a real `Space.id`).
+2. **US-3.1.3 task params** (branded `RuleTaskInstance.params.spaceId`) — still
+   open as [#279254](https://github.com/elastic/kibana/pull/279254). Removes the
+   redundant re-brand in `alerting` `task_runner.ts`.
 
 ## Recommended sequencing
 
-1. Land `Space.id: SpaceId` → unblocks the event-log renderer + UI rebrands.
-2. Land US-3.1.3 → alerting task-params branded (done in a sibling PR).
-3. Sweep **P1** contracts, one plugin per PR, deleting the now-redundant rebrand
+1. ~~Land `Space.id: SpaceId`~~ ✅ [#279200](https://github.com/elastic/kibana/pull/279200).
+2. Land US-3.1.3 → alerting task-params branded ([#279254](https://github.com/elastic/kibana/pull/279254)).
+3. Drop the now-redundant `brandSpaceId(activeSpace.id)` in the event-log
+   renderer (tiny follow-up; can ship with or after step 2).
+4. Sweep **P1** contracts, one plugin per PR, deleting the now-redundant rebrand
    at each call site.
-4. Sweep **P2** core contracts with Core review.
-5. Do **not** chase literal FR-2; keep trust boundaries as `brandSpaceId`/`asSpaceId`.
+5. Sweep **P2** core contracts with Core review.
+6. Do **not** chase literal FR-2; keep trust boundaries as `brandSpaceId`/`asSpaceId`.
