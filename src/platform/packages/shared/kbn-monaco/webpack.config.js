@@ -12,7 +12,7 @@ const path = require('path');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
 /**
- * @typedef {(import('./src/worker_factory').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
+ * @typedef {(import('./src/languages/worker_factory').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
  */
 
 /**
@@ -20,19 +20,20 @@ const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin
  */
 const getWorkerEntry = (language) => {
   switch (language) {
-    case 'default':
+    case 'editorWorkerService':
       return 'monaco-editor/esm/vs/editor/editor.worker.js';
     case 'json':
       return 'monaco-editor/esm/vs/language/json/json.worker.js';
     default:
-      return path.resolve(
+      return path.resolve.apply(path, [
         __dirname,
         'src',
         'languages',
+        'definitions',
         language,
         'worker',
-        `${language}.worker.ts`
-      );
+        `${language}.worker.ts`,
+      ]);
   }
 };
 
@@ -101,4 +102,11 @@ const workerConfig = (languages) => ({
   },
 });
 
-module.exports = workerConfig(['default', 'json', 'xjson', 'painless', 'yaml', 'console']);
+module.exports = workerConfig([
+  'editorWorkerService',
+  'json',
+  'xjson',
+  'painless',
+  'yaml',
+  'console',
+]);
