@@ -34,6 +34,10 @@ import type { ConversationService } from './conversation';
 import type { WorkspaceService } from './workspaces';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { RendererServiceSetup, RendererServiceStart } from './renderers';
+import type {
+  SurfaceProjectionServiceSetup,
+  SurfaceProjectionServiceStart,
+} from './surface_projection';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
@@ -53,6 +57,7 @@ export interface InternalSetupServices {
   agents: AgentsServiceSetup;
   attachments: AttachmentServiceSetup;
   renderers: RendererServiceSetup;
+  surfaceProjection: SurfaceProjectionServiceSetup;
   hooks: HooksServiceSetup;
   skills: SkillServiceSetup;
   plugins: PluginsServiceSetup;
@@ -65,6 +70,7 @@ export interface InternalStartServices {
   agents: AgentsServiceStart;
   attachments: AttachmentServiceStart;
   renderers: RendererServiceStart;
+  surfaceProjection: SurfaceProjectionServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
   workspaces: WorkspaceService;

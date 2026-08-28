@@ -21,10 +21,12 @@ import {
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
 import { deliverCallbackEvents, type CallbackDeliveryService } from '../callback';
+import type { SurfaceProjectionServiceStart } from '../../surface_projection';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
+  surfaceProjection?: SurfaceProjectionServiceStart;
 }
 
 /**
@@ -104,6 +106,7 @@ class TaskHandlerImpl implements TaskHandler {
       execution,
       events$,
       callbackDeliveryService: this.deps.callbackDeliveryService,
+      surfaceProjection: this.deps.surfaceProjection,
       logger: this.logger,
     });
 

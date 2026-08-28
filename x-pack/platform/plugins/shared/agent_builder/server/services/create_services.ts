@@ -22,6 +22,10 @@ import { ConversationServiceImpl } from './conversation';
 import { createWorkspaceService } from './workspaces';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { type RendererService, createRendererService } from './renderers';
+import {
+  type SurfaceProjectionService,
+  createSurfaceProjectionService,
+} from './surface_projection';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
@@ -42,6 +46,7 @@ interface ServiceInstances {
   agents: AgentsService;
   attachments: AttachmentService;
   renderers: RendererService;
+  surfaceProjection: SurfaceProjectionService;
   hooks: HooksService;
   skills: SkillService;
   plugins: PluginsService;
@@ -73,6 +78,7 @@ export class ServiceManager {
       agents: new AgentsService(),
       attachments: createAttachmentService(),
       renderers: createRendererService(),
+      surfaceProjection: createSurfaceProjectionService(),
       hooks: new HooksService(),
       skills: createSkillService(),
       plugins: createPluginsService(),
@@ -97,6 +103,7 @@ export class ServiceManager {
       agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
       renderers: this.services.renderers.setup(),
+      surfaceProjection: this.services.surfaceProjection.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
@@ -155,6 +162,7 @@ export class ServiceManager {
     });
 
     const renderers = this.services.renderers.start();
+    const surfaceProjection = this.services.surfaceProjection.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -258,6 +266,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      surfaceProjection,
     });
 
     executionService = createAgentExecutionService({
@@ -287,6 +296,7 @@ export class ServiceManager {
       agents,
       attachments,
       renderers,
+      surfaceProjection,
       skills: skillsServiceStart,
       conversations,
       workspaces,
