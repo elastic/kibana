@@ -32,7 +32,7 @@ export const CHILDREN_INCREMENT = 10;
 export const MAX_SEARCH_REVEAL = 100;
 
 // Absolute DOM-safety ceiling, in rendered rows, for bulk expansion (Expand all / recursive
-// Cmd-click) and for seeding a fresh cell.
+// Cmd-click) and for seeding a fresh cell. indices-stats is a good index to test this limit.
 export const MAX_RENDERED_NODES = 500;
 
 export const ROOT_ID = 'json-viewer-$root';
