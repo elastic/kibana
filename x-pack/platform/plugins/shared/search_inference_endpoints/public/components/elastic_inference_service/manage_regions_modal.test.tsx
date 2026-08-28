@@ -161,7 +161,7 @@ describe('ManageRegionsModal', () => {
 
       toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to see the no-regions warning.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsNoRegions')).toHaveTextContent(
@@ -186,7 +186,7 @@ describe('ManageRegionsModal', () => {
       );
 
       toggleCustomPolicyOn();
-      fireEvent.click(screen.getByTestId('manageRegionsGeoTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeGeo'));
 
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsNoGeos')).toBeInTheDocument();
@@ -202,8 +202,8 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.queryByTestId('manageRegionsGeoTab')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('manageRegionsRegionsTab')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manageRegionsLocationTypeGeo')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manageRegionsLocationTypeRegions')).not.toBeInTheDocument();
     });
 
     it('reveals the tabs when the toggle is clicked ON', () => {
@@ -215,8 +215,8 @@ describe('ManageRegionsModal', () => {
 
       toggleCustomPolicyOn();
 
-      expect(screen.getByTestId('manageRegionsGeoTab')).toBeInTheDocument();
-      expect(screen.getByTestId('manageRegionsRegionsTab')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsLocationTypeRegions')).toBeInTheDocument();
     });
 
     it('shows the tabs by default when an existing policy is loaded', () => {
@@ -231,8 +231,8 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageRegionsGeoTab')).toBeInTheDocument();
-      expect(screen.getByTestId('manageRegionsRegionsTab')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsLocationTypeRegions')).toBeInTheDocument();
     });
 
     it('hides the tabs when the toggle is turned OFF on an existing policy', () => {
@@ -249,8 +249,8 @@ describe('ManageRegionsModal', () => {
 
       fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
 
-      expect(screen.queryByTestId('manageRegionsGeoTab')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('manageRegionsRegionsTab')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manageRegionsLocationTypeGeo')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manageRegionsLocationTypeRegions')).not.toBeInTheDocument();
     });
   });
 
@@ -264,8 +264,8 @@ describe('ManageRegionsModal', () => {
 
       toggleCustomPolicyOn();
 
-      expect(screen.getByTestId('manageRegionsGeoTab')).toBeInTheDocument();
-      expect(screen.getByTestId('manageRegionsRegionsTab')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsLocationTypeRegions')).toBeInTheDocument();
     });
 
     it('defaults to Geo tab when no policy exists', async () => {
@@ -278,7 +278,10 @@ describe('ManageRegionsModal', () => {
       toggleCustomPolicyOn();
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsGeoTab')).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
       });
     });
 
@@ -290,10 +293,13 @@ describe('ManageRegionsModal', () => {
       );
 
       toggleCustomPolicyOn();
-      fireEvent.click(screen.getByTestId('manageRegionsGeoTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeGeo'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsGeoTab')).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
       });
     });
 
@@ -312,7 +318,10 @@ describe('ManageRegionsModal', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsGeoTab')).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByTestId('manageRegionsLocationTypeGeo')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
       });
     });
   });
@@ -329,7 +338,7 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
       toggleCustomPolicyOn();
-      fireEvent.click(screen.getByTestId('manageRegionsGeoTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeGeo'));
     };
 
     it('renders geo zone rows for each available geo', async () => {
@@ -414,7 +423,7 @@ describe('ManageRegionsModal', () => {
 
       toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to see zone headers.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       // us-east-1 → North America zone, europe-west1 → Europe zone
       await waitFor(() => {
@@ -423,7 +432,7 @@ describe('ManageRegionsModal', () => {
       });
     });
 
-    it('expands a zone when the region count text/icon is clicked', async () => {
+    it('shows region checkboxes directly without expanding (zones always expanded)', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -439,13 +448,7 @@ describe('ManageRegionsModal', () => {
       );
 
       toggleCustomPolicyOn();
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
-      await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsZoneCountToggle-us')).toBeInTheDocument();
-      });
-
-      // Clicking the count/icon button (not the zone title) should expand the zone.
-      fireEvent.click(screen.getByTestId('manageRegionsZoneCountToggle-us'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeInTheDocument();
@@ -469,7 +472,7 @@ describe('ManageRegionsModal', () => {
 
       toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to verify the regions toolbar count.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       // No policy → nothing pre-selected
       await waitFor(() => {
@@ -529,10 +532,6 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // Expand North America zone to see its checkboxes
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-eu'));
-
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
         expect(screen.getByTestId('manageRegionsCheckbox-gcp::europe-west1')).not.toBeChecked();
@@ -556,12 +555,7 @@ describe('ManageRegionsModal', () => {
 
       toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to inspect individual checkboxes.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
-      await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsZoneToggle-us')).toBeInTheDocument();
-      });
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-eu'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).not.toBeChecked();
@@ -588,8 +582,6 @@ describe('ManageRegionsModal', () => {
           <ManageRegionsModal onClose={onClose} />
         </Wrapper>
       );
-
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
 
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
@@ -734,11 +726,7 @@ describe('ManageRegionsModal', () => {
 
       toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions, expand US zone, check a region so Save is enabled.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
-      await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsZoneToggle-us')).toBeInTheDocument();
-      });
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
       await waitFor(() => {
         // No policy → nothing selected; check us-east-1 so a selection exists.
         expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).not.toBeChecked();
@@ -790,9 +778,6 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // Expand North America and uncheck us-east-1
-      fireEvent.click(screen.getByTestId('manageRegionsZoneToggle-us'));
-
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
         fireEvent.click(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1'));
@@ -835,7 +820,7 @@ describe('ManageRegionsModal', () => {
 
       toggleCustomPolicyOn();
       // Default tab is Geo — switch to Regions to make a change there.
-      fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
+      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeInTheDocument();
       });
