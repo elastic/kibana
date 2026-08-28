@@ -45,6 +45,16 @@ const Separator: FC = () => (
 );
 
 /**
+ * The activity feed sizes each attachment from the widest thing inside it, and neither the
+ * single-line entity summary nor the attack chain wraps. Inline size containment keeps the card at
+ * the width the feed gives it, so those two clamp and scroll inside it as they do on the Attacks
+ * page, where the width is already fixed.
+ */
+const cardCss = css`
+  contain: inline-size;
+`;
+
+/**
  * Renders the attack in the case activity log with the same components the Detections
  * → Attacks page uses, so the two read identically: title, "Detected on", the clamped
  * entity summary, the summary markdown, the "Details" section and the attack chain.
@@ -80,7 +90,12 @@ export const AttackChildren: FC<AttackChildrenProps> = ({ metadata }) => {
   const hasTactics = mitreAttackTactics != null && mitreAttackTactics.length > 0;
 
   return (
-    <EuiFlexGroup data-test-subj={ATTACK_CARD_TEST_ID} gutterSize="s" direction="column">
+    <EuiFlexGroup
+      css={cardCss}
+      data-test-subj={ATTACK_CARD_TEST_ID}
+      gutterSize="s"
+      direction="column"
+    >
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h4 data-test-subj={ATTACK_TITLE_TEST_ID}>{title}</h4>

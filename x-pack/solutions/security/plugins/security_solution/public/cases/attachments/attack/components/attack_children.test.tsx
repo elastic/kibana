@@ -107,6 +107,13 @@ describe('AttackChildren', () => {
       expect(screen.getByTestId(ATTACK_CHAIN_TITLE_TEST_ID)).toBeInTheDocument();
     });
 
+    it('scrolls the attack chain horizontally rather than widening the card', () => {
+      renderCard(metadata);
+
+      expect(screen.getByTestId(ATTACK_CARD_TEST_ID)).toHaveStyleRule('contain', 'inline-size');
+      expect(screen.getByTestId('attackChain')).toHaveStyleRule('overflow-x', 'auto');
+    });
+
     it('renders the markdown field tokens rather than their literal syntax', () => {
       renderCard(metadata);
 
