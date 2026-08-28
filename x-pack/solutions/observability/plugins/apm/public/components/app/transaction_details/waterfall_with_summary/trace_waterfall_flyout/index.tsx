@@ -7,10 +7,7 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  FullTraceWaterfallOnErrorClick,
-  WaterfallGetErrorMarkerHref,
-} from '@kbn/apm-types';
+import type { FullTraceWaterfallOnErrorClick, WaterfallGetErrorMarkerHref } from '@kbn/apm-types';
 import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -22,7 +19,7 @@ import { useLogsIndexPattern } from '../../../../../hooks/use_logs_index_pattern
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { getApmInternalServices } from '../../../../../plugin';
 
-const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
+export const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
 
 interface Props {
   traceId: string;
@@ -31,6 +28,11 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   contextSpanIds?: string[];
+  /**
+   * Shared with the parent flyout so the full trace timeline participates in the
+   * same EUI managed back-button stack (Discover FullScreenWaterfall pattern).
+   */
+  historyKey?: symbol;
   /**
    * Optional APM error-group deep link builder. Discover-style hosts omit this and
    * rely on `onErrorClick` → document flyout instead of route-param-based hrefs.
@@ -45,6 +47,7 @@ export function TraceWaterfallFlyout({
   isOpen,
   onClose,
   contextSpanIds,
+  historyKey = TRACE_WATERFALL_FLYOUT_HISTORY_KEY,
   getErrorMarkerHref,
 }: Props) {
   const { callApmApi } = getApmInternalServices();
@@ -103,8 +106,8 @@ export function TraceWaterfallFlyout({
 
   return (
     <EuiFlyout
-      session="inherit"
-      historyKey={TRACE_WATERFALL_FLYOUT_HISTORY_KEY}
+      session="start"
+      historyKey={historyKey}
       onClose={onClose}
       size="m"
       aria-label={i18n.translate('xpack.apm.traceWaterfallFlyout.ariaLabel', {

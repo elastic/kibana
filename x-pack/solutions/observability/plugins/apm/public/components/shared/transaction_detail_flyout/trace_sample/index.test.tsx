@@ -24,9 +24,6 @@ jest.mock('../../../app/transaction_details/use_unified_waterfall_fetcher', () =
 jest.mock('../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link', () => ({
   MaybeViewTraceLink: () => <div data-test-subj="transactionDetailFlyoutViewFullTraceLink" />,
 }));
-jest.mock('../../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout', () => ({
-  TraceWaterfallFlyout: () => null,
-}));
 jest.mock('../../summary/transaction_summary', () => ({
   TransactionSummary: () => <div data-test-subj="transactionDetailFlyoutTraceSampleSummary" />,
 }));
@@ -66,7 +63,10 @@ const DEFAULT_WATERFALL_RESULT = {
 
 describe('TransactionDetailFlyoutTraceSample', () => {
   beforeEach(() => {
-    mockedUseTransactionDetailFlyoutContext.mockReturnValue({ filters: FILTERS });
+    mockedUseTransactionDetailFlyoutContext.mockReturnValue({
+      filters: FILTERS,
+      openFullTraceFlyout: jest.fn(),
+    });
     mockedUseTransactionDetailFlyoutTraceSamplesFetcher.mockReturnValue({
       data: {
         traceSamples: [

@@ -87,4 +87,25 @@ describe('TransactionDetailFlyoutLatencyDistribution', () => {
     expect(chart).toHaveAttribute('data-loading', 'true');
     expect(chart).toHaveAttribute('data-has-error', 'false');
   });
+
+  it('treats NOT_INITIATED as loading so the shared chart does not mount empty', () => {
+    mockedUseTransactionDetailFlyoutDistributionChartData.mockReturnValue({
+      chartData: [
+        {
+          id: 'All transactions',
+          histogram: [],
+          areaSeriesColor: '#000',
+        },
+      ],
+      hasData: false,
+      percentileThresholdValue: undefined,
+      status: FETCH_STATUS.NOT_INITIATED,
+      totalDocCount: undefined,
+    });
+
+    render(<TransactionDetailFlyoutLatencyDistribution />);
+
+    const chart = screen.getByTestId('transactionDetailFlyoutLatencyDistributionChart');
+    expect(chart).toHaveAttribute('data-loading', 'true');
+  });
 });

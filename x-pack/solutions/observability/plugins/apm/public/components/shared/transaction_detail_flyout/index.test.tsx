@@ -16,14 +16,11 @@ jest.mock('@elastic/eui', () => {
     ...original,
     EuiPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     useGeneratedHtmlId: () => 'transaction-detail-flyout-title-id',
+    EuiFlyout: ({ children }: { children: React.ReactNode }) => (
+      <section data-test-subj="transactionDetailFlyout">{children}</section>
+    ),
   };
 });
-
-jest.mock('../responsive_flyout', () => ({
-  ResponsiveFlyout: ({ children }: { children: React.ReactNode }) => (
-    <section data-test-subj="transactionDetailFlyout">{children}</section>
-  ),
-}));
 
 jest.mock('./latency_distribution', () => ({
   TransactionDetailFlyoutLatencyDistribution: () => (

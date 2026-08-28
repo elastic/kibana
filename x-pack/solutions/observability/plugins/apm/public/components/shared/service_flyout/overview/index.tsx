@@ -17,10 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  ServiceFlyoutTransactionsSection,
-  type TransactionGroup,
-} from '@kbn/apm-ui-shared';
+import { ServiceFlyoutTransactionsSection, type TransactionGroup } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -179,6 +176,7 @@ export function ServiceFlyoutOverview() {
     service,
     capabilities,
     indices,
+    flyoutHistoryKey,
     filters: { environment, rangeFrom, rangeTo, transactionType, refreshToken },
   } = useServiceFlyoutContext();
 
@@ -312,6 +310,7 @@ export function ServiceFlyoutOverview() {
           deps={{ core }}
           filters={transactionDetailFilters}
           onClose={() => setTransactionDetailFilters(null)}
+          historyKey={flyoutHistoryKey}
         />
       )}
     </div>

@@ -11,7 +11,7 @@ import { DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChartTitleToolTip } from '../../../app/correlations/chart_title_tool_tip';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import { TotalDocCountLabel } from '../../charts/duration_distribution_chart/total_doc_count_label';
 import { MIN_TAB_TITLE_HEIGHT } from '../../charts/duration_distribution_chart_with_scrubber';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
@@ -21,6 +21,11 @@ export function TransactionDetailFlyoutLatencyDistribution() {
   const { filters } = useTransactionDetailFlyoutContext();
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDetailFlyoutDistributionChartData(filters);
+
+  // Shared DurationDistributionChart only gates on `loading`. Treat NOT_INITIATED like
+  // LOADING (same as APM ChartContainer's isPending) so we don't mount elastic-charts
+  // with an empty histogram / NaN y-domain on the first render.
+  const loading = isPending(status);
 
   return (
     <section data-test-subj="transactionDetailFlyoutSection-latencyDistribution">
@@ -50,10 +55,10 @@ export function TransactionDetailFlyoutLatencyDistribution() {
       <EuiSpacer size="s" />
 
       <DurationDistributionChart
-        data={chartData}
+        data={hasData ? chartData : []}
         markerValue={percentileThresholdValue ?? 0}
         hasData={hasData}
-        loading={status === FETCH_STATUS.LOADING}
+        loading={loading}
         hasError={status === FETCH_STATUS.FAILURE}
         eventType={ProcessorEvent.transaction}
         data-test-subj="transactionDetailFlyoutLatencyDistributionChart"

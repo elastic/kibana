@@ -52,6 +52,20 @@ jest.mock('../responsive_flyout', () => ({
   ),
 }));
 
+jest.mock('./hooks/use_service_flyout_capabilities', () => ({
+  useServiceFlyoutCapabilities: () => ({
+    loading: false,
+    error: undefined,
+    schema: 'ecs',
+    header: { serviceNameLink: true, badges: true },
+    overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+    footer: { alerts: true, slos: true },
+  }),
+}));
+jest.mock('../../../hooks/use_time_range', () => ({
+  useTimeRange: () => ({ start: '2024-01-01T00:00:00.000Z', end: '2024-01-01T01:00:00.000Z' }),
+}));
+
 jest.mock('./header', () => ({
   ServiceFlyoutHeader: ({
     title,
@@ -312,7 +326,9 @@ describe('ServiceFlyout historyKey', () => {
     );
   });
 
-  it('renders without historyKey when not provided', () => {
+  // Nested tx/full-trace flyouts need a shared history key for Back. When the
+  // caller omits `historyKey`, ServiceFlyout creates one (Symbol fallback).
+  it('generates a historyKey when not provided', () => {
     render(
       <ServiceFlyout
         {...contextProps}
@@ -322,6 +338,6 @@ describe('ServiceFlyout historyKey', () => {
       />
     );
 
-    expect(screen.getByTestId('responsiveFlyoutMock')).not.toHaveAttribute('data-history-key');
+    expect(screen.getByTestId('responsiveFlyoutMock')).toHaveAttribute('data-history-key');
   });
 });

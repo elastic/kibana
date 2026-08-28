@@ -136,4 +136,26 @@ describe('MaybeViewTraceLink', () => {
     await user.click(button);
     expect(mockOnViewFullTrace).toHaveBeenCalledTimes(1);
   });
+
+  it('enables the button for root transactions when variant is flyout', async () => {
+    const user = userEvent.setup();
+    renderLink({ variant: 'flyout', transaction: buildTransaction('root-tx') });
+
+    const button = screen.getByTestId('apmFullTraceButtonViewFullTraceButton');
+    expect(button).not.toBeDisabled();
+
+    await user.click(button);
+    expect(mockOnViewFullTrace).toHaveBeenCalledTimes(1);
+  });
+
+  it('enables the button when there is no root and variant is flyout', async () => {
+    const user = userEvent.setup();
+    renderLink({ variant: 'flyout', traceItems: [] });
+
+    const button = screen.getByTestId('apmFullTraceButtonViewFullTraceButton');
+    expect(button).not.toBeDisabled();
+
+    await user.click(button);
+    expect(mockOnViewFullTrace).toHaveBeenCalledTimes(1);
+  });
 });

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { ResponsiveFlyout } from '../responsive_flyout';
+import { EuiFlyout, EuiFlyoutBody, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { TraceWaterfallFlyout } from '../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout';
 import { TransactionDetailFlyoutHeader } from './header';
 import { TransactionDetailFlyoutLatencyDistribution } from './latency_distribution';
 import { TransactionDetailFlyoutRedMetrics } from './red_metrics';
 import { TransactionDetailFlyoutTraceSample } from './trace_sample';
 import {
   TransactionDetailFlyoutContextProvider,
+  type FullTraceFlyoutState,
   type TransactionDetailFlyoutContextValue,
 } from './transaction_detail_flyout_context';
 import type { TransactionDetailFlyoutProps } from './types';
@@ -31,15 +32,21 @@ export function TransactionDetailFlyout({
   onClose,
   historyKey = TRANSACTION_DETAIL_FLYOUT_HISTORY_KEY,
 }: TransactionDetailFlyoutComponentProps) {
-  const { transactionName } = filters;
+  const { transactionName, rangeFrom, rangeTo } = filters;
   const titleId = useGeneratedHtmlId({ prefix: 'transactionDetailFlyoutTitle' });
+  const [fullTraceFlyout, setFullTraceFlyout] = useState<FullTraceFlyoutState | null>(null);
+
+  const openFullTraceFlyout = useCallback((state: FullTraceFlyoutState) => {
+    setFullTraceFlyout(state);
+  }, []);
 
   const contextValue = useMemo<TransactionDetailFlyoutContextValue>(
     () => ({
       deps,
       filters,
+      openFullTraceFlyout,
     }),
-    [deps, filters]
+    [deps, filters, openFullTraceFlyout]
   );
 
   if (!isOpen) {
@@ -48,15 +55,13 @@ export function TransactionDetailFlyout({
 
   return (
     <TransactionDetailFlyoutContextProvider value={contextValue}>
-      <ResponsiveFlyout
+      <EuiFlyout
         data-test-subj="transactionDetailFlyout"
         flyoutMenuDisplayMode="always"
         onClose={onClose}
         ownFocus={false}
-        size="s"
+        size="fill"
         paddingSize="m"
-        resizable
-        minWidth={660}
         session="inherit"
         historyKey={historyKey}
         flyoutMenuProps={{ title: transactionName }}
@@ -70,7 +75,18 @@ export function TransactionDetailFlyout({
           <EuiSpacer size="m" />
           <TransactionDetailFlyoutTraceSample />
         </EuiFlyoutBody>
-      </ResponsiveFlyout>
+      </EuiFlyout>
+      {fullTraceFlyout ? (
+        <TraceWaterfallFlyout
+          traceId={fullTraceFlyout.traceId}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          isOpen
+          onClose={() => setFullTraceFlyout(null)}
+          contextSpanIds={fullTraceFlyout.contextSpanIds}
+          historyKey={historyKey}
+        />
+      ) : null}
     </TransactionDetailFlyoutContextProvider>
   );
 }

@@ -9,11 +9,17 @@ import type { CoreStart } from '@kbn/core/public';
 import React, { createContext, useContext } from 'react';
 import type { TransactionDetailFlyoutFilters } from './types';
 
+export interface FullTraceFlyoutState {
+  traceId: string;
+  contextSpanIds?: string[];
+}
+
 export interface TransactionDetailFlyoutContextValue {
   deps: {
     core: CoreStart;
   };
   filters: TransactionDetailFlyoutFilters;
+  openFullTraceFlyout: (state: FullTraceFlyoutState) => void;
 }
 
 const TransactionDetailFlyoutContext = createContext<TransactionDetailFlyoutContextValue | null>(

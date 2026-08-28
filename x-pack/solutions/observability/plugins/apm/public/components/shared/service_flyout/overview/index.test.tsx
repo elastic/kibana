@@ -85,6 +85,7 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
     },
     service,
     indices: null,
+    flyoutHistoryKey: Symbol('test-service-flyout-history'),
     capabilities: {
       loading: false,
       error: undefined,

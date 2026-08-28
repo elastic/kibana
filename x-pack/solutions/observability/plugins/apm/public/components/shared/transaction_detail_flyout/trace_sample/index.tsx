@@ -25,14 +25,13 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FETCH_STATUS, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { useUnifiedWaterfallFetcher } from '../../../app/transaction_details/use_unified_waterfall_fetcher';
 import { MaybeViewTraceLink } from '../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link';
-import { TraceWaterfallFlyout } from '../../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout';
 import { TransactionSummary } from '../../summary/transaction_summary';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
 import { TransactionDetailFlyoutTraceSampleTimeline } from './trace_sample_timeline';
 import { useTransactionDetailFlyoutTraceSamplesFetcher } from './use_transaction_detail_flyout_trace_samples_fetcher';
 
 export function TransactionDetailFlyoutTraceSample() {
-  const { filters } = useTransactionDetailFlyoutContext();
+  const { filters, openFullTraceFlyout } = useTransactionDetailFlyoutContext();
   const { serviceName, rangeFrom, rangeTo } = filters;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -40,7 +39,6 @@ export function TransactionDetailFlyoutTraceSample() {
   const traceSamples = traceSamplesFetchResult.data?.traceSamples;
 
   const [sampleActivePage, setSampleActivePage] = useState(0);
-  const [isFullTraceFlyoutOpen, setIsFullTraceFlyoutOpen] = useState(false);
 
   useEffect(() => {
     setSampleActivePage(0);
@@ -140,7 +138,13 @@ export function TransactionDetailFlyoutTraceSample() {
                 isLoading={isLoading}
                 transaction={entryTransaction}
                 traceItems={unifiedWaterfallFetchResult.traceItems}
-                onViewFullTrace={() => setIsFullTraceFlyoutOpen(true)}
+                variant="flyout"
+                onViewFullTrace={() => {
+                  if (!traceId) {
+                    return;
+                  }
+                  openFullTraceFlyout({ traceId, contextSpanIds });
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -180,17 +184,6 @@ export function TransactionDetailFlyoutTraceSample() {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {traceId && isFullTraceFlyoutOpen && (
-        <TraceWaterfallFlyout
-          traceId={traceId}
-          rangeFrom={rangeFrom}
-          rangeTo={rangeTo}
-          isOpen={isFullTraceFlyoutOpen}
-          onClose={() => setIsFullTraceFlyoutOpen(false)}
-          contextSpanIds={contextSpanIds}
-        />
-      )}
     </section>
   );
 }
