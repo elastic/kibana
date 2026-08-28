@@ -31,7 +31,8 @@
     "@kbn/data-views-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-util",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/esql-types"
   ],
   "exclude": ["target/**/*"]
 }

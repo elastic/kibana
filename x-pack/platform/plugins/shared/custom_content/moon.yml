@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util'
   - '@kbn/scout'
+  - '@kbn/esql-types'
 tags:
   - plugin
   - prod
