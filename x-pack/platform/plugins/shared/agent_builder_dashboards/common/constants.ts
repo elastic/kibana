@@ -18,8 +18,8 @@ const dashboardTool = (toolName: string) => {
 };
 
 /**
- * Ids of built-in dashboard tools.
- * These tools are registered by the agent_builder_dashboards plugin.
+ * Ids of dashboard tools. `generateDashboard` is registered. `prettifyDashboard`
+ * is a forbidden id the skill tells the agent not to call.
  */
 export const dashboardTools = {
   generateDashboard: dashboardTool('generate_dashboard'),

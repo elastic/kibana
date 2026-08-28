@@ -100,7 +100,7 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
  * Environment-agnostic dashboard *generation* guidance.
  *
  * Visual good practices (chart types, composition, grid) live in referenced
- * content so generate and Dashboard Review share one copy. This `guidance` is
+ * content so generate and Prettify share one copy. This `guidance` is
  * the operations vocabulary only. Pair it with environment-specific rendering
  * guidance for how the current dashboard is referenced and surfaced.
  */

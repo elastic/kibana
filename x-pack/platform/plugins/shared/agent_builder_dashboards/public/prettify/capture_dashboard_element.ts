@@ -7,7 +7,7 @@
 
 import domtoimage from 'dom-to-image-more';
 
-/** Width of the raster screenshot sent to Dashboard Review. */
+/** Width of the raster screenshot attached to the Prettify chat. */
 export const DASHBOARD_SCREENSHOT_WIDTH = 800;
 
 const GRID_TEST_SUBJ = 'kbnGridLayout';

@@ -6,21 +6,16 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { generateDashboardTool, type GetImageBytes } from '../tools';
+import { generateDashboardTool } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { dashboardPrettify } from './prettify_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
 export const createDashboardManagementSkill = ({
   getCustomContentEnabled,
-  getImageBytes,
 }: {
   getCustomContentEnabled: () => Promise<boolean>;
-  getImageBytes: GetImageBytes;
 }) => {
-  // Prettify is screenshot-first via the outer agent; the mutate tool stays unregistered.
-  void getImageBytes;
-
   return defineSkillType({
     id: 'dashboard-management',
     name: 'dashboard-management',

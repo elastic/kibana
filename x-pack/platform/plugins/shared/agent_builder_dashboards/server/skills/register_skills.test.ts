@@ -12,7 +12,6 @@ import { dashboardTools } from '../../common';
 
 const skill = createDashboardManagementSkill({
   getCustomContentEnabled: () => Promise.resolve(true),
-  getImageBytes: async () => Buffer.from([]),
 });
 
 describe('registerSkills', () => {
@@ -24,7 +23,6 @@ describe('registerSkills', () => {
 
     registerSkills(agentBuilder, {
       getCustomContentEnabled: () => Promise.resolve(true),
-      getImageBytes: async () => Buffer.from([]),
     });
 
     expect(register).toHaveBeenCalledTimes(1);
@@ -86,7 +84,9 @@ describe('registerSkills', () => {
     expect(rules?.content).toContain('**Creative**');
     expect(rules?.content).toContain('Title intent vs painted content');
     expect(rules?.content).toContain('Do not invent colors');
-    expect(rules?.content).toContain('Invented metric static colors and BACKGROUND fills must be removed');
+    expect(rules?.content).toContain(
+      'Invented metric static colors and BACKGROUND fills must be removed'
+    );
     expect(rules?.content).toContain('Default palette');
     expect(rules?.content).toContain('NEVER show the dashboard chrome title on a metric');
     expect(rules?.content).toContain('In most cases, enrich the metric');
@@ -100,7 +100,9 @@ describe('registerSkills', () => {
     expect(rules?.content).not.toContain('Gradient-filled areas are not available yet');
     expect(rules?.content).toContain('Do not remove visualization panels');
     expect(rules?.content).toContain('Describe that wanted edition in `edit_panels.query`');
-    expect(rules?.content).toContain('If the edition does not need new columns, pass that query on `esql` unchanged');
+    expect(rules?.content).toContain(
+      'If the edition does not need new columns, pass that query on `esql` unchanged'
+    );
     expect(rules?.content).not.toContain('clear_metric_fill');
     expect(rules?.content).not.toContain('metric_trendline');
     expect(rules?.content).not.toContain('hide_title');

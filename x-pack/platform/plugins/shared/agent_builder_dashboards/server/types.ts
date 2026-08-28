@@ -8,7 +8,6 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
-import type { FilesStart } from '@kbn/files-plugin/server';
 
 export interface AgentBuilderDashboardsSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -17,7 +16,6 @@ export interface AgentBuilderDashboardsSetupDependencies {
 
 export interface AgentBuilderDashboardsStartDependencies {
   dashboard: DashboardPluginStart;
-  files: FilesStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

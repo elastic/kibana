@@ -12,8 +12,7 @@ import { gridLayoutPrompt } from './grid_layout';
 
 /**
  * Shared visual good practices (chart types, composition, grid).
- * Referenced by dashboard-management and injected into Dashboard Review —
- * do not copy this text into other prompts.
+ * Referenced by dashboard-management — do not copy this text into other prompts.
  */
 export const DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME = 'dashboard-design-practices';
 

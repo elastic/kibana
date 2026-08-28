@@ -6,20 +6,15 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { GetImageBytes } from '../tools';
 import { createDashboardManagementSkill } from './dashboard_management_skill';
 
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
   {
     getCustomContentEnabled,
-    getImageBytes,
   }: {
     getCustomContentEnabled: () => Promise<boolean>;
-    getImageBytes: GetImageBytes;
   }
 ): void => {
-  agentBuilder.skills.register(
-    createDashboardManagementSkill({ getCustomContentEnabled, getImageBytes })
-  );
+  agentBuilder.skills.register(createDashboardManagementSkill({ getCustomContentEnabled }));
 };

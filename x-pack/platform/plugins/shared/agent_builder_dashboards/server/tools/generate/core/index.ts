@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export {
-  dashboardOperationSchema,
-  prettifyDashboardOperationSchema,
-  executeDashboardOperations,
-} from './operations';
-export type { DashboardOperation, PrettifyDashboardOperation } from './operations';
+export { dashboardOperationSchema, executeDashboardOperations } from './operations';
+export type { DashboardOperation } from './operations';
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './utils';
 
