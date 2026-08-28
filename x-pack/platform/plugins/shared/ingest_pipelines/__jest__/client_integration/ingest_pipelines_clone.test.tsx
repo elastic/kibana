@@ -12,6 +12,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
 import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesClone } from '../../public/application/sections/pipelines_clone';
 import { getClonePath, ROUTES } from '../../public/application/services/navigation';
@@ -73,8 +76,9 @@ describe('<PipelinesClone />', () => {
   test('should render the correct page header', async () => {
     await renderPipelinesClone();
 
-    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create pipeline');
-    expect(screen.getByTestId('documentationLink')).toHaveTextContent('Create pipeline docs');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Create pipeline');
+    await openAppMenuOverflow();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
   });
 
   test('should send the correct payload', async () => {

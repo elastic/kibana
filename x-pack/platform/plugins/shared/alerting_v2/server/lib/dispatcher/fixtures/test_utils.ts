@@ -7,10 +7,13 @@
 
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { EpisodeScan, PolicyCatalog, RuleCatalog } from '../state';
+import { DEFAULT_GROUPING_MODE } from '../constants';
 import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
   ActionGroup,
   ActionPolicy,
+  ActionPolicyId,
   AlertEpisode,
   AlertEpisodeSuppression,
   DispatchFailure,
@@ -20,6 +23,7 @@ import type {
   DispatcherStepOutput,
   MatchedPair,
   Rule,
+  RuleId,
 } from '../types';
 
 export function createStepLogger(): LoggerServiceContract {
@@ -42,13 +46,29 @@ export function createDispatcherPipelineInput(
   };
 }
 
+/**
+ * Flat overrides for building a pipeline state: value-object fields are given
+ * through their raw source data (`episodes`, `rules`, `policies`) and folded
+ * into the value objects here.
+ */
+export interface DispatcherPipelineStateOverrides
+  extends Omit<Partial<DispatcherPipelineState>, 'input' | 'scan' | 'rules' | 'policies'> {
+  input?: DispatcherPipelineInput;
+  episodes?: AlertEpisode[];
+  rules?: Map<RuleId, Rule>;
+  policies?: Map<ActionPolicyId, ActionPolicy>;
+}
+
 export function createDispatcherPipelineState(
-  state: Partial<DispatcherPipelineState> = {}
+  state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
-  const input = state.input ?? createDispatcherPipelineInput();
+  const { episodes, rules, policies, input, ...rest } = state;
   return {
-    ...state,
-    input,
+    ...rest,
+    ...(episodes ? { scan: EpisodeScan.of({ episodes }) } : {}),
+    ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
+    ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
+    input: input ?? createDispatcherPipelineInput(),
   };
 }
 
@@ -98,6 +118,7 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
     tags: [],
+    groupingMode: DEFAULT_GROUPING_MODE,
     ...overrides,
   };
 }
