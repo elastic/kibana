@@ -33,6 +33,23 @@ export function injectStyleTag(html: string, style: string): string {
   return styleTag + html;
 }
 
+/**
+ * Minimal baseline for the sandboxed iframe: background, font and text color, plus the margin and
+ * box-sizing reset those imply.
+ *
+ * Emitted *before* any template CSS (`injectStyleTag` inserts at the top of `<head>`), so an author
+ * or generated rule of equal specificity wins. A floor, not a lock-in — never add `!important`, and
+ * never append this after the template's own styles.
+ *
+ * Deliberately does not style headings, tables or lists. Those are the template's business; the
+ * point here is only that a panel with no CSS of its own does not render as a bare browser
+ * document. Everything is a token, so it tracks the theme without reading it.
+ */
+const BASE_STYLES = `
+body{margin:0;padding:var(--cc-space-l);box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text);background:var(--cc-color-background)}
+*,*::before,*::after{box-sizing:inherit}
+`;
+
 export function buildThemeCss(
   euiTheme: EuiThemeComputed,
   colorMode: EuiThemeColorModeStandard
@@ -50,7 +67,20 @@ export function buildThemeCss(
     ['--cc-color-danger', c.danger],
     ['--cc-color-border', c.borderBasePlain],
   ];
-  return `:root{${vars.map(([k, v]) => `${k}:${v}`).join(';')}}`;
+  // Spacing, radius and type come from the same theme as the colors so generated markup can match
+  // EUI's rhythm without the prompt hardcoding pixel values that drift when EUI changes.
+  const t = euiTheme;
+  vars.push(
+    ['--cc-space-xs', t.size.xs],
+    ['--cc-space-s', t.size.s],
+    ['--cc-space-m', t.size.m],
+    ['--cc-space-l', t.size.base],
+    ['--cc-space-xl', t.size.l],
+    ['--cc-radius', String(t.border.radius.medium ?? '6px')],
+    ['--cc-font-family', t.font.family]
+  );
+
+  return `:root{${vars.map(([k, v]) => `${k}:${v}`).join(';')}}${BASE_STYLES}`;
 }
 
 export function applyHtmlTheme(

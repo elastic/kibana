@@ -57,10 +57,34 @@ describe('applyHtmlTheme', () => {
       danger: '#b00',
       borderBasePlain: '#ccc',
     },
+    size: { xs: '4px', s: '8px', m: '12px', base: '16px', l: '24px' },
+    border: { radius: { medium: '6px' } },
+    font: {
+      family: 'Inter, sans-serif',
+    },
   } as unknown as EuiThemeComputed;
 
   // A meta CSP only governs resources fetched after it is parsed, so it must precede the
   // theme <style> tag — otherwise CSS injected ahead of it would be ungoverned.
+  // Without this a bare-markup template renders with browser defaults and reads as pasted in from
+  // another product — the reason the feature was hidden.
+  it('gives markup-only templates a themed baseline', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('font-family:var(--cc-font-family)');
+    expect(result).toContain('padding:var(--cc-space-l)');
+    expect(result).toContain('color:var(--cc-color-text)');
+  });
+
+  it('emits the baseline before the template so author CSS still wins', () => {
+    const authored = '<html><head><style>body{padding:0}</style></head><body></body></html>';
+
+    const result = applyHtmlTheme(authored, 'LIGHT', euiTheme);
+
+    expect(result.indexOf('--cc-space-l')).toBeLessThan(result.indexOf('body{padding:0}'));
+    expect(result).not.toContain('!important');
+  });
+
   it('places the CSP meta before the injected theme style tag', () => {
     const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
     expect(result.indexOf('Content-Security-Policy')).toBeLessThan(result.indexOf('<style>'));

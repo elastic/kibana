@@ -17,11 +17,14 @@ import {
   stripMarkdownFences,
 } from '@kbn/custom-content-common';
 
-const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the correct EUI palette for both light and dark themes at render time:
-- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: var(--cc-color-text); background: var(--cc-color-background); }
+const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY color, space, radius and font declaration; never hardcode a hex color, a pixel spacing value, or a font stack, or the panel will look foreign next to the charts beside it.
+- Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
 - Card/surface backgrounds: var(--cc-color-surface).
 - Accent colors: var(--cc-color-primary) (blue), var(--cc-color-accent) (teal), var(--cc-color-accent-2) (pink), var(--cc-color-warning) (yellow).
-- Danger/error: var(--cc-color-danger). Border color: var(--cc-color-border).`;
+- Danger/error: var(--cc-color-danger). Border color: var(--cc-color-border).
+- Spacing (margins, padding, gaps): var(--cc-space-xs) < var(--cc-space-s) < var(--cc-space-m) < var(--cc-space-l) < var(--cc-space-xl). Pick from this scale only — no arbitrary values like 10px or 1.25rem.
+- Corner rounding: var(--cc-radius) on every card, badge, pill and container. Do not invent other radii.
+- Type scale: 0.75rem for secondary/label text, 0.875rem for body, 1.5rem or more for a headline KPI number. Use font-weight 600 for emphasis rather than a larger size.`;
 
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
@@ -88,7 +91,9 @@ function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]):
 
 function colorSection(): string {
   return `VISUAL DESIGN — ${CSS_VARS_GUIDANCE}
-- Clean, modern design. Comfortable padding. Do NOT add a border around cards, containers, or the panel by default — separate elements using background-color contrast and spacing only. Only add a border (e.g. var(--cc-color-border)) if the user explicitly asks for one.`;
+- The panel sits on a dashboard beside Lens and Vega charts. It must read as part of that page, not as an embedded document from another product: same type scale, same spacing rhythm, same corner rounding.
+- Do NOT add a border around cards, containers, or the panel by default — separate elements using background-color contrast and spacing only. Only add a border (e.g. var(--cc-color-border)) if the user explicitly asks for one.
+- No drop shadows, no gradients, no decorative dividers, and no custom accent colors outside the tokens above.`;
 }
 
 function buildSystemPromptStatic(): string {
