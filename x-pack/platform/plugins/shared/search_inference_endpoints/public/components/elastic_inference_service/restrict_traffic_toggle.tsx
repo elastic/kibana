@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiPanel, EuiSwitch, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiPanel,
+  EuiSwitch,
+  EuiText,
+  useGeneratedHtmlId,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -21,6 +28,7 @@ export const RestrictTrafficToggle: React.FC<RestrictTrafficToggleProps> = ({
   isDisabled,
   onChange,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const toggleId = useGeneratedHtmlId({ prefix: 'restrictTrafficToggle' });
 
   const helpText = isRestricted ? (
@@ -45,6 +53,7 @@ export const RestrictTrafficToggle: React.FC<RestrictTrafficToggleProps> = ({
       <EuiSwitch
         id={toggleId}
         checked={isRestricted}
+        css={{ marginBottom: euiTheme.size.m }}
         onChange={(e) => onChange(e.target.checked)}
         disabled={isDisabled}
         label={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.restrictTrafficLabel', {

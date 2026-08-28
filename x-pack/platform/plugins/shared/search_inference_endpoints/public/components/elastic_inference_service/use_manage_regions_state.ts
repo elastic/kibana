@@ -179,11 +179,12 @@ export const useManageRegionsState = (onClose: () => void) => {
   const { reset: resetRegionSelection } = regionTab.regionSelection;
   const handleLocationTypeChange = useCallback(
     (next: PolicyMode) => {
+      if (next === activeTab) return;
       setActiveTab(next);
       resetGeoSelection();
       resetRegionSelection();
     },
-    [setActiveTab, resetGeoSelection, resetRegionSelection]
+    [activeTab, setActiveTab, resetGeoSelection, resetRegionSelection]
   );
 
   const regionTabReturn = useMemo(
