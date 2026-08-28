@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export type { RuleExample, RuleInput, RuleExpected, RuleMetadata, RuleVendor } from './types';
-export { splunkRules } from './splunk';
-export { qradarRules } from './qradar';
-export { sentinelRules } from './sentinel';
+export { sentinelRules } from './sentinel_rules';

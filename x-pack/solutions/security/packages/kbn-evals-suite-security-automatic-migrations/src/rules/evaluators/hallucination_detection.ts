@@ -6,8 +6,15 @@
  */
 
 import type { DefaultEvaluators, Evaluator, EvaluationResult } from '@kbn/evals';
-import type { RuleExample, RuleInput } from '../../../datasets/rules/types';
+import type { RuleExample, RuleInput, RuleVendor } from '../../../datasets/rules/types';
 import type { RuleMigrationResult } from '../migration_client';
+
+/** How the judge is told to refer to the source query, per vendor query language. */
+const SOURCE_LABEL_BY_VENDOR: Record<RuleVendor, string> = {
+  splunk: 'Splunk SPL',
+  qradar: 'QRadar rule definition',
+  'microsoft-sentinel': 'Microsoft Sentinel KQL',
+};
 
 export const createHallucinationDetectionEvaluator = (
   evaluators: DefaultEvaluators
@@ -27,8 +34,7 @@ export const createHallucinationDetectionEvaluator = (
       return { score: null, explanation: 'No source query in input' };
     }
 
-    const vendor = ruleInput.original_rule.vendor;
-    const sourceLabel = vendor === 'splunk' ? 'Splunk SPL' : 'QRadar rule definition';
+    const sourceLabel = SOURCE_LABEL_BY_VENDOR[ruleInput.original_rule.vendor];
 
     const criteriaEval = evaluators.criteria([
       `You are evaluating whether a translated ES|QL query contains hallucinated content — ` +
@@ -40,7 +46,7 @@ export const createHallucinationDetectionEvaluator = (
         `- Filter conditions, thresholds, or constants not in the source\n` +
         `- Data sources or index patterns not derivable from the source\n` +
         `- Logic inversions (AND↔OR, negation flips)\n\n` +
-        `Note: Differences due to syntax translation (SPL→ES|QL or XML→ES|QL) are expected ` +
+        `Note: Differences due to syntax translation (SPL→ES|QL, XML→ES|QL or KQL→ES|QL) are expected ` +
         `and should NOT be flagged. Only flag genuinely invented content.\n\n` +
         `Score YES if the ES|QL is faithful (no hallucinations). Score NO if it contains hallucinations.`,
     ]);
