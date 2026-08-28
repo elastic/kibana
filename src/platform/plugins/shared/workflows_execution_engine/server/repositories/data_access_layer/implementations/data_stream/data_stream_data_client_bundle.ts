@@ -25,11 +25,9 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '../../types';
-import { DeferredDataClient } from '../deferred_data_client';
 
 export class DataStreamDataClientBundle implements DataClientBundle {
-  private esClientPromise!: Promise<ElasticsearchClient>;
-  private started = false;
+  private esClient!: ElasticsearchClient;
 
   constructor(private readonly deps: CreateDataClientDeps) {}
 
@@ -53,58 +51,43 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   }
 
   async initStart(coreStart: CoreStart): Promise<void> {
-    this.esClientPromise = Promise.all([
+    await Promise.all([
       coreStart.dataStreams.initializeClient(WORKFLOWS_EXECUTIONS_DATA_STREAM),
       coreStart.dataStreams.initializeClient(WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM),
-    ]).then(() => coreStart.elasticsearch.client.asInternalUser);
-    this.started = true;
+    ]);
+
+    this.esClient = coreStart.elasticsearch.client.asInternalUser;
   }
 
   async stop(): Promise<void> {}
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
-    if (!this.started) {
-      throw new Error('initStart must be called before creating data clients');
-    }
-    return new DeferredDataClient(() =>
-      this.esClientPromise.then(
-        (esClient) =>
-          new DataStreamExecutionsDataAccess<EsWorkflowExecution>({
-            esClient,
-            dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
-            versionManager: new DocumentVersionManager({
-              esClient,
-              dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
-              logger: this.deps.logger,
-            }),
-            additionalIndexesToQuery: ['.workflows-executions'],
-            logger: this.deps.logger,
-            dateField: 'createdAt',
-          })
-      )
-    );
+    return new DataStreamExecutionsDataAccess<EsWorkflowExecution>({
+      esClient: this.esClient,
+      dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
+      versionManager: new DocumentVersionManager({
+        esClient: this.esClient,
+        dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
+        logger: this.deps.logger,
+      }),
+      additionalIndexesToQuery: ['.workflows-executions'],
+      logger: this.deps.logger,
+      dateField: 'createdAt',
+    });
   }
 
   createStepDataClient(): StepExecutionsDataClient {
-    if (!this.started) {
-      throw new Error('initStart must be called before creating data clients');
-    }
-    return new DeferredDataClient(() =>
-      this.esClientPromise.then(
-        (esClient) =>
-          new DataStreamExecutionsDataAccess<EsWorkflowStepExecution>({
-            esClient,
-            dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
-            versionManager: new DocumentVersionManager({
-              esClient,
-              dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
-              logger: this.deps.logger,
-            }),
-            additionalIndexesToQuery: ['.workflows-step-executions'],
-            logger: this.deps.logger,
-            dateField: 'startedAt',
-          })
-      )
-    );
+    return new DataStreamExecutionsDataAccess<EsWorkflowStepExecution>({
+      esClient: this.esClient,
+      dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
+      versionManager: new DocumentVersionManager({
+        esClient: this.esClient,
+        dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
+        logger: this.deps.logger,
+      }),
+      additionalIndexesToQuery: ['.workflows-step-executions'],
+      logger: this.deps.logger,
+      dateField: 'startedAt',
+    });
   }
 }
