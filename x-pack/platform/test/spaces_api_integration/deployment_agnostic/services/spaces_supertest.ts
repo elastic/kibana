@@ -14,13 +14,26 @@ import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_conte
 
 export type SupertestWithRoleScopeType = SupertestWithBasicAuth | SupertestWithRoleScope;
 
+/**
+ * `timeouts.request` is off by default, so opt this suite family in explicitly. These are the
+ * suites where an unbounded wait has actually bitten (elastic/kibana#287381): a stalled request
+ * burned 120s in a `before each` hook and 360s in a test body, and each time the FTR aborted the
+ * whole config, reporting one stalled request as six failed tests.
+ *
+ * Every request these suites make is a small spaces API call - the slowest hook does three
+ * saved-object imports plus six share operations in ~11s total - so 30s is a wide margin over
+ * normal and well under any mocha budget here. An FTR config may still override it via
+ * `timeouts.request`, and an individual caller via `RequestHeadersOptions.requestTimeout`.
+ */
+const SPACES_REQUEST_TIMEOUT_MS = 30_000;
+
 export function SpacesSupertestProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
   const config = getService('config');
   const license = config.get('esTestCluster.license');
   const isServerless = config.get('serverless');
-  const defaultRequestTimeout = config.get('timeouts.request');
+  const defaultRequestTimeout = config.get('timeouts.request') || SPACES_REQUEST_TIMEOUT_MS;
 
   return {
     async getSupertestWithRoleScope(

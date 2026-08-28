@@ -21,7 +21,8 @@ export interface RequestHeadersOptions {
   withCustomHeaders?: Record<string, string>;
   /**
    * Deadline in ms for each request made through this instance. Defaults to the
-   * `timeouts.request` FTR config value. Pass `0` to opt out for a long-running endpoint.
+   * `timeouts.request` FTR config value, which is `0` (no deadline) unless the suite's FTR
+   * config opts in. Pass `0` here to opt out again for a long-running endpoint.
    */
   requestTimeout?: number;
 }

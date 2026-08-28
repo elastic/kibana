@@ -126,9 +126,17 @@ export const schema = Joi.object()
         // Deadline for a single HTTP request made through the FTR supertest wrappers. Without
         // one, a request that stalls (rather than being refused) hangs until the enclosing
         // mocha timeout fires, at which point the FTR aborts the whole config -- so a single
-        // stalled request is reported as every remaining test in the suite failing. Keep this
-        // comfortably below the mocha timeouts so a stall surfaces as a request error.
-        request: Joi.number().default(30000),
+        // stalled request is reported as every remaining test in the suite failing.
+        //
+        // 0 disables it, which is the default: how long a single legitimate request takes
+        // varies enormously between suites (some deliberately budget minutes for ML jobs or
+        // agent inference), so a global ceiling would be guesswork. Opt in per FTR config:
+        //
+        //   timeouts: { request: 30_000 },
+        //
+        // and keep the value comfortably below that config's mocha timeouts so a stall
+        // surfaces as a request error rather than a suite-wide abort.
+        request: Joi.number().default(0),
 
         kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
