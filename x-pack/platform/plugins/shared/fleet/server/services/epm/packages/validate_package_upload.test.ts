@@ -364,19 +364,6 @@ describe('validatePackageUpload', () => {
       });
     });
 
-    it('allows a registry package name when allowRegistryPackageUploads is true', async () => {
-      mockedGetConfig.mockReturnValue({ internal: { allowRegistryPackageUploads: true } });
-      mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
-
-      await expect(
-        validateUpload({
-          packageInfo: validPackage,
-          paths: [],
-          savedObjectsClient: soClient,
-        })
-      ).resolves.toBeUndefined();
-    });
-
     it('does not query the registry when re-uploading an existing upload package', async () => {
       mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
 
@@ -936,6 +923,106 @@ describe('validatePackageUpload', () => {
         name: 'logs-payroll.records-*',
         expand_wildcards: ['open', 'hidden'],
       });
+    });
+  });
+
+  describe('skipUploadPackageValidation escape hatch', () => {
+    beforeEach(() => {
+      mockedGetConfig.mockReturnValue({ internal: { skipUploadPackageValidation: true } });
+    });
+
+    it('allows a registry package name without querying the registry', async () => {
+      mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockedFetchLatest).not.toHaveBeenCalled();
+    });
+
+    it('allows an upload that shadows a registry-installed package', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+          installedPkg: {
+            attributes: { name: 'my_integration', install_source: 'registry' },
+          } as SavedObject<Installation>,
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('allows a prebuilt index template in the archive', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: ['my_integration-1.0.0/elasticsearch/index_template/logs.json'],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('allows a package name that fails strict name validation', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: { ...validPackage, name: 'My-Integration' },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('allows a matching unowned live data stream without querying Elasticsearch', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-my_integration.logs-default',
+            template: 'logs-my_integration.logs',
+          }),
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
+    });
+
+    it('allows a dataset owned by another installed package', async () => {
+      mockedGetPackageSavedObjects.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: {
+              name: 'nginx',
+              installed_es: [
+                { id: 'logs-nginx.access', type: ElasticsearchAssetType.indexTemplate },
+              ],
+            },
+          },
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'hostile',
+            data_streams: [{ dataset: 'nginx.access', type: 'logs' }],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
   });
 
