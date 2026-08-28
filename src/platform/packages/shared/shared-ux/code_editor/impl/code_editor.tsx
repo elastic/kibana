@@ -542,30 +542,22 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         },
       });
 
-      try {
-        const messageContribution = editor.getContribution('editor.contrib.messageController');
+      const messageContribution = editor.getContribution('editor.contrib.messageController');
 
-        editor.onDidAttemptReadOnlyEdit(() => {
-          messageContribution?.showMessage?.(readOnlyMessage, editor.getPosition());
+      editor.onDidAttemptReadOnlyEdit(() => {
+        messageContribution?.showMessage?.(readOnlyMessage, editor.getPosition());
+      });
+
+      const suggestionController = editor.getContribution('editor.contrib.suggestController');
+      const suggestionWidget = suggestionController?.widget?.value;
+
+      if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
+        suggestionWidget.onDidShow(() => {
+          isSuggestionMenuOpen.current = true;
         });
-      } catch {
-        // This is a guard for possible changes in the underlying lib, as we are leveraging undocumented APIs.
-      }
-
-      try {
-        const suggestionController = editor.getContribution('editor.contrib.suggestController');
-        const suggestionWidget = suggestionController?.widget?.value;
-
-        if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
-          suggestionWidget.onDidShow(() => {
-            isSuggestionMenuOpen.current = true;
-          });
-          suggestionWidget.onDidHide(() => {
-            isSuggestionMenuOpen.current = false;
-          });
-        }
-      } catch {
-        // This is a guard for possible changes in the underlying lib, as we are leveraging undocumented APIs.
+        suggestionWidget.onDidHide(() => {
+          isSuggestionMenuOpen.current = false;
+        });
       }
 
       if (enableCustomContextMenu) {
