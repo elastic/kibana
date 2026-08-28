@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-JUDGEMENTS_FILE="target/scout_llm_smoke_judgements.jsonl"
+JUDGEMENTS_FILE="target/llm_smoke_judgements.jsonl"
 
 if [[ ! -s "$JUDGEMENTS_FILE" ]]; then
   echo "No LLM smoke judgements recorded"

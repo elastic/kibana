@@ -29,6 +29,7 @@ export {
 } from './src/eis_helpers';
 export {
   MAX_LLM_SMOKE_JUDGES,
+  discoverEisJudgeInferenceIds,
   judgeLlmSmokeFailure,
   recordLlmSmokeJudgement,
   type LlmSmokeFailureEvidence,

@@ -40,10 +40,7 @@ export interface LlmSmokeFailureJudgement {
   judgeInferenceId?: string;
 }
 
-export const LLM_SMOKE_JUDGEMENTS_PATH = resolve(
-  REPO_ROOT,
-  'target/scout_llm_smoke_judgements.jsonl'
-);
+export const LLM_SMOKE_JUDGEMENTS_PATH = resolve(REPO_ROOT, 'target/llm_smoke_judgements.jsonl');
 
 /** Max number of backup inference endpoints to try before giving up on a verdict. */
 export const MAX_LLM_SMOKE_JUDGES = 3;
@@ -132,6 +129,22 @@ export const parseJudgeVerdict = (
   return undefined;
 };
 
+/**
+ * Lists EIS chat-completion inference endpoints on the cluster, usable as judge
+ * endpoints when no pre-discovered model list (`target/eis_models.json`) is available.
+ * Requires CCM to be enabled; returns an empty list when EIS is not reachable.
+ */
+export const discoverEisJudgeInferenceIds = async (esClient: Client): Promise<string[]> => {
+  try {
+    const response = await esClient.inference.get({ inference_id: '_all' });
+    return response.endpoints
+      .filter((ep) => ep.task_type === 'chat_completion' && ep.service === 'elastic')
+      .map((ep) => ep.inference_id);
+  } catch {
+    return [];
+  }
+};
+
 const readStreamToString = async (stream: Readable): Promise<string> => {
   let raw = '';
   for await (const chunk of stream) {
@@ -195,7 +208,7 @@ export const judgeLlmSmokeFailure = async ({
 };
 
 /**
- * Appends a judgement record to `target/scout_llm_smoke_judgements.jsonl` so CI can
+ * Appends a judgement record to `target/llm_smoke_judgements.jsonl` so CI can
  * upload it as an artifact and surface judged failures in a build annotation.
  */
 export const recordLlmSmokeJudgement = (

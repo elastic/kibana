@@ -44,7 +44,7 @@ steps:
           preemptible: true
           spotZones: us-central1-f,us-central1-c,us-central1-a
         artifact_paths:
-          - 'target/scout_llm_smoke_judgements.jsonl'
+          - 'target/llm_smoke_judgements.jsonl'
         retry:
           automatic:
             - exit_status: '-1'

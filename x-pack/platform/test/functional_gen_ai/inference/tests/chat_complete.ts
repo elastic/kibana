@@ -10,16 +10,19 @@ import expect from '@kbn/expect';
 import { supertestToObservable } from '@kbn/sse-utils-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { createJudgedIt } from './llm_triage';
 
 export const chatCompleteSuite = (
   { id: connectorId, actionTypeId: connectorType }: AvailableConnectorWithId,
-  { getService }: FtrProviderContext
+  providerContext: FtrProviderContext
 ) => {
+  const { getService } = providerContext;
   const supertest = getService('supertest');
+  const judgedIt = createJudgedIt(providerContext, connectorId);
 
   describe('chatComplete API', () => {
     describe('streaming disabled', () => {
-      it('returns a chat completion message for a simple prompt', async () => {
+      judgedIt('returns a chat completion message for a simple prompt', async () => {
         const response = await supertest
           .post(`/internal/inference/chat_complete`)
           .set('kbn-xsrf', 'kibana')
@@ -37,7 +40,7 @@ export const chatCompleteSuite = (
         expect(message.content).to.contain('4');
       });
 
-      it('executes a tool with native function calling', async () => {
+      judgedIt('executes a tool with native function calling', async () => {
         const response = await supertest
           .post(`/internal/inference/chat_complete`)
           .set('kbn-xsrf', 'kibana')
@@ -73,7 +76,7 @@ export const chatCompleteSuite = (
 
       // simulated FC is only for openAI
       if (connectorType === '.gen-ai') {
-        it('executes a tool with simulated function calling', async () => {
+        judgedIt('executes a tool with simulated function calling', async () => {
           const response = await supertest
             .post(`/internal/inference/chat_complete`)
             .set('kbn-xsrf', 'kibana')
@@ -109,7 +112,7 @@ export const chatCompleteSuite = (
         });
       }
 
-      it('returns token counts', async () => {
+      judgedIt('returns token counts', async () => {
         const response = await supertest
           .post(`/internal/inference/chat_complete`)
           .set('kbn-xsrf', 'kibana')
@@ -149,7 +152,7 @@ export const chatCompleteSuite = (
     });
 
     describe('streaming enabled', () => {
-      it('returns a chat completion message for a simple prompt', async () => {
+      judgedIt('returns a chat completion message for a simple prompt', async () => {
         const response = supertest
           .post(`/internal/inference/chat_complete/stream`)
           .set('kbn-xsrf', 'kibana')
@@ -170,7 +173,7 @@ export const chatCompleteSuite = (
         expect(message.content).to.contain('4');
       });
 
-      it('executes a tool when explicitly requested', async () => {
+      judgedIt('executes a tool when explicitly requested', async () => {
         const response = supertest
           .post(`/internal/inference/chat_complete/stream`)
           .set('kbn-xsrf', 'kibana')
@@ -206,7 +209,7 @@ export const chatCompleteSuite = (
         expect(message.toolCalls[0].function.arguments.formula).to.contain('123');
       });
 
-      it('returns a token count event', async () => {
+      judgedIt('returns a token count event', async () => {
         const response = supertest
           .post(`/internal/inference/chat_complete/stream`)
           .set('kbn-xsrf', 'kibana')
