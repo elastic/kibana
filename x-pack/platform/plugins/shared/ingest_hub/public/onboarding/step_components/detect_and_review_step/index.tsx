@@ -22,17 +22,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
+import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
+import type { EsAssetReference, KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import {
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,
 } from '../service_settings_step/use_service_settings';
-import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import { useServiceDataDetection } from './use_service_data_detection';
 import { DeploymentSummary } from './deployment_summary';
 import { AgentSetupCallout } from './agent_setup_callout';
 import { InstalledContent } from './installed_content';
-import type { EsAssetReference, KibanaAssetReference } from '@kbn/fleet-plugin/common';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -148,7 +148,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            iconType="arrowRight"
+            iconType="sortRight"
             iconSide="right"
             onClick={onContinue}
             data-test-subj="detectAndReviewStep-continueButton"

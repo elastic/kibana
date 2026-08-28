@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
-  EuiAccordion,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiPanel,
   EuiSpacer,
+  EuiStat,
   EuiText,
-  EuiTitle,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +46,23 @@ export function DeploymentSummary({
   totalCount,
 }: DeploymentSummaryProps) {
   const summaryFields = useDeploymentSummary(deploymentMethod);
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(true);
+  const panelCss = css`
+    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+  `;
+  const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
+
+  const headerButtonCss = css`
+    display: block;
+    width: 100%;
+    text-align: left;
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    border: none;
+    padding: ${euiTheme.size.l} ${euiTheme.size.m};
+    cursor: pointer;
+    border-bottom: ${isOpen ? `1px solid ${euiTheme.colors.borderBaseSubdued}` : 'none'};
+  `;
 
   const serviceCountText = i18n.translate(
     'xpack.ingestHub.detectAndReviewStep.deploymentSummary.serviceCount',
@@ -58,71 +79,92 @@ export function DeploymentSummary({
   );
 
   const listItems = summaryFields.map((f) => ({
-    title: <FormattedMessage id={f.labelId} defaultMessage={f.defaultMessage} />,
+    title: (
+      <EuiText color="subdued">
+        <FormattedMessage id={f.labelId} defaultMessage={f.defaultMessage} />
+      </EuiText>
+    ),
     description: f.value as string,
   }));
 
   return (
-    <>
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.title"
-            defaultMessage="Deployment summary"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <FormattedMessage
-          id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.receivingCount"
-          defaultMessage="{receiving} of {total} services receiving data"
-          values={{ receiving: receivingCount, total: totalCount }}
-        />
-      </EuiText>
-      <EuiSpacer size="m" />
-
-      {summaryFields.length > 0 && (
-        <>
-          <EuiDescriptionList type="column" listItems={listItems} />
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      <EuiAccordion
-        id="deployment-summary-services"
-        initialIsOpen
-        extraAction={extraAction}
-        buttonContent={
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.servicesAccordionTitle"
-                defaultMessage="Services"
-              />
-            </strong>
-          </EuiText>
-        }
-        data-test-subj="deploymentSummary-accordion"
+    <EuiPanel
+      paddingSize="none"
+      css={panelCss}
+      data-test-subj="deploymentSummary-panel"
+      hasShadow={false}
+    >
+      <button
+        type="button"
+        css={headerButtonCss}
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+        onClick={() => setIsOpen((v) => !v)}
+        data-test-subj="managedIntegrationsSection-headerButton"
       >
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {selectedServiceIds.map((id) => {
-            const entry = awsServicesMap?.get(id);
-            if (!entry) return null;
-            return (
-              <EuiFlexItem key={id}>
-                <ServiceTile
-                  name={serviceNames[id] ?? entry.name}
-                  status={statusByInstanceId[id] ?? 'instantiating'}
-                  entry={entry}
-                  deploymentMethod={deploymentMethod}
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="checkCircle" size="m" color="subdued" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>
+                <FormattedMessage
+                  id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.title"
+                  defaultMessage="Deployment summary"
                 />
-              </EuiFlexItem>
-            );
-          })}
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{extraAction}</EuiFlexItem>
         </EuiFlexGroup>
-      </EuiAccordion>
-    </>
+      </button>
+      {isOpen && (
+        <div id={contentId} role="region">
+          <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+            {listItems.length > 0 && (
+              <>
+                <EuiFlexGroup direction="row" gutterSize="xl" responsive={false}>
+                  {listItems.map((item) => (
+                    <EuiFlexItem grow={false} key={item.description}>
+                      <EuiStat title={item.description} description={item.title} titleSize="xxs" />
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+                <EuiSpacer size="l" />
+                <EuiHorizontalRule margin="none" />
+                <EuiSpacer size="l" />
+              </>
+            )}
+
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.receivingCount"
+                defaultMessage="{receiving} of {total} services receiving data"
+                values={{ receiving: receivingCount, total: totalCount }}
+              />
+            </EuiText>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup wrap gutterSize="s">
+              {selectedServiceIds.map((id) => {
+                const entry = awsServicesMap?.get(id);
+                if (!entry) return null;
+                return (
+                  <EuiFlexItem key={id} grow={false}>
+                    <ServiceTile
+                      name={serviceNames[id] ?? entry.name}
+                      status={statusByInstanceId[id] ?? 'instantiating'}
+                      entry={entry}
+                      deploymentMethod={deploymentMethod}
+                    />
+                  </EuiFlexItem>
+                );
+              })}
+            </EuiFlexGroup>
+          </EuiPanel>
+        </div>
+      )}
+    </EuiPanel>
   );
 }

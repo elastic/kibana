@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
 import type { ServiceChipState } from '../../../onboarding_flow_context';
 import { ServiceStatusIndicator } from './service_status_indicator';
@@ -21,17 +21,24 @@ interface ServiceTileProps {
 
 export function ServiceTile({ name, status, entry, deploymentMethod }: ServiceTileProps) {
   return (
-    <EuiPanel paddingSize="m" hasBorder data-test-subj={`serviceTile-${entry.id}`}>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m" responsive={false}>
+    <EuiPanel paddingSize="xl" hasBorder data-test-subj={`serviceTile-${entry.id}`}>
+      <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{name}</strong>
-          </EuiText>
-          <ServiceStatusIndicator status={status} />
+          <EuiIcon type="checkCircle" size="l" aria-hidden color="success" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DeliveryMethodBadge entry={entry} deploymentMethod={deploymentMethod} />
-        </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>{name}</strong>
+            </EuiText>
+            <EuiSpacer size="xs" />
+            <ServiceStatusIndicator status={status} />
+          </EuiFlexItem>
+          <EuiSpacer size="xs" />
+          <EuiFlexItem grow={false}>
+            <DeliveryMethodBadge entry={entry} deploymentMethod={deploymentMethod} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );

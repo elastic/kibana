@@ -6,14 +6,11 @@
  */
 
 import React from 'react';
-import { EuiHealth, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ServiceChipState } from '../../../onboarding_flow_context';
 
-const STATUS_CONFIG: Record<
-  ServiceChipState,
-  { color: string; label: React.ReactNode }
-> = {
+const STATUS_CONFIG: Record<ServiceChipState, { color: string; label: React.ReactNode }> = {
   instantiating: {
     color: 'subdued',
     label: (
@@ -72,11 +69,16 @@ export function ServiceStatusIndicator({ status }: ServiceStatusIndicatorProps) 
   return (
     <span aria-live="polite">
       {isAnimated ? (
-        <EuiHealth color={color}>
-          <EuiLoadingSpinner size="s" aria-hidden />
-          {' '}
-          {label}
-        </EuiHealth>
+        <EuiFlexGroup gutterSize="s" direction="row" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="s" aria-hidden />{' '}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color={color}>
+              {label}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         <EuiHealth color={color}>{label}</EuiHealth>
       )}
