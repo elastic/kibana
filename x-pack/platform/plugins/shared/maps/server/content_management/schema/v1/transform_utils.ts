@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/core/server';
 import type { MapItem } from '../../../../common/content_management';
 import type { MapAttributes } from './map_attributes_schema';
 import type { StoredMapAttributes } from '../../../saved_objects/types';
@@ -22,24 +23,31 @@ interface PartialMapsItem {
 
 export function savedObjectToItem(
   savedObject: SavedObject<StoredMapAttributes>,
-  partial: false
+  partial: false,
+  logger?: Logger
 ): MapItem;
 
 export function savedObjectToItem(
   savedObject: PartialSavedObject<StoredMapAttributes>,
-  partial: true
+  partial: true,
+  logger?: Logger
 ): PartialMapsItem;
 
 export function savedObjectToItem(
   savedObject: SavedObject<StoredMapAttributes> | PartialSavedObject<StoredMapAttributes>,
-  partial: boolean
+  partial: boolean,
+  logger?: Logger
 ): MapItem | PartialMapsItem {
   const { references, attributes, ...rest } = savedObject;
   return {
     ...rest,
-    attributes: transformMapAttributesOut(attributes as StoredMapAttributes, (targetName) => {
-      return references ? references.find(({ name }) => name === targetName) : undefined;
-    }),
+    attributes: transformMapAttributesOut(
+      attributes as StoredMapAttributes,
+      (targetName) => {
+        return references ? references.find(({ name }) => name === targetName) : undefined;
+      },
+      logger
+    ),
     references: (references ?? []).filter(({ type }) => type === 'tag'),
   };
 }

@@ -8,11 +8,10 @@
  */
 
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
-import type { StoredFilter } from './types';
 import { toStoredFilter } from './to_stored_filter';
 import { fromStoredFilter } from './from_stored_filter';
 import { FilterStateStore } from '@kbn/es-query-constants';
-import { FILTERS } from '@kbn/es-query';
+import { FILTERS, type Filter } from '@kbn/es-query';
 import { spatialFilterFixture } from './__fixtures__/spatial_filter';
 import { isConditionFilter, isDSLFilter } from './type_guards';
 
@@ -28,7 +27,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result = toStoredFilter(simplified) as StoredFilter;
+      const result = toStoredFilter(simplified) as Filter;
 
       // Properties not set in AsCodeFilter should not be present in StoredFilter
       expect(result.$state).toBeUndefined();
@@ -60,7 +59,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result = toStoredFilter(simplified) as StoredFilter;
+      const result = toStoredFilter(simplified) as Filter;
 
       // AND groups use combined filter format
       expect(result.meta.type).toBe('combined');
@@ -76,7 +75,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result = toStoredFilter(simplified) as StoredFilter;
+      const result = toStoredFilter(simplified) as Filter;
 
       expect(result.query).toEqual({
         script: { source: 'doc.field.value > 0' },
@@ -107,7 +106,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result1 = toStoredFilter(filter1) as StoredFilter;
+      const result1 = toStoredFilter(filter1) as Filter;
 
       // Top-level negate=false overrides condition.negate=true via spread operator
       expect(result1.meta.negate).toBeUndefined(); // false is not preserved (no explicit negate property)
@@ -130,14 +129,14 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result2 = toStoredFilter(filter2) as StoredFilter;
+      const result2 = toStoredFilter(filter2) as Filter;
 
       // Top-level negate=true wins (spread order: condition first, then baseMeta)
       expect(result2.meta.negate).toBe(true);
 
       // Test 3: Round-trip scenario - user can now "un-negate" a negated filter
       // Start with a negated stored filter
-      const originalNegatedFilter: StoredFilter = {
+      const originalNegatedFilter: Filter = {
         meta: {
           negate: true,
           type: 'phrase',
@@ -166,7 +165,7 @@ describe('toStoredFilter', () => {
       };
 
       // Convert back to stored
-      const result3 = toStoredFilter(unnegatedAsCode) as StoredFilter;
+      const result3 = toStoredFilter(unnegatedAsCode) as Filter;
 
       // Result: Top-level negate=false now wins! Filter is un-negated.
       expect(result3.meta.negate).toBeUndefined(); // false doesn't create a negate property
@@ -190,14 +189,18 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const result = toStoredFilter(filterWithGroupDoubleNegate) as StoredFilter;
+      const result = toStoredFilter(filterWithGroupDoubleNegate) as Filter;
 
       // Group filter becomes a combined filter with negate=true at the top level
       expect(result.meta.type).toBe(FILTERS.COMBINED);
       expect(result.meta.negate).toBe(true); // Top-level negate from the group
 
       // The nested condition should have its own negate
-      const nestedFilter = result.meta.params?.[0];
+      const nestedParams = result.meta.params;
+      if (!Array.isArray(nestedParams)) {
+        throw new Error('Expected combined filter params to be an array');
+      }
+      const nestedFilter = nestedParams[0] as Filter;
       expect(nestedFilter).toBeDefined();
       expect(nestedFilter.meta.negate).toBe(true); // condition.negate from the nested condition
 
@@ -243,10 +246,10 @@ describe('toStoredFilter', () => {
         $state: {
           store: 'appState',
         },
-      } as StoredFilter;
+      } as Filter;
 
       const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
-      const roundTripFilter = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTripFilter = toStoredFilter(asCodeFilter) as Filter;
 
       // negate: false is not preserved in round-trip for condition filters
       // because negation is encoded in the operator (is_one_of vs is_not_one_of)
@@ -259,13 +262,13 @@ describe('toStoredFilter', () => {
     });
 
     it('should preserve spatial filter data through round-trip conversion', () => {
-      const originalFilter = spatialFilterFixture as StoredFilter;
+      const originalFilter = spatialFilterFixture as Filter;
 
       // Convert to SimpleFilter
       const simpleFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
 
       // Convert back to StoredFilter
-      const roundTripFilter = toStoredFilter(simpleFilter) as StoredFilter;
+      const roundTripFilter = toStoredFilter(simpleFilter) as Filter;
 
       // Verify core query is preserved
       expect(roundTripFilter.query).toEqual(originalFilter.query);
@@ -291,7 +294,7 @@ describe('toStoredFilter', () => {
 
   describe('Scripted Filters', () => {
     it('should handle scripted phrase filters', () => {
-      const scriptedPhraseFilter: StoredFilter = {
+      const scriptedPhraseFilter: Filter = {
         $state: { store: FilterStateStore.APP_STATE },
         meta: {
           field: 'calculated_field',
@@ -323,7 +326,7 @@ describe('toStoredFilter', () => {
       expect(asCodeFilter.label).toBe('Scripted calculation equals 100');
 
       // Convert back to StoredFilter
-      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTrip = toStoredFilter(asCodeFilter) as Filter;
 
       // Verify script is preserved
       expect(roundTrip.query).toEqual(scriptedPhraseFilter.query);
@@ -334,7 +337,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should handle scripted range filters', () => {
-      const scriptedRangeFilter: StoredFilter = {
+      const scriptedRangeFilter: Filter = {
         $state: { store: FilterStateStore.APP_STATE },
         meta: {
           field: 'calculated_field',
@@ -367,7 +370,7 @@ describe('toStoredFilter', () => {
       expect(asCodeFilter.label).toBe('Scripted calculation between 0 and 100');
 
       // Convert back to StoredFilter
-      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTrip = toStoredFilter(asCodeFilter) as Filter;
 
       // Verify script is preserved
       expect(roundTrip.query).toEqual(scriptedRangeFilter.query);
@@ -378,7 +381,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should handle scripted phrase filter with complex script', () => {
-      const scriptedFilter: StoredFilter = {
+      const scriptedFilter: Filter = {
         $state: { store: FilterStateStore.APP_STATE },
         meta: {
           field: 'bytes_per_second',
@@ -411,7 +414,7 @@ describe('toStoredFilter', () => {
 
       expect(isDSLFilter(asCodeFilter)).toBe(true);
 
-      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTrip = toStoredFilter(asCodeFilter) as Filter;
 
       expect(roundTrip.query?.script).toBeDefined();
       expect(roundTrip.meta.type).toBe('custom');
@@ -420,7 +423,7 @@ describe('toStoredFilter', () => {
 
   describe('Date-Specific Range Filters', () => {
     it('should handle date range filter with strict_date_optional_time_nanos format', () => {
-      const dateRangeFilter: StoredFilter = {
+      const dateRangeFilter: Filter = {
         $state: { store: FilterStateStore.APP_STATE },
         meta: {
           field: '@timestamp',
@@ -456,7 +459,7 @@ describe('toStoredFilter', () => {
         expect(asCodeFilter.condition.operator).toBe('range');
       }
 
-      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTrip = toStoredFilter(asCodeFilter) as Filter;
 
       // Verify format is preserved through round-trip
       expect(roundTrip.query?.range?.['@timestamp']).toBeDefined();
@@ -468,7 +471,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should handle date range filter with date_time format', () => {
-      const dateRangeFilter: StoredFilter = {
+      const dateRangeFilter: Filter = {
         $state: { store: FilterStateStore.APP_STATE },
         meta: {
           field: 'event.created',
@@ -500,14 +503,14 @@ describe('toStoredFilter', () => {
       }
 
       // Convert back
-      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTrip = toStoredFilter(asCodeFilter) as Filter;
 
       expect(roundTrip.meta.type).toBe('range');
     });
 
     it('should handle single-value date as range with format', () => {
       // This is created when user clicks on a date value in Discover
-      const singleDateFilter: StoredFilter = {
+      const singleDateFilter: Filter = {
         $state: { store: FilterStateStore.APP_STATE },
         meta: {
           field: '@timestamp',
@@ -533,7 +536,7 @@ describe('toStoredFilter', () => {
       };
 
       const asCodeFilter = fromStoredFilter(singleDateFilter) as AsCodeFilter;
-      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTrip = toStoredFilter(asCodeFilter) as Filter;
 
       // Format is now preserved through round-trip
       expect(roundTrip.query?.range?.['@timestamp'].format).toBe('strict_date_optional_time_nanos');
@@ -543,7 +546,7 @@ describe('toStoredFilter', () => {
     });
 
     it('should handle date range created from time picker', () => {
-      const timePickerFilter: StoredFilter = {
+      const timePickerFilter: Filter = {
         $state: { store: FilterStateStore.APP_STATE },
         meta: {
           field: '@timestamp',
@@ -572,7 +575,7 @@ describe('toStoredFilter', () => {
         expect(asCodeFilter.condition.operator).toBe('range');
       }
 
-      const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTrip = toStoredFilter(asCodeFilter) as Filter;
       expect(roundTrip.query?.range?.['@timestamp'].gte).toBe('now-15m');
       expect(roundTrip.query?.range?.['@timestamp'].lte).toBe('now');
     });
@@ -590,7 +593,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const storedFilter = toStoredFilter(asCodeFilter) as StoredFilter;
+      const storedFilter = toStoredFilter(asCodeFilter) as Filter;
 
       expect(storedFilter.meta.type).toBe('phrases');
       expect(storedFilter.meta.negate).toBe(true);
@@ -609,7 +612,7 @@ describe('toStoredFilter', () => {
 
     it('should preserve condition.negate true through round-trip conversion (phrases)', () => {
       // Original phrases filter with negation (like "Carrier is not one of...")
-      const originalFilter: StoredFilter = {
+      const originalFilter: Filter = {
         $state: { store: FilterStateStore.APP_STATE },
         meta: {
           alias: null,
@@ -652,7 +655,7 @@ describe('toStoredFilter', () => {
       }
 
       // Convert back to StoredFilter
-      const roundTripFilter = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTripFilter = toStoredFilter(asCodeFilter) as Filter;
 
       // Should still be a phrases filter with negate: true
       expect(roundTripFilter.meta.type).toBe('phrases');
@@ -693,7 +696,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const storedFilter = toStoredFilter(asCodeFilter) as StoredFilter;
+      const storedFilter = toStoredFilter(asCodeFilter) as Filter;
 
       // Should be converted to a combined filter with OR relation
       expect(storedFilter.meta.type).toBe('combined');
@@ -701,7 +704,7 @@ describe('toStoredFilter', () => {
       expect(Array.isArray(storedFilter.meta.params)).toBe(true);
 
       // Each nested condition should preserve its own negate
-      const params = storedFilter.meta.params as StoredFilter[];
+      const params = storedFilter.meta.params as Filter[];
       expect(params).toHaveLength(3);
       expect(params[0].meta.negate).toBe(true);
       expect(params[1].meta.negate).toBe(true);
@@ -711,7 +714,7 @@ describe('toStoredFilter', () => {
     it('should preserve condition.negate for negated range filters through round-trip', () => {
       // Range filters do NOT have an opposition operator (unlike IS/IS_NOT, EXISTS/NOT_EXISTS)
       // so negate must be preserved through round-trip conversion
-      const originalFilter: StoredFilter = {
+      const originalFilter: Filter = {
         $state: { store: FilterStateStore.APP_STATE },
         meta: {
           disabled: false,
@@ -749,7 +752,7 @@ describe('toStoredFilter', () => {
       }
 
       // Convert back to StoredFilter
-      const roundTripFilter = toStoredFilter(asCodeFilter!) as StoredFilter;
+      const roundTripFilter = toStoredFilter(asCodeFilter!) as Filter;
 
       // CRITICAL: negate must be preserved through round-trip
       expect(roundTripFilter.meta.negate).toBe(true);
@@ -762,7 +765,7 @@ describe('toStoredFilter', () => {
   describe('Round-trip conversion', () => {
     it('should preserve phrases filter structure through round-trip conversion', () => {
       // This is the exact stored filter from the dashboard
-      const originalStoredFilter: StoredFilter = {
+      const originalStoredFilter: Filter = {
         meta: {
           disabled: false,
           negate: true,
@@ -792,7 +795,7 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(originalStoredFilter) as AsCodeFilter;
 
       // Convert back to StoredFilter
-      const roundTripFilter = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTripFilter = toStoredFilter(asCodeFilter) as Filter;
 
       // The structure should remain the same
       expect(roundTripFilter.meta.type).toBe('phrases');
@@ -816,7 +819,7 @@ describe('toStoredFilter', () => {
     it('should preserve filters with bool.must containing multiple different query types AS DSL (not group)', () => {
       // A filter with bool.must containing different query types (match_phrase + range)
       // WITHOUT meta.type, this should be preserved as DSL to avoid data loss
-      const originalFilter: StoredFilter = {
+      const originalFilter: Filter = {
         meta: {
           disabled: false,
           negate: false,
@@ -875,7 +878,7 @@ describe('toStoredFilter', () => {
       }
 
       // Round-trip back to stored format
-      const roundTripped = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTripped = toStoredFilter(asCodeFilter) as Filter;
 
       // Both queries should be preserved
       expect(roundTripped.query?.bool?.must).toEqual([
@@ -898,7 +901,7 @@ describe('toStoredFilter', () => {
     it('should handle single query filter with incomplete metadata as DSL', () => {
       // A filter that has query but incomplete metadata (no meta.type)
       // These should be preserved as DSL to avoid ambiguity
-      const singleQueryFilter: StoredFilter = {
+      const singleQueryFilter: Filter = {
         meta: {
           // Incomplete metadata - no type, no key
           disabled: false,
@@ -930,7 +933,7 @@ describe('toStoredFilter', () => {
 
     it('should preserve complex bool.should queries without simplifying', () => {
       // A complex filter that shouldn't be simplified
-      const complexFilter: StoredFilter = {
+      const complexFilter: Filter = {
         meta: {
           disabled: false,
           negate: false,
@@ -971,7 +974,7 @@ describe('toStoredFilter', () => {
     it('should preserve bool query with BOTH must and should clauses as DSL (prevents data loss)', () => {
       // A filter with bool query that has BOTH must and should clauses
       // This prevents the Strategy 3 Bug that would convert to group and lose should clause
-      const complexBoolFilter: StoredFilter = {
+      const complexBoolFilter: Filter = {
         meta: {
           disabled: false,
           negate: false,
@@ -1044,7 +1047,7 @@ describe('toStoredFilter', () => {
       }
 
       // Round-trip to verify NO data loss
-      const roundTripped = toStoredFilter(asCodeFilter) as StoredFilter;
+      const roundTripped = toStoredFilter(asCodeFilter) as Filter;
 
       // The should clause is PRESERVED (not lost!)
       if ('query' in roundTripped && roundTripped.query?.bool) {
@@ -1057,7 +1060,7 @@ describe('toStoredFilter', () => {
 
     it('should preserve bool.must with single query as DSL', () => {
       // Single-clause bool.must goes to DSL fallback since it can't be simplified
-      const boolMustFilter: StoredFilter = {
+      const boolMustFilter: Filter = {
         meta: {
           disabled: false,
           negate: false,
@@ -1102,7 +1105,7 @@ describe('toStoredFilter', () => {
     it('should handle nested combined filters and strip $state from sub-filters during round-trip', () => {
       // Complex nested combined filter structure
       // Note: The input has $state on nested filters, but buildCombinedFilter strips these
-      const nestedCombinedFilter: StoredFilter = {
+      const nestedCombinedFilter: Filter = {
         $state: {
           store: FilterStateStore.APP_STATE,
         },
@@ -1234,29 +1237,31 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(nestedCombinedFilter);
       expect(asCodeFilter).toBeDefined();
 
-      const roundTripped = toStoredFilter(asCodeFilter!) as StoredFilter;
+      const roundTripped = toStoredFilter(asCodeFilter!) as Filter;
 
       // Verify top-level structure
       expect(roundTripped.meta.type).toBe('combined');
       expect(roundTripped.meta.relation).toBe('AND');
-      expect(Array.isArray(roundTripped.meta.params)).toBe(true);
-      expect(roundTripped.meta.params).toHaveLength(2);
+      const topParams = roundTripped.meta.params;
+      expect(Array.isArray(topParams)).toBe(true);
+      expect(topParams).toHaveLength(2);
 
       // Verify first param is a simple phrase filter
-      const firstParam = roundTripped.meta.params[0] as StoredFilter;
+      const firstParam = (topParams as Filter[])[0];
       expect(firstParam.meta.type).toBe('phrase');
       expect(firstParam.meta.key).toBe('extension.keyword');
 
       // Verify second param is a nested combined filter
       // The buildCombinedFilter function strips $state from all sub-filters
-      const secondParam = roundTripped.meta.params[1] as StoredFilter;
+      const secondParam = (topParams as Filter[])[1];
       expect(secondParam.meta.type).toBe('combined');
       expect(secondParam.meta.relation).toBe('OR');
-      expect(Array.isArray(secondParam.meta.params)).toBe(true);
-      expect(secondParam.meta.params).toHaveLength(2);
+      const secondParams = secondParam.meta.params;
+      expect(Array.isArray(secondParams)).toBe(true);
+      expect(secondParams).toHaveLength(2);
 
       // Verify deeply nested combined filter
-      const nestedCombinedInOr = secondParam.meta.params[1] as StoredFilter;
+      const nestedCombinedInOr = (secondParams as Filter[])[1];
       expect(nestedCombinedInOr.meta.type).toBe('combined');
       expect(nestedCombinedInOr.meta.relation).toBe('AND');
     });

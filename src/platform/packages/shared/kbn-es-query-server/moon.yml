@@ -18,8 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-es-query-server
 dependsOn:
   - '@kbn/zod'
-  - '@kbn/utility-types'
-  - '@kbn/es-query-constants'
 tags:
   - shared-server
   - package

@@ -11,7 +11,7 @@
  * As Code Filter Transform Utilities
  *
  * This module provides conversion utilities between AsCodeFilter format
- * (used in Kibana's As Code APIs) and StoredFilter format (used in saved objects/URL state).
+ * (used in Kibana's As Code APIs) and the legacy stored `Filter` format (used in saved objects/URL state).
  */
 
 // Conversion functions
@@ -29,6 +29,3 @@ export {
 
 // Error class
 export { FilterConversionError } from './src/errors';
-
-// Types
-export type { StoredFilter } from './src/types';

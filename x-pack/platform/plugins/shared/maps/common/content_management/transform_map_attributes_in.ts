@@ -6,6 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { extractReferences } from '../migrations/references';
@@ -25,6 +26,7 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
   const mapStateJSON = getJSONString(
     {
       ...mapState,
+      ...(mapState.filters ? { filters: toStoredFilters(mapState.filters) ?? [] } : {}),
       ...(mapState.refreshInterval
         ? {
             refreshConfig: {

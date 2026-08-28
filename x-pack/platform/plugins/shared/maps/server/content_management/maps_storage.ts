@@ -18,6 +18,7 @@ import type {
   SearchQuery,
   DeleteResult,
 } from '@kbn/content-management-plugin/common';
+import type { Logger } from '@kbn/core/server';
 import type { MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
 import type {
@@ -69,6 +70,12 @@ const searchArgsToSOFindOptions = (
 };
 
 export class MapsStorage {
+  private readonly _logger: Logger;
+
+  constructor(logger: Logger) {
+    this._logger = logger;
+  }
+
   async get(ctx: StorageContext, id: string): Promise<MapsGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
@@ -84,7 +91,7 @@ export class MapsStorage {
       throw Boom.internal(`Invalid response. ${savedObject.error.message}`);
     }
 
-    const item = savedObjectToItem(savedObject, false);
+    const item = savedObjectToItem(savedObject, false, this._logger);
     const response = {
       item,
       meta: { aliasPurpose, aliasTargetId, outcome },
@@ -155,7 +162,7 @@ export class MapsStorage {
       }
     );
 
-    const item = savedObjectToItem(savedObject, false);
+    const item = savedObjectToItem(savedObject, false, this._logger);
 
     const validationError = transforms.create.out.result.validate({ item });
     if (validationError) {
@@ -220,7 +227,7 @@ export class MapsStorage {
       }
     );
 
-    const item = savedObjectToItem(partialSavedObject, true);
+    const item = savedObjectToItem(partialSavedObject, true, this._logger);
 
     const validationError = transforms.update.out.result.validate({ item });
     if (validationError) {
@@ -278,7 +285,7 @@ export class MapsStorage {
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
-          const item = savedObjectToItem(so, false);
+          const item = savedObjectToItem(so, false, this._logger);
           return item;
         })
         .filter((item) => item !== null)
@@ -311,7 +318,7 @@ export class MapsStorage {
     toItemResult: (ctx: StorageContext, savedObject: SavedObject<StoredMapAttributes>): MapItem => {
       const transforms = ctx.utils.getTransforms(cmServicesDefinition);
 
-      const contentItem = savedObjectToItem(savedObject, false);
+      const contentItem = savedObjectToItem(savedObject, false, this._logger);
 
       const validationError = transforms.mSearch.out.result.validate(contentItem);
       if (validationError) {

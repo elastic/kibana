@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { layersSchema } from '../layer_schemas';
 import { settingsSchema } from './settings_schema';
@@ -39,7 +40,7 @@ export const mapAttributesSchema = z
     adHocDataViews: z.array(adhocDataViewSchema).optional(),
     center: mapCenterSchema.optional(),
     description: z.string().optional(),
-    filters: z.array(storedFilterSchema).optional(),
+    filters: z.array(asCodeFilterSchema).max(100).optional(),
     isLayerTOCOpen: z.boolean().default(true).optional().meta({
       description: 'Set to false to display map with collapsed legend.',
     }),

@@ -74,9 +74,21 @@ export type FilterMeta = {
   group?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
+  /**
+   * Field the filter applies to.
+   *
+   * NOTE: `PhraseFilterMeta` and `PhrasesFilterMeta` provide stricter typing; this exists for legacy/stored shapes.
+   */
+  field?: string;
   isMultiIndex?: boolean;
   type?: string;
   key?: string;
+  /**
+   * Boolean relation for combined filters.
+   *
+   * NOTE: `CombinedFilterMeta` provides stricter typing; this exists for legacy/stored shapes.
+   */
+  relation?: string;
   params?: FilterMetaParams;
   value?: string | RangeFilterParams | PhraseFilterValue[];
 };

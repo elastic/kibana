@@ -11,10 +11,12 @@ import { get } from 'lodash';
 import { isRangeFilterParams } from '../build_filters/range_filter';
 import type { Filter, FilterMeta } from '..';
 
+type FilterUpdateOperator = Pick<FilterMeta, 'negate' | 'type'>;
+
 export const updateFilter = (
   filter: Filter,
   field?: string,
-  operator?: FilterMeta,
+  operator?: FilterUpdateOperator,
   params?: Filter['meta']['params'],
   fieldType?: string
 ): Filter => {
@@ -51,7 +53,7 @@ function updateField(filter: Filter, field?: string): Filter {
   } as Filter; // need the casting because `field` shouldn't be there
 }
 
-function updateWithExistsOperator(filter: Filter, operator?: FilterMeta) {
+function updateWithExistsOperator(filter: Filter, operator?: FilterUpdateOperator) {
   return {
     ...filter,
     meta: {
@@ -67,7 +69,7 @@ function updateWithExistsOperator(filter: Filter, operator?: FilterMeta) {
 
 function updateWithIsOperator(
   filter: Filter,
-  operator?: FilterMeta,
+  operator?: FilterUpdateOperator,
   params?: Filter['meta']['params'],
   fieldType?: string
 ) {
@@ -101,7 +103,7 @@ function updateWithIsOperator(
 
 function updateWithRangeOperator(
   filter: Filter,
-  operator: FilterMeta,
+  operator: FilterUpdateOperator,
   rawParams: Filter['meta']['params'] | undefined,
   field: string
 ): Filter {

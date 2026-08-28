@@ -106,7 +106,6 @@ const luceneSavedSearch: SavedSearch = {
               },
             },
           ] as FilterMetaParams,
-          // @ts-expect-error SavedSearch needs to be updated with CombinedFilterMeta
           relation: 'OR',
           type: 'combined',
           index: 'cb8808e0-9bfb-11ed-bb38-2b1bd55401e7',

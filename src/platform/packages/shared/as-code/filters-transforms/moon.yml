@@ -18,12 +18,10 @@ project:
   sourceRoot: src/platform/packages/shared/as-code/filters-transforms
 dependsOn:
   - '@kbn/as-code-filters-schema'
-  - '@kbn/es-query-server'
   - '@kbn/es-query'
   - '@kbn/es-query-constants'
   - '@kbn/logging'
   - '@kbn/as-code-filters-constants'
-  - '@kbn/zod'
 tags:
   - shared-common
   - package
