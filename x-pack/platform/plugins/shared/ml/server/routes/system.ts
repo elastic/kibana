@@ -199,10 +199,7 @@ export function systemRoutes(
             isMlAutoscalingEnabled = lazyMlNodeCount > 0;
           }
 
-          let isMlCpsEnabled = await getIsMlCpsEnabled(client);
-
-          // remove this after testing
-          isMlCpsEnabled = true;
+          const isMlCpsEnabled = await getIsMlCpsEnabled(client);
 
           return response.ok({
             body: {
