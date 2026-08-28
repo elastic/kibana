@@ -65,7 +65,6 @@ interface RoundAuthorHeaderProps {
   author?: ConversationRoundAuthor | UserProfileWithAvatar;
   origin?: ConversationRoundOrigin;
   startedAt: string;
-  actor: 'user' | 'agent';
   agent?: AgentDefinition;
 }
 
@@ -73,29 +72,28 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   author,
   origin,
   startedAt,
-  actor,
   agent,
 }) => {
   const { euiTheme } = useEuiTheme();
   const time = formatRoundTime(startedAt);
+  const isAgent = Boolean(agent);
   const hasUserProfileAuthor = isUserProfileAuthor(author);
   const shouldResolveAuthorProfile =
-    actor === 'user' && !hasUserProfileAuthor && !origin && Boolean(author?.id);
+    !isAgent && !hasUserProfileAuthor && !origin && Boolean(author?.id);
   const { data: resolvedAuthorProfiles = [] } = useUserProfiles({
     uids: !hasUserProfileAuthor && author?.id ? [author.id] : [],
     enabled: shouldResolveAuthorProfile,
   });
   const resolvedAuthorProfile = hasUserProfileAuthor ? author : resolvedAuthorProfiles[0];
-  const name =
-    actor === 'agent'
-      ? agent?.name
-      : resolvedAuthorProfile
-      ? getUserDisplayName(resolvedAuthorProfile.user)
-      : !hasUserProfileAuthor
-      ? getAuthorName(author)
-      : undefined;
-  const showSlackOrigin = actor === 'user' && origin?.type === ConversationOriginType.Slack;
-  const showAgentBadge = actor === 'agent';
+  const name = isAgent
+    ? agent?.name
+    : resolvedAuthorProfile
+    ? getUserDisplayName(resolvedAuthorProfile.user)
+    : !hasUserProfileAuthor
+    ? getAuthorName(author)
+    : undefined;
+  const showSlackOrigin = !isAgent && origin?.type === ConversationOriginType.Slack;
+  const showAgentBadge = isAgent;
   const showSeparatorBeforeTime = Boolean(name) || showAgentBadge || showSlackOrigin;
 
   const headerStyles = css`
@@ -130,7 +128,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={headerStyles}>
       <EuiFlexItem grow={false}>
-        {actor === 'agent' && agent ? (
+        {agent ? (
           <AgentAvatar agent={agent} size="s" iconPaddingSize="none" />
         ) : resolvedAuthorProfile ? (
           <UserAvatar

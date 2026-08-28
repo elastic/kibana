@@ -55,7 +55,6 @@ describe('RoundAuthorHeader', () => {
   it('renders the user author and Slack origin', () => {
     render(
       <RoundAuthorHeader
-        actor="user"
         startedAt={startedAt}
         author={{ id: 'user-1', full_name: 'Jane Doe', username: 'jdoe' }}
         origin={{ type: ConversationOriginType.Slack }}
@@ -67,7 +66,7 @@ describe('RoundAuthorHeader', () => {
   });
 
   it('uses the user profile display name and avatar when provided', () => {
-    render(<RoundAuthorHeader actor="user" startedAt={startedAt} author={authorProfile} />);
+    render(<RoundAuthorHeader startedAt={startedAt} author={authorProfile} />);
 
     expect(screen.getByText('Alice Example')).toBeInTheDocument();
     expect(screen.getByText('AE')).toBeInTheDocument();
@@ -79,11 +78,7 @@ describe('RoundAuthorHeader', () => {
     } as unknown as ReturnType<typeof useUserProfiles>);
 
     render(
-      <RoundAuthorHeader
-        actor="user"
-        startedAt={startedAt}
-        author={{ id: 'user-1', username: 'alice' }}
-      />
+      <RoundAuthorHeader startedAt={startedAt} author={{ id: 'user-1', username: 'alice' }} />
     );
 
     expect(mockUseUserProfiles).toHaveBeenCalledWith({
@@ -95,14 +90,14 @@ describe('RoundAuthorHeader', () => {
   });
 
   it('does not render user attribution when no user name is available', () => {
-    const { container } = render(<RoundAuthorHeader actor="user" startedAt={startedAt} />);
+    const { container } = render(<RoundAuthorHeader startedAt={startedAt} />);
 
     expect(screen.queryByText('Me')).not.toBeInTheDocument();
     expect(container.querySelector('strong')).not.toBeInTheDocument();
   });
 
   it('renders the agent name', () => {
-    render(<RoundAuthorHeader actor="agent" startedAt={startedAt} agent={agent} />);
+    render(<RoundAuthorHeader startedAt={startedAt} agent={agent} />);
 
     expect(screen.getByText('Custom Agent')).toBeInTheDocument();
     expect(screen.queryByText('Elastic AI Agent')).not.toBeInTheDocument();

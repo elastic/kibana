@@ -104,10 +104,32 @@ describe('RoundResponse', () => {
     expect(useAgentBuilderAgentByIdMock).toHaveBeenCalledWith('agent-1');
     expect(roundAuthorHeaderMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        actor: 'agent',
         agent,
       }),
       expect.anything()
     );
+  });
+
+  it('does not render the author header when the agent is not available', () => {
+    useAgentBuilderAgentByIdMock.mockReturnValue({
+      agent: null,
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useAgentBuilderAgentById>);
+    const round = createRound();
+
+    render(
+      <RoundResponse
+        hasError={false}
+        response={round.response}
+        steps={round.steps}
+        isLoading={false}
+        isLastRound={false}
+        rawRound={round}
+        startedAt={round.started_at}
+      />
+    );
+
+    expect(roundAuthorHeaderMock).not.toHaveBeenCalled();
   });
 });

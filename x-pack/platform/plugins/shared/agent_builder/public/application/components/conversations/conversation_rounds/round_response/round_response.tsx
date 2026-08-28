@@ -69,9 +69,11 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
         position: relative;
       `}
     >
-      <EuiFlexItem grow={false}>
-        <RoundAuthorHeader startedAt={startedAt} actor="agent" agent={agent ?? undefined} />
-      </EuiFlexItem>
+      {agent && (
+        <EuiFlexItem grow={false}>
+          <RoundAuthorHeader startedAt={startedAt} agent={agent} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         {showStreamingText ? (
           <StreamingText

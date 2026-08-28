@@ -153,12 +153,7 @@ export const RoundInput = ({
       <EuiFlexItem grow={false} css={inputContentStyles}>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <RoundAuthorHeader
-              author={inputAuthor}
-              origin={origin}
-              startedAt={startedAt}
-              actor="user"
-            />
+            <RoundAuthorHeader author={inputAuthor} origin={origin} startedAt={startedAt} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPanel
