@@ -25,7 +25,8 @@ const KI_EVENT_TYPE_BY_ACTION: Record<KiWriteAction, string> = {
 /**
  * Server-side analytics wrapper for Context Engine telemetry.
  *
- * Owns EBT event type registration and reporting for KI writes.
+ * Owns EBT event type registration and reporting for KI writes
+ * and KI verification outcomes.
  * Payloads never contain KI free text. A reporting failure never
  * propagates to the caller.
  */
