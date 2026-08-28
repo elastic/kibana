@@ -190,9 +190,6 @@ export class KibanaA2AAdapter {
 
       const streaming = isStreamingMethod(req.body);
 
-      // Created up-front so the abort signal reaches BOTH the executor (which
-      // hands it to executeAgent to cancel the LLM/tool round when the client
-      // disconnects) AND the SSE helper (which stops writing frames).
       const abortController = new AbortController();
       const abortSub = req.events.aborted$.subscribe(() => abortController.abort());
 

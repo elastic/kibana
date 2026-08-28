@@ -145,9 +145,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
         `A2A: Starting task ${taskId} (contextId=${contextId}, streaming=${this.isStreaming}, blocking=${this.blocking})`
       );
 
-      // Publish the initial Task frame BEFORE executeAgent so the stream always
-      // opens with a Task, even if executeAgent throws (auth/resolver/ES). The
-      // catch below then adds the terminal failed status-update.
+      // Publish the initial Task frame BEFORE executeAgent so the stream always opens with a Task
       if (this.isStreaming) {
         eventBus.publish({
           id: taskId,
@@ -281,8 +279,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
 
   /**
    * Subscribe to the Agent Builder event stream and translate each event into
-   * A2A protocol events published to the event bus. The A2A SDK forwards these
-   * publishes as SSE frames to the client.
+   * A2A protocol events published to the event bus.
    */
   private forwardStreamingEvents({
     events$,
