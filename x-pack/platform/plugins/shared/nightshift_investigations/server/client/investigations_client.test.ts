@@ -114,7 +114,10 @@ describe('NightshiftInvestigationsClient.get()', () => {
   });
 
   it('returns full structured output from SO', async () => {
-    const attrs = makeSoAttrs();
+    const attrs = makeSoAttrs({
+      conversation_id: 'conv-1',
+      impact: { entities: [{ name: 'checkout-service' }] },
+    });
     mockInvestigationSoClient.get.mockResolvedValue(attrs);
     const result = await makeClient().get('inv-1');
 
@@ -134,6 +137,8 @@ describe('NightshiftInvestigationsClient.get()', () => {
       recommendations: [{ title: 'Keep monitoring' }],
       blind_spots: [{ title: 'Blind spot', description: 'desc' }],
       significant_event_updates: [],
+      conversation_id: 'conv-1',
+      impact: { entities: [{ name: 'checkout-service' }] },
     });
   });
 
@@ -302,6 +307,8 @@ describe('NightshiftInvestigationsClient.list()', () => {
     });
     expect(result.results[0]).not.toHaveProperty('conclusion');
     expect(result.results[0]).not.toHaveProperty('hypotheses');
+    expect(result.results[0]).not.toHaveProperty('impact');
+    expect(result.results[0]).not.toHaveProperty('conversation_id');
   });
 
   it('source-filters find to list fields', async () => {
@@ -314,6 +321,8 @@ describe('NightshiftInvestigationsClient.list()', () => {
     const { fields } = mockInvestigationSoClient.find.mock.calls[0][0];
     expect(fields).not.toContain('hypotheses');
     expect(fields).not.toContain('conclusion');
+    expect(fields).not.toContain('impact');
+    expect(fields).not.toContain('conversation_id');
   });
 });
 
@@ -493,5 +502,22 @@ describe('NightshiftInvestigationsClient.update()', () => {
     );
     const [, attrs] = mockInvestigationSoClient.update.mock.calls[0];
     expect(attrs).not.toHaveProperty('error');
+  });
+
+  it('persists conversation_id and impact', async () => {
+    await makeClient().update('inv-1', {
+      status: 'completed',
+      conversation_id: 'conv-1',
+      impact: { entities: [{ name: 'checkout-service' }] },
+    });
+
+    expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
+      'inv-1',
+      expect.objectContaining({
+        status: 'completed',
+        conversation_id: 'conv-1',
+        impact: { entities: [{ name: 'checkout-service' }] },
+      })
+    );
   });
 });

@@ -8,6 +8,7 @@
 export {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+  MAX_KEYWORD_LENGTH,
 } from './investigation_saved_object';
 export type { NightshiftInvestigationAttributes } from './investigation_saved_object';
 export { InvestigationSavedObjectClient } from './investigation_saved_object_client';

@@ -8,6 +8,7 @@
 import type {
   InvestigationBlindSpot,
   InvestigationHypothesis,
+  InvestigationImpact,
   InvestigationRecommendation,
   SignificantEventUpdate,
 } from '@kbn/significant-events-schema';
@@ -93,6 +94,8 @@ export interface GetInvestigationResponse {
   recommendations?: InvestigationRecommendation[];
   blind_spots?: InvestigationBlindSpot[];
   significant_event_updates?: SignificantEventUpdate[];
+  conversation_id?: string;
+  impact?: InvestigationImpact;
 }
 
 export interface ListInvestigationsRequest {

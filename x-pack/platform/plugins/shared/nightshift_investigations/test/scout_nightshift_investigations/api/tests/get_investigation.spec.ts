@@ -51,6 +51,8 @@ apiTest.describe(
         completed_at: '2024-06-01T11:00:00Z',
         summary: 'All clear.',
         conclusion: 'No issues found.',
+        conversation_id: 'conv-get-1',
+        impact: { entities: [{ name: 'checkout-service' }] },
       });
     });
 
@@ -76,6 +78,8 @@ apiTest.describe(
       expect(response.body.executed_by).toBe('test-user');
       expect(response.body.summary).toBe('All clear.');
       expect(response.body.conclusion).toBe('No issues found.');
+      expect(response.body.conversation_id).toBe('conv-get-1');
+      expect(response.body.impact).toStrictEqual({ entities: [{ name: 'checkout-service' }] });
     });
 
     apiTest('returns 403 for a user without agentBuilder:read', async ({ apiClient, samlAuth }) => {

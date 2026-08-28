@@ -131,6 +131,8 @@ apiTest.describe(
       expect(inv.hypotheses).toBeUndefined();
       expect(inv.recommendations).toBeUndefined();
       expect(inv.blind_spots).toBeUndefined();
+      expect(inv.impact).toBeUndefined();
+      expect(inv.conversation_id).toBeUndefined();
     });
 
     apiTest('filters by status', async ({ apiClient }) => {

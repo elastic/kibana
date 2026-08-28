@@ -675,6 +675,8 @@ steps:
         recommendations: ${{ steps.investigate.output.structured_output.recommendations }}
         blind_spots: ${{ steps.investigate.output.structured_output.blind_spots }}
         significant_event_updates: ${{ steps.investigate.output.structured_output.significant_event_updates }}
+        impact: ${{ steps.investigate.output.structured_output.impact }}
+        conversation_id: "${{ steps.investigate.output.conversation_id }}"
     on-failure:
       continue: true
 
@@ -690,6 +692,7 @@ steps:
       body:
         status: "failed"
         error: "${{ steps.investigate.error.message | default: 'Investigation failed' }}"
+        conversation_id: "${{ steps.investigate.output.conversation_id }}"
     on-failure:
       continue: true
 

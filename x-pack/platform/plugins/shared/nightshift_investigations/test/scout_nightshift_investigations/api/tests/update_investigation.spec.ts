@@ -85,6 +85,8 @@ apiTest.describe(
         hypotheses: [{ candidate: 'memory leak', confidence: 0.95, status: 'confirmed' }],
         recommendations: [{ title: 'Restart pod' }],
         blind_spots: [{ title: 'Network logs', description: 'Not available' }],
+        conversation_id: 'conv-persist-1',
+        impact: { entities: [{ name: 'service-x' }] },
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.acknowledged).toBe(true);
@@ -100,6 +102,8 @@ apiTest.describe(
       expect(so.attributes.blind_spots).toStrictEqual([
         { title: 'Network logs', description: 'Not available' },
       ]);
+      expect(so.attributes.conversation_id).toBe('conv-persist-1');
+      expect(so.attributes.impact).toStrictEqual({ entities: [{ name: 'service-x' }] });
       expect(so.attributes.completed_at).toBeDefined();
     });
 

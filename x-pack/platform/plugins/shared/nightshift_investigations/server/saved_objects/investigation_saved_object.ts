@@ -10,12 +10,14 @@ import { schema } from '@kbn/config-schema';
 import type {
   InvestigationBlindSpot,
   InvestigationHypothesis,
+  InvestigationImpact,
   InvestigationRecommendation,
   SignificantEventUpdate,
 } from '@kbn/significant-events-schema';
 import {
   MAX_BLIND_SPOTS,
   MAX_HYPOTHESES,
+  MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
   MAX_SIGNIFICANT_EVENT_UPDATES,
   MAX_TEXT_LENGTH,
@@ -33,7 +35,7 @@ import {
 
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
-const MAX_KEYWORD_LENGTH = 500;
+export const MAX_KEYWORD_LENGTH = 500;
 const MAX_ISO_DATE_LENGTH = 64;
 
 const isoDateStringSchema = schema.string({
@@ -93,6 +95,14 @@ const investigationAttributesSchemaV1 = schema.object({
       maxSize: MAX_SIGNIFICANT_EVENT_UPDATES,
     })
   ),
+  conversation_id: schema.maybe(schema.string({ maxLength: MAX_KEYWORD_LENGTH })),
+  impact: schema.maybe(
+    schema.object({
+      entities: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+        maxSize: MAX_IMPACT_ENTITIES,
+      }),
+    })
+  ),
 });
 
 export interface NightshiftInvestigationAttributes {
@@ -112,6 +122,8 @@ export interface NightshiftInvestigationAttributes {
   recommendations?: InvestigationRecommendation[];
   blind_spots?: InvestigationBlindSpot[];
   significant_event_updates?: SignificantEventUpdate[];
+  conversation_id?: string;
+  impact?: InvestigationImpact;
 }
 
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<NightshiftInvestigationAttributes> =
@@ -138,6 +150,7 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Nightshift
         recommendations: { type: 'flattened' },
         blind_spots: { type: 'flattened' },
         significant_event_updates: { type: 'flattened' },
+        impact: { type: 'flattened' },
       },
     },
     management: {

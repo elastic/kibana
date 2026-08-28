@@ -23,6 +23,8 @@ export interface SeedInvestigationOptions {
   error?: string;
   summary?: string;
   conclusion?: string;
+  conversation_id?: string;
+  impact?: { entities: Array<Record<string, unknown>> };
 }
 
 export const seedInvestigation = async (

@@ -9,11 +9,13 @@ import { z } from '@kbn/zod/v4';
 import {
   MAX_BLIND_SPOTS,
   MAX_HYPOTHESES,
+  MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
   MAX_SIGNIFICANT_EVENT_UPDATES,
   MAX_TEXT_LENGTH,
 } from '@kbn/significant-events-schema';
 import { UPDATABLE_INVESTIGATION_STATUSES } from '../../common';
+import { MAX_KEYWORD_LENGTH } from '../saved_objects';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const orAbsent = <T extends z.ZodType>(schema: T) =>
@@ -34,7 +36,7 @@ export const updateInvestigationRoute = createNightshiftInvestigationsServerRout
   },
   params: z.object({
     path: z.object({
-      id: z.string().min(1).max(500),
+      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
     body: z.object({
       status: z.enum(UPDATABLE_INVESTIGATION_STATUSES),
@@ -48,6 +50,12 @@ export const updateInvestigationRoute = createNightshiftInvestigationsServerRout
       blind_spots: orAbsent(z.array(z.record(z.string(), z.unknown())).max(MAX_BLIND_SPOTS)),
       significant_event_updates: orAbsent(
         z.array(z.record(z.string(), z.unknown())).max(MAX_SIGNIFICANT_EVENT_UPDATES)
+      ),
+      conversation_id: orAbsent(z.string().max(MAX_KEYWORD_LENGTH)),
+      impact: orAbsent(
+        z.object({
+          entities: z.array(z.record(z.string(), z.unknown())).max(MAX_IMPACT_ENTITIES),
+        })
       ),
     }),
   }),

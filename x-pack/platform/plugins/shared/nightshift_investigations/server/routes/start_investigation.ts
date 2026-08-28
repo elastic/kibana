@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { INVESTIGATION_SUBJECT_TYPES } from '../../common';
+import { MAX_KEYWORD_LENGTH } from '../saved_objects';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
@@ -31,9 +32,9 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     body: z.object({
       subject: z.object({
         type: z.enum(INVESTIGATION_SUBJECT_TYPES),
-        id: z.string().min(1).max(500),
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
       }),
-      concurrency_key: z.string().max(500).optional(),
+      concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
       context: z
         .record(z.string().max(128), z.unknown())
         .refine((v) => Object.keys(v).length <= 50, { message: 'context exceeds 50 key limit' })

@@ -55,6 +55,7 @@ const LIST_SO_FIELDS = [
 export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
   status: UpdatableInvestigationStatus;
   error?: string;
+  conversation_id?: string;
 }
 
 function toListInvestigationItem({
@@ -92,6 +93,8 @@ function toInvestigationResponse({
     recommendations: attrs.recommendations,
     blind_spots: attrs.blind_spots,
     significant_event_updates: attrs.significant_event_updates,
+    conversation_id: attrs.conversation_id,
+    impact: attrs.impact,
   };
 }
 

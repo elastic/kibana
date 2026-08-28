@@ -8,6 +8,7 @@
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { InvestigationNotFoundError } from '../client/investigations_client';
+import { MAX_KEYWORD_LENGTH } from '../saved_objects';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
@@ -29,7 +30,7 @@ export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string().min(1).max(500),
+      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {

@@ -15,6 +15,7 @@ import {
   INVESTIGATION_STARTED_TRIGGER_ID,
 } from '../../common/workflows/triggers';
 import { InvestigationNotFoundError } from '../client/investigations_client';
+import { MAX_KEYWORD_LENGTH } from '../saved_objects';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute({
@@ -32,7 +33,7 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
   },
   params: z.object({
     path: z.object({
-      id: z.string().min(1).max(500),
+      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
     body: z.object({
       status: z.enum(EMITTED_INVESTIGATION_STATUSES),

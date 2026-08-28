@@ -21,6 +21,7 @@ export interface InvestigationStructuredOutput {
   recommendations?: Array<Record<string, unknown>>;
   blind_spots?: Array<Record<string, unknown>>;
   significant_event_updates?: Array<Record<string, unknown>>;
+  impact?: { entities: Array<Record<string, unknown>> };
 }
 
 export interface InvestigationSavedObjectUpdateAttributes extends InvestigationStructuredOutput {
@@ -28,6 +29,7 @@ export interface InvestigationSavedObjectUpdateAttributes extends InvestigationS
   completed_at?: string;
   executed_by?: string;
   error?: string;
+  conversation_id?: string;
 }
 
 export interface FindInvestigationsOptions {
