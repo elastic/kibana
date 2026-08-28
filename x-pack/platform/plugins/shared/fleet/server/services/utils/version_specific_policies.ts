@@ -11,6 +11,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { escapeQuotes } from '@kbn/es-query';
 
 import { appContextService } from '../app_context';
+import { collectCompiledSecretRefIds } from '../secrets';
 import * as AgentService from '../agents';
 import type { FleetServerPolicy, FullAgentPolicy, FullAgentPolicyInput } from '../../types';
 import { agentPolicyService } from '../agent_policy';
@@ -109,10 +110,19 @@ export async function getVersionSpecificPolicies(
         id: versionedPolicyId,
         inputs: getInputsForVersion(updatedFullPolicy?.inputs ?? fullPolicy.inputs, version),
         // When the policy was rebuilt for this agent version, its `secret_references` was pruned
-        // against those recompiled inputs. Use that pruned array instead of the base-doc array,
-        // otherwise a placeholder emitted only for certain agent versions would have no matching
-        // entry and Fleet Server would deliver the literal `$co.elastic.secret{X}` to the agent.
-        ...(updatedFullPolicy && { secret_references: updatedFullPolicy.secret_references ?? [] }),
+        // against the compiled inputs for that version. Re-prune against the final version-filtered
+        // input set from getInputsForVersion: package-level agentVersion conditions can remove an
+        // input (and its placeholders) that still appeared in updatedFullPolicy.inputs.
+        ...(updatedFullPolicy && {
+          secret_references: (() => {
+            const versionedInputs = getInputsForVersion(updatedFullPolicy.inputs ?? [], version);
+            const compiledIds = collectCompiledSecretRefIds(versionedInputs);
+            const refs = updatedFullPolicy.secret_references ?? [];
+            return compiledIds
+              ? refs.filter(({ id: refId }) => compiledIds.has(refId))
+              : refs;
+          })(),
+        }),
       },
     };
     fleetServerPolicies.push(versionSpecificPolicy);

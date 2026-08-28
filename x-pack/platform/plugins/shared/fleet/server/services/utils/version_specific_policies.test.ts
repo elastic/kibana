@@ -265,7 +265,9 @@ describe('getVersionSpecificPolicies', () => {
     mockedAgentPolicyService.getFullAgentPolicy.mockImplementation(
       async (_: any, id: string, { agentVersion }: { agentVersion: string }) => ({
         id,
-        inputs: agentVersion.startsWith('9.') ? [{ type: 'cel' }] : [],
+        inputs: agentVersion.startsWith('9.')
+          ? [{ type: 'cel', credential: '$co.elastic.secret{secret-for-9x}' }]
+          : [],
         secret_references: agentVersion.startsWith('9.') ? [{ id: 'secret-for-9x' }] : [],
       })
     );
