@@ -124,6 +124,7 @@ export default function ({
           fieldName: 'bytes',
           title: 'Bytes',
         });
+        await timePicker.setCommonlyUsedTime('Last_15 minutes');
         await dashboard.saveDashboard('Dashboard Controls');
       });
 
