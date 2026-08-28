@@ -2043,6 +2043,74 @@ describe('executeDashboardOperations', () => {
     );
   });
 
+  // The rejection lives in applyCustomContentTemplates, which is also where the template resolver
+  // is used — and the resolver is absent exactly when the feature is off. Regression guard for
+  // that skipping the guard and creating an empty panel instead.
+  it('rejects a custom_content panel and creates nothing when custom content is disabled', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Test', description: 'Desc', panels: [] },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'custom_content',
+              config: { prompt: 'Show error rate KPI' },
+              grid: { x: 0, y: 0, w: 24, h: 6 },
+            },
+          ],
+        },
+      ],
+      logger,
+      customContentEnabled: false,
+      // Omitted the way the tool omits it when the feature is off.
+      resolveCustomContentTemplate: undefined,
+    });
+
+    expect(getPanelsOnly(result.dashboardData.panels)).toHaveLength(0);
+    expect(result.failures).toEqual([
+      expect.objectContaining({ error: expect.stringContaining('disabled') }),
+    ]);
+  });
+
+  it('rejects a custom_content edit when custom content is disabled', async () => {
+    const existingPanel: AttachmentPanel = {
+      id: 'cc-1',
+      type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+      config: { template: '<div>Existing</div>' },
+      grid: { x: 0, y: 0, w: 24, h: 6 },
+    };
+
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Test', description: 'Desc', panels: [existingPanel] },
+      operations: [
+        {
+          operation: 'edit_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'custom_content',
+              panelId: 'cc-1',
+              config: { prompt: 'make it blue' },
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelContent: jest.fn(),
+      customContentEnabled: false,
+    });
+
+    expect(result.failures).toEqual([
+      expect.objectContaining({ error: expect.stringContaining('disabled') }),
+    ]);
+    // The existing panel is left exactly as it was.
+    expect(getPanelsOnly(result.dashboardData.panels)[0].config).toEqual({
+      template: '<div>Existing</div>',
+    });
+  });
+
   it('accepts a markdown config-source panel with content and optional settings', () => {
     const result = dashboardOperationSchema.safeParse({
       operation: 'add_panels',

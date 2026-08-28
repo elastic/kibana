@@ -6,7 +6,9 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { dashboardManagementSkill as skill } from './dashboard_management_skill';
+import { createDashboardManagementSkill } from './dashboard_management_skill';
+
+const skill = createDashboardManagementSkill(async () => true);
 import { registerSkills } from './register_skills';
 
 describe('registerSkills', () => {
@@ -16,7 +18,7 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder);
+    registerSkills(agentBuilder, async () => true);
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard-management' }));

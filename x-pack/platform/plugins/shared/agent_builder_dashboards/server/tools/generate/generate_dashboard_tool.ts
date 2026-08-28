@@ -100,6 +100,18 @@ const summarizeDashboard = (
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
  */
+const CUSTOM_CONTENT_TOOL_GUIDANCE = `
+8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express`;
+
+/**
+ * Stated explicitly rather than just omitting the bullet above: the skill guidance is a static
+ * string that still recommends custom content, so without this the model attempts it anyway and
+ * burns a tool call on the rejection.
+ */
+const CUSTOM_CONTENT_DISABLED_TOOL_GUIDANCE = `
+
+Custom content panels (\`type: "custom_content"\`) are disabled in this environment and will be rejected. Ignore any guidance that suggests them — use markdown for static text, and Lens or Vega for anything data-driven.`;
+
 export const generateDashboardTool = ({
   customContentEnabled,
 }: {
@@ -121,10 +133,7 @@ Use operations[] to:
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
 7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)${
-      customContentEnabled
-        ? `
-8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express`
-        : ''
+      customContentEnabled ? CUSTOM_CONTENT_TOOL_GUIDANCE : CUSTOM_CONTENT_DISABLED_TOOL_GUIDANCE
     }`,
     schema: generateDashboardSchema,
     handler: async (
@@ -153,11 +162,9 @@ Use operations[] to:
             esClient,
           }),
           customContentEnabled,
-          resolveCustomContentTemplate: createCustomContentTemplateResolver({
-            logger,
-            modelProvider,
-            esClient,
-          }),
+          resolveCustomContentTemplate: customContentEnabled
+            ? createCustomContentTemplateResolver({ logger, modelProvider, esClient })
+            : undefined,
         });
 
         // Data-aware default time range computation

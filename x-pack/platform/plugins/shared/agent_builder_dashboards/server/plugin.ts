@@ -12,6 +12,7 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
+import { CUSTOM_CONTENT_ENABLED_FLAG_KEY } from '@kbn/custom-content-common';
 import type {
   AgentBuilderDashboardsSetupDependencies,
   AgentBuilderDashboardsStartDependencies,
@@ -57,7 +58,10 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder);
+    registerSkills(setupDeps.agentBuilder, async () => {
+      const [coreStart] = await coreSetup.getStartServices();
+      return coreStart.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false);
+    });
 
     return {};
   }

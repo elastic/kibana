@@ -26,6 +26,8 @@ interface ExecuteDashboardOperationsParams {
   operations: DashboardOperation[];
   logger: Logger;
   resolvePanelContent?: ResolvePanelContent;
+  /** Defaults to enabled; pass false to reject custom content panel inputs. */
+  customContentEnabled?: boolean;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
 }
 
@@ -41,6 +43,7 @@ export const executeDashboardOperations = async ({
   operations,
   logger,
   resolvePanelContent,
+  customContentEnabled,
   resolveCustomContentTemplate,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
@@ -61,6 +64,7 @@ export const executeDashboardOperations = async ({
     operations,
     logger,
     resolvePanelContent,
+    customContentEnabled,
     resolveCustomContentTemplate,
     failures,
     panelAuthoringNotes,

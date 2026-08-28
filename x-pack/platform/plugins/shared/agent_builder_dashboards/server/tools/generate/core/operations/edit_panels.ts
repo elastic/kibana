@@ -86,7 +86,10 @@ export const editPanelsOperation = defineOperation({
       }
 
       if (panelInput.source === 'config') {
-        if (panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE && !context.customContentEnabled) {
+        if (
+          panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE &&
+          context.customContentEnabled === false
+        ) {
           recordFailure(panelInput.panelId, CUSTOM_CONTENT_DISABLED_ERROR);
           continue;
         }

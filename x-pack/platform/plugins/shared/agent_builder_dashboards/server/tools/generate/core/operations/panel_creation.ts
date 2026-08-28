@@ -232,11 +232,17 @@ export const createPanelInputMaterializer = ({
 export const CUSTOM_CONTENT_DISABLED_ERROR =
   'Custom content panels are disabled. Use a Lens, Vega, or markdown panel instead.';
 
+/**
+ * Resolves templates for custom content panels, or rejects them outright when the feature is off.
+ *
+ * `resolveTemplate` is optional because it is not provided when custom content is disabled — the
+ * rejection below has to run in that case, so this must be called unconditionally.
+ */
 export const applyCustomContentTemplates = async (
   materialized: Array<{ panel: MaterializedPanelInput | undefined }>,
-  resolveTemplate: ResolveCustomContentTemplate,
+  resolveTemplate: ResolveCustomContentTemplate | undefined,
   failures: PanelFailure[],
-  customContentEnabled: boolean
+  customContentEnabled: boolean = true
 ): Promise<void> => {
   await Promise.all(
     materialized.map(async (entry) => {
@@ -256,7 +262,7 @@ export const applyCustomContentTemplates = async (
         return;
       }
 
-      if (!prompt || persistedConfig.template) return;
+      if (!resolveTemplate || !prompt || persistedConfig.template) return;
 
       try {
         const template = await resolveTemplate({ prompt, esqlQuery });

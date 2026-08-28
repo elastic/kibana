@@ -48,14 +48,12 @@ export const addSectionOperation = defineOperation({
         panel: materializePanelInput(item, i),
       }));
 
-      if (context.resolveCustomContentTemplate) {
-        await applyCustomContentTemplates(
-          materialized,
-          context.resolveCustomContentTemplate,
-          context.failures,
-          context.customContentEnabled ?? false
-        );
-      }
+      await applyCustomContentTemplates(
+        materialized,
+        context.resolveCustomContentTemplate,
+        context.failures,
+        context.customContentEnabled ?? true
+      );
 
       const sectionPanels: AttachmentPanel[] = [];
 
