@@ -482,20 +482,20 @@ result = client.search(
                 {
                     "retriever": {
                         "knn": {
-                           "field": "vector",
-                           "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
-                           "k": 10,
-                       }
-
-                    }
+                            "field": "vector",
+                            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
+                            "k": 10,
+                        }
+                    },
+                    "normalizer": "minmax",
                 },
                 {
                     "retriever": {
                         "standard": {
-                           "query": {"match": {"text": "What is a good national park for backpacking?"}}
-                       }
-
-                    }
+                            "query": {"match": {"text": "What is a good national park for backpacking?"}}
+                        }
+                    },
+                    "normalizer": "minmax",
                 },
             ]
         }
@@ -518,20 +518,20 @@ const result = await client.search({
         {
           retriever: {
             knn: {
-             field: "vector",
-             query_vector: [0.10, -0.02, 0.91, 0.18, 0.60],
-             k: 10,
-           },
-
+              field: "vector",
+              query_vector: [0.10, -0.02, 0.91, 0.18, 0.60],
+              k: 10,
+            },
           },
+          normalizer: "minmax",
         },
         {
           retriever: {
             standard: {
-             query: { match: { text: "What is a good national park for backpacking?" }   },
-           },
-
+              query: { match: { text: "What is a good national park for backpacking?" } },
+            },
           },
+          normalizer: "minmax",
         },
       ],
     },
@@ -745,8 +745,14 @@ result = client.search(
     retriever: {
       linear: {
         retrievers: [
-          { retriever: { knn: { field: 'vector', query_vector: [0.10, -0.02, 0.91, 0.18, 0.60], k: 10 } } },
-          { retriever: { standard: { query: { match: { text: 'What is a good national park for backpacking?' } } } } }
+          {
+            retriever: { knn: { field: 'vector', query_vector: [0.10, -0.02, 0.91, 0.18, 0.60], k: 10 } },
+            normalizer: 'minmax'
+          },
+          {
+            retriever: { standard: { query: { match: { text: 'What is a good national park for backpacking?' } } } },
+            normalizer: 'minmax'
+          }
         ]
       }
     }
