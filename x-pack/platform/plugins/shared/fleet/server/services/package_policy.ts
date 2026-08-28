@@ -2583,7 +2583,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         return acc;
       }, new Set());
 
-      const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
+      const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR, {
+        ignoreMissing: true,
+      });
 
       await this.bumpAgentPoliciesRevision(
         { soClient, esClient },
