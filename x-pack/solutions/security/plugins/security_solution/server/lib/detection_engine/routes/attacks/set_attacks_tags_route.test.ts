@@ -25,7 +25,7 @@ import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksTagsRoute } from './set_attacks_tags_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { MAX_TAGS_PER_OPERATION } from '../../../../../common/workflows/triggers';
+import { MAX_TAG_LENGTH, MAX_TAGS_PER_OPERATION } from '../../../../../common/workflows/triggers';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -587,6 +587,45 @@ describe('set attacks tags', () => {
           // that made this attack eligible cannot appear in the payload due to the cap.
           tagsAdded: [],
           truncated: true,
+        })
+      );
+    });
+
+    test('cascade: includes attack in mutation when all requested tags exceed MAX_TAG_LENGTH', async () => {
+      // Encoding WHY: allValidTagsToAdd filters out over-length tags, but updateAlertsTags
+      // applies the original request. If allValid* controls combinedIds, a request with only
+      // over-length tags produces an empty verifiedAttackIds and the attack is omitted from
+      // the mutation while its related alerts are still updated — an inconsistency. The fix
+      // builds combinedIds from allFoundAttackIds (all docs returned by the search) so the
+      // attack is always mutated when it exists in the index.
+      const overLengthTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: { [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: [], [ALERT_WORKFLOW_TAGS]: [] },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          tags: { tags_to_add: [overLengthTag], tags_to_remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { bool: { filter: { terms: { _id: ['attack1'] } } } },
         })
       );
     });
