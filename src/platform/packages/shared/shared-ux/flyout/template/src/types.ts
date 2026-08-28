@@ -26,6 +26,11 @@ export interface FlyoutHeaderProps {
   titleTooltip?: ReactNode;
   /** Subdued text below the title. */
   description?: ReactNode;
+  /**
+   * When true, the header is permanently rendered in its compact collapsed layout regardless of
+   * scroll position, and the description is not shown.
+   */
+  collapsed?: boolean;
 }
 
 /** Props for the declarative `FlyoutTemplate.Body` zone. */
