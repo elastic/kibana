@@ -11,7 +11,7 @@ import React, { Fragment, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import type { ParsedItem } from '@kbn/ui-react-assembly';
+import type { ParsedItem, ParsedPart } from '@kbn/ui-react-assembly';
 import type { HeaderTabDescriptor } from '../header/tab';
 import type { FlyoutBodyProps } from '../types';
 import { bodyAssembly, flyoutAssembly, partsOf } from '../assembly';
@@ -36,7 +36,7 @@ const ActiveTabPanel = ({
   scrollContainerRef,
 }: {
   activeTab: HeaderTabDescriptor;
-  activePanel: ParsedItem;
+  activePanel: ParsedPart;
   bodyTestSubj: string | undefined;
   scrollContainerRef: (node: HTMLElement | null) => void;
 }) => {
