@@ -351,6 +351,7 @@ describe('search embeddable transform utils', () => {
         rowsPerPage: 100,
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
+        documentsDisplayMode: 'json',
         jsonModeSettings: { hideNulls: true, wrapLines: false, defaultRenderedNodes: 2 },
         grid: {
           columns: {
@@ -377,6 +378,7 @@ describe('search embeddable transform utils', () => {
           rows_per_page: 100,
           header_row_height: 3,
           density: DataGridDensity.COMPACT,
+          documents_display_mode: 'json',
           json_mode_settings: {
             hide_nulls: true,
             wrap_lines: false,

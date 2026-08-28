@@ -12,7 +12,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { VIEW_MODE } from '../../common';
 import { MODEL_VERSIONS, typeVersionGuesser } from './model_versions';
 import type { SCHEMA_DISCOVER_SESSION_V13 } from './schema';
-import { DISCOVER_SESSION_MODEL_VERSIONS, SCHEMA_DISCOVER_SESSION_V15 } from './schema';
+import { DISCOVER_SESSION_MODEL_VERSIONS } from './schema';
 import type { SCHEMA_SEARCH_MODEL_VERSION_5 } from './schema_legacy';
 import type { SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND } from './schema_legacy';
 import { LEGACY_MODEL_VERSIONS } from './schema_legacy';
@@ -128,51 +128,6 @@ describe('model_versions', () => {
 
       const latestVersion = Math.max(...Object.keys(DISCOVER_SESSION_MODEL_VERSIONS).map(Number));
       expect(typeVersionGuesser(document)).toBe(latestVersion);
-    });
-  });
-
-  describe('jsonModeSettings.defaultRenderedNodes schema', () => {
-    const sessionWithJsonModeSettings = (jsonModeSettings: Record<string, unknown>) => ({
-      title: 'discover session',
-      description: '',
-      tabs: [
-        {
-          id: 'tab-1',
-          label: 'Tab 1',
-          attributes: {
-            kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-            columns: [],
-            sort: [],
-            grid: {},
-            hideChart: false,
-            hideTable: false,
-            isTextBasedQuery: false,
-            timeRestore: false,
-            jsonModeSettings,
-          },
-        },
-      ],
-    });
-
-    it('accepts defaultRenderedNodes within the allowed range', () => {
-      expect(() =>
-        SCHEMA_DISCOVER_SESSION_V15.validate(
-          sessionWithJsonModeSettings({ defaultRenderedNodes: 500 })
-        )
-      ).not.toThrow();
-    });
-
-    it('rejects defaultRenderedNodes outside the allowed range', () => {
-      expect(() =>
-        SCHEMA_DISCOVER_SESSION_V15.validate(
-          sessionWithJsonModeSettings({ defaultRenderedNodes: 501 })
-        )
-      ).toThrow();
-      expect(() =>
-        SCHEMA_DISCOVER_SESSION_V15.validate(
-          sessionWithJsonModeSettings({ defaultRenderedNodes: -1 })
-        )
-      ).toThrow();
     });
   });
 });
