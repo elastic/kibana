@@ -42,7 +42,7 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 - `collapsed` — renders the compact layout permanently, regardless of scroll position.
 - `children` — `Header.MetaBlock`, `Header.Badge`, `Header.InfoBlock`, and `Header.Tab` parts. Free-form content (arbitrary elements, components, bare text) is not rendered, and the assembly library warns in development about unrecognized children.
 
-**`FlyoutTemplate.Body`** renders `Body.Section`, `Body.Accordion`, and `Body.TabPanel` parts, plus arbitrary passthrough content, inside `EuiFlyoutBody` in source order. Passthrough children manage their own layout; the template adds no sectioning, titling, or spacing around them. See [`src/body/README.md`](src/body/README.md) for sections, and [`src/header/tab/README.md`](src/header/tab/README.md) for tabs.
+**`FlyoutTemplate.Body`** renders `Body.Section`, `Body.Accordion`, and `Body.TabPanel` parts, plus arbitrary passthrough content, inside `EuiFlyoutBody` in source order. Passthrough children manage their own layout; the template adds no sectioning, titling, or spacing around them. See [`src/body/README.md`](src/body/README.md) for sections and unstructured content, and [`src/header/tab/README.md`](src/header/tab/README.md) for tabs.
 
 **`FlyoutTemplate.Footer`** renders `PrimaryAction` and `SecondaryAction` right-aligned inside `EuiFlyoutFooter`, secondary first. If neither action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered.
 

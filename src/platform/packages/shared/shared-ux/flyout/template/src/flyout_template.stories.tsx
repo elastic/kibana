@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSpacer, EuiText } from '@elastic/eui';
@@ -17,22 +18,32 @@ import {
   buildFlyoutProps,
   usePaginationProps,
   unstructuredBlocks,
-  headerZone,
-  bodyZone,
-  footerZone,
   fillContent,
   bodyText,
+  footerZone,
+  headerZone,
+  bodyZone,
 } from './stories_helpers';
 
 type Args = SharedStoryArgs & {
-  headerIsCollapsed: boolean;
-  numTabs: number;
-  numSections: number;
-  numSubsections: number;
+  numInfoBlocks: number;
+  sectionHasBorder: boolean;
   sectionIcon: boolean;
   sectionAction: boolean;
-  sectionHasBorder: boolean;
+  numSections: number;
+  numSubsections: number;
+  numTabs: number;
+  numMetaBlocks: number;
+  numBadges: number;
+  headerIsCollapsed: boolean;
 };
+
+const TABS: Array<{ id: string; label: string }> = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'metadata', label: 'Metadata' },
+  { id: 'timeline', label: 'Timeline' },
+  { id: 'logs', label: 'Logs' },
+];
 
 const meta: Meta<Args> = {
   title: 'Flyout Template/Template',
@@ -41,18 +52,19 @@ const meta: Meta<Args> = {
     numTrailingActions: 1,
     numPages: 0,
     paginationJump: false,
-    numUnstructuredBlocks: 0,
-    numTabs: 0,
+    numInfoBlocks: 5,
+    numTabs: 3,
     numSections: 2,
-    numSubsections: 0,
-    sectionIcon: false,
-    sectionAction: false,
+    numUnstructuredBlocks: 0,
+    sectionIcon: true,
+    sectionAction: true,
     sectionHasBorder: false,
+    numSubsections: 0,
     titleIcon: false,
     description: true,
-    numMetaBlocks: 0,
-    numBadges: 0,
-    numInfoBlocks: 0,
+    numMetaBlocks: 3,
+    numBadges: 8,
+    headerIsCollapsed: false,
     footer: true,
     secondaryActionIcon: true,
     resizable: true,
@@ -92,14 +104,9 @@ const meta: Meta<Args> = {
       table: { category: 'Header' },
     },
     numMetaBlocks: {
-      name: 'Meta blocks',
+      name: 'MetaBlocks',
+      // Max is one above the cap, to exercise the dev warning.
       control: { type: 'range', min: 0, max: 4, step: 1 },
-      table: { category: 'Header' },
-    },
-    numBadges: {
-      // Max is above the overflow threshold, so the `+N more` popover is reachable.
-      name: 'Badges',
-      control: { type: 'range', min: 0, max: 8, step: 1 },
       table: { category: 'Header' },
     },
     numInfoBlocks: {
@@ -107,14 +114,24 @@ const meta: Meta<Args> = {
       control: { type: 'range', min: 0, max: 10, step: 1 },
       table: { category: 'Header' },
     },
-    numSections: {
-      // Zero is allowed so a body of only unstructured content is reachable.
-      name: 'Sections',
-      control: { type: 'range', min: 0, max: 4, step: 1 },
-      table: { category: 'Body' },
+    numBadges: {
+      name: 'Badges',
+      control: { type: 'range', min: 0, max: 8, step: 1 },
+      table: { category: 'Header' },
     },
-    numSubsections: {
-      name: 'Subsections',
+    headerIsCollapsed: {
+      name: 'Force collapsed',
+      control: { type: 'boolean' },
+      table: { category: 'Header' },
+    },
+    numTabs: {
+      name: 'Tabs',
+      control: { type: 'range', min: 0, max: TABS.length, step: 1 },
+      table: { category: 'Header' },
+    },
+    numSections: {
+      name: 'Sections',
+      // Zero is allowed so a body of only unstructured content is reachable.
       control: { type: 'range', min: 0, max: 4, step: 1 },
       table: { category: 'Body' },
     },
@@ -131,6 +148,11 @@ const meta: Meta<Args> = {
     sectionHasBorder: {
       name: 'Section has border',
       control: { type: 'boolean' },
+      table: { category: 'Body' },
+    },
+    numSubsections: {
+      name: 'Subsections',
+      control: { type: 'range', min: 0, max: 4, step: 1 },
       table: { category: 'Body' },
     },
     numUnstructuredBlocks: {
@@ -161,9 +183,259 @@ const meta: Meta<Args> = {
   },
 };
 
+/** Title-row props shared by `Body.Section` and `Body.Accordion`. */
+const buildTitleAdornments = (args: Args) => ({
+  ...(args.sectionIcon
+    ? { icon: 'info' as const, tooltip: 'Additional context about this section.' }
+    : {}),
+  ...(args.sectionAction
+    ? { action: { label: 'Extra action', onClick: action('section action') } }
+    : {}),
+});
+
+/** Maps the section-related story args onto `Body.Section` props. */
+const buildSectionProps = (args: Args) => ({
+  hasBorder: args.sectionHasBorder,
+  ...buildTitleAdornments(args),
+});
+
+/** Header parts every story shares, plus the tab bar this file's tab args drive. */
+const tabParts = (args: Args) =>
+  TABS.slice(0, args.numTabs).map(({ id, label }) => (
+    <FlyoutTemplate.Header.Tab key={id} id={id} label={label} />
+  ));
+
+/** `headerZone` with this file's tab and collapse args applied. */
+const headerZoneWithTabs = (args: Args, title: string) =>
+  headerZone(args, title, tabParts(args), { collapsed: args.headerIsCollapsed });
+
+/** Wraps `content` in one `TabPanel` per visible tab, or renders it bare when tabs are off. */
+const bodyZoneWithTabs = (args: Args, content: (tabId?: string) => ReactNode) => {
+  const tabs = TABS.slice(0, args.numTabs);
+  return bodyZone(
+    tabs.length
+      ? tabs.map(({ id }) => (
+          <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
+            {content(id)}
+          </FlyoutTemplate.Body.TabPanel>
+        ))
+      : content()
+  );
+};
+
 export default meta;
 
 type Story = StoryObj<Args>;
+
+const SECTIONS: Array<{ id: string; title: string; content: string }> = [
+  { id: 'summary', title: 'Regular Section: Summary', content: 'Summary regular section content.' },
+  { id: 'details', title: 'Regular Section: Details', content: 'Details regular section content.' },
+  { id: 'context', title: 'Regular Section: Context', content: 'Context regular section content.' },
+  { id: 'history', title: 'Regular Section: History', content: 'History regular section content.' },
+].map(({ content, ...fields }) => ({ ...fields, content: fillContent(content) }));
+
+const SUBSECTIONS: Array<{ id: string; title: string; content: string }> = [
+  { id: 'host', title: 'Subsection: Host', content: 'Host subsection content.' },
+  { id: 'process', title: 'Subsection: Process', content: 'Process subsection content.' },
+  { id: 'network', title: 'Subsection: Network', content: 'Network subsection content.' },
+  { id: 'user', title: 'Subsection: User', content: 'User subsection content.' },
+].map(({ content, ...fields }) => ({ ...fields, content: fillContent(content) }));
+
+const RegularSectionsRender = (args: Args): React.JSX.Element => {
+  const pagination = usePaginationProps(args);
+  const subsections = SUBSECTIONS.slice(0, args.numSubsections);
+
+  const bodyItems = SECTIONS.slice(0, args.numSections).map(({ id, title, content }) => (
+    <FlyoutTemplate.Body.Section key={id} title={title} {...buildSectionProps(args)}>
+      {subsections.length
+        ? subsections.map(({ id: subId, title: subTitle, content: subContent }) => (
+            <FlyoutTemplate.Body.Section.Subsection key={subId} id={subId} title={subTitle}>
+              {bodyText(subContent)}
+            </FlyoutTemplate.Body.Section.Subsection>
+          ))
+        : bodyText(content)}
+    </FlyoutTemplate.Body.Section>
+  ));
+
+  return (
+    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+      {headerZoneWithTabs(args, 'Service details')}
+      {bodyZoneWithTabs(args, () => (
+        <>
+          {unstructuredBlocks(args.numUnstructuredBlocks)}
+          {bodyItems}
+        </>
+      ))}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+export const RegularSections: Story = {
+  render: RegularSectionsRender,
+};
+
+const ACCORDIONS: Array<{ id: string; title: string; content: string }> = [
+  { id: 'overview', title: 'Accordion: Overview', content: 'Overview accordion section content.' },
+  { id: 'metadata', title: 'Accordion: Metadata', content: 'Metadata accordion section content.' },
+  { id: 'timeline', title: 'Accordion: Timeline', content: 'Timeline accordion section content.' },
+  { id: 'related', title: 'Accordion: Related', content: 'Related accordion section content.' },
+];
+
+const AccordionsRender = (args: Args): React.JSX.Element => {
+  const pagination = usePaginationProps(args);
+  const subsections = SUBSECTIONS.slice(0, args.numSubsections);
+
+  const bodyItems = ACCORDIONS.slice(0, args.numSections).map(({ id, title, content }, index) => (
+    <FlyoutTemplate.Body.Accordion
+      key={id}
+      id={id}
+      title={title}
+      initialIsOpen={index === 0}
+      {...buildTitleAdornments(args)}
+    >
+      {subsections.length
+        ? subsections.map(({ id: subId, title: subTitle, content: subContent }) => (
+            <FlyoutTemplate.Body.Accordion.Subsection key={subId} id={subId} title={subTitle}>
+              {bodyText(subContent)}
+            </FlyoutTemplate.Body.Accordion.Subsection>
+          ))
+        : bodyText(content)}
+    </FlyoutTemplate.Body.Accordion>
+  ));
+
+  return (
+    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+      {headerZoneWithTabs(args, 'Alert details')}
+      {bodyZoneWithTabs(args, () => (
+        <>
+          {unstructuredBlocks(args.numUnstructuredBlocks)}
+          {bodyItems}
+        </>
+      ))}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+export const AccordionSections: Story = {
+  argTypes: {
+    // Accordion content is always outlined, so the border toggle does not apply here.
+    sectionHasBorder: { table: { disable: true } },
+    numSections: { name: 'Body accordions', control: { type: 'range', min: 0, max: 4, step: 1 } },
+  },
+  render: AccordionsRender,
+};
+
+/** Distinct look-and-feel per tab, so switching tabs is obvious even at a glance. */
+const TAB_PANEL_DETAILS: Record<string, { icon: string; detail: string }> = {
+  overview: { icon: 'inspect', detail: 'A high-level summary of the alert lifecycle and current state.' },
+  metadata: { icon: 'tag', detail: 'Structured key/value pairs captured when the alert was created.' },
+  timeline: { icon: 'clock', detail: 'A chronological list of state changes and annotations.' },
+  logs: { icon: 'document', detail: 'Raw log lines correlated to this alert by trace id.' },
+}; // prettier-ignore
+
+const renderTabPanelContent = (id: string, label: string) => {
+  const details = TAB_PANEL_DETAILS[id];
+  return (
+    <FlyoutTemplate.Body.Section title={`${label} panel`} icon={details?.icon}>
+      <EuiText size="s">
+        <p>{fillContent(details.detail)}</p>
+        <p>{fillContent()}</p>
+      </EuiText>
+    </FlyoutTemplate.Body.Section>
+  );
+};
+
+const TabsRender = (args: Args): React.JSX.Element => {
+  const visibleTabs = TABS.slice(0, args.numTabs);
+  const [selectedTabId, setSelectedTabId] = useState<string | undefined>(visibleTabs[0]?.id);
+
+  useEffect(() => {
+    if (!visibleTabs.some((tab) => tab.id === selectedTabId)) {
+      setSelectedTabId(visibleTabs[0]?.id);
+    }
+  }, [visibleTabs, selectedTabId]);
+
+  return (
+    <>
+      <EuiText size="s">
+        <p>
+          These buttons live outside the flyout and drive the same <code>selectedTabId</code> state
+          as the tab bar below, to prove that tab selection is controlled end-to-end.
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+        {visibleTabs.map(({ id, label }) => (
+          <EuiFlexItem grow={false} key={id}>
+            <EuiButton size="s" fill={selectedTabId === id} onClick={() => setSelectedTabId(id)}>
+              {label}
+            </EuiButton>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+
+      <FlyoutTemplate
+        onClose={action('onClose')}
+        size="m"
+        {...buildFlyoutProps(args)}
+        selectedTabId={selectedTabId}
+        onTabChange={setSelectedTabId}
+      >
+        {headerZone(
+          args,
+          'Tabs demo',
+          visibleTabs.map(({ id, label }) => (
+            <FlyoutTemplate.Header.Tab key={id} id={id} label={label} />
+          )),
+          { collapsed: args.headerIsCollapsed }
+        )}
+
+        <FlyoutTemplate.Body>
+          {visibleTabs.map(({ id, label }) => (
+            <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
+              {unstructuredBlocks(args.numUnstructuredBlocks)}
+              {renderTabPanelContent(id, label)}
+            </FlyoutTemplate.Body.TabPanel>
+          ))}
+        </FlyoutTemplate.Body>
+
+        {footerZone(args)}
+      </FlyoutTemplate>
+    </>
+  );
+};
+
+export const Tabs: Story = {
+  argTypes: {
+    numLeadingActions: { name: 'Leading actions', table: { category: 'Menu bar' } },
+    numTrailingActions: { name: 'Trailing actions', table: { category: 'Menu bar' } },
+    numPages: { table: { disable: true } },
+    paginationJump: { table: { disable: true } },
+    numMetaBlocks: { table: { disable: true } },
+    numBadges: { table: { disable: true } },
+    numInfoBlocks: { table: { disable: true } },
+    numSections: { table: { disable: true } },
+    sectionIcon: { table: { disable: true } },
+    sectionAction: { table: { disable: true } },
+    sectionHasBorder: { table: { disable: true } },
+    numSubsections: { table: { disable: true } },
+    numTabs: {
+      name: 'Tabs',
+      control: { type: 'range', min: 1, max: TABS.length, step: 1 },
+      table: { category: 'Header' },
+    },
+  },
+  args: {
+    numTabs: 4,
+    titleIcon: false,
+    description: false,
+    footer: true,
+  },
+  render: TabsRender,
+};
 
 const MenuBarPaginationRender = (args: Args): React.JSX.Element => {
   const pagination = usePaginationProps(args);
@@ -186,7 +458,16 @@ export const MenuBarPagination: Story = {
     titleIcon: { table: { disable: true } },
     description: { table: { disable: true } },
     footer: { table: { disable: true } },
+    numInfoBlocks: { table: { disable: true } },
+    numSections: { table: { disable: true } },
+    numSubsections: { table: { disable: true } },
     numTabs: { table: { disable: true } },
+    numMetaBlocks: { table: { disable: true } },
+    numBadges: { table: { disable: true } },
+    headerIsCollapsed: { table: { disable: true } },
+    sectionIcon: { table: { disable: true } },
+    sectionAction: { table: { disable: true } },
+    sectionHasBorder: { table: { disable: true } },
   },
   args: {
     numUnstructuredBlocks: 1,
@@ -272,9 +553,18 @@ export const MenuBarHistory: Story = {
   argTypes: {
     titleIcon: { table: { disable: true } },
     description: { table: { disable: true } },
+    numMetaBlocks: { table: { disable: true } },
+    numBadges: { table: { disable: true } },
+    numSubsections: { table: { disable: true } },
     numPages: { table: { disable: true } },
-    footer: { table: { disable: true } },
+    numInfoBlocks: { table: { disable: true } },
     numTabs: { table: { disable: true } },
+    numSections: { table: { disable: true } },
+    sectionIcon: { table: { disable: true } },
+    sectionAction: { table: { disable: true } },
+    sectionHasBorder: { table: { disable: true } },
+    footer: { table: { disable: true } },
+    headerIsCollapsed: { table: { disable: true } },
   },
   args: {
     numLeadingActions: 0,
@@ -287,270 +577,51 @@ export const MenuBarHistory: Story = {
   render: WithHistoryRender,
 };
 
-/** Long enough that the body overflows at any realistic viewport height, so collapse can engage. */
-const OVERFLOWING_PARAGRAPH_COUNT = 12;
-
 const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
   const pagination = usePaginationProps(args);
+  const subsections = SUBSECTIONS.slice(0, args.numSubsections);
+
+  const bodyItems = SECTIONS.slice(0, args.numSections).map(({ id, title, content }) => (
+    <FlyoutTemplate.Body.Section key={id} title={title} {...buildSectionProps(args)}>
+      {subsections.length
+        ? subsections.map(({ id: subId, title: subTitle, content: subContent }) => (
+            <FlyoutTemplate.Body.Section.Subsection key={subId} id={subId} title={subTitle}>
+              {bodyText(subContent)}
+            </FlyoutTemplate.Body.Section.Subsection>
+          ))
+        : bodyText(content)}
+    </FlyoutTemplate.Body.Section>
+  ));
+
   return (
     <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
-      {headerZone(
+      {headerZoneWithTabs(
         args,
-        'Flyout title is quite long, so that it takes up 2 lines of text and then some',
-        undefined,
-        { collapsed: args.headerIsCollapsed }
+        'Flyout title is quite long, so that it takes up 2 lines of text and then some'
       )}
-      {bodyZone(
+      {bodyZoneWithTabs(args, () => (
         <>
           {unstructuredBlocks(args.numUnstructuredBlocks)}
-          {Array.from({ length: OVERFLOWING_PARAGRAPH_COUNT }, (_, index) => (
-            <React.Fragment key={index}>
-              {bodyText(fillContent(`Paragraph ${index + 1}.`))}
-              <EuiSpacer size="s" />
-            </React.Fragment>
-          ))}
+          {bodyItems}
         </>
-      )}
+      ))}
       {footerZone(args)}
     </FlyoutTemplate>
   );
 };
 
 export const HeaderCollapseOnScroll: Story = {
-  argTypes: {
-    numPages: { table: { disable: true } },
-    numTabs: { table: { disable: true } },
-    headerIsCollapsed: {
-      name: 'Force collapsed',
-      control: { type: 'boolean' },
-      table: { category: 'Header' },
-    },
-  },
   args: {
     numLeadingActions: 0,
     numTrailingActions: 0,
-    numUnstructuredBlocks: 2,
-    titleIcon: true,
-    description: true,
-    footer: true,
-    headerIsCollapsed: false,
+    numInfoBlocks: 10,
+    numSections: 4,
+    numUnstructuredBlocks: 1,
+    sectionIcon: true,
+    sectionAction: true,
+    numSubsections: 2,
   },
   render: HeaderCollapseOnScrollRender,
-};
-
-/** Distinct look-and-feel per tab, so switching tabs is obvious even at a glance. */
-const TABS: Array<{ id: string; label: string; icon: string; detail: string }> = [
-  { id: 'overview', label: 'Overview', icon: 'inspect', detail: 'A high-level summary of the alert lifecycle and current state.' },
-  { id: 'metadata', label: 'Metadata', icon: 'tag', detail: 'Structured key/value pairs captured when the alert was created.' },
-  { id: 'timeline', label: 'Timeline', icon: 'clock', detail: 'A chronological list of state changes and annotations.' },
-  { id: 'insights', label: 'Insights', icon: 'document', detail: 'Raw log lines correlated to this alert by trace id.' },
-]; // prettier-ignore
-
-const TabsRender = (args: Args): React.JSX.Element => {
-  const visibleTabs = TABS.slice(0, args.numTabs);
-  const [selectedTabId, setSelectedTabId] = useState<string | undefined>(visibleTabs[0]?.id);
-
-  useEffect(() => {
-    if (!visibleTabs.some((tab) => tab.id === selectedTabId)) {
-      setSelectedTabId(visibleTabs[0]?.id);
-    }
-  }, [visibleTabs, selectedTabId]);
-
-  return (
-    <>
-      <EuiText size="s">
-        <p>
-          These buttons live outside the flyout and drive the same <code>selectedTabId</code> state
-          as the tab bar below, proving that tab selection is controlled end-to-end.
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-        {visibleTabs.map(({ id, label }) => (
-          <EuiFlexItem grow={false} key={id}>
-            <EuiButton size="s" fill={selectedTabId === id} onClick={() => setSelectedTabId(id)}>
-              {label}
-            </EuiButton>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-
-      <FlyoutTemplate
-        onClose={action('onClose')}
-        size="m"
-        {...buildFlyoutProps(args)}
-        selectedTabId={selectedTabId}
-        onTabChange={setSelectedTabId}
-      >
-        {headerZone(
-          args,
-          'Tabs demo',
-          visibleTabs.map(({ id, label }) => (
-            <FlyoutTemplate.Header.Tab key={id} id={id} label={label} />
-          )),
-          { collapsed: args.headerIsCollapsed }
-        )}
-
-        <FlyoutTemplate.Body>
-          {visibleTabs.map(({ id, label, icon, detail }) => (
-            <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
-              {unstructuredBlocks(args.numUnstructuredBlocks)}
-              <FlyoutTemplate.Body.Section title={`${label} panel`} icon={icon}>
-                <EuiText size="s">
-                  <p>{fillContent(detail)}</p>
-                  <p>{fillContent()}</p>
-                </EuiText>
-              </FlyoutTemplate.Body.Section>
-            </FlyoutTemplate.Body.TabPanel>
-          ))}
-        </FlyoutTemplate.Body>
-
-        {footerZone(args)}
-      </FlyoutTemplate>
-    </>
-  );
-};
-
-export const Tabs: StoryObj<Args> = {
-  argTypes: {
-    numTabs: {
-      name: 'Tabs',
-      control: { type: 'range', min: 1, max: TABS.length, step: 1 },
-      table: { category: 'Header' },
-    },
-    headerIsCollapsed: {
-      name: 'Force collapsed',
-      control: { type: 'boolean' },
-      table: { category: 'Header' },
-    },
-    numLeadingActions: { name: 'Leading actions', table: { category: 'Menu bar' } },
-    numTrailingActions: { name: 'Trailing actions', table: { category: 'Menu bar' } },
-    numPages: { table: { disable: true } },
-    paginationJump: { table: { disable: true } },
-  },
-  args: {
-    numTabs: 4,
-    titleIcon: false,
-    description: true,
-    footer: true,
-    headerIsCollapsed: false,
-    numLeadingActions: 0,
-    numTrailingActions: 0,
-    numUnstructuredBlocks: 1,
-  },
-  render: TabsRender,
-};
-
-/** Title-row props shared by `Body.Section` and `Body.Accordion`. */
-const buildTitleAdornments = (args: Args) => ({
-  ...(args.sectionIcon
-    ? { icon: 'info' as const, tooltip: 'Additional context about this section.' }
-    : {}),
-  ...(args.sectionAction
-    ? { action: { label: 'Extra action', onClick: action('section action') } }
-    : {}),
-});
-
-const SECTIONS: Array<{ id: string; title: string; content: string }> = [
-  { id: 'summary', title: 'Regular Section: Summary', content: 'Summary regular section content.' },
-  { id: 'details', title: 'Regular Section: Details', content: 'Details regular section content.' },
-  { id: 'context', title: 'Regular Section: Context', content: 'Context regular section content.' },
-  { id: 'history', title: 'Regular Section: History', content: 'History regular section content.' },
-].map(({ content, ...fields }) => ({ ...fields, content: fillContent(content) }));
-
-const SUBSECTIONS: Array<{ id: string; title: string; content: string }> = [
-  { id: 'host', title: 'Subsection: Host', content: 'Host subsection content.' },
-  { id: 'process', title: 'Subsection: Process', content: 'Process subsection content.' },
-  { id: 'network', title: 'Subsection: Network', content: 'Network subsection content.' },
-  { id: 'user', title: 'Subsection: User', content: 'User subsection content.' },
-].map(({ content, ...fields }) => ({ ...fields, content: fillContent(content) }));
-
-const ACCORDIONS: Array<{ id: string; title: string; content: string }> = [
-  { id: 'overview', title: 'Accordion: Overview', content: 'Overview accordion section content.' },
-  { id: 'metadata', title: 'Accordion: Metadata', content: 'Metadata accordion section content.' },
-  { id: 'timeline', title: 'Accordion: Timeline', content: 'Timeline accordion section content.' },
-  { id: 'related', title: 'Accordion: Related', content: 'Related accordion section content.' },
-];
-
-/** Subsections when the count is non-zero, otherwise the section's own body text. */
-const sectionContent = (
-  args: Args,
-  fallback: string,
-  Subsection: typeof FlyoutTemplate.Body.Section.Subsection
-) => {
-  const subsections = SUBSECTIONS.slice(0, args.numSubsections);
-  return subsections.length
-    ? subsections.map(({ id, title, content }) => (
-        <Subsection key={id} id={id} title={title}>
-          {bodyText(content)}
-        </Subsection>
-      ))
-    : bodyText(fallback);
-};
-
-const RegularSectionsRender = (args: Args): React.JSX.Element => {
-  const pagination = usePaginationProps(args);
-  return (
-    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
-      {headerZone(args, 'Service details')}
-      {bodyZone(
-        <>
-          {unstructuredBlocks(args.numUnstructuredBlocks)}
-          {SECTIONS.slice(0, args.numSections).map(({ id, title, content }) => (
-            <FlyoutTemplate.Body.Section
-              key={id}
-              title={title}
-              hasBorder={args.sectionHasBorder}
-              {...buildTitleAdornments(args)}
-            >
-              {sectionContent(args, content, FlyoutTemplate.Body.Section.Subsection)}
-            </FlyoutTemplate.Body.Section>
-          ))}
-        </>
-      )}
-      {footerZone(args)}
-    </FlyoutTemplate>
-  );
-};
-
-export const RegularSections: Story = {
-  render: RegularSectionsRender,
-};
-
-const AccordionSectionsRender = (args: Args): React.JSX.Element => {
-  const pagination = usePaginationProps(args);
-  return (
-    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
-      {headerZone(args, 'Alert details')}
-      {bodyZone(
-        <>
-          {unstructuredBlocks(args.numUnstructuredBlocks)}
-          {ACCORDIONS.slice(0, args.numSections).map(({ id, title, content }, index) => (
-            <FlyoutTemplate.Body.Accordion
-              key={id}
-              id={id}
-              title={title}
-              initialIsOpen={index === 0}
-              {...buildTitleAdornments(args)}
-            >
-              {sectionContent(args, content, FlyoutTemplate.Body.Accordion.Subsection)}
-            </FlyoutTemplate.Body.Accordion>
-          ))}
-        </>
-      )}
-      {footerZone(args)}
-    </FlyoutTemplate>
-  );
-};
-
-export const AccordionSections: Story = {
-  argTypes: {
-    // Accordion content is always outlined, so the border toggle does not apply here.
-    sectionHasBorder: { table: { disable: true } },
-    numSections: { name: 'Body accordions', control: { type: 'range', min: 0, max: 4, step: 1 } },
-  },
-  render: AccordionSectionsRender,
 };
 
 const ErrorInFlyoutRender = (args: Args): React.JSX.Element => {
@@ -558,18 +629,17 @@ const ErrorInFlyoutRender = (args: Args): React.JSX.Element => {
     const [hasError, setHasError] = useState(false);
 
     if (hasError) {
-      throw new Error('This is an error to show the test user!');
+      throw new Error('This is an error to show the test user!'); // custom error
     }
 
     const clickedForError = action('clicked for error');
+    const handleClick = () => {
+      clickedForError();
+      setHasError(true);
+    };
+
     return (
-      <EuiButton
-        color="danger"
-        onClick={() => {
-          clickedForError();
-          setHasError(true);
-        }}
-      >
+      <EuiButton color="danger" onClick={handleClick}>
         Throw error
       </EuiButton>
     );
@@ -608,10 +678,9 @@ const ErrorInFlyoutRender = (args: Args): React.JSX.Element => {
   );
 };
 
-/** Each zone is independently error-bounded: throwing in one leaves the others rendered. */
 export const ErrorInFlyout: Story = {
+  // do not allow any header args
   argTypes: {
-    // This story builds its zones inline, so none of the shared content args apply.
     titleIcon: { table: { disable: true } },
     description: { table: { disable: true } },
     numPages: { table: { disable: true } },
@@ -621,12 +690,14 @@ export const ErrorInFlyout: Story = {
     numTabs: { table: { disable: true } },
     numLeadingActions: { table: { disable: true } },
     numTrailingActions: { table: { disable: true } },
+    // do not allow any body args
     numSections: { table: { disable: true } },
     sectionIcon: { table: { disable: true } },
     sectionAction: { table: { disable: true } },
     sectionHasBorder: { table: { disable: true } },
     numSubsections: { table: { disable: true } },
     numUnstructuredBlocks: { table: { disable: true } },
+    // do not allow any footer args
     footer: { table: { disable: true } },
     secondaryActionIcon: { table: { disable: true } },
   },
