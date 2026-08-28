@@ -18,6 +18,7 @@ export {
 export interface InvestigationSubject {
   type: InvestigationSubjectType;
   id: string;
+  summary?: string;
 }
 
 export interface InvestigationContext {
@@ -72,6 +73,12 @@ export interface GetInvestigationResponse {
   completed_at?: string;
   conclusions?: string;
   error?: string;
+}
+
+export interface InvestigationStatusEvent {
+  type: 'investigation_status';
+  investigation_id: string;
+  status: InvestigationStatus;
 }
 
 export interface ListInvestigationsRequest {
