@@ -6,7 +6,6 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 
 export class GlobalSearch {
   constructor(private readonly page: ScoutPage) {}
@@ -65,7 +64,7 @@ export class GlobalSearch {
     await options[index].click();
   }
 
-  async expectResultVisible(label: string) {
+  async scrollToResult(label: string): Promise<Locator> {
     const item = this.resultLabels.filter({ hasText: label });
     const list = this.page.testSubj
       .locator('chromeNextSearchModal')
@@ -78,25 +77,19 @@ export class GlobalSearch {
       element.scrollTop = 0;
     });
 
-    await expect(async () => {
-      if ((await item.count()) > 0) {
-        return;
-      }
-
+    const deadline = Date.now() + 15_000;
+    while ((await item.count()) === 0 && Date.now() < deadline) {
       const canScrollFurther = await list.evaluate((element) => {
         const previousTop = element.scrollTop;
         element.scrollTop += element.clientHeight;
         return element.scrollTop !== previousTop;
       });
-
       if (!canScrollFurther) {
-        throw new Error(`Search result "${label}" was not found in the virtualized list`);
+        break;
       }
+    }
 
-      throw new Error(`Search result "${label}" is not rendered yet`);
-    }).toPass({ timeout: 15000 });
-
-    await expect(item).toBeVisible();
+    return item;
   }
 
   async isNoResultsPlaceholderDisplayed() {
