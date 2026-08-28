@@ -38,7 +38,8 @@ interface SeedOptions {
   untranslatable?: number;
   failed?: number;
   pending?: number;
-  migrationStatus?: string;
+  /** Seed `last_execution.is_stopped: true` to produce a STOPPED migration status. */
+  isStopped?: boolean;
   vendor?: string;
 }
 
@@ -98,7 +99,7 @@ export async function seedRuleMigration({
   untranslatable = 0,
   failed = 1,
   pending = 0,
-  migrationStatus,
+  isStopped = false,
   vendor = 'splunk',
 }: SeedOptions): Promise<SeedResult> {
   try {
@@ -164,7 +165,17 @@ export async function seedRuleMigration({
           name,
           created_by: 'eval-user',
           created_at: now,
-          ...(migrationStatus ? { status: migrationStatus } : {}),
+          ...(isStopped
+            ? {
+                last_execution: {
+                  is_stopped: true,
+                  started_at: now,
+                  finished_at: now,
+                  connector_id: 'eval-connector',
+                  skip_prebuilt_rules_matching: false,
+                },
+              }
+            : {}),
         },
         ...ruleDocs,
       ],

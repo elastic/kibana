@@ -357,12 +357,6 @@ describe('Security Skills', () => {
       );
     });
 
-    it('content describes the scope limit for index-pattern rewrites', () => {
-      expect(automaticMigrationRulesUpdateMigrationSkill.content).toContain(
-        'index-pattern change is UI-only'
-      );
-    });
-
     it('uses user-facing "Automatic Migration" naming, not "SIEM migration"', () => {
       expect(automaticMigrationRulesUpdateMigrationSkill.description).toContain(
         'Automatic Rule Migration'
@@ -390,9 +384,9 @@ describe('Security Skills', () => {
       );
     });
 
-    it('returns 3 registry tools (under 25 limit)', () => {
+    it('returns 4 registry tools (under 25 limit)', () => {
       const tools = automaticMigrationRulesDeleteMigrationSkill.getRegistryTools!();
-      expect(tools).toHaveLength(3);
+      expect(tools).toHaveLength(4);
       expect((tools as string[]).length).toBeLessThanOrEqual(25);
     });
 

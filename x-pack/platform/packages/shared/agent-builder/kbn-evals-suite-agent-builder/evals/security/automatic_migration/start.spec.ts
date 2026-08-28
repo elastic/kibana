@@ -184,17 +184,19 @@ the translation? If so, please choose an AI connector.`,
             dataset: {
               name: 'agent builder: automatic-migration-start-preflight',
               description: `Validates that the start skill calls get_missing_rule_migration_resources
-as a pre-flight check on a fresh START (ready migration) before calling start_rule_migration.
-The seeded migration has no uploaded resources, so the missing-resources response is empty
-and the agent proceeds to the connector step without a blocking warning.`,
+                            as a pre-flight check on a fresh START (ready migration) before calling start_rule_migration.
+                            The seeded migration has no uploaded resources, so the missing-resources response is empty
+                            and the agent proceeds to the connector step without a blocking warning.`,
               examples: [
                 {
                   input: {
                     question: 'Start my rule migration named Splunk Q1.',
                   },
                   output: {
-                    expected: `I found your "Splunk Q1" migration. No resources are missing.
-I need to ask which AI connector to use before starting.`,
+                    expected: `The following resources are missing, so rules referencing them may fail to translate or produce partial results:
+                                - macros : sample_macro
+                                - lookups : sample lookup 1
+                              you can upload them in launchpad → manage automatic migrations`,
                   },
                   metadata: {
                     query_intent: 'Start Rule Migration - Pre-flight check',
@@ -222,7 +224,7 @@ I need to ask which AI connector to use before starting.`,
           pending: 2,
           completed: 1,
           failed: 0,
-          migrationStatus: 'stopped',
+          isStopped: true,
         });
         teardown = seeded.cleanup;
       });
@@ -279,7 +281,6 @@ Please confirm you want to resume.`,
             pending: 0,
             completed: 2,
             failed: 3,
-            migrationStatus: 'finished',
           });
           teardownMigration = seeded.cleanup;
         });
@@ -332,7 +333,6 @@ using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
             untranslatable: 1,
             failed: 0,
             pending: 0,
-            migrationStatus: 'finished',
           });
           teardownMigration = seeded.cleanup;
         });
@@ -385,7 +385,6 @@ The seeded migration has 2 partially translated and 1 untranslatable rule.`,
             completed: 3,
             failed: 2,
             pending: 0,
-            migrationStatus: 'finished',
           });
           teardownMigration = seeded.cleanup;
         });

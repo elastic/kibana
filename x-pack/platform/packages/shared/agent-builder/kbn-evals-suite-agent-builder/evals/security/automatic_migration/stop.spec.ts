@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { evaluate } from './evaluate_setup';
+import { seedRuleMigration } from './automatic_migration_fixtures';
 
 evaluate.describe(
   'Automatic Rule Migration - stop skill',
@@ -43,5 +44,106 @@ name or check the Automatic Migration UI.`,
         });
       }
     );
+
+    // NOTE: a `running` migration requires in-memory task state and cannot be seeded via ES.
+    // A grounded eval where stop_rule_migration IS called requires an integration-test harness
+    // that starts a real translation task.
+
+    evaluate.describe('already-finished migration: stop_rule_migration is NOT called', () => {
+      let teardown: (() => Promise<void>) | undefined;
+
+      evaluate.beforeAll(async ({ esClient, log }) => {
+        const seeded = await seedRuleMigration({
+          esClient,
+          log,
+          name: 'Splunk Q1 Finished',
+          completed: 3,
+          failed: 0,
+          pending: 0,
+        });
+        teardown = seeded.cleanup;
+      });
+
+      evaluate.afterAll(async () => {
+        await teardown?.();
+      });
+
+      evaluate('finished migration: stop is refused', async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder: automatic-migration-stop-finished',
+            description: `Validates that the stop skill does NOT call stop_rule_migration when the
+migration is already finished (completed + failed === total).`,
+            examples: [
+              {
+                input: {
+                  question: 'Stop my rule migration named Splunk Q1 Finished.',
+                },
+                output: {
+                  expected: `I found your rule migration "Splunk Q1 Finished" but it is already
+finished — there is nothing to stop.`,
+                },
+                metadata: {
+                  query_intent: 'Stop Rule Migration - Finished',
+                  expectedSkill: 'automatic-migration-rules-stop-migration',
+                  expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
+                  shouldNotCallToolId: 'security.siem_migration.stop_rule_migration',
+                  requiredTerms: ['Splunk Q1 Finished'],
+                },
+              },
+            ],
+          },
+        });
+      });
+    });
+
+    evaluate.describe('already-stopped migration: stop_rule_migration is NOT called', () => {
+      let teardown: (() => Promise<void>) | undefined;
+
+      evaluate.beforeAll(async ({ esClient, log }) => {
+        const seeded = await seedRuleMigration({
+          esClient,
+          log,
+          name: 'Splunk Q1 Stopped',
+          pending: 2,
+          completed: 1,
+          failed: 0,
+          isStopped: true,
+        });
+        teardown = seeded.cleanup;
+      });
+
+      evaluate.afterAll(async () => {
+        await teardown?.();
+      });
+
+      evaluate('stopped migration: stop is refused', async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder: automatic-migration-stop-already-stopped',
+            description: `Validates that the stop skill does NOT call stop_rule_migration when the
+migration is already stopped (last_execution.is_stopped: true).`,
+            examples: [
+              {
+                input: {
+                  question: 'Stop my rule migration named Splunk Q1 Stopped.',
+                },
+                output: {
+                  expected: `I found your rule migration "Splunk Q1 Stopped" but it is already
+stopped — there is nothing to stop.`,
+                },
+                metadata: {
+                  query_intent: 'Stop Rule Migration - Already Stopped',
+                  expectedSkill: 'automatic-migration-rules-stop-migration',
+                  expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
+                  shouldNotCallToolId: 'security.siem_migration.stop_rule_migration',
+                  requiredTerms: ['Splunk Q1 Stopped'],
+                },
+              },
+            ],
+          },
+        });
+      });
+    });
   }
 );

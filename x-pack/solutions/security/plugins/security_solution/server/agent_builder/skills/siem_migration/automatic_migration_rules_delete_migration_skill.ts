@@ -60,8 +60,12 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 1. **Resolve the migration** by name using \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` (Name→ID block).
    If the user pastes an id, verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
 2. **Check status**: if the migration is currently \`running\`, do NOT call \`${SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID}\`.
-   Echo the migration's **full name verbatim** (e.g. "Splunk Q1 Running"), then call
-   \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` to stop it. Once stopped, proceed to step 3.
+   Echo the migration's **full name verbatim** and tell the user it cannot be deleted while running.
+   Ask: "Would you like me to stop it first?"
+   - If the user confirms: call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\`. Inform the user
+     the migration has been stopped. **Do not proceed to step 3 in the same turn** — wait for the
+     user to explicitly request deletion.
+   - If the user declines: end the workflow.
 3. **Warn**: your response MUST use the word **irreversible** and MUST echo the migration's full
    name verbatim. Example: "I found 'Splunk Q1 Stopped'. This action is permanent and
    **irreversible** — all translated rule items will be deleted. There is no undo."

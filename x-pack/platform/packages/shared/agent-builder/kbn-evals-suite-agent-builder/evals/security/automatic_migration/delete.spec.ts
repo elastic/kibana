@@ -57,7 +57,7 @@ name or check the Automatic Migration UI.`,
           pending: 0,
           completed: 3,
           failed: 0,
-          migrationStatus: 'stopped',
+          isStopped: true,
         });
         teardown = seeded.cleanup;
       });
@@ -108,7 +108,7 @@ Please confirm you want to delete "Splunk Q1 Stopped".`,
           esClient,
           log,
           name: 'Sentinel Migration',
-          vendor: 'sentinel',
+          vendor: 'microsoft-sentinel',
           pending: 3,
           completed: 0,
           failed: 0,

@@ -75,7 +75,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
   | \`splunk\` | \`macro\` | Macro |
   | \`splunk\` | \`lookup\` | Lookup |
   | \`qradar\` | \`lookup\`| Reference Set |
-  | \`microsoft - sentinel\` | \`lookup\` | Watchlist |
+  | \`microsoft-sentinel\` | \`lookup\` | Watchlist |
 
   Example output for a Splunk migration with missing resources:
 
@@ -128,7 +128,9 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 > **Skip if already answered** — if the user has already chosen a connector in this conversation, use that choice directly without calling \`${platformCoreTools.listInferenceEndpoints}\` again.
 
-- Applicable for **fresh START** and **REPROCESS** only. For **RESUME**, skip this check and use the connector from \`last_execution\` in \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
+- Applicable for **fresh START** only. For **REPROCESS** and **RESUME**, skip this check and reuse
+  the connector from \`last_execution.connector_id\` in \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
+  Re-prompt only if the user explicitly requests a different connector.
 
 Call \`${platformCoreTools.listInferenceEndpoints}\` and present the options as a multiple-choice question. Do **not** choose one automatically.
 
@@ -136,7 +138,9 @@ Call \`${platformCoreTools.listInferenceEndpoints}\` and present the options as 
 
 > **Skip if already answered** — if the user has already stated their preference in this conversation, use it directly.
 
-- Applicable for **fresh START** and **REPROCESS** only. For **RESUME**, skip this check and use the value from \`last_execution\` in \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
+- Applicable for **fresh START** only. For **REPROCESS** and **RESUME**, skip this check and reuse
+  the value from \`last_execution.skip_prebuilt_rules_matching\` in \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
+  Re-prompt only if the user explicitly requests a change.
 
 ## Workflow
 
@@ -165,8 +169,8 @@ between them.
 | \`finished\` | 0 | \`rules.success.result.partial > 0\` OR \`untranslatable > 0\` | **REPROCESS not_fully_translated** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "not_fully_translated" }\` |
 | \`finished\` | 0 | User-selected rules, including rules with mixed statuses | **REPROCESS selected** | \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "selected", selection: { ids } }\` |
 | \`finished\` | 0 | \`rules.success.installable > 0\` | Tell the user their rules are ready to install and direct them to **LaunchPad → Manage Automatic Migrations** in the UI (do not start) | — |
-| \`stopped\` or \`interrupted\` | \`items.pending > 0\` | any | **RESUME** (continue the run) | \`{ settings: { connector_id } }\` (no \`retry\`, no \`selection\`) |
-| \`running\` | any | any | Do nothing — tell the user it's already running | — |
+| \`stopped\` or \`interrupted\` | \`items.pending + items.processing > 0\` | any | **RESUME** (continue the run) | \`{ settings: { connector_id } }\` (no \`retry\`, no \`selection\`) |
+| \`running\` | any | any | Tell the user it is already running and route to **${RULE_MIGRATION_SKILLS.SUMMARIZE}** for progress on **this migration only** | — |
 
 ### Notes on the matrix
 
