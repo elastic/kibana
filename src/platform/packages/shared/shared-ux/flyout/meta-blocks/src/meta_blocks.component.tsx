@@ -53,6 +53,9 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
     fullTextSizer: css`
       visibility: hidden;
       white-space: nowrap;
+      /* EuiTextTruncate measures an integer-rounded width; without this cushion a sub-pixel
+         deficit makes it truncate text that already fits. */
+      padding-inline-end: 1px;
     `,
     truncationOverlay: css`
       position: absolute;

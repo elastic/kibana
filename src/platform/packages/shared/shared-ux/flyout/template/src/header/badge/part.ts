@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutTemplate } from './src/flyout_template';
+import type { HeaderBadgeDescriptor } from './types';
+import { headerAssembly } from '../../assembly';
 
-export type {
-  FlyoutTemplateProps,
-  FlyoutHeaderProps,
-  FlyoutHeaderBadgeProps,
-  FlyoutHeaderInfoBlockProps,
-  FlyoutHeaderMetaBlockProps,
-  FlyoutHeaderTabProps,
-  FlyoutBodyProps,
-  FlyoutBodyTabPanelProps,
-  FlyoutFooterProps,
-  FlyoutFooterPrimaryActionProps,
-  FlyoutFooterSecondaryActionProps,
-} from './src/types';
+/** Part name used for identifying `Header.Badge` children. */
+export const BADGE_PART_NAME = 'badge';
+
+/** Part factory for `FlyoutTemplate.Header.Badge`. Resolves to a `HeaderBadgeDescriptor`. */
+export const badgePart = headerAssembly.definePart<
+  Record<string, never>,
+  HeaderBadgeDescriptor,
+  void
+>({
+  name: BADGE_PART_NAME,
+});

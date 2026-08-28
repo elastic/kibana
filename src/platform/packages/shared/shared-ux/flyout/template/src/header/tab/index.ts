@@ -9,3 +9,4 @@
 
 export { Tab } from './tab';
 export { tabPart, TAB_PART_NAME } from './part';
+export type { HeaderTabDescriptor } from './types';

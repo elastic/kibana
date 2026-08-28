@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutTemplate } from './src/flyout_template';
+import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
+import { headerAssembly } from '../../assembly';
 
-export type {
-  FlyoutTemplateProps,
-  FlyoutHeaderProps,
-  FlyoutHeaderBadgeProps,
-  FlyoutHeaderInfoBlockProps,
-  FlyoutHeaderMetaBlockProps,
-  FlyoutHeaderTabProps,
-  FlyoutBodyProps,
-  FlyoutBodyTabPanelProps,
-  FlyoutFooterProps,
-  FlyoutFooterPrimaryActionProps,
-  FlyoutFooterSecondaryActionProps,
-} from './src/types';
+/** Part name used for identifying `Header.InfoBlock` children. */
+export const INFO_BLOCK_PART_NAME = 'infoBlock';
+
+/** Part factory for `FlyoutTemplate.Header.InfoBlock`. Resolves to an `InfoBlockItem`. */
+export const infoBlockPart = headerAssembly.definePart<Record<string, never>, InfoBlockItem, void>({
+  name: INFO_BLOCK_PART_NAME,
+});

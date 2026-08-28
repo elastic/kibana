@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutTemplate } from './src/flyout_template';
+import type { ReactNode } from 'react';
+import type { EuiBadgeProps } from '@elastic/eui';
 
-export type {
-  FlyoutTemplateProps,
-  FlyoutHeaderProps,
-  FlyoutHeaderBadgeProps,
-  FlyoutHeaderInfoBlockProps,
-  FlyoutHeaderMetaBlockProps,
-  FlyoutHeaderTabProps,
-  FlyoutBodyProps,
-  FlyoutBodyTabPanelProps,
-  FlyoutFooterProps,
-  FlyoutFooterPrimaryActionProps,
-  FlyoutFooterSecondaryActionProps,
-} from './src/types';
+/** Descriptor produced by resolving a `Header.Badge` part. */
+export interface HeaderBadgeDescriptor {
+  label: ReactNode;
+  color?: EuiBadgeProps['color'];
+  iconType?: EuiBadgeProps['iconType'];
+  iconSide?: EuiBadgeProps['iconSide'];
+  'data-test-subj'?: string;
+}

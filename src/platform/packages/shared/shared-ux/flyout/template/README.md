@@ -40,7 +40,7 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — renders the compact layout permanently, regardless of scroll position. See "Header collapse".
-- `children` — `Header.Tab` parts. Free-form content (arbitrary elements, components, bare text) is not rendered, and the assembly library warns in development about unrecognized children.
+- `children` — `Header.MetaBlock`, `Header.Badge`, `Header.InfoBlock`, and `Header.Tab` parts. Free-form content (arbitrary elements, components, bare text) is not rendered, and the assembly library warns in development about unrecognized children.
 
 **`FlyoutTemplate.Body`** renders arbitrary children inside `EuiFlyoutBody` in source order, with no sectioning, titling, or dividers added by the template. Each child manages its own layout.
 
@@ -50,6 +50,28 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 - `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
 
 Both actions take `label`, `onClick`, and optional `id`, `iconType`, `isLoading`, `isDisabled`, `data-test-subj`. The `id` is forwarded to the button element.
+
+## Header blocks
+
+Three declarative parts add secondary content to the header. Declare them as `Header` children in any order — the template groups each kind into its own slot and renders them in a fixed order: meta blocks, then badges, then info blocks, then the tab bar.
+
+```tsx
+<FlyoutTemplate.Header title="Alert details" description="Mar 30, 2022 @ 10:01:21.313">
+  <FlyoutTemplate.Header.MetaBlock title="Last updated">Dec 3, 2025</FlyoutTemplate.Header.MetaBlock>
+  <FlyoutTemplate.Header.Badge color="warning" iconType="warning">Urgent</FlyoutTemplate.Header.Badge>
+  <FlyoutTemplate.Header.InfoBlock title="Risk score" size="xl" color="danger">90</FlyoutTemplate.Header.InfoBlock>
+</FlyoutTemplate.Header>
+```
+
+- **`Header.MetaBlock`** — a compact key/value pair, rendered through `@kbn/flyout-meta-blocks`. Takes `title` (the key, rendered bold) and `children` (the value, which accepts rich content such as links). Use these for provenance: timestamps, owners, authors.
+- **`Header.Badge`** — a status label, rendered through `EuiBadge`. Takes `children` (the label) and optional `color`, `iconType`, `iconSide`. Badges label the subject and are not controls, so no `onClick` is exposed. Labels wider than 200px ellipsize.
+- **`Header.InfoBlock`** — a titled value in a responsive grid, rendered through `@kbn/flyout-info-blocks`. Takes `title` (a plain string label) and `children` (the value), plus optional `size` and `color` for emphasizing a headline figure. The column count is derived from the number of blocks.
+
+All three also take an optional `id` (an explicit instance identity, auto-generated when omitted) and `data-test-subj`, which passes through to the rendered element.
+
+**Badge overflow.** Up to five badges render inline. Past that, the first four render inline and the rest collapse behind a `+N more` badge that opens them in a popover.
+
+All three groups live in the header's collapsible region, so they animate away when the header collapses on scroll and are never visible when `collapsed` is set. Content that must survive collapse belongs in the title or the tab bar.
 
 ## Behavior
 

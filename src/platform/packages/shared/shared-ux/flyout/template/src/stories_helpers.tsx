@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiHealth, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FlyoutTemplateProps } from './types';
 import { FlyoutTemplate } from './flyout_template';
 
@@ -21,6 +21,9 @@ export interface SharedStoryArgs {
   numUnstructuredBlocks: number;
   titleIcon: boolean;
   description: boolean;
+  numMetaBlocks: number;
+  numBadges: number;
+  numInfoBlocks: number;
   footer: boolean;
   secondaryActionIcon: boolean;
   resizable: boolean;
@@ -133,16 +136,109 @@ export const bodyText = (content: string) => (
   </EuiText>
 );
 
+const METABLOCK_POOL = [
+  <FlyoutTemplate.Header.MetaBlock key="updated" title="Last updated">
+    Dec 3, 2025
+  </FlyoutTemplate.Header.MetaBlock>,
+  <FlyoutTemplate.Header.MetaBlock key="updatedBy" title="Last updated by">
+    <EuiLink href="#">name@elastic.co</EuiLink>
+  </FlyoutTemplate.Header.MetaBlock>,
+  <FlyoutTemplate.Header.MetaBlock key="owner" title="Owner">
+    Platform
+  </FlyoutTemplate.Header.MetaBlock>,
+  <FlyoutTemplate.Header.MetaBlock key="creator" title="Created by">
+    automation
+  </FlyoutTemplate.Header.MetaBlock>,
+];
+
+export const metaBlockItems = (count: number) => METABLOCK_POOL.slice(0, count);
+
+/** Long labels are deliberate: they exercise the badge width cap and its ellipsis. */
+const BADGE_POOL = [
+  <FlyoutTemplate.Header.Badge key="type" iconType="warning" color="default">
+    Type
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="urgency" color="warning">
+    Urgency
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta1" color="hollow">
+    Metadata 1 very very very very very very long label
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta2" color="hollow">
+    Metadata 2
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta3" color="hollow">
+    Metadata 3 very very very very long label
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta4" color="hollow">
+    Metadata 4
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta5" color="hollow">
+    Metadata 5
+  </FlyoutTemplate.Header.Badge>,
+  <FlyoutTemplate.Header.Badge key="meta6" color="hollow">
+    Metadata 6
+  </FlyoutTemplate.Header.Badge>,
+];
+
+export const badgeItems = (count: number) => BADGE_POOL.slice(0, count);
+
+const INFO_BLOCK_POOL = [
+  <FlyoutTemplate.Header.InfoBlock key="owner" title="Owner">
+    Platform
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="latency" title="Latency">
+    <EuiHealth color="success">Healthy</EuiHealth>
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="throughput" title="Throughput">
+    1.2k tpm
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="risk" title="Risk score" size="xl" color="danger">
+    90
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="env" title="Environment">
+    Production
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="version" title="Version">
+    2.4.1
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="region" title="Region">
+    us-east-1
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="uptime" title="Uptime">
+    99.9%
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="lastSeen" title="Last seen">
+    2m ago
+  </FlyoutTemplate.Header.InfoBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="errors" title="Errors" color="warning">
+    12
+  </FlyoutTemplate.Header.InfoBlock>,
+];
+
+export const infoBlockItems = (count: number) => INFO_BLOCK_POOL.slice(0, count);
+
 /**
  * Each zone helper below is called inline (not rendered as a component) so the root still
  * sees `FlyoutTemplate.Header`/`Body`/`Footer` as its own direct children.
  */
-export const headerZone = (args: SharedStoryArgs, title: string) => (
+export const headerZone = (
+  args: SharedStoryArgs,
+  title: string,
+  children?: React.ReactNode,
+  headerProps?: Partial<React.ComponentProps<typeof FlyoutTemplate.Header>>
+) => (
   <FlyoutTemplate.Header
     title={title}
     {...buildTitleIconProps(args)}
     description={args.description ? HEADER_DESCRIPTION : undefined}
-  />
+    {...headerProps}
+  >
+    {metaBlockItems(args.numMetaBlocks)}
+    {badgeItems(args.numBadges)}
+    {infoBlockItems(args.numInfoBlocks)}
+    {children}
+  </FlyoutTemplate.Header>
 );
 
 export const bodyZone = (content: React.ReactNode) => (

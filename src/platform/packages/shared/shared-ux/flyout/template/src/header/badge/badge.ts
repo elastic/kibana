@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutTemplate } from './src/flyout_template';
+import type { FlyoutHeaderBadgeProps } from '../../types';
+import { badgePart } from './part';
 
-export type {
-  FlyoutTemplateProps,
-  FlyoutHeaderProps,
-  FlyoutHeaderBadgeProps,
-  FlyoutHeaderInfoBlockProps,
-  FlyoutHeaderMetaBlockProps,
-  FlyoutHeaderTabProps,
-  FlyoutBodyProps,
-  FlyoutBodyTabPanelProps,
-  FlyoutFooterProps,
-  FlyoutFooterPrimaryActionProps,
-  FlyoutFooterSecondaryActionProps,
-} from './src/types';
+/** Declarative `FlyoutTemplate.Header.Badge`. */
+export const Badge = badgePart.createComponent<FlyoutHeaderBadgeProps>({
+  resolve: ({ children, color, iconType, iconSide, 'data-test-subj': dataTestSubj }) => ({
+    label: children,
+    color,
+    iconType,
+    iconSide,
+    'data-test-subj': dataTestSubj,
+  }),
+});
+
+Badge.displayName = 'FlyoutTemplate.Header.Badge';

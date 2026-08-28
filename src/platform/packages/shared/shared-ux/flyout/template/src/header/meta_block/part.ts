@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutTemplate } from './src/flyout_template';
+import type { MetaBlock } from '@kbn/flyout-meta-blocks';
+import { headerAssembly } from '../../assembly';
 
-export type {
-  FlyoutTemplateProps,
-  FlyoutHeaderProps,
-  FlyoutHeaderBadgeProps,
-  FlyoutHeaderInfoBlockProps,
-  FlyoutHeaderMetaBlockProps,
-  FlyoutHeaderTabProps,
-  FlyoutBodyProps,
-  FlyoutBodyTabPanelProps,
-  FlyoutFooterProps,
-  FlyoutFooterPrimaryActionProps,
-  FlyoutFooterSecondaryActionProps,
-} from './src/types';
+/** Part name used for identifying `Header.MetaBlock` children. */
+export const META_BLOCK_PART_NAME = 'metaBlock';
+
+/** Part factory for `FlyoutTemplate.Header.MetaBlock`. Resolves to a `MetaBlock`. */
+export const metaBlockPart = headerAssembly.definePart<Record<string, never>, MetaBlock, void>({
+  name: META_BLOCK_PART_NAME,
+});

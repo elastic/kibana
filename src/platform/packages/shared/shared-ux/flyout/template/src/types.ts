@@ -8,7 +8,8 @@
  */
 
 import type { MouseEventHandler, ReactNode } from 'react';
-import type { EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
+import type { EuiBadgeProps, EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
+import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 
 /** Props for the declarative `FlyoutTemplate.Header.Tab` part. */
 export interface FlyoutHeaderTabProps {
@@ -35,7 +36,10 @@ export interface FlyoutHeaderProps {
   /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
   title: ReactNode;
   'data-test-subj'?: string;
-  /** `Header.Tab` parts. Free-form content is not rendered. */
+  /**
+   * `Header.MetaBlock`, `Header.Badge`, `Header.InfoBlock`, and `Header.Tab` parts.
+   * Free-form content is not rendered.
+   */
   children?: ReactNode;
   /** Icon beside the title; defaults to `info` when `titleTooltip` is set. */
   titleIcon?: EuiIconProps['type'];
@@ -45,9 +49,53 @@ export interface FlyoutHeaderProps {
   description?: ReactNode;
   /**
    * When true, the header is permanently rendered in its compact collapsed layout regardless of
-   * scroll position, and the description is not shown.
+   * scroll position. The description, meta blocks, badges, and info blocks are not shown.
    */
   collapsed?: boolean;
+}
+
+/** Props for the declarative `FlyoutTemplate.Header.MetaBlock` part. */
+export interface FlyoutHeaderMetaBlockProps {
+  /** Optional explicit instance id; auto-generated when omitted. */
+  id?: string;
+  /** The pair's key, rendered bold ahead of the value. */
+  title: ReactNode;
+  /** The pair's value; accepts rich content such as links. */
+  children: ReactNode;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Props for the declarative `FlyoutTemplate.Header.Badge` part.
+ *
+ * The template composes the `EuiBadge` itself, so only presentational options are
+ * exposed. Badges in a flyout header label the subject; they are not controls.
+ */
+export interface FlyoutHeaderBadgeProps {
+  /** Optional explicit instance id; auto-generated when omitted. */
+  id?: string;
+  /** Badge label. */
+  children: ReactNode;
+  /** Palette color name or hex value. */
+  color?: EuiBadgeProps['color'];
+  /** Icon shown inside the badge. */
+  iconType?: EuiBadgeProps['iconType'];
+  /** Which side of the label the icon sits on. */
+  iconSide?: EuiBadgeProps['iconSide'];
+  'data-test-subj'?: string;
+}
+
+/** Props for the declarative `FlyoutTemplate.Header.InfoBlock` part. */
+export interface FlyoutHeaderInfoBlockProps {
+  /** Optional explicit instance id; auto-generated when omitted. */
+  id?: string;
+  /** Fixed-style text label rendered above the value. */
+  title: string;
+  /** The block's value content. */
+  children: ReactNode;
+  size?: InfoBlockItem['size'];
+  color?: InfoBlockItem['color'];
+  'data-test-subj'?: string;
 }
 
 /** Props for the declarative `FlyoutTemplate.Body` zone. */
