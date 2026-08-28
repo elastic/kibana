@@ -51,7 +51,8 @@ spaceTest.describe('Data view without timefield', { tag: '@local-stateful-classi
   });
 
   spaceTest('should display a disabled timepicker', async ({ pageObjects }) => {
-    await expectTimePickerState(pageObjects.datePicker, 'disabled');
+    await expect(pageObjects.datePicker.getTimePickerControl()).toBeVisible();
+    await expect(pageObjects.datePicker.getDisabledDatePickerIndicator()).toBeAttached();
   });
 
   spaceTest('should adapt sidebar fields when switching', async ({ page, pageObjects }) => {
@@ -77,7 +78,8 @@ spaceTest.describe('Data view without timefield', { tag: '@local-stateful-classi
       await pageObjects.discover.selectDataView('with-timefield');
       await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await expectTimePickerState(pageObjects.datePicker, 'enabled');
+      await expect(pageObjects.datePicker.getTimePickerControl()).toBeVisible();
+      await expect(pageObjects.datePicker.getDisabledDatePickerIndicator()).toBeHidden();
     }
   );
 
