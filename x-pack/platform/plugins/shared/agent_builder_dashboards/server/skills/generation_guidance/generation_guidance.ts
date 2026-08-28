@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformCoreTools } from '@kbn/agent-builder-common';
+import { platformCoreTools, internalTools } from '@kbn/agent-builder-common';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import {
@@ -72,7 +72,7 @@ Reach for custom content only when nothing above fits:
 
 For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
-When choosing a chart type, composing the dashboard, or packing the grid, follow referenced content \`${DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME}\`.
+When choosing a chart type, composing the dashboard, or packing the grid, apply \`${DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME}\` after you have read it with \`${internalTools.readFile}\`.
 
 ## ES|QL
 

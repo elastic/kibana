@@ -23,6 +23,17 @@ describe('registerSkills', () => {
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard-management' }));
   });
 
+  it('tells the agent to read_file every referenced_files path before generate', () => {
+    expect(skill.content).toContain('referenced_files');
+    expect(skill.content).toContain('read_file');
+    expect(skill.content).toContain(`Before calling \`${dashboardTools.generateDashboard}\``);
+    expect(skill.content).toContain('every path in `referenced_files`');
+    expect(skill.content).not.toContain('Dashboard Composition Guidelines');
+    expect(skill.referencedContent?.map((ref) => ref.name)).toEqual(
+      expect.arrayContaining(['prettify-rules', 'dashboard-design-practices'])
+    );
+  });
+
   it('includes SML discovery instructions in the skill content', () => {
     expect(skill.content).toContain('platform.core.sml_search');
     expect(skill.content).toContain('platform.core.sml_attach');
@@ -39,9 +50,7 @@ describe('registerSkills', () => {
     expect(design?.content).toContain('Dashboard Composition Guidelines');
     expect(design?.content).toContain('Grid Packing Rules');
     expect(design?.content).toContain('**XY (line / area / bar)** → `w: 24, h: 10`');
-    expect(design?.content).not.toContain(
-      'Use full-width (`w: 48`) for the primary time series'
-    );
+    expect(design?.content).not.toContain('Use full-width (`w: 48`) for the primary time series');
     expect(design?.content).toContain('Available chart types');
     expect(design?.content).toContain('- region_map:');
     expect(design?.content).toContain(

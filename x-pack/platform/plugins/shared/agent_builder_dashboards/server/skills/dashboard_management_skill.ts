@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { internalTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { dashboardTools } from '../../common';
 import { generateDashboardTool } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { dashboardPrettify } from './prettify_guidance';
@@ -28,6 +30,10 @@ Use this skill when:
 Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
+
+## Referenced files
+
+\`load_skill\` returns \`referenced_files\` (name + path). Their content is **not** in this skill body. Before calling \`${dashboardTools.generateDashboard}\` — Prettify **or** a normal create/edit — \`${internalTools.readFile}\` every path in \`referenced_files\`. Do not generate until you have read them.
 
 ${dashboardPrettify.guidance}
 
