@@ -128,9 +128,7 @@ export async function getVersionSpecificPolicies(
             (fleetServerPolicy.data?.secret_references as SecretReference[] | undefined) ??
             [];
           return strippedIds
-            ? refs.filter(
-                ({ id: refId }) => !strippedIds.has(refId) || !!versionedIds?.has(refId)
-              )
+            ? refs.filter(({ id: refId }) => !strippedIds.has(refId) || !!versionedIds?.has(refId))
             : refs;
         })(),
       },
