@@ -212,7 +212,7 @@ test.describe(
       await expect(page).toHaveURL(
         new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`)
       );
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toBeVisible();
+      await expect(page.getByTestId('appHeaderTitle')).toBeVisible();
     });
 
     test('navigates to Dependency Details from popover', async ({

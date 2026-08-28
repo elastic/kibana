@@ -24,6 +24,7 @@ export const registerPutDataViewAsCodeRoute = ({
     .put({
       path: UPDATE_DATA_VIEW_AS_CODE_PATH,
       access: 'internal',
+      enableQueryVersion: true,
       description: 'Update a data view by id',
       security: {
         authz: {

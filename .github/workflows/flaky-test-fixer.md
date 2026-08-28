@@ -70,7 +70,7 @@ tools:
 
 # Bootstrap Kibana on the self-hosted runner, in a pre-agent step that runs on the
 # host (before `awf` starts the sandboxed agent), so `node_modules` and
-# `@kbn/setup-node-env` exist and the agent can lint and type check the fix.
+# `@kbn/setup-node-env` exist so the agent can lint the fix and run any Jest tests.
 runs-on: kibana
 steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -79,6 +79,29 @@ steps:
       cache: yarn
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
+  - name: Expose Kibana's Node.js path to the agent
+    # the sandbox rebuilds PATH from every `bin` dir under RUNNER_TOOL_CACHE, so the agent's
+    # `node` is whichever version the runner cached first, not the one setup-node just
+    # picked, and `node scripts/*` then trips Kibana's version guard. Pass the resolved path
+    # through so the agent can fix PATH itself instead of via `nvm` (mirrors are firewalled).
+    run: |
+      KBN_NODE_BIN="$(dirname "$(command -v node)")"
+      echo "KBN_NODE_BIN=$KBN_NODE_BIN" >> "$GITHUB_ENV"
+      echo "Pinned Node for the agent: $KBN_NODE_BIN ($("$KBN_NODE_BIN/node" --version))"
+  - name: Detect duplicate fix PRs
+    # Shortlist the `flaky-test-fixer` PRs whose `failed-test` issue is owned by the same
+    # team as this issue, so the agent can spot an already-in-flight fix and bail out before
+    # spending a full run. Non-fatal: a detection failure must not block the fix — the agent
+    # treats a missing file as "no duplicate".
+    uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    with:
+      script: |
+        const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
+        try {
+          await writeDuplicateCandidates({ github, core, issueNumber: Number(process.env.ISSUE_NUMBER) });
+        } catch (err) {
+          core.warning(`Duplicate detection failed: ${err.message}`);
+        }
 
 network:
   allowed:
@@ -90,6 +113,8 @@ network:
     - github.com
     - api.github.com
     - openrouter.ai
+    # to properly display links to best practices docs
+    - elastic.co
 sandbox:
   agent: awf
 
@@ -243,7 +268,7 @@ timeout-minutes: 90
 
 Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
-- an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
+- a PR already addresses this root cause (open or merged) — see [Duplicate detection](#duplicate-detection), which runs first as step 1;
 - you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix; or
 - the fix has to target a version branch (see "Fixes that must target a version branch").
 
@@ -253,22 +278,48 @@ Whatever the outcome, always finish by leaving one concise comment on the issue 
 
 `${{ env.REQUESTED_BY }}` triggered this run — the user who applied `ai:fix-flaky`, or the manual dispatcher. @-mention them (`@${{ env.REQUESTED_BY }}`) in both the outcome comment and the PR body so they get pinged to review the outcome and the fix, but **only if it is a real user account**: if `${{ env.REQUESTED_BY }}` ends with `[bot]` or is `kibanamachine`, omit the mention (and the "Requested by" line) entirely.
 
+## Duplicate detection
+
+Many `failed-test` issues share a single **root cause**, so the fixer can open several PRs that all fix it — usually within minutes of each other, by parallel runs. A duplicate is another PR addressing the **same root cause**, which typically (but not always) surfaces as edits to the same method or spec. The converse does **not** hold: two PRs touching the same method or spec are **not** duplicates when they fix **distinct, unrelated root causes**. Before doing any work, rule out that a fix for *this* root cause is already in flight:
+
+- A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json` (`{ team, candidates }`): `team` is this issue's owning team (from its `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Read it first.
+- Same team means same owning code area, not the same test — so **open each candidate's diff** and treat it as a real match only when it addresses the **same root cause / same method for the same purpose** as this issue's failing test — not merely the same team, a similar file, or the same file for an unrelated reason (a different method of the same page object is not a duplicate).
+- If this issue has no `Team:` label, `candidates` falls back to only the PRs already closing this exact issue.
+- If a real match exists (open, or already merged), **do not open a PR**: post the "Existing PR already covers it" outcome comment naming that PR, remove the `ai:fix-flaky` label (step 9), and stop. If you **cannot confirm** a true duplicate, proceed and open the PR — the downstream Flaky Fix Verifier is the backstop that closes any real duplicate that slips through, whereas a flake you wrongly skip here just goes unfixed.
+
 ## Environment
 
-Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed and authenticated and `BUILDKITE_ORGANIZATION_SLUG` is `elastic`, so you can inspect CI builds and download failure artifacts (JUnit XML, screenshots, server logs) when you need to re-investigate (see "Validate the investigation is current").
+Kibana is already bootstrapped for you. Kibana's pinned Node is in `$KBN_NODE_BIN` — put it on PATH in every Bash call that runs `node` or `yarn`, since each call starts a fresh shell:
+
+```bash
+export PATH="$KBN_NODE_BIN:$PATH"
+```
+
+Don't use `nvm`; it can't reach the Node mirrors from here.
+
+The `bk` (Buildkite) CLI is installed and authenticated and `BUILDKITE_ORGANIZATION_SLUG` is `elastic`, so you can inspect CI builds and download failure artifacts (JUnit XML, screenshots, server logs) when you need to re-investigate. Use the exact `bk artifacts list` / `bk artifacts download` recipes in the [`flaky-test-investigator` skill](#validate-the-investigation-is-current) — don't rediscover the CLI syntax by trial and error.
+
+## Working efficiently
+
+This run has a fixed AI-credit budget, and every tool result you read stays in the context that is re-sent on every subsequent turn — so a bloated context makes the whole run more expensive and can exhaust the budget before you finish. Keep the working set small:
+
+- **Read each file once, in the smallest useful slice.** Prefer a ranged read or a targeted `grep` over dumping a whole file, and never re-read or re-download a file you already have — after you edit a file, trust the returned state instead of reading it back.
+- **Don't pull large or binary artifacts into context.** Describe a failure screenshot from its metadata rather than loading the image, and `grep`/`sed` a big log for the failure timestamp instead of reading it end to end. Fetch only the specific artifacts you will actually use.
+- **Don't repeat a check whose inputs haven't changed.** A lint or search returns the same result until you edit the code it inspects, so re-running it just burns budget — reuse the result you already have, and never loop a command hoping for a different outcome. (The repeated runs in [Verifying a Jest fix](#verifying-a-jest-fix) are the deliberate exception: they measure flakiness, not a fixed result.)
 
 ## Steps
 
-1. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 7.
-2. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
-3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
-4. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
-5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check`. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
-6. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
-7. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
-8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
-9. **Only if you opened a PR in step 6**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
-10. **Only if you opened a PR in step 6 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
+1. **Rule out a duplicate.** Before any investigation, run [Duplicate detection](#duplicate-detection). If a fix for this root cause is already in flight (or already merged), **do not open a PR** — skip straight to step 8 (outcome comment) and step 9 (remove label).
+2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8.
+3. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
+4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
+5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
+6. Verify the patch. Lint with `node scripts/eslint <changed files>`, after the PATH export from [Environment](#environment). **Don't type check** — `node scripts/type_check` builds a large project graph and is slow and memory-heavy on this runner (an unscoped run is even OOM-killed with `SIGKILL`), and the PR's CI type-checks the change anyway, so leave that to CI. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
+7. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
+8. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
+9. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
+10. **Only if you opened a PR in step 7**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
+11. **Only if you opened a PR in step 7 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
 
 ## Fix guardrails
 
@@ -291,6 +342,7 @@ To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills
 Run this loop twice: once on the unpatched test, once with the fix applied.
 
 ```bash
+export PATH="$KBN_NODE_BIN:$PATH"
 : > /tmp/gh-aw/agent/jest-durations
 fails=0
 for i in $(seq 1 25); do
@@ -303,7 +355,7 @@ awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", t
 
 - **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
 - **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
-- **Read the timings, not only the counts.** An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing.
+- **Read the timings, not only the counts.** A patch meant to make the test cheaper — an async step removed, a smaller unit under test, heavy children mocked — must show a clearly lower average, not a few percent. An average that barely moves means the expensive work is still there and the patch only changed how the test waits; that is the shape of Jest fix that comes back. An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing. A deliberate timeout bump is the exception: it is not meant to lower the average. Two traps in the durations file — a `0` line means the test name did not match, not a fast run, and a run that crashed adds no line at all, so check you have one line per run.
 - **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
 - **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
 
@@ -341,7 +393,6 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
   ✅ Passed: `node scripts/eslint <files>`
-  ✅ Passed: `node scripts/type_check --project <tsconfig>`
   ✅ Passed: `node scripts/jest <test>`: 4/25 runs failed before the fix (avg 820ms, max 4.9s), 0/25 after (avg 890ms, max 1.0s)
   ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
 
@@ -412,7 +463,7 @@ So when the fix has to land on a version branch, don't call `create_pull_request
 
 ## Outcome comment
 
-In **every** run, finish by posting exactly one short comment on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output, and removing the `ai:fix-flaky` label (see step 8). Format the comment as a short `###` heading that states the outcome (with the leading emoji shown below), followed by a single sentence of detail, then `cc @${{ env.REQUESTED_BY }}` at the very end (see "Requester mention", only append if the requester isn't a bot). No other preamble or sign-off. The only variant that carries more than that sentence is the version-branch hand-off, which appends the proposed PR in collapsed sections.
+In **every** run, finish by posting exactly one short comment on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output, and removing the `ai:fix-flaky` label (see step 9). Format the comment as a short `###` heading that states the outcome (with the leading emoji shown below), followed by a single sentence of detail, then `cc @${{ env.REQUESTED_BY }}` at the very end (see "Requester mention", only append if the requester isn't a bot). No other preamble or sign-off. The only variant that carries more than that sentence is the version-branch hand-off, which appends the proposed PR in collapsed sections.
 
 Follow this format:
 
@@ -475,6 +526,13 @@ Follow this format:
   The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), so there's nothing to patch in this repo. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified.
+- **Pre-fix CI lag** (the reported failure ran a Cloud image that predates the fix — confirm via the `flaky-test-investigator` skill's pipelines reference — so no PR was opened):
+  ```markdown
+  ### 🕒 Pre-fix CI lag, not a regression
+
+  This failure ran on Kibana `<short-sha>`, which doesn't yet include the fix; it should clear once the Cloud image catches up with `main`. cc @<requester-github-handle-here-if-not-a-bot>
+  ```
+  Fill `<short-sha>` with the failing run's `Build hash` (the commit you compared against the fix — see the pipelines reference), abbreviated to 12 chars.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting

@@ -18,6 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
@@ -28,7 +29,6 @@ import {
 import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
 
 const TAG_SEARCH_DEBOUNCE_MS = 300;
-const MAX_TAGS_CAP = 20;
 
 interface TagSelectableMeta {
   value: string;
@@ -76,7 +76,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     onChange(mergeRuleTagsIntoMatcher(matcher, tags));
   };
 
-  const showCapGuidance = apiTags.length >= MAX_TAGS_CAP;
+  const showCapGuidance = apiTags.length >= TAGS_RESPONSE_LIMIT;
 
   return (
     <EuiPopover
@@ -144,8 +144,8 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
         <EuiPopoverFooter paddingSize="s">
           <EuiText size="xs" color="subdued" data-test-subj="quickFilterTagsCapGuidance">
             {i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.tags.capGuidance', {
-              defaultMessage: 'Showing first {cap} most-used — type to search',
-              values: { cap: MAX_TAGS_CAP },
+              defaultMessage: 'Showing first {cap} most-used, type to search',
+              values: { cap: TAGS_RESPONSE_LIMIT },
             })}
           </EuiText>
         </EuiPopoverFooter>

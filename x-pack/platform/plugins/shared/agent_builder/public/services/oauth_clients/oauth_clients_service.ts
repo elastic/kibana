@@ -61,4 +61,8 @@ export class OAuthClientsService {
       { body: JSON.stringify(payload ?? {}) }
     );
   }
+
+  async delete(clientId: string): Promise<void> {
+    await this.http.delete(buildPath(`${OAUTH_API_PATH}/clients/{clientId}`, { clientId }));
+  }
 }

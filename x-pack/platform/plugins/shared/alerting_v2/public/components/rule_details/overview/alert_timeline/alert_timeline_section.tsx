@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -14,11 +14,9 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -27,6 +25,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { deriveAlertTimelineData } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
+import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
@@ -35,7 +34,8 @@ import { AlertTimelineChart } from './alert_timeline_chart';
 import { AlertTimelineStatsRow } from './alert_timeline_stats_row';
 import { AlertTimelineViewAllButton } from './alert_timeline_view_all_button';
 import { useAlertTimelineUrlState } from './use_alert_timeline_url_state';
-import { DEFAULT_ACTIVITY_TIME_RANGE, resolveGteLte } from '../time_range';
+import { DEFAULT_ACTIVITY_TIME_RANGE } from '../time_range';
+import { useResolvedActivityWindow } from '../use_resolved_activity_window';
 
 export const AlertTimelineSection: React.FC = () => {
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
@@ -43,35 +43,28 @@ export const AlertTimelineSection: React.FC = () => {
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
   const http = useService(CoreStart('http'));
+  const notifications = useService(CoreStart('notifications'));
+  const featureFlags = useService(CoreStart('featureFlags'));
   const rule = useRule();
   const groupingFields = rule.grouping?.fields;
   const hasGroupingFields = (groupingFields?.length ?? 0) > 0;
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
   const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ACTIVITY_TIME_RANGE);
-  const [refreshTick, setRefreshTick] = useState(0);
-
-  const handleTimeChange = useCallback(
-    (next: OnTimeChangeProps) => {
-      setTimeRange({ from: next.start, to: next.end });
-    },
-    [setTimeRange]
+  const { windowStartMs, windowEndMs, applyRefresh } = useResolvedActivityWindow(
+    timeRange.from,
+    timeRange.to
   );
 
-  const handleRefresh = useCallback(() => setRefreshTick((n) => n + 1), []);
-
-  const { windowStartMs, windowEndMs } = useMemo(() => {
-    void refreshTick;
-    return resolveGteLte(timeRange.from, timeRange.to);
-  }, [timeRange.from, timeRange.to, refreshTick]);
-
-  const { phases, groupingValuesByHash, summary, isLoading, isError } = useFetchRuleEvents({
-    ruleId: rule.id,
-    windowStartMs,
-    windowEndMs,
-    groupingFields,
-    data,
-  });
+  const { phases, groupingValuesByHash, summary, isLoading, isError, refetch } = useFetchRuleEvents(
+    {
+      ruleId: rule.id,
+      windowStartMs,
+      windowEndMs,
+      groupingFields,
+      data,
+    }
+  );
 
   const timelineData = useMemo(
     () =>
@@ -141,16 +134,15 @@ export const AlertTimelineSection: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            compressed
-            width="auto"
-            start={timeRange.from}
-            end={timeRange.to}
-            onTimeChange={handleTimeChange}
-            onRefresh={handleRefresh}
+          <AlertingDateRangePicker
+            from={timeRange.from}
+            to={timeRange.to}
+            onChange={setTimeRange}
+            services={{ data, notifications, http, application, uiSettings, featureFlags }}
+            onRefresh={() => applyRefresh(refetch)}
             isLoading={isLoading}
-            showUpdateButton="iconOnly"
-            updateButtonProps={{ fill: false }}
+            showTimeWindowButtons
+            width="auto"
             data-test-subj="alertTimelineDatePicker"
           />
         </EuiFlexItem>

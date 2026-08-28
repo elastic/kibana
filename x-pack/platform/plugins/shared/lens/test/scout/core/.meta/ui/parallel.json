@@ -1,8 +1,7 @@
 {
-  "sha1": "cbb860e983c4a6f42d4721ae11ff0ace225d1ed9",
+  "sha1": "e04b253704ebe8867c865f6f75cae983639255f3",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -147,42 +146,16 @@
       }
     },
     {
-      "id": "36fc1fc4383edec-ec0ed097095fb0e",
-      "title": "Lens chart creation creates and saves an XY area chart, then reopens it with the same configuration",
+      "id": "d2815d5da13fdd6-60b241ddf218024",
+      "title": "Lens chart data across visualization types renders the same terms + average config across chart types",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 25,
-        "column": 51
-      }
-    },
-    {
-      "id": "36fc1fc4383edec-e2feb0cd547afef",
-      "title": "Lens chart creation preserves the split field when switching a saved XY chart to filters aggregation",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 52,
-        "column": 60
-      }
-    },
-    {
-      "id": "36fc1fc4383edec-42fc5ed07c9cb92",
-      "title": "Lens chart creation switches the first layer to a different data view",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 71,
-        "column": 15
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_data.spec.ts",
+        "line": 57,
+        "column": 16
       }
     },
     {
@@ -888,6 +861,45 @@
       }
     },
     {
+      "id": "e97cb405298c2ea-004fc5174a88a75",
+      "title": "Lens palette and color mapping picks a legacy palette on an XY split dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 21,
+        "column": 13
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-2f7704d5e1102fd",
+      "title": "Lens palette and color mapping picks a color-mapping palette and carries it across pie and bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 44,
+        "column": 38
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-cbc552dbee08aee",
+      "title": "Lens palette and color mapping renders legend colors from color mapping and categorical overrides",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 82,
+        "column": 31
+      }
+    },
+    {
       "id": "3a650e99e12dfc9-f94217f88e11f64",
       "title": "Lens reference lines creates, styles and duplicates reference lines",
       "expectedStatus": "passed",
@@ -901,6 +913,149 @@
       }
     },
     {
+      "id": "baf8a89526bac91-5065d73fcf0283a",
+      "title": "Lens share and CSV export enables share/export for a valid config and preserves filters in the shared URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/share.spec.ts",
+        "line": 23,
+        "column": 13
+      }
+    },
+    {
+      "id": "c3c5a4dff951829-0e6d6168c3907cb",
+      "title": "Lens show underlying data from dashboard brings dashboard and visualization context to Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/dashboard.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "c334832918cc1c3-8c781937f72a9fe",
+      "title": "Lens show underlying data opens Discover with columns from a compatible saved visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "c334832918cc1c3-6e6d7b171a56f64",
+      "title": "Lens show underlying data opens Discover when the visualization has an annotation layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
+      "id": "c334832918cc1c3-dd1d532280a5bba",
+      "title": "Lens show underlying data opens Discover when the visualization has a reference line layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 84,
+        "column": 18
+      }
+    },
+    {
+      "id": "c334832918cc1c3-94a29e9ef0a338a",
+      "title": "Lens show underlying data disables Open in Discover when the visualization has multiple data layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 110,
+        "column": 9
+      }
+    },
+    {
+      "id": "c334832918cc1c3-0f814bf75cea388",
+      "title": "Lens show underlying data omits terms from the Discover query when Other is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 132,
+        "column": 4
+      }
+    },
+    {
+      "id": "c334832918cc1c3-2c55a18f106ff59",
+      "title": "Lens show underlying data opens Discover with a Lucene dimension filter as a filter pill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 158,
+        "column": 25
+      }
+    },
+    {
+      "id": "c334832918cc1c3-b190ca2e89c0931",
+      "title": "Lens show underlying data extracts formula KQL filters and columns into Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 187,
+        "column": 25
+      }
+    },
+    {
+      "id": "c334832918cc1c3-cf0dce8b54a312a",
+      "title": "Lens show underlying data extracts a formula global filter into Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
+        "line": 231,
+        "column": 31
+      }
+    },
+    {
+      "id": "90a36ca62c33696-d99c41830e18b70",
+      "title": "Lens show underlying data from ES|QL dashboard panel opens Discover with the Lens ES|QL panel query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/esql_dashboard.spec.ts",
+        "line": 33,
+        "column": 23
+      }
+    },
+    {
       "id": "b40d2b710de93c1-6951abc44e2fa95",
       "title": "Lens tag cloud filter renders tags, filters from a tag click, and narrows the cloud",
       "expectedStatus": "passed",
@@ -910,6 +1065,19 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/tagcloud_filter.spec.ts",
         "line": 14,
+        "column": 13
+      }
+    },
+    {
+      "id": "d6d882085a838db-0726e0abd3eb5c7",
+      "title": "Lens time shift configures time-shifted metrics and applies terms fix actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/time_shift.spec.ts",
+        "line": 18,
         "column": 13
       }
     }

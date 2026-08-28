@@ -34,8 +34,8 @@ import { CanvasToolbar } from './canvas_toolbar';
 import { applyLayout } from './layout';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
-import type { ClassicCanvasNode } from './types';
-import { StreamFlyout } from '../../../stream_flyout';
+import { StreamFlyout, type StreamFlyoutTabId } from '../../../stream_flyout';
+import { DESTINATION_NODE_TYPE, type ClassicCanvasGraph, type ClassicCanvasNode } from './types';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
 import { CanvasStateContextProvider, useCanvasEvents, useCanvasUrlRef } from './state_management';
 
@@ -72,20 +72,46 @@ function StreamsCanvasInner() {
     },
   } = useKibana();
   const { flyoutName } = useCanvasUrlRef();
-  const { openFlyout, closeFlyout } = useCanvasEvents();
+  const { openFlyout, closeFlyout, selectTab } = useCanvasEvents();
 
   const { value, loading } = useStreamsAppFetch(
     ({ signal }) => streamsRepositoryClient.fetch('GET /internal/streams/classic', { signal }),
     [streamsRepositoryClient]
   );
 
-  const graph = useMemo(() => buildClassicStreamsGraph(value?.streams ?? []), [value]);
+  const openFlyoutTab = useCallback(
+    (name: string, initialTab: StreamFlyoutTabId = 'overview') => {
+      openFlyout(name);
+      selectTab(initialTab);
+    },
+    [openFlyout, selectTab]
+  );
+
+  const graph = useMemo<ClassicCanvasGraph>(() => {
+    const nextGraph = buildClassicStreamsGraph(value?.streams ?? []);
+    return {
+      ...nextGraph,
+      nodes: nextGraph.nodes.map(
+        (node): ClassicCanvasNode =>
+          node.type === DESTINATION_NODE_TYPE
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  onProcessingClick: (streamName: string) =>
+                    openFlyoutTab(streamName, 'processing'),
+                },
+              }
+            : node
+      ),
+    };
+  }, [openFlyoutTab, value]);
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
   // Positions reset to the inferred layout whenever the fetched streams change.
   const [nodes, setNodes, applyNodesChange] = useNodesState(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
-
+  const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
   const { record, undo, redo, reset, canUndo, canRedo } = useCanvasHistory({
     nodes,
     edges,
@@ -137,8 +163,6 @@ function StreamsCanvasInner() {
     [applyNodesChange, record]
   );
 
-  const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
-
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
 
   // A single node has no tidy action, so suppress the native menu without
@@ -175,10 +199,10 @@ function StreamsCanvasInner() {
     (event, node) => {
       if (node.type === 'destination' && !event.shiftKey) {
         event.preventDefault();
-        openFlyout(node.data.title);
+        openFlyoutTab(node.data.streamName);
       }
     },
-    [openFlyout]
+    [openFlyoutTab]
   );
 
   const reopenContextMenu = useCallback(
@@ -235,10 +259,10 @@ function StreamsCanvasInner() {
     if (selected.length === 1) {
       const selectedNode = selected[0];
       if (selectedNode.type === 'destination') {
-        openFlyout(selectedNode.data.title);
+        openFlyoutTab(selectedNode.data.streamName);
       }
     }
-  }, [nodes, openFlyout]);
+  }, [nodes, openFlyoutTab]);
 
   useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
 
@@ -283,8 +307,8 @@ function StreamsCanvasInner() {
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
-      onNodeContextMenu={onNodeContextMenu}
       onNodeClick={onNodeClick}
+      onNodeContextMenu={onNodeContextMenu}
       onPaneContextMenu={onPaneContextMenu}
       onSelectionContextMenu={onSelectionContextMenu}
       ariaLabel={i18n.translate('xpack.streams.canvas.regionAriaLabel', {

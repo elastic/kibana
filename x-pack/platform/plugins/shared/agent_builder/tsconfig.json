@@ -123,6 +123,7 @@
     "@kbn/security-plugin-types-server",
     "@kbn/agent-builder-sml-plugin",
     "@kbn/shared-ux-ai-components",
+    "@kbn/app-header",
     "@kbn/fs",
     "@kbn/react-hooks",
     "@kbn/search-inference-endpoints",
@@ -143,5 +144,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/storybook",
     "@kbn/context-engine-plugin",
+    "@kbn/ui-callout",
   ]
 }

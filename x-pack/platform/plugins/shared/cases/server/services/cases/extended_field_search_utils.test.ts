@@ -16,6 +16,8 @@ import {
   buildFieldLabelRuntimeMappings,
   buildFieldLabelExistsClauses,
   buildAllExtendedFieldValuesRuntimeMapping,
+  buildAllExtendedFieldValuesSearchClause,
+  getAllExtendedFieldSearchWords,
   EF_ALL_VALUES_FIELD,
 } from './extended_field_search_utils';
 
@@ -600,6 +602,9 @@ describe('buildExtendedFieldRuntimeMappings', () => {
         },
       },
     });
+    const source = (mappings.ef_effort_as_integer.script as { source: string }).source;
+    expect(source).toContain('if (raw.trim().isEmpty()) { return; }');
+    expect(source).toContain('try { emit(Long.parseLong(raw)); } catch (Exception e) {}');
   });
 
   it('builds double runtime field for float type', () => {
@@ -623,6 +628,9 @@ describe('buildExtendedFieldRuntimeMappings', () => {
         },
       },
     });
+    const source = (mappings.ef_score_as_double.script as { source: string }).source;
+    expect(source).toContain('if (raw.trim().isEmpty()) { return; }');
+    expect(source).toContain('try { emit(Double.parseDouble(raw)); } catch (Exception e) {}');
   });
 
   it('skips runtime mapping for DATE_PICKER (uses flattened field directly)', () => {
@@ -1781,6 +1789,22 @@ describe('buildFieldLabelRuntimeMappings', () => {
 
     expect(mappings).toHaveProperty('ef_reviewers_as_keyword');
   });
+
+  it('builds guarded numeric runtime mappings for numeric labels', () => {
+    const mappings = buildFieldLabelRuntimeMappings([
+      {
+        storageKey: 'effort_as_integer',
+        esType: 'integer',
+        control: 'INPUT_NUMBER',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+    ]);
+
+    expect(mappings.ef_effort_as_integer.type).toBe('long');
+    const source = (mappings.ef_effort_as_integer.script as { source: string }).source;
+    expect(source).toContain('if (raw.trim().isEmpty()) { return; }');
+    expect(source).toContain('try { emit(Long.parseLong(raw)); } catch (Exception e) {}');
+  });
 });
 
 describe('buildFieldLabelExistsClauses', () => {
@@ -1925,12 +1949,13 @@ describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
     expect(src).toContain('extended_fields');
   });
 
-  it('generates a Painless script that lowercases and splits on whitespace', () => {
+  it('generates a Painless script that lowercases and emits one boundary-padded combined value', () => {
     const mappings = buildAllExtendedFieldValuesRuntimeMapping();
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
     expect(src).toContain('toLowerCase(Locale.ROOT)');
-    expect(src).toContain('emit(t)');
+    expect(src).toContain("emit(' ' + combined + ' ')");
+    expect(src.match(/emit\(/g)).toHaveLength(1);
   });
 
   it('generates a Painless script that strips JSON punctuation', () => {
@@ -1947,14 +1972,14 @@ describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
     expect(src).not.toContain('?.');
   });
 
-  it('extracts USER_PICKER names via regex before falling back to tokenization', () => {
+  it('extracts USER_PICKER names via regex before falling back to combined text', () => {
     const mappings = buildAllExtendedFieldValuesRuntimeMapping();
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
     expect(src).toContain('"name":"([^"]*)"');
   });
 
-  it('uses = as a word separator in the fallback tokenization', () => {
+  it('normalizes whitespace, commas, and equals as separators in the combined value', () => {
     const mappings = buildAllExtendedFieldValuesRuntimeMapping();
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
@@ -1966,5 +1991,103 @@ describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
     expect(src).toContain('instanceof Map');
+  });
+
+  it('truncates at a complete token using a Lucene-safe UTF-8 character budget', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+    const maxChars = Math.floor(30000 / 3) - 2;
+
+    expect(src).toContain(`combined.length() > ${maxChars}`);
+    expect(src).toContain(`combined.lastIndexOf(' ', ${maxChars})`);
+    expect(src).toContain('if (boundary == -1) { return; }');
+    expect(src).toContain('combined = combined.substring(0, boundary)');
+    expect(src).not.toContain('StandardCharsets');
+    expect(src).not.toContain('getBytes');
+  });
+});
+
+describe('getAllExtendedFieldSearchWords', () => {
+  it('lowercases and splits on whitespace', () => {
+    expect(getAllExtendedFieldSearchWords('  Test   TEXT  ')).toEqual(['test', 'text']);
+  });
+
+  it('returns an empty array for blank search', () => {
+    expect(getAllExtendedFieldSearchWords('   ')).toEqual([]);
+  });
+});
+
+describe('buildAllExtendedFieldValuesSearchClause', () => {
+  it('builds a single wildcard clause for one word', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('distributed')).toEqual({
+      wildcard: {
+        [EF_ALL_VALUES_FIELD]: {
+          value: '* distributed *',
+          case_insensitive: true,
+        },
+      },
+    });
+  });
+
+  it('ANDs wildcard clauses for multi-word search', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('distributed malware')).toEqual({
+      bool: {
+        filter: [
+          {
+            wildcard: {
+              [EF_ALL_VALUES_FIELD]: {
+                value: '* distributed *',
+                case_insensitive: true,
+              },
+            },
+          },
+          {
+            wildcard: {
+              [EF_ALL_VALUES_FIELD]: {
+                value: '* malware *',
+                case_insensitive: true,
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('escapes wildcard metacharacters in search words', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('foo*bar')).toEqual({
+      wildcard: {
+        [EF_ALL_VALUES_FIELD]: {
+          value: '* foo\\*bar *',
+          case_insensitive: true,
+        },
+      },
+    });
+  });
+
+  it('returns undefined for blank search', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('   ')).toBeUndefined();
+  });
+
+  it('uses the provided field name', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('spy', 'custom.field')).toEqual({
+      wildcard: {
+        'custom.field': {
+          value: '* spy *',
+          case_insensitive: true,
+        },
+      },
+    });
+  });
+
+  it('requires whole-word boundaries instead of matching partial words', () => {
+    const clause = buildAllExtendedFieldValuesSearchClause('cat')!;
+    const wildcardQuery = clause.wildcard?.[EF_ALL_VALUES_FIELD] as { value: string };
+    const wildcardValue = wildcardQuery.value;
+    const token = wildcardValue.replace(/\*/g, '');
+
+    expect(wildcardValue).toBe('* cat *');
+    expect(' the cat sat ').toContain(token);
+    expect(' category theory ').not.toContain(token);
   });
 });

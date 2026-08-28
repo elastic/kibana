@@ -82,7 +82,7 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
           extraActions={
-            showExtraActions && onPresetDelete ? (
+            showExtraActions && onPresetDelete && option.isEditable !== false ? (
               <EuiToolTip content={mainPanelTexts.deletePresetAriaLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   aria-label={mainPanelTexts.deletePresetAriaLabel}

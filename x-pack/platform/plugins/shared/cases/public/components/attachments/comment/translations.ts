@@ -15,7 +15,7 @@ export const ADDED_COMMENT = i18n.translate('xpack.cases.attachments.comment.add
   defaultMessage: 'added a comment',
 });
 
-export const DELETE_COMMENT_SUCCESS_TITLE = i18n.translate(
+export const DELETE_COMMENT_SUCCESS_TOAST = i18n.translate(
   'xpack.cases.attachments.comment.deleteSuccessToasterTitle',
   { defaultMessage: 'Deleted comment' }
 );

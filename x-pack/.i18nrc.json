@@ -94,6 +94,7 @@
     "xpack.monitoring": ["platform/plugins/private/monitoring"],
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.nightshift": "solutions/observability/plugins/nightshift",
+    "xpack.nightshiftInvestigations": ["platform/plugins/shared/nightshift_investigations"],
     "xpack.observabilityAgentBuilder": "solutions/observability/plugins/observability_agent_builder",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_ai_assistant",
@@ -113,6 +114,7 @@
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
+    "xpack.pnd": ["solutions/security/plugins/pnd", "solutions/security/packages/kbn-pnd-common"],
     "xpack.queryActivity": "platform/plugins/shared/query_activity",
     "xpack.profiling": ["solutions/observability/plugins/profiling"],
     "xpack.reindexService": "platform/plugins/private/reindex_service",

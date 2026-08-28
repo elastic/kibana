@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
 import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { discoverPlugins } from './plugin_discovery';
@@ -112,4 +113,26 @@ describe('plugin_discovery', () => {
       expect(pluginsWithTest.length).toBeGreaterThanOrEqual(pluginsWithoutTest.length);
     });
   });
+});
+
+describe('discoverPlugins with explicit paths', () => {
+  it('includes an explicitly selected test plugin', async () => {
+    const pluginPath = Path.resolve(
+      REPO_ROOT,
+      'src/platform/test/analytics/plugins/analytics_ftr_helpers'
+    );
+    const plugins = await discoverPlugins({
+      repoRoot: REPO_ROOT,
+      examples: false,
+      testPlugins: false,
+      paths: [pluginPath],
+    });
+
+    expect(plugins).toContainEqual(
+      expect.objectContaining({
+        id: 'analyticsFtrHelpers',
+        contextDir: pluginPath,
+      })
+    );
+  }, 30000);
 });

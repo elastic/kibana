@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { dirname, resolve } from 'path';
-import * as globby from 'globby';
-import minimatch from 'minimatch';
+import { globbySync } from 'globby';
+import { minimatch } from 'minimatch';
 import { getKibanaDir } from '#pipeline-utils';
 
 /**
@@ -111,7 +111,7 @@ function hasTestFiles(configAbsPath: string): boolean {
   }
 
   return rules.roots.some((root) => {
-    const testFiles = globby.sync(UNIT_TEST_MATCH, {
+    const testFiles = globbySync(UNIT_TEST_MATCH, {
       cwd: root,
       ignore: rules.ignore,
       onlyFiles: true,

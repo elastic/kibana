@@ -48,25 +48,19 @@ export class FilterBar {
   async addFilter(options: FilterCreationOptions) {
     const previousCount = await this.getFilterCount();
     await this.page.testSubj.click('addFilter');
-    await this.page.testSubj.waitForSelector('addFilterPopover');
-    // set field name
-    await this.page.testSubj.typeWithDelay(
-      'filterFieldSuggestionList > comboBoxSearchInput',
-      options.field
-    );
-    await this.page.testSubj.click(`filterFieldOption-${options.field}`);
-    // set operator
+    await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    // Prefer EUI comboBox helpers over typeWithDelay: under load the operator combo can be
+    // "stable" while a character-by-character type still times out (overlay / remount race).
+    await this.page.components
+      .comboBox('filterFieldSuggestionList')
+      .setSelectedOptions([options.field]);
     await expect(this.page.testSubj.locator('filterOperatorList')).not.toHaveClass(
       /euiComboBox-isDisabled/
     );
-    await this.page.testSubj.typeWithDelay(
-      'filterOperatorList > comboBoxSearchInput',
-      options.operator
-    );
-    await this.page.testSubj.click(`filterOperatorOption-${options.operator}`);
-    // set value
+    await this.page.components
+      .comboBox('filterOperatorList')
+      .setSelectedOptions([options.operator]);
     await this.fillFilterValue(options.value);
-    // save filter and wait for popover to close
     await this.page.testSubj.click('saveFilter');
     await expect(
       this.page.testSubj.locator('addFilterPopover'),
