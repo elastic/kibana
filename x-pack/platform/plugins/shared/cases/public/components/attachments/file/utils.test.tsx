@@ -14,7 +14,7 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FILE_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import { basicComment } from '../../../containers/mock';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
-import { makeFileComment } from './case_view_files.test';
+import { makeFileComment } from './test_helpers';
 import { getFileIdsFromComments, getFilesFromComments, isImage, parseMimeType } from './utils';
 
 const imageMimeTypes = Array.from(IMAGE_MIME_TYPES);
