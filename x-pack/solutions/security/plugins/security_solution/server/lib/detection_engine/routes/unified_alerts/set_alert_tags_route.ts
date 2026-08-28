@@ -31,6 +31,7 @@ import {
 import {
   fetchAllAlertIdIndexWithSource,
   collectChangedIdsByFamily,
+  computeActualDelta,
 } from '../common/operations/prefetch_previous_statuses';
 
 export const setUnifiedAlertsTagsRoute = (
@@ -85,6 +86,10 @@ export const setUnifiedAlertsTagsRoute = (
           allValidTagsToAdd.length > MAX_TAGS_PER_OPERATION ||
           allValidTagsToRemove.length > MAX_TAGS_PER_OPERATION;
 
+        // Falls back to the requested arrays if the prefetch fails.
+        let tagsActuallyAdded = validTagsToAdd;
+        let tagsActuallyRemoved = validTagsToRemove;
+
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -107,6 +112,14 @@ export const setUnifiedAlertsTagsRoute = (
                 allValidTagsToRemove.some((t) => currentTags.has(t))
               );
             }));
+            const delta = computeActualDelta(
+              hits.map((h) => h.source),
+              validTagsToAdd,
+              validTagsToRemove,
+              ALERT_WORKFLOW_TAGS
+            );
+            tagsActuallyAdded = delta.actualAdded;
+            tagsActuallyRemoved = delta.actualRemoved;
           } catch {
             logger.warn('Failed to pre-fetch alert indices for workflow trigger (tags)');
           }
@@ -118,16 +131,16 @@ export const setUnifiedAlertsTagsRoute = (
             if (attackIds.length > 0) {
               void eventBus.emitAttackTagsChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsAdded: validTagsToAdd,
-                tagsRemoved: validTagsToRemove,
+                tagsAdded: tagsActuallyAdded,
+                tagsRemoved: tagsActuallyRemoved,
                 truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertTagsChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsAdded: validTagsToAdd,
-                tagsRemoved: validTagsToRemove,
+                tagsAdded: tagsActuallyAdded,
+                tagsRemoved: tagsActuallyRemoved,
                 truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }

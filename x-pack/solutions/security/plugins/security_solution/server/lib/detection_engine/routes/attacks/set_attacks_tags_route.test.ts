@@ -11,6 +11,7 @@ import {
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
   ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
 } from '@kbn/elastic-assistant-common';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 
@@ -138,7 +139,7 @@ describe('set attacks tags', () => {
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: [SCHEDULED_INDEX, ADHOC_INDEX],
-          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS],
+          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_TAGS],
         })
       );
     });
@@ -436,6 +437,101 @@ describe('set attacks tags', () => {
       );
       await new Promise((r) => setTimeout(r, 0));
       expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('cascade: computes independent deltas — attack emit and alert emit use their own prefetched sources', async () => {
+      // Encoding WHY: attack doc already has 'attack-tag'; related alert already has 'alert-tag'.
+      // Each emit must use the delta from its own prefetched sources, not a shared delta.
+      // If they shared a delta, 'attack-tag' would be filtered from both; it should only be
+      // filtered from the attack emit, not from the related-alert emit.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: {
+                [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: ['alertA'],
+                [ALERT_WORKFLOW_TAGS]: ['attack-tag'],
+              },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      // fetchAllAlertIdIndexWithSource (related alert sources)
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'alertA',
+              _index: DETECTION_ALERTS_INDEX,
+              _source: { [ALERT_WORKFLOW_TAGS]: ['alert-tag'] },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          tags: { tags_to_add: ['attack-tag', 'alert-tag', 'new-tag'], tags_to_remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      // attack-tag already on attack1 → filtered from attack emit; present in alertA? No → kept
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tagsAdded: ['alert-tag', 'new-tag'], tagsRemoved: [] })
+      );
+      // alert-tag already on alertA → filtered from alert emit; present in attack1? No → kept
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tagsAdded: ['attack-tag', 'new-tag'], tagsRemoved: [] })
+      );
+    });
+
+    test('computes actual delta — filters already-present tags from tagsAdded in non-cascade', async () => {
+      // Encoding WHY: the event must not report 'existing-tag' as added because attack1
+      // already has it. Only 'new-tag' is genuinely absent and should appear in tagsAdded.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: { [ALERT_WORKFLOW_TAGS]: ['existing-tag'] },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          tags: { tags_to_add: ['existing-tag', 'new-tag'], tags_to_remove: [] },
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tagsAdded: ['new-tag'], tagsRemoved: [] })
+      );
     });
   });
 });

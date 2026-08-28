@@ -227,10 +227,20 @@ describe('set unified alerts tags', () => {
     });
 
     test('emits alertTagsChanged for detection alert documents', async () => {
+      // Both docs already have 'tag-remove' so it genuinely gets removed;
+      // neither has 'tag-add' so it genuinely gets added.
       context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
         makeSearchResponse([
-          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
-          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['tag-remove'] },
+          },
+          {
+            _id: 'alert-2',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['tag-remove'] },
+          },
         ])
       );
       const request = requestMock.create({
@@ -584,6 +594,34 @@ describe('set unified alerts tags', () => {
       expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ truncated: true })
+      );
+    });
+
+    test('computes actual delta — filters already-present tags from tagsAdded', async () => {
+      // Encoding WHY: the event must not report 'already-there' as added because alert-1
+      // already has it. Only 'new-tag' is genuinely absent and should appear in tagsAdded.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['already-there'] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1'],
+          tags: { tags_to_add: ['already-there', 'new-tag'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tagsAdded: ['new-tag'], tagsRemoved: [] })
       );
     });
   });

@@ -9,6 +9,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '@kbn/elastic-assistant-common';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
@@ -26,7 +27,11 @@ import {
 } from '../../../../../common/workflows/triggers';
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
 import { searchAlerts } from '../common/operations/search_alerts';
-import { verifyAlertIdsInIndex } from '../common/operations/prefetch_previous_statuses';
+import {
+  verifyAlertIdsInIndex,
+  fetchAllAlertIdIndexWithSource,
+  computeActualDelta,
+} from '../common/operations/prefetch_previous_statuses';
 import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
@@ -104,6 +109,8 @@ export const setAttacksTagsRoute = (
               // so the event payload never includes unknown/non-attack IDs.
               // Failures here must never block the mutation.
               let verifiedAttackIds: string[] = [];
+              let attackTagsActuallyAdded = validTagsToAdd;
+              let attackTagsActuallyRemoved = validTagsToRemove;
               if (eventBus) {
                 try {
                   const attackDocs = await searchAlerts({
@@ -111,7 +118,7 @@ export const setAttacksTagsRoute = (
                     index: attackIndex,
                     params: {
                       query: { bool: { filter: { terms: { _id: ids } } } },
-                      _source: false,
+                      _source: [ALERT_WORKFLOW_TAGS],
                       // `attackIndex` spans the scheduled and adhoc families and an _id can
                       // exist in both, so reserve a slot per family rather than one per id.
                       size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
@@ -126,6 +133,16 @@ export const setAttacksTagsRoute = (
                         .filter((id): id is string => id != null)
                     )
                   );
+                  const delta = computeActualDelta(
+                    attackDocs.hits.hits.map(
+                      (hit) => (hit._source ?? {}) as Record<string, unknown>
+                    ),
+                    validTagsToAdd,
+                    validTagsToRemove,
+                    ALERT_WORKFLOW_TAGS
+                  );
+                  attackTagsActuallyAdded = delta.actualAdded;
+                  attackTagsActuallyRemoved = delta.actualRemoved;
                 } catch (err) {
                   logger?.warn(`Failed to verify attack IDs for workflow trigger: ${err}`);
                 }
@@ -134,8 +151,8 @@ export const setAttacksTagsRoute = (
               if (eventBus && verifiedAttackIds.length > 0) {
                 void eventBus.emitAttackTagsChanged(request, {
                   attackIds: verifiedAttackIds,
-                  tagsAdded: validTagsToAdd,
-                  tagsRemoved: validTagsToRemove,
+                  tagsAdded: attackTagsActuallyAdded,
+                  tagsRemoved: attackTagsActuallyRemoved,
                   truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
                 });
               }
@@ -156,7 +173,7 @@ export const setAttacksTagsRoute = (
               index: attackIndex,
               params: {
                 query: { bool: { filter: { terms: { _id: ids } } } },
-                _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS],
+                _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_TAGS],
                 // `attackIndex` spans the scheduled and adhoc families and an _id can exist
                 // in both, so reserve a slot per family rather than one per requested id.
                 size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
@@ -169,6 +186,16 @@ export const setAttacksTagsRoute = (
               new Set(
                 attackDocs.hits.hits.map((hit) => hit._id).filter((id): id is string => id != null)
               )
+            );
+
+            const attackSources = attackDocs.hits.hits.map(
+              (hit) => (hit._source ?? {}) as Record<string, unknown>
+            );
+            const attackTagsDelta = computeActualDelta(
+              attackSources,
+              validTagsToAdd,
+              validTagsToRemove,
+              ALERT_WORKFLOW_TAGS
             );
 
             const relatedAlertIds = Array.from(
@@ -187,21 +214,43 @@ export const setAttacksTagsRoute = (
             // the target to the unified index pattern for the cascade update.
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-            // Verify that the related alert IDs still exist in the unified index;
-            // stale/deleted references must not appear in the emitted event payload.
+            // Pre-fetch related alert sources to compute the actual tag delta and verify
+            // they still exist; stale/deleted references must not appear in the payload.
             let verifiedRelatedAlertIds: string[] = [];
+            let relatedTagsDelta = {
+              actualAdded: validTagsToAdd,
+              actualRemoved: validTagsToRemove,
+            };
             if (eventBus && relatedAlertIds.length > 0) {
               try {
                 const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-                verifiedRelatedAlertIds = await verifyAlertIdsInIndex(
+                const relatedHits = await fetchAllAlertIdIndexWithSource(
                   esClient,
                   index,
-                  relatedAlertIds
+                  relatedAlertIds,
+                  [ALERT_WORKFLOW_TAGS]
+                );
+                verifiedRelatedAlertIds = relatedHits.map((h) => h.id);
+                relatedTagsDelta = computeActualDelta(
+                  relatedHits.map((h) => h.source),
+                  validTagsToAdd,
+                  validTagsToRemove,
+                  ALERT_WORKFLOW_TAGS
                 );
               } catch (err) {
-                logger?.warn(
-                  `Failed to verify related alert IDs for workflow trigger (tags): ${err}`
-                );
+                // Fall back to verifyAlertIdsInIndex when source fetch fails.
+                try {
+                  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+                  verifiedRelatedAlertIds = await verifyAlertIdsInIndex(
+                    esClient,
+                    index,
+                    relatedAlertIds
+                  );
+                } catch (innerErr) {
+                  logger?.warn(
+                    `Failed to verify related alert IDs for workflow trigger (tags): ${innerErr}`
+                  );
+                }
               }
             }
 
@@ -209,16 +258,16 @@ export const setAttacksTagsRoute = (
             if (verifiedAttackIds.length > 0) {
               void eventBus?.emitAttackTagsChanged(request, {
                 attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsAdded: validTagsToAdd,
-                tagsRemoved: validTagsToRemove,
+                tagsAdded: attackTagsDelta.actualAdded,
+                tagsRemoved: attackTagsDelta.actualRemoved,
                 truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (verifiedRelatedAlertIds.length > 0) {
               void eventBus?.emitAlertTagsChanged(request, {
                 alertIds: verifiedRelatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsAdded: validTagsToAdd,
-                tagsRemoved: validTagsToRemove,
+                tagsAdded: relatedTagsDelta.actualAdded,
+                tagsRemoved: relatedTagsDelta.actualRemoved,
                 truncated:
                   verifiedRelatedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
