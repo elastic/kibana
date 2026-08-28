@@ -21,9 +21,15 @@ export const attachEventInvestigationToolHandler = async ({
   startedAt: string;
   completedAt?: string;
 }): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
+  const { hits } = await eventClient.findByEventUuid(eventUuid);
+  const event = hits[0];
+  if (!event) {
+    return { event_uuid: eventUuid, updated: 0, ignored: 1 };
+  }
+
   return attachInvestigationToEvent({
     eventClient,
-    eventUuid,
+    eventId: event.event_id,
     investigation: {
       workflow_execution_id: workflowExecutionId,
       started_at: startedAt,

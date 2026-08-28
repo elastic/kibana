@@ -10,6 +10,7 @@ import {
   MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  type TriggerFeedback,
   type SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { attachInvestigationToEvent } from './attach_investigation';
@@ -37,6 +38,26 @@ const createInvestigation = (
   started_at: '2026-01-01T01:00:00.000Z',
   ...overrides,
 });
+
+const feedback = <T extends TriggerFeedback>(update: T): T => update;
+
+const severityFeedback = (from: SignificantEvent['severity'], to: SignificantEvent['severity']) =>
+  feedback({
+    field: 'severity',
+    from,
+    to,
+    reason: 'The investigation established a different severity.',
+    evidence: [{ description: 'Investigation evidence.' }],
+  });
+
+const statusFeedback = (from: SignificantEvent['status'], to: SignificantEvent['status']) =>
+  feedback({
+    field: 'status',
+    from,
+    to,
+    reason: 'The investigation established a different status.',
+    evidence: [{ description: 'Investigation evidence.' }],
+  });
 
 /**
  * @param hits - results returned for the first esql query (findByEventUuid)
@@ -233,7 +254,7 @@ describe('attachInvestigationToEvent', () => {
 
     expect(written.investigations).toHaveLength(2);
     expect(written.investigations![0].workflow_execution_id).toBe('exec-1');
-    expect(written.investigations![0].completed_at).toBeDefined();
+    expect(written.investigations![0].completed_at).toBeUndefined();
     expect(written.investigations![1].workflow_execution_id).toBe('exec-2');
     expect(written.investigations![1].completed_at).toBeUndefined();
   });
@@ -261,7 +282,7 @@ describe('attachInvestigationToEvent', () => {
     // Both entries present; orphaned run resolved with a completed_at, none left running
     expect(written.investigations).toHaveLength(2);
     expect(written.investigations![0].workflow_execution_id).toBe('exec-1');
-    expect(written.investigations![0].completed_at).toBeDefined();
+    expect(written.investigations![0].completed_at).toBeUndefined();
     expect(written.investigations![1].workflow_execution_id).toBe('exec-2');
     expect(written.investigations![1].completed_at).toBe('2026-01-01T02:00:00.000Z');
   });
@@ -297,7 +318,7 @@ describe('attachInvestigationToEvent', () => {
       eventClient: client,
       eventUuid: 'event-1',
       investigation,
-      reassessedFields: { severity: '80-critical' },
+      triggerFeedback: [severityFeedback('40-medium', '80-critical')],
     });
 
     expect(result.updated).toBe(1);
@@ -326,7 +347,7 @@ describe('attachInvestigationToEvent', () => {
       eventClient: client,
       eventUuid: 'event-1',
       investigation,
-      reassessedFields: { severity: '80-critical' },
+      triggerFeedback: [severityFeedback('40-medium', '80-critical')],
     });
 
     expect(result.updated).toBe(1);
@@ -351,7 +372,7 @@ describe('attachInvestigationToEvent', () => {
       eventClient: client,
       eventUuid: 'event-1',
       investigation,
-      reassessedFields: { severity: '40-medium' },
+      triggerFeedback: [severityFeedback('40-medium', '40-medium')],
     });
 
     expect(result.updated).toBe(0);
@@ -410,7 +431,7 @@ describe('attachInvestigationToEvent', () => {
       eventClient: client,
       eventUuid: 'event-1',
       investigation,
-      reassessedFields: { status: 'closed' },
+      triggerFeedback: [statusFeedback('open', 'closed')],
     });
 
     expect(triggerEmitter).toHaveBeenCalledWith(
@@ -428,7 +449,7 @@ describe('attachInvestigationToEvent', () => {
       eventClient: client,
       eventUuid: 'event-1',
       investigation,
-      reassessedFields: { severity: '80-critical' },
+      triggerFeedback: [severityFeedback('40-medium', '80-critical')],
     });
 
     expect(triggerEmitter).not.toHaveBeenCalledWith(

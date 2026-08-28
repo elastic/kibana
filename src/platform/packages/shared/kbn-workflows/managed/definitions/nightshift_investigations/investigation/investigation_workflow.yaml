@@ -53,23 +53,6 @@ steps:
     on-failure:
       continue: true
 
-  # Records a pending investigation on the Significant Event as soon as the workflow starts,
-  # so the UI can show an in-progress indicator before the agent step finishes.
-  # Only runs when a sig-event context was supplied (discovery or chat-agent paths).
-  - name: attach_pending_to_significant_event
-    type: kibana.request
-    if: '${{ inputs.context.event_uuid != null }}'
-    with:
-      method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        workflow_execution_id: '{{ execution.id }}'
-        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-    on-failure:
-      continue: true
-
   - name: investigate
     type: ai.agent
     agent-id: significant-events.investigation
@@ -107,7 +90,7 @@ steps:
 
         You are not investigating a significant event. That is a separate curated entity in
         this product, not another word for an alert that matters, and none is attached here.
-        Skip the step that reassesses a significant event. Omit `significant_event_updates`
+        Skip the step that provides trigger feedback. Omit `trigger_feedback`
         from your output entirely — do not invent severity, summary, or status changes for
         one.
 
@@ -302,16 +285,16 @@ steps:
               required:
                 - title
                 - description
-          significant_event_updates:
+          trigger_feedback:
             type: array
             description: >
-              Optional list of proposed changes to the significant event's fields based on what the
-              investigation established. Each entry targets one field (severity, summary, or status)
+              Optional feedback for the trigger based on what the investigation established. Each
+              entry proposes a change to one significant-event field (severity, summary, or status)
               with a typed from/to, a one-or-two-sentence reason tied to the confirmed findings, and
               1–10 evidence items. Omit entries — or the whole array — for fields that do not need
-              changing. Changes are applied automatically via the attach_to_significant_event step; only
+              changing. The workflow returns this feedback but does not apply it directly; only
               propose what the listed evidence can defend. When no significant-event context was
-              provided (no event_uuid in inputs.context), omit significant_event_updates entirely.
+              provided (no event_uuid in inputs.context), omit trigger_feedback entirely.
             maxItems: 3
             items:
               oneOf:
@@ -686,39 +669,6 @@ steps:
         required:
           - summary
           - hypotheses
-    on-failure:
-      continue: true
-
-  # Connects this investigation back to the Significant Event that triggered it, so the
-  # UI can surface investigation history and link to the full RCA result, and — in the same
-  # append-only version — applies any field changes the agent proposed via
-  # `significant_event_updates` (severity/summary/status). Recording the completed investigation
-  # and its reassessed fields as one write keeps the lifecycle to a single meaningful version
-  # rather than two. Only runs when a sig-event context was supplied (i.e. the investigation was
-  # triggered from discovery or from the chat agent for a specific event). Other callers (free-form
-  # issues, alerts) that do not supply `inputs.context.event_uuid` are unaffected.
-  #
-  # The agent only *proposes* field changes; this deterministic step performs the write. Each
-  # attribute the agent didn't reassess resolves to `undefined` (empty `first`) and is dropped from
-  # the request; proposing the current value is a server-side no-op. `reason`/`evidence` stay in the
-  # `investigate` structured output and are intentionally never forwarded to the event document —
-  # the version records only the changed field values plus this execution's id as the audit trail.
-  # `on-failure: continue` so a failed write never fails the overall workflow run.
-  - name: attach_to_significant_event
-    type: kibana.request
-    if: '${{ inputs.context.event_uuid != null }}'
-    with:
-      method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        workflow_execution_id: '{{ execution.id }}'
-        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-        completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-        severity: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'severity' | map: 'to' | first }}"
-        summary: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'summary' | map: 'to' | first }}"
-        status: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'status' | map: 'to' | first }}"
     on-failure:
       continue: true
 

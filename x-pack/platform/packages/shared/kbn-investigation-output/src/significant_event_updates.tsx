@@ -24,11 +24,11 @@ import { i18n } from '@kbn/i18n';
 import {
   getSeverityLabel,
   type SignificantEventStatus,
-  type SignificantEventUpdate,
+  type TriggerFeedback,
 } from '@kbn/significant-events-schema';
 import { EvidenceList, type EvidenceListProps } from './evidence_list';
 
-const FIELD_LABELS: Record<SignificantEventUpdate['field'], string> = {
+const FIELD_LABELS: Record<TriggerFeedback['field'], string> = {
   severity: i18n.translate('xpack.investigationOutput.update.field.severity', {
     defaultMessage: 'Severity',
   }),
@@ -54,7 +54,7 @@ const STATUS_LABELS: Record<SignificantEventStatus, string> = {
  * Old/new values as a badge transition, typed per field. Returns `null` for the `summary` field
  * (long free text, rendered as stacked blocks instead of badges).
  */
-const badgeLabels = (update: SignificantEventUpdate): { from: string; to: string } | null => {
+const badgeLabels = (update: TriggerFeedback): { from: string; to: string } | null => {
   switch (update.field) {
     case 'severity':
       return { from: getSeverityLabel(update.from), to: getSeverityLabel(update.to) };
@@ -65,8 +65,8 @@ const badgeLabels = (update: SignificantEventUpdate): { from: string; to: string
   }
 };
 
-const SignificantEventUpdateRow: React.FC<{
-  update: SignificantEventUpdate;
+const TriggerFeedbackRow: React.FC<{
+  update: TriggerFeedback;
   getQueryHref?: EvidenceListProps['getQueryHref'];
 }> = ({ update, getQueryHref }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationSignificantEventUpdateEvidence' });
@@ -74,7 +74,7 @@ const SignificantEventUpdateRow: React.FC<{
   const badges = badgeLabels(update);
 
   return (
-    <EuiFlexItem grow={false} data-test-subj={`investigationSignificantEventUpdate-${field}`}>
+    <EuiFlexItem grow={false} data-test-subj={`investigationTriggerFeedback-${field}`}>
       <EuiText size="xs" color="text">
         <strong>{FIELD_LABELS[field]}</strong>
       </EuiText>
@@ -135,12 +135,12 @@ const SignificantEventUpdateRow: React.FC<{
 };
 
 /**
- * Read-only display of the field changes an investigation proposed for the significant event
- * (`significant_event_updates` in the investigation state). Intentionally minimal — the caller
- * decides when to render it (e.g. only once the investigation is complete).
+ * Read-only display of the field changes an investigation proposed as trigger feedback
+ * (`trigger_feedback` in the investigation state). Intentionally minimal — the caller decides
+ * when to render it (e.g. only once the investigation is complete).
  */
-export const SignificantEventUpdates: React.FC<{
-  updates: SignificantEventUpdate[];
+export const TriggerFeedback: React.FC<{
+  updates: TriggerFeedback[];
   getQueryHref?: EvidenceListProps['getQueryHref'];
 }> = ({ updates, getQueryHref }) => {
   const { euiTheme } = useEuiTheme();
@@ -150,7 +150,7 @@ export const SignificantEventUpdates: React.FC<{
       hasShadow={false}
       color="subdued"
       paddingSize="m"
-      data-test-subj="investigationSignificantEventUpdates"
+      data-test-subj="investigationTriggerFeedback"
       css={css`
         margin: ${euiTheme.size.base};
       `}
@@ -158,14 +158,14 @@ export const SignificantEventUpdates: React.FC<{
       <EuiTitle size="xxs">
         <h4>
           {i18n.translate('xpack.investigationOutput.update.title', {
-            defaultMessage: 'Significant event updates',
+            defaultMessage: 'Trigger feedback',
           })}
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column" gutterSize="m">
         {updates.map((update, index) => (
-          <SignificantEventUpdateRow
+          <TriggerFeedbackRow
             key={`${update.field}-${index}`}
             update={update}
             getQueryHref={getQueryHref}
