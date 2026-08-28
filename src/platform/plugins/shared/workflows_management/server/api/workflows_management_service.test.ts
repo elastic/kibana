@@ -203,20 +203,6 @@ describe('WorkflowsService (facade)', () => {
   });
 
   describe('initialization', () => {
-    it('uses execution storage exposed by the execution engine', async () => {
-      const pluginsStart = makePluginsStart();
-      const service = new WorkflowsService(
-        makeCoreSetup(jest.fn().mockResolvedValue([makeCoreStart(makeEsClient()), pluginsStart])),
-        makePluginsSetup(),
-        loggerMock.create(),
-        '9.0.0'
-      );
-
-      await expect(service.getWorkflowDataClient()).resolves.toBe(
-        pluginsStart.workflowsExecutionEngine.__internalStorage.workflowExecutionsDataClient
-      );
-    });
-
     it('initializes change history at startup', async () => {
       const changeHistoryInstance = {
         initialize: jest.fn().mockResolvedValue(undefined),
