@@ -54,7 +54,7 @@ describe('HydrateEpisodeDataStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toEqual({ host: 'server-01', count: 3 });
+    expect(result.data?.triage?.dispatchable[0].data).toEqual({ host: 'server-01', count: 3 });
   });
 
   it('un-flattens dot-separated keys in data_json', async () => {
@@ -75,7 +75,7 @@ describe('HydrateEpisodeDataStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toEqual({
+    expect(result.data?.triage?.dispatchable[0].data).toEqual({
       host: { name: 'srv-01', ip: '10.0.0.1' },
     });
   });
@@ -96,7 +96,7 @@ describe('HydrateEpisodeDataStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toEqual({});
+    expect(result.data?.triage?.dispatchable[0].data).toEqual({});
   });
 
   it('leaves data undefined when the hydration query returns no row for an episode', async () => {
@@ -113,7 +113,7 @@ describe('HydrateEpisodeDataStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toBeUndefined();
+    expect(result.data?.triage?.dispatchable[0].data).toBeUndefined();
     expect(mockLogger.warn).toHaveBeenCalled();
   });
 
@@ -133,7 +133,7 @@ describe('HydrateEpisodeDataStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toBeUndefined();
+    expect(result.data?.triage?.dispatchable[0].data).toBeUndefined();
   });
 
   it('derives range bounds from min/max last_event_timestamp across all episodes', async () => {
@@ -194,8 +194,8 @@ describe('HydrateEpisodeDataStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatchable?.[0].data).toEqual({ x: 1 });
-    expect(result.data?.dispatchable?.[1].data).toEqual({ y: 2 });
+    expect(result.data?.triage?.dispatchable[0].data).toEqual({ x: 1 });
+    expect(result.data?.triage?.dispatchable[1].data).toEqual({ y: 2 });
   });
 
   it('concatenates results from multiple chunks', async () => {
@@ -224,8 +224,8 @@ describe('HydrateEpisodeDataStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    const ep1 = result.data?.dispatchable?.find((e) => e.episode_id === longId1);
-    const ep2 = result.data?.dispatchable?.find((e) => e.episode_id === longId2);
+    const ep1 = result.data?.triage?.dispatchable.find((e) => e.episode_id === longId1);
+    const ep2 = result.data?.triage?.dispatchable.find((e) => e.episode_id === longId2);
     expect(ep1?.data).toEqual({ c: 1 });
     expect(ep2?.data).toEqual({ d: 2 });
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
