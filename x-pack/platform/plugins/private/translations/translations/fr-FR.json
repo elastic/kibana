@@ -5706,7 +5706,6 @@
     "indexPatternManagement.editDataView.fields.table.runtimeIconTipText": "Ce champ existe uniquement dans la vue de données.",
     "indexPatternManagement.editDataView.refreshAria": "Actualiser",
     "indexPatternManagement.editDataView.refreshTooltip": "Actualiser la copie locale de la liste des champs de vues de données",
-    "indexPatternManagement.editDataView.removeAria": "Supprimer la vue de données.",
     "indexPatternManagement.editDataView.removeTooltip": "Supprimer la vue de données",
     "indexPatternManagement.editDataView.scripted.noFieldLabel": "La vue de données \"{dataViewTitle}\" ne possède pas de champ scripté nommé \"{fieldName}\"",
     "indexPatternManagement.editDataView.setDefaultTooltip": "Définir par défaut",

@@ -5722,7 +5722,6 @@
     "indexPatternManagement.editDataView.fields.table.runtimeIconTipText": "このフィールドはデータビューにのみ存在します。",
     "indexPatternManagement.editDataView.refreshAria": "更新",
     "indexPatternManagement.editDataView.refreshTooltip": "データビューフィールドリストのローカルコピーを更新",
-    "indexPatternManagement.editDataView.removeAria": "データビューを削除します。",
     "indexPatternManagement.editDataView.removeTooltip": "データビューを削除",
     "indexPatternManagement.editDataView.scripted.noFieldLabel": "''{dataViewTitle}''データビューには、スクリプト化されたフィールド''{fieldName}''がありません",
     "indexPatternManagement.editDataView.setDefaultTooltip": "デフォルトに設定",

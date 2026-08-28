@@ -5706,7 +5706,6 @@
     "indexPatternManagement.editDataView.fields.table.runtimeIconTipText": "Dieses Feld existiert nur in der Datenquelle.",
     "indexPatternManagement.editDataView.refreshAria": "Aktualisieren",
     "indexPatternManagement.editDataView.refreshTooltip": "Lokale Kopie der Datenquellen-Feldliste aktualisieren",
-    "indexPatternManagement.editDataView.removeAria": "Datenquelle löschen.",
     "indexPatternManagement.editDataView.removeTooltip": "Data View löschen",
     "indexPatternManagement.editDataView.scripted.noFieldLabel": "Die Datenquelle „{dataViewTitle}“ hat kein geskriptetes Feld namens „{fieldName}“",
     "indexPatternManagement.editDataView.setDefaultTooltip": "Als Standard festlegen",

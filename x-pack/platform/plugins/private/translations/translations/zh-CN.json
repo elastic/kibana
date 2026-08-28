@@ -5725,7 +5725,6 @@
     "indexPatternManagement.editDataView.fields.table.runtimeIconTipText": "此字段仅在数据视图上存在。",
     "indexPatternManagement.editDataView.refreshAria": "刷新",
     "indexPatternManagement.editDataView.refreshTooltip": "刷新数据视图字段列表的本地副本",
-    "indexPatternManagement.editDataView.removeAria": "删除数据视图。",
     "indexPatternManagement.editDataView.removeTooltip": "删除数据视图",
     "indexPatternManagement.editDataView.scripted.noFieldLabel": "“{dataViewTitle}”数据视图没有称作“{fieldName}”的脚本字段",
     "indexPatternManagement.editDataView.setDefaultTooltip": "设置为默认值",
