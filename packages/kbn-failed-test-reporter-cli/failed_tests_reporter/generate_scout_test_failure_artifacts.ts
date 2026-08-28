@@ -36,9 +36,11 @@ const loadGithubIssues = (dirPath: string): Record<string, ScoutGithubIssueDetai
 export async function generateScoutTestFailureArtifacts({
   log,
   bkMeta,
+  alertSlack = true,
 }: {
   log: ToolingLog;
   bkMeta: BuildkiteMetadata;
+  alertSlack?: boolean;
 }) {
   log.info('Searching for Scout test failure reports');
 
@@ -86,6 +88,7 @@ export async function generateScoutTestFailureArtifacts({
           url: bkMeta.url,
           jobUrl: bkMeta.jobUrl,
           jobName: bkMeta.jobName,
+          ...(!alertSlack ? { alertSlack: false } : {}),
           ...(githubIssue ? { githubIssue } : {}),
           ...(failureCount !== undefined ? { failureCount } : {}),
         },
