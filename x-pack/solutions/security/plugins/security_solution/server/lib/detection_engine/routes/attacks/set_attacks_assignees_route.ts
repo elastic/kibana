@@ -207,9 +207,15 @@ export const setAttacksAssigneesRoute = (
               },
             });
 
-            // Emit only attack IDs that would actually change; deduplicate across families.
-            // Use the full valid arrays (not capped) so over-cap operations that would
-            // actually change a document are not excluded from the mutation's ID list.
+            // All found attack IDs drive the mutation; deduplicate across families.
+            // Length-filtered (allValid*) arrays must not control which attacks are mutated:
+            // updateAlertsAssignees applies the original request assignees regardless of length.
+            const allFoundAttackIds = Array.from(
+              new Set(
+                attackDocs.hits.hits.map((hit) => hit._id).filter((id): id is string => id != null)
+              )
+            );
+            // Trigger emission uses only IDs that would actually change per the valid arrays.
             const verifiedAttackIds = Array.from(
               new Set(
                 attackDocs.hits.hits
@@ -246,7 +252,7 @@ export const setAttacksAssigneesRoute = (
               )
             );
 
-            const combinedIds = Array.from(new Set([...verifiedAttackIds, ...relatedAlertIds]));
+            const combinedIds = Array.from(new Set([...allFoundAttackIds, ...relatedAlertIds]));
 
             // Related detection alerts live outside the attack indices, so expand
             // the target to the unified index pattern for the cascade update.

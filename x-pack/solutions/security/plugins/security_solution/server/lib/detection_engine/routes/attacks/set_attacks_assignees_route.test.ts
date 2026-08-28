@@ -25,7 +25,10 @@ import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksAssigneesRoute } from './set_attacks_assignees_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { MAX_ASSIGNEES_PER_OPERATION } from '../../../../../common/workflows/triggers';
+import {
+  MAX_ASSIGNEE_UID_LENGTH,
+  MAX_ASSIGNEES_PER_OPERATION,
+} from '../../../../../common/workflows/triggers';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -594,6 +597,48 @@ describe('set attacks assignees', () => {
           attackIds: ['attack1'],
           assigneesAdded: [],
           truncated: true,
+        })
+      );
+    });
+
+    test('cascade: includes attack in mutation when all requested assignees exceed MAX_ASSIGNEE_UID_LENGTH', async () => {
+      // Encoding WHY: allValidAssigneesToAdd filters out over-length UIDs, but
+      // updateAlertsAssignees applies the original request. If allValid* controls combinedIds,
+      // a request with only over-length UIDs produces an empty verifiedAttackIds and the attack
+      // is omitted from the mutation while its related alerts are still updated — an
+      // inconsistency. The fix builds combinedIds from allFoundAttackIds so the attack is
+      // always mutated when it exists in the index.
+      const overLengthUid = 'x'.repeat(MAX_ASSIGNEE_UID_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: {
+                [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: [],
+                [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
+              },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          assignees: { add: [overLengthUid], remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { bool: { filter: { terms: { _id: ['attack1'] } } } },
         })
       );
     });
