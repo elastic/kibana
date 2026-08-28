@@ -5,52 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiButton, EuiPanel, EuiText } from '@elastic/eui';
+import React from 'react';
+import { EuiButton, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { getFormattedError } from '../../../../util/errors';
-
-interface CleanupStaleEventsResponse {
-  scanned: number;
-  closed: number;
-  kept: number;
-  skipped: number;
-}
+import { useCleanupStaleEvents } from '../../../../hooks/use_cleanup_stale_events';
 
 export function StaleEventCleanupSection({ canManage }: { canManage: boolean }) {
-  const { core } = useKibana();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const cleanup = async () => {
-    setIsLoading(true);
-    try {
-      const result = await core.http.post<CleanupStaleEventsResponse>(
-        '/internal/significant_events/events/_cleanup'
-      );
-      core.notifications.toasts.addSuccess({
-        title:
-          result.closed === 0
-            ? i18n.translate(
-                'xpack.significantEventsApp.settings.staleEventCleanup.noEventsTitle',
-                { defaultMessage: 'No stale events found' }
-              )
-            : i18n.translate('xpack.significantEventsApp.settings.staleEventCleanup.successTitle', {
-                defaultMessage:
-                  '{count, plural, one {Closed # stale event} other {Closed # stale events}}',
-                values: { count: result.closed },
-              }),
-      });
-    } catch (error) {
-      core.notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.significantEventsApp.settings.staleEventCleanup.errorTitle', {
-          defaultMessage: 'Failed to clean up stale events',
-        }),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { cleanupStaleEvents, isCleaningUp } = useCleanupStaleEvents();
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
@@ -72,11 +33,13 @@ export function StaleEventCleanupSection({ canManage }: { canManage: boolean }) 
             })}
           </p>
         </EuiText>
+        <EuiSpacer />
         <EuiButton
           data-test-subj="streams-settings-stale-event-cleanup-button"
-          isLoading={isLoading}
-          isDisabled={!canManage || isLoading}
-          onClick={cleanup}
+          iconType="broom"
+          isLoading={isCleaningUp}
+          isDisabled={!canManage || isCleaningUp}
+          onClick={cleanupStaleEvents}
         >
           {i18n.translate('xpack.significantEventsApp.settings.staleEventCleanup.buttonLabel', {
             defaultMessage: 'Clean up stale events',

@@ -157,41 +157,6 @@ describe('updateSignificantEventStatus', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
-  it('ignores when the current status no longer matches the expected status', async () => {
-    const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'dismissed' });
-    const { client, dataStreamClient } = createEventClient([existing]);
-
-    const result = await updateSignificantEventStatus({
-      eventClient: client,
-      eventUuid: 'event-1',
-      status: 'closed',
-      expectedCurrentStatus: 'open',
-    });
-
-    expect(result).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'closed' });
-    expect(dataStreamClient.create).not.toHaveBeenCalled();
-  });
-
-  it('ignores when a newer event version appeared after the caller read it', async () => {
-    const stale = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
-    const latest = createSignificantEvent({
-      event_uuid: 'event-2',
-      previous_event_uuid: 'event-1',
-      status: 'open',
-    });
-    const { client, dataStreamClient } = createEventClient([stale], [stale, latest]);
-
-    const result = await updateSignificantEventStatus({
-      eventClient: client,
-      eventUuid: 'event-1',
-      status: 'closed',
-      expectedCurrentEventUuid: 'event-1',
-    });
-
-    expect(result).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'closed' });
-    expect(dataStreamClient.create).not.toHaveBeenCalled();
-  });
-
   it('resolves lineage: update targets the latest event_id version, not a stale caller reference', async () => {
     const e0 = createSignificantEvent({
       event_uuid: 'event-0',

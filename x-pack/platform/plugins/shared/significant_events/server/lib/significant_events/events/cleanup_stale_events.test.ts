@@ -77,8 +77,6 @@ describe('cleanupStaleEvents', () => {
       eventUuid: 'stale-event',
       status: 'closed',
       assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
-      expectedCurrentStatus: 'open',
-      expectedCurrentEventUuid: 'stale-event',
     });
   });
 

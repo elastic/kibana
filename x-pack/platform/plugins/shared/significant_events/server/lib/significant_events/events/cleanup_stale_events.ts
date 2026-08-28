@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { EventClient } from './event_client';
@@ -12,8 +13,12 @@ import { updateSignificantEventStatus } from './update_event_status';
 
 const EVENTS_PAGE_SIZE = 1000;
 
-export const STALE_EVENT_ASSESSMENT_NOTE =
-  'Automatically closed because none of its backing rules exist.';
+export const STALE_EVENT_ASSESSMENT_NOTE = i18n.translate(
+  'xpack.significantEvents.staleEventCleanup.assessmentNoteDescription',
+  {
+    defaultMessage: 'Automatically closed because none of its backing rules exist.',
+  }
+);
 
 export interface CleanupStaleEventsResult {
   scanned: number;
@@ -30,6 +35,39 @@ const getBackingRuleIds = (event: SignificantEventResponse): string[] => [
   ),
 ];
 
+const collectOpenEvents = async ({
+  eventClient,
+  ruleUuids,
+}: {
+  eventClient: EventClient;
+  ruleUuids?: string[];
+}): Promise<SignificantEventResponse[]> => {
+  const events: SignificantEventResponse[] = [];
+  let page = 1;
+  let total = 0;
+
+  do {
+    const result = await eventClient.findLatestByCurrentStatePaginated({
+      status: ['open'],
+      ruleUuids,
+      page,
+      perPage: EVENTS_PAGE_SIZE,
+    });
+    events.push(...result.hits);
+    total = result.total;
+    page += 1;
+    if (result.hits.length === 0) {
+      break;
+    }
+  } while (events.length < total);
+
+  return events;
+};
+
+/**
+ * Cleans open events for the provided rule IDs; omitting them scans all open events, while an
+ * empty array is a no-op.
+ */
 export const cleanupStaleEvents = async ({
   eventClient,
   rulesClient,
@@ -47,24 +85,10 @@ export const cleanupStaleEvents = async ({
     return { scanned: 0, closed: 0, kept: 0, skipped: 0 };
   }
 
-  const events: SignificantEventResponse[] = [];
-  let page = 1;
-  let total = 0;
-
-  do {
-    const result = await eventClient.findLatestByCurrentStatePaginated({
-      status: ['open'],
-      ruleUuids: uniqueCandidateRuleIds,
-      page,
-      perPage: EVENTS_PAGE_SIZE,
-    });
-    events.push(...result.hits);
-    total = result.total;
-    page += 1;
-    if (result.hits.length === 0) {
-      break;
-    }
-  } while (events.length < total);
+  const events = await collectOpenEvents({
+    eventClient,
+    ruleUuids: uniqueCandidateRuleIds,
+  });
 
   const eventsWithRuleIds = events.map((event) => ({
     event,
@@ -89,8 +113,6 @@ export const cleanupStaleEvents = async ({
       eventUuid: event.event_uuid,
       status: 'closed',
       assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
-      expectedCurrentStatus: 'open',
-      expectedCurrentEventUuid: event.event_uuid,
     });
     closed += result.updated;
   }

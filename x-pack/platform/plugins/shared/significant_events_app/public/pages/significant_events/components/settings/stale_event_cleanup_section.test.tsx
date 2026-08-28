@@ -8,42 +8,55 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { StaleEventCleanupSection } from './stale_event_cleanup_section';
 
 jest.mock('../../../../hooks/use_kibana');
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const post = jest.fn();
+const fetch = jest.fn();
 const addSuccess = jest.fn();
 const addError = jest.fn();
 
-const renderSection = (canManage = true) =>
-  render(
-    <I18nProvider>
-      <StaleEventCleanupSection canManage={canManage} />
-    </I18nProvider>
+const renderSection = (canManage = true) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <StaleEventCleanupSection canManage={canManage} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
+};
 
 describe('StaleEventCleanupSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock.mockReturnValue({
       core: {
-        http: { post },
         notifications: { toasts: { addSuccess, addError } },
+      },
+      dependencies: {
+        start: {
+          significantEvents: { significantEventsRepositoryClient: { fetch } },
+        },
       },
     } as never);
   });
 
   it('runs cleanup and reports the number of closed events', async () => {
-    post.mockResolvedValue({ scanned: 3, closed: 2, kept: 1, skipped: 0 });
+    fetch.mockResolvedValue({ scanned: 3, closed: 2, kept: 1, skipped: 0 });
     renderSection();
 
     fireEvent.click(screen.getByTestId('streams-settings-stale-event-cleanup-button'));
 
     await waitFor(() => {
-      expect(post).toHaveBeenCalledWith('/internal/significant_events/events/_cleanup');
+      expect(fetch).toHaveBeenCalledWith('POST /internal/significant_events/events/_cleanup', {
+        signal: null,
+      });
       expect(addSuccess).toHaveBeenCalledWith({ title: 'Closed 2 stale events' });
     });
   });
@@ -55,8 +68,9 @@ describe('StaleEventCleanupSection', () => {
   });
 
   it('keeps the action loading until cleanup settles and reports failures', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     let rejectRequest: (error: Error) => void = () => undefined;
-    post.mockReturnValue(
+    fetch.mockReturnValue(
       new Promise((_, reject) => {
         rejectRequest = reject;
       })
@@ -65,10 +79,11 @@ describe('StaleEventCleanupSection', () => {
 
     const button = screen.getByTestId('streams-settings-stale-event-cleanup-button');
     fireEvent.click(button);
-    expect(button).toBeDisabled();
+    await waitFor(() => expect(button).toBeDisabled());
 
     rejectRequest(new Error('cleanup failed'));
     await waitFor(() => expect(addError).toHaveBeenCalled());
     expect(button).toBeEnabled();
+    consoleErrorSpy.mockRestore();
   });
 });
