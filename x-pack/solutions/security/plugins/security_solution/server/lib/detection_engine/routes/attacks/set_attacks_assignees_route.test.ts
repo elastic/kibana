@@ -11,6 +11,7 @@ import {
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
   ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
 } from '@kbn/elastic-assistant-common';
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 
@@ -139,7 +140,7 @@ describe('set attacks assignees', () => {
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: [SCHEDULED_INDEX, ADHOC_INDEX],
-          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS],
+          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_ASSIGNEE_IDS],
         })
       );
     });
@@ -441,6 +442,99 @@ describe('set attacks assignees', () => {
       );
       await new Promise((r) => setTimeout(r, 0));
       expect(mockEventBus.emitAttackAssigneesChanged).not.toHaveBeenCalled();
+    });
+
+    test('cascade: computes independent deltas — attack emit and alert emit use their own prefetched sources', async () => {
+      // Encoding WHY: attack doc already has 'attack-uid'; related alert already has 'alert-uid'.
+      // Each emit must use the delta from its own prefetched sources, not a shared delta.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: {
+                [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: ['alertA'],
+                [ALERT_WORKFLOW_ASSIGNEE_IDS]: ['attack-uid'],
+              },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      // fetchAllAlertIdIndexWithSource (related alert sources)
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'alertA',
+              _index: DETECTION_ALERTS_INDEX,
+              _source: { [ALERT_WORKFLOW_ASSIGNEE_IDS]: ['alert-uid'] },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          assignees: { add: ['attack-uid', 'alert-uid', 'new-uid'], remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      // attack-uid already on attack1 → filtered from attack emit; present in alertA? No → kept
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ assigneesAdded: ['alert-uid', 'new-uid'], assigneesRemoved: [] })
+      );
+      // alert-uid already on alertA → filtered from alert emit; present in attack1? No → kept
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ assigneesAdded: ['attack-uid', 'new-uid'], assigneesRemoved: [] })
+      );
+    });
+
+    test('computes actual delta — filters already-present assignees from assigneesAdded in non-cascade', async () => {
+      // Encoding WHY: the event must not report 'existing-uid' as added because attack1
+      // already has it. Only 'new-uid' is genuinely absent and should appear in assigneesAdded.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: { [ALERT_WORKFLOW_ASSIGNEE_IDS]: ['existing-uid'] },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          assignees: { add: ['existing-uid', 'new-uid'], remove: [] },
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ assigneesAdded: ['new-uid'], assigneesRemoved: [] })
+      );
     });
   });
 });

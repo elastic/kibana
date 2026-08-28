@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { getSetAlertAssigneesRequestMock } from '../../../../../common/api/detection_engine/alert_assignees/mocks';
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../../common/constants';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
@@ -133,6 +134,23 @@ describe('setAlertAssigneesRoute', () => {
       server = serverMock.create();
       mockEventBus = { emitAlertAssigneesChanged: jest.fn() };
       setAlertAssigneesRoute(server.router, mockEventBus as unknown as SecuritySolutionEventBus);
+      // alert-1 has no current assignees, so adding 'user-1' would change it.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'alert-1',
+              _index: '.alerts-security.alerts-default-default',
+              _source: { 'kibana.alert.workflow_assignee_ids': [] },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
+        },
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as estypes.SearchResponse);
     });
 
     test('emits alertAssigneesChanged after a successful update', async () => {
@@ -163,6 +181,38 @@ describe('setAlertAssigneesRoute', () => {
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
       expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
+    });
+
+    test('computes actual delta — only emits assignees that would change at least one document', async () => {
+      // Encoding WHY: the event must not report 'existing-uid' as added because alert-1
+      // already has it; only 'new-uid' is genuinely absent and should appear in assigneesAdded.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'alert-1',
+              _index: '.alerts-security.alerts-default-default',
+              _source: { 'kibana.alert.workflow_assignee_ids': ['existing-uid'] },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
+        },
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as estypes.SearchResponse);
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
+        body: getSetAlertAssigneesRequestMock(['existing-uid', 'new-uid'], [], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ assigneesAdded: ['new-uid'], assigneesRemoved: [] })
+      );
     });
   });
 });

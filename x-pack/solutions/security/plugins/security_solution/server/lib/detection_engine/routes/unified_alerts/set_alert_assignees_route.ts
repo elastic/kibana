@@ -31,6 +31,7 @@ import {
 import {
   fetchAllAlertIdIndexWithSource,
   collectChangedIdsByFamily,
+  computeActualDelta,
 } from '../common/operations/prefetch_previous_statuses';
 
 export const setUnifiedAlertsAssigneesRoute = (
@@ -92,6 +93,10 @@ export const setUnifiedAlertsAssigneesRoute = (
           allValidAssigneesToAdd.length > MAX_ASSIGNEES_PER_OPERATION ||
           allValidAssigneesToRemove.length > MAX_ASSIGNEES_PER_OPERATION;
 
+        // Falls back to the requested arrays if the prefetch fails.
+        let assigneesActuallyAdded = validAssigneesToAdd;
+        let assigneesActuallyRemoved = validAssigneesToRemove;
+
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -114,6 +119,14 @@ export const setUnifiedAlertsAssigneesRoute = (
                 allValidAssigneesToRemove.some((uid) => currentAssignees.has(uid))
               );
             }));
+            const delta = computeActualDelta(
+              hits.map((h) => h.source),
+              validAssigneesToAdd,
+              validAssigneesToRemove,
+              ALERT_WORKFLOW_ASSIGNEE_IDS
+            );
+            assigneesActuallyAdded = delta.actualAdded;
+            assigneesActuallyRemoved = delta.actualRemoved;
           } catch {
             logger.warn('Failed to pre-fetch alert indices for workflow trigger (assignees)');
           }
@@ -125,16 +138,16 @@ export const setUnifiedAlertsAssigneesRoute = (
             if (attackIds.length > 0) {
               void eventBus.emitAttackAssigneesChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesAdded: validAssigneesToAdd,
-                assigneesRemoved: validAssigneesToRemove,
+                assigneesAdded: assigneesActuallyAdded,
+                assigneesRemoved: assigneesActuallyRemoved,
                 truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertAssigneesChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesAdded: validAssigneesToAdd,
-                assigneesRemoved: validAssigneesToRemove,
+                assigneesAdded: assigneesActuallyAdded,
+                assigneesRemoved: assigneesActuallyRemoved,
                 truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }

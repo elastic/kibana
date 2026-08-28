@@ -10,6 +10,7 @@ import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { SetAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -25,6 +26,10 @@ import {
   MAX_ALERTS_PER_TRIGGER,
   MAX_TAGS_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
+import {
+  fetchAllAlertIdIndexWithSource,
+  computeActualDelta,
+} from '../common/operations/prefetch_previous_statuses';
 
 export const setAlertTagsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -71,12 +76,37 @@ export const setAlertTagsRoute = (
         const operationTruncated =
           tags.tags_to_add.length > MAX_TAGS_PER_OPERATION ||
           tags.tags_to_remove.length > MAX_TAGS_PER_OPERATION;
+
+        const cappedTagsToAdd = tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION);
+        const cappedTagsToRemove = tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION);
+        // Falls back to the requested arrays if the prefetch fails.
+        let tagsActuallyAdded = cappedTagsToAdd;
+        let tagsActuallyRemoved = cappedTagsToRemove;
+        if (eventBus) {
+          try {
+            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
+              ALERT_WORKFLOW_TAGS,
+            ]);
+            const delta = computeActualDelta(
+              hits.map((h) => h.source),
+              cappedTagsToAdd,
+              cappedTagsToRemove,
+              ALERT_WORKFLOW_TAGS
+            );
+            tagsActuallyAdded = delta.actualAdded;
+            tagsActuallyRemoved = delta.actualRemoved;
+          } catch {
+            // prefetch failure is non-blocking; emit with requested arrays as fallback
+          }
+        }
+
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsTags({ context, index, ids, tags });
           void eventBus?.emitAlertTagsChanged(request, {
             alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-            tagsAdded: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
-            tagsRemoved: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
+            tagsAdded: tagsActuallyAdded,
+            tagsRemoved: tagsActuallyRemoved,
             truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
           });
           return result;

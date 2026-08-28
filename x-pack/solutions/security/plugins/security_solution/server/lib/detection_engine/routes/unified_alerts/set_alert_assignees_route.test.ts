@@ -551,5 +551,33 @@ describe('set unified alerts assignees', () => {
         expect.objectContaining({ truncated: true })
       );
     });
+
+    test('computes actual delta — filters already-present assignees from assigneesAdded', async () => {
+      // Encoding WHY: the event must not report 'existing-uid' as added because alert-1
+      // already has it. Only 'new-uid' is genuinely absent and should appear in assigneesAdded.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': ['existing-uid'] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1'],
+          assignees: { add: ['existing-uid', 'new-uid'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ assigneesAdded: ['new-uid'], assigneesRemoved: [] })
+      );
+    });
   });
 });

@@ -10,6 +10,7 @@ import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -25,6 +26,10 @@ import {
   MAX_ALERTS_PER_TRIGGER,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
+import {
+  fetchAllAlertIdIndexWithSource,
+  computeActualDelta,
+} from '../common/operations/prefetch_previous_statuses';
 
 export const setAlertAssigneesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -67,12 +72,37 @@ export const setAlertAssigneesRoute = (
         const operationTruncated =
           assignees.add.length > MAX_ASSIGNEES_PER_OPERATION ||
           assignees.remove.length > MAX_ASSIGNEES_PER_OPERATION;
+
+        const cappedAssigneesToAdd = assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION);
+        const cappedAssigneesToRemove = assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION);
+        // Falls back to the requested arrays if the prefetch fails.
+        let assigneesActuallyAdded = cappedAssigneesToAdd;
+        let assigneesActuallyRemoved = cappedAssigneesToRemove;
+        if (eventBus) {
+          try {
+            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
+              ALERT_WORKFLOW_ASSIGNEE_IDS,
+            ]);
+            const delta = computeActualDelta(
+              hits.map((h) => h.source),
+              cappedAssigneesToAdd,
+              cappedAssigneesToRemove,
+              ALERT_WORKFLOW_ASSIGNEE_IDS
+            );
+            assigneesActuallyAdded = delta.actualAdded;
+            assigneesActuallyRemoved = delta.actualRemoved;
+          } catch {
+            // prefetch failure is non-blocking; emit with requested arrays as fallback
+          }
+        }
+
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsAssignees({ context, index, ids, assignees });
           void eventBus?.emitAlertAssigneesChanged(request, {
             alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-            assigneesAdded: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-            assigneesRemoved: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+            assigneesAdded: assigneesActuallyAdded,
+            assigneesRemoved: assigneesActuallyRemoved,
             truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
           });
           return result;

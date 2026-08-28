@@ -13,6 +13,7 @@ import { MAX_ALERTS_PER_TRIGGER } from '../../../../../../common/workflows/trigg
 import {
   collectChangedIdsByFamily,
   collectStatusTransitions,
+  computeActualDelta,
   extractWorkflowStatus,
   fetchAlertIdToIndex,
   fetchAlertIdIndexWithSource,
@@ -990,5 +991,54 @@ describe('collectChangedIdsByFamily', () => {
       changed
     );
     expect(result.attackIds).toEqual(['dup', 'unique']);
+  });
+});
+
+describe('computeActualDelta', () => {
+  const FIELD = 'kibana.alert.workflow_tags';
+
+  it('returns empty arrays when sources is empty — no docs means no changes occurred', () => {
+    // No prefetched docs → no document had the tag absent/present → delta is empty.
+    const { actualAdded, actualRemoved } = computeActualDelta([], ['a', 'b'], ['c'], FIELD);
+    expect(actualAdded).toEqual([]);
+    expect(actualRemoved).toEqual([]);
+  });
+
+  it('filters out tags already present on all documents from actualAdded', () => {
+    // 'a' is already on the doc → should not appear in actualAdded; 'b' is absent → should.
+    const { actualAdded } = computeActualDelta([{ [FIELD]: ['a'] }], ['a', 'b'], [], FIELD);
+    expect(actualAdded).toEqual(['b']);
+  });
+
+  it('includes a tag in actualAdded if it is absent from at least one document', () => {
+    // Two docs: first has 'a', second does not → 'a' is absent from at least one doc → emit it.
+    const { actualAdded } = computeActualDelta(
+      [{ [FIELD]: ['a'] }, { [FIELD]: [] }],
+      ['a'],
+      [],
+      FIELD
+    );
+    expect(actualAdded).toEqual(['a']);
+  });
+
+  it('includes a tag in actualRemoved only if at least one document has it', () => {
+    // Doc has 'x' but not 'y' → only 'x' is genuinely removable.
+    const { actualRemoved } = computeActualDelta([{ [FIELD]: ['x'] }], [], ['x', 'y'], FIELD);
+    expect(actualRemoved).toEqual(['x']);
+  });
+
+  it('returns empty actualAdded when all requestedToAdd tags are on every document', () => {
+    const { actualAdded } = computeActualDelta(
+      [{ [FIELD]: ['a', 'b'] }, { [FIELD]: ['a', 'b'] }],
+      ['a', 'b'],
+      [],
+      FIELD
+    );
+    expect(actualAdded).toEqual([]);
+  });
+
+  it('preserves the original order of the requestedToAdd array in the output', () => {
+    const { actualAdded } = computeActualDelta([{ [FIELD]: [] }], ['z', 'a', 'm'], [], FIELD);
+    expect(actualAdded).toEqual(['z', 'a', 'm']);
   });
 });

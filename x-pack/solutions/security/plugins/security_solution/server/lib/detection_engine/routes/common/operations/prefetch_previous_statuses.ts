@@ -414,6 +414,40 @@ export const fetchAllAlertIdIndexWithSource = async (
   return allPairs;
 };
 
+/**
+ * Given a list of document sources fetched before an update, computes which items from
+ * the requested add/remove lists would actually change at least one document.
+ *
+ * `actualAdded` = items in `requestedToAdd` that are absent from at least one source
+ * `actualRemoved` = items in `requestedToRemove` that are present in at least one source
+ *
+ * Preserves the order of the requested arrays so downstream caps remain stable.
+ */
+export const computeActualDelta = (
+  sources: Array<Record<string, unknown>>,
+  requestedToAdd: string[],
+  requestedToRemove: string[],
+  sourceField: string
+): { actualAdded: string[]; actualRemoved: string[] } => {
+  const wouldBeAdded = new Set<string>();
+  const wouldBeRemoved = new Set<string>();
+  for (const source of sources) {
+    const current = new Set<string>(
+      Array.isArray(source[sourceField]) ? (source[sourceField] as string[]) : []
+    );
+    for (const item of requestedToAdd) {
+      if (!current.has(item)) wouldBeAdded.add(item);
+    }
+    for (const item of requestedToRemove) {
+      if (current.has(item)) wouldBeRemoved.add(item);
+    }
+  }
+  return {
+    actualAdded: requestedToAdd.filter((t) => wouldBeAdded.has(t)),
+    actualRemoved: requestedToRemove.filter((t) => wouldBeRemoved.has(t)),
+  };
+};
+
 export const prefetchAllPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],
