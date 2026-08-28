@@ -70,7 +70,7 @@ interface SectionState {
 }
 
 /** Collapses visible whitespace into the storage representation. */
-const collapseWhitespace = (input: string): string => input.replace(/\s+/g, ' ').trim();
+export const collapseWhitespace = (input: string): string => input.replace(/\s+/g, ' ').trim();
 
 const pushChildren = (stack: SerializeStep[], element: Element): void => {
   const children = Array.from(element.childNodes);
