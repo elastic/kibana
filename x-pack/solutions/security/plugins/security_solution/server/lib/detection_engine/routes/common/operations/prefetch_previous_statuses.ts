@@ -463,6 +463,33 @@ export const computeActualDelta = (
   };
 };
 
+// Uses raw arrays for the change predicate so over-cap items that genuinely change a document
+// still trigger; the payload uses the capped (valid*) arrays.
+export const prefetchChangedListFieldIds = async (
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  ids: string[],
+  field: string,
+  rawToAdd: string[],
+  rawToRemove: string[],
+  validToAdd: string[],
+  validToRemove: string[]
+): Promise<{ changedIds: string[]; actualAdded: string[]; actualRemoved: string[] }> => {
+  const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [field]);
+  const changedIds = Array.from(
+    new Set(
+      hits.filter((h) => wouldChange(h.source, field, rawToAdd, rawToRemove)).map((h) => h.id)
+    )
+  );
+  const { actualAdded, actualRemoved } = computeActualDelta(
+    hits.map((h) => h.source),
+    validToAdd,
+    validToRemove,
+    field
+  );
+  return { changedIds, actualAdded, actualRemoved };
+};
+
 export const prefetchAllPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],

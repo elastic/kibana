@@ -139,8 +139,8 @@ describe('set attacks tags', () => {
 
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: [SCHEDULED_INDEX, ADHOC_INDEX],
-          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_TAGS],
+          index: `${SCHEDULED_INDEX},${ADHOC_INDEX}`,
+          _source_includes: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_TAGS],
         })
       );
     });

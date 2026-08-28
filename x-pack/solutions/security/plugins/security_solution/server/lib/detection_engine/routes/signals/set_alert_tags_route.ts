@@ -26,11 +26,7 @@ import {
   MAX_ALERTS_PER_TRIGGER,
   MAX_TAGS_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
-import {
-  fetchAllAlertIdIndexWithSource,
-  computeActualDelta,
-  wouldChange,
-} from '../common/operations/prefetch_previous_statuses';
+import { prefetchChangedListFieldIds } from '../common/operations/prefetch_previous_statuses';
 
 export const setAlertTagsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -88,25 +84,20 @@ export const setAlertTagsRoute = (
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
+            ({
+              changedIds: changedAlertIds,
+              actualAdded: tagsActuallyAdded,
+              actualRemoved: tagsActuallyRemoved,
+            } = await prefetchChangedListFieldIds(
+              esClient,
+              index,
+              ids,
               ALERT_WORKFLOW_TAGS,
-            ]);
-            // Emit only IDs whose source would actually change; unknown/no-op IDs are excluded.
-            // Use the full request arrays for the predicate so over-cap tags that would
-            // actually change a document still produce a trigger; the payload uses capped arrays.
-            changedAlertIds = hits
-              .filter((h) =>
-                wouldChange(h.source, ALERT_WORKFLOW_TAGS, tags.tags_to_add, tags.tags_to_remove)
-              )
-              .map((h) => h.id);
-            const delta = computeActualDelta(
-              hits.map((h) => h.source),
+              tags.tags_to_add,
+              tags.tags_to_remove,
               cappedTagsToAdd,
-              cappedTagsToRemove,
-              ALERT_WORKFLOW_TAGS
-            );
-            tagsActuallyAdded = delta.actualAdded;
-            tagsActuallyRemoved = delta.actualRemoved;
+              cappedTagsToRemove
+            ));
           } catch {
             // prefetch failure is non-blocking; changedAlertIds stays empty, suppressing the event
           }

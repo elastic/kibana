@@ -26,11 +26,7 @@ import {
   MAX_ALERTS_PER_TRIGGER,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
-import {
-  fetchAllAlertIdIndexWithSource,
-  computeActualDelta,
-  wouldChange,
-} from '../common/operations/prefetch_previous_statuses';
+import { prefetchChangedListFieldIds } from '../common/operations/prefetch_previous_statuses';
 
 export const setAlertAssigneesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -84,25 +80,20 @@ export const setAlertAssigneesRoute = (
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
+            ({
+              changedIds: changedAlertIds,
+              actualAdded: assigneesActuallyAdded,
+              actualRemoved: assigneesActuallyRemoved,
+            } = await prefetchChangedListFieldIds(
+              esClient,
+              index,
+              ids,
               ALERT_WORKFLOW_ASSIGNEE_IDS,
-            ]);
-            // Emit only IDs whose source would actually change; unknown/no-op IDs are excluded.
-            // Use the full request arrays for the predicate so over-cap assignees that would
-            // actually change a document still produce a trigger; the payload uses capped arrays.
-            changedAlertIds = hits
-              .filter((h) =>
-                wouldChange(h.source, ALERT_WORKFLOW_ASSIGNEE_IDS, assignees.add, assignees.remove)
-              )
-              .map((h) => h.id);
-            const delta = computeActualDelta(
-              hits.map((h) => h.source),
+              assignees.add,
+              assignees.remove,
               cappedAssigneesToAdd,
-              cappedAssigneesToRemove,
-              ALERT_WORKFLOW_ASSIGNEE_IDS
-            );
-            assigneesActuallyAdded = delta.actualAdded;
-            assigneesActuallyRemoved = delta.actualRemoved;
+              cappedAssigneesToRemove
+            ));
           } catch {
             // prefetch failure is non-blocking; changedAlertIds stays empty, suppressing the event
           }
