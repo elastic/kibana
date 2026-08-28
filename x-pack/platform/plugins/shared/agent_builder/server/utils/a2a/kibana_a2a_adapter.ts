@@ -56,16 +56,33 @@ const describeError = (error: unknown): string => {
   return `${error}`;
 };
 
+export interface KibanaA2AAdapterDeps {
+  logger: Logger;
+  getInternalServices: () => InternalStartServices;
+  getBaseUrl: (request: KibanaRequest) => Promise<string>;
+  isCloudEnabled?: boolean;
+}
+
 /**
  * Kibana adapter for the A2A SDK
  */
 export class KibanaA2AAdapter {
-  constructor(
-    private logger: Logger,
-    private getInternalServices: () => InternalStartServices,
-    private getBaseUrl: (request: KibanaRequest) => Promise<string>,
-    private isCloudEnabled: boolean = false
-  ) {}
+  private readonly logger: Logger;
+  private readonly getInternalServices: () => InternalStartServices;
+  private readonly getBaseUrl: (request: KibanaRequest) => Promise<string>;
+  private readonly isCloudEnabled: boolean;
+
+  constructor({
+    logger,
+    getInternalServices,
+    getBaseUrl,
+    isCloudEnabled = false,
+  }: KibanaA2AAdapterDeps) {
+    this.logger = logger;
+    this.getInternalServices = getInternalServices;
+    this.getBaseUrl = getBaseUrl;
+    this.isCloudEnabled = isCloudEnabled;
+  }
 
   /**
    * Create A2A components for a specific agent and request
