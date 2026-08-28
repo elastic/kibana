@@ -181,6 +181,25 @@ export function initializeLayoutManager(
     if (childrenModified) children$.next(currentChildren);
   };
 
+  /**
+   * When panels are removed from the layout (e.g. a section with panels is deleted),
+   * remove their APIs from children$ so downstream consumers don't hold stale references.
+   */
+  const removedPanelCleanupSubscription = layout$.subscribe((layout) => {
+    const currentChildren = children$.value;
+    const removedUuids = Object.keys(currentChildren).filter(
+      (uuid) => !layout.panels[uuid] && !layout.pinnedPanels[uuid]
+    );
+    if (removedUuids.length === 0) return;
+
+    const updatedChildren = { ...currentChildren };
+    for (const uuid of removedUuids) {
+      delete updatedChildren[uuid];
+      delete currentChildState[uuid];
+    }
+    children$.next(updatedChildren);
+  });
+
   // --------------------------------------------------------------------------------------
   // Panel placement functions
   // --------------------------------------------------------------------------------------
@@ -692,6 +711,7 @@ export function initializeLayoutManager(
     cleanup: () => {
       childrenChangesSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
+      removedPanelCleanupSubscription.unsubscribe();
     },
   };
 }
