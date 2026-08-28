@@ -19,8 +19,14 @@ spaceTest.describe('Discover histogram', { tag: tags.deploymentAgnostic }, () =>
     await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'Europe/Berlin' });
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects, config }) => {
+    // Security serverless editor can read `logstash-*` but not `long-window-logstash-*`.
+    // FTR used admin on serverless for the same reason.
+    if (config.serverless && config.projectType === 'security') {
+      await browserAuth.loginAsAdmin();
+    } else {
+      await browserAuth.loginAsPrivilegedUser();
+    }
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
