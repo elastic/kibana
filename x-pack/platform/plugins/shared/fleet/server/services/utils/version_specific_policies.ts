@@ -110,20 +110,22 @@ export async function getVersionSpecificPolicies(
         // POLICY_CHANGE actions every checkin. See https://github.com/elastic/kibana/issues/276294
         id: versionedPolicyId,
         inputs: getInputsForVersion(updatedFullPolicy?.inputs ?? fullPolicy.inputs, version),
-        // Prune secret_references to match the final version-filtered inputs. Two cases need this:
-        // (a) updatedFullPolicy exists: its refs were pruned against the full recompiled inputs;
-        //     getInputsForVersion may remove additional inputs (package-level agentVersion conditions).
-        // (b) updatedFullPolicy is null: we inherit fleetServerPolicy.data.secret_references but
-        //     getInputsForVersion still strips package-level-gated inputs, so refs must be re-scanned.
+        // Remove refs for inputs that getInputsForVersion strips from this variant. Only scan the
+        // stripped inputs: output/fleet-server-host/download-source secrets live outside `inputs`
+        // (in data.outputs, data.fleet, etc.) and have no $co.elastic.secret{X} placeholder there,
+        // so scanning all refs against versionedInputs would incorrectly drop them.
         secret_references: (() => {
           const sourceInputs = updatedFullPolicy?.inputs ?? fullPolicy.inputs;
           const versionedInputs = getInputsForVersion(sourceInputs, version);
-          const compiledIds = collectCompiledSecretRefIds(versionedInputs);
+          const strippedInputs = sourceInputs.filter((inp) => !versionedInputs.includes(inp));
+          const strippedIds = collectCompiledSecretRefIds(strippedInputs);
           const refs: SecretReference[] =
             updatedFullPolicy?.secret_references ??
             (fleetServerPolicy.data?.secret_references as SecretReference[] | undefined) ??
             [];
-          return compiledIds ? refs.filter(({ id: refId }) => compiledIds.has(refId)) : refs;
+          return strippedIds
+            ? refs.filter(({ id: refId }) => !strippedIds.has(refId))
+            : refs;
         })(),
       },
     };
