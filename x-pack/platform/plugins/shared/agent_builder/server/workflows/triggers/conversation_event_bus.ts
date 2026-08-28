@@ -23,7 +23,15 @@ type MetadataPatchedListener = (
  * Lightweight event bus for conversation lifecycle events.
  * Listeners registered here are called after a successful metadata write.
  */
-export class ConversationEventBus {
+export interface ConversationEventBus {
+  onMetadataPatched(listener: MetadataPatchedListener): void;
+  emitMetadataPatched(request: KibanaRequest, payload: ConversationMetadataPatchedPayload): void;
+}
+
+export const createConversationEventBus = (): ConversationEventBus =>
+  new ConversationEventBusImpl();
+
+class ConversationEventBusImpl implements ConversationEventBus {
   private readonly metadataPatchedListeners: MetadataPatchedListener[] = [];
 
   onMetadataPatched(listener: MetadataPatchedListener): void {

@@ -51,7 +51,7 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
-import { ConversationEventBus } from './workflows/triggers/conversation_event_bus';
+import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
 import { registerConversationWorkflowSteps } from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
@@ -75,7 +75,7 @@ export class AgentBuilderPlugin
   private home: HomeServerPluginSetup | null = null;
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
-  private readonly conversationEventBus = new ConversationEventBus();
+  private readonly conversationEventBus = createConversationEventBus();
   private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();

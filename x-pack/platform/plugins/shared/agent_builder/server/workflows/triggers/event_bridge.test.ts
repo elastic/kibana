@@ -11,7 +11,7 @@ import {
   workflowsExtensionsMock,
 } from '@kbn/workflows-extensions/server/mocks';
 import { ConversationMetadataUpdatedTriggerId } from '../../../common/workflows/triggers';
-import { ConversationEventBus } from './conversation_event_bus';
+import { createConversationEventBus } from './conversation_event_bus';
 import { registerConversationWorkflowEventBridge } from './event_bridge';
 
 const flushMicrotasks = async () => {
@@ -25,10 +25,10 @@ describe('registerConversationWorkflowEventBridge', () => {
   const logger = loggingSystemMock.createLogger();
   const request = httpServerMock.createKibanaRequest();
   let mockClient = createWorkflowsClientMock();
-  let eventBus = new ConversationEventBus();
+  let eventBus = createConversationEventBus();
 
   beforeEach(() => {
-    eventBus = new ConversationEventBus();
+    eventBus = createConversationEventBus();
     mockClient = createWorkflowsClientMock();
     isExperimentalEnabled.mockResolvedValue(true);
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
@@ -76,7 +76,7 @@ describe('registerConversationWorkflowEventBridge', () => {
   });
 
   it('does nothing when workflowsExtensions is undefined', async () => {
-    const isolatedBus = new ConversationEventBus();
+    const isolatedBus = createConversationEventBus();
     registerConversationWorkflowEventBridge(isolatedBus, undefined, logger, isExperimentalEnabled);
 
     isolatedBus.emitMetadataPatched(request, {
@@ -92,7 +92,7 @@ describe('registerConversationWorkflowEventBridge', () => {
 
   it('does not emit the trigger when experimental features are disabled', async () => {
     isExperimentalEnabled.mockResolvedValue(false);
-    const disabledBus = new ConversationEventBus();
+    const disabledBus = createConversationEventBus();
     registerConversationWorkflowEventBridge(
       disabledBus,
       workflowsExtensions,
@@ -115,7 +115,7 @@ describe('registerConversationWorkflowEventBridge', () => {
       emitEvent: jest.fn().mockRejectedValue(new Error('network error')),
     });
     workflowsExtensions.getClient.mockResolvedValue(failingClient);
-    const failBus = new ConversationEventBus();
+    const failBus = createConversationEventBus();
     registerConversationWorkflowEventBridge(
       failBus,
       workflowsExtensions,
