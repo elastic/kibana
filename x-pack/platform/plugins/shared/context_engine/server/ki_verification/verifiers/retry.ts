@@ -11,7 +11,8 @@ import { isResponseError } from '@kbn/es-errors';
 // 400 is a query/content error and 403 is authorization — neither will resolve on retry.
 export const isRetryableError = (error: unknown): boolean => {
   if (isResponseError(error)) {
-    return error.statusCode === 429 || error.statusCode >= 500;
+    const { statusCode } = error;
+    return statusCode === 429 || (statusCode !== undefined && statusCode >= 500);
   }
   return true;
 };
