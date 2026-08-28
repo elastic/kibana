@@ -21,6 +21,11 @@ export const EisCardGrid = ({ onViewModelDetails }: EisCardGridProps) => {
   const { items } = useContentListItems();
   const breakpoint = useCurrentEuiBreakpoint();
   const { euiTheme } = useEuiTheme();
+
+  const cardGridStyles = css`
+    padding-top: ${euiTheme.size.s};
+  `;
+
   // ContentList owns the initially-empty state, while filtered zero-result
   // queries remain in the ready phase and render this child.
   if (items.length === 0) {
@@ -32,9 +37,7 @@ export const EisCardGrid = ({ onViewModelDetails }: EisCardGridProps) => {
       columns={breakpoint === 'xl' ? 4 : 3}
       data-test-subj="eisModelCards"
       gutterSize="m"
-      css={css`
-        padding-top: ${euiTheme.size.s};
-      `}
+      css={cardGridStyles}
     >
       {items.map((item) => {
         const modelId = getItemModelId(item);
