@@ -18,10 +18,7 @@ import type { ProductFeaturesService } from '../../../../lib/product_features_se
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
-import {
-  createMissingPrivilegeError,
-  createToolErrorResult,
-} from '../common/tool_results';
+import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
