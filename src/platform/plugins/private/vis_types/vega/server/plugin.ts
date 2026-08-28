@@ -15,6 +15,7 @@ import type {
 } from './types';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
+import { getTransforms } from './embeddable/transforms';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private standaloneEmbeddableEnabled = false;
@@ -24,6 +25,7 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
   public setup(core: CoreSetup, { embeddable }: VisTypeVegaPluginSetupDependencies) {
     embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
       title: 'Vega',
+      getTransforms,
       getSchema: (getDrilldownsSchema) =>
         this.standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
     });
