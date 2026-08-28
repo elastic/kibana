@@ -220,7 +220,9 @@ describe('eventAtOrBefore', () => {
   });
 
   it('returns undefined when node data is loading', () => {
-    expect(eventAtOrBefore({ events: [cat], status: 'loading' }, originTimestampMs)).toBeUndefined();
+    expect(
+      eventAtOrBefore({ events: [cat], status: 'loading' }, originTimestampMs)
+    ).toBeUndefined();
   });
 });
 
@@ -231,9 +233,7 @@ describe('firstEvent', () => {
     const newer = generator.generateEvent({ timestamp: 2000, processName: 'cat' });
     const older = generator.generateEvent({ timestamp: 1000, processName: 'bash' });
     expect(
-      processNameSafeVersion(
-        firstEvent({ events: [newer, older], status: 'running' })
-      )
+      processNameSafeVersion(firstEvent({ events: [newer, older], status: 'running' }))
     ).toEqual('cat');
   });
 });
