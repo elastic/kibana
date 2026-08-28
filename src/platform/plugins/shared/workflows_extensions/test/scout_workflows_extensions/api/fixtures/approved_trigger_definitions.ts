@@ -152,7 +152,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'security.alertAssigneesChanged',
-    schemaHash: 'b5fc06e212a8791e0d8c72b909d6e8b253aa78eda3490d111936ec5b4488e7e5',
+    schemaHash: 'a41a5f8d9fcb5adda2d5be467cee33a6829bb6baedc7ffdc27e37eb606fb45e6',
   },
   {
     id: 'security.alertStatusChanged',
@@ -160,11 +160,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'security.alertTagsChanged',
-    schemaHash: '0e22ac0856896430830756f721a86de8915439a338853bd63fb78e2f1b4080f3',
+    schemaHash: 'b334254ed73a12d6e6a481b67cdb94ba0b884fde5766ce93b754715fad8d2032',
   },
   {
     id: 'security.attackAssigneesChanged',
-    schemaHash: '9534bb2673e1e540d676cf4a7f09811e48d344af6e9322ed395c0530dcefce6e',
+    schemaHash: '604884ec156d203ad52f0a1790968ade54e22cab511c1e88602c1d888930ce87',
   },
   {
     id: 'security.attackStatusChanged',
@@ -172,7 +172,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'security.attackTagsChanged',
-    schemaHash: 'fcccbe2808b9da1ad9617be1be4def8318c810740c07a69cc907f72ac363157f',
+    schemaHash: '00ceee0be37bbe42208e1e692b73da9e317e67134f21fee26ed8d33683089357',
   },
   {
     id: 'security.noteCreated',

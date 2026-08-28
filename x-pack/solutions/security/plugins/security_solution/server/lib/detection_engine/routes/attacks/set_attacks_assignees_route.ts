@@ -139,6 +139,7 @@ export const setAttacksAssigneesRoute = (
                   });
                   // Emit only IDs that exist AND would actually change; deduplicate across
                   // families (an _id can appear in both scheduled and adhoc indices).
+                  // Use full valid arrays so over-cap assignees that would change a doc still fire the trigger.
                   verifiedAttackIds = Array.from(
                     new Set(
                       attackDocs.hits.hits
@@ -146,8 +147,8 @@ export const setAttacksAssigneesRoute = (
                           wouldChange(
                             (hit._source ?? {}) as Record<string, unknown>,
                             ALERT_WORKFLOW_ASSIGNEE_IDS,
-                            validAssigneesToAdd,
-                            validAssigneesToRemove
+                            allValidAssigneesToAdd,
+                            allValidAssigneesToRemove
                           )
                         )
                         .map((hit) => hit._id)
