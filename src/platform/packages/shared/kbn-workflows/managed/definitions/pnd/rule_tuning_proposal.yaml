@@ -1,0 +1,289 @@
+version: "1"
+name: Detection Rule Tuning Proposal
+description: >
+  Diagnoses one rule whose alerts analysts closed as false positives, parks on its own
+  approval gate, and applies an approved query change. Launched per rule by the rule
+  tuning sweep so every proposal's gate can be pending at the same time.
+enabled: true
+tags:
+  - security
+  - detection-rule-tuning
+settings:
+  # Keyed per rule so a later sweep cannot open a second gate for a rule whose
+  # proposal is still pending: alerts are only tagged after the gate resolves,
+  # so the harvest keeps returning such a rule until then.
+  concurrency:
+    key: "rule-tuning-proposal-{{ inputs.rule_id }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        rule_uuid:
+          type: string
+          description: Saved-object id of the rule, used to apply the query change.
+        rule_name:
+          type: string
+          description: Rule name shown in the approval prompt.
+        rule_id:
+          type: string
+          description: Public rule_id used to fetch the rule from the detection engine API.
+        fp_count:
+          type: number
+          description: Unreviewed false-positive alerts that put the rule in the sweep.
+        last_fp_at:
+          type: string
+          description: Timestamp of the newest false positive; anchors both backtest previews.
+        alert_ids:
+          type: array
+          items:
+            type: string
+          description: >-
+            Document ids of the harvested false positives. Ground the diagnosis (the
+            agent retrieves them by id) and are tagged once the gate resolves.
+        analysis_window_days:
+          type: number
+          description: Days of alerts the sweep analyzed. Shown to the diagnosing agent.
+        preview_invocation_count:
+          type: number
+          description: Rule executions each backtest preview simulates.
+        parent_run_id:
+          type: string
+          description: Execution id of the sweep that launched this proposal. Empty on a standalone run.
+      required:
+        - rule_uuid
+        - rule_name
+        - rule_id
+        - fp_count
+        - last_fp_at
+        - alert_ids
+        - analysis_window_days
+        - preview_invocation_count
+      additionalProperties: false
+outputs:
+  - name: rule_id
+    type: string
+  - name: approved
+    type: boolean
+  - name: applied
+    type: boolean
+consts:
+  # Written onto every alert that reached a decision, and filtered out by the sweep's
+  # harvest, so a later sweep cannot rediagnose the same alerts into the same proposal.
+  dismissed_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-dismissed
+  applied_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-applied
+steps:
+  - name: fetch_rule
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.rule_id }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  - name: diagnose_rule
+    type: ai.agent
+    if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
+    timeout: "10m"
+    create-conversation: true
+    with:
+      message: |-
+        Use the [/investigate-rule](skill://investigate-rule) skill to investigate
+        rule_id "{{ inputs.rule_id }}" ({{ inputs.rule_name }}).
+
+        {{ inputs.fp_count }} alerts from this rule were closed as false positives
+        during the last {{ inputs.analysis_window_days }} days. Their document ids
+        {%- if inputs.alert_ids.size > 100 %} (first 100 of {{ inputs.alert_ids.size }}){%- endif %}:
+        ["{{ inputs.alert_ids | slice: 0, 100 | join: '", "' }}"]
+
+        Retrieve exactly these alerts with the investigate-rule.get_alerts_by_ids
+        tool, passing the rule's investigation_fields as additional_fields, and use
+        them as the confirmed false positives grounding the diagnosis; do not
+        re-derive the closed set. Return one structured tuning proposal.
+
+        Run the alert queries with time_window_hours set to
+        {{ inputs.analysis_window_days | times: 24 | at_most: 168 }} — the analysis
+        window above, capped at the tool maximum. The false-positive ids span the
+        full {{ inputs.analysis_window_days }} days, so call out any totals that
+        cover a shorter window than the ids.
+
+        This pipeline backtests and applies query changes directly, so prefer
+        change_type "query": narrow the KQL to exclude the confirmed benign
+        pattern while keeping detection coverage. Pick exception, suppression, or
+        threshold only when narrowing the query is genuinely unsafe for this rule,
+        since those stay manual analyst actions. This rule has type
+        "{{ steps.fetch_rule.output.type }}", so propose a query change only when
+        that type is "query".
+      schema:
+        type: object
+        properties:
+          change_type:
+            type: string
+            enum: [exception, suppression, query, threshold]
+          summary:
+            type: string
+          current_query:
+            type: string
+          proposed_query:
+            type: string
+          exception_condition:
+            type: string
+          rekey_required:
+            type: boolean
+        required: [change_type, summary, current_query, proposed_query, exception_condition, rekey_required]
+
+  # Both previews end at the last false positive, not at now, so the rule's own
+  # `from` lookback covers the events analysts judged. Anchoring at now would
+  # backtest a window where those events no longer exist.
+  - name: preview_current_query
+    type: workflow.execute
+    if: >-
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+        and steps.diagnose_rule.output.structured_output.proposed_query != ''
+        and steps.fetch_rule.output.type == 'query' }}
+    with:
+      workflow-id: system-security-rule-preview
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        preview_body:
+          type: query
+          name: "{{ steps.fetch_rule.output.name }}"
+          description: "{{ steps.fetch_rule.output.description }}"
+          query: "{{ steps.fetch_rule.output.query }}"
+          language: "{{ steps.fetch_rule.output.language }}"
+          index: "${{ steps.fetch_rule.output.index }}"
+          severity: "{{ steps.fetch_rule.output.severity }}"
+          risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+          interval: "{{ steps.fetch_rule.output.interval }}"
+          from: "{{ steps.fetch_rule.output.from }}"
+          to: "{{ steps.fetch_rule.output.to }}"
+          invocationCount: "${{ inputs.preview_invocation_count }}"
+          timeframeEnd: "{{ inputs.last_fp_at }}"
+
+  - name: preview_proposed_query
+    type: workflow.execute
+    if: >-
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+        and steps.diagnose_rule.output.structured_output.proposed_query != ''
+        and steps.fetch_rule.output.type == 'query' }}
+    with:
+      workflow-id: system-security-rule-preview
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        preview_body:
+          type: query
+          name: "{{ steps.fetch_rule.output.name }}"
+          description: "{{ steps.fetch_rule.output.description }}"
+          query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+          language: "{{ steps.fetch_rule.output.language }}"
+          index: "${{ steps.fetch_rule.output.index }}"
+          severity: "{{ steps.fetch_rule.output.severity }}"
+          risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+          interval: "{{ steps.fetch_rule.output.interval }}"
+          from: "{{ steps.fetch_rule.output.from }}"
+          to: "{{ steps.fetch_rule.output.to }}"
+          invocationCount: "${{ inputs.preview_invocation_count }}"
+          timeframeEnd: "{{ inputs.last_fp_at }}"
+
+  - name: review_tuning
+    type: waitForApproval
+    if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
+    timeout: "72h"
+    with:
+      approveLabel: Apply tuning
+      rejectLabel: Dismiss
+      message: |-
+        Rule tuning proposal for {{ inputs.rule_name }}
+        {{ inputs.fp_count }} alerts were closed as false positives.
+
+        {{ steps.diagnose_rule.output.structured_output.summary }}
+
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        Current query:
+        {{ steps.diagnose_rule.output.structured_output.current_query }}
+
+        Proposed query:
+        {{ steps.diagnose_rule.output.structured_output.proposed_query }}
+
+        Backtest:
+        current {% if steps.preview_current_query.output.succeeded and steps.preview_current_query.output.is_aborted == false %}{{ steps.preview_current_query.output.alert_count }}{% else %}inconclusive{% endif %},
+        proposed {% if steps.preview_proposed_query.output.succeeded and steps.preview_proposed_query.output.is_aborted == false %}{{ steps.preview_proposed_query.output.alert_count }}{% else %}inconclusive{% endif %}.
+        {% if steps.preview_current_query.output.error_text != '' %}
+        Current query preview errors: {{ steps.preview_current_query.output.error_text }}
+        {% endif %}
+        {% if steps.preview_proposed_query.output.error_text != '' %}
+        Proposed query preview errors: {{ steps.preview_proposed_query.output.error_text }}
+        {% endif %}
+        {% else %}
+        {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
+        Proposed exception:
+        {{ steps.diagnose_rule.output.structured_output.exception_condition }}
+        {% endif %}
+        Apply this {{ steps.diagnose_rule.output.structured_output.change_type }}
+        proposal manually in the Detection Rules UI. Approving records the handoff;
+        it does not change the rule.
+        {% endif %}
+
+        {% if steps.diagnose_rule.output.conversation_id %}
+        Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
+        {% endif %}
+
+  - name: apply_query_tuning
+    type: kibana.request
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.diagnose_rule.output.structured_output.proposed_query != ''
+        and steps.fetch_rule.output.type == 'query'
+        and steps.preview_proposed_query.output.succeeded == true
+        and steps.preview_proposed_query.output.is_aborted == false }}
+    with:
+      method: PATCH
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ inputs.rule_uuid }}"
+        query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+
+  - name: mark_alerts_dismissed
+    type: security.setAlertTags
+    if: "${{ steps.review_tuning.output.response.approved == false }}"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      tags_to_add: "${{ consts.dismissed_tags }}"
+    on-failure:
+      continue: true
+
+  - name: mark_alerts_applied
+    type: security.setAlertTags
+    if: "${{ steps.review_tuning.output.response.approved == true }}"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      tags_to_add: "${{ consts.applied_tags }}"
+    on-failure:
+      continue: true
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      rule_id: "{{ inputs.rule_id }}"
+      approved: "${{ steps.review_tuning.output.response.approved == true }}"
+      applied: >-
+        ${{ steps.review_tuning.output.response.approved == true
+          and steps.diagnose_rule.output.structured_output.proposed_query != ''
+          and steps.fetch_rule.output.type == 'query'
+          and steps.preview_proposed_query.output.succeeded == true
+          and steps.preview_proposed_query.output.is_aborted == false
+          and steps.apply_query_tuning.error == null }}

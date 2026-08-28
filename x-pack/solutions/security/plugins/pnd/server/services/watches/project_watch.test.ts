@@ -11,6 +11,7 @@ import {
   getManagedWorkflowDefinition,
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
+  PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
   PND_WATCH_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -204,6 +205,7 @@ describe('project watch', () => {
       const ids = [
         PND_WATCH_DETECTION_WORKFLOW_ID,
         PND_RULE_TUNING_WORKFLOW_ID,
+        PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
         PND_RULE_CREATION_WORKFLOW_ID,
         PND_RULE_PREVIEW_WORKFLOW_ID,
       ];
@@ -224,21 +226,22 @@ describe('project watch', () => {
       const ids = [
         PND_WATCH_DETECTION_WORKFLOW_ID,
         PND_RULE_TUNING_WORKFLOW_ID,
+        PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
         PND_RULE_CREATION_WORKFLOW_ID,
         PND_RULE_PREVIEW_WORKFLOW_ID,
       ];
 
-      for (const id of ids) {
+      const conditions = ids.flatMap((id) => {
         const { steps } = parse(getManagedYaml(id)) as WorkflowYaml;
-        const conditions = flattenSteps(steps as unknown as NestedStep[]).flatMap(
+        return flattenSteps(steps as unknown as NestedStep[]).flatMap(
           ({ name, if: stepIf, condition }) =>
             [stepIf, condition].filter(Boolean).map((expr) => [name, expr] as const)
         );
+      });
 
-        expect(conditions.length).toBeGreaterThan(0);
-        for (const [name, expr] of conditions) {
-          expect({ name, expr }).toEqual({ name, expr: expect.not.stringContaining('(') });
-        }
+      expect(conditions.length).toBeGreaterThan(0);
+      for (const [name, expr] of conditions) {
+        expect({ name, expr }).toEqual({ name, expr: expect.not.stringContaining('(') });
       }
     });
 
@@ -248,6 +251,7 @@ describe('project watch', () => {
       const ids = [
         PND_WATCH_DETECTION_WORKFLOW_ID,
         PND_RULE_TUNING_WORKFLOW_ID,
+        PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
         PND_RULE_CREATION_WORKFLOW_ID,
         PND_RULE_PREVIEW_WORKFLOW_ID,
       ];
@@ -263,7 +267,7 @@ describe('project watch', () => {
     // The preview API validates timeframeEnd with zod's `.datetime()`, which rejects a
     // UTC offset and only accepts a `Z` suffix.
     it('sends every preview timeframeEnd as UTC', () => {
-      for (const id of [PND_RULE_TUNING_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
+      for (const id of [PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
         const lines = getManagedYaml(id)
           .split('\n')
           .filter((line) => line.includes('timeframeEnd'));
@@ -278,7 +282,7 @@ describe('project watch', () => {
     // Only `waitForApproval` renders the approve/reject buttons; a `waitForInput` gate
     // makes an analyst hand-author the resume payload as JSON instead.
     it('gates both workers on an approval step that reads response.approved', () => {
-      for (const id of [PND_RULE_TUNING_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
+      for (const id of [PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
         const { steps } = parse(getManagedYaml(id)) as WorkflowYaml;
         const all = flattenSteps(steps as unknown as NestedStep[]);
         const gates = all.filter(({ type }) => type === 'waitForApproval');
@@ -302,11 +306,15 @@ describe('project watch', () => {
       const tuning = parse(
         getManagedWorkflowDefinition(PND_RULE_TUNING_WORKFLOW_ID)!.yaml!
       ) as WorkflowYaml;
+      const proposal = parse(
+        getManagedWorkflowDefinition(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID)!.yaml!
+      ) as WorkflowYaml;
       const tuningSteps = flattenSteps(tuning.steps as unknown as NestedStep[]);
+      const proposalSteps = flattenSteps(proposal.steps as unknown as NestedStep[]);
       const harvest = tuningSteps.find(({ name }) => name === 'harvest_fp_alerts_by_rule')!;
       const harvestQuery = String(harvest.with?.query);
       const reviewedTag = (tuning.consts as Record<string, string>).reviewed_tag;
-      const tagSteps = tuningSteps.filter(({ type }) => type === 'security.setAlertTags');
+      const tagSteps = proposalSteps.filter(({ type }) => type === 'security.setAlertTags');
 
       it('filters the reviewed tag out of the harvest', () => {
         expect(reviewedTag).toEqual(expect.any(String));
@@ -348,23 +356,25 @@ describe('project watch', () => {
       });
 
       it('declares dismissed and applied tag sets', () => {
-        expect(tuning.consts).toEqual(
+        expect(proposal.consts).toEqual(
           expect.objectContaining({
             dismissed_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-dismissed'],
             applied_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-applied'],
           })
         );
-        expect(tuning.consts).not.toHaveProperty('reviewed_only_tags');
+        expect(proposal.consts).not.toHaveProperty('reviewed_only_tags');
       });
 
       it('does not use classify_proposal or can_apply', () => {
-        expect(tuningSteps.some(({ name }) => name === 'classify_proposal')).toBe(false);
-        expect(JSON.stringify(tuningSteps)).not.toContain('can_apply');
+        for (const steps of [tuningSteps, proposalSteps]) {
+          expect(steps.some(({ name }) => name === 'classify_proposal')).toBe(false);
+          expect(JSON.stringify(steps)).not.toContain('can_apply');
+        }
       });
 
       // The harvest projects its columns positionally, so reordering KEEP would make the
-      // tag step read some other column as the alert ids.
-      it('reads the alert ids from the column position KEEP assigns them', () => {
+      // sweep hand some other column to the proposal as the alert ids.
+      it('passes the alert ids from the column position KEEP assigns them', () => {
         const keepClause = harvestQuery
           .split('\n')
           .find((line) => line.trimStart().startsWith('| KEEP'))!;
@@ -372,11 +382,30 @@ describe('project watch', () => {
           .replace('| KEEP', '')
           .split(',')
           .map((column) => column.trim().replace(/`/g, ''));
+        const launch = tuningSteps.find(({ name }) => name === 'launch_proposal')!;
+        const launchInputs = launch.with?.inputs as Record<string, string>;
 
         expect(columns).toContain('alert_ids');
+        expect(launchInputs.alert_ids).toContain(`foreach.item.${columns.indexOf('alert_ids')}`);
         for (const step of tagSteps) {
-          expect(step.with?.alert_ids).toContain(`foreach.item.${columns.indexOf('alert_ids')}`);
+          expect(step.with?.alert_ids).toBe('${{ inputs.alert_ids }}');
         }
+      });
+
+      // Alerts are tagged only after a gate resolves, so a resweep re-harvests rules
+      // whose gate is still pending; the per-rule drop key is what deduplicates them.
+      it('launches one fire-and-forget proposal per rule, deduplicated per rule', () => {
+        const launches = tuningSteps.filter(({ type }) => type === 'workflow.executeAsync');
+
+        expect(launches.map(({ name }) => name)).toEqual(['launch_proposal']);
+        expect(launches[0].with?.['workflow-id']).toBe(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID);
+        expect(tuningSteps.map(({ type }) => type)).not.toContain('waitForApproval');
+
+        const { concurrency } = (proposal as unknown as { settings: Record<string, unknown> })
+          .settings as { concurrency: { key: string; strategy: string; max: number } };
+        expect(concurrency.key).toContain('{{ inputs.rule_id }}');
+        expect(concurrency.strategy).toBe('drop');
+        expect(concurrency.max).toBe(1);
       });
     });
 
@@ -385,6 +414,11 @@ describe('project watch', () => {
         projectCallablesFromDefinition(parse(getManagedYaml(id)) as WorkflowYaml, undefined);
 
       expect(workerCallables(PND_RULE_TUNING_WORKFLOW_ID)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID, kind: 'workflow' }),
+        ])
+      );
+      expect(workerCallables(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID)).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ id: 'investigate-rule', kind: 'skill' }),
           expect.objectContaining({ id: PND_RULE_PREVIEW_WORKFLOW_ID, kind: 'workflow' }),

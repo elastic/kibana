@@ -52,8 +52,15 @@ describe('investigateRuleSkill', () => {
     it('returns the expected inline tools', async () => {
       const inlineTools = await investigateRuleSkill.getInlineTools?.();
       expect(inlineTools).toBeDefined();
-      expect(inlineTools).toHaveLength(1);
-      expect(inlineTools![0].id).toBe('investigate-rule.resolve_rule_attachment');
+      expect(inlineTools!.map((tool) => tool.id)).toEqual([
+        'investigate-rule.resolve_rule_attachment',
+        'investigate-rule.get_alerts_by_ids',
+      ]);
+    });
+
+    it('tells the agent to use provided alert ids instead of re-deriving the closed set', () => {
+      expect(investigateRuleSkill.content).toContain('investigate-rule.get_alerts_by_ids');
+      expect(investigateRuleSkill.content).toContain('do not re-derive the closed set');
     });
   });
 
@@ -156,6 +163,100 @@ describe('investigateRuleSkill', () => {
 
       expect(result.results[0].type).toBe(ToolResultType.error);
       expect((result.results[0].data as { message: string }).message).toContain('unavailable');
+    });
+  });
+
+  // ── get_alerts_by_ids ───────────────────────────────────────────────────────
+  //
+  // Deterministic by-id retrieval for callers that already hold alert document
+  // ids (e.g. the rule tuning workflow passes the harvested false positives),
+  // so the agent grounds the diagnosis on exactly those alerts instead of
+  // re-deriving the closed set through a natural-language query.
+
+  describe('get_alerts_by_ids inline tool', () => {
+    const { mockEsClient, mockRequest, mockLogger } = createToolTestMocks();
+    let tool: BuiltinSkillBoundedTool;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      const inlineTools = await investigateRuleSkill.getInlineTools?.();
+      tool = inlineTools![1] as BuiltinSkillBoundedTool;
+    });
+
+    const makeCtx = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+    it('fetches the requested ids from the space alerts index with the diagnosis fields', async () => {
+      const ctx = makeCtx();
+      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'alert-1',
+              _index: '.alerts-security.alerts-default',
+              _source: {
+                'host.name': 'ci-runner',
+                'kibana.alert.workflow_reason': 'false_positive',
+              },
+            },
+          ],
+        },
+      } as never);
+
+      const result = (await tool.handler(
+        {
+          alert_ids: ['alert-1', 'alert-2'],
+          additional_fields: ['winlog.event_data.TargetUserName'],
+        },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      const searchArgs = mockEsClient.asCurrentUser.search.mock.calls[0][0] as {
+        index: string;
+        size: number;
+        query: unknown;
+        _source: string[];
+      };
+      expect(searchArgs.index).toBe('.alerts-security.alerts-default');
+      expect(searchArgs.size).toBe(2);
+      expect(searchArgs.query).toEqual({ ids: { values: ['alert-1', 'alert-2'] } });
+      expect(searchArgs._source).toEqual(
+        expect.arrayContaining([
+          'kibana.alert.workflow_reason',
+          'kibana.alert.workflow_user',
+          'host.name',
+          'user.name',
+          'winlog.event_data.TargetUserName',
+        ])
+      );
+
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      const data = result.results[0].data as {
+        requested: number;
+        found: number;
+        alerts: Array<Record<string, unknown>>;
+      };
+      expect(data.requested).toBe(2);
+      expect(data.found).toBe(1);
+      expect(data.alerts[0]).toEqual({
+        _id: 'alert-1',
+        'host.name': 'ci-runner',
+        'kibana.alert.workflow_reason': 'false_positive',
+      });
+    });
+
+    it('returns an error result when the search fails', async () => {
+      const ctx = makeCtx();
+      mockEsClient.asCurrentUser.search.mockRejectedValueOnce(new Error('index unavailable'));
+
+      const result = (await tool.handler(
+        { alert_ids: ['alert-1'] },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0].data as { message: string }).message).toContain(
+        'index unavailable'
+      );
     });
   });
 });

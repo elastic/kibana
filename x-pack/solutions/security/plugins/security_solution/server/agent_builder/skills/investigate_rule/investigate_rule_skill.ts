@@ -12,7 +12,51 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { z } from '@kbn/zod/v4';
 import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
-import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  SecurityAgentBuilderAttachments,
+} from '../../../../common/constants';
+
+export const ALERTS_BY_IDS_MAX = 100;
+
+/** The fields Step 2's confirmed-dispositions analysis names, resolved deterministically. */
+const ALERTS_BY_IDS_FIELDS = [
+  '@timestamp',
+  'message',
+  'kibana.alert.workflow_status',
+  'kibana.alert.workflow_reason',
+  'kibana.alert.workflow_user',
+  'kibana.alert.workflow_tags',
+  'kibana.alert.rule.rule_id',
+  'kibana.alert.rule.name',
+  'host.name',
+  'user.name',
+  'source.ip',
+  'event.category',
+  'event.action',
+  'process.name',
+  'process.parent.name',
+  'process.command_line',
+  'file.name',
+  'file.path',
+  'file.hash.sha256',
+  'destination.address',
+  'destination.ip',
+  'destination.port',
+] as const;
+
+const alertsByIdsSchema = z.object({
+  alert_ids: z
+    .array(z.string().max(512))
+    .min(1)
+    .max(ALERTS_BY_IDS_MAX)
+    .describe('Alert document ids (_id) to retrieve'),
+  additional_fields: z
+    .array(z.string().max(256))
+    .max(50)
+    .optional()
+    .describe('Extra field names to return, e.g. the rule investigation_fields'),
+});
 
 const SKILL_CONTENT = `# investigate-rule Skill
 
@@ -108,10 +152,25 @@ these are the candidates for an exception condition (Step 4), so request exactly
 
 These are the only alerts you can speak about with certainty — they carry a human verdict.
 
+**Provided alert ids shortcut.** When the request itself supplies explicit alert
+document ids (for example, a rule tuning workflow passing the ids of alerts analysts
+closed as false positives), do not re-derive the closed set: call
+\`investigate-rule.get_alerts_by_ids\` with those ids, passing the rule's
+\`investigation_fields\` (from the attachment, Step 1) as \`additional_fields\`, and use
+the returned alerts as the confirmed dispositions data. Skip the confirmed dispositions
+query only when the tool found every requested id; if it errors or returns fewer alerts
+(they may have aged out of the index), run the confirmed dispositions query as usual.
+Still run the noise query — the id list only holds confirmed false positives, and only
+the whole-rule picture shows whether the pattern you want to exclude also matches
+open or true-positive alerts.
+
 **Time window (both queries):** set the \`time_window_hours\` parameter (NOT the query
-text) — it defaults to 24. Use 72 or 168 when the user asks about a longer period, and
-retry with a larger value if a query returns nothing (alerts older than the window are
-not searched). Do not put a time range in the query text.
+text) — it defaults to 24. When the request states an explicit analysis window (for
+example, a workflow passing the number of days it harvested over), use that window,
+capped at the 168-hour maximum, and say in the output when the stated window exceeds
+the cap. Otherwise use 72 or 168 when the user asks about a longer period, and retry
+with a larger value if a query returns nothing (alerts older than the window are not
+searched). Do not put a time range in the query text.
 
 Read the results defensively: from the noise query take the total and the dominant
 entities; from the confirmed dispositions query take which entities the closed
@@ -382,6 +441,60 @@ export const createInvestigateRuleSkill = (): SkillDefinition<
                   type: ToolResultType.error,
                   data: {
                     message: `Failed to resolve rule ${ruleId}: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`,
+                  },
+                },
+              ],
+            };
+          }
+        },
+      },
+      // ── get_alerts_by_ids ────────────────────────────────────────────────────
+      {
+        id: 'investigate-rule.get_alerts_by_ids',
+        type: ToolType.builtin,
+        description:
+          'Retrieves security alerts by their document ids, returning the disposition, entity, and event fields the ' +
+          'diagnosis needs. Call when the request already supplies alert document ids (e.g. a rule tuning workflow ' +
+          'passing harvested false positives) instead of re-querying by rule. Pass the rule investigation_fields ' +
+          'as additional_fields.',
+        schema: alertsByIdsSchema,
+        handler: async (args, context) => {
+          const { alert_ids: alertIds, additional_fields: additionalFields } =
+            alertsByIdsSchema.parse(args);
+          try {
+            const response = await context.esClient.asCurrentUser.search({
+              index: `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`,
+              size: alertIds.length,
+              query: { ids: { values: alertIds } },
+              _source: [...ALERTS_BY_IDS_FIELDS, ...(additionalFields ?? [])],
+            });
+
+            const alerts = response.hits.hits.map((hit) => ({
+              _id: hit._id,
+              ...(hit._source as Record<string, unknown>),
+            }));
+
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    requested: alertIds.length,
+                    found: alerts.length,
+                    alerts,
+                  },
+                },
+              ],
+            };
+          } catch (error) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    message: `Failed to fetch alerts by id: ${
                       error instanceof Error ? error.message : String(error)
                     }`,
                   },

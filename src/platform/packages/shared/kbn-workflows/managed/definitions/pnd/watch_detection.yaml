@@ -49,7 +49,6 @@ consts:
       color: "#e7664c"
       order: 50
     config:
-      minFpCountPerRule: 1
       previewInvocationCount: 2
     callables:
       - id: system-security-rule-tuning
@@ -78,12 +77,14 @@ steps:
     type: if
     condition: "${{ steps.select_worker.output.worker == 'tuning' }}"
     steps:
+      # Tuning thresholds (FP count, FP rate, analysis window) live as consts on the
+      # worker itself; the watch only forwards the preview depth it also hands to
+      # rule creation.
       - name: run_rule_tuning
         type: workflow.execute
         with:
           workflow-id: system-security-rule-tuning
           inputs:
-            min_fp_count: "${{ consts.watch_policy.config.minFpCountPerRule }}"
             preview_invocation_count: "${{ consts.watch_policy.config.previewInvocationCount }}"
     else:
       - name: run_rule_creation
