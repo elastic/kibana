@@ -264,6 +264,60 @@
         "multi-step-c"
       ],
       "weight": 1
+    },
+    {
+      "id": "attack-discovery",
+      "label": "Kill-Chain Discovery",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery"
+      ],
+      "evaluators": [
+        "AttackDiscoveryBasic",
+        "AttackDiscoveryRubric",
+        "Criteria",
+        "Alert-ID Grounding",
+        "No Fabrication"
+      ],
+      "weight": 1
+    },
+    {
+      "id": "migrations-rules",
+      "label": "Rule Translation",
+      "group": "Automatic Migrations",
+      "suites": [
+        "security-automatic-migrations"
+      ],
+      "evaluators": [
+        "Translation Result",
+        "Translated ESQL Validity",
+        "Custom Query Accuracy",
+        "Prebuilt Rule Match",
+        "Integration Match",
+        "Hallucination Detection",
+        "Unsupported Pattern Detection",
+        "LOOKUP JOIN Preservation",
+        "NL Description Faithfulness"
+      ],
+      "weight": 1
+    },
+    {
+      "id": "migrations-dashboards",
+      "label": "Dashboard Translation",
+      "group": "Automatic Migrations",
+      "suites": [
+        "security-automatic-migrations"
+      ],
+      "evaluators": [
+        "Translation Completeness",
+        "ES|QL Completeness",
+        "Index Pattern Validity",
+        "Panel Count Preservation",
+        "Lookup Join Presence",
+        "Markdown Error Detection",
+        "translation_fidelity"
+      ],
+      "weight": 1
     }
   ],
   "models": [
