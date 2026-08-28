@@ -55,7 +55,6 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
-  - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-analytics'
   - '@kbn/dev-cli-runner'
   - '@kbn/index-management-shared-types'
@@ -75,6 +74,8 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/es-types'
   - '@kbn/task-manager-plugin'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/react-hooks'
 tags:
   - plugin
   - prod

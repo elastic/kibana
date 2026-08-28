@@ -29,8 +29,6 @@ import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeComponentsDeps } from '../context';
 
-export { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
-
 /**
  * Returns the current classic breadcrumbs set via `chrome.setBreadcrumbs()`.
  * Used by `ClassicHeader`.
@@ -43,7 +41,7 @@ export function useClassicBreadcrumbs(): ChromeBreadcrumb[] {
 
 /**
  * Returns the current project-style breadcrumbs derived from the active
- * navigation tree node. Used by `ProjectHeader`.
+ * navigation tree node.
  */
 export function useProjectBreadcrumbs(): ChromeBreadcrumb[] {
   const chrome = useChromeService();
@@ -262,17 +260,6 @@ export function useHasLegacyActionMenu(): boolean {
 export function useHasAppMenuConfig(): boolean {
   const config = useAppMenu();
   return !!config?.items?.length;
-}
-
-/**
- * Returns `true` when an app menu is currently active — either a legacy action
- * menu mount point (`application.currentActionMenu$`) or a new `AppMenuConfig`
- * registered via `chrome.setAppMenu()`.
- */
-export function useHasAppMenu(): boolean {
-  const hasLegacyActionMenu = useHasLegacyActionMenu();
-  const hasAppMenuConfig = useHasAppMenuConfig();
-  return hasLegacyActionMenu || hasAppMenuConfig;
 }
 
 /**
