@@ -6,14 +6,17 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiCheckbox,
   EuiDataGrid,
   EuiEmptyPrompt,
+  EuiFlexGroup,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import type {
   EuiDataGridColumn,
@@ -212,16 +215,26 @@ export const SourcesGrid = ({
 
   if (status === 'loading') {
     return (
-      <EuiEmptyPrompt
-        icon={<EuiLoadingSpinner size="xl" />}
-        title={
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="center"
+        direction="column"
+        gutterSize="m"
+        responsive={false}
+        data-test-subj="streamsSourcesLoading"
+        css={css`
+          min-block-size: 240px;
+        `}
+      >
+        <EuiLoadingSpinner size="xl" />
+        <EuiTitle size="m">
           <h2>
             {i18n.translate('xpack.streams.sources.loadingTitle', {
               defaultMessage: 'Loading sources',
             })}
           </h2>
-        }
-      />
+        </EuiTitle>
+      </EuiFlexGroup>
     );
   }
 

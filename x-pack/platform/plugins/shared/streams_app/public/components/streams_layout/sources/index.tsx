@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useSourcesTable } from './sources_context';
 import type { SourceStatus, SourceViewModel } from './types';
 import { SOURCE_TYPE_CONFIG_BY_TYPE } from './source_type_config';
@@ -100,38 +101,57 @@ export const SourcesTab = () => {
 
   return (
     <>
-      <EuiSpacer size="m" />
-      <SourcesToolbar
-        query={query}
-        typeOptions={typeFilterOptions}
-        statusOptions={statusFilterOptions}
-        selectedTypes={selectedTypes}
-        selectedStatuses={selectedStatuses}
-        isRefreshing={isRefreshingUnit}
-        onQueryChange={setQuery}
-        onSelectedTypesChange={setSelectedTypes}
-        onSelectedStatusesChange={setSelectedStatuses}
-        onRefresh={refreshUnit}
-        onAddSource={openCreateModal}
-      />
-      <EuiSpacer size="s" />
-      <SourcesGrid
-        status={isLoadingUnit ? 'loading' : isUnitUnavailable ? 'unavailable' : 'ready'}
-        sources={sortedSources}
-        selectedSources={selectedSources}
-        hasActiveFilters={
-          query.trim().length > 0 || selectedTypes.length > 0 || selectedStatuses.length > 0
-        }
-        visibleColumns={visibleColumnIds}
-        pagination={pagination}
-        sortingColumns={sortingColumns}
-        onVisibleColumnsChange={setVisibleColumnIds}
-        onPaginationChange={setPagination}
-        onSortingChange={setSortingColumns}
-        onSelectionChange={setSelectedSources}
-        onOpenSource={openSourceFlyout}
-        onRequestDelete={setSourcesPendingDeletion}
-      />
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        css={css`
+          flex: 1 1 auto;
+          min-block-size: 0;
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="m" />
+          <SourcesToolbar
+            query={query}
+            typeOptions={typeFilterOptions}
+            statusOptions={statusFilterOptions}
+            selectedTypes={selectedTypes}
+            selectedStatuses={selectedStatuses}
+            isRefreshing={isRefreshingUnit}
+            onQueryChange={setQuery}
+            onSelectedTypesChange={setSelectedTypes}
+            onSelectedStatusesChange={setSelectedStatuses}
+            onRefresh={refreshUnit}
+            onAddSource={openCreateModal}
+          />
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={true}
+          css={css`
+            min-block-size: 0;
+          `}
+        >
+          <SourcesGrid
+            status={isLoadingUnit ? 'loading' : isUnitUnavailable ? 'unavailable' : 'ready'}
+            sources={sortedSources}
+            selectedSources={selectedSources}
+            hasActiveFilters={
+              query.trim().length > 0 || selectedTypes.length > 0 || selectedStatuses.length > 0
+            }
+            visibleColumns={visibleColumnIds}
+            pagination={pagination}
+            sortingColumns={sortingColumns}
+            onVisibleColumnsChange={setVisibleColumnIds}
+            onPaginationChange={setPagination}
+            onSortingChange={setSortingColumns}
+            onSelectionChange={setSelectedSources}
+            onOpenSource={openSourceFlyout}
+            onRequestDelete={setSourcesPendingDeletion}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {isCreateModalOpen && (
         <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
       )}
