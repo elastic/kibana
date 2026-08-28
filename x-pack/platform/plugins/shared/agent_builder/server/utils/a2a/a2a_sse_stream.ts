@@ -21,6 +21,47 @@ interface AsyncGeneratorToA2ASSEOptions {
 }
 
 /**
+ * Consumes the JSON-RPC event stream and writes A2A-formatted SSE frames
+ * through the provided `writeFrame` callback. Emits a terminal `event: error`
+ * frame if the source throws. Never rejects; all errors are handled inline
+ * so the caller does not need to attach its own error handler for correctness.
+ */
+async function pumpEventsToFrames({
+  stream,
+  writeFrame,
+  signal,
+  requestId,
+  logger,
+}: {
+  stream: AsyncGenerator<JSONRPCResponse, void, undefined>;
+  writeFrame: (frame: string) => void;
+  signal: AbortSignal;
+  requestId: string | number | null;
+  logger: Pick<Logger, 'debug' | 'error'>;
+}): Promise<void> {
+  try {
+    for await (const event of stream) {
+      if (signal.aborted) break;
+      writeFrame(`id: ${Date.now()}\ndata: ${JSON.stringify(event)}\n\n`);
+    }
+  } catch (streamError) {
+    logger.error(`A2A SSE: streaming error: ${streamError}`);
+    const a2aError =
+      streamError instanceof A2AError
+        ? streamError
+        : A2AError.internalError(
+            streamError instanceof Error ? streamError.message : String(streamError)
+          );
+    const errorResponse = {
+      jsonrpc: '2.0' as const,
+      id: requestId ?? null,
+      error: a2aError.toJSONRPCError(),
+    };
+    writeFrame(`id: ${Date.now()}\nevent: error\ndata: ${JSON.stringify(errorResponse)}\n\n`);
+  }
+}
+
+/**
  * Pipes an A2A JSON-RPC AsyncGenerator into a Node Readable stream that emits
  * SSE frames matching the A2A wire format used by the SDK reference server:
  *
@@ -58,10 +99,8 @@ export const asyncGeneratorToA2ASSE = (
     write(': keep-alive\n\n');
   }, KEEP_ALIVE_INTERVAL_MS);
 
-  const stopKeepAlive = () => clearInterval(keepAliveId);
-
   const endStream = () => {
-    stopKeepAlive();
+    clearInterval(keepAliveId);
     if (!output.writableEnded) {
       output.end();
     }
@@ -77,32 +116,12 @@ export const asyncGeneratorToA2ASSE = (
   }
   signal.addEventListener('abort', onAbort, { once: true });
 
-  (async () => {
-    try {
-      for await (const event of stream) {
-        if (signal.aborted) break;
-        const frame = `id: ${Date.now()}\ndata: ${JSON.stringify(event)}\n\n`;
-        writeFrame(frame);
-      }
-    } catch (streamError) {
-      logger.error(`A2A SSE: streaming error: ${streamError}`);
-      const a2aError =
-        streamError instanceof A2AError
-          ? streamError
-          : A2AError.internalError(
-              streamError instanceof Error ? streamError.message : String(streamError)
-            );
-      const errorResponse = {
-        jsonrpc: '2.0' as const,
-        id: requestId ?? null,
-        error: a2aError.toJSONRPCError(),
-      };
-      writeFrame(`id: ${Date.now()}\nevent: error\ndata: ${JSON.stringify(errorResponse)}\n\n`);
-    } finally {
+  pumpEventsToFrames({ stream, writeFrame, signal, requestId, logger })
+    .catch((err) => logger.error(`A2A SSE: unhandled pump error: ${err}`))
+    .finally(() => {
       signal.removeEventListener('abort', onAbort);
       endStream();
-    }
-  })();
+    });
 
   return output;
 };
