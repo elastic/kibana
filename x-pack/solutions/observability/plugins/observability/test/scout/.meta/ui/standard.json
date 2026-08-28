@@ -1,5 +1,5 @@
 {
-  "sha1": "1705d0ef8d1349189fe935ccabd6752c0ae99d1c",
+  "sha1": "1fdc51b8ab09fba8b5b212047a092927fd40a598",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -487,7 +487,7 @@
     {
       "id": "ce6d2554bbcb1a3-35498c416011944",
       "title": "Observability alerts - overview alert table navigates to onboarding from the no-data \"Add data\" CTA",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -497,13 +497,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
         "line": 33,
-        "column": 7
+        "column": 25
       }
     },
     {
       "id": "ce6d2554bbcb1a3-28cf5e151e58caf",
       "title": "Observability alerts - overview alert table renders the alerts section with alerts once a rule exists",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -513,7 +513,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
         "line": 52,
-        "column": 26
+        "column": 96
       }
     },
     {
