@@ -23,6 +23,7 @@ export const TRUSTED_DEVICES_URL = '/app/security/administration/trusted_devices
 export const ENDPOINT_EXCEPTIONS_URL = '/app/security/administration/endpoint_exceptions';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';
+export const CUSTOM_YARA_SIGNATURES_URL = '/app/security/administration/custom_yara_signatures';
 export const HOST_ISOLATION_EXCEPTIONS_URL = `app/security/administration/host_isolation_exceptions`;
 export const RESPONSE_ACTIONS_HISTORY = `app/security/administration/response_actions_history`;
 
