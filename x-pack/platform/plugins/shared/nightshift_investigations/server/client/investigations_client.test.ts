@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -96,6 +96,19 @@ const makeSoAttrs = (
   ...overrides,
 });
 
+const SO_VERSION = 'WzEsMV0=';
+
+const makeSo = (
+  overrides: Partial<NightshiftInvestigationAttributes> = {},
+  { id = 'inv-1', version = SO_VERSION }: { id?: string; version?: string } = {}
+): SavedObject<NightshiftInvestigationAttributes> => ({
+  id,
+  type: 'nightshift-investigation',
+  references: [],
+  version,
+  attributes: makeSoAttrs(overrides),
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
@@ -111,11 +124,12 @@ describe('NightshiftInvestigationsClient.get()', () => {
   });
 
   it('returns full structured output from SO', async () => {
-    const attrs = makeSoAttrs({
-      conversation_id: 'conv-1',
-      impact: { entities: [{ name: 'checkout-service' }] },
-    });
-    mockInvestigationSoClient.get.mockResolvedValue(attrs);
+    mockInvestigationSoClient.get.mockResolvedValue(
+      makeSo({
+        conversation_id: 'conv-1',
+        impact: { entities: [{ name: 'checkout-service' }] },
+      })
+    );
     const result = await makeClient().get('inv-1');
 
     expect(result).toEqual({
@@ -142,7 +156,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
   it('returns subject.summary from the SO subject_summary attribute', async () => {
     const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
     mockInvestigationSoClient.get.mockResolvedValue(
-      makeSoAttrs({
+      makeSo({
         subject_type: 'significant_event',
         subject_id: 'event-42',
         subject_summary: long,
@@ -159,13 +173,13 @@ describe('NightshiftInvestigationsClient.get()', () => {
   });
 
   it('omits subject.summary when subject_summary is absent', async () => {
-    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs());
+    mockInvestigationSoClient.get.mockResolvedValue(makeSo());
     const result = await makeClient().get('inv-1');
     expect(result.subject).toEqual({ type: 'alert', id: 'alert-42' });
   });
 
   it('does not call workflow execution when SO is found with terminal status', async () => {
-    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs());
+    mockInvestigationSoClient.get.mockResolvedValue(makeSo());
     await makeClient().get('inv-1');
     expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
   });
@@ -173,7 +187,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
   describe('stale-running reconciliation', () => {
     it('reconciles when SO says running but workflow is completed', async () => {
       mockInvestigationSoClient.get.mockResolvedValue(
-        makeSoAttrs({ status: 'running', completed_at: undefined })
+        makeSo({ status: 'running', completed_at: undefined })
       );
       mockManagement.getWorkflowExecution.mockResolvedValue({
         status: ExecutionStatus.COMPLETED,
@@ -186,13 +200,14 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(result.completed_at).toBe('2024-01-01T02:00:00Z');
       expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
         'inv-1',
-        expect.objectContaining({ status: 'completed', completed_at: '2024-01-01T02:00:00Z' })
+        expect.objectContaining({ status: 'completed', completed_at: '2024-01-01T02:00:00Z' }),
+        { version: SO_VERSION }
       );
     });
 
     it('reconciles when SO says running but workflow has failed', async () => {
       mockInvestigationSoClient.get.mockResolvedValue(
-        makeSoAttrs({ status: 'running', completed_at: undefined, error: undefined })
+        makeSo({ status: 'running', completed_at: undefined, error: undefined })
       );
       mockManagement.getWorkflowExecution.mockResolvedValue({
         status: ExecutionStatus.FAILED,
@@ -208,13 +223,14 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('secret-token-xyz'));
       expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
         'inv-1',
-        expect.objectContaining({ status: 'failed', error: 'Investigation failed' })
+        expect.objectContaining({ status: 'failed', error: 'Investigation failed' }),
+        { version: SO_VERSION }
       );
     });
 
     it('does not reconcile when workflow is also still running', async () => {
       mockInvestigationSoClient.get.mockResolvedValue(
-        makeSoAttrs({ status: 'running', completed_at: undefined })
+        makeSo({ status: 'running', completed_at: undefined })
       );
       mockManagement.getWorkflowExecution.mockResolvedValue({
         status: ExecutionStatus.RUNNING,
@@ -228,7 +244,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
 
     it('falls back to the SO status when the engine lookup fails', async () => {
       mockInvestigationSoClient.get.mockResolvedValue(
-        makeSoAttrs({ status: 'running', completed_at: undefined })
+        makeSo({ status: 'running', completed_at: undefined })
       );
       mockManagement.getWorkflowExecution.mockRejectedValue(new Error('engine unavailable'));
 
@@ -238,9 +254,24 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('engine unavailable'));
     });
 
+    it('warns and keeps running when the workflow execution no longer exists', async () => {
+      mockInvestigationSoClient.get.mockResolvedValue(
+        makeSo({ status: 'running', completed_at: undefined })
+      );
+      mockManagement.getWorkflowExecution.mockResolvedValue(undefined);
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.status).toBe('running');
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('workflow execution no longer exists')
+      );
+      expect(mockInvestigationSoClient.update).not.toHaveBeenCalled();
+    });
+
     it('does not fail if SO update during reconciliation throws', async () => {
       mockInvestigationSoClient.get.mockResolvedValue(
-        makeSoAttrs({ status: 'running', completed_at: undefined })
+        makeSo({ status: 'running', completed_at: undefined })
       );
       mockManagement.getWorkflowExecution.mockResolvedValue({
         status: ExecutionStatus.COMPLETED,
@@ -260,7 +291,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         investigationSoClient: mockInvestigationSoClient,
       });
       mockInvestigationSoClient.get.mockResolvedValue(
-        makeSoAttrs({ status: 'running', completed_at: undefined })
+        makeSo({ status: 'running', completed_at: undefined })
       );
 
       const result = await client.get('inv-1');
@@ -370,14 +401,7 @@ describe('NightshiftInvestigationsClient.list()', () => {
 
   describe('stale-running reconciliation', () => {
     const runningListResult = () => ({
-      results: [
-        {
-          id: 'inv-running',
-          type: 'nightshift-investigation',
-          references: [],
-          attributes: makeSoAttrs({ status: 'running', completed_at: undefined }),
-        },
-      ],
+      results: [makeSo({ status: 'running', completed_at: undefined }, { id: 'inv-running' })],
       total: 1,
       page: 1,
       size: 20,
@@ -396,7 +420,8 @@ describe('NightshiftInvestigationsClient.list()', () => {
       expect(result.results[0].completed_at).toBe('2024-01-01T02:00:00Z');
       expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
         'inv-running',
-        expect.objectContaining({ status: 'completed' })
+        expect.objectContaining({ status: 'completed' }),
+        { version: SO_VERSION }
       );
     });
 
@@ -647,7 +672,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 describe('NightshiftInvestigationsClient.update()', () => {
   beforeEach(() => {
     mockInvestigationSoClient.get.mockResolvedValue(
-      makeSoAttrs({ status: 'running', completed_at: undefined })
+      makeSo({ status: 'running', completed_at: undefined })
     );
   });
 
@@ -661,7 +686,7 @@ describe('NightshiftInvestigationsClient.update()', () => {
   });
 
   it('is an idempotent no-op when replaying the same terminal status', async () => {
-    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs({ status: 'completed' }));
+    mockInvestigationSoClient.get.mockResolvedValue(makeSo({ status: 'completed' }));
 
     await expect(
       makeClient().update('inv-1', { status: 'completed', summary: 'Replayed.' })
@@ -670,7 +695,7 @@ describe('NightshiftInvestigationsClient.update()', () => {
   });
 
   it('throws InvestigationConflictError when moving a settled investigation back to running', async () => {
-    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs({ status: 'completed' }));
+    mockInvestigationSoClient.get.mockResolvedValue(makeSo({ status: 'completed' }));
 
     await expect(makeClient().update('inv-1', { status: 'running' })).rejects.toThrow(
       InvestigationConflictError
@@ -679,7 +704,7 @@ describe('NightshiftInvestigationsClient.update()', () => {
   });
 
   it('throws InvestigationConflictError when changing one terminal status to another', async () => {
-    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs({ status: 'cancelled' }));
+    mockInvestigationSoClient.get.mockResolvedValue(makeSo({ status: 'cancelled' }));
 
     await expect(makeClient().update('inv-1', { status: 'failed' })).rejects.toThrow(
       InvestigationConflictError
@@ -695,7 +720,8 @@ describe('NightshiftInvestigationsClient.update()', () => {
 
     expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
       'inv-1',
-      expect.objectContaining({ status: 'failed', error: 'Agent timed out.' })
+      expect.objectContaining({ status: 'failed', error: 'Agent timed out.' }),
+      { version: SO_VERSION }
     );
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Agent timed out.'));
   });
@@ -705,7 +731,8 @@ describe('NightshiftInvestigationsClient.update()', () => {
 
     expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
       'inv-1',
-      expect.objectContaining({ status: 'failed', error: 'Investigation failed' })
+      expect.objectContaining({ status: 'failed', error: 'Investigation failed' }),
+      { version: SO_VERSION }
     );
   });
 
@@ -717,7 +744,8 @@ describe('NightshiftInvestigationsClient.update()', () => {
 
     expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
       'inv-1',
-      expect.objectContaining({ status: 'completed', summary: 'All clear.' })
+      expect.objectContaining({ status: 'completed', summary: 'All clear.' }),
+      { version: SO_VERSION }
     );
     const [, attrs] = mockInvestigationSoClient.update.mock.calls[0];
     expect(attrs).not.toHaveProperty('error');
@@ -736,7 +764,25 @@ describe('NightshiftInvestigationsClient.update()', () => {
         status: 'completed',
         conversation_id: 'conv-1',
         impact: { entities: [{ name: 'checkout-service' }] },
-      })
+      }),
+      { version: SO_VERSION }
+    );
+  });
+
+  it('writes with the version it read and rethrows a concurrent-write conflict', async () => {
+    mockInvestigationSoClient.get.mockResolvedValue(
+      makeSo({ status: 'running', completed_at: undefined })
+    );
+    mockInvestigationSoClient.update.mockRejectedValue(
+      SavedObjectsErrorHelpers.createConflictError('nightshift-investigation', 'inv-1')
+    );
+
+    await expect(makeClient().update('inv-1', { status: 'completed' })).rejects.toThrow();
+    expect(mockInvestigationSoClient.update).toHaveBeenCalledTimes(1);
+    expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
+      'inv-1',
+      expect.objectContaining({ status: 'completed' }),
+      { version: SO_VERSION }
     );
   });
 });
@@ -769,7 +815,7 @@ describe('NightshiftInvestigationsClient.ensureSavedObject()', () => {
   });
 
   it('is a no-op when the saved object already exists', async () => {
-    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs());
+    mockInvestigationSoClient.get.mockResolvedValue(makeSo());
 
     await makeClient().ensureSavedObject(EXECUTION_ID);
 
@@ -829,19 +875,34 @@ describe('NightshiftInvestigationsClient.ensureSavedObject()', () => {
 
   it('cancels a superseded running investigation sharing the concurrency key', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
-    mockInvestigationSoClient.findByConcurrencyKey.mockResolvedValue({
-      id: 'inv-old',
-      type: 'nightshift-investigation',
-      references: [],
-      attributes: makeSoAttrs({ status: 'running', concurrency_key: 'key-1' }),
-    });
+    mockInvestigationSoClient.findByConcurrencyKey.mockResolvedValue(
+      makeSo({ status: 'running', concurrency_key: 'key-1' }, { id: 'inv-old' })
+    );
 
     await makeClient().ensureSavedObject(EXECUTION_ID);
 
     expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
       'inv-old',
-      expect.objectContaining({ status: 'cancelled' })
+      expect.objectContaining({ status: 'cancelled' }),
+      { version: SO_VERSION }
     );
+  });
+
+  it('still creates the saved object when the superseded cancel loses a write race', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
+    mockInvestigationSoClient.findByConcurrencyKey.mockResolvedValue(
+      makeSo({ status: 'running', concurrency_key: 'key-1' }, { id: 'inv-old' })
+    );
+    mockInvestigationSoClient.update.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createConflictError('nightshift-investigation', 'inv-old')
+    );
+
+    await expect(makeClient().ensureSavedObject(EXECUTION_ID)).resolves.toBeUndefined();
+
+    expect(mockInvestigationSoClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: EXECUTION_ID })
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-old'));
   });
 
   it('throws InvestigationNotFoundError when the execution does not exist', async () => {

@@ -81,13 +81,12 @@ export class InvestigationSavedObjectClient {
     );
   }
 
-  async get(id: string): Promise<NightshiftInvestigationAttributes | undefined> {
+  async get(id: string): Promise<SavedObject<NightshiftInvestigationAttributes> | undefined> {
     try {
-      const so = await this.savedObjectsClient.get<NightshiftInvestigationAttributes>(
+      return await this.savedObjectsClient.get<NightshiftInvestigationAttributes>(
         NIGHTSHIFT_INVESTIGATION_SO_TYPE,
         id
       );
-      return so.attributes;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return undefined;
@@ -96,8 +95,14 @@ export class InvestigationSavedObjectClient {
     }
   }
 
-  async update(id: string, attributes: InvestigationSavedObjectUpdateAttributes): Promise<void> {
-    await this.savedObjectsClient.update(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, attributes);
+  async update(
+    id: string,
+    attributes: InvestigationSavedObjectUpdateAttributes,
+    options: { version?: string } = {}
+  ): Promise<void> {
+    await this.savedObjectsClient.update(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, attributes, {
+      version: options.version,
+    });
   }
 
   async findByConcurrencyKey(

@@ -408,11 +408,27 @@ export class NightshiftInvestigationsClient {
   }): Promise<void> {
     const superseded = await this.investigationSoClient.findByConcurrencyKey(concurrency_key);
 
-    if (superseded && !isTerminalStatus(superseded.attributes.status)) {
-      await this.investigationSoClient.update(superseded.id, {
-        status: 'cancelled',
-        completed_at: new Date().toISOString(),
-      });
+    if (!superseded || isTerminalStatus(superseded.attributes.status)) {
+      return;
+    }
+
+    try {
+      await this.investigationSoClient.update(
+        superseded.id,
+        {
+          status: 'cancelled',
+          completed_at: new Date().toISOString(),
+        },
+        { version: superseded.version }
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isConflictError(error)) {
+        this.logger.warn(
+          `Skipped cancelling superseded investigation "${superseded.id}": it was concurrently modified`
+        );
+        return;
+      }
+      throw error;
     }
   }
 
@@ -424,14 +440,14 @@ export class NightshiftInvestigationsClient {
 
     const { status, error, ...output } = state;
 
-    if (isTerminalStatus(existing.status)) {
+    if (isTerminalStatus(existing.attributes.status)) {
       // Replaying the same terminal status is an idempotent success — the workflow persist
       // steps retry when a response is lost. Anything else (a late progress report, a
       // superseded run's final persist) must not overwrite a settled record.
-      if (status === existing.status) {
+      if (status === existing.attributes.status) {
         return;
       }
-      throw new InvestigationConflictError(investigationId, existing.status);
+      throw new InvestigationConflictError(investigationId, existing.attributes.status);
     }
 
     if (status === 'failed' && error) {
@@ -445,25 +461,29 @@ export class NightshiftInvestigationsClient {
       ...output,
     };
 
-    await this.investigationSoClient.update(investigationId, attrs);
+    await this.investigationSoClient.update(investigationId, attrs, {
+      version: existing.version,
+    });
   }
 
   async get(investigationId: string): Promise<GetInvestigationResponse> {
-    const soAttrs = await this.investigationSoClient.get(investigationId);
+    const so = await this.investigationSoClient.get(investigationId);
 
-    if (!soAttrs) {
+    if (!so) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const response = toInvestigationResponse({ id: investigationId, attrs: soAttrs });
+    const response = toInvestigationResponse({ id: investigationId, attrs: so.attributes });
 
-    if (soAttrs.status === 'running') {
-      const reconciled = await this.reconcileStaleRunningStatus(investigationId).catch((err) => {
-        this.logger.warn(
-          `Failed to reconcile status for investigation "${investigationId}": ${err.message}`
-        );
-        return undefined;
-      });
+    if (so.attributes.status === 'running') {
+      const reconciled = await this.reconcileStaleRunningStatus(investigationId, so.version).catch(
+        (err) => {
+          this.logger.warn(
+            `Failed to reconcile status for investigation "${investigationId}": ${err.message}`
+          );
+          return undefined;
+        }
+      );
       if (reconciled) {
         response.status = reconciled.status;
         response.completed_at = reconciled.completed_at;
@@ -475,7 +495,8 @@ export class NightshiftInvestigationsClient {
   }
 
   private async reconcileStaleRunningStatus(
-    investigationId: string
+    investigationId: string,
+    version: string | undefined
   ): Promise<{ status: InvestigationStatus; completed_at?: string; error?: string } | undefined> {
     if (!this.workflowsManagement) {
       return undefined;
@@ -489,6 +510,9 @@ export class NightshiftInvestigationsClient {
     );
 
     if (!execution) {
+      this.logger.warn(
+        `Investigation "${investigationId}" is marked running but its workflow execution no longer exists; the status cannot be reconciled`
+      );
       return undefined;
     }
 
@@ -507,11 +531,13 @@ export class NightshiftInvestigationsClient {
       this.logger.warn(`Investigation "${investigationId}" failed: ${execution.error.message}`);
     }
 
-    await this.investigationSoClient.update(investigationId, correction).catch((err) => {
-      this.logger.warn(
-        `Failed to reconcile stale SO status for investigation "${investigationId}": ${err.message}`
-      );
-    });
+    await this.investigationSoClient
+      .update(investigationId, correction, { version })
+      .catch((err) => {
+        this.logger.warn(
+          `Failed to reconcile stale SO status for investigation "${investigationId}": ${err.message}`
+        );
+      });
 
     return {
       status: workflowStatus,
@@ -552,23 +578,25 @@ export class NightshiftInvestigationsClient {
     // page-bounded) so list and get never disagree about a stale status. Failures fall back to
     // the raw SO status — the list must not fail just because the engine is unreachable.
     await Promise.all(
-      results
-        .filter((item) => item.status === 'running')
-        .map(async (item) => {
-          const reconciled = await this.reconcileStaleRunningStatus(item.investigation_id).catch(
-            (err) => {
-              this.logger.warn(
-                `Failed to reconcile status for investigation "${item.investigation_id}" in list: ${err.message}`
-              );
-              return undefined;
-            }
-          );
-          if (reconciled) {
-            item.status = reconciled.status;
-            item.completed_at = reconciled.completed_at;
-            item.error = reconciled.error;
+      result.results.map(async (so, index) => {
+        if (so.attributes.status !== 'running') {
+          return;
+        }
+        const item = results[index];
+        const reconciled = await this.reconcileStaleRunningStatus(so.id, so.version).catch(
+          (err) => {
+            this.logger.warn(
+              `Failed to reconcile status for investigation "${so.id}" in list: ${err.message}`
+            );
+            return undefined;
           }
-        })
+        );
+        if (reconciled) {
+          item.status = reconciled.status;
+          item.completed_at = reconciled.completed_at;
+          item.error = reconciled.error;
+        }
+      })
     );
 
     return { results, page: result.page, size: result.size, total: result.total };
