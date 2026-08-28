@@ -17,7 +17,7 @@ import {
   SubagentMode,
 } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
-import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
+import type { ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
@@ -99,7 +99,6 @@ export const createSubagentTool = ({
   agentId,
   executionId: parentExecutionId,
   connectorId,
-  capabilities,
   subAgentExecutor,
   abortSignal,
   backgroundExecutionService,
@@ -110,7 +109,6 @@ export const createSubagentTool = ({
   agentId: string;
   executionId: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
@@ -183,7 +181,6 @@ export const createSubagentTool = ({
             conversationId: newChildId,
             prompt: fullPrompt,
             connectorId: selectedConnectorId,
-            capabilities,
             ...(run_in_background ? {} : { abortSignal }),
           });
 
@@ -227,7 +224,6 @@ export const createSubagentTool = ({
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
           agentId,
           connectorId: selectedConnectorId,
-          capabilities,
           parentExecutionId,
           prompt: fullPrompt,
           // background agents should continue running even if main execution completes

@@ -34,9 +34,27 @@ describe('generateYamlSchemaFromConnectors', () => {
       ];
       const schema = generateYamlSchemaFromConnectors(connectors);
       expect(schema).toBeDefined();
-      // strict mode should throw if required fields are missing
+    });
+
+    it('rejects an empty steps array when the other required fields are valid', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          summary: 'Console',
+          description: 'Console',
+          type: 'console',
+          paramsSchema: z.object({
+            message: z.string(),
+          }),
+          outputSchema: z.object({
+            message: z.string(),
+          }),
+        },
+      ];
+      const schema = generateYamlSchemaFromConnectors(connectors);
+
       expect(() =>
         schema.parse({
+          ...BASE_WORKFLOW,
           steps: [],
         })
       ).toThrow();
