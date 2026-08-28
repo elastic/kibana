@@ -48,8 +48,11 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
+import {
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+  VEGA_SUPPORTED_TRIGGERS,
+} from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
