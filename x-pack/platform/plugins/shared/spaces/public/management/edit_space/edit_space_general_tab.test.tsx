@@ -21,6 +21,7 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -35,7 +36,7 @@ import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
 import { getSecurityLicenseMock } from '../security_license.mock';
 
-const space = { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true };
+const space = { id: asSpaceId('default'), name: 'Default', disabledFeatures: [], _reserved: true };
 const history = scopedHistoryMock.create();
 const getUrlForApp = (appId: string) => appId;
 const navigateToUrl = jest.fn();
@@ -144,7 +145,7 @@ describe('EditSpaceSettings', () => {
   it('shows feature visibility controls when allowed', async () => {
     const features = [
       new KibanaFeature({
-        id: 'feature-1',
+        id: asSpaceId('feature-1'),
         name: 'feature 1',
         app: [],
         category: DEFAULT_APP_CATEGORIES.kibana,
@@ -171,7 +172,7 @@ describe('EditSpaceSettings', () => {
 
   it('allows a space to be updated', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -216,7 +217,7 @@ describe('EditSpaceSettings', () => {
 
   it('specifies a color when updating a space without a color or imageUrl', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       initials: 'AB',
@@ -260,7 +261,7 @@ describe('EditSpaceSettings', () => {
 
   it('allows space to be deleted', async () => {
     const spaceToDelete = {
-      id: 'delete-me-space',
+      id: asSpaceId('delete-me-space'),
       name: 'Delete Me Space',
       description: 'This is a very nice space... for me to DELETE!',
       color: '#aabbcc',
@@ -295,7 +296,7 @@ describe('EditSpaceSettings', () => {
     // management page explicitly sets these fields when a new space is created, but it should also handle existing "legacy" spaces that do
     // not already have these fields set.
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: undefined,
@@ -335,7 +336,7 @@ describe('EditSpaceSettings', () => {
 
   it('warns when updating solution view', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -388,7 +389,7 @@ describe('EditSpaceSettings', () => {
 
   it('navigates away when cancel is clicked after changing the solution view', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -429,7 +430,7 @@ describe('EditSpaceSettings', () => {
   it('warns when updating features in the active space', async () => {
     const features = [
       new KibanaFeature({
-        id: 'feature-1',
+        id: asSpaceId('feature-1'),
         name: 'feature 1',
         app: [],
         category: DEFAULT_APP_CATEGORIES.kibana,
@@ -438,7 +439,7 @@ describe('EditSpaceSettings', () => {
     ];
 
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -503,7 +504,7 @@ describe('EditSpaceSettings', () => {
     ];
 
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -542,7 +543,7 @@ describe('EditSpaceSettings', () => {
 
   describe('unsaved changes prompt', () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -620,7 +621,7 @@ describe('EditSpaceSettings', () => {
   it('submits the disabled features list when the solution view is undefined', async () => {
     const features = [
       new KibanaFeature({
-        id: 'feature-1',
+        id: asSpaceId('feature-1'),
         name: 'feature 1',
         app: [],
         category: DEFAULT_APP_CATEGORIES.kibana,
@@ -629,7 +630,7 @@ describe('EditSpaceSettings', () => {
     ];
 
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -684,7 +685,7 @@ describe('EditSpaceSettings', () => {
   it('empties the disabled features list when the solution view non-classic', async () => {
     const features = [
       new KibanaFeature({
-        id: 'feature-1',
+        id: asSpaceId('feature-1'),
         name: 'feature 1',
         app: [],
         category: DEFAULT_APP_CATEGORIES.kibana,
@@ -693,7 +694,7 @@ describe('EditSpaceSettings', () => {
     ];
 
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -785,7 +786,7 @@ describe('EditSpaceSettings', () => {
     }: {
       isTierEligible?: boolean;
       spaceForRender?: {
-        id: string;
+        id: SpaceId;
         name: string;
         disabledFeatures: string[];
         projectRouting?: string;
@@ -945,7 +946,7 @@ describe('EditSpaceSettings', () => {
 
   it('includes projectRouting in updateSpace request when space has projectRouting', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -989,7 +990,7 @@ describe('EditSpaceSettings', () => {
       expect(updateSpaceSpy).toHaveBeenCalled();
       const callArgs = updateSpaceSpy.mock.calls[0][0];
       expect(callArgs).toMatchObject({
-        id: 'existing-space',
+        id: asSpaceId('existing-space'),
         name: 'Updated Space Name',
         projectRouting: '_alias:_origin',
       });
