@@ -38,6 +38,14 @@ export const ConversationDetailsFlyoutHeader: React.FC<{ onClose: () => void }> 
               />
             </EuiToolTip>
           </EuiFlexItem>
+          <div
+            style={{
+              display: ' inline-block',
+              width: '1px',
+              height: euiTheme.size.base,
+              background: euiTheme.colors.lightShade,
+            }}
+          />
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
