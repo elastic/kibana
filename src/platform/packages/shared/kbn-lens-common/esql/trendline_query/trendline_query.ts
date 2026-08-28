@@ -18,6 +18,7 @@ import {
   getTbucketResultColumn,
   getBucketResultColumnForField,
 } from './bucket';
+import { commandsHaveStats, flattenForkCommands } from './fork';
 import { walkTrackedColumn } from './scope_walker';
 
 export { buildTrendlineBucketExpression } from './bucket';
@@ -65,6 +66,9 @@ const resolveAfterCommand = (
  * wrapped in `AVG()` (e.g. `STATS AVG(bytes) BY BUCKET(...)`). When no metric
  * fields are given, it falls back to `STATS COUNT(*) BY BUCKET(...)`.
  *
+ * Queries with a top-level FORK are first reduced to the branch that produces
+ * the metric columns (see `flattenForkCommands`) before the rewrite applies.
+ *
  * Because the rewrite and the time-column resolution operate on the same AST
  * in a single pass, the returned column name is correct by construction for
  * the query the rewrite produced.
@@ -78,6 +82,8 @@ const rewriteTrendlineAst = (
   if (root.commands.length === 0) {
     throw new Error('Cannot append time bucket to an empty ES|QL query');
   }
+
+  flattenForkCommands(root.commands, metricFields);
 
   const bucketExpr = buildTrendlineBucketExpression(timeField);
   const tsStatsCommand = findFirstStatsAfterTs(root.commands);
@@ -193,7 +199,8 @@ export const buildTrendlineQueryWithMetricFieldMap = (
     throw new Error('Cannot append time bucket to an empty ES|QL query');
   }
 
-  const sourceQueryHasStats = root.commands.some((command) => command.name === 'stats');
+  flattenForkCommands(root.commands, metricFields);
+  const sourceQueryHasStats = commandsHaveStats(root.commands);
 
   const metricFieldMap = new Map<string, string>();
   if (!sourceQueryHasStats) {
