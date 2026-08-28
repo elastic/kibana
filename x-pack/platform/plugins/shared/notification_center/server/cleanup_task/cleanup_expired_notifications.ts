@@ -13,7 +13,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { severityTTLQuery } from '../lib/severity_ttl_query';
+import { SEVERITY_TTL_GROUPS } from '../../common/notification_schema';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 
 export const CLEANUP_PAGE_SIZE = 500;
@@ -28,7 +28,19 @@ interface CleanupAggregations {
 }
 
 /** Match every notification copy that has passed its severity retention window. */
-export const buildCleanupQuery = (): QueryDslQueryContainer => severityTTLQuery();
+export const buildCleanupQuery = (): QueryDslQueryContainer => ({
+  bool: {
+    should: [...SEVERITY_TTL_GROUPS.entries()].map(([days, severities]) => ({
+      bool: {
+        filter: [
+          { terms: { severity: severities } },
+          { range: { '@timestamp': { lt: `now-${days}d/d` } } },
+        ],
+      },
+    })),
+    minimum_should_match: 1,
+  },
+});
 
 /** Delete a group's expired history without touching copies written after the aggregation. */
 export const buildGroupCleanupQuery = (
