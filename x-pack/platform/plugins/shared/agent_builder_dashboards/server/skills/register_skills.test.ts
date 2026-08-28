@@ -92,6 +92,8 @@ describe('registerSkills', () => {
     expect(rules?.content).toContain('bottom with LIST layout');
     expect(rules?.content).toContain('Always hide axis titles');
     expect(rules?.content).toContain('ALWAYS prefer gradient area fills over solid');
+    expect(rules?.content).not.toContain('styling.secondary.label');
+    expect(rules?.content).not.toContain('areas.fill');
     expect(rules?.content).not.toContain('Gradient-filled areas are not available yet');
     expect(rules?.content).toContain('Do not remove visualization panels');
     expect(rules?.content).toContain('Describe that wanted edition in `edit_panels.query`');

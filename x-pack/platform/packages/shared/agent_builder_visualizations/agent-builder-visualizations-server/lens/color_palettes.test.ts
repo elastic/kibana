@@ -16,4 +16,12 @@ describe('getColorPalettesPromptContent', () => {
     expect(prompt).toContain('do not preserve invented static colors or background fills');
     expect(prompt).toContain('apply_color_to: "background"');
   });
+
+  it('tells the pie author to use the Lens default palette', () => {
+    const prompt = getColorPalettesPromptContent(SupportedChartType.Pie);
+
+    expect(prompt).toContain('PIE COLORING RULES');
+    expect(prompt).toContain('Omit explicit `color`');
+    expect(prompt).toContain('Lens default palette');
+  });
 });

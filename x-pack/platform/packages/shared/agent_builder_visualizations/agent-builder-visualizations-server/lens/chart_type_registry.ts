@@ -99,6 +99,8 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         'Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.',
       config: {
         rules: [
+          'Do not set a chart title. The primary metric name is the painted title; a dashboard chrome title on a metric is redundant.',
+          'A lone primary number is incomplete. From the same ES|QL columns, add a secondary metric with dynamic coloring (compare to the primary or a baseline — e.g. previous period, error rate next to request count, p95 next to avg) and/or a `background_chart` (`type: "trend"` sparkline, or `type: "bar"` when progress-to-max is meaningful). Skip adding a new secondary or background chart only if the panel already has one, or the query has no complementary field.',
           'When a secondary metric is a trend (period-over-period change, compare-to-primary delta, or paired with a trend/sparkline background chart), hide its title: set `styling.secondary.label.visible: false` and omit `label` on the secondary metric. Keep the value and dynamic coloring. Show a secondary label only when the secondary is a different named measure (e.g. error rate next to request count).',
         ],
         coloringRules: [
@@ -150,6 +152,8 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         rules: [
           'For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
           'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.',
+          'For area series, set `styling.areas.fill: "gradient"` rather than solid.',
+          'If there is only one series, hide the legend (`legend.visibility: "hidden"`). Otherwise place it outside at the bottom with `layout: { type: "list" }` (not grid) and include useful, well-formatted `legend.statistics`.',
         ],
         coloringRules: [
           'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
@@ -215,6 +219,11 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Pie or donut showing part-to-whole proportions as slices. Choose for percentage breakdowns with a limited number of categories, ideally fewer than 7 (e.g. "traffic distribution by browser as a donut").',
+      config: {
+        coloringRules: [
+          'Omit explicit `color` properties and use the Lens default palette. Only add colors when the user explicitly requests them.',
+        ],
+      },
     },
   },
   [SupportedChartType.Treemap]: {
