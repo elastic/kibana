@@ -92,8 +92,8 @@ function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]):
 function colorSection(): string {
   return `VISUAL DESIGN — ${CSS_VARS_GUIDANCE}
 - The panel sits on a dashboard beside Lens and Vega charts. It must read as part of that page, not as an embedded document from another product: same type scale, same spacing rhythm, same corner rounding.
-- Do NOT add a border around cards, containers, or the panel by default — separate elements using background-color contrast and spacing only. Only add a border (e.g. var(--cc-color-border)) if the user explicitly asks for one.
-- No drop shadows, no gradients, no decorative dividers, and no custom accent colors outside the tokens above.`;
+- Borders on cards and containers are fine — use var(--cc-color-border). Do NOT put a border around the panel itself: the dashboard already frames it, and a second frame reads as doubled.
+- No drop shadows, no gradients, and no custom accent colors outside the tokens above.`;
 }
 
 function buildSystemPromptStatic(): string {
