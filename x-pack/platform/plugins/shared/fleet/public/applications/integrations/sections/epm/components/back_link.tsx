@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { useStartServices } from '../../../../../../../hooks';
+import { useStartServices } from '../../../../../hooks';
 
-import { INTEGRATION_GROUPS } from '../../home/integration_groups';
+import { INTEGRATION_GROUPS } from '../screens/home/integration_groups';
 
 interface Props {
   queryParams: URLSearchParams;
