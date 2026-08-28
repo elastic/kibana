@@ -93,11 +93,10 @@ describe('ensureAuthorizedToRunWorkflow', () => {
     expect(clientArgs.authorization.ensureAuthorized).not.toHaveBeenCalled();
   });
 
-  it('surfaces not-found errors after authorization when at least one case resolves', async () => {
-    // A mix of one valid + one missing case: authorization runs (and succeeds) over the
-    // valid case, then the missing case surfaces as a 404. This ordering prevents the
-    // unauthorized caller from learning about the missing case via a 404 before
-    // the 403 fires on the unauthorized owner.
+  it('rejects with forbidden (not not-found) when the batch is mixed (some found, some missing)', async () => {
+    // A mix of one valid + one missing case: surfacing a 404 for the missing id would let an
+    // unauthorized caller enumerate which case ids exist across owners they cannot read.
+    // We therefore reject the whole batch with 403 so the caller learns nothing about existence.
     const soError = {
       id: 'missing-case',
       type: 'cases',
@@ -109,8 +108,8 @@ describe('ensureAuthorizedToRunWorkflow', () => {
 
     await expect(
       ensureAuthorizedToRunWorkflow({ ids: [caseA.id, 'missing-case'] }, clientArgs)
-    ).rejects.toThrow();
-    // Authorization was called first (with the valid case), before the 404.
-    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
+    ).rejects.toThrow('Unauthorized to run workflow on case');
+    // ensureAuthorized must NOT be called — the forbidden must fire before privilege check.
+    expect(clientArgs.authorization.ensureAuthorized).not.toHaveBeenCalled();
   });
 });

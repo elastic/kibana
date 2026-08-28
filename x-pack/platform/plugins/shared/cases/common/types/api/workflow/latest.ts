@@ -11,3 +11,10 @@ export type {
   RunCaseWorkflowRequest,
   RunCaseWorkflowResponse,
 } from './v1';
+
+export {
+  CaseWorkflowRunOriginSchema,
+  CasesWorkflowExecutionMetadataSchema,
+  RunCaseWorkflowRequestSchema,
+  RunCaseWorkflowResponseSchema,
+} from './v1';

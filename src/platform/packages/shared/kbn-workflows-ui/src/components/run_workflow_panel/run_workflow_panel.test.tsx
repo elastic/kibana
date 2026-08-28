@@ -11,7 +11,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { RunWorkflowPanel } from './run_workflow_panel';
-import type { RunWorkflowPanelProps } from './run_workflow_panel';
+import type { RunWorkflowExecutor, RunWorkflowPanelProps } from './run_workflow_panel';
 import * as i18n from './translations';
 import type { WorkflowSelectorConfig } from '../workflow_selector/workflow_utils';
 
@@ -414,6 +414,82 @@ describe('RunWorkflowPanel', () => {
       fireEvent.click(screen.getByTestId('inputs-modal-submit'));
 
       expect(screen.queryByTestId('run-workflow-inputs-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('with injected runWorkflow executor', () => {
+    it('calls the injected executor instead of the default mutation', async () => {
+      const runWorkflow: RunWorkflowExecutor = jest
+        .fn()
+        .mockResolvedValue({ workflowExecutionId: 'injected-exec-1' });
+
+      renderComponent({ runWorkflow });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      expect(runWorkflow).toHaveBeenCalledWith({
+        workflowId: 'test-workflow-id',
+        inputs: { alert_ids: ['alert-1'] },
+      });
+      expect(mockMutate).not.toHaveBeenCalled();
+    });
+
+    it('shows a success toast and closes the modal on success', async () => {
+      const runWorkflow: RunWorkflowExecutor = jest
+        .fn()
+        .mockResolvedValue({ workflowExecutionId: 'exec-ok' });
+      const onClose = jest.fn();
+
+      renderComponent({ runWorkflow, onClose });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      await waitFor(() => expect(mockAddSuccess).toHaveBeenCalled());
+      expect(mockAddSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ title: i18n.WORKFLOW_START_SUCCESS_TOAST })
+      );
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('shows an error toast and closes the modal on rejection', async () => {
+      const runWorkflow: RunWorkflowExecutor = jest
+        .fn()
+        .mockRejectedValue(new Error('executor failed'));
+      const onClose = jest.fn();
+
+      renderComponent({ runWorkflow, onClose });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      await waitFor(() => expect(mockAddError).toHaveBeenCalled());
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'executor failed' }),
+        { title: i18n.WORKFLOW_START_FAILED_TOAST }
+      );
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('merges extra inputs from the inputs modal with the base inputs when using injected executor', async () => {
+      mockWorkflowsData = [requiredInputsWorkflow];
+      const runWorkflow: RunWorkflowExecutor = jest
+        .fn()
+        .mockResolvedValue({ workflowExecutionId: 'exec-merged' });
+
+      renderComponent({ runWorkflow });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+      // The inputs modal is shown for a workflow with required inputs.
+      fireEvent.click(screen.getByTestId('inputs-modal-submit'));
+
+      await waitFor(() => expect(runWorkflow).toHaveBeenCalled());
+      expect(runWorkflow).toHaveBeenCalledWith({
+        workflowId: 'test-workflow-id',
+        inputs: { ticketId: 'ABC', alert_ids: ['alert-1'] },
+      });
     });
   });
 });
