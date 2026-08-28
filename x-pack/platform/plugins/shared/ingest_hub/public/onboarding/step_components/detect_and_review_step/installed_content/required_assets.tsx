@@ -43,7 +43,7 @@ export function RequiredAssets({ esAssets }: RequiredAssetsProps) {
   return (
     <EuiAccordion
       id="required-assets"
-      initialIsOpen={false}
+      initialIsOpen={true}
       extraAction={
         <EuiText size="xs" color="subdued">
           <FormattedMessage

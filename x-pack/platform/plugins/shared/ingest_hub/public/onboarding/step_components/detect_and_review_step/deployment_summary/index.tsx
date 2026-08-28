@@ -151,7 +151,11 @@ export function DeploymentSummary({
                 const entry = awsServicesMap?.get(id);
                 if (!entry) return null;
                 return (
-                  <EuiFlexItem key={id} grow={false}>
+                  <EuiFlexItem
+                    key={id}
+                    grow={false}
+                    style={{ flexBasis: 'calc(25% - 6px)', minWidth: 180 }}
+                  >
                     <ServiceTile
                       name={serviceNames[id] ?? entry.name}
                       status={statusByInstanceId[id] ?? 'instantiating'}

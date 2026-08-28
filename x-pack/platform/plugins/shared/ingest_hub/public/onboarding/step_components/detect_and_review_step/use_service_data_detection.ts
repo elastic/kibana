@@ -121,7 +121,11 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
       }
 
       // Check if any of this service's patterns have data.
-      if (queryData && entry && (contextStatus === 'detecting' || contextStatus === 'instantiating')) {
+      if (
+        queryData &&
+        entry &&
+        (contextStatus === 'detecting' || contextStatus === 'instantiating')
+      ) {
         const patterns = getServiceIndexPatterns(entry);
         const hasData = patterns.some((p) => queryData.results[p] === true);
         if (hasData) {

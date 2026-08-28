@@ -26,7 +26,7 @@ export function ServiceTile({ name, status, entry, deploymentMethod }: ServiceTi
         <EuiFlexItem>
           <EuiIcon type="checkCircle" size="l" aria-hidden color="success" />
         </EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+        <EuiFlexGroup direction="column" gutterSize="xs" responsive={false} alignItems="flexStart">
           <EuiFlexItem>
             <EuiText size="s">
               <strong>{name}</strong>
