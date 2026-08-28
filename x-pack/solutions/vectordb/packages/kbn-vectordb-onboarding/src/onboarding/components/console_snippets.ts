@@ -16,27 +16,27 @@ export const fillPlaceholders = (snippet: string, url?: string, apiKey?: string)
 };
 
 export const HAVE_VECTORS_INGEST = `# Create an index with a dense_vector field
-PUT my-vectors
+PUT my_dense_vectors
 {
   "mappings": {
     "properties": {
-      "vector": {
-        "type": "dense_vector"
-      },
+      "vector": { "type": "dense_vector" },
       "text": { "type": "text" }
     }
   }
 }
 
-# Index a document with your pre-computed embedding
-POST my-vectors/_doc
-{
-  "text": "Elasticsearch is a distributed search and analytics engine.",
-  "vector": [0.12, -0.04, 0.88, 0.21, 0.55]
-}`;
+# Index documents with your pre-computed embeddings
+POST my_dense_vectors/_bulk
+{ "index": {} }
+{ "text": "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.", "vector": [0.12, -0.04, 0.88, 0.21, 0.55] }
+{ "index": {} }
+{ "text": "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.", "vector": [0.4, 0.5, 0.82, -0.3, -0.1] }
+{ "index": {} }
+{ "text": "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.", "vector": [0.2, 0.18, 0.32, -0.5, -0.01] }`;
 
 export const HAVE_VECTORS_SEARCH = `# Run a kNN search with your query vector
-POST my-vectors/_search
+POST my_dense_vectors/_search
 {
   "knn": {
     "field": "vector",
@@ -44,25 +44,31 @@ POST my-vectors/_search
   }
 }`;
 
-// TODO: placeholder example — replace with the final hybrid search example
 export const HAVE_VECTORS_SEARCH_HYBRID = `# Run a hybrid search combining kNN and lexical matches
-POST my-vectors/_search
+POST my_dense_vectors/_search
 {
   "retriever": {
-    "rrf": {
+    "linear": {
       "retrievers": [
         {
-          "knn": {
-            "field": "vector",
-            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
-          }
+          "retriever": {
+            "knn": {
+              "field": "vector",
+              "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
+              "k": 10
+            }
+          },
+          "normalizer": "minmax"
         },
         {
-          "standard": {
-            "query": {
-              "match": { "text": "what is elasticsearch?" }
+          "retriever": {
+            "standard": {
+              "query": {
+                "match": { "text": "What is a good national park for backpacking?" }
+              }
             }
-          }
+          },
+          "normalizer": "minmax"
         }
       ]
     }
@@ -70,57 +76,41 @@ POST my-vectors/_search
 }`;
 
 export const GENERATE_VECTORS_INGEST = `# Create an index that generates vectors automatically
-PUT my-vectors
+PUT my_semantic_vectors
 {
   "mappings": {
     "properties": {
-      "text": { "type": "semantic_text" }
+      "content": { "type": "text", "copy_to": "semantic_content" },
+      "semantic_content": { "type": "semantic_text" }
     }
   }
 }
 
-# Index a document — Elasticsearch generates the embedding for you
-POST my-vectors/_doc
-{
-  "text": "Elasticsearch is a distributed search and analytics engine."
-}`;
+# Index documents — Elasticsearch generates the embeddings for you
+POST my_semantic_vectors/_bulk
+{ "index": {} }
+{ "content": "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano." }
+{ "index": {} }
+{ "content": "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees." }
+{ "index": {} }
+{ "content": "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing." }`;
 
 export const GENERATE_VECTORS_SEARCH = `# Run a semantic search using natural language
-POST my-vectors/_search
+POST my_semantic_vectors/_search
 {
   "query": {
-    "semantic": {
-      "field": "text",
-      "query": "what is elasticsearch?"
-    }
+    "match": { "semantic_content": "What is a good national park for backpacking?" }
   }
 }`;
 
-// TODO: placeholder example — replace with the final hybrid search example
 export const GENERATE_VECTORS_SEARCH_HYBRID = `# Run a hybrid search combining semantic and lexical matches
-POST my-vectors/_search
+POST my_semantic_vectors/_search
 {
   "retriever": {
-    "rrf": {
-      "retrievers": [
-        {
-          "standard": {
-            "query": {
-              "semantic": {
-                "field": "text",
-                "query": "what is elasticsearch?"
-              }
-            }
-          }
-        },
-        {
-          "standard": {
-            "query": {
-              "match": { "text": "what is elasticsearch?" }
-            }
-          }
-        }
-      ]
+    "linear": {
+      "query": "What is a good national park for backpacking?",
+      "fields": ["content", "semantic_content"],
+      "normalizer": "minmax"
     }
   }
 }`;

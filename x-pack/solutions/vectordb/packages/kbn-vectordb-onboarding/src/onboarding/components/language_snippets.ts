@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { SnippetSet } from './languages';
-
-export const HAVE_VECTORS_INGEST_SNIPPETS: SnippetSet = {
+export const HAVE_VECTORS_INGEST_SNIPPETS = {
   python: `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
@@ -16,7 +14,7 @@ client = Elasticsearch(
 )
 
 client.indices.create(
-    index="my-vectors",
+    index="my_dense_vectors",
     mappings={
         "properties": {
             "vector": {"type": "dense_vector"},
@@ -25,13 +23,26 @@ client.indices.create(
     },
 )
 
-client.index(
-    index="my-vectors",
-    document={
-        "text": "Elasticsearch is a search engine.",
-        "vector": [0.12, -0.04, 0.88, 0.21, 0.55],
-    },
-)`,
+client.bulk(
+    operations=[
+        {"index": {"_index": "my_dense_vectors"}},
+        {
+            "text": "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.",
+            "vector": [0.12, -0.04, 0.88, 0.21, 0.55],
+        },
+        {"index": {"_index": "my_dense_vectors"}},
+        {
+            "text": "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.",
+            "vector": [0.4, 0.5, 0.82, -0.3, -0.1],
+        },
+        {"index": {"_index": "my_dense_vectors"}},
+        {
+            "text": "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.",
+            "vector": [0.2, 0.18, 0.32, -0.5, -0.01],
+        },
+    ],
+)
+`,
   javascript: `import { Client } from "@elastic/elasticsearch";
 
 const client = new Client({
@@ -40,7 +51,7 @@ const client = new Client({
 });
 
 await client.indices.create({
-  index: "my-vectors",
+  index: "my_dense_vectors",
   mappings: {
     properties: {
       vector: { type: "dense_vector" },
@@ -49,99 +60,194 @@ await client.indices.create({
   },
 });
 
-await client.index({
-  index: "my-vectors",
-  document: {
-    text: "Elasticsearch is a search engine.",
-    vector: [0.12, -0.04, 0.88, 0.21, 0.55],
-  },
-});`,
+await client.bulk({
+  operations: [
+    { index: { _index: "my_dense_vectors" } },
+    {
+      text: "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.",
+      vector: [0.12, -0.04, 0.88, 0.21, 0.55],
+    },
+    { index: { _index: "my_dense_vectors" } },
+    {
+      text: "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.",
+      vector: [0.4, 0.5, 0.82, -0.3, -0.1],
+    },
+    { index: { _index: "my_dense_vectors" } },
+    {
+      text: "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.",
+      vector: [0.2, 0.18, 0.32, -0.5, -0.01],
+    },
+  ],
+});
+`,
   java: `import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import co.elastic.clients.transport.rest_client.RestClientTransport;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
+import co.elastic.clients.elasticsearch._helpers.bulk.BulkIngester;
 
-RestClient rest = RestClient.builder(HttpHost.create("https://your-elasticsearch-url"))
-    .setDefaultHeaders(new Header[]{new BasicHeader("Authorization", "ApiKey YOUR_API_KEY")})
-    .build();
-ElasticsearchClient client = new ElasticsearchClient(
-    new RestClientTransport(rest, new JacksonJsonpMapper())
-);
+import java.io.IOException;
+import java.util.List;
 
-client.indices().create(c -> c
-    .index("my-vectors")
-    .mappings(m -> m
-        .properties("vector", p -> p.denseVector(d -> d))
-        .properties("text", p -> p.text(t -> t))
-    )
-);
+public class BulkVectorIngestion {
 
-Map<String, Object> doc = Map.of(
-    "text", "Elasticsearch is a search engine.",
-    "vector", List.of(0.12, -0.04, 0.88, 0.21, 0.55)
-);
-client.index(i -> i.index("my-vectors").document(doc));`,
+    public record JsonVector(String text, float[] vector) {
+    }
+
+    private static final List<JsonVector> DOCS = List.of(
+        new JsonVector("Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.", new float[]{0.12f, -0.04f, 0.88f, 0.21f, 0.55f}),
+        new JsonVector("Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.", new float[]{0.4f, 0.5f, 0.82f, -0.3f, -0.1f}),
+        new JsonVector("Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.", new float[]{0.2f, 0.18f, 0.32f, -0.5f, -0.01f})
+    );
+
+    public static void main(String[] args) throws IOException {
+
+        try (ElasticsearchClient esClient = ElasticsearchClient.of(e -> e.host("https://your-elasticsearch-url").apiKey("YOUR_API_KEY"));
+            BulkIngester<Void> ingester = BulkIngester.of(b -> b.client(esClient))) {
+
+            esClient.indices().create(c -> c
+               .index("my_dense_vectors")
+               .mappings(m -> m
+                   .properties("text", p -> p.text(t -> t))
+                   .properties("vector", p -> p.denseVector(d -> d))
+               )
+            );
+
+            DOCS.forEach(doc -> ingester.add(op -> op
+               .index(idx -> idx
+                   .index("my_dense_vectors")
+                   .document(doc)
+               )
+            ));
+        }
+    }
+}
+`,
   go: `package main
 
 import (
-    "context"
-    "strings"
+	"context"
+	"log"
 
-    "github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/esdsl"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/types"
 )
 
-func main() {
-    es, _ := elasticsearch.NewClient(elasticsearch.Config{
-        Addresses: []string{"https://your-elasticsearch-url"},
-        APIKey:    "YOUR_API_KEY",
-    })
+type document struct {
+	Text   string    \`json:"text"\`
+	Vector []float32 \`json:"vector"\`
+}
 
-    es.Indices.Create("my-vectors",
-        es.Indices.Create.WithBody(strings.NewReader(\`{
+func main() {
+	ctx := context.Background()
+
+	es, err := elasticsearch.NewTyped(
+		elasticsearch.WithAddresses("https://your-elasticsearch-url"),
+		elasticsearch.WithAPIKey("YOUR_API_KEY"),
+	)
+	if err != nil {
+		log.Fatalf("failed to create the client: %s", err)
+	}
+
+	if _, err := es.Indices.Create("my_dense_vectors").
+		Mappings(esdsl.NewTypeMapping().
+			AddProperty("vector", esdsl.NewDenseVectorProperty()).
+			AddProperty("text", esdsl.NewTextProperty())).
+		Do(ctx); err != nil {
+		log.Fatalf("failed to create the index: %s", err)
+	}
+
+	bulk := es.Bulk().Index("my_dense_vectors")
+
+	for _, doc := range []document{
+		{Text: "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.", Vector: []float32{0.12, -0.04, 0.88, 0.21, 0.55}},
+		{Text: "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.", Vector: []float32{0.4, 0.5, 0.82, -0.3, -0.1}},
+		{Text: "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.", Vector: []float32{0.2, 0.18, 0.32, -0.5, -0.01}},
+	} {
+		if err := bulk.IndexOp(types.IndexOperation{}, doc); err != nil {
+			log.Fatalf("failed to add document to the bulk request: %s", err)
+		}
+	}
+
+	response, err := bulk.Do(ctx)
+	if err != nil {
+		log.Fatalf("bulk request failed: %s", err)
+	}
+	if response.Errors {
+		for _, item := range response.Items {
+			for _, op := range item {
+				if op.Error != nil {
+					log.Printf("failed to index document (status %d): %s", op.Status, op.Error.Type)
+				}
+			}
+		}
+	}
+}
+`,
+  rust: `#![recursion_limit = "1024"]
+
+use elasticsearch::{
+    Elasticsearch, BulkParts, indices::IndicesCreateParts,
+    auth::Credentials, http::request::JsonBody, http::transport::Transport,
+};
+use serde_json::{json, Value};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let creds = Credentials::EncodedApiKey("YOUR_API_KEY".into());
+    let transport = Transport::single_node("https://your-elasticsearch-url")?
+        .clone_with_auth(Some(creds));
+    let client = Elasticsearch::new(transport);
+
+    client.indices()
+        .create(IndicesCreateParts::Index("my_dense_vectors"))
+        .body(json!({
             "mappings": {
                 "properties": {
                     "vector": { "type": "dense_vector" },
-                    "text":   { "type": "text" }
+                    "text": { "type": "text" }
                 }
             }
-        }\`)),
-    )
+        }))
+        .send().await?
+        .error_for_status_code()?;
 
-    es.Index("my-vectors", strings.NewReader(\`{
-        "text": "Elasticsearch is a search engine.",
-        "vector": [0.12, -0.04, 0.88, 0.21, 0.55]
-    }\`))
-}`,
-  rust: `use elasticsearch::{
-    Elasticsearch, IndexParts, indices::IndicesCreateParts,
-    auth::Credentials, http::transport::Transport,
-};
-use serde_json::json;
+    let body: Vec<JsonBody<Value>> = vec![
+        json!({ "index": {} }).into(),
+        json!({
+            "text": "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.",
+            "vector": [0.12, -0.04, 0.88, 0.21, 0.55]
+        }).into(),
+        json!({ "index": {} }).into(),
+        json!({
+            "text": "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.",
+            "vector": [0.4, 0.5, 0.82, -0.3, -0.1]
+        }).into(),
+        json!({ "index": {} }).into(),
+        json!({
+            "text": "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.",
+            "vector": [0.2, 0.18, 0.32, -0.5, -0.01]
+        }).into(),
+    ];
 
-let creds = Credentials::ApiKey("YOUR_API_KEY".into(), String::new());
-let transport = Transport::single_node("https://your-elasticsearch-url")?
-    .with_auth(creds);
-let client = Elasticsearch::new(transport);
+    let response = client.bulk(BulkParts::Index("my_dense_vectors"))
+        .body(body)
+        .send().await?
+        .error_for_status_code()?;
 
-client.indices()
-    .create(IndicesCreateParts::Index("my-vectors"))
-    .body(json!({
-        "mappings": {
-            "properties": {
-                "vector": { "type": "dense_vector" },
-                "text":   { "type": "text" }
+    let response_body = response.json::<Value>().await?;
+    if response_body["errors"] == true {
+        for item in response_body["items"].as_array().into_iter().flatten() {
+            if !item["index"]["error"].is_null() {
+                eprintln!(
+                    "failed to index document (status {}): {}",
+                    item["index"]["status"], item["index"]["error"]
+                );
             }
         }
-    }))
-    .send().await?;
+    }
 
-client.index(IndexParts::Index("my-vectors"))
-    .body(json!({
-        "text": "Elasticsearch is a search engine.",
-        "vector": [0.12, -0.04, 0.88, 0.21, 0.55]
-    }))
-    .send().await?;`,
+    Ok(())
+}
+`,
   csharp: `using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 
@@ -149,215 +255,506 @@ var settings = new ElasticsearchClientSettings(new Uri("https://your-elasticsear
     .Authentication(new ApiKey("YOUR_API_KEY"));
 var client = new ElasticsearchClient(settings);
 
-await client.Indices.CreateAsync("my-vectors", c => c
+await client.Indices.CreateAsync("my_dense_vectors", c => c
     .Mappings(m => m
         .Properties(p => p
-            .DenseVector("vector", v => v)
+            .DenseVector("vector")
             .Text("text")
         )
     )
 );
 
-await client.IndexAsync(new {
-    text = "Elasticsearch is a search engine.",
-    vector = new[] { 0.12, -0.04, 0.88, 0.21, 0.55 }
-}, i => i.Index("my-vectors"));`,
+await client.BulkAsync("my_dense_vectors", b => b
+    .IndexMany(new[]
+    {
+        new {
+            text = "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.",
+            vector = new[] { 0.12f, -0.04f, 0.88f, 0.21f, 0.55f }
+        },
+        new {
+            text = "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.",
+            vector = new[] { 0.4f, 0.5f, 0.82f, -0.3f, -0.1f }
+        },
+        new {
+            text = "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.",
+            vector = new[] { 0.2f, 0.18f, 0.32f, -0.5f, -0.01f }
+        },
+    })
+);
+`,
+  ruby: `require 'elasticsearch'
+
+client = Elasticsearch::Client.new(
+  url: 'https://your-elasticsearch-url',
+  api_key: 'YOUR_API_KEY'
+)
+
+client.indices.create(
+  index: 'my_dense_vectors',
+  body: {
+    mappings: {
+      properties: { vector: { type: 'dense_vector' }, text: { type: 'text' } }
+    }
+  }
+)
+
+client.bulk(
+  index: 'my_dense_vectors',
+  body: [
+    { index: { data: { text: 'Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.', vector: [0.12, -0.04, 0.88, 0.21, 0.55] } } },
+    { index: { data: { text: 'Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.', vector: [0.4, 0.5, 0.82, -0.3, -0.1] } } },
+    { index: { data: { text: 'Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.', vector: [0.2, 0.18, 0.32, -0.5, -0.01] } } }
+  ]
+)
+`,
 };
 
-export const HAVE_VECTORS_SEARCH_SNIPPETS: SnippetSet = {
-  python: `result = client.search(
-    index="my-vectors",
+export const HAVE_VECTORS_SEARCH_SNIPPETS = {
+  python: `from elasticsearch import Elasticsearch
+
+client = Elasticsearch(
+    "https://your-elasticsearch-url",
+    api_key="YOUR_API_KEY",
+)
+
+result = client.search(
+    index="my_dense_vectors",
     knn={
         "field": "vector",
         "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
     },
 )
-print(result["hits"]["hits"])`,
-  javascript: `const result = await client.search({
-  index: "my-vectors",
+print(result["hits"]["hits"])
+`,
+  javascript: `import { Client } from "@elastic/elasticsearch";
+
+const client = new Client({
+  node: "https://your-elasticsearch-url",
+  auth: { apiKey: "YOUR_API_KEY" },
+});
+
+const result = await client.search({
+  index: "my_dense_vectors",
   knn: {
     field: "vector",
     query_vector: [0.10, -0.02, 0.91, 0.18, 0.60],
   },
 });
-console.log(result.hits.hits);`,
-  java: `SearchResponse<JsonData> result = client.search(s -> s
-    .index("my-vectors")
-    .knn(k -> k
-        .field("vector")
-        .queryVector(List.of(0.10f, -0.02f, 0.91f, 0.18f, 0.60f))
-    ),
-    JsonData.class
-);
-result.hits().hits().forEach(h -> System.out.println(h.source()));`,
-  go: `res, _ := es.Search(
-    es.Search.WithIndex("my-vectors"),
-    es.Search.WithBody(strings.NewReader(\`{
-        "knn": {
-            "field": "vector",
-            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
+console.log(result.hits.hits);
+`,
+  java: `import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.json.JsonData;
+
+import java.io.IOException;
+import java.util.List;
+
+public class KnnSearchFixed {
+
+    public static void main(String[] args) throws IOException {
+
+        try (ElasticsearchClient client = ElasticsearchClient.of(e -> e.host("https://your-elasticsearch-url").apiKey("YOUR_API_KEY"))) {
+
+            SearchResponse<JsonData> result = client.search(s -> s
+                .index("my_dense_vectors")
+                .knn(k -> k
+                    .field("vector")
+                    .queryVector(List.of(0.10f, -0.02f, 0.91f, 0.18f, 0.60f))
+                ),
+                JsonData.class);
+            result.hits().hits().forEach(h -> System.out.println(h.score() + " | " + h.source()));
         }
-    }\`)),
+    }
+}
+`,
+  go: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/esdsl"
 )
-defer res.Body.Close()`,
-  rust: `use elasticsearch::SearchParts;
 
-let response = client.search(SearchParts::Index(&["my-vectors"]))
-    .body(json!({
-        "knn": {
-            "field": "vector",
-            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
-        }
-    }))
-    .send().await?;
+func main() {
+	ctx := context.Background()
 
-let body = response.json::<serde_json::Value>().await?;
-println!("{:#?}", body["hits"]["hits"]);`,
-  csharp: `var response = await client.SearchAsync<object>(s => s
-    .Indices("my-vectors")
+	es, err := elasticsearch.NewTyped(
+		elasticsearch.WithAddresses("https://your-elasticsearch-url"),
+		elasticsearch.WithAPIKey("YOUR_API_KEY"),
+	)
+	if err != nil {
+		log.Fatalf("failed to create the client: %s", err)
+	}
+
+	response, err := es.Search().
+		Index("my_dense_vectors").
+		Knn(esdsl.NewKnnSearch().
+			Field("vector").
+			QueryVector(0.10, -0.02, 0.91, 0.18, 0.60)).
+		Do(ctx)
+	if err != nil {
+		log.Fatalf("search failed: %s", err)
+	}
+
+	for _, hit := range response.Hits.Hits {
+		fmt.Println(*hit.Score_, string(hit.Source_))
+	}
+}
+`,
+  rust: `#![recursion_limit = "1024"]
+
+use elasticsearch::{Elasticsearch, SearchParts, auth::Credentials, http::transport::Transport};
+use serde_json::json;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let creds = Credentials::EncodedApiKey("YOUR_API_KEY".into());
+    let transport = Transport::single_node("https://your-elasticsearch-url")?
+        .clone_with_auth(Some(creds));
+    let client = Elasticsearch::new(transport);
+
+    let response = client.search(SearchParts::Index(&["my_dense_vectors"]))
+        .body(json!({
+            "knn": {
+                "field": "vector",
+                "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
+            }
+        }))
+        .send().await?
+        .error_for_status_code()?;
+
+    let body = response.json::<serde_json::Value>().await?;
+    println!("{:#?}", body["hits"]["hits"]);
+    Ok(())
+}
+`,
+  csharp: `using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
+
+var settings = new ElasticsearchClientSettings(new Uri("https://your-elasticsearch-url"))
+    .Authentication(new ApiKey("YOUR_API_KEY"));
+var client = new ElasticsearchClient(settings);
+
+var response = await client.SearchAsync<object>(s => s
+    .Indices("my_dense_vectors")
     .Knn(k => k
         .Field("vector")
         .QueryVector(new[] { 0.10f, -0.02f, 0.91f, 0.18f, 0.60f })
     )
 );
 
-foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
+foreach (var hit in response.Hits)
+    Console.WriteLine($"{hit.Score}  {hit.Source}");
+`,
+  ruby: `require 'elasticsearch'
+
+client = Elasticsearch::Client.new(
+  url: 'https://your-elasticsearch-url',
+  api_key: 'YOUR_API_KEY'
+)
+
+result = client.search(
+  index: 'my_dense_vectors',
+  body: { knn: { field: 'vector', query_vector: [0.10, -0.02, 0.91, 0.18, 0.60] } }
+)
+puts result['hits']['hits']
+`,
 };
 
-// TODO: placeholder examples — replace with the final hybrid search examples
-export const HAVE_VECTORS_SEARCH_HYBRID_SNIPPETS: SnippetSet = {
-  python: `result = client.search(
-    index="my-vectors",
+export const HAVE_VECTORS_SEARCH_HYBRID_SNIPPETS = {
+  python: `from elasticsearch import Elasticsearch
+
+client = Elasticsearch(
+    "https://your-elasticsearch-url",
+    api_key="YOUR_API_KEY",
+)
+
+result = client.search(
+    index="my_dense_vectors",
     retriever={
-        "rrf": {
+        "linear": {
             "retrievers": [
                 {
-                    "knn": {
-                        "field": "vector",
-                        "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
+                    "retriever": {
+                        "knn": {
+                           "field": "vector",
+                           "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
+                           "k": 10,
+                       }
+
                     }
                 },
                 {
-                    "standard": {
-                        "query": {"match": {"text": "what is elasticsearch?"}}
+                    "retriever": {
+                        "standard": {
+                           "query": {"match": {"text": "What is a good national park for backpacking?"}}
+                       }
+
                     }
                 },
             ]
         }
     },
 )
-print(result["hits"]["hits"])`,
-  javascript: `const result = await client.search({
-  index: "my-vectors",
+print(result["hits"]["hits"])
+`,
+  javascript: `import { Client } from "@elastic/elasticsearch";
+
+const client = new Client({
+  node: "https://your-elasticsearch-url",
+  auth: { apiKey: "YOUR_API_KEY" },
+});
+
+const result = await client.search({
+  index: "my_dense_vectors",
   retriever: {
-    rrf: {
+    linear: {
       retrievers: [
         {
-          knn: {
-            field: "vector",
-            query_vector: [0.10, -0.02, 0.91, 0.18, 0.60],
+          retriever: {
+            knn: {
+             field: "vector",
+             query_vector: [0.10, -0.02, 0.91, 0.18, 0.60],
+             k: 10,
+           },
+
           },
         },
         {
-          standard: {
-            query: { match: { text: "what is elasticsearch?" } },
+          retriever: {
+            standard: {
+             query: { match: { text: "What is a good national park for backpacking?" }   },
+           },
+
           },
         },
       ],
     },
   },
 });
-console.log(result.hits.hits);`,
-  java: `SearchResponse<JsonData> result = client.search(s -> s
-    .index("my-vectors")
-    .retriever(r -> r
-        .rrf(rrf -> rrf
-            .retrievers(k -> k
-                .knn(knn -> knn
-                    .field("vector")
-                    .queryVector(List.of(0.10f, -0.02f, 0.91f, 0.18f, 0.60f))
-                )
-            )
-            .retrievers(st -> st
-                .standard(std -> std
-                    .query(q -> q.match(m -> m.field("text").query("what is elasticsearch?")))
-                )
-            )
-        )
-    ),
-    JsonData.class
-);
-result.hits().hits().forEach(h -> System.out.println(h.source()));`,
-  go: `res, _ := es.Search(
-    es.Search.WithIndex("my-vectors"),
-    es.Search.WithBody(strings.NewReader(\`{
-        "retriever": {
-            "rrf": {
-                "retrievers": [
-                    {
-                        "knn": {
-                            "field": "vector",
-                            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
-                        }
-                    },
-                    {
-                        "standard": {
-                            "query": { "match": { "text": "what is elasticsearch?" } }
-                        }
-                    }
-                ]
-            }
-        }
-    }\`)),
-)
-defer res.Body.Close()`,
-  rust: `use elasticsearch::SearchParts;
+console.log(result.hits.hits);
+`,
+  java: `import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.ScoreNormalizer;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.json.JsonData;
 
-let response = client.search(SearchParts::Index(&["my-vectors"]))
-    .body(json!({
-        "retriever": {
-            "rrf": {
-                "retrievers": [
-                    {
-                        "knn": {
-                            "field": "vector",
-                            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
-                        }
-                    },
-                    {
-                        "standard": {
-                            "query": { "match": { "text": "what is elasticsearch?" } }
-                        }
-                    }
-                ]
-            }
-        }
-    }))
-    .send().await?;
+import java.io.IOException;
+import java.util.List;
 
-let body = response.json::<serde_json::Value>().await?;
-println!("{:#?}", body["hits"]["hits"]);`,
-  csharp: `var response = await client.SearchAsync<object>(s => s
-    .Indices("my-vectors")
-    .Retriever(r => r
-        .Rrf(rrf => rrf
-            .Retrievers(
-                rt => rt.Knn(k => k
-                    .Field("vector")
-                    .QueryVector(new[] { 0.10f, -0.02f, 0.91f, 0.18f, 0.60f })
+public class DenseHybridSearchFixed {
+
+    public static void main(String[] args) throws IOException {
+
+        try (ElasticsearchClient client = ElasticsearchClient.of(e -> e.host("https://your-elasticsearch-url").apiKey("YOUR_API_KEY"))) {
+
+            SearchResponse<JsonData> result = client.search(s -> s
+                .index("my_dense_vectors")
+                .retriever(r -> r
+                    .linear(linear -> linear
+                        .retrievers(k -> k
+                            .retriever(ir -> ir
+                                .knn(knn -> knn
+                                    .field("vector")
+                                    .queryVector(List.of(0.10f, -0.02f, 0.91f, 0.18f, 0.60f))
+                                    .k(10)
+                                )
+                            )
+                            .normalizer(ScoreNormalizer.Minmax)
+                            .weight(1.0f)
+                        )
+                        .retrievers(st -> st
+                            .retriever(ir -> ir
+                                .standard(std -> std
+                                    .query(q -> q.match(m -> m.field("text").query("What is a good national park for backpacking?")))
+                                )
+                            )
+                            .normalizer(ScoreNormalizer.Minmax)
+                            .weight(1.0f)
+                        )
+                    )
                 ),
-                rt => rt.Standard(st => st
-                    .Query(q => q.Match(m => m.Field("text").Query("what is elasticsearch?")))
-                )
-            )
-        )
-    )
+                JsonData.class
+            );
+            result.hits().hits().forEach(h -> System.out.println(h.score() + " | " + h.source()));
+        }
+    }
+}
+`,
+  go: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/esdsl"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/types/enums/scorenormalizer"
+)
+
+func main() {
+	ctx := context.Background()
+
+	es, err := elasticsearch.NewTyped(
+		elasticsearch.WithAddresses("https://your-elasticsearch-url"),
+		elasticsearch.WithAPIKey("YOUR_API_KEY"),
+	)
+	if err != nil {
+		log.Fatalf("failed to create the client: %s", err)
+	}
+
+	response, err := es.Search().
+		Index("my_dense_vectors").
+		Retriever(esdsl.NewLinearRetriever().
+			Retrievers(
+				esdsl.NewInnerRetriever(
+					scorenormalizer.Minmax,
+					esdsl.NewRetrieverContainer().
+						Knn(esdsl.NewKnnRetriever("vector", 10).
+							QueryVector(0.10, -0.02, 0.91, 0.18, 0.60)),
+					1.0,
+				),
+				esdsl.NewInnerRetriever(
+					scorenormalizer.Minmax,
+					esdsl.NewRetrieverContainer().
+						Standard(esdsl.NewStandardRetriever().
+							Query(esdsl.NewMatchQuery("text", "What is a good national park for backpacking?"))),
+					1.0,
+				),
+			)).
+		Do(ctx)
+	if err != nil {
+		log.Fatalf("search failed: %s", err)
+	}
+
+	for _, hit := range response.Hits.Hits {
+		fmt.Println(*hit.Score_, string(hit.Source_))
+	}
+}
+`,
+  rust: `#![recursion_limit = "1024"]
+
+use elasticsearch::{Elasticsearch, SearchParts, auth::Credentials, http::transport::Transport};
+use serde_json::json;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let creds = Credentials::EncodedApiKey("YOUR_API_KEY".into());
+    let transport = Transport::single_node("https://your-elasticsearch-url")?
+        .clone_with_auth(Some(creds));
+    let client = Elasticsearch::new(transport);
+
+    let response = client.search(SearchParts::Index(&["my_dense_vectors"]))
+        .body(json!({
+            "retriever": {
+                "linear": {
+                    "retrievers": [
+                        {
+                            "retriever": {
+                                "knn": {
+                                    "field": "vector",
+                                    "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
+                                    "k": 10
+                                }
+                            },
+                            "weight": 1.0,
+                            "normalizer": "minmax"
+                        },
+                        {
+                            "retriever": {
+                                "standard": {
+                                    "query": { "match": { "text": "What is a good national park for backpacking?" } }
+                                }
+                            },
+                            "weight": 1.0,
+                            "normalizer": "minmax"
+                        }
+                    ]
+                }
+            }
+        }))
+        .send().await?
+        .error_for_status_code()?;
+
+    let body = response.json::<serde_json::Value>().await?;
+    println!("{:#?}", body["hits"]["hits"]);
+
+    Ok(())
+}
+`,
+  csharp: `using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.QueryDsl;
+using Elastic.Transport;
+
+var settings = new ElasticsearchClientSettings(new Uri("https://your-elasticsearch-url"))
+    .Authentication(new ApiKey("YOUR_API_KEY"));
+var client = new ElasticsearchClient(settings);
+
+var response = await client.SearchAsync<object>(s => s
+    .Indices("my_dense_vectors")
+    .Retriever(r => r
+      .Linear(l => l
+          .Retrievers(
+              ir => ir
+                  .Retriever(rr => rr.Knn(k => k
+                      .Field("vector")
+                      .QueryVector(0.10f, -0.02f, 0.91f, 0.18f, 0.60f)
+                      .K(10)
+                      .NumCandidates(10)))
+                  .Normalizer(ScoreNormalizer.Minmax)
+                  .Weight(1.0f),
+              ir => ir
+                  .Retriever(rr => rr.Standard(st => st
+                      .Query(q => q.Match(m => m
+                          .Field("text")
+                          .Query("What is a good national park for backpacking?")))))
+                  .Normalizer(ScoreNormalizer.Minmax)
+                  .Weight(1.0f)
+          )
+      )
+  )
 );
 
-foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
+if (!response.IsValidResponse)
+{
+    Console.Error.WriteLine(response.DebugInformation);
+    return 1;
+}
+
+foreach (var hit in response.Hits)
+    Console.WriteLine($"{hit.Score}  {hit.Source}");
+
+return 0;
+`,
+  ruby: `require 'elasticsearch'
+
+client = Elasticsearch::Client.new(
+  url: 'https://your-elasticsearch-url',
+  api_key: 'YOUR_API_KEY'
+)
+
+result = client.search(
+  index: 'my_dense_vectors',
+  body: {
+    retriever: {
+      linear: {
+        retrievers: [
+          { retriever: { knn: { field: 'vector', query_vector: [0.10, -0.02, 0.91, 0.18, 0.60], k: 10 } } },
+          { retriever: { standard: { query: { match: { text: 'What is a good national park for backpacking?' } } } } }
+        ]
+      }
+    }
+  }
+)
+puts result['hits']['hits']
+`,
 };
 
-export const GENERATE_VECTORS_INGEST_SNIPPETS: SnippetSet = {
+export const GENERATE_VECTORS_INGEST_SNIPPETS = {
   python: `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
@@ -366,14 +763,26 @@ client = Elasticsearch(
 )
 
 client.indices.create(
-    index="my-vectors",
-    mappings={"properties": {"text": {"type": "semantic_text"}}},
+    index="my_semantic_vectors",
+    mappings={
+        "properties": {
+            "content": {"type": "text", "copy_to": "semantic_content"},
+            "semantic_content": {"type": "semantic_text"},
+        }
+    },
 )
 
-client.index(
-    index="my-vectors",
-    document={"text": "Elasticsearch is a search engine."},
-)`,
+client.bulk(
+    operations=[
+        {"index": {"_index": "my_semantic_vectors"}},
+        {"content": "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano."},
+        {"index": {"_index": "my_semantic_vectors"}},
+        {"content": "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees."},
+        {"index": {"_index": "my_semantic_vectors"}},
+        {"content": "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing."},
+    ],
+)
+`,
   javascript: `import { Client } from "@elastic/elasticsearch";
 
 const client = new Client({
@@ -382,79 +791,179 @@ const client = new Client({
 });
 
 await client.indices.create({
-  index: "my-vectors",
-  mappings: { properties: { text: { type: "semantic_text" } } },
+  index: "my_semantic_vectors",
+  mappings: {
+    properties: {
+      content: { type: "text", copy_to: "semantic_content" },
+      semantic_content: { type: "semantic_text" },
+    },
+  },
 });
 
-await client.index({
-  index: "my-vectors",
-  document: { text: "Elasticsearch is a search engine." },
-});`,
+await client.bulk({
+  operations: [
+    { index: { _index: "my_semantic_vectors" } },
+    { content: "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano." },
+    { index: { _index: "my_semantic_vectors" } },
+    { content: "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees." },
+    { index: { _index: "my_semantic_vectors" } },
+    { content: "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing." },
+  ],
+});
+`,
   java: `import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import co.elastic.clients.transport.rest_client.RestClientTransport;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
+import co.elastic.clients.elasticsearch._helpers.bulk.BulkIngester;
 
-RestClient rest = RestClient.builder(HttpHost.create("https://your-elasticsearch-url"))
-    .setDefaultHeaders(new Header[]{new BasicHeader("Authorization", "ApiKey YOUR_API_KEY")})
-    .build();
-ElasticsearchClient client = new ElasticsearchClient(
-    new RestClientTransport(rest, new JacksonJsonpMapper())
-);
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
-client.indices().create(c -> c
-    .index("my-vectors")
-    .mappings(m -> m
-        .properties("text", p -> p.semanticText(t -> t))
-    )
-);
+public class GenerateEmbeddings {
 
-Map<String, Object> doc = Map.of("text", "Elasticsearch is a search engine.");
-client.index(i -> i.index("my-vectors").document(doc));`,
+    private static final List<String> TEXTS = List.of(
+        "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.",
+        "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.",
+        "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing."
+    );
+
+    public static void main(String[] args) throws IOException {
+
+        try (ElasticsearchClient esClient = ElasticsearchClient.of(e -> e.host("https://your-elasticsearch-url").apiKey("YOUR_API_KEY"));
+            BulkIngester<Void> ingester = BulkIngester.of(b -> b.client(esClient))) {
+
+            esClient.indices().create(c -> c
+               .index("my_semantic_vectors")
+               .mappings(m -> m
+                   .properties("content", p -> p.text(t -> t.copyTo("semantic_content")))
+                   .properties("semantic_content", p -> p.semanticText(t -> t))
+               )
+            );
+
+            TEXTS.forEach(text -> ingester.add(op -> op
+               .index(i -> i
+                   .index("my_semantic_vectors")
+                   .document(Map.of("content", text))
+               )
+            ));
+        }
+    }
+}
+`,
   go: `package main
 
 import (
-    "strings"
+	"context"
+	"log"
 
-    "github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/esdsl"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/types"
 )
 
 func main() {
-    es, _ := elasticsearch.NewClient(elasticsearch.Config{
-        Addresses: []string{"https://your-elasticsearch-url"},
-        APIKey:    "YOUR_API_KEY",
-    })
+	ctx := context.Background()
 
-    es.Indices.Create("my-vectors",
-        es.Indices.Create.WithBody(strings.NewReader(\`{
-            "mappings": { "properties": { "text": { "type": "semantic_text" } } }
-        }\`)),
-    )
+	es, err := elasticsearch.NewTyped(
+		elasticsearch.WithAddresses("https://your-elasticsearch-url"),
+		elasticsearch.WithAPIKey("YOUR_API_KEY"),
+	)
+	if err != nil {
+		log.Fatalf("failed to create the client: %s", err)
+	}
 
-    es.Index("my-vectors", strings.NewReader(\`{
-        "text": "Elasticsearch is a search engine."
-    }\`))
-}`,
+	if _, err := es.Indices.Create("my_semantic_vectors").
+		Mappings(esdsl.NewTypeMapping().
+			AddProperty("content", esdsl.NewTextProperty().CopyTo("semantic_content")).
+			AddProperty("semantic_content", esdsl.NewSemanticTextProperty())).
+		Do(ctx); err != nil {
+		log.Fatalf("failed to create the index: %s", err)
+	}
+
+	bulk := es.Bulk().Index("my_semantic_vectors")
+
+	for _, text := range []string{
+		"Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.",
+		"Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.",
+		"Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.",
+	} {
+		if err := bulk.IndexOp(
+			types.IndexOperation{},
+			map[string]string{"content": text},
+		); err != nil {
+			log.Fatalf("failed to add document to the bulk request: %s", err)
+		}
+	}
+
+	response, err := bulk.Do(ctx)
+	if err != nil {
+		log.Fatalf("bulk request failed: %s", err)
+	}
+	if response.Errors {
+		for _, item := range response.Items {
+			for _, op := range item {
+				if op.Error != nil {
+					log.Printf("failed to index document (status %d): %s", op.Status, op.Error.Type)
+				}
+			}
+		}
+	}
+}
+`,
   rust: `use elasticsearch::{
-    Elasticsearch, IndexParts, indices::IndicesCreateParts,
-    auth::Credentials, http::transport::Transport,
+    Elasticsearch, BulkParts, indices::IndicesCreateParts,
+    auth::Credentials, http::request::JsonBody, http::transport::Transport,
 };
-use serde_json::json;
+use serde_json::{json, Value};
 
-let creds = Credentials::ApiKey("YOUR_API_KEY".into(), String::new());
-let transport = Transport::single_node("https://your-elasticsearch-url")?
-    .with_auth(creds);
-let client = Elasticsearch::new(transport);
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let creds = Credentials::EncodedApiKey("YOUR_API_KEY".into());
+    let transport = Transport::single_node("https://your-elasticsearch-url")?
+        .clone_with_auth(Some(creds));
+    let client = Elasticsearch::new(transport);
 
-client.indices()
-    .create(IndicesCreateParts::Index("my-vectors"))
-    .body(json!({ "mappings": { "properties": { "text": { "type": "semantic_text" } } } }))
-    .send().await?;
+    client.indices()
+        .create(IndicesCreateParts::Index("my_semantic_vectors"))
+        .body(json!({
+            "mappings": {
+                "properties": {
+                    "content": { "type": "text", "copy_to": "semantic_content" },
+                    "semantic_content": { "type": "semantic_text" }
+                }
+            }
+        }))
+        .send().await?
+        .error_for_status_code()?;
 
-client.index(IndexParts::Index("my-vectors"))
-    .body(json!({ "text": "Elasticsearch is a search engine." }))
-    .send().await?;`,
+    let body: Vec<JsonBody<Value>> = vec![
+        json!({ "index": {} }).into(),
+        json!({ "content": "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano." }).into(),
+        json!({ "index": {} }).into(),
+        json!({ "content": "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees." }).into(),
+        json!({ "index": {} }).into(),
+        json!({ "content": "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing." }).into(),
+    ];
+
+    let response = client.bulk(BulkParts::Index("my_semantic_vectors"))
+        .body(body)
+        .send().await?
+        .error_for_status_code()?;
+
+    let response_body = response.json::<Value>().await?;
+    if response_body["errors"] == true {
+        for item in response_body["items"].as_array().into_iter().flatten() {
+            if !item["index"]["error"].is_null() {
+                eprintln!(
+                    "failed to index document (status {}): {}",
+                    item["index"]["status"], item["index"]["error"]
+                );
+            }
+        }
+    }
+
+    Ok(())
+}
+`,
   csharp: `using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 
@@ -462,207 +971,378 @@ var settings = new ElasticsearchClientSettings(new Uri("https://your-elasticsear
     .Authentication(new ApiKey("YOUR_API_KEY"));
 var client = new ElasticsearchClient(settings);
 
-await client.Indices.CreateAsync("my-vectors", c => c
-    .Mappings(m => m.Properties(p => p.SemanticText("text")))
-);
-
-await client.IndexAsync(
-    new { text = "Elasticsearch is a search engine." },
-    i => i.Index("my-vectors")
-);`,
-};
-
-export const GENERATE_VECTORS_SEARCH_SNIPPETS: SnippetSet = {
-  python: `result = client.search(
-    index="my-vectors",
-    query={
-        "semantic": {
-            "field": "text",
-            "query": "what is elasticsearch?",
-        }
-    },
-)
-print(result["hits"]["hits"])`,
-  javascript: `const result = await client.search({
-  index: "my-vectors",
-  query: {
-    semantic: { field: "text", query: "what is elasticsearch?" },
-  },
-});
-console.log(result.hits.hits);`,
-  java: `SearchResponse<JsonData> result = client.search(s -> s
-    .index("my-vectors")
-    .query(q -> q
-        .semantic(sem -> sem.field("text").query("what is elasticsearch?"))
-    ),
-    JsonData.class
-);
-result.hits().hits().forEach(h -> System.out.println(h.source()));`,
-  go: `res, _ := es.Search(
-    es.Search.WithIndex("my-vectors"),
-    es.Search.WithBody(strings.NewReader(\`{
-        "query": { "semantic": { "field": "text", "query": "what is elasticsearch?" } }
-    }\`)),
-)
-defer res.Body.Close()`,
-  rust: `use elasticsearch::SearchParts;
-
-let response = client.search(SearchParts::Index(&["my-vectors"]))
-    .body(json!({
-        "query": { "semantic": { "field": "text", "query": "what is elasticsearch?" } }
-    }))
-    .send().await?;
-
-let body = response.json::<serde_json::Value>().await?;
-println!("{:#?}", body["hits"]["hits"]);`,
-  csharp: `var response = await client.SearchAsync<object>(s => s
-    .Indices("my-vectors")
-    .Query(q => q.Semantic(sem => sem
-        .Field("text")
-        .Query("what is elasticsearch?")
+await client.Indices.CreateAsync("my_semantic_vectors", c => c
+    .Mappings(m => m.Properties(p => p
+        .Text("content", t => t.CopyTo("semantic_content"))
+        .SemanticText("semantic_content")
     ))
 );
 
-foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
+await client.BulkAsync("my_semantic_vectors", b => b
+    .IndexMany(new[]
+    {
+        new { content = "Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano." },
+        new { content = "Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees." },
+        new { content = "Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing." },
+    })
+);
+`,
+  ruby: `require 'elasticsearch'
+
+client = Elasticsearch::Client.new(
+  url: 'https://your-elasticsearch-url',
+  api_key: 'YOUR_API_KEY'
+)
+
+client.indices.create(
+  index: 'my_semantic_vectors',
+  body: {
+    mappings: {
+      properties: {
+        content: { type: 'text', copy_to: 'semantic_content' },
+        semantic_content: { type: 'semantic_text' }
+      }
+    }
+  }
+)
+
+client.bulk(
+  index: 'my_semantic_vectors',
+  body: [
+    { index: { data: { content: 'Yellowstone National Park spans Wyoming, Montana, and Idaho, covering over 2.2 million acres. It is famous for the geyser Old Faithful and sits atop the Yellowstone Caldera, a supervolcano.' } } },
+    { index: { data: { content: 'Yosemite National Park covers over 750,000 acres in California. A UNESCO World Heritage Site, it is best known for its granite cliffs, waterfalls, and giant sequoia trees.' } } },
+    { index: { data: { content: 'Rocky Mountain National Park is known for its mountainous terrain, including Longs Peak, the highest in the park. It is a popular destination for hiking, camping, and wildlife viewing.' } } }
+  ]
+)
+`,
 };
 
-// TODO: placeholder examples — replace with the final hybrid search examples
-export const GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS: SnippetSet = {
-  python: `result = client.search(
-    index="my-vectors",
+export const GENERATE_VECTORS_SEARCH_SNIPPETS = {
+  python: `from elasticsearch import Elasticsearch
+
+client = Elasticsearch(
+    "https://your-elasticsearch-url",
+    api_key="YOUR_API_KEY",
+)
+
+result = client.search(
+    index="my_semantic_vectors",
+    query={"match": {"semantic_content": "What is a good national park for backpacking?"}},
+)
+print(result["hits"]["hits"])
+`,
+  javascript: `import { Client } from "@elastic/elasticsearch";
+
+const client = new Client({
+  node: "https://your-elasticsearch-url",
+  auth: { apiKey: "YOUR_API_KEY" },
+});
+
+const result = await client.search({
+  index: "my_semantic_vectors",
+  query: { match: { semantic_content: "What is a good national park for backpacking?" } },
+});
+console.log(result.hits.hits);
+`,
+  java: `import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.json.JsonData;
+
+import java.io.IOException;
+
+public class SemanticSearch {
+
+    public static void main(String[] args) throws IOException {
+
+        try (ElasticsearchClient client = ElasticsearchClient.of(e -> e.host("https://your-elasticsearch-url").apiKey("YOUR_API_KEY"))) {
+
+            SearchResponse<JsonData> result = client.search(s -> s
+                .index("my_semantic_vectors")
+                .query(q -> q
+                    .match(m -> m.field("semantic_content").query("What is a good national park for backpacking?"))
+                ),
+                JsonData.class);
+            result.hits().hits().forEach(h -> System.out.println(h.score() + " | " + h.source()));
+        }
+    }
+}
+`,
+  go: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/esdsl"
+)
+
+func main() {
+	ctx := context.Background()
+
+	es, err := elasticsearch.NewTyped(
+		elasticsearch.WithAddresses("https://your-elasticsearch-url"),
+		elasticsearch.WithAPIKey("YOUR_API_KEY"),
+	)
+	if err != nil {
+		log.Fatalf("failed to create the client: %s", err)
+	}
+
+	response, err := es.Search().
+		Index("my_semantic_vectors").
+		Query(esdsl.NewMatchQuery(
+			"semantic_content",
+			"What is a good national park for backpacking?",
+		)).
+		Do(ctx)
+	if err != nil {
+		log.Fatalf("search failed: %s", err)
+	}
+
+	for _, hit := range response.Hits.Hits {
+		fmt.Println(*hit.Score_, string(hit.Source_))
+	}
+}
+`,
+  rust: `use elasticsearch::{Elasticsearch, SearchParts, auth::Credentials, http::transport::Transport};
+use serde_json::json;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let creds = Credentials::EncodedApiKey("YOUR_API_KEY".into());
+    let transport = Transport::single_node("https://your-elasticsearch-url")?
+        .clone_with_auth(Some(creds));
+    let client = Elasticsearch::new(transport);
+
+    let response = client.search(SearchParts::Index(&["my_semantic_vectors"]))
+        .body(json!({
+            "query": { "match": { "semantic_content": "What is a good national park for backpacking?" } }
+        }))
+        .send().await?
+        .error_for_status_code()?;
+
+    let body = response.json::<serde_json::Value>().await?;
+    println!("{:#?}", body["hits"]["hits"]);
+    Ok(())
+}
+`,
+  csharp: `using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
+
+var settings = new ElasticsearchClientSettings(new Uri("https://your-elasticsearch-url"))
+    .Authentication(new ApiKey("YOUR_API_KEY"));
+var client = new ElasticsearchClient(settings);
+
+var response = await client.SearchAsync<object>(s => s
+    .Indices("my_semantic_vectors")
+    .Query(q => q.Match(m => m
+        .Field("semantic_content")
+        .Query("What is a good national park for backpacking?")
+    ))
+);
+
+foreach (var hit in response.Hits)
+    Console.WriteLine($"{hit.Score}  {hit.Source}");
+`,
+  ruby: `require 'elasticsearch'
+
+client = Elasticsearch::Client.new(
+  url: 'https://your-elasticsearch-url',
+  api_key: 'YOUR_API_KEY'
+)
+
+result = client.search(
+  index: 'my_semantic_vectors',
+  body: { query: { match: { semantic_content: 'What is a good national park for backpacking?' } } }
+)
+puts result['hits']['hits']
+`,
+};
+
+export const GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS = {
+  python: `from elasticsearch import Elasticsearch
+
+client = Elasticsearch(
+    "https://your-elasticsearch-url",
+    api_key="YOUR_API_KEY",
+)
+
+result = client.search(
+    index="my_semantic_vectors",
     retriever={
-        "rrf": {
-            "retrievers": [
-                {
-                    "standard": {
-                        "query": {
-                            "semantic": {
-                                "field": "text",
-                                "query": "what is elasticsearch?",
-                            }
-                        }
-                    }
-                },
-                {
-                    "standard": {
-                        "query": {"match": {"text": "what is elasticsearch?"}}
-                    }
-                },
-            ]
+        "linear": {
+            "query": "What is a good national park for backpacking?",
+            "fields": ["content", "semantic_content"],
+            "normalizer": "minmax",
         }
     },
 )
-print(result["hits"]["hits"])`,
-  javascript: `const result = await client.search({
-  index: "my-vectors",
+print(result["hits"]["hits"])
+`,
+  javascript: `import { Client } from "@elastic/elasticsearch";
+
+const client = new Client({
+  node: "https://your-elasticsearch-url",
+  auth: { apiKey: "YOUR_API_KEY" },
+});
+
+const result = await client.search({
+  index: "my_semantic_vectors",
   retriever: {
-    rrf: {
-      retrievers: [
-        {
-          standard: {
-            query: {
-              semantic: { field: "text", query: "what is elasticsearch?" },
-            },
-          },
-        },
-        {
-          standard: {
-            query: { match: { text: "what is elasticsearch?" } },
-          },
-        },
-      ],
+    linear: {
+      query: "What is a good national park for backpacking?",
+      fields: ["content", "semantic_content"],
+      normalizer: "minmax",
     },
   },
 });
-console.log(result.hits.hits);`,
-  java: `SearchResponse<JsonData> result = client.search(s -> s
-    .index("my-vectors")
-    .retriever(r -> r
-        .rrf(rrf -> rrf
-            .retrievers(sem -> sem
-                .standard(std -> std
-                    .query(q -> q.semantic(se -> se.field("text").query("what is elasticsearch?")))
-                )
-            )
-            .retrievers(lex -> lex
-                .standard(std -> std
-                    .query(q -> q.match(m -> m.field("text").query("what is elasticsearch?")))
-                )
-            )
-        )
-    ),
-    JsonData.class
-);
-result.hits().hits().forEach(h -> System.out.println(h.source()));`,
-  go: `res, _ := es.Search(
-    es.Search.WithIndex("my-vectors"),
-    es.Search.WithBody(strings.NewReader(\`{
-        "retriever": {
-            "rrf": {
-                "retrievers": [
-                    {
-                        "standard": {
-                            "query": {
-                                "semantic": { "field": "text", "query": "what is elasticsearch?" }
-                            }
-                        }
-                    },
-                    {
-                        "standard": {
-                            "query": { "match": { "text": "what is elasticsearch?" } }
-                        }
-                    }
-                ]
-            }
-        }
-    }\`)),
-)
-defer res.Body.Close()`,
-  rust: `use elasticsearch::SearchParts;
+console.log(result.hits.hits);
+`,
+  java: `import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.ScoreNormalizer;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.json.JsonData;
 
-let response = client.search(SearchParts::Index(&["my-vectors"]))
-    .body(json!({
-        "retriever": {
-            "rrf": {
-                "retrievers": [
-                    {
-                        "standard": {
-                            "query": {
-                                "semantic": { "field": "text", "query": "what is elasticsearch?" }
-                            }
-                        }
-                    },
-                    {
-                        "standard": {
-                            "query": { "match": { "text": "what is elasticsearch?" } }
-                        }
-                    }
-                ]
-            }
-        }
-    }))
-    .send().await?;
+import java.io.IOException;
 
-let body = response.json::<serde_json::Value>().await?;
-println!("{:#?}", body["hits"]["hits"]);`,
-  csharp: `var response = await client.SearchAsync<object>(s => s
-    .Indices("my-vectors")
-    .Retriever(r => r
-        .Rrf(rrf => rrf
-            .Retrievers(
-                rt => rt.Standard(st => st
-                    .Query(q => q.Semantic(sem => sem
-                        .Field("text")
-                        .Query("what is elasticsearch?")
-                    ))
+public class HybridSearchFixed {
+
+    public static void main(String[] args) throws IOException {
+
+        try (ElasticsearchClient client = ElasticsearchClient.of(e -> e.host("https://your-elasticsearch-url").apiKey("YOUR_API_KEY"))) {
+
+            SearchResponse<JsonData> result = client.search(s -> s
+                .index("my_semantic_vectors")
+                .retriever(r -> r
+                    .linear(l -> l
+                        .query("What is a good national park for backpacking?")
+                        .fields("content", "semantic_content")
+                        .normalizer(ScoreNormalizer.Minmax)
+                    )
                 ),
-                rt => rt.Standard(st => st
-                    .Query(q => q.Match(m => m.Field("text").Query("what is elasticsearch?")))
-                )
-            )
+                JsonData.class
+            );
+            result.hits().hits().forEach(h -> System.out.println(h.score() + " | " + h.source()));
+        }
+    }
+}
+`,
+  go: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/esdsl"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/types/enums/scorenormalizer"
+)
+
+func main() {
+	ctx := context.Background()
+
+	es, err := elasticsearch.NewTyped(
+		elasticsearch.WithAddresses("https://your-elasticsearch-url"),
+		elasticsearch.WithAPIKey("YOUR_API_KEY"),
+	)
+	if err != nil {
+		log.Fatalf("failed to create the client: %s", err)
+	}
+
+	response, err := es.Search().
+		Index("my_semantic_vectors").
+		Retriever(esdsl.NewLinearRetriever().
+			Query("What is a good national park for backpacking?").
+			Fields("content", "semantic_content").
+			Normalizer(scorenormalizer.Minmax)).
+		Do(ctx)
+	if err != nil {
+		log.Fatalf("search failed: %s", err)
+	}
+
+	for _, hit := range response.Hits.Hits {
+		fmt.Println(*hit.Score_, string(hit.Source_))
+	}
+}
+`,
+  rust: `use elasticsearch::{Elasticsearch, SearchParts, auth::Credentials, http::transport::Transport};
+use serde_json::json;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let creds = Credentials::EncodedApiKey("YOUR_API_KEY".into());
+    let transport = Transport::single_node("https://your-elasticsearch-url")?
+        .clone_with_auth(Some(creds));
+    let client = Elasticsearch::new(transport);
+
+    let response = client.search(SearchParts::Index(&["my_semantic_vectors"]))
+        .body(json!({
+            "retriever": {
+                "linear": {
+                    "query": "What is a good national park for backpacking?",
+                    "fields": ["content", "semantic_content"],
+                    "normalizer": "minmax"
+                }
+            }
+        }))
+        .send().await?
+        .error_for_status_code()?;
+
+    let body = response.json::<serde_json::Value>().await?;
+    println!("{:#?}", body["hits"]["hits"]);
+    Ok(())
+}
+`,
+  csharp: `using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
+
+var settings = new ElasticsearchClientSettings(new Uri("https://your-elasticsearch-url"))
+    .Authentication(new ApiKey("YOUR_API_KEY"));
+var client = new ElasticsearchClient(settings);
+
+var response = await client.SearchAsync<object>(s => s
+    .Indices("my_semantic_vectors")
+    .Retriever(r => r
+        .Linear(l => l
+            .Query("What is a good national park for backpacking?")
+            .Fields("content", "semantic_content")
+            .Normalizer(ScoreNormalizer.Minmax)
         )
     )
 );
 
-foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
+if (!response.IsValidResponse)
+{
+    Console.Error.WriteLine(response.DebugInformation);
+    return 1;
+}
+
+foreach (var hit in response.Hits)
+    Console.WriteLine($"{hit.Score}  {hit.Source}");
+
+return 0;
+`,
+  ruby: `require 'elasticsearch'
+
+client = Elasticsearch::Client.new(
+  url: 'https://your-elasticsearch-url',
+  api_key: 'YOUR_API_KEY'
+)
+
+result = client.search(
+  index: 'my_semantic_vectors',
+  body: {
+    retriever: {
+      linear: {
+        query: 'What is a good national park for backpacking?',
+        fields: ['content', 'semantic_content'],
+        normalizer: 'minmax'
+      }
+    }
+  }
+)
+puts result['hits']['hits']
+`,
 };
