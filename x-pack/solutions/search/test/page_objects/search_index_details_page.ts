@@ -205,11 +205,12 @@ export function SearchIndexDetailPageProvider({ getService, getPageObjects }: Ft
     async expectAddFieldToBeEnabled() {
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
       // The button stays disabled until the async user-privileges request resolves,
-      // so poll for the enabled state instead of sampling it once.
-      const isMappingsFieldEnabled = await testSubjects.waitForEnabled(
-        'indexDetailsMappingsAddField'
+      // so poll until it becomes enabled. Note: testSubjects.waitForEnabled cannot be
+      // used here because it returns the current state on the first successful find
+      // rather than waiting for the enabled transition.
+      await retry.waitFor('add field button to be enabled', () =>
+        testSubjects.isEnabled('indexDetailsMappingsAddField')
       );
-      expect(isMappingsFieldEnabled).to.be(true);
     },
 
     async expectDiscoverLinkExists() {
