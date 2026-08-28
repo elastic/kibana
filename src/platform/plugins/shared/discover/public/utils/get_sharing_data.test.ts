@@ -51,6 +51,19 @@ describe('getSharingData', () => {
     `);
   });
 
+  test('sets the CPS project routing on the serialized search source', async () => {
+    (services.cps!.cpsManager!.getProjectRouting as jest.Mock).mockReturnValue('_alias:*');
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
+    const result = await getSharingData(searchSourceMock, { columns: [] }, services);
+    expect(result.getSearchSource({}).projectRouting).toBe('_alias:*');
+  });
+
+  test('leaves the project routing unset when no CPS scope is active', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
+    const result = await getSharingData(searchSourceMock, { columns: [] }, services);
+    expect(result.getSearchSource({}).projectRouting).toBeUndefined();
+  });
+
   test('returns valid data for sharing when columns are selected', async () => {
     const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
     const result = await getSharingData(

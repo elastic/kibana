@@ -313,6 +313,10 @@ export class CsvGenerator {
 
     const { maxSizeBytes, maxRows, bom, escapeFormulaValues, timezone } = settings;
     const indexPatternTitle = index.getIndexPattern();
+    // Carry the CPS project routing the search was scoped to when the export was requested.
+    // Without it the export searches only the origin project and silently returns no rows
+    // for data that lives in linked projects.
+    const cursorSettings = { ...settings, projectRouting: searchSource.getField('projectRouting') };
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let userError: boolean | undefined;
@@ -333,7 +337,7 @@ export class CsvGenerator {
       // Optional strategy: scan-and-scroll
       cursor = new SearchCursorScroll(
         indexPatternTitle,
-        settings,
+        cursorSettings,
         this.clients,
         abortController,
         this.logger
@@ -343,7 +347,7 @@ export class CsvGenerator {
       // Default strategy: point-in-time
       cursor = new SearchCursorPit(
         indexPatternTitle,
-        settings,
+        cursorSettings,
         this.clients,
         abortController,
         this.logger,

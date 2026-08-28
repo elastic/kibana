@@ -39,7 +39,13 @@ export class SearchCursorPit extends SearchCursor {
   }
 
   protected async openPointInTime() {
-    const { includeFrozen, maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
+    const {
+      includeFrozen,
+      maxConcurrentShardRequests,
+      scroll,
+      taskInstanceFields,
+      projectRouting,
+    } = this.settings;
 
     let pitId: string | undefined;
 
@@ -54,6 +60,8 @@ export class SearchCursorPit extends SearchCursor {
           index: this.indexPatternTitle,
           keep_alive: scroll.duration(taskInstanceFields),
           ignore_unavailable: true,
+          // searches over this PIT inherit its CPS project scope, so routing must be set here
+          ...(projectRouting ? { project_routing: projectRouting } : {}),
           ...(includeFrozen ? { querystring: { ignore_throttled: false } } : {}), // "true" will cause deprecation warnings logged in ES
         },
         {

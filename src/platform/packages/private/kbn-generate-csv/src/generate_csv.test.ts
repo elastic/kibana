@@ -72,6 +72,7 @@ describe('CsvGenerator', () => {
   let uiSettingsClient: IUiSettingsClient;
   let stream: jest.Mocked<Writable>;
   let content: string;
+  let mockProjectRouting: string | undefined;
 
   const searchSourceMock = {
     ...searchSourceInstanceMock,
@@ -161,12 +162,15 @@ describe('CsvGenerator', () => {
 
     dataView.getFormatterForField = jest.fn();
 
+    mockProjectRouting = undefined;
     searchSourceMock.getField = jest.fn((key: string) => {
       switch (key) {
         case 'pit':
           return { id: mockCursorId };
         case 'index':
           return dataView;
+        case 'projectRouting':
+          return mockProjectRouting;
       }
     });
 
@@ -196,6 +200,36 @@ describe('CsvGenerator', () => {
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
+  });
+
+  it('opens the point-in-time with the project routing carried by the search source', async () => {
+    mockProjectRouting = '_alias:*';
+
+    const generateCsv = new CsvGenerator(
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      mockConfig,
+      mockTaskInstanceFields,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      mockLogger,
+      stream,
+      false, // isServerless
+      jobId
+    );
+    await generateCsv.generateData();
+
+    expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
+      expect.objectContaining({ project_routing: '_alias:*' }),
+      expect.anything()
+    );
   });
 
   it('formats a search result to CSV content', async () => {

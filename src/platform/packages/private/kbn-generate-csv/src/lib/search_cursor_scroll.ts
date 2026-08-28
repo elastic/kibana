@@ -30,7 +30,13 @@ export class SearchCursorScroll extends SearchCursor {
   public async initialize() {}
 
   private async scan(searchBody: estypes.SearchRequest) {
-    const { includeFrozen, maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
+    const {
+      includeFrozen,
+      maxConcurrentShardRequests,
+      scroll,
+      taskInstanceFields,
+      projectRouting,
+    } = this.settings;
 
     // maxConcurrentShardRequests=0 is not supported
     const effectiveMaxConcurrentShardRequests =
@@ -51,6 +57,8 @@ export class SearchCursorScroll extends SearchCursor {
       this.clients.data.search(searchParamsScan, {
         strategy: ES_SEARCH_STRATEGY,
         abortSignal: this.abortController.signal,
+        // the scroll context created by this initial scan inherits the CPS project scope
+        projectRouting,
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
           requestTimeout: scroll.duration(taskInstanceFields),

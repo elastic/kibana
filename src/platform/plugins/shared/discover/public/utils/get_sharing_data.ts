@@ -22,6 +22,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 import { isEqualFilters } from '../application/main/state_management/utils/state_comparators';
@@ -33,12 +34,20 @@ import { showTimeFieldColumn } from './show_time_field_column';
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: DiscoverAppState,
-  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
+  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart; cps?: CPSPluginStart },
   absoluteTimeRange?: TimeRange
 ) {
   const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
+
+  // On screen every search is scoped to the selected CPS projects by the search
+  // interceptor. Reports re-run the search server side where no interceptor exists,
+  // so the routing has to travel with the serialized search source.
+  const projectRouting = services.cps?.cpsManager?.getProjectRouting();
+  if (projectRouting) {
+    searchSource.setField('projectRouting', projectRouting);
+  }
 
   searchSource.setField(
     'sort',

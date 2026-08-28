@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { ISearchClient, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
 import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { CsvExportSettings } from './get_export_settings';
 
 export interface SearchCursorClients {
@@ -21,7 +22,13 @@ export interface SearchCursorClients {
 export type SearchCursorSettings = Pick<
   CsvExportSettings,
   'scroll' | 'includeFrozen' | 'maxConcurrentShardRequests' | 'taskInstanceFields'
->;
+> & {
+  /**
+   * {@link ProjectRouting} of the search the export was created from, so the
+   * export queries the same CPS project scope the user saw on screen.
+   */
+  projectRouting?: ProjectRouting;
+};
 
 export abstract class SearchCursor {
   protected cursorId: string | undefined;

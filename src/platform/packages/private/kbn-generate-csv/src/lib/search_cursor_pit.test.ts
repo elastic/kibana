@@ -118,6 +118,13 @@ describe('CSV Export Search Cursor', () => {
       expect(cursor.getCursorId()).toBe('very-typical-pit-id');
     });
 
+    it('does not add project_routing to the point-in-time request by default', () => {
+      expect(openPointInTimeSpy).toBeCalledWith(
+        expect.not.objectContaining({ project_routing: expect.anything() }),
+        expect.anything()
+      );
+    });
+
     it('manages search_after', () => {
       cursor.setSearchAfter([
         {
@@ -174,6 +181,33 @@ describe('CSV Export Search Cursor', () => {
           strategy: 'es',
           transport: { maxRetries: 0, requestTimeout: '10m' },
         }
+      );
+    });
+  });
+
+  describe('with projectRouting', () => {
+    beforeEach(async () => {
+      settings.projectRouting = '_alias:*';
+
+      cursor = new TestSearchCursorPit(
+        'test-index-pattern-string',
+        settings,
+        { data, es },
+        new AbortController(),
+        logger
+      );
+
+      await cursor.initialize();
+    });
+
+    it('opens the point-in-time with project_routing', () => {
+      expect(openPointInTimeSpy).toBeCalledTimes(1);
+      expect(openPointInTimeSpy).toBeCalledWith(
+        expect.objectContaining({
+          index: 'test-index-pattern-string',
+          project_routing: '_alias:*',
+        }),
+        expect.anything()
       );
     });
   });
