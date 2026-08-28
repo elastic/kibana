@@ -74,7 +74,21 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
     return AWS_SERVICES_MAP.get(instanceId)?.name ?? instanceId;
   };
 
-  const hasStarted = Object.keys(serviceStatuses).length > 0;
+  // ECF services appear in serviceStatuses as perpetual 'instantiating' chips because
+  // use_deploy.ts includes them when Deploy is clicked, but they are deployed via CloudFormation
+  // in Step 3 — not through agentless. Filter them out of the Step 4 chip row.
+  const agentlessStatuses = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(serviceStatuses).filter(([instanceId]) => {
+          const entry = AWS_SERVICES_MAP.get(instanceId);
+          return entry?.ecfLogType == null && entry?.ecfDedicatedTemplate == null;
+        })
+      ),
+    [serviceStatuses]
+  );
+
+  const hasStarted = Object.keys(agentlessStatuses).length > 0;
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
@@ -85,7 +99,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup wrap gutterSize="s" data-test-subj="deployAndDetectStep-serviceChips">
-            {Object.entries(serviceStatuses).map(([instanceId, state]) => (
+            {Object.entries(agentlessStatuses).map(([instanceId, state]) => (
               <EuiFlexItem grow={false} key={instanceId}>
                 <EuiBadge color={CHIP_COLORS[state]}>{getChipLabel(instanceId)}</EuiBadge>
               </EuiFlexItem>

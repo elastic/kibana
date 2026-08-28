@@ -61,18 +61,19 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
-  // ECF deploys one CloudFormation stack per template family — it has no concept of duplicate
-  // instances. Use selectedServiceIds directly (always available from the flow context) rather
-  // than session-storage instances, which are only written when the user clicks Next in Step 2.
-  const ecfInstances = useMemo(
-    () =>
-      selectedServiceIds.flatMap((id) => {
-        const service = awsServicesMap?.get(id);
-        if (!service?.showInUI) return [];
-        return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
-      }),
-    [selectedServiceIds, awsServicesMap]
-  );
+  // ECF instances: prefer session-storage instances because they carry duplicate-instance ARNs
+  // (multi-bucket / multi-log-group configs from Step 2). Fall back to one base instance per
+  // selected service when session storage hasn't been written yet — e.g. the user jumped to
+  // Step 3 directly via the horizontal step indicator without clicking Next in Step 2.
+  const ecfInstances = useMemo(() => {
+    const stored = serviceSettings?.instances;
+    if (stored && stored.length > 0) return stored;
+    return selectedServiceIds.flatMap((id) => {
+      const service = awsServicesMap?.get(id);
+      if (!service?.showInUI) return [];
+      return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
+    });
+  }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
 
   // ── Managed Integrations ──────────────────────────────────────────────────────
   const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed } = useDeploy({
