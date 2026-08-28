@@ -25,6 +25,7 @@ import {
   TICK_DEADLINE_MS,
 } from './constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
+import { EpisodeScan } from './state';
 import { toAction } from './steps/store_actions_step';
 import type {
   DispatcherExecutionParams,
@@ -73,7 +74,7 @@ export class DispatcherService implements DispatcherServiceContract {
           eventWatermark
             ? `eventWatermark is Invalid Date; falling back to cold start ` +
               `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`
-            : `Dispatcher: no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
+            : `no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
               `Rule events older than that will not be dispatched.`,
       });
     }
@@ -93,7 +94,7 @@ export class DispatcherService implements DispatcherServiceContract {
       // or corrupt task state. Skip the scan and hold the watermark to avoid a regress.
       logger.debug({
         message: () =>
-          `Dispatcher: windowEnd (${windowEnd.toISOString()}) ≤ windowStart ` +
+          `windowEnd (${windowEnd.toISOString()}) ≤ windowStart ` +
           `(${windowStart.toISOString()}); skipping scan.`,
       });
       return {
@@ -158,7 +159,7 @@ export class DispatcherService implements DispatcherServiceContract {
           });
         } else {
           logger.debug({
-            message: () => `pipeline aborted by Task Manager signal.`,
+            message: 'pipeline aborted by Task Manager signal.',
           });
         }
       }
@@ -166,6 +167,7 @@ export class DispatcherService implements DispatcherServiceContract {
       const nextWatermark = computeNextWatermark({ input, result: pipelineResult });
       const isStuck = nextWatermark.getTime() === resolvedWatermark.getTime();
       const nextStuckTicks = isStuck ? stuckTicks + 1 : 0;
+      const scan = pipelineResult.finalState.scan ?? EpisodeScan.empty();
 
       // Per-tick observability. All fields are lazy so the string is never built
       // at production log levels where debug is off.
@@ -178,15 +180,15 @@ export class DispatcherService implements DispatcherServiceContract {
             `halt_reason=${pipelineResult.haltReason ?? 'completed'}`,
             `watermark_lag_ms=${watermarkLagMs}`,
             `window_span_ms=${windowSpanMs}`,
-            `truncated=${pipelineResult.finalState.truncated ?? false}`,
-            `episode_count=${pipelineResult.finalState.episodes?.length ?? 0}`,
+            `truncated=${scan.truncated}`,
+            `episode_count=${scan.episodes.length}`,
             `stuck_ticks=${nextStuckTicks}`,
           ].join(' ');
         },
       });
 
       if (nextStuckTicks >= STUCK_TICK_LIMIT) {
-        const blockingEpisodes = pipelineResult.finalState.episodes ?? [];
+        const blockingEpisodes = scan.episodes;
         const lagMs = startedAt.getTime() - resolvedWatermark.getTime();
 
         if (blockingEpisodes.length === 0) {
@@ -230,10 +232,8 @@ export class DispatcherService implements DispatcherServiceContract {
         // `.alert-actions` dedup mark moves past them, then advance the watermark.
         // If the batch was truncated, advance only to the truncation edge so the
         // tail (beyond EPISODE_QUERY_LIMIT) is re-read and also escape-hatched next tick.
-        const truncated = pipelineResult.finalState.truncated ?? false;
-        const lastEpisode = blockingEpisodes[blockingEpisodes.length - 1];
-        const escapeTarget = truncated
-          ? new Date(lastEpisode.last_event_timestamp)
+        const escapeTarget = scan.truncated
+          ? scan.truncationEdge() ?? input.windowEnd
           : input.windowEnd;
         // Clamp: never regress below the current watermark (guards against clock skew
         // producing a windowEnd behind resolvedWatermark).
@@ -246,7 +246,7 @@ export class DispatcherService implements DispatcherServiceContract {
           message: () =>
             `watermark stuck for ${STUCK_TICK_LIMIT} consecutive ticks ` +
             `(lag: ${lagMs}ms, blocking episodes: ${blockingEpisodes.length}, ` +
-            `truncated: ${truncated}). ` +
+            `truncated: ${scan.truncated}). ` +
             `Force-recording as unmatched and advancing to ${clampedEscapeTarget.toISOString()}.`,
           error: new Error(`Watermark stuck at ${resolvedWatermark.toISOString()}`),
         });

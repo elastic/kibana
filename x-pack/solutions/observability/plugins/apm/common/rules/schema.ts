@@ -53,6 +53,7 @@ const detectorsSchema = schema.oneOf([
   schema.literal(AnomalyDetectorType.txLatency),
   schema.literal(AnomalyDetectorType.txThroughput),
   schema.literal(AnomalyDetectorType.txFailureRate),
+  schema.literal(AnomalyDetectorType.txLowCount),
 ]);
 
 export const anomalyParamsSchema = schema.object({
@@ -67,7 +68,7 @@ export const anomalyParamsSchema = schema.object({
     schema.literal(ML_ANOMALY_SEVERITY.MINOR),
     schema.literal(ML_ANOMALY_SEVERITY.WARNING),
   ]),
-  anomalyDetectorTypes: schema.maybe(schema.arrayOf(detectorsSchema, { minSize: 1, maxSize: 3 })),
+  anomalyDetectorTypes: schema.maybe(schema.arrayOf(detectorsSchema, { minSize: 1, maxSize: 4 })),
 });
 
 export const transactionErrorRateParamsSchema = schema.object({

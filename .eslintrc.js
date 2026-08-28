@@ -2079,6 +2079,32 @@ module.exports = {
     },
 
     /**
+     * Custom Content overrides
+     */
+    {
+      files: [
+        'x-pack/platform/plugins/shared/custom_content/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/custom-content/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        'react-hooks/exhaustive-deps': 'error',
+        // Custom content renders LLM-generated HTML; it must stay inside the sandboxed iframe.
+        'react/no-danger': 'error',
+      },
+    },
+    {
+      files: [
+        'x-pack/platform/plugins/shared/custom_content/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/custom-content/**/*.{ts,tsx}',
+      ],
+      excludedFiles: ['**/*.test.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'error',
+      },
+    },
+
+    /**
      * Discover overrides
      */
     {
@@ -3104,7 +3130,14 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: ['@kbn/*', '!@kbn/i18n', '!@kbn/i18n-react', '!@kbn/ui-chrome-layout'],
+            patterns: [
+              '@kbn/*',
+              '!@kbn/i18n',
+              '!@kbn/i18n-react',
+              '!@kbn/ui-chrome-layout',
+              '!@kbn/ui-app-menu',
+              '!@kbn/ui-favorite-button',
+            ],
           },
         ],
       },

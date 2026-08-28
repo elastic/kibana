@@ -39,9 +39,23 @@ import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
+/** URL query-param key that holds the currently-open collection group id. */
+export const COLLECTION_QUERYPARAM = 'collection';
+
 export interface CollectionStateRef {
   groupId: string;
   title: string;
+}
+
+/** View-model for one collection method shown inside the chooser flyout. */
+export interface CollectionVariant {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactElement;
+  href?: string;
+  onClick?: React.MouseEventHandler;
+  'data-test-subj'?: string;
 }
 
 export interface IntegrationCardItem {

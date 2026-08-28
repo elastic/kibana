@@ -13,9 +13,10 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
@@ -248,6 +249,8 @@ const createMockServices = (): RuleFormServices => ({
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreMock.createStart().featureFlags,
   lens: lensPluginMock.createStartContract(),
   uiActions: uiActionsPluginMock.createStartContract(),
 });
@@ -905,6 +908,56 @@ describe('ComposeDiscoverFlyout', () => {
       await waitFor(() => {
         expect(onCreateRule).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('create from template rule', () => {
+    const templateRule = {
+      id: '',
+      kind: 'alert' as const,
+      enabled: false,
+      metadata: {
+        name: '[Kubernetes OTel] Pod CrashLoopBackOff',
+        description: 'Alerts when containers have a high restart count',
+        tags: ['Kubernetes'],
+        version: 1,
+      },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '15m' },
+      query: {
+        format: 'composed' as const,
+        base: 'TS metrics-k8sclusterreceiver.otel-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name',
+        breach: { segment: 'WHERE restarts > 0 | SORT restarts DESC | LIMIT 50' },
+      },
+      created_by: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_by: null,
+      updated_at: '2026-01-01T00:00:00.000Z',
+    };
+
+    it('commits the template query in create mode so the flyout shows it', () => {
+      renderFlyout({ mode: 'create', rule: templateRule as any });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(true);
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'composed',
+        base: templateRule.query.base,
+        breach: { segment: templateRule.query.breach.segment },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('does not commit an empty template query in create mode', () => {
+      renderFlyout({
+        mode: 'create',
+        rule: {
+          ...templateRule,
+          query: { format: 'composed' as const, base: '', breach: { segment: '' } },
+        } as any,
+      });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(false);
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
   });
 

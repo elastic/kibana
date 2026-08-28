@@ -28,6 +28,8 @@ import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 import type { TaskOverdueMetric } from './task_overdue_metrics_aggregator';
 import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 import type { TaskManagerMetricsCollector } from './task_metrics_collector';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
+
 export interface Metrics {
   last_update: string;
   metrics: {
@@ -48,6 +50,7 @@ interface CreateMetricsAggregatorsOpts {
   reset$: Observable<boolean>;
   taskPollingLifecycle?: TaskPollingLifecycle;
   taskManagerMetricsCollector?: TaskManagerMetricsCollector;
+  definitions: TaskTypeDictionary;
 }
 export function createMetricsAggregators({
   config,
@@ -55,6 +58,7 @@ export function createMetricsAggregators({
   logger,
   taskPollingLifecycle,
   taskManagerMetricsCollector,
+  definitions,
 }: CreateMetricsAggregatorsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [];
   const debugLogger = createWrappedLogger({ logger, tags: ['metrics-debugger'] });
@@ -88,7 +92,7 @@ export function createMetricsAggregators({
         events$: taskManagerMetricsCollector.events,
         config,
         eventFilter: (event: TaskLifecycleEvent) => isTaskManagerMetricEvent(event),
-        metricsAggregator: new TaskOverdueMetricsAggregator(),
+        metricsAggregator: new TaskOverdueMetricsAggregator(definitions),
       })
     );
   }

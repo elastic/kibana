@@ -130,6 +130,47 @@ producers never construct the id by hand and never track notification state them
 
 A notification declares which variant it is with `kind` in the registry (`kind: 'timeseries'`). defaults to `state`.
 
+## Reading notifications: what is a query param
+
+The list route returns a **collapsed** set (one document per `notification_id`) bounded by a
+result cap.
+
+> **A query param exists only if it can be applied before truncation
+> and maintain an accurate representation of collapsed notification state**
+
+1. **Is it on the document?**
+2. **Does it define the set, or pick a copy within it?**
+
+   - e.g. a time window defines which copies form the group, so the newest one in
+     it is the right representative. A filter on mutable state
+     picks an arbitrary copy to stand for the group.
+
+| Candidate           | On document | Defines the set                             | Where          |
+| ------------------- | ----------- | ------------------------------------------- | -------------- |
+| `namespace`, `type` | yes         | yes — both are encoded in `notification_id` | server param   |
+| `from` / `to`       | yes         | yes — the window is the set                 | server param   |
+| `severity`          | yes         | no — picks an arbitrary copy                | response field |
+| read state, mute    | no          | n/a                                         | response field |
+
+The server annotates per-user read state, it does not filter or order by it.
+
+An older high-severity notification can now fall outside the cap; server-side pagination and/or a higher cap will address this.
+
+### Read state
+
+Read state is per user, lives in `userStorage`, and never touches the notification document. The
+list route **annotates** each item with `isRead` and returns the same order to every caller.
+
+- `readAllBefore` is a single timestamp marker for a user ("mark all as read")
+  any notifications whose timestamp is at or before this show up as read.
+  It is stamped on the user's first read, so a new user doesn't get a giant unread backlog.
+- `_mark_all_read` advances the marker to now and clears the individual overrides
+- `_mark_read` adds an override for a specific notification id with a timestamp.
+  a later re-push of the same `notification_id` postdates the override and shows as unread again.
+  marking it read again updates the override timestamp (i.e. this is not "mute")
+- Callers with no user profile (API keys, headless consumers) get the list with `isRead` absent
+  rather than a 403. The mark routes reject them, since there is no read state to write.
+
 ## Submitting notifications (`forType`)
 
 The server **setup** contract exposes `forType(ref)`, which binds a submitter to a registered
