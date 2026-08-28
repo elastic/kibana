@@ -1814,7 +1814,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           // Skip when both old and new are empty to avoid spurious changes on policies that never
           // had secrets. `undefined` means secret storage is disabled — omit the key.
           ...(secretReferences !== undefined &&
-            (secretReferences.length > 0 || (oldPackagePolicy.secret_references?.length ?? 0) > 0) && {
+            (secretReferences.length > 0 ||
+              (oldPackagePolicy.secret_references?.length ?? 0) > 0) && {
               secret_references: secretReferences,
             }),
           revision: oldPackagePolicy.revision + 1,
@@ -2226,7 +2227,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             // Skip when both old and new are empty to avoid spurious changes on policies that never
             // had secrets. `undefined` means secret storage is disabled — omit the key.
             ...(secretReferences !== undefined &&
-              (secretReferences.length > 0 || (oldPackagePolicy.secret_references?.length ?? 0) > 0) && {
+              (secretReferences.length > 0 ||
+                (oldPackagePolicy.secret_references?.length ?? 0) > 0) && {
                 secret_references: secretReferences,
               }),
             revision: oldPackagePolicy.revision + 1,
