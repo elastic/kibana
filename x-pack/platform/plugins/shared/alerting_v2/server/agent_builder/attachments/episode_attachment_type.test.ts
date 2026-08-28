@@ -23,6 +23,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
+import { getEpisodeTransitionsToolId } from '../tools/get_episode_transitions';
 import { getRuleToolId } from '../tools/get_rule';
 import { refreshEpisodeToolId } from '../tools/refresh_episode';
 import { createEpisodeAttachmentType } from './episode_attachment_type';
@@ -435,21 +436,22 @@ describe('createEpisodeAttachmentType', () => {
       expect(value).toContain('Episode label: Host CPU high alert');
     });
 
-    it('mentions the attachment-scoped refresh and get_rule tools', async () => {
+    it('mentions the attachment-scoped refresh, get_episode_transitions, and get_rule tools', async () => {
       const value = await formatValue(baseEpisodeData);
       expect(value).toContain(refreshEpisodeToolId('attach-1'));
+      expect(value).toContain(getEpisodeTransitionsToolId('attach-1'));
       expect(value).toContain(getRuleToolId('attach-1'));
       expect(value).toContain('rule-management');
     });
 
-    it('exposes refresh_episode and get_rule bounded tools unique to the attachment', async () => {
+    it('exposes refresh_episode, get_episode_transitions, and get_rule bounded tools unique to the attachment', async () => {
       const formatted = await definition.format(buildAttachment(baseEpisodeData), {
         request: {} as KibanaRequest,
         spaceId: 'default',
       });
       expect(formatted.getBoundedTools).toBeDefined();
       const tools = await formatted.getBoundedTools!();
-      expect(tools).toHaveLength(2);
+      expect(tools).toHaveLength(3);
       expect(tools[0]).toEqual(
         expect.objectContaining({
           id: refreshEpisodeToolId('attach-1'),
@@ -458,11 +460,17 @@ describe('createEpisodeAttachmentType', () => {
       );
       expect(tools[1]).toEqual(
         expect.objectContaining({
+          id: getEpisodeTransitionsToolId('attach-1'),
+          description: expect.stringContaining('ep-1'),
+        })
+      );
+      expect(tools[2]).toEqual(
+        expect.objectContaining({
           id: getRuleToolId('attach-1'),
           description: expect.stringContaining('rule-1'),
         })
       );
-      expect(tools[1].description).toContain('rule-management');
+      expect(tools[2].description).toContain('rule-management');
     });
   });
 
@@ -474,6 +482,7 @@ describe('createEpisodeAttachmentType', () => {
       expect(description).toContain('not a Security/SIEM detection alert');
       expect(description).toContain('read-only');
       expect(description).toContain('refresh_episode');
+      expect(description).toContain('get_episode_transitions');
       expect(description).toContain('get_rule');
       expect(description).toContain('rule-management');
     });

@@ -9,8 +9,10 @@ import { inject, injectable } from 'inversify';
 import {
   buildEpisodeGroupHashQuery,
   buildEpisodeQuery,
+  buildEpisodeTransitionsQuery,
   type AlertEpisodeEsqlRow,
   type EpisodeGroupHashEsqlRow,
+  type EpisodeTransitionEsqlRow,
 } from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
@@ -49,5 +51,16 @@ export class EpisodesClient {
     }
 
     return { ...row, last_tags: normalizeTags(row.last_tags) };
+  }
+
+  /**
+   * Returns one row per contiguous `episode.status` run for the episode in the
+   * request's space, oldest first. Empty when the episode has no status-bearing
+   * alert events.
+   */
+  public async getEpisodeTransitions(episodeId: string): Promise<EpisodeTransitionEsqlRow[]> {
+    return this.queryService.executeQueryRows<EpisodeTransitionEsqlRow>({
+      query: buildEpisodeTransitionsQuery(this.spaceId, episodeId).print('basic'),
+    });
   }
 }
