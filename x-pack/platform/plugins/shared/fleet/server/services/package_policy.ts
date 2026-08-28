@@ -1572,8 +1572,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
     },
-    context?: RequestHandlerContext,
-    request?: KibanaRequest
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1605,8 +1604,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicyUpdateWithId,
         soClient,
         esClient,
-        context,
-        request
+        context
       );
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
@@ -3578,8 +3576,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           skipUniqueNameVerification?: boolean | undefined;
         }
       | undefined,
-    context?: RequestHandlerContext,
-    request?: KibanaRequest
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
       fleetAuthz: {
@@ -3587,7 +3584,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
-    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context, request);
+    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context);
   }
 
   async create(
