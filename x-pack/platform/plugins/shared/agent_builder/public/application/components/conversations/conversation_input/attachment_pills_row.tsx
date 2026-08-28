@@ -36,9 +36,14 @@ const indeterminateProgressSweep = keyframes`
 
 const UploadingImagePill: React.FC<{ name: string }> = ({ name }) => {
   const { euiTheme } = useEuiTheme();
+  const label = i18n.translate('xpack.agentBuilder.attachmentPillsRow.uploadingLabel', {
+    defaultMessage: 'Uploading {name}',
+    values: { name },
+  });
   return (
     <div
-      aria-label={name}
+      role="status"
+      aria-label={label}
       css={css`
         position: relative;
         width: 72px;
@@ -113,7 +118,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
       {attachments.map((attachment, index) => {
         if (isAttachmentGroup(attachment)) {
           return (
-            <EuiFlexItem key={attachment.id} grow={false}>
+            <EuiFlexItem key={attachment.id} grow={false} role="listitem">
               <AttachmentGroupPill
                 group={attachment}
                 onRemove={
@@ -135,7 +140,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
             ? (attachment.data as { name?: string }).name
             : undefined;
         return (
-          <EuiFlexItem key={attachmentId} grow={false}>
+          <EuiFlexItem key={attachmentId} grow={false} role="listitem">
             <AttachmentPill
               attachment={{
                 id: attachmentId,
@@ -158,7 +163,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
         );
       })}
       {uploadingEntries.map((name) => (
-        <EuiFlexItem key={`uploading-${name}`} grow={false}>
+        <EuiFlexItem key={`uploading-${name}`} grow={false} role="listitem">
           <UploadingImagePill name={name} />
         </EuiFlexItem>
       ))}

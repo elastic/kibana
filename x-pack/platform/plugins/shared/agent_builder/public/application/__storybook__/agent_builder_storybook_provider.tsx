@@ -18,9 +18,6 @@ import type { AgentBuilderInternalService } from '../../services/types';
 
 const defaultKibanaServices = createStorybookKibanaServices();
 const defaultAgentBuilderServices = createStorybookAgentBuilderServices();
-// refetchOnWindowFocus is disabled because switching stories refocuses the Storybook iframe,
-// which would otherwise refetch every query (e.g. useLoadConnectors) against mocks that don't
-// implement every endpoint's real response shape.
 const defaultQueryClient = new QueryClient({
   defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
 });
@@ -30,7 +27,6 @@ export interface AgentBuilderStorybookProviderProps {
   conversationId?: string;
   agentId?: string;
   initialAttachments?: ConversationAttachment[];
-  /** Override specific service fields on top of the defaults. */
   services?: Partial<AgentBuilderInternalService>;
 }
 

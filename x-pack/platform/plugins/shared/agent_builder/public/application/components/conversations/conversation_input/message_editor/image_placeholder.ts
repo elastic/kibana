@@ -60,6 +60,7 @@ export const createImagePlaceholderElement = (label: string): HTMLSpanElement =>
   const span = document.createElement('span');
   span.contentEditable = 'false';
   span.setAttribute(IMAGE_PLACEHOLDER_ATTRIBUTE, 'true');
+  span.setAttribute('role', 'img');
   span.setAttribute('aria-label', label);
   span.dataset.placeholderName = label;
 
