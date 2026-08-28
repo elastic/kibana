@@ -50,7 +50,7 @@ const defaultProps: ActionPolicyDefinitionListProps = {
   policy: {
     description: 'A test description',
     tags: ['tag-a', 'tag-b'],
-    matcher: 'rule.id: "abc"',
+    matcher: { rules: ['abc'] },
     grouping_mode: 'per_episode',
     destinations: [
       { type: 'workflow', id: 'wf-1' },

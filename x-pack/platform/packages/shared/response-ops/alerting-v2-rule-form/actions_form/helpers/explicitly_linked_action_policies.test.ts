@@ -41,54 +41,45 @@ describe('isExplicitlyLinkedToRule', () => {
     expect(isExplicitlyLinkedToRule(buildRuleScopedMatcher(RULE_ID), RULE_ID)).toBe(true);
   });
 
-  it('returns true for spaced KQL syntax and compound matchers', () => {
-    expect(isExplicitlyLinkedToRule(`rule.id : "${RULE_ID}"`, RULE_ID)).toBe(true);
-    expect(isExplicitlyLinkedToRule(`rule.id: "${RULE_ID}" and severity: "high"`, RULE_ID)).toBe(
-      true
-    );
+  it('returns true for a structured matcher with the rule id in the rules array', () => {
+    expect(isExplicitlyLinkedToRule({ rules: [RULE_ID] }, RULE_ID)).toBe(true);
+    expect(isExplicitlyLinkedToRule({ rules: [RULE_ID], expression: 'severity: "high"' }, RULE_ID)).toBe(true);
   });
 
-  it('returns true when the rule.id clause appears inside an OR branch', () => {
-    expect(isExplicitlyLinkedToRule(`rule.id: "${RULE_ID}" or severity: "high"`, RULE_ID)).toBe(
-      true
-    );
+  it('returns true when rules contains the rule id alongside other rules', () => {
+    expect(isExplicitlyLinkedToRule({ rules: [RULE_ID, 'other-rule'] }, RULE_ID)).toBe(true);
   });
 
-  it('returns false for null, empty, or malformed matchers', () => {
+  it('returns false for null, empty, or matchers without a rules array', () => {
     expect(isExplicitlyLinkedToRule(null, RULE_ID)).toBe(false);
-    expect(isExplicitlyLinkedToRule('', RULE_ID)).toBe(false);
-    expect(isExplicitlyLinkedToRule('rule.id:', RULE_ID)).toBe(false);
-    expect(isExplicitlyLinkedToRule('this is not kql (((', RULE_ID)).toBe(false);
+    expect(isExplicitlyLinkedToRule({}, RULE_ID)).toBe(false);
+    expect(isExplicitlyLinkedToRule({ rules: [] }, RULE_ID)).toBe(false);
+    expect(isExplicitlyLinkedToRule({ expression: 'invalid kql (((' }, RULE_ID)).toBe(false);
   });
 
   it('returns false when the matcher references a different rule id', () => {
     expect(isExplicitlyLinkedToRule(buildRuleScopedMatcher('other-rule'), RULE_ID)).toBe(false);
   });
 
-  it('returns false for negated rule.id clauses', () => {
-    expect(isExplicitlyLinkedToRule(`not rule.id: "${RULE_ID}"`, RULE_ID)).toBe(false);
-  });
-
   it('returns false for global catch-all matchers', () => {
     expect(isExplicitlyLinkedToRule(null, RULE_ID)).toBe(false);
-    expect(isExplicitlyLinkedToRule('severity: "high"', RULE_ID)).toBe(false);
+    expect(isExplicitlyLinkedToRule({ expression: 'severity: "high"' }, RULE_ID)).toBe(false);
   });
 });
 
 describe('isRuleScopedCatchAllMatcher', () => {
   it('returns true for a matcher that only scopes to the rule id', () => {
     expect(isRuleScopedCatchAllMatcher(buildRuleScopedMatcher(RULE_ID), RULE_ID)).toBe(true);
-    expect(isRuleScopedCatchAllMatcher(`rule.id : "${RULE_ID}"`, RULE_ID)).toBe(true);
+    expect(isRuleScopedCatchAllMatcher({ rules: [RULE_ID] }, RULE_ID)).toBe(true);
   });
 
   it('returns false when additional matching criteria are present', () => {
-    expect(isRuleScopedCatchAllMatcher(`rule.id: "${RULE_ID}" and severity: "high"`, RULE_ID)).toBe(
-      false
-    );
+    expect(isRuleScopedCatchAllMatcher({ rules: [RULE_ID], expression: 'severity: "high"' }, RULE_ID)).toBe(false);
+    expect(isRuleScopedCatchAllMatcher({ rules: [RULE_ID], tags: ['prod'] }, RULE_ID)).toBe(false);
   });
 
   it('returns false when the matcher is not explicitly linked', () => {
-    expect(isRuleScopedCatchAllMatcher(`rule.id: "other-rule"`, RULE_ID)).toBe(false);
+    expect(isRuleScopedCatchAllMatcher({ rules: ['other-rule'] }, RULE_ID)).toBe(false);
   });
 });
 
@@ -99,7 +90,7 @@ describe('summarizeExplicitlyLinkedActionPolicies', () => {
         buildPolicy({
           id: 'policy-b',
           name: 'Bravo',
-          matcher: `rule.id: "${RULE_ID}" and severity: "high"`,
+          matcher: { rules: [RULE_ID], expression: 'severity: "high"' },
         }),
         buildPolicy({ id: 'policy-a', name: 'Alpha' }),
         buildPolicy({

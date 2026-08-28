@@ -872,7 +872,7 @@ describe('ActionPolicyClient', () => {
         description: 'original-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        matcher: 'event.severity: critical',
+        matcher: { expression: 'event.severity: critical' },
         groupBy: ['host.name'],
         throttle: { interval: '1h' },
         apiKey: 'old-api-key',
@@ -1612,7 +1612,7 @@ describe('ActionPolicyClient', () => {
         description: 'before description',
         enabled: false,
         destinations: [{ type: 'workflow', id: 'wf-before' }],
-        matcher: 'env: production',
+        matcher: { expression: 'env: production' },
         groupBy: ['host.name'],
         snoozedUntil: '2099-01-01T00:00:00.000Z',
         apiKey: 'old-api-key',
@@ -3174,7 +3174,7 @@ describe('ActionPolicyClient', () => {
 
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: 'rule.id : "rule-1"',
+        matcher: { rules: ['rule-1'] },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
@@ -3199,7 +3199,7 @@ describe('ActionPolicyClient', () => {
 
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: 'rule.tags : "staging"',
+        matcher: { tags: ['staging'] },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
@@ -3222,7 +3222,7 @@ describe('ActionPolicyClient', () => {
 
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: 'invalid kql !!!',
+        matcher: { expression: 'invalid kql !!!' },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
@@ -3253,7 +3253,7 @@ describe('ActionPolicyClient', () => {
     it('uses provided ruleName and ruleTags to evaluate matchers without fetching from DB', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: 'rule.tags : "prod"',
+        matcher: { tags: ['prod'] },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(

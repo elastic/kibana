@@ -75,7 +75,7 @@ const defaultData = {
   name: 'My Policy',
   description: 'A test policy',
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
-  matcher: 'rule.id: "abc"',
+  matcher: { rules: ['abc'] },
   groupingMode: 'per_episode' as const,
   throttle: { strategy: 'on_status_change' as const },
   tags: ['tag1'],
@@ -332,21 +332,21 @@ describe('ActionPolicyCanvasContent', () => {
     });
 
     it('checks the rule referenced in the matcher via RulesApi.getRule', async () => {
-      await renderCanvas({ data: { matcher: 'rule.id: "my-rule-id"' } });
+      await renderCanvas({ data: { matcher: { rules: ['my-rule-id'] } } });
 
       expect(mockGetRule).toHaveBeenCalledWith('my-rule-id', expect.any(AbortSignal));
       expect(mockGetRule).toHaveBeenCalledTimes(1);
     });
 
     it('does not check a rule when the matcher has no rule.id clause', async () => {
-      await renderCanvas({ data: { matcher: 'rule.tags: "production"' } });
+      await renderCanvas({ data: { matcher: { tags: ['production'] } } });
 
       expect(mockGetRule).not.toHaveBeenCalled();
     });
 
     it('extracts the rule id from the matcher rule.id clause', async () => {
       await renderCanvas({
-        data: { matcher: 'rule.id: "from-matcher"' },
+        data: { matcher: { rules: ['from-matcher'] } },
       });
 
       expect(mockGetRule).toHaveBeenCalledWith('from-matcher', expect.any(AbortSignal));

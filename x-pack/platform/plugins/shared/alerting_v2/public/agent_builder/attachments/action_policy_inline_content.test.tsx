@@ -20,7 +20,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     name: 'My Policy',
     description: 'A test policy',
     destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
-    matcher: 'rule.id: "abc"',
+    matcher: { rules: ['abc'] },
     groupingMode: 'per_episode' as const,
     throttle: { strategy: 'on_status_change' as const },
     tags: ['ops', 'critical'],

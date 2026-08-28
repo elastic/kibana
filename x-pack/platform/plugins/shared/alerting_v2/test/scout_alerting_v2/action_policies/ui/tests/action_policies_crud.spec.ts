@@ -82,7 +82,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
       expect(items).toHaveLength(1);
       expect(items[0]).toMatchObject({
         name: CREATED_POLICY_NAME,
-        matcher: MATCHER,
+        matcher: { expression: MATCHER },
         grouping_mode: 'per_episode',
         throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: workflowId }],
@@ -98,7 +98,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
     const seeded = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({
         name: SEEDED_POLICY_NAME,
-        matcher: MATCHER,
+        matcher: { expression: MATCHER },
         destinations: [{ type: 'workflow', id: workflowId }],
       })
     );
@@ -123,7 +123,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
 
       expect(updated).toMatchObject({
         name: EDITED_POLICY_NAME,
-        matcher: MATCHER,
+        matcher: { expression: MATCHER },
         destinations: [{ type: 'workflow', id: workflowId }],
       });
     });

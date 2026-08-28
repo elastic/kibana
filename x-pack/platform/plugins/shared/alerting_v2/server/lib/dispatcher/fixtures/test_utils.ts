@@ -152,7 +152,7 @@ export function createRuleScopedActionPolicy(
 ): ActionPolicy {
   return createActionPolicy({
     name: 'Test rule-scoped policy',
-    matcher: `rule.id: "${ruleId}"`,
+    matcher: { rules: [ruleId] },
     ...overrides,
   });
 }
