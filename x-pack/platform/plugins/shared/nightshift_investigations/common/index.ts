@@ -78,6 +78,23 @@ export const UPDATABLE_INVESTIGATION_STATUSES = [
 ] as const;
 export type UpdatableInvestigationStatus = (typeof UPDATABLE_INVESTIGATION_STATUSES)[number];
 
+export interface InvestigationStructuredOutput {
+  summary?: string;
+  conclusion?: string;
+  hypotheses?: InvestigationHypothesis[];
+  recommendations?: InvestigationRecommendation[];
+  blind_spots?: InvestigationBlindSpot[];
+  significant_event_updates?: SignificantEventUpdate[];
+  impact?: InvestigationImpact;
+}
+
+/** Body of PATCH /internal/nightshift/investigations/{id}. */
+export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
+  status: UpdatableInvestigationStatus;
+  error?: string;
+  conversation_id?: string;
+}
+
 export interface GetInvestigationResponse {
   investigation_id: string;
   /** Undefined for runs initiated without a subject (e.g. a bare manual workflow run). */

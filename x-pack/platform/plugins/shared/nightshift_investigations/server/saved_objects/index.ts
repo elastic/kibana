@@ -13,7 +13,6 @@ export {
 export type { NightshiftInvestigationAttributes } from './investigation_saved_object';
 export { InvestigationSavedObjectClient } from './investigation_saved_object_client';
 export type {
-  InvestigationStructuredOutput,
   InvestigationSavedObjectUpdateAttributes,
   FindInvestigationsOptions,
   FindInvestigationsResult,

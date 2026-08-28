@@ -24,7 +24,7 @@ import type {
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
-  UpdatableInvestigationStatus,
+  UpdateInvestigationRequest,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
@@ -36,7 +36,6 @@ import {
 import type {
   InvestigationSavedObjectClient,
   InvestigationSavedObjectUpdateAttributes,
-  InvestigationStructuredOutput,
   NightshiftInvestigationAttributes,
 } from '../saved_objects';
 import {
@@ -68,12 +67,6 @@ const LIST_SO_FIELDS = [
   'summary',
   'trigger_type',
 ] as const satisfies ReadonlyArray<keyof NightshiftInvestigationAttributes>;
-
-export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
-  status: UpdatableInvestigationStatus;
-  error?: string;
-  conversation_id?: string;
-}
 
 function toSubject({
   subjectType,
