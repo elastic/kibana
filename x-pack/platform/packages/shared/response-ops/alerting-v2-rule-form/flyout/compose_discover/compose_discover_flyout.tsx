@@ -78,7 +78,6 @@ import {
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
 import { useResolveTimeField } from './use_resolve_time_field';
-import { COMPOSE_DISCOVER_FLYOUT_WIDTH } from './constants';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -1192,7 +1191,7 @@ export function ComposeDiscoverFlyout({
             historyKey={historyKey}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
-            size={COMPOSE_DISCOVER_FLYOUT_WIDTH}
+            size={540}
             minWidth={480}
             resizable
           >

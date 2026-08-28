@@ -8,6 +8,3 @@
 export const MIN_EDITOR_HEIGHT = 40;
 export const INITIAL_EDITOR_HEIGHT = 100;
 export const MAX_EDITOR_HEIGHT = 600;
-
-/** Default width for the Compose Discover parent flyout. */
-export const COMPOSE_DISCOVER_FLYOUT_WIDTH = 540;
