@@ -52,6 +52,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getServices } from './services';
+import { getTelemetry } from './telemetry';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
@@ -136,8 +137,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom content',
         }),
-      onEdit: async ({ isNewPanel, returnFocus } = {}) => {
+      onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         const { core } = getServices();
+        getTelemetry().trackEditFlyoutOpened({
+          isNewPanel,
+          hasTemplate: Boolean(template$.getValue()),
+          hasEsqlQuery: Boolean(esqlQuery$.getValue()),
+        });
         let hasSaved = false;
         const flyoutRef = openLazyFlyout({
           core,
@@ -215,7 +221,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   projectRouting={projectRouting}
                   query={query}
                   filters={filters}
-                  isNewPanel={isNewPanel ?? false}
+                  isNewPanel={isNewPanel}
                   ariaLabelledBy={ariaLabelledBy}
                   onSave={handleSave}
                   onClose={handleClose}
@@ -234,7 +240,15 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           },
         });
         flyoutRef.onClose.then(() => {
-          if (!hasSaved && !isRetained && isNewPanel && apiIsPresentationContainer(parentApi)) {
+          const panelRemoved =
+            !hasSaved && !isRetained && isNewPanel && apiIsPresentationContainer(parentApi);
+          if (!hasSaved) {
+            getTelemetry().trackEditCancelled({
+              isNewPanel,
+              panelRemoved,
+            });
+          }
+          if (panelRemoved) {
             parentApi.removePanel(uuid);
           }
           isRetained = false;
@@ -369,6 +383,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
                 template$.next(data.panel_template);
                 esqlQuery$.next(data.esql_query);
+                getTelemetry().trackAgentUpdateApplied({
+                  hasEsqlQuery: Boolean(data.esql_query),
+                  templateSizeBytes: data.panel_template.length,
+                });
                 break;
               }
             });
@@ -383,6 +401,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         const handleGenerateWithChat = useCallback(() => {
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
+          getTelemetry().trackGenerateWithChatClicked({
+            triggerSource: 'empty_panel',
+            hasExistingTemplate: false,
+          });
           isRetained = true;
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
