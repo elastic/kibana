@@ -210,7 +210,7 @@ entries:
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes Fleet integration throughput and Discover links for agentless Entity Analytics integrations that use dynamic datasets (Okta, Active Directory, Microsoft Entra ID).
+  description: Fixes Fleet integration throughput and Discover links for Entity Analytics managed integrations that use dynamic datasets (Okta, Active Directory, Microsoft Entra ID).
   prs:
   - https://github.com/elastic/kibana/pull/286758
   issues:
