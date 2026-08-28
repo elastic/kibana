@@ -10,7 +10,6 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../fixtures';
 
-const ANIMALS_INDEX = 'animals-discover-embeddable-000001';
 const DASHBOARD_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 const DASHBOARD_TITLE = 'discover session multiple data views';
@@ -20,11 +19,13 @@ spaceTest.describe(
   'Discover session with multiple data views',
   { tag: '@local-stateful-classic' },
   () => {
+    let animalsIndex: string;
     let dashboardId: string;
 
     spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
+      animalsIndex = `animals-discover-embeddable-${scoutSpace.id}`;
       await esClient.index({
-        index: ANIMALS_INDEX,
+        index: animalsIndex,
         refresh: 'wait_for',
         document: {
           '@timestamp': new Date().toISOString(),
@@ -52,7 +53,7 @@ spaceTest.describe(
     spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
       await scoutSpace.uiSettings.unset('defaultIndex', IGNORE_FILTER_SETTING);
       await scoutSpace.savedObjects.cleanStandardList();
-      await esClient.indices.delete({ index: ANIMALS_INDEX, ignore_unavailable: true });
+      await esClient.indices.delete({ index: animalsIndex, ignore_unavailable: true });
     });
 
     spaceTest(

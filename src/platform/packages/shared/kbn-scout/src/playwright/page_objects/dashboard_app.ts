@@ -985,7 +985,7 @@ export class DashboardApp {
     const editInDiscoverLink = this.page.testSubj.locator(
       'discoverEmbeddableInlineEditEditInDiscoverLink'
     );
-    await expect(editInDiscoverLink).toBeVisible();
+    await editInDiscoverLink.waitFor({ state: 'visible' });
     await editInDiscoverLink.click();
   }
 
