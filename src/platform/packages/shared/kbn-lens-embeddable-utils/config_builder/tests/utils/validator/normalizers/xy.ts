@@ -388,7 +388,7 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
 
       // isVisible is always emitted; missing = false (API round-trip: no isVisible → 'hidden' → false)
       legend.isVisible ??= false;
-      // showSingleSeries is only emitted when visibility === 'visible' (Lens Show), which requires isVisible === true
+      // showSingleSeries is only emitted when visibility === 'auto', which requires isVisible === true
       if (legend.isVisible === false || legend.showSingleSeries === false)
         delete legend.showSingleSeries;
       // Empty legendStats array is not preserved through the round-trip
