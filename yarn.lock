@@ -14203,10 +14203,10 @@
     "@types/node" "*"
     joi "^17.7.0"
 
-"@types/has-ansi@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/has-ansi/-/has-ansi-3.0.0.tgz#636403dc4e0b2649421c4158e5c404416f3f0330"
-  integrity sha512-H3vFOwfLlFEC0MOOrcSkus8PCnMCzz4N0EqUbdJZCdDhBTfkAu86aRYA+MTxjKW6jCpUvxcn4715US8g+28BMA==
+"@types/has-ansi@5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@types/has-ansi/-/has-ansi-5.0.2.tgz#21d874bfb4a9534db0d279645a3af0964650965e"
+  integrity sha512-umJQ393eDf2R9eBdRxZTyXlRDq82ZVT9/tNfF3H3d2GDIBQILq/LZXHSvwXaH2OSvaSHVe2BX3s+IdoFHQ8zmg==
 
 "@types/hast@^2.0.0":
   version "2.3.1"
@@ -16023,17 +16023,12 @@ ansi-regex@^2.0.0:
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"
   integrity sha1-w7M6te42DYbg5ijwRorn7yfWVN8=
 
-ansi-regex@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-3.0.1.tgz#123d6479e92ad45ad897d4054e3c7ca7db4944e1"
-  integrity sha512-+O9Jct8wf++lXxxFc4hc8LsjaSq0HFzzL7cVsw8pRDIPdjKD2mT4ytDZlLuSBZ4cLKZFXIrMGO7DbQCtMJJMKw==
-
 ansi-regex@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-5.0.1.tgz#082cb2c89c9fe8659a311a53bd6a4dc5301db304"
   integrity sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==
 
-ansi-regex@^6.2.2:
+ansi-regex@^6.0.1, ansi-regex@^6.2.2:
   version "6.2.2"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-6.2.2.tgz#60216eea464d864597ce2832000738a0589650c1"
   integrity sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg==
@@ -22333,12 +22328,12 @@ hard-rejection@^2.1.0:
   resolved "https://registry.yarnpkg.com/hard-rejection/-/hard-rejection-2.1.0.tgz#1c6eda5c1685c63942766d79bb40ae773cecd883"
   integrity sha512-VIZB+ibDhx7ObhAe7OVtoEbuP4h/MuOTHJ+J8h/eBXotJYl0fBgR72xDFCKgIh22OJZIOVNxBMWuhAr10r8HdA==
 
-has-ansi@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/has-ansi/-/has-ansi-3.0.0.tgz#36077ef1d15f333484aa7fa77a28606f1c655b37"
-  integrity sha1-Ngd+8dFfMzSEqn+neihgbxxlWzc=
+has-ansi@6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/has-ansi/-/has-ansi-6.0.2.tgz#f246fe923a734f19cdd26fe264610d1aece5965b"
+  integrity sha512-vAyM+6+jAYwSwz0/M0jYKfU9AvAMCz0kH791RsUhvMKGUHXled/3FjcQB3YiQ4Astj5srHdb6B2FHGIfZkOQNg==
   dependencies:
-    ansi-regex "^3.0.0"
+    ansi-regex "^6.0.1"
 
 has-ansi@^2.0.0:
   version "2.0.0"
@@ -32001,12 +31996,12 @@ stringify-object@^3.2.1:
   dependencies:
     ansi-regex "^5.0.1"
 
-strip-ansi@6.0.1, strip-ansi@^6.0.0, strip-ansi@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
-  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
+strip-ansi@7.2.0, strip-ansi@^7.0.1, strip-ansi@^7.1.0, strip-ansi@^7.1.2, strip-ansi@^7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-7.2.0.tgz#d22a269522836a627af8d04b5c3fd2c7fa3e32e3"
+  integrity sha512-yDPMNjp4WyfYBkHnjIRLfca1i6KMyGCtsVgoKe/z1+6vukgaENdgGBZt+ZmKPc4gavvEZ5OgHfHdrazhgNyG7w==
   dependencies:
-    ansi-regex "^5.0.1"
+    ansi-regex "^6.2.2"
 
 strip-ansi@^3.0.0, strip-ansi@^3.0.1:
   version "3.0.1"
@@ -32015,12 +32010,12 @@ strip-ansi@^3.0.0, strip-ansi@^3.0.1:
   dependencies:
     ansi-regex "^2.0.0"
 
-strip-ansi@^7.0.1, strip-ansi@^7.1.0, strip-ansi@^7.1.2, strip-ansi@^7.2.0:
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-7.2.0.tgz#d22a269522836a627af8d04b5c3fd2c7fa3e32e3"
-  integrity sha512-yDPMNjp4WyfYBkHnjIRLfca1i6KMyGCtsVgoKe/z1+6vukgaENdgGBZt+ZmKPc4gavvEZ5OgHfHdrazhgNyG7w==
+strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
+  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
   dependencies:
-    ansi-regex "^6.2.2"
+    ansi-regex "^5.0.1"
 
 strip-bom@^3.0.0:
   version "3.0.0"
