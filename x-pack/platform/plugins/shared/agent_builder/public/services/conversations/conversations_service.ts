@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
+import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
   ListConversationsResponseItem,
   GetConversationResponse,
@@ -14,6 +15,8 @@ import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  UpdateConversationAccessControlRequestBody,
+  UpdateConversationAccessControlResponse,
 } from '../../../common/http_api/conversations';
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
@@ -76,6 +79,25 @@ export class ConversationsService {
     );
   }
 
+  async submitRoundFeedback({
+    conversationId,
+    roundId,
+    vote,
+    chips,
+    comment,
+  }: {
+    conversationId: string;
+    roundId: string;
+    vote: 'up' | 'down' | null;
+    chips?: FeedbackChipId[];
+    comment?: string;
+  }): Promise<void> {
+    await this.http.post(
+      `${internalApiPath}/conversations/${conversationId}/rounds/${roundId}/_feedback`,
+      { body: JSON.stringify({ vote, chips, comment }) }
+    );
+  }
+
   async updatePinnedStatus({
     conversationId,
     pinned,
@@ -86,6 +108,21 @@ export class ConversationsService {
     return await this.http.post<MarkPinnedConversationResponse>(
       `${internalApiPath}/conversations/${conversationId}/_set_pinned`,
       { body: JSON.stringify({ pinned }) }
+    );
+  }
+
+  async updateAccessControl({
+    conversationId,
+    accessControl,
+  }: {
+    conversationId: string;
+    accessControl: UpdateConversationAccessControlRequestBody;
+  }): Promise<UpdateConversationAccessControlResponse> {
+    return await this.http.put<UpdateConversationAccessControlResponse>(
+      `${publicApiPath}/conversations/${conversationId}/access_control`,
+      {
+        body: JSON.stringify(accessControl),
+      }
     );
   }
 

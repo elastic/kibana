@@ -180,7 +180,6 @@ export class KibanaAgentExecutor implements AgentExecutor {
           agentId: this.agentId,
           nextInput: { message: userText },
           conversationId: a2aConversationId,
-          capabilities: { visualizations: false },
           autoCreateConversationWithId: true,
         },
       });
