@@ -440,6 +440,7 @@ export {
   appendTimeBucketToEsqlQuery,
   buildTrendlineQueryWithMetricFieldMap,
   queryHasStatsCommand,
+  queryHasTsSourceCommand,
 } from './esql/trendline_query';
 export type {
   ESQLExpressionWithParams,
@@ -522,3 +523,14 @@ export {
   getTimeZoneAndInterval,
   mapToEsqlInterval,
 } from './esql/operations';
+export {
+  isTextBasedAttributes,
+  hasTextBasedLayers,
+  getTextBasedLayerQueries,
+  getRepresentativeQuery,
+  getChartScopedFilterQuery,
+  withLegacyAggregateQuerySlot,
+  dropLegacyAggregateQuerySlot,
+  EMPTY_KQL_QUERY,
+} from './esql/lens_attributes_queries';
+export type { MinimalLensAttributes, MinimalLensState } from './esql/lens_attributes_queries';
