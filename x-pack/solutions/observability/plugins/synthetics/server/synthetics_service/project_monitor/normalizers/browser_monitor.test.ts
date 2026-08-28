@@ -7,6 +7,7 @@
 
 import type { Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import {
+  ConfigKey,
   MonitorTypeEnum,
   ScreenshotOption,
   LocationStatus,
@@ -17,6 +18,7 @@ import {
   PROFILES_MAP,
 } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
+import { getNormalizeBrowserFields } from './browser_monitor';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('browser normalizers', () => {
@@ -424,6 +426,58 @@ describe('browser normalizers', () => {
           errors: [],
         },
       ]);
+    });
+
+    it.each([
+      {
+        title: 'array',
+        certificateErrorSpkiAllowlist: [
+          '-----BEGIN CERTIFICATE-----\nAAA\n-----END CERTIFICATE-----',
+          '-----BEGIN CERTIFICATE-----\nBBB\n-----END CERTIFICATE-----',
+        ],
+        expected: [
+          '-----BEGIN CERTIFICATE-----\nAAA\n-----END CERTIFICATE-----',
+          '-----BEGIN CERTIFICATE-----\nBBB\n-----END CERTIFICATE-----',
+        ],
+      },
+      {
+        title: 'string',
+        certificateErrorSpkiAllowlist:
+          '-----BEGIN CERTIFICATE-----\nCCC\n-----END CERTIFICATE-----',
+        expected: ['-----BEGIN CERTIFICATE-----\nCCC\n-----END CERTIFICATE-----'],
+      },
+    ])(
+      'normalizes certificateErrorSpkiAllowlist from $title',
+      ({ certificateErrorSpkiAllowlist, expected }) => {
+        const actual = getNormalizeBrowserFields({
+          locations,
+          privateLocations,
+          monitor: {
+            ...monitors[0],
+            certificateErrorSpkiAllowlist,
+          },
+          projectId,
+          namespace: 'test-space',
+          version: '8.5.0',
+        });
+
+        expect(actual.normalizedFields[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]).toEqual(
+          expected
+        );
+      }
+    );
+
+    it('defaults certificateErrorSpkiAllowlist when omitted', () => {
+      const actual = getNormalizeBrowserFields({
+        locations,
+        privateLocations,
+        monitor: monitors[1],
+        projectId,
+        namespace: 'test-space',
+        version: '8.5.0',
+      });
+
+      expect(actual.normalizedFields[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]).toEqual([]);
     });
   });
 });
