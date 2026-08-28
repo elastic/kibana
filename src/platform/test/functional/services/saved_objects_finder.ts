@@ -19,9 +19,9 @@ export class SavedObjectsFinderService extends FtrService {
 
   public async toggleFilterPopover() {
     this.log.debug('SavedObjectsFinder.toggleFilter');
-    // Keep the locator scoped to the finder. A nested `button` retry is global and
-    // hits chrome.next's header Search button, which opens a modal over the flyout.
-    await this.find.clickByCssSelector('.euiSearchBar__filtersHolder button');
+    const filtersHolder = await this.find.byClassName('euiSearchBar__filtersHolder');
+    const filtersButton = await filtersHolder.findByCssSelector('button');
+    await filtersButton.click();
   }
 
   public async toggleFilter(type: string) {
