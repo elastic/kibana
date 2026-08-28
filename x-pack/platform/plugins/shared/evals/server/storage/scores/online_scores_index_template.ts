@@ -6,7 +6,7 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
-import type { MappingsDefinition } from '@kbn/es-mappings';
+import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 import { EvaluationIndices } from '@kbn/evals-common';
 
 const onlineScoresDataStreamMappings = {
@@ -36,12 +36,12 @@ const onlineScoresDataStreamMappings = {
         name: { type: 'keyword' },
         value: { type: 'float' },
         label: { type: 'keyword' },
-        explanation: { type: 'text', index: false },
+        explanation: mappings.text({ index: false, fields: undefined }),
         metadata: { type: 'flattened' },
       },
     },
   },
-} as unknown as MappingsDefinition;
+} satisfies MappingsDefinition;
 
 export const onlineScoresDataStreamDefinition: DataStreamDefinition<MappingsDefinition> = {
   name: EvaluationIndices.ONLINE_SCORES,

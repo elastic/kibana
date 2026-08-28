@@ -16,6 +16,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { OnlineScoreDocument } from '../../storage/scores/online_score_service';
 import type { RouteDependencies } from '../register_routes';
+import { getEsErrorLogDetails } from '../utils/get_es_error_log_details';
 
 const ONLINE_SCORE_INGEST_PAYLOAD_CAP_BYTES = 5 * 1024 * 1024;
 
@@ -100,7 +101,8 @@ export const registerIngestOnlineScoresRoute = ({
             },
           });
         } catch (error) {
-          logger.error(`Failed to ingest online evaluation scores: ${error}`);
+          const { message, meta } = getEsErrorLogDetails(error);
+          logger.error(`Failed to ingest online evaluation scores: ${message}`, meta);
           return response.customError({
             statusCode: 500,
             body: {

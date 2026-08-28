@@ -25,6 +25,7 @@ export type {
 } from './online_evals/workflow_yaml';
 export {
   buildOnlineEvalWorkflowYaml,
+  ONLINE_EVAL_WORKFLOW_TAG,
   parseOnlineEvalWorkflowYaml,
 } from './online_evals/workflow_yaml';
 export {

@@ -178,7 +178,10 @@ describe('POST /internal/evals/online_scores', () => {
     expect(response.status).toBe(500);
     expect(response.payload).toEqual({ message: 'Failed to ingest online evaluation scores' });
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to ingest online evaluation scores: Error: boom')
+      'Failed to ingest online evaluation scores: boom',
+      expect.objectContaining({
+        error: expect.objectContaining({ message: 'boom', stack_trace: expect.any(String) }),
+      })
     );
   });
 });

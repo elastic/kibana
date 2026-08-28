@@ -11,12 +11,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { buildOnlineEvalWorkflowYaml, type OnlineEvalWorkflowConfig } from '../../common';
 import { queryKeys } from '../query_keys';
-import { useUpdateOnlineEvalWorkflow } from './use_online_eval_workflows';
+import { useOnlineEvalWorkflows, useUpdateOnlineEvalWorkflow } from './use_online_eval_workflows';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 
 const mockHttp = {
   get: jest.fn(),
+  post: jest.fn(),
   put: jest.fn(),
 };
 
@@ -52,6 +53,7 @@ describe('useUpdateOnlineEvalWorkflow', () => {
     } as unknown as ReturnType<typeof useKibana>);
 
     mockHttp.get.mockReset();
+    mockHttp.post.mockReset();
     mockHttp.put.mockReset();
   });
 
@@ -106,5 +108,38 @@ describe('useUpdateOnlineEvalWorkflow', () => {
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: queryKeys.onlineEvals.detail(workflowId),
     });
+  });
+
+  it('loads missing workflow YAML in one bulk request', async () => {
+    const yaml = buildOnlineEvalWorkflowYaml(config);
+    mockHttp.get.mockResolvedValue({
+      page: 1,
+      size: 10,
+      total: 2,
+      results: [
+        { id: 'workflow-1', name: 'First', enabled: true, tags: ['evals-online'] },
+        { id: 'workflow-2', name: 'Second', enabled: false, tags: ['evals-online'], yaml },
+      ],
+    });
+    mockHttp.post.mockResolvedValue([{ id: 'workflow-1', yaml }]);
+
+    const { result } = renderHook(() => useOnlineEvalWorkflows(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(mockHttp.get).toHaveBeenCalledWith('/api/workflows', {
+      query: { tags: 'evals-online' },
+      version: '2023-10-31',
+    });
+    expect(mockHttp.post).toHaveBeenCalledWith('/api/workflows/mget', {
+      body: JSON.stringify({ ids: ['workflow-1'], source: ['yaml'] }),
+      version: '2023-10-31',
+    });
+    expect(result.current.data?.workflows).toEqual([
+      expect.objectContaining({ id: 'workflow-1', yaml }),
+      expect.objectContaining({ id: 'workflow-2', yaml }),
+    ]);
   });
 });

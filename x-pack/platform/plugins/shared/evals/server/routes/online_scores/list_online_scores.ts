@@ -15,6 +15,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { getEsErrorLogDetails } from '../utils/get_es_error_log_details';
 
 export const registerListOnlineScoresRoute = ({
   router,
@@ -54,7 +55,8 @@ export const registerListOnlineScoresRoute = ({
             body: result,
           });
         } catch (error) {
-          logger.error(`Failed to list online evaluation scores: ${error}`);
+          const { message, meta } = getEsErrorLogDetails(error);
+          logger.error(`Failed to list online evaluation scores: ${message}`, meta);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to list online evaluation scores' },

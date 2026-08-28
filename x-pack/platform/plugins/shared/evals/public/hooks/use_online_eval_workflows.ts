@@ -10,6 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { parseYamlToJSONWithoutValidation, stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import {
   buildOnlineEvalWorkflowYaml,
+  ONLINE_EVAL_WORKFLOW_TAG,
   type OnlineEvalWorkflowConfig,
   parseOnlineEvalWorkflowYaml,
 } from '../../common/online_evals/workflow_yaml';
@@ -17,7 +18,6 @@ import { queryKeys } from '../query_keys';
 
 const WORKFLOWS_API_BASE_URL = '/api/workflows';
 const WORKFLOWS_API_VERSION = '2023-10-31';
-const ONLINE_EVAL_WORKFLOW_TAG = 'evals-online';
 
 const getWorkflowUrl = (workflowId: string) =>
   `${WORKFLOWS_API_BASE_URL}/workflow/${encodeURIComponent(workflowId)}`;
@@ -45,6 +45,11 @@ interface WorkflowDetail {
   enabled: boolean;
   tags: string[];
   yaml: string;
+}
+
+interface WorkflowYamlSource {
+  id: string;
+  yaml?: string;
 }
 
 interface UpdateWorkflowPayload {
@@ -105,25 +110,34 @@ export const useOnlineEvalWorkflows = () => {
         version: WORKFLOWS_API_VERSION,
       });
 
-      const workflows = await Promise.all(
-        listResponse.results.map(async (workflow) => {
-          const yaml =
-            workflow.yaml ??
-            (
-              await services.http!.get<WorkflowDetail>(getWorkflowUrl(workflow.id), {
-                version: WORKFLOWS_API_VERSION,
-              })
-            ).yaml;
+      const workflowIdsMissingYaml = listResponse.results
+        .filter(({ yaml }) => yaml === undefined)
+        .map(({ id }) => id);
 
-          return {
-            id: workflow.id,
-            name: workflow.name,
-            enabled: workflow.enabled,
-            yaml,
-            parsedConfig: parseOnlineEvalWorkflowYaml(yaml),
-          };
-        })
-      );
+      const workflowSources =
+        workflowIdsMissingYaml.length > 0
+          ? await services.http!.post<WorkflowYamlSource[]>(`${WORKFLOWS_API_BASE_URL}/mget`, {
+              body: JSON.stringify({ ids: workflowIdsMissingYaml, source: ['yaml'] }),
+              version: WORKFLOWS_API_VERSION,
+            })
+          : [];
+
+      const yamlByWorkflowId = new Map(workflowSources.map(({ id, yaml }) => [id, yaml]));
+
+      const workflows = listResponse.results.map((workflow) => {
+        const yaml = workflow.yaml ?? yamlByWorkflowId.get(workflow.id);
+        if (yaml === undefined) {
+          throw new Error(`Unable to load workflow YAML for ${workflow.id}`);
+        }
+
+        return {
+          id: workflow.id,
+          name: workflow.name,
+          enabled: workflow.enabled,
+          yaml,
+          parsedConfig: parseOnlineEvalWorkflowYaml(yaml),
+        };
+      });
 
       return {
         page: listResponse.page,

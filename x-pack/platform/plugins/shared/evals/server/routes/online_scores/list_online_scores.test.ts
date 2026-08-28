@@ -117,6 +117,11 @@ describe('GET /internal/evals/online_scores', () => {
 
     expect(response.status).toBe(500);
     expect(response.payload).toEqual({ message: 'Failed to list online evaluation scores' });
-    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to list online evaluation scores: es failure',
+      expect.objectContaining({
+        error: expect.objectContaining({ message: 'es failure', stack_trace: expect.any(String) }),
+      })
+    );
   });
 });

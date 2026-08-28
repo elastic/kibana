@@ -7,7 +7,7 @@
 
 import { parseYamlToJSONWithoutValidation, stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 
-const ONLINE_EVAL_WORKFLOW_TAG = 'evals-online';
+export const ONLINE_EVAL_WORKFLOW_TAG = 'evals-online';
 const ONLINE_EVAL_NAME_PREFIX = '[online-eval] ';
 
 const SAMPLE_TRACES_STEP_NAME = 'sample_traces';
