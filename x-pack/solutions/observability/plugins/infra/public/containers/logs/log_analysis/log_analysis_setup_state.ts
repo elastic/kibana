@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ProjectRouting } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -49,6 +50,9 @@ export const useAnalysisSetupState = <T extends JobType>({
   const { services } = useKibanaContextForPlugin();
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
+  // SPIKE: draft CPS project scope for the jobs about to be created. Not yet wired
+  // into validation, dataset discovery, or the module setup call.
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting>(undefined);
 
   const isTimeRangeValid = useMemo(
     () => (startTime != null && endTime != null ? startTime < endTime : true),
@@ -285,8 +289,10 @@ export const useAnalysisSetupState = <T extends JobType>({
     datasetFilter,
     endTime,
     isValidating,
+    projectRouting,
     selectedIndexNames,
     setEndTime,
+    setProjectRouting,
     setStartTime,
     setUp,
     startTime,

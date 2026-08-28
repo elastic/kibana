@@ -7,11 +7,14 @@
 
 import { EuiCallOut, EuiForm, EuiSpacer } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { ProjectRouting } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import type { QualityWarning, SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
+import type { LoadedProjectScopeProjects } from './analysis_setup_project_scope';
+import { AnalysisSetupProjectScopeForm } from './analysis_setup_project_scope';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
 import type {
   AvailableIndex,
@@ -32,6 +35,8 @@ interface InitialConfigurationStepProps {
   setValidatedIndices: (selectedIndices: AvailableIndex[]) => void;
   validationErrors?: ValidationUIError[];
   previousQualityWarnings?: QualityWarning[];
+  projectRouting?: ProjectRouting;
+  onOpenProjectScope?: (projects: LoadedProjectScopeProjects) => void;
 }
 
 export const createInitialConfigurationStep = (
@@ -52,6 +57,8 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setValidatedIndices,
   validationErrors = [],
   previousQualityWarnings = [],
+  projectRouting,
+  onOpenProjectScope,
 }: InitialConfigurationStepProps) => {
   const disabled = useMemo(() => !editableFormStatus.includes(setupStatus.type), [setupStatus]);
 
@@ -61,29 +68,36 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   );
 
   return (
-    <>
-      <EuiForm>
-        <AnalysisSetupTimerangeForm
-          disabled={disabled}
-          setStartTime={setStartTime}
-          setEndTime={setEndTime}
-          startTime={startTime}
-          endTime={endTime}
-          validationErrors={timeRangeValidationErrors}
-        />
-        <EuiSpacer size="xl" />
-        <AnalysisSetupIndicesForm
-          disabled={disabled}
-          indices={validatedIndices}
-          isValidating={isValidating}
-          onChangeSelectedIndices={setValidatedIndices}
-          previousQualityWarnings={previousQualityWarnings}
-          validationErrors={indexValidationErrors}
-        />
+    <EuiForm>
+      {onOpenProjectScope ? (
+        <>
+          <AnalysisSetupProjectScopeForm
+            projectRouting={projectRouting}
+            onOpenProjectScope={onOpenProjectScope}
+          />
+          <EuiSpacer size="xl" />
+        </>
+      ) : null}
+      <AnalysisSetupTimerangeForm
+        disabled={disabled}
+        setStartTime={setStartTime}
+        setEndTime={setEndTime}
+        startTime={startTime}
+        endTime={endTime}
+        validationErrors={timeRangeValidationErrors}
+      />
+      <EuiSpacer size="xl" />
+      <AnalysisSetupIndicesForm
+        disabled={disabled}
+        indices={validatedIndices}
+        isValidating={isValidating}
+        onChangeSelectedIndices={setValidatedIndices}
+        previousQualityWarnings={previousQualityWarnings}
+        validationErrors={indexValidationErrors}
+      />
 
-        <ValidationErrors errors={globalValidationErrors} />
-      </EuiForm>
-    </>
+      <ValidationErrors errors={globalValidationErrors} />
+    </EuiForm>
   );
 };
 

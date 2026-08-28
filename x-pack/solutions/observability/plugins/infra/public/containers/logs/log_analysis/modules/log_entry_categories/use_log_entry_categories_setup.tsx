@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import createContainer from 'constate';
 import { useAnalysisSetupState } from '../../log_analysis_setup_state';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 
@@ -25,7 +26,9 @@ export const useLogEntryCategoriesSetup = () => {
     cleanUpAndSetUp,
     endTime,
     isValidating,
+    projectRouting,
     setEndTime,
+    setProjectRouting,
     setStartTime,
     setValidatedIndices,
     setUp,
@@ -47,7 +50,9 @@ export const useLogEntryCategoriesSetup = () => {
     isValidating,
     lastSetupErrorMessages,
     moduleDescriptor,
+    projectRouting,
     setEndTime,
+    setProjectRouting,
     setStartTime,
     setValidatedIndices,
     setUp,
@@ -58,3 +63,7 @@ export const useLogEntryCategoriesSetup = () => {
     viewResults,
   };
 };
+
+export const [LogEntryCategoriesSetupProvider, useLogEntryCategoriesSetupContext] = createContainer(
+  useLogEntryCategoriesSetup
+);
