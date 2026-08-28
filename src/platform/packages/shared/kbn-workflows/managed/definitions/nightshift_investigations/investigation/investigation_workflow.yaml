@@ -57,7 +57,7 @@ steps:
     type: kibana.request
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -72,7 +72,7 @@ steps:
     if: '${{ inputs.context.event_uuid != null }}'
     with:
       method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -686,7 +686,7 @@ steps:
     if: '${{ inputs.context.event_uuid != null }}'
     with:
       method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -729,7 +729,7 @@ steps:
     if: '${{ steps.investigate.error == null }}'
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -742,7 +742,7 @@ steps:
     if: '${{ steps.investigate.error != null }}'
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
