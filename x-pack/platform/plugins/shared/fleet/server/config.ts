@@ -289,11 +289,7 @@ export const config: PluginConfigDescriptor = {
                 schema.object({
                   certificate: schema.maybe(schema.string()),
                   key: schema.maybe(schema.string()),
-                  // One path (agentless-style) or a list. Serverless mTLS needs
-                  // both cluster-internal-cas and the MKI intermediate.
-                  ca: schema.maybe(
-                    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
-                  ),
+                  ca: schema.maybe(schema.string()),
                 })
               ),
             })
@@ -394,6 +390,8 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
+        // Test/development escape hatch for uploading a package whose name exists in EPR or bundled packages.
+        allowRegistryPackageUploads: schema.boolean({ defaultValue: false }),
         // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
         privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),
         privateElasticsearchHost: schema.maybe(schema.uri({ scheme: ['https'] })),

@@ -529,7 +529,6 @@ describe('XY', () => {
                   },
                 ],
               },
-              query: { esql: 'FROM logs | STATS count = COUNT(*) BY timestamp' },
               filters: [],
             },
           };
@@ -587,7 +586,6 @@ describe('XY', () => {
                   },
                 ],
               },
-              query: { esql: 'FROM logs | STATS count = COUNT(*) BY bytes' },
               filters: [],
             },
           };
