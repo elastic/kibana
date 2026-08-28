@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { EMPTY, map, merge, skip, switchMap } from 'rxjs';
+import { distinctUntilChanged, EMPTY, map, merge, skip, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart, EmbeddableChatAccess } from '@kbn/agent-builder-browser';
 import {
@@ -40,8 +40,11 @@ const isPrettifiable = (
   canWrite &&
   access.hasRequiredLicense &&
   access.hasLlmConnector &&
-  Object.values(dashboardApi.children$.getValue()).some(
-    (child) => apiPublishesEsqlUsage(child) && child.usesEsql$.getValue()
+  Object.entries(dashboardApi.children$.getValue()).some(
+    ([id, child]) =>
+      Boolean(dashboardApi.layout$.getValue().panels[id]) &&
+      apiPublishesEsqlUsage(child) &&
+      child.usesEsql$.getValue()
   );
 
 export const createPrettifyDashboardAction = ({
@@ -64,6 +67,11 @@ export const createPrettifyDashboardAction = ({
     getCompatibilityChangesSubject: ({ dashboardApi }): Observable<undefined> =>
       merge(
         dashboardApi.viewMode$.pipe(skip(1)),
+        dashboardApi.layout$.pipe(
+          map((layout) => Object.keys(layout.panels).length),
+          distinctUntilChanged(),
+          skip(1)
+        ),
         dashboardApi.children$.pipe(skip(1)),
         dashboardApi.children$.pipe(
           switchMap((children) => {

@@ -31,18 +31,32 @@ const child = (usesEsql: boolean) => ({
   usesEsql$: new BehaviorSubject(usesEsql),
 });
 
+const layoutPanel = {
+  type: LENS_EMBEDDABLE_TYPE,
+  grid: { x: 0, y: 0, w: 24, h: 15 },
+};
+
+const createLayout = (panelIds: string[]) => ({
+  panels: Object.fromEntries(panelIds.map((id) => [id, layoutPanel])),
+  sections: {},
+  pinnedPanels: {},
+});
+
 const createDashboardApi = ({
   viewMode = 'edit',
   children = { a: child(true) },
   panels = [esqlLens],
+  layout = createLayout(Object.keys(children)),
 }: {
   viewMode?: string;
   children?: Record<string, ReturnType<typeof child>>;
   panels?: unknown[];
+  layout?: ReturnType<typeof createLayout>;
 } = {}): DashboardApi =>
   ({
     viewMode$: new BehaviorSubject(viewMode),
     children$: new BehaviorSubject(children),
+    layout$: new BehaviorSubject(layout),
     savedObjectId$: new BehaviorSubject('dash-1'),
     getSerializedState: () => ({
       attributes: {
@@ -122,6 +136,19 @@ describe('createPrettifyDashboardAction', () => {
       action.isCompatible!({
         dashboardApi: createDashboardApi({
           children: {},
+        }),
+      })
+    ).resolves.toBe(false);
+  });
+
+  it('is incompatible when an ES|QL child is not in layout$.panels', async () => {
+    const { action } = createAction();
+
+    await expect(
+      action.isCompatible!({
+        dashboardApi: createDashboardApi({
+          children: { a: child(true) },
+          layout: createLayout([]),
         }),
       })
     ).resolves.toBe(false);
@@ -226,5 +253,37 @@ describe('createPrettifyDashboardAction', () => {
   it('uses the prettify action id', () => {
     const { action } = createAction();
     expect(action.id).toBe(PRETTIFY_DASHBOARD_ACTION_ID);
+  });
+
+  it('getCompatibilityChangesSubject emits when layout$.panels length changes', () => {
+    const { action } = createAction();
+    const dashboardApi = createDashboardApi();
+    const next = jest.fn();
+    const subscription = action.getCompatibilityChangesSubject!({ dashboardApi })?.subscribe(next);
+
+    (dashboardApi.layout$ as BehaviorSubject<ReturnType<typeof createLayout>>).next(
+      createLayout([])
+    );
+
+    expect(next).toHaveBeenCalledTimes(1);
+    subscription?.unsubscribe();
+  });
+
+  it('getCompatibilityChangesSubject does not emit when a panel is only repositioned', () => {
+    const { action } = createAction();
+    const dashboardApi = createDashboardApi();
+    const next = jest.fn();
+    const subscription = action.getCompatibilityChangesSubject!({ dashboardApi })?.subscribe(next);
+
+    (dashboardApi.layout$ as BehaviorSubject<ReturnType<typeof createLayout>>).next({
+      panels: {
+        a: { type: LENS_EMBEDDABLE_TYPE, grid: { x: 8, y: 4, w: 24, h: 15 } },
+      },
+      sections: {},
+      pinnedPanels: {},
+    });
+
+    expect(next).not.toHaveBeenCalled();
+    subscription?.unsubscribe();
   });
 });
