@@ -206,7 +206,7 @@ entries:
     name: 286758.yaml
     checksum: 15f03edce987fbdb7b5dda9b8f6fa35b04827344
   type: bug-fix
-  title: Fix zero throughput for agentless Entity Analytics integrations in Fleet
+  title: Fix zero throughput for Entity Analytics managed integrations in Fleet
   products:
   - product: cloud-serverless
   - product: kibana
