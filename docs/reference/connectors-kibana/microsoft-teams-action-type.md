@@ -80,7 +80,7 @@ The Microsoft Teams connector has the following actions:
     - `size` (optional): Number of results to return, up to 25.
     - `enableTopResults` (optional): Sort results by relevance.
 
-**Send channel message**
+**Send channel message** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
 :   Posts a new message to a channel. Requires the `ChannelMessage.Send` delegated permission or `ChannelMessage.ReadWrite.All` application permission.
     - `teamId` (required): The ID of the team containing the channel.
     - `channelId` (required): The ID of the channel to post to.
@@ -88,13 +88,13 @@ The Microsoft Teams connector has the following actions:
     - `contentType` (optional): `"text"` (default) or `"html"`.
     - `subject` (optional): Optional subject line displayed as a message header.
 
-**Send chat message**
+**Send chat message** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
 :   Posts a new message to an existing chat (1:1 or group). Requires the `Chat.ReadWrite` delegated permission or `Chat.ReadWrite.All` application permission.
     - `chatId` (required): The ID of the chat to send the message to.
     - `content` (required): The message body text (plain text or HTML, up to 2000 characters).
     - `contentType` (optional): `"text"` (default) or `"html"`.
 
-**Update message**
+**Update message** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
 :   Edits the body of an existing channel or chat message. Provide `teamId` and `channelId` for a channel message, or `chatId` for a chat message.
     - `messageId` (required): The ID of the message to update.
     - `teamId` (optional, channel messages): The team ID. Must be provided together with `channelId`.
@@ -103,11 +103,11 @@ The Microsoft Teams connector has the following actions:
     - `content` (required): The new message body text.
     - `contentType` (optional): `"text"` (default) or `"html"`.
 
-**Get user**
+**Get user** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
 :   Looks up a user by ID (GUID) or user principal name (UPN, for example `alice@contoso.com`). Useful for resolving an email address to a GUID before calling `createChat`.
     - `userId` (required): The user ID (GUID) or UPN to look up.
 
-**Create chat**
+**Create chat** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
 :   Creates a new 1:1 or group chat and returns the resulting chat object including its `id`. Requires the `Chat.ReadWrite` delegated permission or `Chat.ReadWrite.All` application permission.
     - `chatType` (required): `"oneOnOne"` for a 1:1 direct message (exactly one other member) or `"group"` for a group chat (two or more other members).
     - `memberIds` (required): Array of user IDs (GUIDs or UPNs) to invite, not including yourself (1–20 members).
