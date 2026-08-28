@@ -11,18 +11,21 @@ export const DATASET_WIZARD_FLOW_VARIANT_1 = 'flow_1';
 export const DATASET_WIZARD_FLOW_VARIANT_2 = 'flow_2';
 export const DATASET_WIZARD_FLOW_VARIANT_3 = 'flow_3';
 export const DATASET_WIZARD_FLOW_VARIANT_3_9_6 = 'flow_3_9_6';
+export const DATASET_WIZARD_FLOW_VARIANT_4 = 'flow_4';
 
 export type DatasetWizardFlowVariant =
   | typeof DATASET_WIZARD_FLOW_VARIANT_1
   | typeof DATASET_WIZARD_FLOW_VARIANT_2
   | typeof DATASET_WIZARD_FLOW_VARIANT_3
-  | typeof DATASET_WIZARD_FLOW_VARIANT_3_9_6;
+  | typeof DATASET_WIZARD_FLOW_VARIANT_3_9_6
+  | typeof DATASET_WIZARD_FLOW_VARIANT_4;
 
 export const DATASET_WIZARD_FLOW_VARIANTS: DatasetWizardFlowVariant[] = [
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_4,
 ];
 
 export const isDatasetWizardFlowVariant = (value: string): value is DatasetWizardFlowVariant =>
@@ -30,10 +33,14 @@ export const isDatasetWizardFlowVariant = (value: string): value is DatasetWizar
 
 export const isDatasetWizardFlow3 = (flowVariant: DatasetWizardFlowVariant): boolean =>
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3 ||
-  flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6;
+  flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6 ||
+  flowVariant === DATASET_WIZARD_FLOW_VARIANT_4;
 
 export const isDatasetWizardFlow396 = (flowVariant: DatasetWizardFlowVariant): boolean =>
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6;
+
+export const isDatasetWizardFlow4 = (flowVariant: DatasetWizardFlowVariant): boolean =>
+  flowVariant === DATASET_WIZARD_FLOW_VARIANT_4;
 
 export const hasDatasetWizardPreviewResultsStep = (
   flowVariant: DatasetWizardFlowVariant

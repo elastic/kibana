@@ -15,6 +15,7 @@ import {
 } from '../create_dataset_flyout/dataset_settings_visibility';
 import {
   ADDITIONAL_SETTINGS_STEP,
+  DATA_SOURCE_STEP,
   FLOW_3_REVIEW_STEP,
   LOGISTICS_STEP,
   PREVIEW_RESULTS_STEP,
@@ -24,10 +25,15 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   hasDatasetWizardPreviewResultsStep,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow4,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
-import { getWizardSteps, type DatasetWizardStep } from './dataset_wizard_step_url';
+import {
+  getWizardStepPosition,
+  getWizardSteps,
+  type DatasetWizardStep,
+} from './dataset_wizard_step_url';
 
 const LOGISTICS_STEP_FIELDS_WITHOUT_REGION: Array<FieldPath<DatasetWizardFormValues>> = [
   'data_source',
@@ -39,6 +45,9 @@ const LOGISTICS_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = [
   ...LOGISTICS_STEP_FIELDS_WITHOUT_REGION,
   'region',
 ];
+
+/** Flow 4 step 1 only asks for the file URI; the data source moves to its own step. */
+const FILE_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = ['resource'];
 
 const getLogisticsStepFields = (
   flowVariant: DatasetWizardFlowVariant
@@ -62,9 +71,10 @@ export const getAdditionalSettingsStepFields = (
   flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
 ): Array<FieldPath<DatasetWizardFormValues>> => {
   const { format, error_mode: errorMode } = values.settings;
-  const regionFields: Array<FieldPath<DatasetWizardFormValues>> = isDatasetWizardFlow3(flowVariant)
-    ? ['region']
-    : [];
+  // Flow 4 detects the region from the bucket on its data source step, so it has
+  // no region field to validate here.
+  const regionFields: Array<FieldPath<DatasetWizardFormValues>> =
+    isDatasetWizardFlow3(flowVariant) && !isDatasetWizardFlow4(flowVariant) ? ['region'] : [];
 
   if (!isKnownFormat(format)) {
     return regionFields;
@@ -101,7 +111,13 @@ export const getWizardStepFields = (
 ): Array<FieldPath<DatasetWizardFormValues>> => {
   switch (step) {
     case LOGISTICS_STEP:
-      return getLogisticsStepFields(flowVariant);
+      return isDatasetWizardFlow4(flowVariant)
+        ? FILE_STEP_FIELDS
+        : getLogisticsStepFields(flowVariant);
+    // The flow 4 data source step keeps its own form, so it has no wizard fields
+    // to validate here.
+    case DATA_SOURCE_STEP:
+      return [];
     case ADDITIONAL_SETTINGS_STEP:
       return getAdditionalSettingsStepFields(values, flowVariant);
     case SCHEMA_MAPPINGS_STEP:
@@ -126,7 +142,13 @@ export const getWizardStepFields = (
 export const getWizardStepsThrough = (
   targetStep: DatasetWizardStep,
   flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
-): DatasetWizardStep[] => getWizardSteps(flowVariant).filter((step) => step <= targetStep);
+): DatasetWizardStep[] => {
+  const targetPosition = getWizardStepPosition(targetStep, flowVariant);
+
+  return getWizardSteps(flowVariant).filter(
+    (step) => getWizardStepPosition(step, flowVariant) <= targetPosition
+  );
+};
 
 const getFieldsToValidateForStep = (
   step: DatasetWizardStep,

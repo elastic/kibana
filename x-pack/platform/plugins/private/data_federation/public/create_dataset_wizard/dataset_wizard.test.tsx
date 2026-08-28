@@ -24,6 +24,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_4,
 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
@@ -378,6 +379,129 @@ describe('DatasetWizard step navigation', () => {
 
     expect(queryByTestId('datasetWizardTestConfigurationTable')).toBeNull();
     expect(history.location.search).toContain('step=5');
+  });
+
+  it('shows a File step in flow 4 that only needs a URI to continue', async () => {
+    const { getByTestId, getByRole, history } = renderWizard(
+      '/create?flow=flow_4',
+      emptyDatasetWizardFormValues(),
+      DATASET_WIZARD_FLOW_VARIANT_4
+    );
+
+    expect(getByTestId('datasetWizardFileStep')).toBeInTheDocument();
+    expect(getByRole('heading', { name: 'File' })).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Current step 1: File' })).toBeInTheDocument();
+    expect(
+      within(getByTestId('datasetWizardFileStep')).queryByTestId('datasetWizardDataSource')
+    ).toBeNull();
+
+    fireEvent.change(getByTestId('datasetWizardResource'), {
+      target: { value: 's3://acme-logs/vpcflow/**/*.parquet' },
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardName')).toHaveValue('acme_vpcflow');
+    });
+
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardDataSourceStep')).toBeVisible();
+      expect(history.location.search).toContain('step=2');
+    });
+  });
+
+  it('puts a data source step between file and additional settings in flow 4', async () => {
+    const { getByRole, getByTestId, history } = renderWizard(
+      '/create?flow=flow_4',
+      emptyDatasetWizardFormValues(),
+      DATASET_WIZARD_FLOW_VARIANT_4
+    );
+
+    expect(getByRole('button', { name: /Step 2: Data source/ })).toBeInTheDocument();
+
+    fireEvent.change(getByTestId('datasetWizardResource'), {
+      target: { value: 's3://acme-logs/vpcflow/**/*.parquet' },
+    });
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    // The one existing S3 source is an unambiguous match, so it comes selected.
+    await waitFor(() => {
+      expect(getByRole('radio', { name: 'Use existing' })).toBeChecked();
+    });
+
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
+      expect(history.location.search).toContain('step=3');
+    });
+
+    fireEvent.click(getByTestId('datasetWizardBack'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardDataSourceStep')).toBeVisible();
+    });
+  });
+
+  it('offers to save anyways when the connection test warns in flow 4', async () => {
+    jest.useFakeTimers();
+    jest.spyOn(Math, 'random').mockReturnValue(0.9);
+
+    const { getByTestId } = renderWizard(
+      '/create?flow=flow_4&step=2',
+      testConfigurationDraft,
+      DATASET_WIZARD_FLOW_VARIANT_4
+    );
+
+    expect(getByTestId('datasetWizardDataSourceStep')).toBeVisible();
+    expect(getByTestId('datasetWizardNext')).toHaveTextContent('Save and continue');
+
+    fireEvent.click(getByTestId('datasetWizardTestConnection'));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(getByTestId('datasetWizardTestConnectionCallout-warning')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardNext')).toHaveTextContent('Save and continue anyways');
+
+    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+    fireEvent.click(getByTestId('datasetWizardTestConnection'));
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(getByTestId('datasetWizardNext')).toHaveTextContent('Save and continue');
+  });
+
+  it('does not show a data source step in flow 3', () => {
+    const { queryByRole, queryByTestId } = renderWizard(
+      '/create?flow=flow_3',
+      emptyDatasetWizardFormValues(),
+      DATASET_WIZARD_FLOW_VARIANT_3
+    );
+
+    expect(queryByTestId('datasetWizardDataSourceStep')).toBeNull();
+    expect(queryByRole('button', { name: /Step \d: Data source/ })).toBeNull();
+  });
+
+  it('shows preview results as its own optional step in flow 4', async () => {
+    const { getByTestId, history } = renderWizard(
+      '/create?flow=flow_4&step=5',
+      testConfigurationDraft,
+      DATASET_WIZARD_FLOW_VARIANT_4
+    );
+
+    expect(getByTestId('datasetWizardPreviewResultsStep')).toBeVisible();
+    expect(history.location.search).toContain('step=5');
+
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardReviewStep')).toBeVisible();
+    });
+
+    expect(history.location.search).toContain('step=6');
   });
 
   it('does not include a preview results step in flow 3 9.6', async () => {

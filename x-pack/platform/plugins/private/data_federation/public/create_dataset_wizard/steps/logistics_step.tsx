@@ -7,14 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { Control, UseFormSetValue, Validate } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -23,10 +16,15 @@ import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../../common';
 import { datasetSettingsFieldsWidthCss } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DataSourceSuperSelect } from '../data_source_super_select';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
-import { isDatasetWizardFlow3, type DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
+import {
+  isDatasetWizardFlow3,
+  isDatasetWizardFlow4,
+  type DatasetWizardFlowVariant,
+} from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { validateResourceForDataSource } from '../validate_dataset_resource';
 import { WizardRegionField } from '../wizard_region_field';
+import { FileStep } from './file_step';
 
 const trimRequired =
   (message: string) =>
@@ -45,7 +43,7 @@ export interface LogisticsStepProps {
   onRegionManualChange?: (regionId: string) => void;
 }
 
-export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
+const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
   control,
   dataSources,
   onConnectNewDataSource,
@@ -222,3 +220,10 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
     </>
   );
 };
+
+export const LogisticsStep: FunctionComponent<LogisticsStepProps> = (props) =>
+  isDatasetWizardFlow4(props.flowVariant) ? (
+    <FileStep control={props.control} setValue={props.setValue} validateName={props.validateName} />
+  ) : (
+    <LogisticsStepFields {...props} />
+  );

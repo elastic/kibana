@@ -37,8 +37,9 @@ import { AutoDetectedSuffix } from '../auto_detected_suffix';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
-  DATASET_WIZARD_FLOW_VARIANT_3,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow396,
+  isDatasetWizardFlow4,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
@@ -235,7 +236,8 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
 
   const showDataSourceSetupWarning = useMemo(
     () =>
-      flowVariant === DATASET_WIZARD_FLOW_VARIANT_3 &&
+      isDatasetWizardFlow3(flowVariant) &&
+      !isDatasetWizardFlow396(flowVariant) &&
       !autoDetectedRegion &&
       !autoDetectedFormat,
     [autoDetectedFormat, autoDetectedRegion, flowVariant]
@@ -281,10 +283,8 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       <EuiSpacer size="l" />
 
       <EuiForm component="div">
-        <div
-          css={isDatasetWizardFlow3(flowVariant) ? datasetSettingsFieldsWidthCss : undefined}
-        >
-          {isDatasetWizardFlow3(flowVariant) ? (
+        <div css={isDatasetWizardFlow3(flowVariant) ? datasetSettingsFieldsWidthCss : undefined}>
+          {isDatasetWizardFlow3(flowVariant) && !isDatasetWizardFlow4(flowVariant) ? (
             <WizardRegionField
               control={control}
               autoDetectedRegion={autoDetectedRegion}

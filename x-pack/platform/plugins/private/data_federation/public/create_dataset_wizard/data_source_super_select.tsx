@@ -64,10 +64,11 @@ export interface DataSourceSuperSelectProps {
   dataSources: DataSource[];
   value?: string;
   onChange: (value: string) => void;
-  onConnectNewDataSource: () => void;
+  /** When omitted, the popover has no connect-new footer. */
+  onConnectNewDataSource?: () => void;
   placeholder: string;
   searchPlaceholder: string;
-  connectNewDataSourceLabel: string;
+  connectNewDataSourceLabel?: string;
   'aria-label': string;
   'data-test-subj'?: string;
   name?: string;
@@ -133,7 +134,7 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
 
   const handleConnectNew = useCallback(() => {
     closePopover();
-    onConnectNewDataSource();
+    onConnectNewDataSource?.();
   }, [closePopover, onConnectNewDataSource]);
 
   const control = (
@@ -185,15 +186,20 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
           </>
         )}
       </EuiSelectable>
-      <EuiPopoverFooter paddingSize="s">
-        <EuiFlexGroup justifyContent="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="datasetWizardConnectNewDataSource" onClick={handleConnectNew}>
-              {connectNewDataSourceLabel}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverFooter>
+      {onConnectNewDataSource && connectNewDataSourceLabel ? (
+        <EuiPopoverFooter paddingSize="s">
+          <EuiFlexGroup justifyContent="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                data-test-subj="datasetWizardConnectNewDataSource"
+                onClick={handleConnectNew}
+              >
+                {connectNewDataSourceLabel}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverFooter>
+      ) : null}
     </EuiInputPopover>
   );
 };

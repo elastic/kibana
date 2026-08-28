@@ -13,9 +13,11 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_4,
   hasDatasetWizardPreviewResultsStep,
   isDatasetWizardFlow3,
   isDatasetWizardFlow396,
+  isDatasetWizardFlow4,
   parseWizardFlowVariantFromSearch,
   resolveWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
@@ -28,6 +30,7 @@ describe('dataset_wizard_flow_variant', () => {
     expect(buildCreateDatasetWizardPath(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(
       '/create?flow=flow_3_9_6'
     );
+    expect(buildCreateDatasetWizardPath(DATASET_WIZARD_FLOW_VARIANT_4)).toBe('/create?flow=flow_4');
     expect(buildCloneDatasetWizardPath('my-dataset')).toBe('/clone/my-dataset?flow=flow_3');
     expect(buildEditDatasetWizardPath('my-dataset')).toBe('/edit/my-dataset?flow=flow_3');
   });
@@ -43,6 +46,7 @@ describe('dataset_wizard_flow_variant', () => {
     expect(parseWizardFlowVariantFromSearch('?flow=flow_3_9_6')).toBe(
       DATASET_WIZARD_FLOW_VARIANT_3_9_6
     );
+    expect(parseWizardFlowVariantFromSearch('?flow=flow_4')).toBe(DATASET_WIZARD_FLOW_VARIANT_4);
   });
 
   it('returns undefined for missing or invalid flow variants', () => {
@@ -59,6 +63,7 @@ describe('dataset_wizard_flow_variant', () => {
     expect(resolveWizardFlowVariant('?flow=flow_2')).toBe(DATASET_WIZARD_FLOW_VARIANT_2);
     expect(resolveWizardFlowVariant('?flow=flow_3')).toBe(DATASET_WIZARD_FLOW_VARIANT_3);
     expect(resolveWizardFlowVariant('?flow=flow_3_9_6')).toBe(DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+    expect(resolveWizardFlowVariant('?flow=flow_4')).toBe(DATASET_WIZARD_FLOW_VARIANT_4);
     expect(resolveWizardFlowVariant('', DATASET_WIZARD_FLOW_VARIANT_3)).toBe(
       DATASET_WIZARD_FLOW_VARIANT_3
     );
@@ -67,6 +72,7 @@ describe('dataset_wizard_flow_variant', () => {
   it('identifies flow 3', () => {
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(true);
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(true);
+    expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_4)).toBe(true);
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);
   });
@@ -74,12 +80,22 @@ describe('dataset_wizard_flow_variant', () => {
   it('identifies flow 3 9.6 only', () => {
     expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(true);
     expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(false);
+    expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_4)).toBe(false);
     expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
     expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);
   });
 
-  it('includes preview results only in original flow 3', () => {
+  it('identifies flow 4 only', () => {
+    expect(isDatasetWizardFlow4(DATASET_WIZARD_FLOW_VARIANT_4)).toBe(true);
+    expect(isDatasetWizardFlow4(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(false);
+    expect(isDatasetWizardFlow4(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(false);
+    expect(isDatasetWizardFlow4(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
+    expect(isDatasetWizardFlow4(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);
+  });
+
+  it('includes preview results in flow 3 and flow 4, but not flow 3 9.6', () => {
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(true);
+    expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_4)).toBe(true);
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(false);
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiButtonGroupProps } from '@elastic/eui';
+import type { EuiButtonGroupProps, EuiSpacerProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -36,10 +36,13 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
   dataSourceType,
   authenticationMode,
   onAuthenticationModeChange,
+  leadingSpacerSize = 'm',
 }: {
   dataSourceType: DataSourceType;
   authenticationMode: CreateDataSourceAuthenticationMode;
   onAuthenticationModeChange: (mode: CreateDataSourceAuthenticationMode) => void;
+  /** Gap between the preceding content and the authentication heading. */
+  leadingSpacerSize?: EuiSpacerProps['size'];
 }) {
   const buttonGroupOptions = useMemo(
     (): EuiButtonGroupProps['options'] =>
@@ -57,7 +60,7 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
 
   return (
     <>
-      <EuiSpacer size="m" />
+      <EuiSpacer size={leadingSpacerSize} />
       <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
@@ -92,11 +95,15 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
       {authenticationMode === 'anonymous' ? (
         <>
           <EuiSpacer size="m" />
-          <EuiText size="s" color="subdued" data-test-subj="createDataSourceFlyoutAuthenticationAnonymousDescription">
+          <EuiText
+            size="s"
+            color="subdued"
+            data-test-subj="createDataSourceFlyoutAuthenticationAnonymousDescription"
+          >
             <p>{getAnonymousAuthenticationDescription(dataSourceType)}</p>
           </EuiText>
         </>
       ) : null}
     </>
   );
-};
+}

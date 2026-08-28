@@ -17,6 +17,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_4,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from '../../create_dataset_flyout/dataset_settings_options';
@@ -123,6 +124,14 @@ describe('AdditionalSettingsStep', () => {
     );
 
     expect(queryByTestId('datasetWizardDataSourceSetupWarning')).toBeNull();
+  });
+
+  it('shows a data source setup warning in flow 4 when region and format cannot be auto-detected', async () => {
+    const { findByTestId } = render(
+      <TestHarness resource="s3://bucket/path/data" flowVariant={DATASET_WIZARD_FLOW_VARIANT_4} />
+    );
+
+    expect(await findByTestId('datasetWizardDataSourceSetupWarning')).toBeInTheDocument();
   });
 
   it('does not show the data source setup warning in flow 3 9.6', () => {

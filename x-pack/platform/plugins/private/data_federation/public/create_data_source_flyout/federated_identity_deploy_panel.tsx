@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 export function FederatedIdentityDeployPanel({
@@ -38,6 +40,8 @@ export function FederatedIdentityDeployPanel({
   createsItems: string[];
   testSubjPrefix: string;
 }) {
+  const createsAccordionId = useGeneratedHtmlId({ prefix: 'federatedIdentityDeployCreates' });
+
   return (
     <>
       <EuiPanel hasBorder paddingSize="m" data-test-subj={`${testSubjPrefix}DeployPanel`}>
@@ -78,11 +82,17 @@ export function FederatedIdentityDeployPanel({
         </EuiFlexGroup>
       </EuiPanel>
       <EuiSpacer size="m" />
-      <EuiPanel hasBorder paddingSize="m" data-test-subj={`${testSubjPrefix}DeployCreatesPanel`}>
-        <EuiTitle size="xxs">
-          <h5>{createsTitle}</h5>
-        </EuiTitle>
-        <EuiSpacer size="s" />
+      <EuiAccordion
+        id={createsAccordionId}
+        buttonContent={
+          <EuiText size="s">
+            <strong>{createsTitle}</strong>
+          </EuiText>
+        }
+        initialIsOpen={false}
+        paddingSize="m"
+        data-test-subj={`${testSubjPrefix}DeployCreatesPanel`}
+      >
         <EuiText size="s" color="subdued" as="div">
           <ol>
             {createsItems.map((item) => (
@@ -90,7 +100,7 @@ export function FederatedIdentityDeployPanel({
             ))}
           </ol>
         </EuiText>
-      </EuiPanel>
+      </EuiAccordion>
     </>
   );
 }

@@ -12,6 +12,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_4,
 } from './dataset_wizard_flow_variant';
 import {
   findFirstInvalidWizardStep,
@@ -21,6 +22,7 @@ import {
 } from './dataset_wizard_step_validation';
 import {
   ADDITIONAL_SETTINGS_STEP,
+  DATA_SOURCE_STEP,
   FLOW_3_REVIEW_STEP,
   LOGISTICS_STEP,
   PREVIEW_RESULTS_STEP,
@@ -136,6 +138,36 @@ describe('dataset_wizard_step_validation', () => {
     ).toEqual([]);
     expect(getWizardStepFields(FLOW_3_REVIEW_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3)).toEqual(
       expect.arrayContaining(['data_source', 'name', 'resource', 'region'])
+    );
+  });
+
+  it('only requires the file URI on step 1 in flow 4, but still requires the rest at review', () => {
+    const values = emptyDatasetWizardFormValues();
+
+    expect(getWizardStepFields(LOGISTICS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_4)).toEqual([
+      'resource',
+    ]);
+    expect(getWizardStepFields(FLOW_3_REVIEW_STEP, values, DATASET_WIZARD_FLOW_VARIANT_4)).toEqual(
+      expect.arrayContaining(['data_source', 'name', 'resource'])
+    );
+  });
+
+  it('validates the data source step through its own form, not wizard fields', () => {
+    const values = emptyDatasetWizardFormValues();
+
+    expect(getWizardStepFields(DATA_SOURCE_STEP, values, DATASET_WIZARD_FLOW_VARIANT_4)).toEqual(
+      []
+    );
+  });
+
+  it('drops the region field in flow 4, where it is detected from the bucket', () => {
+    const values = emptyDatasetWizardFormValues();
+
+    expect(getAdditionalSettingsStepFields(values, DATASET_WIZARD_FLOW_VARIANT_3)).toContain(
+      'region'
+    );
+    expect(getAdditionalSettingsStepFields(values, DATASET_WIZARD_FLOW_VARIANT_4)).not.toContain(
+      'region'
     );
   });
 

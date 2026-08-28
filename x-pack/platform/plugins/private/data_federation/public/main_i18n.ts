@@ -217,6 +217,9 @@ export const mainTranslations = {
       addFlow396Label: i18n.translate('xpack.dataFederation.setsAddFlow396Label', {
         defaultMessage: 'Flow 3 9.6',
       }),
+      addFlow4Label: i18n.translate('xpack.dataFederation.setsAddFlow4Label', {
+        defaultMessage: 'Flow 4',
+      }),
     },
   },
 

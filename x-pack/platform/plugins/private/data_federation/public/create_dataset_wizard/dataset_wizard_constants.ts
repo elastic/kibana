@@ -14,5 +14,10 @@ export const PREVIEW_RESULTS_STEP = 4;
 export const REVIEW_STEP = 4;
 /** Review in flow 3, after Preview results. */
 export const FLOW_3_REVIEW_STEP = 5;
+/**
+ * Flow 4 only, between File and Additional settings. Step order comes from
+ * `getWizardSteps`, so this id does not have to sort between the two.
+ */
+export const DATA_SOURCE_STEP = 6;
 
 export const DATASET_WIZARD_FORM_MAX_WIDTH = 850;

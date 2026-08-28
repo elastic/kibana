@@ -35,6 +35,16 @@ export const datasetWizardStrings = {
       defaultMessage: 'Define dataset',
     }),
 
+  stepFile: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.stepFile', {
+      defaultMessage: 'File',
+    }),
+
+  stepDataSource: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.stepDataSource', {
+      defaultMessage: 'Data source',
+    }),
+
   stepAdditionalSettings: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.stepAdditionalSettings', {
       defaultMessage: 'Additional settings',
@@ -63,6 +73,135 @@ export const datasetWizardStrings = {
   logisticsDescription: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.logisticsDescription', {
       defaultMessage: 'Select the source and define which dataset you want added',
+    }),
+
+  fileTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileTitle', {
+      defaultMessage: 'File',
+    }),
+
+  fileDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileDescription', {
+      defaultMessage:
+        'Point to the files you want to query. Details we can read from the URI are shown below it.',
+    }),
+
+  fileUriLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileUriLabel', {
+      defaultMessage: 'File URI',
+    }),
+
+  fileUriHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileUriHelp', {
+      defaultMessage: 'Globs are supported, for example s3://acme-logs/vpcflow/**/*.parquet',
+    }),
+
+  fileDetectedTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileDetectedTitle', {
+      defaultMessage: 'Detected from URI',
+    }),
+
+  fileDetectedTypeLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileDetectedTypeLabel', {
+      defaultMessage: 'Type',
+    }),
+
+  fileDetectedBucketLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileDetectedBucketLabel', {
+      defaultMessage: 'Bucket',
+    }),
+
+  fileDetectedPrefixLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileDetectedPrefixLabel', {
+      defaultMessage: 'Prefix',
+    }),
+
+  fileDetectedFormatHintLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileDetectedFormatHintLabel', {
+      defaultMessage: 'Format hint',
+    }),
+
+  fileDetectedNotDetected: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.fileDetectedNotDetected', {
+      defaultMessage: 'Not detected',
+    }),
+
+  dataSourceStepTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceStepTitle', {
+      defaultMessage: 'Data source',
+    }),
+
+  dataSourceStepDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceStepDescription', {
+      defaultMessage: 'Choose how Elastic connects to the bucket holding these files.',
+    }),
+
+  dataSourceModeLegend: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceModeLegend', {
+      defaultMessage: 'Data source setup',
+    }),
+
+  dataSourceModeExisting: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceModeExisting', {
+      defaultMessage: 'Use existing',
+    }),
+
+  dataSourceModeCreate: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceModeCreate', {
+      defaultMessage: 'Create new',
+    }),
+
+  dataSourceSelectionRequired: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceSelectionRequired', {
+      defaultMessage: 'Select a data source to continue.',
+    }),
+
+  connectionNameLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.connectionNameLabel', {
+      defaultMessage: 'Connection name',
+    }),
+
+  connectionNameRequired: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.connectionNameRequired', {
+      defaultMessage: 'Connection name is required.',
+    }),
+
+  connectionNameAlreadyExists: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.connectionNameAlreadyExists', {
+      defaultMessage: 'A data source with this name already exists.',
+    }),
+
+  dataSourceRegionDetected: (region: string) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceRegionDetected', {
+      defaultMessage: 'AWS region {region}, detected from the bucket.',
+      values: { region },
+    }),
+
+  dataSourceRegionDetectedUnknown: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceRegionDetectedUnknown', {
+      defaultMessage: 'The AWS region is detected from the bucket.',
+    }),
+
+  connectionTestTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.connectionTestTitle', {
+      defaultMessage: 'Test connection',
+    }),
+
+  connectionTestDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.connectionTestDescription', {
+      defaultMessage:
+        'Optional. Check that Elasticsearch can reach this data source before you continue.',
+    }),
+
+  connectionTestButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.connectionTestButton', {
+      defaultMessage: 'Test',
+    }),
+
+  datasetNameEsqlHelp: (query: string) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.datasetNameEsqlHelp', {
+      defaultMessage: 'Used in ES|QL queries as {query}',
+      values: { query },
     }),
 
   dataSourceLabel: () =>
@@ -165,6 +304,16 @@ export const datasetWizardStrings = {
   nextButton: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.nextButton', {
       defaultMessage: 'Next',
+    }),
+
+  saveAndContinueButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.saveAndContinueButton', {
+      defaultMessage: 'Save and continue',
+    }),
+
+  saveAndContinueAnywaysButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.saveAndContinueAnywaysButton', {
+      defaultMessage: 'Save and continue anyways',
     }),
 
   addButton: () =>

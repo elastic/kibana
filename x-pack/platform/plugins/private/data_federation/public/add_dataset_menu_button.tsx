@@ -15,6 +15,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_4,
   type DatasetWizardFlowVariant,
 } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import { mainTranslations } from './main_i18n';
@@ -66,6 +67,11 @@ export const AddDatasetMenuButton: FunctionComponent<AddDatasetMenuButtonProps> 
             name: mainTranslations.columns.dataSets.addFlow396Label,
             onClick: () => handleSelectFlow(DATASET_WIZARD_FLOW_VARIANT_3_9_6),
             'data-test-subj': 'dataSetsSetsCreateFlow396Button',
+          },
+          {
+            name: mainTranslations.columns.dataSets.addFlow4Label,
+            onClick: () => handleSelectFlow(DATASET_WIZARD_FLOW_VARIANT_4),
+            'data-test-subj': 'dataSetsSetsCreateFlow4Button',
           },
         ],
       },

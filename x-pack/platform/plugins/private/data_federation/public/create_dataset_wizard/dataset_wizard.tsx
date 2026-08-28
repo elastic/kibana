@@ -33,8 +33,8 @@ import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
 import {
   ADDITIONAL_SETTINGS_STEP,
+  DATA_SOURCE_STEP,
   DATASET_WIZARD_FORM_MAX_WIDTH,
-  FLOW_3_REVIEW_STEP,
   LOGISTICS_STEP,
   PREVIEW_RESULTS_STEP,
   REVIEW_STEP,
@@ -44,7 +44,10 @@ import { datasetWizardStrings } from './dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   buildWizardStepSearch,
+  getNextWizardStep,
+  getPreviousWizardStep,
   getReviewStep,
+  isWizardStepAfter,
   parseWizardStepFromSearch,
   type DatasetWizardStep,
 } from './dataset_wizard_step_url';
@@ -57,6 +60,11 @@ import { findFirstInvalidWizardStep, getWizardStepFields } from './dataset_wizar
 import { validateResourceForDataSource } from './validate_dataset_resource';
 import { inferRegionFromResource } from './infer_region_from_resource';
 import { LogisticsStep } from './steps/logistics_step';
+import {
+  DataSourceStep,
+  type ConnectionTestResult,
+  type DataSourceStepHandle,
+} from './steps/data_source_step';
 import { AdditionalSettingsStep } from './steps/additional_settings_step';
 import { SchemaMappingsStep } from './steps/schema_mappings_step';
 import { ReviewStep } from './steps/review_step';
@@ -65,6 +73,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   hasDatasetWizardPreviewResultsStep,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow4,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import { TestConfigurationPreview } from './test_configuration_preview';
@@ -129,11 +138,13 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   const initialIdNormalized = initialDataSet?.name?.trim().toLowerCase() ?? '';
   const [currentStep, setCurrentStep] = useState<DatasetWizardStep>(
-    () => parseWizardStepFromSearch(location.search) ?? LOGISTICS_STEP
+    () => parseWizardStepFromSearch(location.search, flowVariant) ?? LOGISTICS_STEP
   );
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateDataSourceFlyoutOpen, setIsCreateDataSourceFlyoutOpen] = useState(false);
+  const dataSourceStepRef = useRef<DataSourceStepHandle>(null);
+  const [connectionTestResult, setConnectionTestResult] = useState<ConnectionTestResult>();
   const [isTestConfigPanelOpen, setIsTestConfigPanelOpen] = useState(false);
   const [isTestConfigLoading, setIsTestConfigLoading] = useState(false);
   const additionalSettingsSyncedResourceRef = useRef<string | null>(null);
@@ -147,6 +158,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   });
   const isFlow1 = flowVariant === DATASET_WIZARD_FLOW_VARIANT_1;
   const isFlow3 = isDatasetWizardFlow3(flowVariant);
+  const isFlow4 = isDatasetWizardFlow4(flowVariant);
   const hasPreviewResultsStep = hasDatasetWizardPreviewResultsStep(flowVariant);
   const reviewStep = getReviewStep(flowVariant);
 
@@ -220,7 +232,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     setIsCreateDataSourceFlyoutOpen(false);
   }, []);
 
-  const onSaveDataSource = useCallback(
+  const createDataSource = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       try {
         await dataSourcesClient.add(dataSource);
@@ -229,13 +241,31 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           shouldValidate: true,
           shouldDirty: true,
         });
-        setIsCreateDataSourceFlyoutOpen(false);
         return null;
       } catch (error) {
         return getFlyoutSaveErrorMessage(error);
       }
     },
     [dataSourcesClient, reloadDataSources, setValue]
+  );
+
+  const onSaveDataSource = useCallback(
+    async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
+      const error = await createDataSource(dataSource);
+      if (!error) {
+        setIsCreateDataSourceFlyoutOpen(false);
+      }
+
+      return error;
+    },
+    [createDataSource]
+  );
+
+  const handleSelectDataSource = useCallback(
+    (dataSourceName: string) => {
+      setValue('data_source', dataSourceName, { shouldValidate: true, shouldDirty: true });
+    },
+    [setValue]
   );
 
   const validateName = useCallback(
@@ -269,6 +299,12 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     const resource = watchedResource?.trim() ?? '';
     const region = watchedRegion?.trim() ?? '';
 
+    // Flow 4 asks only for the file URI on step 1; the data source moves to its
+    // own step.
+    if (isFlow4) {
+      return Boolean(resource);
+    }
+
     if (!dataSource || !name || !resource || (!isFlow3 && !region)) {
       return false;
     }
@@ -281,6 +317,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   }, [
     dataSources,
     isFlow3,
+    isFlow4,
     validateName,
     watchedDataSource,
     watchedName,
@@ -336,11 +373,9 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   }, [clearTestConfigLoadingTimeout]);
 
   useEffect(() => {
-    const stepFromUrl = parseWizardStepFromSearch(location.search) ?? LOGISTICS_STEP;
-    const normalizedStepFromUrl =
-      !hasPreviewResultsStep && stepFromUrl === FLOW_3_REVIEW_STEP ? REVIEW_STEP : stepFromUrl;
+    const stepFromUrl = parseWizardStepFromSearch(location.search, flowVariant) ?? LOGISTICS_STEP;
 
-    if (normalizedStepFromUrl === LOGISTICS_STEP) {
+    if (stepFromUrl === LOGISTICS_STEP) {
       setCurrentStep(LOGISTICS_STEP);
       return;
     }
@@ -350,7 +385,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     const syncStepFromUrl = async () => {
       const values = getValues();
       const firstInvalidStep = await findFirstInvalidWizardStep({
-        targetStep: normalizedStepFromUrl,
+        targetStep: stepFromUrl,
         values,
         trigger,
         flowVariant,
@@ -360,13 +395,13 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         return;
       }
 
-      const nextStep = firstInvalidStep ?? normalizedStepFromUrl;
+      const nextStep = firstInvalidStep ?? stepFromUrl;
       setCurrentStep(nextStep);
 
       if (nextStep !== stepFromUrl) {
         history.replace({
           pathname: location.pathname,
-          search: buildWizardStepSearch(location.search, nextStep),
+          search: buildWizardStepSearch(location.search, nextStep, flowVariant),
         });
       }
     };
@@ -387,8 +422,9 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   ]);
 
   const isStepDisabled = useCallback(
-    (step: DatasetWizardStep) => !logisticsStepComplete && currentStep < step,
-    [currentStep, logisticsStepComplete]
+    (step: DatasetWizardStep) =>
+      !logisticsStepComplete && isWizardStepAfter(step, currentStep, flowVariant),
+    [currentStep, flowVariant, logisticsStepComplete]
   );
 
   const goToStep = useCallback(
@@ -396,10 +432,10 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       setCurrentStep(step);
       history.replace({
         pathname: location.pathname,
-        search: buildWizardStepSearch(location.search, step),
+        search: buildWizardStepSearch(location.search, step, flowVariant),
       });
     },
-    [history, location.pathname, location.search]
+    [flowVariant, history, location.pathname, location.search]
   );
 
   const persistCustomJsonToForm = useCallback(() => {
@@ -426,7 +462,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     async (targetStep: DatasetWizardStep) => {
       setSaveError(undefined);
 
-      if (targetStep <= currentStep) {
+      if (!isWizardStepAfter(targetStep, currentStep, flowVariant)) {
         goToStep(targetStep);
         return;
       }
@@ -456,8 +492,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const stepDefinitions = useMemo(
     () => [
       {
-        step: LOGISTICS_STEP,
-        title: datasetWizardStrings.stepLogistics(),
+        title: isFlow4 ? datasetWizardStrings.stepFile() : datasetWizardStrings.stepLogistics(),
         status: (currentStep === LOGISTICS_STEP
           ? 'current'
           : logisticsStepComplete
@@ -465,24 +500,36 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           : 'incomplete') as EuiStepStatus,
         onClick: () => void attemptGoToStep(LOGISTICS_STEP),
       },
+      ...(isFlow4
+        ? [
+            {
+              title: datasetWizardStrings.stepDataSource(),
+              disabled: isStepDisabled(DATA_SOURCE_STEP),
+              status: (currentStep === DATA_SOURCE_STEP
+                ? 'current'
+                : isWizardStepAfter(currentStep, DATA_SOURCE_STEP, flowVariant)
+                ? 'complete'
+                : 'incomplete') as EuiStepStatus,
+              onClick: () => void attemptGoToStep(DATA_SOURCE_STEP),
+            },
+          ]
+        : []),
       {
-        step: ADDITIONAL_SETTINGS_STEP,
         title: datasetWizardStrings.stepAdditionalSettings(),
         disabled: isStepDisabled(ADDITIONAL_SETTINGS_STEP),
         status: (currentStep === ADDITIONAL_SETTINGS_STEP
           ? 'current'
-          : currentStep > ADDITIONAL_SETTINGS_STEP
+          : isWizardStepAfter(currentStep, ADDITIONAL_SETTINGS_STEP, flowVariant)
           ? 'complete'
           : 'incomplete') as EuiStepStatus,
         onClick: () => void attemptGoToStep(ADDITIONAL_SETTINGS_STEP),
       },
       {
-        step: SCHEMA_MAPPINGS_STEP,
         title: datasetWizardStrings.stepSchemaMappings(),
         disabled: isStepDisabled(SCHEMA_MAPPINGS_STEP),
         status: (currentStep === SCHEMA_MAPPINGS_STEP
           ? 'current'
-          : currentStep > SCHEMA_MAPPINGS_STEP
+          : isWizardStepAfter(currentStep, SCHEMA_MAPPINGS_STEP, flowVariant)
           ? 'complete'
           : 'incomplete') as EuiStepStatus,
         onClick: () => void attemptGoToStep(SCHEMA_MAPPINGS_STEP),
@@ -490,12 +537,11 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       ...(hasPreviewResultsStep
         ? [
             {
-              step: PREVIEW_RESULTS_STEP,
               title: datasetWizardStrings.stepPreviewResults(),
               disabled: isStepDisabled(PREVIEW_RESULTS_STEP),
               status: (currentStep === PREVIEW_RESULTS_STEP
                 ? 'current'
-                : currentStep > PREVIEW_RESULTS_STEP
+                : isWizardStepAfter(currentStep, PREVIEW_RESULTS_STEP, flowVariant)
                 ? 'complete'
                 : 'incomplete') as EuiStepStatus,
               onClick: () => void attemptGoToStep(PREVIEW_RESULTS_STEP),
@@ -503,7 +549,6 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           ]
         : []),
       {
-        step: reviewStep,
         title: datasetWizardStrings.stepReview(),
         disabled: isStepDisabled(reviewStep),
         status: (currentStep === reviewStep ? 'current' : 'incomplete') as EuiStepStatus,
@@ -513,7 +558,9 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     [
       attemptGoToStep,
       currentStep,
+      flowVariant,
       hasPreviewResultsStep,
+      isFlow4,
       isStepDisabled,
       logisticsStepComplete,
       reviewStep,
@@ -540,41 +587,23 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       return;
     }
 
-    if (currentStep === LOGISTICS_STEP) {
-      goToStep(ADDITIONAL_SETTINGS_STEP);
-      return;
+    if (currentStep === DATA_SOURCE_STEP) {
+      const isDataSourceReady = await dataSourceStepRef.current?.submit();
+      if (!isDataSourceReady) {
+        return;
+      }
     }
 
-    if (currentStep === ADDITIONAL_SETTINGS_STEP) {
-      goToStep(SCHEMA_MAPPINGS_STEP);
-      return;
-    }
-
-    if (currentStep === SCHEMA_MAPPINGS_STEP) {
-      goToStep(hasPreviewResultsStep ? PREVIEW_RESULTS_STEP : reviewStep);
-      return;
-    }
-
-    if (hasPreviewResultsStep && currentStep === PREVIEW_RESULTS_STEP) {
-      goToStep(FLOW_3_REVIEW_STEP);
+    const nextStep = getNextWizardStep(currentStep, flowVariant);
+    if (nextStep !== undefined) {
+      goToStep(nextStep);
     }
   };
 
   const handleBack = () => {
-    if (currentStep === reviewStep) {
-      goToStep(hasPreviewResultsStep ? PREVIEW_RESULTS_STEP : SCHEMA_MAPPINGS_STEP);
-      return;
-    }
-    if (hasPreviewResultsStep && currentStep === PREVIEW_RESULTS_STEP) {
-      goToStep(SCHEMA_MAPPINGS_STEP);
-      return;
-    }
-    if (currentStep === SCHEMA_MAPPINGS_STEP) {
-      goToStep(ADDITIONAL_SETTINGS_STEP);
-      return;
-    }
-    if (currentStep === ADDITIONAL_SETTINGS_STEP) {
-      goToStep(LOGISTICS_STEP);
+    const previousStep = getPreviousWizardStep(currentStep, flowVariant);
+    if (previousStep !== undefined) {
+      goToStep(previousStep);
     }
   };
 
@@ -609,8 +638,14 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     }
   };
 
-  const showBackButton = currentStep > LOGISTICS_STEP;
+  const showBackButton = currentStep !== LOGISTICS_STEP;
   const isLastStep = currentStep === reviewStep;
+  const nextButtonLabel =
+    currentStep === DATA_SOURCE_STEP
+      ? connectionTestResult === 'warning'
+        ? datasetWizardStrings.saveAndContinueAnywaysButton()
+        : datasetWizardStrings.saveAndContinueButton()
+      : datasetWizardStrings.nextButton();
   const showTestConfiguration = isFlow1 && TEST_CONFIGURATION_STEPS.includes(currentStep);
 
   const renderStepContent = () => (
@@ -628,6 +663,19 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           onRegionManualChange={handleRegionManualChange}
         />
       </div>
+      {isFlow4 ? (
+        <div hidden={currentStep !== DATA_SOURCE_STEP}>
+          <DataSourceStep
+            ref={dataSourceStepRef}
+            resource={watchedResource ?? ''}
+            dataSources={dataSources}
+            selectedDataSource={watchedDataSource ?? ''}
+            onSelectDataSource={handleSelectDataSource}
+            onCreateDataSource={createDataSource}
+            onConnectionTestResultChange={setConnectionTestResult}
+          />
+        </div>
+      ) : null}
       <div hidden={currentStep !== ADDITIONAL_SETTINGS_STEP}>
         <AdditionalSettingsStep
           control={control}
@@ -747,7 +795,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                       data-test-subj="datasetWizardNext"
                       onClick={() => void handleNext()}
                     >
-                      {datasetWizardStrings.nextButton()}
+                      {nextButtonLabel}
                     </EuiButton>
                   )}
                 </EuiFlexItem>
