@@ -18,6 +18,7 @@ export {
 export interface InvestigationSubject {
   type: InvestigationSubjectType;
   id: string;
+  summary?: string;
 }
 
 export interface InvestigationContext {
