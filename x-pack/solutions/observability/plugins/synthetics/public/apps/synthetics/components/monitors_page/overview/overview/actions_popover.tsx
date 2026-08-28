@@ -177,6 +177,7 @@ export function ActionsPopover({
             location: locationName,
             id: monitor.monitorQueryId,
             locationId: monitor.locationId,
+            spaces: monitor.spaces,
           })
         );
         setIsPopoverOpen(false);
