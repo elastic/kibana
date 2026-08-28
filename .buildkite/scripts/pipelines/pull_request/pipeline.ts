@@ -51,9 +51,11 @@ const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new Reg
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
 
 // Non-package files whose changes can break the Storybook build without
-// matching any story path (build scripts, root dependency manifests).
+// matching any story path. yarn.lock covers external npm dependency changes
+// (webpack/storybook/swc bumps), which the in-repo package graph below cannot
+// see; any install-affecting package.json change also rewrites yarn.lock, so
+// package.json itself is not listed.
 const STORYBOOK_BUILD_CRITICAL_PATHS = [
-  /^package\.json$/,
   /^yarn\.lock$/,
   /^\.buildkite\/scripts\/steps\/storybooks\//,
 ];
