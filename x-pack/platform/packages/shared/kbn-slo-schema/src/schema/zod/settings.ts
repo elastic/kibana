@@ -9,38 +9,31 @@ import { z } from '@kbn/zod';
 
 import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH } from './limits';
 
-const useAllRemoteClustersSchema = z
-  .boolean()
-  .describe('Indicates if the remote clusters are all used for the summary');
-const selectedRemoteClustersSchema = z
-  .array(z.string().max(MAX_KEYWORD_LENGTH))
-  .max(MAX_ARRAY_LENGTH)
-  .describe('The list of remote clusters used for the summary');
-const staleThresholdInHoursSchema = z
-  .number()
-  .describe('The duration in hours after which an SLO instance is considered stale');
-const staleInstancesCleanupEnabledSchema = z
-  .boolean()
-  .describe('Indicates if the cleanup of stale SLO instances is enabled');
-
-const storedSloSettingsSchema = z.object({
-  useAllRemoteClusters: useAllRemoteClustersSchema,
-  selectedRemoteClusters: selectedRemoteClustersSchema,
-  // was added later, so it can be missing in some stored settings
-  staleThresholdInHours: staleThresholdInHoursSchema.optional(),
-  staleInstancesCleanupEnabled: staleInstancesCleanupEnabledSchema.optional(),
-});
-
 const sloSettingsSchema = z.object({
-  useAllRemoteClusters: useAllRemoteClustersSchema,
-  selectedRemoteClusters: selectedRemoteClustersSchema,
-  staleThresholdInHours: staleThresholdInHoursSchema,
-  staleInstancesCleanupEnabled: staleInstancesCleanupEnabledSchema,
+  useAllRemoteClusters: z
+    .boolean()
+    .describe('Indicates if the remote clusters are all used for the summary'),
+  selectedRemoteClusters: z
+    .array(z.string().max(MAX_KEYWORD_LENGTH))
+    .max(MAX_ARRAY_LENGTH)
+    .describe('The list of remote clusters used for the summary'),
+  staleThresholdInHours: z
+    .number()
+    .describe('The duration in hours after which an SLO instance is considered stale'),
+  staleInstancesCleanupEnabled: z
+    .boolean()
+    .describe('Indicates if the cleanup of stale SLO instances is enabled'),
 });
 
-const serverlessSloSettingsSchema = z.object({
-  staleThresholdInHours: staleThresholdInHoursSchema,
-  staleInstancesCleanupEnabled: staleInstancesCleanupEnabledSchema,
+// The stale-instance fields were added later, so they can be missing in some stored settings.
+const storedSloSettingsSchema = sloSettingsSchema.partial({
+  staleThresholdInHours: true,
+  staleInstancesCleanupEnabled: true,
+});
+
+const serverlessSloSettingsSchema = sloSettingsSchema.pick({
+  staleThresholdInHours: true,
+  staleInstancesCleanupEnabled: true,
 });
 
 export { serverlessSloSettingsSchema, sloSettingsSchema, storedSloSettingsSchema };

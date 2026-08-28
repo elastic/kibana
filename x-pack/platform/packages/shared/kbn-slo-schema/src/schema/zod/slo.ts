@@ -12,6 +12,15 @@ import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH } from './limits';
 import { timeWindowSchema } from './time_window';
+import {
+  MAX_PROJECT_ROUTINGS_LENGTH,
+  MAX_SLO_ID_LENGTH,
+  MIN_SLO_ID_LENGTH,
+  PROJECT_ROUTINGS_EMPTY_MESSAGE,
+  PROJECT_ROUTINGS_TOO_LONG_MESSAGE,
+  SLO_ID_INVALID_MESSAGE,
+  SLO_ID_REGEX,
+} from '../validation_constants';
 
 const occurrencesBudgetingMethodSchema = z.literal('occurrences');
 const timeslicesBudgetingMethodSchema = z.literal('timeslices');
@@ -41,17 +50,10 @@ const objectiveSchema = targetSchema
   })
   .meta({ id: 'SLOObjective', description: 'Defines properties for the SLO objective' });
 
-// A `snapshot` project routing encodes every selected project id, so the bound scales with
-// the number of linked projects rather than with the number of exclusions.
-const MAX_PROJECT_ROUTINGS_LENGTH = 8192;
-
 const boundedProjectRoutingSchema = z
   .string()
-  .max(
-    MAX_PROJECT_ROUTINGS_LENGTH,
-    `Invalid projectRoutings, must be at most ${MAX_PROJECT_ROUTINGS_LENGTH} characters`
-  )
-  .refine((value) => value.trim().length > 0, 'Invalid projectRoutings, must not be empty')
+  .max(MAX_PROJECT_ROUTINGS_LENGTH, PROJECT_ROUTINGS_TOO_LONG_MESSAGE)
+  .refine((value) => value.trim().length > 0, PROJECT_ROUTINGS_EMPTY_MESSAGE)
   .describe(
     'ES ProjectRouting expression controlling which linked projects the L1 rollup reads. ' +
       'When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; ' +
@@ -108,15 +110,12 @@ const tagsSchema = z
   .max(MAX_ARRAY_LENGTH)
   .describe('List of tags');
 
-const SLO_ID_INVALID_MESSAGE =
-  'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores';
-
 // id cannot contain special characters and spaces
 const sloIdSchema = z
   .string()
-  .min(8, SLO_ID_INVALID_MESSAGE)
-  .max(48, SLO_ID_INVALID_MESSAGE)
-  .regex(/^[a-z0-9-_]+$/, SLO_ID_INVALID_MESSAGE)
+  .min(MIN_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
+  .max(MAX_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
+  .regex(SLO_ID_REGEX, SLO_ID_INVALID_MESSAGE)
   .describe('The identifier of the SLO.');
 
 const baseSloSchema = z.object({

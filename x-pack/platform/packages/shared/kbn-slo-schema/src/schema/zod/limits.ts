@@ -6,11 +6,15 @@
  */
 
 /**
- * Upper bounds applied to request-facing strings and arrays so that no schema
- * reachable from an HTTP request accepts unbounded input (CodeQL
+ * Upper bounds applied to request-facing strings and arrays (CodeQL
  * js/kibana/unbounded-string-in-schema). Values are deliberately generous:
  * these schemas also rehydrate stored SLOs, so a bound must never reject
- * data that was legitimately written before the bound existed.
+ * data that was legitimately written before the bound existed. For the same
+ * reason a few stored-document fields (SLO name/description, createdBy,
+ * summary metadata) stay unbounded here — their request-side bounds belong to
+ * the rest_specs route schemas, migrated in a later PR. The cross-flavor
+ * projectRoutings bound lives in ../validation_constants.ts, shared with the
+ * io-ts schemas.
  */
 
 /** Free-form identifiers: names, field names, index patterns, ids, urls. */

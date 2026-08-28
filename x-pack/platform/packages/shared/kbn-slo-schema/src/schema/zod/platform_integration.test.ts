@@ -18,7 +18,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { DeepStrict } from '@kbn/zod-helpers';
+import { DeepStrict, expectParseError, expectParseSuccess } from '@kbn/zod-helpers';
 import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
 import type { OpenAPIV3 } from 'openapi-types';
 import { Duration, DurationUnit } from '../../models/duration';
@@ -35,8 +35,7 @@ describe('DeepStrict × z.codec', () => {
   const strictBody = DeepStrict(sloDefinitionSchema);
 
   it('parses valid input containing codec fields', () => {
-    const result = strictBody.safeParse(buildWireSLO());
-    expect(result.success).toBe(true);
+    expectParseSuccess(strictBody.safeParse(buildWireSLO()));
   });
 
   it('does not false-positive on Duration/Date instances in the parsed output', () => {
@@ -47,21 +46,17 @@ describe('DeepStrict × z.codec', () => {
       ...buildWireSLO(),
       artifacts: { dashboards: [{ id: 'dashboard-id' }] },
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.timeWindow.duration).toBeInstanceOf(Duration);
-      expect(result.data.settings.syncDelay).toBeInstanceOf(Duration);
-      expect(result.data.createdAt).toBeInstanceOf(Date);
-    }
+    expectParseSuccess(result);
+    expect(result.data.timeWindow.duration).toBeInstanceOf(Duration);
+    expect(result.data.settings.syncDelay).toBeInstanceOf(Duration);
+    expect(result.data.createdAt).toBeInstanceOf(Date);
   });
 
   it('rejects an unknown top-level key', () => {
     const result = strictBody.safeParse({ ...buildWireSLO(), unknownKey: 'value' });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].code).toBe('unrecognized_keys');
-      expect(JSON.stringify(result.error.issues[0])).toContain('unknownKey');
-    }
+    expectParseError(result);
+    expect(result.error.issues[0].code).toBe('unrecognized_keys');
+    expect(JSON.stringify(result.error.issues[0])).toContain('unknownKey');
   });
 
   it('rejects an unknown nested key next to a codec field', () => {
@@ -70,11 +65,9 @@ describe('DeepStrict × z.codec', () => {
       ...wireSLO,
       timeWindow: { ...wireSLO.timeWindow, extra: true },
     });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].code).toBe('unrecognized_keys');
-      expect(JSON.stringify(result.error.issues[0])).toContain('timeWindow.extra');
-    }
+    expectParseError(result);
+    expect(result.error.issues[0].code).toBe('unrecognized_keys');
+    expect(JSON.stringify(result.error.issues[0])).toContain('timeWindow.extra');
   });
 
   it('preserves schema-level errors for invalid codec input', () => {
@@ -82,10 +75,8 @@ describe('DeepStrict × z.codec', () => {
       ...buildWireSLO(),
       timeWindow: { duration: '0d', type: 'rolling' },
     });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(JSON.stringify(result.error.issues)).toContain('duration');
-    }
+    expectParseError(result);
+    expect(JSON.stringify(result.error.issues)).toContain('duration');
   });
 });
 

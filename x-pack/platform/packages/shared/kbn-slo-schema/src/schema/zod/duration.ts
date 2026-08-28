@@ -7,17 +7,14 @@
 
 import { z } from '@kbn/zod';
 
-import type { DurationUnit } from '../../models/duration';
 import { Duration } from '../../models/duration';
 import { MAX_DURATION_STRING_LENGTH } from './limits';
 
 /**
  * Codec between a wire-form duration string (`30d`) and the {@link Duration} model.
- *
- * Decoding intentionally reproduces the io-ts `durationType` semantics: the value
- * part goes through `parseInt`, so a fractional input such as `1.5h` decodes to
- * `Duration(1, 'h')` exactly like it always has. The `Duration` constructor is the
- * single source of truth for rejecting non-positive values and unknown units.
+ * `Duration.fromString` is the single source of truth for the parsing semantics
+ * (including the historical `parseInt` leniency) and for rejecting non-positive
+ * values and unknown units.
  */
 const durationType = z.codec(
   z
@@ -30,7 +27,7 @@ const durationType = z.codec(
   {
     decode: (value, payload) => {
       try {
-        return new Duration(parseInt(value.slice(0, -1), 10), value.slice(-1) as DurationUnit);
+        return Duration.fromString(value);
       } catch (err) {
         payload.issues.push({
           code: 'custom',

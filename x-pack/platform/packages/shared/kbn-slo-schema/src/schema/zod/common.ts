@@ -7,17 +7,14 @@
 
 import { z } from '@kbn/zod';
 
-import { ALL_VALUE } from '../../constants';
+import { ALL_VALUE, SLO_STATUS } from '../../constants';
 import { MAX_ARRAY_LENGTH, MAX_DATE_STRING_LENGTH, MAX_KEYWORD_LENGTH } from './limits';
 
 const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string().max(MAX_KEYWORD_LENGTH)]);
 
 const allOrAnyStringOrArray = z.union([
-  z.literal(ALL_VALUE),
-  z.string().max(MAX_KEYWORD_LENGTH),
-  z
-    .array(z.union([z.literal(ALL_VALUE), z.string().max(MAX_KEYWORD_LENGTH)]))
-    .max(MAX_ARRAY_LENGTH),
+  allOrAnyString,
+  z.array(allOrAnyString).max(MAX_ARRAY_LENGTH),
 ]);
 
 /**
@@ -67,21 +64,7 @@ const errorBudgetSchema = z
   })
   .meta({ id: 'SLOErrorBudget' });
 
-const SLO_STATUS = {
-  NO_DATA: 'NO_DATA',
-  HEALTHY: 'HEALTHY',
-  DEGRADING: 'DEGRADING',
-  VIOLATED: 'VIOLATED',
-} as const;
-
-const statusSchema = z
-  .union([
-    z.literal(SLO_STATUS.NO_DATA),
-    z.literal(SLO_STATUS.HEALTHY),
-    z.literal(SLO_STATUS.DEGRADING),
-    z.literal(SLO_STATUS.VIOLATED),
-  ])
-  .meta({ id: 'SLOSummaryStatus' });
+const statusSchema = z.enum(SLO_STATUS).meta({ id: 'SLOSummaryStatus' });
 
 const summarySchema = z
   .object({

@@ -24,6 +24,7 @@ import {
   buildWireSLO,
   FIXED_DATE_ISO,
 } from '../test_helpers/fixtures';
+import type { DecodeOutcome } from '../test_helpers/codec_agnostic';
 import { decode, encode, is } from '../test_helpers/codec_agnostic';
 import { dateType } from './common';
 import { durationType } from './duration';
@@ -47,8 +48,6 @@ import {
   storedSloDefinitionSchema as storedSloDefinitionSchemaZod,
   timeWindowSchema as timeWindowSchemaZod,
 } from './zod';
-
-type DecodeOutcome<A> = { success: true; value: A } | { success: false; errors: unknown };
 
 /** A codec bound to the flavor-agnostic helpers, so suites can run against both flavors. */
 interface CodecUnderTest<A> {

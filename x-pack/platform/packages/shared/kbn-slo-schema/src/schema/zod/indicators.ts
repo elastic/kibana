@@ -49,10 +49,7 @@ const filtersSchema = z
 
 const kqlWithFiltersSchema = z
   .object({
-    kqlQuery: z
-      .string()
-      .max(MAX_QUERY_LENGTH)
-      .describe('the KQL query to filter the documents with.'),
+    kqlQuery: kqlQuerySchema,
     filters: filtersSchema,
   })
   .meta({ id: 'SLOKqlWithFilters', description: 'Defines properties for a filter' });
@@ -77,20 +74,23 @@ const timestampFieldSchema = z
   .max(MAX_KEYWORD_LENGTH)
   .describe('The timestamp field used in the source indice.');
 
+const apmIndicatorBaseParams = z.object({
+  environment: allOrAnyString.describe('The APM service environment or "*"'),
+  service: allOrAnyString.describe('The APM service name'),
+  transactionType: allOrAnyString.describe('The APM transaction type or "*"'),
+  transactionName: allOrAnyString.describe('The APM transaction name or "*"'),
+  index: z.string().max(MAX_KEYWORD_LENGTH).describe('The index used by APM metrics'),
+  filter: querySchema.describe('KQL query used for filtering the data').optional(),
+  dataViewId: dataViewIdSchema.optional(),
+});
+
 const apmTransactionDurationIndicatorTypeSchema = z.literal('sli.apm.transactionDuration');
 const apmTransactionDurationIndicatorSchema = z
   .object({
     type: apmTransactionDurationIndicatorTypeSchema.describe('The type of indicator.'),
-    params: z
-      .object({
-        environment: allOrAnyString.describe('The APM service environment or "*"'),
-        service: allOrAnyString.describe('The APM service name'),
-        transactionType: allOrAnyString.describe('The APM transaction type or "*"'),
-        transactionName: allOrAnyString.describe('The APM transaction name or "*"'),
+    params: apmIndicatorBaseParams
+      .extend({
         threshold: z.number().describe('The latency threshold in milliseconds'),
-        index: z.string().max(MAX_KEYWORD_LENGTH).describe('The index used by APM metrics'),
-        filter: querySchema.describe('KQL query used for filtering the data').optional(),
-        dataViewId: dataViewIdSchema.optional(),
       })
       .describe('An object containing the indicator parameters.'),
   })
@@ -103,17 +103,7 @@ const apmTransactionErrorRateIndicatorTypeSchema = z.literal('sli.apm.transactio
 const apmTransactionErrorRateIndicatorSchema = z
   .object({
     type: apmTransactionErrorRateIndicatorTypeSchema.describe('The type of indicator.'),
-    params: z
-      .object({
-        environment: allOrAnyString.describe('The APM service environment or "*"'),
-        service: allOrAnyString.describe('The APM service name'),
-        transactionType: allOrAnyString.describe('The APM transaction type or "*"'),
-        transactionName: allOrAnyString.describe('The APM transaction name or "*"'),
-        index: z.string().max(MAX_KEYWORD_LENGTH).describe('The index used by APM metrics'),
-        filter: querySchema.describe('KQL query used for filtering the data').optional(),
-        dataViewId: dataViewIdSchema.optional(),
-      })
-      .describe('An object containing the indicator parameters.'),
+    params: apmIndicatorBaseParams.describe('An object containing the indicator parameters.'),
   })
   .meta({
     id: 'SLOIndicatorPropertiesApmAvailability',
@@ -155,13 +145,15 @@ const metricNameSchema = z
 
 const metricFilterSchema = querySchema.describe('The filter to apply to the metric.');
 
+const metricFieldSchema = z.string().max(MAX_KEYWORD_LENGTH).describe('The field of the metric.');
+
 const timesliceMetricBasicMetricWithField = z
   .object({
     name: metricNameSchema,
     aggregation: z
       .enum(['avg', 'max', 'min', 'sum', 'cardinality', 'last_value', 'std_deviation'])
       .describe('The aggregation type of the metric.'),
-    field: z.string().max(MAX_KEYWORD_LENGTH).describe('The field of the metric.'),
+    field: metricFieldSchema,
     filter: metricFilterSchema.optional(),
   })
   .meta({ id: 'SLOTimesliceMetricBasicMetricWithField' });
@@ -182,7 +174,7 @@ const timesliceMetricPercentileMetric = z
     aggregation: z
       .literal('percentile')
       .describe('The aggregation type of the metric. Only valid option is "percentile"'),
-    field: z.string().max(MAX_KEYWORD_LENGTH).describe('The field of the metric.'),
+    field: metricFieldSchema,
     percentile: z.number().describe('The percentile value.'),
     filter: metricFilterSchema.optional(),
   })
@@ -361,6 +353,8 @@ const indicatorTypesSchema = z
 /**
  * Codec between a comma separated list of indicator types
  * (e.g. `sli.kql.custom,sli.apm.transactionDuration`) and an array of indicator types.
+ * `ArrayFromString` from @kbn/zod-helpers is decode-only (`z.preprocess`) and cannot
+ * express the encode direction required for io-ts parity, hence the hand-rolled codec.
  */
 const indicatorTypesArraySchema = z.codec(
   z
@@ -376,36 +370,38 @@ const indicatorTypesArraySchema = z.codec(
   }
 );
 
-const indicatorSchema = z
-  .discriminatedUnion('type', [
-    apmTransactionDurationIndicatorSchema,
-    apmTransactionErrorRateIndicatorSchema,
-    syntheticsAvailabilityIndicatorSchema,
-    kqlCustomIndicatorSchema,
-    metricCustomIndicatorSchema,
-    timesliceMetricIndicatorSchema,
-    histogramIndicatorSchema,
-  ])
-  .meta({
-    id: 'SLOIndicator',
-    description: 'The indicator to use to compute the SLI',
-    openapi: {
-      discriminator: {
-        propertyName: 'type',
-        mapping: {
-          'sli.apm.transactionDuration': '#/components/schemas/SLOIndicatorPropertiesApmLatency',
-          'sli.apm.transactionErrorRate':
-            '#/components/schemas/SLOIndicatorPropertiesApmAvailability',
-          'sli.synthetics.availability':
-            '#/components/schemas/SLOIndicatorPropertiesSyntheticsAvailability',
-          'sli.kql.custom': '#/components/schemas/SLOIndicatorPropertiesCustomKql',
-          'sli.metric.custom': '#/components/schemas/SLOIndicatorPropertiesCustomMetric',
-          'sli.metric.timeslice': '#/components/schemas/SLOIndicatorPropertiesTimesliceMetric',
-          'sli.histogram.custom': '#/components/schemas/SLOIndicatorPropertiesHistogram',
-        },
-      },
+const indicatorUnion = z.discriminatedUnion('type', [
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  syntheticsAvailabilityIndicatorSchema,
+  kqlCustomIndicatorSchema,
+  metricCustomIndicatorSchema,
+  timesliceMetricIndicatorSchema,
+  histogramIndicatorSchema,
+]);
+
+// Derives the OAS discriminator mapping from the variants so each component
+// name stays defined exactly once, on the variant's `.meta({ id })`.
+const componentRef = (schema: z.ZodType): string => {
+  const id = schema.meta()?.id;
+  if (!id) {
+    throw new Error('every indicator schema must declare a .meta({ id }) for the OAS mapping');
+  }
+  return `#/components/schemas/${id}`;
+};
+
+const indicatorSchema = indicatorUnion.meta({
+  id: 'SLOIndicator',
+  description: 'The indicator to use to compute the SLI',
+  openapi: {
+    discriminator: {
+      propertyName: 'type',
+      mapping: Object.fromEntries(
+        indicatorUnion.options.map((variant) => [variant.shape.type.value, componentRef(variant)])
+      ),
     },
-  });
+  },
+});
 
 export {
   kqlQuerySchema,
