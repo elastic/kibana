@@ -12,8 +12,8 @@ const PRIVILEGES_PATH = 'permissions.kibana.privileges';
 const SPACE_FIELD = `${PRIVILEGES_PATH}.space`;
 
 /**
- * Builds the AI INDICES prompt section from the resolved catalog: what AI indices are, which ones
- * this agent can reach, and how to scope results to the current space. Empty when disabled or none.
+ * Builds the AI INDICES prompt section from the resolved catalog. Empty when disabled or when
+ * the catalog has no entries.
  */
 export const getAiIndicesInstructions = ({
   enabled,

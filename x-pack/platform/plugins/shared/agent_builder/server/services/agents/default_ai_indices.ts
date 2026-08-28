@@ -9,7 +9,6 @@ import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import { smlAiIndexDescription, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 
 export interface DefaultAiIndex {
-  /** The ES|QL `FROM` target: the index or data stream to query. */
   esqlTarget: string;
   description: string;
 }

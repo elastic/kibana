@@ -12,11 +12,8 @@ import { defaultAiIndices } from '../../../agents/default_ai_indices';
 import type { AiIndexCatalogEntry } from '../types';
 
 /**
- * Builds the prompt's AI index catalog, one entry per configured id in config order (deduped).
- * Static defaults win over the resolver (they carry curated copy); the resolver is called
- * once for the remaining ids. Ids that stay unresolved get no ES|QL target, and the prompt omits
- * them since the id is not a valid `FROM` target. Resolver failures are swallowed so a Context
- * Engine hiccup never breaks a run.
+ * Builds the prompt's AI index catalog. Defaults bypass the resolver, so they survive an
+ * unreachable or unreadable Context Engine; a resolver failure degrades to bare ids.
  */
 export const resolveAiIndexCatalog = async ({
   aiIndices,

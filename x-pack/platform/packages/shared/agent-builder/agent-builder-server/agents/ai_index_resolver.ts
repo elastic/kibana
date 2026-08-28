@@ -13,18 +13,15 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 export interface AiIndexDetail {
   /** Registry id of the AI index (the value stored in agent `ai_indices` config). */
   id: string;
-  /** The ES|QL `FROM` target: an index name, pattern, or comma-separated list. */
+  /** May be a concrete index name, a pattern, or a comma-separated list. */
   esqlTarget: string;
   description?: string;
 }
 
 /**
- * Resolves AI index ids to their details for the requesting user. Registered by the
- * `context_engine_agent_builder` bridge and invoked once per run. Details are authz-sensitive:
- * implementations must enforce the caller's registry access and omit ids they may not see.
- *
- * The resolver enforces only the registry read privilege, not whether Context Engine is enabled;
- * callers must gate on the Context Engine setting themselves before invoking it.
+ * Resolves AI index ids to details for the requesting user. Implementations must enforce the
+ * caller's registry access and omit ids they may not see. Only the registry read privilege is
+ * checked — callers gate on whether Context Engine is enabled.
  */
 export type AiIndexResolver = (params: {
   ids: string[];

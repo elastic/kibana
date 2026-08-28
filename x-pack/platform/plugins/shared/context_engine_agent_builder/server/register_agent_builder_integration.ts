@@ -36,10 +36,9 @@ export const registerContextEngineAgentBuilderIntegration = ({
     const [, startDeps] = await coreSetup.getStartServices();
     const { contextEngine, security } = startDeps;
 
-    // list() reads through the internal user, bypassing Context Engine's API-layer authz, so
-    // re-apply CE's read privilege here for the requesting user. The privilege grant is space-aware;
-    // the registry itself is global (no per-index scoping), matching CE's own list route. Denied ->
-    // no details.
+    // list() reads through the internal user, bypassing CE's API-layer authz, so re-apply CE's
+    // read privilege for the requesting user. One space-aware check covers every id, matching
+    // CE's own list route: the registry has no per-index scoping.
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
     const { hasAllRequested } = await checkPrivileges({
       kibana: [security.authz.actions.api.get(apiPrivileges.readContextEngine)],
