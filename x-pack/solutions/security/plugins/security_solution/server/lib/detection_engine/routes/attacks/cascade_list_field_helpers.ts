@@ -104,7 +104,15 @@ export const executeCascadeListField = async <T>({
       // Exclude Attack Discovery hits: a stale related-alert ID that collides with an AD doc
       // must not be emitted as a detection-alert event.
       const detectionHits = rawRelatedHits.filter((h) => !isAttackDiscoveryIndex(h.index));
-      verifiedRelatedAlertIds = Array.from(new Set(detectionHits.map((h) => h.id)));
+      // Only emit for alerts that would actually change; a no-op cascade must not fire
+      // the alert event, and unchanged IDs must not consume the 10,000-ID cap.
+      verifiedRelatedAlertIds = Array.from(
+        new Set(
+          detectionHits
+            .filter((h) => wouldChange(h.source, field, rawToAdd, rawToRemove))
+            .map((h) => h.id)
+        )
+      );
       relatedDelta = computeActualDelta(
         detectionHits.map((h) => h.source),
         validToAdd,
