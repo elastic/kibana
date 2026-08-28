@@ -34,6 +34,7 @@ import {
   CustomFrequencyState,
   generateNthByweekday,
   getWeekdayInfo,
+  isCustomRecurrenceFrequency,
   recurrenceSummary,
 } from './helpers';
 import { i18nNthWeekday } from './translations';
@@ -93,8 +94,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
 
   useEffect(() => {
     if (initialState && !hasInitialized.current) {
-      const isCustomFrequency =
-        initialState.interval > 1 || (initialState.byweekday ?? []).length > 1;
+      const isCustomFrequency = isCustomRecurrenceFrequency(initialState);
       setFrequency(isCustomFrequency ? 'CUSTOM' : initialState.freq);
       if (isCustomFrequency) {
         setCustomFrequency(initialState as CustomFrequencyState);
@@ -223,6 +223,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
               setFrequency(e.target.value === 'CUSTOM' ? 'CUSTOM' : Number(e.target.value))
             }
             compressed
+            data-test-subj="recurrenceSchedulerRepeat"
           />
         </EuiFormRow>
         {frequency === 'CUSTOM' && (
