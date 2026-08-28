@@ -219,6 +219,14 @@ describe('eventAtOrBefore', () => {
     expect(processNameSafeVersion(event)).toEqual('bash');
   });
 
+  it('returns the oldest event when every event is after the origin timestamp', () => {
+    const event = eventAtOrBefore(data, Date.parse('2026-07-29T14:30:00.000Z'));
+    if (event === undefined) {
+      throw new Error('expected the oldest event');
+    }
+    expect(processNameSafeVersion(event)).toEqual('sshd');
+  });
+
   it('returns the newest event when origin timestamp is undefined', () => {
     const event = eventAtOrBefore(data, undefined);
     if (event === undefined) {

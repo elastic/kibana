@@ -182,6 +182,11 @@ export const graphableNodes = createSelector(resolverTreeResponse, function (tre
   }
 });
 
+/**
+ * The origin node's collapsed lifecycle `@timestamp`, which is the process start time from the tree query that sorts
+ * `@timestamp` ascending. This approximates the analyzed-event time for ancestor labels, but it is not the alert
+ * document timestamp.
+ */
 export const originTimestamp: (state: DataState) => number | undefined = createSelector(
   originID,
   graphableNodes,

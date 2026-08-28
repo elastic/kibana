@@ -262,6 +262,11 @@ export const originID: (state: ResolverState) => string | undefined = composeSel
   dataSelectors.originID
 );
 
+/**
+ * The origin node's collapsed lifecycle `@timestamp`, which is the process start time from the tree query that sorts
+ * `@timestamp` ascending. This approximates the analyzed-event time for ancestor labels, but it is not the alert
+ * document timestamp.
+ */
 export const originTimestamp: (state: ResolverState) => number | undefined = composeSelectors(
   dataStateSelector,
   dataSelectors.originTimestamp
