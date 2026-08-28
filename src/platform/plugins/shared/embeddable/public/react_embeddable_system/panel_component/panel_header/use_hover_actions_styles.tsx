@@ -23,7 +23,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       right: ${euiTheme.size.xs};
       padding: var(--paddingAroundAction);
 
-      border-radius: ${euiTheme.border.radius.medium};
+      border-radius: ${euiTheme.border.radius.control};
       border: var(--internalBorderStyle);
       border-width: ${euiTheme.border.width
         .thin}; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
@@ -66,7 +66,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
           background-color: ${euiTheme.colors.backgroundBasePlain};
           ${euiShadow(euiThemeContext, 'xs')}
           padding: var(--paddingAroundAction);
-          border-radius: ${euiTheme.border.radius.medium};
+          border-radius: ${euiTheme.border.radius.control};
         }
 
         // shrink down to single wrapped element with no breakpoint when panel gets small
