@@ -91,6 +91,8 @@ export const setUnifiedAlertsAssigneesRoute = (
           MAX_ASSIGNEES_PER_OPERATION
         );
         const operationTruncated =
+          allValidAssigneesToAdd.length !== assignees.add.length ||
+          allValidAssigneesToRemove.length !== assignees.remove.length ||
           allValidAssigneesToAdd.length > MAX_ASSIGNEES_PER_OPERATION ||
           allValidAssigneesToRemove.length > MAX_ASSIGNEES_PER_OPERATION;
 
@@ -115,11 +117,11 @@ export const setUnifiedAlertsAssigneesRoute = (
                   ? (source[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[])
                   : []
               );
-              // Use allValid* (not the capped arrays) so a UID beyond position 100 that would
-              // actually change the document still triggers the event.
+              // Use the raw request arrays so over-length UIDs that would change a document
+              // still trigger the event; allValid* is only used for the schema-bounded payload.
               return (
-                allValidAssigneesToAdd.some((uid) => !currentAssignees.has(uid)) ||
-                allValidAssigneesToRemove.some((uid) => currentAssignees.has(uid))
+                assignees.add.some((uid) => !currentAssignees.has(uid)) ||
+                assignees.remove.some((uid) => currentAssignees.has(uid))
               );
             }));
             // Compute independent per-family deltas: an assignee already on every attack doc
