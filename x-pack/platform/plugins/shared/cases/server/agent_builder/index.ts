@@ -66,10 +66,7 @@ export function registerCasesAgentBuilderTools(
     attachmentsTool(availability, getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
   agentBuilder.tools.register(observablesTool(coreSetup, getCasesClient, logger));
-  // TODO: Skills have no availability hook in the current platform API. Until one is added,
-  // casesSkill and casesAnalyticsSkill are registered globally and will appear in es-solution
-  // spaces even though their tools are suppressed. Track: [link to follow-up issue].
-  agentBuilder.skills.register({ ...(buildCasesSkill(templatesEnabled)), availability });
+  agentBuilder.skills.register({ ...buildCasesSkill(templatesEnabled), availability });
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {
     agentBuilder.skills.register({ ...casesAnalyticsSkill, availability });
