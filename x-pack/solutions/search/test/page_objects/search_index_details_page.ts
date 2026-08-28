@@ -171,14 +171,17 @@ export function SearchIndexDetailPageProvider({ getService, getPageObjects }: Ft
     },
 
     async expectBreadcrumbsToBeAvailable(breadcrumbsName: string) {
-      const breadcrumbs = await testSubjects.findAll('euiBreadcrumb');
-      let isBreadcrumbShown: boolean = false;
-      for (const breadcrumb of breadcrumbs) {
-        if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
-          isBreadcrumbShown = true;
+      // Breadcrumbs are set asynchronously once the embedded Index Management app
+      // finishes rendering, so poll for the crumb instead of sampling the list once.
+      await retry.waitFor(`breadcrumb "${breadcrumbsName}" to be available`, async () => {
+        const breadcrumbs = await testSubjects.findAll('euiBreadcrumb');
+        for (const breadcrumb of breadcrumbs) {
+          if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
+            return true;
+          }
         }
-      }
-      expect(isBreadcrumbShown).to.eql(true, `Breadcrumb ${breadcrumbsName} was not found`);
+        return false;
+      });
     },
 
     async clickOnBreadcrumb(breadcrumbsName: string) {

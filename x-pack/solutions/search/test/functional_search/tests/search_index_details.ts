@@ -76,6 +76,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testHasEmbeddedConsole(pageObjects);
         });
         it('should have breadcrumbs', async () => {
+          // The parent breadcrumb was renamed from "Index Management" to "Build"
+          // (xpack.enterpriseSearch.indexManagement.breadcrumb); it has no href so
+          // it is not clickable, hence only its presence is asserted.
+          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Build');
           await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Indices');
 
           await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Indices');
