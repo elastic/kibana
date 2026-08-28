@@ -314,6 +314,7 @@ const preserveTrendlineLayer = (
 
   let trendlineQuery = prevTrendlineLayer.query;
   let metricFieldMap = new Map<string, string>();
+  let trendlineTimeField: string | undefined;
   if (prevTrendlineLayer.timeField) {
     try {
       const trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
@@ -324,6 +325,7 @@ const preserveTrendlineLayer = (
       );
       trendlineQuery = { esql: trendlineQueryResult.query };
       metricFieldMap = trendlineQueryResult.metricFieldMap;
+      trendlineTimeField = trendlineQueryResult.timeField;
     } catch {
       // If the query can't be parsed, keep the existing trendline query unchanged.
     }
@@ -351,6 +353,14 @@ const preserveTrendlineLayer = (
         ? updatedColumns.map((c) => (c.columnId === to ? newCol : c))
         : [...updatedColumns, newCol];
     }
+  }
+
+  if (trendlineTimeField && prevVis.trendlineTimeAccessor) {
+    updatedColumns = updatedColumns.map((column) =>
+      column.columnId === prevVis.trendlineTimeAccessor
+        ? { ...column, fieldName: trendlineTimeField }
+        : column
+    );
   }
 
   if (!newVis.secondaryMetricAccessor) {

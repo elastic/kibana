@@ -174,7 +174,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       numDocs: 0,
       passed: false,
       fieldNames: [],
-      descriptorVersion: 'version' in query ? query.version : 0,
+      descriptorVersion: 'kind' in query ? (query.kind === 'api' ? 3 : 2) : 0,
       status: 'skipped',
       skipReason: skipped.reason,
     };
@@ -220,7 +220,8 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     const now = new Date();
 
     return new Promise<HealthDiagnosticQueryStats>((resolve) => {
-      const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now, query.version);
+      const descriptorVersion = query.kind === 'api' ? 3 : 2;
+      const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now, descriptorVersion);
       let currentPage = 0;
 
       query$

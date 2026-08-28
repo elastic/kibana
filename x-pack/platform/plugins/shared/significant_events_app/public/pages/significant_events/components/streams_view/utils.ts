@@ -164,7 +164,7 @@ export function getOnboardStreamTooltip({
   isCpsMultiProject,
 }: {
   activityBlockTooltip: string | undefined;
-  isCpsMultiProject: boolean;
+  isCpsMultiProject: boolean | undefined;
 }): string {
   if (activityBlockTooltip) {
     return activityBlockTooltip;
