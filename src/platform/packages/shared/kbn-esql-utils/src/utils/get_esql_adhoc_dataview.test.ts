@@ -100,12 +100,12 @@ describe('getESQLAdHocDataview', () => {
       const originResult = await getESQLAdHocDataview({
         dataViewsService,
         query,
-        effectiveProjectRouting: '_alias:_origin',
+        projectRouting: '_alias:_origin',
       });
       const allProjectsResult = await getESQLAdHocDataview({
         dataViewsService,
         query,
-        effectiveProjectRouting: '_alias:*',
+        projectRouting: '_alias:*',
       });
 
       expect(originResult.id).not.toBe(allProjectsResult.id);
@@ -201,7 +201,7 @@ describe('getESQLAdHocDataview', () => {
         dataViewsService,
         query,
         http,
-        effectiveProjectRouting: '_alias:*',
+        projectRouting: '_alias:*',
       });
 
       expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
@@ -268,13 +268,13 @@ describe('getESQLAdHocDataview', () => {
         dataViewsService,
         query,
         http,
-        effectiveProjectRouting: '_alias:_origin',
+        projectRouting: '_alias:_origin',
       });
       await getESQLAdHocDataview({
         dataViewsService,
         query,
         http,
-        effectiveProjectRouting: '_alias:*',
+        projectRouting: '_alias:*',
       });
 
       expect(http.post).toHaveBeenCalledTimes(2);

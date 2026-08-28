@@ -102,7 +102,7 @@ export async function getESQLAdHocDataview({
   const timeFieldName = await getESQLTimeField({
     query,
     http,
-    projectRouting: projectRouting,
+    projectRouting,
   });
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
