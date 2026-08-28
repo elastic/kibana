@@ -9,11 +9,8 @@ import type { Observable } from 'rxjs';
 import { defer } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import type { ChatEvent, AgentCapabilities } from '@kbn/agent-builder-common';
-import {
-  getKibanaDefaultAgentCapabilities,
-  type PromptResponse,
-} from '@kbn/agent-builder-common/agents';
+import type { ChatEvent } from '@kbn/agent-builder-common';
+import { type PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
@@ -29,7 +26,6 @@ interface BaseConverseParams {
   conversationId: string;
   executionId: string;
   browserApiTools?: BrowserApiToolMetadata[];
-  capabilities?: AgentCapabilities;
   projectRouting?: string;
 }
 
@@ -69,7 +65,6 @@ export class ChatService {
       conversation_id: params.conversationId,
       execution_id: params.executionId,
       connector_id: params.connectorId,
-      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
       browser_api_tools: params.browserApiTools ?? [],
       project_routing: params.projectRouting,
@@ -85,7 +80,6 @@ export class ChatService {
       conversation_id: params.conversationId,
       execution_id: params.executionId,
       connector_id: params.connectorId,
-      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
       project_routing: params.projectRouting,
@@ -98,7 +92,6 @@ export class ChatService {
       conversation_id: params.conversationId,
       execution_id: params.executionId,
       connector_id: params.connectorId,
-      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       browser_api_tools: params.browserApiTools ?? [],
       action: 'regenerate',
       project_routing: params.projectRouting,

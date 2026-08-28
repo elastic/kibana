@@ -18,7 +18,7 @@ import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
 import { clearDocumentationDirectives } from '../lib/docs';
 
 // We exlude the time_zone setting as we decided that we won't support it in Kibana
-const SETTINGS_TO_EXCLUDE = new Set(['time_zone', 'project_routing']);
+const SETTINGS_TO_EXCLUDE = new Set(['time_zone']);
 const GENERATED_DEFINITIONS_PATH = join(
   REPO_ROOT,
   'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated'
