@@ -51,7 +51,7 @@ test.describe('Custom content panel create flow', { tag: [...tags.stateful.class
     await dashboard.openAddPanelFlyout();
     await customContentPanel.openFromAddPanelFlyout();
 
-    await expect(customContentPanel.flyoutTitle).toBeVisible();
+    await expect(customContentPanel.createFlyoutTitle).toBeVisible();
 
     await customContentPanel.setTemplate('<p id="greeting">{{ rows[0]["greeting"].value }}</p>');
     await customContentPanel.setEsqlQuery('ROW greeting = "hello"');
@@ -62,7 +62,7 @@ test.describe('Custom content panel create flow', { tag: [...tags.stateful.class
     await expect(iframe.locator('#greeting')).toHaveText('hello');
   });
 
-  test('previews rendered content before saving and re-enables button after template edit', async ({
+  test('previews rendered content before saving, and re-previews after an edit', async ({
     pageObjects,
   }) => {
     const { dashboard, customContentPanel } = pageObjects;
@@ -82,14 +82,15 @@ test.describe('Custom content panel create flow', { tag: [...tags.stateful.class
     const iframe = customContentPanel.getPanelIframe();
     await expect(iframe.locator('#preview-result')).toHaveText('hello');
 
-    // Button disables once the current draft has been previewed
-    await expect(customContentPanel.runPreviewButton).toBeDisabled();
+    // Preview stays available: enablement tracks only whether there is a template, so a draft can
+    // always be re-previewed — including after an edit is reverted to the saved value.
+    await expect(customContentPanel.runPreviewButton).toBeEnabled();
 
-    // Editing the template resets hasPreviewedCurrentDraft — button re-enables
     await customContentPanel.setTemplate(
       '<p id="preview-result">{{ rows[0]["greeting"].value }}!</p>'
     );
-    await expect(customContentPanel.runPreviewButton).toBeEnabled();
+    await customContentPanel.runPreview();
+    await expect(iframe.locator('#preview-result')).toHaveText('hello!');
   });
 
   test('cancelling the flyout on a new panel removes it from the dashboard', async ({
@@ -100,7 +101,7 @@ test.describe('Custom content panel create flow', { tag: [...tags.stateful.class
     await dashboard.openAddPanelFlyout();
     await customContentPanel.openFromAddPanelFlyout();
 
-    await expect(customContentPanel.flyoutTitle).toBeVisible();
+    await expect(customContentPanel.createFlyoutTitle).toBeVisible();
 
     await customContentPanel.cancel();
 

@@ -12,7 +12,7 @@ const TEMPLATE_EDITOR_TEST_SUBJ = 'customContentTemplateEditorContainer';
 
 export class CustomContentPanelPage {
   readonly addCustomPanelAction: Locator;
-  readonly flyoutTitle: Locator;
+  readonly createFlyoutTitle: Locator;
   readonly editFlyoutTitle: Locator;
   readonly templateEditorContainer: Locator;
   readonly esqlAccordionButton: Locator;
@@ -25,8 +25,8 @@ export class CustomContentPanelPage {
 
   constructor(page: ScoutPage) {
     this.addCustomPanelAction = page.testSubj.locator('create-action-Custom');
-    this.flyoutTitle = page.locator('h2', { hasText: 'Create custom panel' });
-    this.editFlyoutTitle = page.locator('h2', { hasText: 'Edit custom panel' });
+    this.createFlyoutTitle = page.testSubj.locator('customContentCreateFlyoutTitle');
+    this.editFlyoutTitle = page.testSubj.locator('customContentEditFlyoutTitle');
     this.templateEditorContainer = page.testSubj.locator(TEMPLATE_EDITOR_TEST_SUBJ);
     this.esqlAccordionButton = page.testSubj
       .locator('customContentEsqlSection')

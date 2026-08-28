@@ -146,7 +146,12 @@ export const EditCustomContentFlyout = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id={ariaLabelledBy ?? 'edit-custom-panel-flyout-title'}>
+              <h2
+                id={ariaLabelledBy ?? 'edit-custom-panel-flyout-title'}
+                data-test-subj={
+                  isNewPanel ? 'customContentCreateFlyoutTitle' : 'customContentEditFlyoutTitle'
+                }
+              >
                 {isNewPanel
                   ? i18n.translate('xpack.customContent.editFlyout.createTitle', {
                       defaultMessage: 'Create custom panel',
