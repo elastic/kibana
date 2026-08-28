@@ -96,6 +96,18 @@ describe('csv export config', () => {
         expect.objectContaining({ absoluteTime: false })
       );
     });
+
+    it('includes projectRouting from sharingData', () => {
+      const { sharingData } = makeClassicSharingData();
+      sharingData.projectRouting = '_alias:linked-project';
+
+      expect(getCsvReportParams({ sharingData, useAbsoluteTime: true })).toEqual(
+        expect.objectContaining({
+          isEsqlMode: false,
+          projectRouting: '_alias:linked-project',
+        })
+      );
+    });
   });
 
   describe('getShareMenuItems', () => {

@@ -655,6 +655,48 @@ describe('CsvGenerator', () => {
         );
       });
     });
+
+    it('passes projectRouting to PIT open and search', async () => {
+      const projectRouting = '_alias:linked-project';
+      const generateCsv = new CsvGenerator(
+        createMockJob({
+          columns: ['date', 'ip', 'message'],
+          pagingStrategy: 'pit',
+          projectRouting,
+        }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        false,
+        jobId
+      );
+
+      await generateCsv.generateData();
+
+      expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
+        expect.objectContaining({
+          project_routing: projectRouting,
+        }),
+        expect.any(Object)
+      );
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          projectRouting,
+        })
+      );
+    });
   });
 
   describe('export behavior when scroll duration config is auto', () => {

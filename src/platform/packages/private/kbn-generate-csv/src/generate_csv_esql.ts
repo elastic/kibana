@@ -45,6 +45,11 @@ export interface JobParamsCsvESQL {
   forceNow?: string;
   timeFieldName?: string;
   esqlVariables?: ESQLControlVariable[];
+  /**
+   * Cross-project search (CPS) routing expression captured from Discover.
+   * Applied when the export re-runs the search on the server.
+   */
+  projectRouting?: string;
 }
 
 interface Clients {
@@ -154,6 +159,7 @@ export class CsvESQLGenerator {
           transport: {
             requestTimeout: settings.scroll.duration(this.taskInstanceFields),
           },
+          ...(this.job.projectRouting ? { projectRouting: this.job.projectRouting } : {}),
         })
       );
 

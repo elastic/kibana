@@ -25,9 +25,10 @@ export class SearchCursorScroll extends SearchCursor {
     clients: SearchCursorClients,
     abortController: AbortController,
     logger: Logger,
-    useInternalUser: boolean = false
+    useInternalUser: boolean = false,
+    projectRouting?: string
   ) {
-    super(indexPatternTitle, settings, clients, abortController, logger);
+    super(indexPatternTitle, settings, clients, abortController, logger, projectRouting);
     this.useInternalUser = useInternalUser;
   }
 
@@ -57,14 +58,17 @@ export class SearchCursorScroll extends SearchCursor {
       : ES_SEARCH_STRATEGY;
 
     return await lastValueFrom(
-      this.clients.data.search(searchParamsScan, {
-        strategy,
-        abortSignal: this.abortController.signal,
-        transport: {
-          maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
-          requestTimeout: scroll.duration(taskInstanceFields),
-        },
-      })
+      this.clients.data.search(
+        searchParamsScan,
+        this.getSearchRequestOptions({
+          strategy,
+          abortSignal: this.abortController.signal,
+          transport: {
+            maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
+            requestTimeout: scroll.duration(taskInstanceFields),
+          },
+        })
+      )
     );
   }
 

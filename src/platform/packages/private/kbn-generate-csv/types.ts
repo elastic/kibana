@@ -19,4 +19,9 @@ export interface JobParamsCSV {
   columns?: string[];
   forceNow?: string;
   pagingStrategy?: CsvPagingStrategy;
+  /**
+   * Cross-project search (CPS) routing expression captured from Discover.
+   * Applied when the export re-runs the search on the server.
+   */
+  projectRouting?: string;
 }

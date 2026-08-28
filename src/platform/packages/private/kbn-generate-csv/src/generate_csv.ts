@@ -334,7 +334,8 @@ export class CsvGenerator {
         this.clients,
         abortController,
         this.logger,
-        this.useInternalUser
+        this.useInternalUser,
+        this.job.projectRouting
       );
       logger.debug('Using search strategy: scroll', { tags: [this.jobId] });
     } else {
@@ -345,7 +346,8 @@ export class CsvGenerator {
         this.clients,
         abortController,
         this.logger,
-        this.useInternalUser
+        this.useInternalUser,
+        this.job.projectRouting
       );
       logger.debug('Using search strategy: pit', { tags: [this.jobId] });
     }

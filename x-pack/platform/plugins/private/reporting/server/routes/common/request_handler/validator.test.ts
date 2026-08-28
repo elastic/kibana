@@ -34,6 +34,20 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).not.toThrow();
   });
 
+  it('accepts csv job params with projectRouting', () => {
+    const validParams = {
+      browserTimezone: 'America/Los_Angeles',
+      objectType: 'search',
+      title: 'Discover session',
+      version: '9.4.0',
+      projectRouting: '_alias:linked-project',
+      searchSource: {},
+      columns: ['message'],
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).not.toThrow();
+  });
+
   it('sanitizes title', () => {
     const validParams = {
       title: 'Monthly Report<script>alert("xss")</script>',

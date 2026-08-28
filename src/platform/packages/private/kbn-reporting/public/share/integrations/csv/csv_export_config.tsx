@@ -62,6 +62,7 @@ export const getCsvReportParams: ReportParamsGetter<
       locatorParams: useAbsoluteTime
         ? toAbsoluteTimeRange(locatorParams, sharingData.absoluteTimeRange)
         : locatorParams,
+      ...(sharingData.projectRouting ? { projectRouting: sharingData.projectRouting } : {}),
     };
   }
 
@@ -76,6 +77,7 @@ export const getCsvReportParams: ReportParamsGetter<
       // which each run resolves anchored to its scheduled run time (forceNow).
       absoluteTime: useAbsoluteTime && !forShareUrl,
     }),
+    ...(sharingData.projectRouting ? { projectRouting: sharingData.projectRouting } : {}),
   };
 };
 

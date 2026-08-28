@@ -22,10 +22,20 @@ export * from './constants';
 interface BaseParamsCSV {
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
+  /**
+   * Cross-project search (CPS) routing expression captured from Discover.
+   * Applied when the export re-runs the search on the server.
+   */
+  projectRouting?: string;
 }
 
 interface BaseParamsCsvV2 {
   locatorParams: LocatorParams[];
+  /**
+   * Cross-project search (CPS) routing expression captured from Discover.
+   * Applied when the export re-runs the search on the server.
+   */
+  projectRouting?: string;
 }
 
 export type JobParamsCSV = BaseParamsCSV & BaseParams;
@@ -43,6 +53,11 @@ export type JobAppParamsCsvV2 = Omit<JobParamsCsvV2, 'browserTimezone' | 'versio
 
 interface CsvFromSavedObjectBase {
   objectType: 'search';
+  /**
+   * Cross-project search (CPS) routing expression captured from Discover.
+   * Applied when the export re-runs the search on the server.
+   */
+  projectRouting?: string;
 }
 
 /**

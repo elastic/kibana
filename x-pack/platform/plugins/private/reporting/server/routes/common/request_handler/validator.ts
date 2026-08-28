@@ -141,6 +141,7 @@ const jobParamsSchema = z
     relativeUrls: relativeUrlsSchema.optional(), // used in tests could be legacy
     relativeUrl: relativeUrlSchema.optional(), // used in tests could be legacy
     isEsqlMode: z.boolean().optional(), // for CSV reports
+    projectRouting: z.string().max(4096).optional(), // CPS routing for CSV reports
   })
   .strict();
 

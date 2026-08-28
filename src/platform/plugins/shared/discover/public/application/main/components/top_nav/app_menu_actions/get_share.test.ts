@@ -322,4 +322,27 @@ describe('getShare', () => {
 
     getContextsSpy.mockRestore();
   });
+
+  it('includes CPS projectRouting from the cps manager in sharingData', async () => {
+    jest
+      .mocked(mockDiscoverService.cps!.cpsManager!.getProjectRouting)
+      .mockReturnValue('_alias:linked-project');
+
+    const shareOptions = await buildShareOptions({
+      services: mockDiscoverService,
+      discoverParams: {
+        dataView: dataViewMock,
+        isEsqlMode: false,
+        adHocDataViews: [],
+        authorizedRuleTypeIds: [],
+      },
+      currentTab: toolkit.getCurrentTab(),
+      runtimeStateManager: toolkit.runtimeStateManager,
+      persistedDiscoverSession: undefined,
+      totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
+      hasUnsavedChanges: false,
+    });
+
+    expect(shareOptions.sharingData.projectRouting).toBe('_alias:linked-project');
+  });
 });

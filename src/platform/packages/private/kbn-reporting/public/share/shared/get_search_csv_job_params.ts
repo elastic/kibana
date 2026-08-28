@@ -18,10 +18,12 @@ export type CsvSearchModeParams =
       isEsqlMode: false;
       searchSource: SerializedSearchSourceFields;
       columns: string[] | undefined;
+      projectRouting?: string;
     }
   | {
       isEsqlMode: true;
       locatorParams: LocatorParams[];
+      projectRouting?: string;
     };
 
 interface GetSearchCsvJobParams {
@@ -45,6 +47,7 @@ export const getSearchCsvJobParams = ({
   const commonJobParams = {
     title,
     objectType: 'search',
+    ...(searchModeParams.projectRouting ? { projectRouting: searchModeParams.projectRouting } : {}),
   };
 
   if (searchModeParams.isEsqlMode) {

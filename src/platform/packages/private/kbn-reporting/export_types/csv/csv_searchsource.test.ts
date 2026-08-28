@@ -45,6 +45,8 @@ const taskInstanceFields = { startedAt: null, retryAt: null };
 let encryptedHeaders: string;
 let stream: jest.Mocked<Writable>;
 let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
+let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
+let mockData: ReturnType<typeof dataPluginMock.createStartContract>;
 
 beforeAll(async () => {
   // use fieldFormats plugin for csv formats
@@ -76,12 +78,15 @@ beforeAll(async () => {
 
   mockCsvSearchSourceExportType.setup({});
 
+  mockEsClient = elasticsearchServiceMock.createClusterClient();
+  mockData = dataPluginMock.createStartContract();
+
   mockCsvSearchSourceExportType.start({
-    esClient: elasticsearchServiceMock.createClusterClient(),
+    esClient: mockEsClient,
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     discover: discoverPluginMock.createStartContract(),
-    data: dataPluginMock.createStartContract(),
+    data: mockData,
     licensing: licensingMock.createStart(),
   });
 });
@@ -135,4 +140,32 @@ test('uses the provided logger', async () => {
   });
 
   expect(logSpy).toHaveBeenCalledWith('execute-job');
+});
+
+test('scopes ES and search clients with CPS expression routing', async () => {
+  mockEsClient.asScoped.mockClear();
+  mockData.search.asScoped.mockClear();
+  const searchSourceAsScopedSpy = jest.spyOn(mockData.search.searchSource, 'asScoped');
+
+  await mockCsvSearchSourceExportType.runTask({
+    jobId: 'cool-job-id',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: {
+      headers: encryptedHeaders,
+      browserTimezone: 'US/Alaska',
+      searchSource: {},
+      objectType: 'search',
+      title: 'Test Search',
+      version: '7.13.0',
+      projectRouting: '_alias:linked-project',
+    },
+    taskInstanceFields,
+    cancellationToken: new CancellationToken(),
+    stream,
+  });
+
+  const expectedScope = { projectRouting: 'expression', value: '_alias:linked-project' };
+  expect(mockEsClient.asScoped).toHaveBeenCalledWith(expect.anything(), expectedScope);
+  expect(mockData.search.asScoped).toHaveBeenCalledWith(expect.anything(), expectedScope);
+  expect(searchSourceAsScopedSpy).toHaveBeenCalledWith(expect.anything(), expectedScope);
 });

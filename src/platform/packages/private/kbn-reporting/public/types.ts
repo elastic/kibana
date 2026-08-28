@@ -62,6 +62,10 @@ export interface ReportingCSVSharingData extends SharingData {
   }) => SerializedSearchSourceFields;
   columns: string[] | undefined;
   absoluteTimeRange: TimeRange | undefined;
+  /**
+   * Cross-project search (CPS) routing from the Discover project picker.
+   */
+  projectRouting?: string;
 }
 
 export interface ReportParamsGetterOptions<S extends SharingData = SharingData> {

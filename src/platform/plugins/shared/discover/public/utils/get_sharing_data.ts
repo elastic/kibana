@@ -32,7 +32,15 @@ import { showTimeFieldColumn } from './show_time_field_column';
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: DiscoverAppState,
-  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
+  services: {
+    uiSettings: IUiSettingsClient;
+    data: DataPublicPluginStart;
+    cps?: {
+      cpsManager?: {
+        getProjectRouting: (override?: string) => string | undefined;
+      };
+    };
+  },
   absoluteTimeRange?: TimeRange
 ) {
   const { uiSettings, data } = services;
@@ -69,6 +77,7 @@ export async function getSharingData(
     absoluteTimeRange
   );
   const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
+  const projectRouting = services.cps?.cpsManager?.getProjectRouting();
   return {
     getSearchSource: ({
       addGlobalTimeFilter,
@@ -131,6 +140,7 @@ export async function getSharingData(
       return searchSourceUpdated.getSerializedFields(true);
     },
     columns,
+    ...(projectRouting ? { projectRouting } : {}),
   };
 }
 

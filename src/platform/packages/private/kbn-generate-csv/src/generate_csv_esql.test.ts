@@ -508,6 +508,38 @@ describe('CsvESQLGenerator', () => {
       );
     });
 
+    it('passes projectRouting on search options', async () => {
+      const projectRouting = '_alias:linked-project';
+      mockSearchResponse({
+        columns: [{ name: 'message', type: 'keyword' }],
+        values: [['hello']],
+      });
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query: { esql: 'from logs' }, projectRouting }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          strategy: 'esql',
+          projectRouting,
+        })
+      );
+    });
+
     it('passes params to the query', async () => {
       const query = {
         esql: 'FROM custom-metrics-without-timestamp | WHERE event.ingested >= ?_tstart AND event.ingested <= ?_tend',

@@ -36,6 +36,7 @@ import {
 } from '@kbn/reporting-server';
 
 import type { ReportingRequestHandlerContext } from './types';
+import { getProjectRoutingScope } from './get_project_routing_scope';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 
@@ -114,7 +115,8 @@ export class CsvV2ExportType extends ExportType<
     const uiSettings = await this.getUiSettingsClient(request, logger);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
     const { data: dataPluginStart, discover: discoverPluginStart } = this.startDeps;
-    const data = dataPluginStart.search.asScoped(request);
+    const projectRoutingScope = getProjectRoutingScope(job.projectRouting);
+    const data = dataPluginStart.search.asScoped(request, projectRoutingScope);
 
     const { locatorParams } = job;
     const { params } = locatorParams[0];
@@ -135,7 +137,7 @@ export class CsvV2ExportType extends ExportType<
       const esqlVariables = params.esqlVariables as ESQLControlVariable[] | undefined;
       const timeFieldName = await locatorClient.timeFieldNameFromLocator(params);
       const filters = await locatorClient.filtersFromLocator(params);
-      const es = this.startDeps.esClient.asScoped(request);
+      const es = this.startDeps.esClient.asScoped(request, projectRoutingScope);
 
       const clients = { uiSettings, data, es };
 
@@ -162,8 +164,11 @@ export class CsvV2ExportType extends ExportType<
     const columns = await locatorClient.columnsFromLocator(params);
     const searchSource = await locatorClient.searchSourceFromLocator(params);
 
-    const es = this.startDeps.esClient.asScoped(request);
-    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
+    const es = this.startDeps.esClient.asScoped(request, projectRoutingScope);
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(
+      request,
+      projectRoutingScope
+    );
 
     const clients = { uiSettings, data, es };
     const dependencies = { searchSourceStart, fieldFormatsRegistry };

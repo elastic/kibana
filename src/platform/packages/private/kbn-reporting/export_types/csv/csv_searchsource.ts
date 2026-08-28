@@ -27,6 +27,7 @@ import type {
   RunTaskOpts,
 } from '@kbn/reporting-server';
 import { ExportType, getFieldFormats } from '@kbn/reporting-server';
+import { getProjectRoutingScope } from './get_project_routing_scope';
 
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
@@ -81,12 +82,16 @@ export class CsvSearchSourceExportType extends ExportType<
     const dataPluginStart = this.startDeps.data;
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
-    const es = this.startDeps.esClient.asScoped(request);
-    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
+    const projectRoutingScope = getProjectRoutingScope(job.projectRouting);
+    const es = this.startDeps.esClient.asScoped(request, projectRoutingScope);
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(
+      request,
+      projectRoutingScope
+    );
 
     const clients = {
       uiSettings,
-      data: dataPluginStart.search.asScoped(request),
+      data: dataPluginStart.search.asScoped(request, projectRoutingScope),
       es,
     };
     const dependencies = {

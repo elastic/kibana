@@ -39,6 +39,15 @@ describe('getSharingData', () => {
     };
   });
 
+  test('includes CPS projectRouting from the cps manager', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
+    jest
+      .mocked(services.cps!.cpsManager!.getProjectRouting)
+      .mockReturnValue('_alias:linked-project');
+    const result = await getSharingData(searchSourceMock, { columns: [] }, services);
+    expect(result.projectRouting).toBe('_alias:linked-project');
+  });
+
   test('returns valid data for sharing', async () => {
     const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
     const result = await getSharingData(searchSourceMock, { columns: [] }, services);

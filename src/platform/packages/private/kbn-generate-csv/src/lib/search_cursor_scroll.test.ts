@@ -153,4 +153,38 @@ describe('CSV Export Search Cursor', () => {
       );
     });
   });
+
+  describe('with projectRouting', () => {
+    const projectRouting = '_alias:linked-project';
+
+    beforeEach(async () => {
+      cursor = new TestSearchCursorScroll(
+        'test-index-pattern-string',
+        settings,
+        { data, es },
+        new AbortController(),
+        logger,
+        false,
+        projectRouting
+      );
+
+      await cursor.initialize();
+    });
+
+    it('passes projectRouting on the initial scan search options', async () => {
+      const dataSearchSpy = jest
+        .spyOn(data, 'search')
+        .mockReturnValue(Rx.of({ rawResponse: { hits: { hits: [] } } }));
+
+      const searchSource = createSearchSourceMock();
+      await cursor.getPage(searchSource);
+
+      expect(dataSearchSpy).toBeCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          projectRouting,
+        })
+      );
+    });
+  });
 });

@@ -31,7 +31,8 @@ export abstract class SearchCursor {
     protected settings: SearchCursorSettings,
     protected clients: SearchCursorClients,
     protected abortController: AbortController,
-    protected logger: Logger
+    protected logger: Logger,
+    protected projectRouting?: string
   ) {}
 
   public abstract initialize(): Promise<void>;
@@ -77,6 +78,14 @@ export abstract class SearchCursor {
       },
     };
     this.logger.debug(`Result details: ${JSON.stringify(logInfo)}`);
+  }
+
+  protected getSearchRequestOptions(base: {
+    strategy: string;
+    abortSignal: AbortSignal;
+    transport: { maxRetries: number; requestTimeout: string };
+  }) {
+    return this.projectRouting ? { ...base, projectRouting: this.projectRouting } : base;
   }
 
   /**
