@@ -146,6 +146,7 @@ describe('useMetricsAppHeaderMenu', () => {
       expect.objectContaining({
         id: 'alerts',
         testId: 'infrastructure-alerts-and-rules',
+        popoverTestId: 'metrics-alert-menu',
       })
     );
     expect(findItem(menu.items, 'settings')).toEqual(

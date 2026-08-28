@@ -192,6 +192,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
           label: ALERTS_LABEL,
           iconType: 'bell',
           testId: 'infrastructure-alerts-and-rules',
+          popoverTestId: 'metrics-alert-menu',
           order: order++,
           items: alertItems,
         });
