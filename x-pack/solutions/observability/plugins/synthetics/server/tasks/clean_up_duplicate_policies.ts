@@ -109,8 +109,16 @@ export async function cleanUpDuplicatedPackagePolicies(
         serverSetup
       );
     }
-    taskState.hasAlreadyDoneCleanup = true;
-    taskState.maxCleanUpRetries = 3;
+    if (performCleanupSync) {
+      // A follow-up sync is required (extras deleted, or expected policies are
+      // missing). Leave hasAlreadyDoneCleanup unset so the next run re-checks
+      // and re-attempts the recreate, but spend a retry so that a permanently
+      // failing recreate stops instead of running cleanup every interval.
+      taskState.maxCleanUpRetries -= 1;
+    } else {
+      taskState.hasAlreadyDoneCleanup = true;
+      taskState.maxCleanUpRetries = 3;
+    }
     return { performCleanupSync };
   } catch (e) {
     taskState.maxCleanUpRetries -= 1;

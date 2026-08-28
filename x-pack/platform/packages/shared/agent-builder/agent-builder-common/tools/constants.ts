@@ -55,7 +55,10 @@ const casesTool = <TName extends string>(
  */
 export const platformCoreCasesTools = {
   manage: casesTool('manage'),
+  /** @deprecated Use `getAttachments` (read) and `manageAttachments` (write) instead. */
   attachments: casesTool('attachments'),
+  getAttachments: casesTool('get_attachments'),
+  manageAttachments: casesTool('manage_attachments'),
   observables: casesTool('observables'),
 } as const;
 
@@ -103,6 +106,7 @@ export const internalTools = {
   setConversationMetadata: 'set_conversation_metadata',
   discoverApis: 'discover_apis',
   describeApi: 'describe_api',
+  describeApiType: 'describe_api_type',
   executeApi: 'execute_api',
 };
 
@@ -131,6 +135,7 @@ export const isInternalTool = (toolName: string) =>
 const filestoreAllowedInternalToolIds = new Set<string>([
   internalTools.discoverApis,
   internalTools.describeApi,
+  internalTools.describeApiType,
   internalTools.executeApi,
 ]);
 
