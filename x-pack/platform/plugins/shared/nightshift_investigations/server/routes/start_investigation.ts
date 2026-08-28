@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { INVESTIGATION_SUBJECT_TYPES } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
@@ -29,8 +31,9 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   params: z.object({
     body: z.object({
       subject: z.object({
-        type: z.enum(['significant_event', 'alert']),
+        type: z.enum(INVESTIGATION_SUBJECT_TYPES),
         id: z.string().min(1).max(500),
+        summary: z.string().max(MAX_TEXT_LENGTH).optional(),
       }),
       concurrency_key: z.string().max(500).optional(),
       context: z
@@ -41,7 +44,11 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
-    const result = await client.start(params.body);
+    // User-initiated starts are always manual.
+    const result = await client.start({
+      ...params.body,
+      trigger_type: 'manual',
+    });
     return result;
   },
 });

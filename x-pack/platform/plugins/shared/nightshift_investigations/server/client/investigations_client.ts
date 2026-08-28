@@ -17,13 +17,14 @@ import type {
   GetInvestigationResponse,
   InvestigationStatus,
   InvestigationSubject,
+  InvestigationTriggerType,
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
-
+import { DEFAULT_INVESTIGATION_TRIGGER_TYPE, INVESTIGATION_TRIGGER_TYPES } from '../../common';
 import { InvestigationNotFoundError } from './errors';
 import { InvestigationUnavailableError } from './investigation_unavailable_error';
 export { InvestigationNotFoundError, InvestigationUnavailableError };
@@ -103,12 +104,25 @@ function recoverSubjectFromInput(
   const ctx = input?.context;
   if (!isPlainObject(ctx)) return undefined;
   if (ctx.source === 'significant_event') {
-    return { type: 'significant_event', id: String(ctx.significant_event_id ?? '') };
+    const id = asString(ctx.event_id) ?? asString(ctx.significant_event_id);
+    return id ? { type: 'significant_event', id } : undefined;
   }
   if (ctx.source === 'alert') {
-    return { type: 'alert', id: String(ctx.alert_id ?? '') };
+    const id = asString(ctx.alert_id);
+    return id ? { type: 'alert', id } : undefined;
   }
   return undefined;
+}
+
+function recoverTriggerTypeFromInput(
+  input: Record<string, unknown> | undefined
+): InvestigationTriggerType | undefined {
+  const ctx = input?.context;
+  if (!isPlainObject(ctx)) return undefined;
+  const valid: readonly string[] = INVESTIGATION_TRIGGER_TYPES;
+  return valid.includes(String(ctx.trigger_type))
+    ? (ctx.trigger_type as InvestigationTriggerType)
+    : undefined;
 }
 
 export interface NightshiftInvestigationsClientDeps {
@@ -151,6 +165,7 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    trigger_type,
     message,
     stream_names,
     concurrency_key,
@@ -166,6 +181,11 @@ export class NightshiftInvestigationsClient {
 
     const spaceId = this.getSpaceId();
 
+    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
+    // agent exists wherever an investigation runs. This narrower install stays because the run
+    // below executes the *stored* workflow definition, which predates that step until the managed
+    // install has upgraded it — and that install is fire-and-forget. Deliberately without the
+    // step's visibility retry: the workflow owns that, and this request path should not pay for it.
     await installInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
 
     const workflow = await this.workflowsManagement.management.getWorkflow(
@@ -188,6 +208,8 @@ export class NightshiftInvestigationsClient {
         ...context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
+        trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+        ...(subject.summary ? { summary: subject.summary } : {}),
       },
     };
 
@@ -254,10 +276,14 @@ export class NightshiftInvestigationsClient {
     })();
 
     const subject = recoverSubjectFromInput(rawInput);
+    const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
+    const rawContext = isPlainObject(rawInput?.context) ? rawInput.context : undefined;
+    const subjectSummary = asString(rawContext?.summary);
 
     return {
       investigation_id: investigationId,
-      subject: subject ?? { type: 'significant_event', id: '' },
+      subject: subject && subjectSummary ? { ...subject, summary: subjectSummary } : subject,
+      trigger_type: recoveredTriggerType,
       status,
       started_at: execution.startedAt,
       completed_at: isTerminal ? execution.finishedAt : undefined,

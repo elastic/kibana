@@ -38,6 +38,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.SCREENSHOTS]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: arrayToJsonFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.TEXT_ASSERTION]: stringToJsonFormatter,
   [ConfigKey.PORT]: stringToJsonFormatter,
