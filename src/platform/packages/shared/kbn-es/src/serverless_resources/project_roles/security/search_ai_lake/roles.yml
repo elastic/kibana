@@ -47,7 +47,6 @@ _search_ai_lake_analyst:
         - ".threat-intel-indicators-*"
       privileges:
         - "read"
-        - "view_index_metadata"
 
   applications:
     - application: "kibana-.kibana"
@@ -133,7 +132,6 @@ _search_ai_lake_soc_manager:
         - ".threat-intel-indicators-*"
       privileges:
         - "read"
-        - "view_index_metadata"
 
   applications:
     - application: "kibana-.kibana"
