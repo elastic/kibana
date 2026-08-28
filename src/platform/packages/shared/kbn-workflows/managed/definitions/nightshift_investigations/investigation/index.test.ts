@@ -65,7 +65,7 @@ describe('investigation lifecycle contracts', () => {
     });
   });
 
-  it('persists the investigation saved object as the first step, without an on-failure override', () => {
+  it('persists the investigation saved object as the first step, retrying then failing the run', () => {
     const [firstStep] = investigation.steps;
 
     expect(firstStep.name).toBe('persist_investigation_started');
@@ -74,9 +74,12 @@ describe('investigation lifecycle contracts', () => {
     expect(firstStep.with?.path).toBe(
       '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/_ensure'
     );
-    // No on-failure override: a run whose record cannot be persisted must fail rather than
-    // proceed invisibly — every run that gets past this step is visible to the investigations API.
-    expect(firstStep['on-failure']).toBeUndefined();
+    // Retry absorbs transient failures (e.g. the execution document not yet readable right at
+    // startup); no `continue`, so a run whose record cannot be persisted fails rather than
+    // proceeding invisibly — every run that gets past this step is visible to the API.
+    expect(firstStep['on-failure']).toEqual({
+      retry: { 'max-attempts': 3, delay: '5s', strategy: 'exponential' },
+    });
   });
 
   it('space-scopes the path of every kibana.request step', () => {

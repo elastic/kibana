@@ -42,9 +42,11 @@ triggers:
 
 steps:
   # Creates the nightshift-investigation saved object for this run if it does not exist yet.
-  # Runs first, with no on-failure override, so any run that proceeds past this step is
-  # guaranteed to be visible to the investigations API regardless of how it was triggered
-  # (start endpoint, nightshift.triggerInvestigation step, or a direct workflow execution).
+  # Runs first so any run that proceeds past this step is guaranteed to be visible to the
+  # investigations API regardless of how it was triggered (start endpoint,
+  # nightshift.triggerInvestigation step, or a direct workflow execution). Retries transient
+  # failures (e.g. the execution document not yet readable right at startup), then fails the
+  # run — no `continue`, so a run whose record cannot be persisted never proceeds invisibly.
   # All attributes derive from the execution document server-side; no body is needed.
   - name: persist_investigation_started
     type: kibana.request
@@ -53,6 +55,11 @@ steps:
       path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/_ensure'
       headers:
         x-elastic-internal-origin: 'kibana'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+        strategy: exponential
 
   - name: emit_investigation_started
     type: kibana.request
@@ -670,8 +677,9 @@ steps:
 
   # Persists the investigation structured output to the nightshift-investigation saved object.
   # Runs after `investigate` when the agent completed successfully. Writes completed status +
-  # all structured output fields. The persist route is idempotent — the progress report tool
-  # may have already set status to 'running' mid-investigation.
+  # all structured output fields. Retries transient failures, then fails the run: a completed
+  # investigation whose record cannot be written must not be lost silently. The persist route
+  # is idempotent — the progress report tool may have already set status to 'running'.
   - name: persist_investigation_completed
     type: kibana.request
     if: '${{ steps.investigate.error == null }}'
@@ -691,9 +699,13 @@ steps:
         impact: ${{ steps.investigate.output.structured_output.impact }}
         conversation_id: "${{ steps.investigate.output.conversation_id }}"
     on-failure:
-      continue: true
+      retry:
+        max-attempts: 3
+        delay: 5s
+        strategy: exponential
 
-  # Persists failure status when the investigate step errored.
+  # Persists failure status when the investigate step errored. Retries transient failures,
+  # then fails the run: an investigation whose record cannot be written must not be lost silently.
   - name: persist_investigation_failed
     type: kibana.request
     if: '${{ steps.investigate.error != null }}'
@@ -707,7 +719,10 @@ steps:
         error: "${{ steps.investigate.error.message | default: 'Investigation failed' }}"
         conversation_id: "${{ steps.investigate.output.conversation_id }}"
     on-failure:
-      continue: true
+      retry:
+        max-attempts: 3
+        delay: 5s
+        strategy: exponential
 
   # Connects this investigation back to the Significant Event that triggered it, so the
   # UI can surface investigation history and link to the full RCA result, and — in the same

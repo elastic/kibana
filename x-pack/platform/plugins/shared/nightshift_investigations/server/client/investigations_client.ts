@@ -313,13 +313,20 @@ export class NightshiftInvestigationsClient {
       `Started investigation for ${subject.type}/${subject.id}, execution_id=${executionId}`
     );
 
+    await this.ensureSavedObject(executionId).catch((error) => {
+      this.logger.warn(
+        `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
+      );
+    });
+
     return { investigation_id: executionId };
   }
 
   /**
-   * Creates the saved object for a workflow execution if it does not exist yet. Called by the
-   * workflow's first step so the record exists regardless of how the workflow was triggered;
-   * idempotent so replays and concurrent calls are safe.
+   * Creates the saved object for a workflow execution if it does not exist yet.
+   * Called from start() so the id is readable immediately, and by the workflow's
+   * first step so runs that skipped start() are still tracked. Idempotent so
+   * replays and concurrent calls are safe.
    */
   async ensureSavedObject(investigationId: string): Promise<void> {
     const existing = await this.investigationSoClient.get(investigationId);

@@ -6,13 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { badRequest, notFound } from '@hapi/boom';
-import {
-  InvestigationNotFoundError,
-  InvestigationSubjectMissingError,
-} from '../client/investigations_client';
 import { MAX_KEYWORD_LENGTH } from '../saved_objects';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
 export const ensureInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations/{id}/_ensure',
@@ -39,13 +35,7 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
     try {
       await client.ensureSavedObject(params.path.id);
     } catch (error) {
-      if (error instanceof InvestigationNotFoundError) {
-        throw notFound(error.message);
-      }
-      if (error instanceof InvestigationSubjectMissingError) {
-        throw badRequest(error.message);
-      }
-      throw error;
+      rethrowInvestigationClientError(error);
     }
     return { acknowledged: true };
   },

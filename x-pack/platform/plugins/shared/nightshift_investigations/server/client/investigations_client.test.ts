@@ -433,6 +433,21 @@ describe('NightshiftInvestigationsClient.start()', () => {
   const WORKFLOW_ID = SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
   const mockWorkflow = { id: WORKFLOW_ID, definition: { steps: [] } };
 
+  beforeEach(() => {
+    mockManagement.getWorkflowExecution.mockImplementation(async (id: string) => {
+      const lastCall = mockManagement.runWorkflow.mock.calls.at(-1);
+      const inputs = lastCall?.[2];
+      return {
+        id,
+        workflowId: WORKFLOW_ID,
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2024-01-01T00:00:00Z',
+        executedBy: 'test-user',
+        context: { inputs },
+      };
+    });
+  });
+
   it('calls runWorkflow with the correct inputs and returns investigation_id', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
@@ -455,13 +470,33 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(result).toEqual({ investigation_id: 'exec-123' });
   });
 
-  it('does not create the saved object itself — the workflow first step owns creation', async () => {
+  it('creates the saved object after the workflow starts', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
     await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
 
-    expect(mockInvestigationSoClient.create).not.toHaveBeenCalled();
+    expect(mockInvestigationSoClient.create).toHaveBeenCalledWith({
+      id: 'exec-123',
+      attributes: expect.objectContaining({
+        investigation_id: 'exec-123',
+        status: 'running',
+        subject_type: 'alert',
+        subject_id: 'alert-1',
+        trigger_type: 'manual',
+      }),
+    });
+  });
+
+  it('still returns the investigation id when the eager saved object creation fails', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+    mockInvestigationSoClient.create.mockRejectedValue(new Error('SO write failed'));
+
+    const result = await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+
+    expect(result).toEqual({ investigation_id: 'exec-123' });
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('SO write failed'));
   });
 
   it('persists an explicit trigger_type into the workflow context', async () => {
@@ -494,6 +529,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.context.summary).toBe('CPU saturation on checkout-api');
+    expect(mockInvestigationSoClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attributes: expect.objectContaining({
+          subject_summary: 'CPU saturation on checkout-api',
+        }),
+      })
+    );
   });
 
   it('omits the context summary when none was supplied', async () => {
