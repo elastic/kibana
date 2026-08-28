@@ -33,12 +33,12 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
             }),
             z.object({
               format: z.literal('json'),
-              value: z.looseObject({ $schema: z.string().min(1) }),
+              value: z.looseObject({}),
             }),
           ])
           .meta({
             description:
-              'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { "$schema": "..." } }` for a JSON object.',
+              'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
           }),
       })
       // Strip unknown keys for forward-compatible additive changes in this public contract.
