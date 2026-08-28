@@ -6,18 +6,15 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useParams } from '@kbn/typed-react-router-config';
 import { useGetErrorMarkerHrefFromRouter } from './use_get_error_marker_href_from_router';
 import * as useApmRouterModule from '../../../../../hooks/use_apm_router';
-
-jest.mock('@kbn/typed-react-router-config', () => ({
-  useParams: jest.fn(),
-}));
+import * as useApmParamsModule from '../../../../../hooks/use_apm_params';
 
 describe('useGetErrorMarkerHrefFromRouter', () => {
   const mockLink = jest.fn();
+
   const mockUseApmRouter = jest.spyOn(useApmRouterModule, 'useApmRouter');
-  const mockUseParams = useParams as jest.Mock;
+  const mockUseAnyOfApmParams = jest.spyOn(useApmParamsModule, 'useAnyOfApmParams');
 
   const defaultQuery = {
     rangeFrom: 'now-15m',
@@ -37,7 +34,7 @@ describe('useGetErrorMarkerHrefFromRouter', () => {
     );
 
     mockUseApmRouter.mockReturnValue({ link: mockLink } as any);
-    mockUseParams.mockReturnValue({ query: defaultQuery });
+    mockUseAnyOfApmParams.mockReturnValue({ query: defaultQuery } as any);
   });
 
   it('returns a function', () => {
@@ -99,7 +96,7 @@ describe('useGetErrorMarkerHrefFromRouter', () => {
     );
   });
 
-  it('builds kuery with both traceId and transactionId when provided', () => {
+  it('builds kuery combining traceId and transactionId when both provided', () => {
     const { result } = renderHook(() => useGetErrorMarkerHrefFromRouter());
 
     result.current({
@@ -172,7 +169,7 @@ describe('useGetErrorMarkerHrefFromRouter', () => {
   });
 
   it('defaults serviceGroup to empty string when not present in query', () => {
-    mockUseParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query: {
         rangeFrom: 'now-1h',
         rangeTo: 'now',
@@ -180,7 +177,7 @@ describe('useGetErrorMarkerHrefFromRouter', () => {
         comparisonEnabled: false,
         kuery: '',
       },
-    });
+    } as any);
 
     const { result } = renderHook(() => useGetErrorMarkerHrefFromRouter());
 
@@ -190,34 +187,6 @@ describe('useGetErrorMarkerHrefFromRouter', () => {
       expect.any(String),
       expect.objectContaining({
         query: expect.objectContaining({ serviceGroup: '' }),
-      })
-    );
-  });
-
-  it('falls back to provided time range when not on a matching route', () => {
-    mockUseParams.mockReturnValue(undefined);
-
-    const { result } = renderHook(() =>
-      useGetErrorMarkerHrefFromRouter({
-        rangeFrom: '2026-08-20T10:00:00.000Z',
-        rangeTo: '2026-08-21T10:00:00.000Z',
-        environment: 'oteldemo',
-      })
-    );
-
-    result.current({ serviceName: 'my-service', errorGroupId: 'abc123' });
-
-    expect(mockLink).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        query: expect.objectContaining({
-          rangeFrom: '2026-08-20T10:00:00.000Z',
-          rangeTo: '2026-08-21T10:00:00.000Z',
-          environment: 'oteldemo',
-          kuery: '',
-          serviceGroup: '',
-          comparisonEnabled: false,
-        }),
       })
     );
   });

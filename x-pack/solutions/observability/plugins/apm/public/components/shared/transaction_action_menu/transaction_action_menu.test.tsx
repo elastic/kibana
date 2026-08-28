@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -112,8 +112,11 @@ const renderTransaction = async (transaction: Record<string, any>) => {
     }
   );
 
-  await act(async () => {
-    fireEvent.click(rendered.getByText('Investigate'));
+  fireEvent.click(rendered.getByTestId('apmActionMenuButtonInvestigateButton'));
+
+  // EUI sets `euiPopover-isOpen` on the next animation frame after `isOpen` flips.
+  await waitFor(() => {
+    expect(rendered.container.querySelector('.euiPopover-isOpen')).toBeTruthy();
   });
 
   return rendered;

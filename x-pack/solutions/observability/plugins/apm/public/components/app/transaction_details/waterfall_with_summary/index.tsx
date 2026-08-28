@@ -76,7 +76,7 @@ export function WaterfallWithSummary<TSample extends {}>({
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
   const [isFullTraceFlyoutOpen, setIsFullTraceFlyoutOpen] = useState(false);
-  const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter({ rangeFrom, rangeTo });
+  const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
 
   const isControlled = selectedSample !== undefined;
 
