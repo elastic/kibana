@@ -21,23 +21,30 @@ import type { DatasetConfig, SnapshotSourceOverride } from './types';
 export const MANAGED_STREAM_NAME = 'logs';
 export const MANAGED_STREAM_SEARCH_PATTERN = `${MANAGED_STREAM_NAME}*`;
 
-const DATASETS: Record<string, DatasetConfig> = {
+const DATASETS: Readonly<Record<string, DatasetConfig>> = {
   [OTEL_DEMO_NAMESPACE]: otelDemoDataset,
   [BANK_OF_ANTHOS_NAMESPACE]: bankOfAnthosDataset,
   [QUARKUS_SUPER_HEROES_NAMESPACE]: quarkusSuperHeroesDataset,
   [INCIDENTS_NAMESPACE]: incidentsDataset,
 };
 
-let cachedActiveDatasets: DatasetConfig[] | undefined;
+const DEFAULT_DATASET_IDS: readonly string[] = [
+  OTEL_DEMO_NAMESPACE,
+  BANK_OF_ANTHOS_NAMESPACE,
+  QUARKUS_SUPER_HEROES_NAMESPACE,
+];
 
 const ALL_DATASETS_SELECTOR = 'all';
 
-const resolveRequestedDatasetIds = (selectedDatasetIds: string | undefined): string[] => {
-  const allIds = Object.keys(DATASETS);
+export const getAllDatasetIds = (): string[] => Object.keys(DATASETS);
+
+export const getDefaultDatasetIds = (): string[] => [...DEFAULT_DATASET_IDS];
+
+export const resolveRequestedDatasetIds = (selectedDatasetIds: string | undefined): string[] => {
   const normalizedSelectedDatasetIds = selectedDatasetIds?.trim();
 
-  if (!normalizedSelectedDatasetIds || normalizedSelectedDatasetIds === ALL_DATASETS_SELECTOR) {
-    return allIds;
+  if (!normalizedSelectedDatasetIds) {
+    return getDefaultDatasetIds();
   }
 
   const requestedDatasets = [
@@ -45,30 +52,24 @@ const resolveRequestedDatasetIds = (selectedDatasetIds: string | undefined): str
   ].filter(Boolean);
 
   if (requestedDatasets.includes(ALL_DATASETS_SELECTOR)) {
-    return allIds;
+    return getAllDatasetIds();
   }
 
-  return requestedDatasets;
-};
-
-export const getActiveDatasets = (): DatasetConfig[] => {
-  if (cachedActiveDatasets) {
-    return cachedActiveDatasets;
-  }
-
-  const requestedDatasetIds = resolveRequestedDatasetIds(process.env.SIGEVENTS_DATASET);
-
-  const unknownDatasetIds = requestedDatasetIds.filter((id) => DATASETS[id] == null);
+  const unknownDatasetIds = requestedDatasets.filter((id) => DATASETS[id] == null);
   if (unknownDatasetIds.length > 0) {
-    const available = Object.keys(DATASETS).join(', ');
+    const available = getAllDatasetIds().join(', ');
     throw new Error(
       `Unknown dataset(s): ${unknownDatasetIds.join(', ')}. Available: ${available}. ` +
         `Set SIGEVENTS_DATASET to a dataset id, a comma-separated list, or "${ALL_DATASETS_SELECTOR}".`
     );
   }
 
-  cachedActiveDatasets = requestedDatasetIds.map((id) => DATASETS[id]);
-  return cachedActiveDatasets;
+  return requestedDatasets;
+};
+
+export const getActiveDatasets = (): DatasetConfig[] => {
+  const requestedDatasetIds = resolveRequestedDatasetIds(process.env.SIGEVENTS_DATASET);
+  return requestedDatasetIds.map((id) => DATASETS[id]);
 };
 
 export const resolveScenarioSnapshotSource = ({
@@ -101,8 +102,6 @@ export const snapshotSourceKey = ({
 }): string => {
   return `${gcs.bucket}/${gcs.basePathPrefix}::${snapshotName}`;
 };
-
-export const getAllDatasetIds = (): string[] => Object.keys(DATASETS);
 
 export const getDatasetById = (id: string): DatasetConfig | undefined => DATASETS[id];
 

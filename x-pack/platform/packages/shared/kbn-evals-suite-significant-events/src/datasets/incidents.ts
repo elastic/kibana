@@ -156,5 +156,4 @@ export const incidentsDataset: DatasetConfig = {
   kiFeatureExclusion: [],
   kiFeatureDeduplication: [],
   discovery: [],
-  discoveryJudge: [],
 };

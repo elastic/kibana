@@ -22,6 +22,7 @@ import {
 import {
   getAllDatasetIds,
   getDatasetById,
+  getDefaultDatasetIds,
   resolveScenarioSnapshotSource,
 } from '../../src/datasets';
 import { readKibanaConfig } from '../lib/kibana';
@@ -125,7 +126,8 @@ const formatDiscovery = (discovery: SignificantEvent): string[] => {
 run(
   async ({ log, flags }) => {
     const datasetIds = getAllDatasetIds();
-    const datasetId = String(flags.dataset || datasetIds[0]);
+    const defaultDatasetId = getDefaultDatasetIds()[0];
+    const datasetId = flags.dataset == null ? defaultDatasetId : String(flags.dataset);
 
     if (datasetId === 'list') {
       log.info(`Registered datasets: ${datasetIds.join(', ')}`);
@@ -373,7 +375,7 @@ run(
         'service-field',
       ],
       help: `
-        --dataset          Dataset id to replay from, or "list" to list registered datasets (default: first registered)
+        --dataset          Dataset id to replay from, or "list" to list registered datasets (default: first default dataset)
         --scenario         (required) Scenario name to replay, or "list" to list available snapshots
         --run-id           Snapshot run ID (default: SIGEVENTS_SNAPSHOT_RUN env var or 2026-02-25)
         --stream-name      Stream name to filter KI features by (default: logs)

@@ -97,12 +97,25 @@ Without tracing infrastructure, token and latency evaluators gracefully return `
 node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
 ```
 
-### Run all evaluations
+### Run the default datasets
 
 > **Note:** Use Gemini 3 Pro as the evaluation judge to ensure consistent scoring across models. This keeps LLM-as-a-judge criteria evaluations comparable regardless of which model is being evaluated.
 
+When `SIGEVENTS_DATASET` is unset or empty, the suite runs `otel-demo`, `bank-of-anthos`, and `quarkus-super-heroes`.
+
 ```bash
 node scripts/evals run \
+  --suite significant-events \
+  --project <connector-id> \
+  --judge <gemini-3-pro-connector-id>
+```
+
+### Run every registered dataset
+
+Set `SIGEVENTS_DATASET=all` to include datasets marked as explicit-only, such as `incidents`.
+
+```bash
+SIGEVENTS_DATASET=all node scripts/evals run \
   --suite significant-events \
   --project <connector-id> \
   --judge <gemini-3-pro-connector-id>
@@ -143,7 +156,7 @@ node scripts/evals run \
 | Variable                                | Description                                                                 | Default                    |
 | --------------------------------------- | --------------------------------------------------------------------------- | -------------------------- |
 | `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-03-27`               |
-| `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
+| `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `otel-demo`, `bank-of-anthos`, and `quarkus-super-heroes` |
 | `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `canonical`                |
 | `KI_QUERY_GENERATION_SCENARIOS`         | Comma-separated KI query generation scenario ids to run (focused local runs); unset runs every scenario | `all`                      |
 | `SELECTED_EVALUATORS`                   | Shared permissive evaluator filter used across the suite, including evaluator-name patterns. The empty-stream safety canary always runs its mandatory evaluator. | all evaluators when unset       |
