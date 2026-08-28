@@ -14418,6 +14418,99 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       })
     ).not.toThrow();
   });
+
+  describe('allowDatasetChange option', () => {
+    it('should not throw on dataset change when allowDatasetChange is true', () => {
+      const oldPackagePolicy = createInputPkgPolicy({
+        namespace: 'default',
+        dataset: 'my-invalid-dataset',
+      });
+      const newPackagePolicy = createInputPkgPolicy({
+        namespace: 'default',
+        dataset: 'my_invalid_dataset',
+      });
+      expect(() =>
+        _validateRestrictedFieldsNotModifiedOrThrow({
+          oldPackagePolicy,
+          packagePolicyUpdate: newPackagePolicy,
+          allowDatasetChange: true,
+        })
+      ).not.toThrow();
+    });
+
+    it('should still throw on dataset change when allowDatasetChange is false', () => {
+      const oldPackagePolicy = createInputPkgPolicy({
+        namespace: 'default',
+        dataset: 'custom_logs.logs',
+      });
+      const newPackagePolicy = createInputPkgPolicy({
+        namespace: 'default',
+        dataset: 'custom_logs_different',
+      });
+      expect(() =>
+        _validateRestrictedFieldsNotModifiedOrThrow({
+          oldPackagePolicy,
+          packagePolicyUpdate: newPackagePolicy,
+          allowDatasetChange: false,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Package policy dataset cannot be modified, please create a new package policy."`
+      );
+    });
+
+    it('should still throw on package name change even when allowDatasetChange is true', () => {
+      const oldPackagePolicy = createInputPkgPolicy({
+        namespace: 'default',
+        dataset: 'custom_logs.logs',
+      });
+      expect(() =>
+        _validateRestrictedFieldsNotModifiedOrThrow({
+          oldPackagePolicy,
+          packagePolicyUpdate: {
+            ...oldPackagePolicy,
+            package: { name: 'different_package', title: 'Different', version: '1.0.0' },
+          },
+          allowDatasetChange: true,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot change the package of an existing integration policy. Create a new policy with the desired package."`
+      );
+    });
+
+    it('should still throw on data stream type change even when allowDatasetChange is true', () => {
+      const makePolicyWithType = (streamType: string) => ({
+        ...createInputPkgPolicy({ namespace: 'default', dataset: 'custom_logs.logs' }),
+        inputs: [
+          {
+            type: 'logfile',
+            policy_template: 'logs',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'custom_logs.logs' },
+                vars: {
+                  'data_stream.dataset': { type: 'text', value: 'custom_logs.logs' },
+                  'data_stream.type': { type: 'text', value: streamType },
+                },
+                id: 'logfile-custom_logs.logs-1',
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(() =>
+        _validateRestrictedFieldsNotModifiedOrThrow({
+          oldPackagePolicy: makePolicyWithType('logs'),
+          packagePolicyUpdate: makePolicyWithType('metrics'),
+          allowDatasetChange: true,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Package policy data stream type cannot be modified, please create a new package policy."`
+      );
+    });
+  });
 });
 
 describe('_normalizePackagePolicyKuery', () => {

@@ -345,6 +345,14 @@ async function createSetupSideEffects(
   logger.info('Scheduling async setup tasks');
   await scheduleSetupTask(appContextService.getTaskManagerStart()!);
 
+  const invalidDatasetRemediationMode =
+    appContextService.getConfig()?.internal?.invalidDatasetRemediation;
+  if (invalidDatasetRemediationMode && invalidDatasetRemediationMode !== 'off') {
+    await scheduleSetupTask(appContextService.getTaskManagerStart()!, {
+      type: 'remediateInvalidDatasets',
+    });
+  }
+
   if (rawNonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
     formatNonFatalErrors(rawNonFatalErrors)

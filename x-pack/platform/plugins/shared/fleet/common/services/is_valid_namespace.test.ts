@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { isValidNamespace, isValidDataStreamType } from './is_valid_namespace';
+import {
+  isValidNamespace,
+  isValidDataStreamType,
+  isValidDataset,
+  sanitizeDataset,
+} from './is_valid_namespace';
 
 describe('Fleet - isValidNamespace', () => {
   it('returns true for valid namespaces', () => {
@@ -83,5 +88,88 @@ describe('Fleet - isValidDataStreamType', () => {
 
   it('returns false for blank when allowBlank is false', () => {
     expect(isValidDataStreamType('', false).valid).toBe(false);
+  });
+});
+
+describe('Fleet - sanitizeDataset', () => {
+  it('leaves already-valid datasets unchanged', () => {
+    expect(sanitizeDataset('my_dataset')).toBe('my_dataset');
+    expect(sanitizeDataset('aws_logs.audit')).toBe('aws_logs.audit');
+    expect(sanitizeDataset('logs123')).toBe('logs123');
+    expect(sanitizeDataset('a')).toBe('a');
+  });
+
+  it('lowercases uppercase characters', () => {
+    expect(sanitizeDataset('MyDataset')).toBe('mydataset');
+    expect(sanitizeDataset('AWS_LOGS')).toBe('aws_logs');
+  });
+
+  it('replaces hyphens with underscores', () => {
+    expect(sanitizeDataset('my-dataset')).toBe('my_dataset');
+    expect(sanitizeDataset('a-b-c')).toBe('a_b_c');
+  });
+
+  it('replaces multiple consecutive invalid characters with a single underscore', () => {
+    expect(sanitizeDataset('a--b')).toBe('a_b');
+    expect(sanitizeDataset('a- -b')).toBe('a_b');
+    expect(sanitizeDataset('a#,b')).toBe('a_b');
+  });
+
+  it('replaces spaces, commas, hashes, colons, asterisks, and other invalid chars', () => {
+    expect(sanitizeDataset('a b')).toBe('a_b');
+    expect(sanitizeDataset('a,b')).toBe('a_b');
+    expect(sanitizeDataset('a#b')).toBe('a_b');
+    expect(sanitizeDataset('a:b')).toBe('a_b');
+    expect(sanitizeDataset('a*b')).toBe('a_b');
+    expect(sanitizeDataset('a?b')).toBe('a_b');
+    expect(sanitizeDataset('a/b')).toBe('a_b');
+    expect(sanitizeDataset('a\\b')).toBe('a_b');
+  });
+
+  it('strips leading underscores and dots after sanitization', () => {
+    expect(sanitizeDataset('-foo')).toBe('foo');
+    expect(sanitizeDataset('_foo')).toBe('foo');
+    expect(sanitizeDataset('.foo')).toBe('foo');
+    expect(sanitizeDataset('---foo')).toBe('foo');
+    expect(sanitizeDataset('._-foo')).toBe('foo');
+  });
+
+  it('trims surrounding whitespace before sanitizing', () => {
+    expect(sanitizeDataset('  my-dataset  ')).toBe('my_dataset');
+  });
+
+  it('returns undefined when the result would be empty', () => {
+    expect(sanitizeDataset('')).toBeUndefined();
+    expect(sanitizeDataset('  ')).toBeUndefined();
+    expect(sanitizeDataset('---')).toBeUndefined();
+    expect(sanitizeDataset('-')).toBeUndefined();
+  });
+
+  it('truncates values longer than 100 bytes', () => {
+    const long = 'a'.repeat(200);
+    const result = sanitizeDataset(long);
+    expect(result).toBeDefined();
+    // Verify the result is within bounds
+    expect(Buffer.byteLength(result!)).toBeLessThanOrEqual(100);
+  });
+
+  it('produces values that always pass isValidDataset', () => {
+    const inputs = [
+      'my-dataset',
+      'AWS_LOGS',
+      'a--b',
+      '  hello world  ',
+      'foo/bar',
+      'test:value',
+      'UPPER_CASE',
+      'mixed-Case_value',
+    ];
+    for (const input of inputs) {
+      const result = sanitizeDataset(input);
+      if (result !== undefined) {
+        const { valid } = isValidDataset(result, false);
+        expect(valid).toBe(true);
+      }
+    }
   });
 });

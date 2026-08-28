@@ -17,6 +17,7 @@ import { runBackportPackagePolicyInputId } from './run_backport_package_policy_i
 import { runMigrateComponentTemplateILMs } from './run_migrate_component_template_ilms';
 import { runUpgradePackageInstallVersion } from './run_upgrade_package_install_version';
 import { runReinstallPackagesForGlobalAssetUpdate } from './run_reinstall_packages_for_global_asset_update';
+import { runRemediateInvalidDatasets } from './run_remediate_invalid_datasets';
 
 /**
  * Register Fleet setup operations, migrations, ...
@@ -59,6 +60,11 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
                 });
               } else if (taskParams.type === 'reinstallPackagesForGlobalAssetUpdate') {
                 await runReinstallPackagesForGlobalAssetUpdate({
+                  signal,
+                  logger,
+                });
+              } else if (taskParams.type === 'remediateInvalidDatasets') {
+                await runRemediateInvalidDatasets({
                   signal,
                   logger,
                 });

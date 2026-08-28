@@ -124,6 +124,51 @@ function isValidEntity(
 
 export const INVALID_NAMESPACE_CHARACTERS = /[\*\\/\?"<>|\s,#:-]+/;
 
+/**
+ * Deterministically sanitizes an invalid dataset name so it satisfies `isValidDataset`.
+ *
+ * Rules applied (in order):
+ *  1. `trim()` + `toLowerCase()`
+ *  2. Replace every run of invalid characters with a single `_`
+ *  3. Strip leading `_` and `.` characters
+ *  4. Truncate to 100 UTF-8 bytes
+ *
+ * Returns `undefined` when the result would be empty or still invalid after all steps,
+ * meaning the value cannot be fixed deterministically. Callers must skip such values and
+ * flag them for manual action.
+ */
+export function sanitizeDataset(dataset: string): string | undefined {
+  let sanitized = dataset.trim().toLowerCase();
+
+  // Replace every run of invalid characters with a single underscore
+  sanitized = sanitized.replace(new RegExp(INVALID_NAMESPACE_CHARACTERS.source, 'g'), '_');
+
+  // Strip leading underscores and dots (isValidDataset rejects both)
+  sanitized = sanitized.replace(/^[_.]+/, '');
+
+  // Truncate to 100 UTF-8 bytes
+  if (typeof Buffer === 'function') {
+    if (Buffer.byteLength(sanitized) > 100) {
+      const buf = Buffer.from(sanitized);
+      sanitized = buf.subarray(0, 100).toString('utf8');
+      // slice may have broken a multi-byte sequence at the boundary; strip the trailing replacement char
+      sanitized = sanitized.replace(/�$/, '');
+    }
+  } else if (typeof Blob === 'function') {
+    // Browser path (not expected in this task runner, but kept for symmetry with isValidEntity)
+    while (new Blob([sanitized]).size > 100) {
+      sanitized = sanitized.slice(0, sanitized.length - 1);
+    }
+  }
+
+  if (!sanitized) {
+    return undefined;
+  }
+
+  const { valid } = isValidDataset(sanitized, false);
+  return valid ? sanitized : undefined;
+}
+
 export const VALID_DATA_STREAM_TYPES: readonly PackageDataStreamTypes[] = [
   'logs',
   'metrics',
