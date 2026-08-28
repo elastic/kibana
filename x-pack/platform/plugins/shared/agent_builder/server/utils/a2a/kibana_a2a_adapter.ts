@@ -9,13 +9,20 @@ import { get } from 'lodash';
 import type { KibanaRequest, KibanaResponseFactory, IKibanaResponse } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { DefaultRequestHandler, JsonRpcTransportHandler, A2AError } from '@a2a-js/sdk/server';
-import type { AgentCard } from '@a2a-js/sdk';
+import type { AgentCard, JSONRPCResponse } from '@a2a-js/sdk';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 
 import type { InternalStartServices } from '../../services';
 import { createAgentCard } from './create_agent_card';
 import { KibanaAgentExecutor } from './kibana_agent_executor';
 import { KibanaTaskStore } from './kibana_task_store';
+import { asyncGeneratorToA2ASSE } from './a2a_sse_stream';
+import { getSSEResponseHeaders } from '../../routes/utils';
+
+/**
+ * JSON-RPC methods that return a streaming response (AsyncGenerator).
+ */
+const STREAMING_METHODS = new Set(['message/stream', 'tasks/resubscribe']);
 
 /**
  * Reads the JSON-RPC `message/send` blocking flag from the raw request body.
@@ -23,6 +30,17 @@ import { KibanaTaskStore } from './kibana_task_store';
  */
 const isBlockingRequest = (body: unknown): boolean =>
   get(body, 'params.configuration.blocking') !== false;
+
+const isStreamingMethod = (body: unknown): boolean => {
+  const method = get(body, 'method');
+  return typeof method === 'string' && STREAMING_METHODS.has(method);
+};
+
+const isAsyncGenerator = (
+  value: unknown
+): value is AsyncGenerator<JSONRPCResponse, void, undefined> =>
+  typeof (value as { [Symbol.asyncIterator]?: unknown } | null)?.[Symbol.asyncIterator] ===
+  'function';
 
 const statusCodeForError = (error: unknown): number => {
   if (isAgentBuilderError(error) && typeof error.meta?.statusCode === 'number') {
@@ -45,7 +63,8 @@ export class KibanaA2AAdapter {
   constructor(
     private logger: Logger,
     private getInternalServices: () => InternalStartServices,
-    private getBaseUrl: (request: KibanaRequest) => Promise<string>
+    private getBaseUrl: (request: KibanaRequest) => Promise<string>,
+    private isCloudEnabled: boolean = false
   ) {}
 
   /**
@@ -54,7 +73,7 @@ export class KibanaA2AAdapter {
   private async createA2AComponents(
     kibanaRequest: KibanaRequest,
     agentId: string,
-    blocking: boolean = true
+    { blocking = true, isStreaming = false }: { blocking?: boolean; isStreaming?: boolean } = {}
   ) {
     // Get agent and create agent card
     const { agents, tools } = this.getInternalServices();
@@ -80,7 +99,8 @@ export class KibanaA2AAdapter {
       this.getInternalServices,
       kibanaRequest,
       agentId,
-      blocking
+      blocking,
+      isStreaming
     );
 
     const requestHandler = new DefaultRequestHandler(
@@ -141,13 +161,31 @@ export class KibanaA2AAdapter {
         });
       }
 
-      // Process request through A2A SDK
-      const { jsonRpcHandler } = await this.createA2AComponents(
-        req,
-        agentId,
-        isBlockingRequest(req.body)
-      );
+      const streaming = isStreamingMethod(req.body);
+
+      const { jsonRpcHandler } = await this.createA2AComponents(req, agentId, {
+        blocking: isBlockingRequest(req.body),
+        isStreaming: streaming,
+      });
+
       const result = await jsonRpcHandler.handle(req.body);
+
+      if (isAsyncGenerator(result)) {
+        const abortController = new AbortController();
+        req.events.aborted$.subscribe(() => abortController.abort());
+
+        const body = asyncGeneratorToA2ASSE(result, {
+          logger: this.logger,
+          signal: abortController.signal,
+          requestId: get(req.body, 'id', null) as string | number | null,
+          isCloudEnabled: this.isCloudEnabled,
+        });
+
+        return res.ok({
+          headers: getSSEResponseHeaders(),
+          body,
+        });
+      }
 
       return res.ok({
         headers: { 'Content-Type': 'application/json' },

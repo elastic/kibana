@@ -8,8 +8,38 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AgentExecutor, RequestContext, ExecutionEventBus } from '@a2a-js/sdk/server';
-import type { Part, TextPart } from '@a2a-js/sdk';
-import { isRoundCompleteEvent, AgentExecutionMode } from '@kbn/agent-builder-common';
+import type {
+  Part,
+  TextPart,
+  DataPart,
+  Message,
+  TaskStatusUpdateEvent,
+  TaskArtifactUpdateEvent,
+  Task,
+  TaskState,
+} from '@a2a-js/sdk';
+import {
+  isRoundCompleteEvent,
+  isMessageChunkEvent,
+  isMessageCompleteEvent,
+  isToolCallEvent,
+  isBrowserToolCallEvent,
+  isToolProgressEvent,
+  isToolResultEvent,
+  isReasoningEvent,
+  isPromptRequestEvent,
+  isUserQuestionAskedEvent,
+  AgentExecutionMode,
+} from '@kbn/agent-builder-common';
+import type { ChatEvent } from '@kbn/agent-builder-common';
+import {
+  isAskUserQuestionPrompt,
+  isConfirmationPrompt,
+  isAuthorizationPrompt,
+  AgentPromptType,
+} from '@kbn/agent-builder-common/agents';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents';
+import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,6 +51,21 @@ const A2A_CONVERSATION_ID_PREFIX = 'a2a-';
 
 const generateA2AConversationId = (id: string) => `${A2A_CONVERSATION_ID_PREFIX}${id}`;
 
+interface StreamContext {
+  taskId: string;
+  contextId: string;
+  /**
+   * Tracks the last known messageId from `message_chunk` events, so we can
+   * associate a `message_complete` event with the same A2A artifactId.
+   */
+  currentMessageId?: string;
+  /**
+   * Set once the first artifact chunk for a given messageId is emitted, so we
+   * know to emit subsequent chunks with `append: true`.
+   */
+  seenArtifactIds: Set<string>;
+}
+
 /**
  * Agent executor that bridges A2A requests to Kibana's agentBuilder system
  */
@@ -30,14 +75,17 @@ export class KibanaAgentExecutor implements AgentExecutor {
     private getInternalServices: () => InternalStartServices,
     private kibanaRequest: KibanaRequest,
     private agentId: string,
-    private blocking: boolean = true
+    private blocking: boolean = true,
+    private isStreaming: boolean = false
   ) {}
 
   async execute(requestContext: RequestContext, eventBus: ExecutionEventBus): Promise<void> {
     const { taskId, userMessage, contextId } = requestContext;
 
     try {
-      this.logger.debug(`A2A: Starting task ${taskId} with contextId ${contextId}`);
+      this.logger.debug(
+        `A2A: Starting task ${taskId} (contextId=${contextId}, streaming=${this.isStreaming}, blocking=${this.blocking})`
+      );
 
       const userText = userMessage.parts
         .filter((part: Part): part is TextPart => part.kind === 'text')
@@ -64,6 +112,12 @@ export class KibanaAgentExecutor implements AgentExecutor {
         },
       });
 
+      if (this.isStreaming) {
+        await this.forwardStreamingEvents({ events$, eventBus, taskId, contextId });
+        this.logger.debug(`A2A: Task ${taskId} streaming completed`);
+        return;
+      }
+
       if (!this.blocking) {
         eventBus.publish({
           id: taskId,
@@ -76,7 +130,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
         return;
       }
 
-      // Process execution response
+      // Process execution response (blocking, non-streaming)
       const events = await firstValueFrom(events$.pipe(toArray()));
       const roundCompleteEvent = events.find(isRoundCompleteEvent);
 
@@ -127,6 +181,20 @@ export class KibanaAgentExecutor implements AgentExecutor {
   ): void {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
+    if (this.isStreaming) {
+      eventBus.publish(
+        buildStatusUpdate({
+          taskId,
+          contextId,
+          state: 'failed',
+          text: `Error: ${errorMessage}`,
+          final: true,
+        })
+      );
+      eventBus.finished();
+      return;
+    }
+
     eventBus.publish({
       kind: 'message',
       role: 'agent',
@@ -138,4 +206,324 @@ export class KibanaAgentExecutor implements AgentExecutor {
 
     eventBus.finished();
   }
+
+  /**
+   * Subscribe to the Agent Builder event stream and translate each event into
+   * A2A protocol events published to the event bus. The A2A SDK forwards these
+   * publishes as SSE frames to the client.
+   */
+  private forwardStreamingEvents({
+    events$,
+    eventBus,
+    taskId,
+    contextId,
+  }: {
+    events$: Observable<ChatEvent>;
+    eventBus: ExecutionEventBus;
+    taskId: string;
+    contextId: string;
+  }): Promise<void> {
+    const ctx: StreamContext = { taskId, contextId, seenArtifactIds: new Set() };
+
+    // Publish an initial Task event so the client sees the task lifecycle start.
+    const initialTask: Task = {
+      id: taskId,
+      contextId,
+      kind: 'task',
+      status: { state: 'submitted', timestamp: new Date().toISOString() },
+      history: [],
+      artifacts: [],
+    };
+    eventBus.publish(initialTask);
+
+    return new Promise((resolve) => {
+      let terminated = false;
+      // eslint-disable-next-line prefer-const
+      let subscription: { unsubscribe: () => void } | undefined;
+      const finish = () => {
+        if (terminated) return;
+        terminated = true;
+        subscription?.unsubscribe();
+        eventBus.finished();
+        resolve();
+      };
+
+      subscription = events$.subscribe({
+        next: (event: ChatEvent) => {
+          if (terminated) return;
+          let sawTerminal = false;
+          try {
+            const publishes = translateAgentBuilderEvent(event, ctx);
+            for (const p of publishes) {
+              eventBus.publish(p);
+              if ('final' in p && p.final) sawTerminal = true;
+            }
+          } catch (translateError) {
+            this.logger.error(`A2A: failed to translate event ${event.type}: ${translateError}`);
+          }
+          if (sawTerminal) finish();
+        },
+        error: (err: unknown) => {
+          if (terminated) return;
+          const message = err instanceof Error ? err.message : String(err);
+          this.logger.error(`A2A: Task ${taskId} stream error: ${message}`);
+          eventBus.publish(
+            buildStatusUpdate({
+              taskId,
+              contextId,
+              state: 'failed',
+              text: `Error: ${message}`,
+              final: true,
+            })
+          );
+          finish();
+        },
+        complete: () => {
+          if (terminated) return;
+          // Underlying stream completed without a terminal A2A event; emit one.
+          eventBus.publish(
+            buildStatusUpdate({ taskId, contextId, state: 'completed', final: true })
+          );
+          finish();
+        },
+      });
+    });
+  }
 }
+
+/**
+ * Translate a single Agent Builder event into zero or more A2A events.
+ * Exported for direct unit testing.
+ */
+export const translateAgentBuilderEvent = (
+  event: ChatEvent,
+  ctx: StreamContext
+): Array<TaskStatusUpdateEvent | TaskArtifactUpdateEvent> => {
+  const { taskId, contextId } = ctx;
+
+  if (isMessageChunkEvent(event)) {
+    const { message_id: messageId, text_chunk: textChunk } = event.data;
+    ctx.currentMessageId = messageId;
+    const artifactId = messageId;
+    const append = ctx.seenArtifactIds.has(artifactId);
+    ctx.seenArtifactIds.add(artifactId);
+    return [
+      {
+        kind: 'artifact-update',
+        taskId,
+        contextId,
+        append,
+        lastChunk: false,
+        artifact: {
+          artifactId,
+          parts: [{ kind: 'text', text: textChunk } as TextPart],
+        },
+      },
+    ];
+  }
+
+  if (isMessageCompleteEvent(event)) {
+    const { message_id: messageId, message_content: messageContent } = event.data;
+    const artifactId = messageId;
+    const alreadyStreamed = ctx.seenArtifactIds.has(artifactId);
+    ctx.seenArtifactIds.add(artifactId);
+    if (alreadyStreamed) {
+      // The full text was already streamed via chunks; just mark the artifact closed.
+      return [
+        {
+          kind: 'artifact-update',
+          taskId,
+          contextId,
+          append: true,
+          lastChunk: true,
+          artifact: {
+            artifactId,
+            parts: [{ kind: 'text', text: '' } as TextPart],
+          },
+        },
+      ];
+    }
+    // No chunks were streamed; send the whole message as a single-shot artifact.
+    return [
+      {
+        kind: 'artifact-update',
+        taskId,
+        contextId,
+        append: false,
+        lastChunk: true,
+        artifact: {
+          artifactId,
+          parts: [{ kind: 'text', text: messageContent } as TextPart],
+        },
+      },
+    ];
+  }
+
+  if (isToolCallEvent(event) || isBrowserToolCallEvent(event)) {
+    return [
+      buildStatusUpdate({
+        taskId,
+        contextId,
+        state: 'working',
+        text: `Calling tool ${event.data.tool_id}...`,
+      }),
+    ];
+  }
+
+  if (isToolProgressEvent(event)) {
+    return [
+      buildStatusUpdate({
+        taskId,
+        contextId,
+        state: 'working',
+        text: event.data.message,
+      }),
+    ];
+  }
+
+  if (isToolResultEvent(event)) {
+    return [
+      buildStatusUpdate({
+        taskId,
+        contextId,
+        state: 'working',
+        text: `Tool ${event.data.tool_id} completed`,
+      }),
+    ];
+  }
+
+  if (isReasoningEvent(event)) {
+    return [
+      buildStatusUpdate({
+        taskId,
+        contextId,
+        state: 'working',
+        text: event.data.reasoning,
+      }),
+    ];
+  }
+
+  if (isPromptRequestEvent(event)) {
+    return [buildInputRequiredFromPrompt({ taskId, contextId, prompt: event.data.prompt })];
+  }
+
+  if (isUserQuestionAskedEvent(event)) {
+    // Reuse the ask-user-question prompt formatter for consistency.
+    return [
+      buildInputRequiredFromPrompt({
+        taskId,
+        contextId,
+        prompt: {
+          type: AgentPromptType.ask_user_question,
+          id: event.data.prompt_id,
+          questions: event.data.questions,
+        } as PromptRequest,
+      }),
+    ];
+  }
+
+  if (isRoundCompleteEvent(event)) {
+    return [buildStatusUpdate({ taskId, contextId, state: 'completed', final: true })];
+  }
+
+  return [];
+};
+
+const buildStatusUpdate = ({
+  taskId,
+  contextId,
+  state,
+  text,
+  parts,
+  final = false,
+}: {
+  taskId: string;
+  contextId: string;
+  state: TaskState;
+  text?: string;
+  parts?: Part[];
+  final?: boolean;
+}): TaskStatusUpdateEvent => {
+  const status: TaskStatusUpdateEvent['status'] =
+    text || parts
+      ? {
+          state,
+          message: {
+            kind: 'message',
+            role: 'agent',
+            messageId: generateMessageId(),
+            parts: parts ?? [{ kind: 'text', text: text ?? '' } as TextPart],
+            taskId,
+            contextId,
+          } as Message,
+          timestamp: new Date().toISOString(),
+        }
+      : { state, timestamp: new Date().toISOString() };
+
+  return {
+    kind: 'status-update',
+    taskId,
+    contextId,
+    status,
+    final,
+  };
+};
+
+const buildInputRequiredFromPrompt = ({
+  taskId,
+  contextId,
+  prompt,
+}: {
+  taskId: string;
+  contextId: string;
+  prompt: PromptRequest;
+}): TaskStatusUpdateEvent => {
+  let text = '';
+  let dataPayload: Record<string, unknown>;
+
+  if (isConfirmationPrompt(prompt)) {
+    text = prompt.message ?? prompt.title ?? 'Confirmation required.';
+    dataPayload = {
+      type: AgentPromptType.confirmation,
+      id: prompt.id,
+      title: prompt.title,
+      confirm_text: prompt.confirm_text,
+      cancel_text: prompt.cancel_text,
+      color: prompt.color,
+    };
+  } else if (isAuthorizationPrompt(prompt)) {
+    text = 'Authorization required.';
+    dataPayload = { type: AgentPromptType.authorization, prompt };
+  } else if (isAskUserQuestionPrompt(prompt)) {
+    text =
+      prompt.questions
+        .map(
+          (q, i) =>
+            `${i + 1}. ${q.question}${
+              q.options?.length ? ` (options: ${q.options.map((o) => o.label).join(', ')})` : ''
+            }`
+        )
+        .join('\n') || 'Question required.';
+    dataPayload = {
+      type: AgentPromptType.ask_user_question,
+      id: prompt.id,
+      questions: prompt.questions,
+    };
+  } else {
+    text = 'Input required.';
+    dataPayload = { prompt };
+  }
+
+  const parts: Part[] = [
+    { kind: 'text', text } as TextPart,
+    { kind: 'data', data: dataPayload } as DataPart,
+  ];
+
+  return buildStatusUpdate({
+    taskId,
+    contextId,
+    state: 'input-required',
+    parts,
+    final: true,
+  });
+};

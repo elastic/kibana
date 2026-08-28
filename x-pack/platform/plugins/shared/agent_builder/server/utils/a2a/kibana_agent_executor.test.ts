@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { RequestContext } from '@a2a-js/sdk/server';
 import type { ExecutionEventBus } from '@a2a-js/sdk/server';
 import type { Message } from '@a2a-js/sdk';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { KibanaAgentExecutor } from './kibana_agent_executor';
 
@@ -44,12 +44,20 @@ describe('KibanaAgentExecutor', () => {
 
   const createExecutor = (
     execution: ReturnType<typeof createExecutionMock>,
-    blocking: boolean = true
+    blocking: boolean = true,
+    isStreaming: boolean = false
   ) => {
     const logger = { debug: jest.fn(), error: jest.fn() } as any;
     const kibanaRequest = { headers: {} } as unknown as KibanaRequest;
     const getInternalServices = () => ({ execution } as any);
-    return new KibanaAgentExecutor(logger, getInternalServices, kibanaRequest, 'agent-1', blocking);
+    return new KibanaAgentExecutor(
+      logger,
+      getInternalServices,
+      kibanaRequest,
+      'agent-1',
+      blocking,
+      isStreaming
+    );
   };
 
   it('disables task manager scheduling for blocking (default) requests', async () => {
@@ -140,5 +148,233 @@ describe('KibanaAgentExecutor', () => {
       })
     );
     expect(eventBus.finished).toHaveBeenCalledTimes(1);
+  });
+
+  describe('streaming mode', () => {
+    it('publishes an initial Task and forwards message chunks + round_complete as A2A events', async () => {
+      const execution = createExecutionMock();
+      execution.executeAgent.mockResolvedValue({
+        executionId: 'exec-1',
+        events$: of(
+          {
+            type: ChatEventType.messageChunk,
+            data: { message_id: 'm-1', text_chunk: 'hel' },
+          },
+          {
+            type: ChatEventType.messageChunk,
+            data: { message_id: 'm-1', text_chunk: 'lo' },
+          },
+          {
+            type: ChatEventType.messageComplete,
+            data: { message_id: 'm-1', message_content: 'hello' },
+          },
+          {
+            type: ChatEventType.roundComplete,
+            data: { round: { id: 'r-1', response: { message: 'hello' } } },
+          }
+        ) as any,
+      });
+
+      const executor = createExecutor(execution, true, true);
+      const eventBus = createEventBusMock();
+      const requestContext = new RequestContext(createUserMessage(), 'task-1', 'ctx-1');
+
+      await executor.execute(requestContext, eventBus);
+
+      const publishes = eventBus.publish.mock.calls.map(([e]) => e);
+
+      // Initial Task event
+      expect(publishes[0]).toMatchObject({ kind: 'task', id: 'task-1', contextId: 'ctx-1' });
+
+      // First message_chunk → artifact-update, append=false
+      expect(publishes[1]).toMatchObject({
+        kind: 'artifact-update',
+        taskId: 'task-1',
+        contextId: 'ctx-1',
+        append: false,
+        lastChunk: false,
+        artifact: expect.objectContaining({
+          artifactId: 'm-1',
+          parts: [{ kind: 'text', text: 'hel' }],
+        }),
+      });
+
+      // Second message_chunk → append=true
+      expect(publishes[2]).toMatchObject({
+        kind: 'artifact-update',
+        append: true,
+        lastChunk: false,
+        artifact: expect.objectContaining({
+          artifactId: 'm-1',
+          parts: [{ kind: 'text', text: 'lo' }],
+        }),
+      });
+
+      // message_complete → append=true, lastChunk=true
+      expect(publishes[3]).toMatchObject({
+        kind: 'artifact-update',
+        append: true,
+        lastChunk: true,
+        artifact: expect.objectContaining({ artifactId: 'm-1' }),
+      });
+
+      // round_complete → terminal status-update, final=true
+      expect(publishes[4]).toMatchObject({
+        kind: 'status-update',
+        final: true,
+        status: expect.objectContaining({ state: 'completed' }),
+      });
+
+      expect(eventBus.finished).toHaveBeenCalledTimes(1);
+    });
+
+    it('emits message_complete as a single artifact when no chunks were streamed', async () => {
+      const execution = createExecutionMock();
+      execution.executeAgent.mockResolvedValue({
+        executionId: 'exec-1',
+        events$: of(
+          {
+            type: ChatEventType.messageComplete,
+            data: { message_id: 'm-1', message_content: 'full text' },
+          },
+          {
+            type: ChatEventType.roundComplete,
+            data: { round: { id: 'r-1', response: { message: 'full text' } } },
+          }
+        ) as any,
+      });
+
+      const executor = createExecutor(execution, true, true);
+      const eventBus = createEventBusMock();
+      const requestContext = new RequestContext(createUserMessage(), 'task-1', 'ctx-1');
+
+      await executor.execute(requestContext, eventBus);
+
+      const publishes = eventBus.publish.mock.calls.map(([e]) => e);
+      // Task, artifact-update (single-shot), status-update completed
+      expect(publishes).toHaveLength(3);
+      expect(publishes[1]).toMatchObject({
+        kind: 'artifact-update',
+        append: false,
+        lastChunk: true,
+        artifact: expect.objectContaining({
+          parts: [{ kind: 'text', text: 'full text' }],
+        }),
+      });
+    });
+
+    it('publishes a working status-update for tool_call, tool_progress, tool_result and reasoning', async () => {
+      const execution = createExecutionMock();
+      execution.executeAgent.mockResolvedValue({
+        executionId: 'exec-1',
+        events$: of(
+          { type: ChatEventType.toolCall, data: { tool_id: 'search', tool_call_id: 't1' } },
+          { type: ChatEventType.toolProgress, data: { tool_call_id: 't1', message: '50%' } },
+          { type: ChatEventType.toolResult, data: { tool_id: 'search', tool_call_id: 't1' } },
+          { type: ChatEventType.reasoning, data: { reasoning: 'thinking about it' } },
+          {
+            type: ChatEventType.roundComplete,
+            data: { round: { id: 'r-1', response: { message: '' } } },
+          }
+        ) as any,
+      });
+
+      const executor = createExecutor(execution, true, true);
+      const eventBus = createEventBusMock();
+      const requestContext = new RequestContext(createUserMessage(), 'task-1', 'ctx-1');
+
+      await executor.execute(requestContext, eventBus);
+
+      const publishes = eventBus.publish.mock.calls.map(([e]) => e);
+      const statusTexts = publishes
+        .filter((e: any) => e.kind === 'status-update' && e.status?.message)
+        .map((e: any) => e.status.message.parts[0].text);
+
+      expect(statusTexts).toEqual(
+        expect.arrayContaining([
+          'Calling tool search...',
+          '50%',
+          'Tool search completed',
+          'thinking about it',
+        ])
+      );
+    });
+
+    it('terminates the stream with input-required and text+data parts on prompt_request', async () => {
+      const execution = createExecutionMock();
+      execution.executeAgent.mockResolvedValue({
+        executionId: 'exec-1',
+        events$: of(
+          {
+            type: ChatEventType.promptRequest,
+            data: {
+              source: {},
+              prompt: {
+                type: 'confirmation',
+                id: 'p-1',
+                title: 'Continue?',
+                message: 'Are you sure you want to proceed?',
+                confirm_text: 'Yes',
+                cancel_text: 'No',
+              },
+            },
+          },
+          {
+            type: ChatEventType.roundComplete,
+            data: { round: { id: 'r-1', response: { message: '' } } },
+          }
+        ) as any,
+      });
+
+      const executor = createExecutor(execution, true, true);
+      const eventBus = createEventBusMock();
+      const requestContext = new RequestContext(createUserMessage(), 'task-1', 'ctx-1');
+
+      await executor.execute(requestContext, eventBus);
+
+      const publishes = eventBus.publish.mock.calls.map(([e]) => e);
+      const terminal = publishes.find(
+        (e: any) => e.kind === 'status-update' && e.status?.state === 'input-required'
+      );
+      expect(terminal).toBeDefined();
+      expect((terminal as any).final).toBe(true);
+      const parts = (terminal as any).status.message.parts;
+      expect(parts[0]).toMatchObject({ kind: 'text', text: 'Are you sure you want to proceed?' });
+      expect(parts[1]).toMatchObject({
+        kind: 'data',
+        data: expect.objectContaining({
+          type: 'confirmation',
+          id: 'p-1',
+          confirm_text: 'Yes',
+          cancel_text: 'No',
+        }),
+      });
+      // round_complete was NOT forwarded because the stream terminated on input-required
+      expect(
+        publishes.filter((e: any) => e.kind === 'status-update' && e.status?.state === 'completed')
+      ).toHaveLength(0);
+    });
+
+    it('terminates the stream with a failed status-update on error', async () => {
+      const execution = createExecutionMock();
+      execution.executeAgent.mockResolvedValue({
+        executionId: 'exec-1',
+        events$: throwError(() => new Error('kaboom')),
+      });
+
+      const executor = createExecutor(execution, true, true);
+      const eventBus = createEventBusMock();
+      const requestContext = new RequestContext(createUserMessage(), 'task-1', 'ctx-1');
+
+      await executor.execute(requestContext, eventBus);
+
+      const publishes = eventBus.publish.mock.calls.map(([e]) => e);
+      const terminal = publishes[publishes.length - 1] as any;
+      expect(terminal.kind).toBe('status-update');
+      expect(terminal.status.state).toBe('failed');
+      expect(terminal.final).toBe(true);
+      expect(terminal.status.message.parts[0].text).toContain('kaboom');
+      expect(eventBus.finished).toHaveBeenCalledTimes(1);
+    });
   });
 });
