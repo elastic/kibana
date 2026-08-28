@@ -51,7 +51,7 @@ export function registerCasesAgentBuilderTools(
   logger: Logger
 ): void {
   const availability = createCasesToolAvailability(coreSetup, logger);
-  agentBuilder.tools.register(searchCasesTool(availability, coreSetup, getCasesClient, logger));
+  agentBuilder.tools.register(searchCasesTool(availability, coreSetup, getCasesClient));
   agentBuilder.tools.register(manageCasesTool(availability, getCasesClient, templatesEnabled));
   agentBuilder.tools.register(getAttachmentsTool(availability, getCasesClient));
   agentBuilder.tools.register(

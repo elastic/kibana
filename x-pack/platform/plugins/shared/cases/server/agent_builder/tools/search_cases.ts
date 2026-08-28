@@ -156,8 +156,7 @@ function enhanceCases(
 export const searchCasesTool = (
   availability: ToolAvailabilityConfig,
   coreSetup: CoreSetup<CasesServerStartDependencies>,
-  getCasesClientFn: (request: KibanaRequest) => Promise<CasesClient>,
-  logger: Logger
+  getCasesClientFn: (request: KibanaRequest) => Promise<CasesClient>
 ): BuiltinToolDefinition<typeof casesSchema> => {
   return {
     id: platformCoreTools.cases,
@@ -204,7 +203,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
         page,
         perPage,
       },
-      { request, spaceId, attachments }
+      { request, spaceId, logger, attachments }
     ) => {
       try {
         const [coreStart] = await coreSetup.getStartServices();
