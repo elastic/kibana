@@ -403,6 +403,12 @@ export const datasetWizardStrings = {
         'Fields that are not mapped will remain dynamic and will be inferred at query time. You can infer schema now to preview what the mapping would look like based on what is currently stored on your dataset.',
     }),
 
+  dynamicFieldsEmptyFlow396: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsEmptyFlow396', {
+      defaultMessage:
+        'Fields that are not mapped will remain dynamic and will be inferred at query time.',
+    }),
+
   dynamicFieldsTableCaption: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsTableCaption', {
       defaultMessage: 'Dynamic fields',

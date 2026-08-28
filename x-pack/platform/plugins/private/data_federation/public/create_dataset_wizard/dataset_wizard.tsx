@@ -63,6 +63,7 @@ import { ReviewStep } from './steps/review_step';
 import { PreviewResultsStep } from './steps/preview_results_step';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
+  hasDatasetWizardPreviewResultsStep,
   isDatasetWizardFlow3,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
@@ -146,6 +147,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   });
   const isFlow1 = flowVariant === DATASET_WIZARD_FLOW_VARIANT_1;
   const isFlow3 = isDatasetWizardFlow3(flowVariant);
+  const hasPreviewResultsStep = hasDatasetWizardPreviewResultsStep(flowVariant);
   const reviewStep = getReviewStep(flowVariant);
 
   const { control, getValues, setValue, trigger, watch } = useForm<DatasetWizardFormValues>({
@@ -336,7 +338,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   useEffect(() => {
     const stepFromUrl = parseWizardStepFromSearch(location.search) ?? LOGISTICS_STEP;
     const normalizedStepFromUrl =
-      !isFlow3 && stepFromUrl === FLOW_3_REVIEW_STEP ? REVIEW_STEP : stepFromUrl;
+      !hasPreviewResultsStep && stepFromUrl === FLOW_3_REVIEW_STEP ? REVIEW_STEP : stepFromUrl;
 
     if (normalizedStepFromUrl === LOGISTICS_STEP) {
       setCurrentStep(LOGISTICS_STEP);
@@ -374,7 +376,15 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     return () => {
       isCancelled = true;
     };
-  }, [flowVariant, getValues, history, isFlow3, location.pathname, location.search, trigger]);
+  }, [
+    flowVariant,
+    getValues,
+    hasPreviewResultsStep,
+    history,
+    location.pathname,
+    location.search,
+    trigger,
+  ]);
 
   const isStepDisabled = useCallback(
     (step: DatasetWizardStep) => !logisticsStepComplete && currentStep < step,
@@ -477,7 +487,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           : 'incomplete') as EuiStepStatus,
         onClick: () => void attemptGoToStep(SCHEMA_MAPPINGS_STEP),
       },
-      ...(isFlow3
+      ...(hasPreviewResultsStep
         ? [
             {
               step: PREVIEW_RESULTS_STEP,
@@ -500,7 +510,14 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         onClick: () => void attemptGoToStep(reviewStep),
       },
     ],
-    [attemptGoToStep, currentStep, isFlow3, isStepDisabled, logisticsStepComplete, reviewStep]
+    [
+      attemptGoToStep,
+      currentStep,
+      hasPreviewResultsStep,
+      isStepDisabled,
+      logisticsStepComplete,
+      reviewStep,
+    ]
   );
 
   const handleNext = async () => {
@@ -534,21 +551,21 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     }
 
     if (currentStep === SCHEMA_MAPPINGS_STEP) {
-      goToStep(isFlow3 ? PREVIEW_RESULTS_STEP : reviewStep);
+      goToStep(hasPreviewResultsStep ? PREVIEW_RESULTS_STEP : reviewStep);
       return;
     }
 
-    if (currentStep === PREVIEW_RESULTS_STEP) {
+    if (hasPreviewResultsStep && currentStep === PREVIEW_RESULTS_STEP) {
       goToStep(FLOW_3_REVIEW_STEP);
     }
   };
 
   const handleBack = () => {
     if (currentStep === reviewStep) {
-      goToStep(isFlow3 ? PREVIEW_RESULTS_STEP : SCHEMA_MAPPINGS_STEP);
+      goToStep(hasPreviewResultsStep ? PREVIEW_RESULTS_STEP : SCHEMA_MAPPINGS_STEP);
       return;
     }
-    if (currentStep === PREVIEW_RESULTS_STEP) {
+    if (hasPreviewResultsStep && currentStep === PREVIEW_RESULTS_STEP) {
       goToStep(SCHEMA_MAPPINGS_STEP);
       return;
     }
@@ -633,7 +650,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           flowVariant={flowVariant}
         />
       </div>
-      {isFlow3 ? (
+      {hasPreviewResultsStep ? (
         <div hidden={currentStep !== PREVIEW_RESULTS_STEP}>
           <PreviewResultsStep
             values={wizardFormValues}

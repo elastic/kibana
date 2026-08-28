@@ -14,6 +14,11 @@ import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types
 
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import {
+  DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  type DatasetWizardFlowVariant,
+} from '../dataset_wizard_flow_variant';
 import type { TestConfigurationPreviewField } from '../test_configuration_preview_utils';
 import { InferredSchemaMappingsEditor } from './inferred_schema_mappings_editor';
 
@@ -102,8 +107,10 @@ const inferredFields: TestConfigurationPreviewField[] = [
 
 const TestHarness = ({
   automaticFieldTypes = {},
+  flowVariant = DATASET_WIZARD_FLOW_VARIANT_3,
 }: {
   automaticFieldTypes?: Record<string, string>;
+  flowVariant?: DatasetWizardFlowVariant;
 }) => {
   const { control, watch } = useForm<DatasetWizardFormValues>({
     defaultValues: {
@@ -114,7 +121,11 @@ const TestHarness = ({
 
   return (
     <EuiProvider>
-      <InferredSchemaMappingsEditor control={control} inferredFields={inferredFields} />
+      <InferredSchemaMappingsEditor
+        control={control}
+        flowVariant={flowVariant}
+        inferredFields={inferredFields}
+      />
       <span data-test-subj="automaticFieldTypesValue">
         {JSON.stringify(watch('automatic_field_types'))}
       </span>
@@ -264,6 +275,37 @@ describe('InferredSchemaMappingsEditor', () => {
       expect(getByTestId('datasetWizardAddField')).toBeInTheDocument();
       expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(
         JSON.stringify({ manual_field: 'keyword' })
+      );
+    });
+  });
+
+  it('hides Infer schema in flow 3 9.6 and shortens the dynamic fields copy', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+    );
+
+    expect(queryByTestId('datasetWizardInferSchema')).toBeNull();
+    expect(queryByTestId('datasetWizardDynamicFieldsTable')).toBeNull();
+    expect(getByTestId('datasetWizardDynamicFieldsEnabled')).toBeChecked();
+    expect(getByTestId('datasetWizardDynamicFieldsEmpty')).toHaveTextContent(
+      'Fields that are not mapped will remain dynamic and will be inferred at query time.'
+    );
+    expect(getByTestId('datasetWizardDynamicFieldsEmpty')).not.toHaveTextContent(
+      'You can infer schema now'
+    );
+  });
+
+  it('lets the user disable dynamic fields in flow 3 9.6', async () => {
+    const { getByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+    );
+
+    fireEvent.click(getByTestId('datasetWizardDynamicFieldsEnabled'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardDynamicFieldsEnabled')).not.toBeChecked();
+      expect(getByTestId('datasetWizardDynamicFieldsDisabled')).toHaveTextContent(
+        'Only mapped fields will be used. Unmapped fields will not be inferred at query time.'
       );
     });
   });

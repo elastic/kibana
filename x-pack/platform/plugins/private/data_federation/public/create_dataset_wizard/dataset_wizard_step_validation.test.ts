@@ -11,6 +11,7 @@ import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
 } from './dataset_wizard_flow_variant';
 import {
   findFirstInvalidWizardStep,
@@ -136,5 +137,13 @@ describe('dataset_wizard_step_validation', () => {
     expect(getWizardStepFields(FLOW_3_REVIEW_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3)).toEqual(
       expect.arrayContaining(['data_source', 'name', 'resource', 'region'])
     );
+  });
+
+  it('treats step 4 as review in flow 3 9.6', () => {
+    const values = emptyDatasetWizardFormValues();
+
+    expect(
+      getWizardStepFields(PREVIEW_RESULTS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    ).toEqual(expect.arrayContaining(['data_source', 'name', 'resource', 'region']));
   });
 });

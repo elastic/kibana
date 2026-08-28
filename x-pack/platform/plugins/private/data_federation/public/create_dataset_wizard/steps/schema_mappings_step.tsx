@@ -127,6 +127,7 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
       {hideAwsGlueTable ? (
         <InferredSchemaMappingsEditor
           control={control}
+          flowVariant={flowVariant}
           inferredFields={automaticSchemaSampleFields}
         />
       ) : (

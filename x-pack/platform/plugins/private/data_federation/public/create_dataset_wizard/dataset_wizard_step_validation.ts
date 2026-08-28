@@ -22,6 +22,7 @@ import {
 } from './dataset_wizard_constants';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
+  hasDatasetWizardPreviewResultsStep,
   isDatasetWizardFlow3,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
@@ -106,7 +107,7 @@ export const getWizardStepFields = (
     case SCHEMA_MAPPINGS_STEP:
       return getSchemaMappingsStepFields(values);
     case PREVIEW_RESULTS_STEP:
-      return isDatasetWizardFlow3(flowVariant)
+      return hasDatasetWizardPreviewResultsStep(flowVariant)
         ? []
         : [
             ...getLogisticsStepFields(flowVariant),

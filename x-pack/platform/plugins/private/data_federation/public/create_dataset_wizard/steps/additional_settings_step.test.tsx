@@ -16,6 +16,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from '../../create_dataset_flyout/dataset_settings_options';
@@ -119,6 +120,17 @@ describe('AdditionalSettingsStep', () => {
   it('does not show the data source setup warning outside flow 3', () => {
     const { queryByTestId } = render(
       <TestHarness resource="s3://bucket/path/data" flowVariant={DATASET_WIZARD_FLOW_VARIANT_2} />
+    );
+
+    expect(queryByTestId('datasetWizardDataSourceSetupWarning')).toBeNull();
+  });
+
+  it('does not show the data source setup warning in flow 3 9.6', () => {
+    const { queryByTestId } = render(
+      <TestHarness
+        resource="s3://bucket/path/data"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+      />
     );
 
     expect(queryByTestId('datasetWizardDataSourceSetupWarning')).toBeNull();

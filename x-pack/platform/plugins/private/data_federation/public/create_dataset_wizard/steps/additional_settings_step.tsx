@@ -37,6 +37,7 @@ import { AutoDetectedSuffix } from '../auto_detected_suffix';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
+  DATASET_WIZARD_FLOW_VARIANT_3,
   isDatasetWizardFlow3,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
@@ -233,7 +234,10 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   }, [autoDetectedFormat, flowVariant, format]);
 
   const showDataSourceSetupWarning = useMemo(
-    () => isDatasetWizardFlow3(flowVariant) && !autoDetectedRegion && !autoDetectedFormat,
+    () =>
+      flowVariant === DATASET_WIZARD_FLOW_VARIANT_3 &&
+      !autoDetectedRegion &&
+      !autoDetectedFormat,
     [autoDetectedFormat, autoDetectedRegion, flowVariant]
   );
 

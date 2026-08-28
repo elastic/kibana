@@ -33,6 +33,7 @@ import {
   getDynamicInferredFields,
   mappingsToAutomaticFieldTypes,
 } from '../automatic_field_types_utils';
+import { isDatasetWizardFlow396, type DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { formatMappedFieldTypeLabel } from '../inferred_field_type_options';
@@ -40,6 +41,7 @@ import type { TestConfigurationPreviewField } from '../test_configuration_previe
 
 export interface InferredSchemaMappingsEditorProps {
   control: Control<DatasetWizardFormValues>;
+  flowVariant: DatasetWizardFlowVariant;
   inferredFields: readonly TestConfigurationPreviewField[];
 }
 
@@ -113,8 +115,10 @@ const DynamicFieldsTable: FunctionComponent<{
 
 export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappingsEditorProps> = ({
   control,
+  flowVariant,
   inferredFields,
 }) => {
+  const isFlow396 = isDatasetWizardFlow396(flowVariant);
   const containerRef = useRef<HTMLDivElement>(null);
   const addFieldButtonRef = useRef<HTMLElement | null>(null);
   const {
@@ -335,17 +339,19 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="indexMapping"
-              color="text"
-              size="s"
-              data-test-subj="datasetWizardInferSchema"
-              onClick={handleInferSchema}
-            >
-              {datasetWizardStrings.inferSchemaButton()}
-            </EuiButton>
-          </EuiFlexItem>
+          {!isFlow396 ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="indexMapping"
+                color="text"
+                size="s"
+                data-test-subj="datasetWizardInferSchema"
+                onClick={handleInferSchema}
+              >
+                {datasetWizardStrings.inferSchemaButton()}
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiText
@@ -359,11 +365,13 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
         >
           <p>
             {isDynamicEnabled
-              ? datasetWizardStrings.dynamicFieldsEmpty()
+              ? isFlow396
+                ? datasetWizardStrings.dynamicFieldsEmptyFlow396()
+                : datasetWizardStrings.dynamicFieldsEmpty()
               : datasetWizardStrings.dynamicFieldsDisabled()}
           </p>
         </EuiText>
-        {dynamicItems.length > 0 ? (
+        {!isFlow396 && dynamicItems.length > 0 ? (
           <>
             <EuiSpacer size="m" />
             <DynamicFieldsTable items={dynamicItems} onMapField={handleMapField} />

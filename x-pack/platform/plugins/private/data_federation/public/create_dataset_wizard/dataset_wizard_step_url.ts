@@ -13,7 +13,10 @@ import {
   REVIEW_STEP,
   SCHEMA_MAPPINGS_STEP,
 } from './dataset_wizard_constants';
-import { isDatasetWizardFlow3, type DatasetWizardFlowVariant } from './dataset_wizard_flow_variant';
+import {
+  hasDatasetWizardPreviewResultsStep,
+  type DatasetWizardFlowVariant,
+} from './dataset_wizard_flow_variant';
 
 export const WIZARD_STEP_SEARCH_PARAM = 'step';
 
@@ -37,10 +40,10 @@ export const isDatasetWizardStep = (value: number): value is DatasetWizardStep =
   WIZARD_STEPS.includes(value as DatasetWizardStep);
 
 export const getReviewStep = (flowVariant: DatasetWizardFlowVariant): DatasetWizardStep =>
-  isDatasetWizardFlow3(flowVariant) ? FLOW_3_REVIEW_STEP : REVIEW_STEP;
+  hasDatasetWizardPreviewResultsStep(flowVariant) ? FLOW_3_REVIEW_STEP : REVIEW_STEP;
 
 export const getWizardSteps = (flowVariant: DatasetWizardFlowVariant): DatasetWizardStep[] =>
-  isDatasetWizardFlow3(flowVariant)
+  hasDatasetWizardPreviewResultsStep(flowVariant)
     ? [
         LOGISTICS_STEP,
         ADDITIONAL_SETTINGS_STEP,

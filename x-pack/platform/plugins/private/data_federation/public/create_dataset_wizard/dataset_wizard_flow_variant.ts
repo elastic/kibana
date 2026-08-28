@@ -32,6 +32,13 @@ export const isDatasetWizardFlow3 = (flowVariant: DatasetWizardFlowVariant): boo
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3 ||
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6;
 
+export const isDatasetWizardFlow396 = (flowVariant: DatasetWizardFlowVariant): boolean =>
+  flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6;
+
+export const hasDatasetWizardPreviewResultsStep = (
+  flowVariant: DatasetWizardFlowVariant
+): boolean => isDatasetWizardFlow3(flowVariant) && !isDatasetWizardFlow396(flowVariant);
+
 export const parseWizardFlowVariantFromSearch = (
   search: string
 ): DatasetWizardFlowVariant | undefined => {

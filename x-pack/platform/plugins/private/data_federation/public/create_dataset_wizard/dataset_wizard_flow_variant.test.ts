@@ -13,7 +13,9 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  hasDatasetWizardPreviewResultsStep,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow396,
   parseWizardFlowVariantFromSearch,
   resolveWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
@@ -67,5 +69,19 @@ describe('dataset_wizard_flow_variant', () => {
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(true);
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);
+  });
+
+  it('identifies flow 3 9.6 only', () => {
+    expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(true);
+    expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(false);
+    expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
+    expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);
+  });
+
+  it('includes preview results only in original flow 3', () => {
+    expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(true);
+    expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(false);
+    expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
+    expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);
   });
 });

@@ -23,6 +23,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
@@ -377,6 +378,27 @@ describe('DatasetWizard step navigation', () => {
 
     expect(queryByTestId('datasetWizardTestConfigurationTable')).toBeNull();
     expect(history.location.search).toContain('step=5');
+  });
+
+  it('does not include a preview results step in flow 3 9.6', async () => {
+    const { getByTestId, queryByTestId, queryByText, history } = renderWizard(
+      `/create?flow=flow_3_9_6&step=${SCHEMA_MAPPINGS_STEP}`,
+      testConfigurationDraft,
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6
+    );
+
+    expect(queryByText('Preview results')).toBeNull();
+    expect(queryByTestId('datasetWizardPreviewResultsStep')).toBeNull();
+
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardReviewStep')).toBeVisible();
+    });
+
+    expect(queryByTestId('datasetWizardPreviewResultsStep')).toBeNull();
+    expect(history.location.search).toContain('step=4');
+    expect(history.location.search).not.toContain('step=5');
   });
 
   it('places region on additional settings in flow 3 and allows leaving logistics without it', async () => {
