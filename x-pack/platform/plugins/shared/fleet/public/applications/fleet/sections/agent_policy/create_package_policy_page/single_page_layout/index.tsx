@@ -788,16 +788,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiPanel hasBorder paddingSize="m" data-test-subj="packageDocumentationCallout">
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type="document"
-                  size="l"
-                  aria-label={i18n.translate(
-                    'xpack.fleet.createPackagePolicy.documentationCallout.iconAriaLabel',
-                    {
-                      defaultMessage: 'Documentation',
-                    }
-                  )}
-                />
+                <EuiIcon type="document" size="l" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">

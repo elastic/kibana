@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -43,9 +44,13 @@ export const PackageDocumentationModal: React.FC<Props> = ({ packageInfo, onClos
 
   useEffect(() => {
     if (packageInfo.readme) {
-      sendGetFileByPath(packageInfo.readme).then((res) => {
-        setMarkdown(res.data ?? '');
-      });
+      sendGetFileByPath(packageInfo.readme)
+        .then((res) => {
+          setMarkdown(res.data ?? '');
+        })
+        .catch(() => {
+          setMarkdown('');
+        });
     }
   }, [packageInfo.readme]);
 
@@ -81,25 +86,17 @@ export const PackageDocumentationModal: React.FC<Props> = ({ packageInfo, onClos
           },
         ]
       : []),
-    ...(packageInfo.type
-      ? [
-          {
-            title: (
-              <FormattedMessage
-                id="xpack.fleet.packageDocumentationModal.ingestionLabel"
-                defaultMessage="Ingestion"
-              />
-            ),
-            description: packageInfo.type,
-          },
-        ]
-      : []),
   ];
+
+  const modalCss = css`
+    max-width: 860px;
+    width: 100%;
+  `;
 
   return (
     <EuiModal
       onClose={onClose}
-      style={{ maxWidth: 860, width: '100%' }}
+      css={modalCss}
       aria-label={i18n.translate('xpack.fleet.packageDocumentationModal.ariaLabel', {
         defaultMessage: '{packageTitle} integration documentation',
         values: { packageTitle: packageInfo.title },
