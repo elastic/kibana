@@ -158,6 +158,7 @@ export const callSiteProceedInputSchema = z
     tokenMap: tokenMapSchema.optional(),
     restoreStreamingContent: z.boolean().optional(),
     restoreToolCallArguments: z.boolean().optional(),
+    dryRun: z.boolean().optional(),
   })
   .strict();
 export const callSiteProceedOutputSchema = z.object({ rawContent: z.string() }).strict();

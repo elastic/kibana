@@ -169,6 +169,28 @@ export const createWorkflowAnonymizationPipeline = ({
           ? [input.system, buildAnonymizationInstruction(tokenMap)].filter(Boolean).join('\n\n')
           : input.system;
 
+      if (input.dryRun) {
+        logger.debug(
+          `Dry run: returning anonymized payload without calling inference connector (${tokenCount} tokens, ${input.messages.length} messages)`
+        );
+        const dryRunPayload = JSON.stringify(
+          { system: augmentedSystem, messages: input.messages },
+          null,
+          2
+        );
+        relay$.next({
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: dryRunPayload,
+          tool_calls: [],
+        });
+        restoredTerminalMessage = {
+          type: ChatCompletionEventType.ChatCompletionMessage,
+          content: dryRunPayload,
+          toolCalls: [],
+        };
+        return { rawContent: dryRunPayload };
+      }
+
       logger.debug(
         `Sending anonymized request to inference connector (${tokenCount} tokens, ${input.messages.length} messages)`
       );
