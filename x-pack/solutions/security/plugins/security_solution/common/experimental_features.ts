@@ -272,6 +272,12 @@ export const allowedExperimentalValues = Object.freeze({
   endpointForensicAnalysisSkill: false,
 
   /**
+   * Enables the recommended-actions Agent Builder skill for Attack Discoveries.
+   * The skill is read-only and only emits recommendations for downstream approval.
+   */
+  recommendedActionsSkill: false,
+
+  /**
    * Enables the investigate-rule Agent Builder skill.
    * Gates skill registration so the feature can ship dark and be enabled per environment.
    */

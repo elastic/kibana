@@ -10,6 +10,7 @@ import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_d
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import { alertTriageSkill, ALERT_TRIAGE_TOOL_ID } from './alert_triage';
+import { recommendedActionsSkill } from './recommended_actions';
 import {
   automaticMigrationRulesStartMigrationSkill,
   automaticMigrationRulesSummarizeSkill,
@@ -19,6 +20,7 @@ const ALL_SKILLS = [
   threatHuntingSkill,
   alertAnalysisSkill,
   alertTriageSkill,
+  recommendedActionsSkill,
   automaticMigrationRulesSummarizeSkill,
   automaticMigrationRulesStartMigrationSkill,
 ];

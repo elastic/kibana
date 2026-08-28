@@ -70,6 +70,7 @@ export {
   PND_TUNING_CANDIDATE_RULES_URL,
   PND_TUNING_URL,
   PND_WATCHES_URL,
+  PND_WATCH_SCHEDULE_URL_TEMPLATE,
   PND_WATCH_URL_TEMPLATE,
   PND_WATCH_WORKFLOW_IDS,
   PND_WORKERS_URL,
@@ -106,6 +107,7 @@ export {
   buildSkillUrl,
   buildTuningApplyUrl,
   buildWatchAutonomyUiSettingKey,
+  buildWatchScheduleUrl,
   buildWatchUrl,
   buildWorkerUrl,
 } from './constants';
@@ -115,6 +117,28 @@ export type {
   PndTunableRuleField,
   SystemSecurityWatchCatalogEntry,
 } from './constants';
+
+export {
+  ATTACK_DISCOVERY_ACTION_CAPABILITIES,
+  ATTACK_DISCOVERY_ASSET_CRITICALITY_LEVELS,
+  ATTACK_DISCOVERY_MANUAL_ACTION_TYPES,
+  ATTACK_DISCOVERY_RECOMMENDED_ACTION_PRIORITIES,
+} from './recommended_actions';
+export type {
+  AttackDiscoveryAssetCriticalityLevel,
+  AttackDiscoveryCapabilityRef,
+  AttackDiscoveryExecutionParamsByActionType,
+  AttackDiscoveryKibanaActionType,
+  AttackDiscoveryKibanaRecommendedAction,
+  AttackDiscoveryKillProcessExecutionParams,
+  AttackDiscoveryManualActionType,
+  AttackDiscoveryManualRecommendedAction,
+  AttackDiscoveryRecommendedAction,
+  AttackDiscoveryRecommendedActionPriority,
+  AttackDiscoveryRecommendedActionTargets,
+  AttackDiscoveryRecommendedActionType,
+  AttackDiscoverySetAssetCriticalityExecutionParams,
+} from './recommended_actions';
 
 export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
 

@@ -17,6 +17,7 @@ import type { WatchesService } from '../services/watches/watches_service';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerUpdateWatchRoute } from './watches/update_watch';
+import { registerEnsureWatchScheduleRoute } from './watches/ensure_watch_schedule';
 import { registerListWorkersRoute } from './workers/list_workers';
 import { registerUpdateWorkerRoute } from './workers/update_worker';
 import { registerListSkillsRoute } from './skills/list_skills';
@@ -119,6 +120,7 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerListWatchesRoute(deps);
   registerGetWatchRoute(deps);
   registerUpdateWatchRoute(deps);
+  registerEnsureWatchScheduleRoute(deps);
   registerListWorkersRoute(deps);
   registerUpdateWorkerRoute(deps);
   registerListSkillsRoute(deps);
