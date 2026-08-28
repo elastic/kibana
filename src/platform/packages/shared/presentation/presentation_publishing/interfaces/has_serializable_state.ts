@@ -18,6 +18,10 @@ export interface HasSerializableState<SerializedState extends object = object> {
    * Must not debounce.
    */
   anyStateChange$: Observable<void>;
+  /**
+   * latestState$ is added to the interface so that we can reduce the amount of times that
+   * serializedState is called, since serializedState can be expensive to compute.
+   */
   latestState$: Observable<SerializedState>;
 
   /**
