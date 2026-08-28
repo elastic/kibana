@@ -388,6 +388,25 @@ describe('mapRuleToComposeFormValues', () => {
     }
   });
 
+  it('round-trips an omitted composed breach through the form as an empty segment', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      query: { format: 'composed', base: BASE },
+    };
+
+    const formValues = mapRuleToComposeFormValues(rule);
+
+    expect(formValues.query).toEqual({
+      format: 'composed',
+      base: BASE,
+      breach: { segment: '' },
+    });
+    expect(composeFormToCreateRequest(formValues).query).toEqual({
+      format: 'composed',
+      base: BASE,
+    });
+  });
+
   it('maps recovery segment from composed query when recovery_strategy: query', () => {
     const rule: RuleResponse = {
       ...baseRuleResponse,

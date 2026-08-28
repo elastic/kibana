@@ -5,278 +5,262 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import * as YAML from 'yaml';
 import {
-  QueryType,
   Action,
+  QueryType,
   type HealthDiagnosticQuery,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV2,
-  type HealthDiagnosticQueryV3,
+  type IndexQuery,
+  type ApiQuery,
   type ParseFailureQuery,
 } from './health_diagnostic_service.types';
 
-export const parseHealthDiagnosticQueries = (input: unknown): HealthDiagnosticQuery[] =>
-  YAML.parseAllDocuments(input as string).map(parseOne);
+// Versions this parser recognises; anything else → unknown_version.
+const VALID_VERSIONS = [1, 2, 3] as const;
+type ValidVersion = (typeof VALID_VERSIONS)[number];
 
-const parseOne = (doc: YAML.Document): HealthDiagnosticQuery => {
-  const raw = doc.toJSON() as Record<string, unknown> | null;
-  const version = raw?.version;
+const filterlistSchema = z.record(z.string(), z.nativeEnum(Action));
+const queryTypeSchema = z.nativeEnum(QueryType);
 
-  try {
-    if (version === undefined || version === 1) {
-      return parseV1(raw);
-    } else if (version === 2) {
-      return parseV2(raw);
-    } else if (version === 3) {
-      return parseV3(raw);
-    } else {
-      return parseUnknown(raw, 'unknown_version');
-    }
-  } catch {
-    return parseUnknown(raw, 'invalid_descriptor');
-  }
+// ---------------------------------------------------------------------------
+// Shared index-query logic (used by v2 and v3 index schemas)
+// ---------------------------------------------------------------------------
+
+// Field definitions shared between v2 and v3 index schemas to avoid duplication.
+const indexQueryFields = {
+  id: z.string().min(1),
+  name: z.string().min(1),
+  type: queryTypeSchema,
+  query: z.string().min(1),
+  scheduleCron: z.string().min(1),
+  filterlist: filterlistSchema,
+  enabled: z.boolean(),
+  // Exactly one of index or integrations must be present (enforced in validateIndexQuery).
+  integrations: z.string().optional(),
+  index: z.string().optional(),
+  // Only meaningful when integrations is set; dropped otherwise in transformIndexQuery.
+  datastreamTypes: z.string().optional(),
+  size: z.number().optional(),
+  tiers: z.array(z.string()).optional(),
+  encryptionKeyId: z.string().min(1).optional(),
 };
 
-const parseV1 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV1 => {
-  assertRequiredString(raw, 'id');
-  assertRequiredString(raw, 'name');
-  assertRequiredString(raw, 'index');
-  assertRequiredEnum(raw, 'type', Object.values(QueryType));
-  assertRequiredString(raw, 'query');
-  assertRequiredString(raw, 'scheduleCron');
-  assertRequiredObject(raw, 'filterlist');
-  assertFilterlistActions(raw);
-  assertRequiredBoolean(raw, 'enabled');
+interface IndexQueryRaw {
+  integrations?: string;
+  index?: string;
+  datastreamTypes?: string;
+  id: string;
+  name: string;
+  scheduleCron: string;
+  filterlist: Record<string, Action>;
+  enabled: boolean;
+  type: QueryType;
+  query: string;
+  size?: number;
+  tiers?: string[];
+  encryptionKeyId?: string;
+}
 
-  return { ...(raw as Record<string, unknown>), version: 1 } as HealthDiagnosticQueryV1;
-};
+const validateIndexQuery = (data: IndexQueryRaw, ctx: z.RefinementCtx): void => {
+  const hasIntegrations = typeof data.integrations === 'string' && data.integrations !== '';
+  const hasIndex = typeof data.index === 'string' && data.index !== '';
 
-const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 => {
-  assertRequiredString(raw, 'id');
-  assertRequiredString(raw, 'name');
-  assertRequiredEnum(raw, 'type', Object.values(QueryType));
-  assertRequiredString(raw, 'query');
-  assertRequiredString(raw, 'scheduleCron');
-  assertRequiredObject(raw, 'filterlist');
-  assertFilterlistActions(raw);
-  assertRequiredBoolean(raw, 'enabled');
-
-  const hasIntegrations = raw && typeof raw.integrations === 'string' && raw.integrations !== '';
-  const hasIndex = raw && typeof raw.index === 'string' && raw.index !== '';
   if (!hasIntegrations && !hasIndex) {
-    throw new Error('v2 descriptor must have either integrations or index');
+    ctx.addIssue({
+      code: 'custom',
+      message: 'must have either integrations or index',
+    });
+    return;
   }
   if (hasIntegrations && hasIndex) {
-    throw new Error('v2 descriptor must not have both integrations and index');
+    ctx.addIssue({
+      code: 'custom',
+      message: 'must not have both integrations and index',
+    });
+    return;
   }
+  if (hasIntegrations) {
+    const parts = (data.integrations as string)
+      .split(',')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+    if (parts.length === 0) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'integrations must have at least one non-empty pattern',
+      });
+    }
+  }
+  if (data.datastreamTypes !== undefined) {
+    if (typeof data.datastreamTypes !== 'string' || data.datastreamTypes.trim() === '') {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'datastreamTypes must be a non-empty comma-separated string',
+      });
+    }
+  }
+};
+
+const transformIndexQuery = (data: IndexQueryRaw): IndexQuery => {
+  const hasIntegrations = typeof data.integrations === 'string' && data.integrations !== '';
+  const hasIndex = typeof data.index === 'string' && data.index !== '';
 
   const integrations = hasIntegrations
-    ? (raw.integrations as string)
+    ? (data.integrations as string)
         .split(',')
         .map((p) => p.trim())
         .filter((p) => p.length > 0)
     : undefined;
 
-  if (integrations !== undefined && integrations.length === 0) {
-    throw new Error('integrations must contain at least one non-empty pattern');
-  }
-
-  const typesRaw = (raw as Record<string, unknown>).datastreamTypes;
-  if (typesRaw !== undefined && typesRaw !== null) {
-    if (typeof typesRaw !== 'string' || typesRaw.trim() === '') {
-      throw new Error('datastreamTypes must be a non-empty comma-separated string when present');
-    }
-  }
-  const types =
-    hasIntegrations && typeof typesRaw === 'string'
-      ? typesRaw
+  // datastreamTypes is dropped when index-based (no integration to scope it to).
+  const datastreamTypes =
+    hasIntegrations && typeof data.datastreamTypes === 'string'
+      ? data.datastreamTypes
           .split(',')
           .map((p) => p.trim())
           .filter((p) => p.length > 0)
       : undefined;
 
-  const { datastreamTypes: _drop, ...rest } = raw as Record<string, unknown>;
-  return {
-    ...rest,
-    version: 2,
-    ...(integrations !== undefined ? { integrations } : {}),
-    ...(types !== undefined ? { datastreamTypes: types } : {}),
-  } as HealthDiagnosticQueryV2;
-};
-
-const API_QUERY_REQUIRED_FIELDS = [
-  'id',
-  'name',
-  'version',
-  'type',
-  'api',
-  'scheduleCron',
-  'enabled',
-  'filterlist',
-] as const;
-
-const API_QUERY_OPTIONAL_FIELDS = [
-  'responsePath',
-  'pathParams',
-  'queryParams',
-  'responsePathKey',
-  'integrations',
-  'encryptionKeyId',
-] as const;
-
-const API_QUERY_FORBIDDEN_FIELDS = ['query', 'index', 'size', 'datastreamTypes', 'tiers'] as const;
-
-const INDEX_QUERY_FORBIDDEN_FIELDS_V3 = [
-  'api',
-  'pathParams',
-  'queryParams',
-  'responsePath',
-] as const;
-
-const parseV3 = (raw: Record<string, unknown> | null): HealthDiagnosticQuery => {
-  if (!raw || typeof raw !== 'object') {
-    return parseUnknown(raw, 'invalid_descriptor');
-  }
-  const type = raw.type;
-
-  if (type === 'API') {
-    for (const field of API_QUERY_FORBIDDEN_FIELDS) {
-      if (field in raw) {
-        return parseUnknown(raw, 'invalid_descriptor');
-      }
-    }
-    const knownFields = new Set<string>([
-      ...API_QUERY_REQUIRED_FIELDS,
-      ...API_QUERY_OPTIONAL_FIELDS,
-    ]);
-    for (const key of Object.keys(raw)) {
-      if (!knownFields.has(key)) {
-        return parseUnknown(raw, 'invalid_descriptor');
-      }
-    }
-    try {
-      const api = assertRequiredString(raw, 'api');
-      const pathParams = raw.pathParams as Record<string, string> | undefined;
-      assertPathParamsCoverage(api, pathParams);
-      return {
-        id: assertRequiredString(raw, 'id'),
-        name: assertRequiredString(raw, 'name'),
-        version: 3 as const,
-        type: 'API' as const,
-        api,
-        responsePath: raw.responsePath as string | undefined,
-        scheduleCron: assertRequiredString(raw, 'scheduleCron'),
-        enabled: assertRequiredBoolean(raw, 'enabled'),
-        filterlist: assertFilterlist(raw),
-        pathParams,
-        queryParams: raw.queryParams as Record<string, string | number> | undefined,
-        responsePathKey: raw.responsePathKey as string | undefined,
-        integrations: normalizeIntegrations(raw.integrations),
-        encryptionKeyId: raw.encryptionKeyId as string | undefined,
-      } satisfies HealthDiagnosticQueryV3;
-    } catch (err) {
-      return parseUnknown(raw, 'invalid_descriptor');
-    }
-  }
-
-  if (type === 'DSL' || type === 'EQL' || type === 'ESQL') {
-    for (const field of INDEX_QUERY_FORBIDDEN_FIELDS_V3) {
-      if (field in raw) {
-        return parseUnknown(raw, 'invalid_descriptor');
-      }
-    }
-    return parseV2({ ...raw, version: 2 });
-  }
-
-  return parseUnknown(raw, 'invalid_descriptor');
-};
-
-const parseUnknown = (
-  raw: unknown,
-  failureReason: ParseFailureQuery['failureReason']
-): ParseFailureQuery => {
-  const obj = raw as Record<string, unknown> | null;
-  return {
-    id: obj?.id as string | undefined,
-    name: obj?.name as string | undefined,
-    _raw: raw,
-    failureReason,
+  const q: IndexQuery = {
+    kind: 'index',
+    id: data.id,
+    name: data.name,
+    scheduleCron: data.scheduleCron,
+    filterlist: data.filterlist,
+    enabled: data.enabled,
+    type: data.type,
+    query: data.query,
   };
+  if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
+  if (data.size !== undefined) q.size = data.size;
+  if (data.tiers !== undefined) q.tiers = data.tiers;
+  if (integrations !== undefined) q.integrations = integrations;
+  if (datastreamTypes !== undefined) q.datastreamTypes = datastreamTypes;
+  if (hasIndex) q.index = data.index as string;
+  return q;
 };
 
-const assertRequiredString = (raw: Record<string, unknown> | null, field: string): string => {
-  if (!raw || typeof raw[field] !== 'string' || raw[field] === '') {
-    throw new Error(`Missing or invalid required field: ${field}`);
-  }
-  return raw[field] as string;
-};
+// ---------------------------------------------------------------------------
+// Per-version schemas
+// ---------------------------------------------------------------------------
 
-const assertRequiredObject = (raw: Record<string, unknown> | null, field: string): void => {
-  if (!raw || typeof raw[field] !== 'object' || raw[field] === null || Array.isArray(raw[field])) {
-    throw new Error(`Missing or invalid required field: ${field}`);
-  }
-};
+// V1: index is required; integrations/datastreamTypes are not supported and are stripped.
+const { integrations: _i, datastreamTypes: _d, index: _ix, ...v1BaseFields } = indexQueryFields;
+const v1Schema = z
+  .object({ version: z.literal(1), ...v1BaseFields, index: z.string().min(1) })
+  .transform(transformIndexQuery);
 
-const assertRequiredEnum = (
-  raw: Record<string, unknown> | null,
-  field: string,
-  values: readonly string[]
-): void => {
-  if (!raw || !values.includes(raw[field] as string)) {
-    throw new Error(`Missing or invalid required field: ${field}`);
-  }
-};
+// V2: integrations XOR index (cross-field constraint in validateIndexQuery).
+const v2Schema = z
+  .object({ version: z.literal(2), ...indexQueryFields })
+  .superRefine(validateIndexQuery)
+  .transform(transformIndexQuery);
 
-const assertFilterlistActions = (raw: Record<string, unknown> | null): void => {
-  const fl = raw?.filterlist as Record<string, unknown>;
-  const validActions = Object.values(Action) as string[];
-  for (const value of Object.values(fl)) {
-    if (!validActions.includes(value as string)) {
-      throw new Error(`Invalid filterlist action value: ${value}`);
-    }
-  }
-};
+// V3 index: same rules as v2; .strict() additionally rejects api/pathParams/queryParams/responsePath.
+const v3IndexSchema = z
+  .object({ version: z.literal(3), ...indexQueryFields })
+  .strict()
+  .superRefine(validateIndexQuery)
+  .transform(transformIndexQuery);
 
-const assertRequiredBoolean = (raw: Record<string, unknown> | null, field: string): boolean => {
-  if (!raw || typeof raw[field] !== 'boolean') {
-    throw new Error(`Missing or invalid required field: ${field}`);
-  }
-  return raw[field] as boolean;
-};
-
-const assertFilterlist = (raw: Record<string, unknown> | null): Record<string, Action> => {
-  assertRequiredObject(raw, 'filterlist');
-  assertFilterlistActions(raw);
-  if (!raw) {
-    throw new Error('Missing or invalid required field: filterlist');
-  }
-  return raw.filterlist as Record<string, Action>;
-};
-
-const normalizeIntegrations = (value: unknown): string[] | undefined => {
-  if (value === undefined || value === null) return undefined;
-  if (typeof value === 'string') {
-    const parts = value
+// V3 API integrations: accepts a comma-separated string OR a YAML string[] sequence,
+// unlike v2 integrations which only accepts a string.
+const v3IntegrationsSchema = z.preprocess((val) => {
+  if (val === undefined || val === null) return undefined;
+  if (typeof val === 'string') {
+    const parts = val
       .split(',')
       .map((p) => p.trim())
       .filter((p) => p.length > 0);
     return parts.length > 0 ? parts : undefined;
   }
-  if (Array.isArray(value) && value.every((v) => typeof v === 'string')) {
-    return value.length > 0 ? value : undefined;
-  }
-  throw new Error('integrations must be a comma-separated string or array of strings');
-};
+  if (Array.isArray(val)) return val.length > 0 ? val : undefined;
+  return val; // invalid types pass through to schema validation
+}, z.array(z.string().min(1)).min(1).optional());
 
-const assertPathParamsCoverage = (
-  api: string,
-  pathParams: Record<string, string> | undefined
-): void => {
-  const placeholders = [...api.matchAll(/\{([^}]+)\}/g)].map(([, key]) => key);
-  for (const key of placeholders) {
-    if (!pathParams || !(key in pathParams)) {
-      throw new Error(`Missing path parameter '${key}' for API template: ${api}`);
+// V3 API: targets a Kibana/ES HTTP endpoint.
+// .strict() rejects index/query/tiers/datastreamTypes and any other unknown field.
+const v3ApiSchema = z
+  .object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    version: z.literal(3),
+    type: z.literal('API'),
+    api: z.string().min(1),
+    responsePath: z.string().optional(),
+    scheduleCron: z.string().min(1),
+    enabled: z.boolean(),
+    filterlist: filterlistSchema,
+    pathParams: z.record(z.string(), z.string()).optional(),
+    queryParams: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+    responsePathKey: z.string().optional(),
+    integrations: v3IntegrationsSchema,
+    encryptionKeyId: z.string().min(1).optional(),
+  })
+  .strict()
+  .superRefine((data, ctx) => {
+    // All {placeholder}s in the api template must have a matching pathParams entry.
+    const placeholders = [...data.api.matchAll(/\{([^}]+)\}/g)].map(([, key]) => key);
+    for (const key of placeholders) {
+      if (!data.pathParams || !(key in data.pathParams)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Missing path parameter '${key}' for API template: ${data.api}`,
+        });
+      }
     }
-  }
-};
+  })
+  .transform((data): ApiQuery => {
+    const q: ApiQuery = {
+      kind: 'api',
+      id: data.id,
+      name: data.name,
+      scheduleCron: data.scheduleCron,
+      filterlist: data.filterlist,
+      enabled: data.enabled,
+      api: data.api,
+    };
+    if (data.responsePath !== undefined) q.responsePath = data.responsePath;
+    if (data.pathParams !== undefined) q.pathParams = data.pathParams;
+    if (data.queryParams !== undefined) q.queryParams = data.queryParams;
+    if (data.responsePathKey !== undefined) q.responsePathKey = data.responsePathKey;
+    if (data.integrations !== undefined) q.integrations = data.integrations;
+    if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
+    return q;
+  });
+
+// ---------------------------------------------------------------------------
+// Top-level schema
+// ---------------------------------------------------------------------------
+
+// .catch() maps any parse failure to ParseFailureQuery so callers never deal
+// with Zod errors directly — the output type is always HealthDiagnosticQuery.
+const QueryDescriptor: z.ZodType<HealthDiagnosticQuery> = z
+  .preprocess((raw) => {
+    if (!raw || typeof raw !== 'object') return raw;
+    const obj = raw as Record<string, unknown>;
+    // Descriptors without a version field are legacy v1.
+    return 'version' in obj ? obj : { ...obj, version: 1 };
+  }, z.union([v1Schema, v2Schema, v3ApiSchema, v3IndexSchema]))
+  .catch((ctx) => {
+    const raw = ctx.input as Record<string, unknown> | null;
+    const version = raw?.version;
+    // unknown_version: silently dropped, debug log only, no telemetry stat doc.
+    // invalid_descriptor: warning logged + skipped stat doc emitted.
+    const failureReason: ParseFailureQuery['failureReason'] =
+      typeof version === 'number' && !VALID_VERSIONS.includes(version as ValidVersion)
+        ? 'unknown_version'
+        : 'invalid_descriptor';
+    // z.catch() must return the schema's output type; cast here so the outer
+    // z.ZodType<HealthDiagnosticQuery> annotation covers ParseFailureQuery at call sites.
+    return {
+      id: raw?.id as string | undefined,
+      name: raw?.name as string | undefined,
+      _raw: ctx.input,
+      failureReason,
+    } as unknown as IndexQuery;
+  });
+
+export const parseHealthDiagnosticQueries = (input: unknown): HealthDiagnosticQuery[] =>
+  YAML.parseAllDocuments(input as string).map((doc) => QueryDescriptor.parse(doc.toJSON()));

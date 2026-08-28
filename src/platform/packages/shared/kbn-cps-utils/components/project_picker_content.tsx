@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React, { useMemo, useRef, useCallback } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
@@ -24,7 +25,8 @@ import type { ProjectsData } from '../types';
 import { useFetchProjects } from './use_fetch_projects';
 
 interface ProjectPickerContentBaseProps
-  extends Pick<ProjectPickerStateProviderProps, 'projectRoutingStrategy'> {
+  extends Pick<ProjectPickerStateProviderProps, 'projectRoutingStrategy'>,
+    Pick<ComponentProps<typeof ProjectPickerFrame>, 'showHeader'> {
   projectRouting?: ProjectRouting;
   /**
    * Fetches projects matching a filter-only routing expression.
@@ -61,6 +63,7 @@ export const ProjectPickerContent = ({
   controlsState = 'enabled',
   customHeaderText,
   projectRoutingStrategy,
+  showHeader,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const initialProjectRouting = useRef(projectRouting);
@@ -97,7 +100,11 @@ export const ProjectPickerContent = ({
             controlsState={controlsState}
             projectRoutingStrategy={projectRoutingStrategy}
           >
-            <ProjectPickerFrame maxBodyHeight={maxListHeight} customHeaderText={customHeaderText}>
+            <ProjectPickerFrame
+              maxBodyHeight={maxListHeight}
+              customHeaderText={customHeaderText}
+              showHeader={showHeader}
+            >
               <ProjectPickerList />
             </ProjectPickerFrame>
           </ProjectPickerStateProvider>

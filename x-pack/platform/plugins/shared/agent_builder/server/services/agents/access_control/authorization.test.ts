@@ -25,6 +25,7 @@ import {
 const owner: UserIdAndName = { id: 'owner-id', username: 'alice' };
 const ownerUser: CurrentUser = { id: 'owner-id', username: 'alice', isAdmin: false };
 const bob: CurrentUser = { id: 'bob-id', username: 'bob', isAdmin: false };
+const adminUser: CurrentUser = { id: 'admin-id', username: 'admin', isAdmin: true };
 
 describe('agent access-control authorization', () => {
   describe('isAgentOwner', () => {
@@ -75,8 +76,7 @@ describe('agent access-control authorization', () => {
         getEffectiveAgentRole({
           accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner,
-          currentUser: bob,
-          isAdmin: true,
+          currentUser: adminUser,
         })
       ).toBe('admin');
 
@@ -85,7 +85,6 @@ describe('agent access-control authorization', () => {
           accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner,
           currentUser: ownerUser,
-          isAdmin: false,
         })
       ).toBe('owner');
     });
@@ -99,7 +98,6 @@ describe('agent access-control authorization', () => {
           },
           owner,
           currentUser: bob,
-          isAdmin: false,
         })
       ).toBe(AgentAccessControlRole.Manager);
 
@@ -108,13 +106,12 @@ describe('agent access-control authorization', () => {
           accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner,
           currentUser: bob,
-          isAdmin: false,
         })
       ).toBe(AgentAccessControlRole.Editor);
     });
 
     it('treats a missing access control as public so built-in agents stay usable', () => {
-      const args = { accessControl: undefined, owner, currentUser: bob, isAdmin: false };
+      const args = { accessControl: undefined, owner, currentUser: bob };
 
       expect(getEffectiveAgentRole(args)).toBe(AgentAccessControlRole.Editor);
       expect(hasAgentReadAccess(args)).toBe(true);
@@ -131,7 +128,6 @@ describe('agent access-control authorization', () => {
         },
         owner,
         currentUser: bob,
-        isAdmin: false,
       };
 
       expect(hasAgentReadAccess(args)).toBe(true);
@@ -149,7 +145,6 @@ describe('agent access-control authorization', () => {
         },
         owner,
         currentUser: bob,
-        isAdmin: false,
       };
 
       expect(canDeleteAgent(args)).toBe(true);
@@ -166,7 +161,6 @@ describe('agent access-control authorization', () => {
           },
           owner,
           currentUser: bob,
-          isAdmin: false,
         })
       ).toBe(false);
     });

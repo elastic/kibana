@@ -78,11 +78,12 @@ steps:
         | EVAL severity_score = COALESCE(severity_score, 0)
         | EVAL suppressed_age_minutes = DATE_DIFF("minute", oldest_unprocessed, NOW())
         | WHERE recent_detection_count < ?2 OR suppressed_age_minutes >= ?3 OR severity_score >= ?4
+        | EVAL flaky_probe = recent_detection_count >= ?2 AND suppressed_age_minutes >= ?3
         | EVAL staleness_minutes = DATE_DIFF("minute", @timestamp, NOW())
         | EVAL score = severity_score + staleness_minutes
         | SORT score DESC, @timestamp ASC, _id ASC
         | LIMIT ?1
-        | KEEP rule_uuid, _source, score, recent_detection_count
+        | KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe
       params:
         - '${{ inputs.detectionBatchMax }}'
         - '${{ inputs.flakyRuleDetectionThreshold }}'
@@ -181,10 +182,12 @@ steps:
             items:
               type: string
             description: >-
-              rule_uuid of every detection signal across all events where the final
-              events_write result was written: true or skipped with reason:
-              existing_active_event or unchanged_outcome.
-              Failed (bulk_error) or unattempted writes must not be included.
+              rule_uuid of every detection that is done this cycle: (1) already-recorded
+              known noise/false-positive that exited after the confirmation query without
+              events_write, or (2) a detection whose events_write result was written: true
+              or skipped with reason existing_active_event or unchanged_outcome.
+              Failed (bulk_error) or unattempted writes (except the already-recorded-noise
+              exit) must not be included.
               Used both as a hallucination guardrail (schema validation forces the agent
               to report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
@@ -214,7 +217,7 @@ steps:
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error, existing_active_event, unchanged_outcome]
+                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]
@@ -418,9 +421,12 @@ steps:
                                 concurrency_key: '{{ foreach.item.event_id }}'
                                 context:
                                   source: 'significant_event'
+                                  trigger_type: 'automatic'
                                   event_uuid: '{{ foreach.item.event_uuid }}'
                                   event_id: '{{ foreach.item.event_id }}'
                                   status: '{{ foreach.item.status }}'
+                                  causal_features: '${{ steps.resolve_open_event.output.hits.hits[0]._source.causal_features | default: [] }}'
+                                  blast_radius: '${{ steps.resolve_open_event.output.hits.hits[0]._source.blast_radius | default: [] }}'
 
   - name: output_result
     type: workflow.output
