@@ -66,12 +66,12 @@ export const RoundInput = ({
     width: 100%;
     background: ${isCurrentUser
       ? euiTheme.colors.backgroundLightPrimary
-      : euiTheme.colors.emptyShade};
+      : euiTheme.colors.backgroundBaseSubdued};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
     border-radius: ${isCurrentUser
       ? `0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px`
-      : `${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0`};
+      : `0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px`};
     padding: ${euiTheme.size.m} ${euiTheme.size.base};
   `;
 
