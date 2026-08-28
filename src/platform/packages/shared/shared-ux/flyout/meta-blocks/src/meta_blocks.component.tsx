@@ -78,7 +78,13 @@ export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest 
         const isStringValue = typeof item.value === 'string';
 
         return (
-          <EuiText key={index} size="s" css={memoized.item} data-test-subj={item['data-test-subj']}>
+          <EuiText
+            key={index}
+            size="s"
+            css={memoized.item}
+            data-test-subj={item['data-test-subj']}
+            color="subdued"
+          >
             <span css={memoized.key}>{item.title}</span>
             {isStringValue ? (
               <span css={memoized.truncatedValue}>
