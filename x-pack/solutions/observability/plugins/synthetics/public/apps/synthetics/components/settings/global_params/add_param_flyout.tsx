@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiFlyout,
@@ -84,6 +84,7 @@ export const AddParamFlyout = ({
   const dispatch = useDispatch();
 
   const { isSaving, savedData } = useSelector(selectGlobalParamState);
+  const wasSavingRef = useRef(false);
 
   const onSubmit = (formData: SyntheticsParams) => {
     const { namespaces, ...paramRequest } = formData;
@@ -117,15 +118,23 @@ export const AddParamFlyout = ({
     }
   };
 
-  // Reset before a new save so an identical follow-up message still re-announces.
   useEffect(() => {
     if (isSaving) {
+      // Clear so an identical follow-up message still re-announces.
       setAnnouncement('');
+      wasSavingRef.current = true;
+      return;
     }
-  }, [isSaving]);
 
-  useEffect(() => {
-    if (savedData && !isSaving) {
+    // savedData stays in the reducer after success, so only announce for a save
+    // that started during this mount — not when remounting with stale state.
+    if (!wasSavingRef.current) {
+      return;
+    }
+
+    wasSavingRef.current = false;
+
+    if (savedData) {
       setAnnouncement(isEditingItem ? EDIT_PARAM_SUCCESS_MESSAGE : ADD_PARAM_SUCCESS_MESSAGE);
       closeFlyout();
       dispatch(getGlobalParamAction.get());
