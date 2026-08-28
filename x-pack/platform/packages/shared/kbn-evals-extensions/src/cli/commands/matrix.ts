@@ -44,15 +44,49 @@ export const matrixScoreQuery = (
     modelIds,
     branch,
     lookbackDays,
-  }: Omit<QueryMatrixScoresOptions, 'examplePrefixes' | 'scoring'>
+  }: Omit<QueryMatrixScoresOptions, 'examplePrefixes' | 'scoring' | 'branchBySuite'>
 ): QueryMatrixScoresOptions => ({
   suiteIds,
   modelIds,
   branch,
+  branchBySuite: branchBySuiteFromColumns(config),
   lookbackDays,
   examplePrefixes: [...new Set(config.columns.flatMap((column) => column.examplePrefixes ?? []))],
   scoring: config.scoring,
 });
+
+/**
+ * Collapses per-column `branch` overrides into the suite-keyed map the query
+ * layer consumes.
+ *
+ * Columns address suites, but the score query iterates suites, so an override
+ * declared on a column has to be projected onto every suite that column reads.
+ * Two columns sharing a suite must agree: silently honouring the first would
+ * make the resulting cells depend on config ordering, so a genuine conflict
+ * throws rather than resolving arbitrarily.
+ */
+export const branchBySuiteFromColumns = (config: MatrixConfig): Record<string, string> => {
+  const bySuite: Record<string, string> = {};
+
+  for (const column of config.columns) {
+    if (!column.branch) {
+      continue;
+    }
+    for (const suiteId of column.suites) {
+      const existing = bySuite[suiteId];
+      if (existing !== undefined && existing !== column.branch) {
+        throw new Error(
+          `Conflicting branch overrides for suite "${suiteId}": ` +
+            `"${existing}" and "${column.branch}". A suite is queried once, so its ` +
+            `columns must agree on which branch to read.`
+        );
+      }
+      bySuite[suiteId] = column.branch;
+    }
+  }
+
+  return bySuite;
+};
 
 export const matrixCmd: Command<void> = {
   name: 'matrix',

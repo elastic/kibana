@@ -44,6 +44,51 @@ describe('matrixScoreQuery', () => {
 
     expect(options.examplePrefixes).toEqual(['dup', 'other']);
   });
+
+  // Suite histories are not co-located: the migrations suite publishes on a
+  // feature branch while every persona column lives on `main`. A single global
+  // branch can only satisfy one of them, so the other renders blank.
+  it('maps per-column branch overrides onto their suites', () => {
+    const options = query({
+      columns: [
+        { id: 'persona', label: 'Persona', suites: ['persona-suite'] },
+        {
+          id: 'migrations',
+          label: 'Migrations',
+          suites: ['migrations-suite'],
+          branch: 'feat/matrix-v3',
+        },
+      ],
+    });
+
+    expect(options.branchBySuite).toEqual({ 'migrations-suite': 'feat/matrix-v3' });
+  });
+
+  it('omits suites that do not override the branch', () => {
+    expect(query().branchBySuite).toEqual({});
+  });
+
+  it('rejects conflicting branch overrides for a shared suite', () => {
+    expect(() =>
+      query({
+        columns: [
+          { id: 'a', label: 'A', suites: ['shared'], branch: 'branch-one' },
+          { id: 'b', label: 'B', suites: ['shared'], branch: 'branch-two' },
+        ],
+      })
+    ).toThrow(/Conflicting branch overrides for suite "shared"/);
+  });
+
+  it('accepts agreeing branch overrides for a shared suite', () => {
+    const options = query({
+      columns: [
+        { id: 'a', label: 'A', suites: ['shared'], branch: 'same-branch' },
+        { id: 'b', label: 'B', suites: ['shared'], branch: 'same-branch' },
+      ],
+    });
+
+    expect(options.branchBySuite).toEqual({ shared: 'same-branch' });
+  });
 });
 
 describe('matrix command empty-result guard', () => {

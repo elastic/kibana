@@ -299,7 +299,8 @@
         "LOOKUP JOIN Preservation",
         "NL Description Faithfulness"
       ],
-      "weight": 1
+      "weight": 1,
+      "branch": "feat/evals-extensions-matrix-v3"
     },
     {
       "id": "migrations-dashboards",
@@ -317,7 +318,8 @@
         "Markdown Error Detection",
         "translation_fidelity"
       ],
-      "weight": 1
+      "weight": 1,
+      "branch": "feat/evals-extensions-matrix-v3"
     }
   ],
   "models": [
@@ -396,7 +398,7 @@
     "methodologyNotes": [
       "ExpectedToolCalled is all-or-nothing over the FULL declared expectedTools set since 2026-08-21 (previously only expectedTools[0] was checked). Categories whose skill contract changed (e.g. threat-hunting requiring generate_esql before execute_esql) score lower than in pre-fix matrices for identical traces.",
       "FinalAnswerPresent evaluator added 2026-08-22: scores 0 when a run ends on a tool call with no user-facing final message (observed in 62% of detection-rule-edit runs). Folded into every cell mean.",
-      "MinExpectedSteps evaluator added 2026-08-22: scores 0 when a run made fewer tool calls than the declared expectedTools count — flags premature-termination / 'gave up without trying' (complements FinalAnswerPresent). Folded into every cell mean.",
+      "MinExpectedSteps evaluator added 2026-08-22: scores 0 when a run made fewer tool calls than the declared expectedTools count \u2014 flags premature-termination / 'gave up without trying' (complements FinalAnswerPresent). Folded into every cell mean.",
       "Repetition depth varies by model: determinism-sweep models ran 3 reps/example, batch models 1 rep. Trace cards carry an N reps badge; 1-rep cells have proportionally higher variance.",
       "Scores are means over 10 evaluators (8 score-typed + FinalAnswerPresent + MinExpectedSteps), scaled to 0-10. Token/latency/tool-count observability evaluators are excluded from cell means and shown separately in the token-cost table.",
       "Judged evaluators (Groundedness, Factuality, Relevance) are scored from their categorical verdict via an ordinal ladder since 2026-08-24, not the per-run geometric mean over a re-extracted claim list. Repetitions re-run the agent, which emits semantically equivalent but textually different answers (inter-rep output similarity 0.172, zero identical across 8,482 measured docs); the judge then extracts a different claim list from different prose and the continuous mean wobbles. Measured on 312 multi-repetition cells, rank flip between repetitions falls from 83.3% to 33.3%. Contract evaluators are deterministic and unaffected.",

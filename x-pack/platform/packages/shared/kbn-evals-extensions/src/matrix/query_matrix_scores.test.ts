@@ -186,6 +186,26 @@ describe('queryMatrixScores', () => {
     expect(result.map((model) => model.modelId).sort()).toEqual(['m1', 'm2']);
   });
 
+  it('reads a suite from its branch override instead of the global branch', async () => {
+    const { client, listExperiments } = createClient({
+      m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
+    });
+
+    await queryMatrixScores(client, log, {
+      suiteIds: ['persona-suite', 'migrations-suite'],
+      modelIds: ['m1'],
+      branch: 'main',
+      branchBySuite: { 'migrations-suite': 'feat/matrix-v3' },
+    });
+
+    expect(listExperiments).toHaveBeenCalledWith(
+      expect.objectContaining({ suiteId: 'persona-suite', branch: 'main' })
+    );
+    expect(listExperiments).toHaveBeenCalledWith(
+      expect.objectContaining({ suiteId: 'migrations-suite', branch: 'feat/matrix-v3' })
+    );
+  });
+
   it('picks the newest experiment within the lookback window per model', async () => {
     const now = Date.now();
     const recent = new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString();

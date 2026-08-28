@@ -73,6 +73,12 @@ const columnSchema = schema.object({
    * scale. Set to 1 for evaluators that already emit a 0-10 score.
    */
   scale: schema.maybe(schema.number({ min: 0 })),
+  /**
+   * Git branch this column's experiments are read from, overriding the
+   * top-level `branch`. Suites do not all publish on the same branch, and a
+   * single global branch renders every column that is absent from it blank.
+   */
+  branch: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH })),
   /** Relative weight of this column in the legacy Overall score. Defaults to 1. */
   weight: schema.number({ defaultValue: 1, min: 0 }),
 });

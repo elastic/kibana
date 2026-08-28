@@ -116,6 +116,11 @@ export interface QueryMatrixScoresOptions {
    */
   modelIds: string[];
   branch?: string;
+  /**
+   * Per-suite branch overrides, keyed by suite id. A suite listed here is read
+   * from its mapped branch instead of the global `branch`.
+   */
+  branchBySuite?: Record<string, string>;
   lookbackDays?: number;
   /**
    * When any config column sets `examplePrefixes`, per-example score documents
@@ -287,6 +292,7 @@ export const queryMatrixScores = async (
     suiteIds,
     modelIds,
     branch,
+    branchBySuite,
     lookbackDays,
     examplePrefixes = [],
     scoring,
@@ -295,11 +301,12 @@ export const queryMatrixScores = async (
   const byModel = new Map<string, AggregatedModelScores>();
 
   for (const suiteId of suiteIds) {
+    const suiteBranch = branchBySuite?.[suiteId] ?? branch;
     for (const modelId of modelIds) {
       const experiments = await evalsClient.listExperiments({
         suiteId,
         taskModelId: modelId,
-        branch,
+        branch: suiteBranch,
         limit: MAX_LIST_EXPERIMENTS,
       });
       const [latest] = [...pickLatestExperimentPerModel(experiments, { lookbackDays }).values()];
