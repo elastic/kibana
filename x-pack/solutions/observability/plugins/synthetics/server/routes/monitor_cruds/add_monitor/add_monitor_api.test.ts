@@ -318,6 +318,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         hash: '',
         id: '',
         ignore_https_errors: false,
+        certificate_error_spki_allowlist: [],
         journey_id: '',
         locations: [],
         max_attempts: 2,

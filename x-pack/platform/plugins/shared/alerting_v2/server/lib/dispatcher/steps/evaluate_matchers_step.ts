@@ -10,16 +10,13 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { PolicyCatalog, RuleCatalog } from '../state';
 import type {
-  ActionPolicy,
-  ActionPolicyId,
   AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  Rule,
-  RuleId,
 } from '../types';
 import { createMatcherContext } from './utils/matcher_context';
 
@@ -33,8 +30,8 @@ export class EvaluateMatchersStep implements DispatcherStep {
   ): Promise<DispatcherStepOutput> {
     const {
       dispatchable = [],
-      rules = new Map<RuleId, Rule>(),
-      policies = new Map<ActionPolicyId, ActionPolicy>(),
+      rules = RuleCatalog.empty(),
+      policies = PolicyCatalog.empty(),
     } = state;
 
     const matched = this.evaluateMatchers(dispatchable, rules, policies, logger);
@@ -44,21 +41,17 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
   private evaluateMatchers(
     dispatchable: readonly AlertEpisode[],
-    rules: ReadonlyMap<RuleId, Rule>,
-    policies: ReadonlyMap<ActionPolicyId, ActionPolicy>,
+    rules: RuleCatalog,
+    policies: PolicyCatalog,
     logger: LoggerServiceContract
   ): MatchedPair[] {
     const matched: MatchedPair[] = [];
 
-    const policiesBySpace = Map.groupBy(policies.values(), (policy) => policy.spaceId);
-
     for (const episode of dispatchable) {
-      const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
-      // Internal episodes whose rule is absent (deleted or failed to fetch) are skipped
-      // to prevent catch-all policies from dispatching spurious notifications.
-      if (episode.rule_id != null && rule == null) continue;
+      if (rules.isOrphanedInternalEpisode(episode)) continue;
+      const rule = rules.forEpisode(episode);
 
-      const spacePolicies = policiesBySpace.get(episode.space_id) ?? [];
+      const spacePolicies = policies.inSpace(episode.space_id);
       let context: MatcherContext | undefined;
 
       for (const policy of spacePolicies) {
