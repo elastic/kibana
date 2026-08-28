@@ -16,6 +16,11 @@ import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import {
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  SUPPORTED_IMAGE_MIME_TYPES,
+  MAX_IMAGE_BYTES,
+} from '@kbn/agent-builder-common/attachments';
 import { createConversationPublicClient } from './services/conversation/conversation_public_client';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
@@ -49,6 +54,7 @@ import { registerInferenceFeatures } from './inference_features';
 import { ConversationEventBus } from './workflows/triggers/conversation_event_bus';
 import { registerConversationWorkflowSteps } from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 
 export class AgentBuilderPlugin
@@ -82,6 +88,20 @@ export class AgentBuilderPlugin
     setupDeps: AgentBuilderSetupDependencies
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
+
+    setupDeps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+      http: {
+        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+      },
+    });
+
     // Create usage counter for telemetry (if usageCollection is available)
     if (setupDeps.usageCollection) {
       this.usageCounter = createAgentBuilderUsageCounter(setupDeps.usageCollection);
