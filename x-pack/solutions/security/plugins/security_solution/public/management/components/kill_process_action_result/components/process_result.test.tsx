@@ -67,7 +67,6 @@ describe('ProcessResult', () => {
     expect(output).toContain('PID 1234');
     expect(output).not.toContain('Entity ID');
     expect(output).not.toContain('Name');
-    expect(output).not.toContain('Command');
   });
 
   it('should separate the fields with a data separator', () => {

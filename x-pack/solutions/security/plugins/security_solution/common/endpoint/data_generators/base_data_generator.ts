@@ -164,7 +164,6 @@ const EXECUTABLE_FILE_EXTENSIONS = Object.freeze([
   '.ps1',
   '.apk',
   '.vbs',
-  '.bin',
   '.app',
   '.run',
   '.bin',

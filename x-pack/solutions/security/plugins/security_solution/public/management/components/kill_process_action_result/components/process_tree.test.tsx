@@ -28,7 +28,7 @@ describe('ProcessTree', () => {
 
     processList = generator.generateKillProcessOutputResponse(
       {},
-      { parameters: { kill_descendants: true } }
+      { parameters: { kill_descendants: true, pid: 234 } }
     ).content.descendants!;
 
     render = (props = {}) =>
