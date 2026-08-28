@@ -206,6 +206,11 @@ rule Broken {
       const result = await validateYaraRule(`
         // just a comment
         /* also a comment */
+
+        /*
+          and even a multiline comment
+          rule Rule1 { condition: true }
+        */
       `);
 
       expect(result.errors).toEqual([]);
