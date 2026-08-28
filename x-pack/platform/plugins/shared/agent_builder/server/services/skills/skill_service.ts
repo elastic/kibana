@@ -20,6 +20,7 @@ import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../execution/runner/store/volumes/skills/utils';
+import { AvailabilityCache } from '../common/availability_cache';
 import { createSkillRegistry } from './skill_registry';
 import type { SkillRegistry } from './skill_registry';
 import { createBuiltinSkillProvider } from './builtin';
@@ -114,13 +115,17 @@ class SkillServiceImpl implements SkillService {
     const validated = Promise.all(
       [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
     );
+    const availabilityCache = new AvailabilityCache();
 
     return {
       getRegistry: async ({ request }) => {
         await this.mutationQueue;
         await validated;
         const space = getCurrentSpaceId({ request, spaces });
-        const builtinProvider = createBuiltinSkillProvider([...this.skills.values()]);
+        const builtinProvider = createBuiltinSkillProvider(
+          [...this.skills.values()],
+          availabilityCache
+        );
         const persistedProvider = createPersistedSkillProvider({
           space,
           esClient: elasticsearch.client.asInternalUser,
@@ -165,6 +170,11 @@ class SkillServiceImpl implements SkillService {
           toolRegistry,
           experimentalFeaturesEnabled,
           uiSettingValues,
+          availabilityContext: {
+            request,
+            spaceId: space,
+            uiSettings: uiSettingsClient,
+          },
         });
       },
       registerSkill: (skill) => {
