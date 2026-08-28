@@ -30,7 +30,7 @@ import { getSpaceColor } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeDisplay } from './privilege_display';
 import { copyRole } from '../../../../../../../common/model';
-import type { DisplaySpace } from '../display_space';
+import { createUnresolvedSpaceEntry, type DisplaySpace } from '../display_space';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -81,12 +81,8 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, privilegeIndex) => {
       const spaces = spacePrivs.spaces.map(
         (spaceId): TableSpace =>
-          displaySpaces.find((space) => space.id === spaceId) || {
-            id: spaceId,
-            name: spaceId,
-            disabledFeatures: [],
-            deleted: true,
-          }
+          displaySpaces.find((space) => space.id === spaceId) ||
+          createUnresolvedSpaceEntry(spaceId, { deleted: true })
       );
 
       return {

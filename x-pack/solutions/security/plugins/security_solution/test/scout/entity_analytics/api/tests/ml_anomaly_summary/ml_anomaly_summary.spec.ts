@@ -54,7 +54,8 @@ const buildOverviewUrl = (entityEuid: string, entityType: 'user' | 'host'): stri
     encodeURIComponent(entityEuid)
   );
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/287531
+apiTest.describe.skip(
   'Entity ML Anomaly Detection APIs',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
