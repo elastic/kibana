@@ -164,7 +164,7 @@ export function initializeLayoutManager(
 
     for (const [uuid, child] of Object.entries(children$.value)) {
       const nextChildState = childStateToApply[uuid];
-      if (apiHasSerializableState(child)) {
+      if (nextChildState && apiHasSerializableState(child)) {
         child.applySerializedState(nextChildState);
       }
     }
