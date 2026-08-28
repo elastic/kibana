@@ -74,6 +74,12 @@ export interface GetInvestigationResponse {
   error?: string;
 }
 
+export interface InvestigationStatusEvent {
+  type: 'investigation_status';
+  investigation_id: string;
+  status: InvestigationStatus;
+}
+
 export interface ListInvestigationsRequest {
   statuses?: InvestigationStatus[];
   started_after?: string;
