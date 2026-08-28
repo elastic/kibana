@@ -218,7 +218,11 @@ async function runIntegration(
     droppedTargets: 0,
     relationshipTypeApplied: {},
   };
-  let totalMetadataResult: WriteRelationshipMetadatasResult = { docsAttempted: 0, docsApplied: 0, docsFailed: 0 };
+  let totalMetadataResult: WriteRelationshipMetadatasResult = {
+    docsAttempted: 0,
+    docsApplied: 0,
+    docsFailed: 0,
+  };
 
   try {
     do {
