@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme, type EuiFlexGroupProps } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  euiCanAnimate,
+  useEuiTheme,
+  type EuiFlexGroupProps,
+} from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -71,7 +77,9 @@ const UploadingImagePill: React.FC<{ name: string }> = ({ name }) => {
             width: 40%;
             border-radius: 999px;
             background: ${euiTheme.colors.backgroundFilledText};
-            animation: ${indeterminateProgressSweep} 1.4s ease-in-out infinite;
+            ${euiCanAnimate} {
+              animation: ${indeterminateProgressSweep} 1.4s ease-in-out infinite;
+            }
           `}
         />
       </div>

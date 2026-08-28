@@ -22,14 +22,13 @@ export interface UseImageUploadParams {
 
 export interface UseImageUploadResult {
   uploadingNames: Set<string>;
-  handlePasteFile: (file: File) => string | undefined;
+  handlePasteFile?: (file: File) => string | undefined;
   handleAfterInput: () => void;
   handleRemoveAttachment?: (attachment: ConversationAttachment) => void;
 }
 
 const EMPTY_UPLOADING_NAMES = new Set<string>();
 const NOOP = () => {};
-const NOOP_HANDLE_PASTE_FILE = (): string | undefined => undefined;
 
 export const useImageUpload = ({
   addErrorToast,
@@ -172,7 +171,7 @@ export const useImageUpload = ({
   const isImageUploadEnabled = useExperimentalFeatures();
   if (!isImageUploadEnabled) {
     result.uploadingNames = EMPTY_UPLOADING_NAMES;
-    result.handlePasteFile = NOOP_HANDLE_PASTE_FILE;
+    result.handlePasteFile = undefined;
     result.handleAfterInput = NOOP;
     result.handleRemoveAttachment = undefined;
   }
