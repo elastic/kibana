@@ -46,6 +46,7 @@ import {
   getHostIsolationExceptionsListPath,
   getTrustedAppsListPath,
   getTrustedDevicesListPath,
+  getCustomYaraSignaturesListPath,
 } from './common/routing';
 import { IconResponseActionHistory } from '../common/icons/response_action_history';
 import { IconEndpoints } from '../common/icons/endpoints';
@@ -198,6 +199,7 @@ export interface ArtifactAuthz {
   canReadEventFilters: boolean;
   showHostIsolationExceptions: boolean;
   canReadBlocklist: boolean;
+  canReadCustomYaraSignatures: boolean;
 }
 
 /**
@@ -208,8 +210,11 @@ export const getFirstAllowedArtifactPath = (
   artifactAuthz: ArtifactAuthz,
   experimentalFeatures: ExperimentalFeatures
 ): string => {
-  const { endpointExceptionsMovedUnderManagement, trustedDevices: trustedDevicesEnabled } =
-    experimentalFeatures;
+  const {
+    endpointExceptionsMovedUnderManagement,
+    trustedDevices: trustedDevicesEnabled,
+    customYaraSignaturesEnabled,
+  } = experimentalFeatures;
   const {
     canReadEndpointExceptions,
     canReadTrustedApplications,
@@ -217,6 +222,7 @@ export const getFirstAllowedArtifactPath = (
     canReadEventFilters,
     showHostIsolationExceptions,
     canReadBlocklist,
+    canReadCustomYaraSignatures,
   } = artifactAuthz;
 
   if (endpointExceptionsMovedUnderManagement && canReadEndpointExceptions) {
@@ -237,6 +243,9 @@ export const getFirstAllowedArtifactPath = (
   if (canReadBlocklist) {
     return getBlocklistsListPath();
   }
+  if (customYaraSignaturesEnabled && canReadCustomYaraSignatures) {
+    return getCustomYaraSignaturesListPath();
+  }
   return getTrustedAppsListPath();
 };
 
@@ -245,8 +254,11 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins,
   experimentalFeatures: ExperimentalFeatures
 ): Promise<LinkItem> => {
-  const { endpointExceptionsMovedUnderManagement, trustedDevices: trustedDevicesEnabled } =
-    experimentalFeatures;
+  const {
+    endpointExceptionsMovedUnderManagement,
+    trustedDevices: trustedDevicesEnabled,
+    customYaraSignaturesEnabled,
+  } = experimentalFeatures;
 
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
@@ -262,6 +274,7 @@ export const getManagementFilteredLinks = async (
     canReadTrustedDevices,
     canReadEventFilters,
     canReadBlocklist,
+    canReadCustomYaraSignatures,
     canReadPolicyManagement,
     canReadScriptsLibrary,
   } =
@@ -293,7 +306,8 @@ export const getManagementFilteredLinks = async (
     (trustedDevicesEnabled && canReadTrustedDevices) ||
     canReadEventFilters ||
     showHostIsolationExceptions ||
-    canReadBlocklist;
+    canReadBlocklist ||
+    (customYaraSignaturesEnabled && canReadCustomYaraSignatures);
   if (!canReadAnyArtifact) {
     linksToExclude.push(SecurityPageName.artifacts);
   }
@@ -317,6 +331,7 @@ export const getManagementFilteredLinks = async (
           canReadEventFilters,
           showHostIsolationExceptions,
           canReadBlocklist,
+          canReadCustomYaraSignatures,
         },
         experimentalFeatures
       )

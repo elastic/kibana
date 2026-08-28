@@ -29,6 +29,7 @@ export const MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH = `${MANAGEMENT_PATH}/:tabN
 export const MANAGEMENT_ROUTING_EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.eventFilters})`;
 export const MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.hostIsolationExceptions})`;
 export const MANAGEMENT_ROUTING_BLOCKLIST_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.blocklist})`;
+export const MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.customYaraSignatures})`;
 export const MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.responseActionsHistory})`;
 export const MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.scriptLibrary})`;
 
@@ -40,6 +41,7 @@ export const ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS: readonly string[] = [
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
+  MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH,
 ];
 
 // --[ STORE ]---------------------------------------------------------------------------

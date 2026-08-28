@@ -34,6 +34,7 @@ import {
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getBlocklistsListPath,
+  getCustomYaraSignaturesListPath,
 } from '../../common/routing';
 import { EndpointExceptions } from '../endpoint_exceptions/view/endpoint_exceptions';
 import { TrustedAppsList } from '../trusted_apps/view/trusted_apps_list';
@@ -41,6 +42,7 @@ import { TrustedDevicesList } from '../trusted_devices/view/trusted_devices_list
 import { EventFiltersList } from '../event_filters/view/event_filters_list';
 import { HostIsolationExceptionsList } from '../host_isolation_exceptions/view/host_isolation_exceptions_list';
 import { Blocklist } from '../blocklist/view/blocklist';
+import { CustomYaraSignaturesList } from '../custom_yara_signatures/view/custom_yara_signatures_list';
 import {
   ENDPOINT_EXCEPTIONS_TAB,
   TRUSTED_APPS_TAB,
@@ -48,6 +50,7 @@ import {
   EVENT_FILTERS_TAB,
   HOST_ISOLATION_EXCEPTIONS_TAB,
   BLOCKLIST_TAB,
+  CUSTOM_YARA_SIGNATURES_TAB,
 } from '../../common/translations';
 
 const ARTIFACTS_PAGE_TITLE = i18n.translate('xpack.securitySolution.artifacts.pageTitle', {
@@ -69,6 +72,7 @@ const TAB_PAGE_NAMES: Partial<Record<AdministrationSubTab, SecurityPageName>> = 
   [AdministrationSubTab.eventFilters]: SecurityPageName.eventFilters,
   [AdministrationSubTab.hostIsolationExceptions]: SecurityPageName.hostIsolationExceptions,
   [AdministrationSubTab.blocklist]: SecurityPageName.blocklist,
+  [AdministrationSubTab.customYaraSignatures]: SecurityPageName.customYaraSignatures,
 };
 
 const ARTIFACT_SUB_TABS: AdministrationSubTab[] = [
@@ -78,6 +82,7 @@ const ARTIFACT_SUB_TABS: AdministrationSubTab[] = [
   AdministrationSubTab.eventFilters,
   AdministrationSubTab.hostIsolationExceptions,
   AdministrationSubTab.blocklist,
+  AdministrationSubTab.customYaraSignatures,
 ];
 
 function getTabLabel(tab: AdministrationSubTab): string {
@@ -94,6 +99,8 @@ function getTabLabel(tab: AdministrationSubTab): string {
       return HOST_ISOLATION_EXCEPTIONS_TAB;
     case AdministrationSubTab.blocklist:
       return BLOCKLIST_TAB;
+    case AdministrationSubTab.customYaraSignatures:
+      return CUSTOM_YARA_SIGNATURES_TAB;
     default:
       return tab;
   }
@@ -116,6 +123,8 @@ function getPathForTab(
       return getHostIsolationExceptionsListPath();
     case AdministrationSubTab.blocklist:
       return getBlocklistsListPath();
+    case AdministrationSubTab.customYaraSignatures:
+      return getCustomYaraSignaturesListPath();
     default:
       // visibleTabs[0] covers all reachable cases; the getTrustedAppsListPath fallback
       // is unreachable because canReadAnyArtifact would be false and the link excluded
@@ -143,6 +152,9 @@ export const ArtifactsPage = memo(() => {
     'endpointExceptionsMovedUnderManagement'
   );
   const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const customYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
+    'customYaraSignaturesEnabled'
+  );
   const {
     canReadBlocklist,
     canReadTrustedApplications,
@@ -151,6 +163,7 @@ export const ArtifactsPage = memo(() => {
     canReadHostIsolationExceptions,
     canAccessHostIsolationExceptions,
     canReadEndpointExceptions,
+    canReadCustomYaraSignatures,
   } = useUserPrivileges().endpointPrivileges;
 
   const getHostIsolationExceptionsApiClientInstance = useCallback(
@@ -188,11 +201,15 @@ export const ArtifactsPage = memo(() => {
       if (tab === AdministrationSubTab.blocklist) {
         return canReadBlocklist;
       }
+      if (tab === AdministrationSubTab.customYaraSignatures) {
+        return customYaraSignaturesEnabled && canReadCustomYaraSignatures;
+      }
       return true;
     });
   }, [
     endpointExceptionsMovedUnderManagement,
     trustedDevicesEnabled,
+    customYaraSignaturesEnabled,
     canReadEndpointExceptions,
     canReadTrustedApplications,
     canReadTrustedDevices,
@@ -201,6 +218,7 @@ export const ArtifactsPage = memo(() => {
     isHostIsolationExceptionsAccessLoading,
     hasAccessToHostIsolationExceptions,
     canReadBlocklist,
+    canReadCustomYaraSignatures,
   ]);
 
   const activeTab = useMemo(
@@ -262,6 +280,7 @@ export const ArtifactsPage = memo(() => {
           !isHostIsolationExceptionsAccessLoading &&
           hasAccessToHostIsolationExceptions && <HostIsolationExceptionsList />}
         {activeTab === AdministrationSubTab.blocklist && <Blocklist />}
+        {activeTab === AdministrationSubTab.customYaraSignatures && <CustomYaraSignaturesList />}
         <SpyRoute pageName={SecurityPageName.artifacts} />
       </TrackApplicationView>
     </AdministrationListPage>
