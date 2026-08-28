@@ -9,7 +9,7 @@
 
 import { monaco } from '../monaco_imports';
 import type { BaseWorkerDefinition } from '../types';
-import { getWorker } from '../worker_factory';
+import { getWorker } from '../languages/worker_factory';
 
 export class WorkerProxyService<IWorker extends BaseWorkerDefinition> {
   private worker: monaco.editor.MonacoWebWorker<IWorker> | undefined;

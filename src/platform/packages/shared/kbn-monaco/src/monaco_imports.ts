@@ -9,11 +9,6 @@
 
 /* eslint-disable @kbn/eslint/module_migration */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import {
-  MenuId,
-  MenuRegistry,
-  type MenuItem,
-} from 'monaco-editor/esm/vs/platform/actions/common/actions.js';
 
 import 'monaco-editor/esm/vs/base/common/worker/webWorker';
 import 'monaco-editor/esm/vs/base/browser/webWorkerFactory';
@@ -72,99 +67,10 @@ export {
   language as yamlLanguage,
 } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
 
-import type { CustomLangModuleType } from './types';
-
-const CLIPBOARD_ACTION_IDS = new Set([
-  'editor.action.clipboardCutAction',
-  'editor.action.clipboardCopyAction',
-  'editor.action.clipboardPasteAction',
-]);
-
-/** Returns Monaco's native clipboard actions for the editor context menu. */
-export const getClipboardMenuActions = (): MenuItem[] =>
-  MenuRegistry.getMenuItems(MenuId.EditorContext).filter((menuItem) =>
-    CLIPBOARD_ACTION_IDS.has(menuItem.command?.id ?? '')
-  );
-
-export interface ClipboardContextMenuLabels {
-  cut: string;
-  copy: string;
-  paste: string;
-}
-
-/** Applies translated labels to Monaco's native clipboard context menu actions. */
-export const setClipboardContextMenuLabels = ({
-  cut,
-  copy,
-  paste,
-}: ClipboardContextMenuLabels): void => {
-  const actionLabels = new Map([
-    ['editor.action.clipboardCutAction', cut],
-    ['editor.action.clipboardCopyAction', copy],
-    ['editor.action.clipboardPasteAction', paste],
-  ]);
-
-  for (const menuItem of getClipboardMenuActions()) {
-    if (menuItem.command) {
-      const actionLabel = actionLabels.get(menuItem.command.id);
-      if (actionLabel) {
-        menuItem.command.title = actionLabel;
-      }
-    }
-  }
-};
-
-const languageThemeResolverDefinitions = new Map<
-  string,
-  CustomLangModuleType['languageThemeResolver']
->();
-
-declare module 'monaco-editor/esm/vs/editor/editor.api' {
-  // eslint-disable-next-line @typescript-eslint/no-namespace -- augment monaco editor types
-  export namespace editor {
-    /**
-     * @description Registers language theme definition for a language
-     */
-    function registerLanguageThemeResolver(
-      langId: string,
-      languageThemeResolver: CustomLangModuleType['languageThemeResolver'],
-      forceOverride?: boolean
-    ): void;
-    /**
-     * @description Returns the registered language theme definition for the provided id
-     */
-    function getLanguageThemeResolver(
-      langId: string
-    ): CustomLangModuleType['languageThemeResolver'];
-  }
-}
-
-// add custom methods to monaco editor
-Object.defineProperties(monaco.editor, {
-  /**
-   * @description Registration for implementation of {@link monaco.editor.registerLanguageThemeResolver}
-   */
-  registerLanguageThemeResolver: {
-    value: ((langId, languageThemeDefinition, forceOverride) => {
-      if (!forceOverride && languageThemeResolverDefinitions.has(langId)) {
-        throw new Error(`Language theme resolver for ${langId} is already registered`);
-      }
-      languageThemeResolverDefinitions.set(langId, languageThemeDefinition);
-    }) satisfies typeof monaco.editor.registerLanguageThemeResolver,
-    enumerable: true,
-    configurable: false,
-  },
-  /**
-   * @description Registration for implementation of {@link monaco.editor.getLanguageThemeResolver}
-   */
-  getLanguageThemeResolver: {
-    value: ((langId) =>
-      languageThemeResolverDefinitions.get(
-        langId
-      )) satisfies typeof monaco.editor.getLanguageThemeResolver,
-    enumerable: true,
-    configurable: false,
-  },
-});
+export {
+  MenuId,
+  MenuRegistry,
+  type MenuItem,
+} from 'monaco-editor/esm/vs/platform/actions/common/actions.js';
 
 export { monaco };
