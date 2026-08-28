@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { YAML_LANG_ID } from './languages';
 import { monaco } from './monaco_imports';
-import { getWorker, getWorkerUrl } from './worker_factory';
+import type { CustomLangModuleType } from './types';
+import { getWorker } from './languages/worker_factory';
 
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
   export interface Environment {
@@ -17,7 +17,7 @@ declare module 'monaco-editor/esm/vs/editor/editor.api' {
     monaco: typeof monaco;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-namespace -- augment monaco editor types for better editor contribution typing
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- augment monaco editor types
   export namespace editor {
     // Define overloads for the getContribution method to allow for better typing of the editor contributions
     interface ICodeEditor {
@@ -36,54 +36,68 @@ declare module 'monaco-editor/esm/vs/editor/editor.api' {
         | null;
       getContribution(id: 'editor.contrib.messageController'):
         | (editor.IEditorContribution & {
-            // add type augmentation for the messageController contribution for the showMessage property, which is not documented in monaco but is available on the vscode upstream,
+            // add type augmentation for the messageController contribution for the showMessage property,
+            // which is not documented in monaco but is available on the vscode upstream,
             // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/message/browser/messageController.ts#L62
             showMessage?: (message: string, position: monaco.Position | null) => void;
           })
         | undefined;
     }
+
+    /**
+     * @description Registers language theme definition for a language
+     */
+    function registerLanguageThemeResolver(
+      langId: string,
+      languageThemeResolver: CustomLangModuleType['languageThemeResolver'],
+      forceOverride?: boolean
+    ): void;
+    /**
+     * @description Returns the registered language theme definition for the provided id
+     */
+    function getLanguageThemeResolver(
+      langId: string
+    ): CustomLangModuleType['languageThemeResolver'];
   }
 }
 
 window.MonacoEnvironment = {
   // passed for use in functional and unit tests so that we can verify values from 'editor'
   monaco,
-  getWorkerUrl: (_: string, languageId: string) => getWorkerUrl(languageId),
+  getWorker: (_moduleId, languageId) => {
+    return getWorker(languageId);
+  },
 };
 
-// Monaco 0.54 changed createWebWorker to accept `{ worker: Worker|Promise<Worker> }` instead of
-// the previous `{ moduleId, label, createData }`. monaco-yaml (via monaco-worker-manager@2) still
-// uses the old signature. This shim intercepts old-style calls, manually creates the Worker, sends
-// the two initialization messages monaco-worker-manager requires before Monaco's own INITIALIZE
-// handshake, then forwards to the real createWebWorker with the new API.
-//
-// TODO: remove this shim once monaco-yaml (currently 5.4.0) / monaco-worker-manager (currently
-// 2.0.1, unmaintained as of 2022) is updated to pass a `worker` factory directly and no longer
-// calls createWebWorker with the old `{ moduleId }` shape. No upstream tracking issue exists yet;
-// check both repos when upgrading monaco-yaml.
-{
-  // Monaco's editor.api.d.ts merges two `editor` namespaces so `createWebWorker` is typed only as
-  // the legacy `{ moduleId }` overload; the runtime accepts `IInternalWebWorkerOptions` as well.
-  const originalCreateWebWorker = monaco.editor.createWebWorker as <T extends object>(
-    opts: monaco.editor.IInternalWebWorkerOptions | monaco.editor.IWebWorkerOptions
-  ) => monaco.editor.MonacoWebWorker<T>;
-  monaco.editor.createWebWorker = function (opts: any) {
-    // Only shim the old `{ moduleId }` signature used by monaco-yaml via monaco-worker-manager.
-    // Kibana's own workers (painless, xjson, console) bypass this path entirely by passing { worker }.
-    if (opts?.moduleId && !opts?.worker && opts?.label === YAML_LANG_ID) {
-      const label: string = opts.label;
-      const url: string = getWorkerUrl(label);
-      if (url) {
-        const worker = getWorker(label);
-        worker.postMessage({}); // trigger: installs monaco-worker-manager's onmessage handler
-        worker.postMessage(opts.createData ?? {}); // createData payload for the language service factory
-        return originalCreateWebWorker.call(this, {
-          worker,
-          host: opts.host,
-          keepIdleModels: opts.keepIdleModels,
-        });
+const languageThemeResolverDefinitions = new Map<
+  string,
+  CustomLangModuleType['languageThemeResolver']
+>();
+
+// add custom methods to monaco editor
+Object.defineProperties(monaco.editor, {
+  /**
+   * @description Registration for implementation of {@link monaco.editor.registerLanguageThemeResolver}
+   */
+  registerLanguageThemeResolver: {
+    value: ((langId, languageThemeDefinition, forceOverride) => {
+      if (!forceOverride && languageThemeResolverDefinitions.has(langId)) {
+        throw new Error(`Language theme resolver for ${langId} is already registered`);
       }
-    }
-    return originalCreateWebWorker.call(this, opts);
-  };
-}
+      languageThemeResolverDefinitions.set(langId, languageThemeDefinition);
+    }) satisfies typeof monaco.editor.registerLanguageThemeResolver,
+    enumerable: true,
+    configurable: false,
+  },
+  /**
+   * @description Registration for implementation of {@link monaco.editor.getLanguageThemeResolver}
+   */
+  getLanguageThemeResolver: {
+    value: ((langId) =>
+      languageThemeResolverDefinitions.get(
+        langId
+      )) satisfies typeof monaco.editor.getLanguageThemeResolver,
+    enumerable: true,
+    configurable: false,
+  },
+});
