@@ -252,6 +252,10 @@ Hooks are not the answer today: `HookLifecycle` has only `beforeAgent` / `before
 
 `agent_builder` gained no dependency on `adaptive_ui` and no knowledge of Adaptive UI: it holds a registry keyed by `ConversationOriginType` and calls whatever is registered. Swapping `renderMarkdown` for `renderSlack` in the projector is what bucket B's B1 becomes — the seam does not move.
 
+Root-relative `href`s are rewritten against the space-aware public Kibana origin before rendering — a bare `/app/…` link is dead once it leaves Kibana, which is why `SurfaceProjectionInput` carries `spaceId`.
+
+**Known divergence:** the server matches render tags with its own regex rather than the remark plugin's parser. Sharing `renderAttachmentElement` bounds the drift — tag and attribute names cannot diverge — but the two still differ on edge cases such as a tag inside a fenced code block, which the remark plugin leaves alone and this one substitutes. Acceptable for a PoC; a shared parser is the durable fix. `resolveAttachmentVersion` *is* now shared, in `@kbn/agent-builder-common/attachments`.
+
 Deliberately not built: per-message projection (B3, cross-repo), Block Kit on the wire (B2), and charts. The terminal-only lossiness stands as documented.
 
 ## Plan, ordered by what Relay can already render

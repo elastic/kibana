@@ -40,10 +40,12 @@ export const getSurfaceProjector = ({
  * readable-but-unprojected Slack post beats a dropped one.
  */
 export const projectRoundForSurface = async ({
+  execution,
   event,
   projector,
   logger,
 }: {
+  execution: AgentExecution;
   event: RoundCompleteEvent;
   projector: SurfaceProjectorDefinition;
   logger: Logger;
@@ -60,6 +62,7 @@ export const projectRoundForSurface = async ({
       message,
       attachments: attachments ?? [],
       attachmentRefs: round.input?.attachment_refs,
+      spaceId: execution.spaceId,
     });
 
     if (!projection) {

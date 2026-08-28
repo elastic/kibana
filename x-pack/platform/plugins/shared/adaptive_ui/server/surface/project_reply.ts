@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import { renderMarkdown } from '@kbn/adaptive-ui';
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type {
@@ -13,6 +14,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { resolveAttachmentVersion } from '@kbn/agent-builder-common/attachments';
 
+import { absolutizeViewSpecHrefs } from '../slack/absolutize_hrefs';
 import { toViewSpec } from './attachment_view_specs';
 
 const { tagName, attributes } = renderAttachmentElement;
@@ -41,11 +43,22 @@ export const projectReplyToMarkdown = ({
   message,
   attachments,
   attachmentRefs,
+  kibanaUrl,
+  logger,
 }: {
   message: string;
   attachments: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
+  /** Public Kibana origin; root-relative `href`s are rewritten against it so links work off-site. */
+  kibanaUrl?: string;
+  logger?: Logger;
 }): string => {
+  // A reply with nothing to substitute is passed through byte-for-byte; the whitespace
+  // cleanup below exists only to tidy up after a removed tag.
+  if (!new RegExp(renderAttachmentTagPattern.source).test(message)) {
+    return message;
+  }
+
   const byId = new Map(attachments.map((attachment) => [attachment.id, attachment]));
 
   const projected = message.replace(renderAttachmentTagPattern, (tag) => {
@@ -68,9 +81,13 @@ export const projectReplyToMarkdown = ({
       return unresolvedTagFallback(attachmentId);
     }
 
-    const spec = toViewSpec({ type: attachment.type, data });
+    const spec = toViewSpec({ type: attachment.type, data, logger });
 
-    return spec ? renderMarkdown(spec) : unresolvedTagFallback(attachmentId);
+    if (!spec) {
+      return unresolvedTagFallback(attachmentId);
+    }
+
+    return renderMarkdown(kibanaUrl ? absolutizeViewSpecHrefs(spec, kibanaUrl) : spec);
   });
 
   // Substitution can leave the blank lines that surrounded a tag stacked up.

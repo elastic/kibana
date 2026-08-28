@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import { parseViewSpec, type ViewSpec } from '@kbn/adaptive-ui';
 import {
   toTextViewSpec,
@@ -65,27 +66,39 @@ const attachmentViewSpecAdapters: Record<string, (data: never) => ViewSpec> = {
 export const toViewSpec = ({
   type,
   data,
+  logger,
 }: {
   type: string;
   data: unknown;
+  logger?: Logger;
 }): ViewSpec | undefined => {
   if (type === ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE) {
     const parsed = parseViewSpec(data);
 
-    return parsed.valid && parsed.spec ? parsed.spec : undefined;
+    if (!parsed.valid || !parsed.spec) {
+      logger?.debug(`Attachment of type "${type}" did not parse as a ViewSpec, degrading`);
+
+      return undefined;
+    }
+
+    return parsed.spec;
   }
 
   const adapter = attachmentViewSpecAdapters[type];
 
   if (!adapter) {
+    logger?.debug(`No ViewSpec adapter registered for attachment type "${type}", degrading`);
+
     return undefined;
   }
 
   try {
     return adapter(data as never);
-  } catch {
+  } catch (error) {
     // Adapters assume well-formed data; a stored attachment that predates a shape change
     // should degrade to the text fallback, not abort the surrounding projection.
+    logger?.debug(`ViewSpec adapter for "${type}" threw, degrading: ${error.message}`);
+
     return undefined;
   }
 };

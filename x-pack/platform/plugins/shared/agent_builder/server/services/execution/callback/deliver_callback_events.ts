@@ -75,7 +75,7 @@ export const deliverCallbackEvents = ({
     // why per-message projection needs the external host to post more than once per turn.
     const payloadEvent$ =
       isRoundCompleteEvent(event) && projector
-        ? from(projectRoundForSurface({ event, projector, logger }))
+        ? from(projectRoundForSurface({ execution, event, projector, logger }))
         : of(event);
 
     const delivery = payloadEvent$.pipe(

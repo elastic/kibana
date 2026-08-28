@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
-import type { AgentBuilderPluginSetup, SurfaceProjectorDefinition } from '@kbn/agent-builder-server';
+import type {
+  AgentBuilderPluginSetup,
+  SurfaceProjectorDefinition,
+} from '@kbn/agent-builder-server';
+import { getKibanaPublicUrl, type KibanaPublicUrlHttp } from '../kibana_public_url';
 import { projectReplyToMarkdown } from './project_reply';
 
 /**
@@ -16,13 +21,28 @@ import { projectReplyToMarkdown } from './project_reply';
  * projection lands inside that string. Richer Block Kit output is the same composition
  * through `renderSlack`, and needs a Relay-side contract to carry it.
  */
-export const slackSurfaceProjector: SurfaceProjectorDefinition = {
+export const createSlackSurfaceProjector = ({
+  http,
+  logger,
+}: {
+  http: KibanaPublicUrlHttp;
+  logger?: Logger;
+}): SurfaceProjectorDefinition => ({
   surface: ConversationOriginType.Slack,
-  project: async ({ message, attachments, attachmentRefs }) => ({
-    message: projectReplyToMarkdown({ message, attachments, attachmentRefs }),
+  project: async ({ message, attachments, attachmentRefs, spaceId }) => ({
+    message: projectReplyToMarkdown({
+      message,
+      attachments,
+      attachmentRefs,
+      kibanaUrl: getKibanaPublicUrl({ http, spaceId }),
+      logger,
+    }),
   }),
-};
+});
 
-export const registerSlackSurfaceProjector = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.surfaceProjection.register(slackSurfaceProjector);
+export const registerSlackSurfaceProjector = (
+  agentBuilder: AgentBuilderPluginSetup,
+  deps: { http: KibanaPublicUrlHttp; logger?: Logger }
+): void => {
+  agentBuilder.surfaceProjection.register(createSlackSurfaceProjector(deps));
 };

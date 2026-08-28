@@ -25,6 +25,8 @@ export interface SurfaceProjectionInput {
   attachments: VersionedAttachment[];
   /** Round-level refs, used to pick a version when a tag does not name one. */
   attachmentRefs?: AttachmentVersionRef[];
+  /** Space the execution ran in; external surfaces need absolute, space-aware links. */
+  spaceId: string;
 }
 
 /**
