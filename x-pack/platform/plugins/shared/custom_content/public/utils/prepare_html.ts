@@ -7,6 +7,7 @@
 
 import DOMPurify from 'dompurify';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
@@ -38,16 +39,21 @@ export function injectStyleTag(html: string, style: string): string {
  * box-sizing reset those imply.
  *
  * Emitted *before* any template CSS (`injectStyleTag` inserts at the top of `<head>`), so an author
- * or generated rule of equal specificity wins. A floor, not a lock-in — never add `!important`, and
- * never append this after the template's own styles.
+ * or generated rule of equal specificity wins. A floor, not a lock-in — never append this after the
+ * template's own styles.
  *
  * Deliberately does not style headings, tables or lists. Those are the template's business; the
  * point here is only that a panel with no CSS of its own does not render as a bare browser
  * document. Everything is a token, so it tracks the theme without reading it.
+ *
+ * The body background is the sole `!important`. Generated templates set `background: #0d1117` and
+ * similar despite the prompt forbidding it, which renders the whole panel as a dark slab for every
+ * light-mode user. Nothing else is locked.
  */
 const BASE_STYLES = `
-body{margin:0;padding:var(--cc-space-l);box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text);background:var(--cc-color-background)}
+body{margin:0;padding:var(--cc-space-l);box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text)}
 *,*::before,*::after{box-sizing:inherit}
+body{background:var(--cc-color-background)!important}
 `;
 
 export function buildThemeCss(
@@ -77,8 +83,14 @@ export function buildThemeCss(
     ['--cc-space-l', t.size.base],
     ['--cc-space-xl', t.size.l],
     ['--cc-radius', String(t.border.radius.medium ?? '6px')],
+    ['--cc-radius-s', String(t.border.radius.small ?? '4px')],
     ['--cc-font-family', t.font.family]
   );
+
+  // This is EUI's own colorblind-safe visualization palette.
+  euiPaletteColorBlind().forEach((color, index) => {
+    vars.push([`--cc-vis-${index}`, color]);
+  });
 
   return `:root{${vars.map(([k, v]) => `${k}:${v}`).join(';')}}${BASE_STYLES}`;
 }

@@ -57,7 +57,7 @@ const mockEuiTheme = {
     borderBasePlain: '#D3DAE6',
   },
   size: { xs: '4px', s: '8px', m: '12px', base: '16px', l: '24px' },
-  border: { radius: { medium: '6px' } },
+  border: { radius: { medium: '6px', small: '4px' } },
   font: {
     family: 'Inter, sans-serif',
   },

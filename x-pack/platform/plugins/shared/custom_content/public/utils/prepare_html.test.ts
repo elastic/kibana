@@ -58,7 +58,7 @@ describe('applyHtmlTheme', () => {
       borderBasePlain: '#ccc',
     },
     size: { xs: '4px', s: '8px', m: '12px', base: '16px', l: '24px' },
-    border: { radius: { medium: '6px' } },
+    border: { radius: { medium: '6px', small: '4px' } },
     font: {
       family: 'Inter, sans-serif',
     },
@@ -82,7 +82,13 @@ describe('applyHtmlTheme', () => {
     const result = applyHtmlTheme(authored, 'LIGHT', euiTheme);
 
     expect(result.indexOf('--cc-space-l')).toBeLessThan(result.indexOf('body{padding:0}'));
-    expect(result).not.toContain('!important');
+  });
+
+  it('locks the body background and nothing else', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('body{background:var(--cc-color-background)!important}');
+    expect(result.match(/!important/g)).toHaveLength(1);
   });
 
   it('places the CSP meta before the injected theme style tag', () => {

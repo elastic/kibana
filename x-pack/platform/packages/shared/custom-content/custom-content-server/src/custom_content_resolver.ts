@@ -20,12 +20,13 @@ import {
 const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY color, space, radius and font declaration; never hardcode a hex color, a pixel spacing value, or a font stack, or the panel will look foreign next to the charts beside it.
 - Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
 - Card/surface backgrounds: var(--cc-color-surface).
-- Accent colors: var(--cc-color-primary) (blue), var(--cc-color-accent) (teal), var(--cc-color-accent-2) (pink), var(--cc-color-warning) (yellow).
+- Accent colors for UI emphasis: var(--cc-color-primary) (blue), var(--cc-color-accent) (teal), var(--cc-color-accent-2) (pink), var(--cc-color-warning) (yellow).
+- Chart series colors: var(--cc-vis-0) through var(--cc-vis-9), in order. Use these for bars, lines, slices and any per-category color — they are the host's colorblind-safe visualization palette. Do NOT use the semantic accent colors above for data series; they are UI chrome and read heavy when used as data.
 - Danger/error: var(--cc-color-danger). Border color: var(--cc-color-border).
 - Spacing (margins, padding, gaps): var(--cc-space-xs) < var(--cc-space-s) < var(--cc-space-m) < var(--cc-space-l) < var(--cc-space-xl). Pick from this scale only — no arbitrary values like 10px or 1.25rem.
-- Corner rounding: var(--cc-radius) on every card, badge, pill and container. Do not invent other radii.
+- Corner rounding: var(--cc-radius) for cards and containers, var(--cc-radius-s) for small elements like badges, pills and tags. Use one of these two rather than a literal value.
 - Type scale: 0.75rem for secondary/label text, 0.875rem for body, 1.5rem or more for a headline KPI number. Use font-weight 600 for emphasis rather than a larger size.
-- This applies to SVG too. \`fill\`, \`stroke\`, \`stop-color\` and every other color attribute must be a var(--cc-color-*) — for example \`<path fill="var(--cc-color-primary)">\`. Charts are where hardcoded palettes creep in; there is no exception for them.
+- This applies to SVG too. \`fill\`, \`stroke\`, \`stop-color\` and every other color attribute must be a token — var(--cc-vis-N) for data marks, var(--cc-color-*) for chrome like axes and gridlines. For example \`<path fill="var(--cc-vis-0)">\`. Charts are where hardcoded palettes creep in; there is no exception for them.
 - Never re-declare \`background\` or \`color\` on \`body\`. The panel frame already sets both from the active theme, and overriding them makes the panel render dark in light mode (or the reverse) for every user.`;
 
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
@@ -94,7 +95,8 @@ function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]):
 function colorSection(): string {
   return `VISUAL DESIGN — ${CSS_VARS_GUIDANCE}
 - The panel sits on a dashboard beside Lens and Vega charts. It must read as part of that page, not as an embedded document from another product: same type scale, same spacing rhythm, same corner rounding.
-- Borders on cards and containers are fine — use var(--cc-color-border). Do NOT put a border around the panel itself: the dashboard already frames it, and a second frame reads as doubled.
+- Borders on cards and containers are fine, but every border is var(--cc-color-border). A border is never tinted with a series or accent color to color-code a card. To show which category a card belongs to, color the data itself — the value, a bar, a dot, a small swatch — and leave the card's edge neutral.
+- Do NOT put a border around the panel itself: the dashboard already frames it, and a second frame reads as doubled.
 - No drop shadows, no gradients, and no custom accent colors outside the tokens above.`;
 }
 
