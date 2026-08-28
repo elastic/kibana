@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FailedTestsByStep } from './failed_tests_by_step';
 import type { PingState } from '../../../../../../common/runtime_types';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
-import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
+import { MonitorErrorsCount, ERROR_STATES_TOOLTIP } from '../monitor_summary/monitor_errors_count';
 import { FailedTestsCount } from './failed_tests_count';
 import { MonitorFailedTests } from './failed_tests';
 import { ErrorsList } from './errors_list';
@@ -52,7 +52,7 @@ export const ErrorsTabContent = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" wrap={true}>
         <EuiFlexItem grow={2} css={{ minWidth: 260 }}>
-          <PanelWithTitle title={ERRORS_LABEL}>
+          <PanelWithTitle title={ERRORS_LABEL} helpText={ERROR_STATES_TOOLTIP}>
             <ErrorsList errorStates={errorStates} upStates={upStates} loading={loading} />
           </PanelWithTitle>
         </EuiFlexItem>

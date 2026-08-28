@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -35,24 +35,31 @@ export const MonitorErrorsCount = ({ from, to, id }: MonitorErrorsCountProps) =>
   }
 
   return (
-    <ExploratoryViewEmbeddable
-      id={id}
-      align="left"
-      customHeight="70px"
-      reportType={ReportTypes.SINGLE_METRIC}
-      dataTypesIndexPatterns={dataTypesIndexPatterns}
-      attributes={[
-        {
-          time,
-          reportDefinitions: queryIdFilter,
-          dataType: 'synthetics',
-          selectedMetricField: 'monitor_errors',
-          name: ERRORS_LABEL,
-          filters: locationFilter,
-          color: euiTheme.colors.vis.euiColorVis6,
-        },
-      ]}
-    />
+    <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" responsive={false} wrap={false}>
+      <EuiFlexItem grow={false}>
+        <ExploratoryViewEmbeddable
+          id={id}
+          align="left"
+          customHeight="70px"
+          reportType={ReportTypes.SINGLE_METRIC}
+          dataTypesIndexPatterns={dataTypesIndexPatterns}
+          attributes={[
+            {
+              time,
+              reportDefinitions: queryIdFilter,
+              dataType: 'synthetics',
+              selectedMetricField: 'monitor_errors',
+              name: ERRORS_LABEL,
+              filters: locationFilter,
+              color: euiTheme.colors.vis.euiColorVis6,
+            },
+          ]}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={{ paddingBottom: euiTheme.size.s }}>
+        <ErrorStatesIconTip />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -61,4 +68,16 @@ export const ERRORS_LABEL = i18n.translate(
   {
     defaultMessage: 'Error states',
   }
+);
+
+export const ERROR_STATES_TOOLTIP = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.errorStatesTooltip',
+  {
+    defaultMessage:
+      'A streak of consecutive failed tests, counted until the monitor recovers. One error state can include many failed tests. Manual run-once tests are not counted.',
+  }
+);
+
+export const ErrorStatesIconTip = () => (
+  <EuiIconTip type="question" content={ERROR_STATES_TOOLTIP} position="top" />
 );

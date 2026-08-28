@@ -16,6 +16,7 @@ import { ErrorsOverTimeChart } from './errors_over_time_chart';
 import { ErrorInsightsPanel } from './error_insights_panel';
 import type { PingState } from '../../../../../../common/runtime_types';
 import type { ErrorGroup, ErrorStats } from '../../../../../../common/runtime_types';
+import { ERROR_STATES_TOOLTIP } from '../../monitor_details/monitor_summary/monitor_errors_count';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
 
 export const ErrorsTabContent = ({
@@ -61,7 +62,7 @@ export const ErrorsTabContent = ({
         <ErrorGroupsList groups={errorGroups} loading={errorGroupsLoading} />
       </PanelWithTitle>
       <EuiSpacer size="m" />
-      <PanelWithTitle title={ERRORS_LABEL}>
+      <PanelWithTitle title={ERRORS_LABEL} helpText={ERROR_STATES_TOOLTIP}>
         <ErrorsList
           errorStates={errorStates}
           upStates={upStates}

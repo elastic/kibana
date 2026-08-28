@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
 import { useOverviewRefreshedRange } from '../../../common/use_overview_date_range';
 import { OverviewErrorsCount } from './overview_errors_count';
+import { ErrorStatesIconTip } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 
 export function OverviewErrors() {
   // Follows the page-level date picker (URL params), defaulting to the overview's
@@ -20,7 +21,14 @@ export function OverviewErrors() {
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiTitle size="xs">
-        <h3>{headingText}</h3>
+        <h3>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{headingText}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ErrorStatesIconTip />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xl">
