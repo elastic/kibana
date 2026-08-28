@@ -32,6 +32,9 @@ export { createDataClientBundle } from './implementations/create_data_client_bun
 export type {
   BulkItem,
   BulkItemResponse,
+  BulkItemResult,
+  BulkPlainItem,
+  BulkUpdaterItem,
   BulkRequestOptions,
   BulkResponse,
   CreateDataClientDeps,

@@ -26,6 +26,57 @@ export interface SharedBulkRequestOptions<TExecution extends { id: string }>
   items: SharedBulkItem<TExecution>[];
 }
 
+type BulkOperation<TExecution extends { id: string }> = NonNullable<
+  estypes.BulkRequest<TExecution, Partial<TExecution> & { id: string }>['operations']
+>[number];
+
+const toBulkOperations = <TExecution extends { id: string }>(
+  item: SharedBulkItem<TExecution>
+): Array<BulkOperation<TExecution>> => {
+  const actionMeta = {
+    _id: item.document.id,
+    _index: item.index,
+    ...(item.seqNo !== undefined ? { if_seq_no: item.seqNo } : {}),
+    ...(item.primaryTerm !== undefined ? { if_primary_term: item.primaryTerm } : {}),
+  };
+
+  switch (item.operation) {
+    case 'create':
+      return [{ create: actionMeta }, item.document as BulkOperation<TExecution>];
+
+    case 'update':
+      return [
+        {
+          update: {
+            ...actionMeta,
+            // retry_on_conflict is mutually exclusive with if_seq_no/if_primary_term —
+            // ES ignores it when version-based CAS fields are present.
+            ...(item.retryOnConflict !== undefined && item.seqNo === undefined
+              ? { retry_on_conflict: item.retryOnConflict }
+              : {}),
+          },
+        },
+        { doc: item.document },
+      ];
+
+    case 'upsert':
+      return [
+        {
+          update: {
+            ...actionMeta,
+            ...(item.retryOnConflict !== undefined && item.seqNo === undefined
+              ? { retry_on_conflict: item.retryOnConflict }
+              : {}),
+          },
+        },
+        { doc: item.document, doc_as_upsert: true },
+      ];
+
+    default:
+      throw new Error(`Invalid operation: ${(item as BulkItem<TExecution>).operation}`);
+  }
+};
+
 export async function sharedBulk<TExecution extends { id: string }>(
   esClient: ElasticsearchClient,
   request: SharedBulkRequestOptions<TExecution>,
@@ -38,54 +89,7 @@ export async function sharedBulk<TExecution extends { id: string }>(
     };
   }
 
-  type BulkOperation = NonNullable<
-    estypes.BulkRequest<TExecution, Partial<TExecution> & { id: string }>['operations']
-  >[number];
-
-  const operations: BulkOperation[] = request.items.flatMap((item): BulkOperation[] => {
-    const actionMeta = {
-      _id: item.document.id,
-      _index: item.index,
-      ...(item.seqNo !== undefined ? { if_seq_no: item.seqNo } : {}),
-      ...(item.primaryTerm !== undefined ? { if_primary_term: item.primaryTerm } : {}),
-    };
-
-    switch (item.operation) {
-      case 'create':
-        return [{ create: actionMeta }, item.document as BulkOperation];
-
-      case 'update':
-        return [
-          {
-            update: {
-              ...actionMeta,
-              // retry_on_conflict is mutually exclusive with if_seq_no/if_primary_term —
-              // ES ignores it when version-based CAS fields are present.
-              ...(item.retryOnConflict !== undefined && item.seqNo === undefined
-                ? { retry_on_conflict: item.retryOnConflict }
-                : {}),
-            },
-          },
-          { doc: item.document },
-        ];
-
-      case 'upsert':
-        return [
-          {
-            update: {
-              ...actionMeta,
-              ...(item.retryOnConflict !== undefined && item.seqNo === undefined
-                ? { retry_on_conflict: item.retryOnConflict }
-                : {}),
-            },
-          },
-          { doc: item.document, doc_as_upsert: true },
-        ];
-
-      default:
-        throw new Error(`Invalid operation: ${(item as BulkItem<TExecution>).operation}`);
-    }
-  });
+  const operations = request.items.flatMap(toBulkOperations);
 
   const response = await retryTransientEsErrors(
     () =>

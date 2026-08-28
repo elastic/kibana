@@ -144,23 +144,51 @@ export type StepExecutionSourceProjectionField =
 export type GetWorkflowExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowExecution>;
 export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowStepExecution>;
 
-export interface BulkItem<TDocument extends { id: string }> {
+export interface BulkPlainItem<TDocument extends { id: string }> {
   operation: 'create' | 'update' | 'upsert';
   document: Partial<TDocument> & { id: string };
   seqNo?: number;
   primaryTerm?: number;
   retryOnConflict?: number;
+  documentId?: never;
+  sourceFields?: never;
+  updater?: never;
 }
+
+export interface BulkUpdaterItem<
+  TDocument extends { id: string },
+  K extends keyof TDocument & string = keyof TDocument & string
+> {
+  document: never;
+  operation: 'update';
+  documentId: string;
+  retryOnConflict?: number;
+  sourceFields: readonly K[];
+  updater: (current: Pick<TDocument, K>) => Partial<TDocument> | 'noop';
+}
+
+export function isBulkUpdaterItem<TDocument extends { id: string }>(
+  item: BulkItem<TDocument>
+): item is BulkUpdaterItem<TDocument> {
+  return 'updater' in item;
+}
+
+export type BulkItem<TDocument extends { id: string }> =
+  | BulkPlainItem<TDocument>
+  | BulkUpdaterItem<TDocument>;
 
 export interface BulkRequestOptions<TDocument extends { id: string }> {
   refresh?: boolean | 'wait_for';
   items: BulkItem<TDocument>[];
 }
 
+export type BulkItemResult = 'created' | 'updated' | 'noop';
+
 /** Per-document outcome aligned with ES bulk item fields (update/index/create). */
 export interface BulkItemResponse extends DocumentVersionFields {
   id: string;
   error?: estypes.ErrorCause;
+  result?: BulkItemResult;
 }
 
 /** Always bulk-shaped: `items.length ===` normalized document count, input order preserved. */
