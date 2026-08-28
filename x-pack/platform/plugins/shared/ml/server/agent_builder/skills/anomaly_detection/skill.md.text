@@ -409,6 +409,16 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
 2. **Update the dashboard** — regenerate the inline dashboard (from Phase 4) replacing the batch job IDs with the new realtime job IDs. Keep the same three-panel layout but omit `time_range` on each panel so they track the live time range.
 3. **Offer batch job cleanup** — the batch/historical jobs created during this session are now superseded. Ask the user to confirm before deleting them, naming each job ID explicitly. This is a destructive action — do not delete without explicit approval. If approved, `ml.ad_manage_job_state` (`stop_datafeed`) → `ml.ad_manage_job_state` (`close_job`) → `ml.ad_manage_job_state` (`delete_job`) for each batch job. Batch jobs are tagged `ml-agent-scratch` (set in Phase 3) so no special flags are needed for deletion.
 4. **Offer alerting** — ask: *"Would you like to set up alerting rules so you're notified when anomaly scores exceed a threshold on the new jobs?"*
+
+   **If yes**, present two options and ask which they want:
+
+   - **Anomaly detection alert** — checks job results for anomalies matching defined conditions (score threshold, result type) and fires when found. Rule type: `xpack.ml.anomaly_detection_alert`.
+   - **Anomaly detection jobs health** — monitors operational status (datafeed stopped, memory limit errors) and fires on issues. Rule type: `xpack.ml.anomaly_detection_jobs_health`.
+
+   Once the user chooses, load the rule management skill via `filestore.read` (path: `skills/platform/alerting/rule-management/SKILL.md`) and delegate rule creation to it. Pass the following context:
+   - The realtime job ID(s) created in step 1 above
+   - The chosen rule type (`xpack.ml.anomaly_detection_alert` or `xpack.ml.anomaly_detection_jobs_health`)
+   - For anomaly detection alert: default severity threshold of 75 (ask user if they want to adjust), result type `bucket`
 5. Set expectation: *"The model will keep learning your data's normal patterns over the coming weeks and will become more accurate over time."*
 
 **If no:**
