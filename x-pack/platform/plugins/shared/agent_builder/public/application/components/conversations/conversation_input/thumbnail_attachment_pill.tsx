@@ -65,8 +65,15 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
             : euiTheme.colors.borderBaseSubdued};
         overflow: hidden;
         flex-shrink: 0;
+
+        .agentBuilderThumbnailRemoveButton {
+          opacity: 0;
+        }
+        &:hover .agentBuilderThumbnailRemoveButton,
+        &:focus-within .agentBuilderThumbnailRemoveButton {
+          opacity: 1;
+        }
       `}
-      tabIndex={0}
       onMouseEnter={() => {
         setIsHovered(true);
         onHoverStart?.();
@@ -100,6 +107,7 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
         <EuiButtonIcon
           iconType="cross"
           size="s"
+          className="agentBuilderThumbnailRemoveButton"
           css={css`
             position: absolute;
             top: 50%;
@@ -109,7 +117,9 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
             height: ${euiTheme.size.l};
             border-radius: ${euiTheme.border.radius.small};
             color: ${euiTheme.colors.textPrimary};
-            visibility: ${isHovered ? 'visible' : 'hidden'};
+            &:focus {
+              opacity: 1;
+            }
             &::before {
               display: none;
             }
