@@ -8,6 +8,7 @@
  */
 
 import React, { lazy, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
@@ -150,6 +151,7 @@ export function transformSpecToActionTypeModel(
           onChange={field.setValue}
           actions={actions}
           readOnly={readOnly}
+          errorMessage={field.errors[0]?.message}
         />
       );
 
@@ -175,7 +177,22 @@ export function transformSpecToActionTypeModel(
             <EuiSpacer size="m" />
             <UseField
               path="config.selectedActions"
-              config={{ defaultValue: null }}
+              config={{
+                defaultValue: null,
+                validations: [
+                  {
+                    validator: ({ value }) =>
+                      Array.isArray(value) && (value as string[]).length === 0
+                        ? {
+                            message: i18n.translate(
+                              'alertsUIShared.connectorActionSelector.emptySelectionError',
+                              { defaultMessage: 'Select at least one action, or enable All.' }
+                            ),
+                          }
+                        : undefined,
+                  },
+                ],
+              }}
               component={ConnectorActionSelectorField}
               componentProps={{ actions: specActions, readOnly }}
             />

@@ -15,13 +15,16 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiCheckbox,
   EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiInMemoryTable,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -38,7 +41,7 @@ const SCOPE_ORDER: ActionScope[] = ['read', 'write', 'destroy'];
 const SCOPE_LABELS: Record<ActionScope, string> = {
   read: 'read',
   write: 'write',
-  destroy: 'delete',
+  destroy: 'destroy',
 };
 
 const SCOPE_BADGE_COLORS: Record<ActionScope, string> = {
@@ -70,6 +73,7 @@ export interface ConnectorActionSelectorProps {
   onChange: (value: string[] | null) => void;
   actions: ConnectorActionDef[];
   readOnly?: boolean;
+  errorMessage?: string;
 }
 
 // null = "all actions" sentinel; serializer strips it before saving.
@@ -78,6 +82,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   onChange,
   actions,
   readOnly = false,
+  errorMessage,
 }) => {
   const isAll = rawSelected === null;
 
@@ -93,43 +98,15 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
     [actions]
   );
 
-  const actionsByScope = useMemo(() => {
-    const groups: Partial<Record<ActionScope, ConnectorActionDef[]>> = {};
-    for (const a of actions) {
-      const scope = resolveActionScope(a);
-      if (!groups[scope]) groups[scope] = [];
-      groups[scope]!.push(a);
-    }
-    return groups;
-  }, [actions]);
+  const [scopeFilters, setScopeFilters] = useState<ActionScope[]>([]);
+  const [isScopePopoverOpen, setIsScopePopoverOpen] = useState(false);
 
-  const scopeCheckState = useMemo(() => {
-    const selectedSet = new Set(rawSelected ?? []);
-    const result: Partial<Record<ActionScope, 'checked' | 'indeterminate' | 'unchecked'>> = {};
-    for (const scope of SCOPE_ORDER) {
-      const scopeActions = actionsByScope[scope] ?? [];
-      if (scopeActions.length === 0) continue;
-      const n = scopeActions.filter((a) => selectedSet.has(a.name)).length;
-      result[scope] =
-        n === 0 ? 'unchecked' : n === scopeActions.length ? 'checked' : 'indeterminate';
-    }
-    return result;
-  }, [rawSelected, actionsByScope]);
-
-  const toggleScopeSelection = useCallback(
-    (scope: ActionScope) => {
-      const scopeNames = (actionsByScope[scope] ?? []).map((a) => a.name);
-      const state = scopeCheckState[scope];
-      const current = rawSelected ?? [];
-      if (state === 'unchecked') {
-        onChange([...new Set([...current, ...scopeNames])]);
-      } else {
-        const scopeSet = new Set(scopeNames);
-        onChange(current.filter((n) => !scopeSet.has(n)));
-      }
-    },
-    [actionsByScope, scopeCheckState, rawSelected, onChange]
-  );
+  const toggleScopeFilter = useCallback((scope: ActionScope) => {
+    setPageIndex(0);
+    setScopeFilters((prev) =>
+      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope]
+    );
+  }, []);
 
   const defaultReadActionNames = useMemo(
     () => actions.filter((a) => resolveActionScope(a) === 'read').map((a) => a.name),
@@ -147,14 +124,20 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   }, [rawSelected]);
 
   const filteredActions = useMemo(() => {
-    if (!searchText) return actions;
-    const lower = searchText.toLowerCase();
-    return actions.filter(
-      (a) =>
-        a.name.toLowerCase().includes(lower) ||
-        (a.description?.toLowerCase().includes(lower) ?? false)
-    );
-  }, [actions, searchText]);
+    let result = actions;
+    if (searchText) {
+      const lower = searchText.toLowerCase();
+      result = result.filter(
+        (a) =>
+          a.name.toLowerCase().includes(lower) ||
+          (a.description?.toLowerCase().includes(lower) ?? false)
+      );
+    }
+    if (scopeFilters.length > 0) {
+      result = result.filter((a) => scopeFilters.includes(resolveActionScope(a)));
+    }
+    return result;
+  }, [actions, searchText, scopeFilters]);
 
   const sortedFilteredActions = useMemo(
     () =>
@@ -182,6 +165,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   const handleModeChange = useCallback(() => {
     setSearchText('');
     setPageIndex(0);
+    setScopeFilters([]);
     if (isAll) {
       onChange(previousSpecificRef.current ?? defaultReadActionNames);
     } else {
@@ -271,7 +255,6 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   );
 
   const selectedCount = (rawSelected ?? []).length;
-  const emptySpecificSelection = !isAll && selectedCount === 0;
   const totalFiltered = filteredActions.length;
   const paginationStart = totalFiltered > 0 ? pageIndex * pageSize + 1 : 0;
   const paginationEnd = Math.min((pageIndex + 1) * pageSize, totalFiltered);
@@ -406,40 +389,61 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
                   data-test-subj="connectorActionSelectorFilter"
                 />
               </EuiFlexItem>
-              {presentScopes.length > 1 &&
-                presentScopes.map((scope) => (
-                  <EuiFlexItem grow={false} key={scope}>
-                    <EuiCheckbox
-                      id={`connectorActionScopeSelect-${scope}`}
-                      checked={scopeCheckState[scope] === 'checked'}
-                      indeterminate={scopeCheckState[scope] === 'indeterminate'}
-                      onChange={() => toggleScopeSelection(scope)}
-                      disabled={readOnly}
-                      label={
-                        <EuiBadge color={SCOPE_BADGE_COLORS[scope]}>{SCOPE_LABELS[scope]}</EuiBadge>
+              {presentScopes.length > 1 && (
+                <EuiFlexItem grow={false}>
+                  <EuiFilterGroup>
+                    <EuiPopover
+                      aria-label={i18n.translate(
+                        'alertsUIShared.connectorActionSelector.scopesPopoverAriaLabel',
+                        { defaultMessage: 'Filter by scope' }
+                      )}
+                      button={
+                        <EuiFilterButton
+                          iconType="arrowDown"
+                          iconSide="right"
+                          onClick={() => setIsScopePopoverOpen((o) => !o)}
+                          isSelected={isScopePopoverOpen}
+                          hasActiveFilters={scopeFilters.length > 0}
+                          numActiveFilters={scopeFilters.length || undefined}
+                          data-test-subj="connectorActionScopeFilter"
+                        >
+                          {i18n.translate('alertsUIShared.connectorActionSelector.scopesLabel', {
+                            defaultMessage: 'Scopes',
+                          })}
+                        </EuiFilterButton>
                       }
-                      data-test-subj={`connectorActionScopeSelect-${scope}`}
-                    />
-                  </EuiFlexItem>
-                ))}
+                      isOpen={isScopePopoverOpen}
+                      closePopover={() => setIsScopePopoverOpen(false)}
+                      panelPaddingSize="none"
+                      anchorPosition="downCenter"
+                    >
+                      {presentScopes.map((scope) => (
+                        <EuiFilterSelectItem
+                          key={scope}
+                          checked={scopeFilters.includes(scope) ? 'on' : undefined}
+                          onClick={() => {
+                            toggleScopeFilter(scope);
+                            setIsScopePopoverOpen(false);
+                          }}
+                          data-test-subj={`connectorActionScopeFilter-${scope}`}
+                        >
+                          <EuiBadge color={SCOPE_BADGE_COLORS[scope]}>
+                            {SCOPE_LABELS[scope]}
+                          </EuiBadge>
+                        </EuiFilterSelectItem>
+                      ))}
+                    </EuiPopover>
+                  </EuiFilterGroup>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
             <EuiSpacer size="s" />
             {tableHeader}
             <EuiSpacer size="xs" />
-            <EuiFormRow
-              isInvalid={emptySpecificSelection}
-              error={
-                emptySpecificSelection
-                  ? i18n.translate('alertsUIShared.connectorActionSelector.emptySelectionError', {
-                      defaultMessage: 'Select at least one action, or enable All.',
-                    })
-                  : undefined
-              }
-              fullWidth
-            >
+            <EuiFormRow isInvalid={Boolean(errorMessage)} error={errorMessage} fullWidth>
               <EuiPanel hasBorder paddingSize="m">
                 <EuiInMemoryTable
-                  items={sortedFilteredActions}
+                  items={filteredActions}
                   columns={columns}
                   itemId="name"
                   selection={selection}
@@ -447,7 +451,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
                     // EuiBasicTable clears selection before firing onChange on page/sort changes.
                     // Capture now and restore below; React batches both calls so this one wins.
                     const selectionToRestore = rawSelectedRef.current;
-                    if (sort) setSortDirection(sort.direction);
+                    if (sort && sort.direction !== sortDirection) setSortDirection(sort.direction);
                     if (page) {
                       if (page.size !== pageSize) {
                         setPageSize(page.size);

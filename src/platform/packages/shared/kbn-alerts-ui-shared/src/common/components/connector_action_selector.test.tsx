@@ -28,6 +28,10 @@ function Fixture({
   onValueChange?: (value: string[] | null) => void;
 }) {
   const [value, setValue] = useState<string[] | null>(initialSelected);
+  const errorMessage =
+    Array.isArray(value) && value.length === 0
+      ? 'Select at least one action, or enable All.'
+      : undefined;
   return (
     <ConnectorActionSelector
       value={value}
@@ -37,6 +41,7 @@ function Fixture({
       }}
       actions={ACTIONS}
       readOnly={false}
+      errorMessage={errorMessage}
     />
   );
 }
