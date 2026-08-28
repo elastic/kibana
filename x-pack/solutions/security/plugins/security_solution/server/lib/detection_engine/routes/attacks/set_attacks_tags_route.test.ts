@@ -352,8 +352,8 @@ describe('set attacks tags', () => {
           expect.anything(),
           expect.objectContaining({
             attackIds: ['attack1', 'attack2'],
-            tagsToAdd: defaultTags.tags_to_add,
-            tagsToRemove: defaultTags.tags_to_remove,
+            tagsAdded: defaultTags.tags_to_add,
+            tagsRemoved: defaultTags.tags_to_remove,
             truncated: false,
           })
         );

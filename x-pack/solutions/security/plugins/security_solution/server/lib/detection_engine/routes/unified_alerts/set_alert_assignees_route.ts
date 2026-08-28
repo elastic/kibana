@@ -125,16 +125,16 @@ export const setUnifiedAlertsAssigneesRoute = (
             if (attackIds.length > 0) {
               void eventBus.emitAttackAssigneesChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: validAssigneesToAdd,
-                assigneesToRemove: validAssigneesToRemove,
+                assigneesAdded: validAssigneesToAdd,
+                assigneesRemoved: validAssigneesToRemove,
                 truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertAssigneesChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: validAssigneesToAdd,
-                assigneesToRemove: validAssigneesToRemove,
+                assigneesAdded: validAssigneesToAdd,
+                assigneesRemoved: validAssigneesToRemove,
                 truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }

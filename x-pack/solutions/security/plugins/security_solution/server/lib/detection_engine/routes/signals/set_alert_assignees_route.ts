@@ -71,8 +71,8 @@ export const setAlertAssigneesRoute = (
           const result = await updateAlertsAssignees({ context, index, ids, assignees });
           void eventBus?.emitAlertAssigneesChanged(request, {
             alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-            assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-            assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+            assigneesAdded: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+            assigneesRemoved: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
             truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
           });
           return result;

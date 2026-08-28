@@ -247,8 +247,8 @@ describe('set unified alerts tags', () => {
         expect.anything(),
         expect.objectContaining({
           alertIds: ['alert-1', 'alert-2'],
-          tagsToAdd: ['tag-add'],
-          tagsToRemove: ['tag-remove'],
+          tagsAdded: ['tag-add'],
+          tagsRemoved: ['tag-remove'],
           truncated: false,
         })
       );
@@ -275,8 +275,8 @@ describe('set unified alerts tags', () => {
         expect.anything(),
         expect.objectContaining({
           attackIds: ['attack-1'],
-          tagsToAdd: ['tag-add'],
-          tagsToRemove: [],
+          tagsAdded: ['tag-add'],
+          tagsRemoved: [],
           truncated: false,
         })
       );
@@ -534,7 +534,7 @@ describe('set unified alerts tags', () => {
         { length: MAX_ALERTS_PER_TRIGGER },
         (_, i) => `tag-${i}`
       ).slice(0, 100);
-      const tagsToAdd = [...existingTags, 'tag-new-101'];
+      const tagsAdded = [...existingTags, 'tag-new-101'];
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         makeSearchResponse([
           {
@@ -549,7 +549,7 @@ describe('set unified alerts tags', () => {
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
         body: {
           ids: ['alert-1'],
-          tags: { tags_to_add: tagsToAdd, tags_to_remove: [] },
+          tags: { tags_to_add: tagsAdded, tags_to_remove: [] },
         },
       });
       await server.inject(request, requestContextMock.convertContext(context));
@@ -561,7 +561,7 @@ describe('set unified alerts tags', () => {
     });
 
     test('sets truncated=true when tags_to_add exceeds MAX_TAGS_PER_OPERATION', async () => {
-      const tagsToAdd = Array.from({ length: 101 }, (_, i) => `tag-${i}`);
+      const tagsAdded = Array.from({ length: 101 }, (_, i) => `tag-${i}`);
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         makeSearchResponse([
           {
@@ -576,7 +576,7 @@ describe('set unified alerts tags', () => {
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
         body: {
           ids: ['alert-1'],
-          tags: { tags_to_add: tagsToAdd, tags_to_remove: [] },
+          tags: { tags_to_add: tagsAdded, tags_to_remove: [] },
         },
       });
       await server.inject(request, requestContextMock.convertContext(context));
