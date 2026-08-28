@@ -111,6 +111,8 @@ A notification can remain visible for up to one cleanup interval after its TTL e
 In the case of duplicate "state" notification IDs with different severity values,
 cleanup expires a notification as a group, deleting every copy through its newest expired copy so
 an older, longer-lived severity cannot resurface.
+Unknown future severity values are normalized to `info` on read, but the cleanup task does not
+match them; those documents remain until the data stream's 180-day retention removes them.
 
 ### Call-to-action (CTA)
 
