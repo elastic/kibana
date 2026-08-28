@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/286264
-type: enhancement
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: "Add `low_count` detector and `txLowCount` to APM anomaly rules"
-description: "Adds a `low_count` detector to the out-of-the-box APM transaction machine learning job and accepts `txLowCount` in the anomaly rule schema so a drop to zero can raise an anomaly. Existing jobs are not updated."

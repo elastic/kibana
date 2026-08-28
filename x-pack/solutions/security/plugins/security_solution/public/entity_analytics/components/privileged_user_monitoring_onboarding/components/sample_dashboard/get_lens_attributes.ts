@@ -67,9 +67,6 @@ export const getLensAttributes: GetLensAttributes = ({ esql, stackByField, extra
         ],
       },
       filters: [], // empty, because filters are applied directly to the lens.EmbeddableComponent
-      query: {
-        esql: '', // empty, because filters are applied directly to the lens.EmbeddableComponent
-      },
       datasourceStates: {
         textBased: {
           layers: {
