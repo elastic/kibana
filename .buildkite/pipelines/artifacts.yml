@@ -5,7 +5,9 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c2-standard-16
+      machineType: c4-standard-16-lssd
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      diskType: hyperdisk-balanced
       diskSizeGb: 180
     timeout_in_minutes: 120
     retry:
