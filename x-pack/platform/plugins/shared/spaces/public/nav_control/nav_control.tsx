@@ -7,7 +7,7 @@
 
 import { EuiSkeletonRectangle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { lazy, Suspense, useState } from 'react';
+import React, { lazy, Suspense } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,6 +16,15 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { SpacesManager } from '../spaces_manager';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 0,
+      networkMode: 'always',
+    },
+  },
+});
 
 const LazyNavControlPopover = lazy(() =>
   import('./nav_control_popover').then(({ NavControlPopover }) => ({
@@ -34,18 +43,6 @@ export function SpacesNavControl({
   config: ConfigType;
   eventTracker: EventTracker;
 }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 0,
-            networkMode: 'always',
-          },
-        },
-      })
-  );
-
   return (
     <QueryClientProvider client={queryClient}>
       <Suspense

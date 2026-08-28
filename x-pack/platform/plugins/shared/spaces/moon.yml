@@ -65,7 +65,6 @@ dependsOn:
   - '@kbn/ui-theme'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-chrome-browser-hooks'
-  - '@kbn/react-env'
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/core-spaces-common'
   - '@kbn/css-utils'
