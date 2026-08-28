@@ -531,7 +531,14 @@ export class DataGrid {
   }
 
   async openGridDisplaySettings() {
+    // The toolbar button toggles the display-options popover, so clicking it while
+    // the popover is already open would close it; confirm it ends up open instead.
+    const densityButtonGroup = this.page.testSubj.locator('densityButtonGroup');
+    if (await densityButtonGroup.isVisible()) {
+      return;
+    }
     await this.page.testSubj.click('dataGridDisplaySelectorButton');
+    await densityButtonGroup.waitFor({ state: 'visible' });
   }
 
   async openInTableSearch() {
@@ -608,7 +615,6 @@ export class DataGrid {
     await input.fill(newValue.toString());
     await input.press('Enter');
     await this.waitForLoad();
-    await this.page.keyboard.press('Escape');
   }
 
   async waitForDocTableRendered() {
