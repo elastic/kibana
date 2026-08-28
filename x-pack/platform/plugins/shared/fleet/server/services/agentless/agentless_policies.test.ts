@@ -557,10 +557,6 @@ describe('AgentlessPoliciesService', () => {
       deleteAgentlessAgentSpy.mockRestore();
     });
 
-
-      deleteAgentlessAgentSpy.mockRestore();
-    });
-
     it('should rethrow non-404 errors from agentPolicyService.get', async () => {
       jest.mocked(agentPolicyService.get).mockRejectedValueOnce({
         output: { statusCode: 500 },
