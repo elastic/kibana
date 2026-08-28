@@ -167,7 +167,7 @@ describe('DetectAndReviewStep', () => {
       setupMocks({
         packageData: {
           item: {
-            installation: {
+            installationInfo: {
               installed_kibana: [{ id: 'dash-1', type: 'dashboard' }],
               installed_es: [],
             },
@@ -188,7 +188,7 @@ describe('DetectAndReviewStep', () => {
       setupMocks({
         packageData: {
           item: {
-            installation: {
+            installationInfo: {
               installed_kibana: [{ id: 'dash-1', type: 'dashboard' }],
               installed_es: [],
             },

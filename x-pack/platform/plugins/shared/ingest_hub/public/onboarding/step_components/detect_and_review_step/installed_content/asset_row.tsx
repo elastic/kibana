@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface AssetRowProps {
@@ -27,17 +27,24 @@ export function AssetRow({ id, title, appLink, action }: AssetRowProps) {
   );
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false} data-test-subj={`assetRow-${id}`}>
-      <EuiFlexItem>{nameNode}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge iconType="check" color="hollow">
-          <FormattedMessage
-            id="xpack.ingestHub.detectAndReviewStep.installedContent.assetRow.installed"
-            defaultMessage="Installed"
-          />
-        </EuiBadge>
-      </EuiFlexItem>
-      {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
-    </EuiFlexGroup>
+    <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={`assetRow-${id}`}>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="m"
+        responsive={false}
+      >
+        <EuiFlexItem>{nameNode}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge iconType="check" color="success">
+            <FormattedMessage
+              id="xpack.ingestHub.detectAndReviewStep.installedContent.assetRow.installed"
+              defaultMessage="Installed"
+            />
+          </EuiBadge>
+        </EuiFlexItem>
+        {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }

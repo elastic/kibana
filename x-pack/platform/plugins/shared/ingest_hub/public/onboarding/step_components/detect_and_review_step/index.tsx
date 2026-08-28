@@ -72,10 +72,10 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
   const { statusByInstanceId, receivingCount, totalCount } = useServiceDataDetection();
 
   // Installed content — read from AWS package installation.
-  const { data: awsPackageData } = useGetPackageInfoByKeyQuery('aws');
-  const installation = (awsPackageData?.item as any)?.installation;
-  const installedKibana: KibanaAssetReference[] = installation?.installed_kibana ?? [];
-  const installedEs: EsAssetReference[] = installation?.installed_es ?? [];
+  const { data: awsPackageData } = useGetPackageInfoByKeyQuery('aws', undefined, { full: true });
+  const installationInfo = awsPackageData?.item?.installationInfo;
+  const installedKibana: KibanaAssetReference[] = installationInfo?.installed_kibana ?? [];
+  const installedEs: EsAssetReference[] = installationInfo?.installed_es ?? [];
 
   const hasDeployedServices = selectedServiceIds.length > 0;
 

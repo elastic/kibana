@@ -6,19 +6,33 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiBadge, EuiFlexGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiNotificationBadge,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import type { EsAssetReference } from '@kbn/fleet-plugin/common';
 
-/**
- * Derive a human-readable sub-label from an ES asset id.
- * `metrics-aws.config@package` → `aws.config`
- * Transform ids (no type-dataset prefix) yield undefined.
- */
-function deriveEsSubLabel(id: string): string | undefined {
-  const match = id.match(/^(?:logs|metrics)-(.+?)(?:@.+)?$/);
-  return match ? match[1] : undefined;
+const ES_TYPE_LABELS: Record<string, string> = {
+  index_template: 'Index template',
+  component_template: 'Component template',
+  ingest_pipeline: 'Ingest pipeline',
+  transform: 'Transform',
+  ml_model: 'ML model',
+  data_stream_ilm_policy: 'ILM policy',
+  ilm_policy: 'ILM policy',
+};
+
+function esTypeLabel(type: string): string {
+  return ES_TYPE_LABELS[type] ?? type;
 }
 
 interface RequiredAssetsProps {
@@ -26,26 +40,21 @@ interface RequiredAssetsProps {
 }
 
 export function RequiredAssets({ esAssets }: RequiredAssetsProps) {
-  const assetCount = i18n.translate(
-    'xpack.ingestHub.detectAndReviewStep.installedContent.category.assetCount',
-    {
-      defaultMessage: '{count, plural, one {# asset} other {# assets}}',
-      values: { count: esAssets.length },
-    }
-  );
-
   return (
     <EuiAccordion
       id="required-assets"
       initialIsOpen={false}
-      isDisabled
       extraAction={
         <EuiText size="xs" color="subdued">
-          {assetCount}
+          <FormattedMessage
+            id="xpack.ingestHub.detectAndReviewStep.installedContent.requiredAssets.label"
+            defaultMessage="Installed with the package — cannot be removed"
+          />
         </EuiText>
       }
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiIcon type="lock" size="m" aria-hidden />
           <EuiTitle size="xxs">
             <h4>
               <FormattedMessage
@@ -54,34 +63,43 @@ export function RequiredAssets({ esAssets }: RequiredAssetsProps) {
               />
             </h4>
           </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.ingestHub.detectAndReviewStep.installedContent.requiredAssets.label"
-              defaultMessage="Installed with the package — cannot be removed"
-            />
-          </EuiText>
+          <EuiNotificationBadge color="subdued">{esAssets.length}</EuiNotificationBadge>
         </EuiFlexGroup>
       }
       data-test-subj="requiredAssets-accordion"
     >
       <EuiSpacer size="s" />
       {esAssets.map((asset) => {
-        const subLabel = deriveEsSubLabel(asset.id);
+        const typeLabel = esTypeLabel(asset.type);
         return (
-          <EuiFlexGroup key={asset.id} alignItems="center" gutterSize="s" responsive={false}>
-            <EuiText size="s">{asset.id}</EuiText>
-            {subLabel && (
-              <EuiText size="xs" color="subdued">
-                {subLabel}
-              </EuiText>
-            )}
-            <EuiBadge iconType="check" color="hollow">
-              <FormattedMessage
-                id="xpack.ingestHub.detectAndReviewStep.installedContent.assetRow.installed"
-                defaultMessage="Installed"
-              />
-            </EuiBadge>
-          </EuiFlexGroup>
+          <React.Fragment key={asset.id}>
+            <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="spaceBetween"
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <strong>{asset.id}</strong>
+                  </EuiText>
+                  <EuiText size="xs" color="subdued">
+                    {typeLabel}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge iconType="lock" color="hollow">
+                    <FormattedMessage
+                      id="xpack.ingestHub.detectAndReviewStep.installedContent.requiredAssets.badge"
+                      defaultMessage="Required"
+                    />
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+            <EuiSpacer size="xs" />
+          </React.Fragment>
         );
       })}
     </EuiAccordion>

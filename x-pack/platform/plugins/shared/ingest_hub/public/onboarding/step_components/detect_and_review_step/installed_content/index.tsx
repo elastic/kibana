@@ -6,11 +6,17 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +31,11 @@ interface InstalledContentProps {
 }
 
 export function InstalledContent({ installedKibana, installedEs }: InstalledContentProps) {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(true);
   const [search, setSearch] = useState('');
+  const contentId = useGeneratedHtmlId({ prefix: 'installedContent' });
+
   const { dashboards, detectionRules, esAssets } = useInstalledContent({
     installedKibana,
     installedEs,
@@ -43,65 +53,104 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
     }
   );
 
+  const panelCss = css`
+    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+  `;
+
+  const headerButtonCss = css`
+    display: block;
+    width: 100%;
+    text-align: left;
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    border: none;
+    padding: ${euiTheme.size.l} ${euiTheme.size.m};
+    cursor: pointer;
+    border-bottom: ${isOpen ? `1px solid ${euiTheme.colors.borderBaseSubdued}` : 'none'};
+  `;
+
   return (
-    <div data-test-subj="installedContent">
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.ingestHub.detectAndReviewStep.installedContent.title"
-            defaultMessage="Installed content"
-          />{' '}
-          <EuiText component="span" size="s" color="subdued">
-            {serviceCount}
-          </EuiText>
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <FormattedMessage
-          id="xpack.ingestHub.detectAndReviewStep.installedContent.body"
-          defaultMessage="Everything below was installed with the AWS integration. You can reinstall or remove content at any time from the integration's Assets tab. Required technical assets are listed separately at the bottom and cannot be removed."
-        />
-      </EuiText>
-      <EuiSpacer size="m" />
+    <EuiPanel paddingSize="none" css={panelCss} hasShadow={false} data-test-subj="installedContent">
+      <button
+        type="button"
+        css={headerButtonCss}
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+        onClick={() => setIsOpen((v) => !v)}
+        data-test-subj="installedContent-headerButton"
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="dashboardApp" size="m" color="subdued" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>
+                <FormattedMessage
+                  id="xpack.ingestHub.detectAndReviewStep.installedContent.title"
+                  defaultMessage="Installed content"
+                />
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {serviceCount}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </button>
 
-      <EuiFieldSearch
-        placeholder={i18n.translate(
-          'xpack.ingestHub.detectAndReviewStep.installedContent.searchPlaceholder',
-          { defaultMessage: 'Search content by name' }
-        )}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        data-test-subj="installedContent-search"
-        fullWidth
-      />
-      <EuiSpacer size="m" />
+      {isOpen && (
+        <div id={contentId} role="region">
+          <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.ingestHub.detectAndReviewStep.installedContent.body"
+                defaultMessage="Everything below was installed with the AWS integration. You can reinstall or remove content at any time from the integration's Assets tab. Required technical assets are listed separately at the bottom and cannot be removed."
+              />
+            </EuiText>
+            <EuiSpacer size="m" />
 
-      {filteredDashboards.length > 0 && (
-        <>
-          <AssetCategory
-            categoryId="dashboards"
-            titleId="xpack.ingestHub.detectAndReviewStep.installedContent.category.dashboards"
-            defaultTitle="Dashboards"
-            assets={filteredDashboards}
-          />
-          <EuiSpacer size="m" />
-        </>
+            <EuiFieldSearch
+              placeholder={i18n.translate(
+                'xpack.ingestHub.detectAndReviewStep.installedContent.searchPlaceholder',
+                { defaultMessage: 'Search content by name' }
+              )}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              data-test-subj="installedContent-search"
+              fullWidth
+            />
+            <EuiSpacer size="m" />
+
+            {filteredDashboards.length > 0 && (
+              <>
+                <AssetCategory
+                  categoryId="dashboards"
+                  titleId="xpack.ingestHub.detectAndReviewStep.installedContent.category.dashboards"
+                  defaultTitle="Dashboards"
+                  assets={filteredDashboards}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            {filteredRules.length > 0 && (
+              <>
+                <AssetCategory
+                  categoryId="detectionRules"
+                  titleId="xpack.ingestHub.detectAndReviewStep.installedContent.category.detectionRules"
+                  defaultTitle="Detection rules"
+                  assets={filteredRules}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            {esAssets.length > 0 && <RequiredAssets esAssets={esAssets} />}
+          </EuiPanel>
+        </div>
       )}
-
-      {filteredRules.length > 0 && (
-        <>
-          <AssetCategory
-            categoryId="detectionRules"
-            titleId="xpack.ingestHub.detectAndReviewStep.installedContent.category.detectionRules"
-            defaultTitle="Detection rules"
-            assets={filteredRules}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {esAssets.length > 0 && <RequiredAssets esAssets={esAssets} />}
-    </div>
+    </EuiPanel>
   );
 }

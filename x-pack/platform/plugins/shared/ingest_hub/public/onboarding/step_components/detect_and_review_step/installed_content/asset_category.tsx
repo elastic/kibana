@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiNotificationBadge,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AssetRow } from './asset_row';
@@ -15,30 +23,41 @@ interface AssetCategoryProps {
   categoryId: string;
   titleId: string;
   defaultTitle: string;
+  iconType?: string;
   assets: Array<{ id: string; title: string; appLink?: string }>;
 }
 
 export function AssetCategory({ categoryId, titleId, defaultTitle, assets }: AssetCategoryProps) {
-  const assetCount = i18n.translate(
-    'xpack.ingestHub.detectAndReviewStep.installedContent.category.assetCount',
+  const installedLabel = i18n.translate(
+    'xpack.ingestHub.detectAndReviewStep.installedContent.category.installedCount',
     {
-      defaultMessage: '{count, plural, one {# asset} other {# assets}}',
-      values: { count: assets.length },
+      defaultMessage: '{count} of {total} installed',
+      values: { count: assets.length, total: assets.length },
     }
   );
 
   return (
-    <div data-test-subj={`assetCategory-${categoryId}`}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiTitle size="xxs">
-          <h4>
-            <FormattedMessage id={titleId} defaultMessage={defaultTitle} />
-          </h4>
-        </EuiTitle>
+    <EuiAccordion
+      id={`assetCategory-${categoryId}`}
+      initialIsOpen={true}
+      extraAction={
         <EuiText size="xs" color="subdued">
-          {assetCount}
+          {installedLabel}
         </EuiText>
-      </EuiFlexGroup>
+      }
+      buttonContent={
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiIcon type="dashboardApp" size="m" aria-hidden />
+          <EuiTitle size="xxs">
+            <h4>
+              <FormattedMessage id={titleId} defaultMessage={defaultTitle} />
+            </h4>
+          </EuiTitle>
+          <EuiNotificationBadge color="subdued">{assets.length}</EuiNotificationBadge>
+        </EuiFlexGroup>
+      }
+      data-test-subj={`assetCategory-${categoryId}`}
+    >
       <EuiSpacer size="s" />
       {assets.map((asset) => (
         <React.Fragment key={asset.id}>
@@ -46,6 +65,6 @@ export function AssetCategory({ categoryId, titleId, defaultTitle, assets }: Ass
           <EuiSpacer size="xs" />
         </React.Fragment>
       ))}
-    </div>
+    </EuiAccordion>
   );
 }
