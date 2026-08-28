@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { SeedContext, SeedScenario, SeededQuery, SeedQuery } from '../types';
 import { deterministicId } from '../types';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { kibanaRequest } from '../lib/kibana';
+import { computeRuleId } from '../../../server/lib/knowledge_indicators/helpers/compute_rule_id';
 
-const ASSET_FETCH_SIZE = 1000;
-const PROMOTE_POLL_INTERVAL_MS = 500;
-const PROMOTE_TIMEOUT_MS = 15_000;
+interface PromoteResponse {
+  promoted: number;
+  skipped_stats: number;
+  skipped_ineligible: number;
+}
 
 export async function seedQueries(
   ctx: SeedContext,
   scenario: SeedScenario,
   config: ConnectionConfig,
-  esClient: Client,
   log: ToolingLog
 ): Promise<SeededQuery[]> {
   const prepared = scenario.queries.map((q: SeedQuery) => ({
@@ -39,92 +40,35 @@ export async function seedQueries(
       ...(q.severityScore !== undefined ? { severity_score: q.severityScore } : {}),
       description: q.description ?? '',
     };
-    const res = await kibanaRequest(config, 'PUT', path, body);
+    const res = await kibanaRequest(config, 'PUT', path, body, ctx.space);
     if (res.status >= 300) {
       log.error(`PUT query failed for "${q.title}": ${res.status} ${JSON.stringify(res.data)}`);
       throw new Error(`Failed to upsert query "${q.title}" (HTTP ${res.status})`);
     }
   }
 
-  const promoteRes = await kibanaRequest(config, 'POST', '/internal/streams/queries/_promote');
+  const promoteRes = await kibanaRequest(
+    config,
+    'POST',
+    '/internal/streams/queries/_promote',
+    { queryIds: prepared.map(({ queryId }) => queryId) },
+    ctx.space
+  );
 
   if (promoteRes.status >= 300) {
     throw new Error(`Query promotion failed (HTTP ${promoteRes.status})`);
   }
 
-  const expectedQueryIds = new Set(prepared.map(({ queryId }) => queryId));
-  const deadline = Date.now() + PROMOTE_TIMEOUT_MS;
-
-  const ruleIdByAssetId = new Map<string, string>();
-
-  const readAssets = async () => {
-    const assetRes = await esClient.search({
-      index: '.kibana_streams_assets',
-      size: ASSET_FETCH_SIZE,
-      query: { term: { 'stream.name': ctx.streamName } },
-    });
-
-    const totalHits =
-      typeof assetRes.hits.total === 'number'
-        ? assetRes.hits.total
-        : assetRes.hits.total?.value ?? 0;
-    if (totalHits > ASSET_FETCH_SIZE) {
-      log.warning(
-        `seedQueries: .kibana_streams_assets has ${totalHits} docs for "${ctx.streamName}" — only first ${ASSET_FETCH_SIZE} read; some rule_ids may be missing`
-      );
-    }
-
-    ruleIdByAssetId.clear();
-    for (const hit of assetRes.hits.hits) {
-      const src = hit._source as Record<string, unknown> | undefined;
-      if (!src) continue;
-      const assetId = src['asset.id'];
-      const ruleId = src.rule_id;
-      if (typeof assetId === 'string' && typeof ruleId === 'string' && ruleId.length > 0) {
-        ruleIdByAssetId.set(assetId, ruleId);
-      }
-    }
-  };
-
-  while (true) {
-    try {
-      await readAssets();
-    } catch (err) {
-      // Transient ES errors (network, 5xx) — log and retry rather than aborting the poll.
-      log.debug(
-        `seedQueries: readAssets error (retrying): ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-
-    if (
-      ruleIdByAssetId.size >= expectedQueryIds.size &&
-      [...expectedQueryIds].every((id) => ruleIdByAssetId.has(id))
-    ) {
-      break;
-    }
-
-    if (Date.now() >= deadline) {
-      const missing = [];
-      for (const id of expectedQueryIds) {
-        if (!ruleIdByAssetId.has(id)) {
-          missing.push(id);
-        }
-      }
-
-      throw new Error(
-        `seedQueries: timed out after ${PROMOTE_TIMEOUT_MS}ms waiting for rule_ids. ` +
-          `Promotion may not have completed. Missing query IDs: ${missing.join(', ')}`
-      );
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, PROMOTE_POLL_INTERVAL_MS));
+  const promotion = promoteRes.data as PromoteResponse;
+  if (promotion.skipped_stats > 0 || promotion.skipped_ineligible > 0) {
+    throw new Error(
+      `Query promotion skipped ${promotion.skipped_stats} STATS and ${promotion.skipped_ineligible} ineligible queries`
+    );
   }
 
   return prepared.map(({ q, queryId, esql }) => ({
     queryId,
-    ruleId: ruleIdByAssetId.get(queryId) as string,
+    ruleId: computeRuleId(ctx.streamName, queryId, esql),
     title: q.title,
     esql,
     severityScore: q.severityScore,

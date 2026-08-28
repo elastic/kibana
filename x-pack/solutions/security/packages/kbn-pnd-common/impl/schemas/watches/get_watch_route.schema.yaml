@@ -32,7 +32,15 @@ paths:
                   settings:
                     $ref: '../components/watch_settings.schema.yaml#/components/schemas/WatchSettings'
                     description: >-
-                      Omitted when the watch has no settings to expose, which is the case for live
-                      projected watches until settings are applied to the managed workflow definition.
+                      Omitted when the watch has not registered a settings extension.
+                  settingsRevision:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    nullable: true
+                    description: >-
+                      Logical workflow version for best-effort stale settings detection. Null when
+                      the per-space managed watch has not been installed yet.
                 required:
                   - watch
+                  - settingsRevision
