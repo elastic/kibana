@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -14,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
+  const retry = getService('retry');
 
   describe('security solution', () => {
     let cleanUp: () => Promise<unknown>;
@@ -52,7 +52,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.clickLink({ navId: 'securityGroup:investigations' });
         await solutionNavigation.sidenav.clickLink({ navId: 'timelines' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'timelines' });
-        expect(await globalNav.getPageTitle()).to.be('Timelines');
+        // The sidenav link goes active before the destination page title renders
+        // (the transient app title is shown first), so poll for the final title
+        // instead of sampling it once.
+        await retry.waitFor('the Timelines page title to render', async () => {
+          return (await globalNav.getPageTitle()) === 'Timelines';
+        });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
