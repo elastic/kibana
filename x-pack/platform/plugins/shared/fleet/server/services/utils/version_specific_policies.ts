@@ -118,9 +118,7 @@ export async function getVersionSpecificPolicies(
             const versionedInputs = getInputsForVersion(updatedFullPolicy.inputs ?? [], version);
             const compiledIds = collectCompiledSecretRefIds(versionedInputs);
             const refs = updatedFullPolicy.secret_references ?? [];
-            return compiledIds
-              ? refs.filter(({ id: refId }) => compiledIds.has(refId))
-              : refs;
+            return compiledIds ? refs.filter(({ id: refId }) => compiledIds.has(refId)) : refs;
           })(),
         }),
       },
