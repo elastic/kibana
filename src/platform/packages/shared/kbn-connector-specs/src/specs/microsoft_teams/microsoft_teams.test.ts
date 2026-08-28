@@ -283,6 +283,20 @@ describe('MicrosoftTeams', () => {
       expect(mockClient.get).not.toHaveBeenCalled();
     });
 
+    it('should throw when using private_key_jwt auth without userId', async () => {
+      const pkjwtContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+      } as unknown as ActionContext;
+
+      await expect(
+        MicrosoftTeams.actions.listJoinedTeams.handler(pkjwtContext, {})
+      ).rejects.toThrow(
+        'listJoinedTeams requires a userId when using app-only (client credentials) auth.'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
     it('should not throw when using app-only auth with userId', async () => {
       const appOnlyContext = {
         ...mockContext,
@@ -298,6 +312,19 @@ describe('MicrosoftTeams', () => {
       ).resolves.not.toThrow();
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/users/user-abc/joinedTeams',
+        expect.any(Object)
+      );
+    });
+
+    it('should encode userId (UPN) in the /users path', async () => {
+      mockClient.get.mockResolvedValue({ data: { value: [] } });
+
+      await MicrosoftTeams.actions.listJoinedTeams.handler(mockContext, {
+        userId: 'alice@contoso.com',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/users/alice%40contoso.com/joinedTeams',
         expect.any(Object)
       );
     });
@@ -551,6 +578,18 @@ describe('MicrosoftTeams', () => {
       } as unknown as ActionContext;
 
       await expect(MicrosoftTeams.actions.listChats.handler(appOnlyContext, {})).rejects.toThrow(
+        'listChats requires a userId when using app-only (client credentials) auth.'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('should throw when using private_key_jwt auth without userId', async () => {
+      const pkjwtContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+      } as unknown as ActionContext;
+
+      await expect(MicrosoftTeams.actions.listChats.handler(pkjwtContext, {})).rejects.toThrow(
         'listChats requires a userId when using app-only (client credentials) auth.'
       );
       expect(mockClient.get).not.toHaveBeenCalled();
@@ -869,6 +908,18 @@ describe('MicrosoftTeams', () => {
           'Microsoft Graph does not support app-only (client credentials) access ' +
           'to the /search/query API for chatMessage entities.'
       );
+      expect(mockClient.post).not.toHaveBeenCalled();
+    });
+
+    it('should throw when called with private_key_jwt (app-only) auth', async () => {
+      const pkjwtContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+      } as unknown as ActionContext;
+
+      await expect(
+        MicrosoftTeams.actions.searchMessages.handler(pkjwtContext, { query: 'test' })
+      ).rejects.toThrow('searchMessages requires delegated authentication');
       expect(mockClient.post).not.toHaveBeenCalled();
     });
 
@@ -1274,9 +1325,7 @@ describe('MicrosoftTeams', () => {
           },
         ],
       });
-      expect(mockContext.log.debug).toHaveBeenCalledWith(
-        'Microsoft Teams creating oneOnOne chat'
-      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith('Microsoft Teams creating oneOnOne chat');
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -1437,6 +1486,22 @@ describe('MicrosoftTeams', () => {
       mockClient.get.mockResolvedValue(mockResponse);
 
       const result = await testSpec.handler(appOnlyContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/teams', {
+        params: { $select: 'id,displayName' },
+      });
+      expect(result).toEqual({});
+    });
+
+    it('should use /teams for app-only auth (oauth_client_credentials_private_key_jwt)', async () => {
+      const pkjwtContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
+      } as unknown as ActionContext;
+
+      mockClient.get.mockResolvedValue({ data: { value: [{ id: 'team-1' }] } });
+
+      const result = await testSpec.handler(pkjwtContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/teams', {
         params: { $select: 'id,displayName' },

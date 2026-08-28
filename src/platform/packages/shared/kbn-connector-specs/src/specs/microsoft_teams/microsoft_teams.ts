@@ -36,12 +36,12 @@ import type {
   GetUserInput,
   CreateChatInput,
 } from './types';
-/**
- * Returns the base path for user-scoped Microsoft Graph API endpoints.
- * When a userId is provided, returns `/users/{userId}` (for app-only auth).
- * Otherwise, returns `/me` (for delegated auth with a signed-in user).
- */
-const userPath = (userId?: string): string => (userId ? `/users/${userId}` : '/me');
+const userPath = (userId?: string): string =>
+  userId ? `/users/${encodeURIComponent(userId)}` : '/me';
+
+const isAppOnlyAuth = (authType?: string): boolean =>
+  authType === 'oauth_client_credentials' ||
+  authType === 'oauth_client_credentials_private_key_jwt';
 
 const GraphCollectionOutputSchema = lazySchema(() =>
   z.object({
@@ -189,7 +189,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       input: ListJoinedTeamsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListJoinedTeamsInput) => {
-        if (ctx.secrets?.authType === 'oauth_client_credentials' && !input?.userId) {
+        if (isAppOnlyAuth(ctx.secrets?.authType) && !input?.userId) {
           throw new Error(
             'listJoinedTeams requires a userId when using app-only (client credentials) auth. ' +
               'Provide the userId of the user whose teams you want to list.'
@@ -219,7 +219,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       handler: async (ctx, input: ListChannelsInput) => {
         ctx.log.debug(`Microsoft Teams listing channels for team ${input.teamId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/teams/${input.teamId}/channels`,
+          `https://graph.microsoft.com/v1.0/teams/${encodeURIComponent(input.teamId)}/channels`,
           {
             params: {
               $select: 'id,displayName,description,createdDateTime,membershipType,webUrl',
@@ -242,7 +242,9 @@ export const MicrosoftTeams: ConnectorSpec = {
           `Microsoft Teams listing messages for channel ${input.channelId} in team ${input.teamId}`
         );
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/teams/${input.teamId}/channels/${input.channelId}/messages`,
+          `https://graph.microsoft.com/v1.0/teams/${encodeURIComponent(
+            input.teamId
+          )}/channels/${encodeURIComponent(input.channelId)}/messages`,
           {
             params: {
               ...(input.top !== undefined && { $top: input.top }),
@@ -261,7 +263,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       input: ListChatsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatsInput) => {
-        if (ctx.secrets?.authType === 'oauth_client_credentials' && !input.userId) {
+        if (isAppOnlyAuth(ctx.secrets?.authType) && !input.userId) {
           throw new Error(
             'listChats requires a userId when using app-only (client credentials) auth. ' +
               'Provide the userId of the user whose chats you want to list.'
@@ -289,7 +291,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       handler: async (ctx, input: ListChatMessagesInput) => {
         ctx.log.debug(`Microsoft Teams listing messages for chat ${input.chatId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/chats/${input.chatId}/messages`,
+          `https://graph.microsoft.com/v1.0/chats/${encodeURIComponent(input.chatId)}/messages`,
           {
             params: {
               ...(input.top !== undefined && { $top: input.top }),
@@ -322,7 +324,7 @@ export const MicrosoftTeams: ConnectorSpec = {
           .describe('Microsoft Graph Search API response')
       ),
       handler: async (ctx, input: SearchMessagesInput) => {
-        if (ctx.secrets?.authType === 'oauth_client_credentials') {
+        if (isAppOnlyAuth(ctx.secrets?.authType)) {
           throw new Error(
             'searchMessages requires delegated authentication (bearer token or OAuth authorization code). ' +
               'Microsoft Graph does not support app-only (client credentials) access ' +
@@ -389,7 +391,9 @@ export const MicrosoftTeams: ConnectorSpec = {
           requestBody.subject = input.subject;
         }
         const response = await ctx.client.post(
-          `https://graph.microsoft.com/v1.0/teams/${encodeURIComponent(input.teamId)}/channels/${encodeURIComponent(input.channelId)}/messages`,
+          `https://graph.microsoft.com/v1.0/teams/${encodeURIComponent(
+            input.teamId
+          )}/channels/${encodeURIComponent(input.channelId)}/messages`,
           requestBody
         );
         return response.data;
@@ -440,27 +444,34 @@ export const MicrosoftTeams: ConnectorSpec = {
       input: UpdateMessageInputSchema,
       output: lazySchema(() =>
         z
-          .object({ success: z.boolean().describe('true when the message was updated successfully') })
+          .object({
+            success: z.boolean().describe('true when the message was updated successfully'),
+          })
           .describe('Update result')
       ),
       handler: async (ctx, input: UpdateMessageInput) => {
-        const isChannel =
-          input.teamId !== undefined && input.channelId !== undefined;
-        const isChatMsg = input.chatId !== undefined;
-        if (!isChannel && !isChatMsg) {
-          throw new Error(
-            'updateMessage requires either teamId + channelId (channel message) or chatId (chat message).'
-          );
-        }
         const requestBody = {
           body: {
             contentType: input.contentType ?? 'text',
             content: input.content,
           },
         };
-        const url = isChannel
-          ? `https://graph.microsoft.com/v1.0/teams/${encodeURIComponent(input.teamId!)}/channels/${encodeURIComponent(input.channelId!)}/messages/${encodeURIComponent(input.messageId)}`
-          : `https://graph.microsoft.com/v1.0/chats/${encodeURIComponent(input.chatId!)}/messages/${encodeURIComponent(input.messageId)}`;
+        let url: string;
+        if (input.teamId !== undefined && input.channelId !== undefined) {
+          url = `https://graph.microsoft.com/v1.0/teams/${encodeURIComponent(
+            input.teamId
+          )}/channels/${encodeURIComponent(input.channelId)}/messages/${encodeURIComponent(
+            input.messageId
+          )}`;
+        } else if (input.chatId !== undefined) {
+          url = `https://graph.microsoft.com/v1.0/chats/${encodeURIComponent(
+            input.chatId
+          )}/messages/${encodeURIComponent(input.messageId)}`;
+        } else {
+          throw new Error(
+            'updateMessage requires either teamId + channelId (channel message) or chatId (chat message).'
+          );
+        }
         ctx.log.debug(`Microsoft Teams updating message ${input.messageId}`);
         await ctx.client.patch(url, requestBody);
         return { success: true };
@@ -471,7 +482,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     getUser: {
       isTool: true,
       description:
-        'Retrieve a Microsoft Teams / Azure AD user by their user ID (GUID) or user principal name (UPN, e.g. alice@contoso.com). Returns the user\'s id, displayName, mail, and userPrincipalName. Use the returned id with createChat or listChats (userId parameter). Works with all auth types.',
+        "Retrieve a Microsoft Teams / Azure AD user by their user ID (GUID) or user principal name (UPN, e.g. alice@contoso.com). Returns the user's id, displayName, mail, and userPrincipalName. Use the returned id with createChat or listChats (userId parameter). Works with all auth types.",
       input: GetUserInputSchema,
       output: lazySchema(() =>
         z
@@ -524,7 +535,9 @@ export const MicrosoftTeams: ConnectorSpec = {
         const members = input.memberIds.map((userId) => ({
           '@odata.type': '#microsoft.graph.aadUserConversationMember',
           roles: ['owner'],
-          'user@odata.bind': `https://graph.microsoft.com/v1.0/users('${encodeURIComponent(userId)}')`,
+          'user@odata.bind': `https://graph.microsoft.com/v1.0/users('${encodeURIComponent(
+            userId
+          )}')`,
         }));
         const requestBody: Record<string, unknown> = {
           chatType: input.chatType,
@@ -533,7 +546,10 @@ export const MicrosoftTeams: ConnectorSpec = {
         if (input.topic !== undefined) {
           requestBody.topic = input.topic;
         }
-        const response = await ctx.client.post('https://graph.microsoft.com/v1.0/chats', requestBody);
+        const response = await ctx.client.post(
+          'https://graph.microsoft.com/v1.0/chats',
+          requestBody
+        );
         return response.data;
       },
     },
@@ -562,16 +578,13 @@ export const MicrosoftTeams: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    // enabled must be explicitly set to true, otherwise the "Test connector"
-    // button stays disabled in the UI even though a handler is defined.
     enabled: true,
     description: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.test.description', {
       defaultMessage: 'Verifies Microsoft Teams connection by listing joined teams',
     }),
     handler: async (ctx) => {
       ctx.log.debug('Microsoft Teams test handler');
-      const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
-      const url = isAppOnly
+      const url = isAppOnlyAuth(ctx.secrets?.authType)
         ? 'https://graph.microsoft.com/v1.0/teams'
         : 'https://graph.microsoft.com/v1.0/me/joinedTeams';
       const response = await ctx.client.get(url, {
@@ -582,6 +595,5 @@ export const MicrosoftTeams: ConnectorSpec = {
       }
       return {};
     },
-    enabled: true,
   },
 };

@@ -25,6 +25,7 @@ export const ListJoinedTeamsInputSchema = lazySchema(() =>
     .object({
       userId: z
         .string()
+        .max(MAX_ID)
         .optional()
         .describe(
           'User ID for app-only auth via client credentials. Omit when using delegated auth (bearer token).'
@@ -38,6 +39,7 @@ export const ListChannelsInputSchema = lazySchema(() =>
   z.object({
     teamId: z
       .string()
+      .max(MAX_ID)
       .describe(
         'The ID of the Microsoft Team whose channels you want to list. Obtain this from listJoinedTeams (the "id" field on each team object).'
       ),
@@ -49,11 +51,13 @@ export const ListChannelMessagesInputSchema = lazySchema(() =>
   z.object({
     teamId: z
       .string()
+      .max(MAX_ID)
       .describe(
         'The ID of the Microsoft Team containing the channel. Obtain this from listJoinedTeams (the "id" field on each team object).'
       ),
     channelId: z
       .string()
+      .max(MAX_ID)
       .describe(
         'The ID of the channel whose messages you want to retrieve. Obtain this from listChannels (the "id" field on each channel object).'
       ),
@@ -71,6 +75,7 @@ export const ListChatsInputSchema = lazySchema(() =>
   z.object({
     userId: z
       .string()
+      .max(MAX_ID)
       .optional()
       .describe(
         'User ID for app-only auth via client credentials. Omit when using delegated auth (bearer token).'
@@ -89,6 +94,7 @@ export const ListChatMessagesInputSchema = lazySchema(() =>
   z.object({
     chatId: z
       .string()
+      .max(MAX_ID)
       .describe(
         'The ID of the chat (direct message or group chat) whose messages you want to retrieve. Obtain this from listChats (the "id" field on each chat object).'
       ),

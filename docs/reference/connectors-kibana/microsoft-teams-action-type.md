@@ -1,7 +1,7 @@
 ---
 navigation_title: "Microsoft Teams"
 type: reference
-description: "Use the Microsoft Teams connector to search messages and browse teams, channels, and chats using the Microsoft Graph API."
+description: "Use the Microsoft Teams connector to send messages, search conversations, and browse teams, channels, and chats using the Microsoft Graph API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Microsoft Teams connector [microsoft-teams-connector]
 
-The Microsoft Teams connector enables Workplace AI to search messages and browse teams, channels, and chats in Microsoft Teams using the Microsoft Graph API.
+The Microsoft Teams connector enables Workplace AI to send messages to channels and chats, search conversations, and browse teams, channels, and chats in Microsoft Teams using the Microsoft Graph API.
 
 ## Create connectors in {{kib}} [define-microsoft-teams-ui]
 
