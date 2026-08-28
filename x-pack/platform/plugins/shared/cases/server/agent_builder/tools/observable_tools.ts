@@ -7,12 +7,14 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type {
+  BuiltinToolDefinition,
+  ToolAvailabilityConfig,
+} from '@kbn/agent-builder-server/tools';
 import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { CasesServerStartDependencies } from '../../types';
-import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 import { addObservablesStepCommonDefinition } from '../../../common/workflows/steps/add_observables';
 import { updateObservableStepCommonDefinition } from '../../../common/workflows/steps/update_observable';
 import { addObservablesStepDefinition } from '../../workflows/steps/add_observables';
@@ -42,6 +44,7 @@ const observablesSchema = z.object({
 });
 
 export const observablesTool = (
+  availability: ToolAvailabilityConfig,
   coreSetup: CoreSetup<CasesServerStartDependencies>,
   getCasesClientFn: GetCasesClientFn,
   logger: Logger
@@ -61,7 +64,7 @@ export const observablesTool = (
       idempotentHint: false,
       openWorldHint: false,
     },
-    availability: createCasesToolAvailability(coreSetup, logger),
+    availability,
     schema: observablesSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {

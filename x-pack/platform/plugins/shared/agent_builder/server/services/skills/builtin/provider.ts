@@ -16,7 +16,6 @@ export const createBuiltinSkillProvider = (
   cache: AvailabilityCache
 ): ReadonlySkillProvider => {
   const skillsMap = new Map(skills.map((s) => [s.id, s]));
-  const convert = (skill: SkillDefinition) => convertBuiltinSkill({ skill, cache });
 
   return {
     id: 'builtin',
@@ -24,20 +23,22 @@ export const createBuiltinSkillProvider = (
     has: (skillId) => skillsMap.has(skillId),
     get: (skillId) => {
       const skill = skillsMap.get(skillId);
-      return skill ? convert(skill) : undefined;
+      return skill ? convertBuiltinSkill({ skill, cache }) : undefined;
     },
     bulkGet: (ids) => {
       const result = new Map<string, InternalSkillDefinition>();
       for (const id of ids) {
         const skill = skillsMap.get(id);
         if (skill) {
-          result.set(id, convert(skill));
+          result.set(id, convertBuiltinSkill({ skill, cache }));
         }
       }
       return result;
     },
     list: (options?: SkillListOptions) => {
-      const converted = [...skillsMap.values()].map(convert);
+      const converted = [...skillsMap.values()].map((skill) =>
+        convertBuiltinSkill({ skill, cache })
+      );
       if (options?.summaryOnly) {
         return converted.map((s) => ({
           ...s,

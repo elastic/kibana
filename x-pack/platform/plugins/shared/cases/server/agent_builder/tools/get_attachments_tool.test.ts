@@ -6,6 +6,7 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AvailabilityContext } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock } from '../../client/mocks';
 import { getAttachmentsTool } from './get_attachments_tool';
@@ -77,7 +78,7 @@ describe('getAttachmentsTool availability', () => {
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
     const tool = getAttachmentsTool(availability, jest.fn());
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as any);
+    const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 
@@ -86,7 +87,7 @@ describe('getAttachmentsTool availability', () => {
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
     const tool = getAttachmentsTool(availability, jest.fn());
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as any);
+    const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'available' });
   });
 

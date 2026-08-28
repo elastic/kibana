@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AvailabilityContext } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
@@ -160,7 +161,7 @@ describe('attachmentsTool availability', () => {
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
     const tool = attachmentsTool(availability, jest.fn(), emptyRegistry, true);
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as any);
+    const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 
@@ -169,7 +170,7 @@ describe('attachmentsTool availability', () => {
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
     const tool = attachmentsTool(availability, jest.fn(), emptyRegistry, true);
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as any);
+    const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'available' });
   });
 

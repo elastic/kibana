@@ -51,7 +51,7 @@ export function registerCasesAgentBuilderTools(
   logger: Logger
 ): void {
   const availability = createCasesToolAvailability(coreSetup, logger);
-  agentBuilder.tools.register(searchCasesTool(coreSetup, getCasesClient, logger));
+  agentBuilder.tools.register(searchCasesTool(availability, coreSetup, getCasesClient, logger));
   agentBuilder.tools.register(manageCasesTool(availability, getCasesClient, templatesEnabled));
   agentBuilder.tools.register(getAttachmentsTool(availability, getCasesClient));
   agentBuilder.tools.register(
@@ -65,7 +65,7 @@ export function registerCasesAgentBuilderTools(
   agentBuilder.tools.register(
     attachmentsTool(availability, getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
-  agentBuilder.tools.register(observablesTool(coreSetup, getCasesClient, logger));
+  agentBuilder.tools.register(observablesTool(availability, coreSetup, getCasesClient, logger));
   agentBuilder.skills.register({ ...buildCasesSkill(templatesEnabled), availability });
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {
