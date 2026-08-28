@@ -49,6 +49,7 @@ export const RulesListPage = () => {
   ] = useBoolean(false);
   const {
     flyout,
+    confirmationModal,
     openCreateFlyout,
     openCreateBuilderFlyout,
     openCreateFromTemplateFlyout,
@@ -196,6 +197,7 @@ export const RulesListPage = () => {
         />
       ) : null}
       {flyout}
+      {confirmationModal}
     </div>
   );
 };
