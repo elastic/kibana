@@ -23,5 +23,8 @@ export const headerAssembly = defineAssembly({ name: 'FlyoutTemplateHeader' });
 /** Parses `FlyoutTemplate.Body` parts and passthrough children. */
 export const bodyAssembly = defineAssembly({ name: 'FlyoutTemplateBody' });
 
+/** Parses `FlyoutTemplate.Body.Section` / `.Accordion` content. */
+export const sectionAssembly = defineAssembly({ name: 'FlyoutTemplateSection' });
+
 /** Parses `FlyoutTemplate.Footer` action parts. */
 export const footerAssembly = defineAssembly({ name: 'FlyoutTemplateFooter' });

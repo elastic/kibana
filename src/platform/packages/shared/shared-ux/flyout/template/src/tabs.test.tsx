@@ -10,17 +10,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
 
-const renderTemplate = (ui: React.ReactElement) =>
-  render(ui, {
-    wrapper: ({ children }) => (
-      <KibanaErrorBoundaryProvider>{children}</KibanaErrorBoundaryProvider>
-    ),
-  });
+const renderTemplate = (ui: React.ReactElement) => render(ui);
 
 describe('FlyoutTemplate tabs', () => {
   it('renders a tab bar with correct roles', () => {
@@ -151,27 +145,25 @@ describe('FlyoutTemplate tabs', () => {
 
     // Consumer updates the controlled value.
     rerender(
-      <KibanaErrorBoundaryProvider>
-        <FlyoutTemplate
-          onClose={noop}
-          session="never"
-          selectedTabId="metadata"
-          onTabChange={onTabChange}
-        >
-          <FlyoutTemplate.Header title="Alert">
-            <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
-            <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
-          </FlyoutTemplate.Header>
-          <FlyoutTemplate.Body>
-            <FlyoutTemplate.Body.TabPanel tabId="overview">
-              <span>overview content</span>
-            </FlyoutTemplate.Body.TabPanel>
-            <FlyoutTemplate.Body.TabPanel tabId="metadata">
-              <span>metadata content</span>
-            </FlyoutTemplate.Body.TabPanel>
-          </FlyoutTemplate.Body>
-        </FlyoutTemplate>
-      </KibanaErrorBoundaryProvider>
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        selectedTabId="metadata"
+        onTabChange={onTabChange}
+      >
+        <FlyoutTemplate.Header title="Alert">
+          <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
+          <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">
+            <span>overview content</span>
+          </FlyoutTemplate.Body.TabPanel>
+          <FlyoutTemplate.Body.TabPanel tabId="metadata">
+            <span>metadata content</span>
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
     );
 
     expect(screen.getByText('metadata content')).toBeInTheDocument();
@@ -301,7 +293,7 @@ describe('FlyoutTemplate tabs', () => {
     await user.click(screen.getByRole('tab', { name: 'Metadata' }));
     expect(screen.getByText('metadata content')).toBeInTheDocument();
 
-    rerender(<KibanaErrorBoundaryProvider>{renderFlyout(false)}</KibanaErrorBoundaryProvider>);
+    rerender(renderFlyout(false));
     expect(screen.getByText('overview content')).toBeInTheDocument();
   });
 

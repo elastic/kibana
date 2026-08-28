@@ -10,7 +10,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSpacer, EuiText } from '@elastic/eui';
 import { FlyoutTemplate } from './flyout_template';
 import {
   type SharedStoryArgs,
@@ -27,6 +27,11 @@ import {
 type Args = SharedStoryArgs & {
   headerIsCollapsed: boolean;
   numTabs: number;
+  numSections: number;
+  numSubsections: number;
+  sectionIcon: boolean;
+  sectionAction: boolean;
+  sectionHasBorder: boolean;
 };
 
 const meta: Meta<Args> = {
@@ -38,6 +43,11 @@ const meta: Meta<Args> = {
     paginationJump: false,
     numUnstructuredBlocks: 0,
     numTabs: 0,
+    numSections: 2,
+    numSubsections: 0,
+    sectionIcon: false,
+    sectionAction: false,
+    sectionHasBorder: false,
     titleIcon: false,
     description: true,
     numMetaBlocks: 0,
@@ -96,6 +106,32 @@ const meta: Meta<Args> = {
       name: 'Info blocks',
       control: { type: 'range', min: 0, max: 10, step: 1 },
       table: { category: 'Header' },
+    },
+    numSections: {
+      // Zero is allowed so a body of only unstructured content is reachable.
+      name: 'Sections',
+      control: { type: 'range', min: 0, max: 4, step: 1 },
+      table: { category: 'Body' },
+    },
+    numSubsections: {
+      name: 'Subsections',
+      control: { type: 'range', min: 0, max: 4, step: 1 },
+      table: { category: 'Body' },
+    },
+    sectionIcon: {
+      name: 'Section icon',
+      control: { type: 'boolean' },
+      table: { category: 'Body' },
+    },
+    sectionAction: {
+      name: 'Section action',
+      control: { type: 'boolean' },
+      table: { category: 'Body' },
+    },
+    sectionHasBorder: {
+      name: 'Section has border',
+      control: { type: 'boolean' },
+      table: { category: 'Body' },
     },
     numUnstructuredBlocks: {
       name: 'Unstructured blocks',
@@ -302,12 +338,13 @@ export const HeaderCollapseOnScroll: Story = {
   render: HeaderCollapseOnScrollRender,
 };
 
-const TABS: Array<{ id: string; label: string; detail: string }> = [
-  { id: 'overview', label: 'Overview', detail: 'Overview panel content.' },
-  { id: 'metadata', label: 'Metadata', detail: 'Metadata panel content.' },
-  { id: 'timeline', label: 'Timeline', detail: 'Timeline panel content.' },
-  { id: 'insights', label: 'Insights', detail: 'Insights panel content.' },
-];
+/** Distinct look-and-feel per tab, so switching tabs is obvious even at a glance. */
+const TABS: Array<{ id: string; label: string; icon: string; detail: string }> = [
+  { id: 'overview', label: 'Overview', icon: 'inspect', detail: 'A high-level summary of the alert lifecycle and current state.' },
+  { id: 'metadata', label: 'Metadata', icon: 'tag', detail: 'Structured key/value pairs captured when the alert was created.' },
+  { id: 'timeline', label: 'Timeline', icon: 'clock', detail: 'A chronological list of state changes and annotations.' },
+  { id: 'insights', label: 'Insights', icon: 'document', detail: 'Raw log lines correlated to this alert by trace id.' },
+]; // prettier-ignore
 
 const TabsRender = (args: Args): React.JSX.Element => {
   const visibleTabs = TABS.slice(0, args.numTabs);
@@ -356,13 +393,15 @@ const TabsRender = (args: Args): React.JSX.Element => {
         )}
 
         <FlyoutTemplate.Body>
-          {visibleTabs.map(({ id, label, detail }) => (
+          {visibleTabs.map(({ id, label, icon, detail }) => (
             <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
               {unstructuredBlocks(args.numUnstructuredBlocks)}
-              <EuiText size="s">
-                <p>{fillContent(detail)}</p>
-                <p>{fillContent()}</p>
-              </EuiText>
+              <FlyoutTemplate.Body.Section title={`${label} panel`} icon={icon}>
+                <EuiText size="s">
+                  <p>{fillContent(detail)}</p>
+                  <p>{fillContent()}</p>
+                </EuiText>
+              </FlyoutTemplate.Body.Section>
             </FlyoutTemplate.Body.TabPanel>
           ))}
         </FlyoutTemplate.Body>
@@ -401,4 +440,195 @@ export const Tabs: StoryObj<Args> = {
     numUnstructuredBlocks: 1,
   },
   render: TabsRender,
+};
+
+/** Title-row props shared by `Body.Section` and `Body.Accordion`. */
+const buildTitleAdornments = (args: Args) => ({
+  ...(args.sectionIcon
+    ? { icon: 'info' as const, tooltip: 'Additional context about this section.' }
+    : {}),
+  ...(args.sectionAction
+    ? { action: { label: 'Extra action', onClick: action('section action') } }
+    : {}),
+});
+
+const SECTIONS: Array<{ id: string; title: string; content: string }> = [
+  { id: 'summary', title: 'Regular Section: Summary', content: 'Summary regular section content.' },
+  { id: 'details', title: 'Regular Section: Details', content: 'Details regular section content.' },
+  { id: 'context', title: 'Regular Section: Context', content: 'Context regular section content.' },
+  { id: 'history', title: 'Regular Section: History', content: 'History regular section content.' },
+].map(({ content, ...fields }) => ({ ...fields, content: fillContent(content) }));
+
+const SUBSECTIONS: Array<{ id: string; title: string; content: string }> = [
+  { id: 'host', title: 'Subsection: Host', content: 'Host subsection content.' },
+  { id: 'process', title: 'Subsection: Process', content: 'Process subsection content.' },
+  { id: 'network', title: 'Subsection: Network', content: 'Network subsection content.' },
+  { id: 'user', title: 'Subsection: User', content: 'User subsection content.' },
+].map(({ content, ...fields }) => ({ ...fields, content: fillContent(content) }));
+
+const ACCORDIONS: Array<{ id: string; title: string; content: string }> = [
+  { id: 'overview', title: 'Accordion: Overview', content: 'Overview accordion section content.' },
+  { id: 'metadata', title: 'Accordion: Metadata', content: 'Metadata accordion section content.' },
+  { id: 'timeline', title: 'Accordion: Timeline', content: 'Timeline accordion section content.' },
+  { id: 'related', title: 'Accordion: Related', content: 'Related accordion section content.' },
+];
+
+/** Subsections when the count is non-zero, otherwise the section's own body text. */
+const sectionContent = (
+  args: Args,
+  fallback: string,
+  Subsection: typeof FlyoutTemplate.Body.Section.Subsection
+) => {
+  const subsections = SUBSECTIONS.slice(0, args.numSubsections);
+  return subsections.length
+    ? subsections.map(({ id, title, content }) => (
+        <Subsection key={id} id={id} title={title}>
+          {bodyText(content)}
+        </Subsection>
+      ))
+    : bodyText(fallback);
+};
+
+const RegularSectionsRender = (args: Args): React.JSX.Element => {
+  const pagination = usePaginationProps(args);
+  return (
+    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+      {headerZone(args, 'Service details')}
+      {bodyZone(
+        <>
+          {unstructuredBlocks(args.numUnstructuredBlocks)}
+          {SECTIONS.slice(0, args.numSections).map(({ id, title, content }) => (
+            <FlyoutTemplate.Body.Section
+              key={id}
+              title={title}
+              hasBorder={args.sectionHasBorder}
+              {...buildTitleAdornments(args)}
+            >
+              {sectionContent(args, content, FlyoutTemplate.Body.Section.Subsection)}
+            </FlyoutTemplate.Body.Section>
+          ))}
+        </>
+      )}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+export const RegularSections: Story = {
+  render: RegularSectionsRender,
+};
+
+const AccordionSectionsRender = (args: Args): React.JSX.Element => {
+  const pagination = usePaginationProps(args);
+  return (
+    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+      {headerZone(args, 'Alert details')}
+      {bodyZone(
+        <>
+          {unstructuredBlocks(args.numUnstructuredBlocks)}
+          {ACCORDIONS.slice(0, args.numSections).map(({ id, title, content }, index) => (
+            <FlyoutTemplate.Body.Accordion
+              key={id}
+              id={id}
+              title={title}
+              initialIsOpen={index === 0}
+              {...buildTitleAdornments(args)}
+            >
+              {sectionContent(args, content, FlyoutTemplate.Body.Accordion.Subsection)}
+            </FlyoutTemplate.Body.Accordion>
+          ))}
+        </>
+      )}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+export const AccordionSections: Story = {
+  argTypes: {
+    // Accordion content is always outlined, so the border toggle does not apply here.
+    sectionHasBorder: { table: { disable: true } },
+    numSections: { name: 'Body accordions', control: { type: 'range', min: 0, max: 4, step: 1 } },
+  },
+  render: AccordionSectionsRender,
+};
+
+const ErrorInFlyoutRender = (args: Args): React.JSX.Element => {
+  const BadComponent = () => {
+    const [hasError, setHasError] = useState(false);
+
+    if (hasError) {
+      throw new Error('This is an error to show the test user!');
+    }
+
+    const clickedForError = action('clicked for error');
+    return (
+      <EuiButton
+        color="danger"
+        onClick={() => {
+          clickedForError();
+          setHasError(true);
+        }}
+      >
+        Throw error
+      </EuiButton>
+    );
+  };
+
+  return (
+    <FlyoutTemplate
+      onClose={action('onClose')}
+      size="s"
+      type={args.type}
+      ownFocus={args.ownFocus}
+      resizable={args.resizable}
+    >
+      <FlyoutTemplate.Header title="Error in flyout">
+        <FlyoutTemplate.Header.InfoBlock title="Bad component">
+          <BadComponent />
+        </FlyoutTemplate.Header.InfoBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Owner">Platform</FlyoutTemplate.Header.InfoBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Latency">
+          <EuiHealth color="success">Healthy</EuiHealth>
+        </FlyoutTemplate.Header.InfoBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Throughput">
+          1.2k tpm
+        </FlyoutTemplate.Header.InfoBlock>
+      </FlyoutTemplate.Header>
+      <FlyoutTemplate.Body>
+        <BadComponent />
+        <EuiSpacer size="m" />
+        <FlyoutTemplate.Body.Section title="Section 1">
+          <EuiText size="s">
+            <p>This is a flyout template body section.</p>
+          </EuiText>
+        </FlyoutTemplate.Body.Section>
+      </FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+};
+
+/** Each zone is independently error-bounded: throwing in one leaves the others rendered. */
+export const ErrorInFlyout: Story = {
+  argTypes: {
+    // This story builds its zones inline, so none of the shared content args apply.
+    titleIcon: { table: { disable: true } },
+    description: { table: { disable: true } },
+    numPages: { table: { disable: true } },
+    numMetaBlocks: { table: { disable: true } },
+    numBadges: { table: { disable: true } },
+    numInfoBlocks: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
+    numLeadingActions: { table: { disable: true } },
+    numTrailingActions: { table: { disable: true } },
+    numSections: { table: { disable: true } },
+    sectionIcon: { table: { disable: true } },
+    sectionAction: { table: { disable: true } },
+    sectionHasBorder: { table: { disable: true } },
+    numSubsections: { table: { disable: true } },
+    numUnstructuredBlocks: { table: { disable: true } },
+    footer: { table: { disable: true } },
+    secondaryActionIcon: { table: { disable: true } },
+  },
+  render: ErrorInFlyoutRender,
 };

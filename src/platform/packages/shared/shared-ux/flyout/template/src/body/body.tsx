@@ -21,13 +21,29 @@ import {
   useFlyoutTabs,
   useFlyoutTemplateConfig,
 } from '../context';
+import { Accordion, ACCORDION_PART_NAME, accordionPart } from './accordion';
+import { Section, SECTION_PART_NAME, sectionPart } from './section';
+import { Subsection } from './subsection';
 import { TAB_PANEL_PART_NAME, TabPanel } from './tab_panel';
 
-/** Renders passthrough children from pre-parsed items in source order. */
+/** Renders `Section`, `Accordion`, and unstructured children from pre-parsed items in source order. */
 const renderBodyItems = (items: ParsedItem[]) =>
-  items.map((item, index) =>
-    item.type === 'child' ? <Fragment key={`passthrough-${index}`}>{item.node}</Fragment> : null
-  );
+  items.map((item, index) => {
+    if (item.type === 'child') {
+      return <Fragment key={`passthrough-${index}`}>{item.node}</Fragment>;
+    }
+    if (item.part === SECTION_PART_NAME) {
+      return (
+        <Fragment key={item.instanceId}>{sectionPart.resolve(item, undefined) ?? null}</Fragment>
+      );
+    }
+    if (item.part === ACCORDION_PART_NAME) {
+      return (
+        <Fragment key={item.instanceId}>{accordionPart.resolve(item, undefined) ?? null}</Fragment>
+      );
+    }
+    return null;
+  });
 
 const ActiveTabPanel = ({
   activeTab,
@@ -75,7 +91,11 @@ const bodyPart = flyoutAssembly.definePart({ name: BODY_PART_NAME });
 const BaseBody = bodyPart.createComponent<FlyoutBodyProps>();
 BaseBody.displayName = 'FlyoutTemplate.Body';
 
-export const Body = Object.assign(BaseBody, { TabPanel });
+export const Body = Object.assign(BaseBody, {
+  Section: Object.assign(Section, { Subsection }),
+  Accordion: Object.assign(Accordion, { Subsection }),
+  TabPanel,
+});
 
 type BodyZoneProps = FlyoutBodyProps & {
   /** Pre-parsed body items from the root, to avoid parsing the children twice. */
