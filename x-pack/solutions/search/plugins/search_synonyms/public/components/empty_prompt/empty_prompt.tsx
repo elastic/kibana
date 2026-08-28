@@ -52,6 +52,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
           iconType="plusCircle"
           iconSide="left"
           onClick={getStartedAction}
+          data-test-subj="searchSynonymsEmptyPromptGetStartedButton"
         >
           <FormattedMessage
             id="xpack.searchSynonyms.emptyPrompt.getStartedButton"
