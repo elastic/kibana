@@ -100,6 +100,17 @@ export const formatInferredFieldTypeLabel = (type: string): string => {
   }
 };
 
+/** Matches Index Management mapped-field badges (`Text`, `Date`, `Date nanos`). */
+export const formatMappedFieldTypeLabel = (type: string): string => {
+  const label = formatInferredFieldTypeLabel(type);
+
+  if (label.length === 0) {
+    return label;
+  }
+
+  return `${label.charAt(0).toUpperCase()}${label.slice(1)}`;
+};
+
 export const getEffectiveAutomaticFieldType = ({
   fieldName,
   inferredType,

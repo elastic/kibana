@@ -9,6 +9,7 @@ import {
   getEffectiveAutomaticFieldType,
   INFERRED_FIELD_TYPE_OPTIONS,
   applyAutomaticFieldTypeOverride,
+  formatMappedFieldTypeLabel,
   isAutomaticFieldTypeOverridden,
   pruneAutomaticFieldTypeOverrides,
 } from './inferred_field_type_options';
@@ -19,6 +20,12 @@ describe('inferred_field_type_options', () => {
       expect.arrayContaining(['keyword', 'text', 'numeric', 'long', 'date'])
     );
     expect(INFERRED_FIELD_TYPE_OPTIONS.length).toBeGreaterThan(30);
+  });
+
+  it('formats mapped field type labels like Index Management badges', () => {
+    expect(formatMappedFieldTypeLabel('text')).toBe('Text');
+    expect(formatMappedFieldTypeLabel('date')).toBe('Date');
+    expect(formatMappedFieldTypeLabel('date_nanos')).toBe('Date nanos');
   });
 
   it('resolves effective field types with overrides', () => {

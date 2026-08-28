@@ -77,6 +77,12 @@ describe('DatasetsTable', () => {
 
     expect(onCreate).toHaveBeenCalledTimes(2);
     expect(onCreate).toHaveBeenLastCalledWith('flow_3');
+
+    fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
+    fireEvent.click(getByTestId('dataSetsSetsCreateFlow396Button'));
+
+    expect(onCreate).toHaveBeenCalledTimes(3);
+    expect(onCreate).toHaveBeenLastCalledWith('flow_3_9_6');
   });
 
   it('renders the data source filter button', () => {

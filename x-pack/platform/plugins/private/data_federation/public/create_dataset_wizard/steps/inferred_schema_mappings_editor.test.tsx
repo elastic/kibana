@@ -154,6 +154,8 @@ describe('InferredSchemaMappingsEditor', () => {
       expect(getByTestId('datasetWizardDynamicFieldsTable')).toBeInTheDocument();
       expect(getByTestId('datasetWizardMapField-@timestamp')).toBeInTheDocument();
       expect(getByTestId('datasetWizardMapField-message')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardDynamicFieldsTable')).toHaveTextContent('Date');
+      expect(getByTestId('datasetWizardDynamicFieldsTable')).toHaveTextContent('Text');
     });
 
     expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(

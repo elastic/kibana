@@ -10,25 +10,27 @@ export const DATASET_WIZARD_FLOW_VARIANT_SEARCH_PARAM = 'flow';
 export const DATASET_WIZARD_FLOW_VARIANT_1 = 'flow_1';
 export const DATASET_WIZARD_FLOW_VARIANT_2 = 'flow_2';
 export const DATASET_WIZARD_FLOW_VARIANT_3 = 'flow_3';
+export const DATASET_WIZARD_FLOW_VARIANT_3_9_6 = 'flow_3_9_6';
 
 export type DatasetWizardFlowVariant =
   | typeof DATASET_WIZARD_FLOW_VARIANT_1
   | typeof DATASET_WIZARD_FLOW_VARIANT_2
-  | typeof DATASET_WIZARD_FLOW_VARIANT_3;
+  | typeof DATASET_WIZARD_FLOW_VARIANT_3
+  | typeof DATASET_WIZARD_FLOW_VARIANT_3_9_6;
 
 export const DATASET_WIZARD_FLOW_VARIANTS: DatasetWizardFlowVariant[] = [
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
 ];
 
 export const isDatasetWizardFlowVariant = (value: string): value is DatasetWizardFlowVariant =>
   DATASET_WIZARD_FLOW_VARIANTS.includes(value as DatasetWizardFlowVariant);
 
-export const isDatasetWizardFlow3 = (
-  flowVariant: DatasetWizardFlowVariant
-): flowVariant is typeof DATASET_WIZARD_FLOW_VARIANT_3 =>
-  flowVariant === DATASET_WIZARD_FLOW_VARIANT_3;
+export const isDatasetWizardFlow3 = (flowVariant: DatasetWizardFlowVariant): boolean =>
+  flowVariant === DATASET_WIZARD_FLOW_VARIANT_3 ||
+  flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6;
 
 export const parseWizardFlowVariantFromSearch = (
   search: string

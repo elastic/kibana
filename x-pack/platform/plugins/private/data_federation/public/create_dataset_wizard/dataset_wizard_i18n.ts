@@ -470,6 +470,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Type',
     }),
 
+  dynamicFieldDataTypeAriaLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldDataTypeAriaLabel', {
+      defaultMessage: 'Data type',
+    }),
+
   automaticSchemaSampleTableCaption: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.automaticSchemaSampleTableCaption', {
       defaultMessage: 'Inferred schema sample',

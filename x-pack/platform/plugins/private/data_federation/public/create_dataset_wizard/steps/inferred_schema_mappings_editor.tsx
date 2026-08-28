@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -34,7 +35,7 @@ import {
 } from '../automatic_field_types_utils';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
-import { FieldTypeWithIcon } from '../field_type_with_icon';
+import { formatMappedFieldTypeLabel } from '../inferred_field_type_options';
 import type { TestConfigurationPreviewField } from '../test_configuration_preview_utils';
 
 export interface InferredSchemaMappingsEditorProps {
@@ -63,7 +64,17 @@ const DynamicFieldsTable: FunctionComponent<{
       {
         field: 'type',
         name: datasetWizardStrings.automaticSchemaSampleTypeColumn(),
-        render: (type: string) => <FieldTypeWithIcon type={type} />,
+        render: (type: string) => (
+          <EuiFlexGroup
+            gutterSize="m"
+            responsive={false}
+            aria-label={datasetWizardStrings.dynamicFieldDataTypeAriaLabel()}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{formatMappedFieldTypeLabel(type)}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
         'data-test-subj': 'datasetWizardDynamicFieldTypeColumn',
       },
       {
