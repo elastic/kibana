@@ -104,7 +104,7 @@ function parseArguments() {
 
   if (shipped === upcoming) {
     console.error('Error: --shipped and --upcoming must differ');
-    process.exit(1);
+    process.exit(0);
   }
 
   let pattern;

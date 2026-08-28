@@ -8,7 +8,7 @@
 import { useCallback, useEffect } from 'react';
 import { stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { UptimeUrlParams } from '../lib/helper';
 import { getSupportedUrlParams } from '../lib/helper';
 import { selectedFiltersSelector } from '../state/selectors';

@@ -122,7 +122,7 @@ export interface MeteringCallbackInput {
   logger: Logger;
   taskId: string;
   lastSuccessfulReport: Date;
-  abortController: AbortController;
+  signal: AbortSignal;
   config: ServerlessSecurityConfig;
 }
 

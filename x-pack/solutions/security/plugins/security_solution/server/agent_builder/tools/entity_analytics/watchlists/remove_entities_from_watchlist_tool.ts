@@ -17,6 +17,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import { getIndexForWatchlist } from '../../../../lib/entity_analytics/watchlists/entities/utils';
 import { createManualEntityService } from '../../../../lib/entity_analytics/watchlists/entity_sources/manual/service';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
+import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatEntityIdsForPrompt } from './entity_ids_preview';
@@ -59,6 +60,13 @@ Use when the user asks to remove entities from a named or known watchlist (e.g. 
 This tool only removes entities that were **manually assigned** to the watchlist. Entities that came in via an entity source are reported as \`not_found\` in the result with the message "Entity not manually assigned to this watchlist" — to remove those, the user must reconfigure or remove the entity source in the UI.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Remove Entities from Watchlist',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>
@@ -80,6 +88,14 @@ This tool only removes entities that were **manually assigned** to the watchlist
         )}`
       );
 
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+        spaceId,
+        actionType: 'mutation',
+      });
+      telemetryTracker.recordResultCount(0);
+
       try {
         const [, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
@@ -92,6 +108,7 @@ This tool only removes entities that were **manually assigned** to the watchlist
           action: 'modify watchlist membership',
         });
         if (!accessResult.allowed) {
+          telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
@@ -105,8 +122,10 @@ This tool only removes entities that were **manually assigned** to the watchlist
 
         const promptId = `watchlists.remove_entities_from_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
+        telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
+          telemetryTracker.recordAwaitingConfirmation();
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Remove entities from watchlist',
@@ -154,6 +173,7 @@ This tool only removes entities that were **manually assigned** to the watchlist
 
         const result = await service.unassign(params.entityIds);
 
+        telemetryTracker.recordResultCount(result.successful);
         return {
           results: [
             {
@@ -169,6 +189,7 @@ This tool only removes entities that were **manually assigned** to the watchlist
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -178,6 +199,8 @@ This tool only removes entities that were **manually assigned** to the watchlist
             },
           ],
         };
+      } finally {
+        await telemetryTracker.report();
       }
     },
   };

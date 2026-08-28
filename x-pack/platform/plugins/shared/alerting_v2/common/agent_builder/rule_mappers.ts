@@ -6,6 +6,7 @@
  */
 
 import type { RuleAttachmentData, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 
 /**
  * Maps partial rule attachment data to the API request payload,
@@ -18,7 +19,7 @@ export const buildRulePayload = (data: Partial<RuleAttachmentData>): CreateRuleD
   schedule: data.schedule!,
   query: data.query!,
   state_transition: data.state_transition ?? null,
-  time_field: data.time_field ?? '@timestamp',
+  time_field: data.time_field ?? DEFAULT_TIME_FIELD,
   ...(data.recovery_strategy !== undefined ? { recovery_strategy: data.recovery_strategy } : {}),
   ...(data.no_data_strategy !== undefined ? { no_data_strategy: data.no_data_strategy } : {}),
   ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),

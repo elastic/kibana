@@ -8,7 +8,7 @@
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
 import { KeyInsightsPanel } from './components/key_insights_panel';
@@ -27,12 +27,14 @@ export const PrivilegedUserMonitoring = ({
   callout,
   error,
   onManageUserClicked,
-  dataViewSpec,
+  indexPattern,
+  fields,
 }: {
   callout?: OnboardingCallout;
   error?: string;
   onManageUserClicked: () => void;
-  dataViewSpec: DataViewSpec;
+  indexPattern: string;
+  fields: DataViewFieldMap;
 }) => {
   const spaceId = useSpaceId();
 
@@ -120,14 +122,16 @@ export const PrivilegedUserMonitoring = ({
             {spaceId && <RiskLevelsPrivilegedUsersPanel spaceId={spaceId} />}
           </EuiFlexItem>
           <EuiFlexItem>
-            {spaceId && <KeyInsightsPanel spaceId={spaceId} dataViewSpec={dataViewSpec} />}
+            {spaceId && (
+              <KeyInsightsPanel spaceId={spaceId} indexPattern={indexPattern} fields={fields} />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       {spaceId && <PrivilegedUsersTable spaceId={spaceId} />}
       {spaceId && <PrivilegedAccessDetectionsPanel spaceId={spaceId} />}
       <EuiFlexItem>
-        <UserActivityPrivilegedUsersPanel dataViewSpec={dataViewSpec} />
+        <UserActivityPrivilegedUsersPanel indexPattern={indexPattern} fields={fields} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

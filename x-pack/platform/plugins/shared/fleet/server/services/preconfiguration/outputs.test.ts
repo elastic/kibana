@@ -13,11 +13,16 @@ import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
 
-import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
+import {
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+} from '../../constants';
 
 import {
   createOrUpdatePreconfiguredOutputs,
   cleanPreconfiguredOutputs,
+  createManagedBulkOutputMatcher,
   getPreconfiguredOutputFromConfig,
   hashSecret,
 } from './outputs';
@@ -286,15 +291,19 @@ describe('Outputs preconfiguration', () => {
 
   describe('create', () => {
     it('should generate a preconfigured output if elasticsearch.hosts is set in the config', async () => {
-      expect(
-        getPreconfiguredOutputFromConfig({
-          agents: {
-            elasticsearch: { hosts: ['http://elasticsearc:9201'] },
-          },
-        })
-      ).toMatchInlineSnapshot(`
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://elasticsearc:9201'] },
+        },
+      });
+      expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "allow_edit": Array [
+            "hosts",
+            "ca_sha256",
+            "ca_trusted_fingerprint",
+          ],
           "ca_sha256": undefined,
           "ca_trusted_fingerprint": undefined,
           "hosts": Array [
@@ -309,6 +318,7 @@ describe('Outputs preconfiguration', () => {
         },
       ]
     `);
+      expect(result[0].allow_edit).toEqual(['hosts', 'ca_sha256', 'ca_trusted_fingerprint']);
     });
 
     it('should include ECH agentless output when agentless is enabled in cloud environment', async () => {
@@ -353,7 +363,7 @@ describe('Outputs preconfiguration', () => {
       });
       expect(result[1]).toMatchObject({
         id: 'es-agentless-output',
-        name: 'Internal output for agentless',
+        name: 'Internal output for managed integrations',
         type: 'elasticsearch',
         hosts: ['https://test-es.co:9200'],
         ca_sha256: 'test-ca-sha256',
@@ -361,6 +371,7 @@ describe('Outputs preconfiguration', () => {
         is_default_monitoring: false,
         is_preconfigured: true,
       });
+      expect(result[1].allow_edit).toEqual(['hosts', 'ca_sha256']);
 
       // Restore original mocks
       jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
@@ -423,6 +434,144 @@ describe('Outputs preconfiguration', () => {
       expect(result[0].id).toBe('fleet-default-output');
 
       // Restore original mocks
+      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+    });
+
+    it('should include ECH agentless managed bulk output when managed bulk is enabled in cloud environment', async () => {
+      const originalGetCloud = appContextService.getCloud;
+      const originalGetConfig = appContextService.getConfig;
+
+      jest.mocked(appContextService.getCloud).mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+        managedOtlp: { url: 'https://managed-otlp.example.com' },
+      } as any);
+
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        agentless: { managedBulk: { enabled: true } },
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      } as any);
+
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      });
+
+      expect(result).toHaveLength(2);
+      expect(result[1]).toMatchObject({
+        id: 'es-managed-bulk-agentless-output',
+        name: 'Bulk output for managed integrations',
+        type: 'elasticsearch',
+        hosts: ['https://managed-otlp.example.com/_es'],
+        is_default: false,
+        is_default_monitoring: false,
+        is_internal: true,
+        is_preconfigured: true,
+      });
+
+      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+    });
+
+    it('should not include ECH agentless managed bulk output when managed bulk is disabled', async () => {
+      const originalGetCloud = appContextService.getCloud;
+      const originalGetConfig = appContextService.getConfig;
+
+      jest.mocked(appContextService.getCloud).mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+        managedOtlp: { url: 'https://managed-otlp.example.com' },
+      } as any);
+
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        agentless: { managedBulk: { enabled: false } },
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      } as any);
+
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('fleet-default-output');
+
+      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+    });
+
+    it('should not include ECH agentless managed bulk output in serverless environment', async () => {
+      const originalGetCloud = appContextService.getCloud;
+      const originalGetConfig = appContextService.getConfig;
+
+      jest.mocked(appContextService.getCloud).mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: true,
+        managedOtlp: { url: 'https://managed-otlp.example.com' },
+      } as any);
+
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        agentless: { managedBulk: { enabled: true } },
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      } as any);
+
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('fleet-default-output');
+
+      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+    });
+
+    it('should not modify the existing ECH agentless output when managed bulk is also enabled', async () => {
+      const originalGetCloud = appContextService.getCloud;
+      const originalGetConfig = appContextService.getConfig;
+
+      jest.mocked(appContextService.getCloud).mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+        elasticsearchUrl: 'https://test-es.co:9200',
+        managedOtlp: { url: 'https://managed-otlp.example.com' },
+      } as any);
+
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        agentless: { enabled: true, managedBulk: { enabled: true } },
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'], ca_sha256: 'test-ca-sha256' },
+        },
+      } as any);
+
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'], ca_sha256: 'test-ca-sha256' },
+        },
+      });
+
+      expect(result).toHaveLength(3);
+      expect(result[1]).toMatchObject({
+        id: 'es-agentless-output',
+        hosts: ['https://test-es.co:9200'],
+        ca_sha256: 'test-ca-sha256',
+      });
+      expect(result[2]).toMatchObject({
+        id: 'es-managed-bulk-agentless-output',
+        hosts: ['https://managed-otlp.example.com/_es'],
+      });
+
       jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
       jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
     });
@@ -1329,7 +1478,7 @@ describe('Outputs preconfiguration', () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1363,7 +1512,7 @@ describe('Outputs preconfiguration', () => {
       it('should delete deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1391,7 +1540,7 @@ describe('Outputs preconfiguration', () => {
       it('should update default deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true, is_default: true } as Output,
             { id: 'output2', is_preconfigured: true, is_default_monitoring: true } as Output,
@@ -1428,7 +1577,7 @@ describe('Outputs preconfiguration', () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             {
               id: SERVERLESS_PRIVATE_OUTPUT_ID,
@@ -1469,5 +1618,144 @@ describe('Outputs preconfiguration', () => {
         );
       });
     });
+  });
+});
+
+describe('createManagedBulkOutputMatcher', () => {
+  beforeEach(() => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue(null);
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+    });
+  });
+
+  it('matches the ECH bulk output on hostname, ignoring the port added by normalizeHostsForAgents', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://managed-otlp.example.invalid:443/_es'],
+      })
+    ).toBe(true);
+  });
+
+  it('matches the serverless bulk output via the config-injected endpoint, with no cloud stub needed', () => {
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      outputs: [
+        {
+          id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+          type: 'elasticsearch',
+          hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+          is_default: false,
+          is_default_monitoring: false,
+          is_preconfigured: true,
+        },
+      ],
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+      })
+    ).toBe(true);
+  });
+
+  it('does not match a non-elasticsearch output type, even when the host matches', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(
+      isManagedBulk({
+        type: 'remote_elasticsearch',
+        hosts: ['https://managed-otlp.example.invalid:443/_es'],
+      })
+    ).toBe(false);
+  });
+
+  it('does not match a direct-ES output on a different host', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(
+      isManagedBulk({ type: 'elasticsearch', hosts: ['https://es.example.invalid:9200'] })
+    ).toBe(false);
+  });
+
+  it('does not match when the output has no hosts', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(isManagedBulk({ type: 'elasticsearch', hosts: undefined })).toBe(false);
+  });
+
+  it('returns false for all outputs and does not throw when config is undefined', () => {
+    const isManagedBulk = createManagedBulkOutputMatcher(undefined);
+
+    expect(
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://managed-otlp.example.invalid:443/_es'],
+      })
+    ).toBe(false);
+  });
+
+  it('returns false and does not throw when cloud.managed_otlp.url is a malformed non-URL string', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'not-a-url' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(() =>
+      isManagedBulk({ type: 'elasticsearch', hosts: ['https://something.example.invalid'] })
+    ).not.toThrow();
+    expect(
+      isManagedBulk({ type: 'elasticsearch', hosts: ['https://something.example.invalid'] })
+    ).toBe(false);
   });
 });

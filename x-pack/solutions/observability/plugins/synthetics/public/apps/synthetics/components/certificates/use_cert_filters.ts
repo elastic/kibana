@@ -22,7 +22,7 @@ export interface CertFiltersState {
   search: string;
   monitorTypes: string[];
   browserResourceTypes: string[];
-  party: string[];
+  certOrigin: string[];
   tags: string[];
   issuers: string[];
   remoteNames: string[];
@@ -33,7 +33,7 @@ export interface CertFiltersActions {
   setSearch: (value: string) => void;
   setMonitorTypes: (values: string[]) => void;
   setBrowserResourceTypes: (values: string[]) => void;
-  setParty: (values: string[]) => void;
+  setCertOrigin: (values: string[]) => void;
   setTags: (values: string[]) => void;
   setIssuers: (values: string[]) => void;
   setRemoteNames: (values: string[]) => void;
@@ -51,7 +51,7 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
     tags,
     issuers,
     browserResourceTypes,
-    party,
+    certOrigin,
     expiringWithin,
     remoteNames,
   } = useGetUrlParams();
@@ -69,8 +69,8 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
     (values: string[]) => updateUrlParams({ browserResourceTypes: serializeArray(values) }),
     [updateUrlParams]
   );
-  const setParty = useCallback(
-    (values: string[]) => updateUrlParams({ party: serializeArray(values) }),
+  const setCertOrigin = useCallback(
+    (values: string[]) => updateUrlParams({ certOrigin: serializeArray(values) }),
     [updateUrlParams]
   );
   const setTags = useCallback(
@@ -95,7 +95,7 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
       search: search || '',
       monitorTypes: toArray(monitorTypes),
       browserResourceTypes: toArray(browserResourceTypes),
-      party: toArray(party),
+      certOrigin: toArray(certOrigin),
       tags: toArray(tags),
       issuers: toArray(issuers),
       remoteNames: toArray(remoteNames),
@@ -103,7 +103,7 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
       setSearch,
       setMonitorTypes,
       setBrowserResourceTypes,
-      setParty,
+      setCertOrigin,
       setTags,
       setIssuers,
       setRemoteNames,
@@ -113,7 +113,7 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
       search,
       monitorTypes,
       browserResourceTypes,
-      party,
+      certOrigin,
       tags,
       issuers,
       remoteNames,
@@ -121,7 +121,7 @@ export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
       setSearch,
       setMonitorTypes,
       setBrowserResourceTypes,
-      setParty,
+      setCertOrigin,
       setTags,
       setIssuers,
       setRemoteNames,

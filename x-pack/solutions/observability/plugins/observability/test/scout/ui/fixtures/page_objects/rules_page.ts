@@ -6,7 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
-import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import {
   RULES_SETTINGS_TEST_SUBJECTS,
@@ -530,11 +529,9 @@ export class RulesPage {
    * `comboBox.setCustom('ruleDetailsTagsInput', ...)`.
    */
   async addRuleTag(tag: string) {
-    const tagsComboBox = new EuiComboBoxWrapper(
-      this.page,
-      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_TAGS_INPUT
-    );
-    await tagsComboBox.setCustomMultiOption(tag);
+    await this.page.components
+      .comboBox(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_TAGS_INPUT)
+      .setCustomSelectedOptions([tag]);
   }
 
   /**
@@ -627,11 +624,9 @@ export class RulesPage {
   async setAverageAggregation(field: string) {
     await this.openMetricRowPopover();
     await this.aggregationTypeSelect.selectOption('avg');
-    const fieldComboBox = new EuiComboBoxWrapper(
-      this.page,
-      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_FIELD
-    );
-    await fieldComboBox.selectSingleOption(field);
+    await this.page.components
+      .comboBox(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_FIELD)
+      .setSelectedOptions([field]);
     await this.closeMetricPopover();
   }
 
@@ -706,11 +701,9 @@ export class RulesPage {
 
   /** Adds a "group by" field via its EuiComboBox. */
   async setGroupBy(field: string) {
-    const groupByComboBox = new EuiComboBoxWrapper(
-      this.page,
-      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.GROUP_BY
-    );
-    await groupByComboBox.selectMultiOption(field);
+    await this.page.components
+      .comboBox(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.GROUP_BY)
+      .setSelectedOptions([field]);
   }
 
   // Rule Status Dropdown methods

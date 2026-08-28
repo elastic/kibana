@@ -7,26 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { from, type QueryOperator } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
+import { useMemo } from 'react';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
+import {
+  applyUnmappedFieldsPolicy,
+  type UnmappedFieldsPolicy,
+} from '../../utils/esql_unmapped_fields';
 
 export interface UseDiscoverLinkAndEsqlQueryParams {
   indexPattern?: string;
-  whereClause?: QueryOperator;
+  whereClause?: ESQLAstExpression;
+  unmappedFieldsPolicy?: UnmappedFieldsPolicy;
 }
 
 export function useDiscoverLinkAndEsqlQuery({
   indexPattern,
   whereClause,
+  unmappedFieldsPolicy,
 }: UseDiscoverLinkAndEsqlQueryParams) {
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern });
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+    indexPattern,
+    unmappedFieldsPolicy,
+  });
 
-  if (!indexPattern || !whereClause) {
-    return { discoverUrl: undefined, esqlQueryString: undefined };
-  }
+  const esqlQueryString = useMemo(() => {
+    if (!indexPattern || !whereClause) return undefined;
 
-  const esqlQueryString = from(indexPattern).pipe(whereClause).toString();
-  const discoverUrl = generateDiscoverLink(whereClause);
+    const query = esql.from(indexPattern);
+    if (unmappedFieldsPolicy) {
+      applyUnmappedFieldsPolicy(query, unmappedFieldsPolicy);
+    }
+    query.where`${whereClause}`;
+    return query.print('pipe-multiline');
+  }, [indexPattern, unmappedFieldsPolicy, whereClause]);
+
+  // `generateDiscoverLink` is recreated every render (it closes over the live
+  // time range from the service), so calling it directly is intentional.
+  const discoverUrl = indexPattern && whereClause ? generateDiscoverLink(whereClause) : undefined;
 
   return { discoverUrl, esqlQueryString };
 }

@@ -163,6 +163,8 @@ export function TransactionDetails() {
           start={start}
           end={end}
           transactionName={transactionName}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
           isServerlessContext={isServerless}
           comparisonEnabled={comparisonEnabled}
           offset={offset}

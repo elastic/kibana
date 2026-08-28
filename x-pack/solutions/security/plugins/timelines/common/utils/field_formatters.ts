@@ -29,8 +29,9 @@ export const getFieldCategory = (field: string): string => {
   return fieldCategory;
 };
 
-export const formatGeoLocation = (item: unknown[]) => {
-  const itemGeo = item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
+export const formatGeoLocation = (item: unknown[] | null | undefined) => {
+  const itemGeo =
+    Array.isArray(item) && item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
   if (itemGeo != null && !isEmpty(itemGeo.coordinates)) {
     try {
       return toStringArray({
@@ -153,10 +154,17 @@ export const getDataFromFieldsHits = (
     const isEcsField = fieldMaps[field as keyof typeof fieldMaps] !== undefined;
     const isRuleParameters = isRuleParametersFieldOrSubfield(field, prependField);
     const isThreatEnrichment = isThreatEnrichmentFieldOrSubfield(field, prependField);
+    const isFlattenedField = fieldMaps[field as keyof typeof fieldMaps]?.type === 'flattened';
+    const shouldKeepFlattenedAsSingleRow =
+      isFlattenedField && !isRuleParameters && !isThreatEnrichment;
 
     // Handle simple fields - but don't treat threat enrichments as simple fields
     // even if they're not in ecsFieldMap (they were excluded as nested type)
-    if (!isObjectArray || (!isEcsField && !isRuleParameters && !isThreatEnrichment)) {
+    if (
+      !isObjectArray ||
+      (!isEcsField && !isRuleParameters && !isThreatEnrichment) ||
+      shouldKeepFlattenedAsSingleRow
+    ) {
       const simpleItem = processSimpleField(dotField, strArr, isObjectArray, fieldCategory);
       resultMap.set(dotField, simpleItem);
       // eslint-disable-next-line no-continue

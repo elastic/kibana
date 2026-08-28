@@ -233,6 +233,9 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
       </EuiFlexGroup>
 
       <EuiInMemoryTable
+        tableCaption={i18n.translate('xpack.agentBuilder.plugins.tableCaption', {
+          defaultMessage: 'Plugins',
+        })}
         columns={columns}
         items={filteredPlugins}
         itemId="id"
@@ -266,7 +269,7 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
   const { createAgentBuilderUrl } = useNavigation();
   const isZeroPlugins = activePluginsCount === 0;
   const statusColor = isZeroPlugins ? 'warning' : 'success';
-  const iconType = isZeroPlugins ? 'alert' : 'checkCircleFill';
+  const iconType = isZeroPlugins ? 'warning' : 'checkCircleFill';
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">

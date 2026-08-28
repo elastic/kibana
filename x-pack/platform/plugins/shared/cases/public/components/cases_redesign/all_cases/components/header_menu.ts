@@ -11,16 +11,35 @@ import * as i18n from '../../../../common/translations';
 
 interface GetListMenuArgs {
   permissions: CasesPermissions;
+  isTemplatesEnabled: boolean;
   navigateToCreateCase: () => void;
   navigateToConfigureCases: () => void;
+  navigateToCasesTemplates: () => void;
+  getCasesTemplatesUrl: () => string;
 }
 
 export const getListMenu = ({
   permissions,
+  isTemplatesEnabled,
   navigateToCreateCase,
   navigateToConfigureCases,
+  navigateToCasesTemplates,
+  getCasesTemplatesUrl,
 }: GetListMenuArgs): AppHeaderMenu => {
   const items = [
+    ...(isTemplatesEnabled && permissions.manageTemplates
+      ? [
+          {
+            id: 'casesTemplates',
+            label: i18n.TEMPLATES_BUTTON,
+            iconType: 'documents' as const,
+            href: getCasesTemplatesUrl(),
+            run: () => navigateToCasesTemplates(),
+            testId: 'cases-templates-button',
+            order: 50,
+          },
+        ]
+      : []),
     ...(permissions.settings
       ? [
           {

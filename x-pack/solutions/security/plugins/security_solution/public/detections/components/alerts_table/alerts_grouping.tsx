@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { Filter, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
@@ -31,6 +31,7 @@ import type {
   GroupPanelRenderer,
   ParsedGroupingAggregation,
 } from '@kbn/grouping/src';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { GroupTakeActionItems } from './types';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
@@ -38,7 +39,6 @@ import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';

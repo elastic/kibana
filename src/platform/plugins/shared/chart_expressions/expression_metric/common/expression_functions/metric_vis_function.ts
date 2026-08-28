@@ -10,9 +10,8 @@
 import { i18n } from '@kbn/i18n';
 
 import type { Dimension } from '@kbn/visualizations-common';
-import { validateAccessor } from '@kbn/chart-expressions-common';
+import { validateAccessor, ChartLayoutDirection } from '@kbn/chart-expressions-common';
 import { prepareLogTable } from '@kbn/visualizations-common';
-import { LayoutDirection } from '@elastic/charts';
 import type { MetricVisRenderConfig } from '../types';
 import { visType } from '../types';
 import type { MetricVisExpressionFunctionDefinition } from '../types';
@@ -71,7 +70,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     progressDirection: {
       types: ['string'],
-      options: [LayoutDirection.Vertical, LayoutDirection.Horizontal],
+      options: [ChartLayoutDirection.Vertical, ChartLayoutDirection.Horizontal],
       help: i18n.translate('expressionMetricVis.function.progressDirection.help', {
         defaultMessage:
           'The direction the progress bar should grow. Must be provided to render a progress bar.',
@@ -105,6 +104,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string', 'number'],
       help: i18n.translate('expressionMetricVis.function.valueFontSize.help', {
         defaultMessage: 'The value font size.',
+      }),
+    },
+    density: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.density.help', {
+        defaultMessage: 'The metric density.',
       }),
     },
     primaryPosition: {
@@ -282,6 +287,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             secondaryAlign: args.secondaryAlign,
             iconAlign: args.iconAlign,
             valueFontSize: args.valueFontSize,
+            density: args.density,
             primaryPosition: args.primaryPosition,
             maxCols: args.maxCols,
             minTiles: args.minTiles,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
+import { connect } from 'react-redux-v7';
 import { MapContainer } from './map_container';
 import {
   getFlyoutDisplay,
   getIsFullScreen,
   getIsTimesliderOpen,
 } from '../../selectors/ui_selectors';
-import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
+import { cancelAllInFlightRequests, exitFullScreen, syncDataForAllLayers } from '../../actions';
 import {
   isMapLoading,
   getLayerList,
@@ -41,6 +41,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   return {
     exitFullScreen: () => dispatch(exitFullScreen()),
     cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
+    reload: () => dispatch(syncDataForAllLayers(false)),
   };
 }
 

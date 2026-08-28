@@ -12,6 +12,8 @@ import { useBulkEnableRules, useBulkDisableRules } from './use_bulk_enable_disab
 
 const mockBulkEnableRules = jest.fn();
 const mockBulkDisableRules = jest.fn();
+const mockEnableRulesByQuery = jest.fn();
+const mockDisableRulesByQuery = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddWarning = jest.fn();
 const mockAddDanger = jest.fn();
@@ -31,6 +33,8 @@ jest.mock('@kbn/core-di-browser', () => ({
     return {
       bulkEnableRules: mockBulkEnableRules,
       bulkDisableRules: mockBulkDisableRules,
+      enableRulesByQuery: mockEnableRulesByQuery,
+      disableRulesByQuery: mockDisableRulesByQuery,
     };
   },
   CoreStart: (key: string) => key,
@@ -50,82 +54,61 @@ describe('useBulkEnableRules', () => {
     jest.clearAllMocks();
   });
 
-  it('calls bulkEnableRules with the provided ids', async () => {
-    mockBulkEnableRules.mockResolvedValueOnce({ rules: [], errors: [] });
+  it('calls the by-ID endpoint with the provided ids', async () => {
+    mockBulkEnableRules.mockResolvedValueOnce({ affected_count: 2, errors: [] });
     const { Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockBulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
+    expect(mockEnableRulesByQuery).not.toHaveBeenCalled();
   });
 
-  it('shows success toast when all rules are enabled', async () => {
-    mockBulkEnableRules.mockResolvedValueOnce({ rules: [], errors: [] });
+  it('calls the by-query endpoint with force=true when using match_all', async () => {
+    mockEnableRulesByQuery.mockResolvedValueOnce({ affected_count: 5, errors: [] });
     const { Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1'] });
+      await result.current.mutateAsync({ mode: 'by_query', match_all: true });
     });
 
-    expect(mockAddSuccess).toHaveBeenCalledWith('Rules enabled successfully');
+    expect(mockEnableRulesByQuery).toHaveBeenCalledWith({ match_all: true, force: true });
+    expect(mockBulkEnableRules).not.toHaveBeenCalled();
+  });
+
+  it('shows success toast with affected_count when all rules are enabled', async () => {
+    mockBulkEnableRules.mockResolvedValueOnce({ affected_count: 3, errors: [] });
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
+    });
+
+    expect(mockAddSuccess).toHaveBeenCalledWith('3 rules enabled successfully');
   });
 
   it('shows warning toast when there are partial errors', async () => {
     mockBulkEnableRules.mockResolvedValueOnce({
-      rules: [],
-      errors: [{ id: 'rule-2', error: { message: 'Conflict', statusCode: 409 } }],
+      affected_count: 0,
+      errors: [{ id: 'rule-2', error: { code: 'RULE_VERSION_CONFLICT', message: 'Conflict' } }],
     });
     const { Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('1 error'));
-    expect(mockAddSuccess).not.toHaveBeenCalled();
-  });
-
-  it('shows truncation warning without success when filter response is truncated', async () => {
-    mockBulkEnableRules.mockResolvedValueOnce({
-      rules: [],
-      errors: [],
-      truncated: true,
-    });
-    const { Wrapper } = createWrapper();
-
-    const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({ filter: '' });
-    });
-
-    expect(mockAddWarning).toHaveBeenCalledWith(expect.stringMatching(/first/i));
-    expect(mockAddSuccess).not.toHaveBeenCalled();
-  });
-
-  it('shows truncation and partial-error warnings without success when both apply', async () => {
-    mockBulkEnableRules.mockResolvedValueOnce({
-      rules: [],
-      errors: [{ id: 'rule-x', error: { message: 'Conflict', statusCode: 409 } }],
-      truncated: true,
-    });
-    const { Wrapper } = createWrapper();
-
-    const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({ filter: 'kind: alert' });
-    });
-
-    expect(mockAddWarning).toHaveBeenCalledTimes(2);
     expect(mockAddSuccess).not.toHaveBeenCalled();
   });
 
@@ -137,7 +120,7 @@ describe('useBulkEnableRules', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync({ ids: ['rule-1'] });
+        await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -154,7 +137,7 @@ describe('useBulkEnableRules', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync({ ids: ['rule-1'] });
+        await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -167,14 +150,14 @@ describe('useBulkEnableRules', () => {
   });
 
   it('invalidates rule list queries on success', async () => {
-    mockBulkEnableRules.mockResolvedValueOnce({ rules: [], errors: [] });
+    mockBulkEnableRules.mockResolvedValueOnce({ affected_count: 1, errors: [] });
     const { Wrapper, queryClient } = createWrapper();
     const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'list']);
@@ -186,38 +169,56 @@ describe('useBulkDisableRules', () => {
     jest.clearAllMocks();
   });
 
-  it('calls bulkDisableRules with the provided ids', async () => {
-    mockBulkDisableRules.mockResolvedValueOnce({ rules: [], errors: [] });
+  it('calls the by-ID endpoint with the provided ids', async () => {
+    mockBulkDisableRules.mockResolvedValueOnce({ affected_count: 2, errors: [] });
     const { Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockBulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
+    expect(mockDisableRulesByQuery).not.toHaveBeenCalled();
   });
 
-  it('shows success toast when all rules are disabled', async () => {
-    mockBulkDisableRules.mockResolvedValueOnce({ rules: [], errors: [] });
+  it('calls the by-query endpoint with force=true when using a filter', async () => {
+    mockDisableRulesByQuery.mockResolvedValueOnce({ affected_count: 5, errors: [] });
     const { Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1'] });
+      await result.current.mutateAsync({ mode: 'by_query', filter: 'enabled: true' });
     });
 
-    expect(mockAddSuccess).toHaveBeenCalledWith('Rules disabled successfully');
+    expect(mockDisableRulesByQuery).toHaveBeenCalledWith({
+      filter: 'enabled: true',
+      force: true,
+    });
+    expect(mockBulkDisableRules).not.toHaveBeenCalled();
+  });
+
+  it('shows success toast with affected_count when all rules are disabled', async () => {
+    mockBulkDisableRules.mockResolvedValueOnce({ affected_count: 2, errors: [] });
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
+    });
+
+    expect(mockAddSuccess).toHaveBeenCalledWith('2 rules disabled successfully');
   });
 
   it('shows warning toast when there are partial errors', async () => {
     mockBulkDisableRules.mockResolvedValueOnce({
-      rules: [],
+      affected_count: 0,
       errors: [
-        { id: 'rule-1', error: { message: 'Not found', statusCode: 404 } },
-        { id: 'rule-2', error: { message: 'Conflict', statusCode: 409 } },
+        { id: 'rule-1', error: { code: 'RULE_NOT_FOUND', message: 'Not found' } },
+        { id: 'rule-2', error: { code: 'RULE_VERSION_CONFLICT', message: 'Conflict' } },
       ],
     });
     const { Wrapper } = createWrapper();
@@ -225,46 +226,10 @@ describe('useBulkDisableRules', () => {
     const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('2 errors'));
-    expect(mockAddSuccess).not.toHaveBeenCalled();
-  });
-
-  it('shows truncation warning without success when filter response is truncated', async () => {
-    mockBulkDisableRules.mockResolvedValueOnce({
-      rules: [],
-      errors: [],
-      truncated: true,
-    });
-    const { Wrapper } = createWrapper();
-
-    const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({ filter: '' });
-    });
-
-    expect(mockAddWarning).toHaveBeenCalledWith(expect.stringMatching(/first/i));
-    expect(mockAddSuccess).not.toHaveBeenCalled();
-  });
-
-  it('shows truncation and partial-error warnings without success when both apply', async () => {
-    mockBulkDisableRules.mockResolvedValueOnce({
-      rules: [],
-      errors: [{ id: 'rule-x', error: { message: 'Not found', statusCode: 404 } }],
-      truncated: true,
-    });
-    const { Wrapper } = createWrapper();
-
-    const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({ filter: 'kind: alert' });
-    });
-
-    expect(mockAddWarning).toHaveBeenCalledTimes(2);
     expect(mockAddSuccess).not.toHaveBeenCalled();
   });
 
@@ -276,7 +241,7 @@ describe('useBulkDisableRules', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync({ ids: ['rule-1'] });
+        await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -293,7 +258,7 @@ describe('useBulkDisableRules', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync({ ids: ['rule-1'] });
+        await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -306,14 +271,14 @@ describe('useBulkDisableRules', () => {
   });
 
   it('invalidates rule list queries on success', async () => {
-    mockBulkDisableRules.mockResolvedValueOnce({ rules: [], errors: [] });
+    mockBulkDisableRules.mockResolvedValueOnce({ affected_count: 1, errors: [] });
     const { Wrapper, queryClient } = createWrapper();
     const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'list']);

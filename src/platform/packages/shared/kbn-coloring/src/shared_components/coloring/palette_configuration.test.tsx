@@ -21,6 +21,7 @@ import type {
 import { CustomizablePalette } from './palette_configuration';
 import { getPaletteRegistry } from './mocks/palettes_registry';
 import { act } from 'react-dom/test-utils';
+import type { PaletteConfigurationActions } from './types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -154,6 +155,84 @@ describe('palette panel', () => {
           rangeMax: Number.POSITIVE_INFINITY,
         }),
       });
+    });
+
+    it('persists palette-name changes immediately before the debounce window elapses', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      act(() => {
+        changePaletteIn(instance, 'negative');
+      });
+
+      expect(props.setPalette).toHaveBeenCalledWith({
+        type: 'palette',
+        name: 'negative',
+        params: expect.objectContaining({
+          name: 'negative',
+          reverse: false,
+        }),
+      });
+    });
+
+    it('allows switching back to the original palette before debounced props catch up', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      act(() => {
+        changePaletteIn(instance, 'negative');
+      });
+      instance.update();
+      act(() => {
+        changePaletteIn(instance, 'positive');
+      });
+      instance.update();
+
+      jest.advanceTimersByTime(250);
+
+      expect(props.setPalette).toHaveBeenLastCalledWith({
+        type: 'palette',
+        name: 'positive',
+        params: expect.objectContaining({
+          name: 'positive',
+          reverse: false,
+        }),
+      });
+    });
+
+    it('flushes local palette edits on unmount before the debounce window elapses', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+      const dispatch = instance
+        .find('ColorRanges')
+        .prop('dispatch') as React.Dispatch<PaletteConfigurationActions>;
+
+      act(() => {
+        dispatch({
+          type: 'deleteColorRange',
+          payload: { index: 0, dataBounds: props.dataBounds, palettes: props.palettes },
+        });
+      });
+
+      expect(props.setPalette).not.toHaveBeenCalled();
+
+      act(() => {
+        instance.unmount();
+      });
+
+      expect(props.setPalette).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not resync on semantically equal parent rerenders', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      act(() => {
+        instance.setProps({
+          activePalette: { type: 'palette', name: 'positive' },
+          dataBounds: { min: 0, max: 100 },
+        });
+      });
+
+      jest.advanceTimersByTime(250);
+
+      expect(props.setPalette).not.toHaveBeenCalled();
     });
   });
 

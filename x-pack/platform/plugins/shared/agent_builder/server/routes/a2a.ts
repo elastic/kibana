@@ -14,6 +14,7 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaA2AAdapter } from '../utils/a2a/kibana_a2a_adapter';
 import { getKibanaUrl } from '../utils/get_kibana_url';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 export const A2A_SERVER_PATH = `${publicApiPath}/a2a`;
 
@@ -85,6 +86,9 @@ export function registerA2ARoutes({
 > This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.
 To learn more about the Agent Builder A2A server, refer to the [A2A server documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/a2a-server).`,
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['a2a', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {

@@ -21,6 +21,11 @@
  */
 
 function multiply(...args) {
+  if (args.length === 1) {
+    if (Array.isArray(args[0])) return args[0].reduce((result, current) => result * current);
+    return args[0];
+  }
+
   return args.reduce((result, current) => {
     if (Array.isArray(result) && Array.isArray(current)) {
       if (current.length !== result.length) throw new Error('Array length mismatch');

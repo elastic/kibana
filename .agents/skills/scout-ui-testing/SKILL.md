@@ -39,12 +39,26 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 ## Page objects (UI)
 
 - Prefer `page.testSubj.locator(...)`, role/label locators; avoid brittle CSS.
-- Keep selectors + interactions inside the page object class. **Do not use `expect` assertions in page objects** — use `waitForSelector` for waiting on elements. Assertions belong in test specs only.
+- Keep selectors + interactions inside the page object class. **Do not use `expect` assertions in page objects** — use `waitForSelector` or `locator.waitFor()` for waiting on elements. Assertions belong in test specs only.
+- **Attribute waits in page objects** — when a page object needs to confirm an element reached a specific attribute state (e.g. after a click toggles `aria-checked`), do **not** use `expect(el).toHaveAttribute(...)`. Instead, compose a locator with `.and()` and call `.waitFor()`:
+  ```ts
+  // ✅ page object — wait for attribute without asserting
+  await includeEmptyRows.click();
+  await includeEmptyRows
+    .and(this.page.locator('[aria-checked="true"]'))
+    .waitFor({ state: 'visible' });
+
+  // ❌ page object — do not use expect
+  await includeEmptyRows.click();
+  await expect(includeEmptyRows).toHaveAttribute('aria-checked', 'true');
+  ```
+  This applies to any attribute check (`aria-pressed`, `aria-selected`, `aria-expanded`, `disabled`, etc.). The `.and()` locator composition auto-retries until the combined selector matches, equivalent to an assertion but without pulling `expect` into the page object.
 - **Keep route mocks out of page objects** — page objects are for UI interactions only. Put `page.route()` mocks in a dedicated `fixtures/mocks.ts` file as standalone functions that accept `page` as a parameter. See `cloud_security_posture/test/scout_cspm_agentless/ui/fixtures/mocks.ts` for the reference pattern.
 - Don't make API calls from page objects (use `apiServices`/`kbnClient` in hooks instead).
 - Register plugin page objects by extending the `pageObjects` fixture in `test/scout*/ui/fixtures/index.ts`.
 - **Use `readonly` class fields for static locators** — assign them in the constructor, not as getter methods. Use methods only for parameterized locators/actions. See `DashboardApp` in `kbn-scout` for the reference pattern.
-- Scout provides EUI component wrappers for stable interactions with common EUI widgets: `EuiComboBoxWrapper`, `EuiDataGridWrapper`, `EuiSelectableWrapper`, `EuiCheckBoxWrapper`, `EuiFieldTextWrapper`, `EuiCodeBlockWrapper`, `EuiSuperSelectWrapper`, `EuiToastWrapper`. Import them from `@kbn/scout` and use them as class members in page objects.
+- **EUI components — prefer published EUI Test Helpers over raw selectors and legacy wrappers.** Drive EUI widgets through `page.components.*` (e.g. `page.components.comboBox(testSubj)`) — Scout's factories over `@elastic/eui-test-helpers`. Don't 1:1-map an old wrapper API: use only the interactions the test needs and push data-correctness checks to API/unit tests.
+- **Compatibility fallback only.** When no equivalent EUI test helper exists, fallback to using locators. Do not add or extend wrappers in a test suite. Route missing Component Object capabilities through the shared Apps DX/EUI contribution workflow.
 - **Avoid `.first()`, `.nth()`, `.last()`** — the `playwright/no-nth-methods` lint rule flags these. Instead, use `data-test-subj` attributes or other targeted selectors. If the component lacks a `data-test-subj`, add one rather than disabling the rule.
 - **Do not disable eslint rules** — avoid `eslint-disable` comments in test files. Fix the underlying issue (e.g., use targeted selectors instead of positional ones, add `data-test-subj` to the components) rather than suppressing the lint rule.
 
@@ -100,6 +114,9 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## Waiting + flake control
 
 - Don’t use `page.waitForTimeout`. Wait on a page-ready signal (loading indicator hidden, container visible, `expect.poll` on element counts).
+- **Bind the wait to the _terminal_ signal the assertion reads**, not an earlier step. Guarding the click, dismissing one toast, or waiting on one intermediate render while the asserted element still races is the top reason a wait-based flake fix recurs.
+- **Wait on the rendered outcome; if there's no element, expose one.** Prefer `expect(locator).toBeVisible()` on the element that shows the data. When nothing renders to wait on, add an app-side DOM signal (`data-test-subj` / `data-loaded` attribute) — it reflects the committed render (a response resolving ≠ the DOM updated) and doesn't couple to the endpoint. Prefer mocking/seeding when the flake is data arrival. Use `page.waitForResponse(...)` (armed *before* the action) only as a last resort for a no-UI gate (a background write or setup precondition); it's unreliable when several requests hit the same endpoint (e.g. a dashboard).
+- **Poll a read, never an action:** re-query _inside_ `expect.poll`/`toPass` (a handle captured once still goes stale); never re-fire a `click`/type/`goto`/request inside the loop — that hides an actionability bug rather than fixing it.
 - When an explicit wait is needed, prefer `locator.waitFor({ state: 'visible' })` over a bare `locator.waitFor()`. The two are equivalent (`visible` is the default state), but stating it keeps the intent explicit and consistent with RTL-style readiness checks.
 - If selectors aren’t stable, add `data-test-subj` (Scout uses it as the `testIdAttribute`).
 - Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`). Don’t use them in tests or page objects for app loading state management; rely on Playwright auto-waiting and page-ready signals instead.
@@ -112,9 +129,9 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## Run / debug quickly
 
 - Use either `--config` or `--testFiles` (they are mutually exclusive).
-- Run by config: `node scripts/scout.js run-tests --arch stateful --domain classic --config <module-root>/test/scout*/ui/playwright.config.ts` (or `.../ui/parallel.playwright.config.ts` for parallel UI)
-- Run by file/dir (Scout derives the right `playwright.config.ts` vs `parallel.playwright.config.ts`): `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <module-root>/test/scout*/ui/tests/my.spec.ts`
-- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `node scripts/playwright test --config <...> --project local --grep <tag> --headed`.
+- Run by config: `node scripts/scout run-tests --arch stateful --domain classic --config <module-root>/test/scout*/ui/playwright.config.ts` (or `.../ui/parallel.playwright.config.ts` for parallel UI)
+- Run by file/dir (Scout derives the right `playwright.config.ts` vs `parallel.playwright.config.ts`): `node scripts/scout run-tests --arch stateful --domain classic --testFiles <module-root>/test/scout*/ui/tests/my.spec.ts`
+- For faster iteration, start servers once in another terminal: `node scripts/scout start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `node scripts/playwright test --config <...> --project local --grep <tag> --headed`.
 - `run-tests` auto-detects custom config sets from `.../test/scout_<name>/...` paths.
 - `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <name>` when your tests require a custom config set.
 - Debug: `SCOUT_LOG_LEVEL=debug`, or `node scripts/playwright test --config <...> --project local --ui`
@@ -122,7 +139,7 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## CI enablement
 
 - Scout tests run in CI only for modules listed under `plugins.enabled` / `packages.enabled` in `.buildkite/scout_ci_config.yml`.
-- `node scripts/scout.js generate` registers the module under `enabled` so the new configs run in CI.
+- `node scripts/scout generate` registers the module under `enabled` so the new configs run in CI.
 
 ## References
 

@@ -25,24 +25,24 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { ESQL_APPROXIMATION_FEATURE_FLAG_KEY } from '@kbn/esql-utils';
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
-  apiPublishesUnifiedSearch,
+  apiPublishesEsqlUsage,
   combineCompatibleChildrenApis,
-  type PublishesUnifiedSearch,
+  type PublishesEsqlUsage,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
-import { AppMenu } from '@kbn/core-chrome-app-menu';
-import { UI_SETTINGS } from '../../common/constants';
-import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
+import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';
+import { useFavorite } from '@kbn/content-management-favorites-public';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
@@ -54,18 +54,21 @@ import {
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
+import { useDashboardShareAction } from '../dashboard_app/top_nav/use_dashboard_share_action';
 import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,
   dataService,
+  screenshotModeService,
   serverlessService,
   unifiedSearchService,
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
-import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { DashboardFavoritesProvider } from './dashboard_favorite_button';
+import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
 export interface InternalDashboardTopNavProps {
@@ -78,21 +81,84 @@ export interface InternalDashboardTopNavProps {
   showResetChange?: boolean;
 }
 
-const LabsFlyout = withSuspense(LazyLabsFlyout, null);
+interface DashboardChromeNextHeaderProps {
+  headerMode: 'inline' | 'registered';
+  title: string;
+  back: AppHeaderBack;
+  menu?: AppMenuConfig;
+  badges: AppHeaderBadge[];
+  dashboardId?: string;
+  viewMode: string;
+  share?: AppHeaderShareAction;
+}
+
+/**
+ * Chrome Next header path. Must render inside `DashboardFavoritesProvider`.
+ */
+const DashboardChromeNextHeader = ({
+  headerMode,
+  title,
+  back,
+  menu,
+  badges,
+  dashboardId,
+  viewMode,
+  share,
+}: DashboardChromeNextHeaderProps) => {
+  const favorite = useFavorite({ id: dashboardId });
+
+  if (headerMode === 'inline') {
+    if (viewMode === 'print') {
+      return null;
+    }
+
+    return (
+      <AppHeader
+        title={title}
+        back={back}
+        menu={menu}
+        badges={badges}
+        favorite={favorite}
+        share={share}
+        spacing="compact"
+      />
+    );
+  }
+
+  return (
+    <ChromeAppHeaderRegistration
+      title={title}
+      menu={menu}
+      badges={badges}
+      favorite={favorite}
+      share={share}
+      spacing="compact"
+    />
+  );
+};
 
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
   embedSettings,
   forceHideUnifiedSearch,
   redirectTo,
+  setCustomHeaderActionMenu,
   showBorderBottom = true,
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
-  const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
-  const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
+  const chromeStyle = useChromeStyle();
+  // Header rendering mode:
+  //  - `inline`: next chrome, standalone -> we render `AppHeader`.
+  //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
+  //    the content so chrome renders it in the app-header slot.
+  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
+  const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
+  const isAppHeaderActive = chromeStyle === 'project';
+  const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
+
   const { onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
@@ -102,7 +168,7 @@ export function InternalDashboardTopNav({
     allDataViews,
     fullScreenMode,
     hasUnsavedChanges,
-    isApproximate,
+    esqlApproximation,
     lastSavedId,
     query,
     title,
@@ -140,20 +206,16 @@ export function InternalDashboardTopNav({
     return !deepEqual(publishedEsqlVariables, unpublishedEsqlVariables);
   }, [publishedEsqlVariables, unpublishedEsqlVariables]);
 
-  // temporary flag — will be removed once the feature is fully enabled
-  const isEsqlApproximationEnabled = useMemo(
-    () => coreServices.featureFlags.getBooleanValue(ESQL_APPROXIMATION_FEATURE_FLAG_KEY, false),
-    []
-  );
-
   const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
   useEffect(() => {
-    const subscription = combineCompatibleChildrenApis<
-      PublishesUnifiedSearch,
-      (Query | AggregateQuery | undefined)[]
-    >(dashboardApi, 'query$', apiPublishesUnifiedSearch, [])
+    const subscription = combineCompatibleChildrenApis<PublishesEsqlUsage, boolean[]>(
+      dashboardApi,
+      'usesEsql$',
+      apiPublishesEsqlUsage,
+      []
+    )
       .pipe(
-        map((queries) => queries.some((q) => isOfAggregateQueryType(q))),
+        map((usesEsqlValues) => usesEsqlValues.some(Boolean)),
         distinctUntilChanged()
       )
       .subscribe(setHasEsqlPanel);
@@ -331,11 +393,12 @@ export function InternalDashboardTopNav({
     [redirectTo]
   );
 
+  const shareAction = useDashboardShareAction({ maybeRedirect });
+
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    isLabsShown,
-    setIsLabsShown,
     maybeRedirect,
     showResetChange,
+    shareAction,
   });
 
   UseUnmount(() => {
@@ -393,19 +456,32 @@ export function InternalDashboardTopNav({
     return allBadges;
   }, [isPopoverOpen, dashboardApi, maybeRedirect]);
 
-  useEffect(() => {
-    coreServices.chrome.setBreadcrumbsBadges(badges);
-    return () => {
-      coreServices.chrome.setBreadcrumbsBadges([]);
-    };
-  }, [badges]);
+  const appHeaderBadges = useMemo<AppHeaderBadge[]>(
+    () =>
+      (badges ?? []).map((badge) => ({
+        label: badge.badgeText,
+        renderCustomBadge: badge.renderCustomBadge,
+      })),
+    [badges]
+  );
 
-  useEffect(() => {
-    return coreServices.chrome.setBreadcrumbsAppendExtension({
-      content: <DashboardFavoriteButton dashboardId={lastSavedId} />,
-      order: 0,
-    });
-  }, [lastSavedId]);
+  const appMenuConfig = useMemo(() => {
+    if (!visibilityProps.showTopNavMenu) {
+      return undefined;
+    }
+    return viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
+  }, [visibilityProps.showTopNavMenu, viewMode, editModeTopNavConfig, viewModeTopNavConfig]);
+
+  // Chrome Next hides the classic breadcrumbs, so the header carries its own back button that leads to the dashboard listing page.
+  const backToListing = useMemo<AppHeaderBack>(
+    () => ({
+      href: coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
+        path: `#${LANDING_PAGE_PATH}`,
+      }),
+      label: getDashboardBreadcrumb(),
+    }),
+    []
+  );
 
   return (
     <div css={styles.container}>
@@ -415,16 +491,23 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      <AppMenu
-        setAppMenu={coreServices.chrome.setAppMenu}
-        config={
-          visibilityProps.showTopNavMenu
-            ? viewMode === 'edit'
-              ? editModeTopNavConfig
-              : viewModeTopNavConfig
-            : undefined
-        }
-      />
+      {(headerMode === 'inline' || headerMode === 'registered') && (
+        <DashboardFavoritesProvider>
+          <DashboardChromeNextHeader
+            headerMode={headerMode}
+            title={dashboardTitle}
+            back={backToListing}
+            menu={appMenuConfig}
+            badges={appHeaderBadges}
+            dashboardId={lastSavedId}
+            viewMode={viewMode}
+            share={shareAction}
+          />
+        </DashboardFavoritesProvider>
+      )}
+      {headerMode === 'legacy' && (
+        <LegacyDashboardHeader badges={badges} config={appMenuConfig} lastSavedId={lastSavedId} />
+      )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
@@ -452,29 +535,27 @@ export function InternalDashboardTopNav({
             dataService.search.isBackgroundSearchEnabled &&
             getDashboardCapabilities().storeSearchSession
           }
-          esqlApproximation={
-            isEsqlApproximationEnabled
-              ? {
-                  isApproximate: isApproximate ?? false,
-                  onChange: dashboardApi.setIsApproximate,
-                  disabled: !hasEsqlPanel,
-                  additionalText: i18n.translate(
-                    'dashboard.esqlApproximationToggle.additionalText',
-                    {
-                      defaultMessage:
-                        'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
-                    }
-                  ),
-                }
-              : undefined
-          }
+          esqlApproximation={{
+            isApproximate: esqlApproximation ?? false,
+            onChange: dashboardApi.setEsqlApproximation,
+            disabled: !hasEsqlPanel,
+            additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
+              defaultMessage:
+                'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+            }),
+          }}
         />
       )}
-      {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-      ) : null}
 
-      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
+      <span
+        // ControlsRenderer must always be rendered
+        // so that control filters are applied to dashboard
+        //
+        // do not display ControlsRenderer in reports
+        style={screenshotModeService.isScreenshotMode() ? { display: 'none' } : undefined}
+      >
+        <DashboardControlsRenderer />
+      </span>
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

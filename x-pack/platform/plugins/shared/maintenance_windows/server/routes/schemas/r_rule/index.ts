@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-export { rRuleRequestSchema } from './request/schemas/latest';
-export { rRuleResponseSchema } from './response/schemas/latest';
-export type { RRuleRequest } from './request/types/latest';
-export type { RRuleResponse } from './response/types/latest';
+import type { TypeOf } from '@kbn/config-schema';
+import { getRRuleRequestSchema, getRRuleResponseSchema } from '@kbn/response-ops-schedule-schema';
 
-export { rRuleRequestSchema as rRuleRequestSchemaV1 } from './request/schemas/v1';
-export { rRuleResponseSchema as rRuleResponseSchemaV1 } from './response/schemas/v1';
-export type { RRuleRequest as RRuleRequestV1 } from './request/types/v1';
-export type { RRuleResponse as RRuleResponseV1 } from './response/types/v1';
+export const rRuleRequestSchema = getRRuleRequestSchema({
+  meta: { id: 'maintenance_window_r_rule_request' },
+});
+export const rRuleResponseSchema = getRRuleResponseSchema({
+  meta: { id: 'maintenance_window_r_rule_response' },
+});
+
+export const rRuleRequestSchemaV1 = rRuleRequestSchema;
+export const rRuleResponseSchemaV1 = rRuleResponseSchema;
+
+export type RRuleRequest = TypeOf<typeof rRuleRequestSchema>;
+export type RRuleResponse = TypeOf<typeof rRuleResponseSchema>;
+export type RRuleRequestV1 = RRuleRequest;
+export type RRuleResponseV1 = RRuleResponse;

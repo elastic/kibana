@@ -16,7 +16,7 @@ export * from './index_statuses';
 // the request is 4096 bytes we can fit a max of 16 indices in a single request.
 export const MAX_INDICES_PER_REQUEST = 16;
 
-export const MAX_DATA_RETENTION = 'max_retention';
+export const MAX_DATA_RETENTION = 'max_global_retention';
 
 export {
   UIM_APP_NAME,
@@ -69,3 +69,6 @@ export const MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX = 2000000000; // 2 billio
 export const MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX = 1; // Single shard
 
 export const DEFAULT_DOCUMENT_PAGE_SIZE = 10;
+
+export const SYNTHETIC_SOURCE_FALLBACK_TO_STORED_SOURCE_SETTING =
+  'xpack.mapping.synthetic_source_fallback_to_stored_source';

@@ -299,6 +299,35 @@ describe('run_check', () => {
     expect(mockRunJestViaMoon).toHaveBeenCalled();
   });
 
+  it('skips fast path for integration tests even when a unit config sits below the integration config', async () => {
+    // integration test with a unit config nested below the integration config —
+    // the walk hits the unit config first, so it used to be run as a unit test.
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: [
+          'x-pack/platform/plugins/shared/fleet/server/integration_tests/cloud_preconfiguration.test.ts',
+        ],
+      },
+    });
+
+    mockExistsSync.mockImplementation(
+      (p: string) =>
+        p === '/repo/x-pack/platform/plugins/shared/fleet/server/jest.config.js' ||
+        p === '/repo/x-pack/platform/plugins/shared/fleet/jest.integration.config.js'
+    );
+
+    await handler(createArgs());
+
+    expect(mockExeca).not.toHaveBeenCalledWith(
+      process.execPath,
+      expect.arrayContaining(['scripts/jest']),
+      expect.anything()
+    );
+    expect(mockRunJestViaMoon).toHaveBeenCalled();
+  });
+
   it('skips fast path for Scout test files', async () => {
     mockResolveValidationBaseContext.mockResolvedValue({
       ...baseContext,
@@ -376,6 +405,42 @@ describe('run_check', () => {
 
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('jest  ✓ 2 test files · 8 tests');
+  });
+
+  it('runs only the unit test files directly when a unit and integration test change together', async () => {
+    // A unit test and an integration test in the same commit share one unit config
+    // (the integration file has none), so the fast path runs — but it must pass only
+    // the unit file to `scripts/jest`, not the integration file.
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: [
+          'packages/foo/src/bar.test.ts',
+          'x-pack/platform/plugins/shared/fleet/server/integration_tests/cloud_preconfiguration.test.ts',
+        ],
+      },
+    });
+    mockExistsSync.mockImplementation(
+      (p: string) =>
+        p === '/repo/packages/foo/jest.config.js' ||
+        p === '/repo/x-pack/platform/plugins/shared/fleet/server/jest.config.js' ||
+        p === '/repo/x-pack/platform/plugins/shared/fleet/jest.integration.config.js'
+    );
+    mockExeca.mockResolvedValue({
+      exitCode: 0,
+      stdout: 'Tests:       8 passed, 8 total\n',
+      stderr: '',
+    });
+
+    await handler(createArgs());
+
+    expect(mockExeca).toHaveBeenCalledWith(
+      process.execPath,
+      ['scripts/jest', '--runTestsByPath', '/repo/packages/foo/src/bar.test.ts', '--maxWorkers=2'],
+      expect.anything()
+    );
+    expect(mockRunJestViaMoon).not.toHaveBeenCalled();
   });
 
   it('shows failing fast-path Jest output and a minimal rerun command', async () => {
@@ -495,6 +560,39 @@ describe('run_check', () => {
     expect(output).toContain('jest  ✗');
     expect(output).toContain('FAIL packages/foo/src/bar.test.ts:12');
     expect(output).toContain('node scripts/jest --config packages/foo/jest.config.js');
+  });
+
+  it('surfaces an OOM note instead of treating a worker crash as a plain failure', async () => {
+    mockRunJestViaMoon.mockResolvedValue({
+      taskCount: 1,
+      cachedCount: 0,
+      totalTests: 0,
+      failed: [
+        {
+          project: '@kbn/foo',
+          configPath: 'packages/foo/jest.config.js',
+          cached: false,
+          passed: false,
+          testCount: 0,
+          failures: [
+            {
+              file: 'packages/foo/src/bar.test.ts',
+              name: 'Test suite failed to run',
+              message: 'Jest worker encountered 4 child process exceptions, exceeding retry limit',
+              oom: true,
+            },
+          ],
+        },
+      ],
+      exitCode: 1,
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('This looks like a Jest worker ran out of memory');
+    expect(output).toContain('NODE_OPTIONS=--max-old-space-size=8192');
   });
 
   it('uses the repo root tsconfig in the tsc rerun command when no nearer config exists', async () => {

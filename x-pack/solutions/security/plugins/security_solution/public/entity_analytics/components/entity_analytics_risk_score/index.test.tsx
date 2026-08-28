@@ -20,6 +20,8 @@ import { useEntityStoreRiskScoreKpi } from '../../api/hooks/use_entity_store_ris
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { capitalize } from 'lodash/fp';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockedUseKibana = mockUseKibana();
@@ -54,7 +56,14 @@ jest.mock('../../../common/containers/query_toggle', () => {
     useQueryToggle: () => mockUseQueryToggle(),
   };
 });
-const defaultProps = {
+const defaultProps: {
+  data: unknown[] | undefined;
+  inspect: unknown;
+  refetch: () => void;
+  hasEngineBeenInstalled: boolean;
+  isAuthorized: boolean;
+  loading: boolean;
+} = {
   data: undefined,
   inspect: null,
   refetch: () => {},
@@ -80,6 +89,13 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
 
 const mockOpenRightPanel = jest.fn();
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
+jest.mock('../../../flyout_v2/use_flyout_api');
+
+const mockOpenHostFlyout = jest.fn();
+const mockOpenUserFlyout = jest.fn();
+const mockOpenServiceFlyout = jest.fn();
+const mockUseIsNewFlyoutEnabled = useIsNewFlyoutEnabled as jest.Mock;
 
 describe.each([EntityType.host, EntityType.user, EntityType.service])(
   'EntityAnalyticsRiskScores entityType: %s',
@@ -87,6 +103,12 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
     beforeEach(() => {
       (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
         openRightPanel: mockOpenRightPanel,
+      });
+      mockUseIsNewFlyoutEnabled.mockReturnValue(false);
+      (useFlyoutApi as jest.Mock).mockReturnValue({
+        openHostFlyout: mockOpenHostFlyout,
+        openUserFlyout: mockOpenUserFlyout,
+        openServiceFlyout: mockOpenServiceFlyout,
       });
       jest.clearAllMocks();
       mockUseRiskScoreKpi.mockReturnValue({
@@ -105,8 +127,18 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
       mockUseEntityStoreRiskScore.mockReturnValue(defaultProps);
     });
 
+    // host/user use useEntityStoreRiskScore; service still uses useRiskScore.
+    const setRiskScoreReturn = (value: typeof defaultProps & { data?: unknown }) => {
+      mockUseRiskScore.mockReturnValue(value);
+      mockUseEntityStoreRiskScore.mockReturnValue(value);
+    };
+    const setRiskScoreKpiReturn = (value: { severityCount: SeverityCount; loading: boolean }) => {
+      mockUseRiskScoreKpi.mockReturnValue(value);
+      mockUseEntityStoreRiskScoreKpi.mockReturnValue(value);
+    };
+
     it('renders enable button when module is disable', () => {
-      mockUseRiskScore.mockReturnValue({ ...defaultProps, hasEngineBeenInstalled: false });
+      setRiskScoreReturn({ ...defaultProps, hasEngineBeenInstalled: false });
       const { getByTestId } = render(
         <TestProviders>
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />
@@ -128,12 +160,12 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
 
     it('renders no data detected component when engine is installed, no severity filter, and data is empty', () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-      mockUseRiskScore.mockReturnValue({
+      setRiskScoreReturn({
         ...defaultProps,
         hasEngineBeenInstalled: true,
         data: [],
       });
-      mockUseRiskScoreKpi.mockReturnValue({
+      setRiskScoreKpiReturn({
         severityCount: mockSeverityCount,
         loading: false,
       });
@@ -163,12 +195,12 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
           },
         },
       ];
-      mockUseRiskScore.mockReturnValue({
+      setRiskScoreReturn({
         ...defaultProps,
         hasEngineBeenInstalled: true,
         data,
       });
-      mockUseRiskScoreKpi.mockReturnValue({
+      setRiskScoreKpiReturn({
         severityCount: mockSeverityCount,
         loading: false,
       });
@@ -182,6 +214,9 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
       expect(queryByTestId(`${riskEntity}-risk-score-no-data-detected`)).not.toBeInTheDocument();
     });
 
+    const isHostOrUser = riskEntity === EntityType.host || riskEntity === EntityType.user;
+    const activeRiskScoreMock = isHostOrUser ? mockUseEntityStoreRiskScore : mockUseRiskScore;
+
     it('queries when toggleStatus is true', () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
       render(
@@ -190,7 +225,7 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
         </TestProviders>
       );
 
-      expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
+      expect(activeRiskScoreMock.mock.calls[0][0].skip).toEqual(false);
     });
 
     it('skips query when toggleStatus is false', () => {
@@ -200,7 +235,7 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />
         </TestProviders>
       );
-      expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
+      expect(activeRiskScoreMock.mock.calls[0][0].skip).toEqual(true);
     });
 
     it('renders components when toggleStatus is true', () => {
@@ -227,7 +262,7 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
 
     it('renders alerts count', async () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-      mockUseRiskScoreKpi.mockReturnValue({
+      setRiskScoreKpiReturn({
         severityCount: mockSeverityCount,
         loading: false,
       });
@@ -247,7 +282,7 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
           alertsCount,
         },
       ];
-      mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
+      setRiskScoreReturn({ ...defaultProps, data });
 
       const { queryByTestId } = render(
         <TestProviders>
@@ -262,7 +297,7 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
 
     it('navigates to alerts page with filters when alerts count is clicked', async () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-      mockUseRiskScoreKpi.mockReturnValue({
+      setRiskScoreKpiReturn({
         severityCount: mockSeverityCount,
         loading: false,
       });
@@ -282,7 +317,7 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
           alertsCount: 999,
         },
       ];
-      mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
+      setRiskScoreReturn({ ...defaultProps, data });
 
       const { getByTestId } = render(
         <TestProviders>
@@ -328,7 +363,7 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
             alertsCount: 0,
           },
         ];
-        mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
+        setRiskScoreReturn({ ...defaultProps, data });
 
         const { getByTestId, queryByTestId } = render(
           <TestProviders>
@@ -358,5 +393,63 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
         });
       }
     );
+
+    it('opens the new entity flyout when entity name is clicked', async () => {
+      mockUseIsNewFlyoutEnabled.mockReturnValue(true);
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+      mockUseRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+      });
+      const name = 'testName';
+      setRiskScoreReturn({
+        ...defaultProps,
+        data: [
+          {
+            '@timestamp': '1234567899',
+            [riskEntity]: {
+              name,
+              risk: {
+                rule_risks: [],
+                calculated_level: RiskSeverity.High,
+                calculated_score_norm: 75,
+                multipliers: [],
+              },
+            },
+            alertsCount: 0,
+          },
+        ],
+      });
+
+      const { getByText } = render(
+        <TestProviders>
+          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByText(name));
+
+      const openFlyoutByType = {
+        [EntityType.host]: mockOpenHostFlyout,
+        [EntityType.user]: mockOpenUserFlyout,
+        [EntityType.service]: mockOpenServiceFlyout,
+      };
+      const nameParamByType = {
+        [EntityType.host]: { hostName: name },
+        [EntityType.user]: { userName: name },
+        [EntityType.service]: { serviceName: name },
+      };
+      const testedRiskEntity = riskEntity as Exclude<EntityType, EntityType.generic>;
+
+      await waitFor(() => {
+        expect(openFlyoutByType[testedRiskEntity]).toHaveBeenCalledWith({
+          ...nameParamByType[testedRiskEntity],
+          scopeId: 'entity-risk-score-table',
+          contextID: 'entity-risk-score-table',
+          origin: 'entity_analytics_risk_score',
+        });
+      });
+      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+    });
   }
 );

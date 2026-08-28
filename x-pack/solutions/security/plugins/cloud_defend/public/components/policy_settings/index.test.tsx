@@ -25,12 +25,23 @@ describe('<PolicySettings />', () => {
     );
   };
 
+  // The name/description fields don't depend on the control input. Rendering with it
+  // disabled skips the heavy ControlSettings subtree so these tests stay well under timeout.
+  const getPolicyWithControlDisabled = () => {
+    const policy = getCloudDefendNewPolicyMock();
+    const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);
+    if (controlInput) {
+      controlInput.enabled = false;
+    }
+    return policy;
+  };
+
   beforeEach(() => {
     onChange.mockClear();
   });
 
   it('allows user to set name of integration', async () => {
-    const { getByTestId } = render(<WrappedComponent />);
+    const { getByTestId } = render(<WrappedComponent policy={getPolicyWithControlDisabled()} />);
     const input = getByTestId('cloud-defend-policy-name');
 
     if (input) {
@@ -45,7 +56,7 @@ describe('<PolicySettings />', () => {
   });
 
   it('allows user to set description of integration', async () => {
-    const { getByTestId } = render(<WrappedComponent />);
+    const { getByTestId } = render(<WrappedComponent policy={getPolicyWithControlDisabled()} />);
     const input = getByTestId('cloud-defend-policy-description');
 
     if (input) {

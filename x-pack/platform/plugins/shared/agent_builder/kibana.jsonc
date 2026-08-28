@@ -26,8 +26,7 @@
       "lens",
       "licensing",
       "management",
-      "presentationUtil",
-      "agentContextLayer",
+      "agentBuilderSml",
       "share",
       "spaces",
       "stackConnectors",
@@ -42,7 +41,8 @@
     "requiredBundles": [
       "kibanaReact",
       "usageCollection",
-      "security"
+      "security",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "cloud",

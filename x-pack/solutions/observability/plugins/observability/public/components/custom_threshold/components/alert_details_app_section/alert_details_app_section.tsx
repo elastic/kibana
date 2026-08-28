@@ -159,6 +159,13 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
                       }
                     )}
                     comparator={criterion.comparator}
+                    warning={
+                      criterion.warningThreshold &&
+                      criterion.warningComparator && {
+                        threshold: criterion.warningThreshold,
+                        comparator: criterion.warningComparator,
+                      }
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={5}>

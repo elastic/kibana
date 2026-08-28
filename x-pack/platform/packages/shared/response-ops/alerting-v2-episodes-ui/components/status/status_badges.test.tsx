@@ -28,18 +28,25 @@ describe('AlertEpisodeStatusBadges', () => {
       <AlertEpisodeStatusBadges
         status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
-          groupHash: '1',
-          ruleId: '1',
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          lastDeactivateAction: null,
           snoozeExpiry: null,
-          tags: [],
-          lastSnoozeActor: null,
-          lastDeactivateActor: null,
         }}
       />
     );
     expect(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator')).toBeInTheDocument();
+  });
+
+  it('does not render snooze badge when snooze expiry has lapsed', () => {
+    renderWithI18n(
+      <AlertEpisodeStatusBadges
+        status={ALERT_EPISODE_STATUS.ACTIVE}
+        groupAction={{
+          lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozeExpiry: '2020-01-01T00:00:00.000Z',
+        }}
+      />
+    );
+    expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
   });
 
   it('shows snooze expiry in tooltip on hover when snoozeExpiry is set', async () => {
@@ -48,14 +55,8 @@ describe('AlertEpisodeStatusBadges', () => {
       <AlertEpisodeStatusBadges
         status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
-          groupHash: '1',
-          ruleId: '1',
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          lastDeactivateAction: null,
           snoozeExpiry: '2035-06-15T14:30:00.000Z',
-          tags: [],
-          lastSnoozeActor: null,
-          lastDeactivateActor: null,
         }}
       />
     );
@@ -71,14 +72,8 @@ describe('AlertEpisodeStatusBadges', () => {
       <AlertEpisodeStatusBadges
         status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
-          groupHash: '1',
-          ruleId: '1',
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          lastDeactivateAction: null,
           snoozeExpiry: null,
-          tags: [],
-          lastSnoozeActor: null,
-          lastDeactivateActor: null,
         }}
       />
     );
@@ -122,22 +117,30 @@ describe('AlertEpisodeStatusBadges', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent(/acknowledged/i);
   });
 
-  it('renders inactive badge when group action has deactivate', () => {
+  it.each([
+    [ALERT_EPISODE_STATUS.ACTIVE, 'Active'],
+    [ALERT_EPISODE_STATUS.INACTIVE, 'Inactive'],
+    [ALERT_EPISODE_STATUS.RECOVERING, 'Recovering'],
+    [ALERT_EPISODE_STATUS.PENDING, 'Pending'],
+  ] as const)('renders the %s status as-is from the `status` prop', (status, expectedLabel) => {
     renderWithI18n(
       <AlertEpisodeStatusBadges
-        status={ALERT_EPISODE_STATUS.ACTIVE}
-        groupAction={{
-          groupHash: '1',
-          ruleId: '1',
-          lastSnoozeAction: null,
-          lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-          snoozeExpiry: null,
-          tags: [],
-          lastSnoozeActor: null,
-          lastDeactivateActor: null,
-        }}
+        status={status}
+        groupAction={{ lastSnoozeAction: null, snoozeExpiry: null }}
       />
     );
-    expect(screen.getByText('Inactive')).toBeInTheDocument();
+    expect(screen.getByText(expectedLabel)).toBeInTheDocument();
+  });
+
+  it('renders flapping badge when isFlapping is true', () => {
+    renderWithI18n(<AlertEpisodeStatusBadges status={ALERT_EPISODE_STATUS.ACTIVE} isFlapping />);
+    expect(screen.getByTestId('alertEpisodeFlappingBadge')).toBeInTheDocument();
+  });
+
+  it('does not render flapping badge when isFlapping is false', () => {
+    renderWithI18n(
+      <AlertEpisodeStatusBadges status={ALERT_EPISODE_STATUS.ACTIVE} isFlapping={false} />
+    );
+    expect(screen.queryByTestId('alertEpisodeFlappingBadge')).not.toBeInTheDocument();
   });
 });

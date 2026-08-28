@@ -191,6 +191,48 @@ describe('logWorkflowChanges', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
+  it('logs per-item actions via getAction with one bulk write per action type', async () => {
+    await logChanges({
+      workflows: [
+        { id: 'wf-new', document: makeDocument({ version: 1 }) },
+        { id: 'wf-existing', document: makeDocument({ version: 2 }) },
+      ],
+      getAction: (id) =>
+        id === 'wf-existing'
+          ? WorkflowChangeHistoryAction.workflowUpdate
+          : WorkflowChangeHistoryAction.workflowCreate,
+      correlationId: 'bulk-123',
+    });
+
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledTimes(2);
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          objectId: 'wf-new',
+          sequence: 1,
+        }),
+      ],
+      {
+        action: WorkflowChangeHistoryAction.workflowCreate,
+        spaceId: 'default',
+        correlationId: 'bulk-123',
+      }
+    );
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          objectId: 'wf-existing',
+          sequence: 2,
+        }),
+      ],
+      {
+        action: WorkflowChangeHistoryAction.workflowUpdate,
+        spaceId: 'default',
+        correlationId: 'bulk-123',
+      }
+    );
+  });
+
   it('passes correlationId for bulk operations', async () => {
     await logChanges({ correlationId: 'bulk-123' });
 

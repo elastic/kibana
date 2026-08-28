@@ -17,7 +17,7 @@ import { UrlTemplateForm } from './url_template_form';
 import type { GraphStore } from '../../state_management';
 import { updateSettings, loadFields, saveTemplate, removeTemplate } from '../../state_management';
 import { createMockGraphStore } from '../../state_management/mocks';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { UrlTemplate } from '../../types';
 
 jest.mock('@elastic/eui', () => {

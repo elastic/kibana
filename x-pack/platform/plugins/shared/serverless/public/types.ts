@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ChromeBreadcrumb,
-  ChromeSetProjectBreadcrumbsParams,
-  NavigationTreeDefinition,
-  SolutionId,
-} from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumb, ChromeSetProjectBreadcrumbsParams } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
 import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
@@ -19,11 +14,15 @@ import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigatio
 export interface ServerlessPluginSetup {}
 
 export interface ServerlessPluginStart {
+  /**
+   * @deprecated Project breadcrumb overrides remain only for compatibility fallback back
+   * navigation. Declare hierarchy in the project navigation tree and pass explicit `back`
+   * configuration to `AppHeader` from `@kbn/app-header`.
+   */
   setBreadcrumbs: (
     breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
     params?: Partial<ChromeSetProjectBreadcrumbsParams>
   ) => void;
-  initNavigation(id: SolutionId, navigationTree$: Observable<NavigationTreeDefinition>): void;
   getNavigationCards$(
     roleManagementEnabled?: boolean,
     extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>

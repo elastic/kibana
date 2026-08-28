@@ -15,8 +15,14 @@ import {
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
-import type { SerializedError, WorkflowTokenUsageSchema, WorkflowYaml } from '../spec/schema';
+import type {
+  SerializedError,
+  WorkflowStepTokenUsageSchema,
+  WorkflowTokenUsageSchema,
+  WorkflowYaml,
+} from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
+import type { WorkflowValidationRuleId } from '../validation/rules';
 
 export type { WorkflowYaml } from '../spec/schema';
 
@@ -127,6 +133,8 @@ export interface QueueMetrics {
  */
 export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
+export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -184,6 +192,8 @@ export interface EsWorkflowExecution {
    * step reported usage. See {@link WorkflowTokenUsage}.
    */
   usage?: WorkflowTokenUsage;
+  /** Per-step counterpart to the summed `usage`, in step-finish order. */
+  stepUsage?: WorkflowStepTokenUsage[];
   /**
    * Workflow document version (`_source.version`) captured when the execution was
    * created.
@@ -304,6 +314,8 @@ export interface WorkflowExecutionDto {
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
   /** Aggregated LLM token usage across all `ai.*` steps in this execution. */
   usage?: WorkflowTokenUsage;
+  /** Per-step LLM token usage broken down by step and connector. See {@link WorkflowStepTokenUsage}. */
+  stepUsage?: WorkflowStepTokenUsage[];
   /** Workflow document version captured at execution start. See {@link EsWorkflowExecution.version}. */
   version?: number;
 }
@@ -311,7 +323,10 @@ export interface WorkflowExecutionDto {
 export type WorkflowExecutionListItemDto = Omit<
   WorkflowExecutionDto,
   'stepExecutions' | 'yaml' | 'workflowDefinition'
->;
+> & {
+  tags?: string[];
+  managed?: boolean;
+};
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
@@ -872,6 +887,12 @@ export interface WorkflowDiagnostic {
   message: string;
   source: string;
   path?: (string | number)[];
+  /**
+   * Stable identity of the check that produced this diagnostic. Prefer this over
+   * matching on `message`, which is translated and reworded freely.
+   * See WORKFLOW_VALIDATION_RULES.
+   */
+  ruleId: WorkflowValidationRuleId;
 }
 export interface ValidateWorkflowResponseDto {
   valid: boolean;

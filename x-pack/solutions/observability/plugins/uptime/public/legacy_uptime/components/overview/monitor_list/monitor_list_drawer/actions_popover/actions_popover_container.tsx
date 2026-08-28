@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { AppState } from '../../../../../state';
 import { isIntegrationsPopupOpen } from '../../../../../state/selectors';
 import type { PopoverState } from '../../../../../state/actions';

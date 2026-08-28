@@ -38,7 +38,7 @@ export class FleetUsageSender {
   constructor(
     taskManager: TaskManagerSetupContract,
     core: CoreSetup,
-    fetchUsage: (abortController: AbortController) => Promise<FleetUsage | undefined>
+    fetchUsage: (signal: AbortSignal) => Promise<FleetUsage | undefined>
   ) {
     taskManager.registerTaskDefinitions({
       [this.taskType]: {
@@ -47,15 +47,15 @@ export class FleetUsageSender {
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
               return withSpan({ name: this.taskType, type: 'telemetry' }, () =>
-                this.runTask(taskInstance, core, () => fetchUsage(abortController))
+                this.runTask(taskInstance, core, () => fetchUsage(signal))
               );
             },
             cancel: async () => {},

@@ -3,6 +3,14 @@
   "value": {
     "index": "logstash-2015.09.22",
     "mappings": {
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script": {
+            "source": "emit(doc['bytes'].value)"
+          }
+        }
+      },
       "dynamic_templates": [
         {
           "string_fields": {
@@ -19,12 +27,6 @@
           }
         }
       ],
-      "runtime": {
-        "runtime_number": {
-          "type": "long",
-          "script" : { "source" : "emit(doc['bytes'].value)" }
-        }
-      },
       "properties": {
         "@message": {
           "fields": {
@@ -159,6 +161,14 @@
                   "type": "integer"
                 }
               }
+            }
+          }
+        },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
             }
           }
         },
@@ -378,6 +388,14 @@
   "value": {
     "index": "logstash-2015.09.20",
     "mappings": {
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script": {
+            "source": "emit(doc['bytes'].value)"
+          }
+        }
+      },
       "dynamic_templates": [
         {
           "string_fields": {
@@ -394,12 +412,6 @@
           }
         }
       ],
-      "runtime": {
-        "runtime_number": {
-          "type": "long",
-          "script" : { "source" : "emit(doc['bytes'].value)" }
-        }
-      },
       "properties": {
         "@message": {
           "fields": {
@@ -508,6 +520,9 @@
             },
             "ram": {
               "type": "long"
+            },
+            "ram_range": {
+              "type": "long_range"
             }
           }
         },
@@ -531,6 +546,14 @@
                   "type": "integer"
                 }
               }
+            }
+          }
+        },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
             }
           }
         },
@@ -750,6 +773,14 @@
   "value": {
     "index": "logstash-2015.09.21",
     "mappings": {
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script": {
+            "source": "emit(doc['bytes'].value)"
+          }
+        }
+      },
       "dynamic_templates": [
         {
           "string_fields": {
@@ -766,12 +797,6 @@
           }
         }
       ],
-      "runtime": {
-        "runtime_number": {
-          "type": "long",
-          "script" : { "source" : "emit(doc['bytes'].value)" }
-        }
-      },
       "properties": {
         "@message": {
           "fields": {
@@ -880,6 +905,9 @@
             },
             "ram": {
               "type": "long"
+            },
+            "ram_range": {
+              "type": "long_range"
             }
           }
         },
@@ -903,6 +931,14 @@
                   "type": "integer"
                 }
               }
+            }
+          }
+        },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
             }
           }
         },

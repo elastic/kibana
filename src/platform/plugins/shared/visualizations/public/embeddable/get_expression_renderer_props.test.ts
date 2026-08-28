@@ -52,6 +52,7 @@ describe('getExpressionRendererProps', () => {
           filters: [],
         },
         projectRouting: '_alias:_origin',
+        isApproximate: false,
         timeRange: { from: 'now-15m', to: 'now' },
         disableTriggers: false,
         settings: {
@@ -81,6 +82,7 @@ describe('getExpressionRendererProps', () => {
           filters: [],
         },
         projectRouting: undefined,
+        isApproximate: false,
         timeRange: { from: 'now-15m', to: 'now' },
         disableTriggers: false,
         settings: {
@@ -110,6 +112,7 @@ describe('getExpressionRendererProps', () => {
           filters: [],
         },
         projectRouting: '_alias:*',
+        isApproximate: false,
         timeRange: { from: 'now-15m', to: 'now' },
         disableTriggers: false,
         settings: {
@@ -127,6 +130,66 @@ describe('getExpressionRendererProps', () => {
       expect(result.params?.searchContext).toEqual(
         expect.objectContaining({
           projectRouting: '_alias:*',
+        })
+      );
+    });
+  });
+
+  describe('isApproximate handling', () => {
+    it('should include isApproximate in search context when provided', async () => {
+      const vis = createMockVis();
+      const result = await getExpressionRendererProps({
+        unifiedSearch: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        isApproximate: true,
+        timeRange: { from: 'now-15m', to: 'now' },
+        disableTriggers: false,
+        settings: {
+          syncColors: true,
+          syncCursor: true,
+          syncTooltips: false,
+        },
+        vis,
+        onRender: jest.fn(),
+        onEvent: jest.fn(),
+        onData: jest.fn(),
+      });
+
+      expect(result.params).toBeDefined();
+      expect(result.params?.searchContext).toEqual(
+        expect.objectContaining({
+          isApproximate: true,
+        })
+      );
+    });
+
+    it('should include isApproximate in search context when false', async () => {
+      const vis = createMockVis();
+      const result = await getExpressionRendererProps({
+        unifiedSearch: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        isApproximate: false,
+        timeRange: { from: 'now-15m', to: 'now' },
+        disableTriggers: false,
+        settings: {
+          syncColors: true,
+          syncCursor: true,
+          syncTooltips: false,
+        },
+        vis,
+        onRender: jest.fn(),
+        onEvent: jest.fn(),
+        onData: jest.fn(),
+      });
+
+      expect(result.params).toBeDefined();
+      expect(result.params?.searchContext).toEqual(
+        expect.objectContaining({
+          isApproximate: false,
         })
       );
     });

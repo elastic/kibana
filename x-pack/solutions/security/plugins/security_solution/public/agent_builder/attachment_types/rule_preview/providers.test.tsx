@@ -30,7 +30,7 @@ jest.mock('../../../data_view_manager/hooks/use_init_data_view_manager', () => (
   useInitDataViewManager: () => jest.fn(),
 }));
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useSelector: jest.fn(),
   useDispatch: jest.fn(() => jest.fn()),
 }));

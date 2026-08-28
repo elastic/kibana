@@ -18,10 +18,38 @@ import { getSSEResponseHeaders } from '../utils';
 export function registerInternalExecutionRoutes({
   router,
   getInternalServices,
-  coreSetup,
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+
+  router.get(
+    {
+      path: `${internalApiPath}/executions/_find`,
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+        },
+      },
+      options: { access: 'internal' },
+      validate: {
+        query: schema.object({
+          metadataKey: schema.string({ minLength: 1, maxLength: 512 }),
+          metadataValue: schema.string({ minLength: 1, maxLength: 1024 }),
+        }),
+      },
+    },
+    wrapHandler(async (context, request, response) => {
+      const { execution: executionService } = getInternalServices();
+      const { metadataKey, metadataValue } = request.query;
+
+      const executions = await executionService.findExecutions(request, {
+        filter: { metadata: { [metadataKey]: metadataValue } },
+        size: 1,
+      });
+
+      return response.ok({ body: { executionId: executions[0]?.executionId ?? null } });
+    })
+  );
 
   router.get(
     {
@@ -42,8 +70,6 @@ export function registerInternalExecutionRoutes({
       },
     },
     wrapHandler(async (context, request, response) => {
-      const [, { cloud }] = await coreSetup.getStartServices();
-      const isCloud = cloud?.isCloudEnabled ?? false;
       const { execution: executionService } = getInternalServices();
       const { executionId } = request.params;
       const { since } = request.query;
@@ -55,7 +81,7 @@ export function registerInternalExecutionRoutes({
 
       const events$ = executionService.followExecution(executionId, { since });
       return response.ok({
-        headers: getSSEResponseHeaders(isCloud),
+        headers: getSSEResponseHeaders(),
         body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
           signal: abortController.signal,
           logger,

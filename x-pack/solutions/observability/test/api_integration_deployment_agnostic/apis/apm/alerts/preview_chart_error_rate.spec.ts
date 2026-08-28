@@ -11,7 +11,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import type { PreviewChartResponseItem } from '@kbn/apm-plugin/server/routes/alerts/route';
+import type { PreviewChartResponseItem } from '@kbn/apm-api-shared';
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

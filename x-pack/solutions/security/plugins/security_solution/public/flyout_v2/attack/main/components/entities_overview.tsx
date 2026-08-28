@@ -23,8 +23,8 @@ import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 export interface EntitiesOverviewProps {
   /** Alert IDs belonging to the attack, used to query entity cardinality. */
   alertIds: string[];
-  /** Optional callback to show the related entities. When undefined, the title renders as plain text. */
-  onShowEntities?: () => void;
+  /** Callback to open the Entities tool flyout. */
+  onShowEntities: () => void;
 }
 
 /**
@@ -36,18 +36,15 @@ export const EntitiesOverview: React.FC<EntitiesOverviewProps> = memo(
     const { relatedUsers, relatedHosts, loading } = useAttackEntitiesCounts(alertIds);
 
     const link = useMemo(
-      () =>
-        onShowEntities
-          ? {
-              callback: onShowEntities,
-              tooltip: (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyoutV2.attack.overview.insights.entitiesLinkTooltip"
-                  defaultMessage="Show related entities"
-                />
-              ),
-            }
-          : undefined,
+      () => ({
+        callback: onShowEntities,
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyoutV2.attack.overview.insights.entitiesLinkTooltip"
+            defaultMessage="Show related entities"
+          />
+        ),
+      }),
       [onShowEntities]
     );
 

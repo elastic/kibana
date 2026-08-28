@@ -11,6 +11,7 @@ import type { GetConnectorSpecResponseV1 } from '../../../../../../common/routes
 export interface GetConnectorSpecServiceResult {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
+  isTestable: boolean;
 }
 
 export const transformGetConnectorSpecResponse = (
@@ -29,4 +30,5 @@ export const transformGetConnectorSpecResponse = (
       : {}),
   },
   schema: spec.schema,
+  is_testable: spec.isTestable,
 });

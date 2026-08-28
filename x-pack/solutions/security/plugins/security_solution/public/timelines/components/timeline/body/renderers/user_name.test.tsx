@@ -15,21 +15,36 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createEntityFlyoutApiMock } from '../../../../../flyout_v2/entity/use_entity_flyout_api.mock';
 
 const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
 
 jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
+jest.mock('../../../../../flyout_v2/use_flyout_api');
+
 describe('UserName', () => {
+  let flyoutApi: ReturnType<typeof createEntityFlyoutApiMock>;
+
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    flyoutApi = createEntityFlyoutApiMock();
+    jest
+      .mocked(useFlyoutApi)
+      .mockReturnValue(flyoutApi as unknown as ReturnType<typeof useFlyoutApi>);
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -148,6 +163,44 @@ describe('UserName', () => {
           },
         },
       });
+    });
+  });
+
+  test('should open system flyout when enableNewFlyout is true', async () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    const context = {
+      enableHostDetailsFlyout: true,
+      enableIpDetailsFlyout: true,
+      timelineID: TimelineId.active,
+      tabType: TimelineTabs.query,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventContext.Provider value={context}>
+          <UserName {...props} />
+        </StatefulEventContext.Provider>
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
+    await waitFor(() => {
+      expect(flyoutApi.openUserFlyout).toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
+    });
+  });
+
+  test('should not open system flyout when enableNewFlyout is true but no timeline context', async () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    const wrapper = mount(
+      <TestProviders>
+        <UserName {...props} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
+    await waitFor(() => {
+      expect(flyoutApi.openUserFlyout).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 });

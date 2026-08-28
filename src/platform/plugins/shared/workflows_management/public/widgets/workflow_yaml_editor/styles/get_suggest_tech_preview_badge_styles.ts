@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
+import { HardcodedIcons } from '@kbn/workflows-ui';
 import { STABILITY_BADGE_HEIGHT_PX } from '../lib/get_stability_note';
 
 const SUGGEST_ROW_PREFIX = '.monaco-editor .suggest-widget .monaco-list .monaco-list-row';

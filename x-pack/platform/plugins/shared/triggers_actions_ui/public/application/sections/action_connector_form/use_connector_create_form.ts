@@ -42,6 +42,7 @@ export const useConnectorCreateForm = ({
   const {
     application: { capabilities },
     http,
+    docLinks,
     uiSettings,
   } = useKibana().services;
   const {
@@ -69,7 +70,7 @@ export const useConnectorCreateForm = ({
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
-  } = useActionTypeModel({ actionTypeRegistry, actionTypeId, http, uiSettings });
+  } = useActionTypeModel({ actionTypeRegistry, actionTypeId, http, docLinks, uiSettings });
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);

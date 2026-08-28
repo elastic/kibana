@@ -20,7 +20,11 @@ export function CasesPage() {
   const userCasesPermissions = canUseCases?.([observabilityFeatureId]);
 
   return userCasesPermissions?.read ? (
-    <ObservabilityPageTemplate isPageDataLoaded data-test-subj="o11yCasesPage">
+    <ObservabilityPageTemplate
+      isPageDataLoaded
+      data-test-subj="o11yCasesPage"
+      pageSectionProps={{ paddingSize: 'none' }}
+    >
       <HeaderMenu />
       <Cases permissions={userCasesPermissions} />
     </ObservabilityPageTemplate>

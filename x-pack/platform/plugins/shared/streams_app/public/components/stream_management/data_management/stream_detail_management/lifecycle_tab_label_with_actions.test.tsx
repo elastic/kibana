@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
-import type { Streams } from '@kbn/streams-schema';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { copyToClipboard } from '@elastic/eui';
 import {
-  LifecycleTabLabel,
-  LifecycleTabLabelWithActions,
-} from './lifecycle_tab_label_with_actions';
+  createMockClassicStreamDefinition,
+  createMockWiredStreamDefinition,
+} from '../shared/mocks/stream_definitions';
+import type { StatefulStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -27,213 +25,263 @@ jest.mock('@elastic/eui', () => {
 
 const mockCopyToClipboard = copyToClipboard as jest.Mock;
 
-const openActionsMenu = async () => {
-  await userEvent.click(screen.getByTestId('streamsLifecycleTabActionsButton'));
-};
+const timeRange = { rangeFrom: 'now-15m', rangeTo: 'now' };
 
-// The EUI popover panel sets `pointer-events: none` during its open animation in jsdom,
-// so menu items must be clicked without the pointer-events check.
-const clickMenuItem = async (testSubj: string) => {
-  await userEvent.click(screen.getByTestId(testSubj), {
-    pointerEventsCheck: PointerEventsCheckLevel.Never,
-  });
-};
+const createRouter = () =>
+  ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    link: jest.fn(),
+  } as unknown as StatefulStreamsAppRouter);
 
-describe('LifecycleTabLabelWithActions', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+const createNotifications = () =>
+  ({
+    toasts: { addSuccess: jest.fn() },
+  } as unknown as CoreStart['notifications']);
 
-  it('always renders the tab label', () => {
-    render(<LifecycleTabLabelWithActions showActions={false} onCopy={jest.fn()} />);
-
-    expect(screen.getByTestId('retentionTab')).toHaveTextContent('Data lifecycle');
-  });
-
-  it('does not render the actions button when showActions is false', () => {
-    render(<LifecycleTabLabelWithActions showActions={false} onCopy={jest.fn()} />);
-
-    expect(screen.queryByTestId('streamsLifecycleTabActionsButton')).not.toBeInTheDocument();
-  });
-
-  it('renders the actions button when showActions is true', () => {
-    render(<LifecycleTabLabelWithActions showActions onCopy={jest.fn()} />);
-
-    expect(screen.getByTestId('streamsLifecycleTabActionsButton')).toBeInTheDocument();
-  });
-
-  it('calls onCopy when the copy menu item is clicked', async () => {
-    const onCopy = jest.fn();
-    render(<LifecycleTabLabelWithActions showActions onCopy={onCopy} />);
-
-    await openActionsMenu();
-    await clickMenuItem('streamsLifecycleTabCopyApiRequest');
-
-    expect(onCopy).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not render the edit index template item when onEditIndexTemplate is not provided', async () => {
-    render(<LifecycleTabLabelWithActions showActions onCopy={jest.fn()} />);
-
-    await openActionsMenu();
-
-    expect(screen.queryByTestId('streamsLifecycleTabEditIndexTemplate')).not.toBeInTheDocument();
-  });
-
-  it('disables the edit index template item when no index template name is available', async () => {
-    render(
-      <LifecycleTabLabelWithActions
-        showActions
-        onCopy={jest.fn()}
-        onEditIndexTemplate={jest.fn()}
-      />
-    );
-
-    await openActionsMenu();
-
-    expect(screen.getByTestId('streamsLifecycleTabEditIndexTemplate')).toBeDisabled();
-  });
-
-  it('calls onEditIndexTemplate with the template name when enabled', async () => {
-    const onEditIndexTemplate = jest.fn();
-    render(
-      <LifecycleTabLabelWithActions
-        showActions
-        onCopy={jest.fn()}
-        indexTemplateName="logs@stream"
-        onEditIndexTemplate={onEditIndexTemplate}
-      />
-    );
-
-    await openActionsMenu();
-    await clickMenuItem('streamsLifecycleTabEditIndexTemplate');
-
-    expect(onEditIndexTemplate).toHaveBeenCalledWith('logs@stream');
-  });
-});
-
-describe('LifecycleTabLabel', () => {
-  const createDefinition = (): Streams.WiredStream.GetResponse => ({
-    stream: {
-      type: 'wired',
-      name: 'logs-test',
-      description: '',
-      updated_at: '2026-01-01T00:00:00.000Z',
-      ingest: {
-        lifecycle: { dsl: { data_retention: '30d' } },
-        processing: { steps: [], updated_at: '2026-01-01T00:00:00.000Z' },
-        settings: {},
-        wired: { fields: {}, routing: [] },
-        failure_store: { inherit: {} },
+const createShare = (
+  locatorGetUrl = jest.fn(async () => '/app/management/data/index_management'),
+  hasLocator = true
+) =>
+  ({
+    url: {
+      locators: {
+        get: jest.fn(() => (hasLocator ? { getUrl: locatorGetUrl } : undefined)),
       },
     },
-    effective_lifecycle: { dsl: { data_retention: '30d' }, from: 'logs-test' },
-    effective_settings: {},
-    data_stream_exists: true,
-    inherited_fields: {},
-    dashboards: [],
-    rules: [],
+  } as unknown as SharePublicStart);
+
+const createClassicStreamWithImportPrivileges = () =>
+  createMockClassicStreamDefinition({
     privileges: {
-      manage: true,
-      monitor: true,
-      lifecycle: true,
-      simulate: true,
-      text_structure: true,
-      read_failure_store: true,
+      ...createMockClassicStreamDefinition().privileges,
       manage_failure_store: true,
-      view_index_metadata: true,
-      create_snapshot_repository: true,
-    },
-    effective_failure_store: {
-      lifecycle: { enabled: { is_default_retention: true } },
-      from: 'logs-test',
     },
   });
 
-  const createNotifications = () =>
-    ({
-      toasts: { addSuccess: jest.fn() },
-    } as unknown as CoreStart['notifications']);
-
-  const createShare = (
-    locatorGetUrl = jest.fn(async () => '/app/management/data/index_management')
-  ) =>
-    ({
-      url: {
-        locators: {
-          get: jest.fn(() => ({ getUrl: locatorGetUrl })),
-        },
-      },
-    } as unknown as SharePublicStart);
-
+describe('buildLifecycleTabActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('copies the lifecycle API request and shows a success toast', async () => {
+  it('exposes the copy action with the expected test subject and aria label', () => {
+    const actions = buildLifecycleTabActions({
+      definition: createMockClassicStreamDefinition(),
+      notifications: createNotifications(),
+      share: createShare(),
+      router: createRouter(),
+      timeRange,
+    });
+
+    expect(actions['data-test-subj']).toBe('streamsLifecycleTabActionsButton');
+    const copyItem = actions.items.find((item) => item.id === 'copy');
+    expect(copyItem?.['data-test-subj']).toBe('streamsLifecycleTabCopyApiRequest');
+  });
+
+  it('copies the lifecycle API request and shows a success toast', () => {
     const notifications = createNotifications();
+    const actions = buildLifecycleTabActions({
+      definition: createMockClassicStreamDefinition(),
+      notifications,
+      share: createShare(),
+      router: createRouter(),
+      timeRange,
+    });
 
-    render(
-      <LifecycleTabLabel
-        definition={createDefinition()}
-        showActions
-        notifications={notifications}
-        share={createShare()}
-      />
-    );
-
-    await openActionsMenu();
-    await clickMenuItem('streamsLifecycleTabCopyApiRequest');
+    actions.items.find((item) => item.id === 'copy')!.onClick();
 
     expect(mockCopyToClipboard).toHaveBeenCalledTimes(1);
-    const copied = mockCopyToClipboard.mock.calls[0][0];
-    expect(copied).toContain('PUT /api/streams/logs-test/_ingest');
+    expect(mockCopyToClipboard.mock.calls[0][0]).toContain(
+      'PUT kbn:/api/streams/logs.classic-test/_ingest'
+    );
     expect(notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
   });
 
-  it('does not show a success toast when copying to clipboard fails', async () => {
+  it('does not show a success toast when copying to clipboard fails', () => {
     mockCopyToClipboard.mockReturnValueOnce(false);
     const notifications = createNotifications();
+    const actions = buildLifecycleTabActions({
+      definition: createMockClassicStreamDefinition(),
+      notifications,
+      share: createShare(),
+      router: createRouter(),
+      timeRange,
+    });
 
-    render(
-      <LifecycleTabLabel
-        definition={createDefinition()}
-        showActions
-        notifications={notifications}
-        share={createShare()}
-      />
-    );
-
-    await openActionsMenu();
-    await clickMenuItem('streamsLifecycleTabCopyApiRequest');
+    actions.items.find((item) => item.id === 'copy')!.onClick();
 
     expect(notifications.toasts.addSuccess).not.toHaveBeenCalled();
   });
 
-  it('opens the index template edit page in a new tab via the index management locator', async () => {
-    const editUrl = '/app/management/data/index_management/templates/edit/logs@stream';
-    const locatorGetUrl = jest.fn(async () => editUrl);
-    const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-
-    render(
-      <LifecycleTabLabel
-        definition={createDefinition()}
-        showActions
-        indexTemplateName="logs@stream"
-        notifications={createNotifications()}
-        share={createShare(locatorGetUrl)}
-      />
-    );
-
-    await openActionsMenu();
-    await clickMenuItem('streamsLifecycleTabEditIndexTemplate');
-
-    expect(locatorGetUrl).toHaveBeenCalledWith({
-      page: 'index_template_edit',
-      indexTemplate: 'logs@stream',
+  it('opens the import lifecycle flyout from the import action', () => {
+    const onImportFromStream = jest.fn();
+    const actions = buildLifecycleTabActions({
+      definition: createClassicStreamWithImportPrivileges(),
+      notifications: createNotifications(),
+      share: createShare(),
+      router: createRouter(),
+      timeRange,
+      onImportFromStream,
     });
-    expect(windowOpenSpy).toHaveBeenCalledWith(editUrl, '_blank');
 
-    windowOpenSpy.mockRestore();
+    const importItem = actions.items.find((item) => item.id === 'importFromStream')!;
+    expect(importItem.disabled).toBe(false);
+    importItem.onClick();
+
+    expect(onImportFromStream).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not include the import lifecycle action without failure store management privilege', () => {
+    const actions = buildLifecycleTabActions({
+      definition: createMockClassicStreamDefinition({
+        privileges: {
+          ...createMockClassicStreamDefinition().privileges,
+          lifecycle: true,
+          manage_failure_store: false,
+        },
+      }),
+      notifications: createNotifications(),
+      share: createShare(),
+      router: createRouter(),
+      timeRange,
+      onImportFromStream: jest.fn(),
+    });
+
+    expect(actions.items.find((item) => item.id === 'importFromStream')).toBeUndefined();
+  });
+
+  it('disables the import lifecycle action while another lifecycle flyout is open', () => {
+    const onImportFromStream = jest.fn();
+    const actions = buildLifecycleTabActions({
+      definition: createClassicStreamWithImportPrivileges(),
+      notifications: createNotifications(),
+      share: createShare(),
+      router: createRouter(),
+      timeRange,
+      onImportFromStream,
+      isImportFromStreamDisabled: true,
+    });
+
+    const importItem = actions.items.find((item) => item.id === 'importFromStream')!;
+    expect(importItem.disabled).toBe(true);
+    importItem.onClick();
+
+    expect(onImportFromStream).not.toHaveBeenCalled();
+  });
+
+  describe('classic stream', () => {
+    it('does not include the edit index template action when no locator is available', () => {
+      const actions = buildLifecycleTabActions({
+        definition: createMockClassicStreamDefinition({
+          elasticsearch_assets: {
+            indexTemplate: 'logs.classic-test@stream',
+            componentTemplates: [],
+            dataStream: 'logs.classic-test',
+          },
+        }),
+        notifications: createNotifications(),
+        share: createShare(undefined, false),
+        router: createRouter(),
+        timeRange,
+      });
+
+      expect(actions.items.find((item) => item.id === 'editTemplate')).toBeUndefined();
+    });
+
+    it('disables the edit index template action when no index template name is available', () => {
+      const actions = buildLifecycleTabActions({
+        definition: createMockClassicStreamDefinition(),
+        notifications: createNotifications(),
+        share: createShare(),
+        router: createRouter(),
+        timeRange,
+      });
+
+      expect(actions.items.find((item) => item.id === 'editTemplate')?.disabled).toBe(true);
+    });
+
+    it('opens the index template edit page in a new tab via the index management locator', async () => {
+      const editUrl =
+        '/app/management/data/index_management/templates/edit/logs.classic-test@stream';
+      const locatorGetUrl = jest.fn(async () => editUrl);
+      const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+
+      const actions = buildLifecycleTabActions({
+        definition: createMockClassicStreamDefinition({
+          elasticsearch_assets: {
+            indexTemplate: 'logs.classic-test@stream',
+            componentTemplates: [],
+            dataStream: 'logs.classic-test',
+          },
+        }),
+        notifications: createNotifications(),
+        share: createShare(locatorGetUrl),
+        router: createRouter(),
+        timeRange,
+      });
+
+      const editItem = actions.items.find((item) => item.id === 'editTemplate')!;
+      expect(editItem.disabled).toBe(false);
+      await editItem.onClick();
+
+      expect(locatorGetUrl).toHaveBeenCalledWith({
+        page: 'index_template_edit',
+        indexTemplate: 'logs.classic-test@stream',
+      });
+      expect(windowOpenSpy).toHaveBeenCalledWith(editUrl, '_blank');
+
+      windowOpenSpy.mockRestore();
+    });
+  });
+
+  describe('wired stream', () => {
+    it('does not include the edit index template action', () => {
+      const actions = buildLifecycleTabActions({
+        definition: createMockWiredStreamDefinition(),
+        notifications: createNotifications(),
+        share: createShare(),
+        router: createRouter(),
+        timeRange,
+      });
+
+      expect(actions.items.find((item) => item.id === 'editTemplate')).toBeUndefined();
+    });
+
+    it('navigates to the parent stream lifecycle tab via the edit parent stream action', () => {
+      const router = createRouter();
+      const actions = buildLifecycleTabActions({
+        definition: createMockWiredStreamDefinition(),
+        notifications: createNotifications(),
+        share: createShare(),
+        router,
+        timeRange,
+      });
+
+      const editItem = actions.items.find((item) => item.id === 'editParentStream')!;
+      expect(editItem['data-test-subj']).toBe('streamsLifecycleTabEditParentStream');
+      editItem.onClick();
+
+      expect(router.push).toHaveBeenCalledWith('/{key}/management/{tab}', {
+        path: { key: 'logs', tab: 'lifecycle' },
+        query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+      });
+    });
+
+    it('omits the edit parent stream action for a root stream', () => {
+      const actions = buildLifecycleTabActions({
+        definition: createMockWiredStreamDefinition({
+          stream: {
+            ...createMockWiredStreamDefinition().stream,
+            name: 'logs',
+          },
+        }),
+        notifications: createNotifications(),
+        share: createShare(),
+        router: createRouter(),
+        timeRange,
+      });
+
+      expect(actions.items.find((item) => item.id === 'editParentStream')).toBeUndefined();
+    });
   });
 });

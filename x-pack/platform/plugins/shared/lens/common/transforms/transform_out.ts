@@ -7,7 +7,11 @@
 
 import type { LensSerializedState } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
-import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
+import {
+  LENS_UNKNOWN_VIS,
+  dropLegacyAggregateQuerySlot,
+  type LensByValueSerializedState,
+} from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
@@ -32,7 +36,11 @@ export const getTransformOut = (
   transformDrilldownsOut: DrilldownTransforms['transformOut'],
   isDashboardAppRequest: boolean
 ): LensTransformOut => {
-  return function transformOut(storedState, panelReferences) {
+  return function transformOut(storedState, panelReferences, containerReferences, id) {
+    // Capture savedObjectId prior to stripInheritedContext
+    const legacySavedObjectId =
+      'savedObjectId' in storedState ? storedState.savedObjectId : undefined;
+
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
       transformTimeRangeOut<LensSerializedState>,
@@ -49,6 +57,11 @@ export const getTransformOut = (
         ...state,
         ref_id: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
+    }
+
+    // Fallback to handle legacy SO with missing savedObjectRef reference
+    if (!attributes && legacySavedObjectId && typeof legacySavedObjectId === 'string') {
+      return { ...state, ref_id: legacySavedObjectId } satisfies LensByRefTransformOutResult;
     }
 
     const migratedAttributes = migrateAttributes(attributes);
@@ -105,12 +118,14 @@ export const getTransformOut = (
         ? { description: attributesDescription }
         : {};
 
-    return {
+    const apiPanelConfig = {
       ...titleFallback,
       ...descriptionFallback,
       ...state,
       ...apiConfig,
     } satisfies LensByValueTransformOutResult;
+
+    return apiPanelConfig;
   };
 };
 
@@ -134,12 +149,12 @@ export function migrateAttributes(
   if (isLensAttributesV0(newAttributes) || isLensAttributesV1(newAttributes)) {
     const v1Attributes = transformToV1LensItemAttributes(newAttributes);
     const v2Attributes = transformToV2LensItemAttributes({ ...v1Attributes, visualizationType });
-    return {
+    return dropLegacyAggregateQuerySlot({
       ...attributes,
       ...v2Attributes,
       version: LENS_ITEM_VERSION_V2 as LensAttributes['version'],
-    };
+    });
   }
 
-  return newAttributes as LensAttributes;
+  return dropLegacyAggregateQuerySlot(newAttributes as LensAttributes);
 }

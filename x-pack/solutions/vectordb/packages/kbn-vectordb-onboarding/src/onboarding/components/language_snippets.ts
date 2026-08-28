@@ -224,6 +224,139 @@ println!("{:#?}", body["hits"]["hits"]);`,
 foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
 };
 
+// TODO: placeholder examples — replace with the final hybrid search examples
+export const HAVE_VECTORS_SEARCH_HYBRID_SNIPPETS: SnippetSet = {
+  python: `result = client.search(
+    index="my-vectors",
+    retriever={
+        "rrf": {
+            "retrievers": [
+                {
+                    "knn": {
+                        "field": "vector",
+                        "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
+                    }
+                },
+                {
+                    "standard": {
+                        "query": {"match": {"text": "what is elasticsearch?"}}
+                    }
+                },
+            ]
+        }
+    },
+)
+print(result["hits"]["hits"])`,
+  javascript: `const result = await client.search({
+  index: "my-vectors",
+  retriever: {
+    rrf: {
+      retrievers: [
+        {
+          knn: {
+            field: "vector",
+            query_vector: [0.10, -0.02, 0.91, 0.18, 0.60],
+          },
+        },
+        {
+          standard: {
+            query: { match: { text: "what is elasticsearch?" } },
+          },
+        },
+      ],
+    },
+  },
+});
+console.log(result.hits.hits);`,
+  java: `SearchResponse<JsonData> result = client.search(s -> s
+    .index("my-vectors")
+    .retriever(r -> r
+        .rrf(rrf -> rrf
+            .retrievers(k -> k
+                .knn(knn -> knn
+                    .field("vector")
+                    .queryVector(List.of(0.10f, -0.02f, 0.91f, 0.18f, 0.60f))
+                )
+            )
+            .retrievers(st -> st
+                .standard(std -> std
+                    .query(q -> q.match(m -> m.field("text").query("what is elasticsearch?")))
+                )
+            )
+        )
+    ),
+    JsonData.class
+);
+result.hits().hits().forEach(h -> System.out.println(h.source()));`,
+  go: `res, _ := es.Search(
+    es.Search.WithIndex("my-vectors"),
+    es.Search.WithBody(strings.NewReader(\`{
+        "retriever": {
+            "rrf": {
+                "retrievers": [
+                    {
+                        "knn": {
+                            "field": "vector",
+                            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
+                        }
+                    },
+                    {
+                        "standard": {
+                            "query": { "match": { "text": "what is elasticsearch?" } }
+                        }
+                    }
+                ]
+            }
+        }
+    }\`)),
+)
+defer res.Body.Close()`,
+  rust: `use elasticsearch::SearchParts;
+
+let response = client.search(SearchParts::Index(&["my-vectors"]))
+    .body(json!({
+        "retriever": {
+            "rrf": {
+                "retrievers": [
+                    {
+                        "knn": {
+                            "field": "vector",
+                            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
+                        }
+                    },
+                    {
+                        "standard": {
+                            "query": { "match": { "text": "what is elasticsearch?" } }
+                        }
+                    }
+                ]
+            }
+        }
+    }))
+    .send().await?;
+
+let body = response.json::<serde_json::Value>().await?;
+println!("{:#?}", body["hits"]["hits"]);`,
+  csharp: `var response = await client.SearchAsync<object>(s => s
+    .Indices("my-vectors")
+    .Retriever(r => r
+        .Rrf(rrf => rrf
+            .Retrievers(
+                rt => rt.Knn(k => k
+                    .Field("vector")
+                    .QueryVector(new[] { 0.10f, -0.02f, 0.91f, 0.18f, 0.60f })
+                ),
+                rt => rt.Standard(st => st
+                    .Query(q => q.Match(m => m.Field("text").Query("what is elasticsearch?")))
+                )
+            )
+        )
+    )
+);
+
+foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
+};
+
 export const GENERATE_VECTORS_INGEST_SNIPPETS: SnippetSet = {
   python: `from elasticsearch import Elasticsearch
 
@@ -388,6 +521,147 @@ println!("{:#?}", body["hits"]["hits"]);`,
         .Field("text")
         .Query("what is elasticsearch?")
     ))
+);
+
+foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
+};
+
+// TODO: placeholder examples — replace with the final hybrid search examples
+export const GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS: SnippetSet = {
+  python: `result = client.search(
+    index="my-vectors",
+    retriever={
+        "rrf": {
+            "retrievers": [
+                {
+                    "standard": {
+                        "query": {
+                            "semantic": {
+                                "field": "text",
+                                "query": "what is elasticsearch?",
+                            }
+                        }
+                    }
+                },
+                {
+                    "standard": {
+                        "query": {"match": {"text": "what is elasticsearch?"}}
+                    }
+                },
+            ]
+        }
+    },
+)
+print(result["hits"]["hits"])`,
+  javascript: `const result = await client.search({
+  index: "my-vectors",
+  retriever: {
+    rrf: {
+      retrievers: [
+        {
+          standard: {
+            query: {
+              semantic: { field: "text", query: "what is elasticsearch?" },
+            },
+          },
+        },
+        {
+          standard: {
+            query: { match: { text: "what is elasticsearch?" } },
+          },
+        },
+      ],
+    },
+  },
+});
+console.log(result.hits.hits);`,
+  java: `SearchResponse<JsonData> result = client.search(s -> s
+    .index("my-vectors")
+    .retriever(r -> r
+        .rrf(rrf -> rrf
+            .retrievers(sem -> sem
+                .standard(std -> std
+                    .query(q -> q.semantic(se -> se.field("text").query("what is elasticsearch?")))
+                )
+            )
+            .retrievers(lex -> lex
+                .standard(std -> std
+                    .query(q -> q.match(m -> m.field("text").query("what is elasticsearch?")))
+                )
+            )
+        )
+    ),
+    JsonData.class
+);
+result.hits().hits().forEach(h -> System.out.println(h.source()));`,
+  go: `res, _ := es.Search(
+    es.Search.WithIndex("my-vectors"),
+    es.Search.WithBody(strings.NewReader(\`{
+        "retriever": {
+            "rrf": {
+                "retrievers": [
+                    {
+                        "standard": {
+                            "query": {
+                                "semantic": { "field": "text", "query": "what is elasticsearch?" }
+                            }
+                        }
+                    },
+                    {
+                        "standard": {
+                            "query": { "match": { "text": "what is elasticsearch?" } }
+                        }
+                    }
+                ]
+            }
+        }
+    }\`)),
+)
+defer res.Body.Close()`,
+  rust: `use elasticsearch::SearchParts;
+
+let response = client.search(SearchParts::Index(&["my-vectors"]))
+    .body(json!({
+        "retriever": {
+            "rrf": {
+                "retrievers": [
+                    {
+                        "standard": {
+                            "query": {
+                                "semantic": { "field": "text", "query": "what is elasticsearch?" }
+                            }
+                        }
+                    },
+                    {
+                        "standard": {
+                            "query": { "match": { "text": "what is elasticsearch?" } }
+                        }
+                    }
+                ]
+            }
+        }
+    }))
+    .send().await?;
+
+let body = response.json::<serde_json::Value>().await?;
+println!("{:#?}", body["hits"]["hits"]);`,
+  csharp: `var response = await client.SearchAsync<object>(s => s
+    .Indices("my-vectors")
+    .Retriever(r => r
+        .Rrf(rrf => rrf
+            .Retrievers(
+                rt => rt.Standard(st => st
+                    .Query(q => q.Semantic(sem => sem
+                        .Field("text")
+                        .Query("what is elasticsearch?")
+                    ))
+                ),
+                rt => rt.Standard(st => st
+                    .Query(q => q.Match(m => m.Field("text").Query("what is elasticsearch?")))
+                )
+            )
+        )
+    )
 );
 
 foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,

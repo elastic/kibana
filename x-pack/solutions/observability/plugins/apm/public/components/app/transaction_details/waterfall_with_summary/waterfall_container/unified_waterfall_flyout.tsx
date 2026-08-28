@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { TraceItem } from '@kbn/apm-types';
+import { useTraceWaterfallContext } from '@kbn/apm-ui-shared';
 import type { History } from 'history';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { useTraceWaterfallContext } from '../../../../shared/trace_waterfall/trace_waterfall_context';
-import { TransactionFlyout } from '../../../../shared/transaction_flyout';
 import { SpanFlyout } from '../../../../shared/span_flyout';
+import { TransactionFlyout } from '../../../../shared/transaction_flyout';
 
 interface Props {
   waterfallItemId?: string;

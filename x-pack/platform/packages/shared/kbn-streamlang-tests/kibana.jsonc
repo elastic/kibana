@@ -1,7 +1,7 @@
 {
   "type": "test-helper",
   "id": "@kbn/streamlang-tests",
-  "owner": "@elastic/obs-onboarding-team",
+  "owner": "@elastic/streams-ui",
   "group": "platform",
   "visibility": "private"
 }

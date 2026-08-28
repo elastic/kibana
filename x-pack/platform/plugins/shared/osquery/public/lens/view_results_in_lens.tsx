@@ -170,9 +170,11 @@ export function getLensAttributes(
       }
     : undefined;
 
+  const resultsIdentifier = scheduleId ?? actionId;
+
   return {
     visualizationType: 'lnsPie',
-    title: `Action ${actionId} results`,
+    title: `Action ${resultsIdentifier} results`,
     references: [
       {
         id: logsDataView.id,

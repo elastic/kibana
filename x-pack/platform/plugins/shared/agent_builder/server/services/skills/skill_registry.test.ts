@@ -803,7 +803,6 @@ describe('createSkillRegistry', () => {
     const tracesSkill = createMockInternalSkillDefinition({
       id: 'agent-builder-traces',
       name: 'agent-builder-traces',
-      experimental: true,
       readonly: true,
       uiSettingRequired: AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
     });
@@ -813,7 +812,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([tracesSkill]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
-        experimentalFeaturesEnabled: true,
+        experimentalFeaturesEnabled: false,
         uiSettingValues: new Map([[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID, false]]),
       });
 
@@ -827,7 +826,7 @@ describe('createSkillRegistry', () => {
         builtinProvider: createMockBuiltinProvider([tracesSkill]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
-        experimentalFeaturesEnabled: true,
+        experimentalFeaturesEnabled: false,
         uiSettingValues: new Map([[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID, true]]),
       });
 

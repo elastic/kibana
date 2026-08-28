@@ -16,6 +16,7 @@ import type {
   ActionResultsStrategyResponse,
 } from '../../../common/search_strategy';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 
 export const getActionResponses = (
   search: IScopedSearchClient,
@@ -65,7 +66,7 @@ export const getActionResponses = (
         spaceId,
       },
       {
-        strategy: 'osquerySearchStrategy',
+        strategy: OSQUERY_SEARCH_STRATEGY,
       }
     )
     .pipe(

@@ -7,6 +7,7 @@ xpack.cloud.serverless.product_tier: complete
 xpack.infra.enabled: true
 xpack.slo.enabled: true
 xpack.uptime.enabled: true
+xpack.significantEvents.enabled: true
 
 xpack.features.overrides:
   infrastructure.name: 'Infrastructure'
@@ -18,14 +19,17 @@ xpack.features.overrides:
     order: 1200
   ### Stack alerts is hidden in Role management since it's not needed.
   stackAlerts.hidden: true
+  stackAlertsOnly.hidden: true
   ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
   uptime.name: 'Synthetics'
   ### Workflows Management should be moved from Analytics category to the Observability one.
   workflowsManagement.category: 'observability'
   ### Agent Builder should be moved from Analytics category to the Observability one.
   agentBuilder.category: 'observability'
-  ### Agent Context Layer should match Agent Builder for role management (avoid orphan Kibana category).
-  agentContextLayer.category: 'observability'
+  ### Agent Builder SML should match Agent Builder for role management (avoid orphan Kibana category).
+  agentBuilderSml.category: 'observability'
+  ### Context Engine should match Agent Builder for role management (avoid orphan Kibana category).
+  contextEngine.category: 'observability'
   
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

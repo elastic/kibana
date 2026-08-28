@@ -7,10 +7,13 @@
 
 import { type ElasticsearchClient } from '@kbn/core/server';
 
+import { appContextService } from '../../services';
+
 import type { Context, Config } from './types';
 import { getPoliciesToClean } from './get_policies_to_clean';
 import { populateMinimumRevisionsUsedByAgents } from './populate_minimum_revisions_used_by_agents';
 import { deletePolicyRevisions } from './delete_policy_revisions';
+import { sweepOrphanedFleetPolicies } from './sweep_orphaned_fleet_policies';
 
 const defaultConfig = {
   maxRevisions: 10,
@@ -25,7 +28,7 @@ export const cleanupPolicyRevisions = async (
   esClient: ElasticsearchClient,
   context: ContextParam
 ) => {
-  const { logger, abortController } = context;
+  const { logger, signal } = context;
 
   const config = {
     ...defaultConfig,
@@ -35,6 +38,20 @@ export const cleanupPolicyRevisions = async (
   logger.debug(
     `[FleetPolicyRevisionsCleanupTask] Starting cleanup with max_revisions: ${config.maxRevisions}, max_policies_per_run: ${config.maxPolicies}`
   );
+
+  // Sweep orphaned .fleet-policies documents first — these belong to agent policies that have
+  // been deleted (via bypass paths or after a previously failed cleanup) and must be removed
+  // before the revision-age cleanup runs so they don't inflate revision counts.
+  if (appContextService.getExperimentalFeatures().enableFleetOrphanedPolicySweep) {
+    const sweepResult = await sweepOrphanedFleetPolicies(esClient, { ...context, config });
+    if (sweepResult.deletedCount > 0) {
+      logger.info(
+        `[FleetPolicyRevisionsCleanupTask] Orphan sweep removed ${sweepResult.deletedCount} documents.`
+      );
+    }
+  }
+
+  throwIfAborted(signal);
 
   const policiesToClean = await getPoliciesToClean(esClient, {
     ...context,
@@ -55,7 +72,7 @@ export const cleanupPolicyRevisions = async (
     } policies with more than ${config.maxRevisions} revisions.`
   );
 
-  throwIfAborted(abortController);
+  throwIfAborted(signal);
 
   const policiesRevisionSummaries = await populateMinimumRevisionsUsedByAgents(
     esClient,
@@ -66,7 +83,7 @@ export const cleanupPolicyRevisions = async (
     }
   );
 
-  throwIfAborted(abortController);
+  throwIfAborted(signal);
 
   const docCount = Object.values(policiesRevisionSummaries).reduce(
     (sum, summary) => sum + (summary.count - config.maxRevisions),
@@ -96,8 +113,8 @@ export const cleanupPolicyRevisions = async (
   };
 };
 
-export const throwIfAborted = (abortController?: AbortController) => {
-  if (abortController?.signal.aborted) {
+export const throwIfAborted = (signal?: AbortSignal) => {
+  if (signal?.aborted) {
     throw new Error('Task was aborted');
   }
 };

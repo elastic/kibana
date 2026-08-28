@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Dispatch, Store } from 'redux';
-import { createStore } from 'redux';
+import type { Dispatch, Store } from 'redux-v4';
+import { createStore } from 'redux-v4';
 import type { EndpointState } from '../types';
 import { listData } from './selectors';
 import { mockEndpointResultList } from './mock_endpoint_result_list';

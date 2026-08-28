@@ -9,12 +9,14 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/**/*",
     "../../typings/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core",
+    "@kbn/scout",
     "@kbn/presentation-publishing",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",

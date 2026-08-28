@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.attacksPage.tour.callout.title',
   {
-    defaultMessage: "What's new in Attacks",
+    defaultMessage: 'The new home for Attack Discovery',
   }
 );
 

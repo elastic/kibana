@@ -36,16 +36,22 @@ paths:
                           enum:
                             - llm
                             - code
+                        origin:
+                          $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluatorOrigin'
                         description:
                           type: string
                           maxLength: 2048
                         reference_data_schema:
                           type: object
                           additionalProperties: true
+                        evidence_schema:
+                          type: object
+                          additionalProperties: true
                       required:
                         - name
                         - version
                         - kind
+                        - origin
                         - description
                 required:
                   - evaluators

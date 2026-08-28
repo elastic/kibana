@@ -6,10 +6,10 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import type { FleetErrorType } from './types';
+import type { FleetErrorResponse } from './types';
 
 export class FleetError<TMeta = unknown> extends Error {
-  attributes?: { type: FleetErrorType };
+  attributes?: FleetErrorResponse['attributes'];
   constructor(message?: string, public readonly meta?: TMeta) {
     super(message);
     this.name = this.constructor.name; // for stack traces

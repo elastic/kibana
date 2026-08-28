@@ -296,16 +296,21 @@ export const WorkflowListTable = ({
             onClick: (item: WorkflowListItemDto) => onRequestRun(item),
           },
           {
-            enabled: () => canUpdateWorkflow,
+            enabled: (item) => canUpdateWorkflow && item.managed !== true,
             type: 'icon',
             color: 'text',
             isPrimary: true,
             name: i18n.translate('workflows.workflowList.edit', { defaultMessage: 'Edit' }),
             'data-test-subj': 'editWorkflowAction',
             icon: 'pencil',
-            description: i18n.translate('workflows.workflowList.edit', {
-              defaultMessage: 'Edit workflow',
-            }),
+            description: (item: WorkflowListItemDto) =>
+              item.managed === true
+                ? i18n.translate('workflows.workflowList.editManagedDisabled', {
+                    defaultMessage: 'Managed workflows cannot be edited',
+                  })
+                : i18n.translate('workflows.workflowList.edit', {
+                    defaultMessage: 'Edit workflow',
+                  }),
             onClick: (item: WorkflowListItemDto) => onEditWorkflow(item),
           },
           {

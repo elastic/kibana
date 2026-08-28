@@ -6,12 +6,12 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Entity } from '@kbn/entity-store/common';
 
 import {
   ASSET_CRITICALITY_INDEX_PATTERN,
   RISK_SCORE_INDEX_PATTERN,
 } from '../../../../common/constants';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import {
   getEntityType as getEntityTypeFromCommon,
   sanitizeEntityRecordForUpsert as sanitizeEntityRecordForUpsertFromCommon,
@@ -41,7 +41,7 @@ export const getEntityRecordRiskForListDisplay = (
   }
 
   if ('host' in record && record.host) {
-    const hostRisk = record.host.risk ?? record.host.entity?.risk;
+    const hostRisk = record.host.risk;
     if (hostRisk) {
       return {
         calculated_level: hostRisk.calculated_level,
@@ -51,15 +51,7 @@ export const getEntityRecordRiskForListDisplay = (
   }
 
   if ('user' in record && record.user) {
-    const userRisk =
-      record.user.risk ??
-      (
-        record.user as {
-          entity?: {
-            risk?: { calculated_level?: string; calculated_score_norm?: number };
-          };
-        }
-      ).entity?.risk;
+    const userRisk = record.user.risk;
     if (userRisk) {
       return {
         calculated_level: userRisk.calculated_level,
@@ -69,7 +61,7 @@ export const getEntityRecordRiskForListDisplay = (
   }
 
   if ('service' in record && record.service) {
-    const serviceRisk = record.service.risk ?? record.service.entity?.risk;
+    const serviceRisk = record.service.risk;
     if (serviceRisk) {
       return {
         calculated_level: serviceRisk.calculated_level,

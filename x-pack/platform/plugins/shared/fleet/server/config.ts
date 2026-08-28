@@ -11,7 +11,10 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-import { isValidExperimentalValue } from '../common/experimental_features';
+import {
+  isValidExperimentalValue,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
 
 import {
   PreconfiguredPackagesSchema,
@@ -20,6 +23,7 @@ import {
   PreconfiguredFleetServerHostsSchema,
   PreconfiguredFleetProxiesSchema,
   PreconfiguredSpaceSettingsSchema,
+  PreconfiguredDownloadSourcesSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
 
@@ -46,6 +50,9 @@ export const config: PluginConfigDescriptor = {
       customIntegrations: {
         enabled: true,
       },
+    },
+    iacProvisioner: {
+      enabled: true,
     },
     enableExperimental: true,
     experimentalFeatures: true,
@@ -179,6 +186,31 @@ export const config: PluginConfigDescriptor = {
         }
       }
     },
+
+    // Warn on the conflicting combination of disabling the agentless policies UI (which makes the
+    // UI call the legacy package-policy/agent-policy APIs for agentless policies) while blocking
+    // those legacy APIs for agentless via disableAgentlessLegacyAPI.
+    (fullConfig, fromPath, addDeprecation) => {
+      const experimentalFeatures = parseExperimentalConfigValue(
+        fullConfig?.xpack?.fleet?.enableExperimental ?? [],
+        fullConfig?.xpack?.fleet?.experimentalFeatures ?? {}
+      );
+      if (
+        !experimentalFeatures.enableAgentlessPoliciesUI &&
+        experimentalFeatures.disableAgentlessLegacyAPI
+      ) {
+        addDeprecation({
+          configPath: 'xpack.fleet.experimentalFeatures.enableAgentlessPoliciesUI',
+          message: `When [enableAgentlessPoliciesUI] is disabled and [disableAgentlessLegacyAPI] is enabled, the server rejects agentless policy operations from the Fleet UI.`,
+          correctiveActions: {
+            manualSteps: [
+              `Re-enable [xpack.fleet.experimentalFeatures.enableAgentlessPoliciesUI] or disable [xpack.fleet.experimentalFeatures.disableAgentlessLegacyAPI].`,
+            ],
+          },
+          level: 'warning',
+        });
+      }
+    },
   ],
   schema: schema.object(
     {
@@ -238,6 +270,30 @@ export const config: PluginConfigDescriptor = {
               interval: schema.maybe(schema.string({ defaultValue: '10m' })),
             })
           ),
+          // Routes agentless policies through the managed `_bulk` endpoint instead of
+          // writing directly to Elasticsearch.
+          managedBulk: schema.maybe(
+            schema.object({
+              enabled: schema.boolean({ defaultValue: false }),
+            })
+          ),
+        })
+      ),
+      iacProvisioner: schema.maybe(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
+          api: schema.maybe(
+            schema.object({
+              url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+              tls: schema.maybe(
+                schema.object({
+                  certificate: schema.maybe(schema.string()),
+                  key: schema.maybe(schema.string()),
+                  ca: schema.maybe(schema.string()),
+                })
+              ),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,
@@ -246,6 +302,7 @@ export const config: PluginConfigDescriptor = {
       fleetServerHosts: PreconfiguredFleetServerHostsSchema,
       proxies: PreconfiguredFleetProxiesSchema,
       spaceSettings: PreconfiguredSpaceSettingsSchema,
+      binaryDownloadSource: PreconfiguredDownloadSourcesSchema,
       agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
       eventIngestedEnabled: schema.boolean({ defaultValue: false }),
       setup: schema.maybe(
@@ -333,6 +390,8 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
+        // Test/development escape hatch for uploading a package whose name exists in EPR or bundled packages.
+        allowRegistryPackageUploads: schema.boolean({ defaultValue: false }),
         // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
         privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),
         privateElasticsearchHost: schema.maybe(schema.uri({ scheme: ['https'] })),

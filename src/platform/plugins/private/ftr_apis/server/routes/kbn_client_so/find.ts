@@ -25,9 +25,12 @@ export const registerFindRoute = (router: IRouter) => {
           per_page: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
           // codeql[js/kibana/unbounded-array-in-schema] FTR test-only API, input from test code not end users
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           search: schema.maybe(schema.string()),
           // codeql[js/kibana/unbounded-array-in-schema] FTR test-only API, input from test code not end users
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
         }),
       },

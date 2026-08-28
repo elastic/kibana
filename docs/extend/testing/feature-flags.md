@@ -17,7 +17,7 @@ Some Kibana features are gated behind feature flags or experimental configuratio
 | **Toggle per suite**   | Yes                           | No — fixed at server start                           |
 | **When to use**        | **Preferred** for most flags  | Settings required at boot (e.g., route registration) |
 
-For custom server configs, reach out to the AppEx QA team before creating one (see [below](#scout-feature-flags-custom-servers)).
+For custom server configs, reach out to the Apps DX team before creating one (see [below](#scout-feature-flags-custom-servers)).
 
 ## Enabling feature flags at runtime [scout-feature-flags-runtime]
 
@@ -25,6 +25,8 @@ Use `apiServices.core.settings()` to toggle feature flags while the server is ru
 
 ::::::{note}
 Feature flag overrides are **server-wide**: they apply to the entire Kibana instance, not to a single space or worker. In [parallel suites](./parallelism.md) all workers share the same server, so a flag set by one worker is visible to every other worker. For parallel tests, enable flags in the **[global setup hook](./global-setup-hook.md)** so they are set once before any worker starts.
+
+The `@kbn/eslint/scout_no_core_settings_in_space_test` ESLint rule warns when `apiServices.core.settings(...)` is called inside `spaceTest` scope (directly, in `spaceTest.describe`/`beforeAll`/`afterAll`/`step`, etc.), since that scope runs in parallel across spaces sharing the same server.
 ::::::
 
 ### In a global setup hook (recommended for parallel suites) [scout-feature-flags-global-setup]
@@ -91,10 +93,20 @@ When using `feature_flags.overrides`, the keys must match the feature flag IDs r
 
 ## Custom server configs [scout-feature-flags-custom-servers]
 
-Some settings — such as those used during the plugin `setup` lifecycle (e.g., HTTP route registration) — cannot be changed at runtime and must be present when Kibana starts. For these cases Scout supports **custom server configuration sets** that manage a local Kibana process.
+Some settings cannot be changed at runtime and must be present when Kibana starts: plugin `enabled` flags, or anything read during the plugin `setup` lifecycle (e.g., HTTP route registration). For these cases Scout supports **custom server configuration sets** that manage a local Kibana process.
 
 ::::::{warning}
-⚠️ Each custom config set requires its own dedicated local server instance, which adds CI cost. **Reach out to the AppEx QA team before creating one** to make sure it is the right approach for your use case. If the flag you need can be toggled at runtime, prefer the [runtime approach](#scout-feature-flags-runtime) instead — it works everywhere, including Cloud.
+⚠️ Each custom config set requires its own dedicated local server instance, which adds CI cost. **Reach out to the Apps DX team before creating one** to make sure it is the right approach for your use case. If the flag you need can be toggled at runtime, prefer the [runtime approach](#scout-feature-flags-runtime) instead — it works everywhere, including Cloud.
+::::::
+
+The `default` config set mirrors a real Elastic Cloud deployment as closely as possible (a [Cloud-first approach](./scout-best-practices.md#design-tests-with-a-cloud-first-mindset)). Keeping it representative of the default customer experience is what lets UI and API suites from different solutions share one set of servers and run the same way locally and on Cloud, so avoid enabling a feature flag there unless it is also enabled by default on Cloud. Put non-default behavior behind a [runtime flag](#scout-feature-flags-runtime) where the flag allows it, and reach for a custom config set only when Kibana needs the setting at boot.
+
+::::::{tip}
+Before creating a set, check the existing sets under `config_sets/` first: if one already boots with a similar purpose (overlapping `serverArgs`), reuse it, or ask its owners whether it can be extended with a small adjustment when no existing consumer is negatively impacted. A set that duplicates another's purpose multiplies CI cost for no benefit. If you do add one, keep it minimal: import the closest existing config (usually `default`) and override only the `serverArgs` you need.
+::::::
+
+::::::{note}
+A custom config set is meant to be temporary. Once the setting it enables ships on by default, delete the set and move its suites back to the `default` config set.
 ::::::
 
 ### How custom configs work [scout-feature-flags-custom-configs-how]
@@ -138,5 +150,5 @@ export const servers: ScoutServerConfig = {
 [Start the local server](./run-scout-tests.md#scout-run-tests-server-config-set) with the custom config:
 
 ```bash
-node scripts/scout.js start-server --arch serverless --domain security_complete --serverConfigSet uiam_local
+node scripts/scout start-server --arch serverless --domain security_complete --serverConfigSet uiam_local
 ```

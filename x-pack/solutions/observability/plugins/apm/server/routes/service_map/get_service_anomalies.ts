@@ -7,8 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
+import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import { rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import {
@@ -71,9 +71,10 @@ export async function getServiceAnomalies({
                 AnomalyDetectorType.txLatency,
                 AnomalyDetectorType.txThroughput,
                 AnomalyDetectorType.txFailureRate,
+                AnomalyDetectorType.txLowCount,
               ],
             }),
-            ...rangeQuery(Math.min(end - 30 * 60 * 1000, start), end, 'timestamp'),
+            ...rangeQuery(start, end, 'timestamp'),
             {
               terms: {
                 // Only retrieving anomalies for default transaction types

@@ -18,7 +18,7 @@ import {
   enrichEntityRecords,
 } from './parse_records';
 import { fetchEntityEnrichment, type EntityEnrichmentFields } from './fetch_entity_enrichment';
-import { checkIfEntitiesIndexExists, addValuesToSet } from './utils';
+import { resolveEntitiesIndexName, addValuesToSet } from './utils';
 import type {
   EsQuery,
   EntityId,
@@ -43,6 +43,7 @@ export interface FetchGraphParams {
   entityIds?: EntityId[];
   pinnedIds?: string[];
   projectRouting?: ProjectRouting;
+  integrationRuntimeEvalsEnabled?: boolean;
 }
 
 export interface FetchGraphResult {
@@ -74,6 +75,7 @@ export const fetchGraph = async ({
   entityIds,
   pinnedIds,
   projectRouting,
+  integrationRuntimeEvalsEnabled,
 }: FetchGraphParams): Promise<FetchGraphResult> => {
   // Only fetch events when originEventIds or esQuery are provided
   const hasOriginEventIds = originEventIds.length > 0;
@@ -85,10 +87,10 @@ export const fetchGraph = async ({
 
   const hasEntityIds = entityIds && entityIds.length > 0;
 
-  // Single existence check upfront, reused by all entity-store-backed fetches and the
-  // downstream enrichment query. Runs in parallel with the events fetch since events
-  // hit logs/alerts indices and don't depend on the result.
-  const [eventsResult, entityStoreIndexExists] = await Promise.all([
+  // Single index resolution upfront (null when no live index), reused by all
+  // entity-store-backed fetches and the downstream enrichment query. Runs in parallel
+  // with the events fetch since events hit logs/alerts indices and don't depend on it.
+  const [eventsResult, entityStoreIndexName] = await Promise.all([
     hasOriginEventIds || hasEsQuery
       ? fetchEvents({
           esClient,
@@ -102,12 +104,13 @@ export const fetchGraph = async ({
           esQuery,
           pinnedIds,
           projectRouting,
+          integrationRuntimeEvalsEnabled,
         }).catch((error) => {
           logger.error(`Failed to fetch events: ${error.message}`);
           throw error;
         })
       : Promise.resolve(emptyEventsResult),
-    checkIfEntitiesIndexExists(esClient, logger, spaceId),
+    resolveEntitiesIndexName(esClient, logger, spaceId),
   ]);
 
   // Relationships and pinned entities both require the entity store index.
@@ -116,8 +119,7 @@ export const fetchGraph = async ({
         esClient,
         logger,
         entityIds,
-        spaceId,
-        entityStoreIndexExists,
+        entityStoreIndexName,
         pinnedIds,
       }).catch((error) => {
         logger.error(`Failed to fetch entity relationships: ${error.message}`);
@@ -132,8 +134,7 @@ export const fetchGraph = async ({
         esClient,
         logger,
         entityIds,
-        spaceId,
-        entityStoreIndexExists,
+        entityStoreIndexName,
       }).catch((error) => {
         logger.error(`Failed to fetch entities: ${error.message}`);
         throw error;
@@ -171,8 +172,7 @@ export const fetchGraph = async ({
           esClient,
           logger,
           entityIds: [...allEntityIds],
-          spaceId,
-          entityStoreIndexExists,
+          entityStoreIndexName,
         }).catch((error) => {
           logger.error(`Failed to enrich entities: ${error.message}`);
           throw error;

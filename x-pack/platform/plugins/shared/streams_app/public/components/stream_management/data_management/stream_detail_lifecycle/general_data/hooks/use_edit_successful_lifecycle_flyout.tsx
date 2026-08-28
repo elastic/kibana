@@ -15,6 +15,7 @@ import type {
 import {
   Streams as StreamsSchema,
   effectiveToIngestLifecycle,
+  isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRoot,
@@ -39,7 +40,10 @@ import { useInheritLink } from '../../common/hooks/use_inherit_link';
 import { useOverrideSettingsConfirmation } from '../../common/hooks/use_override_settings_confirmation';
 import { LifecycleFlyout } from '../../common/lifecycle_flyout';
 import { getLifecycleFlyoutContainer } from '../../common/get_lifecycle_flyout_container';
-import { computeSuccessfulLifecycleFlyoutPreview } from '../../common/data_lifecycle/compute_successful_lifecycle_flyout_preview';
+import {
+  computeSuccessfulLifecycleFlyoutPreview,
+  previewFromLifecycle,
+} from '../../common/data_lifecycle/compute_successful_lifecycle_flyout_preview';
 import type { IlmPhasesMap } from '../../common/data_lifecycle/preview_models';
 
 const getIlmPolicies = async ({
@@ -56,16 +60,17 @@ const getIlmPolicies = async ({
 };
 
 const mapIlmPolicyToFlyout = (policy: PolicyFromES): IlmPolicyForFlyout => {
+  const isManaged = policy.policy._meta?.managed === true;
   return {
     name: policy.name,
     phases: policy.policy.phases,
     serializedPolicy: policy.policy,
+    ...(isManaged ? { isManaged: true } : {}),
   };
 };
 
 export interface UseEditSuccessfulLifecycleFlyoutArgs {
   definition: Streams.ingest.all.GetResponse;
-  stats?: { size?: string; sizeBytes?: number; totalDocs?: number };
   core: CoreStart;
   http: CoreStart['http'];
   application: CoreStart['application'];
@@ -81,7 +86,6 @@ export interface UseEditSuccessfulLifecycleFlyoutArgs {
 
 export const useEditSuccessfulLifecycleFlyout = ({
   definition,
-  stats,
   core,
   http,
   application,
@@ -305,17 +309,23 @@ export const useEditSuccessfulLifecycleFlyout = ({
     return { dsl: {} };
   }, [applyPayload, definition.effective_lifecycle]);
 
+  const hasChanges = useMemo(
+    () => !!nextLifecycle && !isEqual(definition.stream.ingest.lifecycle, nextLifecycle),
+    [definition.stream.ingest.lifecycle, nextLifecycle]
+  );
+
+  // The Apply button stays enabled even when nothing changed for accessibility;
+  // applying without changes is handled as a no-op in `onApply`.
   const isApplyDisabled = useMemo(() => {
     if (!definition.privileges.lifecycle) return true;
     if (!applyPayload) return true;
     if (!nextLifecycle) return true;
     if (inheritLifecycle && inheritedFetchEnabled && inheritedEffectiveLifecycleOrNull === null)
       return true;
-    return isEqual(definition.stream.ingest.lifecycle, nextLifecycle) || updateInProgress;
+    return updateInProgress;
   }, [
     applyPayload,
     definition.privileges.lifecycle,
-    definition.stream.ingest.lifecycle,
     inheritLifecycle,
     inheritedFetchEnabled,
     inheritedEffectiveLifecycleOrNull,
@@ -340,7 +350,6 @@ export const useEditSuccessfulLifecycleFlyout = ({
       isServerless,
       ilmPhases,
       hotColor,
-      stats,
     });
   }, [
     definition.effective_lifecycle,
@@ -355,7 +364,6 @@ export const useEditSuccessfulLifecycleFlyout = ({
     isServerless,
     method,
     selectedIlmPolicyName,
-    stats,
   ]);
 
   const previewModel = useMemo<EditFlyoutPreviewModel>(() => {
@@ -369,7 +377,38 @@ export const useEditSuccessfulLifecycleFlyout = ({
     const hasUnsavedChanges = hasEdits && !updateInProgress;
 
     if (flyoutPreview.action === 'clear') {
-      return { action: 'clear', hasUnsavedChanges };
+      // Prime the preview with the stream's current lifecycle so the bars stay active (and animate)
+      // while the real preview model is still resolving (e.g. inherited lifecycle or ILM policies
+      // still loading), instead of snapping when it finally arrives.
+      const effective = definition.effective_lifecycle;
+      const canPrime =
+        isDslLifecycle(effective) ||
+        (isIlmLifecycle(effective) &&
+          ilmPolicies.some(
+            (policy) => policy.name === effective.ilm.policy && policy.serializedPolicy
+          ));
+
+      if (!canPrime) {
+        return { action: 'clear', hasUnsavedChanges };
+      }
+
+      const primed = previewFromLifecycle({
+        lifecycle: effective,
+        ilmPolicies,
+        isServerless,
+        ilmPhases,
+        hotColor,
+        indexMode: definition.index_mode,
+      });
+
+      return {
+        action: 'apply',
+        timelineModel: primed.timelineModel,
+        retentionPeriod: primed.retentionPeriod,
+        dataPhasesCount: primed.dataPhasesCount,
+        downsampleStepsCount: primed.downsampleStepsCount,
+        hasUnsavedChanges,
+      };
     }
 
     return {
@@ -380,7 +419,19 @@ export const useEditSuccessfulLifecycleFlyout = ({
       downsampleStepsCount: flyoutPreview.downsampleStepsCount,
       hasUnsavedChanges: flyoutPreview.suppressUnsavedChanges ? false : hasUnsavedChanges,
     };
-  }, [definition.stream.ingest.lifecycle, flyoutPreview, isOpen, nextLifecycle, updateInProgress]);
+  }, [
+    definition.effective_lifecycle,
+    definition.index_mode,
+    definition.stream.ingest.lifecycle,
+    flyoutPreview,
+    hotColor,
+    ilmPhases,
+    ilmPolicies,
+    isOpen,
+    isServerless,
+    nextLifecycle,
+    updateInProgress,
+  ]);
 
   useEditFlyoutPreviewSyncFromModel({
     isFlyoutOpen: isOpen,
@@ -531,6 +582,10 @@ export const useEditSuccessfulLifecycleFlyout = ({
           onCancel={closeFlyout}
           onApply={() => {
             if (!nextLifecycle) return;
+            if (!hasChanges) {
+              closeFlyout();
+              return;
+            }
             if (inheritLifecycle) {
               updateLifecycle(nextLifecycle);
               return;
@@ -539,6 +594,7 @@ export const useEditSuccessfulLifecycleFlyout = ({
           }}
           isApplyDisabled={isApplyDisabled}
           showWarning={retentionWarning}
+          warningType="ilm_policy"
         />
       </LifecycleFlyout>
 

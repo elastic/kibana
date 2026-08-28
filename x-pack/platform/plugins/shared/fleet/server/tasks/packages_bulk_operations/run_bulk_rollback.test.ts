@@ -39,10 +39,11 @@ describe('Bulk rollback task', () => {
       throw new Error('not implemented');
     });
   });
+
   describe('_runBulkRollbackTask', () => {
     it('should work for successful rollback', async () => {
       const res = await _runBulkRollbackTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_rollback',
@@ -58,7 +59,7 @@ describe('Bulk rollback task', () => {
 
     it('should return error for non successful rollback', async () => {
       const res = await _runBulkRollbackTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_rollback',
@@ -94,7 +95,7 @@ describe('Bulk rollback task', () => {
       abortController.abort();
       await expect(() =>
         _runBulkRollbackTask({
-          abortController,
+          signal: abortController.signal,
           logger: loggingSystemMock.createLogger(),
           taskParams: {
             type: 'bulk_rollback',

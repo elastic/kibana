@@ -18,7 +18,7 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { EXPECTED_BOUNDS_TEST_SUBJ } from './get_comparison_options';
+import { EXPECTED_BOUNDS_TEST_SUBJ, TimeRangeComparisonEnum } from './get_comparison_options';
 import * as useAnomalyDetectionJobsContextModule from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import * as useEnvironmentContextModule from '../../../context/environments_context/use_environments_context';
 import * as useShouldShowAnomalyUiModule from '../../../hooks/use_should_show_anomaly_ui';
@@ -165,6 +165,80 @@ describe('TimeComparison component', () => {
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
+    });
+
+    it('preserves expected bounds deeplink while anomaly detection setup is loading', () => {
+      jest
+        .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
+        .mockReturnValue(
+          // @ts-ignore mocking only partial data
+          {
+            anomalyDetectionJobsStatus: FETCH_STATUS.LOADING,
+            anomalyDetectionJobsData: undefined,
+            anomalyDetectionSetupState: AnomalyDetectionSetupState.Loading,
+          }
+        );
+
+      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
+        preferredEnvironment: 'prod',
+        environment: 'prod',
+        environments: [],
+        status: FETCH_STATUS.SUCCESS,
+      });
+
+      const Wrapper = getWrapper({
+        url: '/services/frontend/overview',
+        rangeFrom: '2021-06-04T16:17:02.335Z',
+        rangeTo: '2021-06-04T16:32:02.335Z',
+        comparisonEnabled: true,
+        offset: TimeRangeComparisonEnum.ExpectedBounds,
+        mockPluginContext: pluginContextCanGetMlJobs,
+        environment: 'prod',
+      });
+
+      render(<TimeComparison />, { wrapper: Wrapper });
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('replaces the expected bounds deeplink for unauthorized users instead of hiding the selector', () => {
+      // Unauthorized users get a permanent `Unknown` setup state and a fetch that
+      // never initiates, so the deeplink must fall through to the replace guard rather
+      // than being treated as pending (which would hide the selector forever).
+      jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
+      jest
+        .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
+        .mockReturnValue(
+          // @ts-ignore mocking only partial data
+          {
+            anomalyDetectionJobsStatus: FETCH_STATUS.NOT_INITIATED,
+            anomalyDetectionJobsData: undefined,
+            anomalyDetectionSetupState: AnomalyDetectionSetupState.Unknown,
+          }
+        );
+
+      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
+        preferredEnvironment: 'prod',
+        environment: 'prod',
+        environments: [],
+        status: FETCH_STATUS.SUCCESS,
+      });
+
+      const Wrapper = getWrapper({
+        url: '/services/frontend/overview',
+        rangeFrom: '2021-06-04T16:17:02.335Z',
+        rangeTo: '2021-06-04T16:32:02.335Z',
+        comparisonEnabled: true,
+        offset: TimeRangeComparisonEnum.ExpectedBounds,
+        mockPluginContext: pluginContextCanGetMlJobs,
+        environment: 'prod',
+      });
+
+      render(<TimeComparison />, { wrapper: Wrapper });
+
+      expect(spy).toHaveBeenCalledWith(expect.anything(), {
+        query: { offset: '1d' },
+      });
     });
 
     it('shows enabled option for expected bounds when there are ML jobs available matching the preferred environment', () => {

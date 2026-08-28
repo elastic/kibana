@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolType } from '@kbn/agent-builder-common';
+import type { ToolConfirmationPolicyMode, ToolType } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ScoutPage } from '@kbn/scout';
@@ -268,6 +268,28 @@ export class AgentBuilderApp {
     return (await ta.inputValue()).trim();
   }
 
+  async setConfirmationPolicyValue(value: ToolConfirmationPolicyMode) {
+    await this.page.testSubj
+      .locator('agentBuilderToolConfirmationPolicySelect')
+      .selectOption(value);
+  }
+
+  async getConfirmationPolicyValue(): Promise<string> {
+    return this.page.testSubj.locator('agentBuilderToolConfirmationPolicySelect').inputValue();
+  }
+
+  async expectConfirmationPolicyValueToBeVisible() {
+    await expect(
+      this.page.testSubj.locator('agentBuilderToolConfirmationPolicySelect')
+    ).toBeVisible();
+  }
+
+  async expectConfirmationPolicyValue(value: ToolConfirmationPolicyMode) {
+    await expect(
+      this.page.testSubj.locator('agentBuilderToolConfirmationPolicySelect')
+    ).toHaveValue(value);
+  }
+
   async setIndexPattern(indexPattern: string) {
     await this.page.testSubj.fill('agentBuilderIndexPatternInput', indexPattern);
   }
@@ -285,19 +307,7 @@ export class AgentBuilderApp {
   }
 
   async selectMcpTool(toolName: string) {
-    const optionSubj = `mcpToolOption-${toolName}`;
-    const option = this.page.locator(`[data-test-subj="${optionSubj}"]`);
-    // Retry clicking the combobox until the option appears. A single click can
-    // either open or close the EuiComboBox dropdown, so we guard against
-    // accidentally toggling it closed by only clicking when the option isn't
-    // already visible.
-    await expect(async () => {
-      if (!(await option.isVisible())) {
-        await this.page.testSubj.click('agentBuilderMcpToolSelect');
-      }
-      await expect(option).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 60_000 });
-    await option.click();
+    await this.page.components.comboBox('agentBuilderMcpToolSelect').setSelectedOptions([toolName]);
   }
 
   async waitForMcpToolsToLoad() {
@@ -453,13 +463,9 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('agentSettingsIdInput', agent.id);
     await this.page.testSubj.fill('agentSettingsDisplayNameInput', agent.name);
     await this.page.testSubj.fill('agentSettingsDescriptionInput', `Agent for testing ${agent.id}`);
-    const labelsCombo = this.page.testSubj.locator('agentSettingsLabelsComboBox');
-    const labelsInput = labelsCombo.getByTestId('comboBoxSearchInput');
-    for (const label of agent.labels) {
-      await labelsInput.click();
-      await labelsInput.fill(label);
-      await this.page.keyboard.press('Enter');
-    }
+    await this.page.components
+      .comboBox('agentSettingsLabelsComboBox')
+      .setCustomSelectedOptions(agent.labels);
     await this.page.testSubj.click('agentFormSaveButton');
     await this.page.testSubj
       .locator('agentBuilderAgentsListPageTitle')
@@ -539,16 +545,28 @@ export class AgentBuilderApp {
   async getAgentLabels(agentId: string) {
     const row = this.page.testSubj.locator(this.agentListRowSelector(agentId));
     const labelsCell = row.getByTestId('agentBuilderAgentsListLabels');
-    const labelTexts = await labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-    const viewMore = labelsCell.getByTestId('agentBuilderLabelsViewMoreButton');
-    if (await viewMore.isVisible()) {
-      await viewMore.click();
-      const popover = this.page.testSubj.locator('agentBuilderLabelsViewMorePopover');
-      const hidden = await popover.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-      labelTexts.push(...hidden);
-      await viewMore.click();
-    }
-    return labelTexts;
+    return labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
+  }
+
+  async navigateToAgentOverview(agentId: string) {
+    await this.page.gotoApp(`agent_builder/agents/${agentId}/overview`);
+    await this.page.testSubj.locator('agentOverviewPage').waitFor({
+      state: 'visible',
+      timeout: 60_000,
+    });
+  }
+
+  async openEditDetailsFlyout() {
+    await this.page.testSubj.click('agentOverviewEditDetailsButton');
+    await this.page.testSubj.locator('editDetailsFlyout').waitFor({ state: 'visible' });
+  }
+
+  async setEditDetailsInstructions(instructions: string) {
+    await this.page.testSubj.fill('editDetailsInstructionsInput', instructions);
+  }
+
+  async getEditDetailsInstructions() {
+    return this.page.testSubj.locator('editDetailsInstructionsInput').inputValue();
   }
 
   async clickAgentChat(agentId: string) {
@@ -682,5 +700,178 @@ export class AgentBuilderApp {
   async clearEmbeddableConversationSearch() {
     const input = this.page.testSubj.locator('agentBuilderEmbeddableConversationSearch');
     await input.clear();
+  }
+
+  async navigateToMcpClients() {
+    await this.page.gotoApp('agent_builder/manage/tools/mcp_clients');
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible' });
+  }
+
+  async openManageMcpClientsFromMenu() {
+    await this.openManageMcpMenu();
+    await this.page.testSubj
+      .locator('agentBuilderManageMcpClientsMenuItem')
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click('agentBuilderManageMcpClientsMenuItem');
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible' });
+  }
+
+  async waitForMcpClientRow(clientId: string) {
+    await this.page.testSubj
+      .locator(`agentBuilderMcpClientsListRow-${clientId}`)
+      .waitFor({ state: 'visible' });
+  }
+
+  private mcpClientsSearchInput() {
+    const listPage = subj('agentBuilderMcpClientsListPage');
+    return this.page.locator(`${listPage} input[type="search"]`);
+  }
+
+  async searchMcpClients(term: string) {
+    const search = this.mcpClientsSearchInput();
+    await search.click();
+    await search.fill('');
+    await search.pressSequentially(term, { delay: 15 });
+  }
+
+  async clearMcpClientsSearch() {
+    const search = this.mcpClientsSearchInput();
+    await search.click();
+    await search.fill('');
+  }
+
+  async toggleMcpClientsStatusFilter(statusLabel: 'Active' | 'Revoked') {
+    const search = this.page.testSubj.locator('mcpClientsTableSearch');
+    await search.getByRole('button', { name: 'Status' }).click();
+    await this.page.getByRole('option', { name: statusLabel }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  async openMcpClientCreate() {
+    await this.page.testSubj.click('mcpClientsAddButton');
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientCreatePage')
+      .waitFor({ state: 'visible' });
+  }
+
+  async fillMcpClientName(name: string) {
+    await this.page.testSubj.fill('mcpClientNameInput', name);
+  }
+
+  async selectMcpClientLogo(label: string) {
+    const combo = this.page.testSubj.locator('mcpClientLogoSelect');
+    await combo.click();
+    const option = this.page.getByRole('option', { name: label });
+    await option.waitFor({ state: 'visible' });
+    await option.click();
+    await expect(combo.getByText(label, { exact: false })).toBeVisible();
+  }
+
+  async setMcpClientConfidential(confidential: boolean) {
+    const checkbox = this.page.testSubj.locator('mcpClientConfidentialCheckbox');
+    const isChecked = await checkbox.isChecked();
+    if (isChecked !== confidential) {
+      await this.page.locator('label[for="mcpClientConfidential"]').click();
+    }
+  }
+
+  async submitMcpClientCreate(): Promise<string> {
+    const [response] = await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/internal/security/oauth/clients') &&
+          res.request().method() === 'POST'
+      ),
+      this.page.testSubj.click('mcpClientCreateButton'),
+    ]);
+    const { id }: { id: string } = await response.json();
+    return id;
+  }
+
+  async openMcpClientActionsMenu(clientId: string) {
+    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+  }
+
+  async openMcpClientEdit(clientId: string) {
+    await this.openMcpClientActionsMenu(clientId);
+    await this.page.testSubj
+      .locator(`mcpClientEditAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientEditAction-${clientId}`);
+    await this.page.testSubj.locator('agentBuilderMcpClientEditPage').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('mcpClientNameInput').waitFor({ state: 'visible' });
+  }
+
+  async submitMcpClientUpdate(): Promise<void> {
+    await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/internal/security/oauth/clients') &&
+          res.request().method() === 'PATCH'
+      ),
+      this.page.testSubj.click('mcpClientUpdateButton'),
+    ]);
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible' });
+  }
+
+  async closeMcpClientDetails() {
+    await this.dismissToasts();
+    await this.page.testSubj.click('mcpClientDetailsCloseButton');
+  }
+
+  private async dismissToasts() {
+    for (const closeButton of await this.page.testSubj.locator('toastCloseButton').all()) {
+      await closeButton.click().catch(() => {});
+    }
+  }
+
+  async openMcpClientDetailsFlyout(clientId: string) {
+    await this.page.testSubj.click(`mcpClientsListNameLink-${clientId}`);
+    await this.page.testSubj.locator('mcpClientDetailsFlyout').waitFor({ state: 'visible' });
+  }
+
+  async openMcpClientDetailsFlyoutByName(clientName: string) {
+    await this.page.getByRole('button', { name: clientName, exact: true }).click();
+    await this.page.testSubj.locator('mcpClientDetailsFlyout').waitFor({ state: 'visible' });
+  }
+
+  async openMcpClientRevokeModal(clientId: string) {
+    await this.openMcpClientActionsMenu(clientId);
+    await this.page.testSubj
+      .locator(`mcpClientRevokeAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientRevokeAction-${clientId}`);
+    await this.page.testSubj.locator('mcpClientRevokeModal').waitFor({ state: 'visible' });
+  }
+
+  async confirmMcpClientRevoke(clientName: string) {
+    await this.page.testSubj.fill('mcpClientRevokeConfirmInput', clientName);
+    await this.page.testSubj.click('mcpClientRevokeConfirmButton');
+    await this.page.testSubj.locator('mcpClientRevokeModal').waitFor({ state: 'detached' });
+  }
+
+  async openMcpClientDeleteModal(clientId: string) {
+    await this.openMcpClientActionsMenu(clientId);
+    await this.page.testSubj
+      .locator(`mcpClientDeleteAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientDeleteAction-${clientId}`);
+    await this.page.testSubj.locator('mcpClientDeleteModal').waitFor({ state: 'visible' });
+  }
+
+  async confirmMcpClientDelete() {
+    const modal = this.page.testSubj.locator('mcpClientDeleteModal');
+    await modal.getByTestId('confirmModalConfirmButton').click();
+    await modal.waitFor({ state: 'detached' });
+  }
+
+  async getMcpClientRowStatus(clientId: string): Promise<string> {
+    return this.page.testSubj.locator(`agentBuilderMcpClientsListRow-${clientId}`).innerText();
   }
 }

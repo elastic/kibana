@@ -26,7 +26,8 @@ import { withMinimumLicense } from '../../utils/with_minimum_license';
 export const generateLeadsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  ml: EntityAnalyticsRoutesDeps['ml']
 ) => {
   router.versioned
     .post({
@@ -62,6 +63,10 @@ export const generateLeadsRoute = (
 
           const [coreStart, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
+          const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
+            esClient,
+            spaceId
+          );
           const { connectorId } = request.body;
 
           await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
@@ -87,6 +92,10 @@ export const generateLeadsRoute = (
               sourceType: 'adhoc',
               analytics: coreStart.analytics,
               chatModel,
+              ml,
+              request,
+              soClient,
+              relationshipsClient,
             },
           });
 

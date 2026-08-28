@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/i18n-react'
   - '@kbn/custom-integrations-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/deeplinks-management'
   - '@kbn/core-application-common'
   - '@kbn/core-capabilities-common'
@@ -66,6 +67,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/stdio-dev-helpers'
   - '@kbn/tooling-log'
+  - '@kbn/apm-types'
   - '@kbn/apm-utils'
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-http-server'
@@ -112,6 +114,8 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/licensing-types'
   - '@kbn/alerting-plugin'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/alerting-v2-constants'
   - '@kbn/core-spaces-common'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
@@ -130,6 +134,8 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/human-readable-id'
   - '@kbn/elastic-agent-condition-language'
+  - '@kbn/app-header'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -147,5 +153,6 @@ fileGroups:
     - package.json
     - test/scout/**/*
     - test/scout_automatic_import/**/*
+    - test/scout_iac_provisioner/**/*
     - '!target/**/*'
 tasks: {}

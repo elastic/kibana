@@ -33,9 +33,8 @@ export interface RelatedAttacksProps {
   /**
    * Callback to open an attack preview when clicking the expand button.
    * When not provided, the expand button column is hidden.
-   * // TODO make required once we have an attack flyout in the new flyout system
    */
-  onShowAttack?: (id: string, indexName: string) => void;
+  onShowAttack?: (id: string, indexName: string, title?: string) => void;
 }
 
 /**
@@ -66,9 +65,15 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({
                   disableScreenReaderOutput
                 >
                   <EuiButtonIcon
-                    iconType="expand"
+                    iconType="maximize"
                     data-test-subj={`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`}
-                    onClick={() => onShowAttack(row.id as string, row.index as string)}
+                    onClick={() =>
+                      onShowAttack(
+                        row.id as string,
+                        row.index as string,
+                        row['kibana.alert.attack_discovery.title'] as string | undefined
+                      )
+                    }
                     aria-label={i18n.translate(
                       'xpack.securitySolution.flyout.correlations.relatedAttacksPreviewButtonLabel',
                       {

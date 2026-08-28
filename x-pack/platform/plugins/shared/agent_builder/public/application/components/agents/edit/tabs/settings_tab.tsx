@@ -45,10 +45,12 @@ import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
+import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
 import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mode_i18n';
 import type { AgentFormData } from '../agent_form';
 import { truncateAvatarSymbol } from '../agent_form_validation';
+import { AiIndicesSection } from './ai_indices_section';
 
 interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
@@ -71,6 +73,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 }) => {
   const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
   const { docLinksService } = useAgentBuilderServices();
+  const { isAdmin } = useUiPrivileges();
   const {
     services: { uiSettings },
   } = useKibana();
@@ -105,10 +108,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   );
   const accessControlModeOptions = [
     {
-      value: AgentAccessControlMode.Public,
+      value: AgentAccessControlMode.Private,
       inputDisplay: renderAccessControlModeOption({
-        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
-        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
       }),
     },
     {
@@ -119,10 +122,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       }),
     },
     {
-      value: AgentAccessControlMode.Private,
+      value: AgentAccessControlMode.Public,
       inputDisplay: renderAccessControlModeOption({
-        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
-        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
       }),
     },
   ];
@@ -340,6 +343,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <AiIndicesSection control={control} agentId={agentId} isFormDisabled={isFormDisabled} />
 
       <EuiHorizontalRule />
 
@@ -784,7 +789,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 <EuiText size="s" color="subdued">
                   {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowDescription', {
                     defaultMessage:
-                      'Runs immediately when the agent is invoked, before the first LLM call.',
+                      'Runs once after each user message, before the agent makes any LLM calls in response.',
                   })}
                 </EuiText>
               </EuiFlexGroup>
@@ -800,13 +805,24 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     {labels.common.optional}
                   </EuiText>
                 }
+                helpText={
+                  !isAdmin
+                    ? i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.workflowAdminOnlyReason',
+                        {
+                          defaultMessage:
+                            'Only administrators can configure pre-execution workflows.',
+                        }
+                      )
+                    : undefined
+                }
                 isInvalid={!!formState.errors.configuration?.workflow_ids}
                 error={formState.errors.configuration?.workflow_ids?.message}
               >
                 <WorkflowPicker
                   name="configuration.workflow_ids"
                   singleSelection={false}
-                  isDisabled={isFormDisabled}
+                  isDisabled={isFormDisabled || !isAdmin}
                 />
               </EuiFormRow>
             </EuiFlexItem>

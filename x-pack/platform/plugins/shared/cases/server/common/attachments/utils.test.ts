@@ -9,8 +9,12 @@ import { normalizeReferenceAttachmentId, toReferenceMetadata } from './utils';
 
 describe('attachments utils', () => {
   describe('toReferenceMetadata', () => {
-    it('returns scalar metadata for a single index', () => {
-      expect(toReferenceMetadata(['logs-1'])).toEqual({ index: 'logs-1' });
+    it('preserves a single-item array so the index round-trips to the same shape', () => {
+      expect(toReferenceMetadata(['logs-1'])).toEqual({ index: ['logs-1'] });
+    });
+
+    it('preserves a scalar index', () => {
+      expect(toReferenceMetadata('logs-1')).toEqual({ index: 'logs-1' });
     });
 
     it('returns undefined when index is empty', () => {
@@ -19,8 +23,12 @@ describe('attachments utils', () => {
   });
 
   describe('normalizeReferenceAttachmentId', () => {
-    it('normalizes a single-item array to a scalar value', () => {
-      expect(normalizeReferenceAttachmentId(['event-1'])).toBe('event-1');
+    it('preserves a single-item array so the id round-trips to the same shape', () => {
+      expect(normalizeReferenceAttachmentId(['event-1'])).toEqual(['event-1']);
+    });
+
+    it('preserves a scalar id', () => {
+      expect(normalizeReferenceAttachmentId('event-1')).toBe('event-1');
     });
 
     it('preserves multiple ids as an array', () => {

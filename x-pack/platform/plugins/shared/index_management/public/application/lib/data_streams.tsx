@@ -12,6 +12,7 @@ import { EuiIconTip } from '@elastic/eui';
 import type { DataStream } from '../../../common';
 import { splitSizeAndUnits } from '../../../common';
 import { timeUnits, extraTimeUnits } from '../constants/time_units';
+import { getInfiniteRetentionLabel } from './infinite_retention_label';
 
 export const HOT_ONLY_ES_LIFECYCLE: DataStream['lifecycle'] = { enabled: true };
 
@@ -222,9 +223,7 @@ const getDlmLifecycleRetentionLabel = (lifecycle?: EsLifecycle): string => {
   const activeRetention = getActiveRetention(lifecycle);
 
   if (!isFiniteRetentionValue(activeRetention)) {
-    return i18n.translate('xpack.idxMgmt.dataStreamList.dataRetentionInfiniteSymbol', {
-      defaultMessage: '∞',
-    });
+    return getInfiniteRetentionLabel();
   }
 
   return getRetentionPeriod(activeRetention);

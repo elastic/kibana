@@ -8,7 +8,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ExecutionType, TerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ExecutionType,
+  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
+  HITL_TOKEN_HASH_INPUT_FIELD,
+  TerminalExecutionStatuses,
+} from '@kbn/workflows';
 import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
@@ -23,16 +28,11 @@ import type {
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 
 import type { WorkflowExecutionQueryDeps } from './types';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../../common';
+import { WORKFLOWS_INDEX } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import {
-  buildWorkflowExecutionsSearchQuery,
+  buildManagedWorkflowExecutionsFilter,
   buildWorkflowExecutionsSpaceFilter,
-  emptyWorkflowExecutionsSearchResponse,
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
@@ -129,10 +129,9 @@ export class WorkflowExecutionQueryService {
     options?: { includeInput?: boolean; includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
-      esClient: this.deps.esClient,
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       logger: this.deps.logger,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: executionId,
       spaceId,
       includeInput: options?.includeInput,
@@ -145,9 +144,8 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
     return getChildWorkflowExecutions({
-      esClient: this.deps.esClient,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       parentExecutionId,
       spaceId,
     });
@@ -220,9 +218,8 @@ export class WorkflowExecutionQueryService {
       : undefined;
 
     return searchWorkflowExecutions({
-      esClient: this.deps.esClient,
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
       logger: this.deps.logger,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
       query: { bool: { must } },
       size,
       from,
@@ -235,40 +232,92 @@ export class WorkflowExecutionQueryService {
   async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
-  ): Promise<estypes.SearchResponse<unknown>> {
-    try {
-      return await this.deps.esClient.search({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        query: buildWorkflowExecutionsSearchQuery(params.query, spaceId, {
-          includeManagedExecutions: params.includeManagedExecutions,
-        }),
-        sort: params.sort,
-        from: params.from,
-        size: params.size,
-        track_total_hits: params.trackTotalHits ?? true,
-      });
-    } catch (error) {
-      if (isIndexNotFoundError(error)) {
-        return emptyWorkflowExecutionsSearchResponse();
-      }
-      this.deps.logger.error(`Failed to search workflow executions view: ${error}`);
-      throw error;
+  ): Promise<WorkflowExecutionListDto> {
+    const must: estypes.QueryDslQueryContainer[] = [buildWorkflowExecutionsSpaceFilter(spaceId)];
+
+    if (params.query) {
+      must.push(params.query);
     }
+    if (params.statuses?.length) {
+      must.push({ terms: { status: params.statuses } });
+    }
+    if (params.executionTypes?.length === 1) {
+      const isTestRun = params.executionTypes[0] === ExecutionType.TEST;
+      if (isTestRun) {
+        must.push({ term: { isTestRun } });
+      } else {
+        must.push({
+          bool: {
+            should: [
+              { term: { isTestRun: false } },
+              { bool: { must_not: { exists: { field: 'isTestRun' } } } },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      }
+    }
+    if (params.executedBy?.length) {
+      must.push({ terms: { executedBy: params.executedBy } });
+    }
+    if (params.concurrencyGroupKey !== undefined) {
+      must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
+    }
+
+    const startedAtRange = buildTimeRangeFilter(
+      'startedAt',
+      params.startedAfter,
+      params.startedBefore
+    );
+    if (startedAtRange) must.push(startedAtRange);
+
+    const finishedAtRange = buildTimeRangeFilter(
+      'finishedAt',
+      params.finishedAfter,
+      params.finishedBefore
+    );
+    if (finishedAtRange) must.push(finishedAtRange);
+
+    const managedMustNot = params.includeManagedExecutions
+      ? []
+      : [buildManagedWorkflowExecutionsFilter()];
+
+    const page = params.page ?? 1;
+    const size = params.size ?? DEFAULT_PAGE_SIZE;
+    const from = (page - 1) * size;
+    const sort = params.sortField
+      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      : undefined;
+
+    return searchWorkflowExecutions({
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+      logger: this.deps.logger,
+      query: {
+        bool: {
+          must,
+          must_not: [{ exists: { field: 'stepId' } }, ...managedMustNot],
+        },
+      },
+      sort,
+      from,
+      size,
+      page,
+      collapse: params.collapse ? { field: params.collapse } : undefined,
+    });
   }
 
   async getWorkflowExecutionHistory(
     executionId: string,
     spaceId: string
   ): Promise<WorkflowExecutionHistoryModel[]> {
-    const response = await this.deps.esClient.search<StepExecutionWithLegacyFields>({
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+    const response = (await this.deps.stepExecutionsDataClient.search({
       query: {
         bool: {
           must: [{ term: { executionId } }, { term: { spaceId } }],
         },
       },
       sort: [{ timestamp: { order: 'asc' } }],
-    });
+    })) as estypes.SearchResponse<StepExecutionWithLegacyFields>;
 
     return response.hits.hits.map((hit) => {
       if (!hit._source) {
@@ -293,9 +342,8 @@ export class WorkflowExecutionQueryService {
 
   async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
     const searchResult = await searchStepExecutions({
-      esClient: this.deps.esClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       logger: this.deps.logger,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
@@ -312,9 +360,8 @@ export class WorkflowExecutionQueryService {
     if (!params.includeOutput) sourceExcludes.push('output');
 
     return searchStepExecutions({
-      esClient: this.deps.esClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       logger: this.deps.logger,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowId: params.workflowId,
       stepId: params.stepId,
       spaceId,
@@ -355,8 +402,7 @@ export class WorkflowExecutionQueryService {
     const from = Math.max(0, (page - 1) * perPage);
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
-      response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      response = await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
@@ -471,8 +517,7 @@ export class WorkflowExecutionQueryService {
     const filterMust = buildHistoryFilterClauses({ channel, workflowId, respondedBy, q });
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
-      response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      response = await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { stepType: 'waitForInput' } }, ...filterMust],
@@ -569,11 +614,7 @@ export class WorkflowExecutionQueryService {
   ): Promise<ProcessedWaitForInputFacets> {
     let response: estypes.SearchResponse<EsWorkflowStepExecution, ProcessedWaitForInputFacetAggs>;
     try {
-      response = await this.deps.esClient.search<
-        EsWorkflowStepExecution,
-        ProcessedWaitForInputFacetAggs
-      >({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      response = (await this.deps.stepExecutionsDataClient.search({
         // `size: 0` — we only want the aggs, not the matching docs.
         size: 0,
         query: {
@@ -588,7 +629,10 @@ export class WorkflowExecutionQueryService {
           respondedBy: { terms: { field: 'hitl.respondedBy', size: maxBuckets } },
         },
         track_total_hits: false,
-      });
+      })) as unknown as estypes.SearchResponse<
+        EsWorkflowStepExecution,
+        ProcessedWaitForInputFacetAggs
+      >;
     } catch (error) {
       if (isIndexNotFoundError(error)) {
         return { channel: [], respondedBy: [] };
@@ -634,8 +678,7 @@ export class WorkflowExecutionQueryService {
 
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
-      response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      response = await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {
             must: [
@@ -743,8 +786,7 @@ export class WorkflowExecutionQueryService {
   /** Returns the claimable `waitForInput` step currently blocking the run. */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
-      const response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      const response = (await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {
             must: [
@@ -763,7 +805,7 @@ export class WorkflowExecutionQueryService {
         sort: [{ startedAt: { order: 'desc' } }],
         size: 1,
         track_total_hits: false,
-      });
+      })) as estypes.SearchResponse<EsWorkflowStepExecution>;
       const hit = response.hits.hits[0];
       return hit?._source?.id ?? hit?._id ?? null;
     } catch (error) {
@@ -782,8 +824,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
-    const response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+    const response = (await this.deps.stepExecutionsDataClient.search({
       query: {
         bool: {
           must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
@@ -791,7 +832,7 @@ export class WorkflowExecutionQueryService {
       },
       size: 1,
       track_total_hits: false,
-    });
+    })) as estypes.SearchResponse<EsWorkflowStepExecution>;
 
     if (response.hits.hits.length === 0) {
       return null;
@@ -814,44 +855,37 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<boolean> {
     try {
-      const response = await this.deps.esClient.update({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      const response = await this.deps.stepExecutionsDataClient.scriptUpdate({
         id: stepExecutionId,
         // `respondedAt` is the first-writer-wins guard. Retrying conflicts
         // lets simultaneous updates re-run the script against the winner's
         // write and return `noop` instead of leaking a version conflict.
-        retry_on_conflict: 3,
-        script: {
-          source:
-            'if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; return; }' +
-            'if (ctx._source.finishedAt != null) { ctx.op = "noop"; return; }' +
-            'if (ctx._source.status != null && params.settledStatuses.contains(ctx._source.status)) { ctx.op = "noop"; return; }' +
-            'if (ctx._source.hitl != null && ctx._source.hitl.respondedAt != null) { ctx.op = "noop"; return; }' +
-            'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
-            'ctx._source.hitl.respondedBy = params.respondedBy;' +
-            'ctx._source.hitl.respondedAt = params.respondedAt;' +
-            'ctx._source.hitl.channel = params.channel;',
-          lang: 'painless',
-          params: {
-            spaceId,
-            respondedBy: audit.respondedBy,
-            respondedAt: audit.respondedAt,
-            channel: audit.channel,
-            settledStatuses: SETTLED_STEP_STATUSES,
-          },
+        retryOnConflict: 3,
+        script:
+          'if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; return; }' +
+          'if (ctx._source.finishedAt != null) { ctx.op = "noop"; return; }' +
+          'if (ctx._source.status != null && params.settledStatuses.contains(ctx._source.status)) { ctx.op = "noop"; return; }' +
+          'if (ctx._source.hitl != null && ctx._source.hitl.respondedAt != null) { ctx.op = "noop"; return; }' +
+          'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
+          'ctx._source.hitl.respondedBy = params.respondedBy;' +
+          'ctx._source.hitl.respondedAt = params.respondedAt;' +
+          'ctx._source.hitl.channel = params.channel;' +
+          'if (ctx._source.input != null) { ctx._source.input.remove(params.tokenHashField); ctx._source.input.remove(params.tokenExpiresAtField); }',
+        params: {
+          spaceId,
+          respondedBy: audit.respondedBy,
+          respondedAt: audit.respondedAt,
+          channel: audit.channel,
+          settledStatuses: SETTLED_STEP_STATUSES,
+          tokenHashField: HITL_TOKEN_HASH_INPUT_FIELD,
+          tokenExpiresAtField: HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
         },
         refresh: 'wait_for',
       });
-      return response.result !== 'noop';
+      // not_found means the doc was concurrently deleted; treat as a lost claim.
+      return response.result === 'updated';
+      // scriptUpdate absorbs 404 as { result: 'not_found' }; this catch handles all other ES errors.
     } catch (error) {
-      if (
-        error?.statusCode === 404 ||
-        error?.meta?.body?.result === 'not_found' ||
-        error?.body?.result === 'not_found'
-      ) {
-        // Treat concurrent deletion or termination as a lost claim.
-        return false;
-      }
       this.deps.logger.error(
         `Failed to mark step execution ${stepExecutionId} as responded: ${error}`
       );

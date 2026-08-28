@@ -51,7 +51,8 @@ async function runOnCancelIfNeeded(
  *
  * This function orchestrates the execution of a workflow node by:
  * 1. Creating a context manager for the current step
- * 2. Checking in-memory workflow state to skip execution if already cancelled
+ * 2. Checking the execution cursor and in-memory workflow state to skip execution when
+ *    the driver is stopped (`stop()`) or the workflow is no longer RUNNING
  * 3. Creating and running the node implementation
  * 4. Running monitoring in parallel to handle cancellation, timeouts, and other control flow
  * 5. Managing error handling and state persistence
@@ -62,6 +63,7 @@ async function runOnCancelIfNeeded(
  *
  * @param params - The workflow execution loop parameters containing:
  *   - workflowRuntime: Runtime instance managing workflow state and navigation
+ *   - workflowExecutionCursor: Current node and execution-loop gate (`isExecuting`, `start` / `stop`)
  *   - workflowExecutionGraph: The workflow graph definition
  *   - workflowExecutionState: Current execution state
  *   - nodesFactory: Factory for creating node implementations
@@ -74,12 +76,17 @@ async function runOnCancelIfNeeded(
  * @throws Will catch and handle errors through the workflow runtime's error handling mechanism
  */
 export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
-  const node = params.workflowRuntime.getCurrentNode();
+  const { workflowExecutionCursor, stepExecutionRuntimeFactory } = params;
+  const node = workflowExecutionCursor.currentNode;
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
   let nodeImplementation: NodeImplementation | undefined;
 
   if (!node) {
+    return;
+  }
+
+  if (!workflowExecutionCursor.isExecuting) {
     return;
   }
 
@@ -94,10 +101,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   }
 
   try {
-    params.workflowRuntime.exitScope();
-    stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+    stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
       nodeId: node.id,
-      stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+      stackFrames: workflowExecutionCursor.currentStackFrames,
     });
 
     // Build the node implementation before the cancel short-circuit so cancellable nodes
@@ -110,6 +116,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
         params.workflowExecutionState,
         stepExecutionRuntime,
         params.workflowLogger,
+        workflowExecutionCursor,
         stepExecutionRuntime.abortController
       );
     }
@@ -161,7 +168,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
         } finally {
           if (stepExecutionRuntime) {
             await stepExecutionRuntime.flushEventLogs({
-              signal: params.taskAbortController.signal,
+              signal: params.signal,
             });
           }
         }
@@ -169,13 +176,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     }
 
     await Promise.race([runMonitorPromise, runStepPromise]);
-
-    params.workflowRuntime.enterScope();
     nodeSpan?.setOutcome('success');
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(
-      error instanceof Error ? error : new Error(String(error))
-    );
+    workflowExecutionCursor.captureError(error);
     nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();
@@ -195,16 +198,19 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       catchErrorSpan?.end();
     }
 
-    const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
-    await params.workflowRuntime.saveState(); // Ensure state is updated after each step
-    saveStateSpan?.end();
-
     // Note: predecessor outputs that `prepareForRead` rehydrated for this
     // step are released by the *next* step's `prepareForRead` (deferred
     // release) so that consecutive consumers of the same predecessor reuse
     // the in-memory copy instead of re-fetching from ES. The execution
     // loop's final-flush path is responsible for the workflow-end cleanup
     // — see `releaseTransientlyRehydratedOutputs` in `workflow_execution_loop`.
+
+    // Release the read-pins set by ensureContextReady so outputs that were
+    // only needed by this node become eviction-eligible again. Must run after
+    // the node's synchronous getContext() reads have all completed.
+    // Idempotent — safe even if ensureContextReady took the eviction-disabled
+    // fast path and never set any pins.
+    stepExecutionRuntime?.contextManager.releaseReadPins();
 
     nodeSpan?.end();
   }

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { DETECTION_RULE_INSTALL_EVENT } from '../../../../telemetry/event_based/events';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -32,6 +35,7 @@ jest.mock('../../../../machine_learning/validation');
 describe('DetectionRulesClient.createPrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
+  let analytics: AnalyticsServiceSetup;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
   const rulesAuthz = getMockRulesAuthz();
@@ -41,16 +45,39 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
     rulesClient = rulesClientMock.create();
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
+    analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+
     const savedObjectsClient = savedObjectsClientMock.create();
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
+      analytics,
     });
+  });
+
+  it('sends detection_rule_install telemetry with the correct payload', async () => {
+    rulesClient.create.mockResolvedValueOnce(
+      getRuleMock(
+        getQueryRuleParams({
+          immutable: true,
+          ruleSource: { type: 'external', isCustomized: false },
+        })
+      )
+    );
+    const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-id' };
+
+    await detectionRulesClient.createPrebuiltRule({ params });
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      DETECTION_RULE_INSTALL_EVENT.eventType,
+      expect.objectContaining({ isPrebuilt: true, isCustomized: false })
+    );
   });
 
   it('creates a rule with the correct parameters and options', async () => {

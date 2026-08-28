@@ -445,7 +445,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
             boost_mode: 'multiply' as const,
           },
         },
-        size: 5,
+        size: 7,
         min_score: 7,
       });
       expect(results).toHaveLength(1);

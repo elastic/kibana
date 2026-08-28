@@ -61,6 +61,7 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
     rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseReadPins: jest.fn(),
     releaseTransientlyRehydratedOutputs: jest.fn(),
   } as unknown as StepIoService;
 }
@@ -131,6 +132,7 @@ describe('StepExecutionRuntime', () => {
       setLastFailedStepContext: jest.fn(),
       getLastFailedStepContext: jest.fn(),
       accumulateUsage: jest.fn(),
+      recordStepUsage: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {
@@ -262,13 +264,19 @@ describe('StepExecutionRuntime', () => {
       (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([]);
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         id: 'testWorkflowExecutionId',
-        scopeStack: [
-          { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
-          { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
-        ] as StackFrame[],
         currentNodeId: 'node1',
       } as Partial<EsWorkflowExecution>);
       mockDateNow = new Date('2023-01-01T00:00:00.000Z');
+      underTest = new StepExecutionRuntime({
+        node: fakeNode,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
     });
 
     it('should upsertStep with the fake step execution id', () => {
@@ -400,7 +408,7 @@ describe('StepExecutionRuntime', () => {
           (stepExecutionId) => {
             if (stepExecutionId === 'fake_step_execution_id') {
               return {
-                stepId: 'node1',
+                stepId: 'fakeStepId1',
                 startedAt: '2025-08-05T00:00:00.000Z',
                 output: { success: true, data: {} },
                 error: undefined,
@@ -443,15 +451,56 @@ describe('StepExecutionRuntime', () => {
       it('should extract token usage from output.metadata.usage and persist it on the step', () => {
         underTest.finishStep({
           message: 'hello',
-          metadata: { usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 } },
+          metadata: {
+            usage: { inputTokens: 100, outputTokens: 50, cachedTokens: 25, totalTokens: 150 },
+          },
         });
 
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
-            usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 },
+            usage: { inputTokens: 100, outputTokens: 50, cachedTokens: 25, totalTokens: 150 },
           })
         );
         expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith({
+          inputTokens: 100,
+          outputTokens: 50,
+          cachedTokens: 25,
+          totalTokens: 150,
+        });
+      });
+
+      it('records a per-step usage entry keyed by step id and reported connector', () => {
+        underTest.finishStep({
+          message: 'hello',
+          metadata: {
+            usage: {
+              connectorId: '.openai-gpt-5.2',
+              inputTokens: 100,
+              outputTokens: 50,
+              cachedTokens: 25,
+              totalTokens: 150,
+            },
+          },
+        });
+
+        expect(workflowExecutionState.recordStepUsage).toHaveBeenCalledWith({
+          stepId: 'fakeStepId1',
+          connectorId: '.openai-gpt-5.2',
+          inputTokens: 100,
+          outputTokens: 50,
+          cachedTokens: 25,
+          totalTokens: 150,
+        });
+      });
+
+      it('records a per-step usage entry without a connector when none is reported', () => {
+        underTest.finishStep({
+          message: 'hello',
+          metadata: { usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 } },
+        });
+
+        expect(workflowExecutionState.recordStepUsage).toHaveBeenCalledWith({
+          stepId: 'fakeStepId1',
           inputTokens: 100,
           outputTokens: 50,
           totalTokens: 150,
@@ -465,6 +514,7 @@ describe('StepExecutionRuntime', () => {
           expect.not.objectContaining({ usage: expect.anything() })
         );
         expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith(undefined);
+        expect(workflowExecutionState.recordStepUsage).not.toHaveBeenCalled();
       });
 
       it('should log successful step execution', () => {
@@ -686,27 +736,29 @@ describe('StepExecutionRuntime', () => {
       expect(JSON.stringify(persistedStep.error?.details)).not.toContain('do-not-persist');
       expect(JSON.stringify(persistedStep.error?.details)).not.toContain('x-trace-id');
 
-      // Also guarded at the workflow-execution level.
-      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        error: expectedSerializedError,
-      });
+      // The workflow-execution-level error is derived from this same serialized step error
+      // (via the runtime `error` getter, captured by the execution loop), so the guardrail
+      // holds transitively — `failStep` itself no longer writes the workflow execution.
     });
 
     it('should extract and accumulate partial token usage from partial output on failure', () => {
       underTest.failStep(new Error('stream interrupted'), {
         message: '',
-        metadata: { usage: { inputTokens: 150, outputTokens: 60, totalTokens: 210 } },
+        metadata: {
+          usage: { inputTokens: 150, outputTokens: 60, cachedTokens: 30, totalTokens: 210 },
+        },
       });
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           status: ExecutionStatus.FAILED,
-          usage: { inputTokens: 150, outputTokens: 60, totalTokens: 210 },
+          usage: { inputTokens: 150, outputTokens: 60, cachedTokens: 30, totalTokens: 210 },
         })
       );
       expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith({
         inputTokens: 150,
         outputTokens: 60,
+        cachedTokens: 30,
         totalTokens: 210,
       });
     });

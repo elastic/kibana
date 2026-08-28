@@ -18,6 +18,7 @@ import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
+import { createWorkspaceService } from './workspaces';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { type RendererService, createRendererService } from './renderers';
 import { HooksService } from './hooks';
@@ -31,6 +32,9 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
+import { CallbackDeliveryService } from './execution/callback';
+import { createSpaceSettingsService } from './space_settings';
+import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -42,6 +46,8 @@ interface ServiceInstances {
   plugins: PluginsService;
   metering: MeteringService;
   consumption: ConsumptionService;
+  callbackDelivery: CallbackDeliveryService;
+  conversationTemplates: ConversationTemplatesService;
 }
 
 export class ServiceManager {
@@ -59,6 +65,7 @@ export class ServiceManager {
     workflowsManagement,
     cloud,
     usageApi,
+    actions,
   }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
@@ -68,8 +75,14 @@ export class ServiceManager {
       hooks: new HooksService(),
       skills: createSkillService(),
       plugins: createPluginsService(),
-      metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
+      metering: createMeteringService({
+        cloud,
+        usageApi,
+        logger: logger.get('metering'),
+      }),
       consumption: createConsumptionService(),
+      callbackDelivery: new CallbackDeliveryService({ actions }),
+      conversationTemplates: new ConversationTemplatesService(),
     };
 
     const skillsSetup = this.services.skills.setup();
@@ -87,6 +100,7 @@ export class ServiceManager {
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
+      conversationTemplates: this.services.conversationTemplates.setup(),
     };
 
     return this.internalSetup;
@@ -97,6 +111,7 @@ export class ServiceManager {
     security,
     spaces,
     elasticsearch,
+    http,
     inference,
     uiSettings,
     savedObjects,
@@ -130,6 +145,8 @@ export class ServiceManager {
       return executionService;
     };
 
+    const conversationTemplatesStart = this.services.conversationTemplates.start();
+
     const attachments = this.services.attachments.start({
       spaces,
       savedObjects,
@@ -144,6 +161,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       actions,
+      securityPlugin,
     });
 
     const skillsServiceStart = this.services.skills.start({
@@ -176,10 +194,19 @@ export class ServiceManager {
       trackingService,
     });
 
+    const conversations = new ConversationServiceImpl({
+      logger: logger.get('conversations'),
+      security,
+      elasticsearch,
+      spaces,
+      agents,
+    });
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
+      http,
       uiSettings,
       savedObjects,
       inference,
@@ -187,7 +214,9 @@ export class ServiceManager {
       actions,
       toolsService: tools,
       agentsService: agents,
+      conversationService: conversations,
       attachmentsService: attachments,
+      renderersService: renderers,
       skillServiceStart: skillsServiceStart,
       pluginsServiceStart: plugins,
       trackingService,
@@ -195,15 +224,15 @@ export class ServiceManager {
       hooks,
       getExecutionService,
       searchInferenceEndpoints,
+      conversationTemplates: conversationTemplatesStart,
     });
     runner = runnerFactory.getRunner();
 
-    const conversations = new ConversationServiceImpl({
-      logger: logger.get('conversations'),
-      security,
+    const workspaces = createWorkspaceService({
+      logger: logger.get('workspaces'),
       elasticsearch,
       spaces,
-      agents,
+      conversations,
     });
 
     const auditLogService = new AuditLogService({
@@ -225,6 +254,7 @@ export class ServiceManager {
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      callbackDeliveryService: this.services.callbackDelivery,
     });
 
     executionService = createAgentExecutionService({
@@ -247,6 +277,8 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
+    const spaceSettings = createSpaceSettingsService({ savedObjects });
+
     this.internalStart = {
       tools,
       agents,
@@ -254,6 +286,7 @@ export class ServiceManager {
       renderers,
       skills: skillsServiceStart,
       conversations,
+      workspaces,
       runnerFactory,
       auditLogService,
       execution: executionService,
@@ -265,6 +298,10 @@ export class ServiceManager {
       savedObjects,
       plugins,
       consumption,
+      searchInferenceEndpoints,
+      callbackDeliveryService: this.services.callbackDelivery,
+      spaceSettings,
+      conversationTemplates: conversationTemplatesStart,
     };
 
     return this.internalStart;

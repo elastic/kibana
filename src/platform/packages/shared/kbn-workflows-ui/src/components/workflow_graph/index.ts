@@ -20,3 +20,8 @@ export {
   type ToolMenuItemDef,
   useWorkflowBottomBarState,
 } from './workflow_graph_bottom_bar';
+export {
+  WorkflowVisualEditorFlyout,
+  type WorkflowVisualEditorFlyoutProps,
+  type WorkflowVisualEditorFlyoutTarget,
+} from './workflow_visual_editor_flyout';

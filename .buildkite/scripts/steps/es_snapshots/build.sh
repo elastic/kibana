@@ -4,6 +4,9 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+echo "--- Cleaning up cached images"
+clean_cached_images
+
 echo "--- Cloning Elasticsearch and preparing workspace"
 
 cd ..

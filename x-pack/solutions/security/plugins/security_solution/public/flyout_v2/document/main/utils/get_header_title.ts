@@ -11,6 +11,7 @@ import { ALERT_RULE_NAME, EVENT_KIND } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
 import { EventKind } from '../constants/event_kinds';
+import { ALERT_TITLE, formatFlyoutTitle } from '../../../shared/constants/flyout_titles';
 
 const DEFAULT_DOCUMENT_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.document.header.title',
@@ -112,4 +113,28 @@ export const getDocumentTitle = (hit: DataTableRecord): string => {
     eventCategory,
     (fieldName) => getFieldValue(hit, fieldName) as string | undefined
   );
+};
+
+/**
+ * Returns the flyout-history title for an alert in the form `"Alert: <rule name>"`, or `"Alert"`
+ * when the rule name is unavailable. Used as (part of) the `title` passed to
+ * `overlays.openSystemFlyout` for alert-related v2 flyouts.
+ */
+export const getAlertHistoryTitle = (ruleName?: string | null): string =>
+  formatFlyoutTitle(ALERT_TITLE, ruleName);
+
+/**
+ * Returns the flyout-history title for a document. For alerts (signals) this reads
+ * `"Alert: <rule name>"` (or `"Alert"`), so history entries are unambiguous; for other documents
+ * it falls back to {@link getDocumentTitle}'s derived title (e.g. an event's process name).
+ */
+export const getDocumentHistoryTitle = (hit: DataTableRecord): string => {
+  const eventKind = getFieldValue(hit, EVENT_KIND) as string | undefined;
+
+  if (eventKind === EventKind.signal) {
+    const ruleName = getFieldValue(hit, ALERT_RULE_NAME) as string | undefined;
+    return getAlertHistoryTitle(ruleName);
+  }
+
+  return getDocumentTitle(hit);
 };

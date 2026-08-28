@@ -344,6 +344,24 @@ describe('config validation', () => {
     );
   });
 
+  describe('OAuth2 Password', () => {
+    test('throws because OAuth2 password grant is not supported for webhook', async () => {
+      const config = {
+        method: 'post',
+        url: 'https://test.com',
+        hasAuth: true,
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'http://fake.test',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating connector type config: error validation webhook action config: OAuth2 password grant authentication is not supported"`
+      );
+    });
+  });
+
   describe('OAuth2 Client Credentials', () => {
     test('throws if required OAuth2 config is missing', async () => {
       const config = {
@@ -1175,6 +1193,56 @@ describe('execute()', () => {
         expect(result.errorSource).toBe('user');
       }
     );
+
+    test('serializes a non-string response body message instead of logging [object Object]', async () => {
+      const config: ConnectorTypeConfigType = {
+        url: 'https://abc.def/my-webhook',
+        method: WebhookMethods.POST,
+        headers: {
+          aheader: 'a value',
+        },
+        authType: AuthType.Basic,
+        hasAuth: true,
+      };
+
+      requestMock.mockRejectedValueOnce(
+        createTaskRunError(
+          {
+            tag: 'err',
+            isAxiosError: true,
+            response: {
+              status: 404,
+              statusText: 'Not Found',
+              data: { message: { code: 'invalid', detail: 'bad request' } },
+            },
+          } as unknown as Error,
+          TaskErrorSource.USER
+        )
+      );
+
+      const result = await connectorType.executor({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: {
+          user: 'abc',
+          password: '123',
+          key: null,
+          crt: null,
+          pfx: null,
+          clientSecret: null,
+          secretHeaders: null,
+        },
+        params: { body: 'some data' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result.serviceMessage).toBe(
+        '[404] Not Found: {"code":"invalid","detail":"bad request"}'
+      );
+    });
 
     it('should log an error if refreshing access token fails', async () => {
       const errorMessage = 'Invalid client or Invalid client credentials';

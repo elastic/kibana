@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Disable Attack Discovery Schedule Internal API endpoint
+  version: '2023-10-31'
+paths:
+  /internal/attack_discovery/schedules/{id}/_disable:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: DisableAttackDiscoverySchedule
+      x-state: Technical Preview
+      summary: Disable an attack discovery schedule
+      description: >-
+        Internal API that disables an attack discovery schedule, preventing it from
+        running according to its configured interval. The schedule configuration
+        is preserved and can be re-enabled later.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the schedule to disable
+          schema:
+            $ref: '../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        '200':
+          description: Schedule disabled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    $ref: '../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+                    description: The unique identifier of the disabled schedule
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status_code
+                  - error
+                  - message
+                properties:
+                  status_code:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+components:
+  x-codegen-enabled: true

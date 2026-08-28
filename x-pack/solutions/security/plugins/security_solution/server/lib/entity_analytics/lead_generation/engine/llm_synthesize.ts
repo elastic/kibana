@@ -9,33 +9,60 @@ import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import type { LeadEntity, Observation } from '../types';
-
-export interface ScoredEntityInput {
-  readonly entity: LeadEntity;
-  readonly priority: number;
-  readonly observations: Observation[];
-}
+import {
+  formatRelatedEntity,
+  formatOmittedRelatedEntityCounts,
+} from '../../../../../common/entity_analytics/lead_generation/format_related_entity';
+import type { ScoredEntity } from '../types';
 
 export interface LlmSynthesisResult {
   readonly title: string;
+  readonly byline: string;
   readonly description: string;
   readonly tags: string[];
   readonly recommendations: string[];
 }
 
-const BATCH_SYNTHESIS_PROMPT = `You are a senior security analyst writing threat hunting leads for a SOC team. Each lead covers a single entity. Your job is to produce a narrative that gives an analyst immediate context and a clear reason to investigate — not a restatement of the raw alert data.
+/**
+ * Cross-entity ("peer") context for the batch. Lets a lead's narrative convey
+ * scope — e.g. how many other candidate entities share the same signal — so an
+ * analyst can tell an isolated event from a coordinated pattern. Computed by the
+ * engine (see `computeCohortContext`) and rendered per lead in the payload.
+ */
+export interface CohortContext {
+  /** Total number of candidate entities in this generation batch. */
+  readonly totalCandidates: number;
+  /** For each observation type, how many distinct entities exhibit it. */
+  readonly entityCountByObservationType: Readonly<Record<string, number>>;
+}
+
+/** Max distinct shared signals rendered in a lead's peer-context line. */
+const MAX_PEER_SIGNALS = 3;
+
+/** Upper bound on title length (words). Titles are full hypotheses, not labels. */
+const TITLE_MAX_WORDS = 10;
+
+const BATCH_SYNTHESIS_PROMPT = `You are a senior security analyst writing threat hunting leads for a SOC team. Each lead covers a single entity. This feature pre-selects the top candidates worth a threat hunter's time, so the title and byline must let an analyst instantly decide whether and why to prioritize this lead — not restate the raw alert or rule name.
 
 Rules:
 - Write as if briefing a colleague who knows nothing about this entity yet
-- If the data is thin (e.g. one alert), say what that alert type typically indicates and why it still warrants attention for this entity given their role or criticality
+- The title is a specific, prioritizable HYPOTHESIS, not a category label. It must combine three things: (1) the behavior or what happened, (2) an entity qualifier that conveys stakes (privileged, high-criticality, service account, admin, unfamiliar/new), and (3) when useful, why now (a timeframe, escalation, or "after hours").
+- If the data is thin (e.g. one alert), say what that signal typically indicates and why it still warrants attention for THIS entity given their role or criticality
 - Reference the entity's asset criticality and privilege status where present — a single MFA failure from a privileged admin is very different from one on a standard user
 - Never pad with generic security advice; every sentence must be grounded in the specific data provided
+- Vary titles across leads — do not reuse the same phrasing
+- When a lead includes "Peer context" (other candidate entities sharing the same signal), you may reference it in the byline or description to convey scope — e.g. "alongside 5 other privileged accounts escalating in the same window". Only use peer counts that are provided; never invent them.
+- Never mention, quote, or paraphrase the \`signal_strength\` value anywhere (title, byline, description, tags). It is an internal ranking signal, not something meaningful to an analyst, and must not be shown.
+- Only state a numeric risk score when a "Risk escalation" line is present for that lead; use exactly the from/to numbers and window given, and never invent, estimate, or restate a risk score from any other field (including \`signal_strength\`). If no "Risk escalation" line is present, do not mention a risk score at all.
+- Reference other entities only by name from those explicitly listed under "Related entities" for that lead; never infer or invent a connection. When that section is absent, do not mention related entities or their absence.
+- "interacted with: at least N entities" is a lower bound, not an exact count — write "at least N", never "only N" or "exactly N".
+- A "(not shown: N more X)" note means the list was truncated, not an additional entity — you may mention that more exist (e.g. "among dozens of other hosts it accesses"), but never treat it as a specific, nameable entity.
 
 You will receive data for {lead_count} lead(s). Respond ONLY with a valid JSON array (no markdown fences, no extra text) containing exactly {lead_count} objects in the same order as the input, each matching this schema:
 {{
-  "title": "string - 3 to 5 words. A specific threat label, not a restatement of the rule name. Vary titles across leads — avoid repeating the same phrase. Good: 'Credential access attempt', 'Suspicious admin activity', 'Authentication bypass signal'. Bad: 'Okta MFA Verification Failure' (that is the rule name, not a title).",
-  "description": "string - 2 to 4 sentences, plain text, no markdown. Explain: (1) what the evidence shows, (2) why this entity specifically warrants investigation (their role, criticality, or the pattern), (3) what an attacker might be doing. Be direct and specific — name rule names, scores, counts from the data. If data is limited, explain why this signal still matters.",
+  "title": "string - a 5 to 9 word hypothesis combining behavior + entity qualifier + (when useful) why-now. Do NOT restate a detection rule name. Good: 'Rapid risk score escalation across privileged account', 'Anomalous access to unfamiliar hosts after hours', 'Privileged service account showing unusual resource usage', 'Credential attempts against unmanaged critical host'. Bad: 'Okta MFA Verification Failure' (rule name), 'Suspicious activity' (vague label), 'Credential access attempt' (no entity stakes or why-now).",
+  "byline": "string - one sentence, roughly 15 to 25 words, plain text, no markdown. Start with the entity's name exactly as given in the input, then lead with the single strongest quantified signal and its timeframe, and note the stakes (role/criticality) if relevant. It must stand alone without the title or description. Good: 'admin-1 had a risk score spike above 20% in the last day, alongside escalations on other privileged accounts.', 'john-doe accessed 2 unfamiliar hosts outside usual patterns in the last 24h, indicating possible lateral movement.'. Bad: 'with 2 alerts in the last 7 days' (no what/why), 'showed suspicious behavior' (not quantified).",
+  "description": "string - 2 to 4 sentences, plain text, no markdown. Explain: (1) what the evidence shows with specific scores/counts/rule names, (2) why this entity specifically warrants investigation (their role, criticality, or the pattern), (3) what an attacker might be doing. If data is limited, explain why this signal still matters.",
   "tags": ["3 to 6 tags. Short, human-readable. Mix technique tags from rule names in the data with contextual tags like the entity's role or criticality tier. Never use MITRE IDs."],
   "recommendations": ["3 to 5 specific chat prompts an analyst pastes directly into an AI assistant. Name the entity, timeframe, and data source in each prompt. Good: 'Show me all authentication events for {{entity}} in the last 48h including source IPs and geolocations', 'Has {{entity}} accessed any new systems or services in the last 7 days that they haven't used in the past 30?'. Bad: 'Review recent activity' (too vague)."]
 }}
@@ -47,62 +74,126 @@ Respond with the JSON array only.`;
 
 const batchSynthesisPrompt = ChatPromptTemplate.fromTemplate(BATCH_SYNTHESIS_PROMPT);
 
-const formatEntityLine = (s: ScoredEntityInput): string => {
+const formatEntityLine = (s: ScoredEntity): string => {
   const entityDoc = JSON.stringify(s.entity.record);
   return `  - ${s.entity.type} "${s.entity.name}" (priority: ${s.priority}/10)\n    Entity document: ${entityDoc}`;
 };
 
-const formatLeadsPayload = (groups: ScoredEntityInput[][]): string => {
-  return groups
-    .map((group, i) => {
-      const entityLines = group.map(formatEntityLine).join('\n');
+/**
+ * Builds a "Peer context" line for a lead: for each observation type the
+ * entity has, how many OTHER candidate entities share it. Returns an empty
+ * string when no peers share any of the lead's signals.
+ */
+const formatPeerContext = (entity: ScoredEntity, cohort?: CohortContext): string => {
+  if (!cohort) return '';
 
-      const obsLines = group
-        .flatMap((s) => {
-          const key = s.entity.id;
-          return s.observations
-            .filter((o) => o.entityId === key)
-            .map((obs) => {
-              const metaEntries = Object.entries(obs.metadata)
-                .filter(([, v]) => v !== undefined && v !== null && v !== '')
-                .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
-                .join(', ');
-              return `  - [${obs.severity.toUpperCase()}] ${obs.description} (type=${
-                obs.type
-              }, score=${obs.score}/100${metaEntries ? `, ${metaEntries}` : ''})`;
-            });
+  const entityTypes = new Set(entity.observations.map((o) => o.type));
+  const peerSignals = [...entityTypes]
+    .map((type) => ({ type, peers: (cohort.entityCountByObservationType[type] ?? 1) - 1 }))
+    .filter(({ peers }) => peers > 0)
+    .sort((a, b) => b.peers - a.peers)
+    .slice(0, MAX_PEER_SIGNALS)
+    .map(({ type, peers }) => `${peers} other entit${peers === 1 ? 'y' : 'ies'} share "${type}"`);
+
+  if (peerSignals.length === 0) return '';
+  return `  Peer context: ${peerSignals.join('; ')} (of ${cohort.totalCandidates} candidates).`;
+};
+
+/**
+ * Risk escalation observation types considered "short window" — recent enough
+ * that a jump is a meaningful why-now signal rather than gradual drift.
+ * `risk_escalation_90d` is intentionally excluded.
+ */
+const SHORT_WINDOW_ESCALATION_TYPES = new Set(['risk_escalation_24h', 'risk_escalation_7d']);
+
+/**
+ * Builds an explicit, deterministic "Risk escalation" line from the risk
+ * module's own before/after numbers when a short-window escalation
+ * observation is present. This is the ONLY sanctioned source of a risk score
+ * in the prompt — see the corresponding prompt rule — so the LLM never has
+ * to infer or invent one from an unrelated observation's signal strength.
+ */
+const formatRiskEscalation = (entity: ScoredEntity): string => {
+  const escalation = entity.observations
+    .filter((o) => SHORT_WINDOW_ESCALATION_TYPES.has(o.type))
+    .sort((a, b) => Number(b.metadata.delta ?? 0) - Number(a.metadata.delta ?? 0))[0];
+  if (!escalation) return '';
+
+  const previousScore = Number(escalation.metadata.previous_score);
+  const currentScore = Number(escalation.metadata.current_score);
+  const delta = Number(escalation.metadata.delta);
+  const window = escalation.metadata.window;
+  if (Number.isNaN(previousScore) || Number.isNaN(currentScore) || Number.isNaN(delta)) return '';
+
+  return `  Risk escalation: risk score rose from ${Math.round(previousScore)} to ${Math.round(
+    currentScore
+  )} (+${Math.round(delta)}) over the last ${window}.`;
+};
+
+const formatRelatedEntities = (entity: ScoredEntity): string => {
+  if (entity.topRelatedEntities.length === 0) return '';
+  const lines = entity.topRelatedEntities.map((r) => `  - ${formatRelatedEntity(r)}`).join('\n');
+  const omitted = formatOmittedRelatedEntityCounts(
+    entity.topRelatedEntities,
+    entity.relatedEntityCounts
+  );
+  return `  Related entities:\n${lines}${omitted ? `\n  (not shown: ${omitted})` : ''}`;
+};
+
+const formatLeadsPayload = (
+  entities: ReadonlyArray<ScoredEntity>,
+  cohort?: CohortContext
+): string => {
+  return entities
+    .map((entity, i) => {
+      const entityLine = formatEntityLine(entity);
+
+      const obsLines = entity.observations
+        .map((obs) => {
+          const metaEntries = Object.entries(obs.metadata)
+            .filter(([, v]) => v !== undefined && v !== null && v !== '')
+            .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
+            .join(', ');
+          return `  - [${obs.severity.toUpperCase()}] ${obs.description} (type=${
+            obs.type
+          }, signal_strength=${obs.score}/100${metaEntries ? `, ${metaEntries}` : ''})`;
         })
         .join('\n');
 
-      const header =
-        group.length > 1
-          ? `### Lead ${i + 1} — Campaign (${group.length} entities)`
-          : `### Lead ${i + 1} — Single entity`;
-      return `${header}\n${entityLines}\n${obsLines}`;
+      const header = `### Lead ${i + 1}`;
+      const riskEscalation = formatRiskEscalation(entity);
+      const peerContext = formatPeerContext(entity, cohort);
+      const relatedEntities = formatRelatedEntities(entity);
+      return [header, entityLine, obsLines, riskEscalation, peerContext, relatedEntities]
+        .filter(Boolean)
+        .join('\n');
     })
     .join('\n\n');
 };
 
 /**
  * Use an LLM to synthesize content for all leads in a single batch call.
- * Returns results in the same order as the input groups.
+ * Returns results in the same order as the input entities.
  * Throws on failure — the caller should surface the error.
  */
 export const llmSynthesizeBatch = async (
   chatModel: InferenceChatModel,
-  groups: ScoredEntityInput[][],
-  logger: Logger
+  entities: ReadonlyArray<ScoredEntity>,
+  logger: Logger,
+  cohort?: CohortContext
 ): Promise<LlmSynthesisResult[]> => {
-  if (groups.length === 0) return [];
+  if (entities.length === 0) return [];
 
-  const leadsPayload = formatLeadsPayload(groups);
+  const leadsPayload = formatLeadsPayload(entities, cohort);
   const jsonParser = new JsonOutputParser<LlmSynthesisResult[]>();
   const chain = batchSynthesisPrompt.pipe(chatModel).pipe(jsonParser);
 
-  logger.info(`[LeadGenerationEngine] Invoking LLM for batch synthesis of ${groups.length} leads`);
+  logger.info(
+    `[LeadGenerationEngine] Invoking LLM for batch synthesis of ${entities.length} leads`
+  );
 
   const results = await chain.invoke({
-    lead_count: String(groups.length),
+    lead_count: String(entities.length),
     leads_payload: leadsPayload,
   });
 
@@ -112,17 +203,18 @@ export const llmSynthesizeBatch = async (
     } results returned`
   );
 
-  if (!Array.isArray(results) || results.length !== groups.length) {
+  if (!Array.isArray(results) || results.length !== entities.length) {
     throw new Error(
       `LLM batch synthesis returned ${
         Array.isArray(results) ? results.length : typeof results
-      } items, expected ${groups.length}`
+      } items, expected ${entities.length}`
     );
   }
 
   return results.map((result) => {
     if (
       typeof result.title !== 'string' ||
+      typeof result.byline !== 'string' ||
       typeof result.description !== 'string' ||
       !Array.isArray(result.tags) ||
       !Array.isArray(result.recommendations)
@@ -130,7 +222,8 @@ export const llmSynthesizeBatch = async (
       throw new Error('LLM returned malformed JSON: missing required fields in batch item');
     }
     return {
-      title: truncateTitle(result.title, 5),
+      title: truncateTitle(result.title, TITLE_MAX_WORDS),
+      byline: stripMarkdown(result.byline),
       description: stripMarkdown(result.description),
       tags: result.tags
         .map(String)
@@ -158,3 +251,10 @@ const stripMarkdown = (text: string): string =>
     .replace(/_{1,3}([^_]+)_{1,3}/g, '$1')
     .replace(/`([^`]+)`/g, '$1')
     .trim();
+
+/** Exported for unit testing. */
+export const __testables = {
+  formatLeadsPayload,
+  formatRiskEscalation,
+  formatRelatedEntities,
+};

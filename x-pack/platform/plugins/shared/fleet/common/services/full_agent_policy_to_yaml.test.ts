@@ -97,6 +97,46 @@ describe('fullAgentPolicyToYaml', () => {
     expect(result).not.toContain('every 2  //');
   });
 
+  it('serializes policies that reuse an object by reference without throwing on YAML aliases', () => {
+    // The same object is reused by reference in two places (here an ES privileges
+    // object shared between a stream and output_permissions), as happens when Fleet
+    // assembles a full policy server-side. With anchors enabled, the custom key
+    // sorter can emit the alias before its anchor and make serialization throw
+    // "Unresolved alias (the anchor must be set before the alias)". `inputs` is
+    // inserted before `output_permissions` so the anchor would attach here, while
+    // POLICY_KEYS_ORDER sorts `output_permissions` first, triggering the bug.
+    const sharedPrivileges = { cluster: ['monitor'] };
+    const policy = {
+      id: 'test-policy',
+      outputs: {},
+      inputs: [
+        {
+          id: 'test-input',
+          type: 'synthetics/http',
+          streams: [
+            {
+              id: 'test-stream',
+              data_stream: { elasticsearch: { privileges: sharedPrivileges } },
+            },
+          ],
+        },
+      ],
+      output_permissions: { default: { _elastic_agent_checks: sharedPrivileges } },
+      revision: 1,
+      agent: {},
+    } as unknown as FullAgentPolicy;
+
+    let result = '';
+    expect(() => {
+      result = fullAgentPolicyToYaml(policy, yaml);
+    }).not.toThrow();
+
+    // No anchors/aliases are emitted; the shared content is inlined in both places.
+    expect(result).not.toMatch(/&a\d/);
+    expect(result).not.toMatch(/\*a\d/);
+    expect(result.match(/cluster:/g) ?? []).toHaveLength(2);
+  });
+
   it('should quote date-only strings to prevent YAML 1.1 timestamp interpretation by the agent', () => {
     // Integrations like microsoft_defender_cloud use date-only API versions (e.g. 2021-06-01).
     // The Elastic Agent parses policy YAML with a YAML 1.1 parser, which treats unquoted

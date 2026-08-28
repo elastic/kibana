@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   FramePublicAPI,
@@ -26,8 +26,19 @@ export function LayerHeader({
   onlyAllowSwitchToSubtypes?: boolean;
 }) {
   const { visualizationMap } = useEditorFrameService();
-
   const activeVisualization = visualizationMap[activeVisualizationId];
+
+  const availableVisualizationMap = useMemo(
+    () =>
+      filterVisualizationMap(
+        visualizationMap,
+        activeVisualization?.id,
+        layerConfigProps.frame,
+        onlyAllowSwitchToSubtypes
+      ),
+    [visualizationMap, activeVisualization?.id, layerConfigProps.frame, onlyAllowSwitchToSubtypes]
+  );
+
   if (!activeVisualization) {
     return null;
   }
@@ -35,13 +46,6 @@ export function LayerHeader({
   if (customLayerHeader) {
     return customLayerHeader;
   }
-
-  const availableVisualizationMap = filterVisualizationMap(
-    visualizationMap,
-    activeVisualization.id,
-    layerConfigProps.frame,
-    onlyAllowSwitchToSubtypes
-  );
 
   const hasOnlyOneVisAvailable =
     Object.keys(availableVisualizationMap).length === 1 &&

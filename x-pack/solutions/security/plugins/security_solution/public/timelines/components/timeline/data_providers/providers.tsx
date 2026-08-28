@@ -12,7 +12,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { DraggableChildrenFn, DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,

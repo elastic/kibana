@@ -1,4 +1,11 @@
-'use strict';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
 
 const fs = require('fs');
 const path = require('path');
@@ -197,7 +204,9 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
 
   const reviewer = REVIEWERS[artifact.reviewer_id];
   if (!reviewer) {
-    core.setFailed(`Reviewer comment artifact contained unknown reviewer id: ${artifact.reviewer_id}.`);
+    core.setFailed(
+      `Reviewer comment artifact contained unknown reviewer id: ${artifact.reviewer_id}.`
+    );
     return;
   }
 
@@ -218,7 +227,9 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
     commentId,
   });
 
-  if (!commentBelongsToPr({ comment: liveComment, commentType: artifact.comment_type, pullNumber })) {
+  if (
+    !commentBelongsToPr({ comment: liveComment, commentType: artifact.comment_type, pullNumber })
+  ) {
     core.setFailed(`Comment ${commentId} does not belong to PR #${pullNumber}.`);
     return;
   }
@@ -232,7 +243,9 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
     return;
   }
 
-  if (!(await validateReviewerAccess({ github, core, owner, repo, actor: liveComment.user?.login }))) {
+  if (
+    !(await validateReviewerAccess({ github, core, owner, repo, actor: liveComment.user?.login }))
+  ) {
     return;
   }
 
@@ -244,6 +257,7 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
     inputs: {
       pr_number: String(pullNumber),
       comment_id: String(commentId),
+      comment_type: artifact.comment_type,
     },
   });
 

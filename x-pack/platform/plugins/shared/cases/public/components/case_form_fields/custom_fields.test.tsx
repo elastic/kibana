@@ -37,6 +37,7 @@ describe('CustomFields', () => {
     );
 
     expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
+    expect(screen.queryByTestId('legacy-custom-fields-deprecated-badge')).not.toBeInTheDocument();
 
     const cf0 = customFieldsConfigurationMock[0];
     const cf1 = customFieldsConfigurationMock[1];
@@ -47,6 +48,17 @@ describe('CustomFields', () => {
     expect(
       await screen.findByTestId(`${cf1.key}-${cf1.type}-create-custom-field`)
     ).toBeInTheDocument();
+  });
+
+  it('renders the deprecated badge next to the heading when requested', async () => {
+    renderWithTestingProviders(
+      <FormTestComponent onSubmit={onSubmit}>
+        <CustomFields {...defaultProps} showDeprecatedBadge />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('legacy-custom-fields-deprecated-badge')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Legacy custom fields');
   });
 
   it('should not show the custom fields if the configuration is empty', async () => {

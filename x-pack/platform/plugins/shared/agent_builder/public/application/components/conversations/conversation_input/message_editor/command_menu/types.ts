@@ -22,6 +22,7 @@ export enum CommandId {
 export interface CommandMenuComponentProps {
   readonly query: string;
   readonly onSelect: (selection: CommandBadgeData) => void;
+  readonly onContentChange?: (hasContent: boolean, forQuery: string) => void;
 }
 
 /**
@@ -71,13 +72,20 @@ export interface ActiveCommand {
 }
 
 /**
- * Result of evaluating the current input text for command matches.
+ * Result of evaluating the current input text for command matches
  */
-export interface CommandMatchResult {
+export interface TextMatch {
   /** Whether a command is currently active */
   readonly isActive: boolean;
   /** The active command details, or null */
   readonly activeCommand: ActiveCommand | null;
+}
+
+/**
+ * Combines the text match with the mounted menu's own live content confirmation.
+ */
+export interface CommandMatchResult extends TextMatch {
+  readonly hasVisibleContent: boolean;
 }
 
 /**

@@ -325,14 +325,14 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
   });
 
   describe('esql_approximation', () => {
-    test('should map isApproximate attribute to esql_approximation in dashboardState', () => {
+    test('should map esqlApproximation attribute to esql_approximation in dashboardState', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
         kibanaSavedObjectMeta: {},
         title: 'my title',
         description: 'my description',
-        isApproximate: true,
+        esqlApproximation: true,
       };
       const { dashboardState } = transformDashboardOut(
         input,
@@ -343,7 +343,7 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
       expect(dashboardState.esql_approximation).toBe(true);
     });
 
-    test('should not include esql_approximation when isApproximate attribute is undefined', () => {
+    test('should not include esql_approximation when esqlApproximation attribute is undefined', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),

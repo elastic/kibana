@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { settingDefinitions } from '../setting_definitions';
 import type { SettingValidation } from '../setting_definitions/types';
 
@@ -18,17 +18,31 @@ const knownSettings = settingDefinitions.reduce<Record<string, SettingValidation
   {}
 );
 
-export const serviceRt = t.partial({
-  name: t.string,
-  environment: t.string,
+export const serviceSchema = z.object({
+  name: z.string().optional(),
+  environment: z.string().optional(),
 });
 
-export const settingsRt = t.intersection([t.record(t.string, t.string), t.partial(knownSettings)]);
+/**
+ * Every value must be a string, and known settings additionally pass their
+ * per-setting validation.
+ */
+export const settingsSchema = z.record(z.string(), z.string()).superRefine((settings, ctx) => {
+  for (const [key, validator] of Object.entries(knownSettings)) {
+    const value = settings[key];
+    if (value !== undefined) {
+      const result = validator.safeParse(value);
+      if (!result.success) {
+        for (const issue of result.error.issues) {
+          ctx.addIssue({ code: 'custom', path: [key], message: issue.message });
+        }
+      }
+    }
+  }
+});
 
-export const agentConfigurationIntakeRt = t.intersection([
-  t.partial({ agent_name: t.string }),
-  t.type({
-    service: serviceRt,
-    settings: settingsRt,
-  }),
-]);
+export const agentConfigurationIntakeSchema = z.object({
+  agent_name: z.string().optional(),
+  service: serviceSchema,
+  settings: settingsSchema,
+});

@@ -6,56 +6,48 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
 import { getTimelineEventsDetailsFromRecord } from './get_timeline_events_details_from_record';
 
-const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
-  ({
-    id: 'test-id',
-    raw: { _id: 'test-id', _index: 'test-index' },
-    flattened,
-    isAnchor: false,
-  } as DataTableRecord);
+jest.mock('@kbn/timelines-plugin/common', () => ({
+  getTimelineFieldsDataFromHit: jest.fn(),
+}));
 
 describe('getTimelineEventsDetailsFromRecord', () => {
-  it('converts flattened record fields to timeline event details items', () => {
-    expect(
-      getTimelineEventsDetailsFromRecord(
-        createMockHit({
-          'host.name': 'test-host',
-          'event.category': ['process', 'network'],
-          'user.name': null,
-          'process.args': [{ value: 'test' }],
-        })
-      )
-    ).toEqual([
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('delegates to getTimelineFieldsDataFromHit with the raw hit so object arrays and metadata fields are formatted correctly', () => {
+    const raw = {
+      _id: 'test-id',
+      _index: 'test-index',
+      fields: {
+        'host.name': ['test-host'],
+        'threat.enrichments': [{ 'feed.name': ['AbuseCH malware'] }],
+      },
+    };
+    const expected = [
       {
         category: 'host',
         field: 'host.name',
         isObjectArray: false,
-        originalValue: 'test-host',
+        originalValue: ['test-host'],
         values: ['test-host'],
       },
-      {
-        category: 'event',
-        field: 'event.category',
-        isObjectArray: false,
-        originalValue: ['process', 'network'],
-        values: ['process', 'network'],
-      },
-      {
-        category: 'user',
-        field: 'user.name',
-        isObjectArray: false,
-        originalValue: null,
-        values: undefined,
-      },
-      {
-        category: 'process',
-        field: 'process.args',
-        isObjectArray: true,
-        originalValue: [{ value: 'test' }],
-        values: ['[object Object]'],
-      },
-    ]);
+    ];
+    (getTimelineFieldsDataFromHit as jest.Mock).mockReturnValue(expected);
+
+    const hit = {
+      id: 'test-id',
+      raw,
+      flattened: {},
+      isAnchor: false,
+    } as unknown as DataTableRecord;
+
+    const result = getTimelineEventsDetailsFromRecord(hit);
+
+    expect(getTimelineFieldsDataFromHit).toHaveBeenCalledWith(raw);
+    expect(result).toBe(expected);
   });
 });

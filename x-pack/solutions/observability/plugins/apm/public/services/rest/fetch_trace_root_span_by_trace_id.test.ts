@@ -8,16 +8,17 @@
 import { apm } from '@elastic/apm-rum';
 import { fetchRootSpanByTraceId } from './fetch_trace_root_span_by_trace_id';
 import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
-import * as createCallApmApi from './create_call_apm_api';
+import * as plugin from '../../plugin';
 
 const signal = new AbortController().signal;
 
 describe('fetchRootSpanByTraceId', () => {
-  const callApmApiSpy = jest.spyOn(createCallApmApi, 'callApmApi');
+  const callApmApi = jest.fn();
   let captureErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     captureErrorSpy = jest.spyOn(apm, 'captureError').mockImplementation(() => {});
+    jest.spyOn(plugin, 'getApmInternalServices').mockReturnValue({ callApmApi } as any);
     jest.clearAllMocks();
   });
 
@@ -27,7 +28,7 @@ describe('fetchRootSpanByTraceId', () => {
 
   it('captures APM error with kibana_meta_operation_id label and re-throws when callApmApi fails', async () => {
     const error = new Error('boom');
-    callApmApiSpy.mockRejectedValueOnce(error);
+    callApmApi.mockRejectedValueOnce(error);
 
     await expect(
       fetchRootSpanByTraceId({ traceId: 'trace-1', start: 'from', end: 'to' }, signal)
@@ -41,7 +42,7 @@ describe('fetchRootSpanByTraceId', () => {
   it('does not capture AbortError as a RUM event but still re-throws it', async () => {
     const abortError = new Error('aborted');
     abortError.name = 'AbortError';
-    callApmApiSpy.mockRejectedValueOnce(abortError);
+    callApmApi.mockRejectedValueOnce(abortError);
 
     await expect(
       fetchRootSpanByTraceId({ traceId: 'trace-1', start: 'from', end: 'to' }, signal)

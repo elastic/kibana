@@ -84,6 +84,7 @@ export const MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP = 'app/ml/data_frame_anal
 
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
+export const ALERT_DETECTIONS_URL = '/app/security/alert_detections';
 export const ALERTS_URL = '/app/security/alerts';
 export const ALERT_SUMMARY_URL = '/app/security/alert_summary';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
@@ -115,7 +116,7 @@ export const ENTITY_ANALYTICS_HOME_PAGE_URL = '/app/security/entity_analytics_ho
 // Asset Inventory
 export const ASSET_INVENTORY_URL = '/app/security/asset_inventory';
 export const ASSET_INVENTORY_INTEGRATION_URL =
-  '/app/fleet/integrations/cloud_asset_inventory/add-integration';
+  '/app/integrations/detail/cloud_asset_inventory/add-integration';
 
 // Custom Role Creation
 export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';

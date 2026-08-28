@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SmlSearchFilters,
-  SmlSearchConstraints,
-} from '@kbn/agent-context-layer-plugin/public';
+import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-sml-plugin/public';
 
 /**
  * Query keys for react-query
@@ -21,6 +18,8 @@ export const queryKeys = {
   },
   agentProfiles: {
     all: ['agentProfiles'] as const,
+    agentAiIndicesList: ['agentProfiles', 'aiIndices'] as const,
+    agentAiIndicesById: (agentId: string) => ['agentProfiles', 'aiIndices', agentId] as const,
     byId: (agentProfileId?: string) => ['agentProfiles', agentProfileId],
     accessControl: (agentProfileId: string) =>
       ['agentProfiles', agentProfileId, 'accessControl'] as const,
@@ -29,6 +28,8 @@ export const queryKeys = {
     users: ['security', 'users'] as const,
     suggestUsers: (query: string) => ['security', 'users', 'suggest', query] as const,
     roles: ['security', 'roles'] as const,
+    userProfiles: (uids: string[]) => ['security', 'userProfiles', uids] as const,
+    ownerProfiles: (uids: string[]) => ['security', 'ownerProfiles', uids] as const,
   },
   tools: {
     all: ['tools', 'list'] as const,
@@ -75,8 +76,18 @@ export const queryKeys = {
   connectors: {
     all: ['connectors'] as const,
   },
+  workspaceFiles: {
+    byPath: (conversationId: string, path: string) =>
+      ['workspaceFiles', conversationId, path] as const,
+  },
   oauthClients: {
     all: ['oauthClients', 'list'] as const,
     byId: (clientId: string) => ['oauthClients', clientId] as const,
+  },
+  aiIndices: {
+    list: ['aiIndices', 'list'] as const,
+  },
+  spaceSettings: {
+    all: ['spaceSettings'] as const,
   },
 };

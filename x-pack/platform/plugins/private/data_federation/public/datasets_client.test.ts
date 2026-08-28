@@ -49,6 +49,21 @@ describe('DatasetsClient', () => {
       expect(http.put).not.toHaveBeenCalled();
     });
 
+    it('throws when name is not a valid index-like id', async () => {
+      const http = createHttpMock();
+      const client = new DatasetsClient(http as unknown as HttpStart);
+
+      const data: DataSetWithName = {
+        name: 'SomeUpperCaseLetters',
+        data_source: 'ds',
+        resource: 'r',
+        description: '',
+      };
+
+      await expect(client.add(data)).rejects.toThrow('Name must be lowercase.');
+      expect(http.put).not.toHaveBeenCalled();
+    });
+
     it('PUTs to the id route and omits empty settings fields', async () => {
       const http = createHttpMock();
       const client = new DatasetsClient(http as unknown as HttpStart);

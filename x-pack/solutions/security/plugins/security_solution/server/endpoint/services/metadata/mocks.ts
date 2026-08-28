@@ -7,6 +7,7 @@
 
 import type { SavedObjectsServiceStart } from '@kbn/core/server';
 import { type ElasticsearchClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import type { Agent, GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
@@ -20,7 +21,11 @@ import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_ge
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';
 import type { EndpointInternalFleetServicesInterfaceMocked } from '../fleet/endpoint_fleet_services_factory.mocks';
 import { createEndpointFleetServicesFactoryMock } from '../fleet/endpoint_fleet_services_factory.mocks';
-import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
+import {
+  createMockEndpointAppContextService,
+  createMockEndpointAppContextServiceStartContract,
+} from '../../mocks';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { EndpointMetadataService } from './endpoint_metadata_service';
 import { SavedObjectsClientFactory } from '../saved_objects';
 import {
@@ -39,6 +44,7 @@ export interface EndpointMetadataServiceTestContextMock {
   agentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
   packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
   endpointMetadataService: EndpointMetadataService;
+  endpointAppContextService: jest.Mocked<EndpointAppContextService>;
   fleetServices: EndpointInternalFleetServicesInterfaceMocked;
   logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
   esClient: ElasticsearchClientMock;
@@ -55,11 +61,17 @@ export const createEndpointMetadataServiceTestContextMock =
       fleetDependencies: fleetStartServices,
       savedObjects: savedObjectsServiceFactory,
     }).service.asInternalUser();
+    const endpointAppContextService = createMockEndpointAppContextService();
+
+    endpointAppContextService.getInternalEsClient.mockReturnValue(esClient);
+    endpointAppContextService.getInternalFleetServices.mockReturnValue(fleetServices);
+    endpointAppContextService.createLogger.mockReturnValue(logger);
+    (
+      endpointAppContextService.savedObjects.createInternalScopedSoClient as jest.Mock
+    ).mockReturnValue(savedObjectsServiceFactory.createInternalScopedSoClient({ readonly: false }));
     const endpointMetadataService = new EndpointMetadataService(
-      esClient,
-      savedObjectsServiceFactory.createInternalScopedSoClient({ readonly: false }),
-      fleetServices,
-      logger
+      endpointAppContextService,
+      DEFAULT_SPACE_ID
     );
 
     fleetServices.packagePolicy.list.mockImplementation(async (_, options) => {
@@ -82,6 +94,7 @@ export const createEndpointMetadataServiceTestContextMock =
       packagePolicyService: fleetServices.packagePolicy,
       logger,
       endpointMetadataService,
+      endpointAppContextService,
       fleetServices,
       applyMetadataMocks,
       esClient: esClient as ElasticsearchClientMock,

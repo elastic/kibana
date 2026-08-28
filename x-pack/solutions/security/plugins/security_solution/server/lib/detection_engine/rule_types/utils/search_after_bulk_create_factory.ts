@@ -17,6 +17,8 @@ import {
   getTotalHitsValue,
   mergeReturns,
   getSafeSortIds,
+  getSafeNanosSortIds,
+  getUnusableCursorWarning,
 } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
@@ -78,6 +80,8 @@ export const searchAfterAndBulkCreateFactory = async ({
     searchAfterSize: pageSize,
     primaryTimestamp,
     secondaryTimestamp,
+    dateNanosTimestampFields,
+    mixedTimestampFields,
     unprocessedExceptions: exceptionsList,
     tuple,
     ruleExecutionLogger,
@@ -89,11 +93,13 @@ export const searchAfterAndBulkCreateFactory = async ({
     let searchingIteration = 0;
     let totalEventsFound = 0;
     const loggedRequests: RulePreviewLoggedRequest[] = [];
+    const hasDateNanosTimestampFields = dateNanosTimestampFields.length > 0;
 
     // sortId tells us where to start our next consecutive search_after query
     let sortIds: estypes.SortResults | undefined;
 
     const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
+    const searchSize = Math.ceil(Math.min(maxSignals, pageSize));
 
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
@@ -111,13 +117,15 @@ export const searchAfterAndBulkCreateFactory = async ({
           to: tuple.to.toISOString(),
           runtimeMappings,
           filter,
-          size: Math.ceil(Math.min(maxSignals, pageSize)),
+          size: searchSize,
           sortOrder,
           searchAfterSortIds: sortIds,
           primaryTimestamp,
           secondaryTimestamp,
           trackTotalHits,
           additionalFilters,
+          dateNanosTimestampFields,
+          mixedTimestampFields,
         });
         const {
           searchResult,
@@ -148,9 +156,12 @@ export const searchAfterAndBulkCreateFactory = async ({
         loggedRequests.push(...singleSearchLoggedRequests);
         // determine if there are any candidate signals to be processed
         const totalHits = getTotalHitsValue(searchResult.hits.total);
-        const lastSortIds = getSafeSortIds(
-          searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
-        );
+        const lastHitSort = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
+        // with date_nanos, sort values are formatted ISO strings which round-trip exactly;
+        // getSafeSortIds would corrupt them (its null branch produces an out-of-range cursor)
+        const lastSortIds = hasDateNanosTimestampFields
+          ? getSafeNanosSortIds(lastHitSort)
+          : getSafeSortIds(lastHitSort);
 
         if (totalHits === 0 || searchResult.hits.hits.length === 0) {
           ruleExecutionLogger.trace(
@@ -204,6 +215,22 @@ export const searchAfterAndBulkCreateFactory = async ({
             toReturn.warningMessages.push(getWarningMessage());
             break;
           }
+        }
+
+        if (hasDateNanosTimestampFields && searchResult.hits.hits.length < searchSize) {
+          ruleExecutionLogger.trace(
+            `${cycleNum}: Last page reached\nFound ${searchResult.hits.hits.length} of the ${searchSize} requested events, so no further pages exist.`
+          );
+          break;
+        }
+
+        const cursorWarning = hasDateNanosTimestampFields
+          ? getUnusableCursorWarning(lastSortIds, sortIds)
+          : undefined;
+        if (cursorWarning != null) {
+          toReturn.warningMessages.push(cursorWarning);
+          ruleExecutionLogger.warn(`${cycleNum}: ${cursorWarning}`);
+          break;
         }
 
         // ES can return negative sort id for date field, when sort order set to desc

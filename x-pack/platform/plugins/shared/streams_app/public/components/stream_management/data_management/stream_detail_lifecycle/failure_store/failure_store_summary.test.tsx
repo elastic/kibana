@@ -301,6 +301,64 @@ describe('FailureStoreSummary', () => {
     });
   });
 
+  describe('Interaction disabling while an unrelated flyout is open', () => {
+    beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockUseKibana.mockReturnValue({ isServerless: false } as any);
+    });
+
+    it('does not open the phase popover when an unrelated flyout is open', () => {
+      const stats = createMockStats(250000);
+      const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
+
+      render(
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+            onEditDeletePhase={jest.fn()}
+            // Simulates the edit failed lifecycle method-switcher flyout being open: it turns on
+            // isExternalFlyoutOpen without isDeletePhaseFlyoutOpen.
+            isExternalFlyoutOpen
+            isDeletePhaseFlyoutOpen={false}
+          />
+        </LifecyclePreviewProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('failureStore-lifecyclePhase-delete-button'));
+
+      expect(
+        screen.queryByTestId('failureStore-lifecyclePhase-delete-popoverTitle')
+      ).not.toBeInTheDocument();
+    });
+
+    it('still navigates to the delete phase flyout when that is the flyout that is open', () => {
+      const stats = createMockStats(250000);
+      const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
+      const onEditDeletePhase = jest.fn();
+
+      render(
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+            onEditDeletePhase={onEditDeletePhase}
+            // isExternalFlyoutOpen is also true here in real usage (it ORs in
+            // isDeletePhaseFlyoutOpen), but clicking the delete phase itself must still work.
+            isExternalFlyoutOpen
+            isDeletePhaseFlyoutOpen
+          />
+        </LifecyclePreviewProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('failureStore-lifecyclePhase-delete-button'));
+
+      expect(onEditDeletePhase).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Inherited badge', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { MOCK_IDP_UIAM_OAUTH_BASE_URL } from '@kbn/mock-idp-utils';
 import { servers as defaultConfig } from '../../default/serverless/search.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
@@ -24,6 +25,10 @@ const AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
+  esServerlessOptions: {
+    ...defaultConfig.esServerlessOptions!,
+    uiamOAuth: true,
+  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
@@ -44,6 +49,10 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
       '--xpack.agentBuilder.tracing.scheduledDelay=500',
       `--xpack.agentBuilder.githubBaseUrl=http://localhost:${AGENT_BUILDER_GITHUB_MOCK_PORT}`,
+      `--xpack.security.mcp.oauth2.metadata.authorization_servers=${JSON.stringify([
+        MOCK_IDP_UIAM_OAUTH_BASE_URL,
+      ])}`,
+      `--xpack.security.mcp.oauth2.metadata.resource=http://localhost:5620/api/agent_builder/mcp`,
     ],
   },
 };

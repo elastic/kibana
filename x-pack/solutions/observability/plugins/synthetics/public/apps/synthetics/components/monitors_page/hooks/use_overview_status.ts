@@ -6,13 +6,14 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import { selectOverviewPageState } from '../../../state';
 import {
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
   selectOverviewStatus,
+  selectOverviewStatusSettled,
 } from '../../../state/overview_status';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -23,11 +24,13 @@ import { useGetUrlParams } from '../../../hooks';
  */
 export function useOverviewStatusState() {
   const { status, error, loaded, loading, allConfigs } = useSelector(selectOverviewStatus);
+  const settled = useSelector(selectOverviewStatusSettled);
   return {
     status,
     error,
     loading,
     loaded,
+    settled,
     allConfigs: allConfigs ?? [],
   };
 }
@@ -40,6 +43,7 @@ export function useOverviewStatusState() {
 export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
   const pageState = useSelector(selectOverviewPageState);
   const { status, error, loaded, loading, allConfigs } = useSelector(selectOverviewStatus);
+  const settled = useSelector(selectOverviewStatusSettled);
   const isInitialMount = useRef(true);
 
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -83,6 +87,7 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
     error,
     loading,
     loaded,
+    settled,
     allConfigs: allConfigs ?? [],
   };
 }

@@ -123,6 +123,8 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
       enableSemanticText: true,
       enforceAdaptiveAllocations: false,
       enableFailureStoreRetentionDisabling: true,
+      enableIndexMode: true,
+      enableVectorCount: false,
       isServerless: false,
     },
     overlays: coreMock.createStart().overlays,
@@ -137,7 +139,7 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
     settings: settingsServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     kibanaVersion,
-    canUseSyntheticSource: false,
+    hasAtLeastEnterpriseLicense: false,
   };
 };
 

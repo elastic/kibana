@@ -73,6 +73,7 @@ describe('dimension editor', () => {
     subtitle: faker.lorem.word(5),
     secondaryLabel: faker.lorem.word(3),
     secondaryTrend: { type: 'none' },
+    density: 'compact',
     progressDirection: 'vertical',
     maxCols: 5,
     color: faker.color.rgb(),
@@ -189,7 +190,8 @@ describe('dimension editor', () => {
         const optionsList = await screen.findByTestId(
           'comboBoxOptionsList lns-icon-select-optionsList'
         );
-        const option = within(optionsList).getByText(icon, { exact: true });
+        fireEvent.change(iconInput, { target: { value: icon } });
+        const option = await within(optionsList).findByText(icon, { exact: true });
         if (option) {
           await userEvent.click(option);
         } else {

@@ -22,8 +22,22 @@ export const useLastPageUserActions = ({
   caseId,
   lastPage,
 }: LastPageUserActions) => {
-  const { data: lastPageUserActionsData, isLoading: isLoadingLastPageUserActions } =
-    useFindCaseUserActions(caseId, { ...userActivityQueryParams, page: lastPage }, lastPage > 1);
+  const isLastPageQueryEnabled = lastPage > 1;
+  const { data: lastPageUserActionsData, isLoading: isLoadingLastPageUserActionsQuery } =
+    useFindCaseUserActions(
+      caseId,
+      { ...userActivityQueryParams, page: lastPage },
+      isLastPageQueryEnabled
+    );
+
+  // react-query v4's `isLoading` reflects the data status, not whether a
+  // fetch is actually happening: a disabled query with no data is reported
+  // as `isLoading: true` forever. When there's no separate last page to
+  // fetch (search/author filters collapse everything into a single infinite
+  // query, see `useLastPage`), this query is intentionally disabled and
+  // should never be treated as loading, otherwise the skeleton (and the
+  // "no results" state below it) never resolves.
+  const isLoadingLastPageUserActions = isLastPageQueryEnabled && isLoadingLastPageUserActionsQuery;
 
   const { userActions, latestAttachments } = useMemo<{
     userActions: UserActionUI[];

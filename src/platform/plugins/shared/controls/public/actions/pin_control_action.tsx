@@ -65,7 +65,7 @@ export class PinControlAction
           defaultMessage: 'Unpin',
         })
       : i18n.translate('controls.controlGroup.floatingActions.pinControl', {
-          defaultMessage: 'Pin to Dashboard',
+          defaultMessage: 'Pin to dashboard',
         });
   }
 

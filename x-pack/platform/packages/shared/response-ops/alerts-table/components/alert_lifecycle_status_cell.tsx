@@ -12,7 +12,7 @@ import { EuiBadge, EuiFlexGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
-import { buildSnoozeSummary } from '@kbn/response-ops-alert-snooze';
+import { AlertSnoozeBadge, buildSnoozeSummary } from '@kbn/response-ops-alert-snooze';
 import { DefaultCell } from './default_cell';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 import { useAlertSnoozedState } from '../hooks/use_alert_snoozed_state';
@@ -48,18 +48,7 @@ export const AlertLifecycleStatusCell: CellComponent = memo((props) => {
           alertStatus={alertStatus.join() as AlertStatus}
           flapping={flapping}
         />
-        {(isMuted || isSnoozed) && (
-          <EuiToolTip content={snoozedTooltip}>
-            <EuiBadge
-              data-test-subj="alertSnoozedBadge"
-              iconType="bellSlash"
-              tabIndex={0}
-              css={css`
-                padding-inline: ${euiTheme.size.xs};
-              `}
-            />
-          </EuiToolTip>
-        )}
+        {(isMuted || isSnoozed) && <AlertSnoozeBadge summary={snoozedTooltip} />}
         {isAcknowledged && (
           <EuiToolTip
             content={i18n.translate(

@@ -90,5 +90,36 @@ describe('validateFleetSavedObjectId', () => {
     it('256-character id (over limit)', () => {
       expect(() => validateFleetSavedObjectId('a'.repeat(256))).toThrow('id is not valid');
     });
+
+    // Script metacharacters — no legitimate use in Fleet saved object IDs.
+    it('double quote (Painless string break)', () => {
+      expect(() => validateFleetSavedObjectId('x"); ctx._source.pwned=("true')).toThrow(
+        'id is not valid'
+      );
+    });
+
+    it('single quote (Painless string break in renderUpdatePainlessScript)', () => {
+      expect(() => validateFleetSavedObjectId("x'); ctx._source.pwned=('true")).toThrow(
+        'id is not valid'
+      );
+    });
+
+    it('semicolon (Painless statement separator)', () => {
+      expect(() => validateFleetSavedObjectId('x;ctx._source.pwned=true')).toThrow(
+        'id is not valid'
+      );
+    });
+
+    it('backslash (Painless escape character)', () => {
+      expect(() => validateFleetSavedObjectId('x\\"')).toThrow('id is not valid');
+    });
+
+    it('open parenthesis', () => {
+      expect(() => validateFleetSavedObjectId('x(y')).toThrow('id is not valid');
+    });
+
+    it('close parenthesis', () => {
+      expect(() => validateFleetSavedObjectId('x)y')).toThrow('id is not valid');
+    });
   });
 });

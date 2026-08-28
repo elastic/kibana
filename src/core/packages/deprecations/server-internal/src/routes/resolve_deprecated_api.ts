@@ -30,8 +30,8 @@ export const registerMarkAsResolvedRoute = (
       },
       validate: {
         body: schema.object({
-          domainId: schema.string(),
-          routePath: schema.string(),
+          domainId: schema.string({ maxLength: 1024 }),
+          routePath: schema.string({ maxLength: 1024 }),
           routeMethod: schema.oneOf([
             schema.literal('post'),
             schema.literal('put'),
@@ -40,7 +40,7 @@ export const registerMarkAsResolvedRoute = (
             schema.literal('get'),
             schema.literal('options'),
           ]),
-          routeVersion: schema.maybe(schema.string()),
+          routeVersion: schema.maybe(schema.string({ maxLength: 256 })),
           incrementBy: schema.number(),
         }),
       },

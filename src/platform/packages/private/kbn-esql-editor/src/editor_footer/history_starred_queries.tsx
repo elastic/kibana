@@ -319,26 +319,20 @@ export function QueryList({
                   beforeMessage={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                     defaultMessage: 'Copy query to clipboard',
                   })}
+                  tooltipProps={{ disableScreenReaderOutput: true }}
                 >
                   {(copy) => (
-                    <EuiToolTip
-                      content={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
+                    <EuiButtonIcon
+                      iconType="copy"
+                      iconSize="m"
+                      onClick={copy}
+                      css={css`
+                        cursor: pointer;
+                      `}
+                      aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                         defaultMessage: 'Copy query to clipboard',
                       })}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="copy"
-                        iconSize="m"
-                        onClick={copy}
-                        css={css`
-                          cursor: pointer;
-                        `}
-                        aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
-                          defaultMessage: 'Copy query to clipboard',
-                        })}
-                      />
-                    </EuiToolTip>
+                    />
                   )}
                 </EuiCopy>
               </EuiFlexItem>

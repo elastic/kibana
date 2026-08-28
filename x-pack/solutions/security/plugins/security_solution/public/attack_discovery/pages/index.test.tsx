@@ -10,16 +10,12 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { TestProviders } from '../../common/mock';
-import {
-  ATTACK_DISCOVERY_PATH,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-  SECURITY_FEATURE_ID,
-} from '../../../common/constants';
+import { ATTACK_DISCOVERY_PATH, SECURITY_FEATURE_ID } from '../../../common/constants';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
@@ -29,9 +25,6 @@ import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
-import { CALLOUT_TEST_DATA_ID } from './moving_attacks_callout';
-import { useMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout';
-import { mockUseMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout.mock';
 
 const mockConnectors: unknown[] = [
   {
@@ -104,9 +97,6 @@ jest.mock('./use_attack_discovery', () => ({
   }),
 }));
 
-jest.mock('./moving_attacks_callout/use_moving_attacks_callout');
-const useMovingAttacksCalloutMock = useMovingAttacksCallout as jest.Mock;
-
 const mockFilterManager = createFilterManagerMock();
 
 const mockDataViewsService = dataViewPluginMocks.createStartContract();
@@ -173,6 +163,7 @@ const mockUseKibanaReturnValue = {
       get: jest.fn(),
       set: jest.fn(),
     },
+    telemetry: { reportEvent: jest.fn() },
     theme: {
       getTheme: jest.fn().mockReturnValue({ darkMode: false }),
     },
@@ -226,8 +217,6 @@ describe('AttackDiscovery', () => {
       isFetched: true,
       data: mockConnectors,
     });
-
-    useMovingAttacksCalloutMock.mockReturnValue(mockUseMovingAttacksCallout());
   });
 
   describe('page layout', () => {
@@ -319,35 +308,15 @@ describe('AttackDiscovery', () => {
     });
   });
 
-  describe('`enableAlertsAndAttacksAlignment` feature', () => {
-    it('renders callout about new Attacks page when feature is enabled', () => {
-      mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
-        if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
-          return true;
-        }
-        return false;
-      });
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId(CALLOUT_TEST_DATA_ID)).toBeInTheDocument();
+  describe('workflows insufficient privileges callout', () => {
+    afterEach(() => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockReturnValue(false);
     });
 
-    it('does not render callout about new Attacks page when feature is disabled', () => {
-      mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
-        if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
-          return false;
-        }
-        return false;
-      });
+    it('renders the insufficient privileges callout when workflows are enabled but privileges are missing', async () => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockReturnValue(true);
 
       render(
         <TestProviders>
@@ -359,7 +328,25 @@ describe('AttackDiscovery', () => {
         </TestProviders>
       );
 
-      expect(screen.queryByTestId(CALLOUT_TEST_DATA_ID)).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Insufficient privileges')).toBeInTheDocument();
+      });
+    });
+
+    it('does not render the insufficient privileges callout when workflows are disabled', () => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      expect(screen.queryByText('Insufficient privileges')).not.toBeInTheDocument();
     });
   });
 });

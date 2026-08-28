@@ -27,12 +27,13 @@ import {
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { createStructuredSelector } from 'reselect';
-import { useDispatch } from 'react-redux';
+import { createStructuredSelector } from 'reselect-v4';
+import { useDispatch } from 'react-redux-v7';
 import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { isPolicyOutOfDate } from '../utils';
 import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import { TransformFailedCallout } from './components/transform_failed_callout';
@@ -421,10 +422,10 @@ export const EndpointList = () => {
   );
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
-    'fleet',
+    INTEGRATIONS_PLUGIN_ID,
     {
-      path: `/integrations/${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
+      path: `/detail/${
+        endpointPackageVersion ? `endpoint-${endpointPackageVersion}` : 'endpoint'
       }/add-integration`,
       state: stateHandleCreatePolicyClick,
     }

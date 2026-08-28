@@ -44,6 +44,14 @@ export interface ApiKeyDescriptor {
    * Which entity manages this API key
    */
   managed_by: SecurityCredentialManagedBy;
+
+  /**
+   * Whether this API key can only be used by Elastic services, as opposed to an external key that
+   * customers use directly. Internal keys are the ones Elastic services (e.g. Kibana) grant, and
+   * they are only accepted when accompanied by the service's own client authentication. Only
+   * reported for UIAM API keys, and absent for keys managed by Elasticsearch itself.
+   */
+  internal?: boolean;
 }
 
 /**
@@ -107,4 +115,21 @@ export interface AuthenticatedUser extends User {
    * @example "apikey" | "bearer" | "basic"
    */
   http_authentication_scheme: string | null;
+}
+
+/**
+ * Whether the user is anonymous, i.e. was authenticated via the `anonymous` authentication
+ * provider.
+ */
+export function isUserAnonymous(user: Pick<AuthenticatedUser, 'authentication_provider'>) {
+  return user.authentication_provider.type === 'anonymous';
+}
+
+/**
+ * All users are supposed to have profiles except anonymous users and users authenticated
+ * via authentication HTTP proxies.
+ * @param user Authenticated user information.
+ */
+export function canUserHaveProfile(user: Pick<AuthenticatedUser, 'authentication_provider'>) {
+  return !isUserAnonymous(user) && user.authentication_provider.type !== 'http';
 }

@@ -89,4 +89,45 @@ describe('useUserActionsPagination', () => {
     expect(result.current.infiniteCaseUserActions).toHaveLength(2);
     expect(result.current.infiniteLatestAttachments).toHaveLength(2);
   });
+
+  it('returns 0 for total when there is no data yet', () => {
+    const { result } = renderHook(() => useUserActionsPagination(defaultParams));
+
+    expect(result.current.total).toBe(0);
+  });
+
+  it('returns total from the first page, reflecting the current filters', () => {
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({
+      data: {
+        pages: [
+          { userActions: [{ id: '1' }], latestAttachments: [], total: 3 },
+          { userActions: [{ id: '2' }], latestAttachments: [], total: 3 },
+        ],
+      },
+      isLoading: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      isFetchingNextPage: false,
+    });
+
+    const { result } = renderHook(() => useUserActionsPagination(defaultParams));
+
+    expect(result.current.total).toBe(3);
+  });
+
+  it('returns 0 for total when the current page has no matches', () => {
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({
+      data: {
+        pages: [{ userActions: [], latestAttachments: [], total: 0 }],
+      },
+      isLoading: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      isFetchingNextPage: false,
+    });
+
+    const { result } = renderHook(() => useUserActionsPagination(defaultParams));
+
+    expect(result.current.total).toBe(0);
+  });
 });

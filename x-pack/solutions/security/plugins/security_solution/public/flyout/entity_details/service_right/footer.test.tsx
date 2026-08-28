@@ -39,7 +39,9 @@ jest.mock('../shared/components/take_action', () => ({
 }));
 
 jest.mock('../../../entity_analytics/components/ai_assistant_button/ai_assistant_button', () => ({
-  AiAssistantButton: () => <div data-test-subj="mockAiAssistantButton" />,
+  AiAssistantButton: ({ entityName }: { entityName: string }) => (
+    <div data-test-subj="mockAiAssistantButton">{entityName}</div>
+  ),
 }));
 
 // Render the real menu items but with minimal markup — footer tests only care about presence.
@@ -63,7 +65,8 @@ const renderFooter = (
   entityAttachmentsEnabled: boolean,
   attachmentsEnabled: boolean,
   entity?: EntityStoreRecord,
-  identityFields = SERVICE_IDENTITY_FIELDS
+  identityFields: Record<string, string> = SERVICE_IDENTITY_FIELDS,
+  serviceName = 'service-alice'
 ) => {
   mockUseIsExperimentalFeatureEnabled.mockReturnValue(entityAttachmentsEnabled);
   mockUseKibana.mockReturnValue({
@@ -79,7 +82,11 @@ const renderFooter = (
 
   return render(
     <TestProviders>
-      <ServicePanelFooter identityFields={identityFields} entity={entity} />
+      <ServicePanelFooter
+        serviceName={serviceName}
+        identityFields={identityFields}
+        entity={entity}
+      />
     </TestProviders>
   );
 };
@@ -120,5 +127,24 @@ describe('ServicePanelFooter – entity attachment actions', () => {
 
     expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+  });
+});
+
+describe('ServicePanelFooter – AiAssistantButton entity name', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('passes the raw serviceName prop, not a value derived from identityFields', () => {
+    // Consistency regression alongside host/user (security-team/kibana#277619): "Add to chat"
+    // must send the same display name the risk-score tab's AiAssistantButton sends, not
+    // whatever identityFields happens to resolve to.
+    renderFooter(
+      true,
+      true,
+      ENTITY_STORE_RECORD,
+      { 'service.id': 'svc-uuid-1234' },
+      'service-alice'
+    );
+
+    expect(screen.getByTestId('mockAiAssistantButton')).toHaveTextContent('service-alice');
   });
 });

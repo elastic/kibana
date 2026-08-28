@@ -15,13 +15,14 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
-import type { MigrationStepProps } from '../../../../../common/types';
+import { MigrationSource, type MigrationStepProps } from '../../../../../common/types';
 import { SentinelDataInputStep } from '../../types';
 import { LookupsDataInputSubSteps } from '../lookups/lookups_data_input';
-import * as i18n from './translations';
+import { useRuleMigrationVendorCopy } from '../../../../hooks/use_rule_migration_vendor_copy';
 
 export const WatchlistsDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
+    const { resourceDataInputStep } = useRuleMigrationVendorCopy(MigrationSource.SENTINEL);
     const missingLookups = useMemo(
       () => missingResourcesIndexed?.lookups,
       [missingResourcesIndexed]
@@ -51,7 +52,7 @@ export const WatchlistsDataInput = React.memo<MigrationStepProps>(
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs" data-test-subj="watchlistsUploadTitle">
-                  <b>{i18n.WATCHLISTS_DATA_INPUT_TITLE}</b>
+                  <b>{resourceDataInputStep.title}</b>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -60,7 +61,7 @@ export const WatchlistsDataInput = React.memo<MigrationStepProps>(
             <>
               <EuiFlexItem>
                 <EuiText size="s" color="subdued" data-test-subj="watchlistsUploadDescription">
-                  {i18n.WATCHLISTS_DATA_INPUT_DESCRIPTION}
+                  {resourceDataInputStep.description}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>

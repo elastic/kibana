@@ -233,7 +233,7 @@ export const getAlertsAppMenuItem = ({
 
   const items: DiscoverAppMenuPopoverItem[] = [];
 
-  if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
+  if (services.capabilities.management?.insightsAndAlerting?.triggersActionsRules) {
     items.push({
       id: AppMenuActionId.manageRulesAndConnectors,
       order: Number.MAX_SAFE_INTEGER,

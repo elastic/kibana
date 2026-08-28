@@ -9,11 +9,11 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { estypes } from '@elastic/elasticsearch';
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
-} from '@kbn/agent-context-layer-plugin/server';
+} from '@kbn/agent-builder-sml-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,7 +39,6 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,
@@ -56,13 +55,16 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
-import {
-  parseWorkflowYamlToJSON,
-  parseYamlToJSONWithoutValidation,
-  stringifyWorkflowDefinition,
-  WorkflowValidationError,
-} from '@kbn/workflows-yaml';
+import { parseYamlToJSONWithoutValidation, WorkflowValidationError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
+import {
+  type ExternalResumeFormPageParams,
+  type ExternalResumeViaGetParams,
+  type ExternalResumeWorkflowExecutionWithInputParams,
+  getExternalResumeFormPage,
+  resumeWorkflowExecutionExternallyViaGet,
+  resumeWorkflowExecutionExternallyWithInput,
+} from './external_resume/external_resume_service';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -71,12 +73,13 @@ import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
-import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 import { formatWorkflowDiagnostic } from '../../common/lib/format_workflow_diagnostic';
 import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
+import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
@@ -269,7 +272,7 @@ export class WorkflowsManagementApi {
     this.smlIndexAttachment({
       request,
       originId,
-      attachmentType: WORKFLOW_SML_TYPE,
+      attachmentType: WORKFLOW_KI_TYPE,
       action,
     }).catch((error) => {
       this.smlLogger?.warn(
@@ -313,6 +316,10 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowsByIds(ids, spaceId);
   }
 
+  public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
+    return this.workflowsService.findExistingWorkflowIds(ids);
+  }
+
   public async getWorkflowsSourceByIds(
     ids: string[],
     spaceId: string,
@@ -336,10 +343,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest,
     options?: { overwrite?: boolean }
-  ): Promise<{
-    created: WorkflowDetailDto[];
-    failed: Array<{ index: number; id: string; error: string }>;
-  }> {
+  ): Promise<BulkCreateWorkflowsResult> {
     const result = await this.workflowsService.bulkCreateWorkflows(
       workflows,
       spaceId,
@@ -347,7 +351,7 @@ export class WorkflowsManagementApi {
       options
     );
     for (const created of result.created) {
-      this.notifySml(created.id, options?.overwrite ? 'update' : 'create', request);
+      this.notifySml(created.id, 'create', request);
     }
     return result;
   }
@@ -357,32 +361,23 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    // Parse and update the YAML to change the name
-    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: false },
-      spaceId,
-      request
-    );
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema, {
-      connectorParamsSchemaResolver,
-    });
-    if (parsedYaml.error) {
-      throw parsedYaml.error;
-    }
+    // Rewrite only the `name` field directly in the YAML text so that cloning
+    // works even when the source workflow's YAML is schema-invalid. Strictly
+    // parsing/validating here would reject invalid-but-editable workflows.
+    const cloneName = `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+      defaultMessage: 'Copy',
+    })}`;
+    const clonedYaml = updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
 
-    const updatedYaml = {
-      ...parsedYaml.data,
-      name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
-        defaultMessage: 'Copy',
-      })}`,
-    };
-
-    // Convert back to YAML string using proper YAML stringification
-    const clonedYaml = stringifyWorkflowDefinition(updatedYaml as unknown as WorkflowYaml);
+    // `updateWorkflowYamlFields` cannot inject a `name` key when the YAML root is not a
+    // mapping (a scalar or sequence), so it returns the YAML unchanged in that case. Pass
+    // `cloneName` as an explicit fallback so the clone is still named "<name> Copy" instead
+    // of collapsing to "Untitled workflow".
     const result = await this.workflowsService.createWorkflow(
       { yaml: clonedYaml },
       spaceId,
-      request
+      request,
+      { nameFallback: cloneName }
     );
     this.notifySml(result.id, 'create', request);
     return result;
@@ -457,12 +452,15 @@ export class WorkflowsManagementApi {
     return result;
   }
 
-  public async disableAllWorkflows(spaceId?: string): Promise<{
+  public async disableAllWorkflows(
+    spaceId?: string,
+    request?: KibanaRequest
+  ): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
-    return this.workflowsService.disableAllWorkflows(spaceId);
+    return this.workflowsService.disableAllWorkflows(spaceId, request);
   }
 
   public async runWorkflow(
@@ -777,7 +775,7 @@ export class WorkflowsManagementApi {
   public async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
-  ): Promise<estypes.SearchResponse<unknown>> {
+  ): Promise<WorkflowExecutionListDto> {
     return this.workflowsService.searchExecutionsView(params, spaceId);
   }
 
@@ -928,6 +926,22 @@ export class WorkflowsManagementApi {
     params: { page?: number; perPage?: number; includeReasoning?: boolean } = {}
   ): Promise<WaitForInputListResult> {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
+  }
+
+  public async resumeWorkflowExecutionExternallyViaGet(
+    params: ExternalResumeViaGetParams
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
+    return resumeWorkflowExecutionExternallyViaGet(this.workflowsService, params);
+  }
+
+  public async resumeWorkflowExecutionExternallyWithInput(
+    params: ExternalResumeWorkflowExecutionWithInputParams
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
+    return resumeWorkflowExecutionExternallyWithInput(this.workflowsService, params);
+  }
+
+  public async getExternalResumeFormPage(params: ExternalResumeFormPageParams): Promise<string> {
+    return getExternalResumeFormPage(this.workflowsService, params);
   }
 
   /** Cross-workflow listing of processed `waitForInput` step executions. */

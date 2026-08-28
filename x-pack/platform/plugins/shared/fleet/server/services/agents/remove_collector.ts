@@ -57,9 +57,30 @@ export async function removeCollectors(
   soClient: SavedObjectsClientContract,
   options: GetAgentsOptions & {
     showInactive?: boolean;
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const spaceId = getCurrentNamespace(soClient);
+
+  if (options.dryRun) {
+    if ('agentIds' in options) {
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.filter((a) => a.type === AGENT_TYPE_OPAMP).length };
+    }
+    const opampFilter = `agent.type:${AGENT_TYPE_OPAMP}`;
+    const kuery = buildFilterWithNamespace(
+      await agentsKueryNamespaceFilter(spaceId),
+      options.kuery ? `(${options.kuery}) AND ${opampFilter}` : opampFilter
+    );
+    const { total } = await getAgentsByKuery(esClient, soClient, {
+      kuery,
+      showAgentless: options.showAgentless,
+      showInactive: options.showInactive ?? false,
+      page: 1,
+      perPage: 0,
+    });
+    return { count: total };
+  }
 
   const candidateAgents =
     'agentIds' in options

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type {
@@ -18,8 +19,9 @@ import {
   setupMockCoreStartServices,
 } from '../../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { getWatchlistToolAvailability } from './watchlist_availability';
-import { createWatchlistTool } from './create_watchlist_tool';
+import { createWatchlistTool, SECURITY_CREATE_WATCHLIST_TOOL_ID } from './create_watchlist_tool';
 
 jest.mock('./watchlist_availability', () => ({
   getWatchlistToolAvailability: jest.fn(),
@@ -97,10 +99,11 @@ const buildHandlerContextWithPrompts = (
 describe('createWatchlistTool', () => {
   const mocks = createToolTestMocks();
   const tool = createWatchlistTool(mocks.mockCore, mocks.mockLogger, mockExperimentalFeatures);
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setupMockCoreStartServices(mocks.mockCore, mocks.mockEsClient);
+    mockCoreStart = setupMockCoreStartServices(mocks.mockCore, mocks.mockEsClient);
     mockGetWatchlistToolAvailability.mockResolvedValue({ status: 'available' });
     mockGetUserWatchlistPrivileges.mockResolvedValue({
       privileges: {},
@@ -290,6 +293,80 @@ describe('createWatchlistTool', () => {
       const error = result.results[0] as ErrorResult;
       expect(error.type).toBe(ToolResultType.error);
       expect(error.data.message).toContain('boom');
+    });
+
+    describe('telemetry', () => {
+      it('does not report telemetry while only asking for confirmation', async () => {
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ name: 'Privileged Users' }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('reports userConfirmationOutcome=accepted and success=true after a successful create', async () => {
+        mockCreateFn.mockResolvedValueOnce(buildCreatedWatchlist());
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+
+        await tool.handler({ name: 'Privileged Users' }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_CREATE_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: true,
+            errorMessage: undefined,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
+          }
+        );
+      });
+
+      it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.rejected,
+        });
+
+        await tool.handler({ name: 'Privileged Users' }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_CREATE_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: true,
+            errorMessage: undefined,
+            userConfirmationOutcome: ConfirmationStatus.rejected,
+          }
+        );
+      });
+
+      it('reports success=false and errorMessage when the create call throws', async () => {
+        mockCreateFn.mockRejectedValueOnce(new Error('boom'));
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+
+        await tool.handler({ name: 'Privileged Users' }, ctx);
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_CREATE_WATCHLIST_TOOL_ID,
+            actionType: 'mutation',
+            spaceId: 'default',
+            success: false,
+            errorMessage: 'boom',
+            userConfirmationOutcome: ConfirmationStatus.accepted,
+          }
+        );
+      });
     });
   });
 });

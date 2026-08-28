@@ -92,8 +92,15 @@ describe('buildBaseEndpointMetadataFilter', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': [],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': [],
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -126,8 +133,22 @@ describe('buildBaseEndpointMetadataFilter', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': ['policy-1'],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': ['policy-1'],
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-1#*',
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -160,8 +181,36 @@ describe('buildBaseEndpointMetadataFilter', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': ['policy-1', 'policy-2', 'policy-3'],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': ['policy-1', 'policy-2', 'policy-3'],
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-1#*',
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-2#*',
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-3#*',
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -194,8 +243,36 @@ describe('buildBaseEndpointMetadataFilter', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': ['policy-1', 'policy-2', 'policy-3'],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': ['policy-1', 'policy-2', 'policy-3'],
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-1#*',
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-2#*',
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'policy-3#*',
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],

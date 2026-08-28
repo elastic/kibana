@@ -28,6 +28,7 @@ import type {
   ESQLSource,
   ESQLFunction,
   ESQLColumn,
+  ESQLCommand,
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
@@ -177,6 +178,14 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
+ * Converts a single TS command node to an equivalent FROM command node, preserving its
+ * source arguments. Returns the command unchanged if it isn't a TS command.
+ */
+export function convertTimeseriesCommandNodeToFrom<T extends ESQLCommand>(cmd: T): T {
+  return cmd.name === 'ts' ? { ...cmd, name: 'from' } : cmd;
+}
+
+/**
  * Converts timeseries (TS) commands to FROM commands in an ES|QL query
  * @param esql - The ES|QL query string
  * @returns The modified query with TS commands converted to FROM commands
@@ -186,10 +195,7 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
   const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
   if (!timeseriesCommand) return esql || '';
 
-  const fromCommand = {
-    ...timeseriesCommand,
-    name: 'from',
-  };
+  const fromCommand = convertTimeseriesCommandNodeToFrom(timeseriesCommand);
 
   // Replace the ts command with the from command in the commands array
   const newCommands = root.commands.map((command) =>
@@ -205,11 +211,14 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
 }
 
 /**
- * When the ?_tstart and ?_tend params are used, we want to retrieve the timefield from the query.
- * @param esql:string
- * @returns string
+ * Parses the ES|QL query and returns the column used with `?_tstart`/`?_tend` named params.
+ * Returns `undefined` when the query contains no time filter params.
+ *
+ * Use this for synchronous/server-side contexts where only local parsing is needed.
+ * For client-side code with HTTP access that also needs `fieldCaps` fallback,
+ * use `getESQLTimeField` instead.
  */
-export const getTimeFieldFromESQLQuery = (esql: string) => {
+export const parseTimeFieldFromESQLQuery = (esql: string) => {
   const { root } = Parser.parse(esql);
   const functions: ESQLFunction[] = [];
 

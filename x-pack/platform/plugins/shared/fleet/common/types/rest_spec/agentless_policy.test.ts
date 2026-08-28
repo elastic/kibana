@@ -21,6 +21,32 @@ const validBody = {
 };
 
 describe('agentless policy request schemas', () => {
+  describe('global_data_tags', () => {
+    it.each([
+      ['create', CreateAgentlessPolicyRequestSchema.body],
+      ['update', UpdateAgentlessPolicyRequestSchema.body],
+    ])('should reject oversized tag names on %s', (_name, bodySchema) => {
+      expect(() =>
+        bodySchema.validate({
+          ...validBody,
+          global_data_tags: [{ name: 'a'.repeat(1025), value: 'prod' }],
+        })
+      ).toThrow();
+    });
+
+    it.each([
+      ['create', CreateAgentlessPolicyRequestSchema.body],
+      ['update', UpdateAgentlessPolicyRequestSchema.body],
+    ])('should reject oversized string tag values on %s', (_name, bodySchema) => {
+      expect(() =>
+        bodySchema.validate({
+          ...validBody,
+          global_data_tags: [{ name: 'env', value: 'a'.repeat(1025) }],
+        })
+      ).toThrow();
+    });
+  });
+
   describe('cloud_connector', () => {
     // The GET response mapper emits `cloud_connector: null` when no connector is attached, so a
     // GET -> edit -> PUT/POST round-trip sends `null`. The request body must accept it.

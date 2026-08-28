@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { getDurationInMilliseconds } from '@kbn/response-ops-schedule-schema';
 import type { MaintenanceWindowAttributes } from '../../data/types/maintenance_window_attributes';
-import { getDurationInMilliseconds } from '../../lib/transforms/custom_to_rrule/util';
 import type { MaintenanceWindowWithoutComputedProperties } from '../types';
 
 export const transformMaintenanceWindowToMaintenanceWindowAttributes = (

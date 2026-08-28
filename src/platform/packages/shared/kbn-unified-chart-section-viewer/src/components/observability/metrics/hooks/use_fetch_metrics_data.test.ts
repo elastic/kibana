@@ -30,6 +30,7 @@ jest.mock('../utils/get_esql_query', () => ({
 }));
 jest.mock('@kbn/esql-utils', () => ({
   buildMetricsInfoQuery: jest.fn((esql: string, dims?: string[], postFilter?: string) => {
+    if (!esql?.trim()) return '';
     const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
     const post = postFilter ? ` | WHERE ${postFilter}` : '';
     return `${esql}${preFilter} | METRICS_INFO${post}`;
@@ -39,6 +40,8 @@ jest.mock('@kbn/esql-utils', () => ({
     (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
       fields?.map(clause).join(separator) ?? ''
   ),
+  // Still required by getFetchParamsMock (kbn-unified-histogram) which imports it
+  // from @kbn/esql-utils to process breakdown fields. Not used by the hook itself.
   hasTransformationalCommand: jest.fn(() => false),
 }));
 jest.mock('@kbn/field-utils', () => ({
@@ -161,6 +164,7 @@ describe('useFetchMetricsData', () => {
       jest.requireMock('@kbn/esql-utils');
     buildMetricsInfoQuery.mockImplementation(
       (esql: string, dims?: string[], postFilter?: string) => {
+        if (!esql?.trim()) return '';
         const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
         const post = postFilter ? ` | WHERE ${postFilter}` : '';
         return `${esql}${preFilter} | METRICS_INFO${post}`;
@@ -214,7 +218,7 @@ describe('useFetchMetricsData', () => {
       expect(result.current.allDimensions).toEqual([hostDimension]);
     });
 
-    it('returns sorted metricItems and allDimensions', async () => {
+    it('returns sorted allDimensions', async () => {
       const parsed = createMockParsedMetrics(
         ['system.memory.utilization', 'system.cpu.utilization'],
         [serviceDimension, hostDimension]
@@ -228,8 +232,6 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(result.current.metricItems[0].metricName).toBe('system.cpu.utilization');
-      expect(result.current.metricItems[1].metricName).toBe('system.memory.utilization');
       expect(result.current.allDimensions[0].name).toBe('host.name');
       expect(result.current.allDimensions[1].name).toBe('service.name');
     });
@@ -279,8 +281,11 @@ describe('useFetchMetricsData', () => {
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
     });
 
-    it('does not fetch when query is undefined', async () => {
-      const params = createDefaultParams({ query: undefined });
+    it('does not fetch when metricsInfoQuery is empty', async () => {
+      const { buildMetricsInfoQuery } = jest.requireMock('@kbn/esql-utils');
+      buildMetricsInfoQuery.mockReturnValue('');
+
+      const params = createDefaultParams();
 
       renderHook(() => useFetchMetricsData(params));
 
@@ -293,21 +298,6 @@ describe('useFetchMetricsData', () => {
 
     it('does not fetch when dataView is undefined', async () => {
       const params = createDefaultParams({ dataView: undefined });
-
-      renderHook(() => useFetchMetricsData(params));
-
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    });
-
-    it('does not fetch when query has a transformational command', async () => {
-      const { hasTransformationalCommand } = jest.requireMock('@kbn/esql-utils');
-      hasTransformationalCommand.mockReturnValue(true);
-
-      const params = createDefaultParams();
 
       renderHook(() => useFetchMetricsData(params));
 

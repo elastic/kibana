@@ -42,7 +42,7 @@ export const bulkRollbackAgentHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
-  const { agents, batchSize, includeInactive } = request.body;
+  const { agents, batchSize, includeInactive, dryRun } = request.body;
   const agentOptions = Array.isArray(agents)
     ? { agentIds: agents }
     : { kuery: agents, showInactive: includeInactive };
@@ -50,7 +50,11 @@ export const bulkRollbackAgentHandler: RequestHandler<
     ...agentOptions,
     batchSize,
     includeInactive,
+    dryRun,
   });
 
-  return response.ok({ body: { actionIds: results.actionIds } });
+  if (dryRun) {
+    return response.ok({ body: { count: (results as { count: number }).count } });
+  }
+  return response.ok({ body: { actionIds: (results as { actionIds: string[] }).actionIds } });
 };

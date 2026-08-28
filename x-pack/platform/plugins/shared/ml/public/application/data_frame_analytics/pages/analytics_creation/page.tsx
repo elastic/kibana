@@ -31,8 +31,7 @@ import {
   DetailsStep,
   ValidationStepWrapper,
 } from './components';
-import { MlPageHeader } from '../../../components/page_header';
-import { PageTitle } from '../../../components/page_title';
+import { MlAppHeader, useDataFrameAnalyticsJobsBack } from '../../../components/ml_app_header';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,
@@ -48,6 +47,7 @@ interface Props {
 
 export const Page: FC<Props> = ({ jobId }) => {
   const mlApi = useMlApi();
+  const dataFrameAnalyticsJobsBack = useDataFrameAnalyticsJobsBack();
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
   const [activatedSteps, setActivatedSteps] = useState<boolean[]>([
     true,
@@ -169,27 +169,19 @@ export const Page: FC<Props> = ({ jobId }) => {
 
   return (
     <div data-test-subj="mlAnalyticsCreationContainer">
-      <MlPageHeader>
-        <PageTitle
-          title={
-            <span data-test-subj="mlDataFrameAnalyticsWizardHeaderTitle">
-              {jobId === undefined && (
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analytics.creationPageTitle"
-                  defaultMessage="Create job"
-                />
-              )}
-              {jobId !== undefined && (
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analytics.clone.creationPageTitle"
-                  defaultMessage="Clone job from {jobId}"
-                  values={{ jobId }}
-                />
-              )}
-            </span>
-          }
-        />
-      </MlPageHeader>
+      <MlAppHeader
+        title={
+          jobId === undefined
+            ? i18n.translate('xpack.ml.dataframe.analytics.creationPageTitle', {
+                defaultMessage: 'Create job',
+              })
+            : i18n.translate('xpack.ml.dataframe.analytics.clone.creationPageTitle', {
+                defaultMessage: 'Clone job from {jobId}',
+                values: { jobId },
+              })
+        }
+        back={dataFrameAnalyticsJobsBack}
+      />
       <EuiPageBody restrictWidth={1200}>
         <EuiFlexGroup>
           <EuiFlexItem>

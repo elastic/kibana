@@ -61,7 +61,7 @@ export function getIndexManagementDependencies({
   startDependencies,
   uiMetricService,
   notificationService,
-  canUseSyntheticSource,
+  hasAtLeastEnterpriseLicense,
   reindexService,
 }: {
   core: CoreStart;
@@ -75,7 +75,7 @@ export function getIndexManagementDependencies({
   startDependencies: StartDependencies;
   uiMetricService: UiMetricService;
   notificationService: NotificationService;
-  canUseSyntheticSource: boolean;
+  hasAtLeastEnterpriseLicense: boolean;
   reindexService: ReindexServicePublicStart;
 }): AppDependencies {
   const { docLinks, application, uiSettings, settings } = core;
@@ -115,7 +115,7 @@ export function getIndexManagementDependencies({
     docLinks,
     kibanaVersion,
     overlays: core.overlays,
-    canUseSyntheticSource,
+    hasAtLeastEnterpriseLicense,
     privs: {
       monitor: !!monitor,
       manageEnrich: !!manageEnrich,
@@ -134,7 +134,7 @@ export async function mountManagementSection({
   kibanaVersion,
   config,
   cloud,
-  canUseSyntheticSource,
+  hasAtLeastEnterpriseLicense,
   reindexService,
 }: {
   coreSetup: CoreSetup<StartDependencies>;
@@ -145,7 +145,7 @@ export async function mountManagementSection({
   kibanaVersion: SemVer;
   config: AppDependencies['config'];
   cloud?: CloudSetup;
-  canUseSyntheticSource: boolean;
+  hasAtLeastEnterpriseLicense: boolean;
   reindexService: ReindexServicePublicStart;
 }) {
   const { element, setBreadcrumbs, history } = params;
@@ -175,7 +175,7 @@ export async function mountManagementSection({
     startDependencies,
     uiMetricService,
     usageCollection,
-    canUseSyntheticSource,
+    hasAtLeastEnterpriseLicense,
     reindexService,
     notificationService,
   });

@@ -5,56 +5,37 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexItem,
   EuiLink,
-  EuiLoadingSpinner,
   EuiPageBody,
   EuiPageSection,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
   CustomFieldConfiguration,
   TemplateConfiguration,
   CustomFieldTypes,
-  ActionConnector,
-  ObservableTypeConfiguration,
 } from '../../../common/types/domain';
-import { getNoneConnector } from '../../../common/utils/connectors';
-import { KibanaServices, useKibana } from '../../common/lib/kibana';
-import { useGetActionTypes } from '../../containers/configure/use_action_types';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-
-import type { ClosureType } from '../../containers/configure/types';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import { normalizeActionConnector, normalizeCaseConnector } from './utils';
 import * as i18n from './translations';
-import { getConnectorById, addOrReplaceField } from '../utils';
+import { addOrReplaceField } from '../utils';
 import { HeaderPage } from '../header_page';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
-import { CasesDeepLinkId, getCasesConfigureTemplatesPath } from '../../common/navigation';
+import { CasesDeepLinkId } from '../../common/navigation';
 import { useAllCasesNavigation } from '../../common/navigation/hooks';
 import { CustomFields } from '../custom_fields';
 import { CommonFlyout } from './flyout';
-import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
-import { useLicense } from '../../common/use_license';
 import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
@@ -62,20 +43,10 @@ import { TemplateForm } from '../templates/form';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
-import { ObservableTypesForm } from '../observable_types/form';
-import { useCasesFeatures } from '../../common/use_cases_features';
-import { SettingsTabs } from './settings_tabs';
-import { NoPrivilegesPage } from '../no_privileges';
-
-const AllCasesTemplatesLazy = lazy(() => import('../templates_v2/pages/all_templates_page'));
-
-// Wrapper component to conditionally apply breadcrumbs without violating Rules of Hooks.
-// TODO: Remove along with the templates FF cleanup — breadcrumbs will always be handled by the templates tab.
-const ConfigureGeneralBreadcrumbs: React.FC = React.memo(() => {
-  useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
-  return null;
-});
-ConfigureGeneralBreadcrumbs.displayName = 'ConfigureGeneralBreadcrumbs';
+import { KibanaServices, useKibana } from '../../common/lib/kibana';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useConfigureCasesController } from './use_configure_cases_controller';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -91,10 +62,7 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
   }
 `;
 
-interface Flyout {
-  type: 'addConnector' | 'editConnector' | 'customField' | 'template' | 'observableTypes';
-  visible: boolean;
-}
+type LegacyFlyoutType = 'customField' | 'template';
 
 const addNewCustomFieldToTemplates = ({
   templates,
@@ -131,223 +99,52 @@ const addNewCustomFieldToTemplates = ({
 };
 
 export const ConfigureCases: React.FC = React.memo(() => {
-  const { permissions, basePath } = useCasesContext();
+  useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const { navigateToAllCases } = useAllCasesNavigation();
-  const { triggersActionsUi, docLinks } = useKibana().services;
   const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
-  const location = useLocation();
-  const isTemplatesTab =
-    isTemplatesEnabled && location.pathname === getCasesConfigureTemplatesPath(basePath);
-  const license = useLicense();
-  const hasMinimumLicensePermissions = license.isAtLeastGold();
-  const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
-
-  const { isObservablesFeatureEnabled } = useCasesFeatures();
-  const [connectorIsValid, setConnectorIsValid] = useState(true);
-  const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
-  const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
-    null
-  );
   const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(null);
   const [templateToEdit, setTemplateToEdit] = useState<TemplateConfiguration | null>(null);
-  const [observableTypeToEdit, setObservableTypeToEdit] =
-    useState<ObservableTypeConfiguration | null>(null);
   const { euiTheme } = useEuiTheme();
+  const { permissions } = useCasesContext();
+  const { docLinks } = useKibana().services;
+  // Only the legacy templates section needs the full configuration object; the shared
+  // hook already exposes the individual fields it needs for the connector/closure/
+  // observable-types logic.
+  const { data: currentConfiguration } = useGetCaseConfiguration();
 
   const {
-    data: currentConfiguration,
-    isLoading: loadingCaseConfigure,
-    refetch: refetchCaseConfigure,
-  } = useGetCaseConfiguration();
-
-  const {
-    id: configurationId,
-    version: configurationVersion,
+    hasMinimumLicensePermissions,
+    hasMinimumLicensePermissionsForObservables,
+    isObservablesFeatureEnabled,
+    configurationId,
+    configurationVersion,
     closureType,
     connector,
     mappings,
     customFields,
     templates,
     observableTypes,
-  } = currentConfiguration;
-
-  const {
-    mutate: persistCaseConfigure,
-    mutateAsync: persistCaseConfigureAsync,
-    isLoading: isPersistingConfiguration,
-  } = usePersistConfiguration();
-
-  const isLoadingCaseConfiguration = loadingCaseConfigure || isPersistingConfiguration;
-  const {
-    isLoading: isLoadingConnectors,
-    data: connectors = [],
-    refetch: refetchConnectors,
-  } = useGetSupportedActionConnectors();
-  const {
-    isLoading: isLoadingActionTypes,
-    data: actionTypes = [],
-    refetch: refetchActionTypes,
-  } = useGetActionTypes();
-
-  const onConnectorUpdated = useCallback(
-    async (updatedConnector: ActionConnector) => {
-      setEditedConnectorItem(updatedConnector as ActionConnectorTableItem);
-      refetchConnectors();
-      refetchActionTypes();
-      refetchCaseConfigure();
-    },
-    [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
-  );
-  const onConnectorCreated = useCallback(
-    async (createdConnector: ActionConnector) => {
-      const caseConnector = normalizeActionConnector(createdConnector);
-
-      await persistCaseConfigureAsync({
-        connector: caseConnector,
-        closureType,
-        customFields,
-        templates,
-        id: configurationId,
-        version: configurationVersion,
-      });
-
-      onConnectorUpdated(createdConnector);
-    },
-    [
-      persistCaseConfigureAsync,
-      closureType,
-      customFields,
-      templates,
-      configurationId,
-      configurationVersion,
-      onConnectorUpdated,
-    ]
-  );
-
-  const isLoadingAny =
-    isLoadingConnectors ||
-    isPersistingConfiguration ||
-    loadingCaseConfigure ||
-    isLoadingActionTypes;
-  const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
-  const onClickUpdateConnector = useCallback(() => {
-    setFlyOutVisibility({ type: 'editConnector', visible: true });
-  }, []);
-
-  const onCloseAddFlyout = useCallback(
-    () => setFlyOutVisibility({ type: 'addConnector', visible: false }),
-    [setFlyOutVisibility]
-  );
-
-  const onCloseEditFlyout = useCallback(
-    () => setFlyOutVisibility({ type: 'editConnector', visible: false }),
-    []
-  );
-
-  const onAddNewConnector = useCallback(() => {
-    setFlyOutVisibility({ type: 'addConnector', visible: true });
-  }, []);
-
-  const onChangeConnector = useCallback(
-    (id: string) => {
-      if (id === 'add-connector') {
-        setFlyOutVisibility({ type: 'addConnector', visible: true });
-        return;
-      }
-
-      const actionConnector = getConnectorById(id, connectors);
-      const caseConnector =
-        actionConnector != null ? normalizeActionConnector(actionConnector) : getNoneConnector();
-
-      persistCaseConfigure({
-        connector: caseConnector,
-        closureType,
-        customFields,
-        templates,
-        id: configurationId,
-        version: configurationVersion,
-      });
-    },
-    [
-      connectors,
-      persistCaseConfigure,
-      closureType,
-      customFields,
-      templates,
-      configurationId,
-      configurationVersion,
-    ]
-  );
-
-  const onChangeClosureType = useCallback(
-    (type: ClosureType) => {
-      persistCaseConfigure({
-        connector,
-        customFields,
-        templates,
-        id: configurationId,
-        version: configurationVersion,
-        closureType: type,
-      });
-    },
-    [
-      configurationId,
-      configurationVersion,
-      connector,
-      customFields,
-      templates,
-      persistCaseConfigure,
-    ]
-  );
-
-  useEffect(() => {
-    if (
-      !isLoadingConnectors &&
-      connector.id !== 'none' &&
-      !connectors.some((c) => c.id === connector.id)
-    ) {
-      setConnectorIsValid(false);
-    } else if (
-      !isLoadingConnectors &&
-      (connector.id === 'none' || connectors.some((c) => c.id === connector.id))
-    ) {
-      setConnectorIsValid(true);
-    }
-  }, [connectors, connector, isLoadingConnectors]);
-
-  useEffect(() => {
-    if (!isLoadingConnectors && connector.id !== 'none') {
-      setEditedConnectorItem(
-        normalizeCaseConnector(connectors, connector) as ActionConnectorTableItem
-      );
-    }
-  }, [connectors, connector, isLoadingConnectors]);
-
-  const ConnectorAddFlyout = useMemo(
-    () =>
-      flyOutVisibility?.type === 'addConnector' && flyOutVisibility?.visible
-        ? triggersActionsUi.getAddConnectorFlyout({
-            onClose: onCloseAddFlyout,
-            featureId: CasesConnectorFeatureId,
-            onConnectorCreated,
-          })
-        : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [flyOutVisibility]
-  );
-
-  const ConnectorEditFlyout = useMemo(
-    () =>
-      editedConnectorItem && flyOutVisibility?.type === 'editConnector' && flyOutVisibility?.visible
-        ? triggersActionsUi.getEditConnectorFlyout({
-            connector: editedConnectorItem,
-            onClose: onCloseEditFlyout,
-            onConnectorUpdated,
-          })
-        : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connector.id, editedConnectorItem, flyOutVisibility]
-  );
+    isPersistingConfiguration,
+    isLoadingCaseConfiguration,
+    isLoadingConnectors,
+    connectors,
+    actionTypes,
+    isLoadingAny,
+    connectorIsValid,
+    updateConnectorDisabled,
+    flyOutVisibility,
+    setFlyOutVisibility,
+    persistCaseConfigure,
+    onClickUpdateConnector,
+    onAddNewConnector,
+    onChangeConnector,
+    onChangeClosureType,
+    ConnectorAddFlyout,
+    ConnectorEditFlyout,
+    onEditObservableType,
+    onDeleteObservableType,
+    AddOrEditObservableTypeFlyout,
+  } = useConfigureCasesController<LegacyFlyoutType>();
 
   const onDeleteCustomField = useCallback(
     (key: string) => {
@@ -396,94 +193,13 @@ export const ConfigureCases: React.FC = React.memo(() => {
       }
       setFlyOutVisibility({ type: 'customField', visible: true });
     },
-    [setFlyOutVisibility, setCustomFieldToEdit, customFields]
+    [customFields, setFlyOutVisibility]
   );
 
   const onCloseCustomFieldFlyout = useCallback(() => {
     setFlyOutVisibility({ type: 'customField', visible: false });
     setCustomFieldToEdit(null);
-  }, [setFlyOutVisibility, setCustomFieldToEdit]);
-
-  const onEditObservableType = useCallback(
-    (key: string) => {
-      const selectedObservableType = observableTypes.find((item) => item.key === key);
-
-      if (selectedObservableType) {
-        setObservableTypeToEdit(selectedObservableType);
-      }
-      setFlyOutVisibility({ type: 'observableTypes', visible: true });
-    },
-    [setFlyOutVisibility, observableTypes]
-  );
-
-  const onDeleteObservableType = useCallback(
-    (key: string) => {
-      const remainingObservableTypes = observableTypes.filter((field) => field.key !== key);
-
-      persistCaseConfigure({
-        connector,
-        observableTypes: remainingObservableTypes,
-        id: configurationId,
-        version: configurationVersion,
-        closureType,
-        customFields,
-        templates,
-      });
-    },
-    [
-      closureType,
-      configurationId,
-      configurationVersion,
-      connector,
-      observableTypes,
-      persistCaseConfigure,
-      customFields,
-      templates,
-    ]
-  );
-
-  const onCloseObservableTypesFlyout = useCallback(() => {
-    setFlyOutVisibility({ type: 'observableTypes', visible: false });
-    setObservableTypeToEdit(null);
   }, [setFlyOutVisibility]);
-
-  const onObservableTypeSave = useCallback(
-    (data: ObservableTypeConfiguration) => {
-      const existingObservableIndex = observableTypes.findIndex((item) => item.key === data.key);
-
-      let updatedObservableTypes = [];
-
-      if (existingObservableIndex === -1) {
-        updatedObservableTypes = [...structuredClone(observableTypes), data];
-      } else {
-        updatedObservableTypes = structuredClone(observableTypes);
-        updatedObservableTypes[existingObservableIndex] = data;
-      }
-
-      persistCaseConfigure({
-        connector,
-        id: configurationId,
-        version: configurationVersion,
-        closureType,
-        observableTypes: updatedObservableTypes,
-        customFields,
-        templates,
-      });
-
-      onCloseObservableTypesFlyout();
-    },
-    [
-      observableTypes,
-      persistCaseConfigure,
-      connector,
-      configurationId,
-      configurationVersion,
-      closureType,
-      customFields,
-      templates,
-      onCloseObservableTypesFlyout,
-    ]
-  );
 
   const onCustomFieldSave = useCallback(
     (data: CustomFieldConfiguration) => {
@@ -515,6 +231,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
       customFields,
       templates,
       persistCaseConfigure,
+      setFlyOutVisibility,
     ]
   );
 
@@ -551,13 +268,13 @@ export const ConfigureCases: React.FC = React.memo(() => {
       }
       setFlyOutVisibility({ type: 'template', visible: true });
     },
-    [setFlyOutVisibility, setTemplateToEdit, templates]
+    [templates, setFlyOutVisibility]
   );
 
   const onCloseTemplateFlyout = useCallback(() => {
     setFlyOutVisibility({ type: 'template', visible: false });
     setTemplateToEdit(null);
-  }, [setFlyOutVisibility, setTemplateToEdit]);
+  }, [setFlyOutVisibility]);
 
   const onTemplateSave = useCallback(
     (data: TemplateConfiguration) => {
@@ -583,14 +300,15 @@ export const ConfigureCases: React.FC = React.memo(() => {
       customFields,
       templates,
       persistCaseConfigure,
+      setFlyOutVisibility,
     ]
   );
 
   const AddOrEditCustomFieldFlyout =
     flyOutVisibility?.type === 'customField' && flyOutVisibility?.visible ? (
       <CommonFlyout<CustomFieldConfiguration>
-        isLoading={loadingCaseConfigure || isPersistingConfiguration}
-        disabled={!permissions.settings || loadingCaseConfigure || isPersistingConfiguration}
+        isLoading={isLoadingCaseConfiguration}
+        disabled={!permissions.settings || isLoadingCaseConfiguration}
         onCloseFlyout={onCloseCustomFieldFlyout}
         onSaveField={onCustomFieldSave}
         renderHeader={() => (
@@ -606,8 +324,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const AddOrEditTemplateFlyout =
     flyOutVisibility?.type === 'template' && flyOutVisibility?.visible ? (
       <CommonFlyout<TemplateFormProps, TemplateConfiguration>
-        isLoading={loadingCaseConfigure || isPersistingConfiguration}
-        disabled={!permissions.settings || loadingCaseConfigure || isPersistingConfiguration}
+        isLoading={isLoadingCaseConfiguration}
+        disabled={!permissions.settings || isLoadingCaseConfiguration}
         onCloseFlyout={onCloseTemplateFlyout}
         onSaveField={onTemplateSave}
         renderHeader={() => (
@@ -626,26 +344,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
       </CommonFlyout>
     ) : null;
 
-  const AddOrEditObservableTypeFlyout =
-    flyOutVisibility?.type === 'observableTypes' && flyOutVisibility?.visible ? (
-      <CommonFlyout<ObservableTypeConfiguration>
-        isLoading={loadingCaseConfigure || isPersistingConfiguration}
-        disabled={!permissions.settings || loadingCaseConfigure || isPersistingConfiguration}
-        onCloseFlyout={onCloseObservableTypesFlyout}
-        onSaveField={onObservableTypeSave}
-        renderHeader={() => (
-          <span>{observableTypeToEdit ? i18n.EDIT_OBSERVABLE_TYPE : i18n.ADD_OBSERVABLE_TYPE}</span>
-        )}
-      >
-        {({ onChange }) => (
-          <ObservableTypesForm onChange={onChange} initialValue={observableTypeToEdit} />
-        )}
-      </CommonFlyout>
-    ) : null;
-
   return (
     <EuiPageSection paddingSize="none">
-      {!isTemplatesTab && <ConfigureGeneralBreadcrumbs />}
       {isTemplatesEnabled && (
         <EuiButtonEmpty
           iconType="sortLeft"
@@ -658,142 +358,129 @@ export const ConfigureCases: React.FC = React.memo(() => {
         </EuiButtonEmpty>
       )}
       <HeaderPage data-test-subj="case-configure-title" title={i18n.CONFIGURE_CASES_PAGE_TITLE} />
-      {isTemplatesEnabled && (
-        <>
-          <SettingsTabs activeTab={isTemplatesTab ? 'templates' : 'general'} />
-          <EuiSpacer size="l" />
-        </>
-      )}
       <EuiPageBody restrictWidth={false}>
-        {isTemplatesTab ? (
-          <>
-            {permissions.manageTemplates ? (
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <AllCasesTemplatesLazy />
-              </Suspense>
-            ) : (
-              <NoPrivilegesPage pageName={i18n.SETTINGS_TAB_TEMPLATES} />
-            )}
-          </>
-        ) : (
-          <div css={getFormWrapperCss(euiTheme)}>
-            {hasMinimumLicensePermissions && (
-              <>
-                {!connectorIsValid && (
-                  <>
-                    <div css={sectionWrapperCss}>
-                      <EuiCallOut
-                        announceOnMount
-                        title={i18n.WARNING_NO_CONNECTOR_TITLE}
-                        color="warning"
-                        iconType="question"
-                        data-test-subj="configure-cases-warning-callout"
-                      >
-                        <FormattedMessage
-                          defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
-                          id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
-                          values={{
-                            appropriateLicense: (
-                              <EuiLink href={docLinks.links.subscriptions} target="_blank">
-                                {i18n.LINK_APPROPRIATE_LICENSE}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </EuiCallOut>
-                    </div>
-                    <EuiSpacer size="xl" />
-                  </>
-                )}
-                <div css={sectionWrapperCss}>
-                  <ClosureOptions
-                    closureTypeSelected={closureType}
-                    disabled={
-                      isPersistingConfiguration || isLoadingConnectors || !permissions.settings
-                    }
-                    onChangeClosureType={onChangeClosureType}
-                  />
-                </div>
-                <EuiSpacer size="xl" />
-                <div css={sectionWrapperCss}>
-                  <Connectors
-                    actionTypes={actionTypes}
-                    connectors={connectors ?? []}
-                    disabled={
-                      isPersistingConfiguration || isLoadingConnectors || !permissions.settings
-                    }
-                    handleShowEditFlyout={onClickUpdateConnector}
-                    isLoading={isLoadingAny}
-                    mappings={mappings}
-                    onChangeConnector={onChangeConnector}
-                    selectedConnector={connector}
-                    updateConnectorDisabled={updateConnectorDisabled || !permissions.settings}
-                    onAddNewConnector={onAddNewConnector}
-                  />
-                </div>
-                <EuiSpacer size="xl" />
-              </>
-            )}
-            <div css={sectionWrapperCss}>
-              <EuiFlexItem grow={false}>
-                <CustomFields
-                  customFields={customFields}
-                  isLoading={isLoadingCaseConfiguration}
-                  disabled={isLoadingCaseConfiguration}
-                  handleAddCustomField={() =>
-                    setFlyOutVisibility({ type: 'customField', visible: true })
+        <div css={getFormWrapperCss(euiTheme)}>
+          {hasMinimumLicensePermissions && (
+            <>
+              {!connectorIsValid && (
+                <>
+                  <div css={sectionWrapperCss}>
+                    <EuiCallOut
+                      announceOnMount
+                      title={i18n.WARNING_NO_CONNECTOR_TITLE}
+                      color="warning"
+                      iconType="question"
+                      data-test-subj="configure-cases-warning-callout"
+                    >
+                      <FormattedMessage
+                        defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+                        id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+                        values={{
+                          appropriateLicense: (
+                            <EuiLink href={docLinks.links.subscriptions} target="_blank">
+                              {i18n.LINK_APPROPRIATE_LICENSE}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </EuiCallOut>
+                  </div>
+                  <EuiSpacer size="xl" />
+                </>
+              )}
+              <div css={sectionWrapperCss}>
+                <ClosureOptions
+                  closureTypeSelected={closureType}
+                  disabled={
+                    isPersistingConfiguration || isLoadingConnectors || !permissions.settings
                   }
-                  handleDeleteCustomField={onDeleteCustomField}
-                  handleEditCustomField={onEditCustomField}
+                  onChangeClosureType={onChangeClosureType}
                 />
-              </EuiFlexItem>
-            </div>
-
-            <EuiSpacer size="xl" />
-
-            <div css={sectionWrapperCss}>
-              <EuiFlexItem grow={false}>
-                <Templates
-                  templates={templates}
-                  isLoading={isLoadingCaseConfiguration}
-                  disabled={isLoadingCaseConfiguration}
-                  onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
-                  onEditTemplate={onEditTemplate}
-                  onDeleteTemplate={onDeleteTemplate}
+              </div>
+              <EuiSpacer size="xl" />
+              <div css={sectionWrapperCss}>
+                <Connectors
+                  actionTypes={actionTypes}
+                  connectors={connectors ?? []}
+                  disabled={
+                    isPersistingConfiguration || isLoadingConnectors || !permissions.settings
+                  }
+                  handleShowEditFlyout={onClickUpdateConnector}
+                  isLoading={isLoadingAny}
+                  mappings={mappings}
+                  onChangeConnector={onChangeConnector}
+                  selectedConnector={connector}
+                  updateConnectorDisabled={updateConnectorDisabled || !permissions.settings}
+                  onAddNewConnector={onAddNewConnector}
                 />
-              </EuiFlexItem>
-            </div>
+              </div>
+              <EuiSpacer size="xl" />
+            </>
+          )}
+          {/* Templates and custom fields are managed in the new templates UI when it is enabled. */}
+          {!isTemplatesEnabled && (
+            <>
+              <div css={sectionWrapperCss}>
+                <EuiFlexItem grow={false}>
+                  <CustomFields
+                    customFields={customFields}
+                    isLoading={isLoadingCaseConfiguration}
+                    disabled={isLoadingCaseConfiguration}
+                    handleAddCustomField={() =>
+                      setFlyOutVisibility({ type: 'customField', visible: true })
+                    }
+                    handleDeleteCustomField={onDeleteCustomField}
+                    handleEditCustomField={onEditCustomField}
+                  />
+                </EuiFlexItem>
+              </div>
 
-            {hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled && (
-              <>
-                <EuiSpacer size="xl" />
+              <EuiSpacer size="xl" />
 
-                <div css={sectionWrapperCss}>
-                  <EuiFlexItem grow={false}>
-                    <ObservableTypes
-                      observableTypes={observableTypes}
-                      isLoading={isLoadingCaseConfiguration}
-                      disabled={isLoadingCaseConfiguration}
-                      handleAddObservableType={() =>
-                        setFlyOutVisibility({ type: 'observableTypes', visible: true })
-                      }
-                      handleDeleteObservableType={onDeleteObservableType}
-                      handleEditObservableType={onEditObservableType}
-                    />
-                  </EuiFlexItem>
-                </div>
-              </>
-            )}
+              <div css={sectionWrapperCss}>
+                <EuiFlexItem grow={false}>
+                  <Templates
+                    templates={templates}
+                    isLoading={isLoadingCaseConfiguration}
+                    disabled={isLoadingCaseConfiguration}
+                    onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
+                    onEditTemplate={onEditTemplate}
+                    onDeleteTemplate={onDeleteTemplate}
+                  />
+                </EuiFlexItem>
+              </div>
+            </>
+          )}
 
-            <EuiSpacer size="xl" />
+          {hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled && (
+            <>
+              <EuiSpacer size="xl" />
 
-            {ConnectorAddFlyout}
-            {ConnectorEditFlyout}
-            {AddOrEditCustomFieldFlyout}
-            {AddOrEditTemplateFlyout}
-            {AddOrEditObservableTypeFlyout}
-          </div>
-        )}
+              <div css={sectionWrapperCss}>
+                <EuiFlexItem grow={false}>
+                  <ObservableTypes
+                    observableTypes={observableTypes}
+                    isLoading={isLoadingCaseConfiguration}
+                    disabled={isLoadingCaseConfiguration}
+                    handleAddObservableType={() =>
+                      setFlyOutVisibility({ type: 'observableTypes', visible: true })
+                    }
+                    handleDeleteObservableType={onDeleteObservableType}
+                    handleEditObservableType={onEditObservableType}
+                  />
+                </EuiFlexItem>
+              </div>
+            </>
+          )}
+
+          <EuiSpacer size="xl" />
+
+          {ConnectorAddFlyout}
+          {ConnectorEditFlyout}
+          {AddOrEditCustomFieldFlyout}
+          {AddOrEditTemplateFlyout}
+          {AddOrEditObservableTypeFlyout}
+        </div>
       </EuiPageBody>
     </EuiPageSection>
   );

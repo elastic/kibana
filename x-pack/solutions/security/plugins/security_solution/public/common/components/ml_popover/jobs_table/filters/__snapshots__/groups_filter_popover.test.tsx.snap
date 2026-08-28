@@ -26,23 +26,23 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
   repositionOnScroll={true}
   repositionToCrossAxis={true}
 >
-  <EuiFilterSelectItemClass
+  <EuiFilterSelectItemComponent
     key="0-auditbeat"
     onClick={[Function]}
   >
     auditbeat (2)
-  </EuiFilterSelectItemClass>
-  <EuiFilterSelectItemClass
+  </EuiFilterSelectItemComponent>
+  <EuiFilterSelectItemComponent
     key="1-process"
     onClick={[Function]}
   >
     process (3)
-  </EuiFilterSelectItemClass>
-  <EuiFilterSelectItemClass
+  </EuiFilterSelectItemComponent>
+  <EuiFilterSelectItemComponent
     key="2-winlogbeat"
     onClick={[Function]}
   >
     winlogbeat (1)
-  </EuiFilterSelectItemClass>
+  </EuiFilterSelectItemComponent>
 </EuiPopover>
 `;

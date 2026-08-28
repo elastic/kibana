@@ -121,6 +121,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
             initialConnector: { actionTypeId: connectorTypeId },
             onClose: () => setIsCreateFlyoutOpen(false),
             onConnectorCreated: handleConnectorCreated,
+            size: 'm',
           })}
         </KibanaContextProvider>
       )}

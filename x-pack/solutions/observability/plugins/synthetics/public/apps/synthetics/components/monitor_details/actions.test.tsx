@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Actions } from './actions';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -23,8 +23,8 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(),
 }));
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn(),
   useSelector: jest.fn(),
 }));
@@ -175,6 +175,49 @@ describe('Actions Component', () => {
 
         expect(screen.getByTestId('syntheticsEditMonitorContextItem')).toBeDisabled();
       });
+    });
+  });
+
+  describe('heartbeat (Elastic Agent) monitor', () => {
+    beforeEach(() => {
+      // No remoteName in the URL — heartbeat is detected from the resolved
+      // monitor shape (origin === 'heartbeat'), not a URL param.
+      (useSelectedMonitor as jest.Mock).mockReturnValue({
+        monitor: {
+          config_id: 'test-monitor-id',
+          name: 'Autodiscovered monitor',
+          origin: 'heartbeat',
+        },
+        loading: false,
+        error: null,
+        isMonitorMissing: false,
+      });
+    });
+
+    it('disables Edit monitor', () => {
+      render(<Actions />);
+
+      fireEvent.click(screen.getByTestId('monitorDetailsHeaderControlActionsButton'));
+
+      const editItem = screen.getByTestId('syntheticsEditMonitorContextItem');
+      expect(editItem).toBeDisabled();
+      expect(editItem).not.toHaveAttribute('href');
+    });
+
+    it('disables Run test manually', () => {
+      render(<Actions />);
+
+      fireEvent.click(screen.getByTestId('monitorDetailsHeaderControlActionsButton'));
+
+      expect(screen.getByTestId('syntheticsRunTestManuallyButton')).toBeDisabled();
+    });
+
+    it('keeps Refresh enabled', () => {
+      render(<Actions />);
+
+      fireEvent.click(screen.getByTestId('monitorDetailsHeaderControlActionsButton'));
+
+      expect(screen.getByTestId('syntheticsRefreshContextItem')).not.toBeDisabled();
     });
   });
 });

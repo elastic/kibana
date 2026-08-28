@@ -23,22 +23,19 @@ const COMPACT_BADGE_STYLE: CSSProperties = {
 
 export function MonitorTypeBadge({
   monitorType,
-  ariaLabel,
   onClick,
   size = 'm',
 }: {
   monitorType: string;
-  ariaLabel?: string;
   onClick?: () => void;
   size?: 's' | 'm';
 }) {
   const style = size === 's' ? COMPACT_BADGE_STYLE : undefined;
+  const badgeTitle = getMonitorTypeBadgeTitle(monitorType);
   return onClick ? (
     <EuiBadge
       onClick={onClick}
-      onClickAriaLabel={getFilterTitle(monitorType)}
-      title={ariaLabel}
-      aria-label={ariaLabel}
+      onClickAriaLabel={getFilterTitle(badgeTitle)}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
       style={style}
       onMouseDown={(e: MouseEvent) => {
@@ -46,12 +43,10 @@ export function MonitorTypeBadge({
         e.stopPropagation();
       }}
     >
-      {getMonitorTypeBadgeTitle(monitorType)}
+      {badgeTitle}
     </EuiBadge>
   ) : (
     <EuiBadge
-      title={ariaLabel}
-      aria-label={ariaLabel}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
       style={style}
       onMouseDown={(e: MouseEvent) => {
@@ -59,15 +54,17 @@ export function MonitorTypeBadge({
         e.stopPropagation();
       }}
     >
-      {getMonitorTypeBadgeTitle(monitorType)}
+      {badgeTitle}
     </EuiBadge>
   );
 }
 
 const getFilterTitle = (type: string) => {
-  return i18n.translate('xpack.synthetics.management.monitorList.monitorTypeBadge.filter', {
-    defaultMessage: 'Click to filter monitors for type: {type}',
-    values: { type: getMonitorTypeBadgeTitle(type) },
+  return i18n.translate('xpack.synthetics.management.monitorList.monitorTypeBadge.filterByType', {
+    defaultMessage: '{type}. Click to filter monitors for this type',
+    values: {
+      type,
+    },
   });
 };
 
@@ -92,5 +89,5 @@ function getMonitorTypeBadgeTitle(monitorType: string) {
 }
 
 function getMonitorTypeBadgeIcon(monitorType: string) {
-  return monitorType === 'browser' ? 'videoPlayer' : 'online';
+  return monitorType === 'browser' ? 'videoPlayer' : 'wifi';
 }

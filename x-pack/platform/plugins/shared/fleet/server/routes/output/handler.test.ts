@@ -223,7 +223,7 @@ describe('Outputs handler', () => {
   describe('private endpoint (PrivateLink) validation', () => {
     const PRIVATE_URL = 'https://abc.es.private.us-east-1.aws.elastic.cloud';
 
-    it('should return ok on post elasticsearch output in serverless when hosts match private endpoint SO', async () => {
+    it('should return 400 on post elasticsearch output in serverless when hosts match private endpoint SO', async () => {
       jest
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true } as any);
@@ -243,7 +243,13 @@ describe('Outputs handler', () => {
         mockResponse as any
       );
 
-      expect(res).toEqual({ body: { item: { id: 'output1' } } });
+      expect(res).toEqual({
+        body: {
+          message:
+            'Elasticsearch output host must have default URL in serverless: http://elasticsearch:9200',
+        },
+        statusCode: 400,
+      });
     });
 
     it('should return 400 on post elasticsearch output in serverless when hosts are arbitrary (not default or private)', async () => {
@@ -309,7 +315,7 @@ describe('Outputs handler', () => {
       });
     });
 
-    it('should return ok on put elasticsearch output in serverless when hosts match private endpoint SO', async () => {
+    it('should return 400 on put non-preconfigured elasticsearch output in serverless when hosts match private endpoint SO', async () => {
       jest
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true } as any);
@@ -329,7 +335,47 @@ describe('Outputs handler', () => {
         mockResponse as any
       );
 
-      expect(res).toEqual({ body: { item: { id: 'output1', type: 'elasticsearch' } } });
+      expect(res).toEqual({
+        body: {
+          message:
+            'Elasticsearch output host must have default URL in serverless: http://elasticsearch:9200',
+        },
+        statusCode: 400,
+      });
+    });
+
+    it('should return ok on put preconfigured private output in serverless when hosts match private endpoint SO', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+      jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
+        if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
+          return { hosts: ['http://elasticsearch:9200'] } as any;
+        }
+        if (id === SERVERLESS_PRIVATE_OUTPUT_ID) {
+          return {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            hosts: [PRIVATE_URL],
+            type: 'elasticsearch',
+          } as any;
+        }
+        return { id: 'output1', type: 'elasticsearch' } as any;
+      });
+
+      const res = await putOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { hosts: [PRIVATE_URL] },
+          params: { outputId: SERVERLESS_PRIVATE_OUTPUT_ID },
+        } as any,
+        mockResponse as any
+      );
+
+      expect(res).toEqual({
+        body: {
+          item: { id: SERVERLESS_PRIVATE_OUTPUT_ID, hosts: [PRIVATE_URL], type: 'elasticsearch' },
+        },
+      });
     });
   });
 

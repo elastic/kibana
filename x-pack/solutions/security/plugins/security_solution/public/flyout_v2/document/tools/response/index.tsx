@@ -9,13 +9,9 @@ import { css } from '@emotion/react';
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { ResponseDetailsContent } from './components/response_details';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.response.title', {
-  defaultMessage: 'Response',
-});
+import { RESPONSE_TITLE } from '../../../shared/constants/flyout_titles';
 
 export interface ResponseDetailsProps {
   /**
@@ -38,7 +34,7 @@ export const ResponseDetails = memo(({ hit }: ResponseDetailsProps) => {
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
+        <DocumentToolsFlyoutHeader title={RESPONSE_TITLE} hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ResponseDetailsContent hit={hit} />

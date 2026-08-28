@@ -19,7 +19,7 @@ export type SmlAttachHttpResultItem = SmlAttachHttpSuccessItem | SmlAttachHttpEr
 
 export interface SmlAttachHttpSuccessItem {
   success: true;
-  chunk_id: string;
+  entry_id: string;
   conversation_attachment_id: string;
   attachment_type: string;
   message: string;
@@ -27,7 +27,7 @@ export interface SmlAttachHttpSuccessItem {
 
 export interface SmlAttachHttpErrorItem {
   success: false;
-  chunk_id: string;
+  entry_id: string;
   attachment_type?: string;
   message: string;
 }

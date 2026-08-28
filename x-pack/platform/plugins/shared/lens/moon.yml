@@ -108,7 +108,6 @@ dependsOn:
   - '@kbn/test-eui-helpers'
   - '@kbn/shared-ux-utility'
   - '@kbn/esql-utils'
-  - '@kbn/managed-content-badge'
   - '@kbn/sort-predicates'
   - '@kbn/presentation-publishing'
   - '@kbn/saved-objects-finder-plugin'
@@ -154,6 +153,10 @@ dependsOn:
   - '@kbn/as-code-shared-telemetry'
   - '@kbn/core-http-browser'
   - '@kbn/use-observable'
+  - '@kbn/zod'
+  - '@kbn/app-header'
+  - '@kbn/managed-content-badge'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod

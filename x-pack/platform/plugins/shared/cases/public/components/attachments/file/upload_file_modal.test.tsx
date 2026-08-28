@@ -36,8 +36,11 @@ const mockFileUpload = jest
       kind,
       onDone,
       onError,
+      onFilesSelected,
       meta,
-    }: Required<Pick<FileUploadProps, 'kind' | 'onDone' | 'onError' | 'meta'>>) => (
+    }: Required<
+      Pick<FileUploadProps, 'kind' | 'onDone' | 'onError' | 'onFilesSelected' | 'meta'>
+    >) => (
       <>
         <button
           data-test-subj="testOnDone"
@@ -50,6 +53,42 @@ const mockFileUpload = jest
           data-test-subj="testOnError"
           type="button"
           onClick={() => onError({ name: 'upload error name', message: 'upload error message' })}
+        >
+          {'test'}
+        </button>
+        <button
+          data-test-subj="testOnMimeError"
+          type="button"
+          onClick={() => {
+            const mimeError = new Error('File type "application/x-foo" is not supported.');
+            (mimeError as { code?: string }).code = 'mimeTypeNotSupported';
+            onError(mimeError);
+          }}
+        >
+          {'test'}
+        </button>
+        <button
+          data-test-subj="testOnFilesSelectedDuplicate"
+          type="button"
+          onClick={() =>
+            onFilesSelected?.([
+              { name: `${basicFileMock.name}.${basicFileMock.extension ?? ''}` } as File,
+            ])
+          }
+        >
+          {'test'}
+        </button>
+        <button
+          data-test-subj="testOnFilesSelectedNew"
+          type="button"
+          onClick={() => onFilesSelected?.([{ name: 'some-brand-new-file.txt' } as File])}
+        >
+          {'test'}
+        </button>
+        <button
+          data-test-subj="testOnFilesCleared"
+          type="button"
+          onClick={() => onFilesSelected?.([])}
         >
           {'test'}
         </button>
@@ -71,10 +110,12 @@ jest.mock('@kbn/shared-ux-file-upload', () => {
 describe('UploadFileModal', () => {
   const successMock = jest.fn();
   const errorMock = jest.fn();
+  const dangerMock = jest.fn();
 
   useToastsMock.mockImplementation(() => ({
     addSuccess: successMock,
     addError: errorMock,
+    addDanger: dangerMock,
   }));
 
   const createAttachmentsMock = jest.fn();
@@ -93,6 +134,14 @@ describe('UploadFileModal', () => {
     renderWithTestingProviders(<UploadFileModal caseId="foobar" onClose={onCloseMock} />);
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
+  });
+
+  it('renders the upload hint with max size and supported formats', async () => {
+    renderWithTestingProviders(<UploadFileModal caseId="foobar" onClose={onCloseMock} />);
+
+    const hint = await screen.findByTestId('cases-files-upload-hint');
+    expect(hint).toHaveTextContent(/Maximum file size:/);
+    expect(hint).toHaveTextContent(/Supported formats:/);
   });
 
   it('createAttachments called with the unified `file` attachment shape', async () => {
@@ -151,6 +200,19 @@ describe('UploadFileModal', () => {
     );
   });
 
+  it('shows a categorized notice for unsupported file types instead of the raw mime message', async () => {
+    renderWithTestingProviders(<UploadFileModal caseId="foobar" onClose={onCloseMock} />);
+
+    await userEvent.click(await screen.findByTestId('testOnMimeError'));
+
+    // rich (bolded) content is rendered via a mount point, so assert on the
+    // title and that a danger toast was raised rather than the error toast
+    expect(dangerMock).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Unsupported file type', text: expect.anything() })
+    );
+    expect(errorMock).not.toHaveBeenCalled();
+  });
+
   it('forwards `caseId` and the owner from context to FileUpload `meta`', async () => {
     const caseId = 'foobar';
 
@@ -183,5 +245,74 @@ describe('UploadFileModal', () => {
     });
 
     createAttachmentsMock.mockRestore();
+  });
+
+  describe('duplicate file warning', () => {
+    // `basicFileMock.extension` is optional on the type; narrow it here so the
+    // fixture, the mock trigger, and the assertion all share the same value.
+    const duplicateExtension = basicFileMock.extension ?? '';
+    const duplicateFullName = `${basicFileMock.name}.${duplicateExtension}`;
+    // The picked file matches basicFileMock (name + extension), so listing it
+    // as already attached triggers the inline callout without any client fetch.
+    const duplicate = [{ name: basicFileMock.name, extension: duplicateExtension }];
+
+    it('does not show the warning by default', async () => {
+      renderWithTestingProviders(
+        <UploadFileModal caseId="foobar" existingFiles={duplicate} onClose={onCloseMock} />
+      );
+
+      await screen.findByTestId('cases-files-add-modal');
+      expect(screen.queryByTestId('cases-files-duplicate-warning')).not.toBeInTheDocument();
+    });
+
+    it('shows the warning when the picked file matches one already on the case', async () => {
+      renderWithTestingProviders(
+        <UploadFileModal caseId="foobar" existingFiles={duplicate} onClose={onCloseMock} />
+      );
+
+      await userEvent.click(await screen.findByTestId('testOnFilesSelectedDuplicate'));
+
+      const warning = await screen.findByTestId('cases-files-duplicate-warning');
+      expect(warning).toHaveTextContent(`A file named "${duplicateFullName}" is already attached`);
+    });
+
+    it('does not show the warning when the picked file does not match', async () => {
+      renderWithTestingProviders(
+        <UploadFileModal caseId="foobar" existingFiles={duplicate} onClose={onCloseMock} />
+      );
+
+      await userEvent.click(await screen.findByTestId('testOnFilesSelectedNew'));
+
+      expect(screen.queryByTestId('cases-files-duplicate-warning')).not.toBeInTheDocument();
+    });
+
+    it('clears the warning when the picker selection is cleared', async () => {
+      renderWithTestingProviders(
+        <UploadFileModal caseId="foobar" existingFiles={duplicate} onClose={onCloseMock} />
+      );
+
+      await userEvent.click(await screen.findByTestId('testOnFilesSelectedDuplicate'));
+      await screen.findByTestId('cases-files-duplicate-warning');
+
+      await userEvent.click(screen.getByTestId('testOnFilesCleared'));
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('cases-files-duplicate-warning')).not.toBeInTheDocument()
+      );
+    });
+
+    it('still attaches when the user proceeds through the warning', async () => {
+      renderWithTestingProviders(
+        <UploadFileModal caseId="foobar" existingFiles={duplicate} onClose={onCloseMock} />
+      );
+
+      await userEvent.click(await screen.findByTestId('testOnFilesSelectedDuplicate'));
+      await screen.findByTestId('cases-files-duplicate-warning');
+
+      await userEvent.click(screen.getByTestId('testOnDone'));
+
+      await waitFor(() => expect(createAttachmentsMock).toHaveBeenCalled());
+      await waitFor(() => expect(onCloseMock).toHaveBeenCalled());
+    });
   });
 });

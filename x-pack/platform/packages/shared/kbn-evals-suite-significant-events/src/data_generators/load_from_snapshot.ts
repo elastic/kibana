@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
-import type { Detection, Discovery, Feature } from '@kbn/significant-events-schema';
+import type { Detection, Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import {
@@ -23,7 +23,7 @@ import { DEFAULT_LOGS_INDEX } from '../constants';
 
 /**
  * Raw query knowledge-indicator doc as captured from the KI data stream. Carries
- * `query.rule_id`, which the investigator/judge match against `detection.rule_uuid`.
+ * `query.rule_id`, which the discovery/judge match against `detection.rule_uuid`.
  */
 export interface SnapshotQueryKi {
   id?: string;
@@ -182,15 +182,15 @@ export async function loadKnowledgeIndicatorsFromSnapshot(
 }
 
 /**
- * Restores sigevents-captured discovery documents and returns all {@link Discovery} documents.
+ * Restores sigevents-captured event documents.
  */
 export async function loadDiscoveriesFromSnapshot(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
   gcs: GcsConfig
-): Promise<Discovery[]> {
-  return loadDocsFromSnapshot<Discovery>({
+): Promise<SignificantEvent[]> {
+  return loadDocsFromSnapshot<SignificantEvent>({
     esClient,
     log,
     snapshotName,
@@ -209,7 +209,9 @@ export async function loadDetectionsFromSnapshot(
   log: ToolingLog,
   snapshotName: string,
   gcs: GcsConfig,
-  options: { kinds?: Array<Detection['kind']> } = {}
+  // `kind` is a legacy snapshot-doc field (pre-detection-remodel captures); filter on the raw
+  // ES field by string.
+  options: { kinds?: string[] } = {}
 ): Promise<Detection[]> {
   return loadDocsFromSnapshot<Detection>({
     esClient,

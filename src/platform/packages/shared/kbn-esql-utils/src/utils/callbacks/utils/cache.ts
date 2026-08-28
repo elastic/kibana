@@ -94,6 +94,9 @@ export const cacheParametrizedAsyncFunction = <Args extends any[], T>(
     if (forceRefresh) {
       const newValue = fn(...args);
       cache.set(key, { value: newValue, lastCallTime: now() });
+      newValue.catch(() => {
+        if (cache.get(key)?.value === newValue) cache.delete(key);
+      });
       return newValue;
     }
 
@@ -105,15 +108,22 @@ export const cacheParametrizedAsyncFunction = <Args extends any[], T>(
       const newValue = fn(...args);
       entry = { value: newValue, lastCallTime: time };
       cache.set(key, entry);
+      newValue.catch(() => {
+        if (cache.get(key)?.value === newValue) cache.delete(key);
+      });
       return newValue;
     }
 
     // If entry exists, but needs refresh
     if (time - entry.lastCallTime > refreshAfter) {
-      // Refresh in the background
+      // Refresh in the background; ignore failures so the stale entry remains cached
       Promise.resolve().then(async () => {
-        const refreshedValue = await fn(...args);
-        cache.set(key, { value: Promise.resolve(refreshedValue), lastCallTime: now() });
+        try {
+          const refreshedValue = await fn(...args);
+          cache.set(key, { value: Promise.resolve(refreshedValue), lastCallTime: now() });
+        } catch {
+          // intentionally ignored
+        }
       });
     }
 

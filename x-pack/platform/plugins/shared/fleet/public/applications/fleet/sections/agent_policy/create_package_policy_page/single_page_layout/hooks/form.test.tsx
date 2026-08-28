@@ -18,8 +18,21 @@ import { ExperimentalFeaturesService } from '../../../../../services';
 import { SelectedPolicyTab } from '../../components';
 
 import { useOnSubmit, updateAgentlessCloudConnectorConfig } from './form';
+import { useAwsOnboardingTelemetry } from './aws_onboarding_telemetry';
 
 type MockFn = jest.MockedFunction<any>;
+
+jest.mock('./aws_onboarding_telemetry', () => ({
+  useAwsOnboardingTelemetry: jest.fn(() => ({
+    reportCredentialsAdded: jest.fn(),
+    reportDeployClicked: jest.fn(),
+    reportEnrollmentSucceeded: jest.fn(),
+  })),
+}));
+
+jest.mock('../../../../../../../hooks/use_request/agentless_policy', () => ({
+  sendCreateAgentlessPolicy: jest.fn().mockRejectedValue(new Error('mocked agentless api')),
+}));
 
 jest.mock('../../../../../hooks', () => {
   return {
@@ -274,6 +287,46 @@ describe('useOnSubmit', () => {
           value: 'showUserVarVal',
         },
       },
+    });
+  });
+
+  describe('copy source (defaultPolicyData) field carry-over', () => {
+    // Copying a policy seeds the create form from `defaultPolicyData` via a `pick` allowlist.
+    // Agentless copies hydrate that source through `agentlessPolicyToPackagePolicy`, which carries
+    // `global_data_tags` and `var_group_selections`; the allowlist must forward them or they are
+    // silently dropped before `toNewAgentlessPolicy` ever runs.
+    it('carries global_data_tags and var_group_selections onto the copied base policy', async () => {
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+          defaultPolicyData: {
+            name: 'copied-policy',
+            supports_agentless: true,
+            additional_datastreams_permissions: ['logs-test-*'],
+            global_data_tags: [{ name: 'team', value: 'fleet' }],
+            var_group_selections: { credential_type: 'cloud_connectors' },
+          },
+        })
+      );
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        expect(packagePolicy.name).toBe('copied-policy');
+        expect(packagePolicy.global_data_tags).toEqual([{ name: 'team', value: 'fleet' }]);
+        expect(packagePolicy.var_group_selections).toEqual({
+          credential_type: 'cloud_connectors',
+        });
+        // Regression guard: the pre-existing allowlisted field still carries over.
+        expect(packagePolicy.additional_datastreams_permissions).toEqual(['logs-test-*']);
+      });
     });
   });
 
@@ -1172,6 +1225,107 @@ describe('useOnSubmit', () => {
 
       expect(setNewAgentPolicy).not.toHaveBeenCalled();
       expect(setPackagePolicy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('AWS onboarding telemetry on agentless submit', () => {
+    const mockReportCredentialsAdded = jest.fn();
+    const mockReportDeployClicked = jest.fn();
+
+    const awsPackageInfo: PackageInfo = {
+      name: 'aws_cloudwatch_input_otel',
+      version: '0.5.0',
+      description: '',
+      format_version: '',
+      release: 'ga',
+      owner: { github: '' },
+      title: 'AWS CloudWatch (OpenTelemetry)',
+      latestVersion: '0.5.0',
+      assets: {} as any,
+      status: 'not_installed',
+      policy_templates: [
+        {
+          name: 'aws',
+          title: 'AWS',
+          description: '',
+          deployment_modes: {
+            default: { enabled: true },
+            agentless: { enabled: true },
+          },
+          inputs: [
+            {
+              type: 'cloudwatch',
+              title: 'CloudWatch',
+              description: '',
+              deployment_modes: ['agentless'],
+            },
+          ],
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (useConfig as MockFn).mockReturnValue({ agentless: { enabled: true } } as any);
+      (useAwsOnboardingTelemetry as jest.Mock).mockReturnValue({
+        reportCredentialsAdded: mockReportCredentialsAdded,
+        reportDeployClicked: mockReportDeployClicked,
+        reportEnrollmentSucceeded: jest.fn(),
+      });
+    });
+
+    it('calls reportCredentialsAdded and reportDeployClicked with enabled input types on agentless submit', async () => {
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: awsPackageInfo,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      act(() => {
+        renderResult.result.current.handleSetupTechnologyChange('agentless' as any);
+      });
+
+      await act(async () => {
+        await renderResult.result.current.onSubmit();
+      });
+
+      expect(mockReportCredentialsAdded).toHaveBeenCalledTimes(1);
+      expect(mockReportDeployClicked).toHaveBeenCalledWith('agentless', expect.any(Array));
+    });
+
+    it('does not call telemetry when submitting in non-agentless mode', async () => {
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: awsPackageInfo,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      await act(async () => {
+        await renderResult.result.current.onSubmit();
+      });
+
+      expect(mockReportCredentialsAdded).not.toHaveBeenCalled();
+      expect(mockReportDeployClicked).not.toHaveBeenCalled();
     });
   });
 });

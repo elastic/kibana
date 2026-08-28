@@ -19,7 +19,12 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
-export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const updateUserRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
+) => {
   router.versioned
     .put({
       access: 'public',
@@ -39,6 +44,17 @@ export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             body: UpdatePrivMonUserRequestBody,
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);

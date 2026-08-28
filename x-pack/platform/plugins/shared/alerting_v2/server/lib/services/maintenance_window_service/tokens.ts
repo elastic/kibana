@@ -6,19 +6,19 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { MaintenanceWindowServiceContract } from './maintenance_window_service';
 
 /**
  * Pre-configured SavedObjects client with hidden types for maintenance windows
  */
-export const MaintenanceWindowSavedObjectsClientToken = Symbol.for(
+export const MaintenanceWindowSavedObjectsClientToken = createToken<SavedObjectsClientContract>(
   'alerting_v2.MaintenanceWindowSavedObjectsClient'
-) as ServiceIdentifier<SavedObjectsClientContract>;
+);
 
 /**
  * MaintenanceWindowService singleton (internal user, no request scope)
  */
-export const MaintenanceWindowServiceInternalToken = Symbol.for(
+export const MaintenanceWindowServiceInternalToken = createToken<MaintenanceWindowServiceContract>(
   'alerting_v2.MaintenanceWindowServiceInternal'
-) as ServiceIdentifier<MaintenanceWindowServiceContract>;
+);

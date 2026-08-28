@@ -73,16 +73,6 @@ export const dlmPhasesSelectorStrings = {
       defaultMessage: 'Enter a whole number greater than 0.',
     }
   ),
-  frozenMustOccurBeforeDeleteHelpText: (deletePhaseDuration: string) =>
-    i18n.translate('xpack.idxMgmt.dataLifecyclePhaseSelector.frozenMustOccurBeforeDeleteHelpText', {
-      defaultMessage: 'Must occur before the delete phase ({deletePhaseDuration}).',
-      values: { deletePhaseDuration },
-    }),
-  deleteMustOccurAfterFrozenHelpText: (frozenPhaseDuration: string) =>
-    i18n.translate('xpack.idxMgmt.dataLifecyclePhaseSelector.deleteMustOccurAfterFrozenHelpText', {
-      defaultMessage: 'Must occur after the frozen phase ({frozenPhaseDuration}).',
-      values: { frozenPhaseDuration },
-    }),
   frozenMustOccurBeforeDeleteError: (deletePhaseDuration: string) =>
     i18n.translate('xpack.idxMgmt.dataLifecyclePhaseSelector.frozenMustOccurBeforeDeleteError', {
       defaultMessage: 'Must occur before the delete phase ({deletePhaseDuration}).',
@@ -92,5 +82,10 @@ export const dlmPhasesSelectorStrings = {
     i18n.translate('xpack.idxMgmt.dataLifecyclePhaseSelector.deleteMustOccurAfterFrozenError', {
       defaultMessage: 'Must occur after the frozen phase ({frozenPhaseDuration}).',
       values: { frozenPhaseDuration },
+    }),
+  deleteMaximumRetentionText: (maximumRetentionPeriod: string) =>
+    i18n.translate('xpack.idxMgmt.dataLifecyclePhaseSelector.deleteMaximumRetentionText', {
+      defaultMessage: 'Must occur before the maximum retention ({maximumRetentionPeriod}).',
+      values: { maximumRetentionPeriod },
     }),
 };

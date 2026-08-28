@@ -146,6 +146,21 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/not supported inside a parallel branch/);
   });
 
+  it('rejects a waitForApproval step inside a branch body', () => {
+    expect(() =>
+      buildGraph({
+        ...baseParallel,
+        steps: [
+          {
+            name: 'approve',
+            type: 'waitForApproval',
+            with: { message: 'approve?' },
+          } as unknown as ConnectorStep,
+        ],
+      })
+    ).toThrow(/not supported inside a parallel branch/);
+  });
+
   it('compiles a workflow.fail step inside a dynamic branch body', () => {
     // `workflow.output` / `workflow.fail` are allowed inside a branch body; the
     // terminator node is compiled into the branch chain like any other step.
@@ -297,6 +312,27 @@ describe('convertToWorkflowGraph - parallel step', () => {
     ).toThrow(/unsupported flow-control|timeout/);
   });
 
+  it('rejects a waitForApproval step inside a static branch body', () => {
+    expect(() =>
+      buildGraph({
+        name: 'fanOut',
+        type: 'parallel',
+        branches: [
+          {
+            name: 'approval',
+            steps: [
+              {
+                name: 'approve',
+                type: 'waitForApproval',
+                with: { message: 'approve?' },
+              },
+            ],
+          },
+        ],
+      } as unknown as ParallelStep)
+    ).toThrow(/not supported inside a parallel branch/);
+  });
+
   it('compiles a workflow.fail step inside a static branch body', () => {
     const executionGraph = buildGraph({
       name: 'fanOut',
@@ -327,5 +363,59 @@ describe('convertToWorkflowGraph - parallel step', () => {
       'exitParallel_fanOut',
       'exitTimeoutZone_fanOut',
     ]);
+  });
+
+  it('wraps the parallel block in an if zone when a step-level `if` is set', () => {
+    const executionGraph = buildGraph({ ...baseParallel, if: 'inputs.enabled : true' });
+    const topSort = graphlib.alg.topsort(executionGraph);
+    expect(topSort).toEqual([
+      'enterCondition_if_fanOut',
+      'enterThen_if_fanOut',
+      'enterParallel_fanOut',
+      'branchStep',
+      'exitParallel_fanOut',
+      'exitThen_if_fanOut',
+      'exitCondition_if_fanOut',
+    ]);
+  });
+
+  it('rejects a step-level `if` inside a dynamic branch body', () => {
+    expect(() =>
+      buildGraph({
+        ...baseParallel,
+        steps: [
+          {
+            name: 'branchStep',
+            type: 'slack',
+            connectorId: 'slack',
+            with: {},
+            if: 'inputs.enabled : true',
+          } as unknown as ConnectorStep,
+        ],
+      })
+    ).toThrow(/unsupported flow-control/);
+  });
+
+  it('rejects a step-level `if` inside a static branch body', () => {
+    expect(() =>
+      buildGraph({
+        name: 'fanOut',
+        type: 'parallel',
+        branches: [
+          {
+            name: 'vt',
+            steps: [
+              {
+                name: 'scan',
+                type: 'slack',
+                connectorId: 'slack',
+                with: {},
+                if: 'inputs.enabled : true',
+              },
+            ],
+          },
+        ],
+      } as unknown as ParallelStep)
+    ).toThrow(/unsupported flow-control/);
   });
 });

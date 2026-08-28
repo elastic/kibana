@@ -147,7 +147,6 @@ describe('useEpisodesHistogramQuery', () => {
         first_timestamp: '2024-01-01T00:00:00.000Z',
         last_timestamp: '2024-01-01T00:30:00.000Z',
         'episode.status': 'inactive',
-        effective_status: 'inactive',
       },
     ]);
 
@@ -158,7 +157,7 @@ describe('useEpisodesHistogramQuery', () => {
           filterState: {},
           timeRange: mockTimeRange, // covers 00:00–02:00 → two 1h buckets
           bucketInterval: '1h',
-          breakdownField: 'effective_status',
+          breakdownField: 'episode.status',
         }),
       { wrapper: wrapper() }
     );
@@ -167,7 +166,7 @@ describe('useEpisodesHistogramQuery', () => {
 
     const rows = result.current.table?.rows ?? [];
     // Both buckets must be present for the known category 'inactive'
-    const inactiveRows = rows.filter((r) => r.effective_status === 'inactive');
+    const inactiveRows = rows.filter((r) => r['episode.status'] === 'inactive');
     expect(inactiveRows.length).toBe(2);
     // The second bucket must be zero-count
     const secondBucket = inactiveRows.find(

@@ -7,6 +7,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/field-types",
+    "@kbn/lens-common",
     "@kbn/react-field",
     "@kbn/unified-histogram",
     "@kbn/shared-ux-utility",
@@ -41,5 +42,8 @@
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/std",
+    "@kbn/test-eui-helpers",
+    "@kbn/core-feature-flags-browser-mocks",
+    "@kbn/ebt-click",
   ]
 }

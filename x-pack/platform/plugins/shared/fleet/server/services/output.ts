@@ -36,7 +36,7 @@ import type {
   OutputSoKafkaAttributes,
   OutputSoRemoteElasticsearchAttributes,
   SecretReference,
-  OutputSoBaseAttributes,
+  BeatsSoBaseAttributes,
 } from '../types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -66,8 +66,9 @@ import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
   OutputUnauthorizedError,
-  FleetError,
 } from '../errors';
+
+import { OUTPUT_ENCRYPTED_FIELDS } from '../saved_objects';
 
 import type { OutputType } from '../types';
 
@@ -715,6 +716,8 @@ class OutputService {
         data.username = undefined;
         data.password = undefined;
       }
+      // Kafka does not support proxies — clear any proxy_id silently (#267281)
+      data.proxy_id = null;
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -840,6 +843,43 @@ class OutputService {
     };
   }
 
+  public async listPreconfigured() {
+    // Use the plain (non-decrypting) soClient to avoid the cost of decrypting every output.
+    // is_preconfigured is mapped with index:false so it cannot be used in a KQL filter;
+    // filter client-side instead.
+    const outputs = await this.soClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+    });
+
+    const preconfigured = outputs.saved_objects.filter(
+      (so) => so.attributes.is_preconfigured === true
+    );
+
+    for (const output of preconfigured) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        name: output.attributes.name,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    const encryptedFieldKeys = [...OUTPUT_ENCRYPTED_FIELDS].map((f) => f.key);
+
+    return {
+      items: preconfigured.map<Output>((so) =>
+        outputSavedObjectToOutput({
+          ...so,
+          attributes: omit(so.attributes, encryptedFieldKeys) as OutputSOAttributes,
+        })
+      ),
+      total: preconfigured.length,
+      page: 1,
+      perPage: preconfigured.length,
+    };
+  }
+
   public async listAllForProxyId(proxyId: string) {
     const outputs = await this.soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
@@ -878,10 +918,6 @@ class OutputService {
       name: outputSO?.attributes?.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
-
-    if (outputSO.error) {
-      throw new FleetError(outputSO.error.message);
-    }
 
     return outputSavedObjectToOutput(outputSO);
   }
@@ -1039,9 +1075,9 @@ class OutputService {
         originalOutput.type === outputType.Elasticsearch ||
         originalOutput.type === outputType.RemoteElasticsearch
       ) {
-        (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams = null;
-        (updateData as Nullable<OutputSoBaseAttributes>).otel_exporter_config_yaml = null;
-        (updateData as Nullable<OutputSoBaseAttributes>).otel_disable_beatsauth = null;
+        (updateData as Nullable<BeatsSoBaseAttributes>).write_to_logs_streams = null;
+        (updateData as Nullable<BeatsSoBaseAttributes>).otel_exporter_config_yaml = null;
+        (updateData as Nullable<BeatsSoBaseAttributes>).otel_disable_beatsauth = null;
       }
 
       if (data.type === outputType.Logstash) {
@@ -1164,6 +1200,11 @@ class OutputService {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
+    // Kafka does not support proxies — clear any proxy_id silently (#267281)
+    if (mergedType === outputType.Kafka) {
+      updateData.proxy_id = null;
+    }
+
     if (
       data.type === outputType.RemoteElasticsearch &&
       updateData.type === outputType.RemoteElasticsearch
@@ -1232,15 +1273,11 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    const outputSO = await this.soClient.update<Nullable<OutputSOAttributes>>(
+    await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData
     );
-
-    if (outputSO.error) {
-      throw new FleetError(outputSO.error.message);
-    }
 
     if (secretsToDelete.length) {
       try {
@@ -1347,15 +1384,6 @@ class OutputService {
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
-
-    if (outputSO.error) {
-      appContextService
-        .getLogger()
-        .debug(
-          `Error getting output ${id} SO, using updated_at:undefined, cause: ${outputSO.error.message}`
-        );
-      return undefined;
-    }
 
     return outputSO.updated_at;
   }

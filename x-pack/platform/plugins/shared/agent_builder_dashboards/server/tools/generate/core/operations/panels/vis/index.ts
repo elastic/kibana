@@ -39,7 +39,7 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   nlQuery: string;
   /** Index, alias, or datastream to target; discovered when omitted. */
   index?: string;
-  /** Preferred chart type; the LLM suggests one when omitted. */
+  /** Required for new Lens panels; optional for Vega panels and edits. */
   chartType?: SupportedChartType;
   /** ES|QL query to back the visualization; generated when omitted. */
   esql?: string;
@@ -107,41 +107,23 @@ export const visPanelConfigInputSchema = z.object({
   ),
 });
 
-/**
- * A `request`-source input creates a Lens visualization from a natural-language
- * (or ES|QL) query. The inline panel resolver turns it into Lens panel content.
- */
-export const panelRequestSchema = z.object({
+const panelRequestBaseSchema = z.object({
   source: z.literal('request'),
   type: z
     .literal('vis')
     .default('vis')
-    .describe(
-      'Panel type to resolve. Only "vis" is currently resolvable from a request; use "renderer" to pick Lens or Vega.'
-    ),
+    .describe('Panel type to resolve. Only "vis" is currently resolvable from a request.'),
   grid: panelGridSchema,
   query: z
     .string()
     .max(2048)
     .describe('A natural language query describing the desired visualization.'),
-  renderer: z
-    .enum(['lens', 'vega'])
-    .optional()
-    .describe(
-      '(optional) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Ignored when editing an existing panel (edits keep the existing renderer).'
-    ),
   index: z
     .string()
     .max(256)
     .optional()
     .describe(
       '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
-    ),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe(
-      '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
     ),
   esql: z
     .string()
@@ -152,21 +134,59 @@ export const panelRequestSchema = z.object({
     ),
 });
 
+/** A new Lens panel requires the caller to choose its chart type. */
+export const lensPanelRequestSchema = panelRequestBaseSchema.extend({
+  renderer: z
+    .literal('lens')
+    .optional()
+    .describe('(optional) Render with Lens. Lens is the default when renderer is omitted.'),
+  chartType: z
+    .nativeEnum(SupportedChartType)
+    .describe('The Lens chart type to create. Choose it from the dashboard chart type guidance.'),
+});
+
+/** A new Vega panel may carry the closest Lens chart type as an authoring hint. */
+export const vegaPanelRequestSchema = panelRequestBaseSchema.extend({
+  renderer: z
+    .literal('vega')
+    .describe(
+      'Render with Vega-Lite. Use for small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite.'
+    ),
+  chartType: z
+    .nativeEnum(SupportedChartType)
+    .optional()
+    .describe(
+      '(optional) The closest Lens chart type, used only as an authoring hint. Omit it when no Lens chart type represents the requested Vega-Lite visualization.'
+    ),
+});
+
+/**
+ * A `request`-source input creates a Lens or Vega visualization from a
+ * natural-language (or ES|QL) query.
+ */
+export const panelRequestSchema = z.union([lensPanelRequestSchema, vegaPanelRequestSchema]);
+
 export type PanelRequestInput = z.infer<typeof panelRequestSchema>;
 
 /**
- * The vis variant of an `edit_panels` item: targets an existing Lens panel by id
- * and re-resolves its content from a natural-language query. Derived from the
- * add schema so the request shape stays in sync.
+ * The vis variant of an `edit_panels` item targets an existing Lens or Vega
+ * panel by id. The existing panel determines the renderer, while chartType is
+ * an optional instruction for changing or preserving its visual form.
  */
-export const editPanelRequestInputSchema = panelRequestSchema
+export const editPanelRequestInputSchema = panelRequestBaseSchema
   .omit({ grid: true, index: true })
   .extend({
-    panelId: z.string().max(256).describe('Existing Lens panel id to update.'),
+    panelId: z.string().max(256).describe('Existing Lens or Vega panel id to update.'),
     query: z
       .string()
       .max(2048)
       .describe('A natural language query describing how to update the panel.'),
+    chartType: z
+      .nativeEnum(SupportedChartType)
+      .optional()
+      .describe(
+        '(optional) Change the existing panel to this chart type. Omit it to let the visualization resolver interpret the edit using the existing configuration.'
+      ),
   });
 
 export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;

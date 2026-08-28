@@ -18,11 +18,13 @@ export class UnifiedSearchPageObject extends FtrService {
   public async switchDataView(switchButtonSelector: string, dataViewTitle: string) {
     await this.testSubjects.click(switchButtonSelector);
 
-    const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher', 500);
+    await this.testSubjects.find('indexPattern-switcher', 500);
+    // The switcher fetches its data view list asynchronously; typing the filter
+    // before it renders races the re-render and can scramble the input, leaving
+    // the target option unmatched. Wait for the list to populate first.
+    await this.find.byCssSelector('[data-test-subj^="dataView-"]');
     await this.testSubjects.setValue('indexPattern-switcher--input', dataViewTitle);
-    await (
-      await indexPatternSwitcher.findByCssSelector(`[data-test-subj="dataView-${dataViewTitle}"]`)
-    ).click();
+    await this.testSubjects.click(`dataView-${dataViewTitle}`);
 
     await this.retry.waitFor(
       'wait for updating switcher',
@@ -73,12 +75,5 @@ export class UnifiedSearchPageObject extends FtrService {
 
   public async switchToDataViewMode() {
     await this.PageObjects.discover.selectDataViewMode();
-    await this.retry.waitFor('the modal to open', async () => {
-      return await this.testSubjects.exists('discover-esql-to-dataview-modal');
-    });
-    await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
-    await this.retry.waitFor('the modal to close', async () => {
-      return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
-    });
   }
 }

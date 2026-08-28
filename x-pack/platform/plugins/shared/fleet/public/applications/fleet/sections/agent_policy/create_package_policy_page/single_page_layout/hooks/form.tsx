@@ -77,6 +77,7 @@ import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensu
 import { useYaml } from '../../../../../../../services';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
+import { useAwsOnboardingTelemetry } from './aws_onboarding_telemetry';
 
 const DEFAULT_AGENTLESS_LIMIT = 50;
 
@@ -135,7 +136,7 @@ export const createAgentPolicyIfNeeded = async ({
       }
     }
 
-    // Skip policy creation for agentless as it's done through agentless_policies API
+    // Skip policy creation for agentless as it's done through the managed integrations API
     if (newAgentPolicy.supports_agentless) {
       return;
     }
@@ -150,13 +151,20 @@ export const createAgentPolicyIfNeeded = async ({
 
 async function savePackagePolicy(
   pkgPolicy: CreatePackagePolicyRequest['body'],
-  varGroups?: RegistryVarGroup[]
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
 ): Promise<SavedPolicyResult> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
-  // If agentless use agentless policies API
+  // If agentless, use the managed integrations API
   if (policy.supports_agentless) {
-    const agentlessRequestBody = toNewAgentlessPolicy(pkgPolicy as NewPackagePolicy, varGroups);
+    // Pass `packageInfo` so the create write applies the same template-aware input allow-check as the
+    // edit read path (`agentlessPolicyToPackagePolicy`), keeping create → GET → form → PUT idempotent.
+    const agentlessRequestBody = toNewAgentlessPolicy(
+      pkgPolicy as NewPackagePolicy,
+      varGroups,
+      packageInfo
+    );
     const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody);
     return { type: 'agentless', policy: item };
   }
@@ -265,6 +273,8 @@ export function useOnSubmit({
   defaultPolicyData?: Partial<NewPackagePolicy>;
 }) {
   const { notifications, docLinks } = useStartServices();
+  const { reportCredentialsAdded, reportDeployClicked, reportEnrollmentSucceeded } =
+    useAwsOnboardingTelemetry({ pkgName: packageInfo?.name });
   const { spaceId } = useFleetStatus();
   const yaml = useYaml();
   const confirmForceInstall = useConfirmForceInstall();
@@ -411,7 +421,9 @@ export function useOnSubmit({
               'overrides',
               'supports_agentless',
               'supports_cloud_connector',
-              'additional_datastreams_permissions'
+              'additional_datastreams_permissions',
+              'global_data_tags',
+              'var_group_selections'
             )
           );
         }
@@ -596,6 +608,18 @@ export function useOnSubmit({
         return;
       }
 
+      // AWS onboarding funnel telemetry — fire only when coming from the AWS quickstart.
+      // Credentials are guaranteed valid at this point (validation gate above already returned if not).
+      // Both events are emitted together here because "credentials added" is a prerequisite for
+      // reaching Save and doesn't have its own discrete UI commit action.
+      if (isAgentlessSelected) {
+        const enabledInputTypes = (packagePolicy.inputs ?? [])
+          .filter((input) => input.enabled)
+          .map((input) => input.type);
+        reportCredentialsAdded();
+        reportDeployClicked('agentless', enabledInputTypes);
+      }
+
       let createdPolicy = overrideCreatedAgentPolicy;
       if (!overrideCreatedAgentPolicy) {
         try {
@@ -628,7 +652,7 @@ export function useOnSubmit({
                 <>
                   <FormattedMessage
                     id="xpack.fleet.createAgentlessPolicy.overProvisionErrorMessage"
-                    defaultMessage="You've reached the maximum number of {limit} agentless deployments. To add more, either remove or change some to Elastic Agent-based integrations. {docLink}"
+                    defaultMessage="You've reached the maximum number of {limit} managed integrations. To add more, either remove or change some to Elastic Agent-based integrations. {docLink}"
                     values={{
                       limit: <b>{e?.attributes?.limit ?? DEFAULT_AGENTLESS_LIMIT}</b>,
                       docLink: (
@@ -655,7 +679,7 @@ export function useOnSubmit({
                 <>
                   <FormattedMessage
                     id="xpack.fleet.createAgentlessPolicy.FleetUnreachableErrorMessage"
-                    defaultMessage="Fleet is not reachable and required to create agentless policy. Error: {errorMessage}. {docLink}"
+                    defaultMessage="Fleet is not reachable and required to create a managed integration. Error: {errorMessage}. {docLink}"
                     values={{
                       errorMessage: e?.message ?? '',
                       docLink: (
@@ -706,7 +730,8 @@ export function useOnSubmit({
             force: forceInstall,
             create_dataset_templates: createDatasetTemplates,
           },
-          varGroups
+          varGroups,
+          packageInfo
         );
 
         if (savedPolicyResult.policy.package) {
@@ -778,6 +803,7 @@ export function useOnSubmit({
           }
 
           if (isAgentlessConfigured) {
+            reportEnrollmentSucceeded();
             onSaveNavigate(savedPolicyResult, ['openEnrollmentFlyout']);
           } else {
             onSaveNavigate(savedPolicyResult);
@@ -829,6 +855,7 @@ export function useOnSubmit({
       getAgentlessStatusForPackage,
       packageInfo,
       isAgentlessAgentPolicy,
+      isAgentlessSelected,
       packagePolicy,
       newAgentPolicy,
       withSysMonitoring,
@@ -841,6 +868,9 @@ export function useOnSubmit({
       onSaveNavigate,
       confirmForceInstall,
       createDatasetTemplates,
+      reportCredentialsAdded,
+      reportDeployClicked,
+      reportEnrollmentSucceeded,
     ]
   );
 

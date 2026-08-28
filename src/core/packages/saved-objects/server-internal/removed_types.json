@@ -6,6 +6,8 @@
   "csp_rule",
   "data_connector",
   "endpoint:user-artifact",
+  "entity-definition",
+  "entity-discovery-api-key",
   "file-upload-telemetry",
   "fleet-agent-actions",
   "fleet-agent-events",

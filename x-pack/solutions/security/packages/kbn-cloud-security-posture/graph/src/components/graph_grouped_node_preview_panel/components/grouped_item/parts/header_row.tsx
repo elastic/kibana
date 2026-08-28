@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_EVENT,
@@ -33,12 +32,6 @@ import type { EntityOrEventItem, EntityItem, EventItem, AlertItem } from '../typ
 import { displayEntityName, displayEventName } from '../utils';
 import { EntityActionsButton } from './entity_actions_button';
 import { EventActionsButton } from './event_actions_button';
-import {
-  DocumentDetailsPreviewPanelKey,
-  ALERT_PREVIEW_BANNER,
-  EVENT_PREVIEW_BANNER,
-} from '../../../constants';
-import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
 import { isInitialEntityForScope } from '../../../../filters/filter_store';
 
 const entityUnavailableTooltip = i18n.translate(
@@ -54,12 +47,18 @@ export interface HeaderRowProps {
    * Unique identifier for the graph instance, used to scope filter state.
    */
   scopeId: string;
+  /** Invoked to open the event/alert details preview for the clicked item. */
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
+  /** Invoked to open the entity details preview for the clicked item. */
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
-export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
+export const HeaderRow = ({ item, scopeId, onShowDocument, onShowEntity }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
-  const { openPreviewPanel } = useExpandableFlyoutApi();
-  const openEntityPreviewPanel = useOpenEntityPreviewPanel();
 
   const title = useMemo(() => {
     switch (item.itemType) {
@@ -79,24 +78,24 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
 
       if (item.itemType === DOCUMENT_TYPE_ENTITY) {
         const entityItem = item as EntityItem;
-        openEntityPreviewPanel(entityItem.id, scopeId, entityItem.entity);
+        onShowEntity({
+          engineType: entityItem.entity.engine_type,
+          entityId: entityItem.id,
+          entityName: entityItem.entity.name,
+        });
       } else {
         // event or alert
         const eventOrAlertItem = item as EventItem | AlertItem;
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: eventOrAlertItem.docId,
-            indexName: eventOrAlertItem.index,
-            scopeId,
-            banner:
-              item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
-            isPreviewMode: true,
-          },
-        });
+        if (eventOrAlertItem.docId) {
+          onShowDocument(
+            eventOrAlertItem.docId,
+            eventOrAlertItem.index,
+            eventOrAlertItem.itemType === DOCUMENT_TYPE_EVENT
+          );
+        }
       }
     },
-    [item, openPreviewPanel, openEntityPreviewPanel, scopeId]
+    [item, onShowDocument, onShowEntity]
   );
 
   const isClickable =
@@ -169,9 +168,14 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
             item={item as EntityItem}
             scopeId={scopeId}
             isInitialEntity={isInitialEntityForScope(scopeId, (item as EntityItem).id)}
+            onShowEntity={onShowEntity}
           />
         ) : (
-          <EventActionsButton item={item as EventItem | AlertItem} scopeId={scopeId} />
+          <EventActionsButton
+            item={item as EventItem | AlertItem}
+            scopeId={scopeId}
+            onShowDocument={onShowDocument}
+          />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -45,7 +45,6 @@ describe('CloudConnectorSelector', () => {
         role_arn: { value: 'arn:aws:iam::123456789012:role/Role1' },
         external_id: { value: 'external-id-1' },
       },
-      packagePolicyCount: 2,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-02T00:00:00Z',
     },
@@ -58,7 +57,6 @@ describe('CloudConnectorSelector', () => {
         role_arn: { value: 'arn:aws:iam::123456789012:role/Role2' },
         external_id: { value: 'external-id-2' },
       },
-      packagePolicyCount: 1,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-02T00:00:00Z',
     },
@@ -196,104 +194,6 @@ describe('CloudConnectorSelector', () => {
     expect(mockSetCredentials).not.toHaveBeenCalled();
   });
 
-  describe('AccountBadge rendering', () => {
-    it('should render Single Account badge for single account type connector', () => {
-      renderSelector({
-        cloudConnectorId: 'connector-1',
-      });
-
-      expect(screen.getByText('Single Account')).toBeInTheDocument();
-    });
-
-    it('should render Organization badge for organization account type connector', () => {
-      renderSelector({
-        cloudConnectorId: 'connector-2',
-      });
-
-      expect(screen.getByText('Organization')).toBeInTheDocument();
-    });
-
-    it('should display account badges in dropdown options', async () => {
-      const user = userEvent.setup();
-      renderSelector();
-
-      const selector = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
-      await user.click(selector);
-
-      await waitFor(() => {
-        expect(screen.getByText('AWS Connector 1')).toBeInTheDocument();
-        expect(screen.getByText('AWS Connector 2')).toBeInTheDocument();
-        // Both badges should be visible in the dropdown
-        expect(screen.getByText('Single Account')).toBeInTheDocument();
-        expect(screen.getByText('Organization')).toBeInTheDocument();
-      });
-    });
-
-    it('should not render badge when accountType is undefined', () => {
-      const connectorsWithoutAccountType = [
-        {
-          ...mockCloudConnectors[0],
-          accountType: undefined,
-        },
-      ];
-
-      mockUseGetCloudConnectors.mockReturnValue({
-        data: connectorsWithoutAccountType,
-        isLoading: false,
-        error: null,
-      } as unknown as ReturnType<typeof useGetCloudConnectors>);
-
-      renderSelector({
-        cloudConnectorId: 'connector-1',
-      });
-
-      expect(screen.queryByText('Single Account')).not.toBeInTheDocument();
-      expect(screen.queryByText('Organization')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('IntegrationCountBadge rendering', () => {
-    it('should display integration count badges in dropdown options', async () => {
-      const user = userEvent.setup();
-      renderSelector();
-
-      const selector = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
-      await user.click(selector);
-
-      await waitFor(() => {
-        // Badge should show plural for count > 1
-        expect(screen.getByText('Used by 2 integrations')).toBeInTheDocument();
-        // Badge should show singular for count = 1
-        expect(screen.getByText('Used by 1 integration')).toBeInTheDocument();
-      });
-    });
-
-    it('should display zero integrations badge when packagePolicyCount is 0', async () => {
-      const connectorsWithZeroCount = [
-        {
-          ...mockCloudConnectors[0],
-          packagePolicyCount: 0,
-        },
-      ];
-
-      mockUseGetCloudConnectors.mockReturnValue({
-        data: connectorsWithZeroCount,
-        isLoading: false,
-        error: null,
-      } as unknown as ReturnType<typeof useGetCloudConnectors>);
-
-      const user = userEvent.setup();
-      renderSelector();
-
-      const selector = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
-      await user.click(selector);
-
-      await waitFor(() => {
-        expect(screen.getByText('Used by 0 integrations')).toBeInTheDocument();
-      });
-    });
-  });
-
   describe('Account Type Filtering', () => {
     it('should call useGetCloudConnectors with correct filter options', () => {
       renderSelector({
@@ -304,7 +204,6 @@ describe('CloudConnectorSelector', () => {
         cloudProvider: 'aws',
         accountType: SINGLE_ACCOUNT,
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 
@@ -315,7 +214,6 @@ describe('CloudConnectorSelector', () => {
         cloudProvider: 'aws',
         accountType: undefined,
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
   });
@@ -342,7 +240,6 @@ describe('CloudConnectorSelector', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 3,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-02T00:00:00Z',
       },
@@ -366,7 +263,6 @@ describe('CloudConnectorSelector', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 1,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-02T00:00:00Z',
       },
@@ -428,32 +324,6 @@ describe('CloudConnectorSelector', () => {
       });
     });
 
-    it('should display GCP account badges correctly', async () => {
-      const user = userEvent.setup();
-      renderSelector({ provider: 'gcp' });
-
-      const selector = screen.getByTestId(GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
-      await user.click(selector);
-
-      await waitFor(() => {
-        expect(screen.getByText('Single Account')).toBeInTheDocument();
-        expect(screen.getByText('Organization')).toBeInTheDocument();
-      });
-    });
-
-    it('should display GCP integration count badges', async () => {
-      const user = userEvent.setup();
-      renderSelector({ provider: 'gcp' });
-
-      const selector = screen.getByTestId(GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
-      await user.click(selector);
-
-      await waitFor(() => {
-        expect(screen.getByText('Used by 3 integrations')).toBeInTheDocument();
-        expect(screen.getByText('Used by 1 integration')).toBeInTheDocument();
-      });
-    });
-
     it('should display selected GCP connector', () => {
       renderSelector({
         provider: 'gcp',
@@ -473,7 +343,6 @@ describe('CloudConnectorSelector', () => {
         cloudProvider: 'gcp',
         accountType: ORGANIZATION_ACCOUNT,
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
   });

@@ -11,12 +11,6 @@ import type { TestGroupRunOrderResponse } from '../client';
 
 export type RunGroup = TestGroupRunOrderResponse['types'][0];
 
-export interface FtrConfigsManifest {
-  defaultQueue?: string;
-  disabled?: string[];
-  enabled?: Array<string | { [configPath: string]: { queue: string } }>;
-}
-
 export interface FunctionalGroup {
   title: string;
   key: string;

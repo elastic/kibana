@@ -10,7 +10,11 @@ import { SCRIPT_TAGS } from '../../../endpoint/service/script_library/constants'
 import { validateNoDuplicateValues, validateNonEmptyString } from '../schema_utils';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../endpoint/constants';
 
-export const ScriptNameSchema = schema.string({ minLength: 1, validate: validateNonEmptyString });
+export const ScriptNameSchema = schema.string({
+  minLength: 1,
+  maxLength: 256,
+  validate: validateNonEmptyString,
+});
 export const ScriptFileSchema = schema.stream();
 export const ScriptFileTypeSchema = schema.oneOf([
   schema.literal('archive'),
@@ -25,6 +29,7 @@ export const ScriptPlatformSchema = schema.arrayOf(
 
 export const ScriptPathToExecutableSchema = schema.string({
   minLength: 1,
+  maxLength: 4096,
   validate: validateNonEmptyString,
 });
 

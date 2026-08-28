@@ -9,9 +9,16 @@ import type { AggregatedPrebuiltRuleError } from '../../../../../common/api/dete
 import { getErrorMessage, getErrorStatusCode } from '../../../../utils/error_helpers';
 import type { PromisePoolError } from '../../../../utils/promise_pool';
 
+export interface PrebuiltRulesInstallError {
+  item: { rule_id: string; name?: string };
+  error: unknown;
+}
+
+export type PrebuiltRulesUpgradeError = PromisePoolError<{ rule_id: string; name?: string }>;
+
 export function aggregatePrebuiltRuleErrors(
-  errors: Array<PromisePoolError<{ rule_id: string; name?: string }>>
-) {
+  errors: PrebuiltRulesInstallError[] | PrebuiltRulesUpgradeError[]
+): AggregatedPrebuiltRuleError[] {
   const errorsByMessage: Record<string, AggregatedPrebuiltRuleError> = {};
 
   errors.forEach(({ error, item }) => {

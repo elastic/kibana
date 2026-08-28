@@ -107,4 +107,6 @@ components:
                         - process
                     entity_id:
                       type: string
+                      minLength: 1
+                      maxLength: 256
 

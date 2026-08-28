@@ -27,6 +27,7 @@ import {
 } from '../../../../common/constants/attachments';
 import { AttachmentType } from '../../../../common/types/domain';
 import type { ConfigType } from '../../../config';
+import { V2_NOOP_ATTACHMENTS_WRITER } from '../../../cases_analytics_v2';
 
 const mode = 'legacy';
 
@@ -41,6 +42,10 @@ describe('AttachmentService getter', () => {
       log: mockLogger,
       unsecuredSavedObjectsClient,
       config: { attachments: { enabled: attachmentsEnabled } } as unknown as ConfigType,
+      // AttachmentGetter doesn't exercise the analytics writer (it's read-only),
+      // but ServiceContext requires the field. The shared exported noop keeps
+      // this in lockstep with the writer contract instead of a hand-rolled stub.
+      analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
   let attachmentGetter: AttachmentGetter;
 
@@ -369,6 +374,108 @@ describe('AttachmentService getter', () => {
       };
       expect(finderArg.filter.function).toBe('and');
       expect(finderArg.filter.arguments[0]?.function).toBe('or');
+    });
+  });
+
+  describe('getUnifiedAttachmentsByTypes', () => {
+    it('returns an empty array when types is empty without querying', async () => {
+      const res = await attachmentGetter.getUnifiedAttachmentsByTypes({
+        caseId: '1',
+        types: [],
+      });
+
+      expect(res).toEqual([]);
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).not.toHaveBeenCalled();
+    });
+
+    it('preserves entity metadata fields that the document codec would drop', async () => {
+      const soFindRes = createSOFindResponse([
+        {
+          id: 'entity-so-1',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          references: [],
+          score: 0,
+          attributes: {
+            type: 'security.entity',
+            attachmentId: 'user:alice@default',
+            metadata: {
+              entityName: 'alice',
+              entityType: 'user',
+              index: '.entities.*',
+            },
+            owner: 'securitySolution',
+            created_at: '2020-01-01T00:00:00.000Z',
+            created_by: {
+              username: 'elastic',
+              full_name: null,
+              email: null,
+            },
+            pushed_at: null,
+            pushed_by: null,
+            updated_at: null,
+            updated_by: null,
+          },
+        },
+      ]);
+
+      mockFinder(soFindRes);
+
+      const res = await attachmentGetter.getUnifiedAttachmentsByTypes({
+        caseId: '1',
+        types: ['security.entity'],
+      });
+
+      expect(res).toEqual([
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            type: 'security.entity',
+            attachmentId: 'user:alice@default',
+            metadata: {
+              entityName: 'alice',
+              entityType: 'user',
+              index: '.entities.*',
+            },
+          }),
+        }),
+      ]);
+    });
+
+    it('skips a malformed attachment and logs a warning instead of throwing', async () => {
+      const validAttachment = {
+        id: 'entity-so-valid',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        references: [],
+        score: 0,
+        attributes: {
+          type: 'security.entity',
+          attachmentId: 'user:alice@default',
+          metadata: { entityName: 'alice', entityType: 'user' },
+          owner: 'securitySolution',
+          created_at: '2020-01-01T00:00:00.000Z',
+          created_by: { username: 'elastic', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        },
+      };
+      const malformedAttachment = {
+        ...validAttachment,
+        id: 'entity-so-malformed',
+        attributes: { ...validAttachment.attributes },
+      };
+      unset(malformedAttachment, 'attributes.attachmentId');
+      const soFindRes = createSOFindResponse([malformedAttachment, validAttachment]);
+
+      mockFinder(soFindRes);
+
+      const res = await attachmentGetter.getUnifiedAttachmentsByTypes({
+        caseId: '1',
+        types: ['security.entity'],
+      });
+
+      expect(res).toEqual([expect.objectContaining({ id: 'entity-so-valid' })]);
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('entity-so-malformed'));
     });
   });
 

@@ -186,6 +186,16 @@ export const NO_WARNINGS_RECORDED = i18n.translate(
   { defaultMessage: 'No warnings recorded.' }
 );
 
+export const TOP_ERRORS_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topErrorsTableCaption',
+  { defaultMessage: 'Top error messages' }
+);
+
+export const TOP_WARNINGS_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.topWarningsTableCaption',
+  { defaultMessage: 'Top warning messages' }
+);
+
 // ---------------------------------------------------------------------------
 // Historical Trends
 // ---------------------------------------------------------------------------

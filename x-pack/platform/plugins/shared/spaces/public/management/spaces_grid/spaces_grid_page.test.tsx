@@ -13,6 +13,7 @@ import {
   notificationServiceMock,
   scopedHistoryMock,
 } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -23,18 +24,18 @@ import { spacesManagerMock } from '../../spaces_manager/mocks';
 
 const spaces = [
   {
-    id: 'default',
+    id: asSpaceId('default'),
     name: 'Default',
     disabledFeatures: [],
     _reserved: true,
   },
   {
-    id: 'custom-1',
+    id: asSpaceId('custom-1'),
     name: 'Custom 1',
     disabledFeatures: [],
   },
   {
-    id: 'custom-2',
+    id: asSpaceId('custom-2'),
     name: 'Custom 2',
     initials: 'LG',
     color: '#ABCDEF',
@@ -49,10 +50,10 @@ spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
   new KibanaFeature({
-    id: 'feature-1',
+    id: asSpaceId('feature-1'),
     name: 'feature 1',
     app: [],
-    category: { id: 'foo', label: 'foo' },
+    category: { id: asSpaceId('foo'), label: 'foo' },
     privileges: null,
   }),
 ]);
@@ -116,19 +117,19 @@ describe('SpacesGridPage', () => {
     httpStart.get.mockResolvedValue([]);
     const spacesWithSolution = [
       {
-        id: 'default',
+        id: asSpaceId('default'),
         name: 'Default',
         disabledFeatures: [],
         _reserved: true,
       },
       {
-        id: 'custom-1',
+        id: asSpaceId('custom-1'),
         name: 'Custom 1',
         disabledFeatures: [],
         solution: 'es',
       },
       {
-        id: 'custom-2',
+        id: asSpaceId('custom-2'),
         name: 'Custom 2',
         initials: 'LG',
         color: '#ABCDEF',
@@ -220,7 +221,7 @@ describe('SpacesGridPage', () => {
 
     expect(filteredItems).toEqual([
       {
-        id: 'custom-1',
+        id: asSpaceId('custom-1'),
         name: 'Custom 1',
         disabledFeatures: [],
         solution: 'es',
@@ -228,11 +229,62 @@ describe('SpacesGridPage', () => {
     ]);
   });
 
+  it('re-applies an in-flight search when loadGrid resolves', async () => {
+    let resolveSpaces: (value: typeof spaces) => void = () => {};
+    const spacesPromise = new Promise<typeof spaces>((resolve) => {
+      resolveSpaces = resolve;
+    });
+
+    const deferredSpacesManager = spacesManagerMock.create();
+    deferredSpacesManager.getSpaces = jest.fn().mockReturnValue(spacesPromise);
+    deferredSpacesManager.getActiveSpace.mockResolvedValue(spaces[0]);
+
+    const wrapper = shallowWithIntl(
+      <SpacesGridPage
+        spacesManager={deferredSpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility={false}
+        {...spacesGridCommonProps}
+      />
+    );
+
+    const page = wrapper.instance() as SpacesGridPage;
+    act(() => {
+      page.onQueryChange({
+        query: { text: 'Custom 1' },
+      } as Parameters<SpacesGridPage['onQueryChange']>[0]);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      resolveSpaces(spaces);
+      await spacesPromise;
+    });
+    wrapper.update();
+
+    expect(wrapper.find('EuiInMemoryTable').prop('items')).toEqual([
+      {
+        id: asSpaceId('custom-1'),
+        name: 'Custom 1',
+        disabledFeatures: [],
+      },
+    ]);
+  });
+
   it('renders a "current" badge for the current space', async () => {
     const spacesWithCurrent = [
-      { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true },
-      { id: 'test-1', name: 'Test', disabledFeatures: [] },
-      { id: 'test-2', name: 'Test', disabledFeatures: [] },
+      { id: asSpaceId('default'), name: 'Default', disabledFeatures: [], _reserved: true },
+      { id: asSpaceId('test-1'), name: 'Test', disabledFeatures: [] },
+      { id: asSpaceId('test-2'), name: 'Test', disabledFeatures: [] },
     ];
     const spacesManagerWithCurrent = spacesManagerMock.create();
     spacesManagerWithCurrent.getSpaces = jest.fn().mockResolvedValue(spacesWithCurrent);

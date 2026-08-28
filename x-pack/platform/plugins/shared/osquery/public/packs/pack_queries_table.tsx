@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PackQueryFormData, UsePackQueryFormProps } from './queries/use_pack_query_form';
+import { resolveInheritedScheduleInput } from './queries/use_pack_query_form';
 import { OS_LABELS, PLATFORM_IDS, isPlatformId } from './queries/platforms';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { formatQuerySchedule } from './format_query_schedule';
@@ -42,16 +43,23 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
 
   const renderScheduleColumn = useCallback(
-    (_: unknown, item: PackQueryFormData) =>
-      formatQuerySchedule(
-        item.schedule_type
-          ? {
-              schedule_type: item.schedule_type,
-              interval: item.interval,
-              rrule_schedule: item.rrule_schedule,
-            }
-          : packSchedule ?? { interval: item.interval }
-      ),
+    (_: unknown, item: PackQueryFormData) => {
+      if (item.schedule_type) {
+        return formatQuerySchedule({
+          schedule_type: item.schedule_type,
+          interval: item.interval,
+          rrule_schedule: item.rrule_schedule,
+        });
+      }
+
+      // A non-override query resolves its effective schedule through the shared
+      // helper — the single source of truth (shared with the flyout and the
+      // form hook) for whether it inherits a real pack schedule (recurrence, or
+      // an explicitly persisted interval) or falls back to its own interval. A
+      // legacy pack with no real pack-level schedule synthesizes an interval
+      // default that must not shadow the query's own interval.
+      return formatQuerySchedule(resolveInheritedScheduleInput(packSchedule, item.interval));
+    },
     [packSchedule]
   );
   const renderDeleteAction = useCallback(
@@ -239,6 +247,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
 
   return (
     <EuiBasicTable<PackQueryFormData>
+      data-test-subj="packQueriesTable"
       items={data}
       itemId={itemId}
       columns={columns}

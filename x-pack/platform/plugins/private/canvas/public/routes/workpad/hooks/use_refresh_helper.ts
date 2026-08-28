@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useContext, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { WorkpadRoutingContext } from '../workpad_routing_context';
 import { getInFlight } from '../../../state/selectors/resolved_args';
 // @ts-expect-error untyped local

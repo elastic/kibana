@@ -26,7 +26,7 @@ export function registerDisableAllWorkflowsRoute({ router, api, spaces }: RouteD
       },
       withAvailabilityCheck(async (_context, request, response) => {
         const spaceId = spaces.getSpaceId(request);
-        const result = await api.disableAllWorkflows(spaceId);
+        const result = await api.disableAllWorkflows(spaceId, request);
         return response.ok({
           body: result,
         });

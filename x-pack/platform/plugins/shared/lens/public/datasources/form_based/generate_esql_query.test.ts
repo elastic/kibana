@@ -100,6 +100,44 @@ describe('generateEsqlQuery', () => {
     });
   });
 
+  it('should return failure with drop_partials_not_supported reason if drop partial intervals is set', () => {
+    const result = generateEsqlQuery(
+      [
+        [
+          '1',
+          {
+            operationType: 'date_histogram',
+            sourceField: 'order_date',
+            label: 'Date histogram',
+            dataType: 'date',
+            isBucketed: true,
+            params: { interval: 'auto', dropPartials: true },
+          } as DateHistogramIndexPatternColumn,
+        ],
+        [
+          '2',
+          {
+            operationType: 'count',
+            sourceField: 'records',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        ],
+      ],
+      mockLayer,
+      mockIndexPattern,
+      uiSettings,
+      mockDateRange,
+      new Date()
+    );
+
+    expect(result).toEqual({
+      success: false,
+      reason: 'drop_partials_not_supported',
+    });
+  });
+
   it('should return failure with formula_not_supported reason if lens formula is used', () => {
     const result = generateEsqlQuery(
       [

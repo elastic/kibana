@@ -12,6 +12,7 @@ import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { EVALS_EXPERIMENTS_COMPARE_URL, API_VERSIONS } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerCompareExperimentsRoute } from './compare_experiments';
 
@@ -72,7 +73,7 @@ describe('GET /internal/evals/experiments/compare', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
@@ -113,6 +114,20 @@ describe('GET /internal/evals/experiments/compare', () => {
     await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(evaluationScoreService.search).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns 400 without querying when baseline and target are the same', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+
+    const response = await handler(
+      context,
+      makeRequest('experiment-a', 'experiment-a'),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.payload.message).toContain('must differ');
+    expect(evaluationScoreService.search).not.toHaveBeenCalled();
   });
 
   it('returns 404 when no scores exist for the first experiment', async () => {

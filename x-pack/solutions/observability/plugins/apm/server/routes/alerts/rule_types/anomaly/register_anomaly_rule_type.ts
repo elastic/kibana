@@ -41,6 +41,7 @@ import { anomalyParamsSchema } from '@kbn/response-ops-rule-params/apm_anomaly';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   ANOMALY_DETECTOR_TYPE,
+  ANOMALY_TIMESTAMP,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -139,7 +140,7 @@ export function registerAnomalyRuleType({
         return { state: {} };
       }
 
-      const { params, services, spaceId, getTimeRange } = options;
+      const { params, services, spaceId, getTimeRange, previousStartedAt } = options;
       const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
@@ -182,6 +183,9 @@ export function registerAnomalyRuleType({
 
       const { dateStart } = getTimeRange(window);
 
+      // Match docs ingested since the previous run so each is alerted on once. First run falls back to dateStart.
+      const lastRunTime = previousStartedAt ? previousStartedAt.toISOString() : dateStart;
+
       const jobIds = mlJobs.map((job) => job.jobId);
       const anomalySearchParams = {
         track_total_hits: false,
@@ -193,10 +197,24 @@ export function registerAnomalyRuleType({
               { terms: { job_id: jobIds } },
               { term: { is_interim: false } },
               {
-                range: {
-                  timestamp: {
-                    gte: dateStart,
-                  },
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          { exists: { field: 'event.ingested' } },
+                          { range: { 'event.ingested': { gte: lastRunTime } } },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: { exists: { field: 'event.ingested' } },
+                        filter: [{ range: { timestamp: { gte: dateStart } } }],
+                      },
+                    },
+                  ],
                 },
               },
               ...termQuery('partition_field_value', ruleParams.serviceName, {
@@ -330,6 +348,7 @@ export function registerAnomalyRuleType({
 
         const payload = {
           [ANOMALY_DETECTOR_TYPE]: detectorType,
+          [ANOMALY_TIMESTAMP]: timestamp,
           [SERVICE_NAME]: serviceName,
           ...getEnvironmentEsField(environment),
           [TRANSACTION_TYPE]: transactionType,

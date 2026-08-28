@@ -16,7 +16,7 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import type { LensCreateIn, LensSavedObject } from '../../../content_management';
+import type { LensCreateIn, LensSavedObject } from '../../../content_management/zod';
 import type { RegisterAPIRouteFn } from '../../types';
 import type { LensCreateResponseBody } from './types';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
@@ -38,8 +38,8 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
-        since: '9.4.0',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -82,7 +82,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
           .for<LensSavedObject>(LENS_CONTENT_TYPE);
@@ -94,7 +94,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
           const responseItem = getLensResponseItem(builder, result.item);
 
           return res.created<LensCreateResponseBody>({
-            body: responseItem,
+            body: lensCreateResponseBodySchema.parse(responseItem),
           });
         } catch (error) {
           if (isBoom(error) && error.output.statusCode === 403) {

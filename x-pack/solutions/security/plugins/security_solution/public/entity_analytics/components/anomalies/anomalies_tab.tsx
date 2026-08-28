@@ -12,11 +12,10 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiLoadingChart,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import moment from 'moment';
 import {
   ML_PAGES,
@@ -28,6 +27,7 @@ import type { SeverityOption } from '@kbn/ml-plugin/public';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { DateRangePickerSettings, TimeRangeBoundsOption } from '@kbn/date-range-picker/types';
 import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
+import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { parseDateWithDefault } from '../../../common/utils/default_date_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
@@ -47,6 +47,13 @@ import {
   ENTITY_ANOMALY_DATE_RANGE_LAST_1_YEAR,
 } from './translations';
 import { useAnomalySummary } from '../../api/hooks/use_anomaly_summary';
+import {
+  ANOMALIES_TAB_TEST_ID,
+  ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID,
+  ANOMALIES_TAB_MANAGE_JOBS_BUTTON_TEST_ID,
+  ANOMALIES_TAB_DATE_RANGE_ERROR_TEST_ID,
+  ANOMALIES_TAB_ERROR_TEST_ID,
+} from './test_ids';
 import { MitreAttackChain } from './mitre/components/mitre_attack_chain';
 import { AnomalyTabTimelineSection } from './anomalies_tab_timeline';
 import type { TableChangeEvent } from './anomalies_tab_table';
@@ -57,6 +64,9 @@ import {
   DEFAULT_SORT_FIELD,
   DEFAULT_TABLE_PAGE_SIZE,
 } from './table/constants';
+import { AnomaliesBorderedVisPanel } from './anomalies_bordered_vis_panel';
+import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
+import { AnomaliesErrorPrompt } from './anomalies_error_prompt';
 
 const TIME_RANGE_PRESETS: TimeRangeBoundsOption[] = [
   { start: 'now-15m', end: 'now', label: ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES },
@@ -88,21 +98,27 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   const [datePickerSettings, setDatePickerSettings] = useState<DateRangePickerSettings>(
     DEFAULT_DATE_PICKER_SETTINGS
   );
-
   const [recentTimeRanges, setRecentTimeRanges] = useState<TimeRangeBoundsOption[]>([]);
 
-  const handleDatePickerChange = useCallback((args: DateRangePickerOnChangeProps) => {
-    if (args.isInvalid) return;
-    setStart(args.start);
-    setEnd(args.end);
-    setDatePickerValue(args.value);
-    setRecentTimeRanges((prev) => {
-      const key = `${args.start}|${args.end}`;
-      const deduped = prev.filter((r) => `${r.start}|${r.end}` !== key);
-      return [{ start: args.start, end: args.end }, ...deduped].slice(0, 10);
-    });
-    setTablePageIndex(0);
-  }, []);
+  const handleDatePickerChange = useCallback(
+    (args: DateRangePickerOnChangeProps) => {
+      if (args.isInvalid) return;
+      setStart(args.start);
+      setEnd(args.end);
+      setDatePickerValue(args.value);
+      setRecentTimeRanges((prev) => {
+        const key = `${args.start}|${args.end}`;
+        const deduped = prev.filter((r) => `${r.start}|${r.end}` !== key);
+        return [{ start: args.start, end: args.end }, ...deduped].slice(0, 10);
+      });
+      setTablePageIndex(0);
+      if (args.start !== start || args.end !== end) {
+        setIsOverviewFilterPending(true);
+        setIsSummaryFilterPending(true);
+      }
+    },
+    [start, end]
+  );
 
   const timeRangeMs = useMemo(
     () => ({
@@ -115,25 +131,31 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     [start, end]
   );
 
+  // Track filter-triggered refetches explicitly so the swimlane and table can
+  // show a loading state when the user clicks a tactic or a score range, not just on mount.
+  // Each is tracked independently so whichever query finishes first can render immediately,
+  // without waiting on the other.
+  const [isOverviewFilterPending, setIsOverviewFilterPending] = useState(false);
+  const [isSummaryFilterPending, setIsSummaryFilterPending] = useState(false);
+
   const severityOptions = useSeverityOptions();
   const [selectedSeverities, setSelectedSeverities] = useState<SeverityOption[]>(severityOptions);
   const handleSeverityChange = useCallback((next: SeverityOption[]) => {
     setSelectedSeverities(next);
     setTablePageIndex(0);
+    setIsOverviewFilterPending(true);
+    setIsSummaryFilterPending(true);
   }, []);
 
-  const scoreFilter = useMemo<{ min_score?: number; max_score?: number }>(() => {
-    if (selectedSeverities.length === severityOptions.length) return {};
-    const mins = selectedSeverities.map((s) => s.threshold.min);
-    const maxes = selectedSeverities
-      .map((s) => ('max' in s.threshold ? s.threshold.max : undefined))
-      .filter((m): m is number => m != null);
-    return {
-      min_score: Math.min(...mins),
-      // Only set an upper bound when every selected severity has a max (i.e. critical not included)
-      max_score: maxes.length === selectedSeverities.length ? Math.max(...maxes) : undefined,
-    };
-  }, [selectedSeverities, severityOptions.length]);
+  const scoreRanges = useMemo<AnomalyScoreRange[] | undefined>(() => {
+    if (selectedSeverities.length === severityOptions.length) return undefined;
+    // One range per selected severity bucket, so non-contiguous selections
+    // don't get collapsed into a single min/max span
+    return selectedSeverities.map((s) => ({
+      min_score: s.threshold.min,
+      max_score: 'max' in s.threshold ? s.threshold.max : undefined,
+    }));
+  }, [selectedSeverities, severityOptions]);
 
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(DEFAULT_TABLE_PAGE_SIZE);
@@ -146,6 +168,8 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     (tactic: string) => {
       setSelectedTactic((current) => (current === tactic ? null : tactic));
       setTablePageIndex(0);
+      setIsOverviewFilterPending(true);
+      setIsSummaryFilterPending(true);
     },
     [setSelectedTactic]
   );
@@ -167,14 +191,19 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     from: timeRangeMs.from,
     to: timeRangeMs.to,
     threatTactics: selectedTactic ? [selectedTactic] : undefined,
-    minScore: scoreFilter.min_score,
-    maxScore: scoreFilter.max_score,
+    scoreRanges,
   });
 
   const uniqueTactics = useMemo(
     () => Object.keys(anomalyOverview.data?.tacticCounts ?? {}),
     [anomalyOverview]
   );
+  const anomalyByTimeBucket = useMemo(
+    () => anomalyOverview.data?.anomalyByTimeBucket ?? [],
+    [anomalyOverview.data?.anomalyByTimeBucket]
+  );
+  const isLoading = anomalyOverview.isLoading;
+  const isEmpty = anomalyOverview.data?.totalAnomaliesCount === 0;
 
   const anomalySummary = useAnomalySummary({
     entityId,
@@ -183,13 +212,28 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       from: timeRangeMs.from,
       to: timeRangeMs.to,
       threat_tactics: selectedTactic ? [selectedTactic] : undefined,
-      min_score: scoreFilter.min_score,
-      max_score: scoreFilter.max_score,
+      score_ranges: scoreRanges,
       page: tablePageIndex + 1,
       page_size: tablePageSize,
       sort: [{ field: tableSortField, order: tableSortDirection }],
     },
   });
+  useEffect(() => {
+    if (!anomalyOverview.isFetching) {
+      setIsOverviewFilterPending(false);
+    }
+  }, [anomalyOverview.isFetching]);
+
+  useEffect(() => {
+    if (!anomalySummary.isFetching) {
+      setIsSummaryFilterPending(false);
+    }
+  }, [anomalySummary.isFetching]);
+
+  const anomalySummaryAnomalies = useMemo(
+    () => anomalySummary.data?.anomalies ?? [],
+    [anomalySummary.data?.anomalies]
+  );
 
   useEffect(() => {
     if (anomalyOverview.isFetching) return;
@@ -216,6 +260,10 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     anomalySummary.error,
   ]);
 
+  // The date-range-too-old case gets its own actionable warning above, so it
+  // takes precedence over the generic error prompt.
+  const hasError = (anomalyOverview.isError || anomalySummary.isError) && !isDateRangeTooOld;
+
   const {
     services: { ml },
   } = useKibana();
@@ -224,7 +272,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   });
 
   return (
-    <>
+    <div data-test-subj={ANOMALIES_TAB_TEST_ID}>
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceBetween"
@@ -256,6 +304,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj={ANOMALIES_TAB_MANAGE_JOBS_BUTTON_TEST_ID}
             color="primary"
             size="s"
             iconType="external"
@@ -272,6 +321,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       {isDateRangeTooOld && (
         <>
           <EuiCallOut
+            data-test-subj={ANOMALIES_TAB_DATE_RANGE_ERROR_TEST_ID}
             announceOnMount
             color="warning"
             iconType="warning"
@@ -280,53 +330,63 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
           <EuiSpacer size="m" />
         </>
       )}
-      <>
-        <EuiAccordion
-          id="entity-anomalies-tab-attack-chain-accordion"
-          initialIsOpen
-          buttonContent={
-            <EuiTitle size="xs">
-              <h3>{ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE}</h3>
-            </EuiTitle>
-          }
-        >
-          <EuiSpacer size="m" />
-          <EuiPanel
-            color="plain"
-            hasBorder
-            paddingSize="none"
-            css={css`
-              padding: 16px 24px;
-            `}
-          >
-            <MitreAttackChain
-              anomalyCountByTactic={anomalyOverview?.data?.tacticCounts ?? {}}
-              onSelectTactic={handleSelectTactic}
-              selectedTactic={selectedTactic}
-              triggeredTactics={uniqueTactics}
-              showLabels
-            />
-          </EuiPanel>
-        </EuiAccordion>
-      </>
-      <EuiSpacer size="l" />
-      <AnomalyTabTimelineSection
-        anomalies={anomalyOverview.data?.anomalyByTimeBucket ?? []}
-        selectedTactic={selectedTactic}
-        timeRangeMs={timeRangeMs}
-      />
-      <EuiSpacer size="l" />
-      <AnomalyTabTableSection
-        anomalies={anomalySummary.data?.anomalies ?? []}
-        entityType={entityType}
-        onTableChange={handleTableChange}
-        page={anomalySummary.data?.page ?? tablePageIndex + 1}
-        pageSize={anomalySummary.data?.page_size ?? tablePageSize}
-        sortField={tableSortField}
-        sortDirection={tableSortDirection}
-        timeRange={{ from: start, to: end }}
-        total={anomalySummary.data?.total ?? 0}
-      />
-    </>
+      {hasError ? (
+        <AnomaliesErrorPrompt variant="leftTab" data-test-subj={ANOMALIES_TAB_ERROR_TEST_ID} />
+      ) : (
+        <>
+          {(isLoading || uniqueTactics.length > 0) && (
+            <EuiAccordion
+              id="entity-anomalies-tab-attack-chain-accordion"
+              data-test-subj={ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID}
+              initialIsOpen
+              buttonContent={
+                <EuiTitle size="xs">
+                  <h3>{ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE}</h3>
+                </EuiTitle>
+              }
+            >
+              <EuiSpacer size="m" />
+              <AnomaliesBorderedVisPanel>
+                {isLoading ? (
+                  <MitreAttackChainPlaceholder>
+                    <EuiLoadingChart size="l" />
+                  </MitreAttackChainPlaceholder>
+                ) : (
+                  <MitreAttackChain
+                    anomalyCountByTactic={anomalyOverview?.data?.tacticCounts ?? {}}
+                    onSelectTactic={isEmpty ? undefined : handleSelectTactic}
+                    selectedTactic={isEmpty ? null : selectedTactic}
+                    triggeredTactics={uniqueTactics}
+                    showLabels
+                    showPersistentFirstTacticBadge={isEmpty}
+                  />
+                )}
+              </AnomaliesBorderedVisPanel>
+            </EuiAccordion>
+          )}
+          <EuiSpacer size="l" />
+          <AnomalyTabTimelineSection
+            anomalies={anomalyByTimeBucket}
+            selectedTactic={selectedTactic}
+            timeRangeMs={timeRangeMs}
+            isLoading={anomalyOverview.isLoading || isOverviewFilterPending}
+            isEmpty={anomalyByTimeBucket.length === 0}
+          />
+          <EuiSpacer size="l" />
+          <AnomalyTabTableSection
+            anomalies={anomalySummaryAnomalies}
+            entityType={entityType}
+            onTableChange={handleTableChange}
+            page={anomalySummary.data?.page ?? tablePageIndex + 1}
+            pageSize={anomalySummary.data?.page_size ?? tablePageSize}
+            sortField={tableSortField}
+            sortDirection={tableSortDirection}
+            timeRange={{ from: start, to: end }}
+            total={anomalySummary.data?.total ?? 0}
+            isLoading={anomalySummary.isLoading || isSummaryFilterPending}
+          />
+        </>
+      )}
+    </div>
   );
 };

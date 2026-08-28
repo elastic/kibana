@@ -22,8 +22,7 @@
       "visualizations",
       "kibanaUtils"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": ["usageCollection"]
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getSpaceUrlPrefix } from '../../../common/lib/api';
@@ -22,7 +22,7 @@ const TEMPLATES_BULK_DELETE_URL = '/internal/cases/templates/_bulk_delete';
 const buildCreateTemplateBody = (owner: string) => ({
   name: 'Test Template',
   owner,
-  definition: yaml.dump({
+  definition: stringify({
     name: 'Test Template',
     fields: [{ control: 'INPUT_TEXT', name: 'field_one', label: 'Field One', type: 'keyword' }],
   }),
@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send({
             owner: 'securitySolutionFixture',
-            definition: yaml.dump({
+            definition: stringify({
               name: 'Updated',
               fields: [{ control: 'INPUT_TEXT', name: 'f', label: 'F', type: 'keyword' }],
             }),
@@ -167,7 +167,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send({
             owner: 'securitySolutionFixture',
-            definition: yaml.dump({
+            definition: stringify({
               name: 'Updated',
               fields: [{ control: 'INPUT_TEXT', name: 'f', label: 'F', type: 'keyword' }],
             }),

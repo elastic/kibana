@@ -18,6 +18,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const comboBox = getService('comboBox');
 
+  /**
+   * Purpose: Legacy input control chaining smoke test
+   *
+   * Migration: migrate to scout - move to legacy control vis plugin
+   */
   describe('chained controls', function () {
     this.tags('includeFirefox');
 

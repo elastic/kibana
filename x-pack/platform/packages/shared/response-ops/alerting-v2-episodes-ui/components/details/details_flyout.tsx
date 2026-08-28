@@ -18,6 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPanel,
+  EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiToolTip,
@@ -61,7 +62,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const [tab, setTab] = useState<TabId>('overview');
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
-  const { data: episode } = useFetchEpisodeQuery({ episodeId, services });
+  const { data: episode } = useFetchEpisodeQuery({ episodeId, groupHash, services });
   const ruleId = episode?.['rule.id'];
   const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
   const showRuleDependentTabs = isRuleLoaded(ruleState);
@@ -137,8 +138,9 @@ export const AlertEpisodeDetailsFlyout = ({
           <AlertEpisodeDetailsHeaderSection
             episodeId={episodeId}
             services={services}
-            titleSize="m"
+            titleSize="s"
           />
+          <EuiSpacer size="s" />
           <EuiTabs bottomBorder={false}>
             <EuiTab
               isSelected={effectiveTab === 'overview'}

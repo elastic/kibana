@@ -69,7 +69,6 @@ import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { NavigationPublicPluginStart, TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
@@ -148,7 +147,6 @@ export interface LensAppServices extends StartServices {
   contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
-  presentationUtil: PresentationUtilPluginStart;
   spaces?: SpacesApi;
   charts: ChartsPluginSetup;
   share?: SharePluginStart;
@@ -416,7 +414,22 @@ export interface LensDocument {
   state: {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
-    query: Query | AggregateQuery;
+    /**
+     * Chart-scoped KQL/Lucene filter only, or undefined.
+     *
+     * Authored via the query bar of the full-frame editor (not editable in
+     * the inline flyout), persisted with the visualization, and AND-ed with
+     * the dashboard query/filters at render time (see
+     * `getMergedSearchContext`). It narrows every form-based layer of the
+     * chart. Introduced by https://github.com/elastic/kibana/pull/43865.
+     *
+     * ES|QL queries live exclusively on the text-based datasource layers
+     * (`datasourceStates.textBased.layers[id].query`). Legacy documents were
+     * dual-written with an aggregate (ES|QL) copy in this slot; such values
+     * are dead data — ignored at read time (see `getChartScopedFilterQuery`)
+     * and never written again. Documents self-clean on next save.
+     */
+    query?: Query;
     globalPalette?: {
       activePaletteId: string;
       state?: unknown;

@@ -173,7 +173,13 @@ export class APIKeys implements NativeAPIKeysType {
         result = await scopedClusterClient.asCurrentUser.transport.request<CreateAPIKeyResult>({
           method: 'POST',
           path: '/_security/cross_cluster/api_key',
-          body: { name, expiration, metadata, access: createParams.access },
+          body: {
+            name,
+            expiration,
+            metadata,
+            access: createParams.access,
+            certificate_identity: createParams.certificate_identity,
+          },
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.createApiKey({
@@ -227,7 +233,11 @@ export class APIKeys implements NativeAPIKeysType {
         result = await scopedClusterClient.asCurrentUser.transport.request<UpdateAPIKeyResult>({
           method: 'PUT',
           path: `/_security/cross_cluster/api_key/${id}`,
-          body: { metadata, access: updateParams.access },
+          body: {
+            metadata,
+            access: updateParams.access,
+            certificate_identity: updateParams.certificate_identity,
+          },
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.updateApiKey({
@@ -361,8 +371,11 @@ export class APIKeys implements NativeAPIKeysType {
         body: {
           api_key: authorizationHeader.credentials,
           name: cloneParams.name,
-          expiration: null,
+          // `metadata` MUST come before `expiration`. ES's RestCloneApiKeyAction
+          // over-advances the parser on `expiration: null`, silently dropping the next field.
+          // Remove this ordering constraint once the ES fix ships: https://github.com/elastic/elasticsearch/pull/152874
           ...(cloneParams.metadata ? { metadata: cloneParams.metadata } : {}),
+          expiration: null,
         },
       });
 

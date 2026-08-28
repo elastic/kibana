@@ -6,6 +6,7 @@
  */
 
 import { take } from 'lodash';
+import { escapeEsqlColumnName } from '@kbn/esql-utils';
 import type { ResolvedResourceWithSampling } from './resolve_resource_for_esql_with_sampling_stats';
 import type { MappingFieldWithStats } from '../sampling';
 
@@ -54,7 +55,9 @@ const renderFieldLine = (field: MappingFieldWithStats, samplingCount: number): s
           .map((v) => truncate(normalizeSpaces(`${v.value}`), 80))
           .join(', ')}...)`
       : '';
-  return `- ${field.path} [${renderTypeSegment(field)}]${description}${samples}`;
+  return `- ${escapeEsqlColumnName(field.path)} [${renderTypeSegment(
+    field
+  )}]${description}${samples}`;
 };
 
 const renderTypeSegment = (field: MappingFieldWithStats): string => {

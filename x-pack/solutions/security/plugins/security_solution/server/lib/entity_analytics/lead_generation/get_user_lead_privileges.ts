@@ -15,33 +15,24 @@ export const getUserLeadPrivileges = async (
   security: SecurityPluginStart,
   spaceId: string
 ) => {
-  const adhocIndex = getLeadsIndexName(spaceId, 'adhoc');
-  const scheduledIndex = getLeadsIndexName(spaceId, 'scheduled');
+  const indexName = getLeadsIndexName(spaceId);
 
   const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
   const { privileges, hasAllRequested } = await checkPrivileges({
     elasticsearch: {
       cluster: [],
       index: {
-        [adhocIndex]: ['read', 'write'],
-        [scheduledIndex]: ['read', 'write'],
+        [indexName]: ['read', 'write'],
       },
     },
   });
 
-  const adhocPerms = hasReadWritePermissions(privileges.elasticsearch, adhocIndex);
-  const scheduledPerms = hasReadWritePermissions(privileges.elasticsearch, scheduledIndex);
+  const perms = hasReadWritePermissions(privileges.elasticsearch, indexName);
 
   return {
     privileges: _formatPrivileges(privileges),
     has_all_required: hasAllRequested,
-    adhoc: {
-      has_read_permissions: adhocPerms.has_read_permissions,
-      has_write_permissions: adhocPerms.has_write_permissions,
-    },
-    scheduled: {
-      has_read_permissions: scheduledPerms.has_read_permissions,
-      has_write_permissions: scheduledPerms.has_write_permissions,
-    },
+    has_read_permissions: perms.has_read_permissions,
+    has_write_permissions: perms.has_write_permissions,
   };
 };

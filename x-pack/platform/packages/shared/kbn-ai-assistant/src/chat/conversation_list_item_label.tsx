@@ -7,6 +7,12 @@
 
 import React from 'react';
 import { useEuiTheme, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+const sharedConversationLabel = i18n.translate(
+  'xpack.aiAssistant.conversationListItemLabel.sharedConversationIconLabel',
+  { defaultMessage: 'Shared conversation' }
+);
 
 export function ConversationListItemLabel({
   labelText,
@@ -25,7 +31,14 @@ export function ConversationListItemLabel({
           {labelText}
         </span>
       </span>
-      {isPublic ? <EuiIcon type="users" size="m" css={{ flexShrink: 0 }} /> : null}
+      {isPublic ? (
+        <EuiIcon
+          type="users"
+          size="m"
+          css={{ flexShrink: 0 }}
+          aria-label={sharedConversationLabel}
+        />
+      ) : null}
     </span>
   );
 }

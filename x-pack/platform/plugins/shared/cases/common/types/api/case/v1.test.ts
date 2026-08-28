@@ -19,6 +19,9 @@ import {
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
 } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
@@ -376,6 +379,23 @@ describe('CasePostRequestRt', () => {
     });
   });
 
+  it('accepts a template with no version (resolved on create when templates are enabled)', () => {
+    const request = { ...defaultRequest, template: { id: 'template-id' } };
+
+    expect(PathReporter.report(CasePostRequestRt.decode(request))).toContain('No errors!');
+  });
+
+  it.each([0, -1, 1.5])(
+    'throws when the template version is not a positive integer (%p)',
+    (version) => {
+      expect(
+        PathReporter.report(
+          CasePostRequestRt.decode({ ...defaultRequest, template: { id: 'template-id', version } })
+        )
+      ).toContain('The template version must be a positive integer.');
+    }
+  );
+
   it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
     expect(
       PathReporter.report(
@@ -662,6 +682,44 @@ describe('CasesSearchRequestRt', () => {
     const result = CasesSearchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+  });
+
+  it('accepts extended field filters at the Field Library limits', () => {
+    const extendedFieldFilters = Array.from({ length: MAX_EXTENDED_FIELD_FILTERS }, () => ({
+      label: 'l'.repeat(MAX_TEMPLATE_DEFINITION_LENGTH),
+      value: 'v'.repeat(MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH),
+    }));
+    const request = { ...defaultRequest, extendedFieldFilters };
+
+    expect(CasesSearchRequestRt.decode(request)._tag).toBe('Right');
+    expect(CasesSearchRequestSchema.safeParse(request).success).toBe(true);
+  });
+
+  it.each([
+    {
+      field: 'label',
+      extendedFieldFilters: [
+        { label: 'l'.repeat(MAX_TEMPLATE_DEFINITION_LENGTH + 1), value: 'value' },
+      ],
+    },
+    {
+      field: 'value',
+      extendedFieldFilters: [
+        { label: 'label', value: 'v'.repeat(MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH + 1) },
+      ],
+    },
+    {
+      field: 'filter count',
+      extendedFieldFilters: Array.from({ length: MAX_EXTENDED_FIELD_FILTERS + 1 }, (_, index) => ({
+        label: `label-${index}`,
+        value: 'value',
+      })),
+    },
+  ])('rejects extended field filters above the $field limit', ({ extendedFieldFilters }) => {
+    const request = { ...defaultRequest, extendedFieldFilters };
+
+    expect(CasesSearchRequestRt.decode(request)._tag).toBe('Left');
+    expect(CasesSearchRequestSchema.safeParse(request).success).toBe(false);
   });
 });
 

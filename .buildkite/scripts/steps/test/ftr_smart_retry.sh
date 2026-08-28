@@ -2,6 +2,9 @@
 # Reads/writes globals: exitCode, failedConfigs,
 # FAILED_CONFIGS_KEY, JOB, BUILDKITE_RETRY_COUNT.
 
+FTR_SMART_RETRY_ENABLED="${FTR_SMART_RETRY_ENABLED-true}"
+export FTR_SMART_RETRY_ENABLED
+
 retry_recovered=false
 
 smart_retry_applicable() {

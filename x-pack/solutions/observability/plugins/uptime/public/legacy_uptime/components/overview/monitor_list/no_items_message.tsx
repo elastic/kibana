@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import * as labels from './translations';
 import { useGetUrlParams } from '../../../hooks';
 import { selectPingHistogram } from '../../../state/selectors';

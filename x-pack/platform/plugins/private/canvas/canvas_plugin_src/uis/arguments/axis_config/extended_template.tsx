@@ -8,8 +8,8 @@
 import type { ChangeEvent } from 'react';
 import React, { Fragment, PureComponent } from 'react';
 import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import { set } from 'object-path-immutable';
 import { get } from 'lodash';
+import { set } from '../../../../common/lib/object_path_immutable';
 import type { ExpressionAstExpression } from '../../../../types';
 import { ArgumentStrings } from '../../../../i18n/ui';
 

@@ -23,9 +23,13 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import {
   APP_ID,
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  registerOwnerPrefix,
 } from '../common/constants';
 
 import type { CasesClient } from './client';
@@ -38,13 +42,12 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
+import type { CasesClientSource } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
-import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
-import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import { UserProfileService } from './services';
 import {
@@ -65,6 +68,7 @@ import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task
 import {
   CasesAnalyticsV2Service,
   V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
   V2_NOOP_DATA_VIEW_REFRESHER,
   V2_NOOP_WRITER,
 } from './cases_analytics_v2';
@@ -90,8 +94,6 @@ export class CasePlugin
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
   private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
-  private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
@@ -107,8 +109,6 @@ export class CasePlugin
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.logger = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.logger);
-    this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-    this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
@@ -153,11 +153,6 @@ export class CasePlugin
       // backfill within budget. See the config schema.
       resetTaskTimeoutMinutes: this.caseConfig.analyticsV2.resetTaskTimeoutMinutes,
       resetPageDelayMs: this.caseConfig.analyticsV2.resetPageDelayMs,
-      // When templates is off, `cases-templates` isn't registered with core,
-      // so reading it would throw "Missing mappings for saved objects types".
-      // The flag lets the data view sub-service short-circuit to an empty
-      // runtime field map (base data view still bootstrapped, no overlays).
-      templatesEnabled: this.caseConfig.templates?.enabled === true,
     });
     this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
 
@@ -178,7 +173,6 @@ export class CasePlugin
     registerSavedObjects({
       core,
       logger: this.logger,
-      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       lensEmbeddableFactory: this.lensEmbeddableFactory,
       config: this.caseConfig,
     });
@@ -216,7 +210,13 @@ export class CasePlugin
         this.templatesMigrationTaskManager = new TemplatesMigrationTaskManager(
           plugins.taskManager,
           this.logger,
-          plugins.usageCollection
+          plugins.usageCollection,
+          // When the existing-case `extended_fields` backfill finishes, ask cases-analytics v2 to run
+          // a one-time full reconciliation. The backfill bumps only the SO-framework `updated_at`,
+          // which analytics-v2's incremental cursor (keyed on `attributes.updated_at`) never sees —
+          // so without this nudge the backfilled `extended_fields` would be permanently absent from
+          // `.cases`. The callback resolves the service at run time and no-ops when v2 is disabled.
+          () => this.casesAnalyticsV2Service?.triggerBackfillReconciliation()
         );
       }
     }
@@ -227,7 +227,11 @@ export class CasePlugin
     registerRoutes({
       router,
       routes: [
-        ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
+        ...getExternalRoutes({
+          isServerless: this.isServerless,
+          docLinks: core.docLinks,
+          config: this.caseConfig,
+        }),
         ...getInternalRoutes(this.userProfileService, this.caseConfig),
       ],
       logger: this.logger,
@@ -238,9 +242,18 @@ export class CasePlugin
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
     plugins.licensing.featureUsage.register(LICENSING_CASE_OBSERVABLES_FEATURE, 'platinum');
 
-    const getCasesClient = async (request: KibanaRequest): Promise<CasesClient> => {
-      const [coreStart] = await core.getStartServices();
-      return this.getCasesClientWithRequest(coreStart)(request);
+    const getCasesClient = (
+      clientSource: CasesClientSource
+    ): ((request: KibanaRequest) => Promise<CasesClient>) => {
+      return async (request: KibanaRequest) => {
+        const [coreStart] = await core.getStartServices();
+        return this.getCasesClientWithRequest(coreStart, clientSource)(request);
+      };
+    };
+
+    const getActionsClient = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.actions.getActionsClientWithRequest(request);
     };
 
     const getSpaceId = (request?: KibanaRequest) => {
@@ -260,34 +273,50 @@ export class CasePlugin
       alerting: plugins.alerting,
       core,
       logger: this.logger,
-      getCasesClient,
+      getCasesClient: getCasesClient('connector'),
+      getActionsClient,
       getSpaceId,
       serverlessProjectType,
       isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
+      isTemplatesEnabled: this.caseConfig.templates?.enabled === true,
     });
 
-    registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
+    registerCaseWorkflowSteps(
+      plugins.workflowsExtensions,
+      getCasesClient('workflow'),
+      this.unifiedAttachmentTypeRegistry,
+      this.caseConfig.attachments?.enabled === true,
+      this.caseConfig.templates?.enabled === true,
+      () => core.getStartServices()
+    );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.agentBuilder) {
-      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core);
+      registerCasesAgentBuilderTools(
+        plugins.agentBuilder,
+        getCasesClient('agent_builder'),
+        core,
+        this.unifiedAttachmentTypeRegistry,
+        {
+          analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
+          attachmentsEnabled: this.caseConfig.attachments?.enabled === true,
+          templatesEnabled: this.caseConfig.templates?.enabled === true,
+        }
+      );
     }
 
     return {
       attachmentFramework: {
-        registerExternalReference: (externalReferenceAttachmentType) => {
-          this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
-        },
-        registerPersistableState: (persistableStateAttachmentType) => {
-          this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
-        },
-        registerUnified: (unifiedAttachmentType) => {
-          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
+        registerAttachment: (attachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(attachmentType);
         },
       },
       config: this.caseConfig,
       registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => {
         this.closeReasonValidators.set(owner, validator);
+      },
+      registerOwnerPrefix: (owner: string, prefix: string) => {
+        registerOwnerPrefix(owner, prefix);
       },
     };
   }
@@ -339,11 +368,7 @@ export class CasePlugin
     // config error, so log and skip rather than crash.
     if (this.casesAnalyticsV2Service) {
       if (!this.caseConfig.analyticsV2.enabled) {
-        // Disabled: skip building the internal repo entirely. With templates
-        // also off, naming `cases-templates` below would throw "Missing
-        // mappings for saved objects types" (it's registered only when
-        // `templates.enabled`), breaking stripped configs (OAS capture, some
-        // test harnesses).
+        // Disabled: skip building the internal repo entirely — no v2 work to do.
       } else if (plugins.dataViews == null) {
         this.logger.error(
           'cases-analyticsV2 is enabled but the `dataViews` plugin is not installed. ' +
@@ -351,20 +376,47 @@ export class CasePlugin
             'Skipping v2 start.'
         );
       } else {
-        // Internal (unscoped) repo for four consumers: the cases-surface
-        // reconciliation runner (walks `cases` SOs), the activity-surface
-        // runner (walks `cases-user-actions` SOs), the data view sub-service
-        // (reads `cases-templates` per-space for runtime fields), and `/reset`
-        // (deletes per-space `index-pattern` SOs across namespaces — a
-        // request-scoped client 404s outside its own space). The hidden cases
-        // SO types must be opted in explicitly; `cases-templates` only when
-        // templates is on (else "Missing mappings for saved objects types");
-        // `index-pattern` grants the cross-namespace data-view delete `/reset`
-        // needs.
+        // The internal repo serves five consumers:
+        //  - The cases-surface reconciliation runner walks `cases` SOs.
+        //  - The activity-surface reconciliation runner walks
+        //    `cases-user-actions` SOs (created-only, no `updated_at`
+        //    filter — see `reconciliation/activity_runner.ts`).
+        //  - The attachments-surface reconciliation runner walks BOTH
+        //    `cases-comments` (legacy) AND `cases-attachments` (new
+        //    unified) SOs into a single analytics index, so the surface
+        //    works regardless of where in the in-flight SO migration
+        //    (security-team#15066) a tenant sits — see
+        //    `reconciliation/attachments_runner.ts`.
+        //  - The data view sub-service reads `cases-templates` AND
+        //    `cases-field-definitions` SOs per-space to derive runtime
+        //    fields (template fields plus global `isGlobal` field-library
+        //    fields). Both types are always registered with core (see
+        //    `saved_object_types/index.ts`), so they're always opted in
+        //    here; when the templates feature is off there simply are no
+        //    template/field-definition documents to walk and the runtime
+        //    field overlay comes back empty.
+        //  - The `/reset` admin route deletes per-space `index-pattern` SOs
+        //    across namespaces. A request-scoped SO client can't do this:
+        //    the spaces extension scopes `delete` to the request's namespace,
+        //    so deleting a data view in space `analytics-1` from a `/reset`
+        //    request that arrived in `default` 404s on the existence check
+        //    (even with `force: true`).
+        // The cases SO types are hidden, so they must be opted in
+        // explicitly. `index-pattern` is a globally-registered SO type
+        // (data-views plugin); opting it in here grants the internal client
+        // the cross-namespace delete it needs.
+        //
+        // Both attachment SO types are always registered with core (the
+        // unified `cases-attachments` type is registered unconditionally
+        // since #275225), so both are opted in here and the attachments
+        // reconciliation runner always walks both source types.
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
-          ...(this.caseConfig.templates?.enabled ? [CASE_TEMPLATE_SAVED_OBJECT] : []),
+          CASE_COMMENT_SAVED_OBJECT,
+          CASE_ATTACHMENT_SAVED_OBJECT,
+          CASE_TEMPLATE_SAVED_OBJECT,
+          CASE_FIELD_DEFINITION_SAVED_OBJECT,
           'index-pattern',
         ]);
         const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
@@ -406,8 +458,6 @@ export class CasePlugin
        */
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
-      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       notifications: plugins.notifications,
@@ -437,6 +487,12 @@ export class CasePlugin
       // user-actions service via the cases client factory.
       analyticsV2ActivityWriter:
         this.casesAnalyticsV2Service?.getActivityWriter() ?? V2_NOOP_ACTIVITY_WRITER,
+      // Attachments surface companion. Same lifetime + same defensive
+      // fallback as `analyticsV2Writer`. Captured by the AttachmentService
+      // (write hooks) and by the CasesService (cascade-on-case-delete) via
+      // the cases client factory.
+      analyticsV2AttachmentsWriter:
+        this.casesAnalyticsV2Service?.getAttachmentsWriter() ?? V2_NOOP_ATTACHMENTS_WRITER,
       // Companion refresher proxy (same lifetime + fallback). The templates
       // service calls it fire-and-forget after every template mutation.
       analyticsV2DataViewRefresher:
@@ -444,11 +500,14 @@ export class CasePlugin
     });
 
     return {
-      getCasesClientWithRequest: this.getCasesClientWithRequest(core),
-      getExternalReferenceAttachmentTypeRegistry: () =>
-        this.externalReferenceAttachmentTypeRegistry,
-      getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
+      getCasesClientWithRequest: this.getCasesClientWithRequest(core, 'plugin_contract'),
       getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
+      getCasesEventBus: () => {
+        if (!this.casesEventBus) {
+          throw new Error('getCasesEventBus called before casesEventBus was initialized');
+        }
+        return this.casesEventBus;
+      },
       config: this.caseConfig,
     };
   }
@@ -490,6 +549,7 @@ export class CasePlugin
             request,
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
+            clientSource: 'rest_api',
           });
         },
       };
@@ -497,7 +557,7 @@ export class CasePlugin
   };
 
   private getCasesClientWithRequest =
-    (core: CoreStart) =>
+    (core: CoreStart, clientSource: CasesClientSource) =>
     async (request: KibanaRequest): Promise<CasesClient> => {
       const client = core.elasticsearch.client;
 
@@ -505,6 +565,7 @@ export class CasePlugin
         request,
         scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
+        clientSource,
       });
     };
 }

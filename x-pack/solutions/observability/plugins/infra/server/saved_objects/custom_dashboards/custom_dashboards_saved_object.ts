@@ -45,9 +45,11 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
       changes: [],
       schemas: {
         create: schema.object({
-          dashboardIdList: schema.arrayOf(schema.string()),
-          assetType: schema.string(),
-          kuery: schema.maybe(schema.string()),
+          dashboardIdList: schema.arrayOf(schema.string({ maxLength: 256 }), {
+            maxSize: 100,
+          }),
+          assetType: schema.string({ maxLength: 64 }),
+          kuery: schema.maybe(schema.string({ maxLength: 2048 })),
         }),
       },
     },
@@ -71,8 +73,8 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
       ],
       schemas: {
         create: schema.object({
-          dashboardSavedObjectId: schema.string(),
-          assetType: schema.string(),
+          dashboardSavedObjectId: schema.string({ maxLength: 256 }),
+          assetType: schema.string({ maxLength: 64 }),
           dashboardFilterAssetIdEnabled: schema.boolean(),
         }),
       },

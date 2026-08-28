@@ -16,6 +16,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { Model } from '../common_attributes.gen';
+
 export const EvaluateRequestBody = lazySchema(() =>
   z.object({
     subject: z.object({
@@ -29,6 +31,21 @@ export const EvaluateRequestBody = lazySchema(() =>
         )
         .min(1)
         .max(1),
+      /**
+       * Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.
+       */
+      instrumentation: z
+        .object({
+          profile: z
+            .enum([
+              'elastic-inference',
+              'otel-genai-events',
+              'otel-genai-attributes',
+              'claude-code',
+            ])
+            .default('elastic-inference'),
+        })
+        .optional(),
     }),
     evaluators: z
       .array(
@@ -54,6 +71,10 @@ export const EvaluateResponse = lazySchema(() =>
           name: z.string().max(256),
           version: z.string().max(64),
           kind: z.enum(['llm', 'code']),
+          /**
+           * Model resolved from the evaluator's `connector_id`. Absent for code evaluators, which invoke no model.
+           */
+          model: Model.optional(),
         }),
         scores: z
           .array(
@@ -68,6 +89,7 @@ export const EvaluateResponse = lazySchema(() =>
           .optional(),
         error: z
           .object({
+            code: z.literal('evidence_unmet').optional(),
             message: z.string().max(8192),
           })
           .optional(),

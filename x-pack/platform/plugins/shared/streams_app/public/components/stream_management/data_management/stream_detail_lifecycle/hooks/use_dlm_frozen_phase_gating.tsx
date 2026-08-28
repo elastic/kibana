@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Streams } from '@kbn/streams-schema';
 import {
+  CLOUD_SUBSCRIPTION_FEATURES_URL,
+  CONTACT_US_URL,
   DefaultSnapshotRepositoryRequiredModal,
   EnterpriseGatingModal,
   SUBSCRIPTION_FEATURES_URL,
@@ -47,6 +49,7 @@ export interface DlmFrozenPhaseGating {
     isRefreshingDefaultRepository: boolean;
     manageRepositoriesHref: string;
     createDefaultRepositoryHref?: string;
+    hasExistingRepositories: boolean;
     defaultRepositoryName?: string;
   };
   /**
@@ -78,6 +81,7 @@ export const useDlmFrozenPhaseGating = ({
   const hasEnterpriseLicense = !isLicenseLoading && Boolean(license?.hasAtLeast('enterprise'));
 
   const {
+    repositories,
     defaultRepository,
     hasFetched: hasRepositoryFetched,
     isLoading: isRefreshingDefaultRepository,
@@ -85,6 +89,7 @@ export const useDlmFrozenPhaseGating = ({
   } = useSnapshotRepositories({ enabled });
 
   const hasDefaultRepository = Boolean(defaultRepository);
+  const hasExistingRepositories = repositories.length > 0;
   const isRepositoriesLoading = enabled && !hasRepositoryFetched;
   const canCreateRepository = Boolean(definition.privileges.create_snapshot_repository);
 
@@ -162,8 +167,14 @@ export const useDlmFrozenPhaseGating = ({
               : Boolean(application.capabilities?.management?.stack?.license_management)
           }
           trialStatus={cloud?.trialDaysLeft?.() === 0 ? 'expired' : 'notStarted'}
-          subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
-          onPrimaryAction={() => window.open(SUBSCRIPTION_FEATURES_URL, '_blank', 'noopener')}
+          subscriptionFeaturesUrl={
+            cloud?.isCloudEnabled ? CLOUD_SUBSCRIPTION_FEATURES_URL : SUBSCRIPTION_FEATURES_URL
+          }
+          onPrimaryAction={
+            cloud?.isCloudEnabled
+              ? undefined
+              : () => window.open(CONTACT_US_URL, '_blank', 'noopener')
+          }
           onCancel={closeModal}
           data-test-subj="streamsDlmFrozenEnterpriseGatingModal"
         />
@@ -172,6 +183,8 @@ export const useDlmFrozenPhaseGating = ({
       {activeModal === 'defaultRepository' && (
         <DefaultSnapshotRepositoryRequiredModal
           createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+          manageRepositoriesUrl={manageRepositoriesHref}
+          hasExistingRepositories={hasExistingRepositories}
           isRefreshing={isRefreshingDefaultRepository}
           onRefresh={refreshSnapshotRepositories}
           onCancel={closeModal}
@@ -201,6 +214,7 @@ export const useDlmFrozenPhaseGating = ({
       manageRepositoriesHref,
       // Only surface the create-repository link when the user actually has permission to create one.
       createDefaultRepositoryHref: canCreateRepository ? createDefaultRepositoryUrl : undefined,
+      hasExistingRepositories,
       defaultRepositoryName: defaultRepository,
     },
     handleAddPhaseGating,

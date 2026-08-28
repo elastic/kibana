@@ -10,6 +10,7 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
@@ -38,6 +39,7 @@ export interface ServerlessSearchPluginStartDependencies {
   console: ConsolePluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   management: ManagementStart;
+  navigation: NavigationPublicPluginStart;
   security: SecurityPluginStart;
   serverless: ServerlessPluginStart;
   share: SharePluginStart;

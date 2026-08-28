@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { EN_LOCALE } from '@kbn/i18n';
 
 /**
  * Name of the browser-side cookie used to remember the resolved locale across
@@ -29,12 +30,6 @@ export interface ResolveLocaleArgs {
   configuredLocales: readonly string[];
   /** Map of locale id → translation hash for locales we can serve. */
   translationHashes: Record<string, string>;
-  /**
-   * When true, Accept-Language header is consulted as a fallback. Currently
-   * gated to serverless deployments — non-serverless deployments stay
-   * deterministic for existing users.
-   */
-  isServerless: boolean;
   /** Server-wide base path for the cookie's Path attribute. */
   serverBasePath: string;
   /**
@@ -58,8 +53,9 @@ export interface ResolveLocaleResult {
  * Resolves the effective locale for a render using the following priority chain:
  *   1. User profile setting (when value is in `translationHashes`)
  *   2. KBN_LOCALE cookie (only when `allowLocaleCookie` is `true` and value is in `translationHashes`)
- *   3. Accept-Language header (serverless only; strict match against `configuredLocales`)
- *   4. `configLocale`
+ *   3. Explicitly-configured `configLocale` (any `i18n.defaultLocale` other than the built-in `en`)
+ *   4. Accept-Language header (exact match against `configuredLocales`, else language-level (region-optional) fallback)
+ *   5. `configLocale` (the built-in `en` default)
  */
 export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
   const {
@@ -68,7 +64,6 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     configLocale,
     configuredLocales,
     translationHashes,
-    isServerless,
     serverBasePath,
     allowLocaleCookie,
   } = args;
@@ -84,16 +79,19 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     }
   }
 
-  if (isServerless) {
-    const headerLocale = pickFromAcceptLanguage(
-      getHeader(request, 'accept-language'),
-      configuredLocales
-    );
-    // Match the profile/cookie paths above: only return a header-derived
-    // locale if we can actually serve translations for it.
-    if (headerLocale && translationHashes[headerLocale]) {
-      return finalize(headerLocale, request, serverBasePath);
-    }
+  // An explicitly-configured default locale (any value other than the built-in
+  // EN_LOCALE) outranks Accept-Language detection.
+  if (configLocale !== EN_LOCALE) {
+    return finalize(configLocale, request, serverBasePath);
+  }
+
+  const headerLocale = pickFromAcceptLanguage(
+    getHeader(request, 'accept-language'),
+    configuredLocales,
+    translationHashes
+  );
+  if (headerLocale) {
+    return finalize(headerLocale, request, serverBasePath);
   }
 
   return finalize(configLocale, request, serverBasePath);
@@ -132,18 +130,28 @@ export const readCookie = (cookieHeader: string, name: string): string | undefin
 
 /**
  * Walks a weighted Accept-Language header and returns the highest-weight
- * entry that is a strict (case-insensitive) match in `allowed`. Returns
- * `undefined` if no entry matches. Entries with `q=0` are ignored.
+ * servable candidate, matched case-insensitively (exact, else primary-subtag
+ * fallback). Returns `undefined` if no entry yields a servable candidate.
+ * Entries with `q=0` are ignored.
  */
 export const pickFromAcceptLanguage = (
   header: string,
-  allowed: readonly string[]
+  allowed: readonly string[],
+  translationHashes: Record<string, string>
 ): string | undefined => {
   if (!header || allowed.length === 0) return undefined;
 
   const allowedByLowerCase = new Map<string, string>();
+  // Primary subtag → first configured locale with that subtag (config order
+  // wins ties).
+  const allowedByPrimarySubtag = new Map<string, string>();
   for (const id of allowed) {
-    allowedByLowerCase.set(id.toLowerCase(), id);
+    const lower = id.toLowerCase();
+    allowedByLowerCase.set(lower, id);
+    const primary = lower.split('-')[0];
+    if (!allowedByPrimarySubtag.has(primary)) {
+      allowedByPrimarySubtag.set(primary, id);
+    }
   }
 
   const entries = header
@@ -168,8 +176,13 @@ export const pickFromAcceptLanguage = (
     .sort((a, b) => b.q - a.q);
 
   for (const { locale } of entries) {
-    const match = allowedByLowerCase.get(locale);
-    if (match) return match;
+    const exact = allowedByLowerCase.get(locale);
+    if (exact && translationHashes[exact]) return exact;
+    // No exact match: fall back to a configured locale sharing the primary
+    // subtag, regardless of region (`fr-CH` may resolve to `fr-FR`).
+    const primary = locale.split('-')[0];
+    const fallback = allowedByPrimarySubtag.get(primary);
+    if (fallback && translationHashes[fallback]) return fallback;
   }
   return undefined;
 };

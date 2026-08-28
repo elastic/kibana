@@ -81,6 +81,10 @@ export const OverviewStatusSchema = schema.object({
   ...CommonQuerySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
   groupByMonitor: schema.maybe(schema.boolean()),
+  // When explicitly `false`, read-only Heartbeat / Elastic Agent managed
+  // monitors (no saved object, `origin: 'heartbeat'`) are excluded from the
+  // overview. Defaults to showing them; remote (CCS) monitors are unaffected.
+  includeHeartbeatMonitors: schema.maybe(schema.boolean()),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;

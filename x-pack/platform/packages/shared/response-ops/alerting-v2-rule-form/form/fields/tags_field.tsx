@@ -9,9 +9,25 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
-import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
+
+export const validateTags = (value?: string[]): true | string => {
+  if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {
+    return i18n.translate('xpack.alertingV2.ruleForm.tagTooLongError', {
+      defaultMessage: 'Each tag must be no longer than {maxLength} characters.',
+      values: { maxLength: MAX_TAG_LENGTH },
+    });
+  }
+  if (value && value.length > MAX_TAGS) {
+    return i18n.translate('xpack.alertingV2.ruleForm.tooManyTagsError', {
+      defaultMessage: 'You can add up to {maxTags} tags.',
+      values: { maxTags: MAX_TAGS },
+    });
+  }
+  return true;
+};
 
 export const TagsField = () => {
   const { control } = useFormContext<FormValues>();
@@ -21,20 +37,11 @@ export const TagsField = () => {
     <Controller
       name="metadata.tags"
       control={control}
-      rules={{
-        validate: (value) => {
-          if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {
-            return i18n.translate('xpack.alertingV2.ruleForm.tagTooLongError', {
-              defaultMessage: 'Each tag must be no longer than {maxLength} characters.',
-              values: { maxLength: MAX_TAG_LENGTH },
-            });
-          }
-          return true;
-        },
-      }}
+      rules={{ validate: validateTags }}
       render={({ field, fieldState: { error } }) => {
         const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
         const options = selectedOptions;
+        const atTagCountLimit = (field.value?.length ?? 0) >= MAX_TAGS;
 
         return (
           <EuiFormRow
@@ -52,9 +59,13 @@ export const TagsField = () => {
               options={options}
               selectedOptions={selectedOptions}
               onChange={(selected) => field.onChange(selected.map(({ label }) => label))}
-              onCreateOption={(searchValue) => {
-                field.onChange([...(field.value ?? []), searchValue]);
-              }}
+              onCreateOption={
+                atTagCountLimit
+                  ? undefined
+                  : (searchValue) => {
+                      field.onChange([...(field.value ?? []), searchValue]);
+                    }
+              }
               isClearable={true}
               isInvalid={!!error}
               fullWidth

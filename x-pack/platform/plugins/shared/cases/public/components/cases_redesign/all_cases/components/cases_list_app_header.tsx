@@ -7,29 +7,45 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import { PAGE_TITLE } from '../../../../common/translations';
 import { useCreateCaseNavigation } from '../../../../common/navigation';
-import { useConfigureCasesNavigation } from '../../../../common/navigation/hooks';
+import {
+  useConfigureCasesNavigation,
+  useCasesTemplatesNavigation,
+} from '../../../../common/navigation/hooks';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
+import { KibanaServices } from '../../../../common/lib/kibana';
+import { CasesAppHeader } from '../../../app/cases_app_header';
 import { getListMenu } from './header_menu';
 
 export const CasesListAppHeader: FC = () => {
   const { permissions } = useCasesContext();
   const { navigateToCreateCase } = useCreateCaseNavigation();
   const { navigateToConfigureCases } = useConfigureCasesNavigation();
+  const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
+  const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
 
   const menu = useMemo(
     () =>
       getListMenu({
         permissions,
+        isTemplatesEnabled,
         navigateToCreateCase,
         navigateToConfigureCases,
+        navigateToCasesTemplates,
+        getCasesTemplatesUrl,
       }),
-    [permissions, navigateToCreateCase, navigateToConfigureCases]
+    [
+      permissions,
+      isTemplatesEnabled,
+      navigateToCreateCase,
+      navigateToConfigureCases,
+      navigateToCasesTemplates,
+      getCasesTemplatesUrl,
+    ]
   );
 
-  return <AppHeader sticky={false} title={PAGE_TITLE} menu={menu} />;
+  return <CasesAppHeader title={PAGE_TITLE} menu={menu} />;
 };
 
 CasesListAppHeader.displayName = 'CasesListAppHeader';

@@ -18,7 +18,7 @@ import type { FindRuleExecutionsQuery, RuleExecutionSortField } from '../types';
  * schema so the four layers — TM source, ES filter, normalizer, public
  * schema — move in lock-step: widening any one of them without the
  * others triggers the
- * `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS` drop log.
+ * `EXECUTION_HISTORY_NORMALIZER_DEGRADED` drop log.
  */
 const STRUCTURALLY_VALID_OUTCOMES: string[] = [...ruleExecutionOutcomeSchema.options];
 
@@ -62,14 +62,14 @@ const SORT_FIELD_TO_ES: Record<RuleExecutionSortField, string> = {
  *     `isRuleExecutionOutcome` check, and the public
  *     `ruleExecutionOutcomeSchema`. Widening any one of them without
  *     the others surfaces immediately via the
- *     `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS` drop log — which
+ *     `EXECUTION_HISTORY_NORMALIZER_DEGRADED` drop log — which
  *     therefore should not fire in steady state. The caller-supplied
  *     outcome filter, when present, is a subset of the structurally
  *     valid set (enforced by the public schema) and is forwarded
  *     verbatim.
  *
  * `track_total_hits` is intentionally not set. The schema caps the
- * paginatable window via {@link RULE_EXECUTIONS_MAX_RESULT_WINDOW}
+ * paginatable window via {@link EXECUTION_HISTORY_MAX_RESULT_WINDOW}
  * (= 10_000), which mirrors Elasticsearch's default
  * `index.max_result_window`. Both are independently configurable, but
  * the schema cap binds first — the request validator rejects

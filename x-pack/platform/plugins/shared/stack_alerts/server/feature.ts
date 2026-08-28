@@ -13,6 +13,7 @@ import {
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   STACK_ALERTS_FEATURE_ID,
+  STACK_ALERTS_ONLY_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID as ElasticsearchQuery } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -73,10 +74,11 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
     defaultMessage: 'Stack Rules',
   }),
+  order: 2000,
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   alerting: alertingFeatures,
   privileges: {
@@ -84,7 +86,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       app: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       alerting: {
         rule: {
@@ -108,7 +110,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       app: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       alerting: {
         rule: {
@@ -124,6 +126,51 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       api: ['rac'],
       ui: [],
+    },
+  },
+};
+
+export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
+  id: STACK_ALERTS_ONLY_FEATURE_ID,
+  name: i18n.translate('xpack.stackAlerts.featureRegistry.stackAlertsOnlyFeatureName', {
+    defaultMessage: 'Stack Alerts',
+  }),
+  order: 2001,
+  category: DEFAULT_APP_CATEGORIES.management,
+  app: [],
+  catalogue: [],
+  management: {
+    insightsAndAlerting: ['triggersActionsAlerts'],
+  },
+  alerting: alertingFeatures,
+  privileges: {
+    all: {
+      app: [],
+      catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActionsAlerts'],
+      },
+      alerting: {
+        alert: { all: alertingFeatures },
+        rule: { mute_alerts: alertingFeatures },
+      },
+      savedObject: { all: [], read: [] },
+      api: ['rac'],
+      ui: ['show', 'write'],
+    },
+    read: {
+      app: [],
+      catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActionsAlerts'],
+      },
+      alerting: {
+        alert: { read: alertingFeatures },
+        rule: { read_muted_alerts: alertingFeatures },
+      },
+      savedObject: { all: [], read: [] },
+      api: ['rac'],
+      ui: ['show'],
     },
   },
 };

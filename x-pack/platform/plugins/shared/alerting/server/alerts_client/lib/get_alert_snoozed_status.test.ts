@@ -94,4 +94,19 @@ describe('getAlertSnoozedStatus', () => {
     });
     expect(getAlertSnoozedStatus('alert-1', ruleData)).toBe(true);
   });
+
+  test('should return true when alertInstanceId is muted (snooze indefinitely)', () => {
+    const ruleData = createMockRuleData({ mutedInstanceIds: ['alert-1'] });
+    expect(getAlertSnoozedStatus('alert-1', ruleData)).toBe(true);
+  });
+
+  test('should return false when a different alertInstanceId is muted', () => {
+    const ruleData = createMockRuleData({ mutedInstanceIds: ['alert-2'] });
+    expect(getAlertSnoozedStatus('alert-1', ruleData)).toBe(false);
+  });
+
+  test('should return false when only the whole rule is muted (muteAll)', () => {
+    const ruleData = createMockRuleData({ muteAll: true, mutedInstanceIds: [] });
+    expect(getAlertSnoozedStatus('alert-1', ruleData)).toBe(false);
+  });
 });

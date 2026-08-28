@@ -213,4 +213,5 @@ export const DEFAULT_FORM_STATE: ActionPolicyFormState = {
   throttleStrategy: 'on_status_change',
   throttleInterval: '',
   destinations: [],
+  inlineActions: [],
 };

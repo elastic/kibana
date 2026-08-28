@@ -80,6 +80,12 @@ export const LazyCspFindingsVulnerabilityFlyoutFooter = lazy(
     )
 );
 
+// Shared "take action" control (create detection rule) without the flyout footer chrome, so
+// consumers (e.g. the security solution system flyout) can place it in their own footer layout.
+export const LazyCspTakeAction = lazy(() =>
+  import('./components/take_action').then((module) => ({ default: module.TakeAction }))
+);
+
 const CspRouterLazy = lazy(() => import('./application/csp_router'));
 const CspRouter = (props: CspRouterProps) => (
   <Suspense fallback={<CspLoadingState />}>
@@ -176,6 +182,11 @@ export class CspPlugin
               <LazyCspFindingsMisconfigurationFlyoutFooter {...props} />
             </Suspense>
           ),
+          TakeAction: (props: FindingMisconfigurationFlyoutFooterProps) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspTakeAction {...props} />
+            </Suspense>
+          ),
         };
       },
       getCloudSecurityPostureVulnerabilityFlyout: () => {
@@ -200,6 +211,11 @@ export class CspPlugin
           Footer: (props: FindingsVulnerabilityFlyoutFooterProps) => (
             <Suspense fallback={<CspLoadingState />}>
               <LazyCspFindingsVulnerabilityFlyoutFooter {...props} />
+            </Suspense>
+          ),
+          TakeAction: (props: FindingsVulnerabilityFlyoutFooterProps) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspTakeAction {...props} />
             </Suspense>
           ),
         };

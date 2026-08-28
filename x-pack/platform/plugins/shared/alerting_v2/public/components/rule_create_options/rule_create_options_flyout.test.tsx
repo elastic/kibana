@@ -14,7 +14,7 @@ import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onCreateThresholdAlert = jest.fn();
+const onCreateThresholdRule = jest.fn();
 
 const renderFlyout = () =>
   render(
@@ -23,7 +23,7 @@ const renderFlyout = () =>
         onClose={onClose}
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onCreateThresholdAlert={onCreateThresholdAlert}
+        onCreateThresholdRule={onCreateThresholdRule}
       />
     </I18nProvider>
   );
@@ -40,7 +40,7 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
     expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
     expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
-    expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
+    expect(screen.getByText('Threshold rule')).toBeInTheDocument();
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
   });
 
@@ -68,34 +68,41 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the builder divider before the Threshold Alert option', () => {
+  it('renders the builder divider before the Threshold rule option', () => {
     renderFlyout();
 
     expect(screen.getByText('or start from a builder')).toBeInTheDocument();
     expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
-  it('calls onCreateThresholdAlert when the Threshold Alert option is selected', () => {
+  it('calls onCreateThresholdRule when the Threshold rule option is selected', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByRole('button', { name: /threshold alert/i }));
+    fireEvent.click(screen.getByRole('button', { name: /threshold rule/i }));
 
-    expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
+    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
   });
 
-  it('hides the AI Agent option when onCreateWithAgent is not provided', () => {
+  it('renders the AI Agent option disabled and does not fire onCreateWithAgent when createWithAgentDisabled is set', () => {
     render(
       <I18nProvider>
         <RuleCreateOptionsFlyout
           onClose={onClose}
           onCreateEsqlRule={onCreateEsqlRule}
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
+          createWithAgentTooltipText="Missing privileges"
+          onCreateThresholdRule={onCreateThresholdRule}
         />
       </I18nProvider>
     );
 
-    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
-    expect(screen.queryByText('Create with AI Agent')).not.toBeInTheDocument();
-    expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toBeInTheDocument();
+    // Kept focusable (aria-disabled) rather than natively disabled so the tooltip stays reachable.
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 });

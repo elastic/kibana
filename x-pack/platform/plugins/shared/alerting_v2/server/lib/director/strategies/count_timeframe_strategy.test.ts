@@ -13,13 +13,15 @@ import type {
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { createRuleResponse } from '../../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { buildLatestAlertEvent, buildStrategyStateTransitionContext } from '../test_utils';
 
 describe('CountTimeframeStrategy', () => {
   let strategy: CountTimeframeStrategy;
 
   beforeEach(() => {
-    strategy = new CountTimeframeStrategy();
+    const { loggerService } = createLoggerService();
+    strategy = new CountTimeframeStrategy(loggerService);
   });
 
   const getNextState = (...args: Parameters<typeof buildStrategyStateTransitionContext>) =>
@@ -30,6 +32,7 @@ describe('CountTimeframeStrategy', () => {
     on,
     to,
     stateTransition,
+    noDataStrategy,
     statusCount,
     expectedStatusCount,
     eventTimestamp,
@@ -39,6 +42,7 @@ describe('CountTimeframeStrategy', () => {
     on: AlertEventStatus;
     to: AlertEpisodeStatus;
     stateTransition?: RuleResponse['state_transition'];
+    noDataStrategy?: RuleResponse['no_data_strategy'];
     statusCount?: number | null;
     expectedStatusCount?: number;
     eventTimestamp?: string;
@@ -47,6 +51,7 @@ describe('CountTimeframeStrategy', () => {
     const result = getNextState({
       eventStatus: on,
       stateTransition,
+      noDataStrategy,
       eventTimestamp,
       ...(from != null
         ? {
@@ -472,6 +477,99 @@ describe('CountTimeframeStrategy', () => {
       ],
     ])('stays %s', (_label, from, on, to) => {
       expectTransition({ from, on, to, stateTransition });
+    });
+  });
+
+  describe("no_data event with no_data_strategy: 'recover'", () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending_count: 3,
+      recovering_count: 3,
+    };
+
+    it('transitions inactive → inactive immediately, ignoring pending gating', () => {
+      expectTransition({
+        from: alertEpisodeStatus.inactive,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+      });
+    });
+
+    it('transitions pending → inactive immediately, ignoring pending gating', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+        statusCount: 1,
+      });
+    });
+
+    it('transitions active → inactive immediately, ignoring recovery delay', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+      });
+    });
+
+    it('transitions recovering → inactive immediately, ignoring recovery delay', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+        statusCount: 1,
+      });
+    });
+  });
+
+  describe("no_data event with no_data_strategy: 'emit'", () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending_count: 3,
+      recovering_count: 3,
+    };
+
+    it.each<[AlertEpisodeStatus]>([
+      [alertEpisodeStatus.inactive],
+      [alertEpisodeStatus.active],
+      [alertEpisodeStatus.recovering],
+    ])('transitions %s → active', (from) => {
+      expectTransition({
+        from,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        noDataStrategy: 'emit',
+      });
+    });
+
+    it('keeps a pending episode in pending when the consecutive-breach threshold is not yet met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.pending,
+        stateTransition,
+        noDataStrategy: 'emit',
+        statusCount: 1,
+        expectedStatusCount: 2,
+      });
+    });
+
+    it('advances a pending episode to active once the consecutive-breach threshold is met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        noDataStrategy: 'emit',
+        statusCount: 2,
+      });
     });
   });
 });

@@ -2161,5 +2161,51 @@ describe('Response actions history', () => {
       expect(columnHeaders).not.toContain(TABLE_COLUMN_NAMES.actions);
       expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
     });
+
+    it('should display the actions column when user has `canWriteActionsLogManagement` privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointAuthzInitialStateMock({
+          canWriteActionsLogManagement: true,
+        }),
+      });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const columnHeaders = Array.from(
+        renderResult.getByTestId(testPrefix).querySelectorAll('thead th')
+      ).map((col) => col.textContent);
+      expect(columnHeaders).toContain(TABLE_COLUMN_NAMES.actions);
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeTruthy();
+    });
+
+    it('should not display the actions column when user lacks `canWriteActionsLogManagement` privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointAuthzInitialStateMock({
+          canWriteActionsLogManagement: false,
+        }),
+      });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const columnHeaders = Array.from(
+        renderResult.getByTestId(testPrefix).querySelectorAll('thead th')
+      ).map((col) => col.textContent);
+      expect(columnHeaders).not.toContain(TABLE_COLUMN_NAMES.actions);
+      expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
+    });
   });
 });

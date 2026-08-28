@@ -22,7 +22,6 @@ import {
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
 } from '@kbn/inference-tracing';
 import {
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
@@ -30,6 +29,7 @@ import {
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import type { TracingPrivacySettings } from './agent_builder_span_processor';
@@ -58,6 +58,7 @@ const createCachedTracingSettings = async (
     includeSystemPrompt: false,
     includeRealNames: false,
     includeRealIds: false,
+    includeUserData: false,
   };
 
   const refresh = async () => {
@@ -67,31 +68,32 @@ const createCachedTracingSettings = async (
       const client = core.uiSettings.asScopedToClient(internalClient);
       const [
         enabled,
-        experimentalFeaturesEnabled,
         includeUserPrompts,
         includeLlmResponses,
         includeToolDetails,
         includeSystemPrompt,
         includeRealNames,
         includeRealIds,
+        includeUserData,
       ] = await Promise.all([
         client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
       ]);
       settings = {
-        enabled: enabled && experimentalFeaturesEnabled,
+        enabled,
         includeUserPrompts,
         includeLlmResponses,
         includeToolDetails,
         includeSystemPrompt,
         includeRealNames,
         includeRealIds,
+        includeUserData,
       };
     } catch (error) {
       logger.error(`Failed to fetch tracing settings: ${error.message}`);

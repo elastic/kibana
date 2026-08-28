@@ -195,12 +195,22 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
           const primingTargetFqdn = targetFqdn('prime');
           const primingTarget = targetId('prime');
 
+          // Seed the priming actor with a FUTURE last_seen so it stays above any
+          // watermark a prior/concurrent auto-run may have persisted — the same
+          // mitigation every other resolvable actor in this suite already uses.
+          // Without it, the actor defaults to seed-time "now" and can fall below a
+          // run-start watermark, permanently skipping it (waitForRelationshipIds
+          // then times out).
+          const primingFutureTs = new Date(Date.now() + 3_600_000).toISOString();
+
           await seedHostEntity(esClient, { entityId: primingTarget, hostName: primingTargetFqdn });
           await seedHostEntity(esClient, {
             entityId: primingActor,
             hostName: `${entityPrefix}-prime.${domain}`,
             relationship: { key: relationshipKey, hostNames: [primingTargetFqdn] },
             entitySource: requiredEntitySource,
+            lastSeen: primingFutureTs,
+            firstSeen: primingFutureTs,
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });

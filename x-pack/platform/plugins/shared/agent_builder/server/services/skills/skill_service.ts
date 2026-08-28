@@ -15,7 +15,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
+import { isAllowedSkillRegistration } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -81,7 +81,7 @@ class SkillServiceImpl implements SkillService {
   setup(): SkillServiceSetup {
     return {
       registerSkill: (skill) => {
-        if (!isAllowedBuiltinSkill(skill.id)) {
+        if (!isAllowedSkillRegistration(skill)) {
           throw new Error(
             `Built-in skill with id "${skill.id}" is not in the list of allowed built-in skills.
              Please add it to the list of allowed built-in skills in the "@kbn/agent-builder-server/allow_lists.ts" file.`
@@ -129,6 +129,7 @@ class SkillServiceImpl implements SkillService {
         const toolRegistry = await getToolRegistry({ request });
         const soClient = savedObjects.getScopedClient(request);
         const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+        const globalUiSettingsClient = uiSettings.globalAsScopedToClient(soClient);
         const uiSettingKeys = [
           ...new Set(
             [...this.skills.values()]
@@ -140,12 +141,22 @@ class SkillServiceImpl implements SkillService {
               )
           ),
         ];
-        const [experimentalFeaturesEnabled, ...uiSettingValuesList] = await Promise.all([
-          uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
-          ...uiSettingKeys.map((key) => uiSettingsClient.get(key)),
-        ]);
+        const [experimentalFeaturesEnabled, namespaceSettingValues, globalSettingValues] =
+          await Promise.all([
+            uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
+            Promise.all(uiSettingKeys.map((key) => uiSettingsClient.get(key))),
+            Promise.all(uiSettingKeys.map((key) => globalUiSettingsClient.get(key))),
+          ]);
+        // Use the namespace value when it is explicitly defined; otherwise fall back
+        // to the global-scoped value so skills can gate on global settings.
         const uiSettingValues = new Map(
-          uiSettingKeys.map((key, index) => [key, uiSettingValuesList[index]])
+          uiSettingKeys.map((key, index) => {
+            const namespaceValue = namespaceSettingValues[index];
+            return [
+              key,
+              namespaceValue !== undefined ? namespaceValue : globalSettingValues[index],
+            ];
+          })
         );
 
         return createSkillRegistry({

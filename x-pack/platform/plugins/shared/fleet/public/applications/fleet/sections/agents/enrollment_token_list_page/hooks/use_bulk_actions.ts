@@ -47,31 +47,48 @@ export const useBulkActions = ({
       const count = res.data?.count ?? 0;
       const successCount = res.data?.successCount ?? 0;
       const errorCount = res.data?.errorCount ?? 0;
-      const actionLabel = action === 'delete' ? 'deleted' : 'revoked';
 
       if (count === successCount) {
         notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionSuccess', {
-            defaultMessage:
-              '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} {actionLabel}',
-            values: { successCount, actionLabel },
-          })
+          action === 'delete'
+            ? i18n.translate('xpack.fleet.enrollmentTokensList.bulkDeleteSuccess', {
+                defaultMessage:
+                  '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} deleted',
+                values: { successCount },
+              })
+            : i18n.translate('xpack.fleet.enrollmentTokensList.bulkRevokeSuccess', {
+                defaultMessage:
+                  '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} revoked',
+                values: { successCount },
+              })
         );
       } else if (count === errorCount) {
         notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionAllErrors', {
-            defaultMessage:
-              'Failed to {actionLabel} {errorCount, plural, one {# enrollment token} other {# enrollment tokens}}',
-            values: { errorCount, actionLabel },
-          })
+          action === 'delete'
+            ? i18n.translate('xpack.fleet.enrollmentTokensList.bulkDeleteAllErrors', {
+                defaultMessage:
+                  'Failed to delete {errorCount, plural, one {# enrollment token} other {# enrollment tokens}}',
+                values: { errorCount },
+              })
+            : i18n.translate('xpack.fleet.enrollmentTokensList.bulkRevokeAllErrors', {
+                defaultMessage:
+                  'Failed to revoke {errorCount, plural, one {# enrollment token} other {# enrollment tokens}}',
+                values: { errorCount },
+              })
         );
       } else {
         notifications.toasts.addWarning(
-          i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionPartialErrors', {
-            defaultMessage:
-              '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} {actionLabel}, {errorCount, plural, one {# token} other {# tokens}} failed',
-            values: { successCount, errorCount, actionLabel },
-          })
+          action === 'delete'
+            ? i18n.translate('xpack.fleet.enrollmentTokensList.bulkDeletePartialErrors', {
+                defaultMessage:
+                  '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} deleted, {errorCount, plural, one {# token} other {# tokens}} failed',
+                values: { successCount, errorCount },
+              })
+            : i18n.translate('xpack.fleet.enrollmentTokensList.bulkRevokePartialErrors', {
+                defaultMessage:
+                  '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} revoked, {errorCount, plural, one {# token} other {# tokens}} failed',
+                values: { successCount, errorCount },
+              })
         );
       }
     } catch (err) {

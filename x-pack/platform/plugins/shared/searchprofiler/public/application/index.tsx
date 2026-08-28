@@ -22,6 +22,7 @@ interface AppDependencies {
   http: Http;
   notifications: ToastsSetup;
   initialLicenseStatus: LicenseStatus;
+  history: RouteComponentProps['history'];
   location: RouteComponentProps['location'];
   startServices: SearchProfilerStartServices;
 }
@@ -31,13 +32,14 @@ export const renderApp = ({
   http,
   notifications,
   initialLicenseStatus,
+  history,
   location,
   startServices,
 }: AppDependencies) => {
   render(
     <KibanaRenderContextProvider {...startServices}>
       <AppContextProvider
-        args={{ initialLicenseStatus, notifications, http, location, ...startServices }}
+        args={{ initialLicenseStatus, notifications, http, history, location, ...startServices }}
       >
         <ProfileContextProvider>
           <App />

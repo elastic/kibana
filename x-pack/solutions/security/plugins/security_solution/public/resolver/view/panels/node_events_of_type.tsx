@@ -16,7 +16,7 @@ import {
   EuiButton,
   EuiCallOut,
 } from '@elastic/eui';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';

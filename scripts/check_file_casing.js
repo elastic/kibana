@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/run_check_file_casing');
+require('@kbn/dev/run_check_file_casing');

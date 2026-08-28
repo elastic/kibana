@@ -49,6 +49,7 @@ export interface AuthenticatedElasticUser {
   username: string;
   email: string;
   fullName: string;
+  profileUid?: string;
   roles: string[];
   enabled: boolean;
   metadata?: {

@@ -12,6 +12,7 @@ import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-ser
 export const getDefaultUserProfileImplementation = (): CoreUserProfileDelegateContract => {
   return {
     getCurrent: () => Promise.resolve(null),
+    getCurrentProfileId: () => Promise.resolve(null),
     bulkGet: () => Promise.resolve([]),
     suggest: () => Promise.resolve([]),
     update: () => Promise.resolve(),

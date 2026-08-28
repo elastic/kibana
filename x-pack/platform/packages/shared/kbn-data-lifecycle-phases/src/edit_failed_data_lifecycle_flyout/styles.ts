@@ -16,4 +16,7 @@ export const getEditFailedDataLifecycleFlyoutBodyStyles = ({
   headerSection: css`
     padding: ${euiTheme.size.l};
   `,
+  failureStoreHelpText: css`
+    margin-inline-start: calc(${euiTheme.size.base} + ${euiTheme.size.s});
+  `,
 });

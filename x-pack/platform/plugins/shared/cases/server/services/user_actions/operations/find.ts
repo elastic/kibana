@@ -49,7 +49,7 @@ export class UserActionFinder {
     page,
     perPage,
     filter,
-    author,
+    authors,
   }: FindOptions): Promise<SavedObjectsFindResponse<UserActionTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
@@ -57,7 +57,7 @@ export class UserActionFinder {
       const finalFilter = combineFilters([
         filter,
         UserActionFinder.buildFilter(types),
-        UserActionFinder.buildAuthorFilter(author),
+        UserActionFinder.buildAuthorFilter(authors),
       ]);
 
       const userActions =
@@ -113,7 +113,7 @@ export class UserActionFinder {
     sortOrder,
     types,
     filter,
-    author,
+    authors,
     limit,
     decode,
   }: Omit<FindOptions, 'page' | 'perPage' | 'search'> & {
@@ -126,7 +126,7 @@ export class UserActionFinder {
       const finalFilter = combineFilters([
         filter,
         UserActionFinder.buildFilter(types),
-        UserActionFinder.buildAuthorFilter(author),
+        UserActionFinder.buildAuthorFilter(authors),
       ]);
 
       return await this.collectFromPIT(
@@ -255,13 +255,13 @@ export class UserActionFinder {
     );
   }
 
-  private static buildAuthorFilter(author?: string): KueryNode | undefined {
-    if (!author) {
+  private static buildAuthorFilter(authors?: string[]): KueryNode | undefined {
+    if (!authors?.length) {
       return undefined;
     }
 
     return buildFilter({
-      filters: [author],
+      filters: authors,
       field: 'created_by.username',
       operator: 'or',
       type: CASE_USER_ACTION_SAVED_OBJECT,

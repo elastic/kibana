@@ -19,19 +19,31 @@ import {
 import prettyMilliseconds from 'pretty-ms';
 import { CaseStatuses } from '../../../../../common/types/domain';
 import { StatusStats } from '../../../status/status_stats';
-import { useGetCasesMetrics } from '../../../../containers/use_get_cases_metrics';
 import { ATTC_DESCRIPTION, ATTC_STAT, ATTC_STAT_INFO_ARIA_LABEL } from '../translations';
 
 const PRETTY_MS_OPTIONS = { compact: true, verbose: false } as const;
 const MTTR_MULTIPLIER = 1000;
 
-// TODO: This stats bar currently shows unfiltered totals. It should be made responsive
-// to the active table filters (status, severity, tags, etc.) so the counts reflect the
-// filtered data set. https://github.com/elastic/security-team/issues/18001
-const CasesMetricsComponent: React.FC = () => {
+export interface CasesMetricsProps {
+  /**
+   * Counts and MTTR from the cases search response, so the stats bar reflects the same
+   * search, filters, and date range as the table (https://github.com/elastic/security-team/issues/18001).
+   */
+  countOpenCases: number;
+  countInProgressCases: number;
+  countClosedCases: number;
+  mttr: number | null | undefined;
+  isLoading: boolean;
+}
+
+const CasesMetricsComponent: React.FC<CasesMetricsProps> = ({
+  countOpenCases,
+  countInProgressCases,
+  countClosedCases,
+  mttr,
+  isLoading,
+}) => {
   const { euiTheme } = useEuiTheme();
-  const { data: { mttr, status } = { mttr: 0 }, isLoading: isCasesMetricsLoading } =
-    useGetCasesMetrics();
 
   const mttrValue = useMemo(
     () => (mttr != null ? prettyMilliseconds(mttr * MTTR_MULTIPLIER, PRETTY_MS_OPTIONS) : '-'),
@@ -51,25 +63,25 @@ const CasesMetricsComponent: React.FC = () => {
         <EuiFlexItem grow={true}>
           <StatusStats
             dataTestSubj="openStatsHeader"
-            caseCount={status?.open ?? 0}
+            caseCount={countOpenCases}
             caseStatus={CaseStatuses.open}
-            isLoading={isCasesMetricsLoading}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <StatusStats
             dataTestSubj="inProgressStatsHeader"
-            caseCount={status?.inProgress ?? 0}
+            caseCount={countInProgressCases}
             caseStatus={CaseStatuses['in-progress']}
-            isLoading={isCasesMetricsLoading}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <StatusStats
             dataTestSubj="closedStatsHeader"
-            caseCount={status?.closed ?? 0}
+            caseCount={countClosedCases}
             caseStatus={CaseStatuses.closed}
-            isLoading={isCasesMetricsLoading}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
@@ -87,7 +99,7 @@ const CasesMetricsComponent: React.FC = () => {
               </>
             }
             title={
-              isCasesMetricsLoading ? (
+              isLoading ? (
                 <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />
               ) : (
                 mttrValue

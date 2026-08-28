@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { getAssets } from '../../state/selectors/assets';
 import { getWorkpadInfo } from '../../state/selectors/workpad';
 import { ArgForm as Component } from './arg_form';

@@ -95,9 +95,8 @@ export interface AttachmentFormatContext {
 export interface AttachmentResolveContext extends AttachmentFormatContext {
   /**
    * Saved objects client scoped to the current user.
-   * Optional to keep the core attachment contract generic and allow non-Kibana environments.
    */
-  savedObjectsClient?: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
