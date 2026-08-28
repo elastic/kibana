@@ -23,26 +23,28 @@ export const isUserProfileAuthor = (author?: RoundAuthor): author is UserProfile
   return 'uid' in author;
 };
 
-export const getInputAuthor = ({
-  author,
-  currentUser,
+export const isPendingCurrentRound = ({
   isCurrentRound,
   roundId,
 }: {
-  author?: RoundAuthor;
-  currentUser: UserProfileWithAvatar | null;
   isCurrentRound: boolean;
   roundId: string;
+}): boolean => isCurrentRound && roundId === pendingRoundId;
+
+export const getInputAuthor = ({
+  author,
+  currentUser,
+  isPendingCurrentRound: isPendingCurrentRoundValue,
+}: {
+  author?: RoundAuthor;
+  currentUser: UserProfileWithAvatar | null;
+  isPendingCurrentRound: boolean;
 }): RoundAuthor | undefined => {
   if (author) {
     return author;
   }
 
-  if (!isCurrentRound) {
-    return undefined;
-  }
-
-  if (roundId !== pendingRoundId) {
+  if (!isPendingCurrentRoundValue) {
     return undefined;
   }
 

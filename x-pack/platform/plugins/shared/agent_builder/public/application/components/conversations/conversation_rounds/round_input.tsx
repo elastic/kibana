@@ -40,8 +40,7 @@ const labels = {
 interface RoundInputProps {
   input: string;
   author?: RoundAuthor;
-  isCurrentRound: boolean;
-  roundId: string;
+  isPendingCurrentRound: boolean;
   origin?: ConversationRoundOrigin;
   startedAt: string;
   attachmentRefs?: AttachmentVersionRef[];
@@ -52,8 +51,7 @@ interface RoundInputProps {
 export const RoundInput = ({
   input,
   author,
-  isCurrentRound,
-  roundId,
+  isPendingCurrentRound,
   origin,
   startedAt,
   attachmentRefs,
@@ -63,7 +61,7 @@ export const RoundInput = ({
   const { euiTheme } = useEuiTheme();
   const { currentUser } = useCurrentUser();
   const [isHovering, setIsHovering] = useState(false);
-  const inputAuthor = getInputAuthor({ author, currentUser, isCurrentRound, roundId });
+  const inputAuthor = getInputAuthor({ author, currentUser, isPendingCurrentRound });
   const isCurrentUser = isCurrentUserAuthor({ author: inputAuthor, currentUser });
 
   const inputContainerStyles = css`

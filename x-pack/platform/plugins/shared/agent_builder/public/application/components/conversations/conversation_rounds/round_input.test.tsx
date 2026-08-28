@@ -7,7 +7,6 @@
 
 import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { pendingRoundId } from '../../../utils/new_conversation';
 import { getInputAuthor, isCurrentUserAuthor } from './round_author';
 
 const currentUser = {
@@ -54,8 +53,7 @@ describe('getInputAuthor', () => {
       getInputAuthor({
         author: undefined,
         currentUser,
-        isCurrentRound: true,
-        roundId: pendingRoundId,
+        isPendingCurrentRound: true,
       })
     ).toBe(currentUser);
   });
@@ -70,19 +68,17 @@ describe('getInputAuthor', () => {
       getInputAuthor({
         author,
         currentUser,
-        isCurrentRound: true,
-        roundId: pendingRoundId,
+        isPendingCurrentRound: true,
       })
     ).toBe(author);
   });
 
-  it('does not use the current user for non-pending rounds without persisted author attribution', () => {
+  it('does not use the current user for non-pending current rounds without persisted author attribution', () => {
     expect(
       getInputAuthor({
         author: undefined,
         currentUser,
-        isCurrentRound: true,
-        roundId: 'persisted-round',
+        isPendingCurrentRound: false,
       })
     ).toBeUndefined();
   });

@@ -26,6 +26,7 @@ import { RoundError } from './round_error/round_error';
 import { AuthorizationPrompt, ConfirmationPrompt, AskUserQuestionPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './todos_step_display';
+import { isPendingCurrentRound } from './round_author';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -191,6 +192,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   const roundContainerStyles = css`
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
   `;
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -203,8 +205,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         <RoundInput
           input={input.message}
           author={author}
-          isCurrentRound={isCurrentRound}
-          roundId={rawRound.id}
+          isPendingCurrentRound={isPendingCurrentRound({ isCurrentRound, roundId: rawRound.id })}
           origin={origin}
           startedAt={startedAt}
           attachmentRefs={input.attachment_refs}

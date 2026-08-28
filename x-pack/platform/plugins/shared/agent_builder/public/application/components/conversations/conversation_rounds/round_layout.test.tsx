@@ -185,9 +185,8 @@ describe('RoundLayout', () => {
     expect(roundInputProps).toEqual(
       expect.objectContaining({
         author: round.author,
-        isCurrentRound: false,
+        isPendingCurrentRound: false,
         origin: round.origin,
-        roundId: round.id,
         startedAt: round.started_at,
       })
     );
@@ -221,8 +220,7 @@ describe('RoundLayout', () => {
     expect(roundInputMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         author: undefined,
-        isCurrentRound: true,
-        roundId: pendingRoundId,
+        isPendingCurrentRound: true,
       })
     );
   });
