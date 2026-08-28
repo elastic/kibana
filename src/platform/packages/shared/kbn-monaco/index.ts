@@ -15,7 +15,7 @@ export type { ClipboardContextMenuLabels } from './src/monaco_imports';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
 
-export * from './src/languages';
+export * from './src/languages/definitions';
 
 export { BarePluginApi };
 export type * from './src/types';

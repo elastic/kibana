@@ -4,13 +4,17 @@
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
-  "include": ["src/**/*", "**/*.ts", "src/languages/painless/autocomplete_definitions/*.json"],
+  "include": [
+    "src/**/*",
+    "**/*.ts",
+    "src/languages/definitions/painless/autocomplete_definitions/*.json"
+  ],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/repo-info",
     "@kbn/esql-language",
     "@kbn/esql-types",
-    "@kbn/std",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
