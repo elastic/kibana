@@ -2178,6 +2178,15 @@
       "enabled": true
     },
     {
+      "groupName": "Threat intelligence content dependencies",
+      "matchDepNames": ["@mozilla/readability", "css-tree", "@types/css-tree"],
+      "reviewers": ["team:security-threat-hunting"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Threat Hunting"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "seedrandom",
       "matchDepNames": ["seedrandom", "@types/seedrandom"],
       "reviewers": ["team:siem-conduit"],
