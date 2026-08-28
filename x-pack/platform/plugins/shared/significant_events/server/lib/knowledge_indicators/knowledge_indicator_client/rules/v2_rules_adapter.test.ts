@@ -274,6 +274,24 @@ describe('RulesAdapterV2', () => {
 
       await expect(adapter.findExistingRuleIds(['rule-1'])).rejects.toThrow('lookup failed');
     });
+
+    it('limits concurrent existence checks', async () => {
+      const mock = makeRulesClientMock();
+      let activeChecks = 0;
+      let maxActiveChecks = 0;
+      mock.ruleExists.mockImplementation(async () => {
+        activeChecks += 1;
+        maxActiveChecks = Math.max(maxActiveChecks, activeChecks);
+        await Promise.resolve();
+        activeChecks -= 1;
+        return true;
+      });
+      const adapter = makeAdapter(mock);
+      const ruleIds = Array.from({ length: 11 }, (_, index) => `rule-${index}`);
+
+      await expect(adapter.findExistingRuleIds(ruleIds)).resolves.toEqual(ruleIds);
+      expect(maxActiveChecks).toBe(10);
+    });
   });
 
   describe('bulkDeleteRules', () => {

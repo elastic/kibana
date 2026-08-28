@@ -164,13 +164,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
           : {}),
       });
 
-      /**
-       * Even though the cleanup workflow is more generic
-       * and it handle both KI and stale events cleanup.
-       * It is bootstrapped on the KI level as it's
-       * the first and required step in the pipeline,
-       * while Discovery might not be triggered at all.
-       */
+      // Inferred identification is the first streams.manage-scoped request in every identification
+      // run, so it can bootstrap cleanup even when discovery never executes.
       await bootstrapCleanupWorkflow({
         cleanupWorkflowService,
         maintenanceService,

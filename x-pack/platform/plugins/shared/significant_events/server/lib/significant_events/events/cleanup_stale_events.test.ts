@@ -22,6 +22,7 @@ const updateStatusMock = updateSignificantEventStatus as jest.MockedFunction<
 const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResponse =>
   ({
     event_uuid: eventUuid,
+    event_id: eventUuid,
     signals: ruleIds.map((ruleId) => ({
       type: 'detection',
       metadata: { rule_uuid: ruleId },
@@ -30,14 +31,15 @@ const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResp
 
 const createEventClient = (pages: SignificantEventResponse[][]): EventClient =>
   ({
-    findLatestByCurrentStatePaginated: jest.fn().mockImplementation(({ page }: { page: number }) =>
-      Promise.resolve({
-        hits: pages[page - 1] ?? [],
-        page,
-        perPage: 1000,
-        total: pages.flat().length,
-      })
-    ),
+    findLatestByCurrentStateBatch: jest
+      .fn()
+      .mockImplementation(({ afterEventId }: { afterEventId?: string }) => {
+        const previousPageIndex =
+          afterEventId === undefined
+            ? -1
+            : pages.findIndex((page) => page.at(-1)?.event_id === afterEventId);
+        return Promise.resolve({ hits: pages[previousPageIndex + 1] ?? [] });
+      }),
   } as unknown as EventClient);
 
 const createRulesClient = (existingIds: string[]): IRulesManagementClient =>
@@ -80,20 +82,25 @@ describe('cleanupStaleEvents', () => {
     });
   });
 
-  it('collects all pages before closing stale events', async () => {
-    const eventClient = createEventClient([
-      [createEvent('event-1', ['rule-1'])],
-      [createEvent('event-2', ['rule-2'])],
-    ]);
+  it('processes all keyset batches', async () => {
+    const firstBatch = Array.from({ length: 1000 }, (_, index) =>
+      createEvent(`event-${String(index).padStart(4, '0')}`, ['rule-1'])
+    );
+    const eventClient = createEventClient([firstBatch, [createEvent('event-1000', ['rule-2'])]]);
     const rulesClient = createRulesClient([]);
 
     await cleanupStaleEvents({ eventClient, rulesClient });
 
-    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledTimes(2);
-    expect(jest.mocked(rulesClient.findExistingRuleIds).mock.invocationCallOrder[0]).toBeLessThan(
-      updateStatusMock.mock.invocationCallOrder[0]
-    );
-    expect(updateStatusMock).toHaveBeenCalledTimes(2);
+    expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenCalledTimes(2);
+    expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenNthCalledWith(2, {
+      status: ['open'],
+      ruleUuids: undefined,
+      afterEventId: 'event-0999',
+      batchSize: 1000,
+    });
+    expect(rulesClient.findExistingRuleIds).toHaveBeenNthCalledWith(1, ['rule-1']);
+    expect(rulesClient.findExistingRuleIds).toHaveBeenNthCalledWith(2, ['rule-2']);
+    expect(updateStatusMock).toHaveBeenCalledTimes(1001);
   });
 
   it('uses candidate rule IDs to narrow rule-deletion cleanup', async () => {
@@ -106,11 +113,11 @@ describe('cleanupStaleEvents', () => {
       candidateRuleIds: ['rule-1', 'rule-1'],
     });
 
-    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
+    expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenCalledWith({
       status: ['open'],
       ruleUuids: ['rule-1'],
-      page: 1,
-      perPage: 1000,
+      afterEventId: undefined,
+      batchSize: 1000,
     });
   });
 
@@ -125,5 +132,50 @@ describe('cleanupStaleEvents', () => {
       'rule lookup failed'
     );
     expect(updateStatusMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps completed batches when a later rule lookup fails', async () => {
+    const firstBatch = Array.from({ length: 1000 }, (_, index) =>
+      createEvent(`event-${String(index).padStart(4, '0')}`, ['rule-1'])
+    );
+    const eventClient = createEventClient([firstBatch, [createEvent('event-1000', ['rule-2'])]]);
+    const rulesClient = createRulesClient([]);
+    jest
+      .mocked(rulesClient.findExistingRuleIds)
+      .mockResolvedValueOnce([])
+      .mockRejectedValueOnce(new Error('later lookup failed'));
+
+    await expect(cleanupStaleEvents({ eventClient, rulesClient })).rejects.toThrow(
+      'later lookup failed'
+    );
+    expect(updateStatusMock).toHaveBeenCalledTimes(1000);
+    expect(updateStatusMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ eventUuid: 'event-1000' })
+    );
+  });
+
+  it('limits concurrent event status updates', async () => {
+    const eventClient = createEventClient([
+      Array.from({ length: 11 }, (_, index) => createEvent(`event-${index}`, ['deleted-rule'])),
+    ]);
+    const rulesClient = createRulesClient([]);
+    let activeUpdates = 0;
+    let maxActiveUpdates = 0;
+    updateStatusMock.mockImplementation(async ({ eventUuid }) => {
+      activeUpdates += 1;
+      maxActiveUpdates = Math.max(maxActiveUpdates, activeUpdates);
+      await Promise.resolve();
+      activeUpdates -= 1;
+      return {
+        event_uuid: eventUuid,
+        updated: 1,
+        ignored: 0,
+        status: 'closed',
+      };
+    });
+
+    await cleanupStaleEvents({ eventClient, rulesClient });
+
+    expect(maxActiveUpdates).toBe(10);
   });
 });

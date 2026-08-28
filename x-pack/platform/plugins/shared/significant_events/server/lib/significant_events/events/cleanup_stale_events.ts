@@ -7,11 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import pLimit from 'p-limit';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { EventClient } from './event_client';
 import { updateSignificantEventStatus } from './update_event_status';
 
-const EVENTS_PAGE_SIZE = 1000;
+const EVENTS_BATCH_SIZE = 1000;
+const EVENT_STATUS_UPDATE_CONCURRENCY = 10;
 
 export const STALE_EVENT_ASSESSMENT_NOTE = i18n.translate(
   'xpack.significantEvents.staleEventCleanup.assessmentNoteDescription',
@@ -35,33 +37,35 @@ const getBackingRuleIds = (event: SignificantEventResponse): string[] => [
   ),
 ];
 
-const collectOpenEvents = async ({
+const iterateOpenEventBatches = async function* ({
   eventClient,
   ruleUuids,
 }: {
   eventClient: EventClient;
   ruleUuids?: string[];
-}): Promise<SignificantEventResponse[]> => {
-  const events: SignificantEventResponse[] = [];
-  let page = 1;
-  let total = 0;
+}): AsyncGenerator<SignificantEventResponse[]> {
+  let afterEventId: string | undefined;
 
-  do {
-    const result = await eventClient.findLatestByCurrentStatePaginated({
+  while (true) {
+    const result = await eventClient.findLatestByCurrentStateBatch({
       status: ['open'],
       ruleUuids,
-      page,
-      perPage: EVENTS_PAGE_SIZE,
+      afterEventId,
+      batchSize: EVENTS_BATCH_SIZE,
     });
-    events.push(...result.hits);
-    total = result.total;
-    page += 1;
-    if (result.hits.length === 0) {
-      break;
-    }
-  } while (events.length < total);
 
-  return events;
+    if (result.hits.length === 0) {
+      return;
+    }
+
+    yield result.hits;
+
+    const lastEvent = result.hits.at(-1);
+    if (result.hits.length < EVENTS_BATCH_SIZE || lastEvent === undefined) {
+      return;
+    }
+    afterEventId = lastEvent.event_id;
+  }
 };
 
 /**
@@ -85,43 +89,52 @@ export const cleanupStaleEvents = async ({
     return { scanned: 0, closed: 0, kept: 0, skipped: 0 };
   }
 
-  const events = await collectOpenEvents({
+  let scanned = 0;
+  let closed = 0;
+  let skipped = 0;
+  const updateLimit = pLimit(EVENT_STATUS_UPDATE_CONCURRENCY);
+
+  for await (const events of iterateOpenEventBatches({
     eventClient,
     ruleUuids: uniqueCandidateRuleIds,
-  });
+  })) {
+    scanned += events.length;
 
-  const eventsWithRuleIds = events.map((event) => ({
-    event,
-    ruleIds: getBackingRuleIds(event),
-  }));
-  const allRuleIds = [...new Set(eventsWithRuleIds.flatMap(({ ruleIds }) => ruleIds))];
+    const eventsWithRuleIds = events.map((event) => ({
+      event,
+      ruleIds: getBackingRuleIds(event),
+    }));
+    skipped += eventsWithRuleIds.filter(({ ruleIds }) => ruleIds.length === 0).length;
 
-  if (allRuleIds.length === 0) {
-    return { scanned: events.length, closed: 0, kept: 0, skipped: events.length };
+    const allRuleIds = [...new Set(eventsWithRuleIds.flatMap(({ ruleIds }) => ruleIds))];
+    if (allRuleIds.length === 0) {
+      continue;
+    }
+
+    // Resolve a batch before writing it so a lookup failure cannot close events from that batch.
+    const existingRuleIds = new Set(await rulesClient.findExistingRuleIds(allRuleIds));
+    const staleEvents = eventsWithRuleIds.filter(
+      ({ ruleIds }) => ruleIds.length > 0 && ruleIds.every((ruleId) => !existingRuleIds.has(ruleId))
+    );
+    const results = await Promise.all(
+      staleEvents.map(({ event }) =>
+        updateLimit(() =>
+          updateSignificantEventStatus({
+            eventClient,
+            eventUuid: event.event_uuid,
+            status: 'closed',
+            assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
+          })
+        )
+      )
+    );
+    closed += results.reduce((total, result) => total + result.updated, 0);
   }
 
-  // Resolve every rule before writing anything. A lookup failure must leave all events untouched.
-  const existingRuleIds = new Set(await rulesClient.findExistingRuleIds(allRuleIds));
-  const staleEvents = eventsWithRuleIds.filter(
-    ({ ruleIds }) => ruleIds.length > 0 && ruleIds.every((ruleId) => !existingRuleIds.has(ruleId))
-  );
-
-  let closed = 0;
-  for (const { event } of staleEvents) {
-    const result = await updateSignificantEventStatus({
-      eventClient,
-      eventUuid: event.event_uuid,
-      status: 'closed',
-      assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
-    });
-    closed += result.updated;
-  }
-
-  const skipped = eventsWithRuleIds.filter(({ ruleIds }) => ruleIds.length === 0).length;
   return {
-    scanned: events.length,
+    scanned,
     closed,
-    kept: events.length - closed - skipped,
+    kept: scanned - closed - skipped,
     skipped,
   };
 };

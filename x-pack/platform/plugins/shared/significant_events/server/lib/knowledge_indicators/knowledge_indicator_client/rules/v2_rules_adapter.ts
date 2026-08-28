@@ -7,6 +7,7 @@
 
 import { isBoom } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import pLimit from 'p-limit';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import {
   METRIC_SERIES_GROUPING_FIELDS,
@@ -22,7 +23,7 @@ import {
 } from './rules_management_client';
 
 const FIND_PAGE_SIZE = 500;
-const RULE_EXISTS_BATCH_SIZE = 100;
+const RULE_EXISTS_CONCURRENCY = 10;
 
 /**
  * Internal getTags size for ownership-tag enumeration. The HTTP tags route stays
@@ -73,17 +74,14 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async findExistingRuleIds(ids: string[]): Promise<string[]> {
-    const existingIds: string[] = [];
+    const limit = pLimit(RULE_EXISTS_CONCURRENCY);
+    const results = await Promise.all(
+      ids.map((id) =>
+        limit(async () => ({ id, exists: await this.rulesClient.ruleExists({ id }) }))
+      )
+    );
 
-    for (let offset = 0; offset < ids.length; offset += RULE_EXISTS_BATCH_SIZE) {
-      const batch = ids.slice(offset, offset + RULE_EXISTS_BATCH_SIZE);
-      const results = await Promise.all(
-        batch.map(async (id) => ({ id, exists: await this.rulesClient.ruleExists({ id }) }))
-      );
-      existingIds.push(...results.filter(({ exists }) => exists).map(({ id }) => id));
-    }
-
-    return existingIds;
+    return results.filter(({ exists }) => exists).map(({ id }) => id);
   }
 
   async findOwnedRuleIds(streamName: string): Promise<string[]> {
