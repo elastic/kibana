@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { uiActionsService } from '../../services/kibana_services';
 import { PRETTIFY_DASHBOARD_ACTION_ID } from './prettify_dashboard_action';
@@ -49,6 +49,11 @@ describe('PrettifyDashboardButton', () => {
       execute: mockExecute,
       getDisplayName: () => 'Enhance this dashboard',
       getIconType: () => 'sparkles',
+      getCompatibilityChangesSubject: ({ dashboardApi }: { dashboardApi: DashboardApi }) =>
+        merge(dashboardApi.viewMode$, dashboardApi.children$).pipe(
+          skip(1),
+          map(() => undefined)
+        ),
     });
   });
 
@@ -92,13 +97,14 @@ describe('PrettifyDashboardButton', () => {
   });
 
   it('hides when the action becomes incompatible', async () => {
-    mockIsCompatible.mockResolvedValueOnce(true).mockResolvedValue(false);
+    mockIsCompatible.mockResolvedValue(true);
     const dashboardApi = renderButton();
 
     await waitFor(() => {
       expect(screen.getByTestId('dashboardPrettifyButton')).toBeInTheDocument();
     });
 
+    mockIsCompatible.mockResolvedValue(false);
     dashboardApi.viewMode$.next('view');
 
     await waitFor(() => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
+import { EMPTY, map, merge, skip, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart, EmbeddableChatAccess } from '@kbn/agent-builder-browser';
 import {
@@ -59,6 +61,19 @@ export const createPrettifyDashboardAction = ({
     getIconType: () => 'sparkles',
     isCompatible: async ({ dashboardApi }) =>
       isPrettifiable(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards),
+    getCompatibilityChangesSubject: ({ dashboardApi }): Observable<undefined> =>
+      merge(
+        dashboardApi.viewMode$.pipe(skip(1)),
+        dashboardApi.children$.pipe(skip(1)),
+        dashboardApi.children$.pipe(
+          switchMap((children) => {
+            const esqlChildren = Object.values(children).filter(apiPublishesEsqlUsage);
+            return esqlChildren.length === 0
+              ? EMPTY
+              : merge(...esqlChildren.map((child) => child.usesEsql$.pipe(skip(1))));
+          })
+        )
+      ).pipe(map(() => undefined)),
     execute: async ({ dashboardApi }) => {
       if (!isPrettifiable(dashboardApi, await getAgentBuilderAccess(), canWriteDashboards)) {
         return;

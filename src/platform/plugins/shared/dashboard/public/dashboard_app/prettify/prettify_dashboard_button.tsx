@@ -14,8 +14,7 @@ import { layoutVar } from '@kbn/core-chrome-layout-constants';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { merge, skip, startWith, switchMap } from 'rxjs';
-import { anyChildrenChanges$ } from '../../dashboard_api/layout_manager/any_children_changes';
+import { catchError, EMPTY, from, of, startWith, switchMap } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { uiActionsService } from '../../services/kibana_services';
 import {
@@ -45,28 +44,28 @@ export const PrettifyDashboardButton = ({ dashboardApi }: { dashboardApi: Dashbo
       return;
     }
 
-    const subscription = merge(
-      dashboardApi.viewMode$.pipe(skip(1)),
-      dashboardApi.children$.pipe(skip(1)),
-      anyChildrenChanges$(dashboardApi.children$)
-    )
+    const subscription = from(getPrettifyAction())
       .pipe(
-        startWith(undefined),
-        switchMap(async () => {
-          try {
-            const nextAction = await getPrettifyAction();
-            return (await nextAction.isCompatible(context)) ? nextAction : null;
-          } catch {
-            return null;
-          }
-        })
+        switchMap((nextAction) =>
+          (nextAction.getCompatibilityChangesSubject?.(context) ?? EMPTY).pipe(
+            startWith(undefined),
+            switchMap(async () => {
+              try {
+                return (await nextAction.isCompatible(context)) ? nextAction : null;
+              } catch {
+                return null;
+              }
+            })
+          )
+        ),
+        catchError(() => of(null))
       )
       .subscribe(setAction);
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [context, dashboardApi]);
+  }, [context]);
 
   if (!action) {
     return null;

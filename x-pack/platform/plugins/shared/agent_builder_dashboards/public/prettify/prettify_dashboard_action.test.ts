@@ -115,6 +115,18 @@ describe('createPrettifyDashboardAction', () => {
     ).resolves.toBe(false);
   });
 
+  it('is incompatible when there are no children', async () => {
+    const { action } = createAction();
+
+    await expect(
+      action.isCompatible!({
+        dashboardApi: createDashboardApi({
+          children: {},
+        }),
+      })
+    ).resolves.toBe(false);
+  });
+
   it.each(['view', 'print', 'preview'] as const)('is incompatible in %s mode', async (viewMode) => {
     const { action } = createAction();
 
