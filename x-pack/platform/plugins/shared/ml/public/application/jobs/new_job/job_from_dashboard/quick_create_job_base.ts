@@ -84,7 +84,7 @@ export class QuickJobCreatorBase {
     dashboard?: DashboardApi;
   }) {
     const datafeedId = createDatafeedId(jobId);
-    const isMlCpsEnabled = getIsMlCpsEnabled(); // !!!!!!!!!!!!!!!!!!!! test this!!!!!!!!!!!!!!!!!!!!!!
+    const isMlCpsEnabled = getIsMlCpsEnabled();
     const projectRouting = isMlCpsEnabled ? this.cps?.cpsManager?.getProjectRouting() : undefined;
     const datafeed = {
       ...datafeedConfig,
