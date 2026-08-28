@@ -6,8 +6,14 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
-import { CoreStart } from '@kbn/core-di-server';
+import {
+  createToken,
+  OnSetup,
+  OnStart,
+  PluginSetup,
+  Scope,
+  type ServiceTypeOf,
+} from '@kbn/core-di';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
@@ -55,34 +61,45 @@ function getAgentBuilder(container: Container): AgentBuilderSetup | undefined {
  * since they run outside the HTTP route scope.
  */
 export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
+  const ScopeFactory = createToken<() => ServiceTypeOf<typeof Scope>>('ScopeFactory');
+
+  bind(ScopeFactory)
+    .toDynamicValue(
+      ({ get }) =>
+        () =>
+          get(Scope)
+    )
+    .inSingletonScope();
   bind(AttachmentTypeToken).toResolvedValue(
-    (loggerService: LoggerServiceContract, injection) =>
+    (loggerService: LoggerServiceContract, scopeFactory) =>
       createRuleAttachmentType({
         logger: loggerService.forSubsystem('agentBuilder'),
-        getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+        getRulesClient: (context) =>
+          resolveRequestScoped(scopeFactory(), context.request, RulesClient),
       }) as AttachmentTypeDefinition,
-    [LoggerServiceToken, CoreStart('injection')]
+    [LoggerServiceToken, ScopeFactory]
   );
   bind(AttachmentTypeToken).toResolvedValue(
-    (loggerService: LoggerServiceContract, injection) =>
+    (loggerService: LoggerServiceContract, scopeFactory) =>
       createActionPolicyAttachmentType({
         logger: loggerService.forSubsystem('agentBuilder'),
         getActionPolicyClient: (context) =>
-          resolveRequestScoped(injection, context.request, ActionPolicyClient),
+          resolveRequestScoped(scopeFactory(), context.request, ActionPolicyClient),
       }) as AttachmentTypeDefinition,
-    [LoggerServiceToken, CoreStart('injection')]
+    [LoggerServiceToken, ScopeFactory]
   );
   bind(AttachmentTypeToken).toResolvedValue(
-    (loggerService: LoggerServiceContract, injection) =>
+    (loggerService: LoggerServiceContract, scopeFactory) =>
       createEpisodeAttachmentType({
         logger: loggerService.forSubsystem('agentBuilder'),
         getEpisodesClient: (context) =>
-          resolveRequestScoped(injection, context.request, EpisodesClient),
-        getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+          resolveRequestScoped(scopeFactory(), context.request, EpisodesClient),
+        getRulesClient: (context) =>
+          resolveRequestScoped(scopeFactory(), context.request, RulesClient),
         getPrivilegeChecker: (context) =>
-          resolveRequestScoped(injection, context.request, PrivilegeChecker),
+          resolveRequestScoped(scopeFactory(), context.request, PrivilegeChecker),
       }) as AttachmentTypeDefinition,
-    [LoggerServiceToken, CoreStart('injection')]
+    [LoggerServiceToken, ScopeFactory]
   );
 
   bind(OnSetup).toConstantValue((container) => {
@@ -112,14 +129,14 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     agentBuilderSml.registerType(
       createRuleSmlType({
         getScopedRulesClient: (request) =>
-          resolveRequestScoped(container.get(CoreStart('injection')), request, RulesClient),
+          resolveRequestScoped(container.get(Scope), request, RulesClient),
         getIsAlertingV2Enabled,
       })
     );
     agentBuilderSml.registerType(
       createActionPolicySmlType({
         getScopedActionPolicyClient: (request) =>
-          resolveRequestScoped(container.get(CoreStart('injection')), request, ActionPolicyClient),
+          resolveRequestScoped(container.get(Scope), request, ActionPolicyClient),
         getIsAlertingV2Enabled,
       })
     );
