@@ -290,7 +290,7 @@ export const compareCmd: Command<void> = {
           urlObj.username = '';
           urlObj.password = '';
           const baseUrl = urlObj.toString().replace(/\/+$/, '');
-          comparePageUrl = `${baseUrl}/app/management/ai/evals/compare?type=execution&baseline=${encodeURIComponent(
+          comparePageUrl = `${baseUrl}/app/evals/compare?type=execution&baseline=${encodeURIComponent(
             secondExperimentId
           )}&target=${encodeURIComponent(firstExperimentId)}`;
         } catch {
