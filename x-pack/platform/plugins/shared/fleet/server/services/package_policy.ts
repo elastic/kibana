@@ -2112,6 +2112,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         // eslint-disable-next-line prefer-const
         let { version: _version, id: _id, ...restOfPackagePolicy } = packagePolicy;
 
+        if (restOfPackagePolicy.vars === undefined) {
+          restOfPackagePolicy.vars = oldPackagePolicy.vars;
+        }
+
         if (packagePolicyUpdate.is_managed && !options?.force) {
           throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
         }
