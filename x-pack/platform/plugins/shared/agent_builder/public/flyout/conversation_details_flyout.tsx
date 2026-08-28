@@ -29,11 +29,11 @@ import type { ConversationTemplatesService } from '../services/conversation_temp
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 
-const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.title', {
+const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Chat info',
 });
 
-const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.errorBody', {
+const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.errorBody', {
   defaultMessage: 'Something went wrong while loading this conversation.',
 });
 
@@ -88,16 +88,18 @@ const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
   );
 };
 
-export interface ConversationMetadataFlyoutContentProps {
+export interface ConversationDetailsFlyoutContentProps {
   conversation: Conversation;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
 }
 
-/** Presenational only — renders whatever conversation it is given; not responsible for data fetching. */
-export const ConversationMetadataFlyoutContent: React.FC<
-  ConversationMetadataFlyoutContentProps
-> = ({ conversation, conversationTemplatesService, titleId }) => {
+/** Presentational only — renders whatever conversation it is given; not responsible for data fetching. */
+export const ConversationDetailsFlyoutContent = ({
+  conversation,
+  conversationTemplatesService,
+  titleId,
+}: ConversationDetailsFlyoutContentProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -133,7 +135,7 @@ export const ConversationMetadataFlyoutContent: React.FC<
   );
 };
 
-export interface ConversationMetadataFlyoutSnapshotProps {
+export interface ConversationDetailsFlyoutSnapshotProps {
   conversationId: string;
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
@@ -141,15 +143,18 @@ export interface ConversationMetadataFlyoutSnapshotProps {
 }
 
 /** Snapshot variant backed by an isolated, per-open query cache. */
-export const ConversationMetadataFlyoutSnapshot: React.FC<
-  ConversationMetadataFlyoutSnapshotProps
-> = ({ conversationId, conversationsService, conversationTemplatesService, titleId }) => {
+export const ConversationDetailsFlyoutSnapshot = ({
+  conversationId,
+  conversationsService,
+  conversationTemplatesService,
+  titleId,
+}: ConversationDetailsFlyoutSnapshotProps) => {
   const {
     data: conversation,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['conversation-metadata-flyout-snapshot', conversationId],
+    queryKey: ['conversation-details-flyout-snapshot', conversationId],
     queryFn: () => conversationsService.get({ conversationId }),
   });
 
@@ -172,7 +177,7 @@ export const ConversationMetadataFlyoutSnapshot: React.FC<
   }
 
   return (
-    <ConversationMetadataFlyoutContent
+    <ConversationDetailsFlyoutContent
       conversation={conversation}
       conversationTemplatesService={conversationTemplatesService}
       titleId={titleId}
@@ -180,16 +185,14 @@ export const ConversationMetadataFlyoutSnapshot: React.FC<
   );
 };
 
-export interface ConversationMetadataFlyoutProps {
+export interface ConversationDetailsFlyoutProps {
   onClose: () => void;
 }
 
 /** Live variant backed by the active conversation cache. */
-export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProps> = ({
-  onClose,
-}) => {
+export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyoutProps) => {
   const titleId = useGeneratedHtmlId({
-    prefix: 'agentBuilderConversationMetadataFlyoutTitle',
+    prefix: 'agentBuilderConversationDetailsFlyoutTitle',
   });
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
@@ -202,10 +205,10 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
       paddingSize="m"
       role="region"
       aria-labelledby={titleId}
-      data-test-subj="agentBuilderConversationMetadataFlyout-live"
+      data-test-subj="agentBuilderConversationDetailsFlyout-live"
     >
       {conversation ? (
-        <ConversationMetadataFlyoutContent
+        <ConversationDetailsFlyoutContent
           conversation={conversation}
           conversationTemplatesService={conversationTemplatesService}
           titleId={titleId}

@@ -23,7 +23,7 @@ interface ConversationTitleProps {
   ariaLabelledBy?: string;
 }
 
-export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
+export const ConversationTitle = ({ ariaLabelledBy }: ConversationTitleProps) => {
   const { conversation, isLoading: isLoadingTitle } = useConversation();
   const hasPersistedConversation = useHasPersistedConversation();
   const { euiTheme } = useEuiTheme();

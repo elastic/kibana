@@ -233,7 +233,7 @@ export class AgentBuilderPlugin
       onClose,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
       const { openConversationDetailsFlyout } = await import(
-        './flyout/open_conversation_metadata_flyout'
+        './flyout/open_conversation_details_flyout'
       );
       return openConversationDetailsFlyout({
         core,

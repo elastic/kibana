@@ -12,9 +12,9 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
-import { ConversationMetadataFlyoutSnapshot } from './conversation_metadata_flyout';
+import { ConversationDetailsFlyoutSnapshot } from './conversation_details_flyout';
 
-const generateTitleId = htmlIdGenerator('agentBuilderConversationMetadataFlyoutTitle');
+const generateTitleId = htmlIdGenerator('agentBuilderConversationDetailsFlyoutTitle');
 
 export interface OpenConversationDetailsFlyoutOptions {
   core: CoreStart;
@@ -37,7 +37,7 @@ export const openConversationDetailsFlyout = async ({
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
       <QueryClientProvider client={queryClient}>
-        <ConversationMetadataFlyoutSnapshot
+        <ConversationDetailsFlyoutSnapshot
           conversationId={conversationId}
           conversationsService={conversationsService}
           conversationTemplatesService={conversationTemplatesService}
@@ -51,7 +51,7 @@ export const openConversationDetailsFlyout = async ({
       type: 'push',
       paddingSize: 'm',
       role: 'region',
-      'data-test-subj': 'agentBuilderConversationMetadataFlyout-snapshot',
+      'data-test-subj': 'agentBuilderConversationDetailsFlyout-snapshot',
       'aria-labelledby': titleId,
       onClose: (ref) => ref.close(),
     }

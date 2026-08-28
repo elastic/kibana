@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { ConversationMetadataFlyout } from '../../../../flyout/conversation_metadata_flyout';
+import { ConversationDetailsFlyout } from '../../../../flyout/conversation_details_flyout';
 
 const labels = {
   chatInfo: i18n.translate('xpack.agentBuilder.chatInfoButton.label', {
@@ -17,7 +17,7 @@ const labels = {
   }),
 };
 
-export const ChatInfoButton: React.FC = () => {
+export const ChatInfoButton = () => {
   const conversationId = useConversationId();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
@@ -38,7 +38,7 @@ export const ChatInfoButton: React.FC = () => {
       >
         {labels.chatInfo}
       </EuiButtonEmpty>
-      {isFlyoutOpen && <ConversationMetadataFlyout onClose={() => setIsFlyoutOpen(false)} />}
+      {isFlyoutOpen && <ConversationDetailsFlyout onClose={() => setIsFlyoutOpen(false)} />}
     </>
   );
 };

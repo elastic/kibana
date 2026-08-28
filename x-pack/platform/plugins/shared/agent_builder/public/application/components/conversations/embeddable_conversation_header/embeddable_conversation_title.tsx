@@ -45,9 +45,9 @@ interface EmbeddableConversationTitleProps {
   ariaLabelledBy?: string;
 }
 
-export const EmbeddableConversationTitle: React.FC<EmbeddableConversationTitleProps> = ({
+export const EmbeddableConversationTitle = ({
   ariaLabelledBy,
-}) => {
+}: EmbeddableConversationTitleProps) => {
   const { title, isLoading: isLoadingTitle } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
   const { rename: canRename, delete: canDelete } = useConversationPermissions();

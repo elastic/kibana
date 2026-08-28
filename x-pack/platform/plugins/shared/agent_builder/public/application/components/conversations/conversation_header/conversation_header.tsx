@@ -18,7 +18,7 @@ const titleSlotStyles = css`
 interface ConversationHeaderProps {
   ariaLabelledBy?: string;
 }
-export const ConversationHeader: React.FC<ConversationHeaderProps> = ({ ariaLabelledBy }) => {
+export const ConversationHeader = ({ ariaLabelledBy }: ConversationHeaderProps) => {
   return (
     <EuiFlexGroup
       alignItems="center"

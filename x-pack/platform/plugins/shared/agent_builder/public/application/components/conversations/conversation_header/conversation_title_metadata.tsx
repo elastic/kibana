@@ -69,12 +69,14 @@ const labels = {
   }),
 };
 
-const InfoRow: React.FC<{
+interface InfoRowProps {
   label: string;
   value: React.ReactNode;
   icon?: IconType;
   iconPosition?: 'left' | 'right';
-}> = ({ label, value, icon, iconPosition = 'right' }) => {
+}
+
+const InfoRow = ({ label, value, icon, iconPosition = 'right' }: InfoRowProps) => {
   const { euiTheme } = useEuiTheme();
 
   const iconItem = icon && (
@@ -112,9 +114,7 @@ interface ConversationTitleMetadataProps {
   ariaLabelledBy?: string;
 }
 
-export const ConversationTitleMetadata: React.FC<ConversationTitleMetadataProps> = ({
-  ariaLabelledBy,
-}) => {
+export const ConversationTitleMetadata = ({ ariaLabelledBy }: ConversationTitleMetadataProps) => {
   const { conversation, isLoading: isLoadingTitle } = useConversation();
   const { rename: canRename, delete: canDelete } = useConversationPermissions();
   const { euiTheme } = useEuiTheme();

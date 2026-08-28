@@ -26,9 +26,9 @@ export interface EmbeddableConversationRightActionsProps {
   onClose?: () => void;
 }
 
-export const EmbeddableConversationRightActions: React.FC<
-  EmbeddableConversationRightActionsProps
-> = ({ onClose }) => {
+export const EmbeddableConversationRightActions = ({
+  onClose,
+}: EmbeddableConversationRightActionsProps) => {
   const { isEmbeddedContext } = useConversationContext();
 
   return (

@@ -18,7 +18,7 @@ const labels = {
   }),
 };
 
-export const ConversationRightActions: React.FC = () => {
+export const ConversationRightActions = () => {
   const { conversation } = useConversation();
   const hasTemplate = Boolean(conversation?.template_id);
 
