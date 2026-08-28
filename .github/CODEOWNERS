@@ -3160,6 +3160,8 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @e
 
 # Threat intel supply pipeline
 src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/threat_intel @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/threat_intel @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-threat-hunting
