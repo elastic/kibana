@@ -23,6 +23,8 @@ After sourcing, the following are available:
 - **`KIBANA_AUTH`** — Detected credentials (e.g., `elastic:changeme`)
 - **`kibana_curl [curl args...]`** — curl wrapper with auth, `kbn-xsrf`, `x-elastic-internal-origin`, and TLS flags pre-configured
 
+> **Always use `kibana_curl` instead of raw `curl`** when calling Kibana APIs. It automatically injects the auth credentials, `kbn-xsrf`, `x-elastic-internal-origin: Kibana`, and TLS flags. Without `x-elastic-internal-origin`, calls to `internal/*` endpoints will be rejected with a 400 or 403.
+
 ## Auto-Detection
 
 Tries these permutations automatically:
