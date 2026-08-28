@@ -51,8 +51,9 @@ describe('registerSkills', () => {
       'provide a new `chartType` when the request changes the chart family'
     );
     expect(skill.content).toContain('let the visualization author decide how to apply it');
-    expect(skill.content).toContain('Schema-only');
-    expect(skill.content).toContain('pass that existing query on `edit_panels.esql` unchanged');
+    expect(skill.content).toContain(
+      'Omit the `esql` field on visualization panels unless you received a validated query'
+    );
     expect(skill.content).not.toContain('clear_metric_fill');
     expect(skill.content).not.toContain('metric_trendline');
   });

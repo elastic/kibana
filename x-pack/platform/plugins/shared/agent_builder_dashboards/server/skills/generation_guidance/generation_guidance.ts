@@ -76,12 +76,7 @@ When choosing a chart type, composing the dashboard, or packing the grid, follow
 
 ## ES|QL
 
-Do not write or invent ES|QL. On **new** panels, omit \`esql\` — the tool generates it from the natural-language \`query\`.
-
-On **edits**, look at the current panel in the dashboard attachment (\`config.data_source.query\`, or each XY \`layers[].data_source.query\`). Decide whether the wanted edition needs new columns:
-
-- **Schema-only** (hide chrome title, strip invented colors, legend, axis titles, gradient fill, hide a trend-secondary label, line→area with the same series): pass that existing query on \`edit_panels.esql\` unchanged. The visualization author then edits Lens config only and does not regenerate ES|QL.
-- **Needs new columns** (secondary metric or breakdown the current query cannot produce, a chart type that needs a different grouping): omit \`esql\` so the tool regenerates it. Still do not write the new query yourself.
+Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
 
 ## Controls
 
