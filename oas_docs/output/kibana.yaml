@@ -19061,8 +19061,6 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Install a package by uploading a .zip or .tar.gz archive (max 100MB).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: install-package-by-upload
       parameters:
         - $ref: '#/components/parameters/Fleet_kbn_xsrf'
