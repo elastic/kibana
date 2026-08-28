@@ -100,4 +100,24 @@ describe('unflattenMetadataInfoFields', () => {
       },
     });
   });
+
+  it('should skip multi-fields that would overwrite an already-set leaf value', () => {
+    const fields = {
+      'container.name': ['demo-app-1-name'],
+      'container.name.text': ['demo-app-1-text'],
+      'container.name.keyword': ['demo-app-1-keyword'],
+      'container.runtime': ['docker'],
+    };
+
+    const result: Record<string, any> = {};
+    unflattenMetadataInfoFields(result, { fields });
+
+    expect(result).toEqual({
+      container: {
+        name: 'demo-app-1-name',
+        runtime: 'docker',
+      },
+    });
+    expect(typeof result.container.name).toBe('string');
+  });
 });
