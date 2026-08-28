@@ -477,7 +477,15 @@ export const getEuidCompositeQuery = (
     runtimeMappings?: MappingRuntimeFields;
   }
 ) => {
-  const runtimeMapping = euid.painless.getEuidRuntimeMapping(entityType);
+  // This aggregation resolves which entity an alert refers to. It does not decide whether to
+  // create one, and store membership is checked separately by the `inStoreScores` filter in the
+  // maintainer's score_base_entities step. Applying `postAggFilter` here would gate on
+  // `idpGate`, which no alert can satisfy: the detection engine rewrites `event.kind` to
+  // `signal`, so IdP-namespace users resolve to no EUID and never get scored. The ES|QL scoring
+  // query below already computes entity_id without that gate.
+  const runtimeMapping = euid.painless.getEuidRuntimeMapping(entityType, {
+    applyPostAggFilter: false,
+  });
 
   return {
     index: params.index,
