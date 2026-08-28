@@ -35,24 +35,10 @@ import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/pa
 const ConditionEntryCell = memo<{
   showLabel: boolean;
   label?: string;
-  errors?: React.ReactNode[];
-  warnings?: React.ReactNode[];
   children: React.ReactElement;
-}>(({ showLabel, label = '', errors = [], warnings = [], children }) => {
-  const hasFeedback = errors.length > 0 || warnings.length > 0;
-
-  return showLabel || hasFeedback ? (
-    <EuiFormRow
-      label={showLabel ? label : undefined}
-      fullWidth
-      isInvalid={errors.length > 0}
-      error={errors}
-      helpText={warnings.map((warning, index) => (
-        <EuiText key={index} color="warning" size="xs">
-          {warning}
-        </EuiText>
-      ))}
-    >
+}>(({ showLabel, label = '', children }) => {
+  return showLabel ? (
+    <EuiFormRow label={label} fullWidth>
       {children}
     </EuiFormRow>
   ) : (
@@ -91,14 +77,20 @@ export interface ConditionEntryInputProps {
 const InputGroup = styled.div`
   display: grid;
   grid-template-columns: 25% 25% 45% 5%;
-  grid-template-areas: 'field operator value remove';
+  grid-template-areas:
+    'field operator value remove'
+    '. . feedback .';
+  align-items: center;
 `;
 
 const InputItem = styled.div<{ gridArea: string }>`
   grid-area: ${({ gridArea }) => gridArea};
-  align-self: start;
   margin-right: ${(props) => props.theme.euiTheme.size.s};
   vertical-align: baseline;
+`;
+
+const ValueFeedback = styled.div`
+  margin-top: ${({ theme }) => theme.euiTheme.size.xs};
 `;
 
 const operatorOptions = (Object.keys(OperatorFieldIds) as OperatorFieldIds[]).map(
@@ -265,12 +257,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           </ConditionEntryCell>
         </InputItem>
         <InputItem gridArea="value">
-          <ConditionEntryCell
-            showLabel={showLabels}
-            label={ENTRY_PROPERTY_TITLES.value}
-            errors={visibleErrors}
-            warnings={warnings}
-          >
+          <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.value}>
             <EuiFieldText
               name="value"
               value={entry.value}
@@ -312,6 +299,22 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             </EuiToolTip>
           </ConditionEntryCell>
         </InputItem>
+        {hasValueFeedback ? (
+          <InputItem gridArea="feedback">
+            <ValueFeedback>
+              {visibleErrors.map((error, index) => (
+                <EuiText key={`error-${index}`} color="danger" size="xs">
+                  {error}
+                </EuiText>
+              ))}
+              {warnings.map((warning, index) => (
+                <EuiText key={`warning-${index}`} color="warning" size="xs">
+                  {warning}
+                </EuiText>
+              ))}
+            </ValueFeedback>
+          </InputItem>
+        ) : null}
       </InputGroup>
     );
   }
