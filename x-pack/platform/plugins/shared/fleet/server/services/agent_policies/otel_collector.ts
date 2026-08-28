@@ -31,6 +31,8 @@ import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpe
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../../../common/services';
 
+import { buildOtelEsExporterConfig } from './otel_output_settings';
+
 /**
  * Builds OpenTelemetry Collector fragments merged into the full agent policy.
  *
@@ -779,14 +781,20 @@ function generateOtelcolExporter(
         dataOutput.otel_exporter_config_yaml,
         logger
       );
+      // Batching, queueing, retry and compression settings translated from the Fleet output,
+      // so this exporter behaves like the one the agent generates for Beats-based inputs.
+      // User-supplied exporter YAML still wins over the translated values.
+      const outputExporterConfig = buildOtelEsExporterConfig(dataOutput);
 
-      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely and
-      // pass only the endpoint + any user-supplied exporter YAML to the ES exporter.
+      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely. The
+      // output's own exporter settings still apply — beatsauth only carries transport
+      // (ssl/proxy/timeout) configuration.
       if (dataOutput.otel_disable_beatsauth) {
         return {
           extensions: {},
           exporters: {
             [`elasticsearch/${outputID}`]: {
+              ...outputExporterConfig,
               ...extraExporterConfig,
               endpoints: dataOutput.hosts,
             },
@@ -801,6 +809,7 @@ function generateOtelcolExporter(
         extensions: hasBeatsauthConfig ? { [beatsauthID]: beatsauthConfig } : {},
         exporters: {
           [`elasticsearch/${outputID}`]: {
+            ...outputExporterConfig,
             ...extraExporterConfig,
             // endpoints and auth always take precedence over user-supplied YAML
             endpoints: dataOutput.hosts,

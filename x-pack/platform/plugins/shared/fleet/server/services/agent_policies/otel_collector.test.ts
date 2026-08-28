@@ -21,6 +21,46 @@ describe('generateOtelcolConfig', () => {
     hosts: ['http://localhost:9200'],
   };
 
+  // Batching, queueing, retry and compression settings translated from the Fleet output.
+  // Every output in this suite has a single host and no config_yaml, so it resolves to the
+  // `balanced` performance preset. See `otel_output_settings.ts` and the dedicated
+  // 'Elasticsearch output settings translation' describe block below.
+  const expectedEsExporterSettings = {
+    max_conns_per_host: 1,
+    sending_queue: {
+      enabled: true,
+      block_on_overflow: true,
+      wait_for_result: true,
+      num_consumers: 2,
+      queue_size: 6400,
+      batch: {
+        flush_timeout: '10s',
+        max_size: 1600,
+        min_size: 1600,
+        sizer: 'items',
+      },
+    },
+    logs_dynamic_id: { enabled: true },
+    logs_dynamic_pipeline: { enabled: true },
+    include_source_on_error: true,
+    suppress_conflict_errors: true,
+    bulk_response_filter_path: 'errors,items.*.error,items.*.status,items.*.failure_store',
+    retry: {
+      enabled: true,
+      max_retries: 3,
+      initial_interval: '1s',
+      max_interval: '60s',
+      retry_on_status: [
+        300, 301, 302, 303, 304, 305, 307, 308, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409,
+        410, 411, 412, 414, 415, 416, 417, 418, 421, 422, 423, 424, 425, 426, 428, 429, 431, 451,
+        500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511,
+      ],
+      retry_on_document_status: [429, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511],
+    },
+    compression: 'gzip',
+    compression_params: { level: 1 },
+  };
+
   const logInput: FullAgentPolicyInput = {
     type: 'log',
     id: 'test',
@@ -286,6 +326,7 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/default': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -341,6 +382,7 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/fleet-default-output': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -394,6 +436,7 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/default': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -509,6 +552,7 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/default': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -577,6 +621,7 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/default': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -1226,6 +1271,7 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/default': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -2550,6 +2596,7 @@ describe('generateOtelcolConfig', () => {
         },
       });
       expect(result.exporters?.['elasticsearch/default']).toEqual({
+        ...expectedEsExporterSettings,
         endpoints: ['http://localhost:9200'],
         auth: { authenticator: 'beatsauth/default' },
       });
@@ -2746,6 +2793,7 @@ describe('generateOtelcolConfig', () => {
       const result = generateOtelcolConfig({ inputs, dataOutput: outputWithNull });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
+        ...expectedEsExporterSettings,
         endpoints: defaultOutput.hosts,
       });
     });
@@ -2754,6 +2802,7 @@ describe('generateOtelcolConfig', () => {
       const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
+        ...expectedEsExporterSettings,
         endpoints: defaultOutput.hosts,
       });
     });
@@ -2768,6 +2817,7 @@ describe('generateOtelcolConfig', () => {
 
       const result = generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml });
       expect(result.exporters?.['elasticsearch/default']).toEqual({
+        ...expectedEsExporterSettings,
         endpoints: defaultOutput.hosts,
       });
     });
@@ -2781,6 +2831,7 @@ describe('generateOtelcolConfig', () => {
       const result = generateOtelcolConfig({ inputs, dataOutput: outputWithScalarYaml });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
+        ...expectedEsExporterSettings,
         endpoints: defaultOutput.hosts,
       });
     });
@@ -2794,6 +2845,7 @@ describe('generateOtelcolConfig', () => {
       const result = generateOtelcolConfig({ inputs, dataOutput: outputWithArrayYaml });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
+        ...expectedEsExporterSettings,
         endpoints: defaultOutput.hosts,
       });
     });
@@ -2975,6 +3027,7 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.extensions?.['beatsauth/remote-output']).toBeUndefined();
       expect(result.exporters?.['elasticsearch/remote-output']).toEqual({
+        ...expectedEsExporterSettings,
         endpoints: ['https://remote-es.example.com:9200'],
       });
     });
@@ -3023,6 +3076,7 @@ describe('generateOtelcolConfig', () => {
       const result = generateOtelcolConfig({ inputs, dataOutput: outputWithDisabledBeatsauth });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
+        ...expectedEsExporterSettings,
         endpoints: defaultOutput.hosts,
       });
     });
@@ -3037,6 +3091,7 @@ describe('generateOtelcolConfig', () => {
       const result = generateOtelcolConfig({ inputs, dataOutput: outputWithDisabledBeatsauth });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
+        ...expectedEsExporterSettings,
         flush_interval: '5s',
         endpoints: defaultOutput.hosts,
       });
@@ -3114,6 +3169,7 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/default': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -3182,6 +3238,7 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/override-output-id': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://override-es:9200'],
         },
       },
@@ -3278,9 +3335,11 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/override-output-id': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://override-es:9200'],
         },
         'elasticsearch/fleet-default-output': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -3383,9 +3442,11 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/override-output-id': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://override-es:9200'],
         },
         'elasticsearch/default': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -3502,9 +3563,11 @@ describe('generateOtelcolConfig', () => {
       },
       exporters: {
         'elasticsearch/override-output-id': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://override-es:9200'],
         },
         'elasticsearch/default': {
+          ...expectedEsExporterSettings,
           endpoints: ['http://localhost:9200'],
         },
       },
@@ -3530,6 +3593,208 @@ describe('generateOtelcolConfig', () => {
           },
         },
       },
+    });
+  });
+
+  describe('Elasticsearch output settings translation', () => {
+    const inputs: FullAgentPolicyInput[] = [otelInput1];
+
+    const getExporter = (output: Output, id = 'elasticsearch/default') =>
+      generateOtelcolConfig({ inputs, dataOutput: output }).exporters?.[id] as Record<
+        string,
+        unknown
+      >;
+
+    it('should apply the balanced preset when the output defines no preset or config_yaml', () => {
+      // An output with neither is sent to agents as `balanced`, so the exporter must be sized
+      // for it rather than falling back to the collector's own defaults.
+      expect(getExporter(defaultOutput)).toEqual({
+        ...expectedEsExporterSettings,
+        endpoints: defaultOutput.hosts,
+      });
+    });
+
+    it('should size the queue from the throughput preset', () => {
+      const exporter = getExporter({ ...defaultOutput, preset: 'throughput' });
+
+      // worker: 4 on a single host => 4 connections, 2 consumers each.
+      expect(exporter).toMatchObject({
+        max_conns_per_host: 4,
+        sending_queue: {
+          num_consumers: 8,
+          queue_size: 25600,
+          batch: { flush_timeout: '5s', max_size: 1600, min_size: 1600, sizer: 'items' },
+        },
+      });
+    });
+
+    it("should honour the latency preset's small batches and queue floor", () => {
+      const exporter = getExporter({ ...defaultOutput, preset: 'latency' });
+
+      // batch size is bulk_max_size (50), so the formula yields 200 events; the preset's own
+      // queue.mem.events (4100) is the floor and wins.
+      expect(exporter).toMatchObject({
+        max_conns_per_host: 1,
+        sending_queue: {
+          num_consumers: 2,
+          queue_size: 4100,
+          batch: { flush_timeout: '1s', max_size: 50, min_size: 50, sizer: 'items' },
+        },
+      });
+    });
+
+    it('should apply the scale preset backoff to the exporter retry settings', () => {
+      expect(getExporter({ ...defaultOutput, preset: 'scale' })).toMatchObject({
+        retry: {
+          enabled: true,
+          max_retries: 3,
+          initial_interval: '5s',
+          max_interval: '300s',
+        },
+      });
+    });
+
+    it('should scale connections and queue with the number of hosts', () => {
+      const exporter = getExporter({
+        ...defaultOutput,
+        hosts: ['http://es1:9200', 'http://es2:9200'],
+      });
+
+      expect(exporter).toMatchObject({
+        max_conns_per_host: 2,
+        sending_queue: { num_consumers: 4, queue_size: 12800 },
+      });
+    });
+
+    it('should cap the queue size at the in-flight event ceiling for large host lists', () => {
+      const exporter = getExporter({
+        ...defaultOutput,
+        preset: 'throughput',
+        hosts: [
+          'http://es1:9200',
+          'http://es2:9200',
+          'http://es3:9200',
+          'http://es4:9200',
+          'http://es5:9200',
+          'http://es6:9200',
+        ],
+      });
+
+      // 6 hosts x 4 workers = 24 connections would ask for 153,600 in-flight events; the
+      // ceiling scales consumers back proportionally instead.
+      expect(exporter).toMatchObject({
+        max_conns_per_host: 24,
+        sending_queue: { num_consumers: 20, queue_size: 64000 },
+      });
+    });
+
+    it('should use config_yaml performance settings instead of a preset when one is set', () => {
+      const exporter = getExporter({
+        ...defaultOutput,
+        preset: 'custom',
+        config_yaml: [
+          'worker: 2',
+          'bulk_max_size: 800',
+          'queue.mem.events: 4000',
+          'queue.mem.flush.min_events: 400',
+          'queue.mem.flush.timeout: 2s',
+        ].join('\n'),
+      });
+
+      expect(exporter).toMatchObject({
+        max_conns_per_host: 2,
+        sending_queue: {
+          // queue.mem.events is user-owned for `custom`, so it is not recomputed.
+          queue_size: 4000,
+          num_consumers: 4,
+          batch: { flush_timeout: '2s', max_size: 800, min_size: 400, sizer: 'items' },
+        },
+      });
+    });
+
+    it('should treat an output whose config_yaml sets a reserved performance key as custom', () => {
+      // No explicit preset: getDefaultPresetForEsOutput resolves to `custom` here, so the
+      // user's bulk_max_size must survive instead of being overwritten by `balanced`.
+      expect(
+        getExporter({ ...defaultOutput, config_yaml: 'bulk_max_size: 500' })
+      ).toMatchObject({
+        sending_queue: { batch: { max_size: 500, min_size: 500 } },
+      });
+    });
+
+    it('should read nested config_yaml queue settings as well as dotted keys', () => {
+      const exporter = getExporter({
+        ...defaultOutput,
+        preset: 'custom',
+        config_yaml: 'queue:\n  mem:\n    events: 5000\n    flush:\n      min_events: 250\n',
+      });
+
+      expect(exporter).toMatchObject({
+        sending_queue: { queue_size: 5000, batch: { min_size: 250 } },
+      });
+    });
+
+    it('should disable compression when compression_level is 0', () => {
+      const exporter = getExporter({
+        ...defaultOutput,
+        preset: 'custom',
+        config_yaml: 'compression_level: 0',
+      });
+
+      expect(exporter.compression).toBe('none');
+      expect(exporter).not.toHaveProperty('compression_params');
+    });
+
+    it('should disable retries when max_retries is 0', () => {
+      expect(getExporter({ ...defaultOutput, config_yaml: 'max_retries: 0' }).retry).toEqual({
+        enabled: false,
+      });
+    });
+
+    it('should append the unit to unit-less durations from config_yaml', () => {
+      // Beats accepts a bare number as seconds; the OTel exporterhelper does not.
+      const exporter = getExporter({
+        ...defaultOutput,
+        preset: 'custom',
+        config_yaml: 'queue.mem.flush.timeout: 5',
+      });
+
+      expect(exporter).toMatchObject({ sending_queue: { batch: { flush_timeout: '5s' } } });
+    });
+
+    it('should pass through headers from config_yaml', () => {
+      const exporter = getExporter({
+        ...defaultOutput,
+        config_yaml: 'headers:\n  X-Custom: value\n',
+      });
+
+      expect(exporter).toMatchObject({ headers: { 'X-Custom': 'value' } });
+    });
+
+    it('should not translate index into logs_index, which would disable data stream routing', () => {
+      const exporter = getExporter({ ...defaultOutput, config_yaml: 'index: my-index' });
+
+      expect(exporter).not.toHaveProperty('logs_index');
+      expect(exporter).not.toHaveProperty('index');
+    });
+
+    it('should let otel_exporter_config_yaml override the translated settings', () => {
+      const exporter = getExporter({
+        ...defaultOutput,
+        otel_exporter_config_yaml: 'sending_queue:\n  queue_size: 99\n',
+      });
+
+      expect(exporter.sending_queue).toEqual({ queue_size: 99 });
+    });
+
+    it('should translate output settings even when beatsauth is disabled', () => {
+      const exporter = getExporter({ ...defaultOutput, otel_disable_beatsauth: true });
+
+      expect(exporter).toMatchObject({
+        max_conns_per_host: 1,
+        sending_queue: { queue_size: 6400 },
+      });
+      expect(exporter).not.toHaveProperty('auth');
     });
   });
 });
