@@ -139,6 +139,25 @@ describe('AgentShardingField', () => {
       screen.queryByTestId('syntheticsDisableAgentShardingConfirmModal')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('syntheticsAgentShardingCallout')).not.toBeInTheDocument();
-    expect(screen.getByTestId('syntheticsAgentShardingSwitch')).not.toBeChecked();
+    const toggle = screen.getByTestId('syntheticsAgentShardingSwitch');
+    expect(toggle).not.toBeChecked();
+    expect(toggle).not.toBeDisabled();
+  });
+
+  it('lets you turn sharding back on after confirming disable, even without Enterprise', async () => {
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => false, getLicense: () => null });
+    render(<Form isEditingShardedLocation={true} defaultChecked={true} />);
+
+    await userEvent.click(screen.getByTestId('syntheticsAgentShardingSwitch'));
+    await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    const toggle = screen.getByTestId('syntheticsAgentShardingSwitch');
+    expect(toggle).not.toBeChecked();
+    expect(toggle).not.toBeDisabled();
+
+    await userEvent.click(toggle);
+
+    expect(toggle).toBeChecked();
+    expect(screen.getByTestId('syntheticsAgentShardingCallout')).toBeInTheDocument();
   });
 });

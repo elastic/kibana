@@ -50,7 +50,6 @@ export const AgentShardingField = ({
               data-test-subj="syntheticsAgentShardingSwitch"
               label={AGENT_SHARDING_TOGGLE_SWITCH}
               checked={Boolean(field.value)}
-              disabled={!canEnable && !field.value}
               onChange={(event) => {
                 if (isEditingShardedLocation && field.value && !event.target.checked) {
                   setIsConfirmingDisable(true);
