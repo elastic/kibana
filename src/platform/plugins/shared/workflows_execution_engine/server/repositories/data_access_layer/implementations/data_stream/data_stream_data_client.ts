@@ -44,13 +44,13 @@ export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   logger: Logger;
 }
 
-export class DataStreamDataClient<TExecution extends { id: string }>
-  implements DataClient<TExecution>
-{
-  private additionalIndexesToQuery: string[];
+export class DataStreamDataClient<TExecution extends { id: string }> implements DataClient<TExecution> {
+  private indexesToQuery: string[] = [];
+  private readonly additionalIndexesToQuery: string[] = [];
 
   constructor(private readonly deps: DataStreamDataClientDeps<TExecution>) {
     this.additionalIndexesToQuery = deps.additionalIndexesToQuery ?? [];
+    this.indexesToQuery = [this.deps.dataStreamName, ...this.additionalIndexesToQuery];
   }
 
   public async search(
@@ -59,7 +59,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const searchResponse: estypes.SearchResponse<TExecution> = await retryTransientEsErrors(
       () =>
         this.deps.esClient.search({
-          index: [this.deps.dataStreamName, ...this.additionalIndexesToQuery],
+          index: this.indexesToQuery,
           ...request,
           ignore_unavailable: true,
         }),
@@ -82,7 +82,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     return retryTransientEsErrors(
       () =>
         this.deps.esClient.count({
-          index: this.deps.dataStreamName,
+          index: this.indexesToQuery,
           ...request,
         }),
       { logger: this.deps.logger }
@@ -90,38 +90,33 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   }
 
   public async getByIds(
-    ids: (string | { id: string; index: string })[],
+    ids: string[],
     options?: GetExecutionsByIdsOptions<TExecution>
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
     if (ids.length === 0) {
       return { items: [], missing: [] };
     }
 
-    const stringIds = ids.filter((id): id is string => typeof id === 'string');
-    const cachedVersions =
-      stringIds.length > 0 ? this.deps.versionManager.bulkGetCachedVersions(stringIds) : {};
-    const uncachedStringIds = stringIds.filter((id) => !cachedVersions[id]);
+    const cachedVersions = this.deps.versionManager.bulkGetCachedVersions(ids);
+    const uncachedIds = ids.filter((id) => !cachedVersions[id]);
 
     let backingIndexesForFallback: string[] = [];
-    if (uncachedStringIds.length > 0) {
+    if (uncachedIds.length > 0) {
       const { backingIndexes } = await this.deps.versionManager.getMeta();
       backingIndexesForFallback = backingIndexes.slice(-2);
     }
 
-    // For uncached string ids, add one mget entry per backing index (last two) and
+    // For uncached ids, add one mget entry per backing index (last two) and
     // dedup by id taking the first found result — docs may have rolled to older indices.
     const mgetDocs: Array<{ _index: string; _id: string }> = [];
+
     for (const id of ids) {
-      if (typeof id !== 'string') {
-        mgetDocs.push({ _index: id.index, _id: id.id });
+      const version = cachedVersions[id];
+      if (version) {
+        mgetDocs.push({ _index: version.index, _id: id });
       } else {
-        const version = cachedVersions[id];
-        if (version) {
-          mgetDocs.push({ _index: version.index, _id: id });
-        } else {
-          for (const index of backingIndexesForFallback) {
-            mgetDocs.push({ _index: index, _id: id });
-          }
+        for (const index of backingIndexesForFallback.concat(this.additionalIndexesToQuery)) {
+          mgetDocs.push({ _index: index, _id: id });
         }
       }
     }
@@ -161,8 +156,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       }
     }
 
-    const allIds = ids.map((id) => (typeof id === 'string' ? id : id.id));
-    const mgetMissing = allIds.filter((id) => !foundIds.has(id));
+    const mgetMissing = ids.filter((id) => !foundIds.has(id));
 
     if (mgetMissing.length > 0) {
       const searchResponse = await this.search({
@@ -185,7 +179,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       }
     }
 
-    return { items, missing: allIds.filter((id) => !foundIds.has(id)) };
+    return { items, missing: ids.filter((id) => !foundIds.has(id)) };
   }
 
   public async bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
@@ -357,9 +351,6 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       if (item.operation === 'create') {
         // Creates always target the write index; no version needed.
         sendable.push({ item: { ...item, index: this.deps.dataStreamName }, originalIndex: i });
-      } else if (item.index && item.seqNo !== undefined && item.primaryTerm !== undefined) {
-        // Caller already supplied explicit version info — send as-is.
-        sendable.push({ item: { ...item }, originalIndex: i });
       } else {
         // Version must be resolved from cache or ES before this item can be sent.
         pendingIds.set(item.document.id, i);
