@@ -22,9 +22,12 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  euiShadow,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 export interface HomePageStatPanelMetric {
   key: string;
@@ -68,6 +71,15 @@ export const HomePageStatPanel = ({
   const primaryAction = showPrimary ? actions[0] : undefined;
   const menuActions = showPrimary ? actions.slice(1) : actions;
 
+  const euiThemeContext = useEuiTheme();
+  const { colorMode } = euiThemeContext;
+
+  // Shows a shadow in dark mode and removes the added border. Adds the border for light mode and no shadow.
+  const statPanelStyle = css`
+    ${colorMode === 'DARK' && euiShadow(euiThemeContext, 'xs', { border: 'none' })};
+    ${colorMode === 'LIGHT' && { border: euiThemeContext.euiTheme.border.thin }};
+    white-space: nowrap;
+  `;
   const actionsMenuLabel = i18n.translate('xpack.serverlessVectordb.home.statPanel.actionsMenu', {
     defaultMessage: '{title} actions',
     values: { title },
@@ -89,7 +101,11 @@ export const HomePageStatPanel = ({
   ));
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj={testSubj}>
+    <EuiPanel
+      color="subdued"
+      paddingSize="m"
+      data-test-subj={testSubj}
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiIcon type={iconType} size="m" aria-hidden={true} />
@@ -152,36 +168,37 @@ export const HomePageStatPanel = ({
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="l" responsive={false} wrap justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
         {metrics.map(({ key, label, value, isLoading }) => (
           <EuiFlexItem key={key} grow>
-            <EuiStat
-              data-test-subj={`${testSubj}-${key}`}
-              css={{ whiteSpace: 'nowrap' }}
-              title={
-                isLoading ? (
-                  <EuiSkeletonText
-                    size="m"
-                    lines={1}
-                    data-test-subj={`${testSubj}-${key}-loading`}
-                  />
-                ) : (
-                  <span data-test-subj={`${testSubj}-${key}-value`}>{value}</span>
-                )
-              }
-              titleColor="text"
-              titleElement="div"
-              description={
-                <>
-                  <EuiText size="xs" color="subdued" data-test-subj={`${testSubj}-${key}-label`}>
-                    {label}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                </>
-              }
-              descriptionElement="div"
-              titleSize="s"
-            />
+            <EuiPanel color="plain" paddingSize="m" hasBorder={false} hasShadow={false} css={statPanelStyle}>
+              <EuiStat
+                data-test-subj={`${testSubj}-${key}`}
+                title={
+                  isLoading ? (
+                    <EuiSkeletonText
+                      size="m"
+                      lines={1}
+                      data-test-subj={`${testSubj}-${key}-loading`}
+                    />
+                  ) : (
+                    <span data-test-subj={`${testSubj}-${key}-value`}>{value}</span>
+                  )
+                }
+                titleColor="text"
+                titleElement="div"
+                description={
+                  <>
+                    <EuiText size="xs" color="subdued" data-test-subj={`${testSubj}-${key}-label`}>
+                      {label}
+                    </EuiText>
+                    <EuiSpacer size="xs" />
+                  </>
+                }
+                descriptionElement="div"
+                titleSize="s"
+              />
+            </EuiPanel>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

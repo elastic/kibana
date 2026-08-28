@@ -60,12 +60,12 @@ export const HomePage = () => {
                   <h1>
                     {username
                       ? i18n.translate('xpack.serverlessVectordb.home.welcome.title', {
-                          defaultMessage: 'Welcome, {username}',
-                          values: { username },
-                        })
+                        defaultMessage: 'Welcome, {username}',
+                        values: { username },
+                      })
                       : i18n.translate('xpack.serverlessVectordb.home.welcome.defaultTitle', {
-                          defaultMessage: 'Welcome',
-                        })}
+                        defaultMessage: 'Welcome',
+                      })}
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
@@ -101,7 +101,7 @@ export const HomePage = () => {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="m">
+            <EuiFlexGroup gutterSize="l">
               {secondaryCards.map((card) => (
                 <EuiFlexItem key={card.testSubj}>
                   <HomePageStatPanel {...card} />
