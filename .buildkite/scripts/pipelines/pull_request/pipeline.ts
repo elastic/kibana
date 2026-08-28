@@ -21,6 +21,7 @@ import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
+  getAffectedPackages,
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
@@ -48,6 +49,46 @@ const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
+
+// Non-package files whose changes can break the Storybook build without
+// matching any story path (build scripts, root dependency manifests).
+const STORYBOOK_BUILD_CRITICAL_PATHS = [
+  /^package\.json$/,
+  /^yarn\.lock$/,
+  /^\.buildkite\/scripts\/steps\/storybooks\//,
+];
+
+/**
+ * Storybook builds share the webpack/babel/swc toolchain with the rest of the
+ * repo, so changes far outside story paths can break them (e.g. a babel-to-swc
+ * migration once broke every on-merge Storybook build without touching a
+ * single story file). Instead of enumerating toolchain paths in a regex, ask
+ * the package dependency graph: if `@kbn/storybook` (or its config package) is
+ * in the downstream closure of the changed packages, the Storybook build is
+ * potentially affected and must run in this PR.
+ */
+const isStorybookBuildAffected = async (): Promise<boolean> => {
+  if (await doAnyChangesMatch(STORYBOOK_BUILD_CRITICAL_PATHS)) {
+    return true;
+  }
+
+  try {
+    const affectedPackages = await getAffectedPackages(process.env.GITHUB_PR_MERGE_BASE, {
+      strategy: 'git',
+      includeDownstream: true,
+      ignoreUncategorizedChanges: true,
+    });
+    return (
+      affectedPackages.has('@kbn/storybook') || affectedPackages.has('@kbn/ui-storybook-config')
+    );
+  } catch (error) {
+    console.error(
+      'Failed to resolve affected packages for the Storybook gate, running Storybooks to be safe',
+      error
+    );
+    return true;
+  }
+};
 
 (async () => {
   const pipeline: string[] = [];
@@ -289,7 +330,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /.*stor(ies|y).*/,
         /^\.buildkite\/pipelines\/pull_request\/storybooks\.yml/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:build-storybooks')
+      GITHUB_PR_LABELS.includes('ci:build-storybooks') ||
+      (await isStorybookBuildAffected())
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
     }
