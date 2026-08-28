@@ -174,7 +174,7 @@ export function ActionsPopover({
           setFlyoutConfig({
             configId: monitor.configId,
             location: locationName,
-            id: monitor.configId,
+            id: monitor.monitorQueryId,
             locationId: monitor.locationId,
           })
         );

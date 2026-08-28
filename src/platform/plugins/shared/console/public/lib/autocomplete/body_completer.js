@@ -8,7 +8,12 @@
  */
 
 import _ from 'lodash';
-import { WalkingState, walkTokenPath, wrapComponentWithDefaults } from './engine';
+import {
+  getTermsForWalkingStates,
+  WalkingState,
+  walkTokenPath,
+  wrapComponentWithDefaults,
+} from './engine';
 import {
   ConstantComponent,
   SharedComponent,
@@ -16,7 +21,6 @@ import {
   ConditionalProxy,
   GlobalOnlyComponent,
 } from './components';
-
 function CompilingContext(endpointId, parametrizedComponentFactories) {
   this.parametrizedComponentFactories = parametrizedComponentFactories;
   this.endpointId = endpointId;
@@ -34,16 +38,26 @@ function CompilingContext(endpointId, parametrizedComponentFactories) {
  * which should return the top level components for the given endpoint
  */
 
-function resolvePathToComponents(tokenPath, context, editor, components) {
+function resolvePathToWalkingStates(tokenPath, context, editor, components) {
   const walkStates = walkTokenPath(
     tokenPath,
     [new WalkingState('ROOT', components, [])],
     context,
-    editor
+    editor,
+    true
   );
-  const result = [].concat.apply([], _.map(walkStates, 'components'));
-  return result;
+  return walkStates.filter((state) => state.depth === tokenPath.length);
 }
+
+const toContinuationState = (state) => ({
+  parentName: state.parentName,
+  components: state.components,
+  contextExtensionList: state.contextExtensionList,
+  fallbackGroups: state.fallbackGroups,
+  preferredFallbackGroups: state.preferredFallbackGroups,
+  priority: state.priority,
+  specificity: state.specificity,
+});
 
 class ScopeResolver extends SharedComponent {
   constructor(link, compilingContext) {
@@ -60,10 +74,15 @@ class ScopeResolver extends SharedComponent {
     this.compilingContext = compilingContext;
   }
 
-  resolveLinkToComponents(context, editor) {
+  resolveLinkToWalkingStates(context, editor) {
     if (_.isFunction(this.link)) {
       const desc = this.link(context, editor);
-      return compileDescription(desc, this.compilingContext);
+      return resolvePathToWalkingStates(
+        [],
+        context,
+        editor,
+        compileDescription(desc, this.compilingContext)
+      );
     }
     if (!_.isString(this.link)) {
       throw new Error('unsupported link format', this.link);
@@ -88,31 +107,30 @@ class ScopeResolver extends SharedComponent {
     } catch (e) {
       throw new Error('failed to resolve link [' + this.link + ']: ' + e);
     }
-    return resolvePathToComponents(path, context, editor, components);
+    return resolvePathToWalkingStates(path, context, editor, components || []);
   }
 
   getTerms(context, editor) {
-    const options = [];
-    const components = this.resolveLinkToComponents(context, editor);
-    _.each(components, function (component) {
-      options.push.apply(options, component.getTerms(context, editor));
-    });
-    return options;
+    return getTermsForWalkingStates(
+      this.resolveLinkToWalkingStates(context, editor),
+      context,
+      editor
+    );
   }
 
   match(token, context, editor) {
-    const result = {
-      next: [],
-    };
-    const components = this.resolveLinkToComponents(context, editor);
-    _.each(components, function (component) {
-      const componentResult = component.match(token, context, editor);
-      if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
-      }
-    });
+    if (!_.isString(token) && !Array.isArray(token)) {
+      return false;
+    }
+    const walkingStates = this.resolveLinkToWalkingStates(context, editor);
+    const nextDepth = (walkingStates[0]?.depth ?? -1) + 1;
+    const nextWalkingStates = walkTokenPath([token], walkingStates, context, editor, true).filter(
+      (state) => state.depth === nextDepth
+    );
 
-    return result;
+    return nextWalkingStates.length
+      ? { nextStates: nextWalkingStates.map(toContinuationState) }
+      : false;
   }
 }
 function getTemplate(description) {
@@ -196,8 +214,16 @@ function compileDescription(description, compilingContext) {
     }
   } else if (_.isString(description) && /^\{.*\}$/.test(description)) {
     return [compileParametrizedValue(description, compilingContext)];
+  } else if (typeof description === 'boolean' || typeof description === 'number') {
+    return [
+      new ConstantComponent(String(description), null, [
+        {
+          name: description,
+        },
+      ]),
+    ];
   } else {
-    return [new ConstantComponent(description)];
+    return [new ConstantComponent(String(description))];
   }
 }
 
