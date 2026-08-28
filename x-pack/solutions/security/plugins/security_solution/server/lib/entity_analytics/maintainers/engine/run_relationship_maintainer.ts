@@ -218,7 +218,7 @@ async function runIntegration(
     droppedTargets: 0,
     relationshipTypeApplied: {},
   };
-  let totalMetadataResult: WriteRelationshipMetadatasResult = { docsAttempted: 0, docsApplied: 0 };
+  let totalMetadataResult: WriteRelationshipMetadatasResult = { docsAttempted: 0, docsApplied: 0, docsFailed: 0 };
 
   try {
     do {
@@ -339,6 +339,7 @@ async function runIntegration(
         totalMetadataResult = {
           docsAttempted: totalMetadataResult.docsAttempted + pageMetadata.docsAttempted,
           docsApplied: totalMetadataResult.docsApplied + pageMetadata.docsApplied,
+          docsFailed: totalMetadataResult.docsFailed + pageMetadata.docsFailed,
         };
       }
 
@@ -443,6 +444,13 @@ export const runRelationshipMaintainer = async ({
   totalWriteErrors: number;
   /** Count of relationship metadata docs successfully appended to the metadata datastream. */
   totalMetadataDocsApplied: number;
+  /**
+   * Count of relationship metadata docs that failed to append. A non-zero value means writes
+   * are failing silently — the entity relationships are in the store but their history is
+   * incomplete. Surfaced here (rather than only logged) so the caller can react when the
+   * count is sustained.
+   */
+  totalMetadataDocsFailed: number;
   /** Count of target EUIDs pruned because they don't exist in the entity store. */
   totalDroppedTargets: number;
   /** Total composite-agg pagination passes across all integrations. */
@@ -477,6 +485,7 @@ export const runRelationshipMaintainer = async ({
   let totalNotFound = 0;
   let totalWriteErrors = 0;
   let totalMetadataDocsApplied = 0;
+  let totalMetadataDocsFailed = 0;
   let totalDroppedTargets = 0;
   let totalIterations = 0;
   let truncated = false;
@@ -541,6 +550,7 @@ export const runRelationshipMaintainer = async ({
     totalNotFound += write.notFound;
     totalWriteErrors += write.errors;
     totalMetadataDocsApplied += metadata.docsApplied;
+    totalMetadataDocsFailed += metadata.docsFailed;
     totalDroppedTargets += write.droppedTargets;
 
     if (telemetryCollector) {
@@ -564,6 +574,7 @@ export const runRelationshipMaintainer = async ({
     totalNotFound,
     totalWriteErrors,
     totalMetadataDocsApplied,
+    totalMetadataDocsFailed,
     totalDroppedTargets,
     totalIterations,
     truncated,
