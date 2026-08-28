@@ -97,9 +97,7 @@ export const asyncGeneratorToA2ASSE = (
         id: requestId ?? null,
         error: a2aError.toJSONRPCError(),
       };
-      writeFrame(
-        `id: ${Date.now()}\nevent: error\ndata: ${JSON.stringify(errorResponse)}\n\n`
-      );
+      writeFrame(`id: ${Date.now()}\nevent: error\ndata: ${JSON.stringify(errorResponse)}\n\n`);
     } finally {
       signal.removeEventListener('abort', onAbort);
       endStream();
