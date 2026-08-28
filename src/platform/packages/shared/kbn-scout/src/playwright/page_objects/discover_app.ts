@@ -525,6 +525,17 @@ export class DiscoverApp {
     await this.page.mouse.move(0, 0);
   }
 
+  /** Opens the search-threshold rule flyout from Alerts (v1 button or v2 legacy option). */
+  async openSearchThresholdRuleFlyout() {
+    await this.clickAppMenuItem('discoverAlertsButton');
+    const ruleOption = this.page.testSubj
+      .locator('discoverLegacySearchThresholdRule')
+      .or(this.page.testSubj.locator('discoverCreateAlertButton'));
+    await expect(ruleOption).toBeVisible();
+    await ruleOption.click();
+    await expect(this.page.testSubj.locator('addRuleFlyoutTitle')).toBeVisible();
+  }
+
   async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
     await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
     await this.dismissHoverOverlays();
@@ -806,13 +817,16 @@ export class DiscoverApp {
     await this.page.mouse.up();
   }
 
-  async getCurrentQueryName(): Promise<string> {
+  getCurrentQueryNameLocator(): Locator {
     // Project (chrome-next) shows the saved search name in the app header; classic chrome shows it
     // as the last breadcrumb. `.or()` keeps this layout-agnostic without a runtime gate.
-    const title = this.page.testSubj
+    return this.page.testSubj
       .locator('appHeaderTitle')
       .or(this.page.testSubj.locator('breadcrumb last'));
-    return await title.innerText();
+  }
+
+  async getCurrentQueryName(): Promise<string> {
+    return await this.getCurrentQueryNameLocator().innerText();
   }
 
   async loadSavedSearch(searchName: string) {
@@ -829,13 +843,17 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  getHitCountLocator(): Locator {
+    return this.page.testSubj.locator('discoverQueryHits');
+  }
+
   async getHitCountInt(): Promise<number> {
-    const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
+    const hitCount = await this.getHitCountLocator().innerText();
     return parseInt(hitCount.replace(/,/g, ''), 10);
   }
 
   async getHitCount(): Promise<string> {
-    return this.page.testSubj.innerText('discoverQueryHits');
+    return this.getHitCountLocator().innerText();
   }
 
   getRefreshDataButton(): Locator {
@@ -868,9 +886,13 @@ export class DiscoverApp {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
 
+  getHistogramChart(): Locator {
+    return this.page.testSubj.locator('unifiedHistogramChart');
+  }
+
   async getChartTimespan(): Promise<string> {
     // Wait until the attribute no longer contains "Loading"
-    const element = this.page.testSubj.locator('unifiedHistogramChart');
+    const element = this.getHistogramChart();
     await expect(element).not.toHaveAttribute('data-time-range', /Loading/);
 
     return (await element.getAttribute('data-time-range')) ?? '';
@@ -886,6 +908,40 @@ export class DiscoverApp {
     const canvas = this.page.locator('[data-test-subj="unifiedHistogramChart"] canvas');
     // Click at the center of the canvas
     await canvas.click();
+  }
+
+  /**
+   * Brushes a short range on the histogram canvas. Offsets match the FTR
+   * `brushHistogram` gesture so the selected window stays comparable.
+   */
+  async brushHistogram() {
+    const canvas = this.page.locator('[data-test-subj="unifiedHistogramChart"] canvas');
+    await canvas.waitFor({ state: 'visible' });
+    const box = await canvas.boundingBox();
+    if (!box) {
+      throw new Error('Could not read the histogram canvas bounding box');
+    }
+    const centerX = box.x + box.width / 2;
+    const centerY = box.y + box.height / 2;
+    await this.page.mouse.move(centerX - 300, centerY + 20);
+    await this.page.mouse.down();
+    await this.page.mouse.move(centerX - 100, centerY + 30, { steps: 10 });
+    await this.page.mouse.up();
+  }
+
+  async getHistogramLegendLabels(): Promise<string[]> {
+    const labels = this.getHistogramChart().locator('.echLegendItem__label');
+    return (await labels.allInnerTexts()).map((text) => text.trim()).filter(Boolean);
+  }
+
+  async clickLegendFilter(field: string, type: '+' | '-') {
+    const filterType = type === '+' ? 'filterIn' : 'filterOut';
+    await this.page.testSubj.click(`legend-${field}`);
+    await this.page.testSubj.click(`legend-${field}-${filterType}`);
+  }
+
+  getChartIntervalWarningIcon(): Locator {
+    return this.page.locator('[data-test-subj="unifiedHistogramRendered"] .euiToolTipAnchor');
   }
 
   // Waits for a Discover tab to finish loading.

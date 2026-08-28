@@ -8,7 +8,10 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { DATE_NESTED_ES_ARCHIVE } from '../../../common/ui/fixtures/constants';
+import {
+  DATE_NANOS_MIXED_ES_ARCHIVE,
+  DATE_NESTED_ES_ARCHIVE,
+} from '../../../common/ui/fixtures/constants';
 
 globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) => {
   log.debug('[setup:logstash] loading logstash_functional ES data (only if it does not exist)...');
@@ -70,4 +73,10 @@ globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) =>
   log.debug('[setup:date_nested] loading date_nested ES data (only if it does not exist)...');
   await esArchiver.loadIfNeeded(DATE_NESTED_ES_ARCHIVE);
   log.debug('[setup:date_nested] date_nested ES data ready');
+
+  log.debug(
+    '[setup:date_nanos_mixed] loading date_nanos_mixed ES data (only if it does not exist)...'
+  );
+  await esArchiver.loadIfNeeded(DATE_NANOS_MIXED_ES_ARCHIVE);
+  log.debug('[setup:date_nanos_mixed] date_nanos_mixed ES data ready');
 });
