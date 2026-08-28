@@ -269,8 +269,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         width: '40px',
         render: (inst: ServiceInstance) => {
           const service = awsServicesMap?.get(inst.serviceId);
-          const isEcfOnly =
-            service?.deploymentMethods.every((dm) => dm.method === 'ecf') ?? false;
+          const isEcfOnly = service?.deploymentMethods.every((dm) => dm.method === 'ecf') ?? false;
           if (isEcfOnly && !inst.isDuplicate) return null;
           const isOpen = openMenuInstanceId === inst.instanceId;
           const actionsLabel = i18n.translate(

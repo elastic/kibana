@@ -13,7 +13,6 @@ jest.mock('../../onboarding_flow_context', () => ({ useOnboardingFlow: jest.fn()
 jest.mock('./use_service_settings', () => ({ useServiceSettings: jest.fn() }));
 jest.mock('./service_settings_flyout', () => ({ ServiceSettingsFlyout: () => null }));
 jest.mock('./duplicate_service_modal', () => ({
-  // eslint-disable-next-line react/display-name
   DuplicateServiceModal: () => <div data-test-subj="duplicate-modal" />,
 }));
 jest.mock('../service_search_filter', () => ({ ServiceSearchFilter: () => null }));
@@ -24,7 +23,7 @@ import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServiceSettings } from './use_service_settings';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceInstance } from './use_service_settings';
-import { ServiceSettingsStep } from './index';
+import { ServiceSettingsStep } from '.';
 
 function makeService(
   id: string,
@@ -46,7 +45,9 @@ function makeService(
 }
 
 const ECF_SVC = makeService('ecf_svc', [{ method: 'ecf' }]);
-const AGENTLESS_SVC = makeService('agentless_svc', [{ method: 'managed_integration', preferred: true }]);
+const AGENTLESS_SVC = makeService('agentless_svc', [
+  { method: 'managed_integration', preferred: true },
+]);
 const BOTH_SVC = makeService('both_svc', [
   { method: 'managed_integration', preferred: true },
   { method: 'ecf' },
@@ -120,9 +121,7 @@ describe('ServiceSettingsStep — actions column', () => {
     renderStep([inst], new Map([['both_svc', BOTH_SVC]]));
 
     fireEvent.click(screen.getByTestId('serviceSettingsStep-actionsButton-both_svc'));
-    expect(
-      screen.getByTestId('serviceSettingsStep-duplicateAction-both_svc')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('serviceSettingsStep-duplicateAction-both_svc')).toBeInTheDocument();
   });
 
   it('shows only Remove in ⋮ menu for a pre-existing ECF duplicate', () => {
