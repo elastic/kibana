@@ -360,6 +360,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/channel-post-messages
     sendChannelMessage: {
       isTool: true,
+      scope: 'write',
       description:
         'Post a new message to a Microsoft Teams channel. Returns the created message object including its id and webUrl. Use listJoinedTeams → listChannels to obtain teamId and channelId. Requires ChannelMessage.Send delegated permission or ChannelMessage.ReadWrite.All application permission (for app-only auth, grant via Azure AD app registration).',
       input: SendChannelMessageInputSchema,
@@ -403,6 +404,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-post-messages
     sendChatMessage: {
       isTool: true,
+      scope: 'write',
       description:
         'Send a message to a Microsoft Teams 1:1 or group chat. Returns the created message object. Use listChats to obtain an existing chatId, or createChat to open a new chat first. With delegated auth (bearer/OAuth authorization code/ears) the sender is the signed-in user. With app-only (client credentials) the tenant admin must grant Chat.ReadWrite.All application permission to the Azure AD app registration.',
       input: SendChatMessageInputSchema,
@@ -439,6 +441,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chatmessage-update
     updateMessage: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update the body of an existing Teams message. Works for both channel messages (provide teamId + channelId + messageId) and chat messages (provide chatId + messageId). Only the message body content can be changed — sender, timestamp, and other fields are immutable. The API returns no content on success.',
       input: UpdateMessageInputSchema,
@@ -513,6 +516,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-post
     createChat: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new Microsoft Teams chat (1:1 or group). Returns the created chat object with its id, which can be passed to sendChatMessage. For a 1:1 chat, provide exactly one user ID in memberIds; the signed-in user is automatically included as a member. For a group chat, provide two or more user IDs. Use getUser to resolve an email address to a user ID before calling this action.',
       input: CreateChatInputSchema,
