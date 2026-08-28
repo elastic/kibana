@@ -8,12 +8,10 @@
 import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiCode,
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiPopoverFooter,
   EuiSelectable,
   type EuiSelectableOption,
   EuiSpacer,
@@ -21,13 +19,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { EPISODE_STATUS_FILTER_OPTIONS, type EpisodeStatusFilterOption } from '../../constants';
+import { EPISODE_STATUS_FILTER_OPTIONS } from '../../constants';
 import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
 
 interface StatusSelectableMeta {
-  value: EpisodeStatusFilterOption['value'];
+  value: AlertEpisodeStatus;
 }
 
 const KNOWN_STATUS_VALUES = new Set<string>(EPISODE_STATUS_FILTER_OPTIONS.map((o) => o.value));
@@ -49,7 +46,7 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   }, [selectedStatuses]);
 
   const handleStatusChange = (newOptions: Array<EuiSelectableOption<StatusSelectableMeta>>) => {
-    const statuses = newOptions.filter((o) => o.checked === 'on').map((o) => o.value as AlertEpisodeStatus);
+    const statuses = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
     onChange({ ...matcher, statuses: statuses.length > 0 ? statuses : null });
   };
 
@@ -120,15 +117,6 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
       >
         {(list) => <>{list}</>}
       </EuiSelectable>
-      <EuiPopoverFooter paddingSize="s">
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.form.quickFilters.status.footer"
-            defaultMessage="Adds {code} to the filter"
-            values={{ code: <EuiCode>{'episode_status: ("...")'}</EuiCode> }}
-          />
-        </EuiText>
-      </EuiPopoverFooter>
     </EuiPopover>
   );
 };

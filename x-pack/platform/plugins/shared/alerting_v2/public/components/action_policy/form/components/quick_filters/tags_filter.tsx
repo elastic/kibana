@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiCode,
   EuiFilterButton,
   EuiPopover,
   EuiPopoverFooter,
@@ -19,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
 import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
@@ -146,15 +144,6 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           </EuiText>
         </EuiPopoverFooter>
       )}
-      <EuiPopoverFooter paddingSize="s">
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.form.quickFilters.tags.footer"
-            defaultMessage="Adds {code} to the filter"
-            values={{ code: <EuiCode>{'rule.tags: ("...")'}</EuiCode> }}
-          />
-        </EuiText>
-      </EuiPopoverFooter>
     </EuiPopover>
   );
 };

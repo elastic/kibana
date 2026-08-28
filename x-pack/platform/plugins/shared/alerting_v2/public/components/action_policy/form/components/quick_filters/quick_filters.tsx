@@ -17,7 +17,7 @@ export const QuickFilters = ({ matcher, onChange }: QuickFiltersProps) => {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.label', {
-        defaultMessage: 'Quick filters',
+        defaultMessage: 'Filter conditions',
       })}
     >
       <EuiFilterGroup data-test-subj="quickFilters">

@@ -8,12 +8,10 @@
 import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiCode,
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   type EuiSelectableOption,
@@ -23,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useFetchRules } from '../../../../../hooks/use_fetch_rules';
@@ -195,15 +192,6 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           </>
         )}
       </EuiSelectable>
-      <EuiPopoverFooter paddingSize="s">
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.form.quickFilters.rule.footer"
-            defaultMessage="Adds {code} to the filter"
-            values={{ code: <EuiCode>{'rule.id: ("...")'}</EuiCode> }}
-          />
-        </EuiText>
-      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
