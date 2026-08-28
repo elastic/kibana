@@ -64,6 +64,9 @@ export function getWebpackConfig(
         )}${info.query}`,
       chunkLoadingGlobal: `${bundle.id}_bundle_jsonpfunction`,
       chunkLoading: 'jsonp',
+      // Empty: a plugin-root package.json would otherwise become uniqueName and
+      // inject ~100B of data-webpack runtime into every page-load bundle.
+      uniqueName: '',
     },
 
     optimization: {
