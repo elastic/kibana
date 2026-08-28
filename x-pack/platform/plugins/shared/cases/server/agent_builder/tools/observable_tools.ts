@@ -11,10 +11,7 @@ import type {
   BuiltinToolDefinition,
   ToolAvailabilityConfig,
 } from '@kbn/agent-builder-server/tools';
-import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/logging';
-import type { CasesServerStartDependencies } from '../../types';
 import { addObservablesStepCommonDefinition } from '../../../common/workflows/steps/add_observables';
 import { updateObservableStepCommonDefinition } from '../../../common/workflows/steps/update_observable';
 import { addObservablesStepDefinition } from '../../workflows/steps/add_observables';
@@ -45,9 +42,7 @@ const observablesSchema = z.object({
 
 export const observablesTool = (
   availability: ToolAvailabilityConfig,
-  coreSetup: CoreSetup<CasesServerStartDependencies>,
-  getCasesClientFn: GetCasesClientFn,
-  logger: Logger
+  getCasesClientFn: GetCasesClientFn
 ): BuiltinToolDefinition<typeof observablesSchema> => {
   const addObservablesStepDef = addObservablesStepDefinition(getCasesClientFn);
   const updateObservableStepDef = updateObservableStepDefinition(getCasesClientFn);
