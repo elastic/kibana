@@ -250,13 +250,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
         // Close too early discards the operation→field transition. Do not wait on the
         // combobox input: setElement types `field` as a filter before the option is
-        // clicked. data-selected-field is Lens sourceField (or incompleteField) and
-        // updates only after insertOrReplaceColumn. It is independent of aria-invalid,
-        // which stays true while incompleteOperation is set and can linger on CCS.
+        // clicked. data-selected-field is Lens sourceField and updates only after
+        // insertOrReplaceColumn. Independent of aria-invalid (incompleteOperation / CCS).
+        // Tests pass the dropdown label; the document-count field is labeled Records
+        // but stored as ___records___.
         await retry.waitFor('field selection to commit', async () => {
           const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          const selected = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
-          return selected === field;
+          const requiredOptionLabel = field.trim().toLowerCase();
+          const sourceField = (
+            (await fieldCombo.getAttribute('data-selected-field')) ?? ''
+          ).toLowerCase();
+          return (
+            sourceField === requiredOptionLabel ||
+            (sourceField === '___records___' && requiredOptionLabel === 'records')
+          );
         });
       }
 
@@ -670,10 +677,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ? `lns-indexPatternDimension-${operation} incompatible`
         : `lns-indexPatternDimension-${operation}`;
       async function getAriaPressed() {
-        const operationSelectorContainer = await testSubjects.find(operationSelector);
-        await testSubjects.click(operationSelector);
-        const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
-        return ariaPressed;
+        await testSubjects.click(`${operationSelector}-label`);
+        const operationButton = await testSubjects.find(operationSelector);
+        return await operationButton.getAttribute('aria-pressed');
       }
 
       // adding retry here as it seems that there is a flakiness of the operation click
