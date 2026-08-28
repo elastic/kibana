@@ -250,7 +250,7 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
   },
   deserialize: (table) => {
     const { columns, rows } = table;
-    if (columns.length > MAX_DATATABLE_ROWS) {
+    if (rows.length > MAX_DATATABLE_ROWS) {
       throw new Error(`Datatable exceeds maximum of ${MAX_DATATABLE_ROWS} columns.`);
     }
     if (columns.length * rows.length > MAX_DATATABLE_CELLS) {
