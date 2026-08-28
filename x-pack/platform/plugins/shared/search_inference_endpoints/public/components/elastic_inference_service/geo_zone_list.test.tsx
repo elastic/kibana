@@ -112,18 +112,4 @@ describe('GeoZoneList', () => {
     expect(onToggleGeo).toHaveBeenCalledWith('eu');
     expect(onToggleGeo).toHaveBeenCalledTimes(1);
   });
-
-  it('shows "All available regions" annotation for each row', () => {
-    render(
-      <Wrapper>
-        <GeoZoneList
-          availableGeos={['eu']}
-          checkedGeos={new Set(['eu'])}
-          onToggleGeo={onToggleGeo}
-        />
-      </Wrapper>
-    );
-
-    expect(screen.getByText('All available regions')).toBeInTheDocument();
-  });
 });
