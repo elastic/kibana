@@ -38,13 +38,14 @@ import {
 const buildAnonymizationInstruction = (
   tokenMap: Readonly<Record<string, InferenceTokenMapEntry>>
 ): string => {
-  const entityTypes = [
-    ...new Set(Object.values(tokenMap).map((entry) => entry.entityClass)),
-  ].sort();
+  const tokenLines = Object.entries(tokenMap).map(
+    ([token, entry]) => `- ${token}: ${entry.entityClass}`
+  );
   return [
     '[Anonymization context]',
     'Some values in this conversation have been replaced with privacy tokens to protect sensitive information.',
-    `Entity types present: ${entityTypes.join(', ')}.`,
+    'Token registry (treat each token as a real value of its entity type):',
+    ...tokenLines,
     'Rules:',
     '- Use these tokens exactly as given; do not modify, expand, or remove them.',
     '- Do not guess, infer, or reveal the original values behind any token.',
@@ -78,11 +79,16 @@ interface CreateWorkflowAnonymizationPipelineOptions {
 
 const restoreTerminalMessage = (
   event: ChatCompletionMessageEvent,
-  tokenMap: InferenceProceedInput['tokenMap']
+  tokenMap: Readonly<Record<string, InferenceTokenMapEntry>>,
+  restoreContent = true,
+  restoreToolCallArgs = true
 ): ChatCompletionMessageEvent => ({
   ...event,
-  content: restoreTokenizedString(event.content, tokenMap),
+  content: restoreContent ? restoreTokenizedString(event.content, tokenMap) : event.content,
   toolCalls: event.toolCalls.map((toolCall) => {
+    if (!restoreToolCallArgs) {
+      return toolCall;
+    }
     const restoredArguments = restoreTokenizedValue(toolCall.function.arguments, tokenMap);
     if (
       !restoredArguments ||
@@ -154,14 +160,13 @@ export const createWorkflowAnonymizationPipeline = ({
       }
       proceedInvoked = true;
       invocationState.connectorInvoked = true;
-      const contentRestorer = createStreamingContentRestorer(input.tokenMap);
+      const tokenMap = input.tokenMap ?? {};
+      const contentRestorer = createStreamingContentRestorer(tokenMap);
 
-      const tokenCount = Object.keys(input.tokenMap).length;
+      const tokenCount = Object.keys(tokenMap).length;
       const augmentedSystem =
         tokenCount > 0
-          ? [input.system, buildAnonymizationInstruction(input.tokenMap)]
-              .filter(Boolean)
-              .join('\n\n')
+          ? [input.system, buildAnonymizationInstruction(tokenMap)].filter(Boolean).join('\n\n')
           : input.system;
 
       logger.debug(
@@ -178,36 +183,57 @@ export const createWorkflowAnonymizationPipeline = ({
           abortSignal: input.abortSignal ?? abortSignal,
         }).subscribe({
           next: (event) => {
+            const restoreStreaming = input.restoreStreamingContent !== false;
+            const restoreToolCallArgs = input.restoreToolCallArguments !== false;
             if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
-              const restoredContent = contentRestorer.push(event.content);
-              if (restoredContent) {
-                if (!firstChunkRecorded) {
-                  firstChunkRecorded = true;
-                  pipelineFirstChunkDurationHistogram.record(
-                    performance.now() - connectorStartTime
-                  );
+              if (restoreStreaming) {
+                const restoredContent = contentRestorer.push(event.content);
+                if (restoredContent) {
+                  if (!firstChunkRecorded) {
+                    firstChunkRecorded = true;
+                    pipelineFirstChunkDurationHistogram.record(
+                      performance.now() - connectorStartTime
+                    );
+                  }
+                  relay$.next({
+                    ...event,
+                    content: restoredContent,
+                    // Tool-call arguments can be split at arbitrary JSON boundaries. Suppress their
+                    // deltas until the assembled terminal message can be restored structurally.
+                    tool_calls: [],
+                  });
                 }
-                relay$.next({
-                  ...event,
-                  content: restoredContent,
-                  // Tool-call arguments can be split at arbitrary JSON boundaries. Suppress their
-                  // deltas until the assembled terminal message can be restored structurally.
-                  tool_calls: [],
-                });
+              } else {
+                if (event.content) {
+                  if (!firstChunkRecorded) {
+                    firstChunkRecorded = true;
+                    pipelineFirstChunkDurationHistogram.record(
+                      performance.now() - connectorStartTime
+                    );
+                  }
+                  relay$.next({ ...event, tool_calls: [] });
+                }
               }
               return;
             }
             if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
-              const remainingContent = contentRestorer.flush();
-              if (remainingContent) {
-                relay$.next({
-                  type: ChatCompletionEventType.ChatCompletionChunk,
-                  content: remainingContent,
-                  tool_calls: [],
-                });
+              if (restoreStreaming) {
+                const remainingContent = contentRestorer.flush();
+                if (remainingContent) {
+                  relay$.next({
+                    type: ChatCompletionEventType.ChatCompletionChunk,
+                    content: remainingContent,
+                    tool_calls: [],
+                  });
+                }
               }
               rawContent = event.content;
-              restoredTerminalMessage = restoreTerminalMessage(event, input.tokenMap);
+              restoredTerminalMessage = restoreTerminalMessage(
+                event,
+                tokenMap,
+                restoreStreaming,
+                restoreToolCallArgs
+              );
               return;
             }
             relay$.next(event);

@@ -151,7 +151,15 @@ export const anonymizedCompletionSchema = z
   })
   .strict();
 
-export const callSiteProceedInputSchema = anonymizedCompletionSchema;
+export const callSiteProceedInputSchema = z
+  .object({
+    system: z.string().optional(),
+    messages: z.array(workflowChatMessageSchema),
+    tokenMap: tokenMapSchema.optional(),
+    restoreStreamingContent: z.boolean().optional(),
+    restoreToolCallArguments: z.boolean().optional(),
+  })
+  .strict();
 export const callSiteProceedOutputSchema = z.object({ rawContent: z.string() }).strict();
 
 export const piiRestoreInputSchema = z

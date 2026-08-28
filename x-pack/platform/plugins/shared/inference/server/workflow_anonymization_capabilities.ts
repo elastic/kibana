@@ -50,7 +50,9 @@ export interface InferenceTokenMapEntry {
 export interface InferenceProceedInput {
   readonly system?: string;
   readonly messages: readonly Message[];
-  readonly tokenMap: Readonly<Record<string, InferenceTokenMapEntry>>;
+  readonly tokenMap?: Readonly<Record<string, InferenceTokenMapEntry>>;
+  readonly restoreStreamingContent?: boolean;
+  readonly restoreToolCallArguments?: boolean;
   readonly abortSignal?: AbortSignal;
 }
 
