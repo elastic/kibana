@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
 import { UserActions } from '.';
-import { basicCase, getUserAction } from '../../../containers/mock';
+import { basicCase } from '../../../containers/mock';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 import { casesConfigurationsMock } from '../../../containers/configure/mock';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
@@ -21,7 +21,6 @@ import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_
 import { renderWithTestingProviders } from '../../../common/mock';
 import type { CaseUserActionsStats } from '../../../containers/types';
 import type { UserActivityParams } from '../../user_actions_activity_bar/types';
-import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -246,48 +245,6 @@ describe('UserActions (redesign)', () => {
       );
 
       expect(screen.queryByTestId('user-actions-no-search-results')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('renderUserActionExtraActions (regression: redesign list must invoke the slot)', () => {
-    it('renders the extra action for a workflow user action on the redesign list', async () => {
-      // Regression: before this refactor, renderUserActionExtraActions was silently
-      // dropped on the redesign path because use_build_user_actions.ts did not forward it.
-      const workflowUserAction = getUserAction(UserActionTypes.workflow, UserActionActions.create, {
-        payload: {
-          workflow: { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' },
-          origin: { type: 'cases.alert', id: 'alert-1', index: '.alerts' },
-        },
-      });
-
-      useInfiniteFindCaseUserActionsMock.mockReturnValue({
-        data: {
-          pages: [{ userActions: [workflowUserAction], latestAttachments: [], total: 1 }],
-        },
-        isLoading: false,
-        hasNextPage: false,
-        fetchNextPage: jest.fn(),
-        isFetchingNextPage: false,
-      });
-
-      const renderUserActionExtraActions = jest.fn().mockReturnValue(
-        <button type="button" data-test-subj="redesign-extra-action">
-          {'Show alert'}
-        </button>
-      );
-
-      renderWithTestingProviders(<UserActions {...defaultProps} />, {
-        wrapperProps: { renderUserActionExtraActions },
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('redesign-extra-action')).toBeInTheDocument();
-      });
-      expect(renderUserActionExtraActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userAction: expect.objectContaining({ type: UserActionTypes.workflow }),
-        })
-      );
     });
   });
 });

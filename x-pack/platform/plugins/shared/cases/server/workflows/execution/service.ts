@@ -22,6 +22,7 @@ import { AttachmentType, type Case } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
 import { getCasesClientInternalArgs } from '../../client/client';
 import type { AuthorizedCase } from '../../client/cases/ensure_authorized_to_run_workflow';
+import { ensureAuthorizedToRunWorkflow } from '../../client/cases/ensure_authorized_to_run_workflow';
 import type { CasesClientArgs } from '../../client/types';
 import type { CasesRequestHandlerContext } from '../../types';
 import { buildActivityOrigin } from './build_activity_origin';
@@ -118,11 +119,14 @@ export class CasesWorkflowRunService {
 
     const { caseIds } = body;
 
+    // Build clientArgs first so the module-level authorizer can use it directly, keeping
+    // ensureAuthorizedToRunWorkflow off the public CasesSubClient.
+    const clientArgs = this.getClientArgs(casesClient);
+
     // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
     // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
     // which IDs exist. One privilege round-trip for all owners via ensureAuthorized.
-    const authorizedCases = await casesClient.cases.ensureAuthorizedToRunWorkflow({ ids: caseIds });
-    const clientArgs = this.getClientArgs(casesClient);
+    const authorizedCases = await ensureAuthorizedToRunWorkflow({ ids: caseIds }, clientArgs);
 
     // `origin` is optional. When absent the run is a list-surface (bulk) run: the caller
     // was not looking at any specific sub-entity, alert inputs are not permitted, and no

@@ -15,7 +15,6 @@ import { useAlertsPrivileges } from '../../detections/containers/detection_engin
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { Cases } from '.';
-import { renderUserActionExtraActions } from '../components/render_user_action_extra_actions';
 
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
@@ -96,15 +95,5 @@ describe('Cases page', () => {
 
     const getCasesArgs = mockGetCases.mock.calls[0][0];
     expect(getCasesArgs.ruleDetailsNavigation).toBeUndefined();
-  });
-
-  it('passes the user action extra actions renderer to Cases', () => {
-    render(<Cases />);
-
-    expect(mockGetCases).toHaveBeenCalledWith(
-      expect.objectContaining({
-        renderUserActionExtraActions,
-      })
-    );
   });
 });

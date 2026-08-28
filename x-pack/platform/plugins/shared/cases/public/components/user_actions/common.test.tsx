@@ -11,10 +11,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
 
-import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { getUserAction } from '../../containers/mock';
-import { TestProviders, renderWithTestingProviders } from '../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../common/lib/kibana');
@@ -118,50 +118,5 @@ describe('createCommonUpdateUserActionBuilder ', () => {
 
     await userEvent.click(screen.getByLabelText('Highlight the referenced comment'));
     expect(handleOutlineComment).toHaveBeenCalled();
-  });
-
-  describe('renderUserActionExtraActions slot', () => {
-    const buildAndRenderWithAction = (renderUserActionExtraActions?: jest.Mock) => {
-      const userAction = getUserAction(UserActionTypes.workflow, UserActionActions.create);
-      const builder = createCommonUpdateUserActionBuilder({
-        userProfiles: userProfilesMap,
-        userAction,
-        label,
-        icon: 'workflow',
-        handleOutlineComment,
-      });
-      return renderWithTestingProviders(<EuiCommentList comments={builder.build()} />, {
-        wrapperProps: { renderUserActionExtraActions },
-      });
-    };
-
-    it('renders the node returned by renderUserActionExtraActions', () => {
-      const renderUserActionExtraActions = jest.fn().mockReturnValue(
-        <button type="button" data-test-subj="extra-action">
-          {'Extra'}
-        </button>
-      );
-
-      buildAndRenderWithAction(renderUserActionExtraActions);
-
-      expect(screen.getByTestId('extra-action')).toBeInTheDocument();
-      expect(renderUserActionExtraActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userAction: expect.objectContaining({ type: UserActionTypes.workflow }),
-        })
-      );
-    });
-
-    it('renders nothing when renderUserActionExtraActions returns null', () => {
-      const renderUserActionExtraActions = jest.fn().mockReturnValue(null);
-
-      buildAndRenderWithAction(renderUserActionExtraActions);
-
-      expect(screen.queryByTestId('extra-action')).toBeNull();
-    });
-
-    it('does not crash when renderUserActionExtraActions is not provided', () => {
-      expect(() => buildAndRenderWithAction()).not.toThrow();
-    });
   });
 });

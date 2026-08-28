@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import type { Case } from '../../../common/types/domain';
 import { isAlertAttachmentType, toStringArray } from '../../../common/utils/attachments';
 
+/** Returns the value as a plain-object record, or undefined for arrays, null, and primitives. */
+const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 export const getRecord = (value: unknown): Record<string, unknown> | undefined =>
-  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
+  isRecord(value) ? value : undefined;
 
 /**
  * Finds the Elasticsearch index for an alert identified by `alertId` among a case's alert attachments.

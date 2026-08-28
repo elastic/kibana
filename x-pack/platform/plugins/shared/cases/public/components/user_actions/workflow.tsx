@@ -41,7 +41,10 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
   const { id, name, executionId } = workflow;
 
   // Gate the execution deep link on Workflows view permissions (readWorkflow + readWorkflowExecution).
-  const wfCapabilities = capabilities?.workflowsManagement as Record<string, unknown> | undefined;
+  // Type off the enum so we don't need @kbn/workflows-ui (which would grow the bundle).
+  const wfCapabilities = capabilities?.workflowsManagement as
+    | Partial<Record<WorkflowsManagementUiActions, boolean>>
+    | undefined;
   const canViewExecution =
     Boolean(wfCapabilities?.[WorkflowsManagementUiActions.read]) &&
     Boolean(wfCapabilities?.[WorkflowsManagementUiActions.readExecution]);

@@ -27,7 +27,7 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     observables: i18n.OBSERVABLES,
     extended_fields: i18n.EXTENDED_FIELDS,
     template: i18n.APPLIED_TEMPLATE,
-    workflow: i18n.WORKFLOW_STARTED,
+    workflow: i18n.WORKFLOW_RAN,
   };
 
   switch (type) {

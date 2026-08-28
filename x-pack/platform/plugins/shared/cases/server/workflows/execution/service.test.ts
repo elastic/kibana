@@ -15,6 +15,12 @@ import { createCasesClientMock, createCasesClientMockArgs } from '../../client/m
 import type { CasesRequestHandlerContext } from '../../types';
 import { CasesWorkflowRunService } from './service';
 
+jest.mock('../../client/cases/ensure_authorized_to_run_workflow');
+import { ensureAuthorizedToRunWorkflow } from '../../client/cases/ensure_authorized_to_run_workflow';
+const mockEnsureAuthorizedToRunWorkflow = ensureAuthorizedToRunWorkflow as jest.MockedFunction<
+  typeof ensureAuthorizedToRunWorkflow
+>;
+
 describe('CasesWorkflowRunService', () => {
   const request = httpServerMock.createKibanaRequest();
   const logger = loggingSystemMock.createLogger();
@@ -79,7 +85,7 @@ describe('CasesWorkflowRunService', () => {
     jest.clearAllMocks();
     workflowsAvailable = true;
     licenseValid = true;
-    casesClient.cases.ensureAuthorizedToRunWorkflow.mockImplementation(async ({ ids }) =>
+    mockEnsureAuthorizedToRunWorkflow.mockImplementation(async ({ ids }) =>
       ids.map((id) => ({ id, owner: SECURITY_SOLUTION_OWNER }))
     );
     casesClient.cases.get.mockResolvedValue(theCase);
@@ -106,17 +112,15 @@ describe('CasesWorkflowRunService', () => {
       activityStatus: 'succeeded',
     });
 
-    expect(casesClient.cases.ensureAuthorizedToRunWorkflow).toHaveBeenCalledWith({
-      ids: ['case-1'],
-    });
+    expect(mockEnsureAuthorizedToRunWorkflow).toHaveBeenCalledWith({ ids: ['case-1'] }, clientArgs);
     expect(casesClient.cases.get).toHaveBeenCalledWith({
       id: 'case-1',
       includeComments: true,
     });
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
-    expect(
-      casesClient.cases.ensureAuthorizedToRunWorkflow.mock.invocationCallOrder[0]
-    ).toBeLessThan(management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]);
+    expect(mockEnsureAuthorizedToRunWorkflow.mock.invocationCallOrder[0]).toBeLessThan(
+      management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]
+    );
     expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
       workflow: expect.objectContaining({ id: 'workflow-1', name: 'Investigate case' }),
       spaceId: 'default',
@@ -173,7 +177,7 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('records activity with the owner from the already-loaded case', async () => {
-    casesClient.cases.ensureAuthorizedToRunWorkflow.mockResolvedValue([
+    mockEnsureAuthorizedToRunWorkflow.mockResolvedValue([
       { id: 'case-1', owner: 'owner-from-authorization' },
     ]);
     casesClient.cases.get.mockResolvedValue({
@@ -327,9 +331,7 @@ describe('CasesWorkflowRunService', () => {
     // SECURITY REGRESSION TEST: a user authorized on case-a but not case-b must NOT be able
     // to start a workflow that acts on case-b.
     it('refuses to start the workflow when the caller is not authorized on all cases', async () => {
-      casesClient.cases.ensureAuthorizedToRunWorkflow.mockRejectedValue(
-        new Error('Unauthorized: case-b')
-      );
+      mockEnsureAuthorizedToRunWorkflow.mockRejectedValue(new Error('Unauthorized: case-b'));
 
       await expect(run(bulkBody)).rejects.toThrow('Unauthorized: case-b');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -437,7 +439,7 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('rejects execution when the case update is unauthorized', async () => {
-    casesClient.cases.ensureAuthorizedToRunWorkflow.mockRejectedValue(new Error('not authorized'));
+    mockEnsureAuthorizedToRunWorkflow.mockRejectedValue(new Error('not authorized'));
 
     await expect(run()).rejects.toThrow('not authorized');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();

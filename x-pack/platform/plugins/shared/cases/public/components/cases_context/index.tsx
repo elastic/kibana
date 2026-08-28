@@ -19,7 +19,6 @@ import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
   CasesPermissions,
-  UserActionUI,
 } from '../../containers/types';
 import type { ReleasePhase } from '../types';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
@@ -34,12 +33,6 @@ import { CasesStateContext } from './state/cases_state_context';
 import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
 
-export interface RenderUserActionExtraActionsArgs {
-  userAction: UserActionUI;
-}
-
-export type RenderUserActionExtraActions = (args: RenderUserActionExtraActionsArgs) => ReactNode;
-
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
@@ -50,7 +43,6 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
-  renderUserActionExtraActions?: RenderUserActionExtraActions;
 }
 
 export interface CasesContextProps
@@ -59,7 +51,6 @@ export interface CasesContextProps
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
   getFilesClient: (scope: string) => ScopedFilesClient;
-  renderUserActionExtraActions?: RenderUserActionExtraActions;
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
@@ -79,7 +70,6 @@ export const CasesProvider: FC<
     features = {},
     releasePhase = 'ga',
     getFilesClient,
-    renderUserActionExtraActions,
   },
   queryClient = casesQueryClient,
 }) => {
@@ -115,7 +105,6 @@ export const CasesProvider: FC<
       ),
       releasePhase,
       dispatch,
-      renderUserActionExtraActions,
     }),
     /**
      * We want to trigger a rerender only when the permissions will change.
@@ -139,7 +128,6 @@ export const CasesProvider: FC<
       // Need to revisit the re-rendering strategy in general as disabling exhaustive-deps is an anti-pattern
       features.alerts?.all,
       features.alerts?.read,
-      renderUserActionExtraActions,
     ]
   );
 

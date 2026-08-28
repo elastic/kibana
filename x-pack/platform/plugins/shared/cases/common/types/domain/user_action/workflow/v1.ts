@@ -23,30 +23,58 @@ export const WorkflowPayloadRt = rt.strict({
 
 /**
  * The activity origin: what the user was looking at when they triggered the workflow run.
- * The optional fields carry enrichment needed for display (observable type/value, alert index).
+ *
+ * This is a discriminated union so each variant carries only the enrichment fields that
+ * `buildActivityOrigin` actually writes for that type. A `cases.case` origin never carries
+ * `index`, `typeKey`, or `value`; a `cases.observable` origin never carries `index`.
+ *
+ * - `cases.case`       — triggered from the case detail page.
+ * - `cases.observable` — triggered from the observables table for a specific observable;
+ *                        carries optional `typeKey` + `value` for display.
+ * - `cases.alert`      — triggered from the alerts table for a single alert;
+ *                        carries optional `index` for the deep link.
+ * - `cases.alerts`     — triggered from the alerts table with a multi-alert selection.
  */
-export const WorkflowOriginRt = rt.exact(
-  rt.intersection([
-    rt.type({
-      type: rt.union([
-        rt.literal(CASE_WORKFLOW_ORIGIN_TYPE),
-        rt.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
-        rt.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
-        rt.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
-      ]),
-      /** The primary identifier: caseId, observableId, or alertId. */
-      id: rt.string,
-    }),
-    rt.partial({
-      /** Alert origin: the ES index the alert lives in, used to build the deep link. */
-      index: rt.string,
-      /** Observable origin: the observable type key (e.g. 'ip', 'url'). */
-      typeKey: rt.string,
-      /** Observable origin: the observable value for display. */
-      value: rt.string,
-    }),
-  ])
-);
+export const WorkflowOriginRt = rt.union([
+  rt.strict({
+    type: rt.literal(CASE_WORKFLOW_ORIGIN_TYPE),
+    /** The primary identifier: caseId. */
+    id: rt.string,
+  }),
+  rt.exact(
+    rt.intersection([
+      rt.type({
+        type: rt.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
+        /** The primary identifier: observableId. */
+        id: rt.string,
+      }),
+      rt.partial({
+        /** The observable type key (e.g. 'ip', 'url'). */
+        typeKey: rt.string,
+        /** The observable value for display. */
+        value: rt.string,
+      }),
+    ])
+  ),
+  rt.exact(
+    rt.intersection([
+      rt.type({
+        type: rt.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
+        /** The primary identifier: alertId (_id). */
+        id: rt.string,
+      }),
+      rt.partial({
+        /** The ES index the alert lives in, used to build the deep link. */
+        index: rt.string,
+      }),
+    ])
+  ),
+  rt.strict({
+    type: rt.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
+    /** The primary identifier: caseId. */
+    id: rt.string,
+  }),
+]);
 
 export const WorkflowUserActionPayloadRt = rt.exact(
   rt.intersection([

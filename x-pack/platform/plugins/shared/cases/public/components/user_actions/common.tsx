@@ -16,7 +16,6 @@ import { UserActionTimestamp } from './timestamp';
 import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
-import { UserActionExtraActions } from './user_action_extra_actions';
 import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
 import { getUserActionAriaLabel } from './user_actions_aria_labels';
 
@@ -79,7 +78,6 @@ export const createCommonUpdateUserActionBuilder = ({
         timelineAvatarAriaLabel: getUserActionAriaLabel(userAction.type),
         actions: (
           <EuiFlexGroup responsive={false}>
-            <UserActionExtraActions userAction={userAction} />
             <EuiFlexItem grow={false}>
               <UserActionCopyLink id={userAction.id} />
             </EuiFlexItem>
