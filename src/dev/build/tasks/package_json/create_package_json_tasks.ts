@@ -24,17 +24,20 @@ export const CreatePackageJson: Task = {
     const pkg = config.getKibanaPkg();
 
     /**
-     * Replaces `workspace:*` dependencies with `file:` dependencies pointing at the
-     * package's directory (copied into the build). When installing dependencies,
-     * pnpm copies these `file:` dependencies into `node_modules` instead of
-     * symlinking like we do in development.
+     * Keep local `@kbn/*` deps on the `workspace:*` protocol so the in-build
+     * install resolves them as workspace members (see the generated `packages:`
+     * block + `injectWorkspacePackages` below). Under the hoisted linker a
+     * `file:<dir>` dep is materialized as a symlink back to the source dir, which
+     * DeletePackagesFromBuildRoot then deletes — leaving dangling links.
+     * Injected workspace packages are instead hard-copied into `node_modules`, so
+     * they survive the source deletion.
      */
     const transformedDeps = Object.fromEntries(
       Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })
         .filter(([id]) => !id.startsWith('@kbn/') || distPkgIds.has(id))
         .map(([name, version]) => {
           const dir = distPkgDirById.get(name);
-          return [name, dir ? `file:${dir}` : version];
+          return [name, dir ? 'workspace:*' : version];
         })
     );
 
@@ -60,19 +63,28 @@ export const CreatePackageJson: Task = {
         // include dependencies which are explicitly used
         ...(await findUsedDependencies(transformedDeps, build.resolvePath('.'), plugins)),
         // also include all plugin packages
-        ...Object.fromEntries(
-          plugins.map((p) => [p.manifest.id, `file:${p.normalizedRepoRelativeDir}`])
-        ),
+        ...Object.fromEntries(plugins.map((p) => [p.manifest.id, 'workspace:*'])),
       },
     };
 
     await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));
 
     // pnpm 11 reads install settings + overrides only from pnpm-workspace.yaml.
-    // Reuse the repo's authored settings, minus the generated `packages:` block,
-    // so the build dir is its own workspace root. Removed by CleanPackageManagerRelatedFiles.
+    // Reuse the repo's authored settings (minus the generated `packages:` block),
+    // then declare the dist packages as workspace members and enable injection so
+    // `workspace:*` deps are hard-copied into node_modules instead of symlinked to
+    // source. dedupeInjectedDeps is disabled so shared deps also copy rather than
+    // symlink back to a source that DeletePackagesFromBuildRoot removes. Removed by
+    // CleanPackageManagerRelatedFiles.
     const rootWorkspace = await read(config.resolveFromRepo('pnpm-workspace.yaml'));
-    await write(build.resolvePath('pnpm-workspace.yaml'), renderPnpmWorkspace(rootWorkspace));
+    const settings = renderPnpmWorkspace(rootWorkspace);
+    const memberDirs = distPackages.map((p) => p.normalizedRepoRelativeDir).sort();
+    const packagesBlock = ['packages:', ...memberDirs.map((d) => `  - '${d}'`)].join('\n');
+    const injectSettings = 'injectWorkspacePackages: true\ndedupeInjectedDeps: false';
+    await write(
+      build.resolvePath('pnpm-workspace.yaml'),
+      `${packagesBlock}\n\n${settings.replace(/\n*$/, '')}\n${injectSettings}\n`
+    );
   },
 };
 
