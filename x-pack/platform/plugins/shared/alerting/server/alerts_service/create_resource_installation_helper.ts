@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger } from '@kbn/core/server';
 import type { IRuleTypeAlerts } from '../types';
@@ -13,6 +14,15 @@ export interface InitializationPromise {
   result: boolean;
   error?: string;
 }
+
+/**
+ * Cap on concurrently running resource installations. Each install holds a
+ * large (multi-MB) resolved alerts mapping in memory while it runs, so an
+ * unbounded fan-out (contexts x namespaces) can retain enough of them at once
+ * to exhaust the heap. Bounding the concurrency caps peak memory usage;
+ * installs beyond the limit queue and run as slots free up.
+ */
+export const MAX_CONCURRENT_RESOURCE_INSTALLATIONS = 5;
 
 // get multiples of 2 min
 const DEFAULT_RETRY_BACKOFF_PER_ATTEMPT = 2 * 60 * 1000;
@@ -50,6 +60,7 @@ export function createResourceInstallationHelper(
   let commonInitPromise: Promise<InitializationPromise> = commonResourcesInitPromise;
   const initializedContexts: Map<string, Promise<InitializationPromise>> = new Map();
   const lastRetry: Map<string, Retry> = new Map();
+  const installLimiter = pLimit(MAX_CONCURRENT_RESOURCE_INSTALLATIONS);
 
   const waitUntilContextResourcesInstalled = async (
     context: IRuleTypeAlerts,
@@ -59,7 +70,7 @@ export function createResourceInstallationHelper(
     try {
       const { result: commonInitResult, error: commonInitError } = await commonInitPromise;
       if (commonInitResult) {
-        await installFn(context, namespace, timeoutMs);
+        await installLimiter(() => installFn(context, namespace, timeoutMs));
         return successResult();
       } else {
         logger.warn(
