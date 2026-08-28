@@ -111,6 +111,7 @@ describe('DeployPrivateLocationMonitors.mixParamsWithMonitors', () => {
         type: 'browser',
         name: 'SRE-CF-External-Login',
         locations: [{ id: 'pl-1', isServiceManaged: false }],
+        schedule: {},
       },
     } as any;
 
