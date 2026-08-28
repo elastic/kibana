@@ -186,8 +186,7 @@ export class SpacesPlugin
       core,
       this.config,
       this.eventTracker,
-      plugins.cloud,
-      this.isServerless
+      plugins.cloud
     );
 
     return this.spacesApi;

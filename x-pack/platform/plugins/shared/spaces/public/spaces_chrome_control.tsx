@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
+import { useIsServerless } from '@kbn/react-env';
 
 import type { EventTracker } from './analytics';
 import type { ConfigType } from './config';
@@ -23,7 +24,6 @@ interface SpacesChromeControlProps {
   config: ConfigType;
   eventTracker: EventTracker;
   cloud?: CloudStart;
-  isServerless?: boolean;
 }
 
 function SpacesChromeControl({
@@ -32,10 +32,10 @@ function SpacesChromeControl({
   config,
   eventTracker,
   cloud,
-  isServerless,
 }: SpacesChromeControlProps) {
-  const chromeStyle =
-    useObservable(core.chrome.getChromeStyle$(), core.chrome.getChromeStyle()) ?? 'classic';
+  const chromeStyle = useChromeStyle();
+  const isServerless = useIsServerless();
+  const allowSpacePicker = !(isServerless && config.maxSpaces === 1);
 
   switch (chromeStyle) {
     case 'project':
@@ -49,6 +49,9 @@ function SpacesChromeControl({
         />
       );
     case 'classic':
+      if (!allowSpacePicker) {
+        return null;
+      }
       return (
         <SpacesNavControl
           spacesManager={spacesManager}
@@ -69,8 +72,7 @@ export function initSpacesChromeControl(
   core: CoreStart,
   config: ConfigType,
   eventTracker: EventTracker,
-  cloud?: CloudStart,
-  isServerless?: boolean
+  cloud?: CloudStart
 ) {
   if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
     return;
@@ -83,7 +85,6 @@ export function initSpacesChromeControl(
       config={config}
       eventTracker={eventTracker}
       cloud={cloud}
-      isServerless={isServerless}
     />
   );
 }
