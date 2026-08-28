@@ -8,5 +8,6 @@
 import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
-  testDir: './tests',
+  testDir: './parallel_tests',
+  workers: 2,
 });

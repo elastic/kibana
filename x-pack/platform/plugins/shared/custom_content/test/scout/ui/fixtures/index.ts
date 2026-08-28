@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import type {
+  PageObjects,
+  ScoutPage,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+} from '@kbn/scout';
+import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { CustomContentPanelPage } from './page_objects';
 
-export interface CustomContentTestFixtures extends ScoutTestFixtures {
+export interface CustomContentTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
     customContentPanel: CustomContentPanelPage;
   };
 }
 
-export const test = baseTest.extend<CustomContentTestFixtures, ScoutWorkerFixtures>({
+export const spaceTest = spaceBaseTest.extend<
+  CustomContentTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
   pageObjects: async (
     {
       pageObjects,
