@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard } from '@elastic/eui';
 import {
@@ -429,6 +429,37 @@ describe('JsonTreeViewer', () => {
       expect(actions.getByTestId(copyTestId('message'))).toBeInTheDocument();
       expect(actions.getByTestId('treeFilterFor-message')).toBeInTheDocument();
       expect(actions.getByTestId('treeFilterOut-message')).toBeInTheDocument();
+    });
+
+    it('mounts a leaf row’s actions only while hovered, following the pointer', async () => {
+      // `a` is the default-active row; `b`/`c` are not, so their actions stay out of the DOM until
+      // hovered — that's what keeps focus-trap/tabbable scans cheap on large trees.
+      render(
+        <JsonTreeViewer
+          json={{ a: 1, b: 2, c: 3 }}
+          getLeafActions={twoActions(jest.fn(), jest.fn())}
+        />
+      );
+      expect(screen.queryByTestId(copyTestId('b'))).not.toBeInTheDocument();
+      expect(screen.queryByTestId(copyTestId('c'))).not.toBeInTheDocument();
+
+      await userEvent.hover(screen.getByTestId(rowTestId('b')));
+      expect(screen.getByTestId(copyTestId('b'))).toBeInTheDocument();
+      expect(screen.getByTestId('treeFilterFor-b')).toBeInTheDocument();
+
+      // Moving the pointer to another row unmounts the previous row's actions.
+      await userEvent.hover(screen.getByTestId(rowTestId('c')));
+      expect(screen.queryByTestId(copyTestId('b'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(copyTestId('c'))).toBeInTheDocument();
+    });
+
+    it('mounts a row’s actions when it becomes the focused row (keyboard)', () => {
+      render(<JsonTreeViewer json={{ a: 1, b: 2 }} />);
+      expect(screen.queryByTestId(copyTestId('b'))).not.toBeInTheDocument();
+
+      // Focusing the row marks it active (roving tabindex); act() flushes that state update.
+      act(() => screen.getByTestId(rowTestId('b')).focus());
+      expect(screen.getByTestId(copyTestId('b'))).toBeInTheDocument();
     });
 
     it('invokes an action onClick when the button is clicked', async () => {

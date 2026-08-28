@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo, type ReactNode } from 'react';
+import React, { memo, useCallback, useMemo, useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from '@elastic/eui';
 import {
@@ -76,6 +76,10 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   defaultRenderedNodes = 0,
 }: JsonTreeViewerProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
+
+  // Which row the pointer is over: its trailing action buttons mount only while active or hovered, so
+  // the tree doesn't fill the document with focusable elements (see NodeRowView).
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const nodes = useMemo(() => buildNodes(json), [json]);
 
@@ -175,7 +179,11 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
         {extraHeaderContent && <EuiFlexItem grow={false}>{extraHeaderContent}</EuiFlexItem>}
       </EuiFlexGroup>
 
-      <div css={[styles.wrapper, wrapLines ? styles.wrap : styles.noWrap]}>
+      {/* Clearing hover on the wrapper (not the role="tree" element) keeps the tree non-focusable. */}
+      <div
+        css={[styles.wrapper, wrapLines ? styles.wrap : styles.noWrap]}
+        onMouseLeave={() => setHoveredId(null)}
+      >
         <div
           role="tree"
           aria-label={i18n.translate('unifiedDataTable.jsonTreeViewer.treeAriaLabel', {
@@ -209,6 +217,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                   key={row.node.id}
                   row={row}
                   isActive={row.node.id === activeRowId}
+                  isHovered={row.node.id === hoveredId}
+                  onHover={setHoveredId}
                   rowRef={registerRow(row.node.id)}
                   onActivate={(event) => {
                     if (!row.hasChildren) return;

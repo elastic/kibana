@@ -61,12 +61,20 @@ interface FocusableRowProps {
 interface NodeRowViewProps extends FocusableRowProps {
   row: NodeRow;
   onActivate: (event: React.MouseEvent) => void;
+  // The row's trailing action buttons (copy, filter) mount only while the row is active or hovered,
+  // so a large tree doesn't flood the document with focusable elements (which makes focus-trap /
+  // tabbable scans O(elements) and dominates mount/teardown). Keyboard access is preserved: focusing
+  // a row makes it active, which mounts its actions before Arrow-Right can reach them.
+  isHovered: boolean;
+  onHover: (id: string | null) => void;
   formatValue?: FormatValue;
   getLeafActions?: GetLeafActions;
 }
 export const NodeRowView = memo(function NodeRowView({
   row,
   isActive,
+  isHovered,
+  onHover,
   rowRef,
   onActivate,
   onFocus,
@@ -91,6 +99,7 @@ export const NodeRowView = memo(function NodeRowView({
       style={{ paddingInlineStart: rowPaddingInlineStart(euiTheme, row.depth) }}
       onClick={onActivate}
       onFocus={onFocus}
+      onMouseEnter={() => onHover(node.id)}
       onKeyDown={onKeyDown}
       data-test-subj={`jsonTreeViewerRow-${node.id}`}
     >
@@ -105,7 +114,12 @@ export const NodeRowView = memo(function NodeRowView({
       ) : (
         <span css={styles.caret} aria-hidden />
       )}
-      <NodeLabel row={row} formatValue={formatValue} getLeafActions={getLeafActions} />
+      <NodeLabel
+        row={row}
+        showActions={isActive || isHovered}
+        formatValue={formatValue}
+        getLeafActions={getLeafActions}
+      />
     </div>
   );
 });
@@ -426,10 +440,12 @@ const RowActionButton = memo(function RowActionButton({ action }: { action: Json
 // The body of a node row: key prefix + value/brackets + comma.
 const NodeLabel = memo(function NodeLabel({
   row,
+  showActions,
   formatValue,
   getLeafActions,
 }: {
   row: NodeRow;
+  showActions: boolean;
   formatValue?: FormatValue;
   getLeafActions?: GetLeafActions;
 }) {
@@ -437,8 +453,10 @@ const NodeLabel = memo(function NodeLabel({
   const { node, isExpanded, hasChildren, trailingComma } = row;
 
   if (node.kind === 'leaf') {
-    const leafActions =
-      getLeafActions?.({ value: node.value, path: node.path, isArrayItem: node.isArrayItem }) ?? [];
+    const leafActions = showActions
+      ? getLeafActions?.({ value: node.value, path: node.path, isArrayItem: node.isArrayItem }) ??
+        []
+      : [];
     return (
       <span css={styles.label}>
         <span className={`${LABEL_TEXT_CLASS} ${LEAF_LABEL_CLASS}`} css={styles.labelText}>
@@ -450,12 +468,14 @@ const NodeLabel = memo(function NodeLabel({
           />
           {trailingComma && <Comma />}
         </span>
-        <span className="jsonTreeViewerRowActions" css={styles.actions}>
-          <ValueCopyButton nodeId={node.id} value={node.value} />
-          {leafActions.map((action) => (
-            <RowActionButton key={action.id} action={action} />
-          ))}
-        </span>
+        {showActions && (
+          <span className="jsonTreeViewerRowActions" css={styles.actions}>
+            <ValueCopyButton nodeId={node.id} value={node.value} />
+            {leafActions.map((action) => (
+              <RowActionButton key={action.id} action={action} />
+            ))}
+          </span>
+        )}
       </span>
     );
   }
@@ -485,7 +505,7 @@ const NodeLabel = memo(function NodeLabel({
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{open}</span>
         </span>
-        <SubtreeCopyButton node={node} />
+        {showActions && <SubtreeCopyButton node={node} />}
       </span>
     );
   }
@@ -628,6 +648,12 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     paddingInlineEnd: euiTheme.size.xs,
     borderRadius: euiTheme.border.radius.small,
     cursor: 'default',
+    // Skip layout/paint of off-screen rows so large documents (e.g. indices-stats) stay cheap
+    // without giving each cell its own scrollbar. Rows stay in the DOM, so keyboard navigation,
+    // find-in-page, and assistive tech still reach them; `auto` remembers each row's real height, so
+    // the intrinsic size is only an estimate until a row has been shown once.
+    contentVisibility: 'auto',
+    containIntrinsicBlockSize: `auto ${euiTheme.size.base}`,
     '&:hover': {
       backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
     },
@@ -651,6 +677,9 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     alignItems: 'center',
     gap: euiTheme.size.xs,
     minHeight: euiTheme.size.base,
+    // See `row`: skip off-screen layout/paint while keeping the closing bracket in the DOM.
+    contentVisibility: 'auto',
+    containIntrinsicBlockSize: `auto ${euiTheme.size.base}`,
   }),
   caret: css({
     flexShrink: 0,

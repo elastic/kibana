@@ -216,6 +216,8 @@ describe('SourceDocumentJsonMode', () => {
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
 
+      // Filter buttons mount on hover, so hover the target element's row before clicking its action.
+      await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
       await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 200, '+');
     });
@@ -229,6 +231,8 @@ describe('SourceDocumentJsonMode', () => {
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
 
+      // Filter buttons mount on hover, so hover the target element's row before clicking its action.
+      await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
       await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), [200], '+');
     });
