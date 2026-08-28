@@ -58,6 +58,7 @@ export function validateParallelFanOut(
       results.push({
         id: `parallel-fan-out-${step.stepId}-${startPos.line}-${startPos.col}`,
         owner: 'parallel-fan-out-validation',
+        ruleId: 'unboundedParallelFanOut',
         severity: 'warning',
         message:
           `Parallel step "${step.stepId}" has no "concurrency" limit. ` +
@@ -93,6 +94,7 @@ export function validateParallelFanOut(
         results.push({
           id: `parallel-fan-out-size-${step.stepId}-${startPos.line}-${startPos.col}`,
           owner: 'parallel-fan-out-validation',
+          ruleId: 'parallelFanOutExceedsLimit',
           severity: 'warning',
           message:
             `Parallel step "${step.stepId}" fans out over ${foreachValue.length} items, ` +

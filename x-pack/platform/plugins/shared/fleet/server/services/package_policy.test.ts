@@ -6576,6 +6576,71 @@ describe('Package policy service', () => {
       expect(mockAgentPolicyService.delete).not.toHaveBeenCalled();
     });
 
+    it('should call agentPolicyService.getByIds with ignoreMissing:true and skip missing policy ids from revision bump', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const packagePolicyMock = createPackagePolicyMock();
+      const idToDelete = packagePolicyMock.id;
+      const liveAgentPolicyId = 'live-agent-policy-id';
+      const missingAgentPolicyId = 'missing-agent-policy-id';
+
+      // Package policy is attached to two agent policies: one live, one orphaned (missing SO)
+      const packagePolicyWithTwoParents = {
+        ...packagePolicyMock,
+        policy_ids: [liveAgentPolicyId, missingAgentPolicyId],
+      };
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: idToDelete,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyWithTwoParents,
+          },
+        ],
+      });
+
+      // The hosted-policy check iterates uniqueAgentPolicyIds; both calls return a regular policy
+      mockAgentPolicyService.get
+        .mockResolvedValueOnce({ id: liveAgentPolicyId, is_managed: false } as any)
+        .mockResolvedValueOnce({ id: missingAgentPolicyId, is_managed: false } as any);
+
+      // getByIds: live policy resolves, missing one returns null (ignoreMissing)
+      mockAgentPolicyService.getByIds.mockResolvedValueOnce([
+        { id: liveAgentPolicyId, is_managed: false },
+      ] as any);
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(mockAgentPolicyService.getByIds).toHaveBeenCalledWith(
+        soClient,
+        expect.arrayContaining([liveAgentPolicyId, missingAgentPolicyId]),
+        { ignoreMissing: true }
+      );
+      // Only the live policy id is passed to bumpRevision (the missing one was filtered by ignoreMissing)
+      expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        liveAgentPolicyId,
+        expect.anything()
+      );
+      expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        missingAgentPolicyId,
+        expect.anything()
+      );
+    });
+
     it('should NOT call agentPolicyService.delete() for non-agentless agent policies', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
