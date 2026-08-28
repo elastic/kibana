@@ -9,6 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
@@ -254,69 +255,48 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins,
   experimentalFeatures: ExperimentalFeatures
 ): Promise<LinkItem> => {
-  const {
-    endpointExceptionsMovedUnderManagement,
-    trustedDevices: trustedDevicesEnabled,
-    customYaraSignaturesEnabled,
-  } = experimentalFeatures;
-
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
   const isServerless = KibanaServices.getBuildFlavor() === 'serverless';
 
-  const {
-    canReadActionsLogManagement,
-    canAccessHostIsolationExceptions,
-    canReadHostIsolationExceptions,
-    canReadEndpointList,
-    canReadEndpointExceptions,
-    canReadTrustedApplications,
-    canReadTrustedDevices,
-    canReadEventFilters,
-    canReadBlocklist,
-    canReadCustomYaraSignatures,
-    canReadPolicyManagement,
-    canReadScriptsLibrary,
-  } =
+  const endpointAuthz =
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles, isServerless)
       : getEndpointAuthzInitialState();
 
   const showHostIsolationExceptions =
-    canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
+    endpointAuthz.canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
     // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
     // however, in this situation we allow to access only when there is data, otherwise the link won't be accessible.
-    (canReadHostIsolationExceptions &&
+    (endpointAuthz.canReadHostIsolationExceptions &&
       (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
 
   const linksToExclude: SecurityPageName[] = [];
 
-  if (!canReadEndpointList) {
+  if (!endpointAuthz.canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);
   }
 
-  if (!canReadPolicyManagement) {
+  if (!endpointAuthz.canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
     linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
-  const canReadAnyArtifact =
-    (endpointExceptionsMovedUnderManagement && canReadEndpointExceptions) ||
-    canReadTrustedApplications ||
-    (trustedDevicesEnabled && canReadTrustedDevices) ||
-    canReadEventFilters ||
-    showHostIsolationExceptions ||
-    canReadBlocklist ||
-    (customYaraSignaturesEnabled && canReadCustomYaraSignatures);
+  const canReadAnyArtifact = getCanReadAnyArtifact(
+    endpointAuthz,
+    experimentalFeatures,
+    showHostIsolationExceptions
+  );
+
   if (!canReadAnyArtifact) {
     linksToExclude.push(SecurityPageName.artifacts);
   }
 
-  if (!canReadActionsLogManagement) {
+  if (!endpointAuthz.canReadActionsLogManagement) {
     linksToExclude.push(SecurityPageName.responseActionsHistory);
   }
 
-  if (!canReadScriptsLibrary) {
+  if (!endpointAuthz.canReadScriptsLibrary) {
     linksToExclude.push(SecurityPageName.scriptLibrary);
   }
 
@@ -324,15 +304,7 @@ export const getManagementFilteredLinks = async (
 
   const artifactsPath = canReadAnyArtifact
     ? getFirstAllowedArtifactPath(
-        {
-          canReadEndpointExceptions,
-          canReadTrustedApplications,
-          canReadTrustedDevices,
-          canReadEventFilters,
-          showHostIsolationExceptions,
-          canReadBlocklist,
-          canReadCustomYaraSignatures,
-        },
+        { ...endpointAuthz, showHostIsolationExceptions },
         experimentalFeatures
       )
     : undefined;
@@ -348,4 +320,28 @@ export const getManagementFilteredLinks = async (
     ...filtered,
     links: linksWithArtifactsPath,
   };
+};
+
+const getCanReadAnyArtifact = (
+  authz: EndpointAuthz,
+  experimental: ExperimentalFeatures,
+  showHostIsolationExceptions: boolean
+): boolean => {
+  const showTrustedDevices = experimental.trustedDevices && authz.canReadTrustedDevices;
+
+  const showCustomYaraSignatures =
+    experimental.customYaraSignaturesEnabled && authz.canReadCustomYaraSignatures;
+
+  const showEndpointExceptions =
+    experimental.endpointExceptionsMovedUnderManagement && authz.canReadEndpointExceptions;
+
+  return (
+    authz.canReadTrustedApplications ||
+    authz.canReadEventFilters ||
+    authz.canReadBlocklist ||
+    showHostIsolationExceptions ||
+    showTrustedDevices ||
+    showEndpointExceptions ||
+    showCustomYaraSignatures
+  );
 };
