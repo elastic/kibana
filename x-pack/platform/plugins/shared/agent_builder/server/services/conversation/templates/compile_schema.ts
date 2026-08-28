@@ -71,10 +71,9 @@ const buildSchema = (def: ConversationTemplateFieldDefinition): z.ZodType => {
     }
 
     case 'DATE': {
-      return z.string().refine(
-        (v) => ISO_DATE_RE.test(v) && !Number.isNaN(Date.parse(v)),
-        { message: 'Not a valid ISO 8601 date' }
-      );
+      return z.string().refine((v) => ISO_DATE_RE.test(v) && !Number.isNaN(Date.parse(v)), {
+        message: 'Not a valid ISO 8601 date',
+      });
     }
 
     case 'TOGGLE': {

@@ -119,7 +119,13 @@ export const createSetConversationMetadataTool = ({
     const serialized = Object.fromEntries(
       Object.entries(metadata).map(([k, v]) => {
         const def = template.fields[k];
-        return [k, serializeMetadataValue(v as import('@kbn/agent-builder-common').MetadataFieldValue, def.input_type)];
+        return [
+          k,
+          serializeMetadataValue(
+            v as import('@kbn/agent-builder-common').MetadataFieldValue,
+            def.input_type
+          ),
+        ];
       })
     );
 

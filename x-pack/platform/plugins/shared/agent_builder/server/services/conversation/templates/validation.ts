@@ -57,19 +57,25 @@ const checkType = (
       break;
     case 'OBJECT':
       if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-        return `field "${fieldName}" (OBJECT): expected a plain object, got ${Array.isArray(value) ? 'array' : typeof value}`;
+        return `field "${fieldName}" (OBJECT): expected a plain object, got ${
+          Array.isArray(value) ? 'array' : typeof value
+        }`;
       }
       break;
     case 'OBJECT_ARRAY':
       if (!Array.isArray(value)) {
         return `field "${fieldName}" (OBJECT_ARRAY): expected an array of objects, got ${typeof value}`;
       }
-      if (!value.every((item) => typeof item === 'object' && item !== null && !Array.isArray(item))) {
+      if (
+        !value.every((item) => typeof item === 'object' && item !== null && !Array.isArray(item))
+      ) {
         return `field "${fieldName}" (OBJECT_ARRAY): all array items must be plain objects`;
       }
       break;
     default:
-      return `field "${fieldName}": unsupported input_type "${(def as ConversationTemplateFieldDefinition).input_type}"`;
+      return `field "${fieldName}": unsupported input_type "${
+        (def as ConversationTemplateFieldDefinition).input_type
+      }"`;
   }
   return null;
 };
@@ -80,7 +86,10 @@ const checkRequired = (fieldName: string, value: unknown): string | null => {
     value === '' ||
     (Array.isArray(value) && value.length === 0) ||
     // Empty object {} has no keys and therefore carries no data — treat as unset.
-    (typeof value === 'object' && value !== null && !Array.isArray(value) && Object.keys(value).length === 0);
+    (typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === 0);
   return empty ? `field "${fieldName}": value is required` : null;
 };
 
@@ -217,9 +226,7 @@ export const collectFieldViolations = (
           const pathStr =
             issue.path.length > 0
               ? issue.path
-                  .map((seg) =>
-                    typeof seg === 'number' ? `[${seg}]` : `.${String(seg)}`
-                  )
+                  .map((seg) => (typeof seg === 'number' ? `[${seg}]` : `.${String(seg)}`))
                   .join('')
               : '';
           violations.push(`field "${fieldName}${pathStr}": ${issue.message}`);
@@ -314,21 +321,15 @@ const collectFieldDefinitionErrors = (
     }
 
     if (def.max_length !== undefined && inputType !== 'TEXT' && inputType !== 'TEXT_ARRAY') {
-      errors.push(
-        `field "${qualifiedName}": "max_length" is only valid for TEXT and TEXT_ARRAY`
-      );
+      errors.push(`field "${qualifiedName}": "max_length" is only valid for TEXT and TEXT_ARRAY`);
     }
 
     if ((def.min !== undefined || def.max !== undefined) && inputType !== 'NUMBER') {
-      errors.push(
-        `field "${qualifiedName}": "min"/"max" constraints are only valid for NUMBER`
-      );
+      errors.push(`field "${qualifiedName}": "min"/"max" constraints are only valid for NUMBER`);
     }
 
     if (def.regex !== undefined && inputType !== 'TEXT' && inputType !== 'SELECT') {
-      errors.push(
-        `field "${qualifiedName}": "regex" constraint is only valid for TEXT and SELECT`
-      );
+      errors.push(`field "${qualifiedName}": "regex" constraint is only valid for TEXT and SELECT`);
     }
 
     if (def.options !== undefined && inputType !== 'SELECT') {
@@ -338,9 +339,7 @@ const collectFieldDefinitionErrors = (
     // OBJECT / OBJECT_ARRAY: `properties` is required; all other types must not declare it.
     if (inputType === 'OBJECT' || inputType === 'OBJECT_ARRAY') {
       if (!def.properties || Object.keys(def.properties).length === 0) {
-        errors.push(
-          `field "${qualifiedName}" (${inputType}): must declare non-empty "properties"`
-        );
+        errors.push(`field "${qualifiedName}" (${inputType}): must declare non-empty "properties"`);
       } else {
         // Enforce the maximum nesting depth.
         if (depth >= MAX_OBJECT_DEPTH) {
@@ -357,7 +356,6 @@ const collectFieldDefinitionErrors = (
           errors.push(...nestedErrors);
         }
       }
-
     } else {
       if (def.properties !== undefined) {
         errors.push(
@@ -368,9 +366,7 @@ const collectFieldDefinitionErrors = (
 
     // `max_items` is only valid for OBJECT_ARRAY.
     if (def.max_items !== undefined && inputType !== 'OBJECT_ARRAY') {
-      errors.push(
-        `field "${qualifiedName}": "max_items" is only valid for OBJECT_ARRAY`
-      );
+      errors.push(`field "${qualifiedName}": "max_items" is only valid for OBJECT_ARRAY`);
     }
 
     // Nested `default_value` is not supported for any type declared inside `properties`.

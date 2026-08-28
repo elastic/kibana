@@ -394,7 +394,11 @@ describe('collectFieldViolations — OBJECT', () => {
   });
 
   it('returns a required violation for an empty object when the field is required', () => {
-    const requiredDef = makeDef({ input_type: 'OBJECT', required: true, properties: { x: { input_type: 'TEXT' } } });
+    const requiredDef = makeDef({
+      input_type: 'OBJECT',
+      required: true,
+      properties: { x: { input_type: 'TEXT' } },
+    });
     const violations = collectFieldViolations('obj', requiredDef, {});
     expect(violations.some((v) => v.includes('required'))).toBe(true);
   });
@@ -482,21 +486,27 @@ describe('collectTemplateDefinitionErrors — OBJECT / OBJECT_ARRAY rules', () =
     const template = makeTemplate({
       empty_obj: { input_type: 'OBJECT' },
     });
-    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('properties'))).toBe(true);
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('properties'))).toBe(
+      true
+    );
   });
 
   it('errors when OBJECT has an empty properties map', () => {
     const template = makeTemplate({
       empty_obj: { input_type: 'OBJECT', properties: {} },
     });
-    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('properties'))).toBe(true);
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('properties'))).toBe(
+      true
+    );
   });
 
   it('errors when max_items is declared on a non-OBJECT_ARRAY field', () => {
     const template = makeTemplate({
       score: { input_type: 'NUMBER', max_items: 5 } as ConversationTemplateFieldDefinition,
     });
-    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('max_items'))).toBe(true);
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('max_items'))).toBe(
+      true
+    );
   });
 
   it('errors when properties is declared on a non-OBJECT field', () => {
@@ -506,7 +516,9 @@ describe('collectTemplateDefinitionErrors — OBJECT / OBJECT_ARRAY rules', () =
         properties: { nested: { input_type: 'TEXT' } },
       } as ConversationTemplateFieldDefinition,
     });
-    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('properties'))).toBe(true);
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('properties'))).toBe(
+      true
+    );
   });
 
   it('recurses into nested properties and validates them', () => {
@@ -534,7 +546,9 @@ describe('collectTemplateDefinitionErrors — OBJECT / OBJECT_ARRAY rules', () =
         },
       },
     });
-    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('default_value'))).toBe(true);
+    expect(collectTemplateDefinitionErrors(template).some((e) => e.includes('default_value'))).toBe(
+      true
+    );
   });
 
   it('errors when the new default: switch branch is hit (unknown input_type)', () => {

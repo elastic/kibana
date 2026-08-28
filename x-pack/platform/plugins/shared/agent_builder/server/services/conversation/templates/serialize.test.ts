@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConversationTemplate } from '@kbn/agent-builder-common';
+import type { ConversationTemplate, MetadataObjectValue } from '@kbn/agent-builder-common';
 import {
   serializeMetadataValue,
   deserializeMetadataValue,
@@ -160,7 +160,7 @@ describe('deserializeMetadataValue', () => {
     });
 
     it('round-trips byte-identical — nested types are preserved', () => {
-      const original = [
+      const original: MetadataObjectValue[] = [
         { type: 'ip', value: '1.2.3.4', seen: true },
         { type: 'domain', value: 'evil.example.com', count: 42 },
       ];
@@ -168,9 +168,9 @@ describe('deserializeMetadataValue', () => {
       const recovered = deserializeMetadataValue(stored, 'OBJECT_ARRAY');
       expect(recovered).toEqual(original);
       // Regression guard: booleans and numbers are NOT coerced to strings.
-      const first = (recovered as typeof original)[0];
+      const first = (recovered as MetadataObjectValue[])[0];
       expect(first.seen).toBe(true); // boolean, not "true"
-      const second = (recovered as typeof original)[1];
+      const second = (recovered as MetadataObjectValue[])[1];
       expect(second.count).toBe(42); // number, not "42"
     });
   });
