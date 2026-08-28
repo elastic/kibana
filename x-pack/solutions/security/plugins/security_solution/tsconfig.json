@@ -50,6 +50,7 @@
     "@kbn/osquery-plugin",
     "@kbn/session-view-plugin",
     "@kbn/security-plugin",
+    "@kbn/security-solution-endpoint-common",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
     "@kbn/timelines-plugin",

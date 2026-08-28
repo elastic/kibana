@@ -13,10 +13,9 @@
 // enumerated in this file, and adding a symbol to a source module does not
 // silently widen it.
 //
-// Populated by the lift commits that follow:
-//   - endpoint authz types and privilege key list
+// Still to be lifted by the commits that follow:
 //   - response action command names, agent types and the support map
 //   - route path constants
 //   - per-action request schemas (@kbn/config-schema and generated zod)
 
-export {};
+export type { EndpointAuthz, EndpointAuthzKeyList, EndpointPrivileges } from './src/types/authz';
