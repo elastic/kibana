@@ -99,7 +99,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
 
       display: inline-block;
       container: hoverActionsAnchor / inline-size;
-      border-radius: ${euiTheme.border.radius.medium};
+      border-radius: ${euiTheme.border.radius.control};
       position: relative;
       vertical-align: top;
       width: 100%;

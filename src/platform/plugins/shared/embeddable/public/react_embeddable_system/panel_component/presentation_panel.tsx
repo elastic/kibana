@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef } from 'react';
 
-import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPanel, htmlIdGenerator, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   PublishesFetchOnlyVisible,
@@ -55,7 +55,18 @@ const PresentationPanelChrome = <
     setDragHandle: PresentationPanelHoverActionsProps['setDragHandle'];
   }
 >) => {
+  const { euiTheme } = useEuiTheme();
   const headerId = useMemo(() => htmlIdGenerator()(), []);
+  const panelCss = useMemo(
+    () =>
+      css([
+        styles.embPanel,
+        {
+          borderRadius: euiTheme.border.radius.control,
+        },
+      ]),
+    [euiTheme.border.radius.control]
+  );
 
   const viewModeSubject = useMemo(() => {
     if (apiPublishesViewMode(componentApi)) return componentApi.viewMode$;
@@ -125,7 +136,7 @@ const PresentationPanelChrome = <
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
         {...contentAttrs}
-        css={styles.embPanel}
+        css={panelCss}
       >
         {!hideHeader && (
           <PresentationPanelHeader
