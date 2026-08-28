@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ID as XJSON_LANG_ID } from './languages/xjson/constants';
-import { ID as PAINLESS_LANG_ID } from './languages/painless/constants';
-import { CONSOLE_LANG_ID } from './languages/console/constants';
-import { ID as YAML_LANG_ID } from './languages/yaml/constants';
-import { monaco } from './monaco_imports';
+import { ID as XJSON_LANG_ID } from './definitions/xjson/constants';
+import { ID as PAINLESS_LANG_ID } from './definitions/painless/constants';
+import { CONSOLE_LANG_ID } from './definitions/console/constants';
+import { ID as YAML_LANG_ID } from './definitions/yaml/constants';
+import { monaco } from '../monaco_imports';
 
-export const DEFAULT_WORKER_ID = 'default' as const;
+export const DEFAULT_WORKER_ID = 'editorWorkerService' as const;
 
 const langSpecificWorkerIds = [
   monaco.languages.json.jsonDefaults.languageId as 'json',
@@ -44,5 +44,5 @@ export const getWorkerUrl = (languageId: string): string => {
 
 export const getWorker = (languageId: string): Worker => {
   const workerUrl = getWorkerUrl(languageId);
-  return new Worker(workerUrl, { name: languageId, type: 'module' });
+  return new Worker(workerUrl, { name: languageId, type: 'classic' });
 };
