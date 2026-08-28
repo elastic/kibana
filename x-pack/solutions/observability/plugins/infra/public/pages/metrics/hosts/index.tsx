@@ -44,6 +44,13 @@ export const HostsPage = (): React.ReactElement => {
   return (
     <div className={APP_WRAPPER_CLASS}>
       <InfraPageTemplate
+        hasDataOverride={!showOnboarding}
+        header={
+          <>
+            <AppHeader title={hostsTitle} menu={menu} spacing="standard" />
+            {flyouts}
+          </>
+        }
         pageSectionProps={{
           paddingSize: 'none',
           contentProps: {
@@ -59,8 +66,6 @@ export const HostsPage = (): React.ReactElement => {
           },
         }}
       >
-        <AppHeader title={hostsTitle} menu={menu} spacing="standard" />
-        {flyouts}
         {showOnboarding ? (
           <HostsOnboardingPage />
         ) : (

@@ -12,14 +12,18 @@ import { ErrorPage } from './error_page';
 
 interface SourceErrorPageProps {
   errorMessage: string;
+  /** Kept on source-error pages so AppHeader/menu still render. */
+  header?: React.ReactNode;
   retry: () => void;
 }
 
 export const SourceErrorPage: React.FunctionComponent<SourceErrorPageProps> = ({
   errorMessage,
+  header,
   retry,
 }) => (
   <ErrorPage
+    header={header}
     shortMessage={
       <FormattedMessage
         id="xpack.infra.sourceErrorPage.failedToLoadDataSourcesMessage"

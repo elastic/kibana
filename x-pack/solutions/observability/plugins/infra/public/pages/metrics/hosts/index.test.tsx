@@ -13,6 +13,10 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { HostsPage } from '.';
 import { hostsTitle } from '../../../translations';
 
+jest.mock('@kbn/core/public', () => ({
+  APP_WRAPPER_CLASS: 'kbnAppWrapper',
+}));
+
 type MockFetchStatus = 'loading' | 'success' | 'failure' | 'not_initiated' | 'pending';
 
 const mockFetcherState: { hasData: boolean; status: MockFetchStatus } = {
@@ -63,10 +67,26 @@ jest.mock('@kbn/shared-ux-page-no-data', () => ({
   NoDataPage: () => <div data-test-subj="kbnNoDataPage" />,
 }));
 
+let lastInfraPageTemplateProps: { hasDataOverride?: boolean } = {};
+
 jest.mock('../../../components/shared/templates/infra_page_template', () => ({
-  InfraPageTemplate: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="infraPageTemplate">{children}</div>
-  ),
+  InfraPageTemplate: ({
+    children,
+    hasDataOverride,
+    header,
+  }: {
+    children: React.ReactNode;
+    hasDataOverride?: boolean;
+    header?: React.ReactNode;
+  }) => {
+    lastInfraPageTemplateProps = { hasDataOverride };
+    return (
+      <div data-test-subj="infraPageTemplate">
+        {header}
+        {children}
+      </div>
+    );
+  },
 }));
 
 jest.mock('./components/hosts_container', () => ({
@@ -105,6 +125,7 @@ describe('HostsPage', () => {
   beforeEach(() => {
     mockFetcherState.hasData = true;
     mockFetcherState.status = 'success';
+    lastInfraPageTemplateProps = {};
   });
 
   it('renders AppHeader with the hosts title and no back control when host data exists', async () => {
@@ -115,6 +136,7 @@ describe('HostsPage', () => {
     expect(screen.getByTestId('hostsSearchBar')).toBeInTheDocument();
     expect(screen.getByTestId('hostsContainer')).toBeInTheDocument();
     expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 
   it('keeps AppHeader and shows onboarding instead of search and table when there is no host data', async () => {
@@ -127,6 +149,7 @@ describe('HostsPage', () => {
     expect(screen.getByTestId('kbnNoDataPage')).toBeInTheDocument();
     expect(screen.queryByTestId('hostsSearchBar')).not.toBeInTheDocument();
     expect(screen.queryByTestId('hostsContainer')).not.toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(false);
   });
 
   it('does not show onboarding while host data is loading', async () => {
@@ -139,5 +162,6 @@ describe('HostsPage', () => {
     expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
     expect(screen.getByTestId('hostsSearchBar')).toBeInTheDocument();
     expect(screen.getByTestId('hostsContainer')).toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
   });
 });
