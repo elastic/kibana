@@ -114,7 +114,7 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
     );
   });
 
-  it('renders the loading title fallback while data is loading', () => {
+  it('renders a skeleton title while data is loading', () => {
     runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
     fetchEpisodeActionsMock.mockImplementation(() => new Promise(() => {}));
     fetchGroupActionsMock.mockImplementation(() => new Promise(() => {}));
@@ -126,7 +126,8 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
       { wrapper }
     );
 
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('Loading…');
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitleSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeDetailsHeaderTitle')).not.toBeInTheDocument();
   });
 
   it('renders the episode fallback title when the rule fetch returns 404', async () => {

@@ -37,6 +37,7 @@ import {
   type GetEvaluationDatasetsResponse,
 } from '@kbn/evals-common';
 import type { CoreStart } from '@kbn/core/public';
+import { PLUGIN_ID } from '../../../common';
 import type { AddToDatasetFlyoutOpenOptions } from '../../types';
 import { getErrorMessage } from '../../utils/get_error_message';
 import { getSharedNoticeCopy, isSharedAssignment } from '../dataset_spaces';
@@ -439,8 +440,8 @@ export function AddToDatasetFlyout({
             primary: {
               children: VIEW_DATASET_BUTTON,
               onClick: () => {
-                coreStart.application.navigateToApp('management', {
-                  path: `ai/evals/datasets/${datasetId}`,
+                coreStart.application.navigateToApp(PLUGIN_ID, {
+                  path: `datasets/${datasetId}`,
                 });
                 coreStart.notifications.toasts.remove(toast);
               },
