@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { InvestigationConflictError } from './investigation_conflict_error';
 export { InvestigationNotFoundError } from './investigation_not_found_error';
 export { InvestigationSubjectMissingError } from './investigation_subject_missing_error';
 export { InvestigationUnavailableError } from './investigation_unavailable_error';

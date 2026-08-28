@@ -108,6 +108,42 @@ apiTest.describe(
     });
 
     apiTest(
+      'returns 409 when updating an investigation that already settled',
+      async ({ apiClient, kbnClient }) => {
+        await seedInvestigation(kbnClient, { id: TEST_ID, status: 'completed' });
+
+        const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
+          status: 'running',
+        });
+        expect(response).toHaveStatusCode(409);
+
+        const so = await kbnClient.savedObjects.get({ type: SO_TYPE, id: TEST_ID });
+        expect(so.attributes.status).toBe('completed');
+      }
+    );
+
+    apiTest(
+      'treats a replay of the same terminal status as an idempotent success',
+      async ({ apiClient, kbnClient }) => {
+        await seedInvestigation(kbnClient, {
+          id: TEST_ID,
+          status: 'completed',
+          summary: 'Original summary.',
+        });
+
+        const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
+          status: 'completed',
+          summary: 'Replayed summary.',
+        });
+        expect(response).toHaveStatusCode(200);
+
+        const so = await kbnClient.savedObjects.get({ type: SO_TYPE, id: TEST_ID });
+        expect(so.attributes.status).toBe('completed');
+        expect(so.attributes.summary).toBe('Original summary.');
+      }
+    );
+
+    apiTest(
       'returns 403 for a user without agentBuilder:write',
       async ({ apiClient, samlAuth }) => {
         const unauthorized = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);

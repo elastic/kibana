@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { badRequest, notFound } from '@hapi/boom';
+import { badRequest, conflict, notFound } from '@hapi/boom';
 import {
+  InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationSubjectMissingError,
 } from '../client/investigations_client';
@@ -17,6 +18,9 @@ export const rethrowInvestigationClientError = (error: unknown): never => {
   }
   if (error instanceof InvestigationSubjectMissingError) {
     throw badRequest(error.message);
+  }
+  if (error instanceof InvestigationConflictError) {
+    throw conflict(error.message);
   }
   throw error;
 };

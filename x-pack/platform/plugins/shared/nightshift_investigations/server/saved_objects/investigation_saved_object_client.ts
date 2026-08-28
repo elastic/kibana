@@ -49,7 +49,7 @@ export interface FindInvestigationsOptions {
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;
-  fields?: string[];
+  fields?: Array<keyof NightshiftInvestigationAttributes>;
 }
 
 export type FindInvestigationsResult = PaginatedResponse<

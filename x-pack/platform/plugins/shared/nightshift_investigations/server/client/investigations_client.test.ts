@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -17,6 +18,7 @@ import type {
 } from '../saved_objects';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
+  InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
@@ -46,13 +48,13 @@ const mockWorkflowsManagement = {
 
 const mockAgentBuilder = {} as unknown as AgentBuilderPluginStart;
 
-const mockInvestigationSoClient = {
+const mockInvestigationSoClient: jest.Mocked<PublicMethodsOf<InvestigationSavedObjectClient>> = {
   get: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   find: jest.fn(),
   findByConcurrencyKey: jest.fn(),
-} as unknown as jest.Mocked<InvestigationSavedObjectClient>;
+};
 
 const mockLogger = {
   info: jest.fn(),
@@ -222,6 +224,18 @@ describe('NightshiftInvestigationsClient.get()', () => {
 
       expect(result.status).toBe('running');
       expect(mockInvestigationSoClient.update).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the SO status when the engine lookup fails', async () => {
+      mockInvestigationSoClient.get.mockResolvedValue(
+        makeSoAttrs({ status: 'running', completed_at: undefined })
+      );
+      mockManagement.getWorkflowExecution.mockRejectedValue(new Error('engine unavailable'));
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.status).toBe('running');
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('engine unavailable'));
     });
 
     it('does not fail if SO update during reconciliation throws', async () => {
@@ -631,6 +645,48 @@ describe('NightshiftInvestigationsClient.start()', () => {
 });
 
 describe('NightshiftInvestigationsClient.update()', () => {
+  beforeEach(() => {
+    mockInvestigationSoClient.get.mockResolvedValue(
+      makeSoAttrs({ status: 'running', completed_at: undefined })
+    );
+  });
+
+  it('throws InvestigationNotFoundError when the investigation does not exist', async () => {
+    mockInvestigationSoClient.get.mockResolvedValue(undefined);
+
+    await expect(makeClient().update('inv-missing', { status: 'completed' })).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    expect(mockInvestigationSoClient.update).not.toHaveBeenCalled();
+  });
+
+  it('is an idempotent no-op when replaying the same terminal status', async () => {
+    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs({ status: 'completed' }));
+
+    await expect(
+      makeClient().update('inv-1', { status: 'completed', summary: 'Replayed.' })
+    ).resolves.toBeUndefined();
+    expect(mockInvestigationSoClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws InvestigationConflictError when moving a settled investigation back to running', async () => {
+    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs({ status: 'completed' }));
+
+    await expect(makeClient().update('inv-1', { status: 'running' })).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(mockInvestigationSoClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws InvestigationConflictError when changing one terminal status to another', async () => {
+    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs({ status: 'cancelled' }));
+
+    await expect(makeClient().update('inv-1', { status: 'failed' })).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(mockInvestigationSoClient.update).not.toHaveBeenCalled();
+  });
+
   it('persists the provided error when status is failed', async () => {
     await makeClient().update('inv-1', {
       status: 'failed',

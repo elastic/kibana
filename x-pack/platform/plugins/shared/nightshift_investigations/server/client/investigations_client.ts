@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -39,11 +40,13 @@ import type {
   NightshiftInvestigationAttributes,
 } from '../saved_objects';
 import {
+  InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
 } from './errors';
 export {
+  InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
@@ -226,7 +229,7 @@ export interface NightshiftInvestigationsClientDeps {
   logger: Logger;
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
-  investigationSoClient: InvestigationSavedObjectClient;
+  investigationSoClient: PublicMethodsOf<InvestigationSavedObjectClient>;
 }
 
 export class NightshiftInvestigationsClient {
@@ -236,7 +239,7 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
-  private readonly investigationSoClient: InvestigationSavedObjectClient;
+  private readonly investigationSoClient: PublicMethodsOf<InvestigationSavedObjectClient>;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -409,7 +412,22 @@ export class NightshiftInvestigationsClient {
   }
 
   async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
+    const existing = await this.investigationSoClient.get(investigationId);
+    if (!existing) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
     const { status, error, ...output } = state;
+
+    if (isTerminalStatus(existing.status)) {
+      // Replaying the same terminal status is an idempotent success — the workflow persist
+      // steps retry when a response is lost. Anything else (a late progress report, a
+      // superseded run's final persist) must not overwrite a settled record.
+      if (status === existing.status) {
+        return;
+      }
+      throw new InvestigationConflictError(investigationId, existing.status);
+    }
 
     if (status === 'failed' && error) {
       this.logger.warn(`Investigation "${investigationId}" failed: ${error}`);
@@ -435,7 +453,12 @@ export class NightshiftInvestigationsClient {
     const response = toInvestigationResponse({ id: investigationId, attrs: soAttrs });
 
     if (soAttrs.status === 'running') {
-      const reconciled = await this.reconcileStaleRunningStatus(investigationId);
+      const reconciled = await this.reconcileStaleRunningStatus(investigationId).catch((err) => {
+        this.logger.warn(
+          `Failed to reconcile status for investigation "${investigationId}": ${err.message}`
+        );
+        return undefined;
+      });
       if (reconciled) {
         response.status = reconciled.status;
         response.completed_at = reconciled.completed_at;
