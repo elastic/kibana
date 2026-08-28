@@ -12,19 +12,24 @@ import { FIND_PREBUILT_RULES_INLINE_TOOL_ID } from './find_prebuilt_rules_tool';
 import { GET_USER_DATA_INVENTORY_INLINE_TOOL_ID } from './get_user_data_inventory_tool';
 import { GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID } from './get_installable_catalog_overview_tool';
 import { GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID } from './get_installed_rules_mitre_coverage_tool';
+import { FIND_PREBUILT_RULES_SEMANTIC_TOOL_ID } from '../../sml/find_prebuilt_rules_semantic_tool';
 
 const mockMl = {} as unknown as Parameters<typeof createRecommendPrebuiltRulesSkill>[0]['ml'];
 
 const createDeps = () => {
   const { mockCore, mockLogger, mockEsClient } = createToolTestMocks();
   setupMockCoreStartServices(mockCore, mockEsClient);
-  return { getStartServices: mockCore.getStartServices, logger: mockLogger, ml: mockMl };
+  return {
+    getStartServices: mockCore.getStartServices,
+    logger: mockLogger,
+    ml: mockMl,
+    semanticSearchEnabled: false,
+  };
 };
 
 describe('createRecommendPrebuiltRulesSkill', () => {
   it('has stable metadata', () => {
-    const { getStartServices, logger, ml } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
+    const skill = createRecommendPrebuiltRulesSkill(createDeps());
     expect(skill.id).toBe('recommend-prebuilt-rules');
     expect(skill.name).toBe('recommend-prebuilt-rules');
     expect(skill.basePath).toBe('skills/security/rules');
@@ -32,14 +37,12 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('uses an allow-listed built-in skill id', () => {
-    const { getStartServices, logger, ml } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
+    const skill = createRecommendPrebuiltRulesSkill(createDeps());
     expect(isAllowedBuiltinSkill(skill.id)).toBe(true);
   });
 
   it('wires the four inline tools', async () => {
-    const { getStartServices, logger, ml } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
+    const skill = createRecommendPrebuiltRulesSkill(createDeps());
     const inlineTools = await skill.getInlineTools!();
     const ids = inlineTools.map((tool) => tool.id);
 
@@ -54,9 +57,20 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     );
   });
 
+  it('adds the semantic tool when semantic prebuilt-rule search is enabled', async () => {
+    const deps = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({
+      ...deps,
+      semanticSearchEnabled: true,
+    });
+    const inlineTools = await skill.getInlineTools!();
+
+    expect(inlineTools).toHaveLength(5);
+    expect(inlineTools.map((tool) => tool.id)).toContain(FIND_PREBUILT_RULES_SEMANTIC_TOOL_ID);
+  });
+
   it('content names all four tools', () => {
-    const { getStartServices, logger, ml } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
+    const skill = createRecommendPrebuiltRulesSkill(createDeps());
     expect(skill.content).toContain(FIND_PREBUILT_RULES_INLINE_TOOL_ID);
     expect(skill.content).toContain(GET_USER_DATA_INVENTORY_INLINE_TOOL_ID);
     expect(skill.content).toContain(GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID);
@@ -64,8 +78,7 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('content includes the canonical 15 MITRE tactics', () => {
-    const { getStartServices, logger, ml } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
+    const skill = createRecommendPrebuiltRulesSkill(createDeps());
     const tacticIds = [
       'TA0001',
       'TA0002',

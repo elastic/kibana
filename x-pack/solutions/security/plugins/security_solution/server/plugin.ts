@@ -15,8 +15,9 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import { ECS_COMPONENT_TEMPLATE_NAME, RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
@@ -27,6 +28,9 @@ import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { createDetectionRuleSmlType } from './agent_builder/sml/detection_rule_sml_type';
+import { createPrebuiltRuleSmlType } from './agent_builder/sml/prebuilt_rule_sml_type';
+import { PREBUILT_RULE_ASSETS_SO_TYPE } from './lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_type';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
@@ -306,6 +310,50 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
+
+    // Makes detection rules semantically searchable. SML owns the `semantic_text` index,
+    // the inference endpoint, and the crawl schedule; this only declares what to index.
+    // Optional dependency: without SML the rules stay lexical-search only.
+    if (plugins.agentBuilderSml) {
+      plugins.agentBuilderSml.registerType(
+        createDetectionRuleSmlType({
+          getInternalRepository: async () => {
+            const [coreStart] = await core.getStartServices();
+            return coreStart.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
+          },
+        })
+      );
+      if (experimentalFeatures.semanticPrebuiltRuleSearchEnabled) {
+        // The installable catalog is a second, separate question from the installed rules,
+        // so it is a second type rather than a branch inside the first.
+        plugins.agentBuilderSml.registerType(
+          createPrebuiltRuleSmlType({
+            // Keep production scans cheap, but make local semantic-search work visible on the
+            // next minute instead of forcing every developer to wait for the hourly cadence.
+            fetchFrequency: this.pluginContext.env.mode.dev ? '1m' : '60m',
+            getSavedObjectsClient: async () => {
+              const [coreStart] = await core.getStartServices();
+              return coreStart.savedObjects.createInternalRepository([
+                PREBUILT_RULE_ASSETS_SO_TYPE,
+              ]) as unknown as SavedObjectsClientContract;
+            },
+            // The crawler is a background task with no request, so spaces are read straight
+            // from their saved objects rather than through the request-scoped spaces client.
+            getSpaceIds: async () => {
+              const [coreStart] = await core.getStartServices();
+              const repository = coreStart.savedObjects.createInternalRepository(['space']);
+              const { saved_objects: spaces } = await repository.find<unknown>({
+                type: 'space',
+                perPage: 1000,
+                fields: [],
+              });
+              const ids = spaces.map((space) => space.id);
+              return ids.length > 0 ? ids : [DEFAULT_SPACE_ID];
+            },
+          })
+        );
+      }
+    }
 
     registerSkills({
       agentBuilder,

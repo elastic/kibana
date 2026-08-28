@@ -85,6 +85,7 @@
       "automaticImport",
       "serverless",
       "agentBuilder",
+      "agentBuilderSml",
       "llmTasks",
       "cps",
       "searchInferenceEndpoints",

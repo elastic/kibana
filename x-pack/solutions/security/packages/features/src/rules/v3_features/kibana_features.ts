@@ -35,6 +35,7 @@ import {
   SERVER_APP_ID,
   USERS_API_READ,
   RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
+  RULES_AI_INDEX_TYPES,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -78,6 +79,7 @@ export const getRulesV3BaseKibanaFeature = (
   },
   privileges: {
     all: {
+      aiIndex: { read: [...RULES_AI_INDEX_TYPES] },
       replacedBy: {
         default: [{ feature: RULES_FEATURE_ID_V4, privileges: ['all'] }],
         minimal: [
@@ -125,6 +127,7 @@ export const getRulesV3BaseKibanaFeature = (
       ],
     },
     read: {
+      aiIndex: { read: [...RULES_AI_INDEX_TYPES] },
       replacedBy: {
         default: [{ feature: RULES_FEATURE_ID_V4, privileges: ['read'] }],
         minimal: [

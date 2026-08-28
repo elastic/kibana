@@ -290,6 +290,12 @@ export const allowedExperimentalValues = Object.freeze({
   dexAiSkillRecommendPrebuiltRules: true,
 
   /**
+   * Enables semantic search over the installable prebuilt-rule catalog in Agent Builder.
+   * When disabled, recommend-prebuilt-rules remains available with lexical search only.
+   */
+  semanticPrebuiltRuleSearchEnabled: false,
+
+  /**
    * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
    * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
    * Turning this flag on unregisters that advanced setting, forcing the
