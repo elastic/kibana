@@ -6,7 +6,10 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getChartTypeConfigPromptContent } from './chart_type_guidance';
+import {
+  getChartTypeConfigPromptContent,
+  getChartTypeSelectionPromptContent,
+} from './chart_type_guidance';
 
 describe('getChartTypeConfigPromptContent', () => {
   it('tells the xy author to use a gradient fill for area series', () => {
@@ -14,5 +17,20 @@ describe('getChartTypeConfigPromptContent', () => {
 
     expect(prompt).toContain('CHART-SPECIFIC RULES FOR XY');
     expect(prompt).toContain('styling.areas.fill: "gradient"');
+  });
+
+  it('does not give the tagcloud author caption rules after selection', () => {
+    expect(getChartTypeConfigPromptContent(SupportedChartType.Tagcloud)).toBe('');
+  });
+});
+
+describe('getChartTypeSelectionPromptContent', () => {
+  it('tells the agent to choose tagcloud only for short terms', () => {
+    const prompt = getChartTypeSelectionPromptContent();
+
+    expect(prompt).toContain('tag_cloud:');
+    expect(prompt).toContain('only when the terms are short strings');
+    expect(prompt).toContain('Do not use for long text');
+    expect(prompt).not.toContain('top error messages');
   });
 });

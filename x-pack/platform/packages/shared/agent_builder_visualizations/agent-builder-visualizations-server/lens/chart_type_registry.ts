@@ -178,7 +178,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     schema: tagcloudConfigSchemaESQL,
     prompt: {
       selection:
-        'Displays terms sized by frequency or value. Choose for top terms, keywords, or text-based aggregations (e.g. "most common tags", "top error messages").',
+        'Displays terms sized by frequency or value. Choose only when the terms are short strings (tags, status codes, country codes, browsers). Do not use for long text such as error messages, URLs, or log lines — use a table instead.',
     },
   },
   [SupportedChartType.RegionMap]: {
