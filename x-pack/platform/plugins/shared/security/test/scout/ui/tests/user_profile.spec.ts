@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { type EsClient, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 
-const TEST_USERNAME = 'test_user_profile';
+const TEST_USERNAME = `test_user_profile-${randomUUID()}`;
 const TEST_PASSWORD = 'changeme';
 const UPDATED_PASSWORD = 'changeme2';
 
@@ -105,14 +107,20 @@ test.describe('User Profile Page', { tag: tags.stateful.classic }, () => {
 
     await expect(userProfile.themeKeypadMenu).toBeVisible();
 
-    await userProfile.changeTheme('dark');
-    await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
+    await test.step('change to dark', async () => {
+      await userProfile.changeTheme('dark');
+      await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
+    });
 
-    await userProfile.changeTheme('light');
-    await expect.poll(() => userProfile.getThemeTag()).toBe('borealislight');
+    await test.step('change to light', async () => {
+      await userProfile.changeTheme('light');
+      await expect.poll(() => userProfile.getThemeTag()).toBe('borealislight');
+    });
 
-    await userProfile.changeTheme('space_default');
-    await expect.poll(() => userProfile.getThemeTag()).toBe('borealislight');
+    await test.step('change to space default', async () => {
+      await userProfile.changeTheme('space_default');
+      await expect.poll(() => userProfile.getThemeTag()).toBe('borealislight');
+    });
   });
 
   test('theme: should change theme based on the User Profile Theme control with default Adv. Settings value set to dark', async ({
@@ -121,18 +129,25 @@ test.describe('User Profile Page', { tag: tags.stateful.classic }, () => {
   }) => {
     const { userProfile } = pageObjects;
 
-    await uiSettings.set({ 'theme:darkMode': 'enabled' });
-    await userProfile.goto();
+    await test.step('enable dark advanced setting', async () => {
+      await uiSettings.set({ 'theme:darkMode': 'enabled' });
+      await userProfile.goto();
+      await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
+    });
 
-    await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
+    await test.step('change to light', async () => {
+      await userProfile.changeTheme('light');
+      await expect.poll(() => userProfile.getThemeTag()).toBe('borealislight');
+    });
 
-    await userProfile.changeTheme('light');
-    await expect.poll(() => userProfile.getThemeTag()).toBe('borealislight');
+    await test.step('change to dark', async () => {
+      await userProfile.changeTheme('dark');
+      await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
+    });
 
-    await userProfile.changeTheme('dark');
-    await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
-
-    await userProfile.changeTheme('space_default');
-    await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
+    await test.step('change to space default', async () => {
+      await userProfile.changeTheme('space_default');
+      await expect.poll(() => userProfile.getThemeTag()).toBe('borealisdark');
+    });
   });
 });
