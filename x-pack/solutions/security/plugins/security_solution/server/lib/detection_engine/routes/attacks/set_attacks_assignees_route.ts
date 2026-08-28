@@ -31,6 +31,7 @@ import {
   verifyAlertIdsInIndex,
   fetchAllAlertIdIndexWithSource,
   computeActualDelta,
+  wouldChange,
 } from '../common/operations/prefetch_previous_statuses';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
@@ -141,23 +142,14 @@ export const setAttacksAssigneesRoute = (
                   verifiedAttackIds = Array.from(
                     new Set(
                       attackDocs.hits.hits
-                        .filter((hit) => {
-                          const current = new Set<string>(
-                            Array.isArray(
-                              (hit._source as Record<string, unknown> | undefined)?.[
-                                ALERT_WORKFLOW_ASSIGNEE_IDS
-                              ]
-                            )
-                              ? ((hit._source as Record<string, unknown>)[
-                                  ALERT_WORKFLOW_ASSIGNEE_IDS
-                                ] as string[])
-                              : []
-                          );
-                          return (
-                            validAssigneesToAdd.some((uid) => !current.has(uid)) ||
-                            validAssigneesToRemove.some((uid) => current.has(uid))
-                          );
-                        })
+                        .filter((hit) =>
+                          wouldChange(
+                            (hit._source ?? {}) as Record<string, unknown>,
+                            ALERT_WORKFLOW_ASSIGNEE_IDS,
+                            validAssigneesToAdd,
+                            validAssigneesToRemove
+                          )
+                        )
                         .map((hit) => hit._id)
                         .filter((id): id is string => id != null)
                     )
@@ -218,23 +210,14 @@ export const setAttacksAssigneesRoute = (
             const verifiedAttackIds = Array.from(
               new Set(
                 attackDocs.hits.hits
-                  .filter((hit) => {
-                    const current = new Set<string>(
-                      Array.isArray(
-                        (hit._source as Record<string, unknown> | undefined)?.[
-                          ALERT_WORKFLOW_ASSIGNEE_IDS
-                        ]
-                      )
-                        ? ((hit._source as Record<string, unknown>)[
-                            ALERT_WORKFLOW_ASSIGNEE_IDS
-                          ] as string[])
-                        : []
-                    );
-                    return (
-                      validAssigneesToAdd.some((uid) => !current.has(uid)) ||
-                      validAssigneesToRemove.some((uid) => current.has(uid))
-                    );
-                  })
+                  .filter((hit) =>
+                    wouldChange(
+                      (hit._source ?? {}) as Record<string, unknown>,
+                      ALERT_WORKFLOW_ASSIGNEE_IDS,
+                      validAssigneesToAdd,
+                      validAssigneesToRemove
+                    )
+                  )
                   .map((hit) => hit._id)
                   .filter((id): id is string => id != null)
               )
