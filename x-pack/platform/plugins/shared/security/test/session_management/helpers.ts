@@ -330,6 +330,8 @@ export async function resetCleanupTask(
   apiClient: ApiClientFixture,
   config: ScoutTestConfig
 ): Promise<void> {
+  // Successful cleanup is what zeros the counter; leave simulation on and each poll increments it.
+  await simulatePointInTimeFailure(apiClient, config, false);
   await expect
     .poll(
       async () => {
@@ -340,7 +342,6 @@ export async function resetCleanupTask(
       { timeout: 60000 }
     )
     .toBe(0);
-  await simulatePointInTimeFailure(apiClient, config, false);
 }
 
 export async function putNativeUser(

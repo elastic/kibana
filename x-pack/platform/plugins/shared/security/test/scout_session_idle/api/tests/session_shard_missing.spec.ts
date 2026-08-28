@@ -9,6 +9,7 @@ import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
+  assertSessionCookie,
   disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
@@ -20,12 +21,20 @@ import {
   resetCleanupTask,
   runCleanupTask,
   simulatePointInTimeFailure,
+  toggleSessionCleanupTask,
 } from '../../../session_management/helpers';
 
+const BASIC_PROVIDER = { type: 'basic', name: 'basic1' } as const;
+
 test.describe('Session index shard missing', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
+  test.beforeAll(async ({ apiClient, config }) => {
+    await toggleSessionCleanupTask(apiClient, config, false);
+  });
+
   test.beforeEach(async ({ apiClient, config, esClient }) => {
     await ensureSessionIndexReady(esClient);
     await enableSessionAuthcDebugLogs(esClient);
+    await resetCleanupTask(apiClient, config);
     await invalidateAllSessions(apiClient, config);
     await expect.poll(async () => getSessionCount(esClient), { timeout: 15000 }).toBe(0);
   });
@@ -34,26 +43,25 @@ test.describe('Session index shard missing', { tag: [...LOCAL_STATEFUL_TAGS] }, 
     await simulatePointInTimeFailure(apiClient, config, false);
   });
 
-  test.afterAll(async ({ esClient }) => {
+  test.afterAll(async ({ apiClient, config, esClient }) => {
+    await toggleSessionCleanupTask(apiClient, config, true);
     await disableSessionAuthcDebugLogs(esClient);
   });
 
   test('quietly fails if shards are unavailable', async ({ apiClient, config, esClient }) => {
     test.setTimeout(100000);
 
-    await resetCleanupTask(apiClient, config);
     await simulatePointInTimeFailure(apiClient, config, true);
 
-    await loginWithBasic(apiClient, config.auth.username, config.auth.password);
+    const cookie = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
     await runCleanupTask(apiClient, config);
 
-    await expect.poll(async () => getSessionCount(esClient), { timeout: 15000 }).toBe(1);
+    await assertSessionCookie(apiClient, esClient, cookie, config.auth.username, BASIC_PROVIDER);
   });
 
   test('fails if shards are unavailable more than 10 times', async ({ apiClient, config }) => {
     test.setTimeout(600000);
 
-    await resetCleanupTask(apiClient, config);
     await simulatePointInTimeFailure(apiClient, config, true);
 
     await loginWithBasic(apiClient, config.auth.username, config.auth.password);

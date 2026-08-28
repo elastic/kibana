@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
   KibanaRequest,
   PluginInitializerContext,
 } from '@kbn/core/server';
@@ -33,6 +34,8 @@ export function initRoutes(
   core: CoreSetup<PluginStartDependencies>
 ) {
   const logger = initializerContext.logger.get();
+  // Capture once — reading esClient.openPointInTime on disable would recapture the mock.
+  let unpatchedOpenPointInTime: ElasticsearchClient['openPointInTime'] | undefined;
 
   const authenticationAppOptions = { simulateUnauthorized: false };
   core.http.resources.register(
@@ -674,7 +677,8 @@ export function initRoutes(
     },
     async (context, request, response) => {
       const esClient = (await context.core).elasticsearch.client.asInternalUser;
-      const originalOpenPointInTime = esClient.openPointInTime;
+      const originalOpenPointInTime = unpatchedOpenPointInTime ?? esClient.openPointInTime;
+      unpatchedOpenPointInTime = originalOpenPointInTime;
 
       if (request.body.simulateOpenPointInTimeFailure) {
         // @ts-expect-error
