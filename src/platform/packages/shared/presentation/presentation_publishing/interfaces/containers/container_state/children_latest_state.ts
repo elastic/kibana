@@ -13,7 +13,7 @@ import type { PublishingSubject } from '../../../publishing_subject';
 import { apiHasSerializableState, type HasSerializableState } from '../../has_serializable_state';
 
 /**
- *  Create an observable stream of unsaved changes from all react embeddable children
+ * Create an observable stream of latest state from all react embeddable children
  */
 export function childrenLatestState$<Api extends unknown = unknown>(
   children$: PublishingSubject<{ [key: string]: Api }>
