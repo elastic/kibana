@@ -28,6 +28,8 @@ export interface TimelineInput {
   title: string;
   description?: string;
   query?: string;
+  /** EQL correlation query. When set the timeline is created as an EQL-mode timeline. */
+  eqlQuery?: string;
 }
 
 export interface TimelineApiService {
@@ -70,6 +72,14 @@ const buildTimelineBody = (
     savedQueryId: null,
     ...(options.timelineType && { timelineType: options.timelineType }),
     ...(options.templateVersion && { templateTimelineVersion: options.templateVersion }),
+    ...(timeline.eqlQuery && {
+      eqlOptions: {
+        eventCategoryField: 'event.category',
+        timestampField: '@timestamp',
+        query: timeline.eqlQuery,
+        size: 100,
+      },
+    }),
   },
 });
 

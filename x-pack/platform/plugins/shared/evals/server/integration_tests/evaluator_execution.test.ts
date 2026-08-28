@@ -19,6 +19,8 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { registerEvaluateRoute } from '../routes/evaluators/evaluate';
+import type { EvaluatorDefinitionClient } from '../storage/evaluators/evaluator_definition_client';
+import type { EvaluatorDefinitionDocument } from '../evaluators/user_defined/types';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -122,16 +124,40 @@ const createMockSearch = ({ hasToolEvidence }: { hasToolEvidence: boolean }) => 
 };
 
 describe('trace evaluators integration', () => {
-  const setupRoute = ({ search, prompt }: { search: jest.Mock; prompt: jest.Mock }) => {
+  const setupRoute = ({
+    search,
+    prompt,
+    persistedEvaluator,
+  }: {
+    search: jest.Mock;
+    prompt: jest.Mock;
+    persistedEvaluator?: EvaluatorDefinitionDocument;
+  }) => {
     const router = httpServiceMock.createRouter();
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const getClient = jest.fn().mockReturnValue({ prompt } as unknown as BoundInferenceClient);
+
+    const definitionClient = persistedEvaluator
+      ? ({
+          getLatest: jest.fn().mockResolvedValue(persistedEvaluator),
+          getVersion: jest
+            .fn()
+            .mockImplementation((_name: string, version: string) =>
+              Promise.resolve(
+                version === persistedEvaluator.version ? persistedEvaluator : undefined
+              )
+            ),
+          listLatest: jest.fn().mockResolvedValue([persistedEvaluator]),
+        } as unknown as EvaluatorDefinitionClient)
+      : undefined;
 
     registerEvaluateRoute({
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: createEvaluatorRegistry(),
+      evaluatorRegistry: createEvaluatorRegistry({
+        getDefinitionClient: () => definitionClient,
+      }),
       getInferenceStart: async () =>
         ({
           getClient,
@@ -373,6 +399,72 @@ describe('trace evaluators integration', () => {
       'relevance',
       'sequence_accuracy',
     ]);
+  });
+
+  it('loads, compiles, and executes a persisted judge through the evaluate route', async () => {
+    const prompt = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              tone: { score: 0.75, explanation: 'The response is direct and professional.' },
+            },
+          },
+        },
+      ],
+    });
+    const persistedEvaluator: EvaluatorDefinitionDocument = {
+      id: 'tone-1.2.0',
+      name: 'tone',
+      version: '1.2.0',
+      kind: 'llm',
+      description: 'Rates professional tone',
+      judge: {
+        prompt: 'Response: {{{agent_response}}}\nRate its professional tone.',
+        system_prompt: 'Judge the response according to the supplied criteria.',
+        evidence: ['response'],
+        output: { scores: [{ name: 'tone', type: 'number' }] },
+      },
+      created_at: '2026-08-19T12:00:00.000Z',
+      updated_at: '2026-08-19T12:00:00.000Z',
+    };
+    const { handler, context } = setupRoute({
+      search: createMockSearch({ hasToolEvidence: true }),
+      prompt,
+      persistedEvaluator,
+    });
+
+    const response = await handler(
+      context,
+      {
+        body: {
+          subject: {
+            mode: 'single-turn',
+            traces: [{ trace_id: '1234567890abcdef1234567890abcdef' }],
+          },
+          evaluators: [{ name: 'tone', version: '1.2.0', connector_id: 'connector-1' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results).toEqual([
+      expect.objectContaining({
+        status: 'ok',
+        evaluator: expect.objectContaining({ name: 'tone', version: '1.2.0', kind: 'llm' }),
+        scores: [
+          expect.objectContaining({
+            name: 'tone',
+            score: 0.75,
+            explanation: 'The response is direct and professional.',
+          }),
+        ],
+      }),
+    ]);
+    expect(prompt).toHaveBeenCalledWith(
+      expect.objectContaining({ input: { agent_response: expect.any(String) } })
+    );
   });
 
   it('returns 400 when correctness evaluator is called with invalid reference data', async () => {

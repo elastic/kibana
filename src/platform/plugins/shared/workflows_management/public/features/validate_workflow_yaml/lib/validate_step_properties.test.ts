@@ -205,6 +205,7 @@ describe('validateStepProperties', () => {
       afterMessage: null,
       hoverMessage: 'Valid',
     });
+    expect(validationResults[0]).not.toHaveProperty('ruleId');
   });
 
   it('should use cached search option when available (resolve skipped)', async () => {

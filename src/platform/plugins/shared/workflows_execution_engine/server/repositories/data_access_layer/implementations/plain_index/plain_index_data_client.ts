@@ -44,8 +44,8 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
     return retryTransientEsErrors(
       () =>
         this.deps.esClient.search<TExecution>({
-          index: this.deps.indexName,
           ...request,
+          index: this.deps.indexName,
         }),
       { logger: this.deps.logger }
     );
@@ -55,15 +55,15 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
     return retryTransientEsErrors(
       () =>
         this.deps.esClient.count({
-          index: this.deps.indexName,
           ...request,
+          index: this.deps.indexName,
         }),
       { logger: this.deps.logger }
     );
   }
 
   public async getByIds(
-    ids: (string | { id: string; index: string })[],
+    ids: string[],
     options?: GetExecutionsByIdsOptions<TExecution>
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
     return getExecutionsByIds({
@@ -88,12 +88,6 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       },
       this.deps.logger
     );
-    if (response.errors) {
-      const errorCount = response.items.filter((item) => item.error).length;
-      this.deps.logger.debug(
-        `Bulk operation on ${this.deps.indexName} completed with ${errorCount} error(s)`
-      );
-    }
     return response;
   }
 
@@ -112,8 +106,8 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
     return retryTransientEsErrors(
       () =>
         this.deps.esClient.deleteByQuery({
-          index: this.deps.indexName,
           ...request,
+          index: this.deps.indexName,
         }),
       { logger: this.deps.logger }
     );

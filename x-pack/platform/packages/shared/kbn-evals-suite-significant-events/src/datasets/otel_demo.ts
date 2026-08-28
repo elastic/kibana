@@ -641,6 +641,15 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Should generate at least one STATS metric-series query (bucket + metric_value, no post-STATS threshold WHERE) for aggregate monitoring (e.g., error rate, traffic volume) when dataset_analysis reveals fields suitable for aggregation. Descriptions should document dataset_analysis baselines, not breach thresholds.',
             score: 1,
           },
+          {
+            id: 'avoid-routine-success-alerts',
+            text: 'Must not generate MATCH queries that alert solely because a verified routine successful operation occurred in this healthy snapshot (verified examples: "order confirmation email sent to ..." from checkout, 73 docs; "GetCartAsync called with userId=..." from cart, 404 docs). These are success events, not alert conditions. Useful aggregates over successful operations remain allowed (throughput, success rate, absence of activity), and a success event used as evidence inside a broader failure condition rather than as the alert condition itself remains allowed. A direct alert on any of these routine-success messages fails this criterion.',
+            score: 1,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+              { match_phrase: { 'body.text': 'GetCartAsync called' } },
+            ],
+          },
         ],
         expected_categories: ['operational', 'error'],
         expect_stats: true,

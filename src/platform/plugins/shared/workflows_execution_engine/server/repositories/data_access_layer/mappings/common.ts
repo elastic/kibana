@@ -22,16 +22,14 @@ export const TOKEN_USAGE_MAPPING = mappings.object({
   },
 }) satisfies MappingsDefinition;
 
-export const STEP_USAGE_MAPPING_PROPS = {
-  stepId: mappings.keyword(),
-  connectorId: mappings.keyword(),
-  inputTokens: mappings.long(),
-  outputTokens: mappings.long(),
-  cachedTokens: mappings.long(),
-  totalTokens: mappings.long(),
-};
-
 export const STEP_USAGE_MAPPING = {
   type: 'nested' as const,
-  properties: STEP_USAGE_MAPPING_PROPS,
+  properties: {
+    stepId: mappings.keyword(),
+    connectorId: mappings.keyword(),
+    inputTokens: mappings.long(),
+    outputTokens: mappings.long(),
+    cachedTokens: mappings.long(),
+    totalTokens: mappings.long(),
+  },
 };

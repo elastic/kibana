@@ -206,7 +206,7 @@ export class WorkflowExecutionRepository {
       items: updates.map((update) => ({
         operation: 'update',
         document: update as Partial<EsWorkflowExecution> & { id: string },
-        retryOnConflict: 3,
+        retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
       })),
       refresh: true,
     });

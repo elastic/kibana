@@ -11,6 +11,8 @@ import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
 import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
+import { getModelId } from './utils';
 
 export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIRequest => {
   const {
@@ -21,7 +23,11 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     simulatedFunctionCalling,
     temperature = 0,
     modelName,
+    reasoning,
   } = applyProviderTransforms(options);
+
+  // Preconfigured EIS connectors carry no model_id, so fall back to the inference endpoint id.
+  const model = modelName ?? getModelId(options.connector) ?? options.connector.config?.inferenceId;
 
   let request: OpenAIRequest;
   if (simulatedFunctionCalling) {
@@ -31,14 +37,25 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       toolChoice,
       tools,
     });
+    const resolvedReasoning = resolveChatCompletionReasoning({
+      reasoning,
+      hasNativeTools: false,
+      model,
+    });
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
+      ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
     };
   } else {
     const openAiTools = toolsToOpenAI(tools);
     const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+    const resolvedReasoning = resolveChatCompletionReasoning({
+      reasoning,
+      hasNativeTools: hasTools,
+      model,
+    });
 
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
@@ -50,6 +67,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
             tools: openAiTools,
           }
         : {}),
+      ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
     };
   }
 

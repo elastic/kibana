@@ -7,19 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
-import { DataStreamDataClientBundle } from './data_stream/data_stream_data_client_bundle';
-import { createUnsupportedStorageSourceError } from '../lib/validate_factory_params';
+import { DeferredDataClientBundle } from './deferred_data_client_bundle';
 import type { CreateDataClientDeps, DataClientBundle } from '../types';
 
 export function createDataClientBundle(deps: CreateDataClientDeps): DataClientBundle {
-  switch (deps.source) {
-    case 'system_index':
-      return new PlainIndexDataClientBundle(deps);
-    case 'data_stream':
-      return new DataStreamDataClientBundle(deps);
-    default: {
-      throw createUnsupportedStorageSourceError('DataClient', deps.source);
-    }
-  }
+  return new DeferredDataClientBundle(deps);
 }

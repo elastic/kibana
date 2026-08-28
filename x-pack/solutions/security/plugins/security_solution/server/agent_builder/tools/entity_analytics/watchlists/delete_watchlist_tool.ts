@@ -48,6 +48,13 @@ Use when the user asks to delete or remove a watchlist (e.g. "delete the X watch
 Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting a watchlist also cascade-deletes any entity sources linked to it.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Delete Watchlist',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

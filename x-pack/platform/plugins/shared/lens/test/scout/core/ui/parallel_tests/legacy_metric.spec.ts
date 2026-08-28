@@ -43,7 +43,7 @@ spaceTest.describe('Lens legacy metric', { tag: '@local-stateful-classic' }, () 
     async ({ pageObjects: { lens, filterBar } }) => {
       await spaceTest.step('renders a numeric metric', async () => {
         const { title, value } = await lens.metric.getLegacyMetricData();
-        expect(title).toBe('Maximum of bytes');
+        expect(title).toBe(testData.MAX_BYTES_LABEL);
         // Backend-computed aggregation: assert it renders as a formatted number rather than
         // pinning the exact figure.
         expect(value).toMatch(/^[\d,]+$/);

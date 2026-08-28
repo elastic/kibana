@@ -284,8 +284,7 @@ describe('resumeWorkflow', () => {
         meteringService: overrides?.meteringService,
         workflowsExecutionEngine:
           overrides?.workflowsExecutionEngine ?? mockWorkflowExecutionEngine,
-        workflowExecutionRepository:
-          workflowExecutionRepository as unknown as WorkflowExecutionRepository,
+        workflowExecutionRepository: workflowExecutionRepository as any,
         stepExecutionRepository,
       });
 

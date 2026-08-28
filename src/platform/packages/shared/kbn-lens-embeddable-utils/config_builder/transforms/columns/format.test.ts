@@ -221,58 +221,6 @@ describe('Format Transforms', () => {
       });
     });
 
-    describe('duration format — legacy unit names', () => {
-      it('should map legacy `m` input unit to `minutes` Lens state', () => {
-        const input = {
-          type: 'duration',
-          from: 'm',
-          to: 'humanize',
-        } satisfies ApiFormat;
-        expect(fromFormatAPIToLensState(input)).toEqual({
-          id: 'duration',
-          params: {
-            decimals: 0,
-            fromUnit: 'minutes',
-            toUnit: 'humanize',
-          },
-        });
-      });
-
-      it('should map legacy `humanizePrecise` output to Lens state', () => {
-        const input = {
-          type: 'duration',
-          from: 'ms',
-          to: 'humanizePrecise',
-        } satisfies ApiFormat;
-        expect(fromFormatAPIToLensState(input)).toEqual({
-          id: 'duration',
-          params: {
-            decimals: 0,
-            compact: true,
-            fromUnit: 'milliseconds',
-            toUnit: 'humanizePrecise',
-          },
-        });
-      });
-
-      it('should map legacy `m` output unit to `asMinutes` Lens state', () => {
-        const input = {
-          type: 'duration',
-          from: 'ms',
-          to: 'm',
-        } satisfies ApiFormat;
-        expect(fromFormatAPIToLensState(input)).toEqual({
-          id: 'duration',
-          params: {
-            decimals: 0,
-            compact: true,
-            fromUnit: 'milliseconds',
-            toUnit: 'asMinutes',
-          },
-        });
-      });
-    });
-
     describe('custom format', () => {
       it('should transform custom format', () => {
         const input = {
@@ -529,21 +477,6 @@ describe('Format Transforms', () => {
       } satisfies ApiFormat;
       const lensFormat = fromFormatAPIToLensState(apiFormat);
       expect(fromFormatLensStateToAPI(lensFormat)).toEqual(apiFormat);
-    });
-
-    it('should normalize legacy input to GA output on round-trip', () => {
-      // Legacy input uses pre-GA names; output always uses GA enum names
-      const legacyApiFormat = {
-        type: 'duration',
-        from: 'm',
-        to: 'humanize',
-      } satisfies ApiFormat;
-      const lensFormat = fromFormatAPIToLensState(legacyApiFormat);
-      expect(fromFormatLensStateToAPI(lensFormat)).toEqual({
-        type: 'duration',
-        from: 'min',
-        to: 'auto-approximate',
-      });
     });
   });
 });

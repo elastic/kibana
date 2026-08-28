@@ -6,11 +6,13 @@
  */
 
 import { injectable } from 'inversify';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { EpisodeScan } from '../state';
 import type {
   AlertEpisode,
   AlertEpisodeSuppression,
-  DispatcherStep,
   DispatcherPipelineState,
+  DispatcherStep,
   DispatcherStepOutput,
 } from '../types';
 import { suppressionEpisodeKey, suppressionSeriesKey } from './utils/suppression_key';
@@ -19,10 +21,13 @@ import { suppressionEpisodeKey, suppressionSeriesKey } from './utils/suppression
 export class ApplySuppressionStep implements DispatcherStep {
   public readonly name = 'apply_suppression';
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { episodes = [], suppressions = [] } = state;
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { scan = EpisodeScan.empty(), suppressions = [] } = state;
 
-    const { suppressed, dispatchable } = applySuppression(episodes, suppressions);
+    const { suppressed, dispatchable } = applySuppression(scan.episodes, suppressions);
 
     return { type: 'continue', data: { suppressed, dispatchable } };
   }

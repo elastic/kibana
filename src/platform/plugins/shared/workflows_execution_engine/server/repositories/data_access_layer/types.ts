@@ -15,12 +15,6 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflow
 /** Backing store for execution documents. */
 export type ExecutionStorageSource = 'system_index' | 'data_stream';
 
-/**
- * Data stream client handle for `data_stream` backends.
- * Concrete typing from `@kbn/data-streams` will be wired when that backend lands.
- */
-export type ExecutionDataStreamClient = unknown;
-
 /** Search body without index — DAL resolves the target. */
 export type ExecutionsSearchRequest = Omit<estypes.SearchRequest, 'index'>;
 
@@ -83,7 +77,7 @@ export interface ReadonlyDataClient<TExecution extends { id: string }> {
    * Throws on storage errors.
    */
   getByIds(
-    ids: (string | { id: string; index: string })[],
+    ids: string[],
     options?: GetExecutionsByIdsOptions<TExecution>
   ): Promise<GetExecutionsByIdsResponse<TExecution>>;
 }
@@ -153,8 +147,6 @@ export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflow
 export interface BulkItem<TDocument extends { id: string }> {
   operation: 'create' | 'update' | 'upsert';
   document: Partial<TDocument> & { id: string };
-  /** Backing index; resolved by the data access implementation when omitted. */
-  index?: string;
   seqNo?: number;
   primaryTerm?: number;
   retryOnConflict?: number;

@@ -59,8 +59,7 @@ export async function sharedBulk<TExecution extends { id: string }>(
           {
             update: {
               ...actionMeta,
-              // retry_on_conflict and if_seq_no/if_primary_term are mutually exclusive in ES
-              ...(item.retryOnConflict !== undefined && item.seqNo === undefined
+              ...(item.retryOnConflict !== undefined
                 ? { retry_on_conflict: item.retryOnConflict }
                 : {}),
             },
@@ -73,8 +72,7 @@ export async function sharedBulk<TExecution extends { id: string }>(
           {
             update: {
               ...actionMeta,
-              // retry_on_conflict and if_seq_no/if_primary_term are mutually exclusive in ES
-              ...(item.retryOnConflict !== undefined && item.seqNo === undefined
+              ...(item.retryOnConflict !== undefined
                 ? { retry_on_conflict: item.retryOnConflict }
                 : {}),
             },

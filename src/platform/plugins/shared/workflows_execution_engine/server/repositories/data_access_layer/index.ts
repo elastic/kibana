@@ -20,7 +20,7 @@ export {
 export { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from './mappings/workflow_executions_mappings';
 export { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from './mappings/step_executions_mappings';
 
-export { createUnsupportedStorageSourceError } from './lib/validate_factory_params';
+export { createUnsupportedStorageSourceError } from './lib/unsupported_storage_source';
 export { getStepExecutionsByWorkflowExecution } from './lib/get_step_executions_by_workflow_execution';
 export type { GetStepExecutionsByWorkflowExecutionParams } from './lib/get_step_executions_by_workflow_execution';
 

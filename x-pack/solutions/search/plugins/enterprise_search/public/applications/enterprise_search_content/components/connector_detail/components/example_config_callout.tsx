@@ -7,30 +7,28 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { KbnWarningCallout } from '@kbn/ui-callout';
+
 export const ExampleConfigCallout: React.FC = () => (
   <>
-    <EuiCallOut
-      iconType="info"
-      color="warning"
+    <KbnWarningCallout
       title={i18n.translate(
         'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',
         {
           defaultMessage: 'Example connector',
         }
       )}
-    >
-      <EuiSpacer size="s" />
-      <EuiText size="s">
+      text={
         <FormattedMessage
           id="xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.description"
           defaultMessage="This is an example connector that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
         />
-      </EuiText>
-    </EuiCallOut>
+      }
+    />
     <EuiSpacer />
   </>
 );

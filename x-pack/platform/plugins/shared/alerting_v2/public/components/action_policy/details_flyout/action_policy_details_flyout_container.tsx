@@ -61,16 +61,24 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   };
 
   const clonePolicy = (source: ActionPolicyResponse) => {
-    const { name, description, destinations, matcher, groupBy, throttle, tags, groupingMode } =
-      source;
+    const {
+      name,
+      description,
+      destinations,
+      matcher,
+      group_by: groupBy,
+      throttle,
+      tags,
+      grouping_mode: groupingMode,
+    } = source;
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
-      groupingMode: groupingMode ?? 'per_episode',
+      grouping_mode: groupingMode ?? 'per_episode',
       ...(tags != null && { tags }),
       ...(matcher != null && { matcher }),
-      ...(groupBy != null && { groupBy }),
+      ...(groupBy != null && { group_by: groupBy }),
       ...(throttle != null && { throttle }),
     };
     createActionPolicy(data);

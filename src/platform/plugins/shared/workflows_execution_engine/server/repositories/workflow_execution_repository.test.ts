@@ -240,7 +240,9 @@ describe('WorkflowExecutionRepository', () => {
       await repository.updateWorkflowExecution({ id: '1', status: ExecutionStatus.RUNNING });
 
       expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({ items: [expect.objectContaining({ retryOnConflict: 3 })] })
+        expect.objectContaining({
+          items: expect.arrayContaining([expect.objectContaining({ retryOnConflict: 3 })]),
+        })
       );
     });
 

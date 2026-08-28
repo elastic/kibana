@@ -5,22 +5,29 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
+import { EuiProgress, useEuiTheme } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
+import { getServices } from '../services';
+import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 
 interface CustomContentComponentProps {
   embeddableId: string;
-  prompt: string | undefined;
   esqlQuery: string | undefined;
   timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
-  onTemplateChange: (template: string) => void;
-  onErrorChange?: (error: string | undefined) => void;
+  isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
+  previewHtml: string | null;
+  onLoadingChange: (isLoading: boolean) => void;
+  onGenerateWithChat?: () => void;
 }
 
 const iframeContainerCss = css({
@@ -38,31 +45,43 @@ const iframeCss = css({
   background: 'transparent',
 });
 
+const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
+  defaultMessage: 'Custom content panel',
+});
+
 export const CustomContentComponent = ({
   embeddableId,
-  prompt,
   esqlQuery,
   timeRange,
   generationVersion,
   savedTemplate,
-  onTemplateChange,
-  onErrorChange,
+  isApproximate,
+  projectRouting,
+  query,
+  filters,
+  previewHtml,
+  onLoadingChange,
+  onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { html, isLoading, error, isAiUnavailable } = useCustomContentHtml({
+  const { html, isLoading, error, noContent } = useCustomContentHtml({
     embeddableId,
-    prompt,
     esqlQuery,
     timeRange,
     generationVersion,
     savedTemplate,
     colorMode,
-    onTemplateChange,
+    euiTheme,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
   });
 
-  useEffect(() => {
-    onErrorChange?.(error);
-  }, [error, onErrorChange]);
+  const { agentBuilder } = getServices();
+  const isAiAvailable = Boolean(agentBuilder);
+
+  useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
 
   const wrapperCss = useMemo(
     () =>
@@ -78,45 +97,36 @@ export const CustomContentComponent = ({
   );
 
   return (
-    <div css={wrapperCss}>
-      {isAiUnavailable && (
-        <EuiEmptyPrompt
-          iconType="sparkles"
-          iconColor="subdued"
-          title={
-            <h3>
-              {i18n.translate('xpack.customContent.aiUnavailable.title', {
-                defaultMessage: 'Set up an AI connector to use this panel',
-              })}
-            </h3>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.customContent.aiUnavailable.body', {
-                defaultMessage:
-                  'This panel generates content using AI. Ask your administrator to configure an AI connector in Stack Management.',
-              })}
-            </p>
-          }
-          color="subdued"
-        />
-      )}
-      {!isAiUnavailable && error && (
-        <EuiCallOut
-          color="danger"
+    <div css={wrapperCss} data-shared-item>
+      {error && (
+        <KbnDangerCallout
           title={i18n.translate('xpack.customContent.error.title', {
-            defaultMessage: 'Failed to generate panel',
+            defaultMessage: 'Failed to render panel',
           })}
           style={{ margin: euiTheme.size.base }}
           announceOnMount
         >
           {error}
-        </EuiCallOut>
+        </KbnDangerCallout>
       )}
-      {!isAiUnavailable && !error && html && (
+      {!error && noContent && !isLoading && previewHtml == null && (
+        <CustomContentEmptyPrompt
+          isAiAvailable={isAiAvailable}
+          onGenerateWithChat={onGenerateWithChat}
+        />
+      )}
+      {previewHtml != null ? (
         <div css={iframeContainerCss}>
-          <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title={IFRAME_TITLE} />
         </div>
+      ) : (
+        !error &&
+        !noContent &&
+        html && (
+          <div css={iframeContainerCss}>
+            <iframe css={iframeCss} srcDoc={html} sandbox="" title={IFRAME_TITLE} />
+          </div>
+        )
       )}
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </div>
