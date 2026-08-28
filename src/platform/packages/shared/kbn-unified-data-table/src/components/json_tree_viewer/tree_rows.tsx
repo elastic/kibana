@@ -458,7 +458,7 @@ const NodeLabel = memo(function NodeLabel({
   if (node.kind === 'leaf') {
     const leafActions =
       showActions && getLeafActions
-        ? getLeafActions?.({ value: node.value, path: node.path, isArrayItem: node.isArrayItem })
+        ? getLeafActions({ value: node.value, path: node.path, isArrayItem: node.isArrayItem })
         : [];
     return (
       <span css={styles.label}>
@@ -525,7 +525,7 @@ const NodeLabel = memo(function NodeLabel({
         <span css={styles.bracket}>{close}</span>
         {trailingComma && <Comma />}
       </span>
-      <SubtreeCopyButton node={node} />
+      {showActions && <SubtreeCopyButton node={node} />}
     </span>
   );
 });

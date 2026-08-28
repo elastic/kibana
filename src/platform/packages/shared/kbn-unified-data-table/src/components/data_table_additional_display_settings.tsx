@@ -171,6 +171,12 @@ const LinesShownSetting = ({
       ? RENDERED_NODES_STEP
       : 1;
 
+  // Committing re-seeds every JSON cell, so defer it while the slider is being dragged.
+  const debouncedOnChange = useMemo(
+    () => debounce(onChangeDefaultRenderedNodes, 300, { leading: false, trailing: true }),
+    [onChangeDefaultRenderedNodes]
+  );
+
   const onChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (event) => {
       if (!('value' in event.target) || event.target.value === '') {
@@ -179,9 +185,9 @@ const LinesShownSetting = ({
       }
       const clamped = clampRenderedNodes(Number(event.target.value));
       setActiveValue(clamped);
-      onChangeDefaultRenderedNodes(clamped);
+      debouncedOnChange(clamped);
     },
-    [onChangeDefaultRenderedNodes]
+    [debouncedOnChange]
   );
 
   const linesShownLabel = i18n.translate('unifiedDataTable.defaultRenderedNodesLabel', {
