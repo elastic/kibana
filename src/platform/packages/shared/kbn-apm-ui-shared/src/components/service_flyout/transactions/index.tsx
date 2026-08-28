@@ -177,6 +177,7 @@ export function ServiceFlyoutTransactionsSection({
       remainingTransactionsCellTooltipContent={MAX_GROUPS_TOOLTIP}
       columnInteractions={{
         name: {
+          // Hosts with nested tx flyouts pass onTransactionClick; others keep the APM deep link.
           ...(onTransactionClick
             ? { onClick: onTransactionClick }
             : { href: getTransactionDetailHref }),

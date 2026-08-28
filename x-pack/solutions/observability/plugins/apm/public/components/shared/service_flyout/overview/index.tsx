@@ -173,6 +173,7 @@ export function ServiceFlyoutOverview() {
     useState<TransactionDetailFlyoutFilters | null>(null);
   const {
     deps: { core, share },
+    contextActions,
     service,
     capabilities,
     indices,
@@ -307,7 +308,8 @@ export function ServiceFlyoutOverview() {
       </EuiFlexGroup>
       {transactionDetailFilters && (
         <TransactionDetailFlyout
-          deps={{ core }}
+          deps={{ core, share }}
+          contextActions={contextActions}
           filters={transactionDetailFilters}
           onClose={() => setTransactionDetailFilters(null)}
           historyKey={flyoutHistoryKey}

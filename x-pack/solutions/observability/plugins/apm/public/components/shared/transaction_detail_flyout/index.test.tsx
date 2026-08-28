@@ -37,6 +37,11 @@ jest.mock('./trace_sample', () => ({
     <div data-test-subj="transactionDetailFlyoutSection-traceSample">trace sample</div>
   ),
 }));
+jest.mock('./footer', () => ({
+  TransactionDetailFlyoutFooter: () => (
+    <div data-test-subj="transactionDetailFlyoutFooter">footer</div>
+  ),
+}));
 
 const DEPS = {
   core: {} as CoreStart,
@@ -69,6 +74,7 @@ describe('TransactionDetailFlyout', () => {
     expect(
       screen.getByTestId('transactionDetailFlyoutSection-latencyDistribution')
     ).toBeInTheDocument();
+    expect(screen.getByTestId('transactionDetailFlyoutFooter')).toBeInTheDocument();
   });
 
   it('does not render when isOpen is false', () => {

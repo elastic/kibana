@@ -6,6 +6,8 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { TimeRange } from '@kbn/es-query';
 import React, { createContext, useContext } from 'react';
 import type { TransactionDetailFlyoutFilters } from './types';
 
@@ -17,6 +19,14 @@ export interface FullTraceFlyoutState {
 export interface TransactionDetailFlyoutContextValue {
   deps: {
     core: CoreStart;
+    share?: SharePublicStart;
+  };
+  contextActions?: {
+    openInNewDiscoverTab?: (params: {
+      esqlQuery: string;
+      timeRange: TimeRange;
+      tabLabel: string;
+    }) => void;
   };
   filters: TransactionDetailFlyoutFilters;
   openFullTraceFlyout: (state: FullTraceFlyoutState) => void;

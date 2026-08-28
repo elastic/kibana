@@ -9,6 +9,7 @@ import { EuiFlyout, EuiFlyoutBody, EuiSpacer, useGeneratedHtmlId } from '@elasti
 import React, { useCallback, useMemo, useState } from 'react';
 import { TraceWaterfallFlyout } from '../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout';
 import { TransactionDetailFlyoutHeader } from './header';
+import { TransactionDetailFlyoutFooter } from './footer';
 import { TransactionDetailFlyoutLatencyDistribution } from './latency_distribution';
 import { TransactionDetailFlyoutRedMetrics } from './red_metrics';
 import { TransactionDetailFlyoutTraceSample } from './trace_sample';
@@ -23,10 +24,12 @@ export const TRANSACTION_DETAIL_FLYOUT_HISTORY_KEY = Symbol.for('apmTransactionD
 
 interface TransactionDetailFlyoutComponentProps extends TransactionDetailFlyoutProps {
   deps: TransactionDetailFlyoutContextValue['deps'];
+  contextActions?: TransactionDetailFlyoutContextValue['contextActions'];
 }
 
 export function TransactionDetailFlyout({
   deps,
+  contextActions,
   filters,
   isOpen = true,
   onClose,
@@ -43,10 +46,11 @@ export function TransactionDetailFlyout({
   const contextValue = useMemo<TransactionDetailFlyoutContextValue>(
     () => ({
       deps,
+      contextActions,
       filters,
       openFullTraceFlyout,
     }),
-    [deps, filters, openFullTraceFlyout]
+    [deps, contextActions, filters, openFullTraceFlyout]
   );
 
   if (!isOpen) {
@@ -75,6 +79,7 @@ export function TransactionDetailFlyout({
           <EuiSpacer size="m" />
           <TransactionDetailFlyoutTraceSample />
         </EuiFlyoutBody>
+        <TransactionDetailFlyoutFooter />
       </EuiFlyout>
       {fullTraceFlyout ? (
         <TraceWaterfallFlyout
