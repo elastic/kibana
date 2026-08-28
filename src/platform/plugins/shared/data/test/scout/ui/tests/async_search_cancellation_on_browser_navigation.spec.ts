@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { test, tags } from '@kbn/scout';
 
 const LOGSTASH_ARCHIVE = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
@@ -20,14 +18,12 @@ const TIME_RANGE = {
 };
 
 function buildEsqlLensPanel() {
-  const config: LensApiConfig = {
+  const config = {
     type: 'xy',
     title: 'ES|QL Panel',
     layers: [
       {
         type: 'line',
-        ignore_global_filters: false,
-        sampling: 1,
         data_source: {
           type: 'esql',
           query: ESQL_QUERY,
@@ -39,21 +35,19 @@ function buildEsqlLensPanel() {
   };
 
   return {
-    type: LENS_EMBEDDABLE_TYPE,
+    type: 'lens',
     grid: { x: 0, y: 0, w: 24, h: 15 },
     config,
   };
 }
 
 function buildClassicLensPanel() {
-  const config: LensApiConfig = {
+  const config = {
     type: 'xy',
     title: 'Classic Panel',
     layers: [
       {
         type: 'line',
-        ignore_global_filters: false,
-        sampling: 1,
         data_source: {
           type: 'data_view_spec',
           index_pattern: DATA_VIEW_ID,
@@ -62,17 +56,14 @@ function buildClassicLensPanel() {
         x: {
           operation: 'date_histogram',
           field: '@timestamp',
-          suggested_interval: 'auto',
-          use_original_time_range: false,
-          include_empty_rows: true,
         },
-        y: [{ operation: 'count', empty_as_null: false }],
+        y: [{ operation: 'count' }],
       },
     ],
   };
 
   return {
-    type: LENS_EMBEDDABLE_TYPE,
+    type: 'lens',
     grid: { x: 0, y: 15, w: 24, h: 15 },
     config,
   };

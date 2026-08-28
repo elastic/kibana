@@ -76,8 +76,6 @@
     "@kbn/date-range-picker-presets-common",
     "@kbn/zod",
     "@kbn/licensing-plugin",
-    "@kbn/lens-embeddable-utils",
-    "@kbn/lens-common"
   ],
   "exclude": ["target/**/*"]
 }
