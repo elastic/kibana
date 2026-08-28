@@ -31,7 +31,7 @@ describe('getAddVegaEmbeddableAction', () => {
 
     expect(addNewPanel).toHaveBeenCalledWith({
       panelType: VEGA_EMBEDDABLE_TYPE,
-      serializedState: { spec: getDefaultSpec() },
+      serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
     });
     // `returnFocus` is forwarded so closing the editor puts focus back on the Add panel menu.
     expect(onEdit).toHaveBeenCalledWith({ isNewPanel: true, returnFocus });
