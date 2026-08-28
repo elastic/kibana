@@ -12,10 +12,10 @@ export interface AiIndexCatalogEntry {
   /** Context Engine id of the AI index. */
   id: string;
   /**
-   * The ES|QL `FROM` target (index name, pattern, or comma-separated list). Absent when the id
-   * could not be resolved; nameless entries are omitted from the prompt.
+   * The ES|QL `FROM` target: an index name, pattern, or comma-separated list. Absent when the
+   * id could not be resolved; entries without one are omitted from the prompt.
    */
-  name?: string;
+  esqlTarget?: string;
   description?: string;
   /** Extra prompt advice for this index, printed after the description. */
   guidance?: string;

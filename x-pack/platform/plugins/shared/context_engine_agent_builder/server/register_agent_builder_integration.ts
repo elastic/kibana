@@ -55,7 +55,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
       .filter((aiIndex) => requestedIds.has(aiIndex.id))
       .map((aiIndex) => ({
         id: aiIndex.id,
-        name: aiIndex.dest.value,
+        esqlTarget: aiIndex.dest.value,
         description: aiIndex.description,
       }));
   });

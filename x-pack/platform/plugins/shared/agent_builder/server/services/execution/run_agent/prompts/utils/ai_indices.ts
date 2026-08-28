@@ -28,11 +28,13 @@ export const getAiIndicesInstructions = ({
     return '';
   }
 
-  // Nameless (unresolved) entries are omitted: the id is not a valid `FROM` target.
+  // Unresolved entries are omitted: the id is not a valid `FROM` target.
   const entries = catalog
-    .filter(({ name }) => name !== undefined)
-    .map(({ name, description, guidance }) =>
-      [`- \`${name}\`${description ? ` — ${description}` : ''}`, guidance].filter(Boolean).join(' ')
+    .filter(({ esqlTarget }) => esqlTarget !== undefined)
+    .map(({ esqlTarget, description, guidance }) =>
+      [`- \`${esqlTarget}\`${description ? ` — ${description}` : ''}`, guidance]
+        .filter(Boolean)
+        .join(' ')
     );
   const catalogSection =
     entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';

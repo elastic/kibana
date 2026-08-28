@@ -11,7 +11,7 @@ import { getAiIndicesInstructions } from './ai_indices';
 const defaultCatalog: AiIndexCatalogEntry[] = [
   {
     id: 'elastic',
-    name: 'sml-main',
+    esqlTarget: 'sml-main',
     description: 'Summaries of Kibana resources such as dashboards and connectors.',
     guidance: 'Attach an entry before acting on it.',
   },
@@ -66,7 +66,7 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('continue with other relevant data or tools');
   });
 
-  it('renders each catalog entry with its name, description and guidance', () => {
+  it('renders each catalog entry with its ES|QL target, description and guidance', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       catalog: defaultCatalog,
@@ -85,7 +85,7 @@ describe('getAiIndicesInstructions', () => {
       enabled: true,
       catalog: [
         ...defaultCatalog,
-        { id: 'my-custom', name: 'ai-index-idx-custom', description: 'Support tickets.' },
+        { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
       ],
       spaceId: 'default',
     });
@@ -94,7 +94,7 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('- `ai-index-idx-custom` — Support tickets.');
   });
 
-  it('omits nameless entries from the available list, keeping the resolved ones', () => {
+  it('omits entries with no ES|QL target from the available list, keeping the resolved ones', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       catalog: [...defaultCatalog, { id: 'unresolved-custom' }],
@@ -106,7 +106,7 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('unresolved-custom');
   });
 
-  it('renders the section without an available list when no entry resolved to a name', () => {
+  it('renders the section without an available list when no entry resolved to a target', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       catalog: [{ id: 'unresolved-custom' }],
@@ -119,10 +119,10 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('unresolved-custom');
   });
 
-  it('renders a name-only line for an entry without a description', () => {
+  it('renders a target-only line for an entry without a description', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
-      catalog: [{ id: 'bare-id', name: 'bare-id' }],
+      catalog: [{ id: 'bare-id', esqlTarget: 'bare-id' }],
       spaceId: 'default',
     });
 

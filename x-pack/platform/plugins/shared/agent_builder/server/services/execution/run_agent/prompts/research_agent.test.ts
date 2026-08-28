@@ -164,7 +164,9 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          aiIndexCatalog: [{ id: 'elastic', name: 'sml-main', description: 'Kibana resources' }],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+          ],
         },
         experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       })
@@ -179,7 +181,9 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          aiIndexCatalog: [{ id: 'elastic', name: 'sml-main', description: 'Kibana resources' }],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+          ],
         },
         experimentalFeatures: { aiIndices: true, bash: false, skills: false },
         spaceId: 'marketing',
@@ -200,8 +204,8 @@ describe('getResearchAgentPrompt', () => {
           instructions: '',
           aiIndices: ['elastic', 'my-custom'],
           aiIndexCatalog: [
-            { id: 'elastic', name: 'sml-main', description: 'Kibana resources' },
-            { id: 'my-custom', name: 'ai-index-idx-custom', description: 'Support tickets' },
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+            { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets' },
           ],
         },
         experimentalFeatures: { aiIndices: true, bash: false, skills: false },

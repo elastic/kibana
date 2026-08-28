@@ -79,7 +79,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     return { resolver, list, security, checkPrivileges };
   };
 
-  it('registers a resolver mapping registry items to id, name (dest.value) and description', async () => {
+  it('registers a resolver mapping registry items to id, esqlTarget (dest.value) and description', async () => {
     const { resolver } = setup({
       aiIndices: [
         {
@@ -91,7 +91,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     });
 
     expect(await resolver({ ids: ['my-custom'], request })).toEqual([
-      { id: 'my-custom', name: 'ai-index-idx-custom', description: 'Support tickets.' },
+      { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
     ]);
   });
 
@@ -104,7 +104,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
-      { id: 'wanted', name: 'idx-wanted' },
+      { id: 'wanted', esqlTarget: 'idx-wanted' },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
   });

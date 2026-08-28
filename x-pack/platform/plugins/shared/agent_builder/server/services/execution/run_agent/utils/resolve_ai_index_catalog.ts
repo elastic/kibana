@@ -14,8 +14,8 @@ import type { AiIndexCatalogEntry } from '../types';
 /**
  * Builds the prompt's AI index catalog, one entry per configured id in config order (deduped).
  * Static defaults win over the resolver (they carry curated guidance); the resolver is called
- * once for the remaining ids. Ids that stay unresolved become nameless entries, which the prompt
- * omits since the id is not a valid `FROM` target. Resolver failures are swallowed so a Context
+ * once for the remaining ids. Ids that stay unresolved get no ES|QL target, and the prompt omits
+ * them since the id is not a valid `FROM` target. Resolver failures are swallowed so a Context
  * Engine hiccup never breaks a run.
  */
 export const resolveAiIndexCatalog = async ({
@@ -48,14 +48,14 @@ export const resolveAiIndexCatalog = async ({
       const defaultEntry = defaultAiIndices[id];
       return {
         id,
-        name: defaultEntry.name,
+        esqlTarget: defaultEntry.esqlTarget,
         description: defaultEntry.description,
         guidance: defaultEntry.guidance,
       };
     }
     const resolved = resolvedById.get(id);
     if (resolved) {
-      return { id, name: resolved.name, description: resolved.description };
+      return { id, esqlTarget: resolved.esqlTarget, description: resolved.description };
     }
     return { id };
   });

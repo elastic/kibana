@@ -13,8 +13,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 export interface AiIndexDetail {
   /** Registry id of the AI index (the value stored in agent `ai_indices` config). */
   id: string;
-  /** The ES|QL `FROM` target (index name, pattern, or comma-separated list). */
-  name: string;
+  /** The ES|QL `FROM` target: an index name, pattern, or comma-separated list. */
+  esqlTarget: string;
   description?: string;
 }
 

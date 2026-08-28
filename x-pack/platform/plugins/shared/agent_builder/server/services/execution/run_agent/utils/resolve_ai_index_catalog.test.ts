@@ -27,7 +27,7 @@ describe('resolveAiIndexCatalog', () => {
     expect(catalog).toHaveLength(1);
     expect(catalog[0]).toEqual({
       id: agentBuilderDefaultAiIndexId,
-      name: smlIndexName,
+      esqlTarget: smlIndexName,
       description: expect.any(String),
       guidance: expect.stringContaining('Attach an entry before acting on it.'),
     });
@@ -37,13 +37,13 @@ describe('resolveAiIndexCatalog', () => {
     const resolver = jest
       .fn()
       .mockResolvedValue([
-        { id: 'my-custom', name: 'ai-index-idx-custom', description: 'Support tickets.' },
+        { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
       ]);
 
     const catalog = await resolveAiIndexCatalog({ aiIndices: ['my-custom'], request, resolver });
 
     expect(catalog).toEqual([
-      { id: 'my-custom', name: 'ai-index-idx-custom', description: 'Support tickets.' },
+      { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
     ]);
   });
 
@@ -57,7 +57,7 @@ describe('resolveAiIndexCatalog', () => {
     });
 
     expect(resolver).not.toHaveBeenCalled();
-    expect(catalog[0].name).toBe(smlIndexName);
+    expect(catalog[0].esqlTarget).toBe(smlIndexName);
   });
 
   it('calls the resolver once, with only the non-default ids and the request', async () => {
@@ -73,7 +73,7 @@ describe('resolveAiIndexCatalog', () => {
     expect(resolver).toHaveBeenCalledWith({ ids: ['custom-a', 'custom-b'], request });
   });
 
-  it('degrades ids the resolver does not know to nameless entries', async () => {
+  it('degrades ids the resolver does not know to entries with no ES|QL target', async () => {
     const resolver = jest.fn().mockResolvedValue([]);
 
     const catalog = await resolveAiIndexCatalog({
@@ -85,14 +85,14 @@ describe('resolveAiIndexCatalog', () => {
     expect(catalog).toEqual([{ id: 'deleted-index' }]);
   });
 
-  it('degrades all non-default ids to nameless entries when no resolver is registered', async () => {
+  it('degrades all non-default ids to entries with no ES|QL target when no resolver is registered', async () => {
     const catalog = await resolveAiIndexCatalog({
       aiIndices: [agentBuilderDefaultAiIndexId, 'my-custom'],
       request,
     });
 
     expect(catalog).toEqual([
-      expect.objectContaining({ id: agentBuilderDefaultAiIndexId, name: smlIndexName }),
+      expect.objectContaining({ id: agentBuilderDefaultAiIndexId, esqlTarget: smlIndexName }),
       { id: 'my-custom' },
     ]);
   });
@@ -112,8 +112,8 @@ describe('resolveAiIndexCatalog', () => {
 
   it('preserves config order and dedupes repeated ids', async () => {
     const resolver = jest.fn().mockResolvedValue([
-      { id: 'custom-b', name: 'idx-b' },
-      { id: 'custom-a', name: 'idx-a' },
+      { id: 'custom-b', esqlTarget: 'idx-b' },
+      { id: 'custom-a', esqlTarget: 'idx-a' },
     ]);
 
     const catalog = await resolveAiIndexCatalog({
@@ -129,7 +129,7 @@ describe('resolveAiIndexCatalog', () => {
     ]);
   });
 
-  it('swallows resolver failures, degrading to nameless entries', async () => {
+  it('swallows resolver failures, degrading to entries with no ES|QL target', async () => {
     const resolver = jest.fn().mockRejectedValue(new Error('boom'));
     const logger = { warn: jest.fn() } as unknown as Logger;
 
@@ -141,7 +141,7 @@ describe('resolveAiIndexCatalog', () => {
     });
 
     expect(catalog).toEqual([
-      expect.objectContaining({ id: agentBuilderDefaultAiIndexId, name: smlIndexName }),
+      expect.objectContaining({ id: agentBuilderDefaultAiIndexId, esqlTarget: smlIndexName }),
       { id: 'my-custom' },
     ]);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
