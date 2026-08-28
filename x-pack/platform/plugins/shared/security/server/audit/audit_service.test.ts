@@ -269,6 +269,100 @@ describe('#asScoped', () => {
     audit.stop();
   });
 
+  it('includes user.full_name when the current user has one', async () => {
+    const getCurrentUserWithFullName = jest.fn().mockReturnValue({
+      username: 'jdoe',
+      roles: ['admin'],
+      profile_uid: 'uid',
+      full_name: 'Jane Doe',
+    });
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser: getCurrentUserWithFullName,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'MESSAGE',
+      expect.objectContaining({
+        user: { id: 'uid', name: 'jdoe', full_name: 'Jane Doe', roles: ['admin'] },
+      })
+    );
+    audit.stop();
+  });
+
+  describe('user.domain (Serverless OTel only)', () => {
+    const getCurrentUserWithRealm = jest.fn().mockReturnValue({
+      username: 'jdoe',
+      roles: ['admin'],
+      profile_uid: 'uid',
+      authentication_realm: { name: 'cloud-saml-kibana', type: 'saml' },
+    });
+
+    const logWithConfig = async (
+      auditConfig: Partial<ConfigType['audit']>,
+      isServerless: boolean
+    ) => {
+      const audit = new AuditService(logger);
+      const auditSetup = audit.setup({
+        license,
+        config: createAuditConfig(auditConfig),
+        logging,
+        status,
+        http,
+        isServerless,
+        getCurrentUser: getCurrentUserWithRealm,
+        getSpaceId,
+        getSID,
+        recordAuditLoggingUsage,
+      });
+
+      await auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+      audit.stop();
+
+      return (logger.info.mock.calls[logger.info.mock.calls.length - 1][1] as { user: object })
+        .user;
+    };
+
+    const otelAppender = {
+      enabled: true,
+      appender: { type: 'otel' as const, protocol: 'http' as const, url: 'http://collector:4318' },
+    };
+
+    it('includes the authentication realm when serverless and shipping to OTel', async () => {
+      expect(await logWithConfig(otelAppender, true)).toEqual({
+        id: 'uid',
+        name: 'jdoe',
+        domain: 'cloud-saml-kibana',
+        roles: ['admin'],
+      });
+    });
+
+    it('omits it when serverless but not shipping to OTel', async () => {
+      const user = await logWithConfig({ enabled: true }, true);
+      expect(user).not.toHaveProperty('domain');
+    });
+
+    it('omits it when shipping to OTel but not serverless', async () => {
+      const user = await logWithConfig(otelAppender, false);
+      expect(user).not.toHaveProperty('domain');
+    });
+  });
+
   it('logs event enriched with meta data from fake request', async () => {
     const audit = new AuditService(logger);
     const auditSetup = audit.setup({
