@@ -103,4 +103,18 @@ describe('RoundAuthorHeader', () => {
     expect(screen.queryByText('Elastic AI Agent')).not.toBeInTheDocument();
     expect(screen.getByText('Agent')).toBeInTheDocument();
   });
+
+  it('renders the origin for agent messages', () => {
+    render(
+      <RoundAuthorHeader
+        startedAt={startedAt}
+        agent={agent}
+        origin={{ type: ConversationOriginType.Slack }}
+      />
+    );
+
+    expect(screen.getByText('Custom Agent')).toBeInTheDocument();
+    expect(screen.getByText('Agent')).toBeInTheDocument();
+    expect(screen.getByText('via Slack')).toBeInTheDocument();
+  });
 });

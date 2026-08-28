@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { UserAvatar } from '@kbn/user-profile-components';
+import { UserAvatar, type UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ConversationOriginType, type ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { useUserProfiles } from '../../../hooks/use_user_profiles';
@@ -46,6 +46,110 @@ const formatRoundTime = (startedAt: string): string => {
   }).format(date);
 };
 
+interface RoundAuthorAvatarProps {
+  agent?: AgentDefinition;
+  resolvedAuthorProfile?: UserProfileWithAvatar;
+  name?: string;
+}
+
+const RoundAuthorAvatar: React.FC<RoundAuthorAvatarProps> = ({
+  agent,
+  resolvedAuthorProfile,
+  name,
+}) => {
+  if (agent) {
+    return <AgentAvatar agent={agent} size="s" iconPaddingSize="none" />;
+  }
+
+  if (resolvedAuthorProfile) {
+    return (
+      <UserAvatar
+        user={resolvedAuthorProfile.user}
+        avatar={resolvedAuthorProfile.data?.avatar}
+        size="s"
+      />
+    );
+  }
+
+  if (name) {
+    return <EuiAvatar size="s" name={name} />;
+  }
+
+  return null;
+};
+
+const RoundAuthorName: React.FC<{ name?: string }> = ({ name }) => <strong>{name}</strong>;
+
+const RoundAuthorSeparator: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span
+      css={css`
+        color: ${euiTheme.colors.textSubdued};
+      `}
+    >
+      &middot;
+    </span>
+  );
+};
+
+const RoundAgentBadge: React.FC = () => {
+  return (
+    <EuiBadge
+      color="hollow"
+      iconType="productAgent"
+      css={css`
+        background-color: #f2e6ff;
+        color: #5e2ca5;
+        border: none;
+        box-shadow: none;
+      `}
+    >
+      {labels.agentBadge}
+    </EuiBadge>
+  );
+};
+
+const RoundOrigin: React.FC<{ origin: ConversationRoundOrigin }> = ({ origin }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+        color: ${euiTheme.colors.textSubdued};
+      `}
+    >
+      {origin.type === ConversationOriginType.Slack && (
+        <>
+          <EuiIcon type="logoSlack" size="s" aria-hidden={true} />
+          {labels.viaSlack}
+        </>
+      )}
+    </span>
+  );
+};
+
+const RoundTime: React.FC<{ time: string }> = ({ time }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+        color: ${euiTheme.colors.textSubdued};
+      `}
+    >
+      {time}
+    </span>
+  );
+};
+
 interface RoundAuthorHeaderProps {
   author?: RoundAuthor;
   origin?: ConversationRoundOrigin;
@@ -71,79 +175,59 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   });
   const resolvedAuthorProfile = hasUserProfileAuthor ? author : resolvedAuthorProfiles[0];
   const name = getRoundAuthorHeaderName({ agent, author, resolvedAuthorProfile });
-  const showSlackOrigin = !isAgent && origin?.type === ConversationOriginType.Slack;
+
+  const showAuthorName = Boolean(name);
   const showAgentBadge = isAgent;
-  const showSeparatorBeforeTime = Boolean(name) || showAgentBadge || showSlackOrigin;
+  const showOrigin = Boolean(origin);
+  const showTime = Boolean(time);
 
-  const headerStyles = css`
-    line-height: ${euiTheme.size.base};
-  `;
-
-  const attributionStyles = css`
-    display: inline-flex;
-    align-items: center;
-    gap: ${euiTheme.size.xs};
-    flex-wrap: wrap;
-  `;
-
-  const metadataStyles = css`
-    display: inline-flex;
-    align-items: center;
-    gap: ${euiTheme.size.xs};
-    color: ${euiTheme.colors.textSubdued};
-  `;
-
-  const separatorStyles = css`
-    color: ${euiTheme.colors.textSubdued};
-  `;
-
-  const agentBadgeStyles = css`
-    background-color: #f2e6ff;
-    color: #5e2ca5;
-    border: none;
-    box-shadow: none;
-  `;
+  const hasContentBeforeAgentBadge = showAuthorName;
+  const hasContentBeforeOrigin = hasContentBeforeAgentBadge || showAgentBadge;
+  const hasContentBeforeTime = hasContentBeforeOrigin || showOrigin;
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={headerStyles}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      css={css`
+        line-height: ${euiTheme.size.base};
+      `}
+    >
       <EuiFlexItem grow={false}>
-        {agent ? (
-          <AgentAvatar agent={agent} size="s" iconPaddingSize="none" />
-        ) : resolvedAuthorProfile ? (
-          <UserAvatar
-            user={resolvedAuthorProfile.user}
-            avatar={resolvedAuthorProfile.data?.avatar}
-            size="s"
-          />
-        ) : name ? (
-          <EuiAvatar size="s" name={name} />
-        ) : null}
+        <RoundAuthorAvatar
+          agent={agent}
+          resolvedAuthorProfile={resolvedAuthorProfile}
+          name={name}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
-          <span css={attributionStyles}>
-            {name && <strong>{name}</strong>}
+          <span
+            css={css`
+              display: inline-flex;
+              align-items: center;
+              gap: ${euiTheme.size.xs};
+              flex-wrap: wrap;
+            `}
+          >
+            {showAuthorName && <RoundAuthorName name={name} />}
             {showAgentBadge && (
               <>
-                {name && <span css={separatorStyles}>&middot;</span>}
-                <EuiBadge color="hollow" iconType="productAgent" css={agentBadgeStyles}>
-                  {labels.agentBadge}
-                </EuiBadge>
+                {hasContentBeforeAgentBadge && <RoundAuthorSeparator />}
+                <RoundAgentBadge />
               </>
             )}
-            {showSlackOrigin && (
+            {showOrigin && origin && (
               <>
-                <span css={separatorStyles}>&middot;</span>
-                <span css={metadataStyles}>
-                  <EuiIcon type="logoSlack" size="s" aria-hidden={true} />
-                  {labels.viaSlack}
-                </span>
+                {hasContentBeforeOrigin && <RoundAuthorSeparator />}
+                <RoundOrigin origin={origin} />
               </>
             )}
-            {time && (
+            {showTime && (
               <>
-                {showSeparatorBeforeTime && <span css={separatorStyles}>&middot;</span>}
-                <span css={metadataStyles}>{time}</span>
+                {hasContentBeforeTime && <RoundAuthorSeparator />}
+                <RoundTime time={time} />
               </>
             )}
           </span>
