@@ -10,6 +10,7 @@ export type { SecurityBrowserAuthFixture } from './browser_auth';
 
 export { extendPageObjects } from './page_objects';
 export type { SecurityPageObjects } from './page_objects';
+export type { PolicyArtifactKind } from './page_objects/policy_artifacts';
 
 // Entity flyout anomalies test constants
 export {
