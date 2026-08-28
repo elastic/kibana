@@ -25,7 +25,7 @@ export const pipelineQualityScoreEvaluator: Evaluator<Example, PipelineSuggestio
     if (!metrics) {
       // eslint-disable-next-line no-console
       console.error('No metrics found in output:', JSON.stringify(output, null, 2));
-      return { score: 0, reasoning: 'No metrics available' };
+      return { score: 0, explanation: 'No metrics available' };
     }
 
     const issues: string[] = [];
@@ -51,7 +51,7 @@ export const pipelineQualityScoreEvaluator: Evaluator<Example, PipelineSuggestio
         stepEfficiency: metrics.stepEfficiency,
         processorFailureRates: metrics.processorFailureRates,
       },
-      reasoning:
+      explanation:
         issues.length > 0
           ? `Issues: ${issues.join('; ')}`
           : `Good quality: ${formatPercent(metrics.overallQuality)}`,
