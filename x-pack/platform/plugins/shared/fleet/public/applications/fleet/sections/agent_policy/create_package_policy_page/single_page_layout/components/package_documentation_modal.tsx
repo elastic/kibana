@@ -92,6 +92,13 @@ export const PackageDocumentationModal: React.FC<Props> = ({ packageInfo, onClos
     max-width: 860px;
     width: 100%;
   `;
+  const readmePaneCss = css`
+    min-width: 0;
+  `;
+  const sidebarCss = css`
+    min-width: 200px;
+    max-width: 220px;
+  `;
 
   return (
     <EuiModal
@@ -126,7 +133,7 @@ export const PackageDocumentationModal: React.FC<Props> = ({ packageInfo, onClos
 
       <EuiModalBody>
         <EuiFlexGroup alignItems="flexStart" gutterSize="l">
-          <EuiFlexItem style={{ minWidth: 0 }}>
+          <EuiFlexItem css={readmePaneCss}>
             <Readme
               packageName={packageInfo.name}
               version={packageInfo.version}
@@ -135,7 +142,7 @@ export const PackageDocumentationModal: React.FC<Props> = ({ packageInfo, onClos
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} style={{ minWidth: 200, maxWidth: 220 }}>
+          <EuiFlexItem grow={false} css={sidebarCss}>
             {screenshotUrl && (
               <>
                 <EuiTitle size="xxs">

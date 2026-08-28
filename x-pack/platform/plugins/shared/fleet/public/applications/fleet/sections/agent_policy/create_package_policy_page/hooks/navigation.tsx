@@ -18,6 +18,12 @@ import type { EditPackagePolicyFrom, SavedPolicyResult } from '../types';
 
 import { appendOnSaveQueryParamsToPath } from '../utils';
 
+const ALLOWED_RETURN_APP_IDS = new Set([
+  'integrations',
+  'observabilityOnboarding',
+  'securitySolutionUI',
+]);
+
 interface UseCancelParams {
   from: EditPackagePolicyFrom;
   pkgkey: string;
@@ -53,7 +59,7 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
     const searchParams = new URLSearchParams(search);
     const returnPath = searchParams.get('returnPath');
     const returnAppId = searchParams.get('returnAppId');
-    if (returnPath && returnAppId) {
+    if (returnPath && returnAppId && ALLOWED_RETURN_APP_IDS.has(returnAppId)) {
       return getUrlForApp(returnAppId, { path: returnPath });
     }
 

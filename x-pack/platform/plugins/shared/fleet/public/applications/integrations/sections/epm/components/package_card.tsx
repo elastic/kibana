@@ -208,7 +208,7 @@ export function PackageCard({
       // When navigating straight to the add-integration page, pass the current URL as
       // onCancelUrl so the Cancel button returns the user to where they came from
       // (e.g. the integrations catalog) rather than the integration detail page.
-      const cancelState = path.includes('/add-integration')
+      const cancelState = /\/add-integration([/?]|$)/.test(path)
         ? { onCancelUrl: window.location.href }
         : {};
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {

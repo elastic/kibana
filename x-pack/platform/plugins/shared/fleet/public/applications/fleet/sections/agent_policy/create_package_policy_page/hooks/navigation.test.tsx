@@ -93,6 +93,12 @@ describe('useCancelAddPackagePolicy', () => {
       );
     });
 
+    it('ignores an unknown returnAppId and falls back to integration overview', () => {
+      const { result } = renderWithSearch('?returnAppId=unknownApp&returnPath=%2Fsome%2Fpath');
+      expect(mockGetUrlForApp).not.toHaveBeenCalled();
+      expect(result.current.cancelUrl).toBe('/detail/nginx-1.3.0/overview');
+    });
+
     it('falls back to integration overview when no query params are present', () => {
       const { result } = renderWithSearch('');
       expect(result.current.cancelUrl).toBe('/detail/nginx-1.3.0/overview');
