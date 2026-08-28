@@ -120,7 +120,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       'LOG_LEVEL=error',
 
       '--health-cmd',
-      'curl -sk http://127.0.0.1:8080/ready | grep -q "\\"overall\\": true"',
+      `curl -sk http://127.0.0.1:8080/ready | grep -q '"overall": true' && [ "$(curl -sk -o /dev/null -w '%{http_code}' https://127.0.0.1:8081/)" = "200" ]`,
     ],
     cmdParams: ['--protocol', 'https', '--port', '8081'],
   },
