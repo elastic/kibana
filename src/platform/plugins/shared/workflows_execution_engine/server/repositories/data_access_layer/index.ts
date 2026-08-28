@@ -35,7 +35,6 @@ export type {
   BulkRequestOptions,
   BulkResponse,
   CreateDataClientDeps,
-  ExecutionDataStreamClient,
   ExecutionSourceProjectionField,
   ExecutionStorageSource,
   DataClientBundle,

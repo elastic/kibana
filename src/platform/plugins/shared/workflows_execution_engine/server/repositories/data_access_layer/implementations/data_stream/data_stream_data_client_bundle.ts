@@ -13,7 +13,7 @@ import {
   WORKFLOWS_EXECUTIONS_DATA_STREAM,
   WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
 } from './constants';
-import { DataStreamExecutionsDataAccess } from './data_stream_executions_data_access';
+import { DataStreamDataClient } from './data_stream_data_client';
 import { DocumentVersionManager } from './document_version_manager';
 import {
   DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -62,7 +62,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   async stop(): Promise<void> {}
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
-    return new DataStreamExecutionsDataAccess<EsWorkflowExecution>({
+    return new DataStreamDataClient<EsWorkflowExecution>({
       esClient: this.esClient,
       dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
       versionManager: new DocumentVersionManager({
@@ -77,7 +77,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   }
 
   createStepDataClient(): StepExecutionsDataClient {
-    return new DataStreamExecutionsDataAccess<EsWorkflowStepExecution>({
+    return new DataStreamDataClient<EsWorkflowStepExecution>({
       esClient: this.esClient,
       dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
       versionManager: new DocumentVersionManager({

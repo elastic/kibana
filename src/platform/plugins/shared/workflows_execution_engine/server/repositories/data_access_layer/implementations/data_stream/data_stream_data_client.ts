@@ -32,10 +32,10 @@ import type {
 } from '../../types';
 
 const notImplemented = (method: string): never => {
-  throw new Error(`DataStreamExecutionsDataAccess.${method} is not implemented`);
+  throw new Error(`DataStreamDataClient.${method} is not implemented`);
 };
 
-export interface DataStreamExecutionsDataAccessDeps<TExecution extends { id: string }> {
+export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
   dataStreamName: string;
   versionManager: DocumentVersionManager;
@@ -44,12 +44,12 @@ export interface DataStreamExecutionsDataAccessDeps<TExecution extends { id: str
   logger: Logger;
 }
 
-export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
+export class DataStreamDataClient<TExecution extends { id: string }>
   implements DataClient<TExecution>
 {
   private additionalIndexesToQuery: string[];
 
-  constructor(private readonly deps: DataStreamExecutionsDataAccessDeps<TExecution>) {
+  constructor(private readonly deps: DataStreamDataClientDeps<TExecution>) {
     this.additionalIndexesToQuery = deps.additionalIndexesToQuery ?? [];
   }
 

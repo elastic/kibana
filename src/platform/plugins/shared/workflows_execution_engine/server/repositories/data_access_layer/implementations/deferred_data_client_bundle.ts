@@ -9,7 +9,7 @@
 
 import { instrumentAsyncMethods } from '@kbn/apm-utils';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
-import { DataStreamExecutionsDataAccess } from './data_stream/data_stream_data_client_bundle';
+import { DataStreamDataClientBundle } from './data_stream/data_stream_data_client_bundle';
 import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
 import type {
   DataClient,
@@ -75,7 +75,7 @@ export class DeferredDataClientBundle implements DataClientBundle {
       case 'system_index':
         return new PlainIndexDataClientBundle(deps);
       case 'data_stream':
-        return new DataStreamExecutionsDataAccess(deps);
+        return new DataStreamDataClientBundle(deps);
       default:
         throw new Error(`Unsupported storage source: ${deps.source}`);
     }
