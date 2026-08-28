@@ -38,7 +38,7 @@ const renderWithSearch = (search: string) =>
   renderHook(
     () =>
       useCancelAddPackagePolicy({
-        from: 'integration',
+        from: 'package',
         pkgkey: 'nginx-1.3.0',
         agentPolicyId: undefined,
       }),

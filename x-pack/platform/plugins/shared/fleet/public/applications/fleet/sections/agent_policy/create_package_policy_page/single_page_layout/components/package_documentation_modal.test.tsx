@@ -28,7 +28,7 @@ jest.mock('../../../../../hooks', () => ({
 }));
 
 jest.mock('../../../../../services', () => ({
-  epmRouteService: { getFilePath: (...args: any[]) => mockGetFilePath(...args) },
+  epmRouteService: { getFilePath: (path: string) => mockGetFilePath(path) },
 }));
 
 jest.mock('../../../../../../integrations/sections/epm/screens/detail/overview/readme', () => ({
