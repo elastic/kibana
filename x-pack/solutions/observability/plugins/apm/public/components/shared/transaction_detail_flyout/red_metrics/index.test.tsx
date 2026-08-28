@@ -64,7 +64,9 @@ describe('TransactionDetailFlyoutRedMetrics', () => {
     render(<TransactionDetailFlyoutRedMetrics />);
 
     expect(screen.getByTestId('transactionDetailFlyoutSection-redMetrics')).toBeInTheDocument();
-    expect(screen.getByTestId('transactionDetailFlyoutRedMetricsChart-latency')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('transactionDetailFlyoutRedMetricsChart-latency')
+    ).toBeInTheDocument();
     expect(
       screen.getByTestId('transactionDetailFlyoutRedMetricsChart-throughput')
     ).toBeInTheDocument();

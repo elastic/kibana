@@ -353,9 +353,7 @@ export const gaugeESQLAttributes: LensAttributes = {
       },
       colorMode: 'palette',
     },
-    query: {
-      esql: 'FROM kibana_sample_data_logs n| EVAL max = 50n| STATS average=avg(bytes), min=min(bytes), max=avg(bytes)*2, goal=max(bytes)',
-    },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {

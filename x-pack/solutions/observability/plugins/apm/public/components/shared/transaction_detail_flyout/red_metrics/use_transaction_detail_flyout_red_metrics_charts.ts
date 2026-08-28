@@ -14,10 +14,7 @@ import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetch
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../charts/helper/get_timeseries_color';
 import type { TransactionDetailFlyoutFilters } from '../types';
 
 const THROUGHPUT_INITIAL_STATE: APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'> =
@@ -26,18 +23,17 @@ const THROUGHPUT_INITIAL_STATE: APIReturnType<'GET /internal/apm/services/{servi
     previousPeriod: [],
   };
 
-const ERROR_RATE_INITIAL_STATE: APIReturnType<
-  'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'
-> = {
-  currentPeriod: {
-    timeseries: [],
-    average: null,
-  },
-  previousPeriod: {
-    timeseries: [],
-    average: null,
-  },
-};
+const ERROR_RATE_INITIAL_STATE: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'> =
+  {
+    currentPeriod: {
+      timeseries: [],
+      average: null,
+    },
+    previousPeriod: {
+      timeseries: [],
+      average: null,
+    },
+  };
 
 export function useTransactionDetailFlyoutRedMetricsCharts({
   serviceName,
@@ -70,14 +66,7 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
     error: latencyError,
   } = useFetcher(
     (callApmApi) => {
-      if (
-        serviceName &&
-        transactionType &&
-        start &&
-        end &&
-        latencyAggregationType &&
-        preferred
-      ) {
+      if (serviceName && transactionType && start && end && latencyAggregationType && preferred) {
         return callApmApi('GET /internal/apm/services/{serviceName}/transactions/charts/latency', {
           params: {
             path: { serviceName },
@@ -148,16 +137,7 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
         });
       }
     },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
-      preferred,
-    ]
+    [environment, kuery, serviceName, start, end, transactionType, transactionName, preferred]
   );
 
   const {
@@ -188,16 +168,7 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
         );
       }
     },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
-      preferred,
-    ]
+    [environment, kuery, serviceName, start, end, transactionType, transactionName, preferred]
   );
 
   const { currentPeriodColor: throughputColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
