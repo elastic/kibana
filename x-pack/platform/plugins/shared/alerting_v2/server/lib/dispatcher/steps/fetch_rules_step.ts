@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceInternalToken } from '../../services/rules_saved_object_service/tokens';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
+import { RuleCatalog } from '../state';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -37,7 +38,7 @@ export class FetchRulesStep implements DispatcherStep {
       new Set(dispatchable.map((ep) => ep.rule_id).filter((id): id is string => id !== null))
     );
     if (uniqueRuleIds.length === 0) {
-      return { type: 'continue', data: { rules: new Map() } };
+      return { type: 'continue', data: { rules: RuleCatalog.empty() } };
     }
 
     const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds);
@@ -52,6 +53,6 @@ export class FetchRulesStep implements DispatcherStep {
       });
     }
 
-    return { type: 'continue', data: { rules } };
+    return { type: 'continue', data: { rules: RuleCatalog.of(rules) } };
   }
 }
