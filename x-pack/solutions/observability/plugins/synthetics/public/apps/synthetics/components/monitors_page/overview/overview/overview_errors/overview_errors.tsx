@@ -36,5 +36,5 @@ export function OverviewErrors() {
 }
 
 const headingText = i18n.translate('xpack.synthetics.overview.errors.headingText', {
-  defaultMessage: 'Errors',
+  defaultMessage: 'Error states',
 });

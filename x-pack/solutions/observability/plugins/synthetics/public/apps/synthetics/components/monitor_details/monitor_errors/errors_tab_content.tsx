@@ -35,10 +35,10 @@ export const ErrorsTabContent = ({
           <PanelWithTitle title={OVERVIEW_LABEL} titleLeftAlign css={{ minWidth: 260 }}>
             <EuiFlexGroup wrap={true} responsive={false}>
               <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
-                <MonitorErrorsCount from={time.from} to={time.to} id="monitorsErrorsCountErrors" />
+                <FailedTestsCount from={time.from} to={time.to} id="failedTestsCountErrors" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
-                <FailedTestsCount from={time.from} to={time.to} id="failedTestsCountErrors" />
+                <MonitorErrorsCount from={time.from} to={time.to} id="monitorsErrorsCountErrors" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </PanelWithTitle>
@@ -62,8 +62,8 @@ export const ErrorsTabContent = ({
   );
 };
 
-const ERRORS_LABEL = i18n.translate('xpack.synthetics.errors.label', {
-  defaultMessage: 'Errors',
+const ERRORS_LABEL = i18n.translate('xpack.synthetics.errors.errorStatesLabel', {
+  defaultMessage: 'Error states',
 });
 
 const OVERVIEW_LABEL = i18n.translate('xpack.synthetics.errors.overview', {

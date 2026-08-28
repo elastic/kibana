@@ -73,8 +73,8 @@ export const ErrorsTabContent = ({
   );
 };
 
-const ERRORS_LABEL = i18n.translate('xpack.synthetics.errors.label', {
-  defaultMessage: 'Errors',
+const ERRORS_LABEL = i18n.translate('xpack.synthetics.errors.errorStatesLabel', {
+  defaultMessage: 'Error states',
 });
 
 const ERROR_GROUPS_LABEL = i18n.translate('xpack.synthetics.errors.errorGroups', {

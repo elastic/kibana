@@ -375,8 +375,8 @@ export const ErrorsList = ({
   );
 };
 
-const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {
-  defaultMessage: 'Errors list',
+const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorStatesList.label', {
+  defaultMessage: 'Error states list',
 });
 
 const ERROR_DURATION_LABEL = i18n.translate('xpack.synthetics.errorDuration.label', {
