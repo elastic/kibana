@@ -55,6 +55,7 @@ fi
 # Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
 if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
   echo "--- Clearing yarn cache"
+  echo 'Removing ~/.kibana' && rm -rf ~/.kibana
   echo 'Removing /opt/buildkite-agent/.cache/yarn' && rm -rf /opt/buildkite-agent/.cache/yarn
   echo 'Removing /opt/buildkite-agent/.yarn-local-mirror' && rm -rf /opt/buildkite-agent/.yarn-local-mirror
   echo 'Removing ./.yarn-local-mirror' && rm -rf ./.yarn-local-mirror
