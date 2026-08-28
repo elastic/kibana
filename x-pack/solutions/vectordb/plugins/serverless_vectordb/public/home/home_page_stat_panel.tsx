@@ -101,11 +101,7 @@ export const HomePageStatPanel = ({
   ));
 
   return (
-    <EuiPanel
-      color="subdued"
-      paddingSize="m"
-      data-test-subj={testSubj}
-    >
+    <EuiPanel color="subdued" paddingSize="m" data-test-subj={testSubj}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiIcon type={iconType} size="m" aria-hidden={true} />
@@ -171,7 +167,13 @@ export const HomePageStatPanel = ({
       <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
         {metrics.map(({ key, label, value, isLoading }) => (
           <EuiFlexItem key={key} grow>
-            <EuiPanel color="plain" paddingSize="m" hasBorder={false} hasShadow={false} css={statPanelStyle}>
+            <EuiPanel
+              color="plain"
+              paddingSize="m"
+              hasBorder={false}
+              hasShadow={false}
+              css={statPanelStyle}
+            >
               <EuiStat
                 data-test-subj={`${testSubj}-${key}`}
                 title={
