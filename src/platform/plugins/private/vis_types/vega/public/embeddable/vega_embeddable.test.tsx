@@ -473,7 +473,7 @@ describe('vegaEmbeddableFactory', () => {
     const { api } = await buildEmbeddable();
 
     api.applySerializedState({
-      spec: `{ data: { url: { "%type%": "esql", query: "${query}" } } }`,
+      spec: { format: 'hjson', value: `{ data: { url: { "%type%": "esql", query: "${query}" } } }` },
       title: 'Initial title',
     });
 
@@ -494,13 +494,13 @@ describe('vegaEmbeddableFactory', () => {
     const { api } = await buildEmbeddable();
 
     api.applySerializedState({
-      spec: `{ data: { url: { "%type%": "esql", query: "FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz" } } }`,
+      spec: { format: 'hjson', value: `{ data: { url: { "%type%": "esql", query: "FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz" } } }` },
       title: 'Initial title',
     });
     expect(getESQLQueryVariables(api.query$.getValue()!.esql)).toContain('fizzbuzz');
 
     api.applySerializedState({
-      spec: `{ data: { url: { "%type%": "esql", query: "FROM logs-* | WHERE color.keyword == ?color" } } }`,
+      spec: { format: 'hjson', value: `{ data: { url: { "%type%": "esql", query: "FROM logs-* | WHERE color.keyword == ?color" } } }` },
       title: 'Initial title',
     });
     expect(getESQLQueryVariables(api.query$.getValue()!.esql)).toEqual(['color']);
