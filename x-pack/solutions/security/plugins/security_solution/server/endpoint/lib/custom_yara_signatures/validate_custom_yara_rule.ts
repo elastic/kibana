@@ -10,9 +10,9 @@ import type { YaraCompiledRule, YaraMetaKeyOfInterest, YaraValidateResult } from
 import { validateYaraRule } from '../libyara';
 import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH, MAXIMUM_RULE_IDENTIFIER_LENGTH } from './constants';
 
-const VALID_META_ARCH_VALUES = ['x86', 'arm64'];
+const VALID_META_ARCH_VALUES = Object.freeze(['x86', 'arm64']);
 const VALID_META_SCAN_TYPE_VALUE = 'Memory';
-const VALID_META_OS_VALUES = ['Windows', 'Linux', 'MacOS'];
+const VALID_META_OS_VALUES = Object.freeze(['Windows', 'Linux', 'MacOS']);
 
 const hasDuplicateValues = (values: string[]): boolean => new Set(values).size !== values.length;
 
