@@ -41,11 +41,24 @@ triggers:
       additionalProperties: false
 
 steps:
+  # Creates the nightshift-investigation saved object for this run if it does not exist yet.
+  # Runs first, with no on-failure override, so any run that proceeds past this step is
+  # guaranteed to be visible to the investigations API regardless of how it was triggered
+  # (start endpoint, nightshift.triggerInvestigation step, or a direct workflow execution).
+  # All attributes derive from the execution document server-side; no body is needed.
+  - name: persist_investigation_started
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/_ensure'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+
   - name: emit_investigation_started
     type: kibana.request
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -61,7 +74,7 @@ steps:
     if: '${{ inputs.context.event_uuid != null }}'
     with:
       method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -664,7 +677,7 @@ steps:
     if: '${{ steps.investigate.error == null }}'
     with:
       method: PATCH
-      path: '/internal/nightshift/investigations/{{ execution.id }}'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -686,7 +699,7 @@ steps:
     if: '${{ steps.investigate.error != null }}'
     with:
       method: PATCH
-      path: '/internal/nightshift/investigations/{{ execution.id }}'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -716,7 +729,7 @@ steps:
     if: '${{ inputs.context.event_uuid != null }}'
     with:
       method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -759,7 +772,7 @@ steps:
     if: '${{ steps.investigate.error == null }}'
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -772,7 +785,7 @@ steps:
     if: '${{ steps.investigate.error != null }}'
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:

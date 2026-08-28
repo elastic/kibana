@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -17,6 +18,7 @@ import type {
   GetInvestigationResponse,
   InvestigationStatus,
   InvestigationSubject,
+  InvestigationSubjectType,
   InvestigationTriggerType,
   ListInvestigationItem,
   ListInvestigationsRequest,
@@ -25,16 +27,27 @@ import type {
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
-import { DEFAULT_INVESTIGATION_TRIGGER_TYPE } from '../../common';
+import {
+  DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+  INVESTIGATION_SUBJECT_TYPES,
+  INVESTIGATION_TRIGGER_TYPES,
+} from '../../common';
 import type {
   InvestigationSavedObjectClient,
   InvestigationSavedObjectUpdateAttributes,
   InvestigationStructuredOutput,
   NightshiftInvestigationAttributes,
 } from '../saved_objects';
-import { InvestigationNotFoundError } from './errors';
-import { InvestigationUnavailableError } from './investigation_unavailable_error';
-export { InvestigationNotFoundError, InvestigationUnavailableError };
+import {
+  InvestigationNotFoundError,
+  InvestigationSubjectMissingError,
+  InvestigationUnavailableError,
+} from './errors';
+export {
+  InvestigationNotFoundError,
+  InvestigationSubjectMissingError,
+  InvestigationUnavailableError,
+};
 
 /** Used when persist omitted `error`, or when reconciling a failed workflow execution. */
 const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
@@ -131,6 +144,54 @@ function isTerminalStatus(status: InvestigationStatus): boolean {
   return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
+  typeof value === 'string' && INVESTIGATION_SUBJECT_TYPES.some((type) => type === value);
+
+const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
+  typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
+
+interface ExecutionInvestigationMetadata {
+  subject?: InvestigationSubject;
+  triggerType: InvestigationTriggerType;
+  concurrencyKey?: string;
+}
+
+/**
+ * Extracts the investigation metadata that start() encodes into the workflow inputs
+ * (see the `inputs` object built there) back out of a workflow execution document.
+ */
+function parseExecutionInvestigationMetadata(
+  executionContext: Record<string, unknown> | undefined
+): ExecutionInvestigationMetadata {
+  const inputs =
+    isRecord(executionContext) && isRecord(executionContext.inputs)
+      ? executionContext.inputs
+      : undefined;
+  const inputContext = inputs && isRecord(inputs.context) ? inputs.context : undefined;
+
+  const rawSource = inputContext?.source;
+  let subject: InvestigationSubject | undefined;
+  if (isSubjectType(rawSource)) {
+    const rawSubjectId = inputContext?.[`${rawSource}_id`];
+    if (typeof rawSubjectId === 'string' && rawSubjectId.length > 0) {
+      subject = { type: rawSource, id: rawSubjectId };
+    }
+  }
+
+  const rawTriggerType = inputContext?.trigger_type;
+  const triggerType = isTriggerType(rawTriggerType)
+    ? rawTriggerType
+    : DEFAULT_INVESTIGATION_TRIGGER_TYPE;
+
+  const rawConcurrencyKey = inputs?.concurrency_key;
+  const concurrencyKey = typeof rawConcurrencyKey === 'string' ? rawConcurrencyKey : undefined;
+
+  return { subject, triggerType, concurrencyKey };
+}
+
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -139,7 +200,6 @@ export interface NightshiftInvestigationsClientDeps {
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
   investigationSoClient: InvestigationSavedObjectClient;
-  security?: CoreStart['security'];
 }
 
 export class NightshiftInvestigationsClient {
@@ -150,7 +210,6 @@ export class NightshiftInvestigationsClient {
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
   private readonly investigationSoClient: InvestigationSavedObjectClient;
-  private readonly security?: CoreStart['security'];
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -160,7 +219,6 @@ export class NightshiftInvestigationsClient {
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
     this.investigationSoClient = deps.investigationSoClient;
-    this.security = deps.security;
   }
 
   private getSpaceId(): string {
@@ -169,10 +227,6 @@ export class NightshiftInvestigationsClient {
       this.spaces?.spacesService.getSpaceId(this.request) ??
       DEFAULT_SPACE_ID
     );
-  }
-
-  private getCurrentUsername(): string | undefined {
-    return this.security?.authc.getCurrentUser(this.request)?.username;
   }
 
   async start({
@@ -231,44 +285,76 @@ export class NightshiftInvestigationsClient {
       `Started investigation for ${subject.type}/${subject.id}, execution_id=${executionId}`
     );
 
-    await this.createInvestigationSavedObject({
-      executionId,
-      subject,
-      trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
-      concurrency_key,
-    });
-
     return { investigation_id: executionId };
   }
 
-  private async createInvestigationSavedObject({
-    executionId,
-    subject,
-    trigger_type,
-    concurrency_key,
-  }: {
-    executionId: string;
-    subject: InvestigationSubject;
-    trigger_type: InvestigationTriggerType;
-    concurrency_key?: string;
-  }): Promise<void> {
-    if (concurrency_key) {
-      await this.cancelSupersededInvestigation({ concurrency_key });
+  /**
+   * Creates the saved object for a workflow execution if it does not exist yet. Called by the
+   * workflow's first step so the record exists regardless of how the workflow was triggered;
+   * idempotent so replays and concurrent calls are safe.
+   */
+  async ensureSavedObject(investigationId: string): Promise<void> {
+    const existing = await this.investigationSoClient.get(investigationId);
+    if (existing) {
+      return;
     }
 
-    await this.investigationSoClient.create({
-      id: executionId,
-      attributes: {
-        investigation_id: executionId,
-        status: 'running',
-        subject_type: subject.type,
-        subject_id: subject.id,
-        trigger_type,
-        concurrency_key,
-        executed_by: this.getCurrentUsername(),
-        created_at: new Date().toISOString(),
-      },
-    });
+    if (!this.workflowsManagement) {
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
+    }
+
+    const spaceId = this.getSpaceId();
+    const execution = await this.workflowsManagement.management.getWorkflowExecution(
+      investigationId,
+      spaceId,
+      { includeOutput: false }
+    );
+
+    // Identity comes from the execution document, never from the request, so a caller cannot
+    // mint investigation records out of nonexistent or unrelated workflow executions.
+    const belongsToInvestigationWorkflow =
+      execution?.workflowId === SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID ||
+      execution?.originManagedWorkflowId === SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
+    if (!execution || !belongsToInvestigationWorkflow) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
+    const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
+      execution.context
+    );
+
+    // An investigation without a subject is meaningless to the API (entity filtering,
+    // sig-event attachment, alert linkage all presume one), so fail the run loudly —
+    // the step error in the workflow executions UI tells the caller what to pass.
+    if (!subject) {
+      throw new InvestigationSubjectMissingError(investigationId);
+    }
+
+    if (concurrencyKey) {
+      await this.cancelSupersededInvestigation({ concurrency_key: concurrencyKey });
+    }
+
+    try {
+      await this.investigationSoClient.create({
+        id: investigationId,
+        attributes: {
+          investigation_id: investigationId,
+          status: 'running',
+          subject_type: subject.type,
+          subject_id: subject.id,
+          trigger_type: triggerType,
+          concurrency_key: concurrencyKey,
+          executed_by: execution.executedBy,
+          created_at: execution.startedAt ?? new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isConflictError(error)) {
+        // A concurrent ensure created it first.
+        return;
+      }
+      throw error;
+    }
   }
 
   private async cancelSupersededInvestigation({

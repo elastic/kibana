@@ -8,6 +8,7 @@
 import { startInvestigationRoute } from './start_investigation';
 import { getInvestigationRoute } from './get_investigation';
 import { emitLifecycleEventRoute } from './emit_lifecycle_event';
+import { ensureInvestigationRoute } from './ensure_investigation';
 import { listInvestigationsRoute } from './list_investigations';
 import { updateInvestigationRoute } from './update_investigation';
 
@@ -15,6 +16,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
   ...getInvestigationRoute,
   ...emitLifecycleEventRoute,
+  ...ensureInvestigationRoute,
   ...listInvestigationsRoute,
   ...updateInvestigationRoute,
 };

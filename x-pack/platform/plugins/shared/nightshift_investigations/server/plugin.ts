@@ -54,7 +54,6 @@ export class NightshiftInvestigationsPlugin
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private savedObjects?: CoreStart['savedObjects'];
-  private security?: CoreStart['security'];
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
@@ -119,7 +118,6 @@ export class NightshiftInvestigationsPlugin
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
     this.savedObjects = coreStart.savedObjects;
-    this.security = coreStart.security;
 
     if (plugins.agentBuilder) {
       void installInvestigationAgent({
@@ -155,7 +153,6 @@ export class NightshiftInvestigationsPlugin
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
       investigationSoClient: this.createInvestigationSoClient(request, resolvedSpaceId),
-      security: this.security,
     });
   };
 

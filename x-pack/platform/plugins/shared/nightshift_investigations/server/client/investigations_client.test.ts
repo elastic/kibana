@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -17,6 +18,7 @@ import type {
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   InvestigationNotFoundError,
+  InvestigationSubjectMissingError,
   InvestigationUnavailableError,
   NightshiftInvestigationsClient,
 } from './investigations_client';
@@ -52,12 +54,6 @@ const mockInvestigationSoClient = {
   findByConcurrencyKey: jest.fn(),
 } as unknown as jest.Mocked<InvestigationSavedObjectClient>;
 
-const mockSecurity = {
-  authc: {
-    getCurrentUser: jest.fn().mockReturnValue({ username: 'test-user' }),
-  },
-} as unknown as CoreStart['security'];
-
 const mockLogger = {
   info: jest.fn(),
   warn: jest.fn(),
@@ -75,7 +71,6 @@ const makeClient = () =>
     spaceIdOverride: SPACE_ID,
     agentBuilder: mockAgentBuilder,
     investigationSoClient: mockInvestigationSoClient,
-    security: mockSecurity,
   });
 
 const makeSoAttrs = (
@@ -352,17 +347,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(result).toEqual({ investigation_id: 'exec-123' });
   });
 
-  it('persists executed_by from current user into the SO', async () => {
+  it('does not create the saved object itself — the workflow first step owns creation', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
     await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
 
-    expect(mockInvestigationSoClient.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        attributes: expect.objectContaining({ executed_by: 'test-user' }),
-      })
-    );
+    expect(mockInvestigationSoClient.create).not.toHaveBeenCalled();
   });
 
   it('persists an explicit trigger_type into the workflow context', async () => {
@@ -519,5 +510,119 @@ describe('NightshiftInvestigationsClient.update()', () => {
         impact: { entities: [{ name: 'checkout-service' }] },
       })
     );
+  });
+});
+
+describe('NightshiftInvestigationsClient.ensureSavedObject()', () => {
+  const EXECUTION_ID = 'exec-123';
+
+  const makeExecution = (overrides: Record<string, unknown> = {}) => ({
+    id: EXECUTION_ID,
+    workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+    status: ExecutionStatus.RUNNING,
+    startedAt: '2024-01-01T00:00:00Z',
+    executedBy: 'workflow-user',
+    context: {
+      inputs: {
+        message: 'Investigate this',
+        concurrency_key: 'key-1',
+        context: {
+          source: 'alert',
+          alert_id: 'alert-42',
+          trigger_type: 'automatic',
+        },
+      },
+    },
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    mockInvestigationSoClient.findByConcurrencyKey.mockResolvedValue(undefined);
+  });
+
+  it('is a no-op when the saved object already exists', async () => {
+    mockInvestigationSoClient.get.mockResolvedValue(makeSoAttrs());
+
+    await makeClient().ensureSavedObject(EXECUTION_ID);
+
+    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    expect(mockInvestigationSoClient.create).not.toHaveBeenCalled();
+  });
+
+  it('creates the saved object from the execution document', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
+
+    await makeClient().ensureSavedObject(EXECUTION_ID);
+
+    expect(mockInvestigationSoClient.create).toHaveBeenCalledWith({
+      id: EXECUTION_ID,
+      attributes: {
+        investigation_id: EXECUTION_ID,
+        status: 'running',
+        subject_type: 'alert',
+        subject_id: 'alert-42',
+        trigger_type: 'automatic',
+        concurrency_key: 'key-1',
+        executed_by: 'workflow-user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
+    });
+  });
+
+  it('cancels a superseded running investigation sharing the concurrency key', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
+    mockInvestigationSoClient.findByConcurrencyKey.mockResolvedValue({
+      id: 'inv-old',
+      type: 'nightshift-investigation',
+      references: [],
+      attributes: makeSoAttrs({ status: 'running', concurrency_key: 'key-1' }),
+    });
+
+    await makeClient().ensureSavedObject(EXECUTION_ID);
+
+    expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
+      'inv-old',
+      expect.objectContaining({ status: 'cancelled' })
+    );
+  });
+
+  it('throws InvestigationNotFoundError when the execution does not exist', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(null);
+
+    await expect(makeClient().ensureSavedObject(EXECUTION_ID)).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    expect(mockInvestigationSoClient.create).not.toHaveBeenCalled();
+  });
+
+  it('throws InvestigationNotFoundError for an execution of an unrelated workflow', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeExecution({ workflowId: 'some-other-workflow', originManagedWorkflowId: undefined })
+    );
+
+    await expect(makeClient().ensureSavedObject(EXECUTION_ID)).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    expect(mockInvestigationSoClient.create).not.toHaveBeenCalled();
+  });
+
+  it('throws InvestigationSubjectMissingError for executions without an investigation subject', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(
+      makeExecution({ context: { inputs: { message: 'bare run' } } })
+    );
+
+    await expect(makeClient().ensureSavedObject(EXECUTION_ID)).rejects.toThrow(
+      InvestigationSubjectMissingError
+    );
+    expect(mockInvestigationSoClient.create).not.toHaveBeenCalled();
+  });
+
+  it('tolerates a conflict from a concurrent ensure', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
+    mockInvestigationSoClient.create.mockRejectedValue(
+      SavedObjectsErrorHelpers.createConflictError('nightshift-investigation', EXECUTION_ID)
+    );
+
+    await expect(makeClient().ensureSavedObject(EXECUTION_ID)).resolves.toBeUndefined();
   });
 });
