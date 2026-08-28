@@ -199,16 +199,16 @@ export const FieldSelect: FC<FieldSelectProps> = ({
     showTimeSeriesDimensions,
   ]);
 
+  const selectedFieldLabel = selectedField
+    ? currentIndexPattern.getFieldByName(selectedField)?.displayName ?? selectedField
+    : undefined;
+
   return (
     <FieldPicker<FieldChoiceWithOperationType>
       activeField={
         (selectedOperationType && selectedField
           ? {
-              label:
-                (selectedOperationType &&
-                  selectedField &&
-                  currentIndexPattern.getFieldByName(selectedField)?.displayName) ??
-                selectedField,
+              label: selectedFieldLabel ?? selectedField,
               value: { type: 'field', field: selectedField },
             }
           : undefined) as unknown as VisFieldOption<FieldChoiceWithOperationType>
@@ -222,9 +222,9 @@ export const FieldSelect: FC<FieldSelectProps> = ({
       onDelete={onDeleteColumn}
       fieldIsInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
       data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
-      // FTR waits on this (Lens sourceField), not the combobox input value, which
-      // setElement types as a filter before the option click lands.
-      data-selected-field={selectedField}
+      // Functional tests wait on the committed combo label, not the input value
+      // (setElement types the filter before the option click lands).
+      data-selected-field={selectedFieldLabel}
       aria-describedby={ariaDescribedby}
       aria-label={ariaLabel}
     />

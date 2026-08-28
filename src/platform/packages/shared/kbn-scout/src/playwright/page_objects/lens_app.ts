@@ -316,16 +316,18 @@ export class LensApp {
         timeout: 10_000,
       });
     // ComboBox can show the typed option before Lens layer state commits.
-    // data-selected-field is sourceField and updates only after insertOrReplaceColumn.
-    // Tests pass the dropdown label; the document-count field is labeled
-    // Records but stored as ___records___. Compare IDs exactly —
-    // Elasticsearch field names are case-sensitive.
+    // data-selected-field is the committed display name and updates only after
+    // insertOrReplaceColumn. Poll the attribute as data so labels with CSS
+    // metacharacters are not interpolated into a selector.
     const requestedField = field.trim();
-    const committedField = requestedField === 'Records' ? '___records___' : requestedField;
-    await this.page.testSubj
-      .locator('indexPattern-dimension-field')
-      .and(this.page.locator(`[data-selected-field="${committedField}"]`))
-      .waitFor({ state: 'visible', timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS });
+    await this.page.waitForFunction(
+      (expected) =>
+        document
+          .querySelector('[data-test-subj="indexPattern-dimension-field"]')
+          ?.getAttribute('data-selected-field') === expected,
+      requestedField,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
   }
 
   /**

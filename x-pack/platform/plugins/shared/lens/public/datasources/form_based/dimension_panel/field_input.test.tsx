@@ -156,7 +156,7 @@ describe('FieldInput', () => {
     expect(screen.getByTestId('indexPattern-dimension-field')).toBeInTheDocument();
   });
 
-  it('should expose the Lens-committed field on the combobox for functional tests', () => {
+  it('should expose the Lens-committed field display name on the combobox for functional tests', () => {
     const { unmount } = renderFieldInput({
       selectedColumn: getStringBasedOperationColumn(),
     });
@@ -170,6 +170,22 @@ describe('FieldInput', () => {
     expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
       'data-selected-field',
       'dest'
+    );
+  });
+
+  it('should expose displayName on data-selected-field when it differs from the source field id', () => {
+    renderFieldInput({
+      selectedColumn: {
+        label: 'timestamp',
+        dataType: 'date',
+        isBucketed: false,
+        operationType: 'min',
+        sourceField: 'timestamp',
+      },
+    });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'timestampLabel'
     );
   });
 
