@@ -33,6 +33,9 @@ export const DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS = {
     ...WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties,
     '@timestamp': mappings.date(),
     stepUsage: DATASTREAM_STEP_USAGE_MAPPING,
+
+    // Add a deleted field to the step executions mapping to support soft deletion of step executions.
+    deleted: mappings.boolean(),
   },
 } satisfies MappingsDefinition;
 
@@ -42,6 +45,9 @@ export const DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
     '@timestamp': mappings.date(),
     ...WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties,
     stepUsage: DATASTREAM_STEP_USAGE_MAPPING,
+
+    // Add a deleted field to the workflow executions mapping to support soft deletion of workflow executions.
+    deleted: mappings.boolean(),
   },
 } satisfies MappingsDefinition;
 

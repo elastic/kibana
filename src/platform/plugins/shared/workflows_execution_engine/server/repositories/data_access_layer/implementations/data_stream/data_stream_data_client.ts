@@ -44,7 +44,9 @@ export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   logger: Logger;
 }
 
-export class DataStreamDataClient<TExecution extends { id: string }> implements DataClient<TExecution> {
+export class DataStreamDataClient<TExecution extends { id: string }>
+  implements DataClient<TExecution>
+{
   private indexesToQuery: string[] = [];
   private readonly additionalIndexesToQuery: string[] = [];
 
@@ -296,7 +298,48 @@ export class DataStreamDataClient<TExecution extends { id: string }> implements 
   public async deleteByQuery(
     _request: ExecutionsDeleteByQueryRequest
   ): Promise<estypes.DeleteByQueryResponse> {
-    return notImplemented('deleteByQuery');
+    const searchResponse = await retryTransientEsErrors(
+      () =>
+        this.deps.esClient.search({
+          index: this.deps.dataStreamName,
+          query: _request.query,
+          size: 10000,
+          seq_no_primary_term: true,
+          _source: false,
+        }),
+      { logger: this.deps.logger }
+    );
+
+    for (const hit of searchResponse.hits.hits) {
+      if (hit._id && hit._seq_no !== undefined && hit._primary_term !== undefined) {
+        this.deps.versionManager.setVersion(hit._id, {
+          index: hit._index,
+          seqNo: hit._seq_no,
+          primaryTerm: hit._primary_term,
+        });
+      }
+    }
+
+    const bulkResponse = await this.bulk({
+      items: searchResponse.hits.hits.map((hit) => ({
+        operation: 'update',
+        document: { id: hit._id, deleted: true } as unknown as Partial<TExecution> & { id: string },
+        retryOnConflict: 3,
+      })),
+    });
+    return {
+      deleted: bulkResponse.items.filter((item) => !item.error).length,
+      batches: 1,
+      version_conflicts: bulkResponse.items.filter(
+        (item) => item.error?.type === 'version_conflict_engine_exception'
+      ).length,
+      noops: 0,
+      retries: { bulk: 0, search: 0 },
+      timed_out: false,
+      took: 0,
+      task: '',
+      failures: [],
+    };
   }
 
   private async assignTimestampToItems(
