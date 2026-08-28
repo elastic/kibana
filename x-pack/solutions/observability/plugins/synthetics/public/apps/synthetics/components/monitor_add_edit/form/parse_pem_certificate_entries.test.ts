@@ -7,8 +7,7 @@
 
 import { parsePemCertificateEntries } from './parse_pem_certificate_entries';
 
-const pem = (body: string) =>
-  `-----BEGIN CERTIFICATE-----\n${body}\n-----END CERTIFICATE-----`;
+const pem = (body: string) => `-----BEGIN CERTIFICATE-----\n${body}\n-----END CERTIFICATE-----`;
 
 describe('parsePemCertificateEntries', () => {
   it('returns an empty array for blank input', () => {
