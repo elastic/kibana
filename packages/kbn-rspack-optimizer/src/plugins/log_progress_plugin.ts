@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { rspack, type Compiler, type RspackPluginInstance } from '@rspack/core';
+import type { Compiler, RspackPluginInstance } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { rspack } from '../rspack_runtime';
 
 /**
  * Global shutdown flag - when set to true, RSPack logging will stop immediately.

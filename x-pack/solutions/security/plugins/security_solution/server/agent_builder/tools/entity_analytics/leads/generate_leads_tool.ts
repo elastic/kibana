@@ -220,6 +220,10 @@ export const generateLeadsTool = (
 
         const currentEsClient = esClient.asCurrentUser;
         const crudClient = startPlugins.entityStore.createCRUDClient(currentEsClient, spaceId);
+        const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
+          currentEsClient,
+          spaceId
+        );
         const riskScoreDataClient = new RiskScoreDataClient({
           logger,
           kibanaVersion: RISK_SCORE_CLIENT_KIBANA_VERSION,
@@ -255,6 +259,7 @@ export const generateLeadsTool = (
             ml,
             request,
             soClient: savedObjectsClient,
+            relationshipsClient,
           },
         });
 
