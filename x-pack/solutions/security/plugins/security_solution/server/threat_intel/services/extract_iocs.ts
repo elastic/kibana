@@ -9,12 +9,7 @@ import { createHash } from 'crypto';
 import { type IocType, MAX_URL_LENGTH } from '../../../common/threat_intel';
 import { IANA_TLDS } from '../data/iana_tlds';
 import { IOC_NOISE_DOMAINS } from '../data/ioc_noise_domains';
-import {
-  normalizeHeader,
-  IOC_HEADER_TERMS,
-  TERMINATOR_HEADER_TERMS,
-  TERMINATOR_PREFIXES,
-} from '../content/section_headers';
+import { classifyHeader } from '../content/section_headers';
 import { isNonRoutableIPv4 } from '../lib/ip_ranges';
 
 /** IOC tier for correlation anchoring. */
@@ -746,12 +741,6 @@ export interface SectionSpan {
   kind: SectionKind;
 }
 
-const isIocHeader = (normalized: string): boolean => IOC_HEADER_TERMS.has(normalized);
-
-const isTerminatorHeader = (normalized: string): boolean =>
-  TERMINATOR_HEADER_TERMS.has(normalized) ||
-  TERMINATOR_PREFIXES.some((p) => normalized.startsWith(p));
-
 /**
  * Segment structured text (output of htmlToStructured) into labelled section spans.
  * Only `## <heading>` lines delimit sections; prose blocks have no span entry.
@@ -774,12 +763,9 @@ export const classifySectionSpans = (text: string): readonly SectionSpan[] => {
         spans.push({ start: currentStart, end: offset, kind: currentKind });
         currentKind = null;
       }
-      const normalized = normalizeHeader(headingMatch[1]);
-      if (isIocHeader(normalized)) {
-        currentKind = 'ioc';
-        currentStart = offset;
-      } else if (isTerminatorHeader(normalized)) {
-        currentKind = 'references';
+      const headerKind = classifyHeader(headingMatch[1]);
+      if (headerKind === 'ioc' || headerKind === 'references') {
+        currentKind = headerKind;
         currentStart = offset;
       }
     }
