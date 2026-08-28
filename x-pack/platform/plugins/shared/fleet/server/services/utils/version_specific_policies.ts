@@ -119,8 +119,7 @@ export async function getVersionSpecificPolicies(
           const versionedInputs = getInputsForVersion(sourceInputs, version);
           const compiledIds = collectCompiledSecretRefIds(versionedInputs);
           const refs =
-            (updatedFullPolicy?.secret_references ?? fleetServerPolicy.data?.secret_references) ??
-            [];
+            updatedFullPolicy?.secret_references ?? fleetServerPolicy.data?.secret_references ?? [];
           return compiledIds ? refs.filter(({ id: refId }) => compiledIds.has(refId)) : refs;
         })(),
       },
