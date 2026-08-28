@@ -21,6 +21,7 @@ const buildTemplate = (overrides: Record<string, unknown> = {}) => ({
   templateId: 'template-1',
   name: 'Phishing triage',
   owner: 'securitySolution',
+  definition: 'name: Phishing triage',
   templateVersion: 1,
   deletedAt: null,
   description: 'Template for phishing triage cases',
@@ -125,7 +126,8 @@ describe('findTemplatesTool', () => {
       buildToolContext()
     );
 
-    expect(result.results[0].data).toMatchObject({
+    const { results } = result as { results: Array<{ type: string; data: unknown }> };
+    expect(results[0].data).toMatchObject({
       total: 1,
       templates: [
         {
@@ -154,7 +156,8 @@ describe('findTemplatesTool', () => {
       buildToolContext()
     );
 
-    expect(result.results[0].data).toMatchObject({
+    const { results } = result as { results: Array<{ type: string; data: unknown }> };
+    expect(results[0].data).toMatchObject({
       total: 0,
       templates: [],
       message: 'No templates found matching "nonexistent" for owner "securitySolution".',
@@ -175,9 +178,8 @@ describe('findTemplatesTool', () => {
       buildToolContext()
     );
 
-    expect((result.results[0].data as { message?: string }).message).toContain(
-      'Showing page 1 of 2'
-    );
+    const { results } = result as { results: Array<{ type: string; data: { message?: string } }> };
+    expect(results[0].data.message).toContain('Showing page 1 of 2');
   });
 
   it('clamps perPage to the maximum allowed value', async () => {
@@ -205,7 +207,8 @@ describe('findTemplatesTool', () => {
       buildToolContext()
     );
 
-    expect(result.results[0]).toMatchObject({
+    const { results } = result as { results: Array<{ type: string; data: unknown }> };
+    expect(results[0]).toMatchObject({
       data: expect.objectContaining({ message: expect.stringContaining('boom') }),
     });
   });
