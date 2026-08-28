@@ -1,21 +1,9 @@
 {
   "sha1": "89fc84ffce3891e802a3f4850444cc982fedc1db",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "a9aac16ca7b74c5-fdc7ad74ecc4681",
-      "title": "Teardown Discover Enhanced tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 10,
-        "column": 19
-      }
-    },
     {
       "id": "448e82090e00e69-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -239,6 +227,17 @@
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
         "line": 56,
         "column": 14
+      }
+    },
+    {
+      "id": "a9aac16ca7b74c5-fdc7ad74ecc4681",
+      "title": "Teardown Discover Enhanced tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
       }
     }
   ]

@@ -321,11 +321,8 @@ export const MAX_USER_ACTION_AUTHOR_LENGTH = 256 as const;
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
+  alerts: { read: true, all: true },
   metrics: [],
-  observables: { enabled: true, autoExtract: false },
-  events: { enabled: false },
-  templates: { enabled: false },
 });
 
 /**
@@ -398,6 +395,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesTableColumns: 'cases.list.tableColumns',
   casesListFields: 'cases.list.fields',
+  casesGlobalFieldColumns: 'cases.list.globalFieldColumns',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesViewMode: 'cases.list.viewMode',
   casesTableState: 'cases.list.state',
