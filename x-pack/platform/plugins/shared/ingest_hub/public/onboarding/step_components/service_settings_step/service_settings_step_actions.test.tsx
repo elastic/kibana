@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../../onboarding_flow_context', () => ({ useOnboardingFlow: jest.fn() }));
@@ -44,6 +45,10 @@ function makeService(
   };
 }
 
+function makeVarDef(name: string): RegistryVarsEntry {
+  return { name, type: 'text', title: name, required: true, show_user: true } as RegistryVarsEntry;
+}
+
 const ECF_SVC = makeService('ecf_svc', [{ method: 'ecf' }]);
 const AGENTLESS_SVC = makeService('agentless_svc', [
   { method: 'managed_integration', preferred: true },
@@ -52,6 +57,16 @@ const BOTH_SVC = makeService('both_svc', [
   { method: 'managed_integration', preferred: true },
   { method: 'ecf' },
 ]);
+const ECF_CONFIGURABLE_SVC: AwsServiceMatrixEntry = {
+  ...makeService('ecf_configurable_svc', [{ method: 'ecf' }]),
+  dataStreams: ['cloudtrail'],
+  inputs: ['aws-s3', 'aws-cloudwatch'],
+  requiredConfig: ['bucket_arn', 'log_group_arn'],
+  varDefsByInput: {
+    'aws-s3': { bucket_arn: makeVarDef('bucket_arn') },
+    'aws-cloudwatch': { log_group_arn: makeVarDef('log_group_arn') },
+  },
+};
 
 function makeInstance(
   instanceId: string,
@@ -133,5 +148,20 @@ describe('ServiceSettingsStep — actions column', () => {
       screen.queryByTestId('serviceSettingsStep-duplicateAction-ecf_dup')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('serviceSettingsStep-removeAction-ecf_dup')).toBeInTheDocument();
+  });
+
+  it('keeps ECF-only configurable services editable while hiding the ⋮ duplicate action', () => {
+    const inst = makeInstance(
+      'ecf_configurable_svc',
+      'ecf_configurable_svc',
+      'ECF Configurable Service',
+      false
+    );
+    renderStep([inst], new Map([['ecf_configurable_svc', ECF_CONFIGURABLE_SVC]]));
+
+    expect(screen.getByTestId('serviceSettingsStep-editButton-ecf_configurable_svc')).toBeVisible();
+    expect(
+      screen.queryByTestId('serviceSettingsStep-actionsButton-ecf_configurable_svc')
+    ).not.toBeInTheDocument();
   });
 });
