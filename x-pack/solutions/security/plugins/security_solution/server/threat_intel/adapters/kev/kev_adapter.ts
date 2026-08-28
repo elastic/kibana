@@ -7,8 +7,8 @@
 
 import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
-import { severityScore } from '../../content/severity';
-import { buildReportContent } from '../../content/text';
+import { severityScore } from '../../services/severity';
+import { buildReportContent } from '../../services/report_content';
 import type { FetchAdapter, NormalizedReport, SourceHit, AdapterRunContext } from '../types';
 
 /**

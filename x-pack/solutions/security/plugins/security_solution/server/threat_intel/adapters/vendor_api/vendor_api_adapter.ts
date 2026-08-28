@@ -9,8 +9,8 @@ import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
 import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { rssAdapter } from '../rss/rss_adapter';
-import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../content/severity';
-import { buildReportContent, collapseWhitespace, truncate } from '../../content/text';
+import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
+import { buildReportContent, collapseWhitespace, truncate } from '../../services/report_content';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
 import { resolveVendorHandler } from './builtin_vendors';
 
@@ -21,11 +21,6 @@ const SOURCE_DOC_REF_INDEX = 'vendor_api:item';
 const readUrl = (source: SourceHit): string | undefined => {
   const url = source._source.config.url;
   return typeof url === 'string' && url.length > 0 ? url : undefined;
-};
-
-const readVendorOverride = (source: SourceHit): string | undefined => {
-  const v = source._source.config.vendor;
-  return typeof v === 'string' && v.length > 0 ? v : undefined;
 };
 
 const safeParseJson = (body: string): unknown => {
@@ -57,11 +52,11 @@ export const vendorApiAdapter: FetchAdapter = {
   adapterType: 'vendor_api',
   async run(source, context: AdapterRunContext) {
     const log = context.logger.get('vendor-api-adapter');
-    const handler = resolveVendorHandler(source._id, readVendorOverride(source));
+    const handler = resolveVendorHandler(source._id);
     if (!handler) {
       log.warn(
         `Source ${source._id} (vendor_api) has no registered handler — skipping. ` +
-          `Add it to BUILTIN_VENDOR_HANDLERS or set config.vendor to an existing id.`
+          `Add it to BUILTIN_VENDOR_HANDLERS.`
       );
       return [];
     }

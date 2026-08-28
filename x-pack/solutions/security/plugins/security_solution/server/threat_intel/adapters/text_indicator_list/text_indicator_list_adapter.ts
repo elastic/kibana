@@ -8,10 +8,10 @@
 import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
 import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
-import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../content/severity';
-import { buildReportContent } from '../../content/text';
+import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
+import { buildReportContent } from '../../services/report_content';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
-import { canonicalizeUrl } from '../../content/canonicalize_url';
+import { canonicalizeUrl } from './canonicalize_url';
 import { parseIndicatorList } from './parse_indicator_list';
 import type { IndicatorBlock } from './parse_indicator_list';
 
@@ -293,9 +293,9 @@ export const textIndicatorListAdapter: FetchAdapter = {
         space_id: spaceId,
         source: {
           type: 'text_indicator_list',
-          // The configured source name, not the literal 'maltrail'. The create API
-          // accepts arbitrary text-list sources, and hard-coding this attributed
-          // every custom feed's reports and indicators to maltrail.
+          // The configured source name from the approved catalog entry, not the literal
+          // 'maltrail'. The catalog can seed more than one text-list source, so hard-coding
+          // this would misattribute every text-list feed's reports and indicators to maltrail.
           name: source._source.name,
           url: safeUrl,
           adapter_id: `text_indicator_list:${source._id}`,

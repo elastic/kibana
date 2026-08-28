@@ -24,12 +24,10 @@ export const BUILTIN_VENDOR_HANDLERS: Readonly<Record<string, VendorHandler>> = 
   'vendor_api:elastic-security-labs': { kind: 'rss' },
 });
 
-export const resolveVendorHandler = (
-  sourceId: string,
-  configVendor: string | undefined
-): VendorHandler | undefined => {
-  if (configVendor && BUILTIN_VENDOR_HANDLERS[configVendor]) {
-    return BUILTIN_VENDOR_HANDLERS[configVendor];
-  }
-  return BUILTIN_VENDOR_HANDLERS[sourceId];
-};
+/**
+ * Resolves a built-in vendor handler by the source's catalog id. The catalog is fixed, so a
+ * `vendor_api` source is always one of the seeded entries; there is no operator-supplied
+ * `config.vendor` override, since custom sources are not part of MVP.
+ */
+export const resolveVendorHandler = (sourceId: string): VendorHandler | undefined =>
+  BUILTIN_VENDOR_HANDLERS[sourceId];

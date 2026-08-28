@@ -62,28 +62,4 @@ describe('vendorApiAdapter', () => {
     expect(reports[0].source.type).toBe('vendor_api');
     expect(reports[0].source.adapter_id).toBe('vendor_api:vendor_api:elastic-security-labs');
   });
-
-  it('honors a config.vendor override when set', async () => {
-    const fetchMock = jest.fn().mockResolvedValue(
-      new Response(
-        `<?xml version="1.0"?><rss version="2.0"><channel><title>ESL</title>
-        <item><title>X</title><guid>esl:x</guid></item></channel></rss>`,
-        { status: 200 }
-      )
-    );
-    const source: SourceHit = {
-      _id: 'vendor_api:custom-mirror',
-      _source: {
-        adapter_type: 'vendor_api',
-        name: 'Custom Mirror of ESL',
-        config: {
-          url: 'https://mirror.example/feed.xml',
-          vendor: 'vendor_api:elastic-security-labs',
-        },
-      },
-    };
-    const reports = await vendorApiAdapter.run(source, buildContext(fetchMock));
-    expect(reports).toHaveLength(1);
-    expect(reports[0].source.url).toBe('https://mirror.example/feed.xml');
-  });
 });
