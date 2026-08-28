@@ -58,6 +58,7 @@ interface SavedSearchEmbeddableComponentProps {
   initialDocViewerTabId: string | undefined;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   stateManager: SearchEmbeddableStateManager;
+  documentViewerFlyoutType?: 'push' | 'overlay';
 }
 
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
@@ -73,6 +74,7 @@ export function SearchEmbeddableGridComponent({
   initialDocViewerTabId,
   setExpandedDoc,
   stateManager,
+  documentViewerFlyoutType,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
   const parentApi = api.parentApi;
@@ -310,6 +312,7 @@ export function SearchEmbeddableGridComponent({
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
+      documentViewerFlyoutType={documentViewerFlyoutType}
     />
   );
 }

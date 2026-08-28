@@ -22,6 +22,7 @@ export interface NonPersistedDisplayOptions {
   solutionNavIdOverride?: 'oblt' | 'security' | 'search';
   enableDocumentViewer?: boolean;
   enableFilters?: boolean;
+  documentViewerFlyoutType?: 'push' | 'overlay';
 }
 
 export type EditableSavedSearchAttributes = Partial<
