@@ -50,11 +50,7 @@ const UNENRICHED_EXTRACTION_METHODS = ['pending'] as const;
  * Fields holding fetched third-party content. `body_text` and `title` are
  * `semantic_text`, so clearing them also drops their generated embeddings.
  */
-const SCRUBBED_FIELDS = [
-  'content.body_text',
-  'content.body_text_bm25',
-  'content.body_html',
-] as const;
+const SCRUBBED_FIELDS = ['content.body_text', 'content.body_text_bm25'] as const;
 
 /**
  * Removes the report body rather than nulling it: `semantic_text` rejects an

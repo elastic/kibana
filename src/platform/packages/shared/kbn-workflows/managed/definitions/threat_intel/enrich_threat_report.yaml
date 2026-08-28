@@ -102,7 +102,6 @@ steps:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            html: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_html }}"
             text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | slice: 0, 30000 }}"
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
         on-failure:
@@ -128,7 +127,6 @@ steps:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            html: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_html }}"
             text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
             defang: true
         on-failure:

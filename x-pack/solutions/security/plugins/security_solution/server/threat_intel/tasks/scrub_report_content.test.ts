@@ -114,7 +114,7 @@ describe('scrub_report_content task', () => {
 
     const { source } = lastQuery(esClient).script;
     expect(source).toContain("remove('body_text')");
-    expect(source).toContain("remove('body_html')");
+    expect(source).not.toContain("remove('body_html')");
     expect(source).toContain('lineage.content_scrubbed_at');
     // Ranking and hunt cooldown depend on these surviving past retention.
     expect(source).not.toContain('extracted');
