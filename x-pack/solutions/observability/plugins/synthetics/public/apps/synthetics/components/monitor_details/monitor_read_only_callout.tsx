@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { KbnInfoCallout } from '@kbn/ui-callout';
-import React, { useMemo, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
