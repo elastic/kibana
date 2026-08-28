@@ -3143,6 +3143,9 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
 
+# Nightshift investigations managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+
 # PND managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/pnd @elastic/security-solution
 # Per-watch definitions. Keep @elastic/security-solution until product-team ownership is settled.
