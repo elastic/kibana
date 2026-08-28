@@ -8,14 +8,16 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { LENS_BASIC_KBN_ARCHIVE, LOGSTASH_FUNCTIONAL_ARCHIVE } from '../fixtures/constants';
+import { DISCOVER_KBN_ARCHIVE, LOGSTASH_FUNCTIONAL_ARCHIVE } from '../fixtures/constants';
 
 globalSetupHook(
-  'Load logstash + lens_basic archives for search_examples',
+  'Load logstash + discover archives for discover_customization_examples',
   async ({ esArchiver, kbnClient, log }) => {
-    log.debug('[setup:search_examples] loading logstash_functional (if needed)...');
+    log.debug('[setup:discover_customization_examples] loading logstash_functional (if needed)...');
     await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
-    log.debug('[setup:search_examples] loading lens_basic saved objects...');
-    await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
+    log.debug('[setup:discover_customization_examples] loading discover saved objects...');
+    await kbnClient.importExport.load(DISCOVER_KBN_ARCHIVE);
+    log.debug('[setup:discover_customization_examples] setting defaultIndex...');
+    await kbnClient.uiSettings.update({ defaultIndex: 'logstash-*' });
   }
 );

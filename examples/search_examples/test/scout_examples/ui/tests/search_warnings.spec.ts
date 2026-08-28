@@ -9,54 +9,26 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-
-const DOWNSAMPLED_ARCHIVE = 'src/platform/test/functional/fixtures/es_archiver/search/downsampled';
-const TEST_INDEX = 'sample-01';
-const TEST_ROLLUP_INDEX = 'sample-01-rollup';
-const DATA_VIEW_TITLE = 'sample-01,sample-01-rollup';
+import { ensureDownsampledSample, revertDownsampledSample } from '../fixtures/downsampled_sample';
 
 test.describe('Search example shard-failure warnings', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ apiServices, esArchiver, esClient, log }) => {
-    log.debug('[setup:search_warnings] loading downsampled archive...');
-    await esArchiver.loadIfNeeded(DOWNSAMPLED_ARCHIVE);
-    await esClient.indices.addBlock({ index: TEST_INDEX, block: 'write' });
-    try {
-      await esClient.transport.request({
-        method: 'POST',
-        path: `/${TEST_INDEX}/_downsample/${TEST_ROLLUP_INDEX}`,
-        body: { fixed_interval: '1h' },
-      });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (!message.includes('resource_already_exists_exception')) {
-        throw err;
-      }
-    }
-
-    await apiServices.dataViews.create({
-      title: DATA_VIEW_TITLE,
-      timeFieldName: '@timestamp',
-      override: true,
-    });
+    await ensureDownsampledSample({ apiServices, esArchiver, esClient, log });
   });
 
-  test.afterAll(async ({ apiServices, esClient }) => {
-    await esClient.indices.delete({
-      index: [TEST_INDEX, TEST_ROLLUP_INDEX],
-      ignore_unavailable: true,
-    });
-    await apiServices.dataViews.deleteByTitle(DATA_VIEW_TITLE);
+  test.afterAll(async ({ apiServices, esClient, log }) => {
+    await revertDownsampledSample({ apiServices, esClient, log });
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.searchExamples.gotoSearch();
     await pageObjects.searchExamples.configureWarningsDemo();
-    await pageObjects.toasts.dismissAll();
+    await page.components.toast().closeAll();
   });
 
-  test.afterEach(async ({ pageObjects }) => {
-    await pageObjects.toasts.dismissAll();
+  test.afterEach(async ({ page }) => {
+    await page.components.toast().closeAll();
   });
 
   test('shows shard-failure warnings as toasts and can open inspector', async ({ pageObjects }) => {

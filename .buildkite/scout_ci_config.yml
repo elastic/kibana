@@ -30,6 +30,7 @@ plugins:
     - dataset_quality
     - dev_tools
     - discover
+    - discoverCustomizationExamples
     - discover_enhanced
     - discoveries
     - embeddable_alerts_table

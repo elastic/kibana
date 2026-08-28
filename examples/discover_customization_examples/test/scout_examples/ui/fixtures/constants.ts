@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalTeardownHook } from '@kbn/scout';
-import { LENS_BASIC_KBN_ARCHIVE } from '../fixtures/constants';
+export const LOGSTASH_FUNCTIONAL_ARCHIVE =
+  'x-pack/platform/test/fixtures/es_archives/logstash_functional';
 
-globalTeardownHook('Unload lens_basic archives for search_examples', async ({ kbnClient, log }) => {
-  log.debug('[teardown:search_examples] unloading lens_basic saved objects...');
-  await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
-});
+/** Includes `A Saved Search`. */
+export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';

@@ -8,7 +8,13 @@
  */
 
 import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
-import { APP_ID, DATA_VIEW, LOGSTASH_TIME_RANGE } from '../constants';
+import {
+  APP_ID,
+  DATA_VIEW,
+  LOGSTASH_TIME_RANGE,
+  SAMPLE_01_DATA_VIEW_TITLE,
+  SAMPLE_01_TIME_RANGE,
+} from '../constants';
 
 /**
  * Page object for the search_examples demo apps.
@@ -100,16 +106,13 @@ export class SearchExamplesPage {
    * data view, rollup metric field, and the range covering sample-01.
    */
   async configureWarningsDemo(): Promise<void> {
-    await this.selectSingleComboOption('dataViewSelector', 'sample-01,sample-01-rollup');
+    await this.selectSingleComboOption('dataViewSelector', SAMPLE_01_DATA_VIEW_TITLE);
     await this.page.testSubj.locator('searchMetricField').waitFor({ state: 'visible' });
     await this.selectSingleComboOption(
       'searchMetricField',
       'kubernetes.container.memory.usage.bytes'
     );
-    await this.datePicker.setAbsoluteRange({
-      from: 'Jun 17, 2022 @ 00:00:00.000',
-      to: 'Jun 23, 2022 @ 00:00:00.000',
-    });
+    await this.datePicker.setAbsoluteRange(SAMPLE_01_TIME_RANGE);
   }
 
   /**
@@ -139,9 +142,9 @@ export class SearchExamplesPage {
 
   /**
    * Temporary until Apps DX supports replace-without-clear on comboBox.
-   * Skip when the value is already selected — EUI singleSelection hides that
-   * option ("You've selected all available options"). Re-check after opening:
-   * IndexPatternSelect may hydrate the plain-text input only then.
+   * Always types the label. EUI singleSelection hides the already-selected
+   * option, so after typing we wait for the matching list option or the
+   * selected pill, then click the option when it is in the list.
    */
   private async selectSingleComboOption(
     testSubj: string,
@@ -150,43 +153,27 @@ export class SearchExamplesPage {
   ): Promise<void> {
     const normalizedLabel = label.trim();
     const root = this.page.testSubj.locator(testSubj);
-    await root.locator('[data-test-subj="comboBoxInput"]').waitFor({ state: 'visible' });
+    const comboInput = root.locator('[data-test-subj="comboBoxInput"]');
+    await comboInput.waitFor({ state: 'visible' });
+    await comboInput.click();
 
-    if (await this.isSingleComboOptionSelected(root, normalizedLabel)) {
-      return;
-    }
-
-    await root.locator('[data-test-subj="comboBoxInput"]').click();
-    if (await this.isSingleComboOptionSelected(root, normalizedLabel)) {
-      await this.page.keyboard.press('Escape');
-      return;
-    }
-
-    const searchInput = root.locator('[data-test-subj="comboBoxSearchInput"]');
-    await searchInput.fill(label);
-
-    const listbox = this.page.getByRole('listbox');
     const exactLabel = new RegExp(`^${normalizedLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+    const selectedPill = root.locator('[data-test-subj="euiComboBoxPill"]').filter({
+      hasText: exactLabel,
+    });
+    const searchInput = root.locator('[data-test-subj="comboBoxSearchInput"]');
+    const listbox = this.page.getByRole('listbox');
     const option = listbox.getByRole('option').filter({ hasText: exactLabel });
-    await option.waitFor({ state: 'visible', timeout });
-    await option.click();
-    await listbox.waitFor({ state: 'hidden', timeout });
-  }
 
-  private async isSingleComboOptionSelected(root: Locator, label: string): Promise<boolean> {
-    const selected = await this.getSingleComboSelectedLabel(root);
-    return selected?.toLowerCase() === label.toLowerCase();
-  }
+    await searchInput.fill(label);
+    await option.or(selectedPill).waitFor({ state: 'visible', timeout });
 
-  private async getSingleComboSelectedLabel(root: Locator): Promise<string | undefined> {
-    const pills = root.locator('[data-test-subj="euiComboBoxPill"]');
-    if ((await pills.count()) === 1) {
-      return (await pills.innerText()).trim();
+    if ((await option.count()) > 0) {
+      await option.click();
+      await listbox.waitFor({ state: 'hidden', timeout });
+      return;
     }
 
-    const inputValue = (
-      await root.locator('[data-test-subj="comboBoxSearchInput"]').inputValue()
-    ).trim();
-    return inputValue || undefined;
+    await this.page.keyboard.press('Escape');
   }
 }

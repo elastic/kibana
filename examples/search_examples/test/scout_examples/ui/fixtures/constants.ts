@@ -13,10 +13,22 @@ export const LOGSTASH_FUNCTIONAL_ARCHIVE =
 export const LENS_BASIC_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
 
-/** Includes `A Saved Search`. Shares the `logstash-*` data view id with lens_basic. */
-export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
-
 export const DATA_VIEW = 'logstash-*';
+
+export const DOWNSAMPLED_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/search/downsampled';
+
+export const SAMPLE_01_INDEX = 'sample-01';
+
+/** Suite-unique rollup so this spec does not collide with other users of sample-01. */
+export const SAMPLE_01_ROLLUP_INDEX = 'sample-01-rollup-search-examples';
+
+export const SAMPLE_01_DATA_VIEW_TITLE = `${SAMPLE_01_INDEX},${SAMPLE_01_ROLLUP_INDEX}`;
+
+export const SAMPLE_01_TIME_RANGE = {
+  from: 'Jun 17, 2022 @ 00:00:00.000',
+  to: 'Jun 23, 2022 @ 00:00:00.000',
+};
 
 /** Absolute range covering logstash_functional fixture data (date-picker display format). */
 export const LOGSTASH_TIME_RANGE = {

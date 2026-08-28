@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalTeardownHook } from '@kbn/scout';
-import { LENS_BASIC_KBN_ARCHIVE } from '../fixtures/constants';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-globalTeardownHook('Unload lens_basic archives for search_examples', async ({ kbnClient, log }) => {
-  log.debug('[teardown:search_examples] unloading lens_basic saved objects...');
-  await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
+export default createPlaywrightConfig({
+  testDir: './tests',
+  runGlobalSetup: true,
 });
