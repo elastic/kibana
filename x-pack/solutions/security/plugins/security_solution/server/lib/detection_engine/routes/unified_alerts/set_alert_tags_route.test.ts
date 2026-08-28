@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
@@ -622,6 +623,47 @@ describe('set unified alerts tags', () => {
       expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ tagsAdded: ['new-tag'], tagsRemoved: [] })
+      );
+    });
+
+    test('mixed-family: computes independent per-family deltas — attack emit and alert emit do not share sources', async () => {
+      // Encoding WHY (regression): a shared delta over all hits causes a tag already present
+      // on every attack doc to be absent from actualAdded when the alert emit should still
+      // report it as added, and vice versa. Each family must use its own sources.
+      const ATTACK_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['alert-tag'] }, // alert already has alert-tag
+          },
+          {
+            _id: 'attack-1',
+            _index: ATTACK_INDEX,
+            _source: { 'kibana.alert.workflow_tags': ['attack-tag'] }, // attack already has attack-tag
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1', 'attack-1'],
+          tags: { tags_to_add: ['alert-tag', 'attack-tag'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      // alert-1 already has alert-tag → only attack-tag is new for the alert family
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tagsAdded: ['attack-tag'], tagsRemoved: [] })
+      );
+      // attack-1 already has attack-tag → only alert-tag is new for the attack family
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tagsAdded: ['alert-tag'], tagsRemoved: [] })
       );
     });
   });

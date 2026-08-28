@@ -33,6 +33,7 @@ import {
   collectChangedIdsByFamily,
   computeActualDelta,
 } from '../common/operations/prefetch_previous_statuses';
+import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 
 export const setUnifiedAlertsTagsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -87,8 +88,10 @@ export const setUnifiedAlertsTagsRoute = (
           allValidTagsToRemove.length > MAX_TAGS_PER_OPERATION;
 
         // Falls back to the requested arrays if the prefetch fails.
-        let tagsActuallyAdded = validTagsToAdd;
-        let tagsActuallyRemoved = validTagsToRemove;
+        let alertTagsActuallyAdded = validTagsToAdd;
+        let alertTagsActuallyRemoved = validTagsToRemove;
+        let attackTagsActuallyAdded = validTagsToAdd;
+        let attackTagsActuallyRemoved = validTagsToRemove;
 
         if (eventBus) {
           try {
@@ -112,14 +115,26 @@ export const setUnifiedAlertsTagsRoute = (
                 allValidTagsToRemove.some((t) => currentTags.has(t))
               );
             }));
-            const delta = computeActualDelta(
-              hits.map((h) => h.source),
+            // Compute independent per-family deltas: a tag already present on every attack doc
+            // must not appear in the alert emit's tagsAdded, and vice versa.
+            const alertHits = hits.filter((h) => !isAttackDiscoveryIndex(h.index));
+            const attackHits = hits.filter((h) => isAttackDiscoveryIndex(h.index));
+            const alertDelta = computeActualDelta(
+              alertHits.map((h) => h.source),
               validTagsToAdd,
               validTagsToRemove,
               ALERT_WORKFLOW_TAGS
             );
-            tagsActuallyAdded = delta.actualAdded;
-            tagsActuallyRemoved = delta.actualRemoved;
+            const attackDelta = computeActualDelta(
+              attackHits.map((h) => h.source),
+              validTagsToAdd,
+              validTagsToRemove,
+              ALERT_WORKFLOW_TAGS
+            );
+            alertTagsActuallyAdded = alertDelta.actualAdded;
+            alertTagsActuallyRemoved = alertDelta.actualRemoved;
+            attackTagsActuallyAdded = attackDelta.actualAdded;
+            attackTagsActuallyRemoved = attackDelta.actualRemoved;
           } catch {
             logger.warn('Failed to pre-fetch alert indices for workflow trigger (tags)');
           }
@@ -131,16 +146,16 @@ export const setUnifiedAlertsTagsRoute = (
             if (attackIds.length > 0) {
               void eventBus.emitAttackTagsChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsAdded: tagsActuallyAdded,
-                tagsRemoved: tagsActuallyRemoved,
+                tagsAdded: attackTagsActuallyAdded,
+                tagsRemoved: attackTagsActuallyRemoved,
                 truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertTagsChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsAdded: tagsActuallyAdded,
-                tagsRemoved: tagsActuallyRemoved,
+                tagsAdded: alertTagsActuallyAdded,
+                tagsRemoved: alertTagsActuallyRemoved,
                 truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
