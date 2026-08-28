@@ -19,18 +19,20 @@ const LazyContextSwitcherComponent = dynamic(() =>
   }))
 );
 
-export function initContextSwitcher(
-  spacesManager: SpacesManager,
-  core: CoreStart,
-  allowSolutionVisibility: boolean,
-  cloud?: CloudStart,
-  isServerless?: boolean
-) {
-  if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
-    return;
-  }
-
-  core.chrome.next.contextSwitcher.set(
+export function SpacesContextSwitcher({
+  spacesManager,
+  core,
+  allowSolutionVisibility,
+  cloud,
+  isServerless,
+}: {
+  spacesManager: SpacesManager;
+  core: CoreStart;
+  allowSolutionVisibility: boolean;
+  cloud?: CloudStart;
+  isServerless?: boolean;
+}) {
+  return (
     <LazyContextSwitcherComponent
       spacesManager={spacesManager}
       core={core}

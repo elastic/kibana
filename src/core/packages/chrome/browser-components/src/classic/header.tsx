@@ -28,13 +28,18 @@ import { HeaderNavControls } from '../shared/header_nav_controls';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
-import { useClassicBreadcrumbs, useHasAppMenuConfig } from '../shared/chrome_hooks';
+import {
+  useClassicBreadcrumbs,
+  useContextSwitcher,
+  useHasAppMenuConfig,
+} from '../shared/chrome_hooks';
 
 export const ClassicHeader = React.memo(() => {
   const breadcrumbs = useClassicBreadcrumbs();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const hasAppMenuConfig = useHasAppMenuConfig();
+  const contextSwitcher = useContextSwitcher();
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
@@ -96,7 +101,9 @@ export const ClassicHeader = React.memo(() => {
                   }
                 />
               </EuiHeaderSectionItem>
-
+              {contextSwitcher ? (
+                <EuiHeaderSectionItem>{contextSwitcher}</EuiHeaderSectionItem>
+              ) : null}
               <HeaderNavControls position="left" />
             </EuiHeaderSection>
 

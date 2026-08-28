@@ -179,7 +179,7 @@ describe('Spaces plugin', () => {
   });
 
   describe('#start', () => {
-    it('should register the spaces nav control when buildFlavor is traditional', () => {
+    it('should register the chrome space control instead of left navControls', () => {
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
 
@@ -196,26 +196,7 @@ describe('Spaces plugin', () => {
         cloud: cloudMock.createStart(),
       });
 
-      expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
-    });
-
-    it('should not register the spaces nav control when buildFlavor is serverless and maxSpaces is 1', () => {
-      const coreSetup = coreMock.createSetup();
-      const coreStart = coreMock.createStart();
-
-      const mockInitializerContext = coreMock.createPluginInitializerContext(
-        { maxSpaces: 1, allowSolutionVisibility: true },
-        { buildFlavor: 'serverless' }
-      );
-
-      const plugin = new SpacesPlugin(mockInitializerContext);
-      plugin.setup(coreSetup, {});
-
-      plugin.start(coreStart, {
-        features: featuresPluginMock.createStart(),
-        cloud: cloudMock.createStart(),
-      });
-
+      expect(coreStart.chrome.next.contextSwitcher.set).toHaveBeenCalled();
       expect(coreStart.chrome.navControls.registerLeft).not.toHaveBeenCalled();
     });
   });
