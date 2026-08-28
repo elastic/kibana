@@ -41,7 +41,7 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 ## 9.6.0 [kibana-9.6.0-breaking-changes]
 
-$$$kibana-osquery-saved-query-authz$$$
+$$$kibana-287882$$$
 ::::{dropdown} Osquery live queries no longer accept caller-supplied SQL from `runSavedQueries`-only callers
 **Details**<br> `POST /api/osquery/live_queries` now derives the dispatched SQL from the referenced saved query or pack. A caller who holds only the osquery `runSavedQueries` privilege (and not `writeLiveQueries`) can no longer supply a `query` or `queries` array. A mismatched query, an unresolvable `saved_query_id` / `pack_id`, or a `queries` array on that persona returns HTTP 403 Forbidden. Callers who hold `writeLiveQueries` are unchanged.
 
@@ -51,7 +51,7 @@ The same rules apply when attaching an osquery response action to a detection ru
 
 **Action**<br> For `runSavedQueries`-only callers, send a resolvable `saved_query_id` or `pack_id` and omit `query` / `queries`. To run arbitrary SQL, grant `writeLiveQueries`.
 
-View the Osquery saved-query authorization fix (PR number to be filled when the pull request opens).
+View [PR #287882](https://github.com/elastic/kibana/pull/287882).
 ::::
 
 $$$kibana-285645$$$
