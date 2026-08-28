@@ -47,7 +47,11 @@ import {
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByName, getBundledPackageByPkgKey } from './bundled_packages';
 
-import { getInstalledPackageWithAssets, getInstallationObject, getPackageSavedObjects } from './get';
+import {
+  getInstalledPackageWithAssets,
+  getInstallationObject,
+  getPackageSavedObjects,
+} from './get';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 
 jest.mock('../../data_streams');
@@ -146,6 +150,7 @@ function archivePackageFixture(
     Partial<Pick<ArchivePackage, 'data_streams'>>
 ): ArchivePackage {
   return {
+    format_version: '3.0.0',
     title: overrides.name,
     description: 'test',
     owner: { github: 'elastic' },
@@ -172,9 +177,12 @@ function registryPackageFixture(
   return {
     name: overrides.name,
     version: overrides.version,
+    format_version: '3.0.0',
     title: overrides.name,
     description: 'test',
     owner: { github: 'elastic' },
+    download: `/epr/${overrides.name}/${overrides.name}-${overrides.version}.zip`,
+    path: `/package/${overrides.name}/${overrides.version}`,
   };
 }
 

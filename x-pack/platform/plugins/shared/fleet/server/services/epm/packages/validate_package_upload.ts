@@ -50,7 +50,9 @@ function isValidDataStreamType(
 
 function isTopLevelPipeline(path: string): boolean {
   const pathParts = getPathParts(path);
-  return pathParts.type === ElasticsearchAssetType.ingestPipeline && pathParts.dataset === undefined;
+  return (
+    pathParts.type === ElasticsearchAssetType.ingestPipeline && pathParts.dataset === undefined
+  );
 }
 
 function dataStreamUsesOtelInput(
@@ -86,6 +88,9 @@ interface UploadDataStream {
 }
 
 interface UploadPolicyTemplate {
+  // `name` overlaps with both RegistryPolicyTemplate union members so that
+  // ArchivePackage stays assignable to this all-optional (weak) type on 8.19.
+  name?: string;
   dynamic_signal_types?: boolean;
   inputs?: Array<{ dynamic_signal_types?: boolean; name?: string; type?: string }>;
 }
