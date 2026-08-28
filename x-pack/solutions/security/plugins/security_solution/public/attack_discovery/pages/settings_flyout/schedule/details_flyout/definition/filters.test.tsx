@@ -18,10 +18,19 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/
 jest.mock('../../../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../../../../common/hooks/use_experimental_features');
 
+// The filter badge is a lazily-loaded, Suspense-wrapped component from
+// `@kbn/unified-search-plugin`. Its first cold render (on-demand module
+// transform plus Suspense resolution) is costly enough to exceed the default
+// 5s test budget under CI's parallel load, which is what made this test flaky.
+// Give the render headroom rather than waiting the slowness out.
+jest.setTimeout(60_000);
+
 const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
 
 const renderComponent = async () => {
-  await act(() => {
+  // `act(async ...)` so the lazily-loaded filter badge finishes resolving
+  // before we assert, instead of leaving pending Suspense work behind.
+  await act(async () => {
     render(
       <TestProviders>
         {
@@ -54,6 +63,8 @@ describe('Filters', () => {
   it('should render correct filter', async () => {
     await renderComponent();
 
+    // The badge label resolves after the lazy filter component loads, so wait
+    // on that rendered text (the terminal signal) rather than asserting once.
     await waitFor(() => {
       expect(screen.getByTestId('filters')).toHaveTextContent('_type: exists');
     });
