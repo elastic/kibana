@@ -64,8 +64,23 @@ jest.mock('./message_editor', () => ({
 jest.mock('./input_actions', () => ({
   InputActions: () => null,
 }));
-jest.mock('./attachment_pills_row', () => ({
-  AttachmentPillsRow: () => null,
+jest.mock('./attachment_pill', () => ({
+  AttachmentPill: ({
+    attachment,
+    onRemoveAttachment,
+  }: {
+    attachment: { id: string };
+    onRemoveAttachment?: () => void;
+  }) => (
+    <button
+      data-test-subj={`mock-remove-attachment-${attachment.id}`}
+      type="button"
+      onClick={onRemoveAttachment}
+    />
+  ),
+}));
+jest.mock('./attachment_group_pill', () => ({
+  AttachmentGroupPill: () => null,
 }));
 jest.mock('../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(),
@@ -190,6 +205,46 @@ describe('ConversationInput', () => {
       jest.advanceTimersByTime(200);
       expect(editorController.focus).not.toHaveBeenCalled();
       jest.useRealTimers();
+    });
+  });
+
+  describe('attachment removal', () => {
+    const attachment = { id: 'a1', type: 'text', data: {} };
+
+    it('removes a normal attachment via context when image upload is enabled', () => {
+      const removeAttachment = jest.fn();
+      mockedUseExperimentalFeatures.mockReturnValue(true);
+      mockedUseConversationContext.mockReturnValue({
+        attachments: [attachment],
+        upsertAttachments: jest.fn(),
+        removeAttachment,
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+      } as never);
+
+      render(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
+
+      expect(removeAttachment).toHaveBeenCalledWith(0);
+    });
+
+    it('still removes a normal attachment via context when image upload is disabled', () => {
+      const removeAttachment = jest.fn();
+      mockedUseExperimentalFeatures.mockReturnValue(false);
+      mockedUseConversationContext.mockReturnValue({
+        attachments: [attachment],
+        upsertAttachments: jest.fn(),
+        removeAttachment,
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+      } as never);
+
+      render(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
+
+      expect(removeAttachment).toHaveBeenCalledWith(0);
     });
   });
 });
