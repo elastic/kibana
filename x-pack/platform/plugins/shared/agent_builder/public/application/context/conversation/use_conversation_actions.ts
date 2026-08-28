@@ -9,12 +9,11 @@ import { useMemo } from 'react';
 import type { QueryClient } from '@kbn/react-query';
 import produce, { type Draft } from 'immer-v9';
 import type {
+  Conversation,
   ConversationRound,
-  ConversationRoundAuthor,
   ReasoningStep,
   ToolCallProgress,
   ToolCallStep,
-  Conversation,
   CompactionStep,
   BackgroundAgentCompleteStep,
   TodosStep,
@@ -28,7 +27,6 @@ import {
   carriedOverTodos,
 } from '@kbn/agent-builder-common';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
   createAskUserQuestionStep,
   isAskUserQuestionStep,
@@ -50,14 +48,10 @@ export interface ConversationActions {
   invalidateConversation: () => void;
   addOptimisticRound: ({
     userMessage,
-    author,
-    authorProfile,
     attachments,
     agentId,
   }: {
     userMessage: string;
-    author?: ConversationRoundAuthor;
-    authorProfile?: UserProfileWithAvatar;
     attachments?: AttachmentInput[];
     agentId: string;
   }) => Promise<void>;
@@ -143,14 +137,10 @@ export const createConversationActions = ({
 
     addOptimisticRound: async ({
       userMessage,
-      author,
-      authorProfile,
       attachments,
       agentId,
     }: {
       userMessage: string;
-      author?: ConversationRoundAuthor;
-      authorProfile?: UserProfileWithAvatar;
       attachments?: AttachmentInput[];
       agentId: string;
     }) => {
@@ -178,8 +168,6 @@ export const createConversationActions = ({
 
           const nextRound = createNewRound({
             userMessage,
-            author,
-            authorProfile,
             attachments: fallbackAttachments,
             steps: carryoverTodos
               ? [

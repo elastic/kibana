@@ -38,8 +38,7 @@ const labels = {
 
 interface RoundInputProps {
   input: string;
-  author?: ConversationRoundAuthor;
-  authorProfile?: UserProfileWithAvatar;
+  author?: ConversationRoundAuthor | UserProfileWithAvatar;
   isCurrentUser: boolean;
   origin?: ConversationRoundOrigin;
   startedAt: string;
@@ -51,7 +50,6 @@ interface RoundInputProps {
 export const RoundInput = ({
   input,
   author,
-  authorProfile,
   isCurrentUser,
   origin,
   startedAt,
@@ -88,13 +86,7 @@ export const RoundInput = ({
       <EuiFlexItem grow={false} css={inputContentStyles}>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <RoundAuthorHeader
-              author={author}
-              authorProfile={authorProfile}
-              origin={origin}
-              startedAt={startedAt}
-              actor="user"
-            />
+            <RoundAuthorHeader author={author} origin={origin} startedAt={startedAt} actor="user" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPanel

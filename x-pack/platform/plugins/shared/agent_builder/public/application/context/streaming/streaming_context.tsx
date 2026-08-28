@@ -22,8 +22,7 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import produce from 'immer-v9';
-import type { ConversationRoundAuthor, ConversationRoundStep } from '@kbn/agent-builder-common';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import type { SendMessageVars } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
@@ -62,32 +61,20 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
     });
   }, []);
 
-  const setPendingMessage = useCallback(
-    (
-      conversationId: string,
-      message: string,
-      author?: ConversationRoundAuthor,
-      authorProfile?: UserProfileWithAvatar
-    ) => {
-      setByConversationId(
-        produce((draft) => {
-          if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
-          draft[conversationId].pendingMessage = message;
-          draft[conversationId].pendingAuthor = author;
-          draft[conversationId].pendingAuthorProfile = authorProfile;
-        })
-      );
-    },
-    []
-  );
+  const setPendingMessage = useCallback((conversationId: string, message: string) => {
+    setByConversationId(
+      produce((draft) => {
+        if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
+        draft[conversationId].pendingMessage = message;
+      })
+    );
+  }, []);
 
   const clearPendingMessage = useCallback((conversationId: string) => {
     setByConversationId(
       produce((draft) => {
         if (draft[conversationId]) {
           delete draft[conversationId].pendingMessage;
-          delete draft[conversationId].pendingAuthor;
-          delete draft[conversationId].pendingAuthorProfile;
         }
       })
     );

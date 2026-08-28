@@ -57,9 +57,12 @@ const getAuthorName = (author?: ConversationRoundAuthor): string | undefined => 
   return author?.full_name || author?.username;
 };
 
+const isUserProfileAuthor = (
+  author?: ConversationRoundAuthor | UserProfileWithAvatar
+): author is UserProfileWithAvatar => Boolean(author && 'uid' in author);
+
 interface RoundAuthorHeaderProps {
-  author?: ConversationRoundAuthor;
-  authorProfile?: UserProfileWithAvatar;
+  author?: ConversationRoundAuthor | UserProfileWithAvatar;
   origin?: ConversationRoundOrigin;
   startedAt: string;
   actor: 'user' | 'agent';
@@ -68,7 +71,6 @@ interface RoundAuthorHeaderProps {
 
 export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   author,
-  authorProfile,
   origin,
   startedAt,
   actor,
@@ -76,19 +78,22 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const time = formatRoundTime(startedAt);
+  const hasUserProfileAuthor = isUserProfileAuthor(author);
   const shouldResolveAuthorProfile =
-    actor === 'user' && !authorProfile && !origin && Boolean(author?.id);
+    actor === 'user' && !hasUserProfileAuthor && !origin && Boolean(author?.id);
   const { data: resolvedAuthorProfiles = [] } = useUserProfiles({
-    uids: author?.id ? [author.id] : [],
+    uids: !hasUserProfileAuthor && author?.id ? [author.id] : [],
     enabled: shouldResolveAuthorProfile,
   });
-  const resolvedAuthorProfile = authorProfile ?? resolvedAuthorProfiles[0];
+  const resolvedAuthorProfile = hasUserProfileAuthor ? author : resolvedAuthorProfiles[0];
   const name =
     actor === 'agent'
       ? agent?.name
       : resolvedAuthorProfile
       ? getUserDisplayName(resolvedAuthorProfile.user)
-      : getAuthorName(author);
+      : !hasUserProfileAuthor
+      ? getAuthorName(author)
+      : undefined;
   const showSlackOrigin = actor === 'user' && origin?.type === ConversationOriginType.Slack;
   const showAgentBadge = actor === 'agent';
   const showSeparatorBeforeTime = Boolean(name) || showAgentBadge || showSlackOrigin;

@@ -67,14 +67,7 @@ describe('RoundAuthorHeader', () => {
   });
 
   it('uses the user profile display name and avatar when provided', () => {
-    render(
-      <RoundAuthorHeader
-        actor="user"
-        startedAt={startedAt}
-        author={{ id: 'user-1', username: 'alice' }}
-        authorProfile={authorProfile}
-      />
-    );
+    render(<RoundAuthorHeader actor="user" startedAt={startedAt} author={authorProfile} />);
 
     expect(screen.getByText('Alice Example')).toBeInTheDocument();
     expect(screen.getByText('AE')).toBeInTheDocument();

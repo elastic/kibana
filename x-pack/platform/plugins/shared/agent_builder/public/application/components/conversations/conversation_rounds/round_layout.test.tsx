@@ -17,6 +17,7 @@ import { RoundInput } from './round_input';
 import { RoundResponse } from './round_response/round_response';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useCurrentUser } from '../../../hooks/agents/use_current_user';
+import { pendingRoundId } from '../../../utils/new_conversation';
 
 jest.mock('./round_input', () => ({
   RoundInput: jest.fn(() => null),
@@ -52,6 +53,19 @@ const useConversationStreamMock = useConversationStream as jest.MockedFunction<
 const roundInputMock = RoundInput as jest.MockedFunction<typeof RoundInput>;
 const roundResponseMock = RoundResponse as jest.MockedFunction<typeof RoundResponse>;
 const useCurrentUserMock = useCurrentUser as jest.MockedFunction<typeof useCurrentUser>;
+const currentUserProfile = {
+  uid: 'current-user',
+  enabled: true,
+  user: {
+    username: 'alice',
+    full_name: 'Alice Maria',
+  },
+  data: {
+    avatar: {
+      initials: 'AM',
+    },
+  },
+};
 
 const createRound = (version: number): ConversationRound =>
   ({
@@ -100,19 +114,7 @@ describe('RoundLayout', () => {
         id: 'current-user',
         username: 'alice',
       },
-      currentUserProfile: {
-        uid: 'current-user',
-        enabled: true,
-        user: {
-          username: 'alice',
-          full_name: 'Alice Maria',
-        },
-        data: {
-          avatar: {
-            initials: 'AM',
-          },
-        },
-      },
+      currentUserProfile,
       isLoading: false,
     });
   });
@@ -206,16 +208,44 @@ describe('RoundLayout', () => {
       />
     );
 
-    expect(roundInputMock.mock.calls[0][0]).toEqual(
+    const roundInputProps = roundInputMock.mock.calls[0][0];
+    expect(roundInputProps).toEqual(
       expect.objectContaining({
         author: round.author,
         origin: round.origin,
         startedAt: round.started_at,
       })
     );
+    expect(roundInputProps).not.toHaveProperty('authorProfile');
     expect(roundResponseMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         startedAt: round.started_at,
+      })
+    );
+  });
+
+  it('uses the current user profile for local pending rounds without persisted author attribution', () => {
+    const round = {
+      ...createRound(1),
+      id: pendingRoundId,
+      status: ConversationRoundStatus.inProgress,
+    };
+
+    render(
+      <RoundLayout
+        allRounds={[round]}
+        conversationId="conversation-1"
+        isCurrentRound={true}
+        rawRound={round}
+        roundIndex={0}
+        scrollContainerHeight={100}
+      />
+    );
+
+    expect(roundInputMock.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        author: currentUserProfile,
+        isCurrentUser: true,
       })
     );
   });

@@ -18,7 +18,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { AgentPromptType, type PromptResponse } from '@kbn/agent-builder-common/agents';
-import type { OptimisticConversationRound } from '../../../utils/new_conversation';
+import { pendingRoundId } from '../../../utils/new_conversation';
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
@@ -32,10 +32,10 @@ import { TodosStepDisplay } from './todos_step_display';
 interface RoundLayoutProps {
   isCurrentRound: boolean;
   scrollContainerHeight: number;
-  rawRound: OptimisticConversationRound;
+  rawRound: ConversationRound;
   conversationAttachments?: VersionedAttachment[];
   conversationId?: string;
-  allRounds: OptimisticConversationRound[];
+  allRounds: ConversationRound[];
   roundIndex: number;
 }
 
@@ -110,7 +110,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     input,
     origin,
     author,
-    authorProfile,
     started_at: startedAt,
     status,
     pending_prompts: pendingPrompts,
@@ -127,7 +126,10 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   } = useConversationStream();
   const { currentUserProfile } = useCurrentUser();
   const isHitlDisabled = isStreaming && !isResuming;
-  const inputAuthorId = author?.id ?? authorProfile?.uid;
+  const shouldUseCurrentUserProfile = isCurrentRound && rawRound.id === pendingRoundId && !author;
+  const inputAuthor = shouldUseCurrentUserProfile ? currentUserProfile ?? undefined : author;
+  const inputAuthorId =
+    author?.id ?? (shouldUseCurrentUserProfile ? currentUserProfile?.uid : undefined);
   const isInputFromCurrentUser = Boolean(
     currentUserProfile?.uid && inputAuthorId === currentUserProfile.uid
   );
@@ -210,8 +212,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       <EuiFlexItem grow={false}>
         <RoundInput
           input={input.message}
-          author={author}
-          authorProfile={authorProfile}
+          author={inputAuthor}
           isCurrentUser={isInputFromCurrentUser}
           origin={origin}
           startedAt={startedAt}

@@ -144,30 +144,19 @@ export const useConversationTitle = () => {
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
   const conversationId = useConversationId();
-  const { pendingMessage, pendingAuthor, pendingAuthorProfile, error, errorSteps } =
-    useStreamRecord(conversationId);
+  const { pendingMessage, error, errorSteps } = useStreamRecord(conversationId);
 
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
     if (Boolean(error) && pendingMessage) {
       const pendingRound = createNewRound({
         userMessage: pendingMessage,
-        author: pendingAuthor,
-        authorProfile: pendingAuthorProfile,
-        roundId: '',
         steps: errorSteps,
       });
       return [...rounds, pendingRound];
     }
     return rounds;
-  }, [
-    conversation?.rounds,
-    error,
-    errorSteps,
-    pendingAuthor,
-    pendingAuthorProfile,
-    pendingMessage,
-  ]);
+  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
 
   return conversationRounds;
 };
