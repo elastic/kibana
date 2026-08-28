@@ -239,7 +239,8 @@ export function ActionsPopover({
             locationId,
             configId: monitor.configId,
             location: locationName,
-            id: monitor.configId,
+            id: monitor.monitorQueryId,
+            spaces: monitor.spaces,
           })
         );
         setIsPopoverOpen(false);
