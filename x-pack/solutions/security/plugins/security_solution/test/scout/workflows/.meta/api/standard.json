@@ -1,0 +1,36 @@
+{
+  "sha1": "a1b5c21367bc0d41c99fc459c1d460380dbe9c95",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "68c20e17ad478b8-1cd9661fc0b30ba",
+      "title": "security.createRule workflow step creates a real, disabled-by-default rule when \"enabled\" is omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
+        "line": 96,
+        "column": 55
+      }
+    },
+    {
+      "id": "68c20e17ad478b8-5cd22f3bcf4f159",
+      "title": "security.createRule workflow step fails the step when the API rejects an invalid rule body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
+        "line": 122,
+        "column": 79
+      }
+    }
+  ]
+}

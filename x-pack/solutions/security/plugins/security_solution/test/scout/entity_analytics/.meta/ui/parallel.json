@@ -1,8 +1,7 @@
 {
-  "sha1": "0a59f2b9260458e45549528a01bb3b614b9de611",
+  "sha1": "03be2092118645b9b069483ec4ac82cb76c5747a",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -262,8 +261,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 370,
-        "column": 14
+        "line": 374,
+        "column": 27
       }
     },
     {
