@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/286381
-issues:
-- https://github.com/elastic/kibana/issues/285362
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: 'Fix overflowing agent policy names in "Assign to new policy"'

@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/286909
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: 'Fix Cloud Security benchmarks "Evaluated" counts above 500 assets'
-description: 'Fixes the Cloud Security benchmarks "Evaluated" counter so deployments with more than 500 evaluated assets show an exact count instead of an undercount.'
