@@ -25,6 +25,12 @@ interface UseDisplayOptionsArgs {
   commands?: EditorCommand[];
   jumpToStepEntries?: JumpToStepEntry[];
   currentPath: string[];
+  /**
+   * The connector type of the group the user has drilled into (e.g. `.slack`),
+   * when it supports the generic `request` action. Used to append the
+   * "Build one" footer inside that connector's submenu.
+   */
+  buildRequestConnectorType?: string;
 }
 
 export function useDisplayOptions({
@@ -33,6 +39,7 @@ export function useDisplayOptions({
   commands,
   jumpToStepEntries,
   currentPath,
+  buildRequestConnectorType,
 }: UseDisplayOptionsArgs): MenuSelectableOption[] {
   return useMemo(
     () =>
@@ -42,9 +49,34 @@ export function useDisplayOptions({
         commands,
         jumpToStepEntries,
         currentPath,
+        buildRequestConnectorType,
       }),
-    [options, searchTerm, commands, jumpToStepEntries, currentPath]
+    [options, searchTerm, commands, jumpToStepEntries, currentPath, buildRequestConnectorType]
   );
+}
+
+/**
+ * Builds the "Couldn't find your action? Build one" footer rows shown inside a
+ * connector's submenu (from scratch / from cURL). Only relevant for connectors
+ * that expose the generic `request` action.
+ */
+function buildRequestFooterOptions(connectorType: string): MenuSelectableOption[] {
+  return [
+    {
+      label: i18n.translate('workflows.actionsMenu.buildFromScratch', {
+        defaultMessage: "Couldn't find your action? Build one from scratch",
+      }),
+      className: 'compactOption',
+      data: { menuItem: { kind: 'buildRequest', connectorType, mode: 'scratch' } },
+    },
+    {
+      label: i18n.translate('workflows.actionsMenu.buildFromCurl', {
+        defaultMessage: 'Build a request from a cURL command',
+      }),
+      className: 'compactOption',
+      data: { menuItem: { kind: 'buildRequest', connectorType, mode: 'curl' } },
+    },
+  ];
 }
 
 export function buildDisplayOptions({
@@ -53,6 +85,7 @@ export function buildDisplayOptions({
   commands,
   jumpToStepEntries,
   currentPath,
+  buildRequestConnectorType,
 }: UseDisplayOptionsArgs): MenuSelectableOption[] {
   const result: MenuSelectableOption[] = [];
   const term = searchTerm.trim().toLowerCase();
@@ -63,6 +96,9 @@ export function buildDisplayOptions({
   if (currentPath.length > 0) {
     for (const opt of options) {
       result.push({ label: opt.label, data: { menuItem: { kind: 'action', action: opt } } });
+    }
+    if (buildRequestConnectorType) {
+      result.push(...buildRequestFooterOptions(buildRequestConnectorType));
     }
     return result;
   }

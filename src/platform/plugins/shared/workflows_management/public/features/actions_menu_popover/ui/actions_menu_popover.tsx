@@ -22,6 +22,7 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
+  onBuildRequestSelected,
   ...props
 }: ActionsMenuPopoverProps) {
   return (
@@ -41,6 +42,7 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={onCommandSelected}
         onJumpToStep={onJumpToStep}
+        onBuildRequestSelected={onBuildRequestSelected}
       />
     </EuiPopover>
   );

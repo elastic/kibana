@@ -16,12 +16,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type YAML from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
+import { GENERIC_REQUEST_SUB_ACTION } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsMonacoTheme, WORKFLOW_MONACO_LAYOUT_OPTIONS } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
+import { BuildRequestFromCurlModal } from './build_request_from_curl_modal';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
@@ -72,6 +74,7 @@ import {
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type {
   ActionOptionData,
+  BuildRequestMode,
   EditorCommand,
   JumpToStepEntry,
 } from '../../../features/actions_menu_popover/types';
@@ -666,6 +669,40 @@ export const WorkflowYAMLEditor = ({
     [closeActionsPopover, isReadOnlyYaml]
   );
 
+  // Connector type (e.g. `.slack`) whose "Build from cURL" modal is open, if any.
+  const [buildRequestConnectorType, setBuildRequestConnectorType] = useState<string | null>(null);
+
+  const insertRequestStep = useCallback(
+    (connectorType: string, snippetOverride?: string) => {
+      if (isReadOnlyYaml) {
+        return;
+      }
+      const model = editorRef.current?.getModel();
+      const editor = editorRef.current;
+      if (!model || !editor) {
+        return;
+      }
+      const stepType = `${connectorType.replace(/^\./, '')}.${GENERIC_REQUEST_SUB_ACTION}`;
+      insertStepSnippet(model, yamlDocumentRef.current, stepType, editor.getPosition(), editor, {
+        snippetOverride,
+      });
+      editor.focus();
+    },
+    [isReadOnlyYaml]
+  );
+
+  const onBuildRequestSelected = useCallback(
+    (connectorType: string, mode: BuildRequestMode) => {
+      closeActionsPopover();
+      if (mode === 'scratch') {
+        insertRequestStep(connectorType);
+        return;
+      }
+      setBuildRequestConnectorType(connectorType);
+    },
+    [closeActionsPopover, insertRequestStep]
+  );
+
   const editorCommands: EditorCommand[] = useMemo(() => {
     const cmds: EditorCommand[] = [
       {
@@ -863,7 +900,15 @@ export const WorkflowYAMLEditor = ({
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={handleCommandSelected}
         onJumpToStep={handleJumpToStep}
+        onBuildRequestSelected={onBuildRequestSelected}
       />
+      {buildRequestConnectorType && (
+        <BuildRequestFromCurlModal
+          connectorType={buildRequestConnectorType}
+          onClose={() => setBuildRequestConnectorType(null)}
+          onInsert={(snippet) => insertRequestStep(buildRequestConnectorType, snippet)}
+        />
+      )}
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions — anchored to the focused
           step's line in the Monaco editor, so they're meaningless (and

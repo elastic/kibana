@@ -70,6 +70,33 @@ describe('buildDisplayOptions', () => {
     expect(result[0].data?.menuItem).toEqual({ kind: 'action', action: options[0] });
   });
 
+  it('appends "Build one" footer rows inside a request-capable connector group', () => {
+    const options = [makeAction('slack.postMessage', 'Post message')];
+    const result = buildDisplayOptions({
+      ...base,
+      options,
+      currentPath: ['external', 'slack'],
+      buildRequestConnectorType: '.slack',
+    });
+    const buildItems = result.filter((o) => o.data?.menuItem?.kind === 'buildRequest');
+    expect(buildItems).toHaveLength(2);
+    expect(buildItems.map((o) => (o.data?.menuItem as { mode: string }).mode)).toEqual([
+      'scratch',
+      'curl',
+    ]);
+    expect(
+      buildItems.every(
+        (o) => (o.data?.menuItem as { connectorType: string }).connectorType === '.slack'
+      )
+    ).toBe(true);
+  });
+
+  it('does not append footer rows when no request-capable connector is active', () => {
+    const options = [makeAction('a', 'A')];
+    const result = buildDisplayOptions({ ...base, options, currentPath: ['group1'] });
+    expect(result.some((o) => o.data?.menuItem?.kind === 'buildRequest')).toBe(false);
+  });
+
   describe('hash mode (#)', () => {
     it('shows only jump entries when search starts with #', () => {
       const result = buildDisplayOptions({ ...base, searchTerm: '#' });

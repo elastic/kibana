@@ -28,10 +28,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { connectorSupportsGenericRequest } from '../lib/connector_supports_generic_request';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 import { STEPS_PREFIX, useDisplayOptions } from '../lib/use_display_options';
 import {
   type ActionOptionData,
+  type BuildRequestMode,
   type EditorCommand,
   getMenuItemData,
   isActionConnectorGroup,
@@ -49,6 +51,37 @@ export interface ActionsMenuProps {
   jumpToStepEntries?: JumpToStepEntry[];
   onCommandSelected?: (commandId: string) => void;
   onJumpToStep?: (lineNumber: number) => void;
+  onBuildRequestSelected?: (connectorType: string, mode: BuildRequestMode) => void;
+}
+
+/**
+ * Walks the drill-in path against the option tree and, if the user is currently
+ * inside a connector group that supports the generic `request` action, returns
+ * that connector's type (e.g. `.slack`) so the "Build one" footer can be shown.
+ */
+function getBuildRequestConnectorType(
+  defaultOptions: ActionOptionData[],
+  currentPath: string[]
+): string | undefined {
+  if (currentPath.length === 0) {
+    return undefined;
+  }
+  let options = defaultOptions;
+  let current: ActionOptionData | undefined;
+  for (const id of currentPath) {
+    current = options.find((o) => o.id === id);
+    if (current && isActionGroup(current)) {
+      options = current.options;
+    } else {
+      return undefined;
+    }
+  }
+  if (current && isActionConnectorGroup(current)) {
+    return connectorSupportsGenericRequest(current.connectorType)
+      ? current.connectorType
+      : undefined;
+  }
+  return undefined;
 }
 
 export function ActionsMenu({
@@ -57,6 +90,7 @@ export function ActionsMenu({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
+  onBuildRequestSelected,
 }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -88,12 +122,18 @@ export function ActionsMenu({
     }
   }, [defaultOptions, currentPath]);
 
+  const buildRequestConnectorType = useMemo(
+    () => getBuildRequestConnectorType(defaultOptions, currentPath),
+    [defaultOptions, currentPath]
+  );
+
   const displayOptions = useDisplayOptions({
     options,
     searchTerm,
     commands,
     jumpToStepEntries,
     currentPath,
+    buildRequestConnectorType,
   });
 
   const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
@@ -127,6 +167,26 @@ export function ActionsMenu({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiIcon type="chevronSingleRight" size="s" color="primary" aria-hidden={true} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (itemData?.kind === 'buildRequest') {
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" css={styles.viewAllLink}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={itemData.mode === 'curl' ? 'editorCodeBlock' : 'plusInCircle'}
+              size="s"
+              color="primary"
+              aria-hidden={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="primary">
+              {rawOption.label}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -223,6 +283,10 @@ export function ActionsMenu({
     }
     if (itemData?.kind === 'jump') {
       onJumpToStep?.(itemData.entry.lineStart);
+      return;
+    }
+    if (itemData?.kind === 'buildRequest') {
+      onBuildRequestSelected?.(itemData.connectorType, itemData.mode);
       return;
     }
 
