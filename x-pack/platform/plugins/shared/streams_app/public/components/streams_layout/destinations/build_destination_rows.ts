@@ -70,6 +70,9 @@ const compareNumbers = (aValue: number, bValue: number, directionFactor: number)
     }
     return aUnknown ? 1 : -1;
   }
+  if (aValue === bValue) {
+    return 0;
+  }
   return directionFactor * (aValue - bValue);
 };
 
