@@ -100,7 +100,7 @@ export class WorkflowsPlugin
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       appRoute: '/app/workflows',
-      euiIconType: 'workflowsApp',
+      euiIconType: 'logoElastic',
       visibleIn: this.getVisibleIn({ isAuthorized: true, isAvailable: true }),
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
