@@ -31,14 +31,9 @@ export const CHILDREN_INCREMENT = 10;
 // We need to put a limit to not blow up the DOM.
 export const MAX_SEARCH_REVEAL = 100;
 
-// Safety ceiling, in rendered rows, for bulk expansion (Expand all / recursive Cmd-click) and the
-// upper bound of the "Values shown" default-density setting. Rows (not leaves) are the budget because
-// they map directly to DOM cost: a deeply nested document (e.g. indices-stats) renders many container
-// rows per leaf, so a leaf budget under-bounds the DOM.
+// Absolute DOM-safety ceiling, in rendered rows, for bulk expansion (Expand all / recursive
+// Cmd-click) and for seeding a fresh cell.
 export const MAX_RENDERED_NODES = 500;
-
-// Default number of rows each JSON cell renders — seeds the initial expansion.
-export const DEFAULT_RENDERED_NODES = 100;
 
 export const ROOT_ID = 'json-viewer-$root';
 

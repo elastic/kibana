@@ -408,9 +408,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
         ...props,
       });
 
-    // In JSON mode the "Values shown" range is the only numeric input rendered (sample size and row
+    // In JSON mode the "Lines shown" range is the only numeric input rendered (sample size and row
     // heights are not wired here), so the lone spinbutton is its input.
-    const getValuesShownInput = () => screen.getByRole('spinbutton');
+    const getLinesShownInput = () => screen.getByRole('spinbutton');
 
     it('is not rendered in table mode', () => {
       renderJsonMode({ documentsDisplayMode: 'table' });
@@ -421,30 +421,30 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     it('renders first, above the Hide nulls control', () => {
       renderJsonMode();
 
-      const input = getValuesShownInput();
+      const input = getLinesShownInput();
       const hideNulls = screen.getByTestId('unifiedDataTableHideNullsSettings');
-      // Separate, non-nested rows, so this is exactly FOLLOWING when "Values shown" comes first.
+      // Separate, non-nested rows, so this is exactly FOLLOWING when "Lines shown" comes first.
       expect(input.compareDocumentPosition(hideNulls)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     });
 
-    it('defaults to 100 when unset', () => {
+    it('defaults to 50 when unset', () => {
       renderJsonMode({ jsonModeSettings: {} });
 
-      expect(screen.getByText('Values shown')).toBeVisible();
-      expect(getValuesShownInput()).toHaveValue(100);
+      expect(screen.getByText('Lines shown')).toBeVisible();
+      expect(getLinesShownInput()).toHaveValue(50);
     });
 
     it('reflects the provided value', () => {
-      renderJsonMode({ jsonModeSettings: { defaultRenderedNodes: 300 } });
+      renderJsonMode({ jsonModeSettings: { defaultRenderedNodes: 120 } });
 
-      expect(getValuesShownInput()).toHaveValue(300);
+      expect(getLinesShownInput()).toHaveValue(120);
     });
 
     it('propagates a change, preserving the other JSON settings', async () => {
       const onChangeJsonModeSettings = jest.fn();
       renderJsonMode({ jsonModeSettings: { hideNulls: true }, onChangeJsonModeSettings });
 
-      await replaceNumberInputValue(getValuesShownInput(), '100');
+      await replaceNumberInputValue(getLinesShownInput(), '100');
 
       expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({
         hideNulls: true,
@@ -456,10 +456,20 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       const onChangeJsonModeSettings = jest.fn();
       renderJsonMode({ jsonModeSettings: {}, onChangeJsonModeSettings });
 
-      await replaceNumberInputValue(getValuesShownInput(), '999');
+      await replaceNumberInputValue(getLinesShownInput(), '999');
 
-      expect(getValuesShownInput()).toHaveValue(500);
-      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ defaultRenderedNodes: 500 });
+      expect(getLinesShownInput()).toHaveValue(200);
+      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ defaultRenderedNodes: 200 });
+    });
+
+    it('clamps values below the minimum before propagating', async () => {
+      const onChangeJsonModeSettings = jest.fn();
+      renderJsonMode({ jsonModeSettings: {}, onChangeJsonModeSettings });
+
+      await replaceNumberInputValue(getLinesShownInput(), '3');
+
+      expect(getLinesShownInput()).toHaveValue(10);
+      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ defaultRenderedNodes: 10 });
     });
   });
 });

@@ -453,10 +453,10 @@ const NodeLabel = memo(function NodeLabel({
   const { node, isExpanded, hasChildren, trailingComma } = row;
 
   if (node.kind === 'leaf') {
-    const leafActions = showActions
-      ? getLeafActions?.({ value: node.value, path: node.path, isArrayItem: node.isArrayItem }) ??
-        []
-      : [];
+    const leafActions =
+      showActions && getLeafActions
+        ? getLeafActions?.({ value: node.value, path: node.path, isArrayItem: node.isArrayItem })
+        : [];
     return (
       <span css={styles.label}>
         <span className={`${LABEL_TEXT_CLASS} ${LEAF_LABEL_CLASS}`} css={styles.labelText}>

@@ -16,15 +16,16 @@ import type { RowHeightSettingsProps } from './row_height_settings';
 import { RowHeightSettings } from './row_height_settings';
 import type { JsonModeSettings, DocumentsDisplayMode } from '../types';
 import { ViewModeSettings } from './view_mode_settings';
-import { DEFAULT_RENDERED_NODES, MAX_RENDERED_NODES } from './json_tree_viewer/tree_model';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
-export const RANGE_MIN_SAMPLE_SIZE = 10; // it's necessary to be able to use `step={10}` configuration for EuiRange
+export const RANGE_MIN_SAMPLE_SIZE = 10;
 export const RANGE_STEP_SAMPLE_SIZE = 10;
+export const MAX_DEFAULT_RENDERED_NODES = 200;
+export const DEFAULT_RENDERED_NODES = 50;
 
-export const MIN_RENDERED_NODES = 0;
-export const RENDERED_NODES_STEP = 50;
+export const MIN_RENDERED_NODES = 10;
+export const RENDERED_NODES_STEP = 10;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   rowHeight: RowHeightSettingsProps['rowHeight'];
@@ -154,7 +155,7 @@ const OnOffButtonGroup = ({
 };
 
 const clampRenderedNodes = (value: number) =>
-  Math.min(Math.max(Math.round(value), MIN_RENDERED_NODES), MAX_RENDERED_NODES);
+  Math.min(Math.max(Math.round(value), MIN_RENDERED_NODES), MAX_DEFAULT_RENDERED_NODES);
 
 const ValuesShownSetting = ({
   defaultRenderedNodes,
@@ -194,17 +195,17 @@ const ValuesShownSetting = ({
     [debouncedOnChange]
   );
 
-  const valuesShownLabel = i18n.translate('unifiedDataTable.defaultRenderedNodesLabel', {
-    defaultMessage: 'Values shown',
+  const linesShownLabel = i18n.translate('unifiedDataTable.defaultRenderedNodesLabel', {
+    defaultMessage: 'Lines shown',
   });
 
   return (
-    <EuiFormRow label={valuesShownLabel} display="columnCompressed">
+    <EuiFormRow label={linesShownLabel} display="columnCompressed">
       <EuiRange
         compressed
         fullWidth
         min={MIN_RENDERED_NODES}
-        max={MAX_RENDERED_NODES}
+        max={MAX_DEFAULT_RENDERED_NODES}
         step={step}
         showInput
         showRange
