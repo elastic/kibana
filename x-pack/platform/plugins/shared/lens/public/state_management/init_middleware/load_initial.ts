@@ -150,6 +150,7 @@ async function loadFromLocatorState(
       adHocDataViews: lens.persistedDoc?.state.adHocDataViews || initialState.dataViewSpecs,
       references: locatorReferences,
       ...loaderSharedArgs,
+      projectRouting,
     },
     {
       isFullEditor: true,
@@ -208,6 +209,7 @@ async function loadFromEmptyState(
       datasourceStates: lens.datasourceStates,
       adHocDataViews: lens.persistedDoc?.state.adHocDataViews,
       ...loaderSharedArgs,
+      projectRouting,
     },
     {
       isFullEditor: true,
@@ -296,6 +298,7 @@ async function loadFromSavedObject(
       references: [...doc.references, ...(doc.state.internalReferences || [])],
       adHocDataViews: doc.state.adHocDataViews,
       ...loaderSharedArgs,
+      projectRouting,
     },
     { isFullEditor: true }
   );

@@ -148,10 +148,6 @@ describe('Lens App', () => {
 
   describe('ChromeAppHeaderRegistration', () => {
     function enableChromeNextProjectHeader() {
-      Object.defineProperty(services.chrome.next, 'isEnabled', {
-        configurable: true,
-        get: () => true,
-      });
       (services.chrome.getChromeStyle as jest.Mock).mockReturnValue('project');
       (services.chrome.getChromeStyle$ as jest.Mock).mockReturnValue(
         new BehaviorSubject('project')
