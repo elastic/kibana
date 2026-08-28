@@ -26,6 +26,7 @@ import { isDataViewSource } from '../../../../../../common/data_sources';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { migrateLegacyQuery } from '../../../../../utils/migrate_legacy_query';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
@@ -139,7 +140,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       : undefined;
 
     const initialQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
-    const isEsqlMode = isOfAggregateQueryType(initialQuery);
+    const normalizedInitialQuery =
+      typeof initialQuery === 'string' ? migrateLegacyQuery(initialQuery) : initialQuery;
+    const isEsqlMode = isOfAggregateQueryType(normalizedInitialQuery);
 
     const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;
     const initialAdHocDataViewSpec = isObject(initialDataViewIdOrSpec)
@@ -181,10 +184,10 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     let dataView: DataView;
 
-    if (isOfAggregateQueryType(initialQuery)) {
+    if (isOfAggregateQueryType(normalizedInitialQuery)) {
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
-        initialQuery,
+        normalizedInitialQuery,
         persistedTabDataView ?? currentDataView$.getValue(),
         services
       );

@@ -8,7 +8,7 @@
  */
 
 import { has } from 'lodash';
-import type { Query } from '@kbn/es-query';
+import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL
@@ -17,9 +17,15 @@ import type { Query } from '@kbn/es-query';
  * @return Object
  */
 
-export function migrateLegacyQuery(query: Query | { [key: string]: unknown } | string): Query {
+export function migrateLegacyQuery(
+  query: Query | AggregateQuery | { [key: string]: unknown } | string
+): Query | AggregateQuery {
   // Lucene was the only option before, so language-less queries are all lucene
   if (!has(query, 'language')) {
+    if (typeof query === 'object' && isOfAggregateQueryType(query)) {
+      return query;
+    }
+
     return { query, language: 'lucene' };
   }
 

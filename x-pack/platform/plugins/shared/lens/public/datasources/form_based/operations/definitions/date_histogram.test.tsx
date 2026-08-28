@@ -33,6 +33,10 @@ dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpressi
     if (path === UI_SETTINGS.HISTOGRAM_MAX_BARS) {
       return 10;
     }
+
+    if (path === UI_SETTINGS.HISTOGRAM_BAR_TARGET) {
+      return 5;
+    }
   }
 );
 

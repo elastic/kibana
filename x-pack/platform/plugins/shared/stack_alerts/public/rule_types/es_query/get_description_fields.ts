@@ -40,6 +40,7 @@ export const getDescriptionFields: GetDescriptionFieldsFn<EsQueryRuleParams> = (
 
     if (
       searchConfig?.query &&
+      typeof searchConfig.query !== 'string' &&
       isOfQueryType(searchConfig.query) &&
       typeof searchConfig.query.query === 'string'
     ) {
