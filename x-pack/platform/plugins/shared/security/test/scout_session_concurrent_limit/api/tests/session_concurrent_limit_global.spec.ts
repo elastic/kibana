@@ -10,8 +10,10 @@ import { expect } from '@kbn/scout/api';
 
 import {
   deleteNativeUser,
+  disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
+  getSessionCount,
   invalidateAllSessions,
   LOCAL_STATEFUL_TAGS,
   loginWithAnonymous,
@@ -46,10 +48,12 @@ test.describe('Session Concurrent Limit global', { tag: [...LOCAL_STATEFUL_TAGS]
     await ensureSessionIndexReady(esClient);
     await enableSessionAuthcDebugLogs(esClient);
     await invalidateAllSessions(apiClient, config);
+    await expect.poll(async () => getSessionCount(esClient), { timeout: 15000 }).toBe(0);
   });
 
   test.afterAll(async ({ apiClient, config, esClient }) => {
     await toggleSessionCleanupTask(apiClient, config, true);
+    await disableSessionAuthcDebugLogs(esClient);
     await deleteNativeUser(esClient, TEST_USERNAME);
     await deleteNativeUser(esClient, ANONYMOUS_USERNAME);
   });

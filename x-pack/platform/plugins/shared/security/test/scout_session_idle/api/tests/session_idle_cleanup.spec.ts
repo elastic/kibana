@@ -9,6 +9,7 @@ import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
+  disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
   extractSessionCookie,
@@ -27,6 +28,10 @@ test.describe('Session Idle cleanup', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     await enableSessionAuthcDebugLogs(esClient);
     await invalidateAllSessions(apiClient, config);
     await expect.poll(async () => getSessionCount(esClient), { timeout: 10000 }).toBe(0);
+  });
+
+  test.afterAll(async ({ esClient }) => {
+    await disableSessionAuthcDebugLogs(esClient);
   });
 
   test('should properly clean up session expired because of idle timeout', async ({

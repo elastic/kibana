@@ -58,9 +58,17 @@ export async function ensureSessionIndexReady(esClient: EsClient): Promise<void>
   });
 }
 
+const AUTHC_DEBUG_LOGGER = 'logger.org.elasticsearch.xpack.security.authc';
+
 export async function enableSessionAuthcDebugLogs(esClient: EsClient): Promise<void> {
   await esClient.cluster.putSettings({
-    persistent: { 'logger.org.elasticsearch.xpack.security.authc': 'debug' },
+    persistent: { [AUTHC_DEBUG_LOGGER]: 'debug' },
+  });
+}
+
+export async function disableSessionAuthcDebugLogs(esClient: EsClient): Promise<void> {
+  await esClient.cluster.putSettings({
+    persistent: { [AUTHC_DEBUG_LOGGER]: null },
   });
 }
 
@@ -143,19 +151,35 @@ export async function postSessionInvalidate(
   return { statusCode: response.statusCode, body: { total: response.body.total } };
 }
 
-export async function invalidateAllSessions(
+async function pollInvalidateUntilOk(
   apiClient: ApiClientFixture,
-  config: ScoutTestConfig
+  config: ScoutTestConfig,
+  body: InvalidateSessionBody
 ): Promise<void> {
   await expect
     .poll(
       async () => {
-        const response = await postSessionInvalidate(apiClient, config, { match: 'all' });
+        const response = await postSessionInvalidate(apiClient, config, body);
         return response.statusCode;
       },
       { timeout: 15000 }
     )
     .toBe(200);
+}
+
+export async function invalidateAllSessions(
+  apiClient: ApiClientFixture,
+  config: ScoutTestConfig
+): Promise<void> {
+  await pollInvalidateUntilOk(apiClient, config, { match: 'all' });
+}
+
+export async function invalidateMatchingSessions(
+  apiClient: ApiClientFixture,
+  config: ScoutTestConfig,
+  query: Extract<InvalidateSessionBody, { match: 'query' }>['query']
+): Promise<void> {
+  await pollInvalidateUntilOk(apiClient, config, { match: 'query', query });
 }
 
 export async function loginWithBasic(

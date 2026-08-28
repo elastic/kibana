@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/api';
 
 import {
   deleteNativeUser,
+  invalidateMatchingSessions,
   loginWithBasic,
   putNativeUser,
   SESSION_API_HEADERS,
@@ -29,7 +30,15 @@ test.describe('Session Cookie', { tag: [...tags.stateful.classic] }, () => {
     );
   });
 
-  test.afterAll(async ({ esClient }) => {
+  test.afterAll(async ({ apiClient, config, esClient }) => {
+    await invalidateMatchingSessions(apiClient, config, {
+      provider: { type: 'basic', name: 'cloud-basic' },
+      username: config.auth.username,
+    });
+    await invalidateMatchingSessions(apiClient, config, {
+      provider: { type: 'basic', name: 'cloud-basic' },
+      username: TEST_USERNAME,
+    });
     await deleteNativeUser(esClient, TEST_USERNAME);
   });
 

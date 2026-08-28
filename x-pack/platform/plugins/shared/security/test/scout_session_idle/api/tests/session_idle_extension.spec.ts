@@ -9,8 +9,11 @@ import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
+  ensureSessionIndexReady,
   extractSessionCookie,
+  getSessionCount,
   getSessionsCreatedAt,
+  invalidateAllSessions,
   LOCAL_STATEFUL_TAGS,
   loginWithBasic,
   SESSION_API_HEADERS,
@@ -21,7 +24,10 @@ const IDLE_TIMEOUT_MS = 10_000;
 test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   let sessionCookie: string;
 
-  test.beforeEach(async ({ apiClient, config }) => {
+  test.beforeEach(async ({ apiClient, config, esClient }) => {
+    await ensureSessionIndexReady(esClient);
+    await invalidateAllSessions(apiClient, config);
+    await expect.poll(async () => getSessionCount(esClient), { timeout: 10000 }).toBe(0);
     sessionCookie = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
   });
 

@@ -14,6 +14,7 @@ import {
   assertSessionExpired,
   basicAuthHeader,
   deleteNativeUser,
+  disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
   getSessionCount,
@@ -70,6 +71,7 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   });
 
   test.afterAll(async ({ esClient }) => {
+    await disableSessionAuthcDebugLogs(esClient);
     await deleteNativeUser(esClient, TEST_USERNAME);
   });
 

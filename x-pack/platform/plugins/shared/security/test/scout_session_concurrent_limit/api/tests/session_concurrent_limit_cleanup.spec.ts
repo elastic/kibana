@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/api';
 
 import {
   deleteNativeUser,
+  disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
   finishSAMLHandshake,
@@ -48,9 +49,11 @@ test.describe('Session Concurrent Limit cleanup', { tag: [...LOCAL_STATEFUL_TAGS
     await ensureSessionIndexReady(esClient);
     await enableSessionAuthcDebugLogs(esClient);
     await invalidateAllSessions(apiClient, config);
+    await expect.poll(async () => getSessionCount(esClient), { timeout: 15000 }).toBe(0);
   });
 
   test.afterAll(async ({ esClient }) => {
+    await disableSessionAuthcDebugLogs(esClient);
     await deleteNativeUser(esClient, TEST_USERNAME);
     await deleteNativeUser(esClient, ANONYMOUS_USERNAME);
   });

@@ -9,6 +9,7 @@ import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
+  disableSessionAuthcDebugLogs,
   enableSessionAuthcDebugLogs,
   ensureSessionIndexReady,
   getCleanupTaskStatus,
@@ -31,6 +32,10 @@ test.describe('Session index shard missing', { tag: [...LOCAL_STATEFUL_TAGS] }, 
 
   test.afterEach(async ({ apiClient, config }) => {
     await simulatePointInTimeFailure(apiClient, config, false);
+  });
+
+  test.afterAll(async ({ esClient }) => {
+    await disableSessionAuthcDebugLogs(esClient);
   });
 
   test('quietly fails if shards are unavailable', async ({ apiClient, config, esClient }) => {
