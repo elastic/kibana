@@ -18,11 +18,17 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  getUserDisplayName,
+  UserAvatar,
+  type UserProfileWithAvatar,
+} from '@kbn/user-profile-components';
+import {
   agentBuilderDefaultAgentId,
   ConversationOriginType,
   type ConversationRoundAuthor,
   type ConversationRoundOrigin,
 } from '@kbn/agent-builder-common';
+import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { AgentAvatar } from '../../common/agent_avatar';
 
 const labels = {
@@ -59,6 +65,7 @@ const getAuthorName = (author?: ConversationRoundAuthor): string => {
 
 interface RoundAuthorHeaderProps {
   author?: ConversationRoundAuthor;
+  authorProfile?: UserProfileWithAvatar;
   origin?: ConversationRoundOrigin;
   startedAt: string;
   actor: 'user' | 'agent';
@@ -66,13 +73,26 @@ interface RoundAuthorHeaderProps {
 
 export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   author,
+  authorProfile,
   origin,
   startedAt,
   actor,
 }) => {
   const { euiTheme } = useEuiTheme();
   const time = formatRoundTime(startedAt);
-  const name = actor === 'agent' ? labels.agent : getAuthorName(author);
+  const shouldResolveAuthorProfile =
+    actor === 'user' && !authorProfile && !origin && Boolean(author?.id);
+  const { data: resolvedAuthorProfiles = [] } = useUserProfiles({
+    uids: author?.id ? [author.id] : [],
+    enabled: shouldResolveAuthorProfile,
+  });
+  const resolvedAuthorProfile = authorProfile ?? resolvedAuthorProfiles[0];
+  const name =
+    actor === 'agent'
+      ? labels.agent
+      : resolvedAuthorProfile
+      ? getUserDisplayName(resolvedAuthorProfile.user)
+      : getAuthorName(author);
   const showSlackOrigin = actor === 'user' && origin?.type === ConversationOriginType.Slack;
 
   const headerStyles = css`
@@ -115,6 +135,12 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
             color="subdued"
             size="s"
             iconPaddingSize="none"
+          />
+        ) : resolvedAuthorProfile ? (
+          <UserAvatar
+            user={resolvedAuthorProfile.user}
+            avatar={resolvedAuthorProfile.data?.avatar}
+            size="s"
           />
         ) : (
           <EuiAvatar size="s" name={name} />

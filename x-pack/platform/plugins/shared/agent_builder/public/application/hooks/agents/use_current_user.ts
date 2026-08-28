@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from '../use_kibana';
 
 /**
@@ -15,7 +16,7 @@ import { useKibana } from '../use_kibana';
 export const useCurrentUser = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { services } = useKibana();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<UserProfileWithAvatar | undefined>({
     queryKey: ['agentBuilder', 'currentUser'],
     queryFn: async () => services.userProfile.getCurrent(),
     enabled,
@@ -29,5 +30,5 @@ export const useCurrentUser = ({ enabled = true }: { enabled?: boolean } = {}) =
         }
       : null;
 
-  return { currentUser, isLoading };
+  return { currentUser, currentUserProfile: data ?? null, isLoading };
 };

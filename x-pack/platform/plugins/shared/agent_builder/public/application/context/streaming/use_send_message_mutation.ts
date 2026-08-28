@@ -13,8 +13,10 @@ import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/
 import { firstValueFrom, tap } from 'rxjs';
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   ConversationAction,
+  ConversationRoundAuthor,
   ConversationRoundStep,
   Conversation,
 } from '@kbn/agent-builder-common';
@@ -52,6 +54,8 @@ export interface SendMessageVars {
   action?: ConversationAction;
   conversationId: string;
   agentId: string;
+  author?: ConversationRoundAuthor;
+  authorProfile?: UserProfileWithAvatar;
   connectorId?: string;
   attachments?: ConversationAttachment[];
   conversationAttachments?: VersionedAttachment[];
@@ -61,7 +65,12 @@ export interface SendMessageVars {
 }
 
 export interface SendMessageMutationBindings {
-  setPendingMessage: (conversationId: string, message: string) => void;
+  setPendingMessage: (
+    conversationId: string,
+    message: string,
+    author?: ConversationRoundAuthor,
+    authorProfile?: UserProfileWithAvatar
+  ) => void;
   clearPendingMessage: (conversationId: string) => void;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
   clearError: (conversationId: string) => void;
@@ -197,7 +206,7 @@ export const useSendMessageMutation = ({
         if (!vars.message) {
           throw new Error('Message is required');
         }
-        setPendingMessage(vars.conversationId, vars.message);
+        setPendingMessage(vars.conversationId, vars.message, vars.author, vars.authorProfile);
         hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
           queryClient,
           conversationsService,
@@ -207,6 +216,8 @@ export const useSendMessageMutation = ({
         });
         await streamActions.addOptimisticRound({
           userMessage: vars.message,
+          author: vars.author,
+          authorProfile: vars.authorProfile,
           attachments: flattenAttachments(vars.attachments ?? []),
           agentId: vars.agentId,
         });

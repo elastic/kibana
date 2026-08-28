@@ -24,7 +24,7 @@ const mockUseQuery = jest.fn();
 jest.mock('@kbn/react-query', () => ({
   useQuery: (options: {
     queryKey: string[];
-    queryFn: () => Promise<{ uid: string; user: { username: string } }>;
+    queryFn: () => Promise<{ uid: string; user: { username: string }; data?: unknown }>;
     enabled: boolean;
   }) => mockUseQuery(options),
 }));
@@ -90,12 +90,18 @@ describe('useCurrentUser', () => {
     const { result } = renderHook(() => useCurrentUser({ enabled: true }));
 
     expect(result.current.currentUser).toBeNull();
+    expect(result.current.currentUserProfile).toBeNull();
     expect(result.current.isLoading).toBe(false);
   });
 
   it('maps query data to currentUser', () => {
+    const profile = {
+      uid: 'user-123',
+      user: { username: 'testuser' },
+      data: { avatar: { initials: 'TU' } },
+    };
     mockUseQuery.mockReturnValue({
-      data: { uid: 'user-123', user: { username: 'testuser' } },
+      data: profile,
       isLoading: false,
     });
 
@@ -105,6 +111,7 @@ describe('useCurrentUser', () => {
       id: 'user-123',
       username: 'testuser',
     });
+    expect(result.current.currentUserProfile).toBe(profile);
     expect(result.current.isLoading).toBe(false);
   });
 });

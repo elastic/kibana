@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { ConversationRoundAuthor, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 export type StreamType = 'send' | 'regenerate' | 'resume';
 
@@ -15,6 +16,8 @@ export interface ActiveStream {
 
 export interface StreamRecord {
   pendingMessage?: string;
+  pendingAuthor?: ConversationRoundAuthor;
+  pendingAuthorProfile?: UserProfileWithAvatar;
   error?: unknown;
   errorSteps: ConversationRoundStep[];
 }

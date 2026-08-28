@@ -18,6 +18,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { AgentPromptType, type PromptResponse } from '@kbn/agent-builder-common/agents';
+import type { OptimisticConversationRound } from '../../../utils/new_conversation';
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
@@ -30,10 +31,10 @@ import { TodosStepDisplay } from './todos_step_display';
 interface RoundLayoutProps {
   isCurrentRound: boolean;
   scrollContainerHeight: number;
-  rawRound: ConversationRound;
+  rawRound: OptimisticConversationRound;
   conversationAttachments?: VersionedAttachment[];
   conversationId?: string;
-  allRounds: ConversationRound[];
+  allRounds: OptimisticConversationRound[];
   roundIndex: number;
 }
 
@@ -108,6 +109,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     input,
     origin,
     author,
+    authorProfile,
     started_at: startedAt,
     status,
     pending_prompts: pendingPrompts,
@@ -203,6 +205,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         <RoundInput
           input={input.message}
           author={author}
+          authorProfile={authorProfile}
           origin={origin}
           startedAt={startedAt}
           attachmentRefs={input.attachment_refs}

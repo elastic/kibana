@@ -7,6 +7,7 @@
 
 import { QueryClient } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
   isAskUserQuestionStep,
   createAskUserQuestionStep,
@@ -16,7 +17,11 @@ import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { AskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
-import { createNewConversation, createNewRound } from '../../utils/new_conversation';
+import {
+  createNewConversation,
+  createNewRound,
+  type OptimisticConversationRound,
+} from '../../utils/new_conversation';
 import { createConversationActions } from './use_conversation_actions';
 
 const conversationId = 'conv-1';
@@ -58,6 +63,41 @@ const pendingPrompt: AskUserQuestionPrompt = {
   id: promptId,
   questions,
 };
+
+const userProfile: UserProfileWithAvatar = {
+  uid: 'user-1',
+  enabled: true,
+  user: {
+    username: 'alice',
+    full_name: 'Alice Example',
+  },
+  data: {
+    avatar: {
+      initials: 'AE',
+      color: '#f4d9ff',
+    },
+  },
+};
+
+describe('createConversationActions.addOptimisticRound', () => {
+  it('stores the sender author and profile on optimistic rounds', async () => {
+    const { queryClient, actions } = buildActions();
+    const queryKey = queryKeys.conversations.byId(conversationId);
+    const author = { id: 'user-1', username: 'alice' };
+
+    await actions.addOptimisticRound({
+      userMessage: 'hello',
+      agentId: 'agent-1',
+      author,
+      authorProfile: userProfile,
+    });
+
+    const conversation = queryClient.getQueryData<Conversation>(queryKey);
+    const round = conversation?.rounds.at(-1) as OptimisticConversationRound | undefined;
+    expect(round?.author).toEqual(author);
+    expect(round?.authorProfile).toEqual(userProfile);
+  });
+});
 
 describe('createConversationActions.setAskUserQuestionAnswers', () => {
   it('back-fills answers onto an existing AskUserQuestionStep (update-existing)', () => {

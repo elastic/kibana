@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { ConversationRoundAuthor, ConversationRoundOrigin } from '@kbn/agent-builder-common';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   Attachment,
   AttachmentVersionRef,
@@ -38,6 +39,7 @@ const labels = {
 interface RoundInputProps {
   input: string;
   author?: ConversationRoundAuthor;
+  authorProfile?: UserProfileWithAvatar;
   origin?: ConversationRoundOrigin;
   startedAt: string;
   attachmentRefs?: AttachmentVersionRef[];
@@ -48,6 +50,7 @@ interface RoundInputProps {
 export const RoundInput = ({
   input,
   author,
+  authorProfile,
   origin,
   startedAt,
   attachmentRefs,
@@ -82,7 +85,13 @@ export const RoundInput = ({
       <EuiFlexItem grow={false} css={inputContentStyles}>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <RoundAuthorHeader author={author} origin={origin} startedAt={startedAt} actor="user" />
+            <RoundAuthorHeader
+              author={author}
+              authorProfile={authorProfile}
+              origin={origin}
+              startedAt={startedAt}
+              actor="user"
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPanel

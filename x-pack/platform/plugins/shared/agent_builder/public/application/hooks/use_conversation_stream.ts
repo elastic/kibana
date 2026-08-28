@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, type ConversationRoundAuthor } from '@kbn/agent-builder-common';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -15,6 +16,21 @@ import { useConnectorSelection } from './chat/use_connector_selection';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { useNavigation } from './use_navigation';
 import { appPaths } from '../utils/app_paths';
+import { useCurrentUser } from './agents/use_current_user';
+
+const toRoundAuthor = (
+  currentUserProfile: UserProfileWithAvatar | null
+): ConversationRoundAuthor | undefined => {
+  if (!currentUserProfile?.uid) {
+    return undefined;
+  }
+
+  return {
+    id: currentUserProfile.uid,
+    username: currentUserProfile.user.username,
+    ...(currentUserProfile.user.full_name ? { full_name: currentUserProfile.user.full_name } : {}),
+  };
+};
 
 /**
  * Per-conversation scoped slice of the streaming state machine.
@@ -35,6 +51,7 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
+  const { currentUserProfile } = useCurrentUser();
   const { attachments, resetAttachments, browserApiTools, isEmbeddedContext } =
     useConversationContext();
   const { selectedConnector: connectorId } = useConnectorSelection();
@@ -91,6 +108,8 @@ export const useConversationStream = () => {
         conversationId: targetConversationId,
         agentId,
         connectorId,
+        author: toRoundAuthor(currentUserProfile),
+        authorProfile: currentUserProfile ?? undefined,
         attachments,
         conversationAttachments: conversation?.attachments,
         resetAttachments,
@@ -103,6 +122,7 @@ export const useConversationStream = () => {
       mutateSendMessage,
       agentId,
       connectorId,
+      currentUserProfile,
       attachments,
       conversation?.attachments,
       resetAttachments,
