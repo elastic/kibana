@@ -78,6 +78,15 @@ export const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggreg
           dataTestSubj="source-ip"
         />
       );
+    case 'destination.ip':
+      return (
+        <GroupWithIconContent
+          title={bucket.key}
+          icon="globe"
+          nullGroupMessage={nullGroupMessage}
+          dataTestSubj="destination-ip"
+        />
+      );
   }
 };
 

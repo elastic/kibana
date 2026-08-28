@@ -38,10 +38,23 @@ export const applyAuditOtelFieldMap: OtelAttributesTransform = (attributes) => {
   move('kibana.authentication_type', 'authentication.type');
   move('trace.id', 'http.request.id');
   move('http.request.headers.x-forwarded-for', 'network.forwarded_ip');
+  // user_login is the only event carrying the realm in the record; every other event gets
+  // user.domain from the authenticated user at enrichment time (see AuditService.setup).
+  move('kibana.authentication_realm', 'user.domain');
   if ('client.ip' in attrs) {
     attrs['source.address'] = attrs['client.ip'];
     attrs['source.ip'] = attrs['client.ip'];
     delete attrs['client.ip'];
+  }
+
+  // Serverless audit delivery keys users by login name, not by user profile UID: user.id becomes
+  // the username and the profile UID is not emitted. user.id is deleted when there is no username
+  // so a profile UID cannot leak through on events that carry an id but no name (user_logout).
+  const userName = attrs['user.name'];
+  if (typeof userName === 'string' && userName !== '') {
+    attrs['user.id'] = userName;
+  } else {
+    delete attrs['user.id'];
   }
 
   // The ingest pipeline reparses url.original back into components. Skipped for non-http events
@@ -65,7 +78,6 @@ export const applyAuditOtelFieldMap: OtelAttributesTransform = (attributes) => {
   for (const key of [
     'kibana.lookup_realm',
     'kibana.authentication_provider',
-    'kibana.authentication_realm',
     'url.domain',
     'url.path',
     'url.port',

@@ -10,6 +10,7 @@ import type {
   AlertEventSeverity,
 } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
+import type { EpisodeScan, PolicyCatalog, RuleCatalog } from './state';
 import type { DispatchFailureReason } from './steps/constants';
 
 export type RuleId = string;
@@ -47,17 +48,30 @@ export interface AlertEpisodeSuppression {
 }
 
 export interface DispatcherExecutionParams {
-  previousStartedAt?: Date;
+  eventWatermark?: Date;
+  /** Current count of consecutive ticks in which the watermark did not advance. */
+  stuckTicks?: number;
   signal?: AbortSignal;
-  logger: LoggerServiceContract;
+  taskId: string;
 }
 
 export interface DispatcherExecutionResult {
   startedAt: Date;
+  nextWatermark: Date;
+  /** Updated stuck-tick counter (reset to 0 on advance, incremented otherwise). */
+  nextStuckTicks: number;
+  pipelineResult: DispatcherPipelineResult;
 }
 
 export interface DispatcherTaskState {
-  previousStartedAt?: string;
+  eventWatermark?: string;
+  stuckTicks?: number;
+}
+
+export interface DispatcherPipelineResult {
+  readonly completed: boolean;
+  readonly haltReason?: DispatcherHaltReason;
+  readonly finalState: DispatcherPipelineState;
 }
 
 export interface Rule {
@@ -79,8 +93,8 @@ export interface ActionPolicy {
   groupBy: string[];
   /** User-defined tags for organizing and filtering policies */
   tags: string[];
-  /** How episodes are grouped into action group payloads */
-  groupingMode?: 'per_episode' | 'all' | 'per_field';
+  /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
+  groupingMode: 'per_episode' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
@@ -147,20 +161,26 @@ export interface DispatchFailure {
 
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
-  readonly previousStartedAt: Date;
+  readonly eventWatermark: Date;
+  /** Lower bound of the event-row scan window. Equal to `eventWatermark − OVERLAP_WINDOW_MINUTES`. Action rows are not window-capped. */
+  readonly windowStart: Date;
+  /** Upper bound of the event-row scan window. Equal to `min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)`. Action rows are not window-capped. */
+  readonly windowEnd: Date;
   readonly executionUuid: string;
-  readonly logger: LoggerServiceContract;
+  readonly signal: AbortSignal;
 }
 
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
-  readonly logger: LoggerServiceContract;
-  readonly episodes?: AlertEpisode[];
+  /** Result of the windowed candidate scan (episodes + truncation flag). */
+  readonly scan?: EpisodeScan;
+  /** Count of episodes that received an `.alert-actions` record this tick. */
+  readonly recordedEpisodes?: number;
   readonly suppressions?: AlertEpisodeSuppression[];
   readonly dispatchable?: AlertEpisode[];
   readonly suppressed?: Array<AlertEpisode & { reason: string }>;
-  readonly rules?: Map<RuleId, Rule>;
-  readonly policies?: Map<ActionPolicyId, ActionPolicy>;
+  readonly rules?: RuleCatalog;
+  readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
   readonly dispatch?: ActionGroup[];
@@ -169,13 +189,16 @@ export interface DispatcherPipelineState {
   readonly dispatchFailures?: DispatchFailure[];
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
+export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
 
 export type DispatcherStepOutput =
-  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input' | 'logger'>> }
+  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
   | { type: 'halt'; reason: DispatcherHaltReason };
 
 export interface DispatcherStep {
   readonly name: string;
-  execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput>;
+  execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput>;
 }

@@ -44,6 +44,15 @@ export const normalizeConversationAccessControl = (
   };
 };
 
+/** An access-control entry without the server-assigned `added_at` timestamp, for write operations. */
+export type ConversationAccessControlEntryInput = Omit<ConversationAccessControlEntry, 'added_at'>;
+
+/** Access-control shape for write operations. `entries` is optional and defaults to `[]` server-side. */
+export interface ConversationAccessControlInput {
+  access_mode: ConversationAccessControlMode;
+  entries?: ConversationAccessControlEntryInput[];
+}
+
 export const CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES = 100;
 
 export const CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH = 1024;

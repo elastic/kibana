@@ -251,6 +251,11 @@ export class CasePlugin
       };
     };
 
+    const getActionsClient = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.actions.getActionsClientWithRequest(request);
+    };
+
     const getSpaceId = (request?: KibanaRequest) => {
       if (!request) {
         return DEFAULT_SPACE_ID;
@@ -269,6 +274,7 @@ export class CasePlugin
       core,
       logger: this.logger,
       getCasesClient: getCasesClient('connector'),
+      getActionsClient,
       getSpaceId,
       serverlessProjectType,
       isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
@@ -301,8 +307,8 @@ export class CasePlugin
 
     return {
       attachmentFramework: {
-        registerUnified: (unifiedAttachmentType) => {
-          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
+        registerAttachment: (attachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(attachmentType);
         },
       },
       config: this.caseConfig,
@@ -496,6 +502,12 @@ export class CasePlugin
     return {
       getCasesClientWithRequest: this.getCasesClientWithRequest(core, 'plugin_contract'),
       getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
+      getCasesEventBus: () => {
+        if (!this.casesEventBus) {
+          throw new Error('getCasesEventBus called before casesEventBus was initialized');
+        }
+        return this.casesEventBus;
+      },
       config: this.caseConfig,
     };
   }

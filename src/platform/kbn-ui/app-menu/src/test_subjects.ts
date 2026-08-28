@@ -14,6 +14,7 @@
  */
 export const APP_MENU_TEST_SUBJECTS = {
   root: 'app-menu',
+  loading: 'app-menu-loading',
   overflowButton: 'app-menu-overflow-button',
   popover: 'app-menu-popover',
   switch: 'app-menu-switch',

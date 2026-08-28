@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from './spaces';
 
 // ---------------------------------------------------------------------------
@@ -38,6 +39,10 @@ interface TermsBucket {
   buckets?: Array<{ key: string }>;
 }
 
+interface EvaluatorModelsAggregation {
+  buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
+}
+
 interface ExperimentBucket {
   key: string;
   doc_count: number;
@@ -50,9 +55,7 @@ interface ExperimentBucket {
   task_model_id?: TermsBucket;
   task_model_family?: TermsBucket;
   task_model_provider?: TermsBucket;
-  evaluator_model_id?: TermsBucket;
-  evaluator_model_family?: TermsBucket;
-  evaluator_model_provider?: TermsBucket;
+  evaluator_models?: EvaluatorModelsAggregation;
   git_branch?: TermsBucket;
   git_commit_sha?: TermsBucket;
   total_repetitions?: { value?: number };
@@ -76,7 +79,8 @@ export interface ExperimentsListingResult {
     dataset_ids: string[];
     dataset_names: string[];
     task_model: { id: string; family: string | undefined; provider: string | undefined };
-    evaluator_model: { id: string; family: string | undefined; provider: string | undefined };
+    evaluator_model?: EvaluatorJudgeModel;
+    evaluator_models: EvaluatorJudgeModel[];
     git_branch: string | null;
     git_commit_sha: string | null;
     total_repetitions: number;
@@ -90,11 +94,11 @@ export interface ExperimentsListingResult {
 // ---------------------------------------------------------------------------
 
 /**
- * Builds a filter that matches score documents visible in the given space: those
+ * Builds a filter that matches documents visible in the given space: those
  * assigned to it, and in the default space those predating space-awareness.
  */
-export const buildSpaceFilter = (spaceId: string): Record<string, unknown> => {
-  const should: Array<Record<string, unknown>> = [{ terms: { space_ids: [spaceId] } }];
+export const buildSpaceFilter = (spaceId: string): NonNullable<QueryDslQueryContainer> => {
+  const should: Array<NonNullable<QueryDslQueryContainer>> = [{ terms: { space_ids: [spaceId] } }];
   if (spaceId === DEFAULT_SPACE_ID) {
     should.push({ bool: { must_not: { exists: { field: 'space_ids' } } } });
   }
@@ -132,9 +136,12 @@ export const buildExperimentFilterQuery = (
  */
 export const buildExampleScoresQuery = (
   exampleId: string,
-  options?: { spaceId?: string }
+  options?: { spaceId?: string; datasetId?: string }
 ): { bool: { must: Array<Record<string, unknown>> } } => {
   const must: Array<Record<string, unknown>> = [{ term: { 'example.id': exampleId } }];
+  if (options?.datasetId !== undefined) {
+    must.push({ term: { 'example.dataset.id': options.datasetId } });
+  }
   if (options?.spaceId) {
     must.push(buildSpaceFilter(options.spaceId));
   }
@@ -162,12 +169,65 @@ export const buildDatasetExampleScoresQuery = (
 };
 
 // ---------------------------------------------------------------------------
+// Evaluator judge models
+// ---------------------------------------------------------------------------
+
+/**
+ * Cap on the distinct judge models reported for a single experiment. Matches the `maxItems` the
+ * API schemas declare, which the SDK client enforces when it parses those responses.
+ */
+const MAX_EVALUATOR_MODELS = 20;
+
+export interface EvaluatorJudgeModel {
+  id: string;
+  family: string | undefined;
+  provider: string | undefined;
+}
+
+/**
+ * Every distinct model an experiment's evaluators judged with, so callers can tell that the
+ * evaluators differ rather than reporting whichever judge sorted first. Family and provider are
+ * nested under the id so they stay correlated with their own model: sibling terms aggs would pair
+ * one judge's id with another's family and describe a model that never existed.
+ */
+export const buildEvaluatorModelsAggregation = () => ({
+  terms: { field: 'evaluator.model.id', size: MAX_EVALUATOR_MODELS },
+  aggs: {
+    family: { terms: { field: 'evaluator.model.family', size: 1 } },
+    provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+  },
+});
+
+const toEvaluatorModels = (
+  aggregation: EvaluatorModelsAggregation | undefined
+): EvaluatorJudgeModel[] =>
+  (aggregation?.buckets ?? []).map((bucket) => {
+    const family = firstBucket(bucket.family);
+    const provider = firstBucket(bucket.provider);
+    return { id: buildModelDisplayId(bucket.key, family, provider), family, provider };
+  });
+
+/**
+ * Reads {@link buildEvaluatorModelsAggregation}, ordered by how many scores each judge produced,
+ * so the first entry is the experiment's predominant judge. Empty for experiments only code
+ * evaluators scored, which record no model at all.
+ */
+export const parseEvaluatorModelsAggregation = (
+  aggregations: Record<string, unknown> | undefined
+): EvaluatorJudgeModel[] =>
+  toEvaluatorModels(
+    (aggregations as { evaluator_models?: EvaluatorModelsAggregation } | undefined)
+      ?.evaluator_models
+  );
+
+// ---------------------------------------------------------------------------
 // Per-experiment stats aggregation
 // ---------------------------------------------------------------------------
 
 /**
  * Returns the aggregation tree for computing per-evaluator, per-dataset statistics
- * (mean, median, std_dev, min, max, count).
+ * (mean, median, std_dev, min, max, count) along with the model each evaluator
+ * judged with. Code evaluators have no model, so their buckets come back empty.
  */
 export const buildStatsAggregation = () => ({
   by_dataset: {
@@ -180,6 +240,16 @@ export const buildStatsAggregation = () => ({
         aggs: {
           score_stats: { extended_stats: { field: 'evaluator.score' } },
           score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
+          // Family and provider are nested under the id so they stay correlated with their own
+          // model. Sibling terms aggs would pair one judge's id with another's family when a
+          // bucket spans several judges, describing a model that never existed.
+          evaluator_model_id: {
+            terms: { field: 'evaluator.model.id', size: 1 },
+            aggs: {
+              family: { terms: { field: 'evaluator.model.family', size: 1 } },
+              provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+            },
+          },
         },
       },
     },
@@ -302,9 +372,9 @@ export const buildExperimentsListingAggregation = ({
       task_model_id: { terms: { field: 'task.model.id', size: 1 } },
       task_model_family: { terms: { field: 'task.model.family', size: 1 } },
       task_model_provider: { terms: { field: 'task.model.provider', size: 1 } },
-      evaluator_model_id: { terms: { field: 'evaluator.model.id', size: 1 } },
-      evaluator_model_family: { terms: { field: 'evaluator.model.family', size: 1 } },
-      evaluator_model_provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+      // The singular `evaluator_model` is the first of these rather than its own agg, so the
+      // listing cannot report a predominant judge that disagrees with the set it lists.
+      evaluator_models: buildEvaluatorModelsAggregation(),
       git_branch: { terms: { field: 'metadata.git.branch', size: 1 } },
       git_commit_sha: { terms: { field: 'metadata.git.commit_sha', size: 1 } },
       total_repetitions: { max: { field: 'metadata.total_repetitions' } },
@@ -336,8 +406,7 @@ export const parseExperimentsListingResponse = (
   const experiments = experimentBuckets.map((bucket) => {
     const taskFamily = firstBucket(bucket.task_model_family);
     const taskProvider = firstBucket(bucket.task_model_provider);
-    const evalFamily = firstBucket(bucket.evaluator_model_family);
-    const evalProvider = firstBucket(bucket.evaluator_model_provider);
+    const evaluatorModels = toEvaluatorModels(bucket.evaluator_models);
 
     return {
       execution_id: bucket.key,
@@ -353,11 +422,11 @@ export const parseExperimentsListingResponse = (
         family: taskFamily,
         provider: taskProvider,
       },
-      evaluator_model: {
-        id: buildModelDisplayId(firstBucket(bucket.evaluator_model_id), evalFamily, evalProvider),
-        family: evalFamily,
-        provider: evalProvider,
-      },
+      // The judge that produced the most scores, and unset for experiments judged only by code
+      // evaluators, which have no model at all. Reporting them as the "unknown" that
+      // buildModelDisplayId synthesizes for empty buckets would read as an unidentified judge.
+      ...(evaluatorModels.length > 0 && { evaluator_model: evaluatorModels[0] }),
+      evaluator_models: evaluatorModels,
       git_branch: firstBucket(bucket.git_branch) ?? null,
       git_commit_sha: firstBucket(bucket.git_commit_sha) ?? null,
       total_repetitions: bucket.total_repetitions?.value ?? 1,
@@ -392,6 +461,9 @@ interface StatsAggregations {
             count?: number;
           };
           score_median?: { values?: Record<string, number | null> };
+          evaluator_model_id?: {
+            buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
+          };
         }>;
       };
     }>;
@@ -403,6 +475,8 @@ export interface ExperimentDetailEvaluatorStat {
   dataset_name: string;
   evaluator_name: string;
   example_count: number;
+  /** Model this evaluator judged with; absent for code evaluators. */
+  evaluator_model?: { id: string; family: string | undefined; provider: string | undefined };
   stats: {
     mean: number;
     median: number;
@@ -432,12 +506,25 @@ export const parseStatsAggregationResponse = (
     return evaluatorBuckets.map((evaluatorBucket) => {
       const scoreStats = evaluatorBucket.score_stats;
       const median = evaluatorBucket.score_median?.values?.['50.0'];
+      const modelBucket = evaluatorBucket.evaluator_model_id?.buckets?.[0];
+      const modelId = modelBucket?.key;
+      const modelFamily = firstBucket(modelBucket?.family);
+      const modelProvider = firstBucket(modelBucket?.provider);
 
       return {
         dataset_id: datasetId,
         dataset_name: datasetName,
         evaluator_name: evaluatorBucket.key,
         example_count: exampleCount,
+        // Absent rather than 'unknown' when nothing matched, so code evaluators read as
+        // "no model" instead of an unidentified one.
+        ...((modelId || modelFamily || modelProvider) && {
+          evaluator_model: {
+            id: buildModelDisplayId(modelId, modelFamily, modelProvider),
+            family: modelFamily,
+            provider: modelProvider,
+          },
+        }),
         stats: {
           mean: scoreStats?.avg ?? 0,
           median: median ?? 0,

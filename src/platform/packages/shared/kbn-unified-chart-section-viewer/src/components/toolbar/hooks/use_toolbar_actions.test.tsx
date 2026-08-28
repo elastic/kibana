@@ -9,13 +9,16 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useToolbarActions } from './use_toolbar_actions';
 import { ExternalServicesProvider } from '../../../context/external_services';
 import type { ExternalServices } from '../../../context/external_services';
 import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
 import { METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
-import { FEATURE_FLAGS } from '../../../common/constants';
+import {
+  FEATURE_FLAGS,
+  METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ,
+} from '../../../common/constants';
 import { SortSelector } from '../sort_selector';
 import * as metricsExperienceStateProvider from '../../observability/metrics/context/metrics_experience_state_provider';
 
@@ -59,7 +62,37 @@ describe('useToolbarActions', () => {
       onToggleFullscreen: jest.fn(),
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
+      searchTerm: '',
+      onSearchTermChange: jest.fn(),
     } as unknown as ReturnType<typeof metricsExperienceStateProvider.useMetricsExperienceState>);
+  });
+
+  it('renders the search button as the first member of the right side action group', () => {
+    const { result } = renderToolbarActionsHook(undefined);
+
+    expect(result.current.rightSideActions[0]).toEqual(
+      expect.objectContaining({
+        iconType: 'magnify',
+        'data-test-subj': METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ,
+      })
+    );
+  });
+
+  it('does not render the expanded search input until the search button is activated', () => {
+    const { result } = renderToolbarActionsHook(undefined);
+
+    expect(result.current.searchInput).toBeUndefined();
+
+    act(() => {
+      result.current.rightSideActions[0].onClick();
+    });
+
+    expect(result.current.searchInput).toBeDefined();
+    expect(
+      result.current.rightSideActions.some(
+        (button) => button['data-test-subj'] === METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ
+      )
+    ).toBe(false);
   });
 
   it('hides the Edit grid of metrics button when featureFlags is not provided by the host (safe default)', () => {

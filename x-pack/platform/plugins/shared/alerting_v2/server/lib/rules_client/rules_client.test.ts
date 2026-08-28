@@ -28,6 +28,7 @@ import type {
 } from '../events/rule_event_publisher/rule_event_publisher';
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
@@ -69,6 +70,7 @@ describe('RulesClient', () => {
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let rulesSavedObjectService: RulesSavedObjectServiceMock;
   let ruleEventPublisher: RuleEventPublisher;
+  let artifactTypeRegistry: ArtifactTypeRegistry;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -78,7 +80,8 @@ describe('RulesClient', () => {
     jest.clearAllMocks();
 
     rulesSavedObjectService = createRulesSavedObjectServiceMock();
-
+    artifactTypeRegistry = new ArtifactTypeRegistry();
+    registerBuiltinArtifactTypes(artifactTypeRegistry);
     ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
     jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
     jest.spyOn(ruleEventPublisher, 'emitRuleUpdated');
@@ -106,9 +109,14 @@ describe('RulesClient', () => {
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
-        run: { alerts: { max: 10000 }, query: { maxResponseSize: 50 * 1024 * 1024 } },
+        run: {
+          alerts: { max: 10000 },
+          query: { maxResponseSize: 50 * 1024 * 1024 },
+          maxGroupsPerExecution: 10000,
+        },
         ...rulesConfigOverrides,
       },
+      esql: { responseFormat: 'json' },
     };
 
     const pluginConfigAccessor =
@@ -123,7 +131,8 @@ describe('RulesClient', () => {
       pluginConfigAccessor,
       rulesSavedObjectService,
       ruleEventPublisher,
-      loggerService
+      loggerService,
+      artifactTypeRegistry
     );
   }
 
@@ -166,6 +175,22 @@ describe('RulesClient', () => {
           updated_at: '2025-01-01T00:00:00.000Z',
         })
       );
+    });
+
+    it('rejects artifact data that its registered type does not allow', async () => {
+      const client = createClient();
+
+      await expect(
+        client.createRule({
+          data: {
+            ...baseCreateData,
+            artifacts: [{ id: 'run-1', type: 'runbook', data: { content: '' } }],
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: 'INVALID_ARTIFACT_DATA' },
+      });
     });
 
     it('cleans up the saved object if scheduling fails', async () => {
@@ -2179,7 +2204,7 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const enabledAttrs = createRuleSoAttributes({
-        metadata: { name: 'enabled-rule' },
+        metadata: { name: 'enabled-rule', tags: ['critical', 'foo'] },
         schedule: { every: '5m', lookback: '1m' },
         enabled: true,
       });
@@ -2213,7 +2238,17 @@ describe('RulesClient', () => {
       ]);
 
       expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-        { ruleId: 'rule-1', spaceId: 'space-1' },
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          spaceId: 'space-1',
+          rule: expect.objectContaining({
+            id: 'rule-1',
+            metadata: expect.objectContaining({
+              name: 'enabled-rule',
+              tags: ['critical', 'foo'],
+            }),
+          }),
+        }),
       ]);
 
       expect(res).toEqual({ affected_count: 1, errors: [] });

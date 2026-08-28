@@ -14,9 +14,11 @@ import type {
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
-import { getUnmatchedEpisodes } from './unmatched_episodes';
+import { PolicyCatalog } from '../state';
+import { getUnmatchedEpisodes } from './utils/unmatched_episodes';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -26,8 +28,17 @@ export class StoreActionsStep implements DispatcherStep {
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { suppressed = [], throttled = [], dispatch = [], dispatchable = [], policies } = state;
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const {
+      suppressed = [],
+      throttled = [],
+      dispatch = [],
+      dispatchable = [],
+      policies = PolicyCatalog.empty(),
+    } = state;
 
     const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
 
@@ -77,7 +88,7 @@ export class StoreActionsStep implements DispatcherStep {
           )
         ),
         ...dispatch.map((group) => {
-          const groupingMode = policies?.get(group.policyId)?.groupingMode ?? 'per_episode';
+          const groupingMode = policies.groupingModeOf(group.policyId);
           const firstEpisode = group.episodes[0];
           const spaceId = firstEpisode?.space_id ?? 'default';
           const action: AlertAction = {
@@ -109,11 +120,17 @@ export class StoreActionsStep implements DispatcherStep {
       ],
     });
 
-    return { type: 'continue' };
+    const recordedEpisodes =
+      suppressed.length +
+      throttled.reduce((n, g) => n + g.episodes.length, 0) +
+      dispatch.reduce((n, g) => n + g.episodes.length, 0) +
+      unmatched.length;
+
+    return { type: 'continue', data: { recordedEpisodes } };
   }
 }
 
-function toAction({
+export function toAction({
   episode,
   actionType,
   now,

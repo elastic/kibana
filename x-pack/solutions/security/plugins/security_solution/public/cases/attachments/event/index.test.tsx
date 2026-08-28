@@ -20,12 +20,12 @@ const baseProps = {
 describe('Event attachment label rendering', () => {
   it('renders single-event label with the expected test-subj', () => {
     const attachmentType = getEventType();
-    const attachmentViewObject = attachmentType.getAttachmentViewObject({
+    const creationActivity = attachmentType.getCreationActivity({
       ...baseProps,
       attachmentId: 'event-id-1',
     });
 
-    render(<>{attachmentViewObject.event}</>);
+    render(<>{creationActivity.event}</>);
 
     expect(screen.getByTestId('event-user-action-saved-object-id-1')).toHaveTextContent(
       EVENT_COMMENT_LABEL_TITLE
@@ -34,12 +34,12 @@ describe('Event attachment label rendering', () => {
 
   it('renders multiple-event label with the expected test-subj', () => {
     const attachmentType = getEventType();
-    const attachmentViewObject = attachmentType.getAttachmentViewObject({
+    const creationActivity = attachmentType.getCreationActivity({
       ...baseProps,
       attachmentId: ['event-id-1', 'event-id-2'],
     });
 
-    render(<>{attachmentViewObject.event}</>);
+    render(<>{creationActivity.event}</>);
 
     expect(screen.getByTestId('event-user-action-saved-object-id-1')).toHaveTextContent(
       MULTIPLE_EVENTS_COMMENT_LABEL_TITLE(2)
