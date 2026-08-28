@@ -56,4 +56,38 @@ spaceTest.describe('Discover session dashboard editing', { tag: '@local-stateful
       expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
     }
   );
+
+  spaceTest(
+    'keeps the library session unchanged when editing a by-value panel',
+    async ({ page, pageObjects }) => {
+      const { dashboard, discover, queryBar } = pageObjects;
+
+      await dashboard.openNewDashboard();
+      await dashboard.addSavedSearch(testData.SAVED_SEARCH_TITLE);
+      await dashboard.waitForRenderComplete();
+
+      await dashboard.unlinkFromLibrary(testData.SAVED_SEARCH_TITLE);
+      await dashboard.clickPanelAction(
+        'embeddablePanelAction-editPanel',
+        testData.SAVED_SEARCH_TITLE
+      );
+      await discover.waitUntilTabIsLoaded();
+
+      await queryBar.setQuery('test');
+      await discover.submitQuery();
+      await expect.poll(() => queryBar.getQuery()).toBe('test');
+
+      await discover.saveAndReturnToEditor();
+      await dashboard.waitForRenderComplete();
+
+      await dashboard.addSavedSearch(testData.SAVED_SEARCH_TITLE);
+      await dashboard.waitForPanelsToLoad(2);
+      await dashboard.waitForRenderComplete();
+
+      const panelHitCounts = page.testSubj.locator('savedSearchTotalDocuments');
+      await expect(panelHitCounts).toHaveCount(2);
+      await expect.poll(async () => new Set(await panelHitCounts.allInnerTexts()).size).toBe(2);
+      await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+    }
+  );
 });
