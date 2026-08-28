@@ -6,8 +6,9 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { generateDashboardTool, prettifyDashboardTool, type GetImageBytes } from '../tools';
+import { generateDashboardTool, type GetImageBytes } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
+import { dashboardPrettify } from './prettify_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
 export const createDashboardManagementSkill = ({
@@ -16,8 +17,11 @@ export const createDashboardManagementSkill = ({
 }: {
   getCustomContentEnabled: () => Promise<boolean>;
   getImageBytes: GetImageBytes;
-}) =>
-  defineSkillType({
+}) => {
+  // Prettify is screenshot-first via the outer agent; the mutate tool stays unregistered.
+  void getImageBytes;
+
+  return defineSkillType({
     id: 'dashboard-management',
     name: 'dashboard-management',
     basePath: 'skills/platform/dashboard',
@@ -35,23 +39,20 @@ Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
 
-## Prettify
-
-When the user asked to prettify this dashboard and an image is attached, call \`platform.dashboard.prettify_dashboard\` once. Do not read the image. Do not describe the screenshot. Do not call \`platform.dashboard.generate_dashboard\` for this request. It inspects the screenshot, decides operations, and applies them. It returns findings plus \`attachment_id\` and \`version\`; render that attachment. Without an image, this is a normal dashboard edit.
+${dashboardPrettify.guidance}
 
 ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
 `,
     referencedContent: [
+      ...(dashboardPrettify.referencedContent ?? []),
       ...(dashboardGeneration.referencedContent ?? []),
       ...(kibanaRendering.referencedContent ?? []),
     ],
     getInlineTools: async () => {
       const customContentEnabled = await getCustomContentEnabled();
-      return [
-        generateDashboardTool({ customContentEnabled }),
-        prettifyDashboardTool({ getImageBytes, customContentEnabled }),
-      ];
+      return [generateDashboardTool({ customContentEnabled })];
     },
   });
+};

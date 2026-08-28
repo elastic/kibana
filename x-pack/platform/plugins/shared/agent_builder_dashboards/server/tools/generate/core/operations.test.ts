@@ -1183,32 +1183,7 @@ describe('executeDashboardOperations', () => {
       ]);
     });
 
-    it('sets hide_title on panel config without changing grid', async () => {
-      const result = await executeDashboardOperations({
-        dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [createLensPanel('metric-1')],
-        },
-        operations: [
-          {
-            operation: 'update_panel_layouts',
-            panels: [{ panelId: 'metric-1', hide_title: true }],
-          },
-        ],
-        logger,
-      });
-
-      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
-        expect.objectContaining({
-          id: 'metric-1',
-          grid: { x: 0, y: 0, w: 24, h: 9 },
-          config: { type: 'metric', hide_title: true },
-        }),
-      ]);
-    });
-
-    it('clears metric background fill without changing grid', async () => {
+    it('changes only the grid and leaves visualization config untouched', async () => {
       const result = await executeDashboardOperations({
         dashboardData: {
           title: 'Test dashboard',
@@ -1219,6 +1194,7 @@ describe('executeDashboardOperations', () => {
               id: 'metric-1',
               config: {
                 type: 'metric',
+                hide_title: false,
                 metrics: [
                   {
                     type: 'primary',
@@ -1235,7 +1211,7 @@ describe('executeDashboardOperations', () => {
         operations: [
           {
             operation: 'update_panel_layouts',
-            panels: [{ panelId: 'metric-1', clear_metric_fill: true }],
+            panels: [{ panelId: 'metric-1', grid: { x: 12, y: 0, w: 12, h: 5 } }],
           },
         ],
         logger,
@@ -1244,52 +1220,16 @@ describe('executeDashboardOperations', () => {
       expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
         expect.objectContaining({
           id: 'metric-1',
-          grid: { x: 0, y: 0, w: 24, h: 9 },
+          grid: { x: 12, y: 0, w: 12, h: 5 },
           config: {
             type: 'metric',
-            metrics: [{ type: 'primary', column: 'count' }],
-          },
-        }),
-      ]);
-    });
-
-    it('adds a trendline background chart on a sparse metric', async () => {
-      const result = await executeDashboardOperations({
-        dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [
-            {
-              type: LENS_EMBEDDABLE_TYPE,
-              id: 'metric-1',
-              config: {
-                type: 'metric',
-                metrics: [{ type: 'primary', column: 'count' }],
-              },
-              grid: { x: 0, y: 0, w: 24, h: 9 },
-            },
-          ],
-        },
-        operations: [
-          {
-            operation: 'update_panel_layouts',
-            panels: [{ panelId: 'metric-1', metric_trendline: true }],
-          },
-        ],
-        logger,
-      });
-
-      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
-        expect.objectContaining({
-          id: 'metric-1',
-          grid: { x: 0, y: 0, w: 24, h: 9 },
-          config: {
-            type: 'metric',
+            hide_title: false,
             metrics: [
               {
                 type: 'primary',
                 column: 'count',
-                background_chart: { type: 'trend' },
+                color: { type: 'static', color: '#F5C518' },
+                apply_color_to: 'background',
               },
             ],
           },

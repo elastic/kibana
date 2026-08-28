@@ -183,4 +183,36 @@ describe('buildLensConfig', () => {
     expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
   });
+
+  it('reuses the existing panel ES|QL for a schema-only edit', async () => {
+    await buildLensConfig({
+      nlQuery: 'Hide the metric title and add a background sparkline',
+      parsedExistingConfig: {
+        type: SupportedChartType.Metric,
+        data_source: { type: 'esql', query: PROVIDED_ESQL },
+      },
+      modelProvider,
+      logger,
+      events,
+      esClient,
+    });
+
+    expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: PROVIDED_ESQL });
+  });
+
+  it('regenerates ES|QL when the edit needs new columns', async () => {
+    await buildLensConfig({
+      nlQuery: 'Add a secondary metric showing error rate',
+      parsedExistingConfig: {
+        type: SupportedChartType.Metric,
+        data_source: { type: 'esql', query: PROVIDED_ESQL },
+      },
+      modelProvider,
+      logger,
+      events,
+      esClient,
+    });
+
+    expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
+  });
 });

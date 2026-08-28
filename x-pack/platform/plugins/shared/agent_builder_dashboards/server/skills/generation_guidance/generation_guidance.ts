@@ -32,7 +32,8 @@ For a new dashboard:
 For an existing dashboard:
 - Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
-- Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content. Set \`hide_title: true\` on a panel when the visualization already draws the same title inside (typical for metric/gauge) so the dashboard chrome title is not stacked on top. Set \`clear_metric_fill: true\` to strip an invented metric background color. Set \`metric_trendline: true\` to add a sparkline behind a sparse metric.
+- Use \`update_panel_layouts\` only to resize, reposition, or move existing panels between top-level and sections. It does not change visualization content.
+- If a requested change targets presentation or content (chart type, colors, legends, axis titles, metric chrome title, secondary metrics, trendlines, palettes), use \`edit_panels\` with a natural-language \`query\` and let the visualization author decide how to apply it. Do not invent first-class layout flags for those edits.
 
 ## Panel Inputs
 
@@ -56,7 +57,12 @@ When choosing a chart type, composing the dashboard, or packing the grid, follow
 
 ## ES|QL
 
-Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
+Do not write or invent ES|QL. On **new** panels, omit \`esql\` — the tool generates it from the natural-language \`query\`.
+
+On **edits**, look at the current panel in the dashboard attachment (\`config.data_source.query\`, or each XY \`layers[].data_source.query\`). Decide whether the wanted edition needs new columns:
+
+- **Schema-only** (hide chrome title, strip invented colors, legend, axis titles, gradient fill, hide a trend-secondary label, line→area with the same series): pass that existing query on \`edit_panels.esql\` unchanged. The visualization author then edits Lens config only and does not regenerate ES|QL.
+- **Needs new columns** (secondary metric or breakdown the current query cannot produce, a chart type that needs a different grouping): omit \`esql\` so the tool regenerates it. Still do not write the new query yourself.
 
 ## Controls
 

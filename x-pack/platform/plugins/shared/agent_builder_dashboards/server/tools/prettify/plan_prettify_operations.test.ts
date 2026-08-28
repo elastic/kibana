@@ -47,6 +47,9 @@ describe('planPrettifyOperations', () => {
     expect(invoked).toContain('edit_panels');
     expect(invoked).toContain('add_controls');
     expect(invoked).toContain('Do not add or remove visualization panels');
+    expect(invoked).toContain('natural-language query');
+    expect(invoked).not.toContain('clear_metric_fill');
+    expect(invoked).not.toContain('metric_trendline');
     expect(invoked).toContain('pack_layout');
     expect(invoked).toContain('lens-1');
 

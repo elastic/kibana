@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVisualizationGraph } from './graph_lens';
+import { getExistingEsqlQuery, nlQueryNeedsNewEsql } from './reuse_existing_esql';
 import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
 
@@ -100,6 +101,11 @@ export const buildLensConfig = async ({
       );
       providedEsql = undefined;
     }
+  }
+
+  // Schema-only edits: reuse the panel's existing query so generate_esql is skipped.
+  if (!providedEsql && parsedExistingConfig && !nlQueryNeedsNewEsql(nlQuery)) {
+    providedEsql = getExistingEsqlQuery(parsedExistingConfig);
   }
 
   const finalState = await graph.invoke({

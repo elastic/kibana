@@ -23,7 +23,7 @@ const PRETTIFY_PLAN_PROMPT = `You are the Prettify planner for a Kibana dashboar
 
 Write one ordered operations[] batch that implements the findings. You have the generate operations schema. Use only add_section, update_panel_layouts, edit_panels, and add_controls. Do not add or remove visualization panels. Do not remove sections or controls. Do not rewrite titles.
 
-Typical batching: add_section first, then one update_panel_layouts (merge hide_title, clear_metric_fill, and metric_trendline onto packed panels), then edit_panels for chartType changes (source: "request", type: "vis", keep the existing query), then add_controls. Skip any finding you cannot implement faithfully.
+Typical batching: add_section first, then one update_panel_layouts for packed grids only, then edit_panels (source: "request", type: "vis") with a natural-language query for each visual change — chart type, hide chrome title, strip invented metric fills, trendlines, secondary metrics, colors, legends. The visualization author decides how to apply the query. Then add_controls. Skip any finding you cannot implement faithfully.
 
 Empty operations is valid.`;
 
