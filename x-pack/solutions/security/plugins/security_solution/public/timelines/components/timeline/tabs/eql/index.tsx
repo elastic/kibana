@@ -119,7 +119,16 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const [
     dataLoadingState,
-    { events, rawEvents, inspect, totalCount, loadNextBatch, refreshedAt, refetch, isPartial = false },
+    {
+      events,
+      rawEvents,
+      inspect,
+      totalCount,
+      loadNextBatch,
+      refreshedAt,
+      refetch,
+      isPartial = false,
+    },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
