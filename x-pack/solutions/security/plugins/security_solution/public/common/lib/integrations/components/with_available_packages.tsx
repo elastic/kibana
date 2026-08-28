@@ -31,7 +31,6 @@ export const withAvailablePackages = <T extends { availablePackages: AvailablePa
       }) {
         const availablePackages = useAvailablePackages({
           prereleaseIntegrationsEnabled,
-          disableCollectionGrouping: true,
         });
         return <Component {...({ ...props, availablePackages } as T)} />;
       }
