@@ -14,13 +14,16 @@ import { VisTypeVegaPlugin } from './plugin';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
 
 describe('VisTypeVegaPlugin (server)', () => {
-  test('registers a server definition for vega', () => {
+  test('registers a server definition for vega', async () => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
     const embeddable = createEmbeddableSetupMock();
 
     const plugin = new VisTypeVegaPlugin(initializerContext);
-    plugin.setup(coreSetup, { embeddable } as any);
+    plugin.setup(coreSetup, { embeddable });
+    await new Promise(process.nextTick);
 
     expect(embeddable.registerEmbeddableServerDefinition).toHaveBeenCalledTimes(1);
     expect(embeddable.registerEmbeddableServerDefinition).toHaveBeenCalledWith(
@@ -36,12 +39,12 @@ describe('VisTypeVegaPlugin (server)', () => {
     coreStart.featureFlags.getBooleanValue.mockImplementation(async (key, fallback) =>
       key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? false : fallback
     );
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
     const embeddable = createEmbeddableSetupMock();
     const plugin = new VisTypeVegaPlugin(initializerContext);
-    plugin.setup(coreSetup, { embeddable } as any);
-    plugin.start(coreStart);
-    await Promise.resolve();
+    plugin.setup(coreSetup, { embeddable });
+    await new Promise(process.nextTick);
 
     const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
     expect(serverDefinition.getSchema(mockGetDrilldownsSchema)).toBeUndefined();
@@ -54,12 +57,12 @@ describe('VisTypeVegaPlugin (server)', () => {
     coreStart.featureFlags.getBooleanValue.mockImplementation(async (key, fallback) =>
       key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? true : fallback
     );
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
     const embeddable = createEmbeddableSetupMock();
     const plugin = new VisTypeVegaPlugin(initializerContext);
-    plugin.setup(coreSetup, { embeddable } as any);
-    plugin.start(coreStart);
-    await Promise.resolve();
+    plugin.setup(coreSetup, { embeddable });
+    await new Promise(process.nextTick);
 
     const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
     const schema = serverDefinition.getSchema(mockGetDrilldownsSchema);

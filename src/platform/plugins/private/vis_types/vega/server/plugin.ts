@@ -18,28 +18,28 @@ import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
-  private standaloneEmbeddableEnabled = false;
-
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { embeddable }: VisTypeVegaPluginSetupDependencies) {
-    embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
-      title: 'Vega',
-      getTransforms,
-      getSchema: (getDrilldownsSchema) =>
-        this.standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
-    });
+    core
+      .getStartServices()
+      .then(async ([{ featureFlags }]) => {
+        const standaloneEmbeddableEnabled = await featureFlags.getBooleanValue(
+          VEGA_STANDALONE_EMBEDDABLE_FLAG,
+          false
+        );
+        embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
+          title: 'Vega',
+          getTransforms,
+          getSchema: (getDrilldownsSchema) =>
+            standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
+        });
+      })
+      .catch(() => {});
     return {};
   }
 
   public start(core: CoreStart) {
-    // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
-    void core.featureFlags
-      .getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
-      .then((enabled) => {
-        this.standaloneEmbeddableEnabled = enabled;
-      })
-      .catch(() => {});
     return {};
   }
 }
