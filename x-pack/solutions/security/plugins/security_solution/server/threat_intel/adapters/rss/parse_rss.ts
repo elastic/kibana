@@ -9,10 +9,10 @@ import xml2js from 'xml2js';
 
 /**
  * Resolved payload of a feed entry's description/content, disambiguated once here where
- * the feed's XML structure and namespace declarations are visible. Downstream HTML
- * processing never needs to know whether this was entity-encoded HTML, inline XML child
- * elements, or CDATA — only the html/text distinction survives, since that's the one
- * decision the RSS adapter still makes: whether to run `stripHtml` and store `body_html`.
+ * the feed's XML structure and namespace declarations are visible. The adapter never needs
+ * to know whether this was entity-encoded HTML, inline XML child elements, or CDATA — only
+ * the markup/text distinction survives, since that's the one decision it still makes:
+ * whether to convert the fragment to bounded plain text (`markup`) or use it as-is (`text`).
  */
 export type EntryBody = { kind: 'markup'; html: string } | { kind: 'text'; text: string };
 

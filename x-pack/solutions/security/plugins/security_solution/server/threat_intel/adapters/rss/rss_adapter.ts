@@ -8,10 +8,11 @@
 import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
 import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
-import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../content/severity';
-import { buildReportContent, collapseWhitespace, stripHtml, truncate } from '../../content/text';
+import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
+import { buildReportContent, collapseWhitespace, truncate } from '../../services/report_content';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
 import { decodeDataUrl, isDataUrl } from './decode_data_url';
+import { htmlFragmentToText } from './html_fragment_to_text';
 import { parseRssFeed } from './parse_rss';
 
 const TITLE_MAX_LENGTH = 280;
@@ -75,11 +76,14 @@ export const rssAdapter: FetchAdapter = {
     const reports: NormalizedReport[] = [];
     for (const entry of parsed.entries) {
       const title = collapseWhitespace(entry.title || parsed.feedTitle || source._source.name);
-      // `parse_rss.ts` has already decided markup vs text. Only markup goes through
-      // stripHtml and has anything to archive as `body_html` — a text-typed Atom construct
-      // is genuinely not HTML, so it's stored as-is with no `body_html`.
+      // `parse_rss.ts` has already decided markup vs text. Markup is the one narrow HTML
+      // boundary we accept: it is converted to bounded plain text here and only the text is
+      // stored — the raw fragment never leaves this loop. A text-typed Atom construct is
+      // genuinely not HTML, so it is used as-is.
       const fullBodyText =
-        entry.body?.kind === 'markup' ? stripHtml(entry.body.html) : entry.body?.text ?? '';
+        entry.body?.kind === 'markup'
+          ? htmlFragmentToText(entry.body.html)
+          : entry.body?.text ?? '';
       // Untruncated, so a revision differing only past the stored-body cap is still
       // detected as a change.
       const bodyText = truncate(fullBodyText, BODY_TEXT_MAX_LENGTH);
@@ -98,14 +102,15 @@ export const rssAdapter: FetchAdapter = {
         space_id: spaceId,
         source: {
           type: 'rss',
-          name: source._source.name,
+          // Provenance only. The adapter fetches the configured feed URL and nothing else;
+          // an entry link is recorded so an analyst can open the original item, never fetched.
           url: entry.link ?? feedUrl,
+          name: source._source.name,
           adapter_id: adapterId,
         },
         content: buildReportContent({
           title: truncate(title, TITLE_MAX_LENGTH),
           bodyText,
-          bodyHtml: entry.body?.kind === 'markup' ? entry.body.html : undefined,
           language,
         }),
         severity: {

@@ -80,7 +80,6 @@ describe('rssAdapter', () => {
       content: {
         title: 'Item one',
         body_text: 'Body one',
-        body_html: '<p>Body one</p>',
         language: 'en',
       },
       severity: { level: 'medium', score: 40 },
@@ -93,6 +92,29 @@ describe('rssAdapter', () => {
     // Fingerprint must be a stable 64-hex digest (matches buildFingerprint).
     expect(reports[0].content_fingerprint).toMatch(/^[0-9a-f]{64}$/);
     expect(reports[0].content_fingerprint).not.toBe(reports[1].content_fingerprint);
+  });
+
+  it('stores only plain text — never the raw markup fragment', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(okResponse(FEED_BODY));
+    const reports = await rssAdapter.run(buildSource(), buildContext(fetchMock));
+
+    for (const report of reports) {
+      expect(report.content).not.toHaveProperty('body_html');
+      expect(report.content.body_text).not.toMatch(/<[a-z]/i);
+    }
+  });
+
+  // Load-bearing invariant: an entry link is provenance metadata only. The adapter fetches
+  // the configured feed URL and nothing else — it must never fetch each item's link.
+  it('never fetches an entry link, only the configured feed URL', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(okResponse(FEED_BODY));
+    await rssAdapter.run(buildSource(), buildContext(fetchMock));
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const requested = fetchMock.mock.calls.map((call) => String(call[0]));
+    expect(requested).toEqual([FEED_URL]);
+    expect(requested).not.toContain('https://acme.example/1');
+    expect(requested).not.toContain('https://acme.example/2');
   });
 
   // The fingerprint used to be feed URL + guid + title only, so an advisory

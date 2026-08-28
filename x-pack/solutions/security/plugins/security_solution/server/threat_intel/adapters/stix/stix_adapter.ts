@@ -8,8 +8,8 @@
 import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
 import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
-import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../content/severity';
-import { buildReportContent, collapseWhitespace, truncate } from '../../content/text';
+import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
+import { buildReportContent, collapseWhitespace, truncate } from '../../services/report_content';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
 import { composeStixBody, composeStixTitle, splitStixBundle } from './split_bundle';
 import { parseStixPattern } from './parse_pattern';

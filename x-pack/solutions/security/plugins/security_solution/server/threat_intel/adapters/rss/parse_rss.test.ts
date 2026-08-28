@@ -98,7 +98,8 @@ describe('parseRssFeed', () => {
     expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<p>Long body</p>' });
     expect(parsed.entries[1].publishedAt).toBe('2025-05-11T08:00:00.000Z');
     // Second entry has no `type` on its <summary>, which defaults to `text` per RFC 4287 —
-    // literal text, not markup, so it must not land in body_html.
+    // literal text, not markup, so it is classified `text` and never run through the
+    // fragment-to-text conversion.
     expect(parsed.entries[1].body).toEqual({ kind: 'text', text: 'Only a summary.' });
   });
 
@@ -122,8 +123,8 @@ describe('parseRssFeed', () => {
 });
 
 // RSS 2.0 permits an item with a description and no title, and real advisory feeds
-// publish them. Every parser branch leaves `body` empty and puts the description in
-// `bodyHtml`, so a `title || body` check dropped all of them.
+// publish them. The description is carried as the entry `body`, so the drop-empty guard
+// must keep an item that has a body even when the title is missing.
 describe('parseRssFeed — description-only items', () => {
   it('keeps an RSS 2.0 item that has a description but no title', async () => {
     const feed = `<?xml version="1.0" encoding="UTF-8"?>
