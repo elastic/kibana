@@ -321,18 +321,14 @@ export class InventoryPage {
 
   public async openInventoryRuleFlyout() {
     await this.alertsHeaderButton.click();
-    await this.alertsMenu.waitFor({ state: 'visible' });
     await this.inventoryAlertsMenuOption.click();
-    await this.createInventoryRuleButton.waitFor({ state: 'visible' });
     await this.createInventoryRuleButton.click();
     await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   public async openMetricsThresholdRuleFlyout() {
     await this.alertsHeaderButton.click();
-    await this.alertsMenu.waitFor({ state: 'visible' });
     await this.metricsAlertsMenuOption.click();
-    await this.createMetricsThresholdRuleButton.waitFor({ state: 'visible' });
     await this.createMetricsThresholdRuleButton.click();
     await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
