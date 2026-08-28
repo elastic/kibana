@@ -10,22 +10,20 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import {
   getEcfServiceConfigs,
   buildEcfUnifiedCloudFormationUrl,
@@ -183,10 +181,12 @@ export const useEcfDeployment = ({
 
 // ── EcfFamilyPanel ─────────────────────────────────────────────────────────────
 
+// Delay (ms) after clicking Launch before showing the "Reopen console" link — gives users a
+// quick way to re-open the AWS Console tab if they accidentally closed it.
+const REOPEN_LINK_DELAY_MS = 10_000;
+
 interface EcfFamilyPanelProps {
-  title: React.ReactNode;
   description: React.ReactNode;
-  serviceIds: string[];
   launchUrl: string | undefined;
   isLaunched: boolean;
   onLaunch: () => void;
@@ -195,65 +195,68 @@ interface EcfFamilyPanelProps {
 
 /** Renders the content for one ECF template family (description, launch/deploying UI). */
 const EcfFamilyPanel = ({
-  title,
   description,
-  serviceIds,
   launchUrl,
   isLaunched,
   onLaunch,
   launchButtonTestSubj,
-}: EcfFamilyPanelProps) => (
-  <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-    <EuiTitle size="xs">
-      <h3>{title}</h3>
-    </EuiTitle>
-    <EuiSpacer size="s" />
-    <EuiText size="s" color="subdued">
-      <p>{description}</p>
-    </EuiText>
-    <EuiSpacer size="m" />
+}: EcfFamilyPanelProps) => {
+  const [showReopen, setShowReopen] = useState(false);
 
-    {isLaunched ? (
+  useEffect(() => {
+    if (!isLaunched) {
+      setShowReopen(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setShowReopen(true), REOPEN_LINK_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [isLaunched]);
+
+  return (
+    <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+      <EuiText size="s" color="subdued">
+        <p>{description}</p>
+      </EuiText>
+      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" aria-hidden />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiButton
+            href={isLaunched ? undefined : launchUrl}
+            target="_blank"
+            iconType="external"
+            iconSide="right"
+            fill
+            onClick={onLaunch}
+            isDisabled={isLaunched}
+            data-test-subj={launchButtonTestSubj}
+          >
             <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.deployingText"
-              defaultMessage="CloudFormation stack deploying…"
+              id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.launchButton"
+              defaultMessage="Launch CloudFormation"
             />
-          </EuiText>
+          </EuiButton>
         </EuiFlexItem>
+        {showReopen && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={launchUrl}
+              target="_blank"
+              iconType="popout"
+              iconSide="right"
+              size="s"
+              data-test-subj={`${launchButtonTestSubj}-reopen`}
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.reopenButton"
+                defaultMessage="Reopen AWS Console"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-    ) : (
-      <EuiButton
-        href={launchUrl}
-        target="_blank"
-        iconType="external"
-        iconSide="right"
-        fill
-        onClick={onLaunch}
-        data-test-subj={launchButtonTestSubj}
-      >
-        <FormattedMessage
-          id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.launchButton"
-          defaultMessage="Launch CloudFormation"
-        />
-      </EuiButton>
-    )}
-
-    <EuiHorizontalRule margin="m" />
-    <EuiFlexGroup wrap gutterSize="s">
-      {serviceIds.map((serviceId) => (
-        <EuiFlexItem grow={false} key={serviceId}>
-          <EuiBadge color="hollow">{AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}</EuiBadge>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+    </EuiPanel>
+  );
+};
 
 // ── EcfDeploymentSection ──────────────────────────────────────────────────────
 
@@ -368,19 +371,12 @@ export const EcfDeploymentSection = ({
         <div id={contentId} role="region">
           {hasEcfUnified && (
             <EcfFamilyPanel
-              title={
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.title"
-                  defaultMessage="Multi-service stack"
-                />
-              }
               description={
                 <FormattedMessage
                   id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description"
-                  defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the ECS-compatible template, per the data format chosen in Step 1. Trigger source (S3 or CloudWatch) is configured per service in Service settings. Launch CloudFormation to deploy."
+                  defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. The trigger source (S3 or CloudWatch) is configured per service in Service settings."
                 />
               }
-              serviceIds={ecfUnifiedConfigs.map((c) => c.serviceId)}
               launchUrl={unifiedLaunchUrl}
               isLaunched={launchedFamilies.includes('unified')}
               onLaunch={() => onLaunch('unified')}
@@ -392,19 +388,12 @@ export const EcfDeploymentSection = ({
             <>
               {hasEcfUnified && <EuiHorizontalRule margin="none" />}
               <EcfFamilyPanel
-                title={
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.otel.title"
-                    defaultMessage="OpenTelemetry stack"
-                  />
-                }
                 description={
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.otel.description"
                     defaultMessage="Log collection in OpenTelemetry format via a single AWS CloudFormation stack — no agents required. Trigger source (S3 or CloudWatch) is configured per service in Service settings."
                   />
                 }
-                serviceIds={ecfOtelConfigs.map((c) => c.serviceId)}
                 launchUrl={otelLaunchUrl}
                 isLaunched={launchedFamilies.includes('otel')}
                 onLaunch={() => onLaunch('otel')}
@@ -417,19 +406,12 @@ export const EcfDeploymentSection = ({
             <>
               {(hasEcfUnified || hasEcfOtel) && <EuiHorizontalRule margin="none" />}
               <EcfFamilyPanel
-                title={
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.crowdstrike.title"
-                    defaultMessage="CrowdStrike FDR stack"
-                  />
-                }
                 description={
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.crowdstrike.description"
                     defaultMessage="Log collection via a dedicated AWS CloudFormation stack for CrowdStrike Falcon Data Replicator — no agents required."
                   />
                 }
-                serviceIds={ecfCrowdstrikeServices}
                 launchUrl={crowdstrikeLaunchUrl}
                 isLaunched={launchedFamilies.includes('crowdstrike')}
                 onLaunch={() => onLaunch('crowdstrike')}

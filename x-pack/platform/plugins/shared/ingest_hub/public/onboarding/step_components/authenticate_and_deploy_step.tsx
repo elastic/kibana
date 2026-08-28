@@ -30,7 +30,6 @@ import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
 import {
   SERVICE_SETTINGS_SESSION_KEY,
-  type ServiceInstance,
   type ServiceSettingsPersistedState,
 } from './service_settings_step/use_service_settings';
 
@@ -60,19 +59,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   );
   const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
 
-  // Derive instances from session storage, falling back to selectedServiceIds when `instances` is
-  // absent (old sessions written before the field was added — see use_service_settings.ts).
-  const instances: ServiceInstance[] = useMemo(() => {
-    if (serviceSettings?.instances && serviceSettings.instances.length > 0) {
-      return serviceSettings.instances;
-    }
-    // Fallback: build one base instance per selected service using the manifest-enriched map.
-    return selectedServiceIds.flatMap((id) => {
-      const service = awsServicesMap?.get(id);
-      if (!service?.showInUI) return [];
-      return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
-    });
-  }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
+  const instances = serviceSettings?.instances ?? [];
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
