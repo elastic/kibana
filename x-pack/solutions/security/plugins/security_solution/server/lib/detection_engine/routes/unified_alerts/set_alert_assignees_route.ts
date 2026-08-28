@@ -33,6 +33,7 @@ import {
   collectChangedIdsByFamily,
   computeActualDelta,
 } from '../common/operations/prefetch_previous_statuses';
+import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 
 export const setUnifiedAlertsAssigneesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -94,8 +95,10 @@ export const setUnifiedAlertsAssigneesRoute = (
           allValidAssigneesToRemove.length > MAX_ASSIGNEES_PER_OPERATION;
 
         // Falls back to the requested arrays if the prefetch fails.
-        let assigneesActuallyAdded = validAssigneesToAdd;
-        let assigneesActuallyRemoved = validAssigneesToRemove;
+        let alertAssigneesActuallyAdded = validAssigneesToAdd;
+        let alertAssigneesActuallyRemoved = validAssigneesToRemove;
+        let attackAssigneesActuallyAdded = validAssigneesToAdd;
+        let attackAssigneesActuallyRemoved = validAssigneesToRemove;
 
         if (eventBus) {
           try {
@@ -119,14 +122,26 @@ export const setUnifiedAlertsAssigneesRoute = (
                 allValidAssigneesToRemove.some((uid) => currentAssignees.has(uid))
               );
             }));
-            const delta = computeActualDelta(
-              hits.map((h) => h.source),
+            // Compute independent per-family deltas: an assignee already on every attack doc
+            // must not appear in the alert emit's assigneesAdded, and vice versa.
+            const alertHits = hits.filter((h) => !isAttackDiscoveryIndex(h.index));
+            const attackHits = hits.filter((h) => isAttackDiscoveryIndex(h.index));
+            const alertDelta = computeActualDelta(
+              alertHits.map((h) => h.source),
               validAssigneesToAdd,
               validAssigneesToRemove,
               ALERT_WORKFLOW_ASSIGNEE_IDS
             );
-            assigneesActuallyAdded = delta.actualAdded;
-            assigneesActuallyRemoved = delta.actualRemoved;
+            const attackDelta = computeActualDelta(
+              attackHits.map((h) => h.source),
+              validAssigneesToAdd,
+              validAssigneesToRemove,
+              ALERT_WORKFLOW_ASSIGNEE_IDS
+            );
+            alertAssigneesActuallyAdded = alertDelta.actualAdded;
+            alertAssigneesActuallyRemoved = alertDelta.actualRemoved;
+            attackAssigneesActuallyAdded = attackDelta.actualAdded;
+            attackAssigneesActuallyRemoved = attackDelta.actualRemoved;
           } catch {
             logger.warn('Failed to pre-fetch alert indices for workflow trigger (assignees)');
           }
@@ -138,16 +153,16 @@ export const setUnifiedAlertsAssigneesRoute = (
             if (attackIds.length > 0) {
               void eventBus.emitAttackAssigneesChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesAdded: assigneesActuallyAdded,
-                assigneesRemoved: assigneesActuallyRemoved,
+                assigneesAdded: attackAssigneesActuallyAdded,
+                assigneesRemoved: attackAssigneesActuallyRemoved,
                 truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertAssigneesChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesAdded: assigneesActuallyAdded,
-                assigneesRemoved: assigneesActuallyRemoved,
+                assigneesAdded: alertAssigneesActuallyAdded,
+                assigneesRemoved: alertAssigneesActuallyRemoved,
                 truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
