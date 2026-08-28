@@ -191,6 +191,8 @@ export const setAttacksTagsRoute = (
             });
 
             // Emit only attack IDs that would actually change; deduplicate across families.
+            // Use the full valid arrays (not capped) so over-cap operations that would
+            // actually change a document are not excluded from the mutation's ID list.
             const verifiedAttackIds = Array.from(
               new Set(
                 attackDocs.hits.hits
@@ -198,8 +200,8 @@ export const setAttacksTagsRoute = (
                     wouldChange(
                       (hit._source ?? {}) as Record<string, unknown>,
                       ALERT_WORKFLOW_TAGS,
-                      validTagsToAdd,
-                      validTagsToRemove
+                      allValidTagsToAdd,
+                      allValidTagsToRemove
                     )
                   )
                   .map((hit) => hit._id)

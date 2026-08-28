@@ -25,6 +25,7 @@ import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksTagsRoute } from './set_attacks_tags_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import { MAX_TAGS_PER_OPERATION } from '../../../../../common/workflows/triggers';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -498,6 +499,53 @@ describe('set attacks tags', () => {
       expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ tagsAdded: ['attack-tag', 'new-tag'], tagsRemoved: [] })
+      );
+    });
+
+    test('cascade: includes attack in mutation when only over-cap tags would change it', async () => {
+      // Encoding WHY: the cascade `verifiedAttackIds` predicate must use full valid arrays
+      // so that attacks whose only changes are beyond MAX_TAGS_PER_OPERATION are not silently
+      // dropped from the mutation's combinedIds. Without this fix an attack can be excluded
+      // from updateAlertsTags even though the full request would have changed it.
+      const existingTags = Array.from({ length: MAX_TAGS_PER_OPERATION }, (_, i) => `tag-${i}`);
+      const overCapTag = `tag-${MAX_TAGS_PER_OPERATION}`;
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: {
+                [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: [],
+                [ALERT_WORKFLOW_TAGS]: existingTags,
+              },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          tags: { tags_to_add: [...existingTags, overCapTag], tags_to_remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          attackIds: ['attack1'],
+          // Capped tags are all already present → capped delta is empty; the over-cap tag
+          // that made this attack eligible cannot appear in the payload due to the cap.
+          tagsAdded: [],
+          truncated: true,
+        })
       );
     });
 
