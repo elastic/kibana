@@ -110,7 +110,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       namespace: securityContext.getSpaceId(),
       attributes: {
         'entity_analytics.operation': 'entity_calculation',
-        'entity_analytics.identifier_type': identifierType,
+        'entity_analytics.entity_type': identifierType,
       },
       cb: () =>
         riskScoreService.calculateAndPersistScores({

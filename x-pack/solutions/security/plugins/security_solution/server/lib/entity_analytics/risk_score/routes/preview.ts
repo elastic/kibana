@@ -105,6 +105,7 @@ export const riskScorePreviewRoute = (
             namespace,
             attributes: {
               'entity_analytics.operation': 'preview',
+              'entity_analytics.entity_type': identifierType,
               'entity_analytics.v2_enabled': v2PreviewEnabled,
             },
             cb: () =>
