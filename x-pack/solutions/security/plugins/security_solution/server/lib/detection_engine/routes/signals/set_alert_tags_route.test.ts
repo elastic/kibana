@@ -13,6 +13,7 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import { setAlertTagsRoute } from './set_alert_tags_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import { MAX_TAGS_PER_OPERATION } from '../../../../../common/workflows/triggers';
 
 describe('setAlertTagsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -197,6 +198,48 @@ describe('setAlertTagsRoute', () => {
       expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ tagsAdded: ['new-tag'], tagsRemoved: [] })
+      );
+    });
+
+    test('emits when the only changed tag is beyond the operation cap', async () => {
+      // Encoding WHY: the change predicate must use the full request arrays, not the capped
+      // ones. If the first MAX_TAGS_PER_OPERATION tags are already on the alert (all no-ops)
+      // but a tag beyond the cap is genuinely absent, the trigger must still fire. Without
+      // this, the trigger is suppressed even though the mutation ran and changed the document.
+      const existingTags = Array.from({ length: MAX_TAGS_PER_OPERATION }, (_, i) => `tag-${i}`);
+      const overCapTag = `tag-${MAX_TAGS_PER_OPERATION}`;
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'alert-1',
+              _index: '.alerts-security.alerts-default-default',
+              _source: { 'kibana.alert.workflow_tags': existingTags },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
+        },
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as estypes.SearchResponse);
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_TAGS_URL,
+        body: getSetAlertTagsRequestMock([...existingTags, overCapTag], [], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          alertIds: ['alert-1'],
+          // All capped tags are already present → capped delta is empty; the over-cap tag
+          // that triggered the event cannot appear in the payload due to the cap.
+          tagsAdded: [],
+          truncated: true,
+        })
       );
     });
   });

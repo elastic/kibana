@@ -25,6 +25,7 @@ import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksAssigneesRoute } from './set_attacks_assignees_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import { MAX_ASSIGNEES_PER_OPERATION } from '../../../../../common/workflows/triggers';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -501,6 +502,54 @@ describe('set attacks assignees', () => {
       expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ assigneesAdded: ['attack-uid', 'new-uid'], assigneesRemoved: [] })
+      );
+    });
+
+    test('cascade: includes attack in mutation when only over-cap assignees would change it', async () => {
+      // Encoding WHY: the cascade `verifiedAttackIds` predicate must use full valid arrays so
+      // that attacks whose only changes are beyond MAX_ASSIGNEES_PER_OPERATION are not silently
+      // dropped from the mutation's combinedIds. Without this fix an attack can be excluded from
+      // updateAlertsAssignees even though the full request would have changed it.
+      const existingUids = Array.from(
+        { length: MAX_ASSIGNEES_PER_OPERATION },
+        (_, i) => `uid-${i}`
+      );
+      const overCapUid = `uid-${MAX_ASSIGNEES_PER_OPERATION}`;
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: 0,
+          hits: [
+            {
+              _id: 'attack1',
+              _index: SCHEDULED_INDEX,
+              _source: {
+                [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: [],
+                [ALERT_WORKFLOW_ASSIGNEE_IDS]: existingUids,
+              },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>);
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          assignees: { add: [...existingUids, overCapUid], remove: [] },
+          update_related_alerts: true,
+        }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          attackIds: ['attack1'],
+          assigneesAdded: [],
+          truncated: true,
+        })
       );
     });
 

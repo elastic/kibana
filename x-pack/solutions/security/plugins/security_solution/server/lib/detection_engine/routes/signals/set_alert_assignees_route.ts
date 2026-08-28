@@ -87,14 +87,11 @@ export const setAlertAssigneesRoute = (
               ALERT_WORKFLOW_ASSIGNEE_IDS,
             ]);
             // Emit only IDs whose source would actually change; unknown/no-op IDs are excluded.
+            // Use the full request arrays for the predicate so over-cap assignees that would
+            // actually change a document still produce a trigger; the payload uses capped arrays.
             changedAlertIds = hits
               .filter((h) =>
-                wouldChange(
-                  h.source,
-                  ALERT_WORKFLOW_ASSIGNEE_IDS,
-                  cappedAssigneesToAdd,
-                  cappedAssigneesToRemove
-                )
+                wouldChange(h.source, ALERT_WORKFLOW_ASSIGNEE_IDS, assignees.add, assignees.remove)
               )
               .map((h) => h.id);
             const delta = computeActualDelta(

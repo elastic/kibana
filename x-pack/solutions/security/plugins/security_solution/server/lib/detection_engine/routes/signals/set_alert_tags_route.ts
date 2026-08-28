@@ -91,9 +91,11 @@ export const setAlertTagsRoute = (
               ALERT_WORKFLOW_TAGS,
             ]);
             // Emit only IDs whose source would actually change; unknown/no-op IDs are excluded.
+            // Use the full request arrays for the predicate so over-cap tags that would
+            // actually change a document still produce a trigger; the payload uses capped arrays.
             changedAlertIds = hits
               .filter((h) =>
-                wouldChange(h.source, ALERT_WORKFLOW_TAGS, cappedTagsToAdd, cappedTagsToRemove)
+                wouldChange(h.source, ALERT_WORKFLOW_TAGS, tags.tags_to_add, tags.tags_to_remove)
               )
               .map((h) => h.id);
             const delta = computeActualDelta(

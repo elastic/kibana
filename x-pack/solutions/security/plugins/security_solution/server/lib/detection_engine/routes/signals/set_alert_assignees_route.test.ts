@@ -13,6 +13,7 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import { setAlertAssigneesRoute } from './set_alert_assignees_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import { MAX_ASSIGNEES_PER_OPERATION } from '../../../../../common/workflows/triggers';
 
 describe('setAlertAssigneesRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -212,6 +213,49 @@ describe('setAlertAssigneesRoute', () => {
       expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ assigneesAdded: ['new-uid'], assigneesRemoved: [] })
+      );
+    });
+
+    test('emits when the only changed assignee is beyond the operation cap', async () => {
+      // Encoding WHY: the change predicate must use the full request arrays, not the capped
+      // ones. If the first MAX_ASSIGNEES_PER_OPERATION assignees are already on the alert
+      // (all no-ops) but an assignee beyond the cap is genuinely absent, the trigger must
+      // still fire. Without this, the trigger is suppressed even though the mutation ran.
+      const existingUids = Array.from(
+        { length: MAX_ASSIGNEES_PER_OPERATION },
+        (_, i) => `uid-${i}`
+      );
+      const overCapUid = `uid-${MAX_ASSIGNEES_PER_OPERATION}`;
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'alert-1',
+              _index: '.alerts-security.alerts-default-default',
+              _source: { 'kibana.alert.workflow_assignee_ids': existingUids },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
+        },
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as estypes.SearchResponse);
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
+        body: getSetAlertAssigneesRequestMock([...existingUids, overCapUid], [], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          alertIds: ['alert-1'],
+          assigneesAdded: [],
+          truncated: true,
+        })
       );
     });
   });
