@@ -58,7 +58,7 @@ export class SearchCursorScroll extends SearchCursor {
         strategy: ES_SEARCH_STRATEGY,
         abortSignal: this.abortController.signal,
         // the scroll context created by this initial scan inherits the CPS project scope
-        projectRouting,
+        ...(projectRouting ? { projectRouting } : {}),
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
           requestTimeout: scroll.duration(taskInstanceFields),

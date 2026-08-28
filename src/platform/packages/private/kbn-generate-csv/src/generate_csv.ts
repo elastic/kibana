@@ -316,7 +316,8 @@ export class CsvGenerator {
     // Carry the CPS project routing the search was scoped to when the export was requested.
     // Without it the export searches only the origin project and silently returns no rows
     // for data that lives in linked projects.
-    const cursorSettings = { ...settings, projectRouting: searchSource.getField('projectRouting') };
+    const projectRouting = searchSource.getField('projectRouting');
+    const cursorSettings = { ...settings, ...(projectRouting ? { projectRouting } : {}) };
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let userError: boolean | undefined;
