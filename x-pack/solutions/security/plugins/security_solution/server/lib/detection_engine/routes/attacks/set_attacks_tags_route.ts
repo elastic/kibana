@@ -127,10 +127,13 @@ export const setAttacksTagsRoute = (
               const result = await updateAlertsTags({ context, index: attackIndex, ids, tags });
               if (eventBus && verifiedAttackIds.length > 0) {
                 void eventBus.emitAttackTagsChanged(request, {
-                  attackIds: verifiedAttackIds,
+                  attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                   tagsAdded: attackTagsActuallyAdded,
                   tagsRemoved: attackTagsActuallyRemoved,
-                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
+                  truncated:
+                    verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER ||
+                    ids.length > MAX_ALERTS_PER_TRIGGER ||
+                    operationTruncated,
                 });
               }
               return result;

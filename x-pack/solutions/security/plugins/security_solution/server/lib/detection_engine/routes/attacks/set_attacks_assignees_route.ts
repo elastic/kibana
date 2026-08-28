@@ -143,10 +143,13 @@ export const setAttacksAssigneesRoute = (
               });
               if (eventBus && verifiedAttackIds.length > 0) {
                 void eventBus.emitAttackAssigneesChanged(request, {
-                  attackIds: verifiedAttackIds,
+                  attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                   assigneesAdded: attackAssigneesActuallyAdded,
                   assigneesRemoved: attackAssigneesActuallyRemoved,
-                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
+                  truncated:
+                    verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER ||
+                    ids.length > MAX_ALERTS_PER_TRIGGER ||
+                    operationTruncated,
                 });
               }
               return result;
