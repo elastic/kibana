@@ -9,7 +9,8 @@
 import type { StaticValueIndexPatternColumn } from '../datasources/operations';
 import type { GenericIndexPatternColumn } from '../datasources/types';
 import { generateEsqlQuery } from './generate_esql_query';
-import { createMockUiSettings, defaultUiSettingsGet } from './__mocks__/ui_settings';
+import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
+import { defaultUiSettingsGet } from './__mocks__/ui_settings';
 import {
   mockLayer,
   mockIndexPattern,
@@ -33,7 +34,7 @@ const createStaticValueColumn = (
 });
 
 describe('generateEsqlQuery metric max (static_value)', () => {
-  const uiSettings = createMockUiSettings();
+  const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
   });

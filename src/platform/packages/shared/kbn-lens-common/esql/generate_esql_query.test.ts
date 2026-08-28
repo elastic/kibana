@@ -8,7 +8,8 @@
  */
 import type { DateHistogramIndexPatternColumn } from '../datasources/operations';
 import { generateEsqlQuery } from './generate_esql_query';
-import { createMockUiSettings, defaultUiSettingsGet } from './__mocks__/ui_settings';
+import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
+import { defaultUiSettingsGet } from './__mocks__/ui_settings';
 import {
   mockLayer,
   mockIndexPattern,
@@ -17,7 +18,7 @@ import {
 } from './__mocks__/esql_query_mocks';
 
 describe('generateEsqlQuery', () => {
-  const uiSettings = createMockUiSettings();
+  const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
   });

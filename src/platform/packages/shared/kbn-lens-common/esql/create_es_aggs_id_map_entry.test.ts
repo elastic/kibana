@@ -9,11 +9,12 @@
 import type { IndexPattern } from '../types';
 import type { GenericIndexPatternColumn } from '../datasources/types';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
-import { createMockUiSettings, defaultUiSettingsGet } from './__mocks__/ui_settings';
+import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
+import { defaultUiSettingsGet } from './__mocks__/ui_settings';
 import { mockDateRange } from './__mocks__/esql_query_mocks';
 
 describe('createEsAggsIdMapEntry', () => {
-  const uiSettings = createMockUiSettings();
+  const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation(defaultUiSettingsGet);
 
   it('should create an esAggsIdMap entry from a column', () => {

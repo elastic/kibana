@@ -9,7 +9,8 @@
 import type { DateHistogramIndexPatternColumn } from '../datasources/operations';
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 import { generateEsqlQuery } from './generate_esql_query';
-import { createMockUiSettings, defaultUiSettingsGet } from './__mocks__/ui_settings';
+import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
+import { defaultUiSettingsGet } from './__mocks__/ui_settings';
 import { mockLayer, mockIndexPattern, mockDateRange } from './__mocks__/esql_query_mocks';
 
 const baseDateHistogramColumn: Omit<DateHistogramIndexPatternColumn, 'params'> = {
@@ -44,7 +45,7 @@ function buildAggEntries(dateHistogramCol: DateHistogramIndexPatternColumn) {
 }
 
 describe('generateEsqlQuery date histogram', () => {
-  const uiSettings = createMockUiSettings();
+  const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
   });

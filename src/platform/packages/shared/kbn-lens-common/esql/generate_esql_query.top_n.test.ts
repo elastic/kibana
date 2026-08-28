@@ -10,7 +10,8 @@ import type { IndexPattern } from '../types';
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 
 import { generateEsqlQuery } from './generate_esql_query';
-import { createMockUiSettings, defaultUiSettingsGet } from './__mocks__/ui_settings';
+import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
+import { defaultUiSettingsGet } from './__mocks__/ui_settings';
 import { mockDateRange } from './__mocks__/esql_query_mocks';
 
 const mockAggEntries: Array<readonly [string, GenericIndexPatternColumn]> = [
@@ -70,7 +71,7 @@ const mockLayer: FormBasedLayer = {
 };
 
 describe('generateEsqlQuery top N', () => {
-  const uiSettings = createMockUiSettings();
+  const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
   });

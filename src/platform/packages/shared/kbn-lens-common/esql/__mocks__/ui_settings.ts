@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UiSettingsReader } from '../operations/types';
-
 export const defaultUiSettingsGet = (key: string) => {
   switch (key) {
     case 'dateFormat':
@@ -23,8 +21,3 @@ export const defaultUiSettingsGet = (key: string) => {
       return 100;
   }
 };
-
-export type MockUiSettings = UiSettingsReader & { get: jest.Mock };
-
-export const createMockUiSettings = (): MockUiSettings =>
-  ({ get: jest.fn(defaultUiSettingsGet) } as unknown as MockUiSettings);
