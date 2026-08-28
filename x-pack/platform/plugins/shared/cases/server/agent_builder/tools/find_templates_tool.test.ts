@@ -1,0 +1,212 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
+import { findTemplatesTool } from './find_templates_tool';
+
+const buildToolContext = (): ToolHandlerContext =>
+  ({
+    request: httpServerMock.createKibanaRequest(),
+    spaceId: 'default',
+    logger: loggingSystemMock.createLogger(),
+  } as unknown as ToolHandlerContext);
+
+const buildTemplate = (overrides: Record<string, unknown> = {}) => ({
+  templateId: 'template-1',
+  name: 'Phishing triage',
+  owner: 'securitySolution',
+  templateVersion: 1,
+  deletedAt: null,
+  description: 'Template for phishing triage cases',
+  tags: ['phishing'],
+  author: 'elastic',
+  usageCount: 3,
+  fieldCount: 2,
+  fieldDefinitions: [],
+  lastUsedAt: '2026-01-01T00:00:00.000Z',
+  isDefault: false,
+  isLatest: true,
+  isEnabled: true,
+  fieldSearchMatches: false,
+  ...overrides,
+});
+
+describe('findTemplatesTool', () => {
+  let casesClient: CasesClientMock;
+
+  beforeEach(() => {
+    casesClient = createCasesClientMock();
+  });
+
+  const buildTool = () => findTemplatesTool(jest.fn().mockResolvedValue(casesClient));
+
+  it('has the correct tool id', () => {
+    const tool = buildTool();
+    expect(tool.id).toBe('platform.core.cases.find_templates');
+  });
+
+  it('has read-only annotations', () => {
+    const tool = buildTool();
+    expect(tool.annotations).toEqual({
+      title: 'Find Case Templates',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    });
+  });
+
+  it('schema requires owner and makes search optional', () => {
+    const tool = buildTool();
+    const shape = tool.schema.shape;
+    expect(shape).toHaveProperty('owner');
+    expect(shape).toHaveProperty('search');
+    expect(shape.owner.isOptional()).toBe(false);
+    expect(shape.search.isOptional()).toBe(true);
+  });
+
+  it('calls getAllTemplates with the search term scoped to the owner', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [buildTemplate()],
+      page: 1,
+      perPage: 20,
+      total: 1,
+    });
+
+    const tool = buildTool();
+    await tool.handler(
+      { owner: 'securitySolution', search: 'phishing' } as never,
+      buildToolContext()
+    );
+
+    expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+      expect.objectContaining({
+        owner: ['securitySolution'],
+        search: 'phishing',
+        page: 1,
+        perPage: 20,
+      })
+    );
+  });
+
+  it('defaults search to an empty string to list all templates for the owner', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [buildTemplate()],
+      page: 1,
+      perPage: 20,
+      total: 1,
+    });
+
+    const tool = buildTool();
+    await tool.handler({ owner: 'securitySolution' } as never, buildToolContext());
+
+    expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+      expect.objectContaining({ search: '' })
+    );
+  });
+
+  it('maps matching templates into lean results', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [buildTemplate()],
+      page: 1,
+      perPage: 20,
+      total: 1,
+    });
+
+    const tool = buildTool();
+    const result = await tool.handler(
+      { owner: 'securitySolution', search: 'phishing' } as never,
+      buildToolContext()
+    );
+
+    expect(result.results[0].data).toMatchObject({
+      total: 1,
+      templates: [
+        {
+          templateId: 'template-1',
+          name: 'Phishing triage',
+          description: 'Template for phishing triage cases',
+          owner: 'securitySolution',
+          tags: ['phishing'],
+          isEnabled: true,
+        },
+      ],
+    });
+  });
+
+  it('returns a helpful message when no templates match', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [],
+      page: 1,
+      perPage: 20,
+      total: 0,
+    });
+
+    const tool = buildTool();
+    const result = await tool.handler(
+      { owner: 'securitySolution', search: 'nonexistent' } as never,
+      buildToolContext()
+    );
+
+    expect(result.results[0].data).toMatchObject({
+      total: 0,
+      templates: [],
+      message: 'No templates found matching "nonexistent" for owner "securitySolution".',
+    });
+  });
+
+  it('adds a pagination hint when more results exist than the current page', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [buildTemplate()],
+      page: 1,
+      perPage: 1,
+      total: 2,
+    });
+
+    const tool = buildTool();
+    const result = await tool.handler(
+      { owner: 'securitySolution', perPage: 1 } as never,
+      buildToolContext()
+    );
+
+    expect((result.results[0].data as { message?: string }).message).toContain(
+      'Showing page 1 of 2'
+    );
+  });
+
+  it('clamps perPage to the maximum allowed value', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [],
+      page: 1,
+      perPage: 50,
+      total: 0,
+    });
+
+    const tool = buildTool();
+    await tool.handler({ owner: 'securitySolution', perPage: 500 } as never, buildToolContext());
+
+    expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+      expect.objectContaining({ perPage: 50 })
+    );
+  });
+
+  it('returns an error result when the client throws', async () => {
+    casesClient.templates.getAllTemplates.mockRejectedValue(new Error('boom'));
+
+    const tool = buildTool();
+    const result = await tool.handler(
+      { owner: 'securitySolution', search: 'phishing' } as never,
+      buildToolContext()
+    );
+
+    expect(result.results[0]).toMatchObject({
+      data: expect.objectContaining({ message: expect.stringContaining('boom') }),
+    });
+  });
+});
