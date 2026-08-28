@@ -6,7 +6,7 @@ The demo shipped on this branch (AB → Slack via `post_view_to_slack` and the a
 
 Both are describing the same missing piece at **(4)**: a projector, triggered by `origin`, that turns the agent's *entire* reply into a Slack message. This doc plans that, plus the inbound half — and argues the two halves are **not** the same kind of problem.
 
-> **On the Relay side of this doc:** every claim about `relay-service` (the callback parser keeping only `response.message`, `renderFinal`'s markdown wrap, no `files:write` on the Slack app, inbound mrkdwn arriving unnormalized) comes from reading that repo around the demo, not from this worktree. Those are the items to confirm with Bruno/Pierre — the Kibana-side seams below are verified against source and cited inline.
+> **Relay side: now verified against `elastic/relay-service@main`, not assumed.** Every claim below was checked in source; the table in [Relay, verified](#relay-verified) records what held, what was wrong, and the three findings that changed this plan. Kibana-side seams are verified against this worktree and cited inline.
 
 ## The two directions are different problems
 
@@ -59,7 +59,28 @@ Three outbound Slack paths, none of which is this projector.
 
 The Kibana connector path already has the whole pipeline in [`post_view.ts`](../../x-pack/platform/plugins/shared/adaptive_ui/server/slack/post_view.ts): `absolutizeViewSpecHrefs` → `renderSlack(spec, { collectAssets: true })` → rasterize charts → `uploadFile` → `sendMessage`. It is simply not wired to converse/callback. `RelayClient.trigger` already forwards `blocks` on `POST /v1/trigger`, but that is the proactive/connector direction, not the reactive reply.
 
-Relay's callback parser (`parseConverseCallbackNotification` in `elastic/relay-service`) keeps only `response.message` from `round_complete`.
+Relay's callback parser (`parseConverseCallbackNotification`, `src/contracts/http/agent-builder.ts`) keeps only `response.message` from `round_complete` — verified.
+
+### Relay, verified
+
+Read against `elastic/relay-service@main`. The wire contract itself is documented in [kibana#280255](https://github.com/elastic/kibana/pull/280255) and mirrored in Relay's `test/ab-stub/types.ts`.
+
+| Claim | Verdict | Source |
+| --- | --- | --- |
+| Callback parser keeps only `response.message` from `round_complete` | **Confirmed** | `completed` notification is `{kind, execution_id, event_type, idempotency_key, message}` |
+| Unknown top-level fields are dropped | **Confirmed, and safely** — extra keys are *ignored*, not rejected. The `unexpected_field` rejection fires only for `idempotency_key` on a *non-terminal* event | `inspectConverseCallbackNotification` |
+| `message_complete` never reaches Slack | **Confirmed** — it parses to activity-only, alongside `tool_progress` / `reasoning` / `tool_result` | parser's activity group |
+| Progress does not post messages | **Confirmed, and narrower than assumed** — `renderProgress` only sets a Slack *thread status* to the current tool label. Deliberate: *"Tool parameters, results, and model reasoning remain private."* | `slack-renderer.ts` |
+| `awaiting_prompt` → `needs_input` | **Confirmed** | parser |
+| No `files:write` on the Slack app | **Confirmed** — scopes are `app_mentions:read,channels:read,chat:write,reactions:write,users:read` | `src/config.ts` |
+
+Three findings that change the plan:
+
+1. **Relay already posts a `blocks` array.** `renderFinal` sends `blocks: [{ type: 'markdown', text: answer }, ...footer]`. B2 is therefore *not* "teach Relay to send Block Kit" — the plumbing exists and `OutboundMessage.blocks` is already wired. B2 shrinks to widening `FinalRender` (today `{target, text, outcome, conversationUrl}`) to carry optional blocks and preferring them over the single markdown block.
+2. **Per-thread serialization is already guaranteed.** The ingest queue is SQS FIFO with `MessageGroupId: tenantKey#threadKey` and `MessageDeduplicationId: idempotencyKey`. The inbound constraint this doc previously flagged as a dependency is already satisfied — drop it as a risk.
+3. **Malformed Block Kit replaces the answer with a notice.** `renderFinalPost` catches `invalid_blocks` and re-posts a canned "payload rejected" message instead. So a projection bug does not degrade to *unstyled text* — it degrades to *no answer at all*. Validate blocks before they go on the wire, and prefer sending `text` that still carries the full answer.
+
+Also relevant to B3: terminal idempotency is `finalClientMessageId(execution)` — derived per **execution**, not per message. Per-message posting needs a per-message key, which is exactly the `message_key` this doc proposes.
 
 ### What the feature is
 
@@ -209,7 +230,7 @@ This degrades answer quality regardless of any rendering, and it is **Relay-side
 
 Cheapest real win in the whole plan, and it needs nothing from Kibana.
 
-**Message granularity applies inbound too, with one constraint.** Each Slack message is already its own ingestion unit — Slack event → converse callback, with continuity via `origin.external_conversation_id` — so Relay should submit each message as it arrives rather than blocking to assemble thread history; AB supplies prior context from the conversation itself. The constraint: **per-message inbound depends on Relay serializing per `external_conversation_id`.** Two people posting in a thread while a turn is running would otherwise open concurrent rounds on one conversation. Vignesh's *"Relay queues it and submits the turn"* is exactly that queue — this plan assumes it, so it is worth stating rather than leaving implicit.
+**Message granularity applies inbound too, and the ordering constraint is already handled.** Each Slack message is already its own ingestion unit — Slack event → converse callback, with continuity via `origin.external_conversation_id` — so Relay submits each message as it arrives rather than blocking to assemble thread history; AB supplies prior context from the conversation itself. An earlier draft flagged a risk that two people posting during a running turn would open concurrent rounds on one conversation. **Verified as already solved:** the ingest queue is SQS FIFO keyed `MessageGroupId: tenantKey#threadKey`, with `MessageDeduplicationId: idempotencyKey`. Vignesh's *"Relay queues it and submits the turn"* is that queue, and it serializes per thread by construction.
 
 ### (b) Transcript fidelity — what a Kibana user sees
 
@@ -281,7 +302,7 @@ A1 is lossy by construction — `response.message` is only the last message — 
 | # | Step | Touches | Note |
 | --- | --- | --- | --- |
 | B1 | **Composer + Slack projection** — `message + attachments → ViewSpec`, then `absolutizeViewSpecHrefs` → `renderSlack` → asset degrade, reusing `post_view.ts` helpers minus the connector post. | `adaptive_ui` | Buildable and unit-testable ahead of Relay; delivers nothing to Slack until B2 |
-| B2 | **`projection.slack` on the wire**, Relay preferring it in `renderFinal`. | both repos | Block Kit reaches Slack |
+| B2 | **`projection.slack` on the wire**; widen `FinalRender` to carry blocks and prefer them over the single markdown block. Smaller than it looks — Relay already posts a `blocks` array. | both repos | Block Kit reaches Slack |
 | B3 | **Per-message granularity** — tag-bounded attachments on `MessageCompleteEventData`; project each `message_complete`; terminal suppression; widened retry predicate; Relay's `message_key → ts` post-vs-update map. | both repos | **The lossiness fix.** Inherently cross-repo — see the framing above |
 
 ### Bucket C — independent of both
@@ -290,11 +311,11 @@ A1 is lossy by construction — `response.message` is only the last message — 
 | --- | --- | --- |
 | C1 | **Inbound mrkdwn normalize + file passthrough** into `ConverseInput` | Relay |
 | C2 | **Transcript renders `origin` / `author` / files** on `RoundInput` | Kibana |
-| C3 | Charts on the Relay path (`files:write` + upload) | Relay |
+| C3 | Charts on the Relay path — needs `files:write` added to the OAuth scopes, which forces a re-install/re-auth of every connected workspace. Price that in before promising charts. | Relay |
 
 **What to say in the thread:** bucket A is committable now and makes Slack threads readable this week. Bucket B is the actual answer to *"convert that to whatever Adaptive UI is doing before it gets back to Slack"*, and it needs a Relay release — B3 especially, because posting one Slack message per assistant message is a Relay behavior change, not a rendering change.
 
-**One branch to confirm first (it moves B3):** if Relay already posts or updates anything from non-terminal callback deliveries, then the per-message work is much closer to Kibana-only and B3 moves up. This doc assumes it does not, based on the parser reading flagged at the top. **Ask before scheduling B3.**
+**That branch is now resolved.** Relay posts nothing from non-terminal deliveries — `renderProgress` only sets a thread status — so B3 is confirmed cross-repo and stays where it is.
 
 ## Ownership and seams
 
@@ -310,7 +331,8 @@ A1 is lossy by construction — `response.message` is only the last message — 
 
 ## Risks
 
-- **Relay's parser may drop unknown fields.** It read as allowlist-ish on `message`; **confirm before bucket B is scheduled.** If it is strict, the projection is inert until Relay is bumped — which is exactly why bucket A lands inside `response.message` instead, and why `projection.slack.text` carries a tag-stripped fallback even when blocks are ignored.
+- **Relay's parser drops unknown fields** (verified). A `projection` field is ignored, not rejected — so shipping it early is harmless but inert until Relay is bumped. That is exactly why bucket A lands inside `response.message` instead, and why `projection.slack.text` must carry a tag-stripped fallback.
+- **Malformed Block Kit costs the whole answer** (verified). Relay's `invalid_blocks` recovery replaces the message with a canned notice, so a bad projection is worse than no projection. Validate before the wire; keep the full answer in `text`.
 - **Payload size.** Two distinct budgets. Slack's per-message block budget: bound composed body nodes (Adaptive UI already caps graphs and tables); on overflow keep the first card, truncate trailing prose, lean on the footer link. And the *callback* payload: attachments on `message_complete` must be the tag-referenced subset, or every message on the wire carries every blob in the conversation.
 - **Double-posting the answer.** The final `message_complete` and `round_complete.response.message` are the same string. If terminal projection is not suppressed once any message was projected, the duplicated message is the answer itself.
 - **Silently dropped messages.** Non-terminal callbacks are at-most-once today. Until the retry predicate covers projected messages, a failed delivery loses that message from Slack with no signal.
