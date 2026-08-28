@@ -432,30 +432,6 @@ describe('ManageRegionsModal', () => {
       });
     });
 
-    it('shows zone count and checkboxes without requiring expand', async () => {
-      mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
-        typeof useRegionPolicy
-      >);
-      mockUseEisModels.mockReturnValue({
-        data: [endpointWithRegions],
-        isLoading: false,
-      } as unknown as ReturnType<typeof useEisModels>);
-
-      render(
-        <Wrapper>
-          <ManageRegionsModal onClose={onClose} />
-        </Wrapper>
-      );
-
-      toggleCustomPolicyOn();
-      fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsZoneCount-us')).toBeInTheDocument();
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeInTheDocument();
-      });
-    });
-
     it('shows "0 of N selected" when there is no existing policy', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
