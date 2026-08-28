@@ -20,7 +20,6 @@ import type {
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
-  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
@@ -56,19 +55,11 @@ import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
-  /**
-   * Applies `updates` atomically via a Painless merge script.
-   * Updates must already be serialized; callers are responsible for validation.
-   *
-   * Pass `context` when the caller already holds `templateId` and/or `parentId` (e.g.
-   * from the run-start conversation snapshot). Provided values are used directly instead
-   * of being extracted from the fetched document.
-   */
-  unsafeMergeMetadata(
+  /** Validates, serializes, and merges `updates` into the conversation metadata. */
+  patchMetadata(
     conversationId: string,
-    updates: Record<string, SerializedMetadataValue>,
-    context?: { templateId?: string; parentId?: string }
-  ): Promise<void>;
+    updates: Record<string, unknown>
+  ): Promise<{ changedFields: string[] }>;
 }
 
 export type AgentHandlerFn = (

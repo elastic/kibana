@@ -16,8 +16,8 @@ import {
 import type {
   BrowserApiToolMetadata,
   ChatAgentEvent,
+  MetadataFieldValue,
   RoundInput,
-  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
@@ -243,11 +243,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const conversationId = conversation?.id;
   const updateConversationMetadata =
     conversationId && conversation?.template_id
-      ? (updates: Record<string, SerializedMetadataValue>) =>
-          conversationClient.unsafeMergeMetadata(conversationId, updates, {
-            templateId: conversation.template_id,
-            parentId: conversation.parent_conversation?.id,
-          })
+      ? (updates: Record<string, MetadataFieldValue>) =>
+          conversationClient.patchMetadata(conversationId, updates)
       : undefined;
 
   const conversationTemplate = conversation?.template_id

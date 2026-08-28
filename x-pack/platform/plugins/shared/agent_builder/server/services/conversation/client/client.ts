@@ -59,10 +59,10 @@ import type {
   NormalizedConversation,
   UpsertRoundRequest,
 } from './types';
-import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
+import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
-import type { ConversationStorage, ConversationProperties } from './storage';
-import { createStorage, conversationIndexName } from './storage';
+import type { ConversationStorage } from './storage';
+import { createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
@@ -119,21 +119,6 @@ export interface ConversationClient {
     conversationId: string,
     updates: Record<string, unknown>
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
-  /**
-   * Applies `updates` atomically via a Painless merge script, then fires `onMetadataPatched`.
-   * Use instead of `patchMetadata` when multiple concurrent writes may race (e.g. parallel agent
-   * tool calls in the same run). Updates must already be serialized; no template validation is
-   * performed here — callers are responsible for validating before calling.
-   *
-   * Pass `context` when the caller already holds `templateId` and/or `parentId` (e.g. from the
-   * run-start conversation snapshot). When provided those values are used directly, avoiding a
-   * redundant extraction from `_source` after the real-time document fetch.
-   */
-  unsafeMergeMetadata(
-    conversationId: string,
-    updates: Record<string, SerializedMetadataValue>,
-    context?: { templateId?: string; parentId?: string }
-  ): Promise<void>;
 }
 
 /**
@@ -163,7 +148,6 @@ export const createClient = ({
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
     storage,
-    esClient,
     user,
     space,
     agentRegistry,
@@ -175,7 +159,6 @@ export const createClient = ({
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
-  private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
@@ -183,7 +166,6 @@ class ConversationClientImpl implements ConversationClient {
 
   constructor({
     storage,
-    esClient,
     user,
     space,
     agentRegistry,
@@ -191,7 +173,6 @@ class ConversationClientImpl implements ConversationClient {
     onMetadataPatched,
   }: {
     storage: ConversationStorage;
-    esClient: ElasticsearchClient;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
@@ -199,7 +180,6 @@ class ConversationClientImpl implements ConversationClient {
     onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
   }) {
     this.storage = storage;
-    this.esClient = esClient;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
@@ -692,96 +672,6 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return { conversation: result, changedFields };
-  }
-
-  async unsafeMergeMetadata(
-    conversationId: string,
-    updates: Record<string, SerializedMetadataValue>,
-    context?: { templateId?: string; parentId?: string }
-  ): Promise<void> {
-    const doc = await this.getDocumentRealTime(conversationId);
-
-    if (!doc) {
-      throw createConversationNotFoundError({ conversationId });
-    }
-
-    const conversation = fromEsWithoutRounds(doc, this.user);
-    if (!hasConversationOwnerAccess({ conversation, user: this.user })) {
-      throw createConversationNotFoundError({ conversationId });
-    }
-
-    // Best-effort extraction of prior state to compute changedFields.
-    // If extraction fails, fall back to treating all written keys as
-    // changed so the trigger still fires rather than being silently suppressed.
-    let changedFields = Object.keys(updates);
-    let templateId: string | undefined = context?.templateId;
-    let parentId: string | undefined = context?.parentId;
-    try {
-      const stored = (doc._source?.metadata ?? {}) as Record<string, SerializedMetadataValue>;
-      changedFields = ConversationClientImpl.computeChangedFields(updates, stored);
-      if (templateId === undefined) templateId = doc._source?.template_id;
-      if (parentId === undefined) parentId = doc._source?.parent_conversation?.id;
-    } catch {
-      // proceed — changedFields defaults to all keys
-    }
-
-    await this.esClient.update({
-      index: conversationIndexName,
-      id: conversationId,
-      script: {
-        lang: 'painless',
-        source:
-          'if (ctx._source.metadata == null) { ctx._source.metadata = params.updates; } else { ctx._source.metadata.putAll(params.updates); }',
-        params: { updates },
-      },
-      retry_on_conflict: 3,
-    });
-
-    if (changedFields.length > 0 && this.onMetadataPatched) {
-      this.onMetadataPatched({ conversationId, templateId, parentId, changedFields });
-    }
-  }
-
-  /**
-   * Fetches a conversation document using a real-time get (reads the translog).
-   * Unlike `getDocument` which uses `search`, this sees writes that have not yet been
-   * refreshed — critical for `unsafeMergeMetadata` where back-to-back Painless updates
-   * in the same agent turn must observe each other's prior writes.
-   *
-   * Space isolation is enforced after retrieval: documents belonging to a different space
-   * are treated as not found.
-   */
-  private async getDocumentRealTime(conversationId: string): Promise<Document | undefined> {
-    const response = await this.esClient.get<ConversationProperties>({
-      index: conversationIndexName,
-      id: conversationId,
-    });
-
-    if (!response.found || !response._source) {
-      return undefined;
-    }
-
-    // Space check: replicate the search filter applied by getDocument.
-    // Default-space docs may have no `space` field set.
-    const docSpace = response._source.space as string | undefined;
-    const inScope = isDefaultSpace(this.space) ? isDefaultSpace(docSpace) : docSpace === this.space;
-
-    if (!inScope) {
-      return undefined;
-    }
-
-    const hit = {
-      _id: response._id,
-      _source: response._source,
-      _seq_no: response._seq_no,
-      _primary_term: response._primary_term,
-    };
-
-    if (!isConversationDocument(hit)) {
-      throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
-    }
-
-    return hit;
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {

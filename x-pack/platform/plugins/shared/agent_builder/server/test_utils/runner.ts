@@ -367,7 +367,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     },
     conversationClient: {
       exists: jest.fn().mockResolvedValue(false),
-      unsafeMergeMetadata: jest.fn().mockResolvedValue(undefined),
+      patchMetadata: jest.fn().mockResolvedValue({ changedFields: [] }),
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
