@@ -93,13 +93,6 @@ const threatReportsTemplate = {
               copy_to: ['content.body_text_bm25'],
             },
             body_text_bm25: { type: 'text' as const },
-            // Third-party HTML exactly as fetched, stored unsanitized and not
-            // indexed. It is kept so extraction can be re-run without re-fetching.
-            //
-            // CONSUMER CONTRACT: never render this. It is attacker-controlled markup
-            // from an arbitrary feed, so a UI that injects it is stored XSS. Render
-            // `body_text`, which is the stripped and collapsed form.
-            body_html: { type: 'text' as const, index: false },
             // Set when body_text is the report title rather than a real body, which
             // happens for title-only feed entries. Enrichment can use it to skip or
             // cheapen a stage instead of running inference over the title twice.

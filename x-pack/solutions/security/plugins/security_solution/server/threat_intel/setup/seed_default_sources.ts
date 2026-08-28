@@ -9,11 +9,12 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { GLOBAL_SPACE_ID, THREAT_INTEL_SOURCES_INDEX } from '../../../common/threat_intel';
 
 /**
- * Default sources seeded into `.kibana-threat-intel-sources` on first boot.
+ * Approved sources seeded into `.kibana-threat-intel-sources` on first boot.
  *
- * Small curated starter set: first-party vendor research, CISA KEV, and a
- * couple of high-signal RSS feeds. Operators expand the catalog through the
- * create / update / delete source APIs.
+ * This is a fixed, approved catalog. Eight sources ship enabled; the optional
+ * AWS and FortiGuard packs ship disabled for an operator to turn on per design
+ * partner. Operators can only list and enable / disable entries — the catalog
+ * is not operator-extensible, so there is no create / update / delete path.
  */
 interface DefaultSource {
   id: string;
@@ -21,6 +22,12 @@ interface DefaultSource {
   name: string;
   config: { url: string };
   tags: string[];
+  /**
+   * Declared default state. Eight approved sources ship `true`; the optional
+   * AWS and FortiGuard packs ship `false` so an operator opts in per design
+   * partner. Create-only seeding means an operator's later choice survives boots.
+   */
+  enabled: boolean;
 }
 
 export const DEFAULT_SOURCES: readonly DefaultSource[] = [
@@ -32,6 +39,7 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
       url: 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
     },
     tags: ['vulnerability', 'cisa', 'kev', 'government'],
+    enabled: true,
   },
   {
     id: 'vendor_api:elastic-security-labs',
@@ -39,6 +47,7 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     name: 'Elastic Security Labs',
     config: { url: 'https://www.elastic.co/security-labs/rss/feed.xml' },
     tags: ['vendor', 'elastic', 'research', 'research-tools'],
+    enabled: true,
   },
   {
     id: 'rss:mandiant-research',
@@ -46,6 +55,7 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     name: 'Mandiant / Google Cloud Threat Intelligence',
     config: { url: 'https://cloud.google.com/security/blog/threat-intelligence/rss' },
     tags: ['vendor', 'research', 'apt'],
+    enabled: true,
   },
   {
     id: 'rss:unit42',
@@ -53,6 +63,7 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     name: 'Palo Alto Networks Unit 42',
     config: { url: 'https://unit42.paloaltonetworks.com/feed/' },
     tags: ['vendor', 'research', 'malware', 'apt'],
+    enabled: true,
   },
   {
     id: 'rss:talos',
@@ -60,6 +71,7 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     name: 'Cisco Talos Intelligence',
     config: { url: 'https://blog.talosintelligence.com/rss/' },
     tags: ['vendor', 'research', 'malware'],
+    enabled: true,
   },
   {
     id: 'rss:crowdstrike',
@@ -67,6 +79,7 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     name: 'CrowdStrike Blog',
     config: { url: 'https://www.crowdstrike.com/blog/feed/' },
     tags: ['vendor', 'research', 'apt'],
+    enabled: true,
   },
   {
     id: 'rss:cisa-alerts',
@@ -74,6 +87,7 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     name: 'CISA Alerts and Advisories',
     config: { url: 'https://www.cisa.gov/cybersecurity-advisories/all.xml' },
     tags: ['government', 'advisories', 'vulnerability', 'government-policy'],
+    enabled: true,
   },
   {
     id: 'text_indicator_list:maltrail-cobaltstrike',
@@ -83,6 +97,41 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
       url: 'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
     },
     tags: ['malware', 'research-tools', 'feed'],
+    enabled: true,
+  },
+  // Optional technology packs, seeded disabled. An operator enables a pack for a
+  // design partner (e.g. the AWS IAM pair) without turning on any other pack.
+  {
+    id: 'rss:aws-security',
+    adapter_type: 'rss',
+    name: 'AWS Security Blog',
+    config: { url: 'https://aws.amazon.com/blogs/security/feed/' },
+    tags: ['vendor', 'aws', 'cloud', 'iam', 'pack:aws-iam'],
+    enabled: false,
+  },
+  {
+    id: 'rss:aws-security-bulletins',
+    adapter_type: 'rss',
+    name: 'AWS Security Bulletins',
+    config: { url: 'https://aws.amazon.com/security/security-bulletins/rss/feed/' },
+    tags: ['vendor', 'aws', 'cloud', 'iam', 'advisories', 'pack:aws-iam'],
+    enabled: false,
+  },
+  {
+    id: 'rss:fortiguard-advisories',
+    adapter_type: 'rss',
+    name: 'FortiGuard Advisories',
+    config: { url: 'https://filestore.fortinet.com/fortiguard/rss/ir.xml' },
+    tags: ['vendor', 'fortinet', 'fortigate', 'advisories', 'pack:fortigate'],
+    enabled: false,
+  },
+  {
+    id: 'rss:fortiguard-threat-signal',
+    adapter_type: 'rss',
+    name: 'FortiGuard Threat Signal',
+    config: { url: 'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml' },
+    tags: ['vendor', 'fortinet', 'fortigate', 'pack:fortigate'],
+    enabled: false,
   },
 ];
 
@@ -98,7 +147,7 @@ const BULK_CREATE_CHUNK_SIZE = 50;
 const buildDefaultSourceDocument = (src: DefaultSource, now: string) => ({
   adapter_type: src.adapter_type,
   name: src.name,
-  enabled: true,
+  enabled: src.enabled,
   config: src.config,
   tags: src.tags,
   space_id: GLOBAL_SPACE_ID,

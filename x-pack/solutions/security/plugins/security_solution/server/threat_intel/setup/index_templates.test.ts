@@ -440,6 +440,19 @@ describe('installIndexTemplates', () => {
     }
   });
 
+  it('keeps bounded body_text but never maps raw body_html', async () => {
+    const { byIndex } = await runInstall();
+
+    const content = (
+      byIndex(THREAT_REPORTS_INDEX)?.template?.mappings as {
+        properties: { content: { properties: Record<string, unknown> } };
+      }
+    ).properties.content.properties;
+
+    expect(content).toEqual(expect.objectContaining({ body_text: expect.anything() }));
+    expect(content).not.toHaveProperty('body_html');
+  });
+
   it('maps a field for every IOC type the promote task can emit', async () => {
     const { byIndex } = await runInstall();
 

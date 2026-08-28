@@ -180,3 +180,129 @@ describe('seedDefaultSources', () => {
     expect(result.created + result.skipped + result.failed).toBe(result.total);
   });
 });
+
+/**
+ * The approved MVP catalog contract. These assertions are load-bearing: the eight
+ * enabled defaults, the four disabled optional-pack entries, their exact ids and
+ * endpoints, and the fact that an operator's enablement choice survives a re-seed
+ * are the product decision, not implementation detail.
+ */
+describe('DEFAULT_SOURCES approved catalog', () => {
+  const ENABLED_ENDPOINTS: Record<string, string> = {
+    'kev:cisa-known-exploited-vulnerabilities':
+      'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
+    'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
+    'rss:mandiant-research': 'https://cloud.google.com/security/blog/threat-intelligence/rss',
+    'rss:unit42': 'https://unit42.paloaltonetworks.com/feed/',
+    'rss:talos': 'https://blog.talosintelligence.com/rss/',
+    'rss:crowdstrike': 'https://www.crowdstrike.com/blog/feed/',
+    'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
+    'text_indicator_list:maltrail-cobaltstrike':
+      'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
+  };
+
+  const DISABLED_ENDPOINTS: Record<string, string> = {
+    'rss:aws-security': 'https://aws.amazon.com/blogs/security/feed/',
+    'rss:aws-security-bulletins': 'https://aws.amazon.com/security/security-bulletins/rss/feed/',
+    'rss:fortiguard-advisories': 'https://filestore.fortinet.com/fortiguard/rss/ir.xml',
+    'rss:fortiguard-threat-signal':
+      'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml',
+  };
+
+  const byId = (id: string) => DEFAULT_SOURCES.find((source) => source.id === id);
+
+  it('seeds exactly eight enabled sources by default', () => {
+    const enabled = DEFAULT_SOURCES.filter((source) => source.enabled);
+    expect(enabled.map((source) => source.id).sort()).toEqual(
+      Object.keys(ENABLED_ENDPOINTS).sort()
+    );
+  });
+
+  it('seeds exactly four disabled optional-pack sources', () => {
+    const disabled = DEFAULT_SOURCES.filter((source) => !source.enabled);
+    expect(disabled.map((source) => source.id).sort()).toEqual(
+      Object.keys(DISABLED_ENDPOINTS).sort()
+    );
+  });
+
+  it('carries no sources beyond the approved twelve', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(12);
+    expect(new Set(DEFAULT_SOURCES.map((source) => source.id)).size).toBe(12);
+  });
+
+  it.each(Object.entries(ENABLED_ENDPOINTS))(
+    'pins the enabled source %s to its approved endpoint',
+    (id, url) => {
+      const source = byId(id);
+      expect(source?.enabled).toBe(true);
+      expect(source?.config.url).toBe(url);
+    }
+  );
+
+  it.each(Object.entries(DISABLED_ENDPOINTS))(
+    'pins the disabled source %s to its approved endpoint',
+    (id, url) => {
+      const source = byId(id);
+      expect(source?.enabled).toBe(false);
+      expect(source?.config.url).toBe(url);
+    }
+  );
+
+  it('groups the disabled entries into an AWS pack and a FortiGuard pack that do not overlap', () => {
+    const awsPack = DEFAULT_SOURCES.filter((source) => source.tags.includes('pack:aws-iam'));
+    const fortiPack = DEFAULT_SOURCES.filter((source) => source.tags.includes('pack:fortigate'));
+
+    expect(awsPack.map((source) => source.id).sort()).toEqual([
+      'rss:aws-security',
+      'rss:aws-security-bulletins',
+    ]);
+    expect(fortiPack.map((source) => source.id).sort()).toEqual([
+      'rss:fortiguard-advisories',
+      'rss:fortiguard-threat-signal',
+    ]);
+    expect(awsPack.every((source) => !source.enabled)).toBe(true);
+    expect(fortiPack.every((source) => !source.enabled)).toBe(true);
+  });
+});
+
+/**
+ * Create-only seeding is what lets an operator's enable / disable choice survive a
+ * later boot: a re-seed can only insert a missing id, never overwrite the stored
+ * `enabled` value of one that already exists.
+ */
+describe('seedDefaultSources preserves operator-selected enabled state', () => {
+  it('writes each declared enabled state on first seed', async () => {
+    const { esClient } = await run(async ({ operations }: { operations: unknown[] }) =>
+      itemsFor(operations, { result: 'created' })
+    );
+
+    const operations = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0].operations as Array<
+      Record<string, unknown>
+    >;
+
+    const documentsById = new Map<string, { enabled: boolean }>();
+    for (let i = 0; i < operations.length; i += 2) {
+      const action = operations[i] as { create?: { _id?: string } };
+      const document = operations[i + 1] as { enabled: boolean };
+      if (action.create?._id) documentsById.set(action.create._id, document);
+    }
+
+    for (const source of DEFAULT_SOURCES) {
+      expect(documentsById.get(source.id)?.enabled).toBe(source.enabled);
+    }
+  });
+
+  it('only ever issues create operations, so a re-seed cannot overwrite an operator toggle', async () => {
+    const { esClient } = await run(async ({ operations }: { operations: unknown[] }) =>
+      itemsFor(operations, { error: { status: 409 } })
+    );
+
+    const operations = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0].operations as Array<
+      Record<string, unknown>
+    >;
+    const actions = operations.filter((_op, index) => index % 2 === 0);
+
+    expect(actions.every((action) => 'create' in action)).toBe(true);
+    expect(actions.some((action) => 'index' in action || 'update' in action)).toBe(false);
+  });
+});

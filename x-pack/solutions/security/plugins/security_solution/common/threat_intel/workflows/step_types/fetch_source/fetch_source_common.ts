@@ -45,7 +45,6 @@ export const normalizedReportSchema = z.object({
   content: z.object({
     title: z.string(),
     body_text: z.string(),
-    body_html: z.string().optional(),
     language: z.string().default('en'),
     external_references: z
       .array(
