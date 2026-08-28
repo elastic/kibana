@@ -59,9 +59,20 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   );
   const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
 
-  const instances = serviceSettings?.instances ?? [];
-
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
+
+  // ECF deploys one CloudFormation stack per template family — it has no concept of duplicate
+  // instances. Use selectedServiceIds directly (always available from the flow context) rather
+  // than session-storage instances, which are only written when the user clicks Next in Step 2.
+  const ecfInstances = useMemo(
+    () =>
+      selectedServiceIds.flatMap((id) => {
+        const service = awsServicesMap?.get(id);
+        if (!service?.showInUI) return [];
+        return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
+      }),
+    [selectedServiceIds, awsServicesMap]
+  );
 
   // ── Managed Integrations ──────────────────────────────────────────────────────
   const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed } = useDeploy({
@@ -105,7 +116,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
   } = useEcfDeployment({
-    instances,
+    instances: ecfInstances,
     serviceVars,
     globalRegion,
     otlpEndpoint,

@@ -24,6 +24,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
+import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import {
   getEcfServiceConfigs,
   buildEcfUnifiedCloudFormationUrl,
@@ -183,7 +184,7 @@ export const useEcfDeployment = ({
 
 // Delay (ms) after clicking Launch before showing the "Reopen console" link — gives users a
 // quick way to re-open the AWS Console tab if they accidentally closed it.
-const REOPEN_LINK_DELAY_MS = 10_000;
+const REOPEN_LINK_DELAY_MS = 5_000;
 
 interface EcfFamilyPanelProps {
   description: React.ReactNode;
@@ -223,17 +224,24 @@ const EcfFamilyPanel = ({
           <EuiButton
             href={isLaunched ? undefined : launchUrl}
             target="_blank"
-            iconType="external"
-            iconSide="right"
+            iconType={isLaunched ? undefined : 'external'}
+            iconSide={isLaunched ? 'left' : 'right'}
             fill
             onClick={onLaunch}
-            isDisabled={isLaunched}
+            isLoading={isLaunched}
             data-test-subj={launchButtonTestSubj}
           >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.launchButton"
-              defaultMessage="Launch CloudFormation"
-            />
+            {isLaunched ? (
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.deployingText"
+                defaultMessage="CloudFormation stack deploying…"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.launchButton"
+                defaultMessage="Launch CloudFormation"
+              />
+            )}
           </EuiButton>
         </EuiFlexItem>
         {showReopen && (
@@ -241,7 +249,7 @@ const EcfFamilyPanel = ({
             <EuiButtonEmpty
               href={launchUrl}
               target="_blank"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               size="s"
               data-test-subj={`${launchButtonTestSubj}-reopen`}
