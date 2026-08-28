@@ -18,12 +18,10 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { AgentPromptType, type PromptResponse } from '@kbn/agent-builder-common/agents';
-import { pendingRoundId } from '../../../utils/new_conversation';
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
-import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { RoundError } from './round_error/round_error';
 import { AuthorizationPrompt, ConfirmationPrompt, AskUserQuestionPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
@@ -124,15 +122,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     resumeRound,
     isResuming,
   } = useConversationStream();
-  const { currentUserProfile } = useCurrentUser();
   const isHitlDisabled = isStreaming && !isResuming;
-  const shouldUseCurrentUserProfile = isCurrentRound && rawRound.id === pendingRoundId && !author;
-  const inputAuthor = shouldUseCurrentUserProfile ? currentUserProfile ?? undefined : author;
-  const inputAuthorId =
-    author?.id ?? (shouldUseCurrentUserProfile ? currentUserProfile?.uid : undefined);
-  const isInputFromCurrentUser = Boolean(
-    currentUserProfile?.uid && inputAuthorId === currentUserProfile.uid
-  );
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
@@ -212,8 +202,9 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       <EuiFlexItem grow={false}>
         <RoundInput
           input={input.message}
-          author={inputAuthor}
-          isCurrentUser={isInputFromCurrentUser}
+          author={author}
+          isCurrentRound={isCurrentRound}
+          roundId={rawRound.id}
           origin={origin}
           startedAt={startedAt}
           attachmentRefs={input.attachment_refs}

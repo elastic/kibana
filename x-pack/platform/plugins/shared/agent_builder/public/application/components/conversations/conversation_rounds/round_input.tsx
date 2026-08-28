@@ -25,10 +25,14 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { AB_PANEL_RADIUS } from '../../../../common.styles';
+import { useCurrentUser } from '../../../hooks/use_current_user';
+import { pendingRoundId } from '../../../utils/new_conversation';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { CommandBadgeText } from './command_badge_text';
 import { RoundAuthorHeader } from './round_author_header';
+
+type RoundInputAuthor = ConversationRoundAuthor | UserProfileWithAvatar;
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {
@@ -38,8 +42,9 @@ const labels = {
 
 interface RoundInputProps {
   input: string;
-  author?: ConversationRoundAuthor | UserProfileWithAvatar;
-  isCurrentUser: boolean;
+  author?: RoundInputAuthor;
+  isCurrentRound: boolean;
+  roundId: string;
   origin?: ConversationRoundOrigin;
   startedAt: string;
   attachmentRefs?: AttachmentVersionRef[];
@@ -47,10 +52,69 @@ interface RoundInputProps {
   fallbackAttachments?: Attachment[];
 }
 
+export const getInputAuthor = ({
+  author,
+  currentUser,
+  isCurrentRound,
+  roundId,
+}: {
+  author?: RoundInputAuthor;
+  currentUser: UserProfileWithAvatar | null;
+  isCurrentRound: boolean;
+  roundId: string;
+}): RoundInputAuthor | undefined => {
+  if (author) {
+    return author;
+  }
+
+  if (!isCurrentRound) {
+    return undefined;
+  }
+
+  if (roundId !== pendingRoundId) {
+    return undefined;
+  }
+
+  return currentUser ?? undefined;
+};
+
+const getAuthorId = (author?: RoundInputAuthor): string | undefined => {
+  if (!author) {
+    return undefined;
+  }
+
+  if ('uid' in author) {
+    return author.uid;
+  }
+
+  return author.id;
+};
+
+export const isCurrentUserAuthor = ({
+  author,
+  currentUser,
+}: {
+  author?: RoundInputAuthor;
+  currentUser: UserProfileWithAvatar | null;
+}): boolean => {
+  if (!currentUser) {
+    return false;
+  }
+
+  const authorId = getAuthorId(author);
+
+  if (!authorId) {
+    return false;
+  }
+
+  return authorId === currentUser.uid;
+};
+
 export const RoundInput = ({
   input,
   author,
-  isCurrentUser,
+  isCurrentRound,
+  roundId,
   origin,
   startedAt,
   attachmentRefs,
@@ -58,7 +122,10 @@ export const RoundInput = ({
   fallbackAttachments,
 }: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
+  const { currentUser } = useCurrentUser();
   const [isHovering, setIsHovering] = useState(false);
+  const inputAuthor = getInputAuthor({ author, currentUser, isCurrentRound, roundId });
+  const isCurrentUser = isCurrentUserAuthor({ author: inputAuthor, currentUser });
 
   const inputContainerStyles = css`
     width: 100%;
@@ -86,7 +153,12 @@ export const RoundInput = ({
       <EuiFlexItem grow={false} css={inputContentStyles}>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <RoundAuthorHeader author={author} origin={origin} startedAt={startedAt} actor="user" />
+            <RoundAuthorHeader
+              author={inputAuthor}
+              origin={origin}
+              startedAt={startedAt}
+              actor="user"
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPanel
