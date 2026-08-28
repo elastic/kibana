@@ -61,20 +61,12 @@ interface FocusableRowProps {
 interface NodeRowViewProps extends FocusableRowProps {
   row: NodeRow;
   onActivate: (event: React.MouseEvent) => void;
-  // The row's trailing action buttons (copy, filter) mount only while the row is active or hovered,
-  // so a large tree doesn't flood the document with focusable elements (which makes focus-trap /
-  // tabbable scans O(elements) and dominates mount/teardown). Keyboard access is preserved: focusing
-  // a row makes it active, which mounts its actions before Arrow-Right can reach them.
-  isHovered: boolean;
-  onHover: (id: string | null) => void;
   formatValue?: FormatValue;
   getLeafActions?: GetLeafActions;
 }
 export const NodeRowView = memo(function NodeRowView({
   row,
   isActive,
-  isHovered,
-  onHover,
   rowRef,
   onActivate,
   onFocus,
@@ -85,6 +77,10 @@ export const NodeRowView = memo(function NodeRowView({
   const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
   const { node, hasChildren, isExpanded } = row;
+  // The row's action buttons (copy, filter) mount only while the row is active or hovered,
+  // so a large tree doesn't flood the document with focusable elements (which makes focus-trap /
+  // tabbable scans dominate page load time).
+  const [isHovered, setIsHovered] = useState(false);
   return (
     <div
       ref={rowRef}
@@ -99,7 +95,8 @@ export const NodeRowView = memo(function NodeRowView({
       style={{ paddingInlineStart: rowPaddingInlineStart(euiTheme, row.depth) }}
       onClick={onActivate}
       onFocus={onFocus}
-      onMouseEnter={() => onHover(node.id)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onKeyDown={onKeyDown}
       data-test-subj={`jsonTreeViewerRow-${node.id}`}
     >
@@ -314,6 +311,14 @@ const useCopyWithFeedback = (getText: () => string, label: string) => {
   } as const;
 };
 
+// A pointer click leaves the button focused, so the row stays `:focus-within` and its actions remain
+// revealed after the pointer leaves. Drop focus so they fade on mouse-out.
+const blurAfterPointerClick = (event: React.MouseEvent) => {
+  if (event.detail !== 0 && event.currentTarget instanceof HTMLElement) {
+    event.currentTarget.blur();
+  }
+};
+
 const CopyButton = function CopyButton({
   getText,
   label,
@@ -339,6 +344,7 @@ const CopyButton = function CopyButton({
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
           copy();
+          blurAfterPointerClick(event);
         }}
         onKeyDown={rowActionKeyDown}
         size="xs"
@@ -429,6 +435,7 @@ const RowActionButton = memo(function RowActionButton({ action }: { action: Json
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
           action.onClick();
+          blurAfterPointerClick(event);
         }}
         onKeyDown={rowActionKeyDown}
         size="xs"

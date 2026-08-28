@@ -27,7 +27,7 @@ import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_docum
 import type { JsonModeSettings } from '../types';
 import type { FormatValue, GetLeafActions } from './json_tree_viewer/json_tree_viewer';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer/json_tree_viewer';
-import { DEFAULT_RENDERED_NODES } from './json_tree_viewer/tree_model';
+import { DEFAULT_RENDERED_NODES } from './data_table_additional_display_settings';
 import { getDocumentText } from './json_tree_viewer/doc_scan';
 import { UnifiedDataTableContext } from '../table_context';
 
