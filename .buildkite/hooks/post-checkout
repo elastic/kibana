@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+source .buildkite/scripts/lifecycle/merge_target_branch.sh
