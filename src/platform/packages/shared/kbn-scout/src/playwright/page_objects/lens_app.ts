@@ -317,10 +317,11 @@ export class LensApp {
       });
     // ComboBox can show the typed option before Lens layer state commits.
     // data-selected-field is sourceField and updates only after insertOrReplaceColumn.
-    // Tests pass the dropdown label; the document-count field is labeled Records
-    // but stored as ___records___.
-    const optionLabel = field.trim().toLowerCase();
-    const committedField = optionLabel === 'records' ? '___records___' : field.trim();
+    // Tests pass the dropdown label; the document-count field is labeled
+    // Records but stored as ___records___. Compare IDs exactly —
+    // Elasticsearch field names are case-sensitive.
+    const requestedField = field.trim();
+    const committedField = requestedField === 'Records' ? '___records___' : requestedField;
     await this.page.testSubj
       .locator('indexPattern-dimension-field')
       .and(this.page.locator(`[data-selected-field="${committedField}"]`))

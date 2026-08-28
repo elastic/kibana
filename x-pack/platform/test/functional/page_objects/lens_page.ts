@@ -252,18 +252,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         // combobox input: setElement types `field` as a filter before the option is
         // clicked. data-selected-field is Lens sourceField and updates only after
         // insertOrReplaceColumn. Independent of aria-invalid (incompleteOperation / CCS).
-        // Tests pass the dropdown label; the document-count field is labeled Records
-        // but stored as ___records___.
+        // Tests pass the dropdown label; the document-count field is labeled
+        // Records but stored as ___records___. Compare IDs exactly —
+        // Elasticsearch field names are case-sensitive.
         await retry.waitFor('field selection to commit', async () => {
           const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          const requiredOptionLabel = field.trim().toLowerCase();
-          const sourceField = (
-            (await fieldCombo.getAttribute('data-selected-field')) ?? ''
-          ).toLowerCase();
-          return (
-            sourceField === requiredOptionLabel ||
-            (sourceField === '___records___' && requiredOptionLabel === 'records')
-          );
+          const requestedField = field.trim();
+          const sourceField = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+          const expectedSourceField =
+            requestedField === 'Records' ? '___records___' : requestedField;
+          return sourceField === expectedSourceField;
         });
       }
 
