@@ -111,7 +111,7 @@ If zero templates match, say so — do not guess an ID. If more than one matches
           message = search
             ? `No templates found matching "${search}" for owner "${owner}".`
             : `No templates found for owner "${owner}".`;
-        } else if (total > results.length) {
+        } else if (requestedPage < totalPages) {
           message = `Showing page ${requestedPage} of ${totalPages} (${results.length} of ${total} matches). Pass \`page\` to fetch additional pages.`;
         }
 
