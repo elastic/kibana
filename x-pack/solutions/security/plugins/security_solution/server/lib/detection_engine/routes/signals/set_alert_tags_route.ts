@@ -79,7 +79,8 @@ export const setAlertTagsRoute = (
 
         const cappedTagsToAdd = tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION);
         const cappedTagsToRemove = tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION);
-        // Falls back to the requested arrays if the prefetch fails.
+        // Falls back to the full requested IDs/arrays if the prefetch fails.
+        let changedAlertIds = ids;
         let tagsActuallyAdded = cappedTagsToAdd;
         let tagsActuallyRemoved = cappedTagsToRemove;
         if (eventBus) {
@@ -88,6 +89,20 @@ export const setAlertTagsRoute = (
             const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
               ALERT_WORKFLOW_TAGS,
             ]);
+            // Emit only IDs whose source would actually change; unknown/no-op IDs are excluded.
+            changedAlertIds = hits
+              .filter((h) => {
+                const current = new Set<string>(
+                  Array.isArray(h.source[ALERT_WORKFLOW_TAGS])
+                    ? (h.source[ALERT_WORKFLOW_TAGS] as string[])
+                    : []
+                );
+                return (
+                  cappedTagsToAdd.some((t) => !current.has(t)) ||
+                  cappedTagsToRemove.some((t) => current.has(t))
+                );
+              })
+              .map((h) => h.id);
             const delta = computeActualDelta(
               hits.map((h) => h.source),
               cappedTagsToAdd,
@@ -103,12 +118,14 @@ export const setAlertTagsRoute = (
 
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsTags({ context, index, ids, tags });
-          void eventBus?.emitAlertTagsChanged(request, {
-            alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-            tagsAdded: tagsActuallyAdded,
-            tagsRemoved: tagsActuallyRemoved,
-            truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
-          });
+          if (eventBus && changedAlertIds.length > 0) {
+            void eventBus.emitAlertTagsChanged(request, {
+              alertIds: changedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+              tagsAdded: tagsActuallyAdded,
+              tagsRemoved: tagsActuallyRemoved,
+              truncated: changedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
+            });
+          }
           return result;
         });
       }

@@ -75,7 +75,8 @@ export const setAlertAssigneesRoute = (
 
         const cappedAssigneesToAdd = assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION);
         const cappedAssigneesToRemove = assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION);
-        // Falls back to the requested arrays if the prefetch fails.
+        // Falls back to the full requested IDs/arrays if the prefetch fails.
+        let changedAlertIds = ids;
         let assigneesActuallyAdded = cappedAssigneesToAdd;
         let assigneesActuallyRemoved = cappedAssigneesToRemove;
         if (eventBus) {
@@ -84,6 +85,20 @@ export const setAlertAssigneesRoute = (
             const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
               ALERT_WORKFLOW_ASSIGNEE_IDS,
             ]);
+            // Emit only IDs whose source would actually change; unknown/no-op IDs are excluded.
+            changedAlertIds = hits
+              .filter((h) => {
+                const current = new Set<string>(
+                  Array.isArray(h.source[ALERT_WORKFLOW_ASSIGNEE_IDS])
+                    ? (h.source[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[])
+                    : []
+                );
+                return (
+                  cappedAssigneesToAdd.some((uid) => !current.has(uid)) ||
+                  cappedAssigneesToRemove.some((uid) => current.has(uid))
+                );
+              })
+              .map((h) => h.id);
             const delta = computeActualDelta(
               hits.map((h) => h.source),
               cappedAssigneesToAdd,
@@ -99,12 +114,14 @@ export const setAlertAssigneesRoute = (
 
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsAssignees({ context, index, ids, assignees });
-          void eventBus?.emitAlertAssigneesChanged(request, {
-            alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-            assigneesAdded: assigneesActuallyAdded,
-            assigneesRemoved: assigneesActuallyRemoved,
-            truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
-          });
+          if (eventBus && changedAlertIds.length > 0) {
+            void eventBus.emitAlertAssigneesChanged(request, {
+              alertIds: changedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+              assigneesAdded: assigneesActuallyAdded,
+              assigneesRemoved: assigneesActuallyRemoved,
+              truncated: changedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
+            });
+          }
           return result;
         });
       }
