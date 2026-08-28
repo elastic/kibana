@@ -128,6 +128,16 @@ export function runRspackCli(options: CliOptions = {}): void {
           ? Path.resolve(flags.limits)
           : options.defaultLimitsPath ?? DEFAULT_LIMITS_PATH;
 
+      // Parsed (and validated) up front so an invalid group errors in every mode. The
+      // limits modes operate on the canonical full plugin set, so a filtered build there
+      // would validate against — or rewrite limits.yml from — an incomplete set of bundles.
+      const allowlistPluginGroups = parsePluginGroups(flags['plugin-groups']);
+      if (allowlistPluginGroups && (validateLimits || updateLimits || updateLimitsFromMetrics)) {
+        throw createFlagError(
+          '--plugin-groups cannot be combined with --validate-limits, --update-limits, or --update-limits-from-metrics (these operate on the full plugin set)'
+        );
+      }
+
       // --validate-limits: quick check, no build needed
       if (validateLimits) {
         const allPlugins = await discoverPlugins({
@@ -178,8 +188,6 @@ export function runRspackCli(options: CliOptions = {}): void {
       if (updateLimits && !dist) {
         log.info('--update-limits implies --dist (full production build)');
       }
-
-      const allowlistPluginGroups = parsePluginGroups(flags['plugin-groups']);
 
       const effectiveDist = updateLimits || dist;
       // CI validates distribution metrics built with example and test plugins, so limit updates
