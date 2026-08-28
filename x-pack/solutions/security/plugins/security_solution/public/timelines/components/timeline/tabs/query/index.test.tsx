@@ -1142,6 +1142,7 @@ describe.skip('query tab with unified timeline', () => {
             rawEvents: [{ _id: attackDiscoveryEvent._id, _index: attackDiscoveryEvent.ecs._index }],
             inspect: { dsl: [], response: [] },
             totalCount: 1,
+            isPartial: false,
             loadNextBatch: jest.fn(),
             refreshedAt: 0,
             refetch: jest.fn(),

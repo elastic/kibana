@@ -206,6 +206,7 @@ describe('EQL Tab', () => {
               activePage: 0,
               totalPages: 10,
             },
+            isPartial: false,
           },
         ]);
 
@@ -294,6 +295,7 @@ describe('EQL Tab', () => {
              * This helps in testing `sampleSize` and `loadMore`
              */
             totalCount: 50,
+            isPartial: false,
             loadPage: loadPageMock,
           },
         ]);
@@ -456,6 +458,7 @@ describe('EQL Tab', () => {
             activePage: 0,
             totalPages: 10,
           },
+          isPartial: false,
         },
       ]);
     });
