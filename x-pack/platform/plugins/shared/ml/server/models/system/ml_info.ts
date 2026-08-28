@@ -41,7 +41,7 @@ export async function getMlInfo({
     isMlAutoscalingEnabled = lazyMlNodeCount > 0;
   }
 
-  const isMlCpsEnabled = await getIsMlCpsEnabled(client);
+  const isMlCpsEnabled = serverless.cpsEnabled && (await getIsMlCpsEnabled(client));
 
   return {
     ...body,
