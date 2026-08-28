@@ -32,6 +32,7 @@ import { registerSkill } from './agent_builder/register_skill';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import {
+  DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY,
   METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
@@ -123,7 +124,11 @@ export class DiscoverServerPlugin
   }
 
   public start(core: CoreStart, deps: DiscoverServerPluginStartDeps) {
-    discoverSessionSchemaProvider.initialize(core.featureFlags);
+    void discoverSessionSchemaProvider.initialize(core.featureFlags).catch((error) => {
+      this.logger.error(
+        `Failed to resolve feature flag "${DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY}"; Discover session schemas will omit JSON view fields: ${error}`
+      );
+    });
 
     return { locator: initializeLocatorServices(core, deps) };
   }

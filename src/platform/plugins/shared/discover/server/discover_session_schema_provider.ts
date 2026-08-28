@@ -27,12 +27,13 @@ const createDiscoverSessionSchemaProvider = () => {
     getApiSchemas: () => activeSchemas.api,
     getEmbeddableSchema: (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
       activeSchemas.embeddable(getDrilldownsSchema),
-    initialize: (featureFlags: CoreStart['featureFlags']) => {
-      void featureFlags
-        .getBooleanValue(DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY, false)
-        .then((enabled) => {
-          activeSchemas = setActiveSchemas({ dataTableJsonView: enabled });
-        });
+    initialize: async (featureFlags: CoreStart['featureFlags']) => {
+      activeSchemas = setActiveSchemas({
+        dataTableJsonView: await featureFlags.getBooleanValue(
+          DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY,
+          false
+        ),
+      });
     },
   };
 };
