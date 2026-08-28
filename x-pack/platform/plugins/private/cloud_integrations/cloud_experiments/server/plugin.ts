@@ -116,6 +116,7 @@ export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimen
 
   private async addHasDataMetadata(core: CoreStart): Promise<{ has_data: boolean }> {
     const repo = core.savedObjects.createInternalRepository();
+    // same semantics as the previous data-views service check: any data view saved object exists
     const { total } = await repo.find({ type: 'index-pattern', perPage: 0 });
     return { has_data: total > 0 };
   }

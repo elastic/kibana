@@ -38,7 +38,6 @@ jest.doMock('@kbn/kibana-react-plugin/public', () => ({
       application: applicationStartMock,
       http: httpServiceMock.createStartContract(),
       dataViews: {
-        hasUserDataView: jest.fn(),
         hasData: {
           hasESData,
           hasDataView,

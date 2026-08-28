@@ -69,7 +69,6 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
           hasData: {
             hasESData: jest.fn(),
             hasDataView: jest.fn(),
-            hasUserDataView: jest.fn(),
           },
         },
       },
