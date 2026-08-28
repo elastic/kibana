@@ -1253,7 +1253,7 @@ describe('AgentlessPoliciesService', () => {
 
       await expect(() =>
         agentlessPoliciesService.deleteAgentlessPolicy(packagePolicyId)
-      ).rejects.toThrow('Cannot delete managed package policies without force');
+      ).rejects.toThrow('Cannot delete managed agentless policies without force');
 
       expect(packagePolicyService.delete).not.toHaveBeenCalled();
     });
