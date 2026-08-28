@@ -212,11 +212,19 @@ describe('eventAtOrBefore', () => {
   const originTimestampMs = Date.parse('2026-07-29T14:31:21.160Z');
 
   it('returns the newest event at or before the origin timestamp', () => {
-    expect(processNameSafeVersion(eventAtOrBefore(data, originTimestampMs))).toEqual('bash');
+    const event = eventAtOrBefore(data, originTimestampMs);
+    if (event === undefined) {
+      throw new Error('expected an event at or before origin');
+    }
+    expect(processNameSafeVersion(event)).toEqual('bash');
   });
 
   it('returns the newest event when origin timestamp is undefined', () => {
-    expect(processNameSafeVersion(eventAtOrBefore(data, undefined))).toEqual('cat');
+    const event = eventAtOrBefore(data, undefined);
+    if (event === undefined) {
+      throw new Error('expected an event when origin is undefined');
+    }
+    expect(processNameSafeVersion(event)).toEqual('cat');
   });
 
   it('returns undefined when node data is loading', () => {
@@ -232,8 +240,10 @@ describe('firstEvent', () => {
   it('returns the newest event', () => {
     const newer = generator.generateEvent({ timestamp: 2000, processName: 'cat' });
     const older = generator.generateEvent({ timestamp: 1000, processName: 'bash' });
-    expect(
-      processNameSafeVersion(firstEvent({ events: [newer, older], status: 'running' }))
-    ).toEqual('cat');
+    const event = firstEvent({ events: [newer, older], status: 'running' });
+    if (event === undefined) {
+      throw new Error('expected a first event');
+    }
+    expect(processNameSafeVersion(event)).toEqual('cat');
   });
 });
