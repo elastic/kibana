@@ -6,6 +6,9 @@
  */
 
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { AvailabilityContext } from '@kbn/agent-builder-server';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AvailabilityCache } from '../../common/availability_cache';
 import { convertBuiltinSkill } from './converter';
 
@@ -124,5 +127,48 @@ describe('convertBuiltinSkill', () => {
     const result = convertBuiltinSkill({ skill, cache });
 
     expect(result.uiSettingRequired).toBe('agentBuilder:tracing:enabled');
+  });
+
+  it('sets isAvailable to undefined when no availability config is provided', () => {
+    const skill = createMockSkillDefinition();
+    const result = convertBuiltinSkill({ skill, cache });
+
+    expect(result.isAvailable).toBeUndefined();
+  });
+
+  it('wires availability config to isAvailable via the cache', async () => {
+    const handler = jest.fn().mockResolvedValue({ status: 'unavailable', reason: 'gated' });
+    const skill = createMockSkillDefinition({
+      availability: { cacheMode: 'space', handler },
+    });
+    const result = convertBuiltinSkill({ skill, cache });
+
+    expect(result.isAvailable).toBeDefined();
+    const context: AvailabilityContext = {
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'test-space',
+      uiSettings: uiSettingsServiceMock.createClient(),
+    };
+    const availabilityResult = await result.isAvailable!(context);
+    expect(availabilityResult).toEqual({ status: 'unavailable', reason: 'gated' });
+    expect(handler).toHaveBeenCalledWith(context);
+  });
+
+  it('caches availability results for the same skill and space', async () => {
+    const handler = jest.fn().mockResolvedValue({ status: 'available' });
+    const testCache = new AvailabilityCache();
+    const skill = createMockSkillDefinition({
+      availability: { cacheMode: 'space', handler },
+    });
+    const result = convertBuiltinSkill({ skill, cache: testCache });
+
+    const context: AvailabilityContext = {
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'cached-space',
+      uiSettings: uiSettingsServiceMock.createClient(),
+    };
+    await result.isAvailable!(context);
+    await result.isAvailable!(context);
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 });
