@@ -11,13 +11,13 @@ import { inject, injectable } from 'inversify';
 import type { MaintenanceWindowServiceContract } from '../../services/maintenance_window_service/maintenance_window_service';
 import { MaintenanceWindowServiceInternalToken } from '../../services/maintenance_window_service/tokens';
 import type { ActiveMaintenanceWindow } from '../../services/maintenance_window_service/types';
+import { RuleCatalog } from '../state';
 import type {
   AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   Rule,
-  RuleId,
 } from '../types';
 import { createMatcherContext } from './utils/matcher_context';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
@@ -41,7 +41,7 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { dispatchable = [], suppressed = [], rules = new Map<RuleId, Rule>() } = state;
+    const { dispatchable = [], suppressed = [], rules = RuleCatalog.empty() } = state;
     if (dispatchable.length === 0) {
       return { type: 'continue' };
     }
@@ -56,13 +56,13 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
     const newlySuppressed: Array<AlertEpisode & { reason: string }> = [];
 
     for (const episode of dispatchable) {
-      const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
-      // Internal episodes whose rule is absent bypass MW so that the evaluate_matchers guard
+      // Orphaned internal episodes bypass MW so that the evaluate_matchers guard
       // (not MW suppression) is the reason they never dispatch — preserving pre-PR behavior.
-      if (episode.rule_id != null && rule == null) {
+      if (rules.isOrphanedInternalEpisode(episode)) {
         newDispatchable.push(episode);
         continue;
       }
+      const rule = rules.forEpisode(episode);
       const candidates = windowsBySpace.get(episode.space_id);
       if (!candidates) {
         newDispatchable.push(episode);
