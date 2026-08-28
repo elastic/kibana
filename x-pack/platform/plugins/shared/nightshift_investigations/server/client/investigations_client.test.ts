@@ -9,11 +9,22 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InvestigationStatus } from '../../common';
+import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   InvestigationNotFoundError,
+  InvestigationUnavailableError,
   NightshiftInvestigationsClient,
 } from './investigations_client';
+
+jest.mock('../lib/install_investigation_agent', () => ({
+  installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
+}));
+
+const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
+  typeof installInvestigationAgent
+>;
 
 const SPACE_ID = 'test-space';
 
@@ -27,6 +38,8 @@ const mockManagement = {
 const mockWorkflowsManagement = {
   management: mockManagement,
 } as unknown as WorkflowsServerPluginSetup;
+
+const mockAgentBuilder = {} as unknown as AgentBuilderPluginStart;
 
 const mockLogger = {
   info: jest.fn(),
@@ -49,16 +62,17 @@ const makeExecution = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const makeClient = () =>
-  new NightshiftInvestigationsClient(
-    mockRequest,
-    mockWorkflowsManagement,
-    undefined,
-    mockLogger,
-    SPACE_ID
-  );
+  new NightshiftInvestigationsClient({
+    request: mockRequest,
+    workflowsManagement: mockWorkflowsManagement,
+    logger: mockLogger,
+    spaceIdOverride: SPACE_ID,
+    agentBuilder: mockAgentBuilder,
+  });
 
 beforeEach(() => {
   jest.clearAllMocks();
+  installInvestigationAgentMock.mockResolvedValue(undefined);
 });
 
 describe('NightshiftInvestigationsClient.get()', () => {
@@ -123,6 +137,16 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(result.subject).toEqual({ type: 'significant_event', id: 'se-42' });
     });
 
+    it('recovers significant_event subject from direct workflow input', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: { inputs: { context: { source: 'significant_event', event_id: 'event-42' } } },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({ type: 'significant_event', id: 'event-42' });
+    });
+
     it('recovers alert subject from context.inputs', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
@@ -133,10 +157,127 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
     });
 
-    it('falls back to empty significant_event when context is missing', async () => {
+    it('prefers the stable event_id over significant_event_id when both are present', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: 'checkout-latency-breach',
+                significant_event_id: 'event-uuid-1',
+              },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({
+        type: 'significant_event',
+        id: 'checkout-latency-breach',
+      });
+    });
+
+    it('returns no subject when the recovered significant_event id is empty', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: { context: { source: 'significant_event', significant_event_id: '' } },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toBeUndefined();
+    });
+
+    it('returns no subject when context is missing', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
       const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({ type: 'significant_event', id: '' });
+      expect(result.subject).toBeUndefined();
+    });
+
+    it('returns no subject when the source is unrecognized', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({ context: { inputs: { context: { source: 'chat' } } } })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toBeUndefined();
+    });
+
+    it('recovers trigger_type from context.inputs', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: { context: { source: 'alert', alert_id: 'a-1', trigger_type: 'automatic' } },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.trigger_type).toBe('automatic');
+    });
+
+    it('returns no trigger_type when context is missing', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
+      const result = await makeClient().get('inv-1');
+      expect(result.trigger_type).toBeUndefined();
+    });
+  });
+
+  describe('subject reference', () => {
+    it('returns the summary verbatim, however long', async () => {
+      const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: 'event-42',
+                summary: long,
+              },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({
+        type: 'significant_event',
+        id: 'event-42',
+        summary: long,
+      });
+    });
+
+    it('adds the summary to an alert subject', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({
+        type: 'alert',
+        id: 'alert-99',
+        summary: 'CPU saturation',
+      });
+    });
+
+    it('omits the summary when the caller supplied none', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              message: 'Investigation requested for alert alert-99',
+              context: { source: 'alert', alert_id: 'alert-99' },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
     });
   });
 
@@ -439,12 +580,58 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.objectContaining({ id: WORKFLOW_ID }),
       SPACE_ID,
       expect.objectContaining({
-        context: expect.objectContaining({ source: 'alert', alert_id: 'alert-1' }),
+        context: expect.objectContaining({
+          source: 'alert',
+          alert_id: 'alert-1',
+          trigger_type: 'manual',
+        }),
       }),
       expect.anything(),
       'nightshift-investigations'
     );
     expect(result).toEqual({ investigation_id: 'exec-123' });
+  });
+
+  it('persists an explicit trigger_type into the workflow context', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-124');
+
+    await makeClient().start({
+      subject: { type: 'alert', id: 'alert-2' },
+      trigger_type: 'automatic',
+    });
+
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({
+        context: expect.objectContaining({ trigger_type: 'automatic' }),
+      }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+  });
+
+  it('persists the subject summary into the workflow context', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1', summary: 'CPU saturation on checkout-api' },
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context.summary).toBe('CPU saturation on checkout-api');
+  });
+
+  it('omits the context summary when none was supplied', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context).not.toHaveProperty('summary');
   });
 
   it('includes concurrency_key in inputs when provided', async () => {
@@ -465,11 +652,65 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('throws when the workflow is not installed', async () => {
+  it('uses the caller-supplied message and stream_names when provided', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-789');
+
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'se-1' },
+      message: 'Checkout latency breach\n\nP99 latency climbed above 2s.',
+      stream_names: ['logs.checkout'],
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.message).toBe('Checkout latency breach\n\nP99 latency climbed above 2s.');
+    expect(inputs.stream_names).toEqual(['logs.checkout']);
+  });
+
+  it('falls back to a generic message and empty stream_names when omitted', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-999');
+
+    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.message).toBe('Investigation requested for alert alert-1');
+    expect(inputs.stream_names).toEqual([]);
+  });
+
+  it('ensures the investigation agent exists in the space before running the workflow', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+
+    expect(installInvestigationAgentMock).toHaveBeenCalledWith({
+      agentBuilder: mockAgentBuilder,
+      spaceId: SPACE_ID,
+    });
+    expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(
+      mockManagement.runWorkflow.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
 
     await expect(makeClient().start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
-      'Investigations are not configured in this space'
+      InvestigationUnavailableError
+    );
+  });
+
+  it('throws InvestigationUnavailableError when agentBuilder is not available', async () => {
+    const client = new NightshiftInvestigationsClient({
+      request: mockRequest,
+      workflowsManagement: mockWorkflowsManagement,
+      logger: mockLogger,
+      spaceIdOverride: SPACE_ID,
+    });
+
+    await expect(client.start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
+      InvestigationUnavailableError
     );
   });
 });

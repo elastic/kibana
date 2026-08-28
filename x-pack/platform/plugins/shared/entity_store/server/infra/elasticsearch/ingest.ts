@@ -81,7 +81,7 @@ interface IngestEntitiesParams {
   fieldsToIgnore?: string[];
   /** Optional transform applied to each document before indexing (e.g. add @timestamp, reshape for entity type). */
   transformDocument?: IngestEntitiesTransformDocument;
-  /** Use `false` when downstream consumers tolerate the 1 s natural refresh window (e.g. CCS updates data stream). Use `true` when same-run visibility is required (e.g. LOOKUP JOIN on the latest index). */
+  /** Use `true` when same-run visibility is required (e.g. LOOKUP JOIN on the latest index); `false` when downstream consumers tolerate the 1 s natural refresh window. */
   refresh: boolean | 'wait_for';
   /** Called once per document rejected by the ES bulk API. Use to increment an external dropped-docs counter. */
   onDropped?: () => void;
