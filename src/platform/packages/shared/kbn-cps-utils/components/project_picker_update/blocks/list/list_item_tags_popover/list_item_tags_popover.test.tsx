@@ -44,19 +44,32 @@ const envProdAExpression = {
   tagValue: 'prod-a',
 } as const;
 
-const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
-  filterExpressions: new Map(),
-  filteringDimensions: [],
-  availableProjects: new Map([[defaultProject._id, defaultProject]]),
-  excludedOverrides: [],
-  filteredProjectIds: [defaultProject._id],
-  visibleProjectIds: [defaultProject._id],
-  selectedProjects: [defaultProject._id],
-  ...overrides,
-  defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
-  hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
-  originProjectId: overrides.originProjectId,
-});
+const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
+  const filterExpressions = overrides.filterExpressions ?? new Map();
+
+  return {
+    controlsState: 'enabled',
+    originProjectId: 'origin',
+    defaultProjectRouting: '',
+    projectRoutingStrategy: 'dynamic',
+    hasUserModifiedRouting: false,
+    filterExpressions,
+    filteringDimensions: [],
+    availableProjects: new Map([[defaultProject._id, defaultProject]]),
+    excludedOverrides: [],
+    proposedFilters: null,
+    filteredProjectIds: [defaultProject._id],
+    isFilterSearchLoading: false,
+    filterSearchError: null,
+    visibleProjectIds: [defaultProject._id],
+    selectedProjectIds: [defaultProject._id],
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
+    displayedFilterExpressions: filterExpressions,
+    isFilterProposalPending: false,
+    ...overrides,
+  };
+};
 
 let currentState = createState();
 
@@ -64,7 +77,11 @@ const addFilterExpression = jest.fn((payload: { expression: typeof envProdAExpre
   const id = getFilterExpressionLookupKey(payload.expression);
   const filterExpressions = new Map(currentState.filterExpressions);
   filterExpressions.set(id, { expression: payload.expression, enabled: true });
-  currentState = { ...currentState, filterExpressions };
+  currentState = {
+    ...currentState,
+    filterExpressions,
+    displayedFilterExpressions: filterExpressions,
+  };
 });
 
 const defaultActions = {
@@ -174,9 +191,9 @@ describe('ProjectPickerListItemTagsPopover', () => {
     expect(within(popover).getByRole('button', { name: 'Add filter to project' })).toBeDisabled();
   });
 
-  it('does not render an add-filter button in read-only mode', () => {
+  it('does not render an add-filter button when controls state is disabled', () => {
     // Opening the popover from the list in read-only is covered in list.test.tsx.
-    renderTagsPopover({ isReadOnly: true });
+    renderTagsPopover({ controlsState: 'disabled' });
 
     const popover = screen.getByLabelText('Project tags');
     expect(within(popover).getByText('env:prod-a')).toBeInTheDocument();

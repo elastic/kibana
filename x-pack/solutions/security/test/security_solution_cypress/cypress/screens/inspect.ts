@@ -103,14 +103,14 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         panelSelector: HOSTS_VISUALIZATION,
         tab: ALL_HOSTS_TAB,
         embeddableId: 'hostsKpiHostsQuery-hosts-metric-embeddable',
-        customIndexPattern: '.entities.v2.latest.default',
+        customIndexPattern: 'entities-latest-default',
       },
       {
         title: 'all hosts',
         panelSelector: HOSTS_VISUALIZATION,
         tab: ALL_HOSTS_TAB,
         embeddableId: 'hostsKpiHostsQuery-area-embeddable',
-        customIndexPattern: '.entities.v2.latest.default',
+        customIndexPattern: 'entities-latest-default',
       },
       {
         title: 'Unique IPs',
@@ -234,14 +234,14 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         panelSelector: USERS_VISUALIZATION,
         embeddableId: 'TotalUsersKpiQuery-users-metric-embeddable',
         tab: ALL_USERS_TAB,
-        customIndexPattern: '.entities.v2.latest.default',
+        customIndexPattern: 'entities-latest-default',
       },
       {
         title: 'Users',
         panelSelector: USERS_VISUALIZATION,
         embeddableId: 'TotalUsersKpiQuery-area-embeddable',
         tab: ALL_USERS_TAB,
-        customIndexPattern: '.entities.v2.latest.default',
+        customIndexPattern: 'entities-latest-default',
       },
       {
         title: 'User authentications',

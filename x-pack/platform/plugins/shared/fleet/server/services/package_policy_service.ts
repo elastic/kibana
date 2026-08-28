@@ -162,8 +162,13 @@ export interface PackagePolicyClient {
   getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options?: PackagePolicyClientGetByIdsOptions
+    options?: Omit<PackagePolicyClientGetByIdsOptions, 'fields'>
   ): Promise<PackagePolicy[]>;
+  getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: PackagePolicyClientGetByIdsOptions & { fields: string[] }
+  ): Promise<PartialPackagePolicy[]>;
 
   list(
     soClient: SavedObjectsClientContract,
@@ -335,13 +340,24 @@ export type PackagePolicyClientFetchAllItemsOptions = Pick<
 > &
   WithSpaceIdsOption;
 
+export type PartialPackagePolicy = Pick<PackagePolicy, 'id'> & Partial<PackagePolicy>;
+
 export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
   ignoreMissing?: boolean;
+  fields?: string[];
 }
 
 export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   user?: AuthenticatedUser;
+  /**
+   * When true, skip unassigning from surviving agent policies and skip the agent policy revision
+   * bump. This also suppresses the agentless agent policy cascade-delete. Use only when the caller
+   * manages those side-effects itself.
+   */
   skipUnassignFromAgentPolicies?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
+  /** Bypass `is_managed` and hosted-agent-policy guards. */
   force?: boolean;
   asyncDeploy?: boolean;
   ignoreMissing?: boolean;
@@ -350,6 +366,8 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
 export interface PackagePolicyClientBulkUpdateOptions {
   user?: AuthenticatedUser;
   force?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];

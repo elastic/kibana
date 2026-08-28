@@ -8,7 +8,17 @@
 import type { ConverseStep } from '@kbn/evals';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+// Memory tool IDs are inlined here to avoid a package→plugin-server dependency.
+// These must stay in sync with platformStreamsMemoryTools in the plugin's tool_ids.ts.
+const MEMORY_NAMESPACE = 'platform.sig_events.memory';
+export const memoryToolIds = {
+  memorySearch: `${MEMORY_NAMESPACE}.search`,
+  memoryRead: `${MEMORY_NAMESPACE}.read`,
+  memoryWrite: `${MEMORY_NAMESPACE}.write`,
+  memoryPatch: `${MEMORY_NAMESPACE}.patch`,
+} as const;
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
@@ -48,6 +58,25 @@ export function getToolCallCount(steps: ConverseStep[]): number {
   return steps.filter((step) => step.type === 'tool_call').length;
 }
 
+/** Agent Builder live traces use underscores; eval fixtures use dotted ids. */
+export function isToolId(toolId: string, canonical: string): boolean {
+  return toolId.replace(/\./g, '_') === canonical.replace(/\./g, '_');
+}
+
+const isSchemaOrToolError = (step: ConverseStep): boolean => {
+  if (step.type !== 'tool_call' || !Array.isArray(step.results)) {
+    return false;
+  }
+  return step.results.some(
+    (result) =>
+      isRecord(result) &&
+      (result.type === 'error' ||
+        (isRecord(result.data) &&
+          typeof result.data.message === 'string' &&
+          /schema|items/i.test(result.data.message)))
+  );
+};
+
 const getRetryableBulkErrorCount = (step: ConverseStep): number => {
   if (step.type !== 'tool_call' || !Array.isArray(step.results)) return 0;
   return step.results.reduce<number>((count, result) => {
@@ -71,7 +100,10 @@ const getBulkInputCount = (step: ConverseStep): number =>
 export interface PersistenceCallSummary {
   count: number;
   valid: boolean;
+  /** True only when the first call had item-level bulk errors and the retry resubmitted exactly those items. */
   retriedPartialFailure: boolean;
+  /** True when the first call returned a schema or tool-level error and the retry submitted a populated payload. */
+  retriedSchemaFailure: boolean;
 }
 
 /** One normal persistence call, or one retry after a completed call exposed item-level bulk errors. */
@@ -79,14 +111,22 @@ export function summarizePersistenceCalls(
   steps: ConverseStep[],
   toolId: string
 ): PersistenceCallSummary {
-  const calls = steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId);
+  const calls = steps.filter(
+    (step) =>
+      step.type === 'tool_call' &&
+      typeof step.tool_id === 'string' &&
+      isToolId(step.tool_id, toolId)
+  );
   if (calls.length === 1) {
-    return { count: 1, valid: true, retriedPartialFailure: false };
+    return { count: 1, valid: true, retriedPartialFailure: false, retriedSchemaFailure: false };
   }
   const failedItemCount = calls.length === 2 ? getRetryableBulkErrorCount(calls[0]) : 0;
   const retriedPartialFailure =
     failedItemCount > 0 && getBulkInputCount(calls[1]) === failedItemCount;
-  return { count: calls.length, valid: retriedPartialFailure, retriedPartialFailure };
+  const retriedSchemaFailure =
+    calls.length === 2 && isSchemaOrToolError(calls[0]) && getBulkInputCount(calls[1]) > 0;
+  const valid = retriedPartialFailure || retriedSchemaFailure;
+  return { count: calls.length, valid, retriedPartialFailure, retriedSchemaFailure };
 }
 
 /**
@@ -97,7 +137,11 @@ export function summarizePersistenceCalls(
 export function extractEventSearchCandidateCount(steps: ConverseStep[]): number | null {
   let candidateCount: number | null = null;
   for (const step of steps) {
-    if (step.type !== 'tool_call' || step.tool_id !== platformSignificantEventsTools.searchEvent) {
+    if (
+      step.type !== 'tool_call' ||
+      typeof step.tool_id !== 'string' ||
+      !isToolId(step.tool_id, platformSignificantEventsTools.searchEvent)
+    ) {
       continue;
     }
     const results = Array.isArray(step.results) ? step.results : [];
@@ -140,7 +184,11 @@ export function summarizeEsqlGrounding(steps: ConverseStep[]): EsqlGroundingSumm
   let noOfToolCallsWithResults = 0;
 
   for (const step of steps) {
-    if (step.type !== 'tool_call' || step.tool_id !== platformCoreTools.executeEsql) {
+    if (
+      step.type !== 'tool_call' ||
+      typeof step.tool_id !== 'string' ||
+      !isToolId(step.tool_id, platformCoreTools.executeEsql)
+    ) {
       continue;
     }
     noOfToolCalls++;

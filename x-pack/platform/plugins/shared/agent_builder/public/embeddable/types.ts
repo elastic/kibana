@@ -21,6 +21,7 @@ export interface EmbeddableConversationCallbacks {
   updateProps: (props: EmbeddableConversationProps) => void;
   resetBrowserApiTools: () => void;
   addAttachment: (attachment: ConversationAttachment) => void;
+  removeAttachmentById: (attachmentId: string) => void;
 }
 
 export interface EmbeddableConversationSidebarProps {

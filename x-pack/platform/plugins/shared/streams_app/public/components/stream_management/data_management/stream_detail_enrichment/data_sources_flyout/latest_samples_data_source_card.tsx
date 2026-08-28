@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
 import { DataSourceCard } from './data_source_card';
 import { DATA_SOURCES_I18N } from './translations';
@@ -24,7 +25,7 @@ export const LatestSamplesDataSourceCard = ({
       title={DATA_SOURCES_I18N.latestSamples.defaultName}
       subtitle={DATA_SOURCES_I18N.latestSamples.subtitle}
     >
-      <EuiCallOut iconType="info" size="s" title={DATA_SOURCES_I18N.latestSamples.callout} />
+      <KbnInfoCallout size="s" title={DATA_SOURCES_I18N.latestSamples.callout} />
       <EuiSpacer size="m" />
     </DataSourceCard>
   );

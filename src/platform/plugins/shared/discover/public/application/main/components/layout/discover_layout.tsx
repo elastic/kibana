@@ -31,7 +31,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { useColumns } from '@kbn/unified-data-table';
+import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -70,6 +70,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { DiscoverDocumentFlyout } from '../document_flyout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 import { useIsChromeNextProjectHeader } from '../chrome_app_header';
@@ -175,6 +176,11 @@ export function DiscoverLayout() {
     sort,
     settings: grid,
   });
+
+  const sidebarColumns = useMemo(
+    () => currentColumns.filter((column) => column !== SOURCE_COLUMN),
+    [currentColumns]
+  );
 
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
@@ -411,7 +417,7 @@ export function DiscoverLayout() {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                columns={currentColumns}
+                columns={sidebarColumns}
                 documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
@@ -477,6 +483,13 @@ export function DiscoverLayout() {
           />
         </div>
       </EuiPageBody>
+      <DiscoverDocumentFlyout
+        dataView={dataView}
+        columns={currentColumns}
+        onAddColumn={onAddColumnWithTracking}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddFilter={onAddFilter}
+      />
     </EuiPage>
   );
 }

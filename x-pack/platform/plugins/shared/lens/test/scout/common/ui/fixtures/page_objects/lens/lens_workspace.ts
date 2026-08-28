@@ -8,7 +8,7 @@
 import type { DebugState } from '@elastic/charts';
 import { encode as encodeRison } from '@kbn/rison';
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { LOGSTASH_IN_RANGE_DATES } from '../../constants';
+import { LOGSTASH_IN_RANGE_DATES } from '../../../../fixtures/constants';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `LensApp` helpers needed by workspace navigation / formula reading. */
@@ -43,6 +43,7 @@ export class LensWorkspace {
   readonly inlineEditor;
   readonly discardChangesModal;
   readonly autoApplyToggle;
+  readonly noResults;
 
   private readonly goBackToAppButton;
   private readonly confirmModalConfirmButton;
@@ -56,6 +57,11 @@ export class LensWorkspace {
   readonly currentSuggestionError;
   readonly shareButton;
   readonly exportButton;
+  /** Top-nav "Explore in Discover" control (`lnsApp_openInDiscover`). */
+  readonly openInDiscoverButton;
+  /** Dimension Filter-by popover trigger (`indexPattern-filters-existingFilterTrigger`). */
+  readonly dimensionFilterTrigger;
+  private readonly dimensionFilterQueryInput;
   private readonly shareModal;
   private readonly copyShareUrlButton;
 
@@ -69,6 +75,9 @@ export class LensWorkspace {
     this.inlineEditor = this.page.getByTestId('customizeLens');
     this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
     this.autoApplyToggle = this.page.testSubj.locator('lnsToggleAutoApply');
+    this.noResults = this.page.testSubj
+      .locator('lnsVisualizationContainer')
+      .getByText('No results found', { exact: true });
 
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
@@ -83,6 +92,13 @@ export class LensWorkspace {
     );
     this.shareButton = this.page.testSubj.locator('lnsApp_shareButton');
     this.exportButton = this.page.testSubj.locator('lnsApp_exportButton');
+    this.openInDiscoverButton = this.page.testSubj.locator('lnsApp_openInDiscover');
+    this.dimensionFilterTrigger = this.page.testSubj.locator(
+      'indexPattern-filters-existingFilterTrigger'
+    );
+    this.dimensionFilterQueryInput = this.page.testSubj.locator(
+      'indexPattern-filters-queryStringInput'
+    );
     this.shareModal = this.page.testSubj.locator('shareContextModal');
     this.copyShareUrlButton = this.page.testSubj.locator('copyShareUrlButton');
   }
@@ -176,6 +192,44 @@ export class LensWorkspace {
       .locator('indexPattern-filters-queryStringInput')
       .pressSequentially(queryString, { delay: 20 });
     await this.page.testSubj.click('indexPattern-filters-existingFilterTrigger');
+  }
+
+  /**
+   * Commits a Filter-by query on an already-open dimension filter popover.
+   *
+   * `QueryInput` uses `useDebouncedValue` (~256ms). Closing the popover or the
+   * dimension editor before that flush leaves `inputFilter` empty, so Discover
+   * receives no global filter. `fill()` is used instead of `pressSequentially`
+   * so operators like `>` are not dropped mid-type. Caller must have the
+   * popover open (`enableFilter`).
+   */
+  async setDimensionFilterQuery(query: string) {
+    await this.dimensionFilterQueryInput.waitFor({ state: 'visible' });
+    await this.dimensionFilterQueryInput.fill(query);
+    await this.page.waitForFunction(
+      (expected) => {
+        const root = document.querySelector(
+          '[data-test-subj="indexPattern-filters-queryStringInput"]'
+        );
+        if (!root) {
+          return false;
+        }
+        const field =
+          root instanceof HTMLTextAreaElement || root instanceof HTMLInputElement
+            ? root
+            : root.querySelector('textarea, input');
+        return field instanceof HTMLTextAreaElement || field instanceof HTMLInputElement
+          ? field.value === expected
+          : false;
+      },
+      query,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+
+    const committedTrigger = this.dimensionFilterTrigger.filter({ hasText: query });
+    await committedTrigger.waitFor({ state: 'visible' });
+    await committedTrigger.click();
+    await this.dimensionFilterQueryInput.waitFor({ state: 'hidden' });
   }
 
   /** Reads the current title displayed in the Lens editor header. */

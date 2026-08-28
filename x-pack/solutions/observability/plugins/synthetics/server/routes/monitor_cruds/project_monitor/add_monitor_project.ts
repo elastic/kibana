@@ -20,7 +20,7 @@ import type { ProjectMonitor } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
 import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
-import { assertCanUpdateMonitorInAllSpaces } from '../monitor_locations_utils';
+import { assertCanPerformMonitorBulkActionInAllSpaces } from '../monitor_locations_utils';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
 const MAX_BROWSER_MONITORS = 250;
@@ -181,7 +181,10 @@ const validMultiSpacePrivileges = async (
 ) => {
   const spacesList = [...new Set(monitors.flatMap((monitor) => monitor.spaces ?? []))];
   if (spacesList.length > 0) {
-    const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(routeContext, spacesList);
+    const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
+      routeContext,
+      spacesList
+    );
     if (spaceAuthError) {
       throw spaceAuthError;
     }
