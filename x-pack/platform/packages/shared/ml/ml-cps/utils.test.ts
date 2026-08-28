@@ -66,10 +66,10 @@ describe('getProjectRoutingFromJob', () => {
   it('returns project_routing from the job datafeed_config', () => {
     const job = {
       job_id: 'test-job',
-      datafeed_config: createDatafeed({ project_routing: '_type:security' }),
+      datafeed_config: createDatafeed({ project_routing: '_id:blah' }),
     } as estypes.MlJob;
 
-    expect(getProjectRoutingFromJob(job)).toBe('_type:security');
+    expect(getProjectRoutingFromJob(job)).toBe('_id:blah');
   });
 
   it('returns origin routing when datafeed has no project_routing or cloud API key', () => {
