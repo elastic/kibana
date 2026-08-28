@@ -9,8 +9,7 @@ import {
   loadSourceReportStatsByAdapterId,
   loadSourceForMutationForTest,
   mapSourceHitForTest,
-  scopedSourceId,
-  createSourceBodySchemaForTest,
+  updateSourceBodySchemaForTest,
 } from './list_sources';
 
 describe('loadSourceReportStatsByAdapterId', () => {
@@ -57,9 +56,8 @@ describe('loadSourceReportStatsByAdapterId', () => {
     });
   });
 
-  // Aggregating on source.name merged rows whenever two sources shared a
-  // display name — the create API allows duplicates, and a space-private source
-  // can share a name with a global one.
+  // Aggregating on source.name merged rows whenever two approved sources shared a
+  // display name. The stable adapter id keeps them separate.
   it('keeps two sources that share a display name separate', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({
@@ -196,21 +194,6 @@ describe('mapSourceHit', () => {
   });
 });
 
-// ── Cross-space isolation ────────────────────────────────────────────────────
-
-describe('scopedSourceId', () => {
-  // Sources share one index. An unprefixed id meant two spaces creating the same
-  // adapter and name targeted the same `_id`, so the second got a 409 that both
-  // blocked a name it was entitled to and confirmed another space held it.
-  it('namespaces the id by owning space', () => {
-    expect(scopedSourceId('marketing', 'rss:acme')).toBe('marketing:rss:acme');
-  });
-
-  it('gives two spaces distinct ids for the same logical source', () => {
-    expect(scopedSourceId('space-a', 'rss:acme')).not.toBe(scopedSourceId('space-b', 'rss:acme'));
-  });
-});
-
 describe('loadSourceForMutation', () => {
   const globalSource = (spaceId?: string) => ({
     get: jest.fn().mockResolvedValue({
@@ -270,44 +253,28 @@ describe('loadSourceForMutation', () => {
   });
 });
 
-// ── vendor_api handler binding ────────────────────────────────────────────────
+// ── Update contract: enable / disable only ────────────────────────────────────
 
-describe('create source schema — vendor', () => {
-  const body = (over: Record<string, unknown> = {}) => ({
-    name: 'Acme',
-    adapter_type: 'rss',
-    url: 'https://feeds.example/rss.xml',
-    ...over,
+describe('update source schema — enable/disable only', () => {
+  it('accepts a bare enabled toggle', () => {
+    expect(() => updateSourceBodySchemaForTest.validate({ enabled: true })).not.toThrow();
+    expect(() => updateSourceBodySchemaForTest.validate({ enabled: false })).not.toThrow();
   });
 
-  it('accepts a source with no vendor for a non-vendor adapter', () => {
-    expect(() => createSourceBodySchemaForTest.validate(body())).not.toThrow();
+  it('requires enabled', () => {
+    expect(() => updateSourceBodySchemaForTest.validate({})).toThrow();
   });
 
-  // A vendor feed needs a response-shape handler that only exists in code, and an
-  // API-created source's id is namespaced by space so it can never match one.
-  // Without a vendor the source is created and then produces nothing on every fetch.
-  it('accepts a known built-in vendor', () => {
-    expect(() =>
-      createSourceBodySchemaForTest.validate(
-        body({ adapter_type: 'vendor_api', vendor: 'vendor_api:elastic-security-labs' })
-      )
-    ).not.toThrow();
-  });
-
-  it('rejects a vendor that has no built-in handler', () => {
-    expect(() =>
-      createSourceBodySchemaForTest.validate(
-        body({ adapter_type: 'vendor_api', vendor: 'vendor_api:does-not-exist' })
-      )
-    ).toThrow(/must be one of/);
-  });
-
-  it('bounds the vendor length', () => {
-    expect(() =>
-      createSourceBodySchemaForTest.validate(
-        body({ adapter_type: 'vendor_api', vendor: 'v'.repeat(300) })
-      )
-    ).toThrow();
+  // The approved catalog is fixed, so an operator can only flip `enabled`. Any
+  // attempt to re-point, rename, retag, or re-vendor a source is rejected.
+  it.each([
+    ['url', { enabled: true, url: 'https://evil.example/feed.xml' }],
+    ['name', { enabled: true, name: 'Renamed' }],
+    ['adapter_type', { enabled: true, adapter_type: 'rss' }],
+    ['tags', { enabled: true, tags: ['x'] }],
+    ['vendor', { enabled: true, vendor: 'vendor_api:elastic-security-labs' }],
+    ['id', { enabled: true, id: 'rss:injected' }],
+  ])('rejects an attempt to change %s', (_field, body) => {
+    expect(() => updateSourceBodySchemaForTest.validate(body)).toThrow();
   });
 });

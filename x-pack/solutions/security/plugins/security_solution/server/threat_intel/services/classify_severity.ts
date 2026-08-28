@@ -13,7 +13,7 @@ import {
   type SeverityLevel,
   type ThreatCategory,
 } from '../../../common/threat_intel';
-import { severityScore } from '../content/severity';
+import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
 
 const SEVERITY_BODY_CHAR_LIMIT = 30_000;

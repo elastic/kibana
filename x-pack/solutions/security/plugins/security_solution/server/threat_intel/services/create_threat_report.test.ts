@@ -98,26 +98,35 @@ describe('createThreatReport', () => {
     expect(inDefault.content_fingerprint).toBe(inTeamA.content_fingerprint);
   });
 
-  it('stores content.body_html when body_html is provided', async () => {
-    const esClient = buildEsClient();
-    const html = '<h2>IOCs</h2><ul><li>evil.com</li></ul>';
-    await createThreatReport(esClient, logger, 'default', { ...BASE_PARAMS, body_html: html });
-
-    const createCall = esClient.create.mock.calls[0][0];
-    const doc = createCall.document as Record<string, unknown>;
-    const content = doc.content as Record<string, unknown>;
-    expect(content.body_html).toBe(html);
-    // body_text remains the clean fallback
-    expect(content.body_text).toBe(BASE_PARAMS.body_text);
-  });
-
-  it('does not include body_html in content when body_html is absent', async () => {
+  it('stores only bounded plain text — never a raw HTML body', async () => {
     const esClient = buildEsClient();
     await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
 
     const createCall = esClient.create.mock.calls[0][0];
     const doc = createCall.document as Record<string, unknown>;
     const content = doc.content as Record<string, unknown>;
+    expect(content.body_text).toBe(BASE_PARAMS.body_text);
     expect(content).not.toHaveProperty('body_html');
+  });
+
+  it('records source_url as provenance metadata without fetching it', async () => {
+    const esClient = buildEsClient();
+    await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
+
+    const createCall = esClient.create.mock.calls[0][0];
+    const doc = createCall.document as Record<string, unknown>;
+    const source = doc.source as Record<string, unknown>;
+    // The URL is stored on the report the analyst supplied…
+    expect(source.url).toBe(BASE_PARAMS.source_url);
+    expect(source.type).toBe('manual');
+    // …and nothing about ingesting a report ever reaches out over the network. The
+    // service only ever talks to Elasticsearch (search for dedup, then create).
+    const esMethodsCalled = Object.entries(esClient)
+      .filter(
+        ([, value]) =>
+          typeof value === 'function' && (value as unknown as jest.Mock).mock?.calls.length
+      )
+      .map(([name]) => name);
+    expect(esMethodsCalled.sort()).toEqual(['create', 'search']);
   });
 });

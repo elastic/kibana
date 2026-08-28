@@ -18,15 +18,16 @@ import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
 import type { RouteRegistrationDeps } from '.';
 
-// Raw HTML can substantially exceed Kibana's default 1 MiB body cap.
+// A large bounded plain-text body can exceed Kibana's default 1 MiB body cap.
 // Match the same ceiling used by the extract_iocs route.
 const CREATE_THREAT_REPORT_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 const createThreatReportBodySchema = schema.object({
   title: schema.string({ minLength: 1, maxLength: 1024 }),
   body_text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
-  body_html: schema.maybe(schema.string({ maxLength: 10_000_000 })),
   source_name: schema.string({ minLength: 1, maxLength: 256 }),
+  // Provenance only. Stored as metadata on the supplied report; it is never
+  // fetched. Kibana does not turn this URL into a report.
   source_url: schema.maybe(
     schema.uri({
       validate: (value) =>
@@ -47,7 +48,8 @@ const createThreatReportBodySchema = schema.object({
 
 /**
  * Internal route for the `create_threat_report` domain action — the canonical
- * execution surface for analyst-paste / ad-hoc URL ingestion.
+ * execution surface for bounded analyst-paste ingestion. `source_url` is optional
+ * provenance metadata only; the route never fetches it.
  */
 export const registerCreateThreatReportRoute = ({
   router,
@@ -88,7 +90,6 @@ export const registerCreateThreatReportRoute = ({
           const result = await createThreatReport(esClient, logger, spaceId, {
             title: request.body.title,
             body_text: request.body.body_text,
-            body_html: request.body.body_html,
             source_name: request.body.source_name,
             source_url: request.body.source_url,
             severity: request.body.severity as SeverityLevel | undefined,

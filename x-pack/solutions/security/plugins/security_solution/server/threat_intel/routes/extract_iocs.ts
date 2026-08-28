@@ -7,21 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 import { EXTRACT_IOCS_API_PATH } from '../../../common/threat_intel';
-import { extractArticleHtml } from '../content/extract_article';
-import { htmlToStructured } from '../content/text';
 import { extractIocs } from '../services';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import type { RouteRegistrationDeps } from '.';
 
 const extractIocsBodySchema = schema.object({
-  // `text` is the body_text fallback when html is absent.
+  // Bounded plain text only. Callers pass `content.body_text`; no HTML is accepted
+  // or converted here.
   text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
-  // When present, converted to structured text via htmlToStructured before extractIocs runs.
-  html: schema.maybe(schema.string({ maxLength: 10_000_000 })),
   defang: schema.maybe(schema.boolean()),
 });
 
-// Feed bodies can exceed Kibana's default 1 MiB cap; 10 MiB matches other large-text internal routes.
+// Bounded plain-text bodies can exceed Kibana's default 1 MiB cap; 10 MiB matches other large-text internal routes.
 const EXTRACT_IOCS_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 /**
@@ -50,18 +47,8 @@ export const registerExtractIocsRoute = ({ router, logger }: RouteRegistrationDe
       },
       async (_context, request, response) => {
         try {
-          // html primary / body_text fallback: the route owns the conversion so
-          // extractIocs stays a pure string-in function. YAML workflow callers render
-          // `{{ ...content.body_html }}` via Liquid, which coerces a missing
-          // body_html (manual / STIX reports) to an EMPTY STRING rather than
-          // omitting the field — treat blank html as absent or those reports
-          // would be extracted against an empty document and yield zero IOCs.
-          const inputText =
-            request.body.html != null && request.body.html.trim() !== ''
-              ? htmlToStructured(extractArticleHtml(request.body.html))
-              : request.body.text;
           const result = extractIocs({
-            text: inputText,
+            text: request.body.text,
             defang: request.body.defang,
           });
           return response.ok({ body: result });

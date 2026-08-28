@@ -12,14 +12,14 @@ import {
   THREAT_REPORTS_INDEX,
   type SeverityLevel,
 } from '../../../common/threat_intel';
-import { buildReportContent } from '../content/text';
-import { severityScore } from '../content/severity';
+import { buildReportContent } from './report_content';
+import { severityScore } from './severity';
 
 export interface CreateThreatReportParams {
   title: string;
   body_text: string;
-  body_html?: string;
   source_name: string;
+  /** Provenance metadata only — recorded on the report, never fetched. */
   source_url?: string;
   severity?: SeverityLevel;
   language?: string;
@@ -51,7 +51,6 @@ export const createThreatReport = async (
   const {
     title,
     body_text: bodyText,
-    body_html: bodyHtml,
     source_name: sourceName,
     source_url: sourceUrl,
     severity = 'medium',
@@ -119,7 +118,7 @@ export const createThreatReport = async (
           url: sourceUrl,
           adapter_id: 'manual:analyst-paste',
         },
-        content: buildReportContent({ title, bodyText, bodyHtml, language }),
+        content: buildReportContent({ title, bodyText, language }),
         severity: {
           level: severity,
           score: severityScore(severity),

@@ -16,12 +16,7 @@ import { registerExtractDiamondRoute } from './extract_diamond';
 import { registerEnrichTaxonomyRoute } from './enrich_taxonomy';
 import { registerClassifySeverityRoute } from './classify_severity';
 import { registerAssessRelevanceRoute } from './assess_relevance';
-import {
-  registerCreateSourceRoute,
-  registerDeleteSourceRoute,
-  registerListSourcesRoute,
-  registerUpdateSourceRoute,
-} from './list_sources';
+import { registerListSourcesRoute, registerUpdateSourceRoute } from './list_sources';
 
 export interface RouteRegistrationDeps {
   router: IRouter;
@@ -67,7 +62,5 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerClassifySeverityRoute(deps);
   registerAssessRelevanceRoute(deps);
   registerListSourcesRoute(deps);
-  registerCreateSourceRoute(deps);
   registerUpdateSourceRoute(deps);
-  registerDeleteSourceRoute(deps);
 };
