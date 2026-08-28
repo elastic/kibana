@@ -6,32 +6,12 @@
  */
 
 import type { DefaultEvaluators, Evaluator, EvaluationResult } from '@kbn/evals';
-import type { RuleExample, RuleInput, RuleVendor } from '../../../datasets/rules/types';
+import type { RuleExample, RuleInput } from '../../../datasets/rules/types';
 import type { RuleMigrationResult } from '../migration_client';
 
 /**
- * NL-interpretation vendors (`isNlInterpretationVendor` in `graph_v2.ts`).
- * Splunk skips that branch and has no NL description to grade.
- */
-const NL_INTERPRETATION_VENDORS: Record<
-  Exclude<RuleVendor, 'splunk'>,
-  { sourceLabel: string; dependencyCriterion: string }
-> = {
-  qradar: {
-    sourceLabel: 'QRadar XML rule definition',
-    dependencyCriterion:
-      'References all dependencies (building blocks, sub-rules) that were fetched and expanded, and resolves reference sets to lookup index names or explicitly marks them as unresolved',
-  },
-  'microsoft-sentinel': {
-    sourceLabel: 'Microsoft Sentinel KQL rule definition',
-    dependencyCriterion:
-      'References all dependencies (watchlists, saved functions, cross-workspace or cross-table joins) that the query relies on, and either resolves them to lookup index names or explicitly marks them as unresolved',
-  },
-};
-
-/**
- * Checks whether the NL description (nl_query) faithfully captures all detection logic from the
- * source rule, for the vendors that go through the agent's NL-interpretation branch.
+ * QRadar-only evaluator that checks whether the NL description (nl_query)
+ * faithfully captures all detection logic from the source QRadar XML.
  *
  * LIMITATION: The nl_query is an intermediate graph state not currently
  * exposed via the HTTP API. This evaluator extracts the NL description
@@ -49,20 +29,13 @@ export const createNlDescriptionFaithfulnessEvaluator = (
   evaluate: async ({ input, output, expected, metadata }): Promise<EvaluationResult> => {
     const ruleInput = input as RuleInput;
 
-    const vendor = ruleInput?.original_rule?.vendor;
-    const vendorCriteria =
-      vendor && vendor !== 'splunk' ? NL_INTERPRETATION_VENDORS[vendor] : undefined;
-
-    if (!vendorCriteria) {
-      return {
-        score: null,
-        explanation: `Vendor "${vendor}" does not produce an NL description — evaluator skipped`,
-      };
+    if (ruleInput?.original_rule?.vendor !== 'qradar') {
+      return { score: null, explanation: 'Not a QRadar rule — evaluator skipped' };
     }
 
-    const sourceQuery = ruleInput.original_rule.query;
-    if (!sourceQuery) {
-      return { score: null, explanation: `No source ${vendorCriteria.sourceLabel} in input` };
+    const sourceXml = ruleInput.original_rule.query;
+    if (!sourceXml) {
+      return { score: null, explanation: 'No source QRadar XML in input' };
     }
 
     const comments = output?.rule?.comments ?? [];
@@ -82,13 +55,14 @@ export const createNlDescriptionFaithfulnessEvaluator = (
 
     const criteriaEval = evaluators.criteria([
       `You are evaluating whether a natural language (NL) description faithfully captures ` +
-        `the detection logic from a ${vendorCriteria.sourceLabel}.\n\n` +
-        `SOURCE RULE:\n${sourceQuery.slice(0, 3000)}\n\n` +
+        `the detection logic from a QRadar XML rule definition.\n\n` +
+        `SOURCE QRADAR XML RULE:\n${sourceXml.slice(0, 3000)}\n\n` +
         `GENERATED NL DESCRIPTION:\n${nlQuery.slice(0, 2000)}\n\n` +
         `Check if the NL description:\n` +
-        `1. Captures ALL detection conditions from the source (negations, thresholds, constants like port numbers, boolean logic AND/OR)\n` +
-        `2. ${vendorCriteria.dependencyCriterion}\n` +
-        `3. Does NOT misrepresent logic from the source (e.g., flipping AND↔OR, missing negations)\n\n` +
+        `1. Captures ALL test conditions from the XML (negations, thresholds, constants like port numbers, boolean logic AND/OR)\n` +
+        `2. References all dependencies (building blocks, sub-rules) that were fetched and expanded\n` +
+        `3. Resolves reference sets to lookup index names or explicitly marks them as unresolved\n` +
+        `4. Does NOT misrepresent logic from the XML (e.g., flipping AND↔OR, missing negations)\n\n` +
         `Score YES if the NL description is faithful. Score NO if it is missing or misrepresenting logic.`,
     ]);
 

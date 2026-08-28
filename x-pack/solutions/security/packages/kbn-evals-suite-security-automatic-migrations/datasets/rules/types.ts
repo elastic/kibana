@@ -7,13 +7,6 @@
 
 import type { Example } from '@kbn/evals';
 
-/**
- * Source SIEM the rule was exported from. Values must match `OriginalRuleVendor` in
- * `security_solution/common/siem_migrations/model/rule_migration.gen.ts`, since they are
- * posted verbatim to the rule-migration API.
- */
-export type RuleVendor = 'splunk' | 'qradar' | 'microsoft-sentinel';
-
 /** Ground truth for a single rule translation. */
 export interface RuleExpected {
   /** Expected translation result classification */
@@ -39,7 +32,7 @@ export interface RuleExpected {
 export interface RuleInput {
   original_rule: {
     id: string;
-    vendor: RuleVendor;
+    vendor: 'splunk' | 'qradar';
     title: string;
     description: string;
     query: string;
@@ -55,7 +48,7 @@ export interface RuleInput {
 }
 
 export interface RuleMetadata {
-  vendor: RuleVendor;
+  vendor: 'splunk' | 'qradar';
   category:
     | 'simple'
     | 'with_macros'

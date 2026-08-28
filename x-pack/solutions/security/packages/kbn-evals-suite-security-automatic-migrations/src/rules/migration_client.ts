@@ -6,7 +6,6 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { RuleVendor } from '../../datasets/rules/types';
 
 // These path strings mirror the constants defined in
 // security_solution/common/siem_migrations/rules/constants.ts.
@@ -23,7 +22,7 @@ export interface MigratedRule {
   migration_id: string;
   original_rule: {
     id: string;
-    vendor: RuleVendor;
+    vendor: 'splunk' | 'qradar';
     title: string;
     description: string;
     query: string;
