@@ -14,6 +14,7 @@ import { appContextService } from '../app_context';
 import { collectCompiledSecretRefIds } from '../secrets';
 import * as AgentService from '../agents';
 import type { FleetServerPolicy, FullAgentPolicy, FullAgentPolicyInput } from '../../types';
+import type { SecretReference } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types';
 import { AGENT_POLICY_INDEX, AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
@@ -118,8 +119,10 @@ export async function getVersionSpecificPolicies(
           const sourceInputs = updatedFullPolicy?.inputs ?? fullPolicy.inputs;
           const versionedInputs = getInputsForVersion(sourceInputs, version);
           const compiledIds = collectCompiledSecretRefIds(versionedInputs);
-          const refs =
-            updatedFullPolicy?.secret_references ?? fleetServerPolicy.data?.secret_references ?? [];
+          const refs: SecretReference[] =
+            (updatedFullPolicy?.secret_references ??
+              (fleetServerPolicy.data?.secret_references as SecretReference[] | undefined)) ??
+            [];
           return compiledIds ? refs.filter(({ id: refId }) => compiledIds.has(refId)) : refs;
         })(),
       },
