@@ -88,6 +88,7 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       },
       this.deps.logger
     );
+
     return response;
   }
 
