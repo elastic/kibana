@@ -150,7 +150,8 @@
     "@kbn/use-observable",
     "@kbn/zod",
     "@kbn/app-header",
-    "@kbn/managed-content-badge"
+    "@kbn/managed-content-badge",
+    "@kbn/core-http-common"
   ],
   "exclude": ["target/**/*"]
 }
