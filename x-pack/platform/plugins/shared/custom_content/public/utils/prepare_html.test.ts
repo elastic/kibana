@@ -101,6 +101,25 @@ describe('applyHtmlTheme', () => {
     expect(result).toContain('--cc-color-text:#111');
     expect(result).toContain('--cc-color-border:#ccc');
   });
+
+  // Pins the light/dark branch in `buildThemeCss`. Inverting it would paint a dark background in
+  // light mode, and no other test would catch it — every other case here runs in LIGHT.
+  it('resolves the background variable per theme', () => {
+    const markup = '<html><head></head><body></body></html>';
+
+    expect(applyHtmlTheme(markup, 'LIGHT', euiTheme)).toContain(
+      '--cc-color-background:transparent'
+    );
+
+    const dark = applyHtmlTheme(markup, 'DARK', euiTheme);
+    expect(dark).toContain('--cc-color-background:#fff');
+    expect(dark).not.toContain('--cc-color-background:transparent');
+  });
+
+  it('sets the color-scheme meta per theme', () => {
+    expect(applyHtmlTheme('<p>hi</p>', 'DARK', euiTheme)).toContain('content="dark"');
+    expect(applyHtmlTheme('<p>hi</p>', 'LIGHT', euiTheme)).toContain('content="light"');
+  });
 });
 
 describe('sanitizeHtml', () => {
