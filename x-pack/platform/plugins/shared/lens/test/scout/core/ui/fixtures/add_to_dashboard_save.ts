@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { ApiServicesFixture } from '@kbn/scout';
 import { createNewLens, testData, type LensPageObjects } from '../../../common/ui/fixtures';
 
 type VisualizeAndLens = Pick<LensPageObjects, 'visualize' | 'lens'>;
+type DashboardApiServices = Pick<ApiServicesFixture, 'dashboard'>;
 
 export interface AddToDashboardSaveScenario {
   name: string;
@@ -28,7 +30,7 @@ export interface AddToDashboardSaveResult {
  * Markdown is a valid Dashboard API panel type; `type: 'lens'` is not.
  */
 async function createDashboardWithSeedPanel(
-  apiServices: { dashboard: { create: (body: unknown, spaceId?: string) => Promise<string> } },
+  apiServices: DashboardApiServices,
   spaceId: string,
   dashboardTitle: string
 ): Promise<void> {
@@ -73,7 +75,7 @@ export async function runAddToDashboardSave({
   scenario,
 }: {
   pageObjects: VisualizeAndLens;
-  apiServices: { dashboard: { create: (body: unknown, spaceId?: string) => Promise<string> } };
+  apiServices: DashboardApiServices;
   spaceId: string;
   artistMetricId: string;
   scenario: AddToDashboardSaveScenario;

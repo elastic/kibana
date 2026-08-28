@@ -38,7 +38,6 @@ export class LensDatatable {
     await cell.hover();
 
     const filterOutButton = cell.getByTestId('lensDatatableFilterOut');
-    await filterOutButton.waitFor({ state: 'visible' });
     await filterOutButton.click();
   }
 

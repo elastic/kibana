@@ -16,6 +16,7 @@ spaceTest.describe('Lens heatmap add to dashboard', { tag: '@local-stateful-clas
 
   spaceTest.afterAll(suiteSetup.afterAll);
 
+  // Regression test for https://github.com/elastic/kibana/issues/111104
   spaceTest(
     'adds a heatmap with number-based palette ranges to a new dashboard',
     async ({ pageObjects, scoutSpace }) => {
