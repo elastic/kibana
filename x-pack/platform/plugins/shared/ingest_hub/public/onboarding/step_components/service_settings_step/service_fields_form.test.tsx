@@ -199,7 +199,7 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
   };
 
   beforeEach(() => {
-    (LazyPackagePolicyInputVarField as jest.Mock).mockClear();
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
   });
 
   it('shows both ECF inputs enabled by default for a single data stream', () => {
@@ -210,7 +210,7 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
 
   it('forces ECF trigger vars to multi-value fields for the no-duplicate flow', () => {
     renderForm(ECF_SERVICE);
-    const varDefs = (LazyPackagePolicyInputVarField as jest.Mock).mock.calls.map(
+    const varDefs = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.map(
       ([props]) => props.varDef
     );
 
