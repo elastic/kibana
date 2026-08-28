@@ -58,7 +58,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'bulkEditAlertSuppressionEnabled',
         ])}`,
         // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
-        `--xpack.fleet.internal.allowRegistryPackageUploads=true`,
+        `--xpack.fleet.internal.skipUploadPackageValidation=true`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
       ],

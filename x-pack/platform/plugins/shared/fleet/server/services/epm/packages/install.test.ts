@@ -766,7 +766,7 @@ describe('install', () => {
       );
     });
 
-    it('rejects a registry package name when allowRegistryPackageUploads is unset', async () => {
+    it('rejects a registry package name when skipUploadPackageValidation is unset', async () => {
       jest
         .mocked(Registry.fetchFindLatestPackageOrThrow)
         .mockResolvedValue(registryPackageFixture({ name: 'apache', version: '1.3.0' }));

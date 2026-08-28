@@ -46,7 +46,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           '--serverless=security',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
-          `--xpack.fleet.internal.allowRegistryPackageUploads=true`,
+          `--xpack.fleet.internal.skipUploadPackageValidation=true`,
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'bulkEditAlertSuppressionEnabled',
           ])}`,
