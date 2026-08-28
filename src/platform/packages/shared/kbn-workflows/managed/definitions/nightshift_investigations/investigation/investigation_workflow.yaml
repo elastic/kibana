@@ -105,6 +105,12 @@ steps:
         stated above (the reason, and the observed value against its threshold) and work
         outwards to what caused the metric to move.
 
+        You are not investigating a significant event. That is a separate curated entity in
+        this product, not another word for an alert that matters, and none is attached here.
+        Skip the step that reassesses a significant event. Omit `significant_event_updates`
+        from your output entirely — do not invent severity, summary, or status changes for
+        one.
+
         Treat the affected entity fields as the scope of the problem: filter your ES|QL queries
         to that entity first, and only widen when you need to establish whether neighbours are
         affected too. Where an index pattern is given, use it as the starting point for queries
