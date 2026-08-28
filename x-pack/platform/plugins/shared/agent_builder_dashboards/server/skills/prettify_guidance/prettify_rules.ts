@@ -6,6 +6,7 @@
  */
 
 import type { ReferencedContent } from '@kbn/agent-builder-server/skills/type_definition';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { dashboardTools } from '../../../common';
 import { DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME } from '../generation_guidance/design';
 
@@ -17,7 +18,7 @@ export const PRETTIFY_RULES_REFERENCE_NAME = 'prettify-rules';
  */
 export const prettifyRulesPrompt = `## Prettify findings
 
-Look at the painted screenshot first. Use the full dashboard attachment for panel ids, ES|QL, chart types, grid, and whether an edit needs new columns. Divide every finding into one of two buckets. These buckets are for you — never show them to the user.
+Look at the painted screenshot first. Use the full dashboard attachment for panel ids, ES|QL, chart types, grid, control queries, and whether an edit needs new columns. Divide every finding into one of two buckets. These buckets are for you — never show them to the user.
 
 - **Hard rule** — a violation of the rules below. Fix these.
 - **Creative** — something you noticed yourself that would make the dashboard clearer or richer. Title intent vs painted content belongs here. Expand existing charts rather than deleting them.
@@ -28,7 +29,7 @@ Prefer modify and expand. Do not remove visualization panels. Do not invent brok
 
 ## Hard rules — dashboard
 
-- **Controls.** Add useful \`options_list_control\` dropdowns when panel ES|QL has unused low-cardinality fields (service, host, env, status). Field and index must appear in existing ES|QL. Do not remove controls.
+- **Controls.** A control showing an error in the screenshot is a hard-rule miss — the field is not in this index. Confirm every control field with \`${platformCoreTools.getIndexMapping}\` on the panel \`FROM\` index. \`remove_controls\` any whose \`field_name\` is missing from the mapping; \`add_controls\` only for unused low-cardinality fields that appear in existing panel ES|QL **and** in that mapping. Never invent ECS field names. Do not remove working controls.
 - **Sections.** When there are many panels or distinct topics, organize into collapsible sections. Follow the "When to use sections" guidance in referenced \`${DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME}\`.
 - **Grid.** Follow Panel Layout and Grid Packing Rules in referenced \`${DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME}\`. Concrete violations:
   - Three metrics alone on the top row look stretched — use metric \`w: 6–12\`, \`h: 5–6\`, and 4–8 KPIs per row when the data supports it.
@@ -59,7 +60,7 @@ When applying, call \`${dashboardTools.generateDashboard}\` once. Typical batch:
 2. \`update_panel_layouts\` to pack the grid **and move** those panels into the new section via \`sectionId\`. Do not put visual edits on this operation.
 3. \`edit_panels\` (\`source: "request"\`) with a natural-language \`query\` for every visual change and let the visualization author apply the chart-type config rules (metric chrome title, fills, secondary/background, \`chartType\`, gradient, legend, axes, Default palette). Read each panel's existing ES|QL from the dashboard attachment. If the edition does not need new columns, pass that query on \`esql\` unchanged (schema-only). Omit \`esql\` only when a complementary number or different grouping requires new columns.
 4. \`add_panels\` only to add charts for variety or to match title intent. Do not \`remove_panels\` visualization panels.
-5. \`add_controls\` for missing useful filters.`;
+5. \`remove_controls\` for fields not in the index mapping, then \`add_controls\` for missing useful filters on mapped fields.`;
 
 export const prettifyRulesReference: ReferencedContent = {
   name: PRETTIFY_RULES_REFERENCE_NAME,

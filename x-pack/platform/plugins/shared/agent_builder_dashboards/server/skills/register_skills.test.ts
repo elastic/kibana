@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { dashboardManagementSkill as skill } from './dashboard_management_skill';
 import { registerSkills } from './register_skills';
 import { dashboardTools } from '../../common';
@@ -70,6 +71,9 @@ describe('registerSkills', () => {
     expect(skill.content).toContain(
       '`add_section.panels` creates new panels — never copy existing configs into it'
     );
+    expect(skill.content).toContain(platformCoreTools.getIndexMapping);
+    expect(skill.content).toContain('must exist in that mapping **and** appear in panel ES|QL');
+    expect(skill.content).toContain('Never invent ECS field names');
     expect(skill.content).not.toContain(
       'Use `add_section` with its optional `panels` array when you already know the panels that belong in the new section'
     );
@@ -121,6 +125,11 @@ describe('registerSkills', () => {
     expect(rules?.content).not.toContain('areas.fill');
     expect(rules?.content).not.toContain('Gradient-filled areas are not available yet');
     expect(rules?.content).toContain('Do not remove visualization panels');
+    expect(rules?.content).toContain(platformCoreTools.getIndexMapping);
+    expect(rules?.content).toContain('error in the screenshot');
+    expect(rules?.content).toContain('remove_controls');
+    expect(rules?.content).toContain('missing from the mapping');
+    expect(rules?.content).not.toContain('Do not remove controls');
     expect(rules?.content).toContain('Describe that wanted edition in `edit_panels.query`');
     expect(rules?.content).toContain('`add_section` without `panels`');
     expect(rules?.content).toContain('never copy existing panel configs into `add_section.panels`');

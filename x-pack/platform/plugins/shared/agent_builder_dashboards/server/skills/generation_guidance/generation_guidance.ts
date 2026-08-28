@@ -82,9 +82,11 @@ Omit the \`esql\` field on visualization panels unless you received a validated 
 
 Controls are interactive filters pinned above the dashboard that let users explore data without editing queries. Add them with \`add_controls\` and remove them by id with \`remove_controls\`.
 
-**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs).
+**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs). Before \`add_controls\`, call \`${platformCoreTools.getIndexMapping}\` on the panel index. \`field_name\` must exist in that mapping **and** appear in panel ES|QL. Never invent ECS field names.
 
 Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.).
+
+On an existing dashboard, if a control errors or its field is missing from the mapping, \`remove_controls\` that id. Replace it only with a field that exists in the mapping and in panel ES|QL.
 
 **Control types:**
 - \`options_list_control\` — dropdown for categorical / keyword fields. The most common type (95% of cases).
