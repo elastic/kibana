@@ -31,9 +31,9 @@ export const CHILDREN_INCREMENT = 10;
 // We need to put a limit to not blow up the DOM.
 export const MAX_SEARCH_REVEAL = 100;
 
-// Absolute DOM-safety ceiling, in rendered rows, for bulk expansion (Expand all / recursive
-// Cmd-click) and for seeding a fresh cell. indices-stats is a good index to test this limit.
-export const MAX_RENDERED_NODES = 500;
+// Safety budget for bulk expansion (Expand all / recursive Cmd-click)
+// indices-stats is a good index to test this limit.
+export const MAX_RENDERED_NODES = 1000;
 
 export const ROOT_ID = 'json-viewer-$root';
 
@@ -348,22 +348,24 @@ export const collectExpandableIds = (
   return ids;
 };
 
-/** The initial expand/reveal state seeded into a fresh JSON cell. */
-export interface DefaultSeed {
+export interface DefaultExpansionSeed {
   expanded: Set<string>;
   revealed: Map<string, number>;
 }
 
 /**
- * Builds the initial expand/reveal state for a fresh cell: opens collections and lifts per-collection
- * pagers, breadth-first, until about `rowBudget` rows render. Every shown child — a leaf or a
- * container header — counts as one row, so the budget bounds DOM cost directly regardless of nesting
- * depth (a deeply nested document renders many container rows per leaf). Children are revealed in
- * INITIAL_CHILDREN-sized chunks that interleave across lists (round-robin), so a wide list can't
- * render all its rows before deeper ones get a turn. A collection is opened only once it is reached
- * with budget to spare, so a leaf-less document can't open unbounded collections.
+ * Builds the initial expand/reveal state: opens collections and lifts pagers, breadth-first,
+ * until about `rowBudget` rows are rendered. Children are revealed in
+ * INITIAL_CHILDREN-sized chunks that interleave across arrays/objects using a round-robin approach.
+ *
+ * This prevents a gigant array/object to eat all the budget leaving other collections hidden,
+ * instead the budget is splitted between the collections.
+ *
  */
-export const collectDefaultSeed = (roots: JsonNode[], rowBudget: number): DefaultSeed => {
+export const collectDefaultExpansionSeed = (
+  roots: JsonNode[],
+  rowBudget: number
+): DefaultExpansionSeed => {
   const expanded = new Set<string>();
   const revealed = new Map<string, number>();
   let rows = 0;

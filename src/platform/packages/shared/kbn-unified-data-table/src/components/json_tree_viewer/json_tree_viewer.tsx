@@ -13,7 +13,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from 
 import {
   buildNodes,
   buildRows,
-  collectDefaultSeed,
+  collectDefaultExpansionSeed,
   collectExpandableIds,
   MAX_RENDERED_NODES,
   rootToJsonString,
@@ -60,7 +60,7 @@ export interface JsonTreeViewerProps {
   extraHeaderContent?: ReactNode;
   /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
   wrapLines?: boolean;
-  /** Rows rendered when a fresh cell is seeded (0 = fully collapsed). Defaults to 0. */
+  /** Number of nodes to render by default. This budget is split uniformly between the lists.*/
   defaultRenderedNodes?: number;
 }
 
@@ -79,12 +79,12 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
 
   const nodes = useMemo(() => buildNodes(json), [json]);
 
-  // Expand all / isAllExpanded use the full safety ceiling.
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
-  // The initial expand/reveal state for a fresh cell: open collections and lift pagers breadth-first
-  // until ~N rows render, capped to the safety ceiling.
-  const seed = useMemo(
-    () => collectDefaultSeed(nodes, Math.min(defaultRenderedNodes, MAX_RENDERED_NODES)),
+
+  // The initial expand/reveal state for a fresh cell: open collections and pagers breadth-first
+  // until defaultRenderedNodes rows are rendered.
+  const expansionSeed = useMemo(
+    () => collectDefaultExpansionSeed(nodes, Math.min(defaultRenderedNodes, MAX_RENDERED_NODES)),
     [nodes, defaultRenderedNodes]
   );
 
@@ -99,7 +99,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
     onStateChange,
     expandedBySearchNodes: searchMatches.containers,
     expandableIds,
-    seed,
+    expansionSeed,
     defaultRenderedNodes,
   });
 

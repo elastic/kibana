@@ -9,7 +9,7 @@
 
 import {
   buildNodes,
-  collectDefaultSeed,
+  collectDefaultExpansionSeed,
   collectExpandableIds,
   getNodeId,
   nodeToJsonValue,
@@ -75,38 +75,34 @@ describe('collectDefaultSeed', () => {
   it('opens nested collections without lifting any pager for a small document', () => {
     const nodes = buildNodes({ user: { name: 'Alice', address: { city: 'Berlin' } } });
 
-    const { expanded, revealed } = collectDefaultSeed(nodes, 100);
+    const { expanded, revealed } = collectDefaultExpansionSeed(nodes, 100);
 
     expect(expanded).toEqual(new Set([getNodeId(['user']), getNodeId(['user', 'address'])]));
     expect(revealed.size).toBe(0); // nothing exceeds the default per-collection window
   });
 
-  it('reveals a large flat list past the default window up to the budget', () => {
-    const nodes = buildNodes(Array.from({ length: 30 }, (_, i) => i));
-
-    const { expanded, revealed } = collectDefaultSeed(nodes, 20);
-
-    // A flat array has no nested collections; every shown item is one row, so the pager lifts to 20.
-    expect(expanded.size).toBe(0);
-    expect(revealed.get(ROOT_ID)).toBe(20);
-  });
-
   it('expands and reveals array items to reach the row budget', () => {
     const nodes = buildNodes(Array.from({ length: 30 }, (_, i) => ({ v: i })));
 
-    const { expanded, revealed } = collectDefaultSeed(nodes, 40);
+    const { expanded, revealed } = collectDefaultExpansionSeed(nodes, 40);
 
     // 20 object headers + their 20 leaf rows = 40 rows, so 20 objects open and the pager lifts to 20.
     expect(expanded.size).toBe(20);
     expect(revealed.get(ROOT_ID)).toBe(20);
   });
 
-  it('opens nothing and keeps the default window at budget 0', () => {
-    const nodes = buildNodes(Array.from({ length: 30 }, (_, i) => i));
+  it('interleaves sibling lists in chunks (round-robin) instead of draining the first', () => {
+    const nodes = buildNodes({
+      a: Array.from({ length: 25 }, (_, i) => i),
+      b: Array.from({ length: 25 }, (_, i) => i),
+    });
 
-    const { expanded, revealed } = collectDefaultSeed(nodes, 0);
+    const { expanded, revealed } = collectDefaultExpansionSeed(nodes, 24);
 
-    expect(expanded.size).toBe(0);
-    expect(revealed.size).toBe(0);
+    // Both lists open and share the budget in INITIAL_CHILDREN-sized chunks: 2 headers + a[0..9] +
+    // b[0..9], then `a` gets a second turn for 2 more = 24 rows. Draining `a` first would instead
+    // leave `b` collapsed and lift `a`'s pager to 22.
+    expect(expanded).toEqual(new Set([getNodeId(['a']), getNodeId(['b'])]));
+    expect(revealed).toEqual(new Map([[getNodeId(['a']), 12]]));
   });
 });

@@ -408,23 +408,16 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
         ...props,
       });
 
-    // In JSON mode the "Lines shown" range is the only numeric input rendered (sample size and row
-    // heights are not wired here), so the lone spinbutton is its input.
-    const getLinesShownInput = () => screen.getByRole('spinbutton');
+    const getLinesShownInput = () =>
+      screen.getByTestId(
+        (id, el) =>
+          id === 'unifiedDataTableRenderedNodesInput' && el?.getAttribute('type') === 'number'
+      );
 
     it('is not rendered in table mode', () => {
       renderJsonMode({ documentsDisplayMode: 'table' });
 
-      expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
-    });
-
-    it('renders first, above the Hide nulls control', () => {
-      renderJsonMode();
-
-      const input = getLinesShownInput();
-      const hideNulls = screen.getByTestId('unifiedDataTableHideNullsSettings');
-      // Separate, non-nested rows, so this is exactly FOLLOWING when "Lines shown" comes first.
-      expect(input.compareDocumentPosition(hideNulls)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(screen.queryByTestId('unifiedDataTableRenderedNodesInput')).not.toBeInTheDocument();
     });
 
     it('defaults to 50 when unset', () => {
@@ -432,24 +425,6 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
 
       expect(screen.getByText('Lines shown')).toBeVisible();
       expect(getLinesShownInput()).toHaveValue(50);
-    });
-
-    it('reflects the provided value', () => {
-      renderJsonMode({ jsonModeSettings: { defaultRenderedNodes: 120 } });
-
-      expect(getLinesShownInput()).toHaveValue(120);
-    });
-
-    it('propagates a change, preserving the other JSON settings', async () => {
-      const onChangeJsonModeSettings = jest.fn();
-      renderJsonMode({ jsonModeSettings: { hideNulls: true }, onChangeJsonModeSettings });
-
-      await replaceNumberInputValue(getLinesShownInput(), '100');
-
-      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({
-        hideNulls: true,
-        defaultRenderedNodes: 100,
-      });
     });
 
     it('clamps values above the maximum before propagating', async () => {

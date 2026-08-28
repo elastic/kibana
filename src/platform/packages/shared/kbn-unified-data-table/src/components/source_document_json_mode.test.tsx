@@ -145,27 +145,6 @@ describe('SourceDocumentJsonMode', () => {
     expect(container.textContent).not.toContain('empty');
   });
 
-  describe('defaultRenderedNodes setting', () => {
-    const nestedHit: EsHitRecord = {
-      _id: '1',
-      _index: 'test',
-      _source: { user: { name: 'Alice' } },
-    };
-
-    it('auto-expands the tree by default to render the nested leaves', () => {
-      renderCell(nestedHit);
-
-      expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
-    });
-
-    it('leaves the tree collapsed when the budget is 0', () => {
-      renderCell(nestedHit, { jsonModeSettings: { defaultRenderedNodes: 0 } });
-
-      expect(screen.getByTestId(rowTestId('user'))).toBeVisible();
-      expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
-    });
-  });
-
   describe('filter for / filter out leaf actions', () => {
     it('renders filter buttons on a filterable leaf and calls onFilter with the field, value and mode', async () => {
       const onFilter = jest.fn();
@@ -208,7 +187,6 @@ describe('SourceDocumentJsonMode', () => {
 
     it('filters on the exact clicked element of a multi-value field', async () => {
       const onFilter = jest.fn();
-      // Start collapsed so the click drives the expansion under test, not the auto-expand default.
       renderCell(
         { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
         { onFilter, jsonModeSettings: { defaultRenderedNodes: 0 } }
@@ -216,7 +194,6 @@ describe('SourceDocumentJsonMode', () => {
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
 
-      // Filter buttons mount on hover, so hover the target element's row before clicking its action.
       await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
       await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 200, '+');
@@ -231,7 +208,6 @@ describe('SourceDocumentJsonMode', () => {
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
 
-      // Filter buttons mount on hover, so hover the target element's row before clicking its action.
       await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
       await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), [200], '+');

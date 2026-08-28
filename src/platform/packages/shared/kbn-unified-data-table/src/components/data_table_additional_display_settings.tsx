@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiRangeProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiFormRow, EuiHorizontalRule, EuiRange, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -166,17 +166,6 @@ const ValuesShownSetting = ({
 }) => {
   const [activeValue, setActiveValue] = useState<number | ''>(defaultRenderedNodes);
 
-  useEffect(() => {
-    setActiveValue(defaultRenderedNodes); // reset local state when the stored value changes
-  }, [defaultRenderedNodes]);
-
-  const debouncedOnChange = useMemo(
-    () => debounce(onChangeDefaultRenderedNodes, 300, { leading: false, trailing: true }),
-    [onChangeDefaultRenderedNodes]
-  );
-
-  // EUI rejects a value that isn't a multiple of `step`, which the input lets the user type, so fall
-  // back to a step of 1 for off-step values (same approach as the sample-size control).
   const step =
     activeValue === '' || checkIfValueIsMultipleOfStep(activeValue, RENDERED_NODES_STEP)
       ? RENDERED_NODES_STEP
@@ -190,9 +179,9 @@ const ValuesShownSetting = ({
       }
       const clamped = clampRenderedNodes(Number(event.target.value));
       setActiveValue(clamped);
-      debouncedOnChange(clamped);
+      onChangeDefaultRenderedNodes(clamped);
     },
-    [debouncedOnChange]
+    [onChangeDefaultRenderedNodes]
   );
 
   const linesShownLabel = i18n.translate('unifiedDataTable.defaultRenderedNodesLabel', {
@@ -236,21 +225,13 @@ const JsonModeDisplaySettings = ({
     defaultMessage: 'Wrap lines',
   });
 
-  // Keep a stable callback that always merges into the latest settings, so the debounced range input
-  // never fires with a stale `jsonModeSettings`.
-  const settingsRef = useRef(jsonModeSettings);
-  settingsRef.current = jsonModeSettings;
-  const onChangeDefaultRenderedNodes = useCallback(
-    (value: number) =>
-      onChangeJsonModeSettings?.({ ...settingsRef.current, defaultRenderedNodes: value }),
-    [onChangeJsonModeSettings]
-  );
-
   return (
     <>
       <ValuesShownSetting
         defaultRenderedNodes={defaultRenderedNodes}
-        onChangeDefaultRenderedNodes={onChangeDefaultRenderedNodes}
+        onChangeDefaultRenderedNodes={(value) =>
+          onChangeJsonModeSettings?.({ ...jsonModeSettings, defaultRenderedNodes: value })
+        }
       />
       <OnOffButtonGroup
         label={hideNullsLabel}

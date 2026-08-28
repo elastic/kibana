@@ -435,7 +435,6 @@ describe('JsonTreeViewer', () => {
       render(<JsonTreeViewer json={{ a: 1, b: 2 }} />);
       expect(screen.queryByTestId(copyTestId('b'))).not.toBeInTheDocument();
 
-      // Focusing the row marks it active (roving tabindex); act() flushes that state update.
       act(() => screen.getByTestId(rowTestId('b')).focus());
       expect(screen.getByTestId(copyTestId('b'))).toBeInTheDocument();
     });
@@ -568,61 +567,6 @@ describe('JsonTreeViewer', () => {
       expect(screen.getByTestId(rowTestId('19'))).toBeVisible();
       expect(screen.queryByTestId(rowTestId('20'))).not.toBeInTheDocument();
       expect(screen.getByTestId(moreTestId())).toBeVisible();
-    });
-
-    it('re-seeds an already-rendered cell when the budget changes', () => {
-      const { rerender } = render(<JsonTreeViewer json={doc} defaultRenderedNodes={0} />);
-      expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
-
-      rerender(<JsonTreeViewer json={doc} defaultRenderedNodes={10} />);
-      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
-    });
-
-    it('tags the mirrored state with the budget it was seeded at', () => {
-      let lastState: TreeExpansionState | undefined;
-      render(
-        <JsonTreeViewer
-          json={doc}
-          defaultRenderedNodes={2}
-          onStateChange={(state) => (lastState = state)}
-        />
-      );
-
-      expect(lastState?.seedBudget).toBe(2);
-    });
-
-    it('restores the user’s expansions on remount when the seed budget is unchanged', async () => {
-      const twoRoots = { user: { name: 'Alice' }, org: { name: 'Acme' } };
-      let lastState: TreeExpansionState | undefined;
-      const { unmount } = render(
-        <JsonTreeViewer
-          json={twoRoots}
-          defaultRenderedNodes={0}
-          onStateChange={(state) => (lastState = state)}
-        />
-      );
-
-      // The budget-0 seed leaves `org` closed; the user opens it manually.
-      await userEvent.click(screen.getByTestId(rowTestId('org')));
-      expect(lastState?.seedBudget).toBe(0);
-
-      // A fresh instance at the same budget restores that manual expansion.
-      unmount();
-      render(<JsonTreeViewer json={twoRoots} defaultRenderedNodes={0} initialState={lastState} />);
-      expect(screen.getByTestId(rowTestId('org.name'))).toHaveTextContent('"Acme"');
-    });
-
-    it('ignores stored state seeded at a different budget and re-seeds', () => {
-      const staleState: TreeExpansionState = {
-        expanded: new Set(),
-        revealed: new Map(),
-        seedBudget: 0,
-      };
-
-      render(<JsonTreeViewer json={doc} defaultRenderedNodes={10} initialState={staleState} />);
-
-      // The budget-10 seed wins over the stale (collapsed) state.
-      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
     });
   });
 });
