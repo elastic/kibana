@@ -32,7 +32,7 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
+import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
@@ -80,13 +80,12 @@ import {
 } from './color_assignment';
 import { getDefaultPalette } from './default_palette';
 import {
-  applyChartDefaultsIfNeeded,
   getAnnotationLayerErrors,
   isHorizontalChart,
   isHorizontalSeries,
   getColumnToLabelMap,
-  isLineSeries,
 } from './state_helpers';
+import { applyChartDefaultsIfNeeded, applySeriesDefaultsIfNeeded } from './apply_defaults';
 import {
   getGroupsAvailableInData,
   getReferenceConfiguration,
@@ -301,16 +300,13 @@ export const getXyVisualization = ({
         compatibleSeriesType
       );
 
-    return applyChartDefaultsIfNeeded(
-      {
-        ...state,
-        preferredSeriesType: compatibleSeriesType,
-        layers: layerId
-          ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
-          : state.layers.map(switchLayer),
-      },
-      compatibleSeriesType
-    );
+    return applyChartDefaultsIfNeeded({
+      ...state,
+      preferredSeriesType: compatibleSeriesType,
+      layers: layerId
+        ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
+        : state.layers.map(switchLayer),
+    });
   },
 
   getSuggestions,
@@ -824,8 +820,7 @@ export const getXyVisualization = ({
                 state,
                 applySeriesDefaultsIfNeeded(newLayer, layer.seriesType, newLayer.seriesType),
                 index
-              ),
-              newLayer.seriesType
+              )
             )
           )
         }
@@ -1303,53 +1298,6 @@ const getMappedAccessors = ({
   }
   return mappedAccessors;
 };
-
-/**
- * Applies series-type-specific defaults to a layer after a type switch.
- */
-function applySeriesDefaultsIfNeeded(
-  layer: XYLayerConfig,
-  fromSeriesType: SeriesType,
-  toSeriesType: SeriesType
-): XYLayerConfig {
-  const updated = { ...layer, seriesType: toSeriesType };
-  if (isDataLayer(layer) && isDataLayer(updated) && updated.colorMapping) {
-    return {
-      ...updated,
-      colorMapping: resolveDefaultPaletteForSeriesType(
-        updated.colorMapping,
-        fromSeriesType,
-        toSeriesType
-      ),
-    };
-  }
-  return updated;
-}
-
-/**
- * Resolves the default palette when switching between series types.
- * Uses direction-specific matching so that user-chosen palettes are preserved:
- *  - Switching TO line: only replaces 'default' with 'elastic_line_optimized'
- *  - Switching FROM line: only replaces 'elastic_line_optimized' with 'default'
- */
-function resolveDefaultPaletteForSeriesType(
-  colorMapping: NonNullable<XYDataLayerConfig['colorMapping']>,
-  fromSeriesType: SeriesType,
-  toSeriesType: SeriesType
-): NonNullable<XYDataLayerConfig['colorMapping']> {
-  if (isLineSeries(fromSeriesType) === isLineSeries(toSeriesType)) {
-    return colorMapping;
-  }
-
-  if (isLineSeries(toSeriesType) && colorMapping.paletteId === KbnPalette.Default) {
-    return { ...colorMapping, paletteId: KbnPalette.ElasticLineOptimized };
-  }
-  if (isLineSeries(fromSeriesType) && colorMapping.paletteId === KbnPalette.ElasticLineOptimized) {
-    return { ...colorMapping, paletteId: KbnPalette.Default };
-  }
-
-  return colorMapping;
-}
 
 function getVisualizationInfo(
   state: XYVisualizationState,

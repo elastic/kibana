@@ -4608,12 +4608,18 @@ describe('xy_visualization', () => {
 
     describe('areaFill defaulting', () => {
       it('applies the gradient default when an area layer is introduced', () => {
-        const state = exampleState();
+        const { areaFill, ...state } = exampleState();
         (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
-        expect(state.areaFill).toBeUndefined();
         const newState = xyVisualization.switchVisualizationType!('area', state);
         expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
         expect(newState.areaFill).toEqual('gradient');
+      });
+
+      it('does not apply the gradient default when no layer is an area', () => {
+        const { areaFill, ...state } = exampleState();
+        (state.layers[0] as XYDataLayerConfig).seriesType = 'area';
+        const newState = xyVisualization.switchVisualizationType!('bar', state);
+        expect(newState.areaFill).toBeUndefined();
       });
 
       it('preserves an existing areaFill when switching area subtypes', () => {
@@ -4629,6 +4635,17 @@ describe('xy_visualization', () => {
         state.areaFill = 'solid';
         (state.layers[0] as XYDataLayerConfig).seriesType = 'area';
         const newState = xyVisualization.switchVisualizationType!('area_stacked', state);
+        expect(newState.areaFill).toEqual('solid');
+      });
+
+      it('keeps the areaFill while another layer is still an area', () => {
+        const state = exampleState();
+        state.areaFill = 'solid';
+        state.layers = [
+          { ...(state.layers[0] as XYDataLayerConfig), layerId: 'first', seriesType: 'area' },
+          { ...(state.layers[0] as XYDataLayerConfig), layerId: 'second', seriesType: 'area' },
+        ];
+        const newState = xyVisualization.switchVisualizationType!('bar', state, 'second');
         expect(newState.areaFill).toEqual('solid');
       });
     });

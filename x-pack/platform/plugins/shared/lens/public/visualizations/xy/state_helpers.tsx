@@ -12,7 +12,6 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
-import { AreaFillOptions } from '@kbn/expression-xy-plugin/public';
 import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { validateQuery } from '@kbn/visualization-ui-components';
@@ -26,7 +25,6 @@ import type {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-  XYVisualizationState,
   SeriesType,
   YConfig,
   XYAnnotationLayerConfig,
@@ -103,20 +101,6 @@ export const hasBarSeries = (layers: XYLayerConfig[]) => {
 
 export const hasAreaSeries = (layers: XYLayerConfig[]) =>
   layers.some((layer) => isDataLayer(layer) && AREA_SERIES.includes(layer.seriesType));
-
-export const applyChartDefaultsIfNeeded = (
-  state: XYVisualizationState,
-  toSeriesType: SeriesType
-): XYVisualizationState => {
-  if (!AREA_SERIES.includes(toSeriesType) || state.areaFill !== undefined) {
-    return state;
-  }
-
-  return {
-    ...state,
-    areaFill: AreaFillOptions.GRADIENT,
-  };
-};
 
 export const getBarSeriesLayers = (layers: XYLayerConfig[]): XYDataLayerConfig[] =>
   getDataLayers(layers).filter((layer) => BAR_SERIES.includes(layer.seriesType));

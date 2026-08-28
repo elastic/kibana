@@ -23,7 +23,8 @@ import type {
 import { getColorMappingDefaults } from '../../utils';
 import type { XYVisualizationState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
-import { applyChartDefaultsIfNeeded, flipSeriesType, getIconForSeries } from './state_helpers';
+import { flipSeriesType, getIconForSeries } from './state_helpers';
+import { applyChartDefaultsIfNeeded } from './apply_defaults';
 import { getDefaultPalette } from './default_palette';
 import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
@@ -699,7 +700,7 @@ function buildSuggestion({
         isIncomplete ||
         // Don't advertise charts without at least one split
         (!xValue && !splitBy)),
-    state: applyChartDefaultsIfNeeded(state, seriesType),
+    state: applyChartDefaultsIfNeeded(state),
     incomplete: isIncomplete,
     previewIcon: getIconForSeries(seriesType),
   };
