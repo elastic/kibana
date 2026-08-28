@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import type { ApiClientFixture, KbnClient, KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -29,7 +30,15 @@ const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
 const CRAWL_POLL_TIMEOUT_MS = 90_000;
 const CRAWL_POLL_INTERVAL_MS = 1_000;
 
-const OTHER_SPACE_ID = 'sml-type-permissions-other';
+/*
+ * Per-run id, because the space outlives a failed attempt within a single run. Scout sets
+ * `retries: 1` on a step's first CI attempt and a retry re-runs `beforeAll` in a fresh worker
+ * against the *same* Kibana, so with a fixed literal any setup failure after `spaces.create` turns
+ * the retry into a 409 — replacing the original error with a misleading one. The documented local
+ * loop has the same shape, where one `scout start-server` stack serves many `run-tests` runs.
+ * `kbnClient.spaces` has no `createIfNeeded`, so uniqueness is the cleanest guarantee.
+ */
+const OTHER_SPACE_ID = `sml-type-permissions-other-${randomUUID().slice(0, 8)}`;
 
 /** Enough to call the SML search route, and nothing else. Holds no `ai_index:*` action. */
 const SML_READ_ONLY_ROLE: KibanaRole = {
@@ -109,6 +118,11 @@ apiTest.describe(
     };
 
     apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient }) => {
+      // Scout's default test timeout is 60s and a beforeAll hook is billed against it, so the
+      // readiness poll below cannot outlive its own budget: without this the hook is killed at 60s
+      // and reports "Received: false" rather than whatever the crawl was actually doing.
+      apiTest.setTimeout(CRAWL_POLL_TIMEOUT_MS + 30_000);
+
       await kbnClient.spaces.create({
         id: OTHER_SPACE_ID,
         name: 'SML type permissions other space',
