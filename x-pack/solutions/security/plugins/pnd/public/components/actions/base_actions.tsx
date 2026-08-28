@@ -7,19 +7,26 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
+  type IconType,
+  type EuiContextMenuItemProps,
+  EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiHorizontalRule,
   EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { type Investigation } from '@kbn/pnd-common';
-import { CardActionIconButton } from './action_icon_button';
+import type { ConversationsActionsGroupProps } from '../conversation_card';
+import { ActionButton } from './action_button';
+import { ACTIONS_TRANSLATIONS } from './translations';
+import { getActionButtonIconProps } from '../helpers';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 
 interface ActionConfig {
   key: string;
-  icon: string;
+  icon: IconType;
+  color?: EuiContextMenuItemProps['color'];
   name: string;
   onClick: () => void;
   /** Inserts a horizontal rule before this item */
@@ -33,7 +40,7 @@ const useContextMenuItems = (
   const { euiTheme } = useEuiTheme();
   return useMemo(
     () =>
-      actions.flatMap(({ key, icon, name, onClick, separator }) => {
+      actions.flatMap(({ key, icon, color = 'text', name, onClick, separator }) => {
         const item = (
           <EuiContextMenuItem
             style={{
@@ -41,6 +48,7 @@ const useContextMenuItems = (
             }}
             key={key}
             icon={icon}
+            color={color}
             onClick={(ev) => {
               ev.stopPropagation();
               onClose();
@@ -61,59 +69,97 @@ const useContextMenuItems = (
 export type CardActionType = 'openIncident' | 'dismiss' | 'assign';
 export interface BaseActionsProps {
   investigation: Investigation;
-  onClickAction: (action: CardActionType, conversationId: Investigation['recordId']) => void;
+  isFlyout?: boolean;
+  onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
+  onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
   'data-test-subj'?: string;
 }
 
 export const BaseActions = memo<BaseActionsProps>(
-  ({ investigation, onClickAction, 'data-test-subj': dataTestSubj }) => {
+  ({
+    investigation,
+    isFlyout = false,
+    onClickAction,
+    onClickRecommendedAction,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const [isOpen, setIsOpen] = useState(false);
-
     const handleClose = useCallback(() => setIsOpen(false), []);
     const handleToggle = useCallback(() => setIsOpen((prev) => !prev), []);
+    const onOpenChat = useOpenInChat(investigation.id);
 
-    const button = (
-      <CardActionIconButton
+    const button = isFlyout ? (
+      <EuiButton
+        size="s"
+        color="primary"
+        fill
+        iconType="chevronSingleDown"
+        iconSide="right"
+        onClick={handleToggle}
+        data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
+      >
+        {ACTIONS_TRANSLATIONS.buttons.actions}
+      </EuiButton>
+    ) : (
+      <ActionButton
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
         iconType="boxesVertical"
-        tooltipContent={i18n.translate('xpack.pnd.baseActions.openMenu', {
-          defaultMessage: 'More actions',
-        })}
+        tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openMenu}
         onClick={handleToggle}
       />
     );
 
     const actionConfigs = useMemo<ActionConfig[]>(
       () => [
+        ...(onClickRecommendedAction
+          ? [
+              {
+                key: 'proposedAction',
+                icon: getActionButtonIconProps(investigation).type,
+                color: getActionButtonIconProps(investigation).color,
+                name: investigation.primaryActionLabel ?? '',
+                onClick: () =>
+                  onClickRecommendedAction({
+                    id: investigation.id,
+                  }),
+              },
+            ]
+          : []),
+        ...(!isFlyout
+          ? [
+              {
+                key: 'openChat',
+                icon: 'productAgent',
+                name: ACTIONS_TRANSLATIONS.buttons.openInChat,
+                onClick: onOpenChat,
+                // TODO: Add a isDisabled for actions that are disabled
+                // might apply to openIncident if the investigation already has an incident created
+              },
+            ]
+          : []),
         {
           key: 'openIncident',
           icon: 'document',
-          name: i18n.translate('xpack.pnd.baseActions.openAnIncident', {
-            defaultMessage: 'Open an incident',
-          }),
+          name: ACTIONS_TRANSLATIONS.buttons.openIncident,
           onClick: () => onClickAction('openIncident', investigation.recordId),
-          // TODO: Add a isdisabled for actions that are disabled
+          // TODO: Add a isDisabled for actions that are disabled
           // might apply to openIncident if the investigation already has an incident created
         },
         {
           key: 'assign',
           icon: 'user',
-          name: i18n.translate('xpack.pnd.baseActions.assign', {
-            defaultMessage: 'Assign',
-          }),
+          name: ACTIONS_TRANSLATIONS.buttons.assign,
           onClick: () => onClickAction('assign', investigation.recordId),
           separator: true,
         },
         {
           key: 'dismiss',
           icon: 'trash',
-          name: i18n.translate('xpack.pnd.baseActions.dismiss', {
-            defaultMessage: 'Dismiss',
-          }),
+          name: ACTIONS_TRANSLATIONS.buttons.dismiss,
           onClick: () => onClickAction('dismiss', investigation.recordId),
         },
       ],
-      [investigation.recordId, onClickAction]
+      [onClickRecommendedAction, investigation, isFlyout, onOpenChat, onClickAction]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);
@@ -126,9 +172,7 @@ export const BaseActions = memo<BaseActionsProps>(
         button={button}
         isOpen={isOpen}
         closePopover={handleClose}
-        aria-label={i18n.translate('xpack.pnd.baseActions.popover.ariaLabel', {
-          defaultMessage: 'Actions menu',
-        })}
+        aria-label={ACTIONS_TRANSLATIONS.popover.ariaLabel}
       >
         <EuiContextMenuPanel
           css={`
