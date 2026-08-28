@@ -8,16 +8,12 @@
 import { getUniqueName, processImageFile } from './upload_image';
 import { AttachmentType, MAX_IMAGE_BYTES } from '@kbn/agent-builder-common/attachments';
 
-// jsdom doesn't implement createImageBitmap; stub it to resolve like a real decode would.
 (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap = jest
   .fn()
   .mockResolvedValue({ close: jest.fn() });
 const mockCreateImageBitmap = (global as unknown as { createImageBitmap: jest.Mock })
   .createImageBitmap;
 
-// ---------------------------------------------------------------------------
-// getUniqueName
-// ---------------------------------------------------------------------------
 describe('getUniqueName', () => {
   it('returns the original name when no collision', () => {
     expect(getUniqueName('photo.png', new Set())).toBe('photo.png');
@@ -38,9 +34,6 @@ describe('getUniqueName', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// processImageFile
-// ---------------------------------------------------------------------------
 const makeFile = (name: string, type: string, size: number): File => {
   const file = new File([new Uint8Array(size)], name, { type });
   return file;
@@ -97,7 +90,6 @@ describe('processImageFile', () => {
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
-    // Renamed .mp4 with a spoofed image/jpeg type — should still be rejected.
     const result = await processImageFile({
       file: makeFile('video.jpg', 'image/jpeg', 100),
       name: 'video.jpg',

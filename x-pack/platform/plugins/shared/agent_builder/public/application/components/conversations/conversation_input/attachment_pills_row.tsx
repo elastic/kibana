@@ -19,16 +19,11 @@ export interface AttachmentPillsRowProps {
   attachments: ConversationAttachment[];
   removable?: boolean;
   justifyContent?: EuiFlexGroupProps['justifyContent'];
-  /** Called when a pill's remove button is clicked; overrides the default index-based removal. */
   onRemoveAttachment?: (attachment: ConversationAttachment) => void;
-  /** Names of images currently uploading — each renders an animated spinner pill. */
   uploadingNames?: Set<string>;
-  /** Name of the image placeholder currently hovered in the editor (drives pill highlight). */
   hoveredImageName?: string | null;
 }
 
-// NOTE: filesClient.upload uses http.put with no onProgress callback; true upload % is unavailable.
-// Using an indeterminate animation that matches the design's visual intent (thin line at bottom edge).
 const indeterminateProgressSweep = keyframes`
   0% { transform: translateX(-100%); }
   100% { transform: translateX(250%); }

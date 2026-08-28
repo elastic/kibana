@@ -31,7 +31,7 @@ const labels = {
   }),
 };
 
-/** Returns a name that is not already in `existingNames`. Appends ` 2`, ` 3`, … as needed. */
+/** Returns a name that is not already in `existingNames`. Appends ` 2`, ` 3`, ... as needed. */
 export const getUniqueName = (originalName: string, existingNames: Set<string>): string => {
   if (!existingNames.has(originalName)) return originalName;
   const dot = originalName.lastIndexOf('.');
@@ -44,9 +44,8 @@ export const getUniqueName = (originalName: string, existingNames: Set<string>):
 
 /**
  * Validates a File, uploads it to the Files service, and calls upsertAttachments.
- * Returns whether the attachment was created — `false` tells the caller to remove
- * the inline editor placeholder, since no attachment now backs it.
- * On abort the promise resolves `true` silently (the caller already removed the placeholder).
+ * Returns whether the attachment was created - `false` tells the caller to remove
+ * the inline editor placeholder.
  */
 export const processImageFile = async ({
   file,
