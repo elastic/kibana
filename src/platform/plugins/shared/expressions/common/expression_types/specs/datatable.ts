@@ -10,7 +10,6 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-
 import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import type { PointSeries, PointSeriesColumn } from './pointseries';
 import type { ExpressionValueRender } from './render';
@@ -25,7 +24,8 @@ export enum DimensionType {
   SPLIT_ROW = 'splitRow',
 }
 
-const MAX_DATATABLE_CELLS = 500_000;
+export const MAX_DATATABLE_ROWS = 10_000; // matches default ES index.max_result_window
+const MAX_DATATABLE_CELLS = MAX_DATATABLE_ROWS * 50; // max rows * 50 columns per row
 
 const name = 'datatable';
 
@@ -250,6 +250,9 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
   },
   deserialize: (table) => {
     const { columns, rows } = table;
+    if (columns.length > MAX_DATATABLE_ROWS) {
+      throw new Error(`Datatable exceeds maximum of ${MAX_DATATABLE_ROWS} columns.`);
+    }
     if (columns.length * rows.length > MAX_DATATABLE_CELLS) {
       throw new Error(`Datatable exceeds maximum allowed size of ${MAX_DATATABLE_CELLS} cells.`);
     }
