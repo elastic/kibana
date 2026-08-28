@@ -644,6 +644,7 @@
     "@kbn/deeplinks-analytics": "link:src/platform/packages/shared/deeplinks/analytics",
     "@kbn/deeplinks-context-engine": "link:src/platform/packages/shared/deeplinks/context-engine",
     "@kbn/deeplinks-devtools": "link:src/platform/packages/shared/deeplinks/devtools",
+    "@kbn/deeplinks-evals": "link:src/platform/packages/shared/deeplinks/evals",
     "@kbn/deeplinks-fleet": "link:src/platform/packages/shared/deeplinks/fleet",
     "@kbn/deeplinks-management": "link:src/platform/packages/shared/deeplinks/management",
     "@kbn/deeplinks-ml": "link:src/platform/packages/shared/deeplinks/ml",
