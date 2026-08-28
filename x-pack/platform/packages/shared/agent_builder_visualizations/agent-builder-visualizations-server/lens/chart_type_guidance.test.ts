@@ -26,15 +26,19 @@ describe('getChartTypeConfigPromptContent', () => {
     expect(prompt).toContain('secondary metric with dynamic coloring');
   });
 
-  it('tells the xy author to use gradient fills, a default grid legend, and hide a one-series legend', () => {
+  it('tells the xy author to drop solid area fills, use a bottom legend, and add time-series legend stats', () => {
     const prompt = getChartTypeConfigPromptContent(SupportedChartType.XY);
 
     expect(prompt).toContain('CHART-SPECIFIC RULES FOR XY');
-    expect(prompt).toContain('styling.areas.fill: "gradient"');
-    expect(prompt).toContain('legend.visibility: "hidden"');
+    expect(prompt).toContain('drop `styling.areas.fill: "solid"`');
+    expect(prompt).not.toContain('fill: "gradient"');
     expect(prompt).toContain('Omit `legend.layout.type`');
-    expect(prompt).toContain('legend.statistics');
+    expect(prompt).toContain('legend.statistics: ["avg", "min", "max", "last_non_null_value"]');
+    expect(prompt).toContain('even for one series');
+    expect(prompt).toContain('Hide a one-series categorical legend');
+    expect(prompt).toContain('legend.visibility: "hidden"');
     expect(prompt).toContain('axis title visibility to false');
+    expect(prompt).not.toContain('If there is only one series, hide the legend');
     expect(prompt).not.toContain('type: "list"');
     expect(prompt).not.toContain('type: "grid"');
   });

@@ -23,7 +23,7 @@ Look at the painted screenshot first. Use the full dashboard attachment for pane
 - **Hard rule** — a violation of the rules below. Fix these.
 - **Creative** — something you noticed yourself that would make the dashboard clearer or richer. Title intent vs painted content belongs here. Expand existing charts rather than deleting them.
 
-When you talk to the user, use a few sentences of plain language about what will look different (e.g. "I'll shrink the note at the top and hide the legends on the charts — each has only one series."). Do not quote grid units (\`w\`/\`h\`), Lens fields, ES|QL, or tool operations. Do not list findings you are skipping.
+When you talk to the user, use a few sentences of plain language about what will look different (e.g. "I'll shrink the note at the top and hide the legends on the bar charts — each has only one series."). Apply hard-rule fixes without asking. If there is a creative invention, add one question about it and wait (e.g. "The title says Security overview but the charts are all logs — should I retarget that, or just tidy the layout?"). Skip the question when there is nothing creative. Do not quote grid units (\`w\`/\`h\`), Lens fields, ES|QL, or tool operations. Do not list findings you are skipping.
 
 Prefer modify and expand. Do not remove visualization panels. Do not invent broken ES|QL.
 
@@ -44,21 +44,21 @@ Prefer modify and expand. Do not remove visualization panels. Do not invent brok
 ## Hard rules — panel
 
 - **Metric.** NEVER show the dashboard chrome title on a metric. A lone number on white is a miss. In most cases, enrich the metric from the same ES|QL (secondary metric with dynamic coloring and/or a background chart). If the secondary is a trend, it must not have a title. Invented static colors and BACKGROUND fills must be removed. Describe that wanted edition in \`edit_panels.query\` and let the visualization author apply it. Do not invent a second index.
-- **XY.** ALWAYS prefer gradient area fills over solid. Hide the legend when there is one series; otherwise put it at the bottom as a grid with useful stats. Always hide axis titles. Describe that wanted edition in \`edit_panels.query\` and let the visualization author apply it.
+- **XY.** Solid area fills must be removed. Bottom legend. Time series with few series: avg/min/max/last-non-null stats, even for one series. Many series or categorical: no stats; hide a one-series categorical legend. Always hide axis titles. Describe that wanted edition in \`edit_panels.query\` and let the visualization author apply it.
 - **Table.** Set width from the number of columns (\`w: 24–48\`). More columns → closer to 48. Never shrink a table below 24.
 
 ## Creative inventions
 
-Judge these from the screenshot and the dashboard title. They are not automatic, and skipping them is valid.
+Judge these from the screenshot and the dashboard title. They are not automatic. Ask first and do not apply until the user agrees; skipping them is valid.
 
 - **Intent.** If the title says one story (e.g. "Security overview") and the painted charts tell another, say so. Fix by retargeting or adding charts that match the title, not by deleting what is already useful.
 - Other visual improvements the screenshot suggests: clipped legends, unreadable labels, a missing filter the ES|QL already has a field for, a sparse canvas that should grow.
 
-When applying, call \`${dashboardTools.generateDashboard}\` once. Typical batch:
+When applying, call \`${dashboardTools.generateDashboard}\` once. Do not include creative inventions until the user agrees. Typical batch:
 
 1. \`add_section\` without \`panels\` (pass \`id\`) when organizing existing panels into topics — never copy existing panel configs into \`add_section.panels\` (that duplicates them).
 2. \`update_panel_layouts\` to pack the grid **and move** those panels into the new section via \`sectionId\`. Do not put visual edits on this operation.
-3. \`edit_panels\` (\`source: "request"\`) with a natural-language \`query\` for every visual change and let the visualization author apply the chart-type config rules (metric chrome title, fills, secondary/background, \`chartType\`, gradient, legend, axes, Default palette). Read each panel's existing ES|QL from the dashboard attachment. If the edition does not need new columns, pass that query on \`esql\` unchanged (schema-only). Omit \`esql\` only when a complementary number or different grouping requires new columns.
+3. \`edit_panels\` (\`source: "request"\`) with a natural-language \`query\` for every visual change and let the visualization author apply the chart-type config rules (metric chrome title, fills, secondary/background, \`chartType\`, solid area fills, legend, axes, Default palette). Read each panel's existing ES|QL from the dashboard attachment. If the edition does not need new columns, pass that query on \`esql\` unchanged (schema-only). Omit \`esql\` only when a complementary number or different grouping requires new columns.
 4. \`add_panels\` only to add charts for variety or to match title intent. Do not \`remove_panels\` visualization panels.
 5. \`remove_controls\` for fields not in the index mapping, then \`add_controls\` for missing useful filters on mapped fields.`;
 

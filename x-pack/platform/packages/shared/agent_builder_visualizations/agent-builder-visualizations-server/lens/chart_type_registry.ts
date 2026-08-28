@@ -152,8 +152,8 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         rules: [
           'For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
           'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.',
-          'For area series, set `styling.areas.fill: "gradient"` rather than solid.',
-          'If there is only one series, hide the legend (`legend.visibility: "hidden"`). Otherwise place it outside at the bottom. Omit `legend.layout.type` — grid is the default. Include useful, well-formatted `legend.statistics`.',
+          'When editing an existing XY chart, drop `styling.areas.fill: "solid"` unless the user asked for a solid fill.',
+          'Place the legend outside at the bottom. Omit `legend.layout.type`. On time series with <= 8 series, set `legend.statistics: ["avg", "min", "max", "last_non_null_value"]` even for one series; otherwise omit statistics. Hide a one-series categorical legend (`legend.visibility: "hidden"`).',
         ],
         coloringRules: [
           'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
