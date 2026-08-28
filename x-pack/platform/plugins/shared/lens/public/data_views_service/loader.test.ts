@@ -593,6 +593,5 @@ describe('loader', () => {
         projectRouting: '_alias:*',
       });
     });
-
   });
 });
