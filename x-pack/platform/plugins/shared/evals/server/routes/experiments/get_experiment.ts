@@ -22,30 +22,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-
-interface EvalDocSource {
-  experiment_name?: string;
-  task?: { model?: { id?: string; family?: string; provider?: string } };
-  metadata?: {
-    execution_id?: string;
-    suite_id?: string;
-    total_repetitions?: number;
-    git?: {
-      branch?: string | null;
-      commit_sha?: string | null;
-    };
-    ci?: {
-      build_url?: string;
-      pull_request?: string;
-      pipeline_slug?: string;
-      build_id?: string;
-      job_id?: string;
-      branch?: string;
-      commit?: string;
-    };
-  };
-  '@timestamp'?: string;
-}
+import type { EvalDocSource } from './types';
 
 export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned
