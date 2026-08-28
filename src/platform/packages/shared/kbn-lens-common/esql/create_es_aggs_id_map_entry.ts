@@ -1,30 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type {
-  DateHistogramIndexPatternColumn,
-  DateRange,
-  FormBasedLayer,
-  IndexPattern,
-  ValueFormatConfig,
-  GenericIndexPatternColumn,
-} from '@kbn/lens-common';
-import type { OriginalColumn } from '../../../common/types';
-import { isColumnOfType } from './operations/definitions/helpers';
-import { operationDefinitionMap } from './operations';
-import { getTimeZoneAndInterval } from './date_histogram_esql';
+import type { DateRange, IndexPattern, OriginalColumn, ValueFormatConfig } from '../types';
+import type { DateHistogramIndexPatternColumn } from '../datasources/operations';
+import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
+import { isColumnOfType } from '../datasources/form_based/helpers';
+import { getTimeZoneAndInterval } from './operations/date_histogram_helpers';
+import { getDefaultLabelFn } from './operations/default_labels';
+import type { UiSettingsReader } from './operations/types';
 
 export interface CreateEsAggsIdMapEntryParams {
   col: GenericIndexPatternColumn;
   colId: string;
   layer: FormBasedLayer;
   indexPattern: IndexPattern;
-  uiSettings: IUiSettingsClient;
+  uiSettings: UiSettingsReader;
   dateRange: DateRange;
   /** Format configuration for the column (accepts ValueFormatConfig or serialized format) */
   format?: ValueFormatConfig | Record<string, unknown>;
@@ -51,13 +47,13 @@ export function createEsAggsIdMapEntry({
 }: CreateEsAggsIdMapEntryParams): OriginalColumn[] {
   const label = col.customLabel
     ? col.label
-    : operationDefinitionMap[col.operationType].getDefaultLabel(
+    : getDefaultLabelFn(col.operationType)?.(
         col,
         layer.columns,
         indexPattern,
         uiSettings,
         dateRange
-      );
+      ) ?? col.label;
 
   // Build the entry with proper typing for the discriminated union
   if (
