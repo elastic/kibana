@@ -16,6 +16,8 @@ import {
   isFunctionExpression,
   isAssignment,
   isColumn,
+  isParens,
+  isQuery,
 } from '@elastic/esql';
 import type { ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
 import { AUTO_TARGET_NUMBER_OF_BUCKETS } from './constants';
@@ -61,12 +63,93 @@ const findByOption = (statsCmd: ESQLCommand): ESQLCommandOption => {
   return option;
 };
 
+/** Returns the command lists of each FORK branch (subqueries in parens). */
+const getForkBranches = (forkCommand: ESQLCommand): ESQLCommand[][] =>
+  forkCommand.args
+    .filter(isParens)
+    .map((paren) =>
+      isQuery(paren.child)
+        ? paren.child.commands.filter((c): c is ESQLCommand => c.type === 'command')
+        : []
+    );
+
+const commandsHaveStats = (commands: ESQLCommand[]): boolean =>
+  commands.some(
+    (command) =>
+      command.name === 'stats' ||
+      (command.name === 'fork' && getForkBranches(command).some(commandsHaveStats))
+  );
+
 /**
- * Returns true when the ES|QL query contains at least one STATS command.
+ * Returns true when the ES|QL query contains at least one STATS command,
+ * including STATS commands nested inside FORK branches.
  */
 export const queryHasStatsCommand = (esqlQuery: string): boolean => {
   const { root } = Parser.parse(esqlQuery);
-  return root.commands.some((c) => c.name === 'stats');
+  return commandsHaveStats(root.commands);
+};
+
+/** Returns the result column names produced by a STATS command's aggregations. */
+const getStatsResultColumns = (statsCommand: ESQLCommand): string[] => {
+  const columns: string[] = [];
+  for (const arg of statsCommand.args) {
+    if (Array.isArray(arg) || isOptionNode(arg)) continue;
+    if (isAssignment(arg) && isColumn(arg.args[0])) {
+      columns.push(arg.args[0].name);
+    } else if (isFunctionExpression(arg) || isColumn(arg)) {
+      columns.push(BasicPrettyPrinter.expression(arg));
+    }
+  }
+  return columns;
+};
+
+/**
+ * Selects the FORK branch to derive the trendline from: the first branch whose
+ * STATS produces one of the requested metric columns, otherwise the first
+ * branch containing a STATS command, otherwise the first branch.
+ */
+const selectForkBranch = (
+  branches: ESQLCommand[][],
+  metricFields?: string[]
+): ESQLCommand[] | undefined => {
+  if (metricFields && metricFields.length > 0) {
+    const match = branches.find((branch) =>
+      branch.some(
+        (command) =>
+          command.name === 'stats' &&
+          getStatsResultColumns(command).some((column) => metricFields.includes(column))
+      )
+    );
+    if (match) return match;
+  }
+  return branches.find((branch) => branch.some((c) => c.name === 'stats')) ?? branches[0];
+};
+
+/**
+ * Replaces a top-level FORK command with the commands of a single selected
+ * branch so the trendline rewrite operates on source columns that are in
+ * scope. After FORK, only branch output columns (plus the synthetic `_fork`
+ * discriminator) are available, so time bucketing cannot be appended to the
+ * whole query; instead the branch that produces the metric column is inlined.
+ *
+ * Mutates `commands` in place. References to the synthetic `_fork` column in
+ * later KEEP/DROP commands are removed since the column no longer exists.
+ */
+const flattenForkCommands = (commands: ESQLCommand[], metricFields?: string[]): void => {
+  const forkIndex = commands.findIndex((command) => command.name === 'fork');
+  if (forkIndex === -1) return;
+
+  const branch = selectForkBranch(getForkBranches(commands[forkIndex]), metricFields) ?? [];
+  commands.splice(forkIndex, 1, ...branch);
+
+  for (let i = commands.length - 1; i >= forkIndex + branch.length; i--) {
+    const command = commands[i];
+    if (command.name !== 'keep' && command.name !== 'drop') continue;
+    command.args = command.args.filter((arg) => !(isColumn(arg) && arg.name === '_fork'));
+    if (command.args.length === 0) {
+      commands.splice(i, 1);
+    }
+  }
 };
 
 /** Returns true when the ES|QL query uses the TS source command. */
@@ -213,6 +296,9 @@ const applyRenamesToColumn = (commands: ESQLCommand[], columnName: string): stri
  * When the query has no STATS and `metricFields` are provided, each field is
  * wrapped in `AVG()` (e.g. `STATS AVG(bytes) BY BUCKET(...)`). When no metric
  * fields are given, it falls back to `STATS COUNT(*) BY BUCKET(...)`.
+ *
+ * Queries with a top-level FORK are first reduced to the branch that produces
+ * the metric columns (see `flattenForkCommands`) before the rewrite applies.
  */
 export const appendTimeBucketToEsqlQuery = (
   esqlQuery: string,
@@ -228,6 +314,8 @@ export const appendTimeBucketToEsqlQuery = (
   if (root.commands.length === 0) {
     throw new Error('Cannot append time bucket to an empty ES|QL query');
   }
+
+  flattenForkCommands(root.commands, metricFields);
 
   const tsStatsCommand = findFirstStatsAfterTs(root.commands);
 
@@ -309,9 +397,12 @@ export const buildTrendlineQueryWithMetricFieldMap = (
   metricFields: string[] = [],
   groupByFields: string[] = []
 ): TrendlineQueryWithMetricFieldMap => {
-  const sourceQueryHasStats = queryHasStatsCommand(esqlQuery);
-  const metricFieldMap = new Map<string, string>();
   const { root } = Parser.parse(esqlQuery);
+  flattenForkCommands(root.commands, metricFields);
+  const flattenedQuery = BasicPrettyPrinter.print(root);
+
+  const sourceQueryHasStats = queryHasStatsCommand(flattenedQuery);
+  const metricFieldMap = new Map<string, string>();
   const tbucketStatsCommand = findStatsWithTbucket(root.commands);
   const tsStatsCommand = findFirstStatsAfterTs(root.commands);
   const statsCommand = root.commands.findLast(
@@ -324,7 +415,7 @@ export const buildTrendlineQueryWithMetricFieldMap = (
 
   return {
     query: appendTimeBucketToEsqlQuery(
-      esqlQuery,
+      flattenedQuery,
       timeField,
       !sourceQueryHasStats ? metricFields : undefined,
       !sourceQueryHasStats ? groupByFields : undefined
