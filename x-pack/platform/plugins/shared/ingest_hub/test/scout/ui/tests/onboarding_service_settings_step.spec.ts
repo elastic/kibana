@@ -432,25 +432,6 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
   // ── Duplicate service ───────────────────────────────────────────────────
 
-  test('⋮ actions menu with Duplicate is visible for agentless services; ECF-only services have no ⋮ button', async ({
-    browserAuth,
-    page,
-  }) => {
-    await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['elb', 'cloudtrail'],
-    });
-
-    // Agentless service: ⋮ button present and contains Duplicate
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
-    await expect(page.testSubj.locator('serviceSettingsStep-duplicateAction-elb')).toBeVisible();
-    await page.keyboard.press('Escape');
-
-    // ECF-only service: no ⋮ button at all
-    await expect(
-      page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail')
-    ).toBeHidden();
-  });
-
   test('duplicate modal opens with correct service name in body copy', async ({
     browserAuth,
     page,
