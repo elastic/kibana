@@ -27,20 +27,20 @@ export class DocumentVersionManager {
   }
 
   async bulkGetFreshVersions(
-    ids: string[]
+    ids: string[],
+    writeIndex?: string
   ): Promise<Record<string, Required<DocumentVersionFields>>> {
     if (ids.length === 0) {
       return {};
     }
 
-    const meta = await this.getMeta();
-    const writeIndex = meta.backingIndexes.at(-1);
+    const resolvedWriteIndex = writeIndex ?? (await this.getMeta()).backingIndexes.at(-1);
     const result: Record<string, Required<DocumentVersionFields>> = {};
 
     const mgetResponse = await retryTransientEsErrors(
       () =>
         this.deps.esClient.mget({
-          docs: ids.map((id) => ({ _index: writeIndex, _id: id, _source: false })),
+          docs: ids.map((id) => ({ _index: resolvedWriteIndex, _id: id, _source: false })),
         }),
       { logger: this.deps.logger }
     );

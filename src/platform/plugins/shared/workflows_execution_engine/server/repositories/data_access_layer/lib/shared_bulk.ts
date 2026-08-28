@@ -59,7 +59,9 @@ export async function sharedBulk<TExecution extends { id: string }>(
           {
             update: {
               ...actionMeta,
-              ...(item.retryOnConflict !== undefined
+              // retry_on_conflict is mutually exclusive with if_seq_no/if_primary_term —
+              // ES ignores it when version-based CAS fields are present.
+              ...(item.retryOnConflict !== undefined && item.seqNo === undefined
                 ? { retry_on_conflict: item.retryOnConflict }
                 : {}),
             },
@@ -72,7 +74,7 @@ export async function sharedBulk<TExecution extends { id: string }>(
           {
             update: {
               ...actionMeta,
-              ...(item.retryOnConflict !== undefined
+              ...(item.retryOnConflict !== undefined && item.seqNo === undefined
                 ? { retry_on_conflict: item.retryOnConflict }
                 : {}),
             },

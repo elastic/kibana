@@ -193,6 +193,16 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       return { items: [], errors: false };
     }
 
+    const seenIds = new Set<string>();
+    for (const item of request.items) {
+      if (seenIds.has(item.document.id)) {
+        throw new Error(
+          `DataStreamDataClient.bulk: duplicate document id "${item.document.id}" in same request`
+        );
+      }
+      seenIds.add(item.document.id);
+    }
+
     // Data streams require @timestamp on every document. Derive it from the item's
     // dateField (createdAt for workflow executions, startedAt for step executions).
     const itemsWithTimestamp = await this.assignTimestampToItems(request.items);
@@ -215,6 +225,11 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       remainingRetries: item.retryOnConflict ?? 0,
     }));
 
+    // Resolve the write index once — it cannot change during a single bulk call.
+    // Passed down to bulkGetFreshVersions to avoid a getDataStream call per retry.
+    const { backingIndexes } = await this.deps.versionManager.getMeta();
+    const writeIndex = backingIndexes.at(-1);
+
     // On the first pass use the version cache; on retries bypass the cache so we
     // always send the seqNo/primaryTerm that ES just wrote.
     let fetchFreshVersions = false;
@@ -229,7 +244,8 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       // cannot be found become preFailed (update) or are converted to create (upsert).
       const { sendable, preFailed } = await this.resolveBulkItemVersions(
         batch.map(({ item }) => item),
-        fetchFreshVersions
+        fetchFreshVersions,
+        writeIndex
       );
 
       const esResponse = await sharedBulk(
@@ -325,7 +341,8 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   //   true  — retry pass, always fetch from ES to get the latest seqNo (bulkGetFreshVersions)
   private async resolveBulkItemVersions(
     items: BulkItem<TExecution>[],
-    fresh: boolean
+    fresh: boolean,
+    writeIndex?: string
   ): Promise<{
     sendable: Array<{ item: SharedBulkItem<TExecution>; originalIndex: number }>;
     preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }>;
@@ -351,7 +368,10 @@ export class DataStreamDataClient<TExecution extends { id: string }>
 
     if (pendingIds.size > 0) {
       const versions = fresh
-        ? await this.deps.versionManager.bulkGetFreshVersions(Array.from(pendingIds.keys()))
+        ? await this.deps.versionManager.bulkGetFreshVersions(
+            Array.from(pendingIds.keys()),
+            writeIndex
+          )
         : await this.deps.versionManager.bulkGetVersions(Array.from(pendingIds.keys()));
 
       for (const [id, i] of pendingIds) {
