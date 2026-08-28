@@ -161,6 +161,7 @@ describe('useTimelineEventsHandler', () => {
         refetch: expect.any(Function),
         totalCount: -1,
         refreshedAt: 0,
+        isPartial: false,
       },
     ]);
   });
@@ -194,6 +195,7 @@ describe('useTimelineEventsHandler', () => {
           refetch: result.current[1].refetch,
           totalCount: 32,
           refreshedAt: result.current[1].refreshedAt,
+          isPartial: false,
         },
       ]);
     });
@@ -239,6 +241,7 @@ describe('useTimelineEventsHandler', () => {
         refetch: result.current[1].refetch,
         totalCount: 32,
         refreshedAt: result.current[1].refreshedAt,
+        isPartial: false,
       },
     ]);
   });
@@ -283,6 +286,83 @@ describe('useTimelineEventsHandler', () => {
       result.current[1].loadNextBatch();
     });
     await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(1));
+  });
+
+  describe('EQL isPartial', () => {
+    const eqlProps: UseTimelineEventsProps = {
+      ...props,
+      language: 'eql',
+      eqlOptions: {
+        eventCategoryField: 'category',
+        tiebreakerField: '',
+        timestampField: '@timestamp',
+        query: 'process where true',
+        size: 100,
+      },
+    };
+
+    it('returns isPartial false when the EQL strategy response is complete', async () => {
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        expect(result.current[0]).toEqual(DataLoadingState.loaded);
+      });
+
+      expect(result.current[1].isPartial).toEqual(false);
+    });
+
+    it('returns isPartial true when the EQL strategy response is partial', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: { securitySolutionTimeline: { crud: true } },
+          },
+          data: {
+            search: {
+              search: () => ({
+                subscribe: jest.fn().mockImplementation(({ next }) => {
+                  const requestTimeout = setTimeout(() => {
+                    next({
+                      isRunning: false,
+                      isPartial: true,
+                      inspect: { dsl: [], response: [] },
+                      edges: [],
+                      pageInfo: { activePage: 0, querySize: 25 },
+                      rawResponse: {},
+                      totalCount: 1,
+                    });
+                  }, 50);
+                  return {
+                    unsubscribe: () => {
+                      clearTimeout(requestTimeout);
+                    },
+                  };
+                }),
+              }),
+              showError: jest.fn(),
+            },
+          },
+        },
+      });
+
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        expect(result.current[0]).toEqual(DataLoadingState.loaded);
+      });
+
+      expect(result.current[1].isPartial).toEqual(true);
+    });
   });
 
   describe('error/invalid states', () => {

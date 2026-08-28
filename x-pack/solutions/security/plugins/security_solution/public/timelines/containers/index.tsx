@@ -68,6 +68,7 @@ export interface TimelineArgs {
   refetch: inputsModel.Refetch;
   totalCount: number;
   refreshedAt: number;
+  isPartial: boolean;
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
@@ -240,6 +241,7 @@ export const useTimelineEventsHandler = ({
       rawEvents: [],
       loadNextBatch,
       refreshedAt: 0,
+      isPartial: false,
     }),
     [id, loadNextBatch]
   );
@@ -292,6 +294,7 @@ export const useTimelineEventsHandler = ({
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
                     refreshedAt: Date.now(),
+                    isPartial: response.isPartial === true,
                   };
                   if (id === TimelineId.active) {
                     activeTimeline.setPageName(pageName);
