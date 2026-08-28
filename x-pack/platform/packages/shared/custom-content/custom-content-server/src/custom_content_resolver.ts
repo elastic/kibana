@@ -24,7 +24,9 @@ const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to t
 - Danger/error: var(--cc-color-danger). Border color: var(--cc-color-border).
 - Spacing (margins, padding, gaps): var(--cc-space-xs) < var(--cc-space-s) < var(--cc-space-m) < var(--cc-space-l) < var(--cc-space-xl). Pick from this scale only — no arbitrary values like 10px or 1.25rem.
 - Corner rounding: var(--cc-radius) on every card, badge, pill and container. Do not invent other radii.
-- Type scale: 0.75rem for secondary/label text, 0.875rem for body, 1.5rem or more for a headline KPI number. Use font-weight 600 for emphasis rather than a larger size.`;
+- Type scale: 0.75rem for secondary/label text, 0.875rem for body, 1.5rem or more for a headline KPI number. Use font-weight 600 for emphasis rather than a larger size.
+- This applies to SVG too. \`fill\`, \`stroke\`, \`stop-color\` and every other color attribute must be a var(--cc-color-*) — for example \`<path fill="var(--cc-color-primary)">\`. Charts are where hardcoded palettes creep in; there is no exception for them.
+- Never re-declare \`background\` or \`color\` on \`body\`. The panel frame already sets both from the active theme, and overriding them makes the panel render dark in light mode (or the reverse) for every user.`;
 
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
