@@ -97,6 +97,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/css-utils",
     "@kbn/licensing-types",
+    "@kbn/logging",
     "@kbn/control-group-renderer",
     "@kbn/es-query-server",
     "@kbn/data-service-server",

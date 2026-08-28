@@ -259,7 +259,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
 
     contentManagement.register({
       id: CONTENT_ID,
-      storage: new MapsStorage(),
+      storage: new MapsStorage(this._logger),
       version: {
         latest: LATEST_VERSION,
       },

@@ -8,6 +8,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
+import type { Logger } from '@kbn/logging';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
 import type { LayerDescriptor } from '../descriptor_types';
@@ -17,7 +18,8 @@ import { transformLayersOut } from './transform_layers_out';
 
 export function transformMapAttributesOut(
   storedMapAttributes: StoredMapAttributes,
-  findReference: (name: string) => Reference | undefined
+  findReference: (name: string) => Reference | undefined,
+  logger?: Logger
 ): MapAttributes {
   const { attributes: injectedAttributes } = injectReferences({
     attributes: storedMapAttributes,
@@ -27,7 +29,7 @@ export function transformMapAttributesOut(
     title: injectedAttributes.title,
     ...(injectedAttributes.description ? { description: injectedAttributes.description } : {}),
     ...parseLayerListJSON(injectedAttributes.layerListJSON),
-    ...parseMapStateJSON(injectedAttributes.mapStateJSON),
+    ...parseMapStateJSON(injectedAttributes.mapStateJSON, logger),
     ...parseUiStateJSON(injectedAttributes.uiStateJSON),
   };
 }
@@ -39,7 +41,7 @@ function parseLayerListJSON(layerListJSON?: string) {
   return { layers: transformLayersOut(layers) };
 }
 
-function parseMapStateJSON(mapStateJSON?: string) {
+function parseMapStateJSON(mapStateJSON?: string, logger?: Logger) {
   const parsedMapState = parseJSON<{ [key: string]: unknown }>({}, mapStateJSON);
   const { refreshConfig, timeFilters, adHocDataViews, filters, ...rest } = dropUnknownKeys(
     parsedMapState,
@@ -48,7 +50,7 @@ function parseMapStateJSON(mapStateJSON?: string) {
 
   return {
     ...rest,
-    ...(Array.isArray(filters) ? { filters: fromStoredFilters(filters) ?? [] } : {}),
+    ...(Array.isArray(filters) ? { filters: fromStoredFilters(filters, logger) ?? [] } : {}),
     ...(refreshConfig
       ? { refreshInterval: { pause: refreshConfig.isPaused, value: refreshConfig.interval } }
       : {}),
