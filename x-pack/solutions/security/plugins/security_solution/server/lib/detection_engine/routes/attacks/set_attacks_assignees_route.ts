@@ -8,7 +8,6 @@
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '@kbn/elastic-assistant-common';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import {
   ALERTS_API_ALL,
@@ -26,16 +25,10 @@ import {
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
-import { searchAlerts } from '../common/operations/search_alerts';
-import {
-  fetchAllAlertIdIndexWithSource,
-  computeActualDelta,
-  wouldChange,
-} from '../common/operations/prefetch_previous_statuses';
-import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
+import { prefetchChangedListFieldIds } from '../common/operations/prefetch_previous_statuses';
 import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
-import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
+import { executeCascadeListField } from './cascade_list_field_helpers';
 import { buildSiemResponse } from '../utils';
 import {
   ATTACKS_DUPLICATE_ASSIGNEES_VALIDATION_ERROR,
@@ -117,55 +110,27 @@ export const setAttacksAssigneesRoute = (
             telemetrySender,
             telemetryFields,
             async () => {
-              // Verify which IDs actually exist in the attack index before emitting,
-              // so the event payload never includes unknown/non-attack IDs.
-              // Failures here must never block the mutation.
+              // prefetch failure suppresses the trigger; must not block the mutation
               let verifiedAttackIds: string[] = [];
               let attackAssigneesActuallyAdded = validAssigneesToAdd;
               let attackAssigneesActuallyRemoved = validAssigneesToRemove;
               if (eventBus) {
                 try {
-                  const attackDocs = await searchAlerts({
-                    context,
-                    index: attackIndex,
-                    params: {
-                      query: { bool: { filter: { terms: { _id: ids } } } },
-                      _source: [ALERT_WORKFLOW_ASSIGNEE_IDS],
-                      // `attackIndex` spans the scheduled and adhoc families and an _id can
-                      // exist in both, so reserve a slot per family rather than one per id.
-                      size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
-                    },
-                  });
-                  // Emit only IDs that exist AND would actually change; deduplicate across
-                  // families (an _id can appear in both scheduled and adhoc indices).
-                  // Use the raw request arrays for the predicate: the mutation applies the
-                  // original assignees (including over-length/over-cap values), so the
-                  // trigger should fire whenever the mutation would actually change a doc.
-                  verifiedAttackIds = Array.from(
-                    new Set(
-                      attackDocs.hits.hits
-                        .filter((hit) =>
-                          wouldChange(
-                            (hit._source ?? {}) as Record<string, unknown>,
-                            ALERT_WORKFLOW_ASSIGNEE_IDS,
-                            assignees.add,
-                            assignees.remove
-                          )
-                        )
-                        .map((hit) => hit._id)
-                        .filter((id): id is string => id != null)
-                    )
-                  );
-                  const delta = computeActualDelta(
-                    attackDocs.hits.hits.map(
-                      (hit) => (hit._source ?? {}) as Record<string, unknown>
-                    ),
+                  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+                  ({
+                    changedIds: verifiedAttackIds,
+                    actualAdded: attackAssigneesActuallyAdded,
+                    actualRemoved: attackAssigneesActuallyRemoved,
+                  } = await prefetchChangedListFieldIds(
+                    esClient,
+                    attackIndex,
+                    ids,
+                    ALERT_WORKFLOW_ASSIGNEE_IDS,
+                    assignees.add,
+                    assignees.remove,
                     validAssigneesToAdd,
-                    validAssigneesToRemove,
-                    ALERT_WORKFLOW_ASSIGNEE_IDS
-                  );
-                  attackAssigneesActuallyAdded = delta.actualAdded;
-                  attackAssigneesActuallyRemoved = delta.actualRemoved;
+                    validAssigneesToRemove
+                  ));
                 } catch (err) {
                   logger?.warn(`Failed to verify attack IDs for workflow trigger: ${err}`);
                 }
@@ -193,138 +158,39 @@ export const setAttacksAssigneesRoute = (
           response,
           telemetrySender,
           telemetryFields,
-          async () => {
-            // Pre-fetch the verified attack docs to read their related detection
-            // alert ids; the attack index scope filters out unknown attack ids.
-            const attackDocs = await searchAlerts({
+          () =>
+            executeCascadeListField({
               context,
-              index: attackIndex,
-              params: {
-                query: { bool: { filter: { terms: { _id: ids } } } },
-                _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_ASSIGNEE_IDS],
-                // `attackIndex` spans the scheduled and adhoc families and an _id can exist
-                // in both, so reserve a slot per family rather than one per requested id.
-                size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
+              ruleDataClient,
+              attackIndex,
+              ids,
+              field: ALERT_WORKFLOW_ASSIGNEE_IDS,
+              rawToAdd: assignees.add,
+              rawToRemove: assignees.remove,
+              validToAdd: validAssigneesToAdd,
+              validToRemove: validAssigneesToRemove,
+              operationTruncated,
+              mutate: (index, combinedIds) =>
+                updateAlertsAssignees({ context, index, ids: combinedIds, assignees }),
+              eventBus,
+              emitAttack: (attackIds, actualAdded, actualRemoved, truncated) => {
+                void eventBus?.emitAttackAssigneesChanged(request, {
+                  attackIds,
+                  assigneesAdded: actualAdded,
+                  assigneesRemoved: actualRemoved,
+                  truncated,
+                });
               },
-            });
-
-            // All found attack IDs drive the mutation; deduplicate across families.
-            // Length-filtered (allValid*) arrays must not control which attacks are mutated:
-            // updateAlertsAssignees applies the original request assignees regardless of length.
-            const allFoundAttackIds = Array.from(
-              new Set(
-                attackDocs.hits.hits.map((hit) => hit._id).filter((id): id is string => id != null)
-              )
-            );
-            // Trigger emission uses only IDs that would actually change.
-            // Use the raw request arrays: the mutation applies the original assignees
-            // (including over-length/over-cap values), so the trigger should fire
-            // whenever the mutation would actually change a document.
-            const verifiedAttackIds = Array.from(
-              new Set(
-                attackDocs.hits.hits
-                  .filter((hit) =>
-                    wouldChange(
-                      (hit._source ?? {}) as Record<string, unknown>,
-                      ALERT_WORKFLOW_ASSIGNEE_IDS,
-                      assignees.add,
-                      assignees.remove
-                    )
-                  )
-                  .map((hit) => hit._id)
-                  .filter((id): id is string => id != null)
-              )
-            );
-
-            const attackSources = attackDocs.hits.hits.map(
-              (hit) => (hit._source ?? {}) as Record<string, unknown>
-            );
-            const attackAssigneesDelta = computeActualDelta(
-              attackSources,
-              validAssigneesToAdd,
-              validAssigneesToRemove,
-              ALERT_WORKFLOW_ASSIGNEE_IDS
-            );
-
-            const relatedAlertIds = Array.from(
-              new Set(
-                attackDocs.hits.hits.flatMap((hit) => {
-                  const source = hit._source as Record<string, unknown> | undefined;
-                  const alertIds = source?.[ALERT_ATTACK_DISCOVERY_ALERT_IDS];
-                  return Array.isArray(alertIds) ? (alertIds as string[]) : [];
-                })
-              )
-            );
-
-            const combinedIds = Array.from(new Set([...allFoundAttackIds, ...relatedAlertIds]));
-
-            // Related detection alerts live outside the attack indices, so expand
-            // the target to the unified index pattern for the cascade update.
-            const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
-
-            // Pre-fetch related alert sources to compute the actual assignee delta and verify
-            // they still exist; stale/deleted references must not appear in the payload.
-            let verifiedRelatedAlertIds: string[] = [];
-            let relatedAssigneesDelta = {
-              actualAdded: validAssigneesToAdd,
-              actualRemoved: validAssigneesToRemove,
-            };
-            if (eventBus && relatedAlertIds.length > 0) {
-              try {
-                const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-                const rawRelatedHits = await fetchAllAlertIdIndexWithSource(
-                  esClient,
-                  index,
-                  relatedAlertIds,
-                  [ALERT_WORKFLOW_ASSIGNEE_IDS]
-                );
-                // Exclude Attack Discovery hits: a stale related-alert ID that collides with
-                // an AD doc must not be emitted as a detection-alert event. Deduplicate IDs
-                // so the same alert doesn't consume multiple payload slots.
-                const detectionHits = rawRelatedHits.filter(
-                  (h) => !isAttackDiscoveryIndex(h.index)
-                );
-                verifiedRelatedAlertIds = Array.from(new Set(detectionHits.map((h) => h.id)));
-                relatedAssigneesDelta = computeActualDelta(
-                  detectionHits.map((h) => h.source),
-                  validAssigneesToAdd,
-                  validAssigneesToRemove,
-                  ALERT_WORKFLOW_ASSIGNEE_IDS
-                );
-              } catch (err) {
-                // Source-fetch failed; suppress the fact event for related alerts rather than
-                // emitting request intent as observed fact (delta is unknown).
-                logger?.warn(
-                  `Failed to fetch related alert sources for workflow trigger (assignees): ${err}`
-                );
-              }
-            }
-
-            const result = await updateAlertsAssignees({
-              context,
-              index,
-              ids: combinedIds,
-              assignees,
-            });
-            if (verifiedAttackIds.length > 0) {
-              void eventBus?.emitAttackAssigneesChanged(request, {
-                attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesAdded: attackAssigneesDelta.actualAdded,
-                assigneesRemoved: attackAssigneesDelta.actualRemoved,
-                truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
-              });
-            }
-            if (verifiedRelatedAlertIds.length > 0) {
-              void eventBus?.emitAlertAssigneesChanged(request, {
-                alertIds: verifiedRelatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesAdded: relatedAssigneesDelta.actualAdded,
-                assigneesRemoved: relatedAssigneesDelta.actualRemoved,
-                truncated:
-                  verifiedRelatedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
-              });
-            }
-            return result;
-          }
+              emitAlert: (alertIds, actualAdded, actualRemoved, truncated) => {
+                void eventBus?.emitAlertAssigneesChanged(request, {
+                  alertIds,
+                  assigneesAdded: actualAdded,
+                  assigneesRemoved: actualRemoved,
+                  truncated,
+                });
+              },
+              logger,
+            })
         );
       }
     );
