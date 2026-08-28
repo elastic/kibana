@@ -36,14 +36,11 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async blur() {
-    if (await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 })) {
-      await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      await this.testSubjects.missingOrFail(SEARCH_MODAL);
+    if (!(await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 }))) {
       return;
     }
-    await this.testSubjects.click('helpMenuButton');
-    await this.testSubjects.click('helpMenuButton');
-    await this.find.waitForDeletedByCssSelector('.navSearch__panel');
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.testSubjects.missingOrFail(SEARCH_MODAL);
   }
 
   async searchFor(
