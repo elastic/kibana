@@ -27,7 +27,6 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
-import { updateDatasourceState, setDimensionAndUpdateDatasource } from '../../../state_management';
 
 jest.mock('../../../id_generator');
 
@@ -159,36 +158,73 @@ describe('ConfigPanel', () => {
     expect(screen.queryByTestId('lns-layerPanel-0')).not.toBeInTheDocument();
   });
 
-  it('updates datasources and visualizations through store dispatch', () => {
-    const props = getDefaultProps();
+  function mockDimensionEditorApply(
+    datasourceMap: ReturnType<typeof mockDatasourceMap>,
+    visualizationMap: ReturnType<typeof mockVisualizationMap>,
+    accessors: Array<{ columnId: string }>
+  ) {
+    visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+      groups: [
+        {
+          groupId: 'a',
+          groupLabel: 'a',
+          layerId: 'first',
+          supportsMoreColumns: true,
+          accessors,
+          filterOperations: jest.fn(() => true),
+          dataTestSubj: 'mockVisA',
+        },
+      ],
+    }));
+    visualizationMap.testVis.setDimension = jest.fn().mockReturnValue('state');
+    datasourceMap.formBased.DimensionEditorComponent = jest
+      .fn()
+      .mockImplementation(({ setState }: { setState: (s: unknown) => void }) => (
+        <button data-test-subj="mockDimensionEditorApply" onClick={() => setState('updated')} />
+      ));
+  }
+
+  it('updates datasource state by exercising the existing-accessor callback chain', () => {
+    const datasourceMap = mockDatasourceMap();
+    const visualizationMap = mockVisualizationMap();
+    mockDimensionEditorApply(datasourceMap, visualizationMap, [{ columnId: 'col1' }]);
+
+    const props = getDefaultProps({ datasourceMap, visualizationMap });
     const { store } = renderConfigPanel(props);
 
+    fireEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
+    fireEvent.click(screen.getByTestId('mockDimensionEditorApply'));
+
     act(() => {
-      store.dispatch(
-        updateDatasourceState({
-          newDatasourceState: 'updated',
-          datasourceId: 'formBased',
-          clearStagedPreview: false,
-        })
-      );
+      jest.runAllTimers();
     });
 
     expect(store.getState().lens.datasourceStates.formBased.state).toEqual('updated');
+  });
+
+  it('updates datasource and visualization by exercising the new-accessor callback chain', () => {
+    const datasourceMap = mockDatasourceMap();
+    const visualizationMap = mockVisualizationMap();
+    mockDimensionEditorApply(datasourceMap, visualizationMap, []);
+
+    const props = getDefaultProps({ datasourceMap, visualizationMap });
+    const { store } = renderConfigPanel(props);
+
+    fireEvent.click(screen.getByTestId('lns-empty-dimension'));
+    fireEvent.click(screen.getByTestId('mockDimensionEditorApply'));
 
     act(() => {
-      store.dispatch(
-        setDimensionAndUpdateDatasource({
-          visualizationId: 'testVis',
-          layerId: 'first',
-          groupId: 'a',
-          columnId: 'col1',
-          datasourceId: 'formBased',
-          newDatasourceState: 'updated-again',
-        })
-      );
+      jest.runAllTimers();
     });
 
-    expect(store.getState().lens.datasourceStates.formBased.state).toEqual('updated-again');
+    expect(store.getState().lens.datasourceStates.formBased.state).toEqual('updated');
+    expect(visualizationMap.testVis.setDimension).toHaveBeenCalledWith(
+      expect.objectContaining({
+        layerId: 'first',
+        groupId: 'a',
+        columnId: 'newId',
+      })
+    );
   });
 
   describe('initial default value', () => {
@@ -261,6 +297,7 @@ describe('ConfigPanel', () => {
       });
 
       renderConfigPanel(props, undefined, { esql: 'from "foo"' });
+      expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
       // Regex matches "lnsLayerClone--{index}" (e.g. "lnsLayerClone--0")
       expect(screen.queryByTestId(/^lnsLayerClone/)).not.toBeInTheDocument();
     });
