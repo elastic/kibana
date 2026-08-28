@@ -181,6 +181,20 @@ export function SearchIndexDetailPageProvider({ getService, getPageObjects }: Ft
     },
 
     async clickOnBreadcrumb(breadcrumbsName: string) {
+      // Breadcrumbs are set asynchronously once the embedded Index Management app
+      // finishes rendering. Wait for the crumb to be present before clicking,
+      // otherwise this used to silently no-op and the expected navigation never
+      // happened.
+      await retry.waitFor(`breadcrumb "${breadcrumbsName}" to be present`, async () => {
+        const breadcrumbs = await testSubjects.findAll('euiBreadcrumb');
+        for (const breadcrumb of breadcrumbs) {
+          if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
+            return true;
+          }
+        }
+        return false;
+      });
+
       const breadcrumbs = await testSubjects.findAll('euiBreadcrumb');
       for (const breadcrumb of breadcrumbs) {
         if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
@@ -188,6 +202,7 @@ export function SearchIndexDetailPageProvider({ getService, getPageObjects }: Ft
           return;
         }
       }
+      throw new Error(`Breadcrumb "${breadcrumbsName}" was not found`);
     },
 
     async expectAddFieldToBeDisabled() {
