@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 export function hasGettingStartedAddDataReturn(search: string): boolean {
   const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
@@ -37,3 +42,28 @@ export function getGettingStartedBackLink({
     }),
   };
 }
+
+export const GettingStartedBackLink: React.FC = () => {
+  const { search } = useLocation();
+  const { application } = useKibana<ClientPluginsStart>().services;
+  const backLink = getGettingStartedBackLink({
+    search,
+    getUrlForApp: (appId, options) => application?.getUrlForApp(appId, options) ?? '',
+  });
+
+  if (!backLink) {
+    return null;
+  }
+
+  return (
+    <EuiButtonEmpty
+      iconType="chevronSingleLeft"
+      size="xs"
+      flush="left"
+      href={backLink.href}
+      data-test-subj="syntheticsGettingStartedBackLink"
+    >
+      {backLink.text}
+    </EuiButtonEmpty>
+  );
+};

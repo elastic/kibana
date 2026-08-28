@@ -12,7 +12,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -34,14 +33,13 @@ import type { ClientPluginsStart } from '../../../../plugin';
 import { getAgentPoliciesAction, selectAgentPolicies } from '../../state/agent_policies';
 import { setIsPrivateLocationFlyoutVisible } from '../../state/private_locations/actions';
 import { selectPrivateLocationFlyoutVisible } from '../../state/private_locations/selectors';
-import { getGettingStartedBackLink } from './getting_started_back_link';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const { search } = useLocation();
 
-  const { observabilityAIAssistant, application } = useKibana<ClientPluginsStart>().services;
+  const { observabilityAIAssistant } = useKibana<ClientPluginsStart>().services;
   const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
   useEnablement();
@@ -62,10 +60,6 @@ export const GettingStartedPage = () => {
   const loading = allLocationsLoading || agentPoliciesLoading;
 
   const hasNoLocations = !allLocationsLoading && locations.length === 0;
-  const backLink = getGettingStartedBackLink({
-    search,
-    getUrlForApp: (appId, options) => application?.getUrlForApp(appId, options) ?? '',
-  });
 
   useEffect(() => {
     return setScreenContext?.({
@@ -93,53 +87,38 @@ export const GettingStartedPage = () => {
   }, [setScreenContext, hasNoLocations, locations]);
 
   return !loading ? (
-    <Wrapper $withPageBackLink={Boolean(backLink)}>
-      {backLink ? (
-        <BackLinkWrap>
-          <EuiButtonEmpty
-            iconType="chevronSingleLeft"
-            size="xs"
-            flush="left"
-            href={backLink.href}
-            data-test-subj="syntheticsGettingStartedBackLink"
-          >
-            {backLink.text}
-          </EuiButtonEmpty>
-        </BackLinkWrap>
-      ) : null}
-      <PromptWrap $withPageBackLink={Boolean(backLink)}>
-        {hasNoLocations ? (
-          <GettingStartedOnPrem />
-        ) : (
-          <EuiEmptyPrompt
-            title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
-            layout="horizontal"
-            color="plain"
-            body={
-              <>
-                <EuiText size="s">
-                  {OR_LABEL}{' '}
-                  <EuiLink
-                    data-test-subj="syntheticsGettingStartedPageLink"
-                    href={history.createHref({
-                      pathname: MONITOR_ADD_ROUTE,
-                      search,
-                    })}
-                  >
-                    {SELECT_DIFFERENT_MONITOR}
-                  </EuiLink>
-                  {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
-                    defaultMessage: ' to get started with Elastic Synthetics Monitoring.',
+    <Wrapper>
+      {hasNoLocations ? (
+        <GettingStartedOnPrem />
+      ) : (
+        <EuiEmptyPrompt
+          title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
+          layout="horizontal"
+          color="plain"
+          body={
+            <>
+              <EuiText size="s">
+                {OR_LABEL}{' '}
+                <EuiLink
+                  data-test-subj="syntheticsGettingStartedPageLink"
+                  href={history.createHref({
+                    pathname: MONITOR_ADD_ROUTE,
+                    search,
                   })}
-                </EuiText>
-                <EuiSpacer />
-                <SimpleMonitorForm />
-              </>
-            }
-            footer={<GettingStartedLink />}
-          />
-        )}
-      </PromptWrap>
+                >
+                  {SELECT_DIFFERENT_MONITOR}
+                </EuiLink>
+                {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
+                  defaultMessage: ' to get started with Elastic Synthetics Monitoring.',
+                })}
+              </EuiText>
+              <EuiSpacer />
+              <SimpleMonitorForm />
+            </>
+          }
+          footer={<GettingStartedLink />}
+        />
+      )}
     </Wrapper>
   ) : (
     <LoadingState />
@@ -224,40 +203,13 @@ export const GettingStartedLink = () => (
   </>
 );
 
-const Wrapper = styled.div<{ $withPageBackLink?: boolean }>`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  ${({ $withPageBackLink }) =>
-    $withPageBackLink
-      ? `
-    min-height: 100%;
-  `
-      : ''}
+const Wrapper = styled.div`
   &&& {
     .euiEmptyPrompt__content {
       max-width: 40em;
       padding: 0;
     }
   }
-`;
-
-const BackLinkWrap = styled.div`
-  align-self: flex-start;
-`;
-
-const PromptWrap = styled.div<{ $withPageBackLink?: boolean }>`
-  ${({ $withPageBackLink }) =>
-    $withPageBackLink
-      ? `
-    flex: 1 1 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-  `
-      : ''}
 `;
 
 const FOR_MORE_INFO_LABEL = i18n.translate('xpack.synthetics.gettingStarted.forMoreInfo', {

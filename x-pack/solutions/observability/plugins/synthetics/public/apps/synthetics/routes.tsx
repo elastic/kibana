@@ -32,7 +32,10 @@ import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
-import { hasGettingStartedAddDataReturn } from './components/getting_started/getting_started_back_link';
+import {
+  GettingStartedBackLink,
+  hasGettingStartedAddDataReturn,
+} from './components/getting_started/getting_started_back_link';
 import {
   InspectMonitorPortalNode,
   MonitorDetailsLinkPortalNode,
@@ -81,16 +84,13 @@ const getRoutes = (
       path: GETTING_STARTED_ROUTE,
       component: GettingStartedPage,
       dataTestSubj: 'syntheticsGettingStartedPage',
-      // Keep the empty state centered for native Synthetics. From Add Data, use
-      // the full content column so "Back to selection" sits at the page top-left.
-      pageSectionProps: hasGettingStartedAddDataReturn(location.search)
-        ? {
-            paddingSize: 'l',
-          }
-        : {
-            alignment: 'center',
-            paddingSize: 'none',
-          },
+      pageSectionProps: {
+        alignment: 'center',
+        paddingSize: 'none',
+      },
+      pageHeader: hasGettingStartedAddDataReturn(location.search)
+        ? { pageTitle: <GettingStartedBackLink />, bottomBorder: false }
+        : undefined,
     },
     {
       title: i18n.translate('xpack.synthetics.createMonitorRoute.title', {
