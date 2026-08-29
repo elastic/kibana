@@ -299,7 +299,8 @@ export const queryMatrixTraces = async (
   evalsClient: EvalsClient,
   log: SomeDevLog,
   aggregated: AggregatedModelScores[],
-  traceCache?: Record<string, EvaluationScoreDocument[]>
+  traceCache?: Record<string, EvaluationScoreDocument[]>,
+  toolCallWarnAbove: number = 0
 ): Promise<MatrixTraceData> => {
   const traces: MatrixTraceData = {};
 
@@ -418,9 +419,15 @@ export const queryMatrixTraces = async (
       }
     }
     const scores = await fetchScores(ref, exampleId);
-    if (serverSupportsFilter === undefined) {
-      serverSupportsFilter =
-        scores.length === 0 || scores.every((s) => s.metadata?.execution_id === ref.executionId);
+    if (serverSupportsFilter === undefined && scores.length > 0) {
+      // Only a NON-EMPTY response proves anything about filter support. An
+      // empty one is ambiguous — it happens when the route rejects the filter
+      // params, when the execution has no docs, or when the payload blew the
+      // transport cap. Latching `true` on it (the previous behaviour) declared
+      // the server healthy off the very response that signals it isn't, so the
+      // fallback never armed and EVERY later cell returned empty: 442/442
+      // traces rendered hollow while scores stayed intact.
+      serverSupportsFilter = scores.every((s) => s.metadata?.execution_id === ref.executionId);
       if (!serverSupportsFilter) {
         log.warning(
           'Example-scores route ignores execution filters (older evals plugin) — falling back to shared per-example fetches; traces will be complete but slower'
@@ -464,6 +471,20 @@ export const queryMatrixTraces = async (
   if (pairs.length > 0) {
     await fetchPair(pairs[0]);
     await mapWithConcurrency(pairs.slice(1), 8, fetchPair);
+  }
+
+  // Completeness gate. Per-cell failures are deliberately swallowed above so one
+  // bad example cannot abort a report — but that also means a TOTAL fetch
+  // failure is silent, and the matrix renders every trace card empty while the
+  // score columns look perfect. Measured 2026-08-29: 442/442 cells hollow with
+  // no error surfaced. Fetching nothing at all is never a valid outcome.
+  const fetchedCells = [...exampleScores.values()].filter((docs) => docs.length > 0).length;
+  if (pairs.length > 0 && fetchedCells === 0) {
+    log.warning(
+      `Trace fetch returned no documents for any of ${pairs.length} (execution, example) pairs — ` +
+        `every trace card will render empty. The scores above are unaffected. ` +
+        `Re-run with --trace-cache <path> to read score documents straight from ES.`
+    );
   }
 
   // Category prefixes come from the same synthetic `prefix:*` dataset ids the
@@ -521,6 +542,29 @@ export const queryMatrixTraces = async (
     log.warning(
       `Trace coverage incomplete — scores exist but no trace was resolved for: ${details}`
     );
+  }
+
+  // Runaway tool-loop report. `Tool Calls` is deliberately excluded from
+  // quality scoring and thrashing cells do NOT score worse (measured 0.70 vs
+  // 0.62 trajectory), so this is a COST signal, never a penalty: without it a
+  // 115-call/3.78M-token cell is indistinguishable from an 8-call one in every
+  // rendered artifact.
+  if (toolCallWarnAbove > 0) {
+    const runaway = Object.entries(traces)
+      .map(([key, trace]) => ({ key, calls: trace.scores?.['Tool Calls'] }))
+      .filter((c): c is { key: string; calls: number } => typeof c.calls === 'number')
+      .filter((c) => c.calls > toolCallWarnAbove)
+      .sort((a, b) => b.calls - a.calls);
+
+    if (runaway.length > 0) {
+      log.warning(
+        `Possible runaway tool loops (> ${toolCallWarnAbove} calls) in ${runaway.length} cell(s): ` +
+          runaway
+            .slice(0, 10)
+            .map((c) => `${c.key}=${c.calls}`)
+            .join(', ')
+      );
+    }
   }
 
   log.debug(`Matrix traces resolved ${Object.keys(traces).length} trace entries`);

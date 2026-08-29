@@ -187,6 +187,20 @@ export const matrixConfigSchema = schema.object({
   decimals: schema.number({ defaultValue: 2, min: 0, max: 6 }),
   /** Cells at/under this value (after scaling) render as `notRecommendedLabel`. */
   notRecommendedBelow: schema.number({ defaultValue: 0, min: 0 }),
+  /**
+   * Tool-call count above which a cell is reported as a possible runaway loop.
+   * Observability only: thrashing cells do not score worse, so this must not
+   * become a score penalty. It exists because the cost is otherwise invisible
+   * (one cell burned 115 calls / 3.78M input tokens). 0 disables the check.
+   */
+  toolCallWarnAbove: schema.number({ defaultValue: 0, min: 0 }),
+  /**
+   * Minimum scored columns a model needs before `Overall` is published as a
+   * number. A model scored on 2 of 24 prompts can average 10.0 and outrank every
+   * frontier model, so below this floor `Overall` becomes `insufficient-coverage`,
+   * which ranks last. Default 0 preserves existing behaviour.
+   */
+  minCoverage: schema.number({ defaultValue: 0, min: 0 }),
   /** Text rendered when a model fails / lacks data for a column. */
   notRecommendedLabel: schema.string({
     defaultValue: 'Not recommended',

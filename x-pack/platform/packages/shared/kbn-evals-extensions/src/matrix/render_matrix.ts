@@ -53,6 +53,10 @@ const cellToString = (cell: MatrixCell, notRecommendedLabel: string): string => 
     // rejected. Publishing this as a blank invites a re-sweep that cannot fill it.
     case 'excluded':
       return `excluded:${cell.reason}`;
+    // Never a bare number: an average over too few columns is not comparable
+    // to a full row, and publishing one as a score invites a false ranking.
+    case 'insufficient-coverage':
+      return `insufficient-coverage:${cell.covered}/${cell.required}`;
     case 'missing':
     default:
       return '';

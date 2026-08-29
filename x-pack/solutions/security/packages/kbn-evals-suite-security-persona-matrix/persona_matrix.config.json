@@ -10,6 +10,8 @@
   "defaultScale": 10,
   "decimals": 2,
   "notRecommendedBelow": 0,
+  "minCoverage": 12,
+  "toolCallWarnAbove": 40,
   "notRecommendedLabel": "Not recommended",
   "showOverall": true,
   "columns": [

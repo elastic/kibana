@@ -297,6 +297,10 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
     // of them. Re-running fills nothing until the judge assignment is fixed.
     case 'excluded':
       return `<span class="status warn" title="${cell.docs} score(s) rejected: ${cell.reason}">⚠ excluded</span>`;
+    // Renders the ratio, not a score: the reader must see WHY there is no
+    // number, or a thin run silently reads as a missing one.
+    case 'insufficient-coverage':
+      return `<span class="status warn" title="scored on ${cell.covered} of ${cell.required} required columns — too thin to aggregate">${cell.covered}/${cell.required} cols</span>`;
     case 'missing':
     default:
       return '<span class="sub-num">—</span>';

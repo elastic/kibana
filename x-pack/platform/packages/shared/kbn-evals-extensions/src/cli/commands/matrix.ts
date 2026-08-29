@@ -261,7 +261,13 @@ export const matrixCmd: Command<void> = {
         const cellCount = traceCache ? Object.keys(traceCache).length : 0;
         log.info(`Loaded trace cache: ${cellCount} cells from ${traceCachePath}`);
       }
-      traces = await queryMatrixTraces(evalsClient, log, aggregated, traceCache);
+      traces = await queryMatrixTraces(
+        evalsClient,
+        log,
+        aggregated,
+        traceCache,
+        config.toolCallWarnAbove
+      );
     }
 
     const rendered = renderMatrix(

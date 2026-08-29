@@ -145,6 +145,106 @@ describe('queryMatrixTraces example fetching', () => {
     warning: jest.fn(),
   };
 
+  it('arms the legacy fallback when a later response reveals unfiltered scores', async () => {
+    // Discriminates the latch specifically: the FIRST response is empty (proves
+    // nothing), the SECOND returns mixed executions (proves the server ignores
+    // filters). With the old `scores.length === 0 ||` latch the first response
+    // pinned serverSupportsFilter=true and this warning never fired.
+    let call = 0;
+    const getExampleScores = jest.fn(async () => {
+      call += 1;
+      return call === 1 ? [] : [completeDoc('exec-a'), completeDoc('exec-b')];
+    });
+    const client = {
+      getExperimentScores: jest.fn(
+        async () =>
+          [
+            { example: { id: 'example-1' } },
+            { example: { id: 'example-2' } },
+          ] as EvaluationScoreDocument[]
+      ),
+      getExampleScores,
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    await queryMatrixTraces(client as never, log as never, aggregatedFor('exec-a') as never);
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Example-scores route ignores execution filters')
+    );
+  });
+
+  it('reports runaway tool loops above the configured threshold', async () => {
+    const heavy = (calls: number): EvaluationScoreDocument =>
+      ({
+        example: { id: 'example-1' },
+        evaluator: { name: 'Tool Calls', score: calls },
+        metadata: { execution_id: 'exec-a' },
+        task: {
+          model: { id: 'model-x' },
+          output: { messages: [{ message: 'done' }] },
+          repetition_index: 0,
+        },
+      } as unknown as EvaluationScoreDocument);
+
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async () => [heavy(115)]),
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    await queryMatrixTraces(
+      client as never,
+      log as never,
+      aggregatedFor('exec-a') as never,
+      undefined,
+      40
+    );
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Possible runaway tool loops')
+    );
+  });
+
+  it('does not report tool loops when the threshold is disabled', async () => {
+    const client = makeClient({ filtered: true });
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    await queryMatrixTraces(client as never, log as never, aggregatedFor('exec-a') as never);
+
+    expect(log.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('Possible runaway tool loops')
+    );
+  });
+
+  it('does not treat an empty response as proof the server honours filters', async () => {
+    // The regression: an empty first response latched serverSupportsFilter=true,
+    // so the legacy fallback never armed and every later cell came back empty —
+    // 442/442 hollow traces while scores rendered perfectly.
+    const empty = jest.fn(async () => [] as EvaluationScoreDocument[]);
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: empty,
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    await queryMatrixTraces(client as never, log as never, aggregatedFor('exec-a') as never);
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Trace fetch returned no documents')
+    );
+  });
+
+  it('stays quiet about total trace loss when documents do come back', async () => {
+    const client = makeClient({ filtered: true });
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    await queryMatrixTraces(client as never, log as never, aggregatedFor('exec-a') as never);
+
+    expect(log.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('Trace fetch returned no documents')
+    );
+  });
+
   it('passes the execution filter to the example-scores route', async () => {
     const client = makeClient({ filtered: true });
     const traces = await queryMatrixTraces(

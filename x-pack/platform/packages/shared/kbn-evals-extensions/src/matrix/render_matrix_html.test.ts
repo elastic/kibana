@@ -17,6 +17,8 @@ const mockConfig: MatrixConfig = {
   defaultScale: 10,
   decimals: 2,
   notRecommendedBelow: 0,
+  toolCallWarnAbove: 0,
+  minCoverage: 0,
   notRecommendedLabel: 'Not recommended',
   notRecommendedCountsAsZeroInOverall: true,
   excludeEvaluators: [],

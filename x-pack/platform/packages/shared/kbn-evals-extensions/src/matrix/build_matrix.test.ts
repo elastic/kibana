@@ -54,6 +54,68 @@ const aggregated: AggregatedModelScores[] = [
   },
 ];
 
+describe('buildMatrix coverage floor', () => {
+  // Reproduces the 2026-08-29 matrix: GLM-5.2 answered 2 of 24 prompts, scored
+  // 10.0 on both, and outranked every frontier model. A thin run must never
+  // publish an Overall number.
+  const floorConfig: MatrixConfig = parseMatrixConfig({
+    minCoverage: 2,
+    columns: [
+      { id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 },
+      { id: 'detect', label: 'Detect', suites: ['suite-b'], weight: 1 },
+      { id: 'hunt', label: 'Hunt', suites: ['suite-c'], weight: 1 },
+    ],
+    models: [
+      { id: 'model-thin', label: 'Thin Model' },
+      { id: 'model-broad', label: 'Broad Model' },
+    ],
+  });
+
+  const suite = (suiteId: string, id: string, mean: number) => ({
+    suiteId,
+    experimentId: `run-${id}`,
+    datasets: [{ datasetId: id, datasetName: id, evaluators: [evaluator(mean)] }],
+  });
+
+  it('withholds Overall and ranks last when scored on too few columns', () => {
+    const scores: AggregatedModelScores[] = [
+      // One perfect cell — a 1.0 mean that would average to a rank-topping 10.
+      { modelId: 'model-thin', provider: 'zai', suites: [suite('suite-a', 'd1', 1.0)] },
+      // Two solid-but-lower cells from a model that actually ran the suite.
+      {
+        modelId: 'model-broad',
+        provider: 'anthropic',
+        suites: [suite('suite-a', 'd1', 0.8), suite('suite-b', 'd2', 0.8)],
+      },
+    ];
+
+    const matrix = buildMatrix(scores, floorConfig);
+    const thin = matrix.proprietary.find((r) => r.modelId === 'model-thin')!;
+    const broad = matrix.proprietary.find((r) => r.modelId === 'model-broad')!;
+
+    // The thin row must not publish a number...
+    expect(thin.overall.kind).toBe('insufficient-coverage');
+    expect(thin.coverage.covered).toBe(1);
+    // ...and must rank BELOW the model with real coverage, despite scoring 10.
+    expect(broad.overall.kind).toBe('score');
+    expect(matrix.proprietary.indexOf(broad)).toBeLessThan(matrix.proprietary.indexOf(thin));
+  });
+
+  it('publishes Overall once the floor is met', () => {
+    const scores: AggregatedModelScores[] = [
+      {
+        modelId: 'model-thin',
+        provider: 'zai',
+        suites: [suite('suite-a', 'd1', 1.0), suite('suite-b', 'd2', 1.0)],
+      },
+    ];
+    const matrix = buildMatrix(scores, floorConfig);
+    const row = matrix.proprietary.find((r) => r.modelId === 'model-thin')!;
+    expect(row.overall.kind).toBe('score');
+    expect(row.coverage.covered).toBe(2);
+  });
+});
+
 describe('buildMatrix', () => {
   it('scales evaluator means onto a 0-10 scale and splits proprietary/open-source', () => {
     const matrix = buildMatrix(aggregated, config);

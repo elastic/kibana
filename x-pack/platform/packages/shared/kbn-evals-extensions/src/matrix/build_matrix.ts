@@ -25,6 +25,12 @@ export type MatrixCell =
    * fixed. Conflating the two cost a full re-sweep on 2026-08-29.
    */
   | { kind: 'excluded'; reason: 'self-judged' | 'non-eis-judge' | 'same-family'; docs: number }
+  /**
+   * The model was scored on too few columns for an aggregate to mean anything
+   * (`config.minCoverage`). Only ever produced for `Overall` — a 2-of-24 run
+   * averaging 10.0 must not outrank a 22-of-24 run averaging 8.5.
+   */
+  | { kind: 'insufficient-coverage'; covered: number; required: number }
   | { kind: 'missing' };
 
 /** Synthetic id for the legacy single "Overall" column. */
@@ -203,8 +209,8 @@ const aggregateCells = (
 
     hasAnyData = true;
 
-    if (cell.kind === 'not-recommended') {
-      if (config.notRecommendedCountsAsZeroInOverall) {
+    if (cell.kind === 'not-recommended' || cell.kind === 'insufficient-coverage') {
+      if (config.notRecommendedCountsAsZeroInOverall && cell.kind === 'not-recommended') {
         totalWeight += weight;
       }
       continue;
@@ -395,14 +401,26 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
       cells[composite.id] = computeComposite(cells, composite, config);
     }
 
+    // A scored column is one with a real, trustworthy value. 'excluded' cells
+    // ran but had every grade rejected, so they are NOT coverage — counting
+    // them would let a fully self-judged model claim a full row.
+    const scoredColumns = config.columns.filter((c) => cells[c.id].kind === 'score').length;
+    const overall = computeOverall(cells, config);
+
     const row: MatrixRow = {
       modelId: modelConfig.id,
       modelLabel: modelConfig.label,
       openSource: modelConfig.openSource,
       cells,
-      overall: computeOverall(cells, config),
+      // Publishing an average over too few columns invites the wrong read: a
+      // model scored on 2 of 24 prompts averaged 10.0 and ranked above every
+      // frontier model until this floor existed.
+      overall:
+        config.minCoverage > 0 && scoredColumns < config.minCoverage
+          ? { kind: 'insufficient-coverage', covered: scoredColumns, required: config.minCoverage }
+          : overall,
       coverage: {
-        covered: config.columns.filter((c) => cells[c.id].kind !== 'missing').length,
+        covered: scoredColumns,
         total: config.columns.length,
       },
     };
