@@ -560,6 +560,79 @@ describe('useAllCasesQueryParams', () => {
     });
   });
 
+  describe('setFilterOptions resets page to 1', () => {
+    it('resets the page to 1 when filter options change', () => {
+      // Seed the page via setQueryParams so the in-memory + localStorage state has
+      // page: 3.  We do NOT seed via mockLocation.search here because the mock
+      // history.push does not actually mutate mockLocation, so the URL would be
+      // re-read as page: 3 even after the filter change.
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setQueryParams({ page: 3 });
+      });
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      expect(result.current.queryParams.page).toBe(1);
+      expect(result.current.filterOptions.status).toStrictEqual([CaseStatuses.closed]);
+    });
+
+    it('writes page:1 to the URL when changing filter options from a non-first page', () => {
+      mockLocation.search = stringifyUrlParams({ page: 3 });
+
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      const lastCall = mockPush.mock.calls[mockPush.mock.calls.length - 1][0];
+      expect(lastCall.search).toContain('page:1');
+    });
+
+    it('writes page:1 to localStorage when changing filter options from a non-first page', () => {
+      mockLocation.search = stringifyUrlParams({ page: 3 });
+
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      const localStorageState = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}');
+      expect(localStorageState.queryParams.page).toBe(1);
+    });
+
+    it('does not affect setQueryParams — paging still works', () => {
+      const { result } = renderHook(() => useAllCasesState(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setQueryParams({ page: 3 });
+      });
+
+      expect(result.current.queryParams.page).toBe(3);
+    });
+  });
+
   it('updates the local storage when navigating to a URL and the query params are not empty', () => {
     mockLocation.search = stringifyUrlParams({
       severity: [CaseSeverity.HIGH],
@@ -817,6 +890,27 @@ describe('useAllCasesQueryParams', () => {
         ...DEFAULT_CASES_TABLE_STATE.filterOptions,
         status: [CaseStatuses.closed],
       });
+    });
+
+    it('resets the page to 1 when filter options change in modal view', () => {
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.setQueryParams({ page: 3 });
+      });
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      expect(result.current.queryParams.page).toBe(1);
+      expect(result.current.filterOptions.status).toStrictEqual([CaseStatuses.closed]);
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
     });
 
     it('does not update the URL when changing the state of the table', () => {
