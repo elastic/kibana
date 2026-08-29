@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { findRuleTemplatesSo, searchRuleTemplatesSo } from '../../../../data/rule_template';
+import { searchRuleTemplatesSo } from '../../../../data/rule_template';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { FindRuleTemplatesParams } from './types';
 import { findRuleTemplatesParamsSchema } from './schema';
@@ -70,33 +70,21 @@ export async function findRuleTemplates(
     ? combineFilterWithAuthorizationFilter(combinedFilters, authorizationFilter as KueryNode)
     : combinedFilters;
 
-  const searchQuery = buildTemplateSearchQuery(search);
   const {
     page: resultPage,
     per_page: resultPerPage,
     total,
     saved_objects: data,
-  } = searchQuery
-    ? await searchRuleTemplatesSo({
-        savedObjectsClient: context.unsecuredSavedObjectsClient,
-        namespaces: [context.spaceId || 'default'],
-        page,
-        perPage,
-        sortField: mapSortField(sortField),
-        sortOrder,
-        filter: finalFilter,
-        searchQuery,
-      })
-    : await findRuleTemplatesSo({
-        savedObjectsClient: context.unsecuredSavedObjectsClient,
-        savedObjectsFindOptions: {
-          page,
-          perPage,
-          sortField: mapSortField(sortField),
-          sortOrder,
-          filter: finalFilter,
-        },
-      });
+  } = await searchRuleTemplatesSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    namespaces: [context.spaceId || 'default'],
+    page,
+    perPage,
+    sortField: mapSortField(sortField),
+    sortOrder,
+    filter: finalFilter,
+    searchQuery: buildTemplateSearchQuery(search),
+  });
 
   const authorizedData = data.map((so) => {
     try {

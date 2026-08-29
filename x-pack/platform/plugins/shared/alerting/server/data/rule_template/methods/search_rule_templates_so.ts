@@ -28,7 +28,7 @@ export interface SearchRuleTemplatesSoParams {
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   filter?: KueryNode;
-  searchQuery: QueryDslQueryContainer;
+  searchQuery?: QueryDslQueryContainer;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -83,8 +83,9 @@ const rawHitToSavedObject = (hit: {
 };
 
 /**
- * Searches Fleet / alerting v1 rule templates with a raw ES query.
- * Used when the user typed a search string so we can send a real wildcard.
+ * Lists Fleet / alerting v1 rule templates through Saved Objects `search()`.
+ * A typed string becomes a wildcard must clause. An empty box is the same
+ * query without that clause.
  */
 export const searchRuleTemplatesSo = async (
   params: SearchRuleTemplatesSoParams
@@ -127,7 +128,7 @@ export const searchRuleTemplatesSo = async (
     query: {
       bool: {
         filter: filterClauses,
-        must: [searchQuery],
+        ...(searchQuery ? { must: [searchQuery] } : {}),
       },
     },
   });
