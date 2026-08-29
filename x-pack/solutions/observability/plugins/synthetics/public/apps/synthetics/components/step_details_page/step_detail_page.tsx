@@ -26,7 +26,11 @@ import { BreakdownLegend } from './step_timing_breakdown/breakdown_legend';
 import { NetworkTimingsBreakdown } from './network_timings_breakdown';
 
 export const StepDetailPage = () => {
-  const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
+  const { checkGroupId, stepIndex, monitorId } = useParams<{
+    checkGroupId: string;
+    stepIndex: string;
+    monitorId: string;
+  }>();
 
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
@@ -57,10 +61,10 @@ export const StepDetailPage = () => {
   return (
     <>
       <ErrorCallOut step={currentStep} />
-      {data?.details?.journey?.config_id && (
+      {monitorId && (
         <MonitorDetailsLinkPortal
-          configId={data.details.journey.config_id}
-          name={data.details.journey.monitor.name!}
+          configId={monitorId}
+          name={data?.details?.journey?.monitor.name ?? ''}
           remoteName={remoteName}
         />
       )}

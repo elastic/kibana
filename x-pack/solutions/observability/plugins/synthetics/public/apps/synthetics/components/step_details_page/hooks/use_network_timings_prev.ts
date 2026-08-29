@@ -20,6 +20,9 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import moment from 'moment';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
+import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
+import { isHeartbeatSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { getMonitorIdentityFilter } from '../../../../../../common/lib';
 import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useGetUrlParams } from '../../../hooks';
@@ -47,11 +50,13 @@ export const useNetworkTimingsPrevious24Hours = (
 ) => {
   const params = useParams<{ checkGroupId: string; stepIndex: string; monitorId: string }>();
 
-  const configId = params.monitorId;
+  const monitorId = params.monitorId;
   const checkGroupId = checkGroupIdArg ?? params.checkGroupId;
   const stepIndex = stepIndexArg ?? Number(params.stepIndex);
 
   const { currentStep } = useJourneySteps();
+  const { monitor } = useSelectedMonitor();
+  const origin = isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined;
 
   const timestamp = timestampArg ?? currentStep?.['@timestamp'];
 
@@ -94,11 +99,7 @@ export const useNetworkTimingsPrevious24Hours = (
                 'synthetics.step.index': stepIndex,
               },
             },
-            {
-              term: {
-                config_id: configId,
-              },
-            },
+            getMonitorIdentityFilter({ monitorId, origin, remoteName }),
           ],
           must_not: [
             {
@@ -160,9 +161,9 @@ export const useNetworkTimingsPrevious24Hours = (
         },
       },
     },
-    [remoteName],
+    [remoteName, origin],
     {
-      name: `stepNetworkPreviousTimings/${configId}/${checkGroupId}/${stepIndex}`,
+      name: `stepNetworkPreviousTimings/${monitorId}/${checkGroupId}/${stepIndex}`,
       isRequestReady: Boolean(timestamp),
     }
   );

@@ -8,14 +8,16 @@
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import type { Ping } from '../../../../../../common/runtime_types';
+import { isHeartbeatSyntheticsMonitor, type Ping } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
+import { getMonitorIdentityFilter } from '../../../../../../common/lib';
 import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
+import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 
 export function useFindMyKillerState() {
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -23,6 +25,8 @@ export function useFindMyKillerState() {
   const { errorStateId, monitorId } = useParams<{ errorStateId: string; monitorId: string }>();
 
   const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
+  const { monitor } = useSelectedMonitor();
+  const origin = isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined;
 
   const { data, loading } = useReduxEsSearch(
     {
@@ -45,17 +49,17 @@ export function useFindMyKillerState() {
                 'state.ends.id': errorStateId,
               },
             },
-            {
-              term: {
-                config_id: monitorId,
-              },
-            },
+            getMonitorIdentityFilter({
+              monitorId,
+              origin,
+              remoteName,
+            }),
           ],
         },
       },
       sort: [{ '@timestamp': 'desc' }],
     },
-    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd, remoteName],
+    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd, remoteName, origin],
     { name: 'getStateWhichEndTheState' }
   );
 

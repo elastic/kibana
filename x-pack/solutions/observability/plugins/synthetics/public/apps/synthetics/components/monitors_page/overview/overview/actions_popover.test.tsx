@@ -491,14 +491,14 @@ describe('ActionsPopover', () => {
       expect(getByTestId('syntheticsActionsPopoverAddToDashboard')).toBeDisabled();
     });
 
-    // The read-only detail page isn't available yet (coming in a follow-up),
-    // so "Go to monitor" is omitted for heartbeat monitors.
-    it('omits Go to monitor', () => {
+    // Heartbeat monitors are read-only, but the details page now synthesizes
+    // from pings, so "Go to monitor" is offered (same as remote CCS).
+    it('keeps Go to monitor', () => {
       jest
         .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
         .mockReturnValue('/a/test/detail/url');
 
-      const { queryByTestId } = render(
+      const { getByTestId } = render(
         <ActionsPopover
           isPopoverOpen={true}
           position="relative"
@@ -508,7 +508,10 @@ describe('ActionsPopover', () => {
         />
       );
 
-      expect(queryByTestId('actionsPopoverGoToMonitor')).not.toBeInTheDocument();
+      expect(getByTestId('actionsPopoverGoToMonitor')).toHaveAttribute(
+        'href',
+        '/a/test/detail/url'
+      );
     });
   });
 });

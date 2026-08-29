@@ -679,7 +679,20 @@ export function MonitorDetailFlyout(props: Props) {
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              ) : isHeartbeat ? null : ( // Heartbeat / Elastic Agent monitors are read-only here and the read-only detail page isn't available yet (coming in a follow-up), so no footer action is offered for now.
+              ) : isHeartbeat ? (
+                // Heartbeat / Elastic Agent monitors are read-only (no saved
+                // object to edit). The details page synthesizes from pings.
+                <EuiButton
+                  data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                  isDisabled={!detailLink}
+                  href={detailLink}
+                  iconType="sortRight"
+                  iconSide="right"
+                  fill
+                >
+                  {GO_TO_MONITOR_LINK_TEXT}
+                </EuiButton>
+              ) : (
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiButton

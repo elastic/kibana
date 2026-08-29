@@ -8,6 +8,9 @@
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
+import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
+import { isHeartbeatSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { getMonitorIdentityFilter } from '../../../../../../common/lib';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useGetUrlParams } from '../../../hooks';
 import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
@@ -36,6 +39,8 @@ export const usePreviousObjectMetrics = () => {
 
   const { remoteName } = useGetUrlParams();
   const index = getSyntheticsCcsIndex(remoteName);
+  const { monitor } = useSelectedMonitor();
+  const origin = isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined;
 
   const { data: prevObjectMetrics } = useReduxEsSearch(
     {
@@ -65,11 +70,7 @@ export const usePreviousObjectMetrics = () => {
                 },
               },
             },
-            {
-              term: {
-                config_id: monitorId,
-              },
-            },
+            getMonitorIdentityFilter({ monitorId, origin, remoteName }),
             {
               term: {
                 'synthetics.type': 'journey/network_info',
@@ -121,7 +122,7 @@ export const usePreviousObjectMetrics = () => {
         },
       },
     },
-    [stepIndex, monitorId, checkGroupId, remoteName],
+    [stepIndex, monitorId, checkGroupId, remoteName, origin],
     {
       name: `previousObjectMetrics/${monitorId}/${checkGroupId}/${stepIndex}/`,
       isRequestReady: !!timestamp,

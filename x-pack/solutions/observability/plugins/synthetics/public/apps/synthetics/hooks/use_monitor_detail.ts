@@ -8,7 +8,7 @@
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { useSyntheticsEsSearch } from './use_synthetics_es_search';
 import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices';
-import { getHeartbeatLocationFilter } from '../../../../common/lib';
+import { getHeartbeatLocationFilter, getMonitorIdentityFilter } from '../../../../common/lib';
 import { STATUS_LOOKBACK_RANGE_FILTER } from '../../../../common/constants/client_defaults';
 import type { MonitorOrigin, Ping } from '../../../../common/runtime_types';
 
@@ -20,13 +20,11 @@ export const useMonitorDetail = (
 ): { data?: Ping; loading?: boolean } => {
   const index = getSyntheticsCcsIndex(remoteName);
 
-  // Heartbeat / Agent autodiscovery pings carry no `config_id`; their identity
-  // is `monitor.id` (see `useExternalMonitor`). Matching `config_id` would
-  // return zero hits and the flyout would render "waiting for first run".
-  const isHeartbeat = origin === 'heartbeat' && !remoteName;
-  const identityFilter = isHeartbeat
-    ? { term: { 'monitor.id': configId } }
-    : { term: { config_id: configId } };
+  const identityFilter = getMonitorIdentityFilter({
+    monitorId: configId,
+    origin,
+    remoteName,
+  });
 
   const params = {
     index,

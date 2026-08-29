@@ -365,7 +365,7 @@ export const MobileRowDetails = ({
         </EuiFlexItem>
         <EuiFlexItem css={{ textAlign: 'right' }}>
           {ping?.state?.id! &&
-          ping.config_id &&
+          (ping.config_id ?? ping.monitor?.id) &&
           locationId &&
           parseBadgeStatus(ping?.monitor?.status ?? 'skipped') === 'failed' ? (
             <EuiButtonEmpty
@@ -373,7 +373,7 @@ export const MobileRowDetails = ({
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                configId: ping.config_id,
+                configId: ping.config_id ?? ping.monitor?.id ?? '',
                 locationId,
                 stateId: ping?.state?.id!,
                 spaceId,
