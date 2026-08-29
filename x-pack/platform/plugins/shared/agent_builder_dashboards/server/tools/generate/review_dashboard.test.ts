@@ -20,11 +20,18 @@ const summary: DashboardSummary = {
       chart_type: 'metric',
     },
   ],
-  controls: [],
+  controls: [
+    {
+      id: 'c1',
+      type: 'options_list_control',
+      title: 'Response Status',
+      esql_query: 'FROM kibana_sample_data_logs | STATS BY `response`',
+    },
+  ],
 };
 
 describe('reviewDashboard', () => {
-  it('returns structured problems from the judge and does not invent fixes', async () => {
+  it('returns structured problems from the judge and does not invent field-name fixes', async () => {
     const invoke = jest.fn().mockResolvedValue({
       problems: [
         {
@@ -59,12 +66,15 @@ describe('reviewDashboard', () => {
         },
       ],
     });
-    expect(invoke).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.arrayContaining(['system', expect.stringContaining('List only problems')]),
-        expect.arrayContaining(['human', expect.stringContaining('full-width metric')]),
-      ])
-    );
+    const [systemMessage, humanMessage] = invoke.mock.calls[0][0] as Array<[string, string]>;
+    expect(systemMessage[1]).toContain('List only problems');
+    expect(systemMessage[1]).toContain('Do not validate field names');
+    expect(humanMessage[1]).toContain('full-width metric');
+    expect(humanMessage[1]).toContain('Do not flag control field names');
+    expect(humanMessage[1]).toContain('Response Status');
+    expect(humanMessage[1]).not.toContain('esql_query');
+    expect(humanMessage[1]).not.toContain('kibana_sample_data_logs');
+    expect(humanMessage[1]).not.toContain('`response`');
     expect(modelProvider.selectModel).toHaveBeenCalledWith({ effortLevel: 'low' });
     expect(modelProvider.getDefaultModel).not.toHaveBeenCalled();
   });

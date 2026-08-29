@@ -22,6 +22,7 @@ describe('getDashboardAuthoringPromptContent', () => {
     expect(prompt).toContain('Pie → w: 12 or 24, h: 10');
     expect(prompt).toContain('### controls');
     expect(prompt).toContain('3–5 `options_list_control` dropdowns');
+    expect(prompt).toContain('Copy `field_name` exactly from a panel BY / WHERE clause');
     expect(prompt).toContain('### sections');
     expect(prompt).toContain('roughly 6 or more visualization panels');
   });
@@ -45,6 +46,7 @@ describe('getDashboardReviewPromptContent', () => {
     expect(prompt).toContain('A pie panel wider than w: 24 is a miss.');
     expect(prompt).toContain('### controls');
     expect(prompt).toContain('high-cardinality identifier');
+    expect(prompt).toContain('Do not flag control field names');
     expect(prompt).toContain('Considerations:');
     expect(prompt).toContain('markdown panel when it adds value');
   });

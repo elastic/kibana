@@ -44,7 +44,7 @@ export const dashboardRuleRegistry: DashboardRuleRegistry = {
         'How to compose a dashboard story: metrics first, then trends, then breakdowns, with as many useful panels as the data supports.',
       review: {
         considerations: [
-          'Consider a markdown panel when it adds value — context about what the dashboard monitors, data sources, or important notes. Not every dashboard needs one.',
+          'Consider a markdown panel when it adds value — context about what the dashboard monitors, data sources, or important notes. Not every dashboard needs one. Markdown should be placed at the top of the dashboard.',
           'When the request is vague, consider covering the breadth of the available fields (overview metrics, trends, breakdowns, distributions) instead of a minimal set.',
         ],
       },
@@ -98,6 +98,7 @@ export const dashboardRuleRegistry: DashboardRuleRegistry = {
           'A new multi-entity dashboard with no categorical controls is a miss — add 3–5 options_list_control dropdowns for useful low-cardinality fields.',
           'A control on a high-cardinality identifier (trace id, request id, UUID) is a miss.',
           'More than one time_slider_control is a miss.',
+          'Do not flag control field names, ECS paths, or whether a field exists — the judge has no index mapping.',
         ],
         considerations: [
           'Add a range_slider_control only when a numeric threshold is useful across multiple panels.',
@@ -105,7 +106,7 @@ export const dashboardRuleRegistry: DashboardRuleRegistry = {
       },
       config: {
         rules: [
-          'When building a new dashboard from scratch, proactively add 3–5 `options_list_control` dropdowns for the most useful categorical fields. Pick fields that appear in panel BY / WHERE clauses; prefer low-cardinality keyword fields (e.g. service.name, host.name, env, region, kubernetes.namespace, http.response.status_code). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs).',
+          'When building a new dashboard from scratch, proactively add 3–5 `options_list_control` dropdowns for the most useful categorical fields. Copy `field_name` exactly from a panel BY / WHERE clause you already wrote or you know from index mapping — do not invent, rename, or "correct" ECS paths. Prefer low-cardinality keyword fields. Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs).',
           'Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.).',
           'options_list_control — dropdown for categorical / keyword fields. The most common type (95% of cases).',
           'range_slider_control — numeric range slider. Add sparingly, only when filtering by a numeric threshold is useful across multiple panels (e.g. latency, bytes, duration).',
