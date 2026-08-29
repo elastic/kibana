@@ -30,6 +30,7 @@ import argparse
 import json
 import sys
 import os
+import re
 import shlex
 import subprocess
 import time
@@ -336,6 +337,54 @@ def launch(ip: str, model: str) -> subprocess.Popen:
         stdout=open(log, "w"), stderr=subprocess.STDOUT)
 
 
+def _score_id(canon: str) -> str:
+    """Connector ids spell versions with hyphens (claude-4-5); score docs
+    spell them with dots (claude-4.5). Bridge the two."""
+    return re.sub(r"(?<=[0-9])-(?=[0-9])", ".", canon)
+
+
+def _resolve_from_golden(model: str, ip: str) -> dict:
+    """Recover stored_id and evaluator count from golden.
+
+    The VM-local index is empty when a run exports straight to golden, which
+    is not proof the eval produced nothing. Connector ids hyphenate semantic
+    versions while score docs dot them, so match a phrase instead of
+    reconstructing the id.
+    """
+    canon = model[4:] if model.startswith("eis-") else model
+    # score docs write 4.5 where connector ids write 4-5
+    body = {
+        "size": 0,
+        "query": {"bool": {"must": [
+            {"match_phrase": {"task.model.id": _score_id(canon)}},
+            {"term": {"metadata.suite_id": "security-persona-matrix"}},
+        ]}},
+        "aggs": {
+            "m": {"terms": {"field": "task.model.id", "size": 1}},
+            "n": {"cardinality": {"field": "evaluator.name"}},
+        },
+    }
+    fb_q = json.dumps(body)
+    out = ssh(
+        ip,
+        f"source /tmp/golden-cluster-env.sh; printf '%s' '{fb_q}' > /tmp/q_fb.json; "
+        f'curl -sS -H "Authorization: ApiKey $GOLDEN_ES_API_KEY" '
+        f'"$GOLDEN_ES_URL/.evaluation-scores/_search" '
+        f"-H 'Content-Type: application/json' --data @/tmp/q_fb.json",
+    )
+    try:
+        res = json.loads(out.splitlines()[-1])
+        buckets = res["aggregations"]["m"]["buckets"]
+        if not buckets:
+            return {"error": "no docs on golden for this model either"}
+        return {
+            "stored_id": buckets[0]["key"],
+            "n_evaluators": int(res["aggregations"]["n"]["value"]),
+        }
+    except Exception as exc:
+        return {"error": f"golden fallback failed: {exc}"}
+
+
 def check_golden(model: str, ip: str) -> dict:
     """Completeness gate: docs on golden for this model's LATEST execution.
 
@@ -362,19 +411,30 @@ def check_golden(model: str, ip: str) -> dict:
     except Exception as exc:
         return {"count": -1, "error": f"cannot read local scores index: {exc}"}
     if not hits:
-        return {"count": 0, "error": "local scores index is empty: the eval produced no docs"}
-    stored_id = hits[0]["_source"]["task"]["model"]["id"]
+        # A run that exports straight to golden leaves the VM-local index
+        # empty. That is not proof the eval produced nothing, so resolve
+        # the same two facts from golden and let the doc-count gate below
+        # deliver the verdict.
+        fallback = _resolve_from_golden(model, ip)
+        if fallback.get("error"):
+            return {"count": 0, "error": fallback["error"]}
+        stored_id = fallback["stored_id"]
+        n_evaluators = fallback["n_evaluators"]
+    else:
+        stored_id = hits[0]["_source"]["task"]["model"]["id"]
+        n_evaluators = None
 
-    eval_count_cmd = (
-        "curl -sf -u elastic:changeme 'http://localhost:9220/.evaluation-scores/"
-        "_search?size=0' -H 'Content-Type: application/json' --data "
-        "'{\"aggs\":{\"n\":{\"cardinality\":{\"field\":\"evaluator.name\"}}}}'"
-    )
-    try:
-        local2 = json.loads(ssh(ip, eval_count_cmd).splitlines()[-1])
-        n_evaluators = int(local2["aggregations"]["n"]["value"])
-    except Exception as exc:
-        return {"count": -1, "error": f"cannot count local evaluators: {exc}"}
+    if n_evaluators is None:
+        eval_count_cmd = (
+            "curl -sf -u elastic:changeme 'http://localhost:9220/.evaluation-scores/"
+            "_search?size=0' -H 'Content-Type: application/json' --data "
+            "'{\"aggs\":{\"n\":{\"cardinality\":{\"field\":\"evaluator.name\"}}}}'"
+        )
+        try:
+            local2 = json.loads(ssh(ip, eval_count_cmd).splitlines()[-1])
+            n_evaluators = int(local2["aggregations"]["n"]["value"])
+        except Exception as exc:
+            return {"count": -1, "error": f"cannot count local evaluators: {exc}"}
 
     latest_cmd_q = json.dumps({
         "size": 1,
