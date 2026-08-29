@@ -26,6 +26,8 @@ export function ApmTimeRangeMetadataContextProvider({ children }: { children?: R
   const { query } = useApmParams('/*');
 
   const kuery = 'kuery' in query && query.kuery ? query.kuery : '';
+  const serviceGroupId =
+    'serviceGroup' in query && query.serviceGroup ? query.serviceGroup : undefined;
 
   const range =
     'rangeFrom' in query && 'rangeTo' in query
@@ -44,13 +46,31 @@ export function ApmTimeRangeMetadataContextProvider({ children }: { children?: R
     routePath.startsWith('/dependencies/operation') ||
     routePath.startsWith('/dependencies/operations');
 
+  const { data: serviceGroupData } = useFetcher(
+    (callApmApi) => {
+      if (serviceGroupId) {
+        return callApmApi('GET /internal/apm/service-group', {
+          params: { query: { serviceGroup: serviceGroupId } },
+        });
+      }
+    },
+    [serviceGroupId]
+  );
+
+  const serviceGroupKuery = serviceGroupData?.serviceGroup.kuery;
+  const effectiveKuery = serviceGroupKuery
+    ? kuery
+      ? `(${kuery}) AND (${serviceGroupKuery})`
+      : serviceGroupKuery
+    : kuery;
+
   return (
     <TimeRangeMetadataContextProvider
       uiSettings={uiSettings}
       useSpanName={isOperationView}
       start={start}
       end={end}
-      kuery={kuery}
+      kuery={effectiveKuery}
     >
       {children}
     </TimeRangeMetadataContextProvider>

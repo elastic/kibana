@@ -491,6 +491,34 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
+      describe('when a kuery filter is specified', () => {
+        it('returns metric sources with docs when the kuery matches existing data', async () => {
+          const response = await getTimeRangeMetadata({
+            start,
+            end,
+            kuery: 'service.name: "my-service"',
+          });
+          expect(
+            response.sources.filter(
+              (s) => s.hasDocs && s.documentType !== ApmDocumentType.TransactionEvent
+            ).length
+          ).to.be.greaterThan(0);
+        });
+
+        it('returns no metric sources with docs when the kuery matches nothing', async () => {
+          const response = await getTimeRangeMetadata({
+            start,
+            end,
+            kuery: 'service.name: "nonexistent-service-xyz"',
+          });
+          expect(
+            response.sources.filter(
+              (s) => s.hasDocs && s.documentType !== ApmDocumentType.TransactionEvent
+            )
+          ).to.eql([]);
+        });
+      });
+
       describe('after deleting a specific data set', () => {
         before(async () => {
           await es.deleteByQuery({

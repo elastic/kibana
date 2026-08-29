@@ -17,11 +17,15 @@ export async function getServicesCounts({
   start,
   end,
   serviceGroups,
+  kuery: _kuery,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   serviceGroups: SavedServiceGroup[];
+  // Combined kuery of all service groups; used by the document source selection
+  // added in https://github.com/elastic/kibana/pull/284452.
+  kuery: string;
 }) {
   if (!serviceGroups.length) {
     return {};
