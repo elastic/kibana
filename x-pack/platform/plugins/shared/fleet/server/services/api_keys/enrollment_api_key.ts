@@ -474,7 +474,8 @@ export async function generateEnrollmentAPIKey(
     index: ENROLLMENT_API_KEYS_INDEX,
     body,
     id,
-    refresh: 'wait_for',
+    // Fleet Server and the UI poll/get-by-id; do not block HTTP on refresh_interval.
+    refresh: false,
   });
 
   const enrollmentAPIKey: EnrollmentAPIKey = {

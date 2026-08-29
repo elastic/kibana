@@ -616,15 +616,18 @@ describe('UninstallTokenService', () => {
             const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id, true);
 
-            expect(soClientMock.bulkCreate).toBeCalledWith([
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so.attributes.policy_id,
-                  ...expectAnyToken,
+            expect(soClientMock.bulkCreate).toBeCalledWith(
+              [
+                {
+                  type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    policy_id: so.attributes.policy_id,
+                    ...expectAnyToken,
+                  },
                 },
-              },
-            ]);
+              ],
+              { refresh: false }
+            );
             expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
               so.attributes.policy_id,
             ]);
@@ -638,22 +641,25 @@ describe('UninstallTokenService', () => {
               [so.attributes.policy_id, so2.attributes.policy_id],
               true
             );
-            expect(soClientMock.bulkCreate).toBeCalledWith([
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so.attributes.policy_id,
-                  ...expectAnyToken,
+            expect(soClientMock.bulkCreate).toBeCalledWith(
+              [
+                {
+                  type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    policy_id: so.attributes.policy_id,
+                    ...expectAnyToken,
+                  },
                 },
-              },
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so2.attributes.policy_id,
-                  ...expectAnyToken,
+                {
+                  type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    policy_id: so2.attributes.policy_id,
+                    ...expectAnyToken,
+                  },
                 },
-              },
-            ]);
+              ],
+              { refresh: false }
+            );
             expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
               so.attributes.policy_id,
               so2.attributes.policy_id,
@@ -667,22 +673,25 @@ describe('UninstallTokenService', () => {
             mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
             await uninstallTokenService.generateTokensForAllPolicies(true);
-            expect(soClientMock.bulkCreate).toBeCalledWith([
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so.attributes.policy_id,
-                  ...expectAnyToken,
+            expect(soClientMock.bulkCreate).toBeCalledWith(
+              [
+                {
+                  type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    policy_id: so.attributes.policy_id,
+                    ...expectAnyToken,
+                  },
                 },
-              },
-              {
-                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-                attributes: {
-                  policy_id: so2.attributes.policy_id,
-                  ...expectAnyToken,
+                {
+                  type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    policy_id: so2.attributes.policy_id,
+                    ...expectAnyToken,
+                  },
                 },
-              },
-            ]);
+              ],
+              { refresh: false }
+            );
             expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
               so.attributes.policy_id,
               so2.attributes.policy_id,
@@ -700,15 +709,18 @@ describe('UninstallTokenService', () => {
         it('creates a new token when calling generateTokenForPolicyId', async () => {
           const so = getDefaultSO(canEncrypt);
           await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
-          expect(soClientMock.bulkCreate).toBeCalledWith([
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so.attributes.policy_id,
-                ...expectAnyToken,
+          expect(soClientMock.bulkCreate).toBeCalledWith(
+            [
+              {
+                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                attributes: {
+                  policy_id: so.attributes.policy_id,
+                  ...expectAnyToken,
+                },
               },
-            },
-          ]);
+            ],
+            { refresh: false }
+          );
         });
 
         it('creates a new token when calling generateTokensForPolicyIds', async () => {
@@ -719,22 +731,25 @@ describe('UninstallTokenService', () => {
             so.attributes.policy_id,
             so2.attributes.policy_id,
           ]);
-          expect(soClientMock.bulkCreate).toBeCalledWith([
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so.attributes.policy_id,
-                ...expectAnyToken,
+          expect(soClientMock.bulkCreate).toBeCalledWith(
+            [
+              {
+                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                attributes: {
+                  policy_id: so.attributes.policy_id,
+                  ...expectAnyToken,
+                },
               },
-            },
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so2.attributes.policy_id,
-                ...expectAnyToken,
+              {
+                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                attributes: {
+                  policy_id: so2.attributes.policy_id,
+                  ...expectAnyToken,
+                },
               },
-            },
-          ]);
+            ],
+            { refresh: false }
+          );
         });
 
         it('creates a new token when calling generateTokensForAllPolicies', async () => {
@@ -744,22 +759,25 @@ describe('UninstallTokenService', () => {
           mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
           await uninstallTokenService.generateTokensForAllPolicies();
-          expect(soClientMock.bulkCreate).toBeCalledWith([
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so.attributes.policy_id,
-                ...expectAnyToken,
+          expect(soClientMock.bulkCreate).toBeCalledWith(
+            [
+              {
+                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                attributes: {
+                  policy_id: so.attributes.policy_id,
+                  ...expectAnyToken,
+                },
               },
-            },
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              attributes: {
-                policy_id: so2.attributes.policy_id,
-                ...expectAnyToken,
+              {
+                type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+                attributes: {
+                  policy_id: so2.attributes.policy_id,
+                  ...expectAnyToken,
+                },
               },
-            },
-          ]);
+            ],
+            { refresh: false }
+          );
         });
 
         it('excludes agentless policies when calling generateTokensForAllPolicies', async () => {

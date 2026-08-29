@@ -569,7 +569,11 @@ class AgentPolicyService {
     });
 
     const newSo = await soClient
-      .create<AgentPolicySOAttributes>(savedObjectType, preparedAgentPolicySo, options)
+      .create<AgentPolicySOAttributes>(savedObjectType, preparedAgentPolicySo, {
+        ...options,
+        // Subsequent reads use get-by-id; do not block HTTP on refresh_interval.
+        refresh: false,
+      })
       .catch(
         catchAndSetErrorStackTrace.withMessage(
           `Attempt to create agent policy [${agentPolicy.id}] failed`
@@ -2045,7 +2049,8 @@ class AgentPolicyService {
             .bulk({
               index: AGENT_POLICY_INDEX,
               operations: fleetServerPoliciesBulkBody,
-              refresh: 'wait_for',
+              // Agents poll .fleet-policies; wait_for adds ~1s per deploy on serverless.
+              refresh: false,
             })
             .catch(catchAndSetErrorStackTrace.withMessage('ES bulk operation failed'));
 

@@ -17,18 +17,12 @@ import { agentPolicyService, packagePolicyService, appContextService } from '.';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { bulkInstallPackages } from './epm/packages';
 import { incrementPackageName } from './package_policies';
-import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 const mockIncrementPackageName = incrementPackageName as jest.MockedFunction<
   typeof incrementPackageName
 >;
-
-const mockEnsureDefaultEnrollmentAPIKeyForAgentPolicy =
-  ensureDefaultEnrollmentAPIKeyForAgentPolicy as jest.MockedFunction<
-    typeof ensureDefaultEnrollmentAPIKeyForAgentPolicy
-  >;
 
 jest.mock('./epm/packages', () => {
   return {
@@ -37,12 +31,6 @@ jest.mock('./epm/packages', () => {
 });
 
 const mockedBulkInstallPackages = bulkInstallPackages as jest.Mocked<typeof bulkInstallPackages>;
-
-jest.mock('./api_keys', () => {
-  return {
-    ensureDefaultEnrollmentAPIKeyForAgentPolicy: jest.fn(),
-  };
-});
 
 jest.mock('./agent_policy');
 jest.mock('./package_policy');
@@ -368,27 +356,6 @@ describe('createAgentPolicyWithPackages', () => {
     });
 
     expect(response.id).toEqual('policy-1');
-  });
-
-  it('should create an enrollment token', async () => {
-    const response = await createAgentPolicyWithPackages({
-      esClient: esClientMock,
-      soClient: soClientMock,
-      agentPolicyService: mockedAgentPolicyService,
-      newPolicy: { id: 'policy-1', name: 'Agent policy 1', namespace: 'default' },
-      withSysMonitoring: false,
-      spaceId: 'default',
-      monitoringEnabled: [],
-      request: {} as KibanaRequest,
-    });
-
-    expect(response.id).toEqual('policy-1');
-
-    expect(mockEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledWith(
-      expect.anything(),
-      expect.anything(),
-      'policy-1'
-    );
   });
 
   it('should create policy with fleet_server and id', async () => {

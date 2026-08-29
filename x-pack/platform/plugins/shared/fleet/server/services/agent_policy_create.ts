@@ -30,7 +30,6 @@ import { PackagePolicyNameExistsError } from '../errors';
 import { type AgentPolicyServiceInterface, appContextService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
-import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 
 async function getFleetServerAgentPolicyId(
   soClient: SavedObjectsClientContract,
@@ -104,6 +103,7 @@ async function createPackagePolicy(
     () =>
       appContextService.getLockManagerService()!.withLock(lockKey, async () => {
         newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall, spaceIds);
+        // Lock + PackagePolicyNameExistsError retry replace wait_for for system-N uniqueness.
         await packagePolicyService.create(
           soClient,
           esClient,
@@ -279,8 +279,6 @@ export async function createAgentPolicyWithPackages({
       }
     );
   }
-
-  await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
 
   try {
     // Deploy policy will create the agentless agent if needed
