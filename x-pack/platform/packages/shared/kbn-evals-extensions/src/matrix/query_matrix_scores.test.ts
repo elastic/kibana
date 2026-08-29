@@ -40,6 +40,25 @@ describe('pickLatestExperimentPerModel', () => {
     expect(result.get('m2')?.experiment_id).toBe('other');
   });
 
+  it('skips a self-judged experiment so an older independent run still counts', () => {
+    const result = pickLatestExperimentPerModel([
+      experiment({
+        experiment_id: 'clean',
+        modelId: 'm1',
+        timestamp: '2026-06-01T00:00:00.000Z',
+        evaluator_models: [{ id: 'judge', family: 'f', provider: 'p' }],
+      }),
+      experiment({
+        experiment_id: 'self',
+        modelId: 'm1',
+        timestamp: '2026-06-09T00:00:00.000Z',
+        evaluator_models: [{ id: 'm1', family: 'f', provider: 'p' }],
+      }),
+    ]);
+
+    expect(result.get('m1')?.experiment_id).toBe('clean');
+  });
+
   it('ignores experiments without a task model id', () => {
     const result = pickLatestExperimentPerModel([
       experiment({ experiment_id: 'no-model', modelId: undefined }),

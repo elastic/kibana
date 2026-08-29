@@ -247,6 +247,17 @@ export const pickLatestExperimentPerModel = (
       continue;
     }
 
+    // Selection runs before scoring, so a self-judged experiment picked here
+    // blanks the model outright: its scores are dropped downstream and the
+    // older, independently judged runs are never reconsidered. Skip it now so
+    // recency cannot silently cost a model every cell it earned.
+    const judges = experiment.evaluator_models?.length
+      ? experiment.evaluator_models
+      : [experiment.evaluator_model];
+    if (judges.some((judge) => judge?.id && describeJudge(judge.id, modelId).selfJudged)) {
+      continue;
+    }
+
     const existing = latestByModel.get(modelId);
     if (!existing || at > existing.at) {
       latestByModel.set(modelId, { experiment, at });
