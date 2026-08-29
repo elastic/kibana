@@ -187,3 +187,35 @@ export const stripRecommendedActionsJson = (reasoning: string): string => {
 
   return rest.length > 0 ? (before.length > 0 ? `${before} ${rest}` : rest) : before;
 };
+
+/**
+ * The staged containment actions from the proposal row's `stagedActions` field — the JSON
+ * array the server projected verbatim from the Watch Floor's untruncated reasoning sections.
+ *
+ * This is the primary channel: unlike the summary, it cannot be cut mid-array by the 8192
+ * reasoning bound, so a long staged list still reaches the toggle form. The label-anchored
+ * {@link parseRecommendedActions} stays as the fallback for rows parked before the field
+ * existed. Same fail-closed contract: `undefined` on anything but a well-formed array of
+ * staged actions, because the caller's fallback is the fixed decision form where nothing
+ * executes; `[]` is a valid "nothing staged".
+ */
+export const parseStagedActionsBody = (
+  stagedActions: string | undefined
+): AttackDiscoveryRecommendedAction[] | undefined => {
+  if (stagedActions == null) {
+    return undefined;
+  }
+
+  const trimmed = stagedActions.trim();
+  if (!trimmed.startsWith('[')) {
+    return undefined;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(trimmed);
+
+    return Array.isArray(parsed) && parsed.every(isStagedAction) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};

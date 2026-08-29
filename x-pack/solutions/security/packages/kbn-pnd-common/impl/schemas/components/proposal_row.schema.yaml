@@ -93,6 +93,14 @@ components:
         reasoning:
           type: string
           maxLength: 8192
+        stagedActions:
+          type: string
+          maxLength: 32768
+          description: >-
+            The staged containment actions as the JSON array the Watch Floor wrote to its
+            reasoning sections — projected only for the incident_contained gate, and from the
+            untruncated sections rather than the 8192-bounded summary, so a long staged list
+            still reaches the per-action toggle form intact.
         preview:
           $ref: './tuning.schema.yaml#/components/schemas/PndTuningPreview'
         createdAt:

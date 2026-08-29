@@ -9,12 +9,14 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   deriveThreadConversationId,
   getGateDefinition,
+  PND_GATE_IDS,
   type PndProposalRow,
 } from '@kbn/pnd-common';
 
 import { buildProposalSourceIdFromStep } from '../../../../../lib/proposal_source_id';
 import { extractGatePrompt } from '../../../../../lib/extract_gate_prompt';
 import { extractReasoningSummary } from '../../../../../lib/extract_reasoning_summary';
+import { extractStagedActionsJson } from '../../../../../lib/extract_staged_actions_json';
 
 export interface BuildProposalRowsParams {
   /** `runId → correlationId` from `listPendingPndGates`. */
@@ -84,6 +86,14 @@ export const buildProposalRows = ({
 
     const { inputSchema, message, title } = extractGatePrompt(step);
 
+    // The containment gate's staged actions ride the untruncated reasoning sections
+    // (the 8192-bounded summary can lose a long list mid-array); projected only for
+    // that gate, because no other gate stages a machine-readable action list.
+    const stagedActions =
+      gate.gateId === PND_GATE_IDS.incidentContained
+        ? extractStagedActionsJson(reasoningByStepId.get(step.id))
+        : undefined;
+
     return [
       {
         alwaysGate: gate.alwaysGate,
@@ -93,6 +103,7 @@ export const buildProposalRows = ({
         inputSchema,
         message,
         reasoning: extractReasoningSummary(reasoningByStepId.get(step.id)),
+        ...(stagedActions != null ? { stagedActions } : {}),
         recommendedAction: gate.recommendedAction,
         reversible: gate.reversible,
         sourceId: buildProposalSourceIdFromStep(step),

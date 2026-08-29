@@ -1149,23 +1149,29 @@ describe('watch_floor.yaml phase 3 recommended actions', () => {
     });
   });
 
-  // Only reasoning.summary reaches the proposal card, so the summary carries the staged actions
-  // behind a stable label anchor, parsed back by the PND queue's recommended-actions form.
+  // The reasoning summary is TRUNCATED at 8192 characters by the server's projection, which a
+  // staged-action array with full target lists can exceed on its own — so the machine-readable
+  // list rides the UNtruncated sections entry (title pinned on both sides: the server's
+  // extract_staged_actions_json projects it onto the row's stagedActions field), and the summary
+  // stays human prose.
   describe('reason_incident_contained carries the staged actions', () => {
-    const summary = getStep('reason_incident_contained').with?.reasoning?.summary ?? '';
+    const reasoning = getStep('reason_incident_contained').with?.reasoning;
+    const summary = reasoning?.summary ?? '';
 
-    it('anchors the machine-readable list behind a stable label', () => {
-      expect(summary).toContain('Staged containment actions JSON:');
+    it('keeps the summary prose-only — no JSON blob that the 8192 bound could truncate mid-array', () => {
+      expect(summary).not.toContain('Staged containment actions JSON:');
+      expect(summary).not.toContain('{{ variables.phase3_recommended_actions | json }}');
     });
 
-    it('embeds the staged actions as JSON after the anchor', () => {
-      const anchorIndex = summary.indexOf('Staged containment actions JSON:');
-      const jsonIndex = summary.indexOf('{{ variables.phase3_recommended_actions | json }}');
+    it('carries the machine-readable list in the pinned sections entry', () => {
+      const section = (reasoning?.sections ?? []).find(
+        ({ title }) => title === 'Staged containment actions'
+      );
 
-      expect(jsonIndex).toBeGreaterThan(anchorIndex);
+      expect(section?.body).toContain('{{ variables.phase3_recommended_actions | json }}');
     });
 
-    it('still quotes the incident agent verbatim after the staged list', () => {
+    it('still quotes the incident agent verbatim at the end of the summary', () => {
       expect(summary).toContain('{{ steps.open_incident.output.structured_output.proposal }}');
     });
   });

@@ -702,20 +702,28 @@ steps:
                   properties:
                     hosts:
                       type: array
+                      maxItems: 10
                       items:
                         type: string
+                        maxLength: 256
                     users:
                       type: array
+                      maxItems: 10
                       items:
                         type: string
+                        maxLength: 256
                     ips:
                       type: array
+                      maxItems: 10
                       items:
                         type: string
+                        maxLength: 64
                     alert_ids:
                       type: array
+                      maxItems: 15
                       items:
                         type: string
+                        maxLength: 128
                   required:
                     - hosts
                     - users
@@ -792,12 +800,11 @@ steps:
         correlationId: "{{ event.attackDiscoveryAlertId }}"
         gateId: incident_contained
 
-  # A7: only reasoning.summary reaches the proposal card, so the summary carries BOTH the
-  # human explanation and the machine-readable staged actions behind a stable label anchor
-  # ("Staged containment actions JSON:") — the same label-anchored `| json` contract
-  # reason_apply_tuning uses, parsed back by the PND queue's recommended-actions form.
-  # Short, load-bearing anchors first; the model's free prose last (extractReasoningSummary
-  # truncates at 8192 characters silently, so what sits late is what gets lost).
+  # A7: only reasoning.summary reaches the proposal card as prose, and it is TRUNCATED at
+  # 8192 characters — which a staged-action array with full target lists can exceed on its
+  # own. The machine-readable actions therefore ride the UNtruncated sections entry titled
+  # "Staged containment actions" (a contract with the server's staged-actions projection
+  # and the queue's toggle form; pinned on both sides), and the summary stays human prose.
   - name: reason_incident_contained
     type: data.set
     with:
@@ -816,9 +823,8 @@ steps:
           emits pnd.incidentClosed, which wakes the Detection Watch to draft a rule tuning.
           Manual actions are listed for the analyst to perform outside Kibana; the workflow
           never executes them. Declining executes nothing and records your rationale in the
-          thread. This gate is always human — no autonomy level can auto-accept it.
-          Staged containment actions JSON:
-          {{ variables.phase3_recommended_actions | json }}.
+          thread. This gate is always human — no autonomy level can auto-accept it. The
+          staged actions are listed on the approval card, each with its own toggle.
           The incident responder's own closing statement follows.
           {{ steps.open_incident.output.structured_output.proposal }}
         sections:

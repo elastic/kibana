@@ -34,6 +34,21 @@ const applyTuningStep = (): EsWorkflowStepExecution =>
     workflowId: SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
   });
 
+const incidentContainedStep = (): EsWorkflowStepExecution =>
+  openInvestigationStep({ stepId: 'await_incident_contained' });
+
+const ACTIONS_JSON = JSON.stringify([
+  { action_type: 'isolate_host', execution: 'kibana_api', title: 'Isolate host-1' },
+]);
+
+const containmentReasoning = {
+  summary: 'Approving executes ONLY the actions you toggle on.',
+  sections: [
+    { title: 'Incident', body: 'prose' },
+    { title: 'Staged containment actions', body: ACTIONS_JSON },
+  ],
+};
+
 describe('buildProposalRows', () => {
   it('builds one row per registered gate', () => {
     const rows = buildProposalRows({
@@ -213,5 +228,36 @@ describe('buildProposalRows', () => {
 
     expect(row.workflowId).toEqual(SYSTEM_SECURITY_WATCH_FLOOR_ID);
     expect(row.sourceId).toEqual(`${documentId}:run-1:step-exec-1`);
+  });
+});
+
+describe('buildProposalRows staged-actions projection', () => {
+  const build = (steps: EsWorkflowStepExecution[], reasoning: Record<string, unknown>) =>
+    buildProposalRows({
+      attackDiscoveryIdByRunId: new Map([['run-1', 'ad-1']]),
+      readableAttackDiscoveryAlertIds: new Set(['ad-1']),
+      reasoningByStepId: new Map([['step-exec-1', reasoning]]),
+      steps,
+    });
+
+  it('projects the staged-actions section onto the containment row, untruncated by the summary bound', () => {
+    const [row] = build([incidentContainedStep()], containmentReasoning);
+
+    expect(row.stagedActions).toBe(ACTIONS_JSON);
+  });
+
+  it('never projects staged actions onto another gate, whatever its sections carry', () => {
+    const [row] = build([openInvestigationStep()], containmentReasoning);
+
+    expect(row.stagedActions).toBeUndefined();
+  });
+
+  it('omits the field when the containment reasoning has no staged-actions section', () => {
+    const [row] = build([incidentContainedStep()], {
+      summary: 'Nothing was staged.',
+      sections: [{ title: 'Incident', body: 'prose' }],
+    });
+
+    expect(row.stagedActions).toBeUndefined();
   });
 });

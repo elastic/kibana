@@ -7,7 +7,12 @@
 
 import type { AttackDiscoveryRecommendedAction } from '@kbn/pnd-common';
 
-import { parseRecommendedActions, RECOMMENDED_ACTIONS_LABEL, stripRecommendedActionsJson } from '.';
+import {
+  parseRecommendedActions,
+  parseStagedActionsBody,
+  RECOMMENDED_ACTIONS_LABEL,
+  stripRecommendedActionsJson,
+} from '.';
 
 const ISOLATE_HOST: AttackDiscoveryRecommendedAction = {
   action_type: 'isolate_host',
@@ -199,5 +204,37 @@ describe('stripRecommendedActionsJson', () => {
 
   it('strips an empty staged array the same way', () => {
     expect(stripRecommendedActionsJson(summary('[]'))).toBe(`${PROSE_BEFORE} ${PROSE_AFTER}`);
+  });
+});
+
+describe('parseStagedActionsBody', () => {
+  it('parses the verbatim JSON array the server projected', () => {
+    expect(parseStagedActionsBody(JSON.stringify([ISOLATE_HOST]))).toEqual([ISOLATE_HOST]);
+  });
+
+  it('tolerates surrounding whitespace', () => {
+    expect(parseStagedActionsBody(`\n ${JSON.stringify([ISOLATE_HOST])} `)).toEqual([ISOLATE_HOST]);
+  });
+
+  it('returns [] for an empty staged list — nothing staged is not a failure', () => {
+    expect(parseStagedActionsBody('[]')).toEqual([]);
+  });
+
+  it('returns undefined when the field is absent', () => {
+    expect(parseStagedActionsBody(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined for a JSON object rather than an array', () => {
+    expect(parseStagedActionsBody('{"recommended_actions": []}')).toBeUndefined();
+  });
+
+  it('returns undefined for a truncated array', () => {
+    expect(parseStagedActionsBody('[{"action_type":"isolate_h')).toBeUndefined();
+  });
+
+  it('returns undefined when an element is missing a required string', () => {
+    const { title, ...untitled } = ISOLATE_HOST;
+
+    expect(parseStagedActionsBody(JSON.stringify([untitled]))).toBeUndefined();
   });
 });

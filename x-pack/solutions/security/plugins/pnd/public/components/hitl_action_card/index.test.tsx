@@ -16,6 +16,7 @@ import {
 } from './test_helpers/pnd_hitl_proposal';
 import {
   PND_HITL_CONTAINMENT_PROPOSAL,
+  PND_STAGED_ACTIONS,
   PND_STAGED_ISOLATE_HOST,
   stagedContainmentReasoning,
 } from './test_helpers/pnd_recommended_actions';
@@ -269,6 +270,25 @@ describe('HitlActionCard', () => {
       expect(reasoning).toHaveTextContent(
         "The incident responder's own closing statement follows."
       );
+    });
+
+    it('prefers the stagedActions field, so a summary truncated mid-array still gets toggles', () => {
+      renderWithPndProviders(
+        <HitlActionCard
+          {...defaultProps}
+          proposal={{
+            ...PND_HITL_CONTAINMENT_PROPOSAL,
+            // The 8192-truncation scenario: the summary lost its array tail…
+            reasoning:
+              'Approving executes ONLY the actions you toggle on. [{"action_type":"isolate_h',
+            // …but the projected field carries the full list.
+            stagedActions: JSON.stringify(PND_STAGED_ACTIONS),
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('pndRecommendedActionsDecisionForm')).toBeInTheDocument();
+      expect(screen.getByTestId('pndRecommendedActionToggle-0')).toBeInTheDocument();
     });
 
     it('keeps the raw reasoning on gates the toggle form does not draw', () => {

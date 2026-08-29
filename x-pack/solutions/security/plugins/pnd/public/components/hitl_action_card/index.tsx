@@ -13,6 +13,7 @@ import type { PndDiscoveryContext, PndProposalRow } from '@kbn/pnd-common';
 
 import {
   parseRecommendedActions,
+  parseStagedActionsBody,
   stripRecommendedActionsJson,
 } from '../../pages/conversations/helpers/parse_recommended_actions';
 import {
@@ -75,8 +76,9 @@ export interface HitlActionCardProps {
  * accordingly, because a button reading "Approve" that dismisses the proposal is
  * the sharpest version of a UI lying about what it is about to do.
  *
- * **It renders three branches.** An `incident_contained` gate whose reasoning
- * carries staged containment actions behind the label anchor is drawn by
+ * **It renders three branches.** An `incident_contained` gate whose row carries
+ * staged containment actions — the `stagedActions` field, or the summary's label
+ * anchor on rows parked before it existed — is drawn by
  * `RecommendedActionsDecisionForm`; otherwise a gate whose schema
  * `canRenderWithSchemaForm` accepts is drawn by `SchemaForm`; anything else —
  * including the `{}` every row carries when its gate declared no schema — falls
@@ -107,20 +109,25 @@ export const HitlActionCard: React.FC<HitlActionCardProps> = ({
     reasoning,
     recommendedAction,
     reversible,
+    stagedActions,
     threadTitle,
     title,
   } = proposal;
 
   const tokens = getHitlToneTokens(getHitlTone({ recommendedAction, reversible }), euiTheme.colors);
 
-  // The staged containment actions the Watch Floor wrote into the Phase-3
-  // gate's reasoning summary behind the label anchor. `undefined` on every
-  // other gate, and on a summary that lost the anchor — both fall through to
-  // the two branches below, where nothing can be toggled on.
+  // The staged containment actions for the Phase-3 gate. The row's stagedActions
+  // field is the primary channel (projected from the untruncated reasoning
+  // sections, immune to the 8192 summary bound); the label anchor in the summary
+  // is the fallback for rows parked before the field existed. `undefined` on
+  // every other gate and on any malformed carrier — those fall through to the
+  // two branches below, where nothing can be toggled on.
   const recommendedActions = useMemo(
     () =>
-      gateId === PND_GATE_IDS.incidentContained ? parseRecommendedActions(reasoning) : undefined,
-    [gateId, reasoning]
+      gateId === PND_GATE_IDS.incidentContained
+        ? parseStagedActionsBody(stagedActions) ?? parseRecommendedActions(reasoning)
+        : undefined,
+    [gateId, reasoning, stagedActions]
   );
 
   // The toggle rows below render the staged actions, so the reasoning shown above

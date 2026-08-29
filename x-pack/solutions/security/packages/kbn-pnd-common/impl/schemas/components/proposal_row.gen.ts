@@ -61,6 +61,13 @@ export const PndProposalRow = lazySchema(() =>
      */
     inputSchema: z.object({}).catchall(z.unknown()),
     reasoning: z.string().max(8192),
+    /**
+     * The staged containment actions as the JSON array the Watch Floor wrote to its
+     * reasoning sections — projected only for the incident_contained gate, and from the
+     * UNtruncated sections rather than the 8192-bounded summary, so a long staged list
+     * still reaches the per-action toggle form intact.
+     */
+    stagedActions: z.string().max(32768).optional(),
     preview: PndTuningPreview.optional(),
     /**
      * ISO 8601 timestamp
