@@ -9,17 +9,21 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
-import { dashboardDesignGuidancePrompt } from './design';
+import { getDashboardAuthoringPromptContent } from './dashboard_guidance';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
 
 const guidance = `## Building a Dashboard
 
-The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
+The ${
+  dashboardTools.generateDashboard
+} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
 Every dashboard MUST have a non-empty \`title\`. If the current dashboard's title is empty, missing, or \`"User Dashboard"\`, your first operation MUST be \`set_metadata\` with a title you invent from its contents.
 
-Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
+Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${
+  dashboardTools.generateDashboard
+} call whenever possible.
 
 When a dashboard needs sections, prefer a single batched call:
 1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section.
@@ -57,7 +61,9 @@ Reach for custom content only when nothing above fits:
 - Plain explanatory text with no data → use markdown.
 - The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
 
-**ES|QL for custom content:** set \`config.esqlQuery\` yourself when the panel needs live data — omitting it renders static content with no data, it does not get generated for you. Build the query with \`${platformCoreTools.generateEsql}\` rather than writing it directly, or use one the user supplied verbatim. The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails that panel and returns an error naming the reason — correct the query and retry rather than proceeding.
+**ES|QL for custom content:** set \`config.esqlQuery\` yourself when the panel needs live data — omitting it renders static content with no data, it does not get generated for you. Build the query with \`${
+  platformCoreTools.generateEsql
+}\` rather than writing it directly, or use one the user supplied verbatim. The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails that panel and returns an error naming the reason — correct the query and retry rather than proceeding.
 
 **Creating a custom content panel:**
 - Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` — it is generated server-side from the prompt.
@@ -73,37 +79,13 @@ For every new Lens panel, choose and pass \`chartType\`; it is required. For a n
 
 Before \`add_panels\`, pick at most two primary time-series XY (the overview trend that matches the title or intent). On that panel's \`query\` only, ask for legend statistics (\`avg\`, \`min\`, \`max\`, last non-null).
 
-
 ${chartTypeSelectionGuidance}
 
-${dashboardDesignGuidancePrompt}
+${getDashboardAuthoringPromptContent()}
 
 ## ES|QL
 
 Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
-
-## Controls
-
-Controls are interactive filters pinned above the dashboard that let users explore data without editing queries. Add them with \`add_controls\` and remove them by id with \`remove_controls\`.
-
-**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs).
-
-Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.).
-
-**Control types:**
-- \`options_list_control\` — dropdown for categorical / keyword fields. The most common type (95% of cases).
-- \`range_slider_control\` — numeric range slider. Add sparingly, only when filtering by a numeric threshold is useful across multiple panels (e.g. \`latency\`, \`bytes\`, \`duration\`).
-- \`time_slider_control\` — global time sub-range picker. Add at most one per dashboard, only when time-range narrowing within the global window is useful.
-
-**Required fields per control:**
-- \`type\`: one of the three above.
-- \`field_name\` (not for \`time_slider_control\`): exact field name as it appears in the panel queries (e.g. \`"service.name"\`).
-- \`index\` (not for \`time_slider_control\`): same index as the dashboard panels (e.g. \`"logs-*"\`).
-- \`title\` (optional, \`options_list_control\` and \`range_slider_control\` only): human-readable label shown above the control (e.g. \`"Service"\`).
-
-**Defaults applied by the server:** \`width: "medium"\`, \`grow: true\` (fills available horizontal space). Override only if the user asks.
-
-**Removing controls:** use \`remove_controls\` with the \`id\` values from the \`controls[]\` list in the tool result.
 
 ## Generation Edge Cases
 
@@ -117,12 +99,15 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 /**
  * Environment-agnostic dashboard *generation* guidance.
  *
- * The `guidance` describes how to build a dashboard, including the detailed design guidance
- * (composition + panel layout) inlined directly. It deliberately says nothing about how the
- * current dashboard is referenced or how the result is returned/surfaced. Those are
- * environment-specific and avoided here so the block can be reused across environments. Pair it with
- * an environment-specific rendering guidance block (e.g. the Kibana one) that explains how the
- * generated dashboard is surfaced.
+ * The `guidance` describes how to build a dashboard. Chart-type selection
+ * and dashboard authoring rules (composition, grid, controls, sections) are
+ * inlined so they arrive with `load_skill`. Review should compile
+ * `getDashboardReviewPromptContent` instead of appending this block again.
+ * It deliberately says nothing about how the current dashboard
+ * is referenced or how the result is returned/surfaced. Those are
+ * environment-specific and avoided here so the block can be reused across
+ * environments. Pair it with an environment-specific rendering guidance block
+ * (e.g. the Kibana one) that explains how the generated dashboard is surfaced.
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,

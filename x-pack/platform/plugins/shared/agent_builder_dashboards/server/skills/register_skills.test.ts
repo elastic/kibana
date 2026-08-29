@@ -27,18 +27,18 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
-  it('inlines the dashboard design guidance directly in the skill body', () => {
-    expect(skill.content).toContain('Dashboard Composition Guidelines');
-    expect(skill.content).toContain('Grid Packing Rules');
+  it('inlines dashboard authoring rules in the skill body', () => {
+    expect(skill.content).toContain('Lead with high-level metrics');
+    expect(skill.content).toContain('do not make metric or gauge panels full-width');
+    expect(skill.content).toContain('3–5 `options_list_control` dropdowns');
+    expect(skill.content).not.toContain('is a miss');
   });
 
-  it('includes the shared chart type selection guidance', () => {
+  it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {
     expect(skill.content).toContain('Chart Type Guidance');
     expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
-    expect(skill.content).toContain(
-      'Choose for cross-tabulations (e.g. "request methods by status code"'
-    );
+    expect(skill.content).toContain('only when the terms are short strings');
     expect(skill.content).toContain(
       'provide a new `chartType` when the request changes the chart family'
     );
