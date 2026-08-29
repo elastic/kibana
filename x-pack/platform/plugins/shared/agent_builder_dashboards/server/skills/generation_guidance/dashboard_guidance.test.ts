@@ -19,6 +19,7 @@ describe('getDashboardAuthoringPromptContent', () => {
     expect(prompt).toContain('Lead with high-level metrics');
     expect(prompt).toContain('### grid');
     expect(prompt).toContain('do not make metric or gauge panels full-width');
+    expect(prompt).toContain('Pie → w: 12 or 24, h: 10');
     expect(prompt).toContain('### controls');
     expect(prompt).toContain('3–5 `options_list_control` dropdowns');
     expect(prompt).toContain('### sections');
@@ -41,6 +42,7 @@ describe('getDashboardReviewPromptContent', () => {
     expect(prompt).toContain('### grid');
     expect(prompt).toContain('do not make metric or gauge panels full-width');
     expect(prompt).toContain('full-width metric or gauge is a miss');
+    expect(prompt).toContain('A pie panel wider than w: 24 is a miss.');
     expect(prompt).toContain('### controls');
     expect(prompt).toContain('high-cardinality identifier');
     expect(prompt).toContain('Considerations:');

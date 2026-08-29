@@ -67,7 +67,7 @@ export const dashboardRuleRegistry: DashboardRuleRegistry = {
         misses: [
           'A full-width metric or gauge is a miss — keep metrics at w: 6, 8, or 12 and gauges at w: 12.',
           'Visible gaps or dead space between panels is a miss — rows must tile left-to-right with no unused columns, and the next row y must be previous row y + max(h).',
-          'A pie panel wider than w: 12 is a miss.',
+          'A pie panel wider than w: 24 is a miss.',
         ],
       },
       config: {
@@ -77,7 +77,7 @@ export const dashboardRuleRegistry: DashboardRuleRegistry = {
           'Metric → w: 6, 8, or 12, h: 5–6. Keep them small; do not make metric or gauge panels full-width. 8 in a row: w: 6; 6 in a row: w: 8; 4 in a row: w: 12.',
           'Gauge → w: 12, h: 8. Fit up to 4 per row.',
           'XY (line / area / bar) → w: 24, h: 10. Use full-width (w: 48) only for the primary time series.',
-          'Heatmap and tagcloud → w: 24, h: 10. Pie → w: 12, h: 10. Treemap / waffle / mosaic → w: 24, h: 10.',
+          'Heatmap and tagcloud → w: 24, h: 10. Pie → w: 12 or 24, h: 10. Treemap / waffle / mosaic → w: 24, h: 10.',
           'Markdown → w: 24–48, h: 4–9, sized from content. Datatable → w: 24–48, h: 12–16; prefer full-width so columns are readable.',
           'Prefer w values that divide 48 evenly: 6, 8, 12, 24, 48.',
           'Eliminate dead space: when starting a new row, set y to the previous row y + max(h) across all panels in that row — do not use only one neighbor y + h.',
