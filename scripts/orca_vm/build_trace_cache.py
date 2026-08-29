@@ -116,14 +116,14 @@ def trim_step(step: dict) -> dict:
     kind = step.get("type")
     if kind == "tool_call":
         args = step.get("args")
-        return {
-            "type": "tool_call",
-            "tool_id": step.get("tool_id"),
-            # Mirrors the renderer's own JSON.stringify(...).slice(0, 300).
-            "args": json.loads(json.dumps(args))
-            if args is not None and len(json.dumps(args)) <= 300
-            else None,
-        }
+        # query_matrix_traces re-runs JSON.stringify(args).slice(0, 300) on
+        # whatever this holds, so keep a real object (a pre-stringified value
+        # would double-encode). Oversized args are replaced by a marker rather
+        # than dropped, so the tool card still shows the call was made.
+        encoded = json.dumps(args) if args is not None else None
+        if encoded is not None and len(encoded) > 300:
+            args = {"_truncated": len(encoded)}
+        return {"type": "tool_call", "tool_id": step.get("tool_id"), "args": args}
     if kind == "reasoning":
         text = step.get("reasoning")
         return {"type": "reasoning", "reasoning": text[:500] if isinstance(text, str) else text}
