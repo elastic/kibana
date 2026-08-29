@@ -131,7 +131,6 @@ export const matrixCmd: Command<void> = {
     --profile          Golden-cluster config profile providing EVAL_KBN_URL/API_KEY
                        (e.g. 'dev-vault' for runtime Vault, or a config.<name>.json file).
     --trace-cache      Path to a trace-cache JSON (executionId::exampleId -> score docs).
-      ...[truncated]
     --kbn-url          Kibana URL override.
     --kbn-api-key      Kibana API key override.
     --html             Also generate a self-contained HTML report (matrix.html).
