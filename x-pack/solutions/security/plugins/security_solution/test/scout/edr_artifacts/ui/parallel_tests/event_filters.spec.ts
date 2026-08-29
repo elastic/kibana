@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export const MOCK_ENDPOINT_POLICY_ID = 'scout-mock-endpoint-policy';
-export const MOCK_ENDPOINT_POLICY_NAME = 'Scout mocked endpoint policy';
-export const MOCK_AGENT_POLICY_ID = 'scout-mock-agent-policy';
+import { describeArtifactTabPolicyDetails } from '../fixtures/artifact_tabs_suite';
+import { getArtifactTabCase } from '../fixtures/artifact_tabs_test_data';
+
+describeArtifactTabPolicyDetails(getArtifactTabCase('eventFilters'));

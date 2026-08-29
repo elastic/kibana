@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout-security';
+import { describeArtifactTabPolicyDetails } from '../fixtures/artifact_tabs_suite';
+import { getArtifactTabCase } from '../fixtures/artifact_tabs_test_data';
 
-export default createPlaywrightConfig({
-  testDir: './tests',
-  workers: 1,
-});
+describeArtifactTabPolicyDetails(getArtifactTabCase('hostIsolationExceptions'));

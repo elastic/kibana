@@ -19,6 +19,7 @@ import {
   AGENT_POLICY_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
   API_VERSIONS,
+  INVALID_NAMESPACE_CHARACTERS,
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -65,7 +66,14 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       name:
         agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
       description: `Policy created with endpoint data generator (${policyName})`,
-      namespace: spaceIds?.[0] ?? 'default',
+      // Fleet data-stream namespace is not a Kibana space id. Scout `spaceTest`
+      // ids like `test-space-1` fail `INVALID_NAMESPACE_CHARACTERS` (hyphens).
+      // Keep `space_ids` for space isolation; sanitize namespace for Fleet.
+      // The exported regex is not global — split/join replaces every match.
+      namespace: (spaceIds?.[0] ?? 'default')
+        .toLowerCase()
+        .split(INVALID_NAMESPACE_CHARACTERS)
+        .join('_'),
       monitoring_enabled: ['logs', 'metrics'],
       space_ids: spaceIds,
     };

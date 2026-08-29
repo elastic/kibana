@@ -154,7 +154,9 @@ export class PolicyArtifactsPage {
       await combo.setCustomSelectedOptions([value]);
       return;
     }
-    await combo.setSelectedOptions([value]);
+    // Field autocomplete is backed by ES field caps and can lag after first
+    // document ingest; the EUI helper default (2.5s) is too short.
+    await combo.setSelectedOptions([value], { timeout: 15_000 });
   }
 
   private async fillTrustedAppsForm() {
@@ -192,7 +194,7 @@ export class PolicyArtifactsPage {
       .fill('This is the blocklist description');
     await this.page.testSubj.locator('blocklist-form-field-select').click();
     await this.page.testSubj.locator('blocklist-form-file.hash.*').click();
-    await this.page.testSubj.locator('blocklist-form-values-input').fill(TRUSTED_APP_HASH);
+    await this.fillComboBox('blocklist-form-values-input', TRUSTED_APP_HASH, true);
     await this.page.testSubj.locator('blocklist-form-name-input').click();
   }
 
@@ -217,7 +219,7 @@ export class PolicyArtifactsPage {
     await this.page.getByRole('option', { name: 'Windows and Mac', exact: true }).click();
     await this.page.testSubj.locator('trustedDevices-form-entry0fieldSelect').click();
     await this.page.getByRole('option', { name: 'Host', exact: true }).click();
-    await this.page.testSubj.locator('trustedDevices-form-entry0valueField').fill('test-host');
+    await this.fillComboBox('trustedDevices-form-entry0valueField', 'test-host', true);
   }
 
   private async fillEndpointExceptionsForm() {

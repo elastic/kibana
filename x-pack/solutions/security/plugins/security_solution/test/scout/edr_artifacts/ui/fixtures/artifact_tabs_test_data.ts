@@ -28,6 +28,14 @@ export interface ArtifactTabCase {
   };
 }
 
+export const getArtifactTabCase = (kind: PolicyArtifactKind): ArtifactTabCase => {
+  const artifact = ARTIFACT_TAB_CASES.find((item) => item.kind === kind);
+  if (!artifact) {
+    throw new Error(`Unknown artifact tab case: ${kind}`);
+  }
+  return artifact;
+};
+
 export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
   {
     kind: 'trustedApps',
