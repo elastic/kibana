@@ -34,6 +34,13 @@ describe('registerSkills', () => {
     expect(skill.content).not.toContain('is a miss');
   });
 
+  it('tells the agent to mention first-generate review problems without auto-fixing', () => {
+    expect(skill.content).toContain('first generate of a new dashboard only');
+    expect(skill.content).toContain('data.review.problems');
+    expect(skill.content).toContain('do not auto-fix unless asked');
+    expect(skill.content).toContain('Later updates omit');
+  });
+
   it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {
     expect(skill.content).toContain('Chart Type Guidance');
     expect(skill.content).toContain('Available chart types');
