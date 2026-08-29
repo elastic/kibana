@@ -268,7 +268,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               })}
               fullWidth
               required={isVisited}
-              isInvalid={hasValueFeedback}
+              isInvalid={visibleErrors.length > 0}
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}
               data-test-subj={getTestId('value')}

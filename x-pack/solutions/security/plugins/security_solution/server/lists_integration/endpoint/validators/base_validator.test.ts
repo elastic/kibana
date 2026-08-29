@@ -128,7 +128,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).not.toThrow();
     });
 
-    it('rejects top-level and nested values and aggregates fields and issue categories', () => {
+    it('trims edge whitespace and rejects remaining control characters', () => {
       exceptionLikeItem.entries = [
         {
           field: 'process.executable.caseless',
@@ -144,14 +144,36 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
               field: 'subject_name',
               type: 'match_any',
               operator: 'included',
-              value: ['Elastic', 'bad\u0085signer'],
+              value: [' Elastic ', 'bad\u0085signer'],
             },
           ],
         },
       ] as ExceptionItemLikeOptions['entries'];
 
       expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).toThrow(
-        /control characters in fields: subject_name; leading or trailing whitespace in fields: process\.executable\.caseless/
+        /control characters in fields: subject_name/
+      );
+      expect(exceptionLikeItem.entries[0]).toEqual(
+        expect.objectContaining({ value: 'C:\\Elastic\\*.exe' })
+      );
+      expect(
+        (exceptionLikeItem.entries[1] as { entries: Array<{ value: string[] }> }).entries[0].value
+      ).toEqual(['Elastic', 'bad\u0085signer']);
+    });
+
+    it('accepts a value after trimming edge whitespace', () => {
+      exceptionLikeItem.entries = [
+        {
+          field: 'process.executable.caseless',
+          type: 'match',
+          operator: 'included',
+          value: ' C:\\Program Files\\Elastic\\endpoint.exe ',
+        },
+      ] as ExceptionItemLikeOptions['entries'];
+
+      expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).not.toThrow();
+      expect(exceptionLikeItem.entries[0]).toEqual(
+        expect.objectContaining({ value: 'C:\\Program Files\\Elastic\\endpoint.exe' })
       );
     });
 

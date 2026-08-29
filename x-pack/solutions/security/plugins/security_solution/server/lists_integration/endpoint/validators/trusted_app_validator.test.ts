@@ -126,10 +126,11 @@ describe('Endpoint Exceptions API validations', () => {
       ).rejects.toThrow(/maximum length of \[4096\]/);
     });
 
-    it('rejects edge whitespace before hash schema validation on create', async () => {
-      await expect(
-        validator.validatePreCreateItem(buildItem(hashEntry(' invalid-hash ')))
-      ).rejects.toThrow(/leading or trailing whitespace in fields: process\.hash\.sha256/);
+    it('trims edge whitespace on create and then validates the cleaned hash', async () => {
+      const item = buildItem(hashEntry(` ${'a'.repeat(64)} `));
+
+      await expect(validator.validatePreCreateItem(item)).resolves.toBeDefined();
+      expect(item.entries[0]).toEqual(expect.objectContaining({ value: 'a'.repeat(64) }));
     });
 
     it('rejects a nested control character on update', async () => {

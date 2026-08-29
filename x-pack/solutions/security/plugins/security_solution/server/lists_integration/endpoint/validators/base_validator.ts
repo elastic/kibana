@@ -13,6 +13,7 @@ import {
   getInputValueCharacterIssue,
   InputValueCharacterIssue,
   OperatingSystem,
+  trimInputValues,
 } from '@kbn/securitysolution-utils';
 
 import { i18n } from '@kbn/i18n';
@@ -199,10 +200,7 @@ export class BaseValidator {
   }
 
   protected validateEntryValueCharacters(item: ExceptionItemLikeOptions): void {
-    const fieldsByIssue = {
-      [InputValueCharacterIssue.CONTROL_CHARACTER]: new Set<string>(),
-      [InputValueCharacterIssue.EDGE_WHITESPACE]: new Set<string>(),
-    };
+    const controlCharacterFields = new Set<string>();
 
     const inspectEntries = (entries: EndpointArtifactEntryValue[]): void => {
       entries.forEach((entry) => {
@@ -211,16 +209,16 @@ export class BaseValidator {
           return;
         }
 
-        if (!['match', 'match_any', 'wildcard'].includes(entry.type)) {
+        if (!['match', 'match_any', 'wildcard'].includes(entry.type) || entry.value === undefined) {
           return;
         }
 
+        entry.value = trimInputValues(entry.value);
+
         const values = Array.isArray(entry.value) ? entry.value : [entry.value];
         values.forEach((value) => {
-          const issue = getInputValueCharacterIssue(value);
-
-          if (issue) {
-            fieldsByIssue[issue].add(entry.field);
+          if (getInputValueCharacterIssue(value) === InputValueCharacterIssue.CONTROL_CHARACTER) {
+            controlCharacterFields.add(entry.field);
           }
         });
       });
@@ -228,41 +226,13 @@ export class BaseValidator {
 
     inspectEntries(item.entries as EndpointArtifactEntryValue[]);
 
-    const issueDescriptions: string[] = [];
-    const controlCharacterFields = [...fieldsByIssue[InputValueCharacterIssue.CONTROL_CHARACTER]];
-    const edgeWhitespaceFields = [...fieldsByIssue[InputValueCharacterIssue.EDGE_WHITESPACE]];
-
-    if (controlCharacterFields.length) {
-      issueDescriptions.push(
-        i18n.translate(
-          'xpack.securitySolution.endpointArtifactValidation.controlCharacterFieldsErrorMessage',
-          {
-            defaultMessage: 'control characters in fields: {fields}',
-            values: { fields: i18n.formatList('unit', controlCharacterFields) },
-          }
-        )
-      );
-    }
-
-    if (edgeWhitespaceFields.length) {
-      issueDescriptions.push(
-        i18n.translate(
-          'xpack.securitySolution.endpointArtifactValidation.edgeWhitespaceFieldsErrorMessage',
-          {
-            defaultMessage: 'leading or trailing whitespace in fields: {fields}',
-            values: { fields: i18n.formatList('unit', edgeWhitespaceFields) },
-          }
-        )
-      );
-    }
-
-    if (issueDescriptions.length) {
+    if (controlCharacterFields.size) {
       throw new EndpointArtifactExceptionValidationError(
         i18n.translate(
           'xpack.securitySolution.endpointArtifactValidation.invalidEntryValuesErrorMessage',
           {
-            defaultMessage: 'Invalid entry values: {issues}',
-            values: { issues: issueDescriptions.join('; ') },
+            defaultMessage: 'Invalid entry values: control characters in fields: {fields}',
+            values: { fields: i18n.formatList('unit', [...controlCharacterFields]) },
           }
         )
       );

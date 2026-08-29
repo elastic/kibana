@@ -131,12 +131,13 @@ describe('Blocklists API validations', () => {
       ).rejects.toThrow(/maximum length of \[4096\]/);
     });
 
-    it('rejects an edge-whitespace match_any array member on create', async () => {
-      await expect(
-        validator.validatePreCreateItem(
-          buildItem(filePathEntry(['C:\\Elastic\\endpoint.exe', '\tbad']))
-        )
-      ).rejects.toThrow(/leading or trailing whitespace in fields: file\.path/);
+    it('trims an edge-whitespace match_any array member on create', async () => {
+      const item = buildItem(filePathEntry([' C:\\Elastic\\endpoint.exe ', '\tbad']));
+
+      await expect(validator.validatePreCreateItem(item)).resolves.toBeDefined();
+      expect(item.entries[0]).toEqual(
+        expect.objectContaining({ value: ['C:\\Elastic\\endpoint.exe', 'bad'] })
+      );
     });
 
     it('rejects a nested match_any control character on update', async () => {

@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   CONTROL_CHARACTER_ERROR,
-  EDGE_WHITESPACE_WARNING,
   ConditionEntryField,
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
@@ -139,15 +138,21 @@ describe('Condition entry input', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ['warning', { errors: [], warnings: [EDGE_WHITESPACE_WARNING] }, EDGE_WHITESPACE_WARNING],
-    ['error', { errors: [CONTROL_CHARACTER_ERROR], warnings: [] }, CONTROL_CHARACTER_ERROR],
-  ])('renders an inline %s and marks the value input invalid', (_, validation, message) => {
-    props = { ...props, validation };
+  it('renders an inline warning without marking the value input invalid', () => {
+    props = { ...props, validation: { errors: [], warnings: ['Path may be formed incorrectly'] } };
     render();
 
     const valueInput = renderResult.getByTestId(`${formPrefix}-value`);
-    expect(renderResult.getByText(message)).toBeInTheDocument();
+    expect(renderResult.getByText('Path may be formed incorrectly')).toBeInTheDocument();
+    expect(valueInput).not.toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('renders an inline error and marks the value input invalid', () => {
+    props = { ...props, validation: { errors: [CONTROL_CHARACTER_ERROR], warnings: [] } };
+    render();
+
+    const valueInput = renderResult.getByTestId(`${formPrefix}-value`);
+    expect(renderResult.getByText(CONTROL_CHARACTER_ERROR)).toBeInTheDocument();
     expect(valueInput).toHaveAttribute('aria-invalid', 'true');
   });
 

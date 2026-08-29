@@ -140,9 +140,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     listType === ExceptionListTypeEnum.ENDPOINT_EVENTS ||
     listType === ExceptionListTypeEnum.ENDPOINT_BLOCKLISTS ||
     (listType === ExceptionListTypeEnum.ENDPOINT &&
-      listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id);
+      (listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id ||
+        listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id));
 
-  const getInvisibleCharacterWarning = (value?: string): string | undefined => {
+  const getInvisibleCharacterWarning = (value?: string | string[]): string | undefined => {
     if (!isEndpointArtifactBuilder) {
       return undefined;
     }
@@ -470,6 +471,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       case OperatorTypeEnum.MATCH_ANY:
         const values: string[] = Array.isArray(entry.value) ? entry.value : [];
+        const matchAnyWarning = getInvisibleCharacterWarning(values);
         return (
           <AutocompleteFieldMatchAnyComponent
             autocompleteService={autocompleteService}
@@ -486,6 +488,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isClearable={false}
             indexPattern={indexPattern}
             onError={handleError}
+            onWarning={handleWarning}
+            warning={matchAnyWarning}
             onChange={handleFieldMatchAnyValueChange}
             isRequired
             aria-label={ariaLabel}

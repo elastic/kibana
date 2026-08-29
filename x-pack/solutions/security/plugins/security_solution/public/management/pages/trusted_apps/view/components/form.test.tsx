@@ -12,7 +12,6 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import {
   CONTROL_CHARACTER_ERROR,
-  EDGE_WHITESPACE_WARNING,
   OperatingSystem,
   ConditionEntryField,
 } from '@kbn/securitysolution-utils';
@@ -415,20 +414,30 @@ describe('Trusted apps form', () => {
     });
 
     describe('invisible character validation', () => {
-      it('shows edge whitespace beside the affected value before path warnings', () => {
+      it('validates the trimmed value instead of warning about edge whitespace', () => {
         formProps.item = createItem({
           entries: [createEntry(ConditionEntryField.PATH, 'match', ' malformed-path ')],
         });
         rerender();
 
         const condition = getCondition();
-        expect(getByTestId(condition, `${condition.dataset.testSubj}-value`)).toHaveAttribute(
+        expect(getByTestId(condition, `${condition.dataset.testSubj}-value`)).not.toHaveAttribute(
           'aria-invalid',
           'true'
         );
-        expect(condition).toContainElement(renderResult.getByText(EDGE_WHITESPACE_WARNING));
-        expect(renderResult.getAllByText(EDGE_WHITESPACE_WARNING)).toHaveLength(1);
-        expect(renderResult.queryByText(INPUT_ERRORS.pathWarning(0))).not.toBeInTheDocument();
+        expect(condition).toContainElement(renderResult.getByText(INPUT_ERRORS.pathWarning(0)));
+      });
+
+      it('shows an invalid-hash error for a padded invalid hash', () => {
+        formProps.item = createItem({
+          entries: [createEntry(ConditionEntryField.HASH, 'match', ' not-a-hash ')],
+        });
+        rerender();
+
+        expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0))).toBeInTheDocument();
+        expect(formProps.onChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ isValid: false })
+        );
       });
 
       it('blocks submission for an interior control character', async () => {
@@ -446,7 +455,7 @@ describe('Trusted apps form', () => {
         );
       });
 
-      it('keeps an edge-whitespace warning submit-eligible', async () => {
+      it('keeps an edge-whitespace value submit-eligible', async () => {
         formProps.item = createItem({
           name: 'Trusted app',
           entries: [createEntry(ConditionEntryField.PATH, 'match', ' C:\\Elastic\\Endpoint.exe')],
@@ -455,7 +464,6 @@ describe('Trusted apps form', () => {
 
         await userEvent.type(getNameField(), ' ');
 
-        expect(renderResult.getByText(EDGE_WHITESPACE_WARNING)).toBeInTheDocument();
         expect(formProps.onChange).toHaveBeenLastCalledWith(
           expect.objectContaining({ isValid: true })
         );

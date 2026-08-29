@@ -9,16 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export enum InputValueCharacterIssue {
   CONTROL_CHARACTER = 'control_character',
-  EDGE_WHITESPACE = 'edge_whitespace',
 }
-
-export const EDGE_WHITESPACE_WARNING = i18n.translate(
-  'utils.inputValueValidation.edgeWhitespaceWarningMessage',
-  {
-    defaultMessage:
-      'Leading or trailing whitespace prevents matching and will be removed automatically.',
-  }
-);
 
 export const CONTROL_CHARACTER_ERROR = i18n.translate(
   'utils.inputValueValidation.controlCharacterErrorMessage',
@@ -30,18 +21,10 @@ export const CONTROL_CHARACTER_ERROR = i18n.translate(
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001F\u007F-\u009F]/;
 
 const getStringCharacterIssue = (value: string): InputValueCharacterIssue | undefined => {
-  if (!value.length) {
-    return;
-  }
-
   const trimmedValue = value.trim();
 
-  if (CONTROL_CHARACTER_PATTERN.test(trimmedValue)) {
+  if (trimmedValue.length && CONTROL_CHARACTER_PATTERN.test(trimmedValue)) {
     return InputValueCharacterIssue.CONTROL_CHARACTER;
-  }
-
-  if (value !== trimmedValue) {
-    return InputValueCharacterIssue.EDGE_WHITESPACE;
   }
 };
 
@@ -69,8 +52,14 @@ export const getInputValueCharacterIssueMessage = (
   if (issue === InputValueCharacterIssue.CONTROL_CHARACTER) {
     return CONTROL_CHARACTER_ERROR;
   }
+};
 
-  if (issue === InputValueCharacterIssue.EDGE_WHITESPACE) {
-    return EDGE_WHITESPACE_WARNING;
+export const trimInputValue = (value: string): string => value.trim();
+
+export const trimInputValues = (value: string | string[]): string | string[] => {
+  if (Array.isArray(value)) {
+    return value.map(trimInputValue).filter((member) => member.length > 0);
   }
+
+  return trimInputValue(value);
 };

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getInputValueCharacterIssue, InputValueCharacterIssue } from '.';
+import {
+  getInputValueCharacterIssue,
+  InputValueCharacterIssue,
+  trimInputValue,
+  trimInputValues,
+} from '.';
 
 describe('getInputValueCharacterIssue', () => {
   it.each([
@@ -19,35 +24,18 @@ describe('getInputValueCharacterIssue', () => {
     expect(getInputValueCharacterIssue(value)).toBe(InputValueCharacterIssue.CONTROL_CHARACTER);
   });
 
-  it.each([
-    ['space', ' value '],
-    ['tab', '\tvalue\t'],
-    ['line feed', '\nvalue\n'],
-    ['non-breaking space', '\u00A0value\u00A0'],
-    ['byte order mark', '\uFEFFvalue\uFEFF'],
-  ])('classifies edge %s as repairable whitespace', (_, value) => {
-    expect(getInputValueCharacterIssue(value)).toBe(InputValueCharacterIssue.EDGE_WHITESPACE);
-  });
-
-  it('classifies an edge-only tab as whitespace and an interior tab as a control', () => {
-    expect(getInputValueCharacterIssue('\tvalue')).toBe(InputValueCharacterIssue.EDGE_WHITESPACE);
-    expect(getInputValueCharacterIssue('value\tvalue')).toBe(
-      InputValueCharacterIssue.CONTROL_CHARACTER
-    );
-  });
-
   it('gives a remaining control character precedence over edge whitespace', () => {
     expect(getInputValueCharacterIssue(' value\u0000 ')).toBe(
       InputValueCharacterIssue.CONTROL_CHARACTER
     );
   });
 
-  it('inspects every array member', () => {
-    expect(getInputValueCharacterIssue(['clean', 'also clean', 'bad\u007Fvalue'])).toBe(
+  it('inspects every array member and prefers a control character', () => {
+    expect(getInputValueCharacterIssue([' whitespace ', 'ctl\u0000'])).toBe(
       InputValueCharacterIssue.CONTROL_CHARACTER
     );
-    expect(getInputValueCharacterIssue(['clean', ' trailing '])).toBe(
-      InputValueCharacterIssue.EDGE_WHITESPACE
+    expect(getInputValueCharacterIssue(['clean', 'also clean', 'bad\u007Fvalue'])).toBe(
+      InputValueCharacterIssue.CONTROL_CHARACTER
     );
   });
 
@@ -59,7 +47,23 @@ describe('getInputValueCharacterIssue', () => {
     ['Unix path', '/opt/Elastic Endpoint/endpoint'],
     ['hash', 'a'.repeat(64)],
     ['ordinary interior spaces', 'Elastic Endpoint'],
+    ['leading and trailing space', ' value '],
+    ['edge tab', '\tvalue\t'],
+    ['edge line feed', '\nvalue\n'],
+    ['edge non-breaking space', '\u00A0value\u00A0'],
+    ['edge byte order mark', '\uFEFFvalue\uFEFF'],
+    ['array of edge-whitespace members', ['clean', ' trailing ']],
   ])('returns no issue for a clean %s', (_, value) => {
     expect(getInputValueCharacterIssue(value)).toBeUndefined();
+  });
+});
+
+describe('trimInputValues', () => {
+  it('trims a string', () => {
+    expect(trimInputValue('  /opt/app  ')).toBe('/opt/app');
+  });
+
+  it('trims array members and drops empties', () => {
+    expect(trimInputValues(['  one  ', '\ttwo', '   ', 'three'])).toEqual(['one', 'two', 'three']);
   });
 });

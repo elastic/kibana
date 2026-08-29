@@ -1190,6 +1190,7 @@ describe('BuilderEntryItem', () => {
     ['trusted applications', 'endpoint', ENDPOINT_ARTIFACT_LISTS.trustedApps.id],
     ['event filters', 'endpoint_events', ENDPOINT_ARTIFACT_LISTS.eventFilters.id],
     ['blocklists', 'endpoint_blocklists', ENDPOINT_ARTIFACT_LISTS.blocklists.id],
+    ['endpoint exceptions', 'endpoint', ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id],
   ] as const)(
     'it shows invisible-character feedback for %s match values',
     (_, listType, listId) => {
@@ -1229,7 +1230,7 @@ describe('BuilderEntryItem', () => {
   );
 
   test('invisible-character feedback takes precedence over wildcard path feedback', () => {
-    (getInputValueCharacterIssue as jest.Mock).mockReturnValue('edge_whitespace');
+    (getInputValueCharacterIssue as jest.Mock).mockReturnValue('control_character');
     (getInputValueCharacterIssueMessage as jest.Mock).mockReturnValue(
       'invisible-character warning'
     );
@@ -1266,8 +1267,11 @@ describe('BuilderEntryItem', () => {
     expect(validatePotentialWildcardInput).not.toHaveBeenCalled();
   });
 
-  test('it leaves match_any client validation unchanged for Endpoint artifacts', () => {
+  test('it shows invisible-character feedback for Endpoint artifact match_any values', () => {
     (getInputValueCharacterIssue as jest.Mock).mockReturnValue('control_character');
+    (getInputValueCharacterIssueMessage as jest.Mock).mockReturnValue(
+      'invisible-character warning'
+    );
 
     wrapper = mount(
       <BuilderEntryItem
@@ -1295,13 +1299,13 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(getInputValueCharacterIssue).not.toHaveBeenCalled();
+    expect(getInputValueCharacterIssue).toHaveBeenCalledWith(['clean', 'bad\u0000value']);
+    expect(wrapper.text()).toContain('invisible-character warning');
   });
 
   test.each([
     ['detection', undefined],
     ['rule_default', undefined],
-    ['endpoint', 'endpoint_list'],
   ] as const)('it excludes %s exception match values', (listType, listId) => {
     (getInputValueCharacterIssue as jest.Mock).mockReturnValue('control_character');
     (getInputValueCharacterIssueMessage as jest.Mock).mockReturnValue(

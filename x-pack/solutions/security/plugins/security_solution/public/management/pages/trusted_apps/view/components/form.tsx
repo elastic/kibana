@@ -36,7 +36,6 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import {
   CONTROL_CHARACTER_ERROR,
-  EDGE_WHITESPACE_WARNING,
   getInputValueCharacterIssue,
   InputValueCharacterIssue,
   hasSimpleExecutableName,
@@ -243,29 +242,24 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
         return;
       }
 
-      const characterIssue = getInputValueCharacterIssue(entryValue);
-      if (characterIssue === InputValueCharacterIssue.CONTROL_CHARACTER) {
+      if (getInputValueCharacterIssue(entryValue) === InputValueCharacterIssue.CONTROL_CHARACTER) {
         isValid = false;
         addEntryResultToValidation(validation, index, 'errors', CONTROL_CHARACTER_ERROR);
         return;
       }
 
-      if (characterIssue === InputValueCharacterIssue.EDGE_WHITESPACE) {
-        addEntryResultToValidation(validation, index, 'warnings', EDGE_WHITESPACE_WARNING);
-        return;
-      }
-
+      const trimmedValue = entryValue.trim();
       const isValidPathEntry = isPathValid({
         os,
         field: entry.field as AllConditionEntryFields,
         type: entry.type as EntryTypes,
-        value: entryValue,
+        value: trimmedValue,
       });
 
       if (
         validateHasWildcardWithWrongOperator({
           operator: entry.type as EntryTypes,
-          value: entryValue,
+          value: trimmedValue,
         })
       ) {
         if (entry.field === ConditionEntryField.PATH) {
@@ -290,7 +284,7 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
         validation.showUnnecessaryEscapingCalloutAndConfirmModal = true;
       }
 
-      if (entry.field === ConditionEntryField.HASH && !isValidHash(entryValue)) {
+      if (entry.field === ConditionEntryField.HASH && !isValidHash(trimmedValue)) {
         isValid = false;
         addEntryResultToValidation(validation, index, 'errors', INPUT_ERRORS.invalidHash(index));
       } else if (!isValidPathEntry) {
@@ -299,7 +293,7 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
         isValidPathEntry &&
         !hasSimpleExecutableName({
           os,
-          value: entryValue,
+          value: trimmedValue,
           type: entry.type as EntryTypes,
         })
       ) {

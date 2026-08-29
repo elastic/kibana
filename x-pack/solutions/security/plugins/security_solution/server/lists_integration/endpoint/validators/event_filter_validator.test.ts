@@ -60,7 +60,7 @@ describe('Endpoint Exceptions API validations', () => {
       );
     });
 
-    it('rejects edge whitespace on create', async () => {
+    it('trims edge whitespace on create', async () => {
       const item = buildItem('process.executable');
       item.entries = [
         {
@@ -71,9 +71,8 @@ describe('Endpoint Exceptions API validations', () => {
         },
       ];
 
-      await expect(validator.validatePreCreateItem(item)).rejects.toThrow(
-        /leading or trailing whitespace in fields: process\.executable/
-      );
+      await expect(validator.validatePreCreateItem(item)).resolves.toBeDefined();
+      expect(item.entries[0]).toEqual(expect.objectContaining({ value: '/opt/Elastic/*' }));
     });
 
     it('rejects a control character in a nested entry on update', async () => {
