@@ -65,6 +65,9 @@ export function httpHandlerFromKbnClient({
 
     const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
     const retryStatuses = new Set([429, 503, 504]);
+    // Transport-level deaths, which arrive with no HTTP status at all.
+    const RETRYABLE_TRANSPORT_ERRORS =
+      /fetch failed|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE|EAI_AGAIN|socket hang up|other side closed/i;
 
     async function sleep(ms: number) {
       await new Promise((r) => setTimeout(r, ms));
@@ -142,8 +145,22 @@ export function httpHandlerFromKbnClient({
 
         lastError = error;
 
+        // A dead transport carries no HTTP status: kbnClient surfaces it as
+        // `Status: N/A, Cause: fetch failed` (undici) or a bare socket errno.
+        // Those are exactly the blips a long sweep must survive -- glm-5-2 lost
+        // 19 of 21 examples 58 minutes in when Kibana stopped answering and
+        // every remaining example failed this way. Retry them like a 503, but
+        // stay narrow: a status-less TypeError from our own code is a bug, not
+        // a blip, and must still fail fast.
+        const transportCause = `${error.message ?? ''} ${
+          (error as { cause?: { code?: string; message?: string } }).cause?.code ?? ''
+        } ${(error as { cause?: { message?: string } }).cause?.message ?? ''}`;
+        const isTransportFailure =
+          typeof status !== 'number' && RETRYABLE_TRANSPORT_ERRORS.test(transportCause);
+
         const shouldRetry =
-          attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
+          attempt < maxRetries &&
+          ((typeof status === 'number' && retryStatuses.has(status)) || isTransportFailure);
 
         if (!shouldRetry) {
           throw error;
@@ -162,9 +179,11 @@ export function httpHandlerFromKbnClient({
         const delayMs = baseDelayMs + jitterMs;
 
         log.warning(
-          `HTTP ${status} from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${
-            attempt + 1
-          }/${maxRetries + 1})`
+          `${
+            typeof status === 'number' ? `HTTP ${status}` : 'Transport failure'
+          } from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${attempt + 1}/${
+            maxRetries + 1
+          })`
         );
         await sleep(delayMs);
       }
