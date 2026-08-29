@@ -25,6 +25,7 @@ const rulesClientContext = {
   unsecuredSavedObjectsClient,
   authorization: authorization as unknown as AlertingAuthorization,
   logger: loggingSystemMock.create().get(),
+  spaceId: 'default',
 } as unknown as RulesClientContext;
 
 const rulesClientContextWithAuditLogger = {
@@ -260,15 +261,44 @@ describe('findRuleTemplates', () => {
     );
   });
 
-  test('applies search and sort parameters', async () => {
+  const mockSearchHits = (...templates: Array<typeof mockTemplate1>) => ({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, failed: 0 },
+    hits: {
+      total: { value: templates.length, relation: 'eq' as const },
+      hits: templates.map((template) => ({
+        _id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:${template.id}`,
+        _source: {
+          type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          [RULE_TEMPLATE_SAVED_OBJECT_TYPE]: template.attributes,
+        },
+      })),
+    },
+  });
+
+  test('uses find() when search is empty', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      per_page: 5,
-      page: 2,
-      saved_objects: [mockTemplate1],
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [mockTemplate1, mockTemplate2],
     });
 
     await findRuleTemplates(rulesClientContext, {
+      perPage: 10,
+      page: 1,
+      search: '   ',
+    });
+
+    expect(unsecuredSavedObjectsClient.search).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalled();
+  });
+
+  test('uses search() for a typed query and keeps sort', async () => {
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(mockSearchHits(mockTemplate1));
+
+    const result = await findRuleTemplates(rulesClientContext, {
       perPage: 5,
       page: 2,
       search: 'my template',
@@ -277,31 +307,63 @@ describe('findRuleTemplates', () => {
       sortOrder: 'desc',
     });
 
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
-      type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    expect(result).toEqual({
       page: 2,
       perPage: 5,
-      sortField: 'name.keyword',
-      sortOrder: 'desc',
-      filter: expect.any(Object),
+      total: 1,
+      data: [
+        {
+          id: 'template-1',
+          name: 'Template 1',
+          description: 'My first template',
+          ruleTypeId: 'test.rule.type',
+          schedule: { interval: '1m' },
+          params: { foo: 'bar' },
+          tags: ['tag1'],
+        },
+      ],
     });
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(((alerting_rule_template.attributes.name.keyword: *my*template* OR ' +
-        'alerting_rule_template.attributes.tags: *my*template*) AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)) AND ' +
-        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'
-    );
+    expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledWith({
+      type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+      namespaces: ['default'],
+      from: 5,
+      size: 5,
+      track_total_hits: true,
+      sort: [{ 'alerting_rule_template.name.keyword': { order: 'desc' } }],
+      query: {
+        bool: {
+          filter: expect.any(Array),
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    wildcard: {
+                      'alerting_rule_template.name.keyword': { value: '*my template*' },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'alerting_rule_template.tags': {
+                        value: '*my template*',
+                        case_insensitive: true,
+                      },
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    });
   });
 
-  test('matches a partial search against name and tags', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [mockTemplate1],
-    });
+  test('search() does not pass find() search or searchFields', async () => {
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(mockSearchHits(mockTemplate1));
 
     await findRuleTemplates(rulesClientContext, {
       perPage: 10,
@@ -309,15 +371,39 @@ describe('findRuleTemplates', () => {
       search: 'kub*',
     });
 
-    expect(unsecuredSavedObjectsClient.find.mock.calls[0][0].search).toBeUndefined();
-    expect(unsecuredSavedObjectsClient.find.mock.calls[0][0].searchFields).toBeUndefined();
+    expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+    const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+    expect(searchCall.search).toBeUndefined();
+    expect(searchCall.searchFields).toBeUndefined();
+    expect(JSON.stringify(searchCall.query)).toContain('*kub**');
+  });
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(((alerting_rule_template.attributes.name.keyword: *kub* OR ' +
-        'alerting_rule_template.attributes.tags: *kub*) AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)) AND ' +
-        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'
+  test('CPU threshold and CPU*threshold emit different wildcard values', async () => {
+    unsecuredSavedObjectsClient.search.mockResolvedValue(mockSearchHits(mockTemplate1));
+
+    await findRuleTemplates(rulesClientContext, {
+      perPage: 10,
+      page: 1,
+      search: 'CPU threshold',
+    });
+    await findRuleTemplates(rulesClientContext, {
+      perPage: 10,
+      page: 1,
+      search: 'CPU*threshold',
+    });
+
+    const nameWildcardValue = (query: unknown): string | undefined => {
+      const match = JSON.stringify(query).match(
+        /"alerting_rule_template\.name\.keyword":\{"value":"([^"]+)"\}/
+      );
+      return match?.[1];
+    };
+
+    expect(nameWildcardValue(unsecuredSavedObjectsClient.search.mock.calls[0][0].query)).toBe(
+      '*CPU threshold*'
+    );
+    expect(nameWildcardValue(unsecuredSavedObjectsClient.search.mock.calls[1][0].query)).toBe(
+      '*CPU*threshold*'
     );
   });
 
@@ -354,6 +440,19 @@ describe('findRuleTemplates', () => {
         page: 1,
       })
     ).rejects.toThrow('Something went wrong');
+  });
+
+  test('handles errors from saved objects search()', async () => {
+    const error = new Error('search failed');
+    unsecuredSavedObjectsClient.search.mockRejectedValueOnce(error);
+
+    await expect(
+      findRuleTemplates(rulesClientContext, {
+        perPage: 10,
+        page: 1,
+        search: 'kub',
+      })
+    ).rejects.toThrow('search failed');
   });
 
   test('returns empty results when no templates found', async () => {

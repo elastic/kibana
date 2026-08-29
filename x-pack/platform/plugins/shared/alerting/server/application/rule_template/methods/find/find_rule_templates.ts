@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { findRuleTemplatesSo } from '../../../../data/rule_template';
+import { findRuleTemplatesSo, searchRuleTemplatesSo } from '../../../../data/rule_template';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { FindRuleTemplatesParams } from './types';
 import { findRuleTemplatesParamsSchema } from './schema';
@@ -18,7 +18,7 @@ import type { RuleTemplate } from '../../types';
 import {
   buildRuleTypeIdsFilter,
   buildTagsFilter,
-  buildTemplateSearchFilter,
+  buildTemplateSearchQuery,
   combineFilters,
   combineFilterWithAuthorizationFilter,
 } from '../../../../rules_client/common/filters';
@@ -64,28 +64,39 @@ export async function findRuleTemplates(
     ? buildRuleTypeIdsFilter([ruleTypeId], RULE_TEMPLATE_SAVED_OBJECT_TYPE)
     : undefined;
   const tagsFilter = tags ? buildTagsFilter(tags, RULE_TEMPLATE_SAVED_OBJECT_TYPE) : undefined;
-  const searchFilter = buildTemplateSearchFilter(search);
-  const combinedFilters = combineFilters([ruleTypeFilter, tagsFilter, searchFilter], 'and');
+  const combinedFilters = combineFilters([ruleTypeFilter, tagsFilter], 'and');
 
   const finalFilter = authorizationFilter
     ? combineFilterWithAuthorizationFilter(combinedFilters, authorizationFilter as KueryNode)
     : combinedFilters;
 
+  const searchQuery = buildTemplateSearchQuery(search);
   const {
     page: resultPage,
     per_page: resultPerPage,
     total,
     saved_objects: data,
-  } = await findRuleTemplatesSo({
-    savedObjectsClient: context.unsecuredSavedObjectsClient,
-    savedObjectsFindOptions: {
-      page,
-      perPage,
-      sortField: mapSortField(sortField),
-      sortOrder,
-      filter: finalFilter,
-    },
-  });
+  } = searchQuery
+    ? await searchRuleTemplatesSo({
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+        namespaces: [context.spaceId || 'default'],
+        page,
+        perPage,
+        sortField: mapSortField(sortField),
+        sortOrder,
+        filter: finalFilter,
+        searchQuery,
+      })
+    : await findRuleTemplatesSo({
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+        savedObjectsFindOptions: {
+          page,
+          perPage,
+          sortField: mapSortField(sortField),
+          sortOrder,
+          filter: finalFilter,
+        },
+      });
 
   const authorizedData = data.map((so) => {
     try {
