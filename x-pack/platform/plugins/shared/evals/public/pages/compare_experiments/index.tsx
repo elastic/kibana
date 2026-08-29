@@ -664,11 +664,18 @@ export const CompareExperimentsPage: React.FC = () => {
       'Mean baseline',
       'Mean target',
       'Diff',
+      'Direction',
       'p-value',
       'Significant',
+      'Outcome',
     ];
     const rows = sortedResults.map((r) => {
       const diff = computeCompareDiff(r.meanTarget, r.meanBaseline);
+      const significant = r.pValue !== null && r.pValue < SIGNIFICANCE_THRESHOLD;
+      let outcome = '';
+      if (significant && r.direction !== 'neutral') {
+        outcome = isImproved(diff, r.direction) ? 'Improvement' : 'Regression';
+      }
       return [
         `"${r.datasetName.replace(/"/g, '""')}"`,
         `"${r.evaluatorName.replace(/"/g, '""')}"`,
@@ -676,8 +683,10 @@ export const CompareExperimentsPage: React.FC = () => {
         r.meanBaseline.toFixed(4),
         r.meanTarget.toFixed(4),
         diff.toFixed(4),
+        r.direction,
         r.pValue?.toFixed(6) ?? '',
-        r.pValue !== null && r.pValue < SIGNIFICANCE_THRESHOLD ? 'Yes' : 'No',
+        significant ? 'Yes' : 'No',
+        outcome,
       ];
     });
     const csv = [header.join(','), ...rows.map((row) => row.join(','))].join('\n');

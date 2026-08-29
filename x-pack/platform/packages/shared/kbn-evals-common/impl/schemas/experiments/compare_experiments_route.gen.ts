@@ -22,13 +22,7 @@ export const PairedTTestResult = lazySchema(() =>
     datasetName: z.string().max(256),
     evaluatorName: z.string().max(256),
     sampleSize: z.number().int(),
-    /**
-     * Mean score of the baseline experiment
-     */
     meanBaseline: z.number(),
-    /**
-     * Mean score of the target experiment
-     */
     meanTarget: z.number(),
     pValue: z.number().nullable(),
     /**
