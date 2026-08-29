@@ -65,15 +65,15 @@ describe('RecommendedActionsDecisionForm', () => {
     );
   });
 
-  it('marks analyze_exfiltration_ips as surfaced-only, because it is never executed', () => {
+  it('marks analyze_exfiltration_ips as a read-only agent hunt, so the toggle cannot read as a response action', () => {
     renderWithPndProviders(<RecommendedActionsDecisionForm {...defaultProps} />);
 
-    expect(screen.getByTestId('pndRecommendedActionSurfacedOnly-1')).toHaveTextContent(
-      'Surfaced only — not executed by the workflow'
+    expect(screen.getByTestId('pndRecommendedActionAgentHunt-1')).toHaveTextContent(
+      'Read-only agent hunt — findings post to the incident chat'
     );
   });
 
-  it('still gives the surfaced-only action a toggle, so the endorsement is recorded', () => {
+  it('gives the agent-hunt action a toggle, because approving it runs the hunt', () => {
     renderWithPndProviders(<RecommendedActionsDecisionForm {...defaultProps} />);
 
     expect(screen.getByTestId('pndRecommendedActionToggle-1')).toBeInTheDocument();

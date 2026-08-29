@@ -1079,6 +1079,7 @@ describe('watch_floor.yaml phase 3 recommended actions', () => {
       'execute_isolate_host_actions',
       'execute_kill_process_actions',
       'execute_hunt_process_persistence_actions',
+      'execute_analyze_exfiltration_ips_actions',
       'account_unexecuted_actions',
       'collect_executed_actions',
       'record_containment_outcome',
@@ -1213,6 +1214,7 @@ describe('watch_floor.yaml phase 3 recommended actions', () => {
     ['execute_isolate_host_actions', 'isolate_host'],
     ['execute_kill_process_actions', 'kill_process'],
     ['execute_hunt_process_persistence_actions', 'hunt_process_persistence'],
+    ['execute_analyze_exfiltration_ips_actions', 'analyze_exfiltration_ips'],
   ])('%s', (stepName, actionType) => {
     const step = getStep(stepName);
 
@@ -1237,6 +1239,52 @@ describe('watch_floor.yaml phase 3 recommended actions', () => {
 
     it('is never wrapped in an if step', () => {
       expect(findEnclosingIf(stepName)).toBeUndefined();
+    });
+  });
+
+  // The exfil-analysis "execution" is a scoped, read-only agent hunt rather than a
+  // kibana.request: its findings land in the incident conversation (the audit thread)
+  // and its structured result lands in the ledger — approval authorizes a bounded
+  // read, never a mutation.
+  describe('analyze_exfiltration_ips runs as a read-only agent hunt', () => {
+    const block = getStep('execute_analyze_exfiltration_ips_actions');
+    const hunt = (block.steps ?? []).find(
+      (child: { name?: string }) => child.name === 'analyze_exfiltration_ips'
+    );
+
+    it('is an ai.agent step that appends to the incident conversation', () => {
+      expect(hunt?.type).toBe('ai.agent');
+      expect(hunt?.with?.conversation_id).toContain(
+        'steps.derive_ids.output.incidentConversationId'
+      );
+      expect(hunt?.with?.metadata?.pnd_conversation_kind).toBe('incident');
+    });
+
+    it('instructs a strictly read-only hunt', () => {
+      expect(hunt?.with?.message).toContain('strictly read-only');
+      expect(hunt?.with?.message).toContain('do not execute any response action');
+    });
+
+    it('continues on failure, so a failed hunt records a ledger row instead of blocking close-out', () => {
+      expect(hunt?.['on-failure']?.continue).toBe(true);
+    });
+
+    it('requires a bounded structured hunt result', () => {
+      const schema = hunt?.with?.schema;
+      expect(schema?.required).toEqual([
+        'summary',
+        'communicating_hosts',
+        'exfiltration_suspected',
+      ]);
+      expect(schema?.properties?.summary?.maxLength).toBe(2000);
+      expect(schema?.properties?.communicating_hosts?.maxItems).toBe(50);
+    });
+
+    it('records both a success and a failure ledger record', () => {
+      const names = (block.steps ?? []).map((child: { name?: string }) => child.name);
+      expect(names).toEqual(
+        expect.arrayContaining(['record_exfil_analysis_success', 'record_exfil_analysis_failure'])
+      );
     });
   });
 

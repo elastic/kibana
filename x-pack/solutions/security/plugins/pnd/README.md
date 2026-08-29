@@ -180,9 +180,10 @@ Attack Discovery 2.0 generation  (any of 4 invocation methods; see the write-pat
                    │    execute_set_asset_criticality_actions (Entity Store EUID resolve + bulk write)
                    │    execute_isolate_host_actions / execute_kill_process_actions /
                    │      execute_hunt_process_persistence_actions   (Endpoint response actions)
+                   │    execute_analyze_exfiltration_ips_actions     (read-only ai.agent hunt —
+                   │      findings appended to the incident conversation + a structured ledger row)
                    │    account_unexecuted_actions   (ledger completeness — not_executed reasons:
-                   │      manual action / surfaced-only (analyze_exfiltration_ips) /
-                   │      containment dismissed / not approved)
+                   │      manual action / containment dismissed / not approved)
                    │    collect_executed_actions     (stable ledger marker the projection keys on)
                    │    record_containment_outcome   (audit turn in the incident conversation,
                    │      incl. approved actions + the ledger)
@@ -878,8 +879,10 @@ precedence order:
    same label-anchored `| json` contract style as the tuning facts) is drawn by
    `RecommendedActionsDecisionForm`: **one toggle per staged `kibana_api` action, every toggle
    starting off**; a `manual` action is listed read-only, because the workflow never executes it no
-   matter what is sent; `analyze_exfiltration_ips` is marked **surfaced-only** — its toggle records
-   endorsement, not execution. Choosing **dismiss disables every toggle and empties the set**, so a
+   matter what is sent; `analyze_exfiltration_ips` is badged as a **read-only agent hunt** — there
+   is no single Kibana endpoint behind `threat_hunting.exfil_ips`, so approving it runs a scoped
+   `ai.agent` hunt post-gate whose findings land in the incident conversation and whose structured
+   result lands in the ledger, never a mutation. Choosing **dismiss disables every toggle and empties the set**, so a
    dismissal can never smuggle an approval. The form reports the toggled-on actions as the full
    objects under `approved_actions`, seeded as `[]` rather than absent so an approval that toggles
    nothing on says so explicitly.

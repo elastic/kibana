@@ -25,11 +25,12 @@ import * as i18n from './translations';
 export const APPROVED_ACTIONS_NAME = 'approved_actions';
 
 /**
- * The one staged action the Watch Floor surfaces but never executes: its
- * toggle records the analyst's endorsement, and the row says so out loud
- * rather than letting the toggle read as "will run".
+ * The one staged action whose execution is analysis rather than a state
+ * change: approving it runs a scoped, read-only agent hunt whose findings are
+ * appended to the incident conversation. The row says so out loud, because a
+ * toggle that reads like a response action would overstate what it authorizes.
  */
-const SURFACED_ONLY_ACTION_TYPE = 'analyze_exfiltration_ips';
+const AGENT_HUNT_ACTION_TYPE = 'analyze_exfiltration_ips';
 
 interface PriorityBadge {
   color: 'danger' | 'hollow' | 'warning';
@@ -230,12 +231,12 @@ export const RecommendedActionsDecisionForm: React.FC<RecommendedActionsDecision
                       {i18n.MANUAL_BADGE}
                     </EuiBadge>
                   ) : null}
-                  {action.action_type === SURFACED_ONLY_ACTION_TYPE ? (
+                  {action.action_type === AGENT_HUNT_ACTION_TYPE ? (
                     <EuiBadge
-                      color="warning"
-                      data-test-subj={`pndRecommendedActionSurfacedOnly-${index}`}
+                      color="hollow"
+                      data-test-subj={`pndRecommendedActionAgentHunt-${index}`}
                     >
-                      {i18n.SURFACED_ONLY_BADGE}
+                      {i18n.AGENT_HUNT_BADGE}
                     </EuiBadge>
                   ) : null}
                 </div>

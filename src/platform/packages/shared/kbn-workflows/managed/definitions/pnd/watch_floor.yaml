@@ -1614,11 +1614,137 @@ steps:
             ${{ variables.executed_actions
               | push: steps.build_hunt_process_persistence_missing_agent_record.output.execution_record }}
 
+
+  # analyze_exfiltration_ips is the one approved action whose "execution" is analysis
+  # rather than a state change: there is no single Kibana endpoint behind
+  # threat_hunting.exfil_ips, so an approved toggle runs a scoped, READ-ONLY agent hunt
+  # instead of a kibana.request. The findings are appended to the incident conversation
+  # — the audit thread — and the ledger records the structured result, so approval
+  # authorizes a bounded read, never a mutation. on-failure continue: a failed hunt
+  # records a failed ledger row and must not block closing out the incident.
+  # create-conversation: true is the same degrade path as record_dismissed_investigation —
+  # when open_incident failed-and-continued, the incident conversation does not exist
+  # yet, and the hunt findings can still mint it at the same deterministic UUIDv5.
+  - name: execute_analyze_exfiltration_ips_actions
+    type: foreach
+    if: >-
+      ${{ steps.await_incident_contained.output.response.decision == 'approve' }}
+    foreach: >-
+      ${{ variables.approved_actions | where: 'action_type', 'analyze_exfiltration_ips' }}
+    steps:
+      - name: capture_exfil_analysis_action
+        type: data.set
+        with:
+          current_action: "${{ foreach.item }}"
+
+      - name: analyze_exfiltration_ips
+        type: ai.agent
+        timeout: "10m"
+        create-conversation: true
+        public-conversation: true
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.derive_ids.output.incidentConversationId }}"
+          metadata:
+            pnd_conversation_kind: incident
+            pnd_attack_discovery_alert_id: "{{ event.attackDiscoveryAlertId }}"
+          message: >
+            APPROVED CONTAINMENT ANALYSIS — read-only. A human analyst approved the
+            containment action below for this incident. Run a scoped, time-bounded,
+            strictly read-only threat hunt and report your findings; do not modify,
+            create, or delete anything, and do not execute any response action.
+
+
+            Approved action: {{ foreach.item.title }}
+
+            Action rationale: {{ foreach.item.rationale }}
+
+            Target IPs: {{ foreach.item.targets.ips | json }}
+
+            Known affected hosts: {{ foreach.item.targets.hosts | json }}
+
+
+            Using read-only ES|QL over this space's alert and event indices (for example
+            .alerts-security.alerts-{{ workflow.spaceId }} and logs-*), bounded to the
+            last 7 days: identify every host that communicated with the target IPs,
+            flag outbound volumes or patterns suggesting data exfiltration, and state
+            the time bounds of the activity. End with a concise summary suitable for
+            the incident audit thread.
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              summary:
+                type: string
+                maxLength: 2000
+                description: Concise hunt findings for the incident audit thread.
+              communicating_hosts:
+                type: array
+                maxItems: 50
+                description: Every host observed communicating with the target IPs.
+                items:
+                  type: string
+                  maxLength: 256
+              exfiltration_suspected:
+                type: boolean
+                description: Whether the observed traffic patterns suggest data exfiltration.
+            required:
+              - summary
+              - communicating_hosts
+              - exfiltration_suspected
+
+      - name: build_exfil_analysis_success_record
+        type: data.set
+        if: >-
+          ${{ steps.analyze_exfiltration_ips.error == null
+            and steps.analyze_exfiltration_ips.output.structured_output != null }}
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: succeeded
+            output: "${{ steps.analyze_exfiltration_ips.output.structured_output }}"
+
+      - name: record_exfil_analysis_success
+        type: data.set
+        if: >-
+          ${{ steps.analyze_exfiltration_ips.error == null
+            and steps.analyze_exfiltration_ips.output.structured_output != null }}
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_exfil_analysis_success_record.output.execution_record }}
+
+      - name: build_exfil_analysis_failure_record
+        type: data.set
+        if: >-
+          ${{ steps.analyze_exfiltration_ips.error != null
+            or steps.analyze_exfiltration_ips.output.structured_output == null }}
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: failed
+            error: "${{ steps.analyze_exfiltration_ips.error | default: 'agent returned no structured hunt result' }}"
+
+      - name: record_exfil_analysis_failure
+        type: data.set
+        if: >-
+          ${{ steps.analyze_exfiltration_ips.error != null
+            or steps.analyze_exfiltration_ips.output.structured_output == null }}
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_exfil_analysis_failure_record.output.execution_record }}
+
   # Account for every staged action that was NOT covered by an execution attempt
   # above, so the ledger is complete: every staged action ends with either an
-  # executed/submitted/failed/skipped record (from the execute_* loops) or a
-  # not_executed record with a reason (manual action, surfaced-only, containment
-  # dismissed, or not approved by the analyst).
+  # executed/failed/skipped record (from the execute_* loops), or a not_executed
+  # record with a reason (manual action, containment dismissed, or not approved
+  # by the analyst).
   - name: account_unexecuted_actions
     type: foreach
     foreach: "${{ variables.phase3_recommended_actions }}"
@@ -1648,30 +1774,10 @@ steps:
             ${{ variables.executed_actions
               | push: steps.build_manual_action_record.output.execution_record }}
 
-      - name: build_surfaced_only_record
-        type: data.set
-        if: "${{ foreach.item.action_type == 'analyze_exfiltration_ips' }}"
-        with:
-          execution_record:
-            action_type: "{{ foreach.item.action_type }}"
-            title: "{{ foreach.item.title }}"
-            targets: "${{ foreach.item.targets }}"
-            status: not_executed
-            reason: surfaced-only in this workflow
-
-      - name: record_surfaced_only
-        type: data.set
-        if: "${{ foreach.item.action_type == 'analyze_exfiltration_ips' }}"
-        with:
-          executed_actions: >-
-            ${{ variables.executed_actions
-              | push: steps.build_surfaced_only_record.output.execution_record }}
-
       - name: build_dismissed_record
         type: data.set
         if: >-
           ${{ foreach.item.execution == 'kibana_api'
-            and foreach.item.action_type != 'analyze_exfiltration_ips'
             and steps.await_incident_contained.output.response.decision == 'dismiss' }}
         with:
           execution_record:
@@ -1685,7 +1791,6 @@ steps:
         type: data.set
         if: >-
           ${{ foreach.item.execution == 'kibana_api'
-            and foreach.item.action_type != 'analyze_exfiltration_ips'
             and steps.await_incident_contained.output.response.decision == 'dismiss' }}
         with:
           executed_actions: >-
@@ -1696,7 +1801,6 @@ steps:
         type: data.set
         if: >-
           ${{ foreach.item.execution == 'kibana_api'
-            and foreach.item.action_type != 'analyze_exfiltration_ips'
             and steps.await_incident_contained.output.response.decision == 'approve'
             and variables.matching_approved.size == 0 }}
         with:
@@ -1711,7 +1815,6 @@ steps:
         type: data.set
         if: >-
           ${{ foreach.item.execution == 'kibana_api'
-            and foreach.item.action_type != 'analyze_exfiltration_ips'
             and steps.await_incident_contained.output.response.decision == 'approve'
             and variables.matching_approved.size == 0 }}
         with:

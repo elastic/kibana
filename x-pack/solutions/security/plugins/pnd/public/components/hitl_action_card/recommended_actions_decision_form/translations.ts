@@ -47,10 +47,10 @@ export const PRIORITY_INVESTIGATION = i18n.translate(
   }
 );
 
-export const SURFACED_ONLY_BADGE = i18n.translate(
-  'xpack.pnd.recommendedActionsDecisionForm.surfacedOnlyBadge',
+export const AGENT_HUNT_BADGE = i18n.translate(
+  'xpack.pnd.recommendedActionsDecisionForm.agentHuntBadge',
   {
-    defaultMessage: 'Surfaced only — not executed by the workflow',
+    defaultMessage: 'Read-only agent hunt — findings post to the incident chat',
   }
 );
 
