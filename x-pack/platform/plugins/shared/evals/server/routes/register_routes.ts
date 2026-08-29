@@ -16,6 +16,7 @@ import type { TaskProviderRegistry } from '../task_providers/types';
 import { registerGetExperimentsRoute } from './experiments/get_experiments';
 import { registerGetExperimentRoute } from './experiments/get_experiment';
 import { registerGetExperimentProtocolRoute } from './experiments/get_experiment_protocol';
+import { registerGetExperimentRunsRoute } from './experiments/get_experiment_runs';
 import { registerGetExperimentScoresRoute } from './experiments/get_experiment_scores';
 import { registerGetExperimentDatasetExamplesRoute } from './experiments/get_experiment_dataset_examples';
 import { registerCompareExperimentsRoute } from './experiments/compare_experiments';
@@ -69,6 +70,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetExperimentsRoute(dependencies);
   registerGetExperimentRoute(dependencies);
   registerGetExperimentProtocolRoute(dependencies);
+  registerGetExperimentRunsRoute(dependencies);
   registerGetExperimentScoresRoute(dependencies);
   registerGetExperimentDatasetExamplesRoute(dependencies);
   registerCompareExperimentsRoute(dependencies);

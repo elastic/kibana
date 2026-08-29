@@ -22,6 +22,9 @@ import {
   escapeWildcard,
   buildProtocolAggregation,
   parseProtocolAggregationResponse,
+  buildExperimentRunsAggregation,
+  parseExperimentRunsAggregation,
+  buildExperimentRunsFetchQuery,
 } from './query_builders';
 
 describe('query_builders', () => {
@@ -1082,6 +1085,116 @@ describe('query_builders', () => {
         total_repetitions: 1,
         datasets: [],
         evaluators: [],
+      });
+    });
+  });
+
+  describe('buildExperimentRunsAggregation', () => {
+    it('enumerates runs in natural order with ids as tie-breakers', () => {
+      expect(buildExperimentRunsAggregation()).toEqual({
+        runs: {
+          composite: {
+            size: 10000,
+            sources: [
+              { dataset_name: { terms: { field: 'example.dataset.name' } } },
+              { dataset_id: { terms: { field: 'example.dataset.id' } } },
+              { example_index: { terms: { field: 'example.index' } } },
+              { example_id: { terms: { field: 'example.id' } } },
+              { repetition_index: { terms: { field: 'task.repetition_index' } } },
+            ],
+          },
+        },
+      });
+    });
+  });
+
+  describe('parseExperimentRunsAggregation', () => {
+    const bucket = (exampleIndex: number, repetition: number, docCount = 2) => ({
+      key: {
+        dataset_name: 'Dataset One',
+        dataset_id: 'ds-1',
+        example_index: exampleIndex,
+        example_id: `ex-${exampleIndex}`,
+        repetition_index: repetition,
+      },
+      doc_count: docCount,
+    });
+
+    const aggs = {
+      runs: {
+        buckets: [bucket(0, 0), bucket(0, 1), bucket(1, 0), bucket(1, 1), bucket(2, 0)],
+      },
+    };
+
+    it('reports the exact total and slices the requested page window', () => {
+      const { total, runs } = parseExperimentRunsAggregation(aggs, { page: 2, perPage: 2 });
+
+      expect(total).toBe(5);
+      expect(runs).toEqual([
+        {
+          dataset_id: 'ds-1',
+          dataset_name: 'Dataset One',
+          example_id: 'ex-1',
+          example_index: 1,
+          repetition_index: 0,
+          score_count: 2,
+        },
+        {
+          dataset_id: 'ds-1',
+          dataset_name: 'Dataset One',
+          example_id: 'ex-1',
+          example_index: 1,
+          repetition_index: 1,
+          score_count: 2,
+        },
+      ]);
+    });
+
+    it('returns an empty window past the last page, keeping the total', () => {
+      const { total, runs } = parseExperimentRunsAggregation(aggs, { page: 4, perPage: 2 });
+
+      expect(total).toBe(5);
+      expect(runs).toEqual([]);
+    });
+
+    it('handles a missing aggregation response', () => {
+      expect(parseExperimentRunsAggregation(undefined, { page: 1, perPage: 20 })).toEqual({
+        total: 0,
+        runs: [],
+      });
+    });
+  });
+
+  describe('buildExperimentRunsFetchQuery', () => {
+    it('narrows the experiment filter to the given run keys', () => {
+      const experimentQuery = buildExperimentFilterQuery('experiment-1');
+      const runs = [
+        {
+          dataset_id: 'ds-1',
+          dataset_name: 'Dataset One',
+          example_id: 'ex-1',
+          example_index: 1,
+          repetition_index: 0,
+          score_count: 2,
+        },
+      ];
+
+      expect(buildExperimentRunsFetchQuery(experimentQuery, runs)).toEqual({
+        bool: {
+          must: [experimentQuery],
+          should: [
+            {
+              bool: {
+                filter: [
+                  { term: { 'example.dataset.id': 'ds-1' } },
+                  { term: { 'example.id': 'ex-1' } },
+                  { term: { 'task.repetition_index': 0 } },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
       });
     });
   });

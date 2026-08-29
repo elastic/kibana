@@ -392,6 +392,121 @@ export const parseProtocolAggregationResponse = (
   };
 };
 
+// ---------------------------------------------------------------------------
+// Experiment runs (example x repetition) pagination
+// ---------------------------------------------------------------------------
+
+/**
+ * Ceiling on the distinct runs a single aggregation reports, matching
+ * MAX_SCORES_PER_QUERY: an experiment cannot have more runs than score
+ * documents, and the score endpoints already stop at that many documents.
+ */
+const MAX_RUNS_PER_QUERY = 10_000;
+
+export interface ExperimentRunKey {
+  dataset_id: string;
+  dataset_name: string;
+  example_id: string;
+  example_index: number;
+  repetition_index: number;
+  /** Score documents in this run: one per evaluator that scored it. */
+  score_count: number;
+}
+
+export interface ExperimentRunsPage {
+  /** Distinct runs matching the query, exact up to {@link MAX_RUNS_PER_QUERY}. */
+  total: number;
+  /** The requested page window, in dataset name / example index / repetition order. */
+  runs: ExperimentRunKey[];
+}
+
+/**
+ * Returns a composite aggregation enumerating an experiment's runs (one
+ * bucket per example x repetition) in their natural presentation order:
+ * dataset name, example index, repetition. Dataset and example ids sit
+ * between as tie-breakers, so the order stays deterministic when two
+ * datasets share a name, and each bucket carries the ids the run's score
+ * documents are fetched by.
+ */
+export const buildExperimentRunsAggregation = () => ({
+  runs: {
+    composite: {
+      size: MAX_RUNS_PER_QUERY,
+      sources: [
+        { dataset_name: { terms: { field: 'example.dataset.name' } } },
+        { dataset_id: { terms: { field: 'example.dataset.id' } } },
+        { example_index: { terms: { field: 'example.index' } } },
+        { example_id: { terms: { field: 'example.id' } } },
+        { repetition_index: { terms: { field: 'task.repetition_index' } } },
+      ],
+    },
+  },
+});
+
+interface ExperimentRunsAggregations {
+  runs?: {
+    buckets?: Array<{
+      key: {
+        dataset_name?: string;
+        dataset_id?: string;
+        example_index?: number;
+        example_id?: string;
+        repetition_index?: number;
+      };
+      doc_count?: number;
+    }>;
+  };
+}
+
+/**
+ * Parses {@link buildExperimentRunsAggregation} into the run keys of the
+ * requested page and the exact total. The composite enumerates every run in
+ * one response (bounded by {@link MAX_RUNS_PER_QUERY}), so the page is a
+ * slice and the total is the bucket count.
+ */
+export const parseExperimentRunsAggregation = (
+  aggregations: Record<string, unknown> | undefined,
+  { page, perPage }: { page: number; perPage: number }
+): ExperimentRunsPage => {
+  const buckets = (aggregations as ExperimentRunsAggregations | undefined)?.runs?.buckets ?? [];
+  const offset = (page - 1) * perPage;
+
+  const runs = buckets.slice(offset, offset + perPage).map((bucket) => ({
+    dataset_id: bucket.key.dataset_id ?? '',
+    dataset_name: bucket.key.dataset_name ?? '',
+    example_id: bucket.key.example_id ?? '',
+    example_index: bucket.key.example_index ?? 0,
+    repetition_index: bucket.key.repetition_index ?? 0,
+    score_count: bucket.doc_count ?? 0,
+  }));
+
+  return { total: buckets.length, runs };
+};
+
+/**
+ * Builds the query fetching the score documents of the given runs: the
+ * experiment filter the runs were enumerated under, narrowed to documents
+ * matching one of the runs' (dataset, example, repetition) keys.
+ */
+export const buildExperimentRunsFetchQuery = (
+  experimentQuery: Record<string, unknown>,
+  runs: ExperimentRunKey[]
+): Record<string, unknown> => ({
+  bool: {
+    must: [experimentQuery],
+    should: runs.map((run) => ({
+      bool: {
+        filter: [
+          { term: { 'example.dataset.id': run.dataset_id } },
+          { term: { 'example.id': run.example_id } },
+          { term: { 'task.repetition_index': run.repetition_index } },
+        ],
+      },
+    })),
+    minimum_should_match: 1,
+  },
+});
+
 /**
  * Standard sort order for retrieving individual score documents,
  * grouped by dataset, example, evaluator, then repetition.

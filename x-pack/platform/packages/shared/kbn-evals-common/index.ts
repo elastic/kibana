@@ -19,6 +19,9 @@ export {
   parseEvaluatorModelsAggregation,
   buildProtocolAggregation,
   parseProtocolAggregationResponse,
+  buildExperimentRunsAggregation,
+  parseExperimentRunsAggregation,
+  buildExperimentRunsFetchQuery,
   SCORES_SORT_ORDER,
   buildExperimentsListingFilterQuery,
   buildExperimentsListingAggregation,
@@ -33,6 +36,8 @@ export type {
   ExperimentProtocolAggregates,
   ExperimentProtocolDataset,
   ExperimentProtocolEvaluator,
+  ExperimentRunKey,
+  ExperimentRunsPage,
 } from './impl/query_builders';
 export { getDatasetId } from './impl/dataset_ids';
 export { getEvaluatorDefinitionId } from './impl/evaluator_ids';
