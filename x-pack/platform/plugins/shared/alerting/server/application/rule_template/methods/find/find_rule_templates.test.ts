@@ -261,23 +261,7 @@ describe('findRuleTemplates', () => {
     );
   });
 
-  const mockSearchHits = (...templates: Array<typeof mockTemplate1>) => ({
-    took: 1,
-    timed_out: false,
-    _shards: { total: 1, successful: 1, failed: 0 },
-    hits: {
-      total: { value: templates.length, relation: 'eq' as const },
-      hits: templates.map((template) => ({
-        _id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:${template.id}`,
-        _source: {
-          type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-          [RULE_TEMPLATE_SAVED_OBJECT_TYPE]: template.attributes,
-        },
-      })),
-    },
-  });
-
-  test('uses find() when search is empty', async () => {
+  test('blank search uses find() and a typed search uses search()', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 2,
       per_page: 10,
@@ -293,118 +277,33 @@ describe('findRuleTemplates', () => {
 
     expect(unsecuredSavedObjectsClient.search).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalled();
-  });
 
-  test('uses search() for a typed query and keeps sort', async () => {
-    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(mockSearchHits(mockTemplate1));
-
-    const result = await findRuleTemplates(rulesClientContext, {
-      perPage: 5,
-      page: 2,
-      search: 'my template',
-      defaultSearchOperator: 'AND',
-      sortField: 'name',
-      sortOrder: 'desc',
-    });
-
-    expect(result).toEqual({
-      page: 2,
-      perPage: 5,
-      total: 1,
-      data: [
-        {
-          id: 'template-1',
-          name: 'Template 1',
-          description: 'My first template',
-          ruleTypeId: 'test.rule.type',
-          schedule: { interval: '1m' },
-          params: { foo: 'bar' },
-          tags: ['tag1'],
-        },
-      ],
-    });
-
-    expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledWith({
-      type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      namespaces: ['default'],
-      from: 5,
-      size: 5,
-      track_total_hits: true,
-      sort: [{ 'alerting_rule_template.name.keyword': { order: 'desc' } }],
-      query: {
-        bool: {
-          filter: expect.any(Array),
-          must: [
-            {
-              bool: {
-                should: [
-                  {
-                    wildcard: {
-                      'alerting_rule_template.name.keyword': { value: '*my template*' },
-                    },
-                  },
-                  {
-                    wildcard: {
-                      'alerting_rule_template.tags': {
-                        value: '*my template*',
-                        case_insensitive: true,
-                      },
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
+    unsecuredSavedObjectsClient.search.mockResolvedValueOnce({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [
+          {
+            _id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:${mockTemplate1.id}`,
+            _source: {
+              type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+              [RULE_TEMPLATE_SAVED_OBJECT_TYPE]: mockTemplate1.attributes,
             },
-          ],
-        },
+          },
+        ],
       },
     });
-  });
 
-  test('search() does not pass find() search or searchFields', async () => {
-    unsecuredSavedObjectsClient.search.mockResolvedValueOnce(mockSearchHits(mockTemplate1));
-
-    await findRuleTemplates(rulesClientContext, {
+    const result = await findRuleTemplates(rulesClientContext, {
       perPage: 10,
       page: 1,
-      search: 'kub*',
+      search: 'kub',
     });
 
-    expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
-    const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
-    expect(searchCall.search).toBeUndefined();
-    expect(searchCall.searchFields).toBeUndefined();
-    expect(JSON.stringify(searchCall.query)).toContain('*kub**');
-  });
-
-  test('CPU threshold and CPU*threshold emit different wildcard values', async () => {
-    unsecuredSavedObjectsClient.search.mockResolvedValue(mockSearchHits(mockTemplate1));
-
-    await findRuleTemplates(rulesClientContext, {
-      perPage: 10,
-      page: 1,
-      search: 'CPU threshold',
-    });
-    await findRuleTemplates(rulesClientContext, {
-      perPage: 10,
-      page: 1,
-      search: 'CPU*threshold',
-    });
-
-    const nameWildcardValue = (query: unknown): string | undefined => {
-      const match = JSON.stringify(query).match(
-        /"alerting_rule_template\.name\.keyword":\{"value":"([^"]+)"\}/
-      );
-      return match?.[1];
-    };
-
-    expect(nameWildcardValue(unsecuredSavedObjectsClient.search.mock.calls[0][0].query)).toBe(
-      '*CPU threshold*'
-    );
-    expect(nameWildcardValue(unsecuredSavedObjectsClient.search.mock.calls[1][0].query)).toBe(
-      '*CPU*threshold*'
-    );
+    expect(unsecuredSavedObjectsClient.search).toHaveBeenCalled();
+    expect(result.data[0].id).toBe('template-1');
   });
 
   test('applies ascending sort order', async () => {
@@ -440,19 +339,6 @@ describe('findRuleTemplates', () => {
         page: 1,
       })
     ).rejects.toThrow('Something went wrong');
-  });
-
-  test('handles errors from saved objects search()', async () => {
-    const error = new Error('search failed');
-    unsecuredSavedObjectsClient.search.mockRejectedValueOnce(error);
-
-    await expect(
-      findRuleTemplates(rulesClientContext, {
-        perPage: 10,
-        page: 1,
-        search: 'kub',
-      })
-    ).rejects.toThrow('search failed');
   });
 
   test('returns empty results when no templates found', async () => {

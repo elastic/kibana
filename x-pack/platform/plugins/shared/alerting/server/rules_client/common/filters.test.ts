@@ -450,11 +450,6 @@ describe('filters', () => {
 
   describe('buildTemplateSearchQuery', () => {
     const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    /**
-     * Same operators as ES `wildcard`: `*` any sequence, `\\` escapes the
-     * next character. Used to lock AC / notes examples to the pattern we emit.
-     */
     const matchesWildcard = (title: string, wildcardValue: string): boolean => {
       let regex = '';
       for (let i = 0; i < wildcardValue.length; i++) {
@@ -464,22 +459,9 @@ describe('filters', () => {
           i += 1;
           continue;
         }
-        if (character === '*') {
-          regex += '.*';
-          continue;
-        }
-        regex += escapeRegex(character);
+        regex += character === '*' ? '.*' : escapeRegex(character);
       }
       return new RegExp(`^${regex}$`, 'i').test(title);
-    };
-
-    const expectMatch = (title: string, search: string, shouldMatch: boolean) => {
-      const value = buildTemplateSearchWildcardValue(search);
-      expect(value).toBeDefined();
-      if (!value) {
-        return;
-      }
-      expect(matchesWildcard(title, value)).toBe(shouldMatch);
     };
 
     it('returns undefined when search is empty or only quotes', () => {
@@ -512,69 +494,28 @@ describe('filters', () => {
       });
     });
 
-    describe('acceptance criteria: "Kubernetes idle data threshold"', () => {
-      const title = 'Kubernetes idle data threshold';
-
-      it.each([
-        ['kub', true],
-        ['thresh', true],
-        ['idle data', true],
-        ['data thresh', true],
-        ['kub*', true],
-        ['*kub*', true],
-      ] as const)('"%s" matches', (search, shouldMatch) => {
-        expectMatch(title, search, shouldMatch);
-      });
-    });
-
-    describe('notes examples', () => {
-      it('kub matches [Kubernetes OTel] Container CPU throttling', () => {
-        expectMatch('[Kubernetes OTel] Container CPU throttling', 'kub', true);
-      });
-
-      it('idle data matches Idle data streams as a literal substring', () => {
-        expect(buildTemplateSearchWildcardValue('idle data')).toBe('*idle data*');
-        expectMatch('Idle data streams', 'idle data', true);
-      });
-
-      it('CPU threshold does not match across extra words', () => {
-        expect(buildTemplateSearchWildcardValue('CPU threshold')).toBe('*CPU threshold*');
-        expectMatch('CPU average combined with latency threshold', 'CPU threshold', false);
-        expectMatch('Maximum CPU threshold per service', 'CPU threshold', true);
-      });
-
-      it('CPU*threshold is a different query than CPU threshold', () => {
-        expect(buildTemplateSearchWildcardValue('CPU*threshold')).toBe('*CPU*threshold*');
-        expectMatch('CPU average combined with latency threshold', 'CPU*threshold', true);
-        expectMatch('Maximum CPU threshold per service', 'CPU*threshold', true);
-        expectMatch('CPU average combined with latency threshold', 'CPU threshold', false);
-      });
-
-      it('wrapping quotes are not phrase syntax, they are stripped', () => {
-        expect(buildTemplateSearchWildcardValue('"CPU threshold"')).toBe('*CPU threshold*');
-        expectMatch('Maximum CPU threshold per service', '"CPU threshold"', true);
-        expectMatch('CPU average combined with latency threshold', '"CPU threshold"', false);
-      });
-    });
-
-    describe('injection / wildcard safety', () => {
-      it('keeps * as a wildcard operator', () => {
-        expect(buildTemplateSearchWildcardValue('kub*')).toBe('*kub**');
-        expect(buildTemplateSearchWildcardValue('*kub*')).toBe('**kub**');
-      });
-
-      it('escapes ? so a typed question mark is literal', () => {
-        expect(buildTemplateSearchWildcardValue('foo?')).toBe('*foo\\?*');
-        expectMatch('foo?', 'foo?', true);
-        expectMatch('food', 'foo?', false);
-      });
-
-      it('escapes \\ so it cannot neutralize the wrapping *', () => {
-        expect(buildTemplateSearchWildcardValue('foo\\')).toBe('*foo\\\\*');
-        expectMatch('foo*', 'foo\\', false);
-        expectMatch('foobar', 'foo\\', false);
-        expectMatch('foo\\bar', 'foo\\', true);
-      });
+    it.each([
+      ['Kubernetes idle data threshold', 'kub', '*kub*', true],
+      ['Kubernetes idle data threshold', 'thresh', '*thresh*', true],
+      ['Kubernetes idle data threshold', 'idle data', '*idle data*', true],
+      ['Kubernetes idle data threshold', 'data thresh', '*data thresh*', true],
+      ['Kubernetes idle data threshold', 'kub*', '*kub**', true],
+      ['Kubernetes idle data threshold', '*kub*', '**kub**', true],
+      ['[Kubernetes OTel] Container CPU throttling', 'kub', '*kub*', true],
+      ['Idle data streams', 'idle data', '*idle data*', true],
+      ['Maximum CPU threshold per service', 'CPU threshold', '*CPU threshold*', true],
+      ['CPU average combined with latency threshold', 'CPU threshold', '*CPU threshold*', false],
+      ['CPU average combined with latency threshold', 'CPU*threshold', '*CPU*threshold*', true],
+      ['Maximum CPU threshold per service', 'CPU*threshold', '*CPU*threshold*', true],
+      ['Maximum CPU threshold per service', '"CPU threshold"', '*CPU threshold*', true],
+      ['CPU average combined with latency threshold', '"CPU threshold"', '*CPU threshold*', false],
+      ['foo?', 'foo?', '*foo\\?*', true],
+      ['food', 'foo?', '*foo\\?*', false],
+      ['foo\\bar', 'foo\\', '*foo\\\\*', true],
+      ['foo*', 'foo\\', '*foo\\\\*', false],
+    ])('%s + %j', (title, search, wildcard, shouldMatch) => {
+      expect(buildTemplateSearchWildcardValue(search)).toBe(wildcard);
+      expect(matchesWildcard(title, wildcard)).toBe(shouldMatch);
     });
   });
 
