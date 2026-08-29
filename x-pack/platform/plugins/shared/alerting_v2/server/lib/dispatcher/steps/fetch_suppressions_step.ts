@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getAlertEpisodeSuppressionsQueries } from '../queries';
+import { EpisodeScan, SuppressionIndex } from '../state';
 import type {
   AlertEpisodeSuppression,
   DispatcherPipelineState,
@@ -29,14 +30,14 @@ export class FetchSuppressionsStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { episodes } = state;
-    if (!episodes || episodes.length === 0) {
-      return { type: 'continue', data: { suppressions: [] } };
+    const { scan = EpisodeScan.empty() } = state;
+    if (scan.isEmpty()) {
+      return { type: 'continue', data: { suppressions: SuppressionIndex.empty() } };
     }
 
     const { signal } = state.input;
 
-    const queries = getAlertEpisodeSuppressionsQueries(episodes);
+    const queries = getAlertEpisodeSuppressionsQueries(scan.episodes);
     const responses = await Promise.all(
       queries.map((request) =>
         this.queryService.executeQueryRows<AlertEpisodeSuppression>({
@@ -47,6 +48,6 @@ export class FetchSuppressionsStep implements DispatcherStep {
     );
     const suppressions = responses.flat();
 
-    return { type: 'continue', data: { suppressions } };
+    return { type: 'continue', data: { suppressions: SuppressionIndex.of(suppressions) } };
   }
 }

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { Logger } from '@kbn/core/server';
+import {
+  createWorkflowTriggerForwarder,
+  type WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { CasesEventBus } from '../../events/event_bus';
 import {
   CaseCreatedTriggerId,
@@ -30,14 +33,7 @@ export function registerCasesWorkflowEventBridge(
     return;
   }
 
-  const forward = async (eventType: string, payload: unknown, request: KibanaRequest) => {
-    try {
-      const client = await workflowsExtensions.getClient(request);
-      await client.emitEvent(eventType, payload as Record<string, unknown>);
-    } catch (error) {
-      logger.warn(`Failed to emit workflow trigger "${eventType}": ${error}`);
-    }
-  };
+  const forward = createWorkflowTriggerForwarder(workflowsExtensions, logger);
 
   casesEventBus.onCaseCreated((event) => {
     void forward(CaseCreatedTriggerId, event.payload, event.request);
