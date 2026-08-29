@@ -386,10 +386,19 @@ export const queryMatrixScores = async (
           );
           if (datasets.length === before && excludedByModel.has(modelId)) {
             const c = excludedByModel.get(modelId)!;
+            // A pure unmapped-verdict rejection is not a judge problem, so do
+            // not send the operator to the judge config. Measured cause on
+            // attack-discovery: every document carries `example.id` "0", so
+            // prefix bucketing matches no column and every score falls out.
+            const judgeIssue = c.selfJudged + c.nonEis;
+            const remedy =
+              judgeIssue === 0
+                ? `no score carried a mappable verdict — check that this suite's example ids match the column's examplePrefixes (a suite that writes a constant example id cannot be bucketed) before blaming the judge.`
+                : `Re-running this model will NOT fill these cells — fix the judge assignment first.`;
             log.warning(
-              `All per-prefix scores rejected by judge policy for model ${modelId} (suite ${suiteId}): ` +
+              `All per-prefix scores rejected for model ${modelId} (suite ${suiteId}): ` +
                 `${c.selfJudged} self-judged, ${c.nonEis} non-EIS judge, ${c.unmappedVerdict} unmapped verdict. ` +
-                `Re-running this model will NOT fill these cells — fix the judge assignment first.`
+                remedy
             );
           }
         } catch (error) {

@@ -223,7 +223,6 @@ const processExampleBatch = (
   // badges it so 1-rep cells are visually distinguishable from 3-rep cells.
   entry.repetitions = countRepetitions(relevant);
   const exampleId = relevant[0].example?.id;
-  const datasetId = relevant[0].example?.dataset?.id;
 
   const complete = isCompleteScore(relevant[0]);
 
@@ -252,9 +251,11 @@ const processExampleBatch = (
       }
     }
   }
-  if (datasetId) {
-    traces[traceKey(modelId, datasetId)] = entry;
-  }
+  // Deliberately NOT keyed by `example.dataset.id`: that key is overwritten on
+  // every example, so it ends up holding whichever example happened to be
+  // processed last, and no renderer reads it (HTML resolves a column via
+  // examplePrefixes then `column.suites`). Writing it only added arbitrary
+  // `model:<dataset-uuid>` entries that duplicate real cells' payload.
   // For the suite-level key, only complete runs qualify — and the FIRST
   // complete one wins. Overwriting on every example made the suite key
   // "last example processed", which every non-matching card then inherited.

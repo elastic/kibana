@@ -65,24 +65,21 @@ def fetch_all(request, index: str, experiment: str, hours: int) -> list[dict]:
             # These documents are large (full step lists plus correctness and
             # groundedness analyses). Without source filtering a full pull moves
             # hundreds of MB and stalls; the renderer only reads these fields.
+            # `example.metadata` and the analyses are excluded deliberately: a
+            # 720h cache that includes them exceeds Node's max string length
+            # (0x1fffffe8) and the CLI cannot readFileSync it at all.
             "_source": [
                 "@timestamp",
-                "experiment_name",
                 "example.id",
-                "example.input",
-                "example.dataset",
-                "example.metadata",
+                "example.input.question",
                 "task.output.steps",
                 "task.output.messages",
-                "task.output.traceId",
-                "task.model",
-                "task.trace_id",
+                "task.model.id",
                 "task.repetition_index",
                 "evaluator.name",
                 "evaluator.score",
-                "evaluator.model",
+                "evaluator.model.id",
                 "metadata.execution_id",
-                "metadata.suite_id",
             ],
             "query": {
                 "bool": {
@@ -156,13 +153,24 @@ def main() -> int:
     with open(args.out, "w") as handle:
         json.dump(cache, handle)
 
+    size = os.path.getsize(args.out)
     print(f"docs        : {len(docs)}")
     print(f"cache keys  : {len(cache)}")
     print(f"docs w/steps: {with_steps}")
     print(f"models      : {len(models - {None})}")
-    print(f"written     : {args.out}")
+    print(f"written     : {args.out} ({size / 1e6:.0f} MB)")
     if with_steps == 0:
         print("ERROR: no document carries task.output.steps", file=sys.stderr)
+        return 1
+    # Node reads this file with readFileSync, which cannot produce a string
+    # longer than 0x1fffffe8 (~536 MB). A larger cache aborts the matrix CLI
+    # outright, so refuse it here where the cause is obvious.
+    if size > 500_000_000:
+        print(
+            f"ERROR: cache is {size / 1e6:.0f} MB; Node cannot readFileSync "
+            f"more than ~536 MB. Narrow --hours or the _source list.",
+            file=sys.stderr,
+        )
         return 1
     return 0
 

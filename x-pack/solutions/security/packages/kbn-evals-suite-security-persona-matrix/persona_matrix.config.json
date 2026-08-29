@@ -276,10 +276,9 @@
       ],
       "evaluators": [
         "AttackDiscoveryBasic",
-        "AttackDiscoveryRubric",
+        "Rubric",
         "Criteria",
-        "Alert-ID Grounding",
-        "No Fabrication"
+        "StrictTrajectory"
       ],
       "weight": 1
     },
@@ -340,7 +339,9 @@
     {
       "id": "anthropic-claude-4.6-sonnet",
       "label": "Claude Sonnet 4.6",
-      "matchIds": ["anthropic-claude-4.6-sonnet-chat_completion"]
+      "matchIds": [
+        "anthropic-claude-4.6-sonnet-chat_completion"
+      ]
     },
     {
       "id": "anthropic-claude-4.6-opus",
