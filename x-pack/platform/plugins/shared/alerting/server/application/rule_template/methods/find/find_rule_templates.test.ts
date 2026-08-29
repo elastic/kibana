@@ -287,8 +287,8 @@ describe('findRuleTemplates', () => {
     });
 
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(((alerting_rule_template.attributes.name.keyword: *my template* OR ' +
-        'alerting_rule_template.attributes.tags: *my template*) AND ' +
+      '(((alerting_rule_template.attributes.name.keyword: *my*template* OR ' +
+        'alerting_rule_template.attributes.tags: *my*template*) AND ' +
         '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
         'alerting_rule_template.attributes.ruleTypeId: another.rule.type)) AND ' +
         '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
+import { nodeBuilder, toElasticsearchQuery, toKqlExpression } from '@kbn/es-query';
 import {
   buildAlertingV1RuleTemplateEngineFilter,
   buildConsumersFilter,
@@ -466,6 +466,23 @@ describe('filters', () => {
         '(alerting_rule_template.attributes.name.keyword: *kub* OR ' +
           'alerting_rule_template.attributes.tags: *kub*)'
       );
+    });
+
+    it('collapses spaces so query_string stays one wildcard term', () => {
+      expect(toKqlExpression(buildTemplateSearchFilter('idle data'))).toBe(
+        '(alerting_rule_template.attributes.name.keyword: *idle*data* OR ' +
+          'alerting_rule_template.attributes.tags: *idle*data*)'
+      );
+
+      const filter = buildTemplateSearchFilter('idle data');
+      expect(filter).toBeDefined();
+      if (!filter) {
+        return;
+      }
+
+      const esQuery = JSON.stringify(toElasticsearchQuery(filter));
+      expect(esQuery).toContain('"query":"*idle*data*"');
+      expect(esQuery).not.toContain('*idle data*');
     });
   });
 

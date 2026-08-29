@@ -75,12 +75,16 @@ export const buildTagsFilter = (tags?: string[], type = RULE_SAVED_OBJECT_TYPE) 
 /**
  * Substring match on template name and tags. Avoids Saved Objects `search`,
  * which token-matches and 400s on wildcard queries because `tags` is keyword.
+ *
+ * Spaces become `*` so Lucene query_string keeps one term. SO find has no
+ * field types, so `name.keyword: *idle data*` is emitted as query_string
+ * `*idle data*` and splits into `*idle` OR `data*`.
  */
 export const buildTemplateSearchFilter = (
   search?: string,
   type = RULE_TEMPLATE_SAVED_OBJECT_TYPE
 ) => {
-  const query = search?.trim().replace(/\*/g, '');
+  const query = search?.trim().replace(/\*/g, '').replace(/\s+/g, '*');
   if (!query) {
     return;
   }
