@@ -26,6 +26,8 @@ import { renderMatrix } from '../../matrix/render_matrix';
 import { renderMatrixHtml } from '../../matrix/render_matrix_html';
 import { queryMatrixTraces } from '../../matrix/query_matrix_traces';
 import type { MatrixTraceData } from '../../matrix/trace_types';
+import { readLocalGitState } from '../../matrix/local_git_state';
+import { warnOnConfiguredNamesMissingFromData } from '../../matrix/config_data_preflight';
 
 const DEFAULT_OUT_DIR = 'target/llm_matrix';
 
@@ -236,6 +238,8 @@ export const matrixCmd: Command<void> = {
       );
     }
 
+    warnOnConfiguredNamesMissingFromData(config, aggregated, log);
+
     const matrix = buildMatrix(aggregated, config);
     const generateHtml = flagsReader.boolean('html');
 
@@ -243,6 +247,12 @@ export const matrixCmd: Command<void> = {
     // the artifact then carries everything needed to audit a cell's full
     // conversation without re-querying the evals cluster.
     let traces: MatrixTraceData | undefined;
+    // Recorded in the artifact's provenance. A matrix built from a dirty tree or
+    // from a different cache than a later regen will not reproduce, and every
+    // stale-artifact mix-up this pipeline has had looked exactly like a real
+    // result until someone diffed it.
+    const traceCacheForProvenance = flagsReader.string('trace-cache') ?? 'none';
+    const localGit = readLocalGitState(repoRoot, log);
     if (generateHtml) {
       log.info('Querying trace data for HTML report...');
       // --trace-cache <path>: pre-pulled score documents keyed
@@ -293,7 +303,9 @@ export const matrixCmd: Command<void> = {
         branch,
         lookbackDays,
         suiteIds,
-        commitSha: process.env.BUILDKITE_COMMIT,
+        commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
+        dirtyWorkingTree: localGit.dirty,
+        traceCache: traceCacheForProvenance,
         buildUrl: process.env.BUILDKITE_BUILD_URL,
       },
       traces
@@ -321,7 +333,9 @@ export const matrixCmd: Command<void> = {
           branch,
           lookbackDays,
           suiteIds,
-          commitSha: process.env.BUILDKITE_COMMIT,
+          commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
+          dirtyWorkingTree: localGit.dirty,
+          traceCache: traceCacheForProvenance,
           buildUrl: process.env.BUILDKITE_BUILD_URL,
           fixtureFingerprint: config.provenance?.fixtureFingerprint,
           methodologyNotes: config.provenance?.methodologyNotes,

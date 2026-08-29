@@ -24,6 +24,14 @@ export interface MatrixProvenance {
   suiteIds?: string[];
   /** Commit the generator ran against, when known. */
   commitSha?: string;
+  /**
+   * True when the generator's working tree had uncommitted changes. An artifact
+   * built from a dirty tree cannot be reproduced from `commitSha` alone, and a
+   * regen at a later commit may not match it.
+   */
+  dirtyWorkingTree?: boolean;
+  /** Trace-cache file the run loaded, or `none` when it fetched from the server. */
+  traceCache?: string;
   /** CI build URL that produced the artifact, when known. */
   buildUrl?: string;
   /** sha256 of the dataset/tool seed files the runs were scored against. */
