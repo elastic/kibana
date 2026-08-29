@@ -147,6 +147,28 @@ components:
         allowManualRun:
           type: boolean
 
+    WatchGenerationSettings:
+      type: object
+      description: >-
+        Attack Discovery generation options, offered only by the Attack Discovery Generation watch.
+        An empty connectorId means the server-resolved default AI connector.
+      required:
+        - alertSize
+        - lookback
+        - connectorId
+      properties:
+        alertSize:
+          type: integer
+          minimum: 1
+          maximum: 500
+        lookback:
+          type: string
+          minLength: 1
+          maxLength: 64
+        connectorId:
+          type: string
+          maxLength: 256
+
     WatchScopeRoutingSettings:
       type: object
       description: >-
@@ -251,6 +273,8 @@ components:
             per watch — see WATCH_AUTONOMY_LEVELS.
         triggers:
           $ref: '#/components/schemas/WatchTriggersSettings'
+        generation:
+          $ref: '#/components/schemas/WatchGenerationSettings'
         scopeRouting:
           $ref: '#/components/schemas/WatchScopeRoutingSettings'
         skills:

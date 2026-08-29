@@ -139,6 +139,16 @@ export const TRIGGERS_SECTION_SUBTITLE = i18n.translate(
   { defaultMessage: 'owned by the Workers in this Watch' }
 );
 
+export const GENERATION_SECTION_TITLE = i18n.translate(
+  'xpack.pnd.watches.settings.generation.sectionTitle',
+  { defaultMessage: 'Generation' }
+);
+
+export const GENERATION_SECTION_SUBTITLE = i18n.translate(
+  'xpack.pnd.watches.settings.generation.sectionSubtitle',
+  { defaultMessage: 'what each Attack Discovery run reads and runs with' }
+);
+
 export const SCOPE_SECTION_TITLE = i18n.translate('xpack.pnd.watches.settings.scope.sectionTitle', {
   defaultMessage: 'Scope & routing',
 });
@@ -301,6 +311,56 @@ export const SCHEDULE_OPTION_LABELS: Record<string, string> = {
   }),
   hourly: i18n.translate('xpack.pnd.watches.settings.schedule.hourly', {
     defaultMessage: 'Every hour',
+  }),
+};
+
+/* -------------------------------------------------------------------------- */
+/* Generation (Attack Discovery Generation watch only)                        */
+/* -------------------------------------------------------------------------- */
+
+export const ALERT_SIZE_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.generation.alertSizeLabel',
+  { defaultMessage: 'Alerts per run' }
+);
+
+export const ALERT_SIZE_HELP = i18n.translate(
+  'xpack.pnd.watches.settings.generation.alertSizeHelp',
+  { defaultMessage: 'How many of the newest alerts each run sends for analysis.' }
+);
+
+export const LOOKBACK_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.generation.lookbackLabel',
+  { defaultMessage: 'Alert window' }
+);
+
+export const LOOKBACK_HELP = i18n.translate('xpack.pnd.watches.settings.generation.lookbackHelp', {
+  defaultMessage: 'How far back each run looks for alerts.',
+});
+
+export const GENERATION_CONNECTOR_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.generation.connectorLabel',
+  { defaultMessage: 'Generation connector' }
+);
+
+export const GENERATION_CONNECTOR_HELP = i18n.translate(
+  'xpack.pnd.watches.settings.generation.connectorHelp',
+  { defaultMessage: 'The AI connector each run generates discoveries with.' }
+);
+
+export const GENERATION_CONNECTOR_DEFAULT = i18n.translate(
+  'xpack.pnd.watches.settings.generation.connectorDefault',
+  { defaultMessage: 'Default AI connector (server-resolved)' }
+);
+
+export const LOOKBACK_OPTION_LABELS: Record<string, string> = {
+  'now-24h': i18n.translate('xpack.pnd.watches.settings.lookback.last24h', {
+    defaultMessage: 'Last 24 hours',
+  }),
+  'now-48h': i18n.translate('xpack.pnd.watches.settings.lookback.last48h', {
+    defaultMessage: 'Last 48 hours',
+  }),
+  'now-7d': i18n.translate('xpack.pnd.watches.settings.lookback.last7d', {
+    defaultMessage: 'Last 7 days',
   }),
 };
 

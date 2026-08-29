@@ -16,6 +16,10 @@ import {
   PND_RULE_TUNING_WORKFLOW_ID,
 } from './rule_workflows';
 import {
+  PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW,
+  PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+} from './watch_attack_discovery_generation';
+import {
   PND_WATCH_AUTO_APPROVER_WORKFLOW,
   PND_WATCH_AUTO_APPROVER_WORKFLOW_ID,
 } from './watch_auto_approver';
@@ -28,7 +32,10 @@ import {
   PND_WATCH_POST_INCIDENT_WORKFLOW,
   PND_WATCH_POST_INCIDENT_WORKFLOW_ID,
 } from './watch_post_incident';
-import type { PndWatchTemplateValues } from './watch_template_values';
+import type {
+  PndAdGenerationTemplateValues,
+  PndWatchTemplateValues,
+} from './watch_template_values';
 
 export {
   PND_RULE_CREATION_WORKFLOW,
@@ -52,18 +59,26 @@ export {
   PND_WATCH_POST_INCIDENT_WORKFLOW_ID,
 } from './watch_post_incident';
 export {
+  PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW,
+  PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+} from './watch_attack_discovery_generation';
+export {
   readCorrelationIdFromEvent,
   readCorrelationIdFromExecutionContext,
 } from './read_correlation_id_from_event';
-export type { PndWatchTemplateValues } from './watch_template_values';
+export type {
+  PndAdGenerationTemplateValues,
+  PndWatchTemplateValues,
+} from './watch_template_values';
 
-/** Catalog watches: dynamic, per-space, not installed at boot. 5th is Post-Incident, not Detection. */
+/** Catalog watches: dynamic, per-space, not installed at boot. Detection is not one of them. */
 export const PND_MANAGED_WATCH_WORKFLOW_IDS = [
   PND_WATCH_FLOOR_WORKFLOW_ID,
   PND_WATCH_OFFICER_WORKFLOW_ID,
   PND_WATCH_DARK_WORKFLOW_ID,
   PND_WATCH_DEEP_WORKFLOW_ID,
   PND_WATCH_POST_INCIDENT_WORKFLOW_ID,
+  PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
 ] as const;
 
 export const PND_RULE_WORKFLOW_IDS = [
@@ -86,6 +101,7 @@ export const PND_WATCH_WORKFLOWS = [
   PND_WATCH_DEEP_WORKFLOW,
   PND_WATCH_DETECTION_WORKFLOW,
   PND_WATCH_POST_INCIDENT_WORKFLOW,
+  PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW,
 ] as const;
 
 export const PND_WORKFLOWS = [
@@ -109,6 +125,7 @@ export const PND_WATCH_WORKFLOW_IDS = [
   PND_WATCH_DEEP_WORKFLOW_ID,
   PND_WATCH_DETECTION_WORKFLOW_ID,
   PND_WATCH_POST_INCIDENT_WORKFLOW_ID,
+  PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
   PND_RULE_CREATION_WORKFLOW_ID,
@@ -124,13 +141,24 @@ export const PND_WORKFLOW_TEMPLATE_VALUES: PndWatchTemplateValues = {
   settingsVersion: 1,
 };
 
-export const PND_WORKFLOW_TEMPLATE_VALUES_BY_ID: Record<
-  PndWorkflowId,
-  typeof PND_WORKFLOW_TEMPLATE_VALUES
-> = {
+/**
+ * Default template values for the Attack Discovery Generation watch: the shared
+ * watch defaults plus a 15-minute cadence over the last 24h of alerts, using the
+ * server-resolved default AI connector.
+ */
+export const PND_AD_GENERATION_TEMPLATE_VALUES: PndAdGenerationTemplateValues = {
+  ...PND_WORKFLOW_TEMPLATE_VALUES,
+  alertSize: 100,
+  connectorId: '',
+  lookback: 'now-24h',
+  scheduleEvery: '15m',
+};
+
+export const PND_WORKFLOW_TEMPLATE_VALUES_BY_ID: Record<PndWorkflowId, PndWatchTemplateValues> = {
   [PND_RULE_CREATION_WORKFLOW_ID]: PND_WORKFLOW_TEMPLATE_VALUES,
   [PND_RULE_PREVIEW_WORKFLOW_ID]: PND_WORKFLOW_TEMPLATE_VALUES,
   [PND_RULE_TUNING_WORKFLOW_ID]: PND_WORKFLOW_TEMPLATE_VALUES,
+  [PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: PND_AD_GENERATION_TEMPLATE_VALUES,
   [PND_WATCH_AUTO_APPROVER_WORKFLOW_ID]: PND_WORKFLOW_TEMPLATE_VALUES,
   [PND_WATCH_DARK_WORKFLOW_ID]: PND_WORKFLOW_TEMPLATE_VALUES,
   [PND_WATCH_DEEP_WORKFLOW_ID]: PND_WORKFLOW_TEMPLATE_VALUES,

@@ -33,6 +33,12 @@ export const GetExecutionResponse = lazySchema(() =>
   z.object({
     correlationId: z.string().max(1024),
     steps: z.array(PndPhaseStepProjection).max(100),
+    /**
+     * Per-action containment execution ledger, projected from the Watch Floor run's
+     * `collect_executed_actions` step output. Absent until the containment gate has been
+     * answered and the execute steps have recorded outcomes.
+     */
+    containmentActions: z.array(z.record(z.string(), z.unknown())).max(200).optional(),
   })
 );
 export type GetExecutionResponse = z.infer<typeof GetExecutionResponse>;

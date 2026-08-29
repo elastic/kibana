@@ -133,6 +133,18 @@ export const WatchTriggersSettings = lazySchema(() =>
 export type WatchTriggersSettings = z.infer<typeof WatchTriggersSettings>;
 
 /**
+ * Attack Discovery generation options, offered only by the Attack Discovery Generation watch. An empty connectorId means the server-resolved default AI connector.
+ */
+export const WatchGenerationSettings = lazySchema(() =>
+  z.object({
+    alertSize: z.number().int().min(1).max(500),
+    lookback: z.string().min(1).max(64),
+    connectorId: z.string().max(256),
+  })
+);
+export type WatchGenerationSettings = z.infer<typeof WatchGenerationSettings>;
+
+/**
  * The data-boundary chips the design shows in this section are rendered from the watch's own `scopes`, which already carry a name and an access level, so they are not duplicated here.
  */
 export const WatchScopeRoutingSettings = lazySchema(() =>
@@ -217,6 +229,7 @@ export const WatchSettings = lazySchema(() =>
      */
     autonomy: WatchAutonomyLevel,
     triggers: WatchTriggersSettings.optional(),
+    generation: WatchGenerationSettings.optional(),
     scopeRouting: WatchScopeRoutingSettings.optional(),
     skills: z.array(WatchSkillAttachment).optional(),
     /**

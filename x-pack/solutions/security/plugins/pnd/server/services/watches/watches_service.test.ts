@@ -7,7 +7,10 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
+import {
+  SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
+  SYSTEM_SECURITY_WATCH_FLOOR_ID,
+} from '@kbn/pnd-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { resetWatchStore } from '../watch_store/watch_store';
@@ -15,6 +18,7 @@ import type { WatchWorkflowsManagementClient } from './watch_workflows_managemen
 import { WatchesService } from './watches_service';
 
 const FLOOR = SYSTEM_SECURITY_WATCH_FLOOR_ID;
+const AD_GENERATION = SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
 
@@ -221,7 +225,7 @@ describe('WatchesService', () => {
       const response = await service.list(SPACE, request);
       const floor = response.watches.find(({ id }) => id === FLOOR);
 
-      expect(response.watches).toHaveLength(5);
+      expect(response.watches).toHaveLength(6);
       expect(floor).toEqual(
         expect.objectContaining({
           id: FLOOR,
@@ -421,6 +425,161 @@ describe('WatchesService', () => {
       expect(disabled.response.watch.enabled).toBe(false);
       expect(harness.documents.has(`${FLOOR}-space-a`)).toBe(true);
       expect(harness.managedWorkflows.uninstall).not.toHaveBeenCalled();
+    });
+  });
+
+  // A schedule or generation change re-renders the managed YAML, but Task Manager only re-reads
+  // a workflow's scheduled triggers when an update flows through the Workflows management API —
+  // so the settings write must re-assert enablement (idempotent) on an installed, enabled watch.
+  describe('re-programming the schedule after a settings write', () => {
+    const revisionOf = async (
+      service: ReturnType<ReturnType<typeof createPersistentHarness>['createService']>
+    ) => {
+      const body = await service.get(AD_GENERATION, SPACE, request);
+      return body?.settingsRevision ?? null;
+    };
+
+    it('re-asserts enabled after a generation patch on an enabled watch', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(AD_GENERATION, { enabled: true }, SPACE, request);
+      jest.mocked(harness.management.updateWorkflow).mockClear();
+
+      const result = await service.update(
+        AD_GENERATION,
+        { generation: { alertSize: 250 }, settingsRevision: await revisionOf(service) },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      expect(harness.documents.get(`${AD_GENERATION}-${SPACE}`)?.values).toEqual(
+        expect.objectContaining({ alertSize: 250 })
+      );
+      expect(harness.management.updateWorkflow).toHaveBeenCalledWith(
+        `${AD_GENERATION}-${SPACE}`,
+        { enabled: true },
+        SPACE,
+        request
+      );
+    });
+
+    it('re-asserts enabled after a schedule change on an enabled watch', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(AD_GENERATION, { enabled: true }, SPACE, request);
+      jest.mocked(harness.management.updateWorkflow).mockClear();
+
+      const result = await service.update(
+        AD_GENERATION,
+        { triggers: { scheduleId: 'every-30m' }, settingsRevision: await revisionOf(service) },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      expect(harness.documents.get(`${AD_GENERATION}-${SPACE}`)?.values).toEqual(
+        expect.objectContaining({ scheduleEvery: '30m' })
+      );
+      expect(harness.management.updateWorkflow).toHaveBeenCalledWith(
+        `${AD_GENERATION}-${SPACE}`,
+        { enabled: true },
+        SPACE,
+        request
+      );
+    });
+
+    it('never re-enables a disabled watch behind a settings write', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(AD_GENERATION, { enabled: true }, SPACE, request);
+      await service.update(AD_GENERATION, { enabled: false }, SPACE, request);
+      jest.mocked(harness.management.updateWorkflow).mockClear();
+
+      const result = await service.update(
+        AD_GENERATION,
+        { generation: { lookback: 'now-7d' }, settingsRevision: await revisionOf(service) },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      expect(harness.management.updateWorkflow).not.toHaveBeenCalled();
+      expect(harness.documents.get(`${AD_GENERATION}-${SPACE}`)?.enabled).toBe(false);
+    });
+
+    it('makes no extra enablement call for an autonomy-only patch', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(AD_GENERATION, { enabled: true }, SPACE, request);
+      jest.mocked(harness.management.updateWorkflow).mockClear();
+
+      const result = await service.update(
+        AD_GENERATION,
+        { autonomyLevel: 'supervised', settingsRevision: await revisionOf(service) },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      expect(harness.management.updateWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ensureSchedule', () => {
+    it('re-asserts enablement on the installed per-space document and reports scheduled', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(AD_GENERATION, { enabled: true }, SPACE, request);
+      jest.mocked(harness.management.updateWorkflow).mockClear();
+
+      await expect(service.ensureSchedule(AD_GENERATION, SPACE, request)).resolves.toEqual({
+        outcome: 'scheduled',
+      });
+      expect(harness.management.updateWorkflow).toHaveBeenCalledWith(
+        `${AD_GENERATION}-${SPACE}`,
+        { enabled: true },
+        SPACE,
+        request
+      );
+      expect(harness.documents.get(`${AD_GENERATION}-${SPACE}`)?.enabled).toBe(true);
+    });
+
+    it('reports not-found for a watch never installed in the space, without touching management', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+
+      await expect(service.ensureSchedule(AD_GENERATION, SPACE, request)).resolves.toEqual({
+        outcome: 'not-found',
+      });
+      expect(harness.management.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('reports unavailable when the workflow services are absent', async () => {
+      const service = new WatchesService(
+        undefined,
+        undefined,
+        loggingSystemMock.createLogger() as Logger,
+        false
+      );
+
+      await expect(service.ensureSchedule(AD_GENERATION, SPACE, request)).resolves.toEqual({
+        outcome: 'unavailable',
+      });
+    });
+
+    it('reports unavailable when the managed workflows API resolves to nothing', async () => {
+      const harness = createPersistentHarness();
+      const service = new WatchesService(
+        harness.management,
+        Promise.resolve(undefined),
+        loggingSystemMock.createLogger() as Logger,
+        false
+      );
+
+      await expect(service.ensureSchedule(AD_GENERATION, SPACE, request)).resolves.toEqual({
+        outcome: 'unavailable',
+      });
     });
   });
 

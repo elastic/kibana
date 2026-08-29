@@ -30,17 +30,23 @@ interface ParsedAttachment {
 interface ParsedJsonSchema {
   type?: string;
   description?: string;
+  maxItems?: number;
   maxLength?: number;
+  items?: ParsedJsonSchema;
   properties?: Record<string, ParsedJsonSchema>;
   required?: string[];
   additionalProperties?: boolean;
 }
 
 interface ParsedStepWith {
+  approved_actions?: string;
   attachments?: ParsedAttachment[];
   autoAccepted?: { autonomyLevel?: string; gateId?: string; reason?: string };
   body?: Record<string, unknown>;
+  configuration_overrides?: { skill_ids?: string[]; enable_elastic_capabilities?: boolean };
+  containment_executed_actions?: string;
   conversation_id?: string;
+  executed_actions?: unknown;
   headers?: Record<string, string>;
   inputs?: Record<string, string>;
   message?: string;
@@ -49,8 +55,10 @@ interface ParsedStepWith {
   outcome?: string;
   path?: string;
   phase?: string;
+  phase3_recommended_actions?: string;
   rationale?: string;
   reasoning?: { summary?: string; sections?: ParsedReasoningSection[] };
+  recommended_actions?: string;
   schema?: ParsedJsonSchema;
   'workflow-id'?: string;
 }
@@ -62,6 +70,8 @@ interface ParsedStep {
   condition?: string;
   'create-conversation'?: boolean;
   else?: ParsedStep[];
+  foreach?: string;
+  if?: string;
   'on-failure'?: ParsedOnFailure;
   'public-conversation'?: boolean;
   status?: string;
@@ -1041,5 +1051,247 @@ describe('watch_floor.yaml investigation split (kibana-tjil.8)', () => {
 
   it('bumps the managed version, so the split reaches an installed stack', () => {
     expect(PND_WATCH_FLOOR_WORKFLOW.version).toBeGreaterThan(13);
+  });
+});
+
+// Phase 3 rebuilt: the containment gate is no longer a bare "confirm containment" prose card.
+// The recommended-actions skill stages a machine-readable action list before the gate, the analyst
+// approves a per-action subset on the gate (approved_actions), and the approved Kibana-executable
+// actions are executed by steps AFTER the gate — post-gate placement is identity-correct, because a
+// resume re-keys the execution to the responder, so the consequential writes run as the approving
+// analyst. The whole sequence stays TOP-LEVEL with no `if` wrapper: the alwaysGate invariant above
+// still owns the gate itself, and these pins own the staged-execute structure around it.
+describe('watch_floor.yaml phase 3 recommended actions', () => {
+  const topLevel = stepNames(parsed.steps);
+
+  it('runs the containment sequence top-level, in exactly this order, after the verdict', () => {
+    expect(topLevel.slice(topLevel.indexOf('assess_investigation'))).toEqual([
+      'assess_investigation',
+      'recommend_actions',
+      'capture_recommended_actions',
+      'ensure_thread_incident_contained',
+      'reason_incident_contained',
+      'await_incident_contained',
+      'capture_approved_actions',
+      'resolve_endpoint_agent_ids',
+      'execute_create_case_actions',
+      'execute_set_asset_criticality_actions',
+      'execute_isolate_host_actions',
+      'execute_kill_process_actions',
+      'execute_hunt_process_persistence_actions',
+      'account_unexecuted_actions',
+      'collect_executed_actions',
+      'record_containment_outcome',
+      'incident_closed',
+    ]);
+  });
+
+  // Liquid cannot express an empty array as a reliable filter fallback, so the guards below
+  // default through a const.
+  it('declares the empty-array const the default guards read', () => {
+    expect(parsed.consts).toHaveProperty('no_rows', []);
+  });
+
+  describe('recommend_actions', () => {
+    const step = getStep('recommend_actions');
+
+    it('stages the actions with an agent turn', () => {
+      expect(step.type).toBe('ai.agent');
+    });
+
+    // A tool-call hallucination must not fail the run before the gate is reached; the gate
+    // then says plainly that nothing was staged.
+    it('continues on failure, so a staging failure cannot abort the run before the gate', () => {
+      expect(step['on-failure']?.continue).toBe(true);
+    });
+
+    it('pins the recommended-actions skill into the run so load_skill cannot miss it', () => {
+      expect(step.with?.configuration_overrides?.skill_ids).toEqual(['recommended-actions']);
+    });
+
+    it('tells the model to load the skill rather than guess a tool name', () => {
+      expect(step.with?.message).toContain('skill://recommended-actions');
+    });
+
+    it('forbids executing anything at staging time', () => {
+      expect(step.with?.message).toContain('Do not execute any action');
+    });
+
+    it('requires the structured action list', () => {
+      expect(step.with?.schema?.required).toEqual(['recommended_actions']);
+    });
+
+    it('bounds the staged list', () => {
+      expect(step.with?.schema?.properties?.recommended_actions?.maxItems).toBe(8);
+    });
+  });
+
+  // Guards the structured output (absent when recommend_actions failed and its continue carried
+  // the run onward), so every downstream reference reads a guaranteed array — and seeds the
+  // execution ledger.
+  describe('capture_recommended_actions', () => {
+    const step = getStep('capture_recommended_actions');
+
+    it('is a data.set step', () => {
+      expect(step.type).toBe('data.set');
+    });
+
+    it('defaults the staged list through the empty-array const', () => {
+      expect(step.with?.phase3_recommended_actions).toContain(
+        'steps.recommend_actions.output.structured_output.recommended_actions'
+      );
+      expect(step.with?.phase3_recommended_actions).toContain('default: consts.no_rows');
+    });
+
+    it('seeds the execution ledger empty', () => {
+      expect(step.with?.executed_actions).toEqual([]);
+    });
+  });
+
+  // Only reasoning.summary reaches the proposal card, so the summary carries the staged actions
+  // behind a stable label anchor, parsed back by the PND queue's recommended-actions form.
+  describe('reason_incident_contained carries the staged actions', () => {
+    const summary = getStep('reason_incident_contained').with?.reasoning?.summary ?? '';
+
+    it('anchors the machine-readable list behind a stable label', () => {
+      expect(summary).toContain('Staged containment actions JSON:');
+    });
+
+    it('embeds the staged actions as JSON after the anchor', () => {
+      const anchorIndex = summary.indexOf('Staged containment actions JSON:');
+      const jsonIndex = summary.indexOf('{{ variables.phase3_recommended_actions | json }}');
+
+      expect(jsonIndex).toBeGreaterThan(anchorIndex);
+    });
+
+    it('still quotes the incident agent verbatim after the staged list', () => {
+      expect(summary).toContain('{{ steps.open_incident.output.structured_output.proposal }}');
+    });
+  });
+
+  describe('await_incident_contained per-action approval', () => {
+    const schema = getStep('await_incident_contained').with?.schema;
+
+    it('asks the analyst to review the staged actions, not to confirm prose', () => {
+      expect(getStep('await_incident_contained').with?.message).toContain(
+        'Review the staged containment actions'
+      );
+    });
+
+    it('accepts the toggled subset as approved_actions', () => {
+      expect(schema?.properties).toHaveProperty('approved_actions');
+    });
+
+    it('bounds the approved subset', () => {
+      expect(schema?.properties?.approved_actions?.maxItems).toBe(50);
+    });
+
+    // Absent or empty approved_actions means nothing is executed, so a plain dismissal — and a
+    // legacy responder that sends only decision and rationale — must still validate.
+    it('requires only decision and rationale, never the subset itself', () => {
+      expect(schema?.required).toEqual(['decision', 'rationale']);
+    });
+  });
+
+  it('captures the approved subset through the same empty-array default', () => {
+    const step = getStep('capture_approved_actions');
+
+    expect(step.type).toBe('data.set');
+    expect(step.with?.approved_actions).toContain(
+      'steps.await_incident_contained.output.response.approved_actions'
+    );
+    expect(step.with?.approved_actions).toContain('default: consts.no_rows');
+  });
+
+  // Post-gate execution. Each execute block is a top-level foreach over the approved subset —
+  // never wrapped in an `if` STEP (which the alwaysGate invariant forbids around this sequence) —
+  // and each is additionally guarded on an explicit approve decision, so a dismissal executes
+  // nothing even if approved_actions were somehow non-empty.
+  describe.each([
+    ['execute_create_case_actions', 'create_case'],
+    ['execute_set_asset_criticality_actions', 'set_asset_criticality'],
+    ['execute_isolate_host_actions', 'isolate_host'],
+    ['execute_kill_process_actions', 'kill_process'],
+    ['execute_hunt_process_persistence_actions', 'hunt_process_persistence'],
+  ])('%s', (stepName, actionType) => {
+    const step = getStep(stepName);
+
+    it('is a foreach over the approved subset', () => {
+      expect(step.type).toBe('foreach');
+      expect(step.foreach).toContain(
+        `variables.approved_actions | where: 'action_type', '${actionType}'`
+      );
+    });
+
+    it('runs only on an explicit approve decision', () => {
+      expect(step.if).toContain(
+        "steps.await_incident_contained.output.response.decision == 'approve'"
+      );
+    });
+
+    it('sits after the gate, so the writes run as the approving analyst', () => {
+      expect(topLevel.indexOf(stepName)).toBeGreaterThan(
+        topLevel.indexOf('await_incident_contained')
+      );
+    });
+
+    it('is never wrapped in an if step', () => {
+      expect(findEnclosingIf(stepName)).toBeUndefined();
+    });
+  });
+
+  it('guards the endpoint-agent resolution on the same approve decision', () => {
+    const step = getStep('resolve_endpoint_agent_ids');
+
+    expect(step.type).toBe('elasticsearch.esql.query');
+    expect(step.if).toContain(
+      "steps.await_incident_contained.output.response.decision == 'approve'"
+    );
+    expect(step['on-failure']?.continue).toBe(true);
+  });
+
+  // The account pass runs UNGUARDED, so a dismissal still yields a complete ledger: every staged
+  // action ends with either an execution record or a not_executed record with a reason.
+  it('accounts for unexecuted actions on every path, approved or dismissed', () => {
+    const step = getStep('account_unexecuted_actions');
+
+    expect(step.type).toBe('foreach');
+    expect(step.foreach).toContain('variables.phase3_recommended_actions');
+    expect(step.if).toBeUndefined();
+  });
+
+  // Stable marker for the four-phase execution projection: GET /internal/pnd/executions/
+  // {correlationId} extracts the ledger from exactly this step name and output key, and the phase
+  // catalog keys its "Execute approved actions" row on the step name.
+  describe('collect_executed_actions marker', () => {
+    const step = getStep('collect_executed_actions');
+
+    it('is a data.set step, so its with-block is its output', () => {
+      expect(step.type).toBe('data.set');
+    });
+
+    it('publishes the ledger under the projection key', () => {
+      expect(step.with?.containment_executed_actions).toBe('${{ variables.executed_actions }}');
+    });
+  });
+
+  it('records the approved subset and the ledger in the incident conversation', () => {
+    const message = getStep('record_containment_outcome').with?.message ?? '';
+
+    expect(message).toContain('{{ variables.approved_actions | json }}');
+    expect(message).toContain('{{ variables.executed_actions | json }}');
+  });
+
+  it('carries the staged and executed actions on the terminal output', () => {
+    const step = getStep('incident_closed');
+
+    expect(step.with?.recommended_actions).toBe('${{ variables.phase3_recommended_actions }}');
+    expect(step.with?.executed_actions).toBe('${{ variables.executed_actions }}');
+  });
+
+  // `versionStrategy: 'auto'` only re-applies the YAML when the version increases. Greater-than
+  // rather than equal, so later beads can bump.
+  it('bumps the managed version, so the staged-execute sequence reaches an installed stack', () => {
+    expect(PND_WATCH_FLOOR_WORKFLOW.version).toBeGreaterThan(20);
   });
 });

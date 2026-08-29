@@ -36,10 +36,11 @@ describe('PND workflow id lists', () => {
   });
 
   // kibana-phf4.5 / ADR-015 moved the Attack Discovery lane between two watches that were both
-  // already installed and both already resumable, so neither list may gain or lose a member. A
-  // relocation that changed either one would be widening PND's install or resume boundary under
-  // cover of a YAML swap, which is a different change needing its own review.
-  it('keeps the same nine watch and worker ids the lane relocation started with', () => {
+  // already installed and both already resumable, so a relocation must never change this list under
+  // cover of a YAML swap — widening PND's install or resume boundary is a different change needing
+  // its own review. The tenth member is that reviewed change: the Attack Discovery Generation
+  // catalog watch, the per-space scheduled worker whose only job is AD generation.
+  it('keeps exactly the reviewed watch and worker ids', () => {
     expect([...PND_WATCH_WORKFLOW_IDS]).toEqual([
       'system-security-watch-floor',
       'system-security-watch-officer',
@@ -47,6 +48,7 @@ describe('PND workflow id lists', () => {
       'system-security-watch-deep',
       'system-security-watch-detection',
       'system-security-watch-post-incident',
+      'system-security-watch-attack-discovery-generation',
       'system-security-rule-preview',
       'system-security-rule-tuning',
       'system-security-rule-creation',

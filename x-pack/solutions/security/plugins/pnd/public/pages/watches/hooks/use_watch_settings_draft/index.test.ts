@@ -7,7 +7,11 @@
 
 import { act, renderHook } from '@testing-library/react';
 import type { WatchSettings } from '@kbn/pnd-common';
-import { SYSTEM_SECURITY_WATCH_DEEP_ID, SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
+import {
+  SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
+  SYSTEM_SECURITY_WATCH_DEEP_ID,
+  SYSTEM_SECURITY_WATCH_FLOOR_ID,
+} from '@kbn/pnd-common';
 import { useWatchSettingsDraft } from '.';
 
 const settings: WatchSettings = {
@@ -24,6 +28,13 @@ const settings: WatchSettings = {
     sharedWithAttackDiscovery: true,
   },
   watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+};
+
+/** The Attack Discovery Generation watch is the one watch whose payload carries `generation`. */
+const generationSettings: WatchSettings = {
+  ...settings,
+  generation: { alertSize: 100, connectorId: '', lookback: 'now-24h' },
+  watchId: SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
 };
 
 describe('useWatchSettingsDraft', () => {
@@ -60,6 +71,43 @@ describe('useWatchSettingsDraft', () => {
     });
   });
 
+  it('carries generation edits in the same one patch as trigger edits', () => {
+    const { result } = renderHook(() => useWatchSettingsDraft(generationSettings));
+
+    act(() => result.current.setScheduleId('hourly'));
+    act(() => result.current.setGenerationAlertSize(250));
+    act(() => result.current.setGenerationLookback('now-7d'));
+    act(() => result.current.setGenerationConnectorId('my-gpt4o'));
+
+    expect(result.current.patch).toEqual({
+      generation: { alertSize: 250, connectorId: 'my-gpt4o', lookback: 'now-7d' },
+      triggers: { scheduleId: 'hourly' },
+    });
+  });
+
+  it('starts with the fetched generation options in the draft', () => {
+    const { result } = renderHook(() => useWatchSettingsDraft(generationSettings));
+
+    expect(result.current.draft.generation).toEqual(generationSettings.generation);
+  });
+
+  it('puts a discarded generation edit back to the fetched value', () => {
+    const { result } = renderHook(() => useWatchSettingsDraft(generationSettings));
+
+    act(() => result.current.setGenerationAlertSize(250));
+    act(() => result.current.discard());
+
+    expect(result.current.draft.generation?.alertSize).toBe(100);
+  });
+
+  it('edits no generation on a watch whose payload offers none', () => {
+    const { result } = renderHook(() => useWatchSettingsDraft(settings));
+
+    act(() => result.current.setGenerationAlertSize(250));
+
+    expect(result.current.isDirty).toBe(false);
+  });
+
   /**
    * The declutter (bead kibana-phf4.33) left the hook with three setters. Pinned by name, because a
    * setter re-added here would be the first half of re-adding a write path the design removed.
@@ -78,7 +126,14 @@ describe('useWatchSettingsDraft', () => {
       Object.keys(result.current)
         .filter((key) => key.startsWith('set'))
         .sort()
-    ).toEqual(['setAllowManualRun', 'setScheduleId', 'setScopeRoutingSelection']);
+    ).toEqual([
+      'setAllowManualRun',
+      'setGenerationAlertSize',
+      'setGenerationConnectorId',
+      'setGenerationLookback',
+      'setScheduleId',
+      'setScopeRoutingSelection',
+    ]);
   });
 
   it('turns clean again when an edit is put back by hand', () => {

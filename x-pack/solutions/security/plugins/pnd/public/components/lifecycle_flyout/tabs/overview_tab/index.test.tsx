@@ -31,13 +31,18 @@ jest.mock('../../sections/tuning_section', () => ({
     <div data-test-subj="pndLifecycleSection-tuning">{correlationId}</div>
   ),
 }));
+jest.mock('../../sections/actions_section', () => ({
+  LifecycleActionsSection: ({ correlationId }: { correlationId: string }) => (
+    <div data-test-subj="pndLifecycleSection-actions">{correlationId}</div>
+  ),
+}));
 jest.mock('../../sections/lifecycle_section', () => ({
   LifecycleStepsSection: ({ correlationId }: { correlationId: string }) => (
     <div data-test-subj="pndLifecycleSection-lifecycle">{correlationId}</div>
   ),
 }));
 
-const SECTION_IDS = ['summary', 'attachments', 'tuning', 'lifecycle'] as const;
+const SECTION_IDS = ['summary', 'attachments', 'tuning', 'actions', 'lifecycle'] as const;
 
 const renderTab = (correlationId = 'ad-1') =>
   render(<LifecycleOverviewTab correlationId={correlationId} />);
@@ -67,8 +72,11 @@ describe('LifecycleOverviewTab', () => {
   /**
    * Load-bearing: decision 1 enumerates the Overview tab as *"description, related items, fields
    * table, attachments"*, so the fields table leads and attachments closes the content it names. The
-   * two sections the decision does not name — Review tuning and Lifecycle — follow, rather than
-   * being interleaved into a list the decision spelled out.
+   * sections the decision does not name — Review tuning, Containment actions and Lifecycle — follow,
+   * rather than being interleaved into a list the decision spelled out. Containment actions sits
+   * between Review tuning and Lifecycle: it is the record of what a gate decision did, and its rows
+   * are the expanded form of the evidence the Lifecycle section pins to its
+   * execute-approved-actions row.
    */
   it('orders the sections so the enumeration in decision 1 is intact and ours follows it', () => {
     const { container } = renderTab();
@@ -81,6 +89,7 @@ describe('LifecycleOverviewTab', () => {
       'pndLifecycleSection-summary',
       'pndLifecycleSection-attachments',
       'pndLifecycleSection-tuning',
+      'pndLifecycleSection-actions',
       'pndLifecycleSection-lifecycle',
     ]);
   });

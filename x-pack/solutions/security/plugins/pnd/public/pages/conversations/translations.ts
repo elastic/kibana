@@ -42,6 +42,13 @@ export const WATCH_POST_INCIDENT = i18n.translate('xpack.pnd.brief.watch.detecti
   defaultMessage: 'Post-Incident Watch',
 });
 
+export const WATCH_ATTACK_DISCOVERY_GENERATION = i18n.translate(
+  'xpack.pnd.brief.watch.attackDiscoveryGeneration',
+  {
+    defaultMessage: 'Attack Discovery Generation',
+  }
+);
+
 export const LOADING = i18n.translate('xpack.pnd.brief.loading', {
   defaultMessage: 'Loading the approval queue…',
 });

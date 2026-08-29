@@ -18,8 +18,8 @@ describe('actionLabel', () => {
     expect(actionLabel(PND_GATE_IDS.promoteIncident)).toEqual('Escalate to an incident');
   });
 
-  it('reads Confirm containment from gate.actionLabel', () => {
-    expect(actionLabel(PND_GATE_IDS.incidentContained)).toEqual('Confirm containment');
+  it('reads Review containment actions from gate.actionLabel', () => {
+    expect(actionLabel(PND_GATE_IDS.incidentContained)).toEqual('Review containment actions');
   });
 
   it('reads Apply the rule tuning from gate.actionLabel', () => {

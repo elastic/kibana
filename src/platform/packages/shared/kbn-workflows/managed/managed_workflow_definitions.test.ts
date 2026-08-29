@@ -16,6 +16,7 @@ import {
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
+  PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   PND_WATCH_AUTO_APPROVER_WORKFLOW_ID,
   PND_WATCH_DARK_WORKFLOW_ID,
   PND_WATCH_DEEP_WORKFLOW_ID,
@@ -27,6 +28,7 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import WATCH_ATTACK_DISCOVERY_GENERATION_YAML from './definitions/pnd/watch_attack_discovery_generation.yaml';
 import WATCH_DARK_YAML from './definitions/pnd/watch_dark.yaml';
 import WATCH_DEEP_YAML from './definitions/pnd/watch_deep.yaml';
 import WATCH_DETECTION_YAML from './definitions/pnd/watch_detection.yaml';
@@ -79,6 +81,14 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [PND_WATCH_POST_INCIDENT_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+  },
+  [PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+    scheduleEvery: '15m',
+    alertSize: 100,
+    lookback: 'now-24h',
+    connectorId: '',
   },
   [PND_WATCH_AUTO_APPROVER_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -170,7 +180,12 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '19:ef20a452'],
+  [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '21:c760df96'],
+  [
+    PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+    WATCH_ATTACK_DISCOVERY_GENERATION_YAML,
+    '1:e19afd0d',
+  ],
   [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '6:ac13554a'],
   [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '6:add36220'],
   [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '13:971b27fd'],

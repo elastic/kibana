@@ -23,6 +23,7 @@ const result = ({
   isCorrelated?: boolean;
   steps?: PndPhaseStepProjection[];
 }): PndExecutionQueryResult => ({
+  containmentActions: [],
   execution: { correlationId: 'ad-1', steps },
   isCorrelated,
 });

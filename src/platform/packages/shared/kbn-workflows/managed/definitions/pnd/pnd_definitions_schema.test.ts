@@ -10,7 +10,8 @@
 import { parse } from 'yaml';
 import type { z } from '@kbn/zod/v4';
 
-import { PND_WORKFLOW_TEMPLATE_VALUES } from '.';
+import { PND_WORKFLOW_TEMPLATE_VALUES_BY_ID } from '.';
+import type { PndWatchTemplateValues } from '.';
 import { managedWorkflowDefinitions } from '..';
 import { createWorkflowLiquidEngine } from '../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 import { validateStepNameUniqueness } from '../../../common/validate_step_names';
@@ -111,9 +112,15 @@ const formatIssues = (error: z.ZodError): string[] =>
  *
  * Deliberately does **not** fall back to a static `yaml` property: decision 7 put every PND
  * definition on `yamlTemplate`, so a definition that still declares `yaml` is the regression this
- * throw exists to name. `PND_WORKFLOW_TEMPLATE_VALUES` is what the plugin installs with, and none of
- * the templates read it — see the comment at the top of `./index.ts`.
+ * throw exists to name. `PND_WORKFLOW_TEMPLATE_VALUES_BY_ID` is what the plugin installs with —
+ * per-definition defaults, because the Attack Discovery Generation watch reads real values (its
+ * scheduled-trigger interval among them) where the other templates ignore what they are handed.
  */
+const templateValuesById = PND_WORKFLOW_TEMPLATE_VALUES_BY_ID as Record<
+  string,
+  PndWatchTemplateValues | undefined
+>;
+
 const getYaml = ({ id, yamlTemplate }: ManagedWorkflowDefinition): string => {
   if (typeof yamlTemplate !== 'function') {
     throw new Error(
@@ -121,7 +128,14 @@ const getYaml = ({ id, yamlTemplate }: ManagedWorkflowDefinition): string => {
     );
   }
 
-  return yamlTemplate(PND_WORKFLOW_TEMPLATE_VALUES);
+  const templateValues = templateValuesById[id];
+  if (!templateValues) {
+    throw new Error(
+      `PND managed workflow '${id}' has no entry in PND_WORKFLOW_TEMPLATE_VALUES_BY_ID. Every PND definition must declare its install-time template values.`
+    );
+  }
+
+  return yamlTemplate(templateValues);
 };
 
 const parseDefinition = (definition: ManagedWorkflowDefinition): WorkflowYaml => {

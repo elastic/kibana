@@ -458,6 +458,17 @@ export const SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID =
   'system-security-watch-post-incident' as const;
 
 /**
+ * The Attack Discovery Generation watch: scheduled AD generation, split from the
+ * per-discovery Watch Floor lifecycle so a parked HITL gate can never stall (or
+ * drop) the next generation tick, and so the engine's avoid-loop guard passes
+ * when a persisted discovery emits `security.attackDiscoveryCreated` back into
+ * the Floor. Kept in sync with `PND_WATCH_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID`
+ * in `@kbn/workflows/managed`; `managed_workflow_drift.test.ts` pins the two together.
+ */
+export const SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID =
+  'system-security-watch-attack-discovery-generation' as const;
+
+/**
  * The watches whose Triggers section is driven by a **signal** rather than a schedule, mapped to the
  * trigger that drives each.
  *
@@ -483,6 +494,7 @@ export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
+  SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
 ] as const;
 
 /**
@@ -541,6 +553,13 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     color: '#ec4899',
     isBeta: true,
   },
+  {
+    id: SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
+    deepLinkId: SecurityPageName.pndWatchAttackDiscoveryGeneration,
+    name: 'Attack Discovery Generation',
+    color: '#0b64dd',
+    isBeta: true,
+  },
 ] as const;
 
 export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATALOG)[number];
@@ -571,22 +590,27 @@ export const WATCH_DETECTION_TAG = 'watch-detection' as const;
 /** Tier tag of PND's phase-4 watch, {@link SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID}. */
 export const WATCH_POST_INCIDENT_TAG = 'watch-post-incident' as const;
 
+/** Tier tag of {@link SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID}. */
+export const WATCH_ATTACK_DISCOVERY_GENERATION_TAG = 'watch-attack-discovery-generation' as const;
+
 export const WATCH_CUSTOM_TAG = 'watch-custom' as const;
 
 /**
  * Every managed tier tag, ours and #283488's.
  *
- * Documentation only: `projectWorkflowToWatch` passes a workflow's YAML `tags` straight through and
- * `list_watches` filters on {@link WATCH_TAG} alone, so no runtime behaviour reads this array. It
- * exists so the tag vocabulary has one home.
+ * ⚠️ Not documentation-only: `createCatalogWatchPlaceholder` resolves a catalog watch's tier tag
+ * by its INDEX in {@link SYSTEM_SECURITY_WATCH_IDS}, so the first entries here must stay aligned
+ * with that array, in order. #283488's Detection Watch is not a catalog watch, so its tag sits
+ * after the aligned prefix.
  */
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
   WATCH_OFFICER_TAG,
   WATCH_DARK_TAG,
   WATCH_DEEP_TAG,
-  WATCH_DETECTION_TAG,
   WATCH_POST_INCIDENT_TAG,
+  WATCH_ATTACK_DISCOVERY_GENERATION_TAG,
+  WATCH_DETECTION_TAG,
 ] as const;
 
 /**

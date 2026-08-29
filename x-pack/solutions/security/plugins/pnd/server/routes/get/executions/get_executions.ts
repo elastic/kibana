@@ -15,6 +15,7 @@ import {
   SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
 } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 
 import type { RouteDependencies } from '../../register_routes';
 import { getLiveExecutionReadAuthz } from '../../watches/watch_route_security';
@@ -55,9 +56,45 @@ const CORRELATED_WORKFLOW_IDS = [
 const EXECUTION_CORRELATION_SIZE_PER_WORKFLOW = 100;
 
 /**
+ * The Watch Floor step whose output carries the final per-action containment ledger. The
+ * execute_* foreach blocks fan out into many transient step executions, so the projection
+ * reads the one stable collector instead — its `containment_executed_actions` output key is
+ * the contract with `watch_floor.yaml`'s `collect_executed_actions` step.
+ */
+const COLLECT_EXECUTED_ACTIONS_STEP_ID = 'collect_executed_actions';
+
+const MAX_CONTAINMENT_ACTIONS = 200;
+
+/**
+ * Read the per-action containment execution ledger from the correlated step executions, or
+ * `undefined` when the run has not reached (or recorded) it. Fail-open to absence: a ledger
+ * of unexpected shape must degrade to "no ledger" rather than fail the whole projection.
+ */
+const extractContainmentActions = (
+  stepExecutions: readonly WorkflowStepExecutionDto[]
+): Array<Record<string, unknown>> | undefined => {
+  const collector = stepExecutions
+    .filter((step) => step.stepId === COLLECT_EXECUTED_ACTIONS_STEP_ID && step.output != null)
+    .sort((a, b) => (b.startedAt ?? '').localeCompare(a.startedAt ?? ''))[0];
+
+  if (collector == null || typeof collector.output !== 'object' || collector.output == null) {
+    return undefined;
+  }
+
+  const ledger = (collector.output as Record<string, unknown>).containment_executed_actions;
+  if (!Array.isArray(ledger)) {
+    return undefined;
+  }
+
+  return ledger
+    .filter((entry): entry is Record<string, unknown> => typeof entry === 'object' && entry != null)
+    .slice(0, MAX_CONTAINMENT_ACTIONS);
+};
+
+/**
  * `GET /internal/pnd/executions/{correlationId}` — the four-phase execution projection.
  *
- * Returns the always-complete 14-row four-phase skeleton (the ten catalog steps plus the four
+ * Returns the always-complete 16-row four-phase skeleton (the twelve catalog steps plus the four
  * phase-gate rows) for one Attack Discovery, overlaying live status onto the rows PND executes and
  * marking the two `upstream` rows `upstream`, because Attack Discovery performs that work before PND
  * is invoked. Rows are matched to real step executions aggregated across the Watch Floor **and**
@@ -158,9 +195,15 @@ export const registerGetExecutionRoute = ({
             stepExecutionsByStepId: selectStepExecutions(stepExecutions),
           });
 
-          const body: GetExecutionResponse = { correlationId, steps };
+          const containmentActions = extractContainmentActions(stepExecutions);
 
-          // The skeleton is always 14 rows, so "no run correlated" can only be said in a header.
+          const body: GetExecutionResponse = {
+            correlationId,
+            steps,
+            ...(containmentActions ? { containmentActions } : {}),
+          };
+
+          // The skeleton is always complete, so "no run correlated" can only be said in a header.
           return response.ok({
             body,
             headers: buildExecutionCorrelationHeaders(runIds.length > 0),

@@ -14,6 +14,11 @@ import {
   PND_HITL_PROPOSAL,
   PND_HITL_SCHEMA_PROPOSAL,
 } from './test_helpers/pnd_hitl_proposal';
+import {
+  PND_HITL_CONTAINMENT_PROPOSAL,
+  PND_STAGED_ISOLATE_HOST,
+  stagedContainmentReasoning,
+} from './test_helpers/pnd_recommended_actions';
 import { HitlActionCard } from '.';
 
 const onCancel = jest.fn();
@@ -240,5 +245,115 @@ describe('HitlActionCard', () => {
     );
 
     expect(screen.getByTestId('hitlActionCardReasoning')).toHaveTextContent('<b>escalated</b>');
+  });
+
+  describe('the recommended-actions branch, for an incident_contained gate with staged actions', () => {
+    it('renders the per-action toggle form', () => {
+      renderWithPndProviders(
+        <HitlActionCard {...defaultProps} proposal={PND_HITL_CONTAINMENT_PROPOSAL} />
+      );
+
+      expect(screen.getByTestId('pndRecommendedActionsDecisionForm')).toBeInTheDocument();
+    });
+
+    it('takes precedence over the schema branch, which cannot echo the staged actions back', () => {
+      renderWithPndProviders(
+        <HitlActionCard
+          {...defaultProps}
+          proposal={{
+            ...PND_HITL_CONTAINMENT_PROPOSAL,
+            inputSchema: PND_HITL_SCHEMA_PROPOSAL.inputSchema,
+          }}
+        />
+      );
+
+      expect(screen.queryByTestId('pndSchemaForm')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the fixed controls when the reasoning lost the label anchor', () => {
+      renderWithPndProviders(
+        <HitlActionCard
+          {...defaultProps}
+          proposal={{ ...PND_HITL_CONTAINMENT_PROPOSAL, reasoning: 'The anchor is gone.' }}
+        />
+      );
+
+      expect(screen.queryByTestId('pndRecommendedActionsDecisionForm')).not.toBeInTheDocument();
+    });
+
+    it('renders no toggle form for another gate, whatever its reasoning carries', () => {
+      renderWithPndProviders(
+        <HitlActionCard
+          {...defaultProps}
+          proposal={{
+            ...PND_HITL_PROPOSAL,
+            reasoning: PND_HITL_CONTAINMENT_PROPOSAL.reasoning,
+          }}
+        />
+      );
+
+      expect(screen.queryByTestId('pndRecommendedActionsDecisionForm')).not.toBeInTheDocument();
+    });
+
+    it('submits an explicitly empty approved_actions when nothing was toggled on', () => {
+      renderWithPndProviders(
+        <HitlActionCard {...defaultProps} proposal={PND_HITL_CONTAINMENT_PROPOSAL} />
+      );
+
+      answer('approve', 'the host is contained', 'pndFixedDecisionFormControl');
+      fireEvent.click(screen.getByTestId('hitlCardApprove'));
+
+      expect(onConfirm).toBeCalledWith({
+        approved_actions: [],
+        decision: 'approve',
+        rationale: 'the host is contained',
+      });
+    });
+
+    it('submits the full action objects whose toggles are on', () => {
+      renderWithPndProviders(
+        <HitlActionCard {...defaultProps} proposal={PND_HITL_CONTAINMENT_PROPOSAL} />
+      );
+
+      fireEvent.click(screen.getByTestId('pndRecommendedActionToggle-0'));
+      answer('approve', 'the host is contained', 'pndFixedDecisionFormControl');
+      fireEvent.click(screen.getByTestId('hitlCardApprove'));
+
+      expect(onConfirm).toBeCalledWith({
+        approved_actions: [PND_STAGED_ISOLATE_HOST],
+        decision: 'approve',
+        rationale: 'the host is contained',
+      });
+    });
+
+    it('submits an empty approved_actions on a dismissal, even after a toggle was on', () => {
+      renderWithPndProviders(
+        <HitlActionCard {...defaultProps} proposal={PND_HITL_CONTAINMENT_PROPOSAL} />
+      );
+
+      fireEvent.click(screen.getByTestId('pndRecommendedActionToggle-0'));
+      answer('dismiss', 'a false positive', 'pndFixedDecisionFormControl');
+      fireEvent.click(screen.getByTestId('hitlCardApprove'));
+
+      expect(onConfirm).toBeCalledWith({
+        approved_actions: [],
+        decision: 'dismiss',
+        rationale: 'a false positive',
+      });
+    });
+
+    it('renders the staged-nothing callout when the summary staged an empty array', () => {
+      renderWithPndProviders(
+        <HitlActionCard
+          {...defaultProps}
+          proposal={{
+            ...PND_HITL_CONTAINMENT_PROPOSAL,
+            reasoning: stagedContainmentReasoning([]),
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('pndRecommendedActionsEmpty')).toBeInTheDocument();
+    });
   });
 });

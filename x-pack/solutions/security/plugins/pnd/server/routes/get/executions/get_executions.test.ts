@@ -371,6 +371,75 @@ describe('registerGetExecutionRoute', () => {
     });
   });
 
+  // The per-action containment ledger rides the same projection: the Watch Floor's
+  // `collect_executed_actions` data.set step publishes it under `containment_executed_actions`,
+  // and the route surfaces it as `containmentActions`. Fail-open to absence — a run that has not
+  // reached the collector (or recorded an unexpected shape) yields no key, never an error.
+  describe('containment action ledger', () => {
+    const LEDGER = [
+      { action_type: 'isolate_host', status: 'submitted', title: 'Isolate host-1' },
+      { action_type: 'create_case', status: 'succeeded', title: 'Open a case for the incident' },
+    ];
+
+    beforeEach(() => {
+      correlateExecutionsMock.mockResolvedValue([correlatedExecution({ id: 'run-deep' })]);
+    });
+
+    const bodyFor = async (stepExecutions: unknown[]) => {
+      const getWorkflowExecution = jest.fn().mockResolvedValue({ stepExecutions });
+      const deps = createDeps(getWorkflowExecution);
+      registerGetExecutionRoute(deps);
+
+      const response = await invoke(getHandler(deps.router));
+
+      return (response.ok as jest.Mock).mock.calls[0][0].body as {
+        containmentActions?: Array<Record<string, unknown>>;
+      };
+    };
+
+    it('projects the ledger from the collector step output', async () => {
+      const body = await bodyFor([
+        stepExecution('se-derive', ORCHESTRATOR_STEP_IDS.deriveIds),
+        stepExecution('se-collect', ORCHESTRATOR_STEP_IDS.executeActions, {
+          output: { containment_executed_actions: LEDGER },
+        }),
+      ]);
+
+      expect(body.containmentActions).toEqual(LEDGER);
+    });
+
+    it('omits the key entirely when the run has not reached the collector', async () => {
+      const body = await bodyFor([stepExecution('se-derive', ORCHESTRATOR_STEP_IDS.deriveIds)]);
+
+      expect(body).not.toHaveProperty('containmentActions');
+    });
+
+    it('degrades to absence when the collector output carries no array ledger', async () => {
+      const body = await bodyFor([
+        stepExecution('se-collect', ORCHESTRATOR_STEP_IDS.executeActions, {
+          output: { containment_executed_actions: 'not-a-ledger' },
+        }),
+      ]);
+
+      expect(body).not.toHaveProperty('containmentActions');
+    });
+
+    it('reads the newest collector when a re-triggered run recorded two', async () => {
+      const body = await bodyFor([
+        stepExecution('se-collect-old', ORCHESTRATOR_STEP_IDS.executeActions, {
+          output: { containment_executed_actions: [{ action_type: 'stale' }] },
+          startedAt: '2026-08-01T00:00:00.000Z',
+        }),
+        stepExecution('se-collect-new', ORCHESTRATOR_STEP_IDS.executeActions, {
+          output: { containment_executed_actions: LEDGER },
+          startedAt: '2026-08-02T00:00:00.000Z',
+        }),
+      ]);
+
+      expect(body.containmentActions).toEqual(LEDGER);
+    });
+  });
+
   it('ignores correlated runs for a different discovery', async () => {
     correlateExecutionsMock.mockResolvedValue([
       correlatedExecution({ correlationId: 'ad-other', id: 'run-other' }),

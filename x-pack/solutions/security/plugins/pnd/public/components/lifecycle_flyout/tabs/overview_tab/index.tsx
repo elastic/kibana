@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
+import { LifecycleActionsSection } from '../../sections/actions_section';
 import { LifecycleAttachmentsSection } from '../../sections/attachments_section';
 import { LifecycleStepsSection } from '../../sections/lifecycle_section';
 import { LifecycleSummarySection } from '../../sections/summary_section';
@@ -40,8 +41,12 @@ export interface LifecycleOverviewTabProps {
  * ⚠️ Two sections that were tabs are now mounted **together**, where before only one could be. Each
  * reads a different react-query key (`executions.detail`, `conversations.list`,
  * `proposals.list`), so this costs three requests rather than one, not three copies of one — and
- * `LifecycleSummarySection` and `LifecycleStepsSection` share `executions.detail`, which is why they
- * cannot disagree about where the discovery is.
+ * `LifecycleSummarySection`, `LifecycleActionsSection` and `LifecycleStepsSection` share
+ * `executions.detail`, which is why they cannot disagree about where the discovery is.
+ *
+ * Containment actions sits between Review tuning and Lifecycle: it is the same kind of surface as
+ * Review tuning — the record of what a gate decision does — and the ledger it renders is the
+ * expanded form of the evidence the Lifecycle section pins to its execute-approved-actions row.
  */
 export const LifecycleOverviewTab: React.FC<LifecycleOverviewTabProps> = ({ correlationId }) => (
   <div data-test-subj="pndLifecyclePanel-overview">
@@ -54,6 +59,10 @@ export const LifecycleOverviewTab: React.FC<LifecycleOverviewTabProps> = ({ corr
     <EuiHorizontalRule margin="m" />
 
     <LifecycleTuningSection correlationId={correlationId} />
+
+    <EuiHorizontalRule margin="m" />
+
+    <LifecycleActionsSection correlationId={correlationId} />
 
     <EuiHorizontalRule margin="m" />
 

@@ -655,6 +655,87 @@ describe('LifecycleView', () => {
     expect(screen.queryByTestId('pndLifecycleTuningEvidence')).not.toBeInTheDocument();
   });
 
+  describe('the containment ledger on the execute-approved-actions row', () => {
+    const containmentActions = [
+      { action_type: 'isolate_host', status: 'succeeded', title: 'Isolate host web-01' },
+      {
+        action_type: 'block_ip',
+        error: { message: 'connector timed out' },
+        status: 'failed',
+        title: 'Block IP 10.0.0.7',
+      },
+    ];
+
+    const stubWithLedger = () => {
+      stubRoutes({
+        executions: {
+          containmentActions,
+          correlationId: ATTACK_DISCOVERY_ALERT_ID,
+          steps: fullProjection(),
+        },
+      });
+    };
+
+    it('renders the ledger evidence once the route projects one', async () => {
+      stubWithLedger();
+
+      renderView();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('pndLifecycleActionsEvidence')).toBeInTheDocument()
+      );
+    });
+
+    it('attaches the evidence to the 3.6 row, where the ledger is written', async () => {
+      stubWithLedger();
+
+      renderView();
+      await waitFor(() =>
+        expect(screen.getByTestId('pndLifecycleActionsEvidence')).toBeInTheDocument()
+      );
+
+      expect(rowFor('step-3-6')).toContainElement(
+        screen.getByTestId('pndLifecycleActionsEvidence')
+      );
+    });
+
+    it('renders one title-plus-badge pair per executed action', async () => {
+      stubWithLedger();
+
+      renderView();
+
+      await waitFor(() =>
+        expect(screen.getAllByTestId('pndLifecycleActionsEvidenceItem')).toHaveLength(
+          containmentActions.length
+        )
+      );
+    });
+
+    it('badges each action with its own outcome', async () => {
+      stubWithLedger();
+
+      renderView();
+      await waitFor(() =>
+        expect(screen.getAllByTestId('pndContainmentActionStatusBadge')).toHaveLength(
+          containmentActions.length
+        )
+      );
+
+      expect(
+        screen
+          .getAllByTestId('pndContainmentActionStatusBadge')
+          .map((badge) => badge.getAttribute('data-status'))
+      ).toEqual(['succeeded', 'failed']);
+    });
+
+    it('renders no ledger evidence while the route projects none', async () => {
+      renderView();
+      await waitForRows();
+
+      expect(screen.queryByTestId('pndLifecycleActionsEvidence')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders the lifecycle even when the proposals read fails, because evidence is supplementary', async () => {
     get.mockImplementation(async (path: string) => {
       if (path === PND_PROPOSALS_URL) {

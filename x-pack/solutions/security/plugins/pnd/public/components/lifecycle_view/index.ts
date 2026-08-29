@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-export { LifecycleView, TUNING_EVIDENCE_PHASE_STEP_ID } from './lifecycle_view';
+export {
+  ACTIONS_EVIDENCE_PHASE_STEP_ID,
+  LifecycleView,
+  TUNING_EVIDENCE_PHASE_STEP_ID,
+} from './lifecycle_view';
 export type { LifecycleViewProps } from './lifecycle_view';
 export { LifecycleStepRow } from './lifecycle_step_row';
 export type { LifecycleStepRowProps } from './lifecycle_step_row';
 export { LifecycleStepLink } from './lifecycle_step_link';
 export type { LifecycleStepLinkProps } from './lifecycle_step_link';
+export { LifecycleActionsEvidence } from './lifecycle_actions_evidence';
+export type { LifecycleActionsEvidenceProps } from './lifecycle_actions_evidence';
 export { LifecycleTuningEvidence } from './lifecycle_tuning_evidence';
 export type { LifecycleTuningEvidenceProps } from './lifecycle_tuning_evidence';
 export {

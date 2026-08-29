@@ -7,6 +7,7 @@
 
 import type {
   UpdateWatchRequestBody,
+  WatchGenerationSettings,
   WatchScopeRoutingSettings,
   WatchTriggersSettings,
 } from '@kbn/pnd-common';
@@ -29,10 +30,12 @@ export const buildWatchSettingsPatch = (
   baseline: WatchSettingsDraft,
   draft: WatchSettingsDraft
 ): UpdateWatchRequestBody => {
+  const generation = buildGenerationPatch(baseline.generation, draft.generation);
   const scopeRouting = buildScopeRoutingPatch(baseline.scopeRouting, draft.scopeRouting);
   const triggers = buildTriggersPatch(baseline.triggers, draft.triggers);
 
   return {
+    ...(generation && { generation }),
     ...(scopeRouting && { scopeRouting }),
     ...(triggers && { triggers }),
   };
@@ -63,6 +66,32 @@ const buildTriggersPatch = (
   return {
     ...(allowManualRun != null && { allowManualRun }),
     ...(scheduleId != null && { scheduleId }),
+  };
+};
+
+/**
+ * The empty `connectorId` is a real value, not an absence: it selects the server-resolved default AI
+ * connector, so switching back to the default sends `connectorId: ''` rather than dropping the field.
+ */
+const buildGenerationPatch = (
+  baseline: WatchGenerationSettings | undefined,
+  draft: WatchGenerationSettings | undefined
+): UpdateWatchRequestBody['generation'] => {
+  if (!baseline || !draft) {
+    return undefined;
+  }
+
+  const alertSize = draft.alertSize === baseline.alertSize ? undefined : draft.alertSize;
+  const lookback = draft.lookback === baseline.lookback ? undefined : draft.lookback;
+  const connectorId = draft.connectorId === baseline.connectorId ? undefined : draft.connectorId;
+
+  if (alertSize == null && lookback == null && connectorId == null) {
+    return undefined;
+  }
+  return {
+    ...(alertSize != null && { alertSize }),
+    ...(lookback != null && { lookback }),
+    ...(connectorId != null && { connectorId }),
   };
 };
 

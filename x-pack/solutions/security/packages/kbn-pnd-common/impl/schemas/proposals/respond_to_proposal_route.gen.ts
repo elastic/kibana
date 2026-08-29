@@ -42,6 +42,11 @@ export const RespondToProposalRequestBody = lazySchema(() =>
 
       */
         rationale: z.string().max(2000).superRefine(isNonEmptyString),
+        /**
+      * The recommended actions the analyst toggled on, echoed back for the containment gate. Only the gate's own workflow reads them; a gate whose schema does not declare the key has it stripped by the engine on resume.
+
+      */
+        approved_actions: z.array(z.record(z.string(), z.unknown())).max(50).optional(),
       })
       .strict(),
   })

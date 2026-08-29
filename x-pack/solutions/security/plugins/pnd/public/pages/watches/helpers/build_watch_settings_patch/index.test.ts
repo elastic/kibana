@@ -6,10 +6,16 @@
  */
 
 import type { WatchSettings } from '@kbn/pnd-common';
-import { SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
+import {
+  SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
+  SYSTEM_SECURITY_WATCH_FLOOR_ID,
+} from '@kbn/pnd-common';
 import {
   readWatchSettingsDraft,
   withAllowManualRun,
+  withGenerationAlertSize,
+  withGenerationConnectorId,
+  withGenerationLookback,
   withScheduleId,
   withScopeRoutingSelection,
 } from '../watch_settings_draft';
@@ -34,7 +40,15 @@ const settings: WatchSettings = {
   watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
 };
 
+/** The Attack Discovery Generation watch is the one watch whose payload carries `generation`. */
+const generationSettings: WatchSettings = {
+  ...settings,
+  generation: { alertSize: 100, connectorId: '', lookback: 'now-24h' },
+  watchId: SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
+};
+
 const baseline = readWatchSettingsDraft(settings);
+const generationBaseline = readWatchSettingsDraft(generationSettings);
 
 describe('buildWatchSettingsPatch', () => {
   it('sends nothing when nothing was edited', () => {
@@ -65,6 +79,50 @@ describe('buildWatchSettingsPatch', () => {
     expect(buildWatchSettingsPatch(baseline, draft)).toEqual({
       triggers: { allowManualRun: false, scheduleId: 'hourly' },
     });
+  });
+
+  it('sends only the generation fields that changed', () => {
+    const draft = withGenerationLookback(
+      withGenerationAlertSize(generationBaseline, 250),
+      'now-7d'
+    );
+
+    expect(buildWatchSettingsPatch(generationBaseline, draft)).toEqual({
+      generation: { alertSize: 250, lookback: 'now-7d' },
+    });
+  });
+
+  it('sends nothing when a generation field was edited and put back', () => {
+    const draft = withGenerationAlertSize(withGenerationAlertSize(generationBaseline, 250), 100);
+
+    expect(buildWatchSettingsPatch(generationBaseline, draft)).toEqual({});
+  });
+
+  /** '' is a value, not an absence: it retargets the run onto the server-resolved default. */
+  it('sends the empty connector id that selects the server-resolved default', () => {
+    const withConnector = readWatchSettingsDraft({
+      ...generationSettings,
+      generation: { alertSize: 100, connectorId: 'my-gpt4o', lookback: 'now-24h' },
+    });
+
+    expect(
+      buildWatchSettingsPatch(withConnector, withGenerationConnectorId(withConnector, ''))
+    ).toEqual({ generation: { connectorId: '' } });
+  });
+
+  it('sends generation and trigger edits together in the one patch', () => {
+    const draft = withGenerationAlertSize(withScheduleId(generationBaseline, 'hourly'), 250);
+
+    expect(buildWatchSettingsPatch(generationBaseline, draft)).toEqual({
+      generation: { alertSize: 250 },
+      triggers: { scheduleId: 'hourly' },
+    });
+  });
+
+  it('sends no generation for a watch whose payload offers none', () => {
+    expect(
+      'generation' in buildWatchSettingsPatch(baseline, withScheduleId(baseline, 'hourly'))
+    ).toBe(false);
   });
 
   it('sends only the selects that were retargeted', () => {

@@ -6,6 +6,7 @@
  */
 
 import {
+  SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
@@ -13,7 +14,10 @@ import {
   SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
 } from '@kbn/pnd-common';
 import type { SYSTEM_SECURITY_WATCH_IDS } from '@kbn/pnd-common';
-import { createWatchSettingsRegistration } from './watch_settings';
+import {
+  createAdGenerationWatchSettingsRegistration,
+  createWatchSettingsRegistration,
+} from './watch_settings';
 import type { WatchSettingsRegistration } from './types';
 
 type RegisteredWatchId = (typeof SYSTEM_SECURITY_WATCH_IDS)[number];
@@ -28,7 +32,12 @@ export const watchSettingsById: Record<RegisteredWatchId, WatchSettingsRegistrat
   [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID]: createWatchSettingsRegistration(
     SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID
   ),
+  [SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID]:
+    createAdGenerationWatchSettingsRegistration(),
 };
 
-export { createWatchSettingsRegistration } from './watch_settings';
+export {
+  createAdGenerationWatchSettingsRegistration,
+  createWatchSettingsRegistration,
+} from './watch_settings';
 export type { WatchSettingsPatch, WatchSettingsRegistration } from './types';

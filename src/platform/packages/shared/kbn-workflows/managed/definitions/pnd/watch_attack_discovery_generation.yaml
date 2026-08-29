@@ -1,0 +1,114 @@
+version: "1"
+name: Attack Discovery Generation
+description: >
+  Attack Discovery Generation worker. Runs Attack Discovery on a configurable
+  schedule: retrieves recent security alerts, generates discoveries with an LLM,
+  and persists them to the shared ad-hoc Attack Discovery index. Each net-new
+  persisted discovery emits security.attackDiscoveryCreated, which triggers one
+  Watch Floor run per discovery — this worker only generates; investigation,
+  HITL gates and response actions belong to the Watch Floor lifecycle. Keeping
+  generation in its own workflow (rather than a scheduled Floor trigger) is what
+  lets the engine's avoid-loop guard pass: the Floor is not in this run's event
+  chain when the created event fires. Schedule cadence and generation options
+  are template values written from the watch's settings page.
+enabled: false
+tags:
+  - watch
+  - watch-attack-discovery-generation
+settings:
+  # Overlapping scheduled ticks would stack redundant AD generations, so drop a
+  # new run while one is already in flight (concurrency 1, strategy drop).
+  concurrency:
+    key: watch-attack-discovery-generation
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "__AD_SCHEDULE_EVERY__"
+  - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          description: >
+            LLM connector UUID used for generation. When omitted, the configured
+            generation connector template value (or the server-resolved default
+            AI connector) is used.
+        size:
+          type: number
+          description: Maximum number of alerts to retrieve for the run.
+        start:
+          type: string
+          description: Alert retrieval window start (Elasticsearch date math).
+        end:
+          type: string
+          description: Alert retrieval window end (Elasticsearch date math).
+      additionalProperties: false
+consts:
+  watch_policy:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; the generation worker parks no HITL gates, so the
+    # autonomy level never changes its behavior.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
+    mandate: Attack discovery generation
+    autonomyLevel: supervised
+    handoff: floor
+    onDemand: true
+    draft: false
+    cadence: scheduled
+    mode: always
+    ui:
+      color: "#0b64dd"
+      icon: sparkles
+      order: 15
+    scopeSummary: Security alerts
+    scopes:
+      - name: Security indices
+        access: full
+        label: Read
+    callables:
+      - id: run_attack_discovery
+        name: Attack Discovery run
+        kind: workflow
+        summary: On schedule · generates attack discoveries from recent alerts
+        gated: false
+        enabled: true
+    # Generation options written from the watch settings page. An empty
+    # connector id means "server-resolved default AI connector" — the run step
+    # treats '' as absent.
+    config:
+      adAlertSize: __AD_ALERT_SIZE__
+      adLookback: "__AD_LOOKBACK__"
+      adConnectorId: "__AD_CONNECTOR_ID__"
+outputs:
+  properties:
+    discovery_count:
+      type: number
+    execution_uuid:
+      type: string
+    status:
+      type: string
+steps:
+  # Run the full pipeline (retrieve -> generate -> validate -> persist) in sync
+  # mode, so the step blocks until the run is terminal. Persisting flows through
+  # the discoveries plugin's persist step, which emits one
+  # security.attackDiscoveryCreated event per net-new discovery (feature-flag
+  # gated) — that event, not this workflow, is what wakes the Watch Floor.
+  - name: run_attack_discovery
+    type: security.attack-discovery.run
+    timeout: "10m"
+    with:
+      connector_id: "{{ inputs.connector_id | default: consts.watch_policy.config.adConnectorId }}"
+      alert_retrieval_mode: custom_query
+      size: "${{ inputs.size | default: consts.watch_policy.config.adAlertSize }}"
+      start: "{{ inputs.start | default: consts.watch_policy.config.adLookback }}"
+      end: "{{ inputs.end | default: 'now' }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      discovery_count: "${{ steps.run_attack_discovery.output.discovery_count | default: 0 }}"
+      execution_uuid: "{{ steps.run_attack_discovery.output.execution_uuid }}"
+      status: "{{ steps.run_attack_discovery.output.status }}"

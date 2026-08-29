@@ -163,7 +163,15 @@ export const registerRespondToProposalRoute = ({
           await managementClient.resumeWorkflowExecution(
             target.workflowRunId,
             spaceId,
-            { decision: input.decision, rationale: input.rationale },
+            {
+              decision: input.decision,
+              rationale: input.rationale,
+              // Only the containment gate's schema declares approved_actions; the engine
+              // strips the key on any gate that does not, so forwarding it is safe here.
+              ...(input.approved_actions != null
+                ? { approved_actions: input.approved_actions }
+                : {}),
+            },
             request,
             { channel: PND_RESPOND_CHANNEL, stepExecutionId: target.stepExecutionId }
           );

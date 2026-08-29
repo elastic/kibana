@@ -51,6 +51,16 @@ paths:
                       description: >
                         Required, non-empty human rationale for the decision. Mandatory for a
                         dismissal too — there is no rationale-free path through a gate.
+                    approved_actions:
+                      type: array
+                      maxItems: 50
+                      description: >
+                        The recommended actions the analyst toggled on, echoed back for the
+                        containment gate. Only the gate's own workflow reads them; a gate whose
+                        schema does not declare the key has it stripped by the engine on resume.
+                      items:
+                        type: object
+                        additionalProperties: true
               required:
                 - input
       responses:

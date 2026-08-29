@@ -17,6 +17,7 @@ import { isCorrelationUnavailable } from './helpers/is_correlation_unavailable';
 import { resolveRowConversation } from './helpers/resolve_row_conversation';
 import { useOpenAgentBuilderConversation } from './hooks/use_open_agent_builder_conversation';
 import { useTuningProposal } from './hooks/use_tuning_proposal';
+import { LifecycleActionsEvidence } from './lifecycle_actions_evidence';
 import { LifecycleStepRow } from './lifecycle_step_row';
 import { LifecycleTuningEvidence } from './lifecycle_tuning_evidence';
 import * as i18n from './translations';
@@ -27,6 +28,13 @@ import * as i18n from './translations';
  * as well would only duplicate it.
  */
 export const TUNING_EVIDENCE_PHASE_STEP_ID = 'step-4-3';
+
+/**
+ * The row the containment ledger is attached to: 3.6, "Execute approved actions", whose
+ * `collect_executed_actions` step is the step that writes the ledger. Not 3.5 — the review gate is
+ * where the decision is asked, but the ledger records what the decision *did*.
+ */
+export const ACTIONS_EVIDENCE_PHASE_STEP_ID = 'step-3-6';
 
 export interface LifecycleViewProps {
   /** Omitted when the host does not know which discovery to show yet. */
@@ -71,6 +79,24 @@ export const LifecycleView: React.FC<LifecycleViewProps> = ({ correlationId }) =
   }
 
   const conversations = conversationsData?.conversations ?? [];
+  const containmentActions = data?.containmentActions ?? [];
+
+  /**
+   * The evidence a row carries under its description: the drafted tuning while 4.3 is parked, and
+   * the per-action containment ledger once 3.6 has one. At most one row renders each, and a row
+   * with nothing to show renders nothing rather than an empty panel.
+   */
+  const resolveRowEvidence = (phaseStepId: string): React.ReactNode => {
+    if (phaseStepId === TUNING_EVIDENCE_PHASE_STEP_ID && tuningEvidence != null) {
+      return <LifecycleTuningEvidence evidence={tuningEvidence} />;
+    }
+
+    if (phaseStepId === ACTIONS_EVIDENCE_PHASE_STEP_ID && containmentActions.length > 0) {
+      return <LifecycleActionsEvidence actions={containmentActions} />;
+    }
+
+    return undefined;
+  };
   // The server's own answer wins over the client-side guess, in **both** directions: a `true` keeps
   // a legitimately-early run out of the could-not-correlate screen, and a `false` puts an older
   // discovery into it even if some row happens to name a run. The guess is only for a response that
@@ -115,11 +141,7 @@ export const LifecycleView: React.FC<LifecycleViewProps> = ({ correlationId }) =
 
                   return [
                     <LifecycleStepRow
-                      evidence={
-                        entry.id === TUNING_EVIDENCE_PHASE_STEP_ID && tuningEvidence != null ? (
-                          <LifecycleTuningEvidence evidence={tuningEvidence} />
-                        ) : undefined
-                      }
+                      evidence={resolveRowEvidence(entry.id)}
                       key={entry.id}
                       onOpenConversation={
                         conversation != null ? () => openConversation(conversation.id) : undefined

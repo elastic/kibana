@@ -28,6 +28,7 @@ export {
   LifecyclePhase,
   WatchApprovalGate,
   WatchAutonomyLevel,
+  WatchGenerationSettings,
   WatchLedgerEntry,
   WatchRunOutcome,
   WatchScopeRoutingSettings,

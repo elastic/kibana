@@ -122,7 +122,7 @@ describe('PND_GATE_REGISTRY actionLabel', () => {
     expect(PND_GATE_REGISTRY.map(({ actionLabel, gateId }) => ({ actionLabel, gateId }))).toEqual([
       { actionLabel: 'Open an investigation', gateId: PND_GATE_IDS.openInvestigation },
       { actionLabel: 'Escalate to an incident', gateId: PND_GATE_IDS.promoteIncident },
-      { actionLabel: 'Confirm containment', gateId: PND_GATE_IDS.incidentContained },
+      { actionLabel: 'Review containment actions', gateId: PND_GATE_IDS.incidentContained },
       { actionLabel: 'Apply the rule tuning', gateId: PND_GATE_IDS.applyTuning },
     ]);
   });

@@ -17,7 +17,7 @@ import { watchRegistry } from './watch_registry';
 
 describe('watchRegistry', () => {
   it('registers durable settings for every managed watch', () => {
-    expect(watchRegistry.list()).toHaveLength(5);
+    expect(watchRegistry.list()).toHaveLength(6);
     for (const watchId of SYSTEM_SECURITY_WATCH_IDS) {
       expect(watchRegistry.get(watchId)?.settings).toBeDefined();
     }

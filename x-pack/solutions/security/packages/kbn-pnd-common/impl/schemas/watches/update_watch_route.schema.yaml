@@ -54,6 +54,23 @@ paths:
                       maxLength: 128
                     allowManualRun:
                       type: boolean
+                generation:
+                  type: object
+                  description: >-
+                    Attack Discovery generation options. Only the generation watch offers them;
+                    other watches reject the patch.
+                  properties:
+                    alertSize:
+                      type: integer
+                      minimum: 1
+                      maximum: 500
+                    lookback:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                    connectorId:
+                      type: string
+                      maxLength: 256
                 scopeRouting:
                   type: object
                   description: Each value is an option id the watch offers; unknown ids are rejected.

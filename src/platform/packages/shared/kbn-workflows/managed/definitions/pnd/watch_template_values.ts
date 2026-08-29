@@ -13,3 +13,16 @@ export interface PndWatchTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
 }
+
+/**
+ * Template values for the Attack Discovery Generation watch: the shared watch
+ * settings plus the schedule cadence and generation options its settings page
+ * writes. `scheduleEvery` is a workflows `scheduled` trigger interval (e.g.
+ * `15m`); an empty `connectorId` means "server-resolved default AI connector".
+ */
+export interface PndAdGenerationTemplateValues extends PndWatchTemplateValues {
+  scheduleEvery: string;
+  alertSize: number;
+  lookback: string;
+  connectorId: string;
+}

@@ -118,6 +118,127 @@ describe('usePndExecution', () => {
     expect(result.current.fetchStatus).toBe('idle');
   });
 
+  describe('the containment ledger', () => {
+    const withLedger = (containmentActions: Array<Record<string, unknown>>) => {
+      get.mockResolvedValue(
+        createHttpResponse({
+          body: { ...execution, containmentActions },
+          headers: { [PND_EXECUTION_CORRELATED_HEADER]: 'true' },
+        })
+      );
+    };
+
+    it('narrows a full ledger entry into the camelCased record consumers render', async () => {
+      withLedger([
+        {
+          action_type: 'isolate_host',
+          reason: 'Not approved at the containment gate.',
+          status: 'not_executed',
+          targets: { host: 'web-01' },
+          title: 'Isolate host web-01',
+        },
+      ]);
+
+      const { result } = render('ad-1');
+
+      await waitFor(() =>
+        expect(result.current.data?.containmentActions).toEqual([
+          {
+            actionType: 'isolate_host',
+            reason: 'Not approved at the containment gate.',
+            status: 'not_executed',
+            title: 'Isolate host web-01',
+          },
+        ])
+      );
+    });
+
+    it('surfaces a string error as the compact error message', async () => {
+      withLedger([{ error: 'connector timed out', status: 'failed', title: 'Block IP' }]);
+
+      const { result } = render('ad-1');
+
+      await waitFor(() =>
+        expect(result.current.data?.containmentActions?.[0]?.errorMessage).toBe(
+          'connector timed out'
+        )
+      );
+    });
+
+    it('surfaces the message of an object-shaped error', async () => {
+      withLedger([
+        { error: { message: 'connector timed out' }, status: 'failed', title: 'Block IP' },
+      ]);
+
+      const { result } = render('ad-1');
+
+      await waitFor(() =>
+        expect(result.current.data?.containmentActions?.[0]?.errorMessage).toBe(
+          'connector timed out'
+        )
+      );
+    });
+
+    it('keeps a failed entry whose error has no compact rendering, without one', async () => {
+      withLedger([{ error: { statusCode: 502 }, status: 'failed', title: 'Block IP' }]);
+
+      const { result } = render('ad-1');
+
+      await waitFor(() =>
+        expect(result.current.data?.containmentActions).toEqual([
+          { status: 'failed', title: 'Block IP' },
+        ])
+      );
+    });
+
+    it('falls back to the action type when an entry carries no title', async () => {
+      withLedger([{ action_type: 'isolate_host', status: 'succeeded' }]);
+
+      const { result } = render('ad-1');
+
+      await waitFor(() =>
+        expect(result.current.data?.containmentActions?.[0]?.title).toBe('isolate_host')
+      );
+    });
+
+    it('drops an entry with no status, because the status is the fact the ledger exists to carry', async () => {
+      withLedger([
+        { action_type: 'isolate_host', title: 'Isolate host web-01' },
+        { status: 'succeeded', title: 'Disable user' },
+      ]);
+
+      const { result } = render('ad-1');
+
+      await waitFor(() =>
+        expect(result.current.data?.containmentActions).toEqual([
+          { status: 'succeeded', title: 'Disable user' },
+        ])
+      );
+    });
+
+    it('drops an entry with nothing to call it', async () => {
+      withLedger([{ status: 'succeeded' }]);
+
+      const { result } = render('ad-1');
+
+      await waitFor(() => expect(result.current.data?.containmentActions).toEqual([]));
+    });
+
+    it('reads an empty ledger when the route sent none, so consumers need no null branch', async () => {
+      const { result } = render('ad-1');
+
+      await waitFor(() => expect(result.current.data?.containmentActions).toEqual([]));
+    });
+
+    it('reads an empty ledger when the response carried no body', async () => {
+      get.mockResolvedValue(createHttpResponse<typeof execution>({}));
+
+      const { result } = render('ad-1');
+
+      await waitFor(() => expect(result.current.data?.containmentActions).toEqual([]));
+    });
+  });
+
   it('surfaces a 404 without retrying it, because an unreadable discovery stays unreadable', async () => {
     get.mockRejectedValue(createHttpFetchError({ status: 404 }));
 

@@ -65,8 +65,8 @@ describe('installed-but-not-resumable ids (resume-boundary drift guard)', () => 
     expect(PND_WATCH_WORKFLOW_IDS).toBe(SYSTEM_SECURITY_WATCH_IDS);
   });
 
-  it('holds the resume allow-list at exactly the five managed watches', () => {
-    expect(SYSTEM_SECURITY_WATCH_IDS).toHaveLength(5);
+  it('holds the resume allow-list at exactly the six managed watches', () => {
+    expect(SYSTEM_SECURITY_WATCH_IDS).toHaveLength(6);
   });
 
   it('uses a prefix distinct from the watch ids, so a startsWith heuristic cannot re-widen the boundary', () => {

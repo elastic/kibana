@@ -63,6 +63,11 @@ export const SECTION_LIFECYCLE = i18n.translate('xpack.pnd.lifecycleFlyout.tabs.
   defaultMessage: 'Lifecycle',
 });
 
+/** Never a tab, so — unlike the three above — its id carries no `tabs.` history. */
+export const SECTION_ACTIONS = i18n.translate('xpack.pnd.lifecycleFlyout.sections.actions', {
+  defaultMessage: 'Containment actions',
+});
+
 // --- Overview's summary section ----------------------------------------------------------------
 
 export const OVERVIEW_EMPTY_TITLE = i18n.translate(
@@ -191,6 +196,21 @@ export const TUNING_REASONING_TITLE = i18n.translate(
   'xpack.pnd.lifecycleFlyout.tuning.reasoningTitle',
   { defaultMessage: 'Why this tuning' }
 );
+
+// --- Overview's containment-actions section ------------------------------------------------------
+
+export const ACTIONS_EMPTY_TITLE = i18n.translate('xpack.pnd.lifecycleFlyout.actions.emptyTitle', {
+  defaultMessage: 'No containment actions have been executed yet',
+});
+
+export const ACTIONS_EMPTY_BODY = i18n.translate('xpack.pnd.lifecycleFlyout.actions.emptyBody', {
+  defaultMessage:
+    'Per-action outcomes appear here once the containment gate has been answered and the approved actions have recorded their results.',
+});
+
+export const ACTIONS_LOADING = i18n.translate('xpack.pnd.lifecycleFlyout.actions.loading', {
+  defaultMessage: 'Loading containment actions',
+});
 
 // --- Timeline tab ------------------------------------------------------------------------------
 

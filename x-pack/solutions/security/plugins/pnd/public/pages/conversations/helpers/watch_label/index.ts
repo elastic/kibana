@@ -6,6 +6,7 @@
  */
 
 import {
+  SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
@@ -15,7 +16,7 @@ import {
 import * as i18n from '../../translations';
 
 /**
- * Human names for the five managed watches, keyed by workflow id.
+ * Human names for the managed watches, keyed by workflow id.
  *
  * A proposal row carries `workflowId` and nothing friendlier, and the watch
  * projection lives behind a different route — so the queue resolves the name
@@ -23,6 +24,7 @@ import * as i18n from '../../translations';
  * map over the id constants so a renamed watch id fails the type check here.
  */
 const LABEL_BY_WORKFLOW_ID: Readonly<Record<string, string>> = {
+  [SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID]: i18n.WATCH_ATTACK_DISCOVERY_GENERATION,
   [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.WATCH_DARK,
   [SYSTEM_SECURITY_WATCH_DEEP_ID]: i18n.WATCH_DEEP,
   [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID]: i18n.WATCH_POST_INCIDENT,
@@ -32,7 +34,7 @@ const LABEL_BY_WORKFLOW_ID: Readonly<Record<string, string>> = {
 
 /**
  * The name of the watch a proposal came from, or the raw workflow id when it is
- * not one of the five managed watches.
+ * not one of the managed watches.
  *
  * The fallback is the honest answer rather than a guess: a custom watch has no
  * registered display name anywhere in PND, and showing its id is more useful to

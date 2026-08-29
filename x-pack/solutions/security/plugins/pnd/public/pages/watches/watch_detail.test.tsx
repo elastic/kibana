@@ -12,6 +12,7 @@ import { Route } from '@kbn/shared-ux-router';
 import {
   PND_DETECTION_CHANGE_SIGNAL_TRIGGER_ID,
   PND_SIGNAL_DRIVEN_WATCH_TRIGGERS,
+  SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
@@ -118,8 +119,17 @@ jest.mock('../../hooks/use_workers_api', () => ({
   useWorkers: jest.fn(),
 }));
 
+/**
+ * The Generation section's connector list is a react-query read behind Kibana services; mocked so a
+ * watch that offers `generation` renders without the search_inference_endpoints route.
+ */
+jest.mock('../../components/ad_worker_config/use_ad_connectors', () => ({
+  useAdConnectors: jest.fn(),
+}));
+
 const { useUpdateWatch, useWatch, useWatches } = jest.requireMock('../../hooks/use_watches_api');
 const { useWorkers } = jest.requireMock('../../hooks/use_workers_api');
+const { useAdConnectors } = jest.requireMock('../../components/ad_worker_config/use_ad_connectors');
 
 const autonomy: GetAutonomyResponse = {
   autoAccept: { apply_tuning: false, incident_contained: false, open_investigation: false },
@@ -158,6 +168,16 @@ const triggersSeed: NonNullable<WatchSettings['triggers']> = {
   allowManualRun: true,
   schedule: { optionIds: ['every-15m', 'hourly'], selectedId: 'every-15m' },
   sharedWithAttackDiscovery: false,
+};
+
+/**
+ * What the Attack Discovery Generation watch's registration projects — the one watch whose payload
+ * carries `generation`. Rides in through `settingsOverrides`, since the seed's watches offer none.
+ */
+const generationSeed: NonNullable<WatchSettings['generation']> = {
+  alertSize: 100,
+  connectorId: '',
+  lookback: 'now-24h',
 };
 
 const settings: WatchSettings = {
@@ -259,6 +279,10 @@ const renderWatchDetail = ({
   useUpdateWatch.mockReturnValue({ mutate: updateWatch });
   useWatches.mockReturnValue({ data: { watches }, isLoading: false });
   useWorkers.mockReturnValue({ data: { workers }, error: null, isLoading: false });
+  useAdConnectors.mockReturnValue({
+    data: [{ id: 'connector-a', name: 'GPT-4o' }],
+    isLoading: false,
+  });
   useWatch.mockReturnValue({
     data: {
       settings: withSettings ? { ...settings, ...settingsOverrides, watchId: watch.id } : undefined,
@@ -494,6 +518,69 @@ describe('WatchDetailPage', () => {
       fireEvent.click(screen.getByTestId('pndWatchSettingsDiscard'));
 
       expect(updateWatch).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * The Generation section — Attack Discovery generation options. Only the Attack Discovery
+   * Generation watch's registration projects a `generation` payload, so the section renders exactly
+   * where that payload is, and its edits ride the same draft-until-Save as the Triggers beside it.
+   */
+  describe('the Generation section', () => {
+    it('renders no Generation section for a watch whose payload offers none', () => {
+      renderWatchDetail();
+
+      expect(screen.queryByTestId('pndWatchGenerationSection')).not.toBeInTheDocument();
+    });
+
+    it('renders the Generation section when the payload offers one', () => {
+      renderWatchDetail({ settingsOverrides: { generation: generationSeed } });
+
+      expect(screen.getByTestId('pndWatchGenerationSection')).toBeInTheDocument();
+    });
+
+    it('does not write when a generation field is edited', () => {
+      const { updateWatch } = renderWatchDetail({
+        settingsOverrides: { generation: generationSeed },
+      });
+
+      fireEvent.change(screen.getByTestId('pndWatchGenerationAlertSize'), {
+        target: { value: '250' },
+      });
+
+      expect(updateWatch).not.toHaveBeenCalled();
+    });
+
+    it('sends generation and trigger edits together in the one Save', () => {
+      const { updateWatch } = renderWatchDetail({
+        settingsOverrides: { generation: generationSeed },
+      });
+
+      editSchedule();
+      fireEvent.change(screen.getByTestId('pndWatchGenerationAlertSize'), {
+        target: { value: '250' },
+      });
+      fireEvent.change(screen.getByTestId('pndWatchGenerationLookbackSelect'), {
+        target: { value: 'now-7d' },
+      });
+      fireEvent.click(screen.getByTestId('pndWatchSettingsSave'));
+
+      expect(updateWatch).toHaveBeenCalledTimes(1);
+      expect(updateWatch.mock.calls[0][0]).toEqual({
+        generation: { alertSize: 250, lookback: 'now-7d' },
+        triggers: { scheduleId: 'hourly' },
+      });
+    });
+
+    it('puts an edited generation field back when the changes are discarded', () => {
+      renderWatchDetail({ settingsOverrides: { generation: generationSeed } });
+
+      fireEvent.change(screen.getByTestId('pndWatchGenerationAlertSize'), {
+        target: { value: '250' },
+      });
+      fireEvent.click(screen.getByTestId('pndWatchSettingsDiscard'));
+
+      expect(screen.getByTestId('pndWatchGenerationAlertSize')).toHaveValue(100);
     });
   });
 
@@ -736,10 +823,19 @@ describe('WatchDetailPage', () => {
       renderWatchDetail({
         saveOutcome: 'success',
         watch: { ...deepWatch, enabled: false },
-        watches: WATCHES_SEED.map((seedWatch) => ({
-          ...seedWatch,
-          enabled: seedWatch.id !== SYSTEM_SECURITY_WATCH_DEEP_ID,
-        })),
+        // `WATCHES_SEED` carries no Attack Discovery Generation row, and the helper treats a missing
+        // catalog id as off — so "every other catalog watch is on" needs that one appended by hand.
+        watches: [
+          ...WATCHES_SEED.map((seedWatch) => ({
+            ...seedWatch,
+            enabled: seedWatch.id !== SYSTEM_SECURITY_WATCH_DEEP_ID,
+          })),
+          {
+            ...deepWatch,
+            enabled: true,
+            id: SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
+          },
+        ],
       });
 
       fireEvent.click(screen.getByTestId('pndWatchEnabledSwitch'));
@@ -759,7 +855,7 @@ describe('WatchDetailPage', () => {
       fireEvent.click(screen.getByTestId('pndEnableRemainingWatchesConfirm'));
 
       await waitFor(() => {
-        expect(services.http.patch).toHaveBeenCalledTimes(4);
+        expect(services.http.patch).toHaveBeenCalledTimes(5);
       });
 
       const patchedIds = services.http.patch.mock.calls.map(([url]: [string]) => url);
@@ -769,6 +865,7 @@ describe('WatchDetailPage', () => {
           expect.stringContaining(SYSTEM_SECURITY_WATCH_OFFICER_ID),
           expect.stringContaining(SYSTEM_SECURITY_WATCH_DARK_ID),
           expect.stringContaining(SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID),
+          expect.stringContaining(SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID),
         ])
       );
       expect(patchedIds.join(' ')).not.toContain(SYSTEM_SECURITY_WATCH_DEEP_ID);

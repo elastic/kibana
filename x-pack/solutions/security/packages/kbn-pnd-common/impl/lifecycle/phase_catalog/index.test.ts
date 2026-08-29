@@ -14,8 +14,8 @@ import {
 } from '.';
 
 describe('PHASE_CATALOG_STEPS', () => {
-  it('has exactly ten lifecycle steps', () => {
-    expect(PHASE_CATALOG_STEPS).toHaveLength(10);
+  it('has exactly twelve lifecycle steps', () => {
+    expect(PHASE_CATALOG_STEPS).toHaveLength(12);
   });
 
   it('assigns every step a known phase', () => {
@@ -24,11 +24,11 @@ describe('PHASE_CATALOG_STEPS', () => {
     });
   });
 
-  it('marks exactly eight steps live', () => {
-    expect(PHASE_CATALOG_STEPS.filter((step) => step.liveness === 'live')).toHaveLength(8);
+  it('marks exactly ten steps live', () => {
+    expect(PHASE_CATALOG_STEPS.filter((step) => step.liveness === 'live')).toHaveLength(10);
   });
 
-  it('marks the eight expected steps live', () => {
+  it('marks the ten expected steps live', () => {
     expect(
       PHASE_CATALOG_STEPS.filter((step) => step.liveness === 'live').map((step) => step.id)
     ).toEqual([
@@ -36,7 +36,9 @@ describe('PHASE_CATALOG_STEPS', () => {
       'step-2-1',
       'step-2-6',
       'step-2-7',
+      'step-3-2',
       'step-3-5',
+      'step-3-6',
       'step-4-2',
       'step-4-3',
       'step-4-4',
@@ -81,8 +83,8 @@ describe('PHASE_CATALOG', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('combines the ten steps and 4 gate rows', () => {
-    expect(PHASE_CATALOG).toHaveLength(14);
+  it('combines the twelve steps and 4 gate rows', () => {
+    expect(PHASE_CATALOG).toHaveLength(16);
   });
 });
 

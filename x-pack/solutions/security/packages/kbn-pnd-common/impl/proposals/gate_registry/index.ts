@@ -197,7 +197,7 @@ export const PND_GATE_REGISTRY: readonly PndGateDefinition[] = [
     workflowId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
   },
   {
-    actionLabel: 'Confirm containment',
+    actionLabel: 'Review containment actions',
     alwaysGate: true,
     gateId: PND_GATE_IDS.incidentContained,
     parentKind: 'incident',

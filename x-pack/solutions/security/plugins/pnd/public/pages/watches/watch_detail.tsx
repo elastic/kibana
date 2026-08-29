@@ -40,6 +40,7 @@ import { useWatchSettingsDraft } from './hooks/use_watch_settings_draft';
 import { AutonomyControl } from './components/autonomy_control';
 import { EnableRemainingWatchesModal } from './components/enable_remaining_watches_modal';
 import { SettingsSection } from './components/settings_section';
+import { WatchGenerationSection } from './components/watch_generation_section';
 import { WatchRunsLedger } from './components/watch_runs_ledger';
 import { WatchSkillsTable } from './components/watch_skills_table';
 import { WatchTriggersSection } from './components/watch_triggers_section';
@@ -85,8 +86,18 @@ export const WatchDetailPage: React.FC = () => {
    * hook still returns the setter and the draft still carries the section — see the block comment where
    * the section used to render. Pulling it out here without a control would only be an unused binding.
    */
-  const { discard, draft, isDirty, markSaved, patch, setAllowManualRun, setScheduleId } =
-    useWatchSettingsDraft(settings);
+  const {
+    discard,
+    draft,
+    isDirty,
+    markSaved,
+    patch,
+    setAllowManualRun,
+    setGenerationAlertSize,
+    setGenerationConnectorId,
+    setGenerationLookback,
+    setScheduleId,
+  } = useWatchSettingsDraft(settings);
 
   /**
    * The Workers this watch's lane runs, projected from its real `ai.agent` steps (kibana-phf4.6).
@@ -402,6 +413,25 @@ export const WatchDetailPage: React.FC = () => {
             signalTriggerId={signalTriggerId}
             onScheduleChange={setScheduleId}
             onManualRunChange={setAllowManualRun}
+          />
+        ),
+      });
+    }
+
+    /**
+     * Generation options exist only on the Attack Discovery Generation watch — its settings
+     * registration is the one that projects a `generation` section — so this renders nowhere else.
+     * Like the triggers above, the section reads `draft` and its edits travel in the same one Save.
+     */
+    if (draft.generation) {
+      sections.push({
+        key: 'generation',
+        node: (
+          <WatchGenerationSection
+            generation={draft.generation}
+            onAlertSizeChange={setGenerationAlertSize}
+            onLookbackChange={setGenerationLookback}
+            onConnectorChange={setGenerationConnectorId}
           />
         ),
       });

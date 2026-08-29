@@ -251,6 +251,48 @@ describe('RespondToProposalRequestBody', () => {
       RespondToProposalRequestBody.parse({ input: { rationale: 'a'.repeat(2001) } })
     ).toThrow();
   });
+
+  // The containment gate's per-action approval. Optional, so every other gate's two-field
+  // body keeps parsing; bounded to match the waitForInput schema's maxItems.
+  it('parses the containment approved_actions subset', () => {
+    const result = RespondToProposalRequestBody.parse({
+      input: {
+        approved_actions: [{ action_type: 'isolate_host', title: 'Isolate host-1' }],
+        decision: 'approve',
+        rationale: 'Contain it',
+      },
+    });
+
+    expect(result.input.approved_actions).toHaveLength(1);
+  });
+
+  it('parses an explicitly empty approved_actions, which executes nothing', () => {
+    const result = RespondToProposalRequestBody.parse({
+      input: { approved_actions: [], decision: 'approve', rationale: 'Close without executing' },
+    });
+
+    expect(result.input.approved_actions).toEqual([]);
+  });
+
+  it('rejects more than 50 approved actions', () => {
+    expect(() =>
+      RespondToProposalRequestBody.parse({
+        input: {
+          approved_actions: Array.from({ length: 51 }, () => ({ action_type: 'isolate_host' })),
+          decision: 'approve',
+          rationale: 'Contain it',
+        },
+      })
+    ).toThrow();
+  });
+
+  it('rejects a non-object approved action entry', () => {
+    expect(() =>
+      RespondToProposalRequestBody.parse({
+        input: { approved_actions: ['isolate_host'], decision: 'approve', rationale: 'Contain' },
+      })
+    ).toThrow();
+  });
 });
 
 describe('AutoRespondToProposals', () => {
@@ -817,6 +859,37 @@ describe('GetExecutionResponse (four-phase projection)', () => {
       GetExecutionResponse.parse({
         correlationId: 'ad-1',
         steps: [{ phaseStepId: '1.1', status: 'done' }],
+      })
+    ).toThrow();
+  });
+
+  // The per-action containment ledger, projected from the Watch Floor run's
+  // collect_executed_actions output. Optional — absent until the gate has been answered.
+  it('parses a payload carrying the containment action ledger', () => {
+    const result = GetExecutionResponse.parse({
+      containmentActions: [{ action_type: 'isolate_host', status: 'submitted' }],
+      correlationId: 'ad-1',
+      steps: [{ phaseStepId: '1.1', status: 'completed' }],
+    });
+
+    expect(result.containmentActions).toHaveLength(1);
+  });
+
+  it('parses a payload with no ledger at all', () => {
+    const result = GetExecutionResponse.parse({
+      correlationId: 'ad-1',
+      steps: [{ phaseStepId: '1.1', status: 'completed' }],
+    });
+
+    expect(result.containmentActions).toBeUndefined();
+  });
+
+  it('rejects a ledger beyond its 200-entry bound', () => {
+    expect(() =>
+      GetExecutionResponse.parse({
+        containmentActions: Array.from({ length: 201 }, () => ({ status: 'succeeded' })),
+        correlationId: 'ad-1',
+        steps: [{ phaseStepId: '1.1', status: 'completed' }],
       })
     ).toThrow();
   });

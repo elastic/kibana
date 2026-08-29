@@ -15,6 +15,9 @@ import type { WatchScopeRoutingKey, WatchSettingsDraft } from '../../helpers/wat
 import {
   readWatchSettingsDraft,
   withAllowManualRun,
+  withGenerationAlertSize,
+  withGenerationConnectorId,
+  withGenerationLookback,
   withScheduleId,
   withScopeRoutingSelection,
 } from '../../helpers/watch_settings_draft';
@@ -31,6 +34,9 @@ export interface UseWatchSettingsDraft {
   /** The one PATCH body Save sends. Empty when nothing changed. */
   patch: UpdateWatchRequestBody;
   setAllowManualRun: (allowManualRun: boolean) => void;
+  setGenerationAlertSize: (alertSize: number) => void;
+  setGenerationConnectorId: (connectorId: string) => void;
+  setGenerationLookback: (lookback: string) => void;
   setScheduleId: (scheduleId: string) => void;
   setScopeRoutingSelection: (key: WatchScopeRoutingKey, selectedId: string) => void;
 }
@@ -95,6 +101,33 @@ export const useWatchSettingsDraft = (
     []
   );
 
+  const setGenerationAlertSize = useCallback(
+    (alertSize: number) =>
+      setState((current) => ({
+        ...current,
+        draft: withGenerationAlertSize(current.draft, alertSize),
+      })),
+    []
+  );
+
+  const setGenerationConnectorId = useCallback(
+    (connectorId: string) =>
+      setState((current) => ({
+        ...current,
+        draft: withGenerationConnectorId(current.draft, connectorId),
+      })),
+    []
+  );
+
+  const setGenerationLookback = useCallback(
+    (lookback: string) =>
+      setState((current) => ({
+        ...current,
+        draft: withGenerationLookback(current.draft, lookback),
+      })),
+    []
+  );
+
   const setScheduleId = useCallback(
     (scheduleId: string) =>
       setState((current) => ({ ...current, draft: withScheduleId(current.draft, scheduleId) })),
@@ -117,6 +150,9 @@ export const useWatchSettingsDraft = (
     markSaved,
     patch,
     setAllowManualRun,
+    setGenerationAlertSize,
+    setGenerationConnectorId,
+    setGenerationLookback,
     setScheduleId,
     setScopeRoutingSelection,
   };

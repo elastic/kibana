@@ -218,6 +218,52 @@ describe('registerRespondToProposalRoute', () => {
     );
   });
 
+  // The containment gate's per-action approval: the analyst's toggled subset rides the resume
+  // into the run, where the execute_* steps read it. Gates whose waitForInput schema does not
+  // declare the key have it stripped by the engine, so forwarding is gate-agnostic here.
+  it('forwards approved_actions into the resume when the analyst toggled a subset', async () => {
+    const approvedActions = [
+      { action_type: 'isolate_host', execution: 'kibana_api', title: 'Isolate host-1' },
+    ];
+    const managementClient = createManagementClient();
+    managementClient.getWorkflowExecution.mockResolvedValue(containmentExecution());
+    const deps = createDeps(managementClient, createWorkflowsExtensions().workflowsExtensions);
+    registerRespondToProposalRoute(deps);
+
+    await invoke(getHandler(deps.router), {
+      body: {
+        input: { decision: 'approve', rationale: 'contained', approved_actions: approvedActions },
+      },
+    });
+
+    expect(managementClient.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'run-1',
+      'agent-3',
+      { decision: 'approve', rationale: 'contained', approved_actions: approvedActions },
+      expect.anything(),
+      { channel: 'pnd', stepExecutionId: 'step-exec-1' }
+    );
+  });
+
+  it('forwards an explicitly empty approved_actions, which the run reads as "execute nothing"', async () => {
+    const managementClient = createManagementClient();
+    managementClient.getWorkflowExecution.mockResolvedValue(containmentExecution());
+    const deps = createDeps(managementClient, createWorkflowsExtensions().workflowsExtensions);
+    registerRespondToProposalRoute(deps);
+
+    await invoke(getHandler(deps.router), {
+      body: { input: { decision: 'approve', rationale: 'contained', approved_actions: [] } },
+    });
+
+    expect(managementClient.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'run-1',
+      'agent-3',
+      { decision: 'approve', rationale: 'contained', approved_actions: [] },
+      expect.anything(),
+      { channel: 'pnd', stepExecutionId: 'step-exec-1' }
+    );
+  });
+
   it('returns { resumed: true } on success', async () => {
     const deps = createDeps(createManagementClient());
     registerRespondToProposalRoute(deps);
@@ -859,6 +905,38 @@ describe('registerRespondToProposalRoute — decision validation at the route bo
 
     expect(
       rejection(deps.router, { input: { decision: 'approve', rationale: '   ' } })
+    ).toBeInstanceOf(RouteValidationError);
+  });
+
+  it('accepts the containment gate approved_actions subset', () => {
+    const deps = createDeps(createManagementClient());
+    registerRespondToProposalRoute(deps);
+
+    expect(
+      rejection(deps.router, {
+        input: {
+          decision: 'approve',
+          rationale: 'contained',
+          approved_actions: [{ action_type: 'isolate_host', title: 'Isolate host-1' }],
+        },
+      })
+    ).toBeUndefined();
+  });
+
+  // Bounded to match the waitForInput schema's maxItems, so an unbounded body cannot ride the
+  // resume into the execution document.
+  it('rejects more than 50 approved actions', () => {
+    const deps = createDeps(createManagementClient());
+    registerRespondToProposalRoute(deps);
+
+    expect(
+      rejection(deps.router, {
+        input: {
+          decision: 'approve',
+          rationale: 'contained',
+          approved_actions: Array.from({ length: 51 }, () => ({ action_type: 'isolate_host' })),
+        },
+      })
     ).toBeInstanceOf(RouteValidationError);
   });
 });

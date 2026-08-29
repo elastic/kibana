@@ -66,6 +66,9 @@ export const WORKER_NAMES: Record<string, string> = {
   draft_tuning: i18n.translate('xpack.pnd.watches.workers.draftTuning.name', {
     defaultMessage: 'Draft tuning',
   }),
+  recommend_actions: i18n.translate('xpack.pnd.watches.workers.recommendActions.name', {
+    defaultMessage: 'Recommend containment actions',
+  }),
   open_incident: i18n.translate('xpack.pnd.watches.workers.openIncident.name', {
     defaultMessage: 'Open incident',
   }),
@@ -102,6 +105,10 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
   draft_tuning: i18n.translate('xpack.pnd.watches.workers.draftTuning.description', {
     defaultMessage:
       'Drafts a detection-rule change from the incident, with the query diff and its backtested impact, for a human to approve.',
+  }),
+  recommend_actions: i18n.translate('xpack.pnd.watches.workers.recommendActions.description', {
+    defaultMessage:
+      'Stages evidence-based containment and response actions for the incident via the recommended-actions skill; a per-action human gate approves what executes.',
   }),
   open_incident: i18n.translate('xpack.pnd.watches.workers.openIncident.description', {
     defaultMessage:

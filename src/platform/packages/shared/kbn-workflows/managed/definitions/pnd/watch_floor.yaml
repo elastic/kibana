@@ -31,6 +31,8 @@ triggers:
       condition: 'event.attackDiscoveryAlertId : *'
   - type: manual
 consts:
+  # Liquid cannot express an empty array as a reliable filter fallback.
+  no_rows: []
   watch_policy:
     settingsVersion: __WATCH_SETTINGS_VERSION__
     # Persisted plumbing only; runtime autonomy is request-time from template values.
@@ -591,7 +593,7 @@ steps:
           rationale: "{{ steps.investigate.output.rationale }}"
 
   # ============================================================================
-  # Phase 3 — Incident Response (containment)
+  # Phase 3 — Incident Response (containment via recommended actions)
   # ============================================================================
 
   # Containment gets NO `if` wrapper at all: it is an alwaysGate gate, enforced
@@ -600,6 +602,166 @@ steps:
   # raised autonomy level auto-accept a gate that must always require a human, and it must
   # never gain an `else` auto-accept marker either. Its reasoning block precedes it directly.
   #
+  # The containment gate is no longer a bare "confirm containment" prose card: the
+  # recommended-actions skill stages a machine-readable action list, the analyst approves a
+  # per-action subset on the gate (approved_actions), and the approved Kibana-executable
+  # actions are executed by the steps AFTER the gate — post-gate placement is
+  # identity-correct, because a resume re-keys the execution to the responder, so the
+  # consequential writes run as the approving analyst.
+
+  # Stage the containment actions. A tool-call hallucination (e.g. guessing a skill-as-tool
+  # name instead of calling load_skill) must not fail the run before the gate is reached, so
+  # this continues on failure and the gate then says plainly that nothing was staged.
+  - name: recommend_actions
+    type: ai.agent
+    timeout: "10m"
+    on-failure:
+      continue: true
+    with:
+      message: >
+        Call the load_skill tool for the
+        [/recommended-actions](skill://recommended-actions) skill, then follow
+        its instructions on the incident below. Recommend only justified
+        containment and response actions, classify each as Kibana-executable or
+        analyst-manual, include manual actions when warranted, and return the
+        required structured output. Do not execute any action — a human gate
+        approves execution.
+
+        Attack Discovery:
+        {{ steps.derive_ids.output.attackDiscoveryMarkdown }}
+
+        Investigation assessment:
+        {{ steps.investigate.output.rationale }}
+
+        Incident summary:
+        {{ steps.open_incident.output.structured_output.summary }}
+
+        Staged response rationale:
+        {{ steps.open_incident.output.structured_output.rationale }}
+      # Guarantees the skill is present in this run's skill store so load_skill
+      # succeeds (fixes "Tool ... called but was not available" from the model
+      # guessing a skill-as-tool name instead of loading it).
+      configuration_overrides:
+        skill_ids:
+          - recommended-actions
+        enable_elastic_capabilities: false
+      schema:
+        type: object
+        additionalProperties: false
+        properties:
+          recommended_actions:
+            type: array
+            maxItems: 8
+            description: Evidence-based containment actions recommended for this incident.
+            items:
+              type: object
+              additionalProperties: false
+              properties:
+                action_type:
+                  type: string
+                  enum:
+                    - isolate_host
+                    - kill_process
+                    - hunt_process_persistence
+                    - create_case
+                    - set_asset_criticality
+                    - analyze_exfiltration_ips
+                    - revoke_user_account
+                    - enforce_step_up_auth
+                    - onboard_integration
+                execution:
+                  type: string
+                  enum:
+                    - kibana_api
+                    - manual
+                title:
+                  type: string
+                  maxLength: 150
+                rationale:
+                  type: string
+                  maxLength: 600
+                priority:
+                  type: string
+                  enum:
+                    - immediate
+                    - investigation
+                    - hardening
+                targets:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    hosts:
+                      type: array
+                      items:
+                        type: string
+                    users:
+                      type: array
+                      items:
+                        type: string
+                    ips:
+                      type: array
+                      items:
+                        type: string
+                    alert_ids:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - hosts
+                    - users
+                    - ips
+                    - alert_ids
+                capability_ref:
+                  type: string
+                  enum:
+                    - endpoint.isolate
+                    - endpoint.kill_process
+                    - endpoint.running_procs
+                    - cases.create
+                    - asset_criticality.set
+                    - threat_hunting.exfil_ips
+                  description: Required for kibana_api actions and omitted for manual actions.
+                execution_params:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    process_entity_id:
+                      type: string
+                      maxLength: 256
+                    process_name:
+                      type: string
+                      maxLength: 1024
+                    pid:
+                      type: integer
+                      minimum: 1
+                    criticality_level:
+                      type: string
+                      enum:
+                        - low_impact
+                        - medium_impact
+                        - high_impact
+                        - extreme_impact
+              required:
+                - action_type
+                - execution
+                - title
+                - rationale
+                - priority
+                - targets
+        required:
+          - recommended_actions
+
+  # Guard the structured output (it may be absent if recommend_actions failed and was
+  # caught by its on-failure: continue), so every downstream reference reads a
+  # guaranteed array. Also seeds the execution ledger.
+  - name: capture_recommended_actions
+    type: data.set
+    with:
+      phase3_recommended_actions: >-
+        ${{ steps.recommend_actions.output.structured_output.recommended_actions
+          | default: consts.no_rows }}
+      executed_actions: []
+
   # D5 / ADR-012, third gate. Same contract, placement and degradation reasoning as
   # ensure_thread_open_investigation. Top level, with no `if` wrapper, matching the alwaysGate it
   # precedes — a wrapper here would hand a raised autonomy level a branch to skip.
@@ -620,29 +782,44 @@ steps:
         correlationId: "{{ event.attackDiscoveryAlertId }}"
         gateId: incident_contained
 
+  # A7: only reasoning.summary reaches the proposal card, so the summary carries BOTH the
+  # human explanation and the machine-readable staged actions behind a stable label anchor
+  # ("Staged containment actions JSON:") — the same label-anchored `| json` contract
+  # reason_apply_tuning uses, parsed back by the PND queue's recommended-actions form.
+  # Short, load-bearing anchors first; the model's free prose last (extractReasoningSummary
+  # truncates at 8192 characters silently, so what sits late is what gets lost).
   - name: reason_incident_contained
     type: data.set
     with:
       reasoning:
         summary: >-
-          Approval closes out the incident for
-          "{{ steps.derive_ids.output.attackDiscoveryTitle }}" and emits pnd.incidentClosed,
-          which wakes the Detection Watch to draft a rule tuning. This gate is always human —
-          no autonomy level can auto-accept it. Declining records your rationale in the
-          thread. The incident responder's own closing statement follows.
+          {% if variables.phase3_recommended_actions.size == 0 %}NO CONTAINMENT ACTIONS WERE
+          STAGED: the recommended-actions skill returned nothing for this incident, so there
+          is nothing to execute. Approving closes out the incident without running anything;
+          declining records your rationale in the thread.
+          {% endif %}Approving executes ONLY the Kibana-executable actions you toggle on —
+          an action left toggled off is never executed — then closes out the incident and
+          emits pnd.incidentClosed, which wakes the Detection Watch to draft a rule tuning.
+          Manual actions are listed for the analyst to perform outside Kibana; the workflow
+          never executes them. Declining executes nothing and records your rationale in the
+          thread. This gate is always human — no autonomy level can auto-accept it.
+          Staged containment actions JSON:
+          {{ variables.phase3_recommended_actions | json }}.
+          The incident responder's own closing statement follows.
           {{ steps.open_incident.output.structured_output.proposal }}
         sections:
           - title: Incident
             body: "{{ steps.open_incident.output.structured_output.summary }}"
-          - title: Staged response
-            body: "{{ steps.open_incident.output.structured_output.rationale }}"
+          - title: Staged containment actions
+            body: "{{ variables.phase3_recommended_actions | json }}"
   - name: await_incident_contained
     type: waitForInput
     timeout: 30d
     with:
       message: >-
-        Confirm "{{ steps.derive_ids.output.attackDiscoveryTitle }}" has been contained, and
-        close the incident?
+        Review the staged containment actions for
+        "{{ steps.derive_ids.output.attackDiscoveryTitle }}" — approve to execute only the
+        actions you toggle on, and close the incident.
       schema:
         type: object
         properties:
@@ -651,17 +828,894 @@ steps:
             enum: [approve, dismiss]
           rationale:
             type: string
+          approved_actions:
+            type: array
+            maxItems: 50
+            description: >-
+              The staged actions the analyst toggled on. Echoed back by the PND queue's
+              per-action toggle form; absent or empty means nothing is executed.
+            items:
+              type: object
+              additionalProperties: true
         required: [decision, rationale]
+
+  # Everything below runs AFTER the gate, i.e. as the approving analyst (a resume re-keys
+  # the execution to the responder). Approved actions are the analyst's toggled subset;
+  # a dismissal executes nothing because approved_actions is empty and every execute block
+  # is additionally gated on decision == approve.
+  - name: capture_approved_actions
+    type: data.set
+    with:
+      approved_actions: >-
+        ${{ steps.await_incident_contained.output.response.approved_actions
+          | default: consts.no_rows }}
+
+  # Resolve the most recent Endpoint agent id for every approved endpoint-action host.
+  # Each request below selects only ids belonging to its recommendation.
+  - name: resolve_endpoint_agent_ids
+    type: elasticsearch.esql.query
+    if: >-
+      ${{ steps.await_incident_contained.output.response.decision == 'approve' }}
+    with:
+      format: json
+      query: |-
+        FROM metrics-endpoint.metadata_current_*
+        | WHERE host.name IN (
+            "__workflow_no_matching_host__"
+            {%- for action in variables.approved_actions -%}
+              {%- if action.action_type == "isolate_host" or action.action_type == "kill_process" or action.action_type == "hunt_process_persistence" -%}
+                {%- for host in action.targets.hosts -%}
+            , {{ host | json }}
+                {%- endfor -%}
+              {%- endif -%}
+            {%- endfor -%}
+          )
+        | KEEP agent.id, host.name
+        | LIMIT 1000
+    on-failure:
+      continue: true
+
+  - name: execute_create_case_actions
+    type: foreach
+    if: >-
+      ${{ steps.await_incident_contained.output.response.decision == 'approve' }}
+    foreach: >-
+      ${{ variables.approved_actions | where: 'action_type', 'create_case' }}
+    steps:
+      # Captured so nested foreach loops below (which shadow foreach.item with
+      # their own loop variable) can still reach this recommendation.
+      - name: capture_case_action
+        type: data.set
+        with:
+          current_case_action: "${{ foreach.item }}"
+
+      - name: create_case
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/cases"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            title: "{{ foreach.item.title }}"
+            description: |-
+              {{ foreach.item.rationale }}
+
+              Recommended action targets:
+              {{ foreach.item.targets | json }}
+            tags:
+              - attack-discovery
+              - recommended-action
+            owner: securitySolution
+            connector:
+              id: none
+              name: none
+              type: .none
+              fields: null
+            settings:
+              syncAlerts: false
+            severity: high
+        on-failure:
+          continue: true
+
+      - name: build_create_case_success_record
+        type: data.set
+        if: "${{ steps.create_case.error == null }}"
+        with:
+          execution_record:
+            action_type: "{{ foreach.item.action_type }}"
+            title: "{{ foreach.item.title }}"
+            targets: "${{ foreach.item.targets }}"
+            status: succeeded
+            output: "${{ steps.create_case.output }}"
+
+      - name: record_create_case_success
+        type: data.set
+        if: "${{ steps.create_case.error == null }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_create_case_success_record.output.execution_record }}
+
+      - name: build_create_case_failure_record
+        type: data.set
+        if: "${{ steps.create_case.error != null }}"
+        with:
+          execution_record:
+            action_type: "{{ foreach.item.action_type }}"
+            title: "{{ foreach.item.title }}"
+            targets: "${{ foreach.item.targets }}"
+            status: failed
+            error: "${{ steps.create_case.error }}"
+
+      - name: record_create_case_failure
+        type: data.set
+        if: "${{ steps.create_case.error != null }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_create_case_failure_record.output.execution_record }}
+
+      # Resolve the source alerts' index and rule so they can be attached to
+      # the case as proper alert attachments (not just referenced in the
+      # free-text description above).
+      - name: resolve_case_alert_rows
+        type: elasticsearch.esql.query
+        if: >-
+          ${{ steps.create_case.error == null
+            and variables.current_case_action.targets.alert_ids.size > 0 }}
+        with:
+          format: json
+          query: |-
+            FROM .alerts-security.alerts-{{ workflow.spaceId }}
+            METADATA _id, _index
+            | WHERE _id IN (
+                "__workflow_no_matching_alert__"
+                {%- for alert_id in variables.current_case_action.targets.alert_ids -%}
+            , {{ alert_id | json }}
+                {%- endfor -%}
+              )
+            | KEEP _id, _index, kibana.alert.rule.uuid, kibana.alert.rule.name
+            | LIMIT 1000
+        on-failure:
+          continue: true
+
+      - name: attach_case_alerts
+        type: foreach
+        if: "${{ steps.create_case.error == null }}"
+        foreach: "${{ steps.resolve_case_alert_rows.output.values | default: consts.no_rows }}"
+        steps:
+          - name: attach_case_alert
+            type: kibana.request
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/cases/{{ steps.create_case.output.id }}/comments"
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "2023-10-31"
+                Content-Type: application/json
+              body:
+                type: alert
+                alertId: "{{ foreach.item[0] }}"
+                index: "{{ foreach.item[1] }}"
+                rule:
+                  id: "{{ foreach.item[2] }}"
+                  name: "{{ foreach.item[3] }}"
+                owner: securitySolution
+            on-failure:
+              continue: true
+
+          - name: build_attach_case_alert_record
+            type: data.set
+            with:
+              execution_record:
+                action_type: "{{ variables.current_case_action.action_type }}"
+                title: "{{ variables.current_case_action.title }}"
+                target:
+                  alert_id: "{{ foreach.item[0] }}"
+                  case_id: "{{ steps.create_case.output.id }}"
+                status: >-
+                  {%- if steps.attach_case_alert.error == null -%}succeeded{%- else -%}failed{%- endif -%}
+
+          - name: record_attach_case_alert
+            type: data.set
+            with:
+              executed_actions: >-
+                ${{ variables.executed_actions
+                  | push: steps.build_attach_case_alert_record.output.execution_record }}
+
+      # Attach hosts and IPs as case observables (the create-case API has no
+      # observables field; they must be added one at a time after creation).
+      # Requires a Platinum+ license and caps at 50 observables per case.
+      - name: add_case_host_observables
+        type: foreach
+        if: "${{ steps.create_case.error == null }}"
+        foreach: "${{ variables.current_case_action.targets.hosts }}"
+        steps:
+          - name: add_case_host_observable
+            type: kibana.request
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/cases/{{ steps.create_case.output.id }}/observables"
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "1"
+                Content-Type: application/json
+              body:
+                observable:
+                  typeKey: observable-type-hostname
+                  value: "{{ foreach.item }}"
+                  description: null
+            on-failure:
+              continue: true
+
+          - name: build_case_host_observable_record
+            type: data.set
+            with:
+              execution_record:
+                action_type: "{{ variables.current_case_action.action_type }}"
+                title: "{{ variables.current_case_action.title }}"
+                target:
+                  observable_type: host
+                  value: "{{ foreach.item }}"
+                status: >-
+                  {%- if steps.add_case_host_observable.error == null -%}succeeded{%- else -%}failed{%- endif -%}
+
+          - name: record_case_host_observable
+            type: data.set
+            with:
+              executed_actions: >-
+                ${{ variables.executed_actions
+                  | push: steps.build_case_host_observable_record.output.execution_record }}
+
+      - name: add_case_ip_observables
+        type: foreach
+        if: "${{ steps.create_case.error == null }}"
+        foreach: "${{ variables.current_case_action.targets.ips }}"
+        steps:
+          - name: add_case_ip_observable
+            type: kibana.request
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/cases/{{ steps.create_case.output.id }}/observables"
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "1"
+                Content-Type: application/json
+              body:
+                observable:
+                  typeKey: >-
+                    {%- if foreach.item contains ':' -%}
+                    observable-type-ipv6
+                    {%- else -%}
+                    observable-type-ipv4
+                    {%- endif -%}
+                  value: "{{ foreach.item }}"
+                  description: null
+            on-failure:
+              continue: true
+
+          - name: build_case_ip_observable_record
+            type: data.set
+            with:
+              execution_record:
+                action_type: "{{ variables.current_case_action.action_type }}"
+                title: "{{ variables.current_case_action.title }}"
+                target:
+                  observable_type: ip
+                  value: "{{ foreach.item }}"
+                status: >-
+                  {%- if steps.add_case_ip_observable.error == null -%}succeeded{%- else -%}failed{%- endif -%}
+
+          - name: record_case_ip_observable
+            type: data.set
+            with:
+              executed_actions: >-
+                ${{ variables.executed_actions
+                  | push: steps.build_case_ip_observable_record.output.execution_record }}
+
+  - name: execute_set_asset_criticality_actions
+    type: foreach
+    if: >-
+      ${{ steps.await_incident_contained.output.response.decision == 'approve' }}
+    foreach: >-
+      ${{ variables.approved_actions | where: 'action_type', 'set_asset_criticality' }}
+    steps:
+      - name: capture_asset_criticality_action
+        type: data.set
+        with:
+          current_action: "${{ foreach.item }}"
+
+      - name: build_missing_asset_criticality_params_record
+        type: data.set
+        if: "${{ variables.current_action.execution_params.criticality_level == null }}"
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: skipped
+            error: missing execution_params.criticality_level
+
+      - name: record_missing_asset_criticality_params
+        type: data.set
+        if: "${{ variables.current_action.execution_params.criticality_level == null }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_missing_asset_criticality_params_record.output.execution_record }}
+
+      - name: set_host_asset_criticality_actions
+        type: foreach
+        if: "${{ variables.current_action.execution_params.criticality_level != null }}"
+        foreach: "${{ variables.current_action.targets.hosts }}"
+        steps:
+          # Replicate the Entity Store v2 lookup the alerts flyout performs when
+          # clicking a host.name: resolve the entity's canonical entity.id (EUID)
+          # first, then write criticality keyed by it, instead of the legacy
+          # name-keyed /api/asset_criticality API.
+          - name: resolve_host_entity
+            type: kibana.request
+            with:
+              method: GET
+              path: "/s/{{ workflow.spaceId }}/api/security/entity_store/entities"
+              headers:
+                elastic-api-version: "2023-10-31"
+              query:
+                per_page: 1
+                filterQuery: >-
+                  {"bool":{"filter":[{"term":{"host.name":{{ foreach.item | json }}}}]}}
+            on-failure:
+              continue: true
+
+          - name: capture_host_entity_id
+            type: data.set
+            with:
+              host_entity_id: "${{ steps.resolve_host_entity.output.records[0].entity.id }}"
+
+          - name: build_host_asset_criticality_missing_entity_record
+            type: data.set
+            if: "${{ variables.host_entity_id == null }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                target:
+                  id_field: host.name
+                  id_value: "{{ foreach.item }}"
+                status: skipped
+                error: entity not found in Entity Store
+
+          - name: record_host_asset_criticality_missing_entity
+            type: data.set
+            if: "${{ variables.host_entity_id == null }}"
+            with:
+              executed_actions: >-
+                ${{ variables.executed_actions
+                  | push: steps.build_host_asset_criticality_missing_entity_record.output.execution_record }}
+
+          - name: set_host_asset_criticality
+            type: kibana.request
+            if: "${{ variables.host_entity_id != null }}"
+            with:
+              method: PUT
+              path: "/s/{{ workflow.spaceId }}/api/security/entity_store/entities/bulk"
+              query:
+                force: true
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "2023-10-31"
+                Content-Type: application/json
+              body:
+                entities:
+                  - type: host
+                    doc:
+                      entity:
+                        id: "{{ variables.host_entity_id }}"
+                      asset:
+                        criticality: "{{ variables.current_action.execution_params.criticality_level }}"
+            on-failure:
+              continue: true
+
+          - name: build_host_asset_criticality_record
+            type: data.set
+            if: "${{ variables.host_entity_id != null }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                target:
+                  id_field: entity.id
+                  id_value: "{{ variables.host_entity_id }}"
+                  host_name: "{{ foreach.item }}"
+                status: >-
+                  {%- if steps.set_host_asset_criticality.error == null -%}succeeded{%- else -%}failed{%- endif -%}
+
+          - name: record_host_asset_criticality
+            type: data.set
+            if: "${{ variables.host_entity_id != null }}"
+            with:
+              executed_actions: >-
+                ${{ variables.executed_actions
+                  | push: steps.build_host_asset_criticality_record.output.execution_record }}
+
+      - name: set_user_asset_criticality_actions
+        type: foreach
+        if: "${{ variables.current_action.execution_params.criticality_level != null }}"
+        foreach: "${{ variables.current_action.targets.users }}"
+        steps:
+          - name: resolve_user_entity
+            type: kibana.request
+            with:
+              method: GET
+              path: "/s/{{ workflow.spaceId }}/api/security/entity_store/entities"
+              headers:
+                elastic-api-version: "2023-10-31"
+              query:
+                per_page: 1
+                filterQuery: >-
+                  {"bool":{"filter":[{"term":{"user.name":{{ foreach.item | json }}}}]}}
+            on-failure:
+              continue: true
+
+          - name: capture_user_entity_id
+            type: data.set
+            with:
+              user_entity_id: "${{ steps.resolve_user_entity.output.records[0].entity.id }}"
+
+          - name: build_user_asset_criticality_missing_entity_record
+            type: data.set
+            if: "${{ variables.user_entity_id == null }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                target:
+                  id_field: user.name
+                  id_value: "{{ foreach.item }}"
+                status: skipped
+                error: entity not found in Entity Store
+
+          - name: record_user_asset_criticality_missing_entity
+            type: data.set
+            if: "${{ variables.user_entity_id == null }}"
+            with:
+              executed_actions: >-
+                ${{ variables.executed_actions
+                  | push: steps.build_user_asset_criticality_missing_entity_record.output.execution_record }}
+
+          - name: set_user_asset_criticality
+            type: kibana.request
+            if: "${{ variables.user_entity_id != null }}"
+            with:
+              method: PUT
+              path: "/s/{{ workflow.spaceId }}/api/security/entity_store/entities/bulk"
+              query:
+                force: true
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "2023-10-31"
+                Content-Type: application/json
+              body:
+                entities:
+                  - type: user
+                    doc:
+                      entity:
+                        id: "{{ variables.user_entity_id }}"
+                      asset:
+                        criticality: "{{ variables.current_action.execution_params.criticality_level }}"
+            on-failure:
+              continue: true
+
+          - name: build_user_asset_criticality_record
+            type: data.set
+            if: "${{ variables.user_entity_id != null }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                target:
+                  id_field: entity.id
+                  id_value: "{{ variables.user_entity_id }}"
+                  user_name: "{{ foreach.item }}"
+                status: >-
+                  {%- if steps.set_user_asset_criticality.error == null -%}succeeded{%- else -%}failed{%- endif -%}
+
+          - name: record_user_asset_criticality
+            type: data.set
+            if: "${{ variables.user_entity_id != null }}"
+            with:
+              executed_actions: >-
+                ${{ variables.executed_actions
+                  | push: steps.build_user_asset_criticality_record.output.execution_record }}
+
+  - name: execute_isolate_host_actions
+    type: foreach
+    if: >-
+      ${{ steps.await_incident_contained.output.response.decision == 'approve' }}
+    foreach: >-
+      ${{ variables.approved_actions | where: 'action_type', 'isolate_host' }}
+    steps:
+      - name: prepare_isolate_host_action
+        type: data.set
+        with:
+          current_action: "${{ foreach.item }}"
+          endpoint_ids: >-
+            ${{ steps.resolve_endpoint_agent_ids.output.values | default: consts.no_rows
+              | where_exp: 'row', 'foreach.item.targets.hosts contains row.1'
+              | map: '0' | uniq }}
+
+      - name: isolate_host
+        type: kibana.request
+        if: "${{ variables.endpoint_ids.size > 0 }}"
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/endpoint/action/isolate"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            endpoint_ids: "${{ variables.endpoint_ids }}"
+            comment: "{{ variables.current_action.rationale }}"
+        on-failure:
+          continue: true
+
+      - name: build_isolate_host_record
+        type: data.set
+        if: "${{ variables.endpoint_ids.size > 0 }}"
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: >-
+              {%- if steps.isolate_host.error == null -%}submitted{%- else -%}failed{%- endif -%}
+
+      - name: record_isolate_host
+        type: data.set
+        if: "${{ variables.endpoint_ids.size > 0 }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_isolate_host_record.output.execution_record }}
+
+      - name: build_isolate_host_missing_agent_record
+        type: data.set
+        if: "${{ variables.endpoint_ids.size == 0 }}"
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: skipped
+            error: no Endpoint agent id resolved for target hosts
+
+      - name: record_isolate_host_missing_agent
+        type: data.set
+        if: "${{ variables.endpoint_ids.size == 0 }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_isolate_host_missing_agent_record.output.execution_record }}
+
+  - name: execute_kill_process_actions
+    type: foreach
+    if: >-
+      ${{ steps.await_incident_contained.output.response.decision == 'approve' }}
+    foreach: >-
+      ${{ variables.approved_actions | where: 'action_type', 'kill_process' }}
+    steps:
+      - name: prepare_kill_process_action
+        type: data.set
+        with:
+          current_action: "${{ foreach.item }}"
+          endpoint_ids: >-
+            ${{ steps.resolve_endpoint_agent_ids.output.values | default: consts.no_rows
+              | where_exp: 'row', 'foreach.item.targets.hosts contains row.1'
+              | map: '0' | uniq }}
+          kill_process_parameters: null
+
+      - name: use_process_entity_id
+        type: data.set
+        if: "${{ variables.current_action.execution_params.process_entity_id != null }}"
+        with:
+          kill_process_parameters:
+            entity_id: "{{ variables.current_action.execution_params.process_entity_id }}"
+
+      - name: use_process_pid
+        type: data.set
+        if: >-
+          ${{ variables.current_action.execution_params.process_entity_id == null
+            and variables.current_action.execution_params.pid != null }}
+        with:
+          kill_process_parameters:
+            pid: "${{ variables.current_action.execution_params.pid }}"
+
+      - name: use_process_name
+        type: data.set
+        if: >-
+          ${{ variables.current_action.execution_params.process_entity_id == null
+            and variables.current_action.execution_params.pid == null
+            and variables.current_action.execution_params.process_name != null }}
+        with:
+          kill_process_parameters:
+            process_name: "{{ variables.current_action.execution_params.process_name }}"
+
+      - name: kill_process
+        type: kibana.request
+        if: >-
+          ${{ variables.endpoint_ids.size > 0
+            and variables.kill_process_parameters != null }}
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/endpoint/action/kill_process"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            endpoint_ids: "${{ variables.endpoint_ids }}"
+            comment: "{{ variables.current_action.rationale }}"
+            parameters: "${{ variables.kill_process_parameters }}"
+        on-failure:
+          continue: true
+
+      - name: build_kill_process_record
+        type: data.set
+        if: >-
+          ${{ variables.endpoint_ids.size > 0
+            and variables.kill_process_parameters != null }}
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: >-
+              {%- if steps.kill_process.error == null -%}submitted{%- else -%}failed{%- endif -%}
+
+      - name: record_kill_process
+        type: data.set
+        if: >-
+          ${{ variables.endpoint_ids.size > 0
+            and variables.kill_process_parameters != null }}
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_kill_process_record.output.execution_record }}
+
+      - name: build_kill_process_missing_params_record
+        type: data.set
+        if: "${{ variables.kill_process_parameters == null }}"
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: skipped
+            error: missing process execution params
+
+      - name: record_kill_process_missing_params
+        type: data.set
+        if: "${{ variables.kill_process_parameters == null }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_kill_process_missing_params_record.output.execution_record }}
+
+      - name: build_kill_process_missing_agent_record
+        type: data.set
+        if: >-
+          ${{ variables.kill_process_parameters != null
+            and variables.endpoint_ids.size == 0 }}
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: skipped
+            error: no Endpoint agent id resolved for target hosts
+
+      - name: record_kill_process_missing_agent
+        type: data.set
+        if: >-
+          ${{ variables.kill_process_parameters != null
+            and variables.endpoint_ids.size == 0 }}
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_kill_process_missing_agent_record.output.execution_record }}
+
+  - name: execute_hunt_process_persistence_actions
+    type: foreach
+    if: >-
+      ${{ steps.await_incident_contained.output.response.decision == 'approve' }}
+    foreach: >-
+      ${{ variables.approved_actions | where: 'action_type', 'hunt_process_persistence' }}
+    steps:
+      - name: prepare_hunt_process_persistence_action
+        type: data.set
+        with:
+          current_action: "${{ foreach.item }}"
+          endpoint_ids: >-
+            ${{ steps.resolve_endpoint_agent_ids.output.values | default: consts.no_rows
+              | where_exp: 'row', 'foreach.item.targets.hosts contains row.1'
+              | map: '0' | uniq }}
+
+      - name: hunt_process_persistence
+        type: kibana.request
+        if: "${{ variables.endpoint_ids.size > 0 }}"
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/api/endpoint/action/running_procs"
+          headers:
+            kbn-xsrf: string
+            elastic-api-version: "2023-10-31"
+            Content-Type: application/json
+          body:
+            endpoint_ids: "${{ variables.endpoint_ids }}"
+            comment: "{{ variables.current_action.rationale }}"
+        on-failure:
+          continue: true
+
+      - name: build_hunt_process_persistence_record
+        type: data.set
+        if: "${{ variables.endpoint_ids.size > 0 }}"
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: >-
+              {%- if steps.hunt_process_persistence.error == null -%}submitted{%- else -%}failed{%- endif -%}
+
+      - name: record_hunt_process_persistence
+        type: data.set
+        if: "${{ variables.endpoint_ids.size > 0 }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_hunt_process_persistence_record.output.execution_record }}
+
+      - name: build_hunt_process_persistence_missing_agent_record
+        type: data.set
+        if: "${{ variables.endpoint_ids.size == 0 }}"
+        with:
+          execution_record:
+            action_type: "{{ variables.current_action.action_type }}"
+            title: "{{ variables.current_action.title }}"
+            targets: "${{ variables.current_action.targets }}"
+            status: skipped
+            error: no Endpoint agent id resolved for target hosts
+
+      - name: record_hunt_process_persistence_missing_agent
+        type: data.set
+        if: "${{ variables.endpoint_ids.size == 0 }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_hunt_process_persistence_missing_agent_record.output.execution_record }}
+
+  # Account for every staged action that was NOT covered by an execution attempt
+  # above, so the ledger is complete: every staged action ends with either an
+  # executed/submitted/failed/skipped record (from the execute_* loops) or a
+  # not_executed record with a reason (manual action, surfaced-only, containment
+  # dismissed, or not approved by the analyst).
+  - name: account_unexecuted_actions
+    type: foreach
+    foreach: "${{ variables.phase3_recommended_actions }}"
+    steps:
+      - name: capture_accounting_action
+        type: data.set
+        with:
+          matching_approved: >-
+            ${{ variables.approved_actions | where: 'title', foreach.item.title }}
+
+      - name: build_manual_action_record
+        type: data.set
+        if: "${{ foreach.item.execution == 'manual' }}"
+        with:
+          execution_record:
+            action_type: "{{ foreach.item.action_type }}"
+            title: "{{ foreach.item.title }}"
+            targets: "${{ foreach.item.targets }}"
+            status: not_executed
+            reason: manual action; analyst executes outside Kibana
+
+      - name: record_manual_action
+        type: data.set
+        if: "${{ foreach.item.execution == 'manual' }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_manual_action_record.output.execution_record }}
+
+      - name: build_surfaced_only_record
+        type: data.set
+        if: "${{ foreach.item.action_type == 'analyze_exfiltration_ips' }}"
+        with:
+          execution_record:
+            action_type: "{{ foreach.item.action_type }}"
+            title: "{{ foreach.item.title }}"
+            targets: "${{ foreach.item.targets }}"
+            status: not_executed
+            reason: surfaced-only in this workflow
+
+      - name: record_surfaced_only
+        type: data.set
+        if: "${{ foreach.item.action_type == 'analyze_exfiltration_ips' }}"
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_surfaced_only_record.output.execution_record }}
+
+      - name: build_dismissed_record
+        type: data.set
+        if: >-
+          ${{ foreach.item.execution == 'kibana_api'
+            and foreach.item.action_type != 'analyze_exfiltration_ips'
+            and steps.await_incident_contained.output.response.decision == 'dismiss' }}
+        with:
+          execution_record:
+            action_type: "{{ foreach.item.action_type }}"
+            title: "{{ foreach.item.title }}"
+            targets: "${{ foreach.item.targets }}"
+            status: not_executed
+            reason: containment dismissed by analyst
+
+      - name: record_dismissed
+        type: data.set
+        if: >-
+          ${{ foreach.item.execution == 'kibana_api'
+            and foreach.item.action_type != 'analyze_exfiltration_ips'
+            and steps.await_incident_contained.output.response.decision == 'dismiss' }}
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_dismissed_record.output.execution_record }}
+
+      - name: build_not_approved_record
+        type: data.set
+        if: >-
+          ${{ foreach.item.execution == 'kibana_api'
+            and foreach.item.action_type != 'analyze_exfiltration_ips'
+            and steps.await_incident_contained.output.response.decision == 'approve'
+            and variables.matching_approved.size == 0 }}
+        with:
+          execution_record:
+            action_type: "{{ foreach.item.action_type }}"
+            title: "{{ foreach.item.title }}"
+            targets: "${{ foreach.item.targets }}"
+            status: not_executed
+            reason: not approved by analyst
+
+      - name: record_not_approved
+        type: data.set
+        if: >-
+          ${{ foreach.item.execution == 'kibana_api'
+            and foreach.item.action_type != 'analyze_exfiltration_ips'
+            and steps.await_incident_contained.output.response.decision == 'approve'
+            and variables.matching_approved.size == 0 }}
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | push: steps.build_not_approved_record.output.execution_record }}
+
+  # Stable marker for the four-phase execution projection: its output carries the
+  # final per-action ledger, which GET /internal/pnd/executions/{correlationId}
+  # projects into the lifecycle flyout's action-status section. The phase catalog
+  # keys the "Execute approved actions" row on exactly this step name.
+  - name: collect_executed_actions
+    type: data.set
+    with:
+      containment_executed_actions: "${{ variables.executed_actions }}"
 
   # A6: this gate is TERMINAL for the incident conversation — nothing follows it that could
   # carry the decision into the thread — so the outcome is appended explicitly. Agent Builder
   # exposes no plain conversation-append endpoint, so this is the documented fallback: a
   # minimal ai.agent turn on the same conversation with create-conversation: false.
-  #
-  # The decision is recorded VERBATIM rather than interpreted, because `incident_closed` below
-  # reports `outcome: contained` for either answer (a dismissal on containment is a
-  # pre-existing asymmetry owned by the server's pnd.incidentClosed emission, not by this
-  # YAML). The thread stays honest either way.
   - name: record_containment_outcome
     type: ai.agent
     agent-id: "{{ steps.derive_ids.output.incidentAgentId }}"
@@ -688,6 +1742,10 @@ steps:
 
         Rationale: {{ steps.await_incident_contained.output.response.rationale }}
 
+        Approved actions: {{ variables.approved_actions | json }}
+
+        Action execution ledger: {{ variables.executed_actions | json }}
+
   # Terminal marker for the execution projection. pnd.incidentClosed is emitted server-side
   # when _respond resolves the containment gate on an approval; security.detectionChangeSignal
   # is emitted from _respond at every Floor HITL terminal and from emit_coverage_gap on the
@@ -700,3 +1758,5 @@ steps:
       phase: incident_response
       decision: "{{ steps.await_incident_contained.output.response.decision }}"
       rationale: "{{ steps.await_incident_contained.output.response.rationale }}"
+      recommended_actions: "${{ variables.phase3_recommended_actions }}"
+      executed_actions: "${{ variables.executed_actions }}"

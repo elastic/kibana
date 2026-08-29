@@ -88,11 +88,18 @@ export interface WatchScopeRoutingPatch {
   escalationContact?: string;
 }
 
+export interface WatchGenerationPatch {
+  alertSize?: number;
+  lookback?: string;
+  connectorId?: string;
+}
+
 export interface WatchUpdatePatch {
   enabled?: boolean;
   settingsRevision?: number | null;
   autonomyLevel?: WatchAutonomyLevel;
   triggers?: WatchTriggersPatch;
+  generation?: WatchGenerationPatch;
   scopeRouting?: WatchScopeRoutingPatch;
   approvalGate?: {
     gateId: string;
@@ -452,9 +459,24 @@ export class WatchesService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WatchUpdateResult> {
-    const { enabled, autonomyLevel, triggers, scopeRouting, approvalGate, worker, skill } = patch;
+    const {
+      enabled,
+      autonomyLevel,
+      triggers,
+      generation,
+      scopeRouting,
+      approvalGate,
+      worker,
+      skill,
+    } = patch;
     const touchesSettings = Boolean(
-      autonomyLevel != null || triggers || scopeRouting || approvalGate || worker || skill
+      autonomyLevel != null ||
+        triggers ||
+        generation ||
+        scopeRouting ||
+        approvalGate ||
+        worker ||
+        skill
     );
     const registration = watchRegistry.get(watchId);
 
@@ -532,6 +554,16 @@ export class WatchesService {
         );
         return { outcome: 'failed' };
       }
+
+      // A schedule or generation change re-renders the managed YAML, but Task Manager only
+      // re-reads a workflow's scheduled triggers when an update flows through the Workflows
+      // management API. Re-assert enablement (idempotent) so the new cadence is programmed.
+      if ((patch.triggers || patch.generation) && patch.enabled == null) {
+        const detail = await management.getWorkflow(status.workflowId, spaceId, request);
+        if (detail?.enabled) {
+          await management.updateWorkflow(status.workflowId, { enabled: true }, spaceId, request);
+        }
+      }
     }
 
     if (patch.enabled != null) {
@@ -575,11 +607,11 @@ export class WatchesService {
   /**
    * Registers the space-scoped Task Manager schedule for a watch's `scheduled` trigger.
    *
-   * PND installs its watches through the managed static-install path, which writes the workflow
-   * document but never wires the scheduler; scheduling only happens once an enablement update
-   * reaches the Workflows management API. This re-asserts `enabled: true` for the caller's space so
-   * `syncSchedulerAfterSave` programs the trigger's task there. Idempotent — Task Manager updates
-   * the deterministic task in place when it already exists.
+   * A managed install writes the workflow document but never wires the scheduler; scheduling
+   * only happens once an enablement update reaches the Workflows management API. This
+   * re-asserts `enabled: true` for the caller's space so `syncSchedulerAfterSave` programs the
+   * trigger's task there. Idempotent — Task Manager updates the deterministic task in place
+   * when it already exists.
    */
   async ensureSchedule(
     watchId: string,
@@ -594,7 +626,12 @@ export class WatchesService {
       return { outcome: 'unavailable' };
     }
 
-    const status = await managedWorkflows.getWorkflowStatus(watchId, {
+    const registration = watchRegistry.get(watchId);
+    if (!registration) {
+      return { outcome: 'not-found' };
+    }
+
+    const status = await managedWorkflows.getWorkflowStatus(registration.id, {
       spaceId,
       workflowIdSuffix: spaceId,
     });

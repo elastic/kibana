@@ -60,6 +60,14 @@ export const ORCHESTRATOR_STEP_IDS = {
   assessInvestigation: 'assess_investigation',
   deriveIds: 'derive_ids',
   draftTuning: 'draft_tuning',
+  /** The `ai.agent` step that stages containment actions via the recommended-actions skill. */
+  recommendActions: 'recommend_actions',
+  /**
+   * `collect_executed_actions`, the stable post-gate marker whose output carries the final
+   * per-action execution ledger — the execute_* foreach blocks fan out into many transient
+   * step names, so the ledger collector is the row the projection can always find.
+   */
+  executeActions: 'collect_executed_actions',
   openInvestigation: 'create_investigation_container',
   /**
    * `tuning_applied`, **not** `apply_tuning`. The Detection Watch deliberately has no apply step:
@@ -143,11 +151,29 @@ export const PHASE_CATALOG_STEPS: readonly PhaseCatalogEntry[] = [
   // --- Phase 3 · Incident Response ---------------------------------------------
   {
     description:
-      'A HITL gate (always analyst) confirms the incident is contained; PND emits pnd.incidentClosed on resume.',
+      'The recommended-actions skill stages evidence-based containment and response actions for the incident.',
+    id: 'step-3-2',
+    label: 'Recommend containment actions',
+    liveness: 'live',
+    orchestratorStepId: ORCHESTRATOR_STEP_IDS.recommendActions,
+    phase: 'incident_response',
+  },
+  {
+    description:
+      'A HITL gate (always analyst) approves a per-action subset of the staged containment actions; PND emits pnd.incidentClosed on resume.',
     id: 'step-3-5',
-    label: 'Confirm containment',
+    label: 'Review containment actions',
     liveness: 'live',
     orchestratorStepId: PND_GATE_STEP_IDS.awaitIncidentContained,
+    phase: 'incident_response',
+  },
+  {
+    description:
+      'The approved containment actions are executed as the approving analyst, and every outcome lands in a per-action ledger.',
+    id: 'step-3-6',
+    label: 'Execute approved actions',
+    liveness: 'live',
+    orchestratorStepId: ORCHESTRATOR_STEP_IDS.executeActions,
     phase: 'incident_response',
   },
   // --- Phase 4 · Post-Incident Follow-on ---------------------------------------

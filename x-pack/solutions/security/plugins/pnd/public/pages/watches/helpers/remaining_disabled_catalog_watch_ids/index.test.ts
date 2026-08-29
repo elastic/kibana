@@ -6,6 +6,7 @@
  */
 
 import {
+  SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
@@ -29,6 +30,7 @@ describe('remainingDisabledCatalogWatchIds', () => {
           catalogWatch(SYSTEM_SECURITY_WATCH_DARK_ID, false),
           catalogWatch(SYSTEM_SECURITY_WATCH_DEEP_ID, false),
           catalogWatch(SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID, false),
+          catalogWatch(SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID, false),
         ],
       })
     ).toEqual([
@@ -36,6 +38,7 @@ describe('remainingDisabledCatalogWatchIds', () => {
       SYSTEM_SECURITY_WATCH_DARK_ID,
       SYSTEM_SECURITY_WATCH_DEEP_ID,
       SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
+      SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
     ]);
   });
 
@@ -49,6 +52,7 @@ describe('remainingDisabledCatalogWatchIds', () => {
           catalogWatch(SYSTEM_SECURITY_WATCH_DARK_ID, false),
           catalogWatch(SYSTEM_SECURITY_WATCH_DEEP_ID, false),
           catalogWatch(SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID, true),
+          catalogWatch(SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID, true),
         ],
       })
     ).toEqual([SYSTEM_SECURITY_WATCH_DARK_ID, SYSTEM_SECURITY_WATCH_DEEP_ID]);
@@ -69,6 +73,7 @@ describe('remainingDisabledCatalogWatchIds', () => {
       SYSTEM_SECURITY_WATCH_DARK_ID,
       SYSTEM_SECURITY_WATCH_DEEP_ID,
       SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
+      SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID,
     ]);
   });
 
@@ -94,6 +99,7 @@ describe('remainingDisabledCatalogWatchIds', () => {
           catalogWatch(SYSTEM_SECURITY_WATCH_DARK_ID, true),
           catalogWatch(SYSTEM_SECURITY_WATCH_DEEP_ID, true),
           catalogWatch(SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID, true),
+          catalogWatch(SYSTEM_SECURITY_WATCH_ATTACK_DISCOVERY_GENERATION_ID, true),
         ],
       })
     ).toEqual([]);

@@ -8,8 +8,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { PND_GATE_IDS } from '@kbn/pnd-common';
 import type { PndDiscoveryContext, PndProposalRow } from '@kbn/pnd-common';
 
+import { parseRecommendedActions } from '../../pages/conversations/helpers/parse_recommended_actions';
 import {
   canRenderWithSchemaForm,
   extractSchemaDefaults,
@@ -25,6 +27,10 @@ import {
   FIXED_DECISION_NAME,
   validateFixedDecisionValues,
 } from './helpers/validate_fixed_decision_values';
+import {
+  APPROVED_ACTIONS_NAME,
+  RecommendedActionsDecisionForm,
+} from './recommended_actions_decision_form';
 import * as i18n from './translations';
 
 const HEADER_ICON_SIZE_PX = 36;
@@ -66,10 +72,16 @@ export interface HitlActionCardProps {
  * accordingly, because a button reading "Approve" that dismisses the proposal is
  * the sharpest version of a UI lying about what it is about to do.
  *
- * **It renders two branches.** A gate whose schema `canRenderWithSchemaForm`
- * accepts is drawn by `SchemaForm`; anything else — including the `{}` every
- * row carries when its gate declared no schema — falls back to fixed controls.
- * Both report the same value map, so submission does not know which one it drew.
+ * **It renders three branches.** An `incident_contained` gate whose reasoning
+ * carries staged containment actions behind the label anchor is drawn by
+ * `RecommendedActionsDecisionForm`; otherwise a gate whose schema
+ * `canRenderWithSchemaForm` accepts is drawn by `SchemaForm`; anything else —
+ * including the `{}` every row carries when its gate declared no schema — falls
+ * back to fixed controls. All three report the same value map, so submission
+ * does not know which one it drew. The first branch is fail-closed too: a
+ * Phase-3 row whose summary lost the anchor falls back to the fixed controls,
+ * where approving carries no `approved_actions` and the workflow executes
+ * nothing.
  *
  * The prototype renders `item.html`, `operatorNote` and `alwaysAllowHtml`
  * through `dangerouslySetInnerHTML`. None of that is ported: every string here
@@ -85,18 +97,43 @@ export const HitlActionCard: React.FC<HitlActionCardProps> = ({
   titleId,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { inputSchema, message, reasoning, recommendedAction, reversible, threadTitle, title } =
-    proposal;
+  const {
+    gateId,
+    inputSchema,
+    message,
+    reasoning,
+    recommendedAction,
+    reversible,
+    threadTitle,
+    title,
+  } = proposal;
 
   const tokens = getHitlToneTokens(getHitlTone({ recommendedAction, reversible }), euiTheme.colors);
 
+  // The staged containment actions the Watch Floor wrote into the Phase-3
+  // gate's reasoning summary behind the label anchor. `undefined` on every
+  // other gate, and on a summary that lost the anchor — both fall through to
+  // the two branches below, where nothing can be toggled on.
+  const recommendedActions = useMemo(
+    () =>
+      gateId === PND_GATE_IDS.incidentContained ? parseRecommendedActions(reasoning) : undefined,
+    [gateId, reasoning]
+  );
+
   // The guard is the only supported way to narrow a row's `inputSchema`, and it
   // is fail-closed: every `false`, `{}` included, means the fallback branch.
-  const schema = canRenderWithSchemaForm(inputSchema) ? inputSchema : undefined;
+  // The recommended-actions branch takes precedence — its gate declares a
+  // schema too, but only the dedicated form can echo the staged actions back.
+  const schema =
+    recommendedActions == null && canRenderWithSchemaForm(inputSchema) ? inputSchema : undefined;
 
-  const [values, setValues] = useState<Record<string, unknown>>(() =>
-    schema != null ? extractSchemaDefaults(schema) : {}
-  );
+  const [values, setValues] = useState<Record<string, unknown>>(() => {
+    // Seeded empty rather than absent, so an approval that toggles nothing on
+    // still says so explicitly instead of leaving the key to a server default.
+    if (recommendedActions != null) return { [APPROVED_ACTIONS_NAME]: [] };
+
+    return schema != null ? extractSchemaDefaults(schema) : {};
+  });
 
   const errors = useMemo(
     () =>
@@ -270,7 +307,15 @@ export const HitlActionCard: React.FC<HitlActionCardProps> = ({
       </div>
 
       <div css={formStyles}>
-        {schema != null ? (
+        {recommendedActions != null ? (
+          <RecommendedActionsDecisionForm
+            actions={recommendedActions}
+            disabled={isLoading}
+            errors={errors}
+            onChange={setValues}
+            values={values}
+          />
+        ) : schema != null ? (
           <SchemaForm
             disabled={isLoading}
             errors={errors}

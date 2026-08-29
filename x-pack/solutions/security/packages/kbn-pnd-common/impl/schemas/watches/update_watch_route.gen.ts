@@ -52,6 +52,16 @@ export const UpdateWatchRequestBody = lazySchema(() =>
       })
       .optional(),
     /**
+     * Attack Discovery generation options. Only the generation watch offers them; other watches reject the patch.
+     */
+    generation: z
+      .object({
+        alertSize: z.number().int().min(1).max(500).optional(),
+        lookback: z.string().min(1).max(64).optional(),
+        connectorId: z.string().max(256).optional(),
+      })
+      .optional(),
+    /**
      * Each value is an option id the watch offers; unknown ids are rejected.
      */
     scopeRouting: z

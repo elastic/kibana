@@ -10,7 +10,7 @@ import type { WatchScopeRoutingSettings, WatchSettings } from '@kbn/pnd-common';
 /**
  * The settings the page edits locally before a Save.
  *
- * Exactly the two writable sections of {@link WatchSettings}, and deliberately not one field more:
+ * Exactly the three writable sections of {@link WatchSettings}, and deliberately not one field more:
  *
  * - `autonomy` is **not** here. The dial writes immediately through `PUT /internal/pnd/autonomy`,
  *   behind the `pnd_manage_autonomy` privilege, and prompts a proposal sweep on a raise;
@@ -31,7 +31,7 @@ import type { WatchScopeRoutingSettings, WatchSettings } from '@kbn/pnd-common';
  * writes through on click, because it is the one mutation a managed workflow permits and reversing
  * it is one more click.
  */
-export type WatchSettingsDraft = Pick<WatchSettings, 'scopeRouting' | 'triggers'>;
+export type WatchSettingsDraft = Pick<WatchSettings, 'generation' | 'scopeRouting' | 'triggers'>;
 
 /** The scope-and-routing selects a customer can retarget. */
 export type WatchScopeRoutingKey = keyof WatchScopeRoutingSettings;
@@ -55,6 +55,7 @@ export const WATCH_SCOPE_ROUTING_KEYS = [
 export const readWatchSettingsDraft = (
   settings: WatchSettings | undefined
 ): WatchSettingsDraft => ({
+  generation: settings?.generation,
   scopeRouting: settings?.scopeRouting,
   triggers: settings?.triggers,
 });
@@ -81,6 +82,29 @@ export const withAllowManualRun = (
   allowManualRun: boolean
 ): WatchSettingsDraft =>
   draft.triggers == null ? draft : { ...draft, triggers: { ...draft.triggers, allowManualRun } };
+
+/**
+ * The generation updaters below edit the Attack Discovery Generation watch's options. Only that
+ * watch's payload carries a `generation` section, so on every other watch each is a no-op.
+ */
+
+export const withGenerationAlertSize = (
+  draft: WatchSettingsDraft,
+  alertSize: number
+): WatchSettingsDraft =>
+  draft.generation == null ? draft : { ...draft, generation: { ...draft.generation, alertSize } };
+
+export const withGenerationLookback = (
+  draft: WatchSettingsDraft,
+  lookback: string
+): WatchSettingsDraft =>
+  draft.generation == null ? draft : { ...draft, generation: { ...draft.generation, lookback } };
+
+export const withGenerationConnectorId = (
+  draft: WatchSettingsDraft,
+  connectorId: string
+): WatchSettingsDraft =>
+  draft.generation == null ? draft : { ...draft, generation: { ...draft.generation, connectorId } };
 
 export const withScopeRoutingSelection = (
   draft: WatchSettingsDraft,
