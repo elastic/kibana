@@ -106,6 +106,32 @@ def fetch_all(request, index: str, experiment: str, hours: int) -> list[dict]:
     return docs
 
 
+def trim_step(step: dict) -> dict:
+    """Keep only what the trace renderer reads from a step.
+
+    A full 720h cache of raw steps is ~1.7 GB, which Node cannot readFileSync
+    (max string 0x1fffffe8). The renderer truncates tool args to 300 chars and
+    reasoning to 500, so caching the untruncated originals buys nothing.
+    """
+    kind = step.get("type")
+    if kind == "tool_call":
+        args = step.get("args")
+        return {
+            "type": "tool_call",
+            "tool_id": step.get("tool_id"),
+            # Mirrors the renderer's own JSON.stringify(...).slice(0, 300).
+            "args": json.loads(json.dumps(args))
+            if args is not None and len(json.dumps(args)) <= 300
+            else None,
+        }
+    if kind == "reasoning":
+        text = step.get("reasoning")
+        return {"type": "reasoning", "reasoning": text[:500] if isinstance(text, str) else text}
+    if kind == "relevant_skills":
+        return {"type": "relevant_skills", "skills": step.get("skills")}
+    return {"type": kind}
+
+
 def build_cache(docs: list[dict]) -> dict[str, list[dict]]:
     cache: dict[str, list[dict]] = {}
     for doc in docs:
@@ -113,6 +139,16 @@ def build_cache(docs: list[dict]) -> dict[str, list[dict]]:
         example_id = (doc.get("example") or {}).get("id")
         if not execution_id or not example_id:
             continue
+        output = (doc.get("task") or {}).get("output") or {}
+        steps = output.get("steps")
+        if isinstance(steps, list):
+            output["steps"] = [trim_step(s) for s in steps if isinstance(s, dict)]
+        messages = output.get("messages")
+        if isinstance(messages, list):
+            # Only the last message over 50 chars becomes the answer.
+            output["messages"] = [
+                {"message": m.get("message")} for m in messages if isinstance(m, dict)
+            ]
         cache.setdefault(f"{execution_id}::{example_id}", []).append(doc)
     return cache
 
