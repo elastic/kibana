@@ -71,6 +71,10 @@ TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
 
 Also omit \`LIMIT\` and \`SORT\` (same reasons as with FROM).
 
+## Time-series statistics (avg / min / max etc)
+
+If the request asks for average, minimum, maximum, last value, or other series statistics of a time-series trend, keep a single \`STATS ... BY <time bucket>\`. Do **not** add a second \`STATS\` that collapses the buckets into overall avg/min/max. Those series statistics are Lens legend statistics, not query columns.
+
 ## Grouping dimensions (BY)
 
 Only \`BY\` dimensions the user asked for:

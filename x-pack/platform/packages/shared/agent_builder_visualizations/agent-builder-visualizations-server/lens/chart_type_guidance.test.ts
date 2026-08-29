@@ -18,6 +18,8 @@ describe('getChartTypeConfigPromptContent', () => {
 
     expect(prompt).toContain('CHART-SPECIFIC RULES FOR XY');
     expect(prompt).toContain('styling.areas.fill: "gradient"');
+    expect(prompt).toContain('legend.statistics');
+    expect(prompt).toContain('Do NOT bind extra Y columns for those statistics');
   });
 
   it('does not give the tagcloud author caption rules after selection', () => {

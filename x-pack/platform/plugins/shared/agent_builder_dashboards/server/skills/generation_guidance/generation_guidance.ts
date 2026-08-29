@@ -77,7 +77,7 @@ Reach for custom content only when nothing above fits:
 
 For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
-Before \`add_panels\`, pick at most two primary time-series XY (the overview trend that matches the title or intent). On that panel's \`query\` only, ask for legend statistics (\`avg\`, \`min\`, \`max\`, last non-null).
+Before \`add_panels\`, pick at most two primary time-series XY (the overview trend that matches the title or intent). On those panels, ask for a time-series of the measure and request legend statistics as a presentation hint (e.g. "show avg/min/max in the legend"). Do not ask the query to compute avg/min/max as extra ES|QL columns.
 
 ${chartTypeSelectionGuidance}
 
