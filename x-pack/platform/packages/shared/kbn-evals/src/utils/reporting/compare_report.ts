@@ -7,6 +7,7 @@
 
 import chalk from 'chalk';
 import { table } from 'table';
+import { isImproved } from '@kbn/evals-common';
 import type { Direction, PairedTTestResult } from '@kbn/evals-common';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -33,8 +34,7 @@ function formatDifference(value: number, direction: Direction): string {
     return formatted;
   }
 
-  const improved = direction === 'maximize' ? value > 0 : value < 0;
-  return improved ? chalk.green(formatted) : chalk.red(formatted);
+  return isImproved(value, direction) ? chalk.green(formatted) : chalk.red(formatted);
 }
 
 function buildTableConfig(columnCount: number): {

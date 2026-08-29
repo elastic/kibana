@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isImproved } from '@kbn/evals-common';
 import type { Direction, PairedTTestResult } from '@kbn/evals-common';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -36,8 +37,7 @@ function formatOutcome(
 ): string {
   if (pValue === null || !Number.isFinite(pValue) || pValue >= threshold) return '-';
   if (direction === 'neutral') return '-';
-  const isImprovement = direction === 'maximize' ? delta > 0 : delta < 0;
-  return isImprovement ? 'Improvement' : 'Regression';
+  return isImproved(delta, direction) ? 'Improvement' : 'Regression';
 }
 
 function formatDifference(value: number): string {

@@ -50,6 +50,11 @@ export function resolveDirection(
   return resolveDirectionFromEvaluatorName(evaluatorName);
 }
 
+export function isImproved(diff: number, direction: Direction): boolean {
+  if (direction === 'neutral') return false;
+  return direction === 'maximize' ? diff > 0 : diff < 0;
+}
+
 const MAX_BETA_ITERATIONS = 100;
 const BETA_EPSILON = 3e-7;
 const BETA_TINY = 1e-30;
