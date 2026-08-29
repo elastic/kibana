@@ -11,6 +11,7 @@ import {
   buildConsumersFilter,
   buildFilter,
   buildRuleTypeIdsFilter,
+  buildTemplateSearchFilter,
   combineFilterWithAuthorizationFilter,
   combineFilters,
 } from './filters';
@@ -441,6 +442,29 @@ describe('filters', () => {
     it('matches engine v1 or missing engine', () => {
       expect(toKqlExpression(buildAlertingV1RuleTemplateEngineFilter())).toBe(
         '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *)'
+      );
+    });
+  });
+
+  describe('buildTemplateSearchFilter', () => {
+    it('returns undefined when search is empty', () => {
+      expect(buildTemplateSearchFilter()).toBeUndefined();
+      expect(buildTemplateSearchFilter('')).toBeUndefined();
+      expect(buildTemplateSearchFilter('   ')).toBeUndefined();
+      expect(buildTemplateSearchFilter('***')).toBeUndefined();
+    });
+
+    it('matches name and tags as a substring', () => {
+      expect(toKqlExpression(buildTemplateSearchFilter('kub'))).toBe(
+        '(alerting_rule_template.attributes.name.keyword: *kub* OR ' +
+          'alerting_rule_template.attributes.tags: *kub*)'
+      );
+    });
+
+    it('strips user-typed wildcards before wrapping', () => {
+      expect(toKqlExpression(buildTemplateSearchFilter('*kub*'))).toBe(
+        '(alerting_rule_template.attributes.name.keyword: *kub* OR ' +
+          'alerting_rule_template.attributes.tags: *kub*)'
       );
     });
   });

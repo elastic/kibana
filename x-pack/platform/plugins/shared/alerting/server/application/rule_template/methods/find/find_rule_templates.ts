@@ -18,6 +18,7 @@ import type { RuleTemplate } from '../../types';
 import {
   buildRuleTypeIdsFilter,
   buildTagsFilter,
+  buildTemplateSearchFilter,
   combineFilters,
   combineFilterWithAuthorizationFilter,
 } from '../../../../rules_client/common/filters';
@@ -57,20 +58,18 @@ export async function findRuleTemplates(
       operation: ReadOperations.Find,
     });
 
-  const { ruleTypeId, tags, perPage, page, search, defaultSearchOperator, sortField, sortOrder } =
-    params;
+  const { ruleTypeId, tags, perPage, page, search, sortField, sortOrder } = params;
 
   const ruleTypeFilter = ruleTypeId
     ? buildRuleTypeIdsFilter([ruleTypeId], RULE_TEMPLATE_SAVED_OBJECT_TYPE)
     : undefined;
   const tagsFilter = tags ? buildTagsFilter(tags, RULE_TEMPLATE_SAVED_OBJECT_TYPE) : undefined;
-  const combinedFilters = combineFilters([ruleTypeFilter, tagsFilter], 'and');
+  const searchFilter = buildTemplateSearchFilter(search);
+  const combinedFilters = combineFilters([ruleTypeFilter, tagsFilter, searchFilter], 'and');
 
   const finalFilter = authorizationFilter
     ? combineFilterWithAuthorizationFilter(combinedFilters, authorizationFilter as KueryNode)
     : combinedFilters;
-
-  const searchFields = ['name', 'tags', 'description'];
 
   const {
     page: resultPage,
@@ -82,9 +81,6 @@ export async function findRuleTemplates(
     savedObjectsFindOptions: {
       page,
       perPage,
-      search,
-      searchFields,
-      defaultSearchOperator,
       sortField: mapSortField(sortField),
       sortOrder,
       filter: finalFilter,

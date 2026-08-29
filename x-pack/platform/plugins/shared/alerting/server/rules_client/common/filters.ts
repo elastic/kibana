@@ -6,7 +6,7 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
@@ -70,6 +70,29 @@ export const buildTagsFilter = (tags?: string[], type = RULE_SAVED_OBJECT_TYPE) 
   }
 
   return buildFilter({ filters: tags, field: 'tags', operator: 'or', type });
+};
+
+/**
+ * Substring match on template name and tags. Avoids Saved Objects `search`,
+ * which token-matches and 400s on wildcard queries because `tags` is keyword.
+ */
+export const buildTemplateSearchFilter = (
+  search?: string,
+  type = RULE_TEMPLATE_SAVED_OBJECT_TYPE
+) => {
+  const query = search?.trim().replace(/\*/g, '');
+  if (!query) {
+    return;
+  }
+
+  const wildcard = nodeTypes.wildcard.buildNode(`*${query}*`);
+  return combineFilters(
+    [
+      nodeBuilder.is(`${type}.attributes.name.keyword`, wildcard),
+      nodeBuilder.is(`${type}.attributes.tags`, wildcard),
+    ],
+    'or'
+  );
 };
 
 /**

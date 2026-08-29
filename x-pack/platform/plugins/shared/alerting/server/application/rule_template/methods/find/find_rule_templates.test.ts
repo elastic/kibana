@@ -139,9 +139,6 @@ describe('findRuleTemplates', () => {
       type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: 10,
-      search: undefined,
-      searchFields: ['name', 'tags', 'description'],
-      defaultSearchOperator: undefined,
       sortField: undefined,
       sortOrder: undefined,
       filter: expect.any(Object),
@@ -284,16 +281,21 @@ describe('findRuleTemplates', () => {
       type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       page: 2,
       perPage: 5,
-      search: 'my template',
-      searchFields: ['name', 'tags', 'description'],
-      defaultSearchOperator: 'AND',
       sortField: 'name.keyword',
       sortOrder: 'desc',
       filter: expect.any(Object),
     });
+
+    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
+      '(((alerting_rule_template.attributes.name.keyword: *my template* OR ' +
+        'alerting_rule_template.attributes.tags: *my template*) AND ' +
+        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)) AND ' +
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'
+    );
   });
 
-  test('applies OR search operator', async () => {
+  test('matches a partial search against name and tags', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
       per_page: 10,
@@ -304,15 +306,18 @@ describe('findRuleTemplates', () => {
     await findRuleTemplates(rulesClientContext, {
       perPage: 10,
       page: 1,
-      search: 'template',
-      defaultSearchOperator: 'OR',
+      search: 'kub*',
     });
 
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        search: 'template',
-        defaultSearchOperator: 'OR',
-      })
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0][0].search).toBeUndefined();
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0][0].searchFields).toBeUndefined();
+
+    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
+      '(((alerting_rule_template.attributes.name.keyword: *kub* OR ' +
+        'alerting_rule_template.attributes.tags: *kub*) AND ' +
+        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)) AND ' +
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'
     );
   });
 
