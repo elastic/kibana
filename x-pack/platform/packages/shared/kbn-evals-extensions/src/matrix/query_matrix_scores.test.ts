@@ -206,6 +206,7 @@ describe('queryMatrixScores', () => {
       .fn()
       .mockResolvedValue([selfJudgedScore(1), selfJudgedScore(2)]);
 
+    const warn = jest.spyOn(log, 'warning');
     const [model] = await queryMatrixScores(client, log, {
       suiteIds: ['suite-a'],
       modelIds: ['m1'],
@@ -215,6 +216,8 @@ describe('queryMatrixScores', () => {
     });
 
     expect(model.excluded?.selfJudged).toBe(2);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('dropped 2 self-judged'));
+
     // No per-prefix dataset survived the policy, so the cells stay empty — but
     // the exclusion tally proves the emptiness is a judge defect, not absent data.
     expect(model.suites[0].datasets.some((d) => d.datasetId.startsWith('prefix:'))).toBe(false);

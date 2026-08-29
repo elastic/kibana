@@ -421,6 +421,15 @@ export const queryMatrixScores = async (
     }
   }
 
+  for (const [modelId, counts] of excludedByModel) {
+    if (counts.selfJudged > 0) {
+      log.warning(
+        `${modelId}: dropped ${counts.selfJudged} self-judged score doc(s). ` +
+          `Excluding them is correct, but a model judged by itself is not evidence ` +
+          `of quality — re-run it against an independent judge to fill those cells.`
+      );
+    }
+  }
   log.debug(`Matrix query resolved ${byModel.size} model(s) across ${suiteIds.length} suite(s)`);
   return [...byModel.values()].map((model) => {
     const excluded = excludedByModel.get(model.modelId);
