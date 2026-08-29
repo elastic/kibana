@@ -34,10 +34,11 @@ describe('registerSkills', () => {
     expect(skill.content).not.toContain('is a miss');
   });
 
-  it('tells the agent to mention first-generate review problems without auto-fixing', () => {
+  it('tells the agent to verify first-generate review problems before mentioning them', () => {
     expect(skill.content).toContain('first generate of a new dashboard only');
     expect(skill.content).toContain('data.review.problems');
-    expect(skill.content).toContain('do not auto-fix unless asked');
+    expect(skill.content).toContain('hypotheses');
+    expect(skill.content).toContain('Only mention problems you can confirm');
     expect(skill.content).toContain('Later updates omit');
   });
 
