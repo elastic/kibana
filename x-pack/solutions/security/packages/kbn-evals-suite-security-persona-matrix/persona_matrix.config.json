@@ -276,9 +276,8 @@
       ],
       "evaluators": [
         "AttackDiscoveryBasic",
-        "Rubric",
-        "Criteria",
-        "StrictTrajectory"
+        "AttackDiscoveryRubric",
+        "Criteria"
       ],
       "weight": 1
     },
