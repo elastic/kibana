@@ -18,6 +18,7 @@ import {
   replaceFromSources,
 } from '@kbn/streams-schema';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { getMappingConflicts } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ChatCompletionTokenCount,
@@ -263,12 +264,27 @@ export async function identifyKIQueries({
   });
   const targetSources = getSourcesForStream(stream);
 
-  const validationLookback = await computeValidationLookback({
-    esClient,
-    sources: targetSources,
-    signal,
-    logger,
-  });
+  const [validationLookback, mappingConflicts] = await Promise.all([
+    computeValidationLookback({
+      esClient,
+      sources: targetSources,
+      signal,
+      logger,
+    }),
+    // Detected once, source-wide; drives full-source validation below.
+    // Best-effort: a probe failure must not fail generation.
+    getMappingConflicts({ esClient, index: targetSources, signal }).catch((error) => {
+      logger.debug(
+        () =>
+          `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${getErrorMessage(
+            error
+          )}`
+      );
+      return [];
+    }),
+  ]);
+
+  const hasMappingConflicts = mappingConflicts.length > 0;
 
   const existingQueriesList = existingQueries ?? [];
 
@@ -473,14 +489,22 @@ export async function identifyKIQueries({
                 await esClient.esql.query(
                   {
                     query: `${rewritten}\n| LIMIT 0`,
-                    filter: {
-                      range: {
-                        '@timestamp': {
-                          gte: validationLookback,
-                          lte: 'now',
-                        },
-                      },
-                    },
+                    // Union fields present: resolve over the full source. The
+                    // lookback filter prunes older indices via can_match, hiding
+                    // the conflict so a bare reference passes here yet breaks when
+                    // run unbounded.
+                    ...(hasMappingConflicts
+                      ? {}
+                      : {
+                          filter: {
+                            range: {
+                              '@timestamp': {
+                                gte: validationLookback,
+                                lte: 'now',
+                              },
+                            },
+                          },
+                        }),
                     format: 'json',
                   },
                   { signal, requestTimeout: queryValidationTimeoutMs }
