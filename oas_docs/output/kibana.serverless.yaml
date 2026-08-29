@@ -36621,6 +36621,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -43901,7 +43918,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a package by uploading a .zip or .tar.gz archive (max 100MB).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48960,6 +48977,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -133448,7 +133482,7 @@ components:
           metadata:
             execution_context:
               name: osquery
-              url: /app/osquery/live_queries/new
+              url: /app/osquery/new
           queries:
             - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
               agents:
@@ -135075,7 +135109,7 @@ components:
       type: object
       properties:
         agentCount:
-          description: The number of agents targeted by the query.
+          description: For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.
           type: integer
         errorCount:
           description: The number of agent responses with errors.

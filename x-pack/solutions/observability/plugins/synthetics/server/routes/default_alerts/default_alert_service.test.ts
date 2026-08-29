@@ -41,6 +41,7 @@ describe('DefaultAlertService', () => {
         defaultEmail: undefined,
         defaultStatusRuleEnabled: true,
         defaultTLSRuleEnabled: true,
+        rebalancePrivateLocationShardsEnabled: true,
       });
       expect(soClient.get).toHaveBeenCalledTimes(1);
     });

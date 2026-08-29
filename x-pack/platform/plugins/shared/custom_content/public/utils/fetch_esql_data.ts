@@ -19,6 +19,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 
 export type EsqlDataResult = ESQLSearchResponse;
 
@@ -28,6 +29,7 @@ export interface FetchEsqlOptions {
   query?: Query | AggregateQuery;
   filters?: Filter[];
   esQueryConfig?: EsQueryConfig;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export async function fetchEsqlData(
@@ -38,7 +40,8 @@ export async function fetchEsqlData(
   signal: AbortSignal,
   options?: FetchEsqlOptions
 ): Promise<EsqlDataResult> {
-  const { isApproximate, projectRouting, query, filters, esQueryConfig } = options ?? {};
+  const { isApproximate, projectRouting, query, filters, esQueryConfig, esqlVariables } =
+    options ?? {};
 
   let timeRangeFilter: { range: Record<string, unknown> } | undefined;
   if (timeRange) {
@@ -81,6 +84,7 @@ export async function fetchEsqlData(
     timeRange,
     ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
     ...(projectRouting !== undefined ? { projectRouting } : {}),
+    ...(esqlVariables?.length ? { variables: esqlVariables } : {}),
   });
 
   return response;

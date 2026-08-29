@@ -393,6 +393,15 @@ Use \`set_dashboards\` to link investigation dashboards to the rule by saved-obj
 | \`operation\` | \\"set_dashboards\\" | required |  |
 | \`dashboard_ids\` | string[] | required | Dashboard saved-object IDs to link as investigation artifacts on the rule. Each ID must be an existing dashboard the current user can read. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards. (max items: 100) |
 
+#### \`operation: \\"set_runbook\\"\`
+
+Use \`set_runbook\` to attach investigation markdown to the rule. Stored as a \`runbook\` artifact (\`{ id, type: \\"runbook\\", data: { content } }\`), matching the create/update API. Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Content longer than 50000 characters is rejected.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_runbook\\" | required |  |
+| \`content\` | string \\\\| null | required | Markdown investigation steps. Stored as a \`runbook\` artifact (\`{ id, type: \\"runbook\\", data: { content } }\`). Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Max 50000 characters. |
+
 #### \`operation: \\"validate\\"\`
 
 Use \`validate\` as the last operation to confirm the rule is complete and ready to save.

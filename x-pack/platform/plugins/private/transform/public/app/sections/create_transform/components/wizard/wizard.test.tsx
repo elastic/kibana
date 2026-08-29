@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
@@ -24,6 +24,7 @@ let mockDataViewPickerProps: Record<string, any> = {};
 let mockEmptyStepDefineFormProps: Record<string, any> = {};
 let mockProjectScopePickerProps: Record<string, any> = {};
 let mockStepDefineFormProps: Record<string, any> = {};
+let mockStepDetailsFormProps: Record<string, any> = {};
 
 jest.mock('../../../../app_dependencies');
 
@@ -101,7 +102,10 @@ jest.mock('../step_details', () => {
   const actual = jest.requireActual('../step_details/common');
   return {
     ...actual,
-    StepDetailsForm: () => <div data-test-subj="mockStepDetailsForm" />,
+    StepDetailsForm: (props: Record<string, any>) => {
+      mockStepDetailsFormProps = props;
+      return <div data-test-subj="mockStepDetailsForm" />;
+    },
     StepDetailsSummary: () => <div data-test-subj="mockStepDetailsSummary" />,
   };
 });
@@ -140,6 +144,7 @@ describe('Transform: <Wizard />', () => {
     mockEmptyStepDefineFormProps = {};
     mockProjectScopePickerProps = {};
     mockStepDefineFormProps = {};
+    mockStepDetailsFormProps = {};
     const appDeps = appDependencies.useAppDependencies();
     appDeps.cps = undefined;
     appDeps.data.dataViews.getIdsWithTitle = jest.fn().mockResolvedValue([
@@ -178,6 +183,7 @@ describe('Transform: <Wizard />', () => {
       isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
         fetchProjects: jest.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
@@ -216,6 +222,7 @@ describe('Transform: <Wizard />', () => {
       isTierEligible: false,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
         fetchProjects: jest.fn(),
         getDefaultProjectRouting,
       },
@@ -235,19 +242,57 @@ describe('Transform: <Wizard />', () => {
     expect(getDefaultProjectRouting).not.toHaveBeenCalled();
   });
 
-  test('shows a visible project scope error when project fetch fails', async () => {
+  test('does not render project scope or inject default routing when there are no linked projects', async () => {
     const appDeps = appDependencies.useAppDependencies();
+    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
+    const fetchProjects = jest.fn().mockResolvedValue({
+      origin: {
+        _id: 'origin-id',
+        _alias: 'local_project',
+        _organisation: 'org',
+        _type: 'security',
+      },
+      linkedProjects: [],
+    });
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
-        fetchProjects: jest.fn().mockRejectedValue(new Error('Project fetch failed')),
-        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+        hasLinkedProjects: jest.fn(() => false),
+        fetchProjects,
+        getDefaultProjectRouting,
       },
     } as any;
 
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
+      setSavedObjectId: jest.fn(),
+    });
+
+    await waitFor(() => {
+      expect(fetchProjects).toHaveBeenCalledWith(PROJECT_ROUTING.ALL);
+    });
+    expect(screen.queryByTestId('transformProjectScopePicker')).not.toBeInTheDocument();
+    expect(mockStepDefineFormProps.overrides.projectRouting).toBeUndefined();
+  });
+
+  test('shows a visible project scope error when project fetch fails', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
+    appDeps.cps = {
+      isTierEligible: true,
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => false),
+        fetchProjects: jest.fn().mockRejectedValue(new Error('Project fetch failed')),
+        getDefaultProjectRouting,
+      },
+    } as any;
+
+    renderWizard({
+      initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
       setSavedObjectId: jest.fn(),
     });
 
@@ -255,6 +300,8 @@ describe('Transform: <Wizard />', () => {
       expect(screen.getByText('Project scope unavailable')).toBeInTheDocument();
     });
     expect(screen.getByTestId('transformProjectScopePicker')).toBeDisabled();
+    expect(mockStepDefineFormProps.overrides.projectRouting).toBe(PROJECT_ROUTING.ALL);
+    expect(getDefaultProjectRouting).toHaveBeenCalled();
   });
 
   test('shows confirmation before changing an existing data view', async () => {
@@ -292,6 +339,7 @@ describe('Transform: <Wizard />', () => {
       isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
         fetchProjects: jest.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
@@ -344,6 +392,7 @@ describe('Transform: <Wizard />', () => {
               resolveWhenReady = resolve;
             })
         ),
+        hasLinkedProjects: jest.fn(() => true),
         fetchProjects: jest.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
@@ -380,6 +429,112 @@ describe('Transform: <Wizard />', () => {
     await waitFor(() => {
       expect(screen.getByTestId('transformProjectScopePicker')).toHaveTextContent('1/2 projects');
       expect(mockStepDefineFormProps.overrides.projectRouting).toBe('_id:linked-id');
+    });
+  });
+
+  test('preserves wizard step and configured state when linked project discovery resolves', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    let resolveFetchProjects: (projects: unknown) => void = () => {};
+    let resolveWhenReady: () => void = () => {};
+    const fetchProjects = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveFetchProjects = resolve;
+        })
+    );
+    appDeps.cps = {
+      isTierEligible: true,
+      cpsManager: {
+        whenReady: jest.fn(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveWhenReady = resolve;
+            })
+        ),
+        hasLinkedProjects: jest.fn(() => false),
+        fetchProjects,
+        getDefaultProjectRouting: jest.fn(() => '_id:linked-id'),
+      },
+    } as any;
+
+    renderWizard({
+      initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
+      setSavedObjectId: jest.fn(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockStepDefineForm')).toBeInTheDocument();
+    });
+
+    act(() => {
+      mockStepDefineFormProps.onChange({
+        ...mockStepDefineFormProps.overrides,
+        searchString: 'configured source query',
+        valid: true,
+        validationStatus: { isValid: true },
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformWizardNavButtonNext')).toBeEnabled();
+    });
+
+    fireEvent.click(screen.getByTestId('transformWizardNavButtonNext'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockStepDetailsForm')).toBeInTheDocument();
+    });
+
+    act(() => {
+      mockStepDetailsFormProps.onChange({
+        ...mockStepDetailsFormProps.overrides,
+        transformId: 'configured-transform-id',
+        destinationIndex: 'configured-destination-index',
+        valid: true,
+      });
+    });
+
+    act(() => {
+      resolveFetchProjects({
+        origin: {
+          _id: 'origin-id',
+          _alias: 'local_project',
+          _organisation: 'org',
+          _type: 'security',
+        },
+        linkedProjects: [
+          {
+            _id: 'linked-id',
+            _alias: 'linked_local_project',
+            _organisation: 'org',
+            _type: 'security',
+          },
+        ],
+      });
+    });
+
+    await waitFor(() => {
+      expect(fetchProjects).toHaveBeenCalledWith(PROJECT_ROUTING.ALL);
+    });
+
+    act(() => {
+      resolveWhenReady();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockStepDetailsForm')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockStepDefineForm')).not.toBeInTheDocument();
+      expect(mockStepDefineFormProps.overrides).toMatchObject({
+        projectRouting: '_id:linked-id',
+        searchString: 'configured source query',
+        valid: true,
+      });
+      expect(mockStepDetailsFormProps.overrides).toMatchObject({
+        destinationIndex: 'configured-destination-index',
+        transformId: 'configured-transform-id',
+        valid: true,
+      });
     });
   });
 });
