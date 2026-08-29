@@ -34,6 +34,15 @@ DEFAULT_INDEX = ".evaluation-scores*"
 # for every example multiplies the cache size with no added trace detail.
 PAGE_SIZE = 1000
 
+# Mirror query_matrix_traces.ts: it stores JSON.stringify(args).slice(0, 300)
+# and slices reasoning at 500, so anything longer is cached and then discarded.
+MAX_ARGS_CHARS = 300
+MAX_REASONING_CHARS = 500
+
+# Node aborts readFileSync above its max string length (0x1fffffe8, ~536 MB).
+# A cache past this is unusable by the matrix CLI, so refuse to write one.
+MAX_CACHE_BYTES = 500_000_000
+
 
 def _client(url: str, api_key: str):
     # Elastic Cloud serves a properly-issued certificate; default verification
@@ -121,12 +130,15 @@ def trim_step(step: dict) -> dict:
         # would double-encode). Oversized args are replaced by a marker rather
         # than dropped, so the tool card still shows the call was made.
         encoded = json.dumps(args) if args is not None else None
-        if encoded is not None and len(encoded) > 300:
+        if encoded is not None and len(encoded) > MAX_ARGS_CHARS:
             args = {"_truncated": len(encoded)}
         return {"type": "tool_call", "tool_id": step.get("tool_id"), "args": args}
     if kind == "reasoning":
         text = step.get("reasoning")
-        return {"type": "reasoning", "reasoning": text[:500] if isinstance(text, str) else text}
+        return {
+            "type": "reasoning",
+            "reasoning": text[:MAX_REASONING_CHARS] if isinstance(text, str) else text,
+        }
     if kind == "relevant_skills":
         return {"type": "relevant_skills", "skills": step.get("skills")}
     return {"type": kind}
@@ -153,13 +165,104 @@ def build_cache(docs: list[dict]) -> dict[str, list[dict]]:
     return cache
 
 
+def self_test() -> int:
+    """Exercise the trim/keying contract without touching Elasticsearch.
+
+    This script is a committed tool with no jest coverage (it is Python in a
+    TypeScript repo), so the checks that guard its contract live here and run
+    via `--self-test` in the verify manifest.
+    """
+    failures: list[str] = []
+
+    def check(name: str, got: object, want: object) -> None:
+        if got != want:
+            failures.append(f"{name}: got {got!r}, want {want!r}")
+
+    # Small tool args stay a real object: query_matrix_traces re-runs
+    # JSON.stringify on this value, so a pre-stringified one would double-encode.
+    small = trim_step({"type": "tool_call", "tool_id": "load_skill", "args": {"id": "x"}, "n": 1})
+    check("small args", small, {"type": "tool_call", "tool_id": "load_skill", "args": {"id": "x"}})
+
+    # Oversized args collapse to a marker rather than vanishing, so the tool
+    # card still shows the call happened.
+    big = trim_step({"type": "tool_call", "tool_id": "t", "args": {"q": "z" * 400}})
+    check("oversized args marked", sorted(big["args"]), ["_truncated"])
+    check("marker records real size", big["args"]["_truncated"] > MAX_ARGS_CHARS, True)
+
+    # Reasoning is capped at what the renderer shows.
+    long_reasoning = trim_step({"type": "reasoning", "reasoning": "y" * 900})
+    check("reasoning cap", len(long_reasoning["reasoning"]), 500)
+    check("short reasoning", trim_step({"type": "reasoning", "reasoning": "ab"})["reasoning"], "ab")
+
+    check(
+        "relevant_skills",
+        trim_step({"type": "relevant_skills", "skills": [{"id": "a"}]}),
+        {"type": "relevant_skills", "skills": [{"id": "a"}]},
+    )
+    # An unrecognised future step type must survive rather than crash.
+    check("unknown kind", trim_step({"type": "future"}), {"type": "future"})
+    check("args absent", trim_step({"type": "tool_call", "tool_id": "t"})["args"], None)
+
+    # Cache keying: execution_id::example.id, and documents missing either are
+    # dropped instead of colliding under a partial key.
+    docs = [
+        {"metadata": {"execution_id": "e1"}, "example": {"id": "a"}, "task": {"output": {}}},
+        {"metadata": {"execution_id": "e1"}, "example": {"id": "a"}, "task": {"output": {}}},
+        {"metadata": {"execution_id": "e1"}, "task": {"output": {}}},
+        {"example": {"id": "a"}, "task": {"output": {}}},
+    ]
+    cache = build_cache(docs)
+    check("cache keys", sorted(cache), ["e1::a"])
+    check("entries merged under one key", len(cache["e1::a"]), 2)
+
+    # Steps are trimmed in place through build_cache, not only via trim_step.
+    keyed = build_cache(
+        [
+            {
+                "metadata": {"execution_id": "e2"},
+                "example": {"id": "b"},
+                "task": {
+                    "output": {
+                        "steps": [{"type": "tool_call", "tool_id": "t", "args": {"k": "v"}, "x": 1}],
+                        "messages": [{"message": "hi", "extra": "dropped"}],
+                    }
+                },
+            }
+        ]
+    )
+    step = keyed["e2::b"][0]["task"]["output"]["steps"][0]
+    check("build_cache trims steps", step, {"type": "tool_call", "tool_id": "t", "args": {"k": "v"}})
+    check(
+        "build_cache trims messages",
+        keyed["e2::b"][0]["task"]["output"]["messages"],
+        [{"message": "hi"}],
+    )
+
+    for failure in failures:
+        print(f"FAIL {failure}", file=sys.stderr)
+    print(f"self-test: {len(failures)} failure(s)")
+    return 1 if failures else 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", required=True)
+    parser.add_argument("--out")
     parser.add_argument("--experiment", default="security: security-persona-matrix")
     parser.add_argument("--index", default=DEFAULT_INDEX)
     parser.add_argument("--hours", type=int, default=720)
+    parser.add_argument(
+        "--self-test",
+        action="store_true",
+        help="Verify the trim/keying contract offline and exit.",
+    )
     args = parser.parse_args()
+
+    if args.self_test:
+        return self_test()
+
+    if not args.out:
+        print("--out is required", file=sys.stderr)
+        return 2
 
     url = os.environ.get("GOLDEN_ES_URL")
     api_key = os.environ.get("GOLDEN_ES_API_KEY")
@@ -201,7 +304,7 @@ def main() -> int:
     # Node reads this file with readFileSync, which cannot produce a string
     # longer than 0x1fffffe8 (~536 MB). A larger cache aborts the matrix CLI
     # outright, so refuse it here where the cause is obvious.
-    if size > 500_000_000:
+    if size > MAX_CACHE_BYTES:
         print(
             f"ERROR: cache is {size / 1e6:.0f} MB; Node cannot readFileSync "
             f"more than ~536 MB. Narrow --hours or the _source list.",
