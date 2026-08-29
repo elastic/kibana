@@ -70,6 +70,13 @@ if [ "$EVAL_CONNECTOR_ID" = "$MODEL" ]; then
   exit 2
 fi
 echo "=== judge: $EVAL_CONNECTOR_ID | candidate: $MODEL ==="
+
+# kbn-evals ships HTTP retries off (KBN_EVALS_HTTP_RETRIES defaults to 0), so a
+# single blip on the converse call ends the whole suite: glm-5-2 lost 19 of 21
+# examples 58 minutes in when Kibana stopped answering on 2026-08-29. Retries
+# only cover 429/503/504, so this does not save a status-less transport death,
+# but it does absorb the overload responses a long sweep actually provokes.
+export KBN_EVALS_HTTP_RETRIES="${KBN_EVALS_HTTP_RETRIES:-3}"
 export EVAL_REPETITIONS="${EVAL_REPETITIONS:-1}"
 export PERSONA_MATRIX_TIMEOUT_MINUTES="${PERSONA_MATRIX_TIMEOUT_MINUTES:-30}"
 export AGENT_BUILDER_INFERENCE_TIMEOUT_MS=600000
