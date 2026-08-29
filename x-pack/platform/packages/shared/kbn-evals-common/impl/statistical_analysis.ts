@@ -6,10 +6,10 @@
  */
 
 import { gammaln, mean, tTest } from 'simple-statistics';
-import type { EvaluationScoreDocument } from './schemas/common_attributes.gen';
+import type { Direction, EvaluationScoreDocument } from './schemas/common_attributes.gen';
 import type { PairedTTestResult } from './schemas/experiments/compare_experiments_route.gen';
 
-export type Direction = 'maximize' | 'minimize' | 'neutral';
+export type { Direction };
 
 export interface PairedScore {
   datasetId: string;
