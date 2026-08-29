@@ -13,11 +13,13 @@ import { generateObservabilityAlerts } from '../../fixtures/alerts_data';
 // Ported from the FTR `Observability overview` suite
 // (x-pack/solutions/observability/test/observability_functional/apps/observability/pages/overview/alert_table.ts).
 //
-// The overview "no data" prompt and the alerts section are both driven by
-// whether any Observability rule exists (the `alert` data section calls
-// `/api/alerting/rules/_find` and treats a rule with an allowed consumer as
-// "has data"), not by the selected time range. So the "Without data" case
-// clears all rules and the "With data" case creates one rule before navigating.
+// The overview alerts section is driven by whether any Observability rule
+// exists (the `alert` data section calls `/api/alerting/rules/_find` and treats
+// a rule with an allowed consumer as "has data"), not by the selected time
+// range, so the "With data" case creates one rule before navigating. The
+// empty-state / no-data path is covered by the OverviewPage unit test
+// (public/pages/overview/overview.test.tsx), since a shared deployment can't
+// guarantee the absence of data across every section.
 const ALERTS_FIRST_PAGE = 10;
 
 // Failing: See https://github.com/elastic/kibana/issues/286401
@@ -35,31 +37,6 @@ test.describe.skip(
 
     test.afterAll(async ({ apiServices }) => {
       await apiServices.alerting.cleanup.deleteAllRules();
-    });
-
-    test('navigates to onboarding from the no-data "Add data" CTA', async ({
-      apiServices,
-      page,
-      pageObjects,
-    }) => {
-      // No Observability rules => the overview reports no data and shows the CTA.
-      // The overview's `hasData.alert` flag is driven by `/api/alerting/rules/_find`,
-      // so wait until no rules remain before navigating: `deleteAllRules` issues
-      // async deletes and a stale rule would keep the page in its "has data"
-      // layout, in which case the no-data prompt never renders.
-      await apiServices.alerting.cleanup.deleteAllRules();
-      await expect
-        .poll(async () => (await apiServices.alerting.rules.find({ per_page: 1 })).data.total, {
-          timeout: 30_000,
-          intervals: [1_000],
-        })
-        .toBe(0);
-
-      await pageObjects.overviewPage.gotoWithoutAlerts();
-      await expect(pageObjects.overviewPage.noDataPrompt).toBeVisible();
-
-      await pageObjects.overviewPage.clickAddData();
-      await expect.poll(() => page.url()).toContain('observabilityOnboarding');
     });
 
     test('renders the alerts section with alerts once a rule exists', async ({
