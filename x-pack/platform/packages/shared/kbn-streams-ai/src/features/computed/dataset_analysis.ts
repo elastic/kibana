@@ -18,7 +18,7 @@ export const datasetAnalysisGenerator: ComputedFeatureGenerator = {
   llmInstructions: `Contains the schema (excluding empty fields), field distributions, and sample values from the log dataset.
 Use the \`properties.analysis\` field to understand available fields and their value distributions.
 This is useful for understanding what fields are available for querying and what values they typically contain.
-\`properties.mapping_conflicts\` lists fields mapped as multiple incompatible types across the dataset's backing indices (ES|QL union types). Referencing such a field bare fails with an ambiguity error, so cast it to its \`suggested_cast\` type before use, e.g. \`field::keyword == "value"\` or \`TO_KEYWORD(field)\`. This applies even when \`properties.analysis\` shows the field with a single type, because the conflict may live in an older backing index.`,
+Each field key is \`name (types)\`. When a field is mapped as multiple incompatible types across the dataset's backing indices (an ES|QL union type), its key carries a recommendation: \`name (type1, type2, recommended: <cast>)\`. A bare reference to such a field fails with an ambiguity error — cast it to the exact recommended type, e.g. \`field::<cast>\` (\`exception.message::keyword == "value"\`). The recommended value is authoritative, do not assume \`keyword\`: it is usually \`keyword\`, but e.g. an aggregate_metric_double/double union recommends \`aggregate_metric_double\`, and casting that to \`keyword\` would be lossy. This applies even when the sample values look single-typed, because the conflicting type may live in an older backing index.`,
 
   generate: async ({ stream, start, end, esClient, signal }) => {
     const samplingSource = getStreamSamplingSource(stream);
@@ -38,15 +38,22 @@ This is useful for understanding what fields are available for querying and what
       }),
     ]);
 
+    const conflicts = Object.fromEntries(
+      mappingConflicts.map(({ field, types, suggestedCast }) => [
+        field,
+        { types, ...(suggestedCast ? { suggestedCast } : {}) },
+      ])
+    );
+
     const formattedAnalysis = formatDocumentAnalysis(analysis, {
       dropEmpty: true,
       dropUnmapped: false,
       limit: 150,
+      conflicts,
     });
 
     return {
       analysis: formattedAnalysis,
-      ...(mappingConflicts.length > 0 ? { mapping_conflicts: mappingConflicts } : {}),
     };
   },
 };

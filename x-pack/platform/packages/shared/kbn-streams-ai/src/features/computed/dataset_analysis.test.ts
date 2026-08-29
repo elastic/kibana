@@ -34,29 +34,11 @@ describe('datasetAnalysisGenerator', () => {
     formatDocumentAnalysisMock.mockReturnValue(formatted as never);
   });
 
-  it('surfaces source-wide conflicts (probed without time bounds) as mapping_conflicts', async () => {
-    const conflicts = [
+  it('passes source-wide conflicts (probed without time bounds) to the formatter keyed by field', async () => {
+    getMappingConflictsMock.mockResolvedValueOnce([
       { field: 'exception.message', types: ['keyword', 'text'], suggestedCast: 'keyword' },
-    ];
-    getMappingConflictsMock.mockResolvedValueOnce(conflicts);
-
-    const result = await datasetAnalysisGenerator.generate({
-      stream,
-      start: 100,
-      end: 200,
-      esClient,
-      logger,
-      signal,
-    });
-
-    expect(result).toEqual({ analysis: formatted, mapping_conflicts: conflicts });
-    const conflictCall = getMappingConflictsMock.mock.calls[0][0];
-    expect(conflictCall).not.toHaveProperty('start');
-    expect(conflictCall).not.toHaveProperty('end');
-  });
-
-  it('omits mapping_conflicts when the source has none', async () => {
-    getMappingConflictsMock.mockResolvedValueOnce([]);
+      { field: 'host.name', types: ['ip', 'keyword'] },
+    ]);
 
     const result = await datasetAnalysisGenerator.generate({
       stream,
@@ -68,6 +50,17 @@ describe('datasetAnalysisGenerator', () => {
     });
 
     expect(result).toEqual({ analysis: formatted });
-    expect(result).not.toHaveProperty('mapping_conflicts');
+    expect(formatDocumentAnalysisMock.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        conflicts: {
+          'exception.message': { types: ['keyword', 'text'], suggestedCast: 'keyword' },
+          'host.name': { types: ['ip', 'keyword'] },
+        },
+      })
+    );
+
+    const conflictCall = getMappingConflictsMock.mock.calls[0][0];
+    expect(conflictCall).not.toHaveProperty('start');
+    expect(conflictCall).not.toHaveProperty('end');
   });
 });

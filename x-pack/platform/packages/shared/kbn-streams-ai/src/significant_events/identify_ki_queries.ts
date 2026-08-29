@@ -271,8 +271,7 @@ export async function identifyKIQueries({
       signal,
       logger,
     }),
-    // Detected once, source-wide; drives full-source validation below.
-    // Best-effort: a probe failure must not fail generation.
+    // Best-effort source-wide probe; drives full-source validation below and must not fail generation.
     getMappingConflicts({ esClient, index: targetSources, signal }).catch((error) => {
       logger.debug(
         () =>

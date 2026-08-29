@@ -11,7 +11,6 @@ import { getEsqlColumnSchema } from './get_esql_column_schema';
 
 export interface MappingConflict {
   field: string;
-  /** `originalTypes`, sorted. */
   types: string[];
   suggestedCast?: string;
 }
@@ -23,9 +22,8 @@ export interface GetMappingConflictsParams {
 }
 
 /**
- * Detects fields mapped as multiple incompatible types across a source's backing
- * indices (ES|QL union types). Probes unfiltered so a conflict isolated in an
- * older backing index is still seen.
+ * Detects fields mapped as multiple incompatible types across a source (ES|QL union types),
+ * probing unfiltered so a conflict isolated in an older backing index is still seen.
  */
 export async function getMappingConflicts({
   esClient,

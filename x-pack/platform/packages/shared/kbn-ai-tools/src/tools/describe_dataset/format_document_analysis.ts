@@ -16,17 +16,30 @@ const HIDE_VALUES_FOR = ['@timestamp', 'timestamp', 'event.ingested', 'event.cre
 
 const NO_VALUE_LABEL = '(no value)';
 
+/** A source-wide union-type conflict for a field, as detected by `getMappingConflicts`. */
+export interface FieldConflict {
+  types: string[];
+  /** ES's `suggested_cast` for resolving the union, if any. */
+  suggestedCast?: string;
+}
+
 interface FormatDocumentAnalysisOptions {
   dropEmpty?: boolean;
   dropUnmapped?: boolean;
   limit?: number;
+  /**
+   * Source-wide union conflicts keyed by field name. Only fields that survive
+   * truncation get annotated, so the noise of source-wide-but-irrelevant
+   * conflicts never reaches the output.
+   */
+  conflicts?: Record<string, FieldConflict>;
 }
 
 export function formatDocumentAnalysis(
   analysis: DocumentAnalysis,
   options?: FormatDocumentAnalysisOptions
 ): FormattedDocumentAnalysis {
-  const { dropEmpty = false, dropUnmapped = false, limit = 500 } = options ?? {};
+  const { dropEmpty = false, dropUnmapped = false, limit = 500, conflicts } = options ?? {};
 
   const fields = selectFields(analysis, { dropEmpty, dropUnmapped, limit });
 
@@ -35,7 +48,10 @@ export function formatDocumentAnalysis(
     sampled: analysis.sampled,
     fields: Object.fromEntries(
       fields.map((field) => {
-        return [getFieldKey(field), formatFieldSummary(field, analysis.sampled)];
+        return [
+          getFieldKey(field, conflicts?.[field.name]),
+          formatFieldSummary(field, analysis.sampled),
+        ];
       })
     ),
   };
@@ -43,7 +59,13 @@ export function formatDocumentAnalysis(
   return formatted;
 }
 
-function getFieldKey(field: DocumentAnalysis['fields'][number]): string {
+function getFieldKey(field: DocumentAnalysis['fields'][number], conflict?: FieldConflict): string {
+  if (conflict) {
+    return `${field.name} (${conflict.types.join(', ')}, recommended: ${
+      conflict.suggestedCast ?? 'keyword'
+    })`;
+  }
+
   if (!field.types.length) {
     return `${field.name} (unmapped - no type)`;
   }

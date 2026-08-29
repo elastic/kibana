@@ -656,8 +656,7 @@ describe('identifyKIQueries agent', () => {
   });
 
   describe('mapping-conflict-aware validation', () => {
-    // One mock serves all three ES calls: STATS = volume probe, `\n| LIMIT 0` =
-    // candidate validation, bare `| LIMIT 0` = source-wide conflict probe.
+    // One mock routes all ES calls by query text: STATS = volume probe, `\n| LIMIT 0` = candidate validation, else = source-wide conflict probe.
     const createScriptedClient = (probeColumns: unknown[]) => {
       const candidateCalls: Array<Record<string, unknown>> = [];
       const query = jest.fn(async (params: Record<string, unknown>) => {
