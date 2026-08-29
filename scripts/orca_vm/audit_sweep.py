@@ -24,31 +24,9 @@ import ssl
 import sys
 import urllib.request
 
+from model_ids import resolve_model_id
+
 GOLDEN_INDEX = ".evaluation-scores"
-
-
-def canonical(model_id: str) -> str:
-    """Best-effort connector id -> stored id. ONLY a fallback.
-
-    The stored id space is inconsistent and cannot be reliably derived by string
-    rules: `eis-zai-glm-5-2` is stored as `zai-glm-5-2` (hyphen) while
-    `eis-anthropic-claude-4-6-sonnet` is stored as `anthropic-claude-4.6-sonnet`
-    (dot). Others use slashes (`openai/gpt-5.4`) or display names
-    (`EIS Anthropic Claude 4.5 Sonnet`). Guessing produced a false "0 docs"
-    verdict for GLM. `resolve_model_id` checks live data first; this is only the
-    last resort.
-    """
-    base = model_id[4:] if model_id.startswith("eis-") else model_id
-    parts = base.split("-")
-    out: list[str] = []
-    for i, part in enumerate(parts):
-        if part.isdigit() and i + 1 < len(parts) and parts[i + 1].isdigit():
-            out.append(part + ".")
-        elif out and out[-1].endswith("."):
-            out[-1] = out[-1] + part
-        else:
-            out.append(part)
-    return "-".join(out)
 
 
 def list_stored_model_ids(url: str, key: str, hours: int) -> list[str]:
@@ -60,30 +38,6 @@ def list_stored_model_ids(url: str, key: str, hours: int) -> list[str]:
     }
     res = es_search(url, key, body)
     return [b["key"] for b in res["aggregations"]["m"]["buckets"]]
-
-
-def resolve_model_id(connector_id: str, stored_ids: list[str]) -> str | None:
-    """Match a connector id to the id actually stored, using live values.
-
-    Compares on a normalized key (lowercase, non-alphanumerics stripped) so
-    `zai-glm-5-2`, `zai-glm-5.2` and `eis-zai-glm-5-2` all collapse together.
-    Returns None when nothing matches, which is a real "never landed" signal
-    rather than an artifact of a bad guess.
-    """
-
-    def norm(value: str) -> str:
-        return "".join(ch for ch in value.lower() if ch.isalnum())
-
-    base = connector_id[4:] if connector_id.startswith("eis-") else connector_id
-    target = norm(base)
-    for stored in stored_ids:
-        if norm(stored) == target:
-            return stored
-    guess = canonical(connector_id)
-    for stored in stored_ids:
-        if norm(stored) == norm(guess):
-            return stored
-    return None
 
 
 def es_search(url: str, key: str, body: dict) -> dict:

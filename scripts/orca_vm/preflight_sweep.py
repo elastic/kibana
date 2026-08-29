@@ -28,6 +28,8 @@ import sys
 import urllib.error
 import urllib.request
 
+from model_ids import same_model, strip_connector_prefix
+
 GOLDEN_INDEX = ".evaluation-scores"
 
 
@@ -39,31 +41,10 @@ def _ok(check: str, msg: str) -> None:
     print(f"  ok  [{check}] {msg}")
 
 
-def canonical(model_id: str) -> str:
-    """Strip the connector prefix so `eis-anthropic-claude-4-6-sonnet` compares
-    equal to the `anthropic-claude-4.6-sonnet` stored in score docs.
-
-    Score documents store vendor-canonical ids, NOT connector ids. Comparing the
-    raw strings makes every check trivially pass and hides self-judging.
-    """
-    base = model_id[4:] if model_id.startswith("eis-") else model_id
-    # Connector ids spell versions with '-', score docs use '.': 4-6 -> 4.6
-    parts = base.split("-")
-    out: list[str] = []
-    for i, part in enumerate(parts):
-        if part.isdigit() and i + 1 < len(parts) and parts[i + 1].isdigit():
-            out.append(part + ".")
-        elif out and out[-1].endswith("."):
-            out[-1] = out[-1] + part
-        else:
-            out.append(part)
-    return "-".join(out)
-
-
 def check_judge_independence(models: list[str], judge: str) -> bool:
     """A model must never grade itself."""
-    judge_c = canonical(judge)
-    clashes = [m for m in models if canonical(m) == judge_c]
+    judge_c = strip_connector_prefix(judge)
+    clashes = [m for m in models if same_model(m, judge)]
     if clashes:
         _fail(
             "judge-independence",
