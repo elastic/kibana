@@ -337,10 +337,12 @@ def launch(ip: str, model: str) -> subprocess.Popen:
         stdout=open(log, "w"), stderr=subprocess.STDOUT)
 
 
-def _score_id(canon: str) -> str:
-    """Connector ids spell versions with hyphens (claude-4-5); score docs
-    spell them with dots (claude-4.5). Bridge the two."""
-    return re.sub(r"(?<=[0-9])-(?=[0-9])", ".", canon)
+def _score_id_candidates(canon: str) -> list:
+    """Connector ids hyphenate versions (claude-4-5, glm-5-2). Score docs
+    dot some (anthropic-claude-4.5-sonnet) and keep hyphens on others
+    (zai-glm-5-2), so never assume one spelling -- try both."""
+    dotted = re.sub(r"(?<=[0-9])-(?=[0-9])", ".", canon)
+    return [canon] if dotted == canon else [dotted, canon]
 
 
 def _resolve_from_golden(model: str, ip: str) -> dict:
@@ -352,11 +354,14 @@ def _resolve_from_golden(model: str, ip: str) -> dict:
     reconstructing the id.
     """
     canon = model[4:] if model.startswith("eis-") else model
-    # score docs write 4.5 where connector ids write 4-5
+    # id spelling varies per vendor, so match any candidate
     body = {
         "size": 0,
         "query": {"bool": {"must": [
-            {"match_phrase": {"task.model.id": _score_id(canon)}},
+            {"bool": {"should": [
+                {"match_phrase": {"task.model.id": c}}
+                for c in _score_id_candidates(canon)
+            ], "minimum_should_match": 1}},
             {"term": {"metadata.suite_id": "security-persona-matrix"}},
         ]}},
         "aggs": {
