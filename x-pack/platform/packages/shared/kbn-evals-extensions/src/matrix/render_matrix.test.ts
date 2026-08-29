@@ -61,6 +61,29 @@ const matrix: Matrix = {
 };
 
 describe('renderMatrix', () => {
+  it('distinguishes a judge-rejected cell from a blank one in CSV', () => {
+    // A cell whose scores were all self-judged must not read as "no data".
+    // Both render empty otherwise, and a reader cannot tell that re-running the
+    // model is pointless until the judge is changed (2026-08-29 incident).
+    const withExcluded = {
+      ...matrix,
+      openSource: [
+        {
+          ...matrix.openSource[0],
+          cells: {
+            triage: { kind: 'score' as const, value: 7.6 },
+            detect: { kind: 'excluded' as const, reason: 'self-judged' as const, docs: 294 },
+          },
+        },
+      ],
+    };
+
+    const { openSourceCsv } = renderMatrix(withExcluded, config);
+
+    expect(openSourceCsv).toContain('excluded:self-judged');
+    expect(openSourceCsv).not.toContain('GPT OSS 120B,7.6,,');
+  });
+
   it('renders CSV with a header row and one row per model', () => {
     const { proprietaryCsv, openSourceCsv } = renderMatrix(matrix, config);
 

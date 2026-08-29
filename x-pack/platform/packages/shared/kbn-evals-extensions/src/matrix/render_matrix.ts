@@ -49,6 +49,10 @@ const cellToString = (cell: MatrixCell, notRecommendedLabel: string): string => 
       return String(cell.value);
     case 'not-recommended':
       return notRecommendedLabel;
+    // Rendered distinctly from 'missing': the model ran, but every grade was
+    // rejected. Publishing this as a blank invites a re-sweep that cannot fill it.
+    case 'excluded':
+      return `excluded:${cell.reason}`;
     case 'missing':
     default:
       return '';

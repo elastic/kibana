@@ -293,6 +293,10 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
       return `<span class="ok-dot">✓</span> ${cell.value}`;
     case 'not-recommended':
       return `<span class="status err">⛔ fail</span>`;
+    // Distinct from 'missing' (—): scores existed but judge policy rejected all
+    // of them. Re-running fills nothing until the judge assignment is fixed.
+    case 'excluded':
+      return `<span class="status warn" title="${cell.docs} score(s) rejected: ${cell.reason}">⚠ excluded</span>`;
     case 'missing':
     default:
       return '<span class="sub-num">—</span>';
