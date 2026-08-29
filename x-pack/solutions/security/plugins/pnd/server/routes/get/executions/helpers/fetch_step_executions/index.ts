@@ -38,10 +38,16 @@ export const fetchStepExecutions = async ({
   const perRun = await Promise.all(
     runIds.map(async (runId): Promise<WorkflowStepExecutionDto[]> => {
       try {
+        // includeOutput: the containment-action ledger projection reads the
+        // collect_executed_actions step's output; without the flag the engine
+        // strips step outputs and the lifecycle flyout can never show statuses.
         const full =
           request == null
-            ? await managementClient.getWorkflowExecution(runId, spaceId)
-            : await managementClient.getWorkflowExecution(runId, spaceId, { request });
+            ? await managementClient.getWorkflowExecution(runId, spaceId, { includeOutput: true })
+            : await managementClient.getWorkflowExecution(runId, spaceId, {
+                includeOutput: true,
+                request,
+              });
         return full?.stepExecutions ?? [];
       } catch (error) {
         logger.debug(

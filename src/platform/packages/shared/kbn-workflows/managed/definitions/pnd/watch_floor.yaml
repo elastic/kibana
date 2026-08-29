@@ -1032,6 +1032,7 @@ steps:
                   case_id: "{{ steps.create_case.output.id }}"
                 status: >-
                   {%- if steps.attach_case_alert.error == null -%}succeeded{%- else -%}failed{%- endif -%}
+                error: "${{ steps.attach_case_alert.error }}"
 
           - name: record_attach_case_alert
             type: data.set
@@ -1040,9 +1041,10 @@ steps:
                 ${{ variables.executed_actions
                   | push: steps.build_attach_case_alert_record.output.execution_record }}
 
-      # Attach hosts and IPs as case observables (the create-case API has no
-      # observables field; they must be added one at a time after creation).
-      # Requires a Platinum+ license and caps at 50 observables per case.
+      # Attach hosts and IPs as case observables via the internal cases API (the
+      # create-case API has no observables field; they must be added one at a time
+      # after creation). Requires a Platinum+ license and caps at 10 observables
+      # per case — overflow attempts land in the ledger as failed, honestly.
       - name: add_case_host_observables
         type: foreach
         if: "${{ steps.create_case.error == null }}"
@@ -1052,10 +1054,9 @@ steps:
             type: kibana.request
             with:
               method: POST
-              path: "/s/{{ workflow.spaceId }}/api/cases/{{ steps.create_case.output.id }}/observables"
+              path: "/s/{{ workflow.spaceId }}/internal/cases/{{ steps.create_case.output.id }}/observables"
               headers:
                 kbn-xsrf: string
-                elastic-api-version: "1"
                 Content-Type: application/json
               body:
                 observable:
@@ -1076,6 +1077,7 @@ steps:
                   value: "{{ foreach.item }}"
                 status: >-
                   {%- if steps.add_case_host_observable.error == null -%}succeeded{%- else -%}failed{%- endif -%}
+                error: "${{ steps.add_case_host_observable.error }}"
 
           - name: record_case_host_observable
             type: data.set
@@ -1093,10 +1095,9 @@ steps:
             type: kibana.request
             with:
               method: POST
-              path: "/s/{{ workflow.spaceId }}/api/cases/{{ steps.create_case.output.id }}/observables"
+              path: "/s/{{ workflow.spaceId }}/internal/cases/{{ steps.create_case.output.id }}/observables"
               headers:
                 kbn-xsrf: string
-                elastic-api-version: "1"
                 Content-Type: application/json
               body:
                 observable:
@@ -1122,6 +1123,7 @@ steps:
                   value: "{{ foreach.item }}"
                 status: >-
                   {%- if steps.add_case_ip_observable.error == null -%}succeeded{%- else -%}failed{%- endif -%}
+                error: "${{ steps.add_case_ip_observable.error }}"
 
           - name: record_case_ip_observable
             type: data.set
