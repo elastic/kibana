@@ -320,6 +320,28 @@ describe('find', () => {
         await test(['unknownType', HIDDEN_TYPE]);
       });
 
+      it.each([
+        { all_types: { terms: { field: 'type', size: 50 } } },
+        { type_count: { cardinality: { field: 'type' } } },
+      ])(`does not expose hidden type metadata via aggregations: %j`, async (aggs) => {
+        await findSuccess(client, repository, {
+          type: ['index-pattern', HIDDEN_TYPE],
+          aggs,
+        });
+
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            type: ['index-pattern'],
+          })
+        );
+        expect(client.search).toHaveBeenCalledWith(
+          expect.objectContaining({ aggs }),
+          expect.anything()
+        );
+      });
+
       it('migrates the found document', async () => {
         const noNamespaceSearchResults = generateIndexPatternSearchResults();
         client.search.mockResolvedValueOnce(
