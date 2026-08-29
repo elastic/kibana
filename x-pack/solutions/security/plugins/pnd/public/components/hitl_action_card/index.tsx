@@ -11,7 +11,10 @@ import { css } from '@emotion/react';
 import { PND_GATE_IDS } from '@kbn/pnd-common';
 import type { PndDiscoveryContext, PndProposalRow } from '@kbn/pnd-common';
 
-import { parseRecommendedActions } from '../../pages/conversations/helpers/parse_recommended_actions';
+import {
+  parseRecommendedActions,
+  stripRecommendedActionsJson,
+} from '../../pages/conversations/helpers/parse_recommended_actions';
 import {
   canRenderWithSchemaForm,
   extractSchemaDefaults,
@@ -120,6 +123,14 @@ export const HitlActionCard: React.FC<HitlActionCardProps> = ({
     [gateId, reasoning]
   );
 
+  // The toggle rows below render the staged actions, so the reasoning shown above
+  // them is the prose alone — the raw JSON block is stripped on exactly the rows
+  // where the dedicated form drew it. Every other branch shows the summary as-is.
+  const displayReasoning = useMemo(
+    () => (recommendedActions != null ? stripRecommendedActionsJson(reasoning) : reasoning),
+    [recommendedActions, reasoning]
+  );
+
   // The guard is the only supported way to narrow a row's `inputSchema`, and it
   // is fail-closed: every `false`, `{}` included, means the fallback branch.
   // The recommended-actions branch takes precedence — its gate declares a
@@ -161,10 +172,17 @@ export const HitlActionCard: React.FC<HitlActionCardProps> = ({
   const submitLabel =
     decision === 'approve' ? i18n.APPROVE : decision === 'dismiss' ? i18n.DISMISS : i18n.SUBMIT;
 
+  // A flex column capped at its container's height: the header and footer stay
+  // put and the middle region scrolls, so a long staged-action list can never
+  // push the Approve/Cancel buttons (or its own toggles) off screen.
   const cardStyles = css`
     background: ${euiTheme.colors.emptyShade};
     border: 1px solid ${tokens.border};
     border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    min-height: 0;
     overflow: hidden;
     width: 100%;
   `;
@@ -174,8 +192,15 @@ export const HitlActionCard: React.FC<HitlActionCardProps> = ({
     background: ${tokens.headerBackground};
     border-bottom: 1px solid ${tokens.border};
     display: flex;
+    flex-shrink: 0;
     gap: ${euiTheme.size.m};
     padding: ${euiTheme.size.base};
+  `;
+
+  const scrollRegionStyles = css`
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
   `;
 
   const headerIconStyles = css`
@@ -254,6 +279,7 @@ export const HitlActionCard: React.FC<HitlActionCardProps> = ({
     align-items: center;
     border-top: 1px solid ${euiTheme.border.color};
     display: flex;
+    flex-shrink: 0;
     gap: ${euiTheme.size.s};
     padding: ${euiTheme.size.m} ${euiTheme.size.base};
   `;
@@ -283,66 +309,68 @@ export const HitlActionCard: React.FC<HitlActionCardProps> = ({
         </div>
       </div>
 
-      <div css={bodyStyles}>
-        <EuiText data-test-subj="hitlActionCardMessage" size="s">
-          <p>{message}</p>
-        </EuiText>
+      <div css={scrollRegionStyles} data-test-subj="hitlActionCardScrollRegion">
+        <div css={bodyStyles}>
+          <EuiText data-test-subj="hitlActionCardMessage" size="s">
+            <p>{message}</p>
+          </EuiText>
 
-        <span css={sectionLabelStyles}>{i18n.BLAST_RADIUS}</span>
-        <BlastRadiusLines
-          entities={discoveryContext?.entities ?? []}
-          iconColor={tokens.eyebrowText}
-        />
+          <span css={sectionLabelStyles}>{i18n.BLAST_RADIUS}</span>
+          <BlastRadiusLines
+            entities={discoveryContext?.entities ?? []}
+            iconColor={tokens.eyebrowText}
+          />
 
-        <hr css={dashedRuleStyles} />
+          <hr css={dashedRuleStyles} />
 
-        <div css={operatorStyles}>
-          <EuiIcon aria-hidden={true} color="subdued" size="m" type="securitySignal" />
-          {reasoning.trim().length > 0 ? (
-            <span data-test-subj="hitlActionCardReasoning">{reasoning}</span>
-          ) : (
-            <span data-test-subj="hitlActionCardReasoningMissing">{i18n.REASONING_MISSING}</span>
-          )}
+          <div css={operatorStyles}>
+            <EuiIcon aria-hidden={true} color="subdued" size="m" type="securitySignal" />
+            {displayReasoning.trim().length > 0 ? (
+              <span data-test-subj="hitlActionCardReasoning">{displayReasoning}</span>
+            ) : (
+              <span data-test-subj="hitlActionCardReasoningMissing">{i18n.REASONING_MISSING}</span>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div css={formStyles}>
-        {recommendedActions != null ? (
-          <RecommendedActionsDecisionForm
-            actions={recommendedActions}
-            disabled={isLoading}
-            errors={errors}
-            onChange={setValues}
-            values={values}
-          />
-        ) : schema != null ? (
-          <SchemaForm
-            disabled={isLoading}
-            errors={errors}
-            onChange={setValues}
-            schema={schema}
-            values={values}
-          />
-        ) : (
-          <FixedDecisionForm
-            disabled={isLoading}
-            errors={errors}
-            onChange={setValues}
-            values={values}
-          />
-        )}
+        <div css={formStyles}>
+          {recommendedActions != null ? (
+            <RecommendedActionsDecisionForm
+              actions={recommendedActions}
+              disabled={isLoading}
+              errors={errors}
+              onChange={setValues}
+              values={values}
+            />
+          ) : schema != null ? (
+            <SchemaForm
+              disabled={isLoading}
+              errors={errors}
+              onChange={setValues}
+              schema={schema}
+              values={values}
+            />
+          ) : (
+            <FixedDecisionForm
+              disabled={isLoading}
+              errors={errors}
+              onChange={setValues}
+              values={values}
+            />
+          )}
 
-        {errorMessage != null ? (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            data-test-subj="hitlActionCardError"
-            iconType="error"
-            size="s"
-            text={<p>{errorMessage}</p>}
-            title={i18n.ERROR_TITLE}
-          />
-        ) : null}
+          {errorMessage != null ? (
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              data-test-subj="hitlActionCardError"
+              iconType="error"
+              size="s"
+              text={<p>{errorMessage}</p>}
+              title={i18n.ERROR_TITLE}
+            />
+          ) : null}
+        </div>
       </div>
 
       <div css={footerStyles}>

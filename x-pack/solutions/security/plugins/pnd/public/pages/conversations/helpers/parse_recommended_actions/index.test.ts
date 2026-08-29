@@ -7,7 +7,7 @@
 
 import type { AttackDiscoveryRecommendedAction } from '@kbn/pnd-common';
 
-import { parseRecommendedActions, RECOMMENDED_ACTIONS_LABEL } from '.';
+import { parseRecommendedActions, RECOMMENDED_ACTIONS_LABEL, stripRecommendedActionsJson } from '.';
 
 const ISOLATE_HOST: AttackDiscoveryRecommendedAction = {
   action_type: 'isolate_host',
@@ -150,5 +150,54 @@ describe('parseRecommendedActions', () => {
     const { action_type: actionType, ...untyped } = ISOLATE_HOST;
 
     expect(parseRecommendedActions(stagedReasoning(JSON.stringify([untyped])))).toBeUndefined();
+  });
+});
+
+describe('stripRecommendedActionsJson', () => {
+  const PROSE_BEFORE = 'Approving executes ONLY the Kibana-executable actions you toggle on.';
+  const PROSE_AFTER = "The incident responder's own closing statement follows.";
+  const summary = (json: string): string =>
+    `${PROSE_BEFORE} ${RECOMMENDED_ACTIONS_LABEL}\n${json}.\n${PROSE_AFTER}`;
+
+  it('removes the label, the array and its closing period, keeping the prose on both sides', () => {
+    expect(stripRecommendedActionsJson(summary(JSON.stringify([ISOLATE_HOST])))).toBe(
+      `${PROSE_BEFORE} ${PROSE_AFTER}`
+    );
+  });
+
+  it('does not stop at a bracket inside a quoted title', () => {
+    const bracketed = { ...ISOLATE_HOST, title: 'Kill process [mimikatz.exe] on "host-1"' };
+
+    expect(stripRecommendedActionsJson(summary(JSON.stringify([bracketed])))).toBe(
+      `${PROSE_BEFORE} ${PROSE_AFTER}`
+    );
+  });
+
+  it('returns the input untouched when the label is absent', () => {
+    expect(stripRecommendedActionsJson('No anchor here.')).toBe('No anchor here.');
+  });
+
+  it('returns the input untouched when the label is not followed by an array', () => {
+    const noArray = `${PROSE_BEFORE} ${RECOMMENDED_ACTIONS_LABEL} nothing was staged.`;
+
+    expect(stripRecommendedActionsJson(noArray)).toBe(noArray);
+  });
+
+  it('keeps the leading prose and drops the ragged tail of a truncated array', () => {
+    const truncated = `${PROSE_BEFORE} ${RECOMMENDED_ACTIONS_LABEL} [{"action_type":"isolate_h`;
+
+    expect(stripRecommendedActionsJson(truncated)).toBe(PROSE_BEFORE);
+  });
+
+  it('returns only the trailing prose when the summary starts at the label', () => {
+    expect(
+      stripRecommendedActionsJson(
+        `${RECOMMENDED_ACTIONS_LABEL} ${JSON.stringify([ISOLATE_HOST])}. ${PROSE_AFTER}`
+      )
+    ).toBe(PROSE_AFTER);
+  });
+
+  it('strips an empty staged array the same way', () => {
+    expect(stripRecommendedActionsJson(summary('[]'))).toBe(`${PROSE_BEFORE} ${PROSE_AFTER}`);
   });
 });

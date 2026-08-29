@@ -40,12 +40,19 @@ export const HitlActionModal: React.FC<HitlActionModalProps> = ({
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'hitlActionCardTitle' });
 
+  // The height cap is what arms the card's internal scroll: the card is a flex
+  // column whose middle region scrolls at max-height 100%, so without a bound
+  // here a long staged-action list would grow the dialog past the viewport and
+  // put the footer buttons (and the toggles) out of reach.
   const modalStyles = css`
     background: transparent;
     block-size: auto;
     border: none;
     box-shadow: none;
+    display: flex;
+    flex-direction: column;
     inline-size: ${MODAL_WIDTH_PX}px;
+    max-block-size: calc(100vh - ${euiTheme.size.xxl});
     max-inline-size: calc(100vw - ${euiTheme.size.xl});
 
     .euiModal__closeIcon {

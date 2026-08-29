@@ -256,6 +256,32 @@ describe('HitlActionCard', () => {
       expect(screen.getByTestId('pndRecommendedActionsDecisionForm')).toBeInTheDocument();
     });
 
+    it('strips the machine-readable block from the displayed reasoning — the toggles render it', () => {
+      renderWithPndProviders(
+        <HitlActionCard {...defaultProps} proposal={PND_HITL_CONTAINMENT_PROPOSAL} />
+      );
+
+      const reasoning = screen.getByTestId('hitlActionCardReasoning');
+      expect(reasoning).not.toHaveTextContent('action_type');
+      expect(reasoning).toHaveTextContent(
+        'Approving executes ONLY the Kibana-executable actions you toggle on.'
+      );
+      expect(reasoning).toHaveTextContent(
+        "The incident responder's own closing statement follows."
+      );
+    });
+
+    it('keeps the raw reasoning on gates the toggle form does not draw', () => {
+      renderWithPndProviders(
+        <HitlActionCard
+          {...defaultProps}
+          proposal={{ ...PND_HITL_PROPOSAL, reasoning: PND_HITL_CONTAINMENT_PROPOSAL.reasoning }}
+        />
+      );
+
+      expect(screen.getByTestId('hitlActionCardReasoning')).toHaveTextContent('action_type');
+    });
+
     it('takes precedence over the schema branch, which cannot echo the staged actions back', () => {
       renderWithPndProviders(
         <HitlActionCard

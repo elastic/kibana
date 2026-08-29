@@ -151,3 +151,39 @@ export const parseRecommendedActions = (
     return undefined;
   }
 };
+
+/**
+ * The reasoning with the machine-readable block removed: everything from
+ * {@link RECOMMENDED_ACTIONS_LABEL} through the end of its JSON array (and the sentence's own
+ * closing period) is dropped, leaving only the prose meant for a person. The dedicated
+ * containment form renders the same actions as toggle rows, so showing the raw array above it
+ * would be the one thing on the card no analyst can read.
+ *
+ * Returns the input untouched when the anchor or the array is not where the contract puts it —
+ * on those rows the caller renders the fixed decision form and the full summary is all there is.
+ * A summary whose array never closes (truncated at 8192 characters) keeps the prose before the
+ * label and drops the ragged tail: half a JSON blob is noise on either branch.
+ */
+export const stripRecommendedActionsJson = (reasoning: string): string => {
+  const labelIndex = reasoning.indexOf(RECOMMENDED_ACTIONS_LABEL);
+  if (labelIndex === -1) {
+    return reasoning;
+  }
+
+  const start = skipWhitespace(reasoning, labelIndex + RECOMMENDED_ACTIONS_LABEL.length);
+  if (reasoning[start] !== '[') {
+    return reasoning;
+  }
+
+  const before = reasoning.slice(0, labelIndex).trimEnd();
+
+  const end = findArrayEnd(reasoning, start);
+  if (end == null) {
+    return before;
+  }
+
+  const afterPeriod = skipWhitespace(reasoning, end);
+  const rest = reasoning.slice(reasoning[afterPeriod] === '.' ? afterPeriod + 1 : end).trim();
+
+  return rest.length > 0 ? (before.length > 0 ? `${before} ${rest}` : rest) : before;
+};
