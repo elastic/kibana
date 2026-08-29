@@ -323,6 +323,7 @@ describe('registerGetExecutionRoute', () => {
 
       expect(getWorkflowExecution).toHaveBeenCalledTimes(1);
       expect(getWorkflowExecution).toHaveBeenCalledWith('run-deep-new', 'agent-3', {
+        includeOutput: true,
         request: expect.any(Object),
       });
     });

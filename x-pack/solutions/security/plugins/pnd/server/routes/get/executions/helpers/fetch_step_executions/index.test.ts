@@ -44,8 +44,12 @@ describe('fetchStepExecutions', () => {
     });
 
     expect(result.map((se) => se.id)).toEqual(['se-1', 'se-2', 'se-3']);
-    expect(managementClient.getWorkflowExecution).toHaveBeenCalledWith('run-deep', 'agent-3');
-    expect(managementClient.getWorkflowExecution).toHaveBeenCalledWith('run-detection', 'agent-3');
+    expect(managementClient.getWorkflowExecution).toHaveBeenCalledWith('run-deep', 'agent-3', {
+      includeOutput: true,
+    });
+    expect(managementClient.getWorkflowExecution).toHaveBeenCalledWith('run-detection', 'agent-3', {
+      includeOutput: true,
+    });
   });
 
   it('treats a missing execution as an empty contribution', async () => {
@@ -92,6 +96,7 @@ describe('fetchStepExecutions', () => {
     });
 
     expect(managementClient.getWorkflowExecution).toHaveBeenCalledWith('run-deep', 'agent-3', {
+      includeOutput: true,
       request,
     });
   });
