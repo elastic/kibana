@@ -18,6 +18,13 @@ import type { AggregatedEvaluatorScore, AggregatedModelScores } from './query_ma
 export type MatrixCell =
   | { kind: 'score'; value: number }
   | { kind: 'not-recommended' }
+  /**
+   * Scores existed but every one was rejected by judge policy (self-judged,
+   * non-EIS judge, or same-family when configured). Distinct from 'missing':
+   * the model DID run, so re-running it changes nothing until the judge is
+   * fixed. Conflating the two cost a full re-sweep on 2026-08-29.
+   */
+  | { kind: 'excluded'; reason: 'self-judged' | 'non-eis-judge' | 'same-family'; docs: number }
   | { kind: 'missing' };
 
 /** Synthetic id for the legacy single "Overall" column. */
@@ -187,7 +194,10 @@ const aggregateCells = (
   let hasAnyData = false;
 
   for (const { cell, weight } of sources) {
-    if (!cell || cell.kind === 'missing') {
+    // 'excluded' means every score was rejected by judge policy, so there is no
+    // trustworthy value to aggregate. Skip like 'missing' rather than counting
+    // it as a zero, which would silently depress Overall for a model that ran.
+    if (!cell || cell.kind === 'missing' || cell.kind === 'excluded') {
       continue;
     }
 

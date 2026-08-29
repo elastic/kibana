@@ -50,7 +50,26 @@ print('config.local.json written (tracingEs -> %s)' % ('golden' if _golden_es el
 
 # ─── Env vars ────────────────────────────────────────────────────────────────
 source /tmp/golden-cluster-env.sh 2>/dev/null
-export EVAL_CONNECTOR_ID=eis-anthropic-claude-4-6-sonnet
+# Judge independence. The matrix drops self-judged docs (`excludeSelfJudged`),
+# so a model graded by itself scores a whole row of blanks that look identical
+# to "never ran" — 4.6-sonnet lost 294 valid docs this way on 2026-08-29.
+# Pick a default judge that differs from the model under test, and let the
+# caller override. DEFAULT_JUDGE is only used when it is not the candidate.
+DEFAULT_JUDGE=eis-anthropic-claude-4-6-sonnet
+ALT_JUDGE=eis-anthropic-claude-4-5-haiku
+if [ -z "${EVAL_CONNECTOR_ID:-}" ]; then
+  if [ "$MODEL" = "$DEFAULT_JUDGE" ]; then
+    export EVAL_CONNECTOR_ID="$ALT_JUDGE"
+  else
+    export EVAL_CONNECTOR_ID="$DEFAULT_JUDGE"
+  fi
+fi
+if [ "$EVAL_CONNECTOR_ID" = "$MODEL" ]; then
+  echo "FATAL: judge ($EVAL_CONNECTOR_ID) == model under test ($MODEL);" >&2
+  echo "       every score would be dropped as self-judged. Set EVAL_CONNECTOR_ID." >&2
+  exit 2
+fi
+echo "=== judge: $EVAL_CONNECTOR_ID | candidate: $MODEL ==="
 export EVAL_REPETITIONS="${EVAL_REPETITIONS:-1}"
 export PERSONA_MATRIX_TIMEOUT_MINUTES="${PERSONA_MATRIX_TIMEOUT_MINUTES:-30}"
 export AGENT_BUILDER_INFERENCE_TIMEOUT_MS=600000

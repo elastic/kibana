@@ -104,6 +104,13 @@ export interface AggregatedModelScores {
   family?: string;
   provider?: string;
   suites: AggregatedSuiteScores[];
+  /**
+   * Scores that existed for this model but were rejected by judge policy.
+   * Present only when at least one score was dropped. A model with `suites`
+   * empty AND this set ran successfully — its grades were untrustworthy — so
+   * re-running it is wasted compute until the judge assignment is fixed.
+   */
+  excluded?: ExcludedScoreCounts;
 }
 
 export interface QueryMatrixScoresOptions {
@@ -299,6 +306,12 @@ export const queryMatrixScores = async (
   }: QueryMatrixScoresOptions
 ): Promise<AggregatedModelScores[]> => {
   const byModel = new Map<string, AggregatedModelScores>();
+  /**
+   * Per-model tally of scores rejected by judge policy, keyed by model id.
+   * Lets the renderer distinguish a never-run cell from one whose grades were
+   * all thrown away — the two are indistinguishable otherwise.
+   */
+  const excludedByModel = new Map<string, ExcludedScoreCounts>();
 
   for (const suiteId of suiteIds) {
     const suiteBranch = branchBySuite?.[suiteId] ?? branch;
@@ -356,7 +369,29 @@ export const queryMatrixScores = async (
             taskModelId: modelId,
             executionId: latest.execution_id ?? latest.experiment_id,
           });
-          datasets.push(...scoresByPrefixToDatasets(scores, examplePrefixes, scoring));
+          // Capture WHY scores were dropped. Without this the caller cannot tell
+          // "model never ran" from "model ran and every grade was rejected" —
+          // they render identically as a blank cell and invite a pointless
+          // re-sweep. See references/self-judging-provenance-impact.md.
+          const before = datasets.length;
+          datasets.push(
+            ...scoresByPrefixToDatasets(scores, examplePrefixes, {
+              ...scoring,
+              onExcluded: (counts) => {
+                if (counts.selfJudged + counts.nonEis + counts.unmappedVerdict > 0) {
+                  excludedByModel.set(modelId, counts);
+                }
+              },
+            })
+          );
+          if (datasets.length === before && excludedByModel.has(modelId)) {
+            const c = excludedByModel.get(modelId)!;
+            log.warning(
+              `All per-prefix scores rejected by judge policy for model ${modelId} (suite ${suiteId}): ` +
+                `${c.selfJudged} self-judged, ${c.nonEis} non-EIS judge, ${c.unmappedVerdict} unmapped verdict. ` +
+                `Re-running this model will NOT fill these cells — fix the judge assignment first.`
+            );
+          }
         } catch (error) {
           log.warning(
             `Per-prefix scores unavailable for experiment ${
@@ -378,5 +413,8 @@ export const queryMatrixScores = async (
   }
 
   log.debug(`Matrix query resolved ${byModel.size} model(s) across ${suiteIds.length} suite(s)`);
-  return [...byModel.values()];
+  return [...byModel.values()].map((model) => {
+    const excluded = excludedByModel.get(model.modelId);
+    return excluded ? { ...model, excluded } : model;
+  });
 };

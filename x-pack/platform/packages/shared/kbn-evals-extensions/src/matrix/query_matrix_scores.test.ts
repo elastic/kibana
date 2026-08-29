@@ -186,6 +186,40 @@ describe('queryMatrixScores', () => {
     expect(result.map((model) => model.modelId).sort()).toEqual(['m1', 'm2']);
   });
 
+  it('reports self-judged exclusions so a rejected model is not mistaken for one that never ran', async () => {
+    // Reproduces the 2026-08-29 persona-matrix incident: claude-4.6-sonnet was
+    // its own judge, so every score was dropped by `excludeSelfJudged` and the
+    // row rendered blank — indistinguishable from a model that never ran. That
+    // ambiguity triggered a full re-sweep which could not, even in principle,
+    // fill the cells.
+    const selfJudgedScore = (index: number) =>
+      ({
+        task: { model: { id: 'm1' } },
+        evaluator: { model: { id: 'm1' }, name: 'Factuality', score: 1 },
+        example: { id: `entity-analytics-${index}` },
+      } as unknown as EvaluationScoreDocument);
+
+    const { client } = createClient({
+      m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
+    });
+    (client as unknown as { getExperimentScores: jest.Mock }).getExperimentScores = jest
+      .fn()
+      .mockResolvedValue([selfJudgedScore(1), selfJudgedScore(2)]);
+
+    const [model] = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      branch: 'main',
+      examplePrefixes: ['entity-analytics'],
+      scoring: { excludeSelfJudged: true },
+    });
+
+    expect(model.excluded?.selfJudged).toBe(2);
+    // No per-prefix dataset survived the policy, so the cells stay empty — but
+    // the exclusion tally proves the emptiness is a judge defect, not absent data.
+    expect(model.suites[0].datasets.some((d) => d.datasetId.startsWith('prefix:'))).toBe(false);
+  });
+
   it('reads a suite from its branch override instead of the global branch', async () => {
     const { client, listExperiments } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],

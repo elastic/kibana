@@ -404,6 +404,12 @@ export function createEvaluatePersonaMatrixDataset({
 
     await executorClient.runExperiment(
       {
+        // Reasoning models (GLM, Qwen-thinking) wedge a single-node Kibana
+        // event loop at the default concurrency of 5: `converse` calls time out
+        // or fail outright with `fetch failed`, losing whole examples. Allow the
+        // runner to dial it back per model instead of hardcoding one value that
+        // is either too slow for frontier models or too aggressive for these.
+        concurrency: Number(process.env.PERSONA_MATRIX_CONCURRENCY) || undefined,
         datasets: [
           {
             name: dataset.name,

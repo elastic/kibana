@@ -43,7 +43,7 @@ VM_SIZE = "Standard_D8s_v5"
 
 # Per-model env for run_model.sh. Slow chat models blow the default 30-min
 # Playwright cap mid-suite (glm-5-2 died at example 16/21 on 2026-08-22).
-MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=60"}
+MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=60 PERSONA_MATRIX_CONCURRENCY=3"}
 GOLDEN_ENV_LOCAL = "/tmp/golden-cluster-env.sh"
 SWEEP_DIR = Path.home() / "persona-sweep"
 KIBANA_MAIN = Path.home() / "Projects" / "kibana"
@@ -319,13 +319,14 @@ def launch(ip: str, model: str) -> subprocess.Popen:
     # defaults it to 1 when absent, preserving the sweep's single-pass behavior.
     # Per-model defaults from MODEL_ENV; the process env overrides them.
     model_env = dict([kv.split("=", 1) for kv in MODEL_ENV.get(model, "").split()]) if MODEL_ENV.get(model) else {}
-    repetitions = os.environ.get("EVAL_REPETITIONS", model_env.get("EVAL_REPETITIONS", ""))
-    timeout_min = os.environ.get("PERSONA_MATRIX_TIMEOUT_MINUTES", model_env.get("PERSONA_MATRIX_TIMEOUT_MINUTES", ""))
+    # Forward every per-model var (plus any process-env override) rather than a
+    # hardcoded pair: a var added to MODEL_ENV but missing from this list is a
+    # silent no-op that looks like a tuning fix and changes nothing.
     env_prefix = ""
-    if repetitions:
-        env_prefix += f"export EVAL_REPETITIONS={shlex.quote(repetitions)} && "
-    if timeout_min:
-        env_prefix += f"export PERSONA_MATRIX_TIMEOUT_MINUTES={shlex.quote(timeout_min)} && "
+    for key in sorted({*model_env, "EVAL_REPETITIONS", "PERSONA_MATRIX_TIMEOUT_MINUTES"}):
+        value = os.environ.get(key, model_env.get(key, ""))
+        if value:
+            env_prefix += f"export {key}={shlex.quote(value)} && "
     return subprocess.Popen(
         ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
          "-o", "LogLevel=ERROR",
