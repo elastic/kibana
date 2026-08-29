@@ -28,6 +28,7 @@ Usage:
 """
 import argparse
 import json
+import sys
 import os
 import shlex
 import subprocess
@@ -357,9 +358,12 @@ def check_golden(model: str, ip: str) -> dict:
     )
     try:
         local = json.loads(ssh(ip, resolve_cmd).splitlines()[-1])
-        stored_id = local["hits"]["hits"][0]["_source"]["task"]["model"]["id"]
+        hits = local["hits"]["hits"]
     except Exception as exc:
-        return {"count": -1, "error": f"cannot resolve stored model id: {exc}"}
+        return {"count": -1, "error": f"cannot read local scores index: {exc}"}
+    if not hits:
+        return {"count": 0, "error": "local scores index is empty: the eval produced no docs"}
+    stored_id = hits[0]["_source"]["task"]["model"]["id"]
 
     eval_count_cmd = (
         "curl -sf -u elastic:changeme 'http://localhost:9220/.evaluation-scores/"
@@ -456,7 +460,16 @@ def prepare(model: str) -> tuple[str, str]:
     return model, ip
 
 
-def main() -> None:
+def _model_state(model: str) -> str:
+    """Read the state a model last wrote, so skips count as failures too."""
+    try:
+        with open(SWEEP_DIR / model / "status.json") as fh:
+            return json.load(fh).get("state", "UNKNOWN")
+    except Exception:
+        return "UNKNOWN"
+
+
+def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", default="all")
     ap.add_argument("--status", action="store_true")
@@ -544,5 +557,13 @@ def main() -> None:
               + (f" ({result['error']})" if result.get("error") else ""), flush=True)
 
 
+    # A sweep that skipped or failed every model must not look like a green
+    # run to its caller: report the count so CI and shell wrappers can gate.
+    failed = [m for m in models if _model_state(m) != "PASS"]
+    if failed:
+        print(f"SWEEP FAILED: {len(failed)}/{len(models)} models did not pass: {failed}", flush=True)
+        return 1
+    return 0
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
