@@ -252,9 +252,9 @@ describe('findRuleTemplates', () => {
       page: 1,
       search: 'kub',
     });
-    expect(
-      JSON.stringify(unsecuredSavedObjectsClient.search.mock.calls[1][0].query)
-    ).toContain('*kub*');
+    expect(JSON.stringify(unsecuredSavedObjectsClient.search.mock.calls[1][0].query)).toContain(
+      '*kub*'
+    );
   });
 
   test('applies ascending sort order', async () => {

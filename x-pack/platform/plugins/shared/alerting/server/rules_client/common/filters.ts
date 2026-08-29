@@ -80,11 +80,7 @@ export const buildTagsFilter = (tags?: string[], type = RULE_SAVED_OBJECT_TYPE) 
 export const sanitizeTemplateSearchQuery = (search?: string): string | undefined => {
   let query = search?.trim() ?? '';
   const quote = query[0];
-  if (
-    query.length >= 2 &&
-    (quote === '"' || quote === "'") &&
-    query[query.length - 1] === quote
-  ) {
+  if (query.length >= 2 && (quote === '"' || quote === "'") && query[query.length - 1] === quote) {
     query = query.slice(1, -1).trim();
   }
   if (!query) {
@@ -114,9 +110,7 @@ export const buildTemplateSearchWildcardValue = (search?: string): string | unde
  * spaces. `*` stays a wildcard operator so `CPU threshold` and
  * `CPU*threshold` are different queries.
  */
-export const buildTemplateSearchQuery = (
-  search?: string
-): QueryDslQueryContainer | undefined => {
+export const buildTemplateSearchQuery = (search?: string): QueryDslQueryContainer | undefined => {
   const value = buildTemplateSearchWildcardValue(search);
   if (!value) {
     return undefined;

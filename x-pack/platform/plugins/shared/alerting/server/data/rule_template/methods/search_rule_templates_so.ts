@@ -34,9 +34,7 @@ export interface SearchRuleTemplatesSoParams {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
-const isAlertingV1TemplateAttributes = (
-  value: unknown
-): value is AlertingV1RawRuleTemplate => {
+const isAlertingV1TemplateAttributes = (value: unknown): value is AlertingV1RawRuleTemplate => {
   if (!isRecord(value) || value.engine === 'v2') {
     return false;
   }
