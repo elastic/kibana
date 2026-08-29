@@ -11,6 +11,23 @@ type FullTraceWaterfallScrollProps =
   | { scrollStrategy?: 'window'; contextSpanIds?: string[] }
   | { scrollStrategy: 'parent'; contextSpanIds?: string[]; scrollToContextOnMount?: boolean };
 
+/**
+ * EBT click `element` values the consumer supplies so waterfall interactions can be
+ * attributed to the hosting surface (e.g. page waterfall vs flyout waterfall).
+ */
+export interface TraceWaterfallEbt {
+  row: { element: string };
+  errorBadge: { element: string };
+  serviceBadge: { element: string };
+  rowToggle?: { element: string };
+  spanLinksBadge?: { element: string };
+  errorMarker?: { element: string };
+  errorMarkerMessage?: { element: string };
+  foldButton?: { element: string };
+  sizeWarningDiscoverLink?: { element: string };
+  scrollToOrigin?: { element: string };
+}
+
 export type FullTraceWaterfallProps = {
   traceId: string;
   rangeFrom: string;
@@ -20,11 +37,7 @@ export type FullTraceWaterfallProps = {
   onNodeClick?: (nodeSpanId: string) => void;
   onErrorClick?: FullTraceWaterfallOnErrorClick;
   getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
-  ebt: {
-    row: { element: string };
-    errorBadge: { element: string };
-    serviceBadge: { element: string };
-  };
+  ebt: TraceWaterfallEbt;
 } & FullTraceWaterfallScrollProps;
 
 export type FullTraceWaterfallOnErrorClick = (params: {

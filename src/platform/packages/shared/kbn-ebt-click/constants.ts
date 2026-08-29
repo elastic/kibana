@@ -58,6 +58,10 @@ export const EBT_CLICK_ACTIONS = {
   SET_SORT_OPTION: 'setSortOption',
   /** User sets the direction a chart or grid is sorted in. */
   SET_SORT_DIRECTION: 'setSortDirection',
+  /** User intends to read documentation (docs links, troubleshooting guides). */
+  VIEW_DOCS: 'viewDocs',
+  /** User opens an inline info popover/tooltip trigger to learn more about a UI element. */
+  VIEW_MORE_INFO: 'viewMoreInfo',
 } as const;
 
 /** EBT click `element` for the charts toolbar, shared by the unified histogram and metrics grid toolbars. */

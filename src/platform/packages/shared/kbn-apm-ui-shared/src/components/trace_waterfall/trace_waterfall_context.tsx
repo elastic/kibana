@@ -13,6 +13,7 @@ import type {
   IWaterfallGetRelatedErrorsHref,
   IWaterfallLegend,
   TraceItem,
+  TraceWaterfallEbt,
   WaterfallGetErrorMarkerHref,
   WaterfallGetServiceBadgeHref,
 } from '@kbn/apm-types';
@@ -65,11 +66,7 @@ export interface TraceWaterfallContextProps {
   scrollElement?: Element;
   scrollStrategy: TraceWaterfallScrollStrategy;
   // TODO: Make required once the legacy waterfall is removed. See https://github.com/elastic/kibana/issues/248693.
-  ebt?: {
-    row: { element: string };
-    errorBadge: { element: string };
-    serviceBadge: { element: string };
-  };
+  ebt?: TraceWaterfallEbt;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -140,11 +137,7 @@ interface Props {
   scrollToContextOnMount?: boolean;
   scrollElement?: Element;
   // TODO: Make required once the legacy waterfall is removed. See https://github.com/elastic/kibana/issues/248693
-  ebt?: {
-    row: { element: string };
-    errorBadge: { element: string };
-    serviceBadge: { element: string };
-  };
+  ebt?: TraceWaterfallEbt;
 }
 
 const MAX_DEPTH_OPEN_LIMIT = 2;
@@ -271,10 +264,18 @@ export function TraceWaterfallContextProvider({
     return filterMapByCriticalPath(fullTraceWaterfallMap, criticalPathSegmentsById);
   }, [criticalPathSegmentsById, fullTraceWaterfallMap, showCriticalPath]);
 
-  const marks = useMemo(
-    () => [...getAgentMarks(agentMarks), ...errorMarks],
-    [agentMarks, errorMarks]
-  );
+  const marks = useMemo(() => {
+    // Error markers render inside the generic timeline, which has no access to this
+    // context — carry the consumer-supplied EBT elements on the marks themselves.
+    const decoratedErrorMarks =
+      ebt?.errorMarker || ebt?.errorMarkerMessage
+        ? errorMarks.map((mark) => ({
+            ...mark,
+            ebt: { errorMarker: ebt.errorMarker, errorMarkerMessage: ebt.errorMarkerMessage },
+          }))
+        : errorMarks;
+    return [...getAgentMarks(agentMarks), ...decoratedErrorMarks];
+  }, [agentMarks, errorMarks, ebt]);
 
   return (
     <TraceWaterfallContext.Provider

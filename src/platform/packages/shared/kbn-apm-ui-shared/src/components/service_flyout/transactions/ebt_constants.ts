@@ -11,4 +11,7 @@ export const SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS = {
   HEADER: 'serviceFlyoutTransactionsHeader',
   ROW_NAME: 'serviceFlyoutTransactionsRowName',
   ROW_ALERTS_BADGE: 'serviceFlyoutTransactionsRowAlertsBadge',
+  REMAINING_TOOLTIP_DOCS_LINK: 'serviceFlyoutTransactionsRemainingTooltipDocsLink',
+  ROW_REMAINING_TRANSACTIONS_INFO_BUTTON:
+    'serviceFlyoutTransactionsRowRemainingTransactionsInfoButton',
 } as const;

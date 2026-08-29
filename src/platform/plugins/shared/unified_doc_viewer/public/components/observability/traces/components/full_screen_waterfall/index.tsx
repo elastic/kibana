@@ -153,6 +153,18 @@ export const FullScreenWaterfall = ({
               row: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ROW },
               errorBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
               serviceBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
+              rowToggle: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ROW_TOGGLE },
+              spanLinksBadge: {
+                element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_SPAN_LINKS_BADGE,
+              },
+              errorMarker: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ERROR_MARKER },
+              errorMarkerMessage: {
+                element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ERROR_MARKER_MESSAGE,
+              },
+              foldButton: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_FOLD_BUTTON },
+              scrollToOrigin: {
+                element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_SCROLL_TO_ORIGIN,
+              },
             }}
           />
         </div>

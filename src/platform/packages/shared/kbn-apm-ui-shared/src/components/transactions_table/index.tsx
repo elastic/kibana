@@ -50,6 +50,8 @@ interface TransactionsTableProps {
   };
   onSearchQueryChange?: (query: string) => void;
   remainingTransactionsCellTooltipContent?: React.ReactNode;
+  /** EBT click `element` for the "Remaining Transactions" info button, so each hosting surface emits its own element. */
+  remainingTransactionsInfoEbtElement?: string;
   showSparklines?: boolean;
   isSparklineLoading?: boolean;
   errorMessage?: string;
@@ -82,6 +84,7 @@ export function TransactionsTable({
   columnInteractions,
   onSearchQueryChange,
   remainingTransactionsCellTooltipContent,
+  remainingTransactionsInfoEbtElement,
   showSparklines: showSparklinesProp,
   isSparklineLoading,
   errorMessage,
@@ -109,6 +112,7 @@ export function TransactionsTable({
       showSparklines: resolvedShowSparklines,
       isSparklineLoading,
       remainingTransactionsCellTooltipContent,
+      remainingTransactionsInfoEbtElement,
     });
     return (columns ?? DEFAULT_COLUMNS).map((col) =>
       typeof col === 'string' ? builtIn[col] : col
@@ -120,6 +124,7 @@ export function TransactionsTable({
     isSparklineLoading,
     columns,
     remainingTransactionsCellTooltipContent,
+    remainingTransactionsInfoEbtElement,
   ]);
 
   const onSearchChange = useCallback(

@@ -10,6 +10,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 
 export enum Shape {
   circle = 'circle',
@@ -58,6 +59,8 @@ interface Props {
   clickable?: boolean;
   shape?: Shape;
   indicator?: React.ReactNode;
+  /** When provided, clicks on the legend are tracked via `data-ebt-*` attributes. */
+  ebt?: EbtClickAttrs;
 }
 
 export function Legend({
@@ -68,6 +71,7 @@ export function Legend({
   clickable = false,
   shape = Shape.circle,
   indicator,
+  ebt,
   ...rest
 }: Props) {
   const { euiTheme } = useEuiTheme();
@@ -78,6 +82,7 @@ export function Legend({
       onClick={onClick}
       disabled={disabled}
       clickable={clickable || Boolean(onClick)}
+      {...(ebt ? getEbtProps(ebt) : {})}
       {...rest}
     >
       {indicator ? (

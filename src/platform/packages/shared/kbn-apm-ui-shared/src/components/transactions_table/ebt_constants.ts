@@ -14,4 +14,5 @@ export const TRANSACTIONS_TABLE_EBT_ACTIONS = {
 export const TRANSACTIONS_TABLE_EBT_ELEMENTS = {
   ROW_NAME: 'transactionsTableRowName',
   ROW_ALERTS_BADGE: 'transactionsTableRowAlertsBadge',
+  ROW_REMAINING_TRANSACTIONS_INFO_BUTTON: 'transactionsTableRowRemainingTransactionsInfoButton',
 } as const;

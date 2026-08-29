@@ -31,9 +31,12 @@ const disabledTooltip = i18n.translate(
 export function ScrollToOriginButton({
   isDisabled,
   onClick,
+  ebtElement = TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_SCROLL_TO_ORIGIN,
 }: {
   isDisabled: boolean;
   onClick: () => void;
+  /** EBT click `element` supplied by the hosting waterfall so scroll-to-origin clicks can be attributed to its surface. */
+  ebtElement?: string;
 }) {
   return (
     <EuiToolTip content={isDisabled ? disabledTooltip : activeTooltip}>
@@ -48,7 +51,7 @@ export function ScrollToOriginButton({
           }}
           {...getEbtProps({
             action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.SCROLL_TO_ORIGIN,
-            element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_SCROLL_TO_ORIGIN,
+            element: ebtElement,
           })}
           data-test-subj="waterfallScrollToOriginButton"
         >

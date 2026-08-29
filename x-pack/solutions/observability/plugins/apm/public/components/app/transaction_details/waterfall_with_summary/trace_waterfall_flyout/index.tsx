@@ -128,6 +128,18 @@ export function TraceWaterfallFlyout({
             row: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ROW },
             errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ERROR_BADGE },
             serviceBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_SERVICE_BADGE },
+            rowToggle: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ROW_TOGGLE },
+            spanLinksBadge: {
+              element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_SPAN_LINKS_BADGE,
+            },
+            errorMarker: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ERROR_MARKER },
+            errorMarkerMessage: {
+              element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ERROR_MARKER_MESSAGE,
+            },
+            foldButton: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_FOLD_BUTTON },
+            scrollToOrigin: {
+              element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_SCROLL_TO_ORIGIN,
+            },
           }}
         />
       </EuiFlyoutBody>

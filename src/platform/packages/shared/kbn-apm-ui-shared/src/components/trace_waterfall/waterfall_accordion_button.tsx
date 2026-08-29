@@ -9,15 +9,23 @@
 
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { TRACE_WATERFALL_EBT_CLICK_ACTIONS } from './ebt_constants';
 
 export interface WaterfallAccordionButtonProps {
   isOpen: boolean;
   onClick: () => void;
+  /** EBT click `element` supplied by the hosting waterfall so fold/unfold clicks can be attributed to its surface. */
+  ebtElement?: string;
 }
 
-export function WaterfallAccordionButton({ isOpen, onClick }: WaterfallAccordionButtonProps) {
+export function WaterfallAccordionButton({
+  isOpen,
+  onClick,
+  ebtElement,
+}: WaterfallAccordionButtonProps) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -41,6 +49,13 @@ export function WaterfallAccordionButton({ isOpen, onClick }: WaterfallAccordion
         onClick={onClick}
         iconType={isOpen ? 'fold' : 'unfold'}
         data-test-subj="traceWaterfallAccordionButton"
+        {...(ebtElement
+          ? getEbtProps({
+              action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.TOGGLE_ALL_ROWS,
+              element: ebtElement,
+              detail: isOpen ? 'fold' : 'unfold',
+            })
+          : {})}
         css={css`
           position: absolute;
           z-index: ${euiTheme.levels.menu};

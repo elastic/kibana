@@ -9,16 +9,20 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { asBigNumber } from '@kbn/apm-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { TRACE_WATERFALL_EBT_CLICK_ACTIONS } from './ebt_constants';
 
 export const TOGGLE_BUTTON_WIDTH = 20;
 interface Props {
   isOpen: boolean;
   childrenCount: number;
   onClick: () => void;
+  /** EBT click `element` supplied by the hosting waterfall so toggle clicks can be attributed to its surface. */
+  ebtElement?: string;
 }
-export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props) {
+export function ToggleAccordionButton({ isOpen, childrenCount, onClick, ebtElement }: Props) {
   return (
     <EuiFlexGroup
       gutterSize="xs"
@@ -27,6 +31,13 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
       responsive={false}
       css={{ position: 'relative', width: `${TOGGLE_BUTTON_WIDTH}px` }}
       data-test-subj="toggleAccordionButton"
+      {...(ebtElement
+        ? getEbtProps({
+            action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.TOGGLE_ACCORDION,
+            element: ebtElement,
+            detail: isOpen ? 'collapse' : 'expand',
+          })
+        : {})}
       onClick={onClick}
       onKeyDown={(e) => {
         if (onClick && (e.key === 'Enter' || e.key === ' ')) {
