@@ -722,6 +722,7 @@ describe('TaskStore', () => {
       const { args } = await testMsearch([{}], []);
       expect(args).toMatchObject({
         index: 'tasky',
+        _source_excludes: ['task.state', 'task.params'],
         searches: [
           {},
           {
@@ -771,7 +772,7 @@ describe('TaskStore', () => {
       });
     });
 
-    test('should return tasks with decrypted API keys', async () => {
+    test('returns slim hits without decrypting API keys', async () => {
       const { result } = await testMsearch(
         [{}],
         [
@@ -788,6 +789,7 @@ describe('TaskStore', () => {
         ]
       );
 
+      expect(esoClient.createPointInTimeFinderDecryptedAsInternalUser).not.toHaveBeenCalled();
       expect(result.docs[0]).toEqual({
         ...mockTask,
         retryAt: new Date(mockTask.retryAt),
@@ -796,11 +798,11 @@ describe('TaskStore', () => {
         startedAt: new Date(mockTask.startedAt),
         state: {},
         params: {},
-        apiKey: 'decryptedApiKey',
+        apiKey: 'encryptedKey',
       });
     });
 
-    test('returns all API keys when first getApiKeys search misses a key, but finds after refresh', async () => {
+    test('search() returns all API keys when first getApiKeys search misses a key, but finds after refresh', async () => {
       const logger = mockLogger();
       const mockSerializer = savedObjectsServiceMock.createSerializer();
       mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
@@ -869,31 +871,22 @@ describe('TaskStore', () => {
         });
       refreshStore.registerEncryptedSavedObjectsClient(esoClient);
 
-      mockEsClient.msearch.mockResponse({
-        took: 0,
-        responses: [
-          {
-            hits: {
-              hits: [
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task1', apiKey: 'encryptedKey1' } },
-                },
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task2', apiKey: 'encryptedKey2' } },
-                },
-              ],
+      mockEsClient.search.mockResponse({
+        hits: {
+          hits: [
+            {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _source: { task: { ...mockTask, id: 'task1', apiKey: 'encryptedKey1' } },
             },
-            took: 0,
-            _shards: { failed: 0, successful: 1, total: 1 },
-            timed_out: false,
-            status: 200,
-          },
-        ],
-      });
+            {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _source: { task: { ...mockTask, id: 'task2', apiKey: 'encryptedKey2' } },
+            },
+          ],
+        },
+      } as estypes.SearchResponse);
 
-      const result = await refreshStore.msearch([{}]);
+      const result = await refreshStore.search({});
 
       expect(result.docs).toHaveLength(2);
       expect(result.docs[0].apiKey).toBe('decryptedKey1');
@@ -906,7 +899,7 @@ describe('TaskStore', () => {
       expect(logger.error).not.toHaveBeenCalled();
     });
 
-    test('returns partial API keys when first getApiKeys search misses a key, and second search after refresh still does not find it', async () => {
+    test('search() returns partial API keys when first getApiKeys search misses a key, and second search after refresh still does not find it', async () => {
       const mockSerializer = savedObjectsServiceMock.createSerializer();
       mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
       mockSerializer.rawToSavedObject = jest
@@ -966,31 +959,22 @@ describe('TaskStore', () => {
         });
       refreshStore.registerEncryptedSavedObjectsClient(esoClient);
 
-      mockEsClient.msearch.mockResponse({
-        took: 0,
-        responses: [
-          {
-            hits: {
-              hits: [
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task1', apiKey: 'encryptedKey1' } },
-                },
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task2', apiKey: 'encryptedKey2' } },
-                },
-              ],
+      mockEsClient.search.mockResponse({
+        hits: {
+          hits: [
+            {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _source: { task: { ...mockTask, id: 'task1', apiKey: 'encryptedKey1' } },
             },
-            took: 0,
-            _shards: { failed: 0, successful: 1, total: 1 },
-            timed_out: false,
-            status: 200,
-          },
-        ],
-      });
+            {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _source: { task: { ...mockTask, id: 'task2', apiKey: 'encryptedKey2' } },
+            },
+          ],
+        },
+      } as estypes.SearchResponse);
 
-      const result = await refreshStore.msearch([{}]);
+      const result = await refreshStore.search({});
 
       expect(result.docs).toHaveLength(2);
       expect(result.docs[0].apiKey).toBe('decryptedKey1');
@@ -1004,7 +988,7 @@ describe('TaskStore', () => {
       );
     });
 
-    test('returns partial API keys when refresh fails', async () => {
+    test('search() returns partial API keys when refresh fails', async () => {
       const mockSerializer = savedObjectsServiceMock.createSerializer();
       mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
       mockSerializer.rawToSavedObject = jest
@@ -1064,31 +1048,22 @@ describe('TaskStore', () => {
         });
       refreshStore.registerEncryptedSavedObjectsClient(esoClient);
 
-      mockEsClient.msearch.mockResponse({
-        took: 0,
-        responses: [
-          {
-            hits: {
-              hits: [
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task1', apiKey: 'encryptedKey1' } },
-                },
-                {
-                  _index: '.kibana_task_manager_8.16.0_001',
-                  _source: { task: { ...mockTask, id: 'task2', apiKey: 'encryptedKey2' } },
-                },
-              ],
+      mockEsClient.search.mockResponse({
+        hits: {
+          hits: [
+            {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _source: { task: { ...mockTask, id: 'task1', apiKey: 'encryptedKey1' } },
             },
-            took: 0,
-            _shards: { failed: 0, successful: 1, total: 1 },
-            timed_out: false,
-            status: 200,
-          },
-        ],
-      });
+            {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _source: { task: { ...mockTask, id: 'task2', apiKey: 'encryptedKey2' } },
+            },
+          ],
+        },
+      } as estypes.SearchResponse);
 
-      const result = await refreshStore.msearch([{}]);
+      const result = await refreshStore.search({});
 
       expect(result.docs).toHaveLength(2);
       expect(result.docs[0].apiKey).toBe('decryptedKey1');
