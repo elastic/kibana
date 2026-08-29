@@ -28,6 +28,7 @@ describe('httpHandlerFromKbnClient transport retries', () => {
 
   afterEach(() => {
     delete process.env.KBN_EVALS_HTTP_RETRIES;
+    delete process.env.KBN_EVALS_HTTP_TIMEOUT_MS;
   });
 
   it('retries a status-less "fetch failed" and succeeds', async () => {
@@ -79,5 +80,30 @@ describe('httpHandlerFromKbnClient transport retries', () => {
     const handler2 = httpHandlerFromKbnClient({ kbnClient: kbnClient(refused), log });
     await expect(handler2('/api/x', { method: 'POST' })).rejects.toThrow('bad request');
     expect(refused).toHaveBeenCalledTimes(1);
+  });
+  it('aborts a hung request and retries it', async () => {
+    process.env.KBN_EVALS_HTTP_RETRIES = '1';
+    process.env.KBN_EVALS_HTTP_TIMEOUT_MS = '150';
+    let calls = 0;
+    const request = jest.fn().mockImplementation(async ({ signal }: { signal?: AbortSignal }) => {
+      calls += 1;
+      if (calls === 1) {
+        // Never resolves on its own -- only the timeout signal ends it.
+        return new Promise((_resolve, reject) => {
+          signal?.addEventListener('abort', () => {
+            const err: any = new Error('The operation was aborted');
+            err.name = 'AbortError';
+            reject(err);
+          });
+        });
+      }
+      return { data: { ok: true } };
+    });
+
+    const handler = httpHandlerFromKbnClient({ kbnClient: { request } as any, log });
+    const result = await handler({ path: '/api/agent_builder/converse', method: 'POST' } as any);
+
+    expect(result).toEqual({ ok: true });
+    expect(calls).toBe(2);
   });
 });

@@ -67,7 +67,7 @@ export function httpHandlerFromKbnClient({
     const retryStatuses = new Set([429, 503, 504]);
     // Transport-level deaths, which arrive with no HTTP status at all.
     const RETRYABLE_TRANSPORT_ERRORS =
-      /fetch failed|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE|EAI_AGAIN|socket hang up|other side closed/i;
+      /fetch failed|aborted|AbortError|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE|EAI_AGAIN|socket hang up|other side closed/i;
 
     async function sleep(ms: number) {
       await new Promise((r) => setTimeout(r, ms));
@@ -97,9 +97,19 @@ export function httpHandlerFromKbnClient({
       return seconds * 1000;
     }
 
+    // A hung endpoint is worse than a failing one: retries need a request that
+    // FAILS, and a converse call that never returns just parks the worker in
+    // ep_poll forever. Observed on 2026-08-29: a glm-5-2 run sat 45 minutes with
+    // 4 seconds of CPU and six open sockets while /api/status still answered 200.
+    // Bound each attempt so a dead endpoint becomes a retryable failure.
+    const requestTimeoutMs = Number(process.env.KBN_EVALS_HTTP_TIMEOUT_MS ?? '0') || 0;
     let lastError: unknown;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const timeoutController = requestTimeoutMs > 0 ? new AbortController() : undefined;
+      const timeoutHandle = timeoutController
+        ? setTimeout(() => timeoutController.abort(), requestTimeoutMs)
+        : undefined;
       try {
         const response = await kbnClient.request({
           path: options.path,
@@ -108,10 +118,11 @@ export function httpHandlerFromKbnClient({
           query,
           responseType: rawResponse ? 'stream' : undefined,
           headers: finalHeaders,
-          signal: signal || undefined,
+          signal: signal || timeoutController?.signal,
           // We implement retries here so we can retry only on specific status codes.
           retries: 0,
         });
+        if (timeoutHandle) clearTimeout(timeoutHandle);
         // success
         if (asResponse) {
           // `HttpResponse.request` is required by Core's type. We don't have access to undici's
@@ -139,6 +150,7 @@ export function httpHandlerFromKbnClient({
         }
         return response.data as any;
       } catch (err) {
+        if (timeoutHandle) clearTimeout(timeoutHandle);
         // `kbnClient.request` only ever throws `KbnClientRequesterError`.
         const error = err as KbnClientRequesterError;
         const status = error.status;
