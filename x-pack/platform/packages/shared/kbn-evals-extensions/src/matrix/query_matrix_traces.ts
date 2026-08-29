@@ -565,6 +565,27 @@ export const queryMatrixTraces = async (
             .join(', ')
       );
     }
+
+    // A zero `Tool Calls` score on a cell whose trace shows real tool calls
+    // means the metric is broken for that model, not that it used no tools.
+    // Unreported, that renders as "this model uses no tools" in the published
+    // matrix — a fabricated claim, and it hides genuine tool-loop failures.
+    const brokenMetric = new Map<string, number>();
+    for (const [key, trace] of Object.entries(traces)) {
+      const trail = trace.toolTrail?.length ?? 0;
+      const scored = trace.scores?.['Tool Calls'];
+      if (trail > 0 && (scored === 0 || scored === undefined)) {
+        const modelId = key.split(':')[0];
+        brokenMetric.set(modelId, (brokenMetric.get(modelId) ?? 0) + 1);
+      }
+    }
+    if (brokenMetric.size > 0) {
+      log.warning(
+        `'Tool Calls' reads 0 despite a non-empty tool trail for: ` +
+          [...brokenMetric].map(([modelId, n]) => `${modelId}=${n}`).join(', ') +
+          ` — the metric is broken for these models; do not publish their tool counts`
+      );
+    }
   }
 
   log.debug(`Matrix traces resolved ${Object.keys(traces).length} trace entries`);

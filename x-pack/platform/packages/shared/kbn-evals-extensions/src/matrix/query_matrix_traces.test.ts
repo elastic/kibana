@@ -421,4 +421,39 @@ describe('queryMatrixTraces example fetching', () => {
     expect(maxInFlight).toBeLessThanOrEqual(6);
     expect(getExperimentScores).toHaveBeenCalledTimes(8);
   });
+
+  it('flags a broken Tool Calls metric when the trail is non-empty but the score is 0', async () => {
+    // Observed on real golden data: 4.5-sonnet scored Tool Calls=0 on 20/20
+    // cells whose traces showed 43+ real calls. Unreported that publishes as
+    // "this model uses no tools" and hides genuine tool-loop failures.
+    const zeroToolCallDoc = {
+      example: { id: 'example-1' },
+      evaluator: { name: 'Tool Calls', score: 0 },
+      metadata: { execution_id: 'exec-a' },
+      task: {
+        model: { id: 'model-x' },
+        output: {
+          messages: [{ message: 'done' }],
+          steps: [
+            { type: 'tool_call', tool_id: 'load_skill' },
+            { type: 'tool_call', tool_id: 'load_skill' },
+          ],
+        },
+        repetition_index: 0,
+      },
+    } as unknown as EvaluationScoreDocument;
+
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    await queryMatrixTraces(
+      makeClient({ filtered: true }) as never,
+      log as never,
+      aggregatedFor('exec-a') as never,
+      { 'exec-a::example-1': [zeroToolCallDoc] } as never,
+      40
+    );
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining("'Tool Calls' reads 0 despite a non-empty tool trail")
+    );
+  });
 });
