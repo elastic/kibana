@@ -268,6 +268,23 @@ export const matrixCmd: Command<void> = {
         traceCache,
         config.toolCallWarnAbove
       );
+
+      // Traces fetched from the server come back hollow (stepCount 0) when the
+      // evals plugin cannot serve step payloads, so the report renders panels
+      // with nothing in them and still exits 0. Counting panels is not enough
+      // -- count the ones that actually carry steps.
+      const traceCells = Object.values(traces ?? {});
+      const withSteps = traceCells.filter((t) => (t?.stepCount ?? 0) > 0).length;
+      if (traceCells.length === 0) {
+        log.warning('no traces resolved -- the report will have no trace panels');
+      } else if (withSteps === 0) {
+        log.warning(
+          `all ${traceCells.length} traces came back without steps` +
+            (traceCachePath
+              ? ''
+              : ' -- pass --trace-cache to load step payloads from a pre-pulled cache')
+        );
+      }
     }
 
     const rendered = renderMatrix(
