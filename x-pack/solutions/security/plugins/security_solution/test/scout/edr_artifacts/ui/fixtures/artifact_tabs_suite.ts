@@ -55,18 +55,74 @@ export const describeArtifactTabPolicyDetails = (artifact: ArtifactTabCase): voi
       );
 
       spaceTest(
-        `${artifact.title} READ user cannot add an artifact from an empty tab`,
+        `${artifact.title} READ user can view artifacts but cannot add, assign, or remove`,
         async ({ browserAuth, pageObjects, apiServices, endpointPolicy, config }) => {
           spaceTest.skip(Boolean(config.serverless), STATEFUL_ONLY_REASON);
+          // One login plus two policy-details reloads; default 60s is tight.
+          spaceTest.setTimeout(90_000);
 
           await apiServices.endpointArtifacts.deleteList(artifact.listId);
           await browserAuth.loginWithCustomRole(getArtifactReadRole(artifact.privilegePrefix));
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
-          await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
-          await pageObjects.policyArtifactsPage.waitForEmptyUnexisting();
 
-          await expect(pageObjects.policyArtifactsPage.unexistingManageButton).toHaveCount(0);
-          await expect(pageObjects.policyArtifactsPage.unexistingImportButton).toHaveCount(0);
+          const openTab = async () => {
+            await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
+          };
+
+          await spaceTest.step('cannot add an artifact from an empty tab', async () => {
+            await openTab();
+            await pageObjects.policyArtifactsPage.waitForEmptyUnexisting();
+            await expect(pageObjects.policyArtifactsPage.unexistingManageButton).toHaveCount(0);
+            await expect(pageObjects.policyArtifactsPage.unexistingImportButton).toHaveCount(0);
+          });
+
+          await spaceTest.step('cannot manage or assign unassigned artifacts', async () => {
+            await apiServices.endpointArtifacts.createList({
+              listId: artifact.listId,
+              type: artifact.listType,
+            });
+            await apiServices.endpointArtifacts.createItem({
+              name: artifact.artifactName,
+              listId: artifact.listId,
+              entries: artifact.entries,
+              osTypes: artifact.osTypes,
+            });
+            await pageObjects.policyDetailsPage.reload();
+            await openTab();
+            await pageObjects.policyArtifactsPage.waitForEmptyUnassigned();
+            await expect(pageObjects.policyArtifactsPage.unassignedManageButton).toHaveCount(0);
+            await expect(pageObjects.policyArtifactsPage.unassignedAssignButton).toHaveCount(0);
+          });
+
+          await spaceTest.step(
+            'can see assigned artifacts but cannot assign or remove',
+            async () => {
+              await apiServices.endpointArtifacts.deleteList(artifact.listId);
+              await apiServices.endpointArtifacts.createList({
+                listId: artifact.listId,
+                type: artifact.listType,
+              });
+              await apiServices.endpointArtifacts.createItem({
+                name: artifact.artifactName,
+                listId: artifact.listId,
+                entries: artifact.entries,
+                osTypes: artifact.osTypes,
+                policyId: endpointPolicy.id,
+              });
+              await pageObjects.policyDetailsPage.reload();
+              await openTab();
+              await pageObjects.policyArtifactsPage.waitForAssignedList();
+
+              await expect(pageObjects.policyArtifactsPage.artifactCard).toHaveCount(1);
+              await expect(pageObjects.policyArtifactsPage.artifactCardTitle).toContainText(
+                artifact.artifactName
+              );
+              await expect(pageObjects.policyArtifactsPage.assignButton).toHaveCount(0);
+
+              await pageObjects.policyArtifactsPage.openCardActions();
+              await expect(pageObjects.policyArtifactsPage.removeFromPolicyAction).toHaveCount(0);
+            }
+          );
         }
       );
 
@@ -107,31 +163,6 @@ export const describeArtifactTabPolicyDetails = (artifact: ArtifactTabCase): voi
       );
 
       spaceTest(
-        `${artifact.title} READ user cannot manage or assign unassigned artifacts`,
-        async ({ browserAuth, pageObjects, apiServices, endpointPolicy, config }) => {
-          spaceTest.skip(Boolean(config.serverless), STATEFUL_ONLY_REASON);
-
-          await apiServices.endpointArtifacts.createList({
-            listId: artifact.listId,
-            type: artifact.listType,
-          });
-          await apiServices.endpointArtifacts.createItem({
-            name: artifact.artifactName,
-            listId: artifact.listId,
-            entries: artifact.entries,
-            osTypes: artifact.osTypes,
-          });
-          await browserAuth.loginWithCustomRole(getArtifactReadRole(artifact.privilegePrefix));
-          await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
-          await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
-          await pageObjects.policyArtifactsPage.waitForEmptyUnassigned();
-
-          await expect(pageObjects.policyArtifactsPage.unassignedManageButton).toHaveCount(0);
-          await expect(pageObjects.policyArtifactsPage.unassignedAssignButton).toHaveCount(0);
-        }
-      );
-
-      spaceTest(
         `${artifact.title} ALL user can manage and assign unassigned artifacts`,
         async ({ browserAuth, page, pageObjects, apiServices, endpointPolicy }) => {
           await apiServices.endpointArtifacts.createList({
@@ -162,38 +193,6 @@ export const describeArtifactTabPolicyDetails = (artifact: ArtifactTabCase): voi
             await expect(pageObjects.policyArtifactsPage.assignConfirmButton).toBeDisabled();
             await pageObjects.policyArtifactsPage.assignArtifact(artifact.artifactName);
           });
-        }
-      );
-
-      spaceTest(
-        `${artifact.title} READ user can see assigned artifacts but cannot assign or remove`,
-        async ({ browserAuth, pageObjects, apiServices, endpointPolicy, config }) => {
-          spaceTest.skip(Boolean(config.serverless), STATEFUL_ONLY_REASON);
-
-          await apiServices.endpointArtifacts.createList({
-            listId: artifact.listId,
-            type: artifact.listType,
-          });
-          await apiServices.endpointArtifacts.createItem({
-            name: artifact.artifactName,
-            listId: artifact.listId,
-            entries: artifact.entries,
-            osTypes: artifact.osTypes,
-            policyId: endpointPolicy.id,
-          });
-          await browserAuth.loginWithCustomRole(getArtifactReadRole(artifact.privilegePrefix));
-          await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
-          await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
-          await pageObjects.policyArtifactsPage.waitForAssignedList();
-
-          await expect(pageObjects.policyArtifactsPage.artifactCard).toHaveCount(1);
-          await expect(pageObjects.policyArtifactsPage.artifactCardTitle).toContainText(
-            artifact.artifactName
-          );
-          await expect(pageObjects.policyArtifactsPage.assignButton).toHaveCount(0);
-
-          await pageObjects.policyArtifactsPage.openCardActions();
-          await expect(pageObjects.policyArtifactsPage.removeFromPolicyAction).toHaveCount(0);
         }
       );
 

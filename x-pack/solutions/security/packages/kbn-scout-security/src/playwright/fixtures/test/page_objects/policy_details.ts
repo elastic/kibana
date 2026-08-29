@@ -24,8 +24,16 @@ export class PolicyDetailsPage {
 
   async goto(policyId: string) {
     await this.page.gotoApp(`security/administration/policy/${policyId}`);
-    await this.pageContainer.waitFor({ state: 'visible' });
-    await this.settingsTab.waitFor({ state: 'visible' });
+    await this.waitForPolicyDetailsReady();
+  }
+
+  /**
+   * Reload the current policy-details URL after API-seeded list changes.
+   * Cheaper than `gotoApp` when the browser is already on this page.
+   */
+  async reload() {
+    await this.page.reload();
+    await this.waitForPolicyDetailsReady();
   }
 
   async openArtifactTab(tabTestSubj: string) {
@@ -36,6 +44,11 @@ export class PolicyDetailsPage {
 
   async waitForPolicyDetailsVisible() {
     await this.pageContainer.waitFor({ state: 'visible' });
+  }
+
+  private async waitForPolicyDetailsReady() {
+    await this.pageContainer.waitFor({ state: 'visible' });
+    await this.settingsTab.waitFor({ state: 'visible' });
   }
 
   async clickBackToOrigin() {
