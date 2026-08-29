@@ -80,6 +80,18 @@ EXECUTOR_CLIENT_REMOTE = (
     "kibana_evals_executor/client.ts"
 )
 EXECUTOR_TYPES_REMOTE = "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/types.ts"
+# Transport retries. The base image predates the fix, so without this overlay a
+# dropped connection still ends the whole suite: glm-5-2 lost 19 of 21 examples
+# twice this way, the second time on a re-run that was supposed to carry the fix.
+PATCHED_HTTP_HANDLER = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/utils/http_handler_from_kbn_client.ts"
+)
+HTTP_HANDLER_REMOTE = (
+    "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/utils/"
+    "http_handler_from_kbn_client.ts"
+)
 PATCHED_SCOUT_CONFIG = (
     KIBANA_MAIN.parent
     / "kibana.worktrees/persona-matrix-maxpayload"
@@ -277,6 +289,7 @@ def deploy(ip: str) -> None:
     # Per-example failure isolation — see PATCHED_EXECUTOR_CLIENT.
     scp(str(PATCHED_EXECUTOR_CLIENT), ip, EXECUTOR_CLIENT_REMOTE)
     scp(str(PATCHED_EXECUTOR_TYPES), ip, EXECUTOR_TYPES_REMOTE)
+    scp(str(PATCHED_HTTP_HANDLER), ip, HTTP_HANDLER_REMOTE)
     # Scout-readiness timeout overlay (PR #285302) — see PATCHED_EVAL_STACK.
     EVAL_STACK_REMOTE = (
         "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/cli/eval_stack.ts"
