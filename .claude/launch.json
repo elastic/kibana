@@ -1,0 +1,10 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kibana-dev",
+      "url": "http://localhost:5601",
+      "port": 5601
+    }
+  ]
+}

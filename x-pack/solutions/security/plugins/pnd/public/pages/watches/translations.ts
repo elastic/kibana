@@ -214,7 +214,7 @@ export const gateLabel = (gateId: PndGateId): string => {
       });
     case 'incident_contained':
       return i18n.translate('xpack.pnd.watches.detail.autonomy.gate.incidentContained', {
-        defaultMessage: 'Confirm containment',
+        defaultMessage: 'Review containment actions',
       });
     case 'apply_tuning':
       return i18n.translate('xpack.pnd.watches.detail.autonomy.gate.applyTuning', {

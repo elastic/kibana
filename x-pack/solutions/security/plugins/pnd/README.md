@@ -107,6 +107,14 @@ workflows and four `waitForInput` HITL gates, emits two signals of its own
 (`pnd.incidentClosed` and `security.detectionChangeSignal`) on containment, and exposes everything a
 UI needs as `/internal/pnd/*` routes.
 
+Since the sixth catalog watch landed, PND can also *schedule the production* of that signal: the
+**Attack Discovery Generation** watch (`system-security-watch-attack-discovery-generation`) runs
+`security.attack-discovery.run` on a cadence, and each net-new persisted discovery emits
+`security.attackDiscoveryCreated` — waking one Watch Floor run per discovery. It is deliberately a
+**separate workflow** from the Floor, not a scheduled Floor trigger; see
+[the generation watch](#the-attack-discovery-generation-watch-two-workers-one-lane) for the
+two-worker rationale. The lifecycle below still starts where it always did, at the emit.
+
 ```
 Attack Discovery 2.0 generation  (any of 4 invocation methods; see the write-path table)
    │
@@ -146,9 +154,40 @@ Attack Discovery 2.0 generation  (any of 4 invocation methods; see the write-pat
              │                            title `[Incident] …`; sibling of the investigation via
              │                            promotedFrom, not a child)
              │
-             └─ Phase 3  Incident Response
+             └─ Phase 3  Incident Response  (containment via recommended actions)
+                   recommend_actions   → ai.agent + skill://recommended-actions
+                                          (the security_solution Agent Builder skill, gated by the
+                                          `recommendedActionsSkill` experimental flag; structured
+                                          recommended_actions[] — action_type (enum of 9),
+                                          execution kibana_api|manual, priority, targets,
+                                          capability_ref, execution_params)
+                   capture_recommended_actions  (data.set — guards the possibly-absent structured
+                                          output and seeds the per-action execution ledger)
                    ensure_thread_incident_contained → POST /internal/pnd/threads/_ensure
-                   [gate] await_incident_contained      (alwaysGate — parks at every level; never armed)
+                   reason_incident_contained  (the card body; embeds the machine-readable staged
+                                          list behind the label anchor
+                                          `Staged containment actions JSON:` — the same
+                                          label-anchored contract as the tuning facts, parsed
+                                          back by the queue's per-action toggle form)
+                   [gate] await_incident_contained      (alwaysGate — parks at every level; never armed;
+                                          schema { decision, rationale, approved_actions: object[] ≤ 50 };
+                                          actionLabel 'Review containment actions')
+                   │
+                   ├─ post-gate execution, AS THE APPROVING ANALYST (a resume re-keys the run):
+                   │    capture_approved_actions
+                   │    resolve_endpoint_agent_ids   (ES|QL over metrics-endpoint.metadata_current_*)
+                   │    execute_create_case_actions          (case + alert attachments + host/ip observables)
+                   │    execute_set_asset_criticality_actions (Entity Store EUID resolve + bulk write)
+                   │    execute_isolate_host_actions / execute_kill_process_actions /
+                   │      execute_hunt_process_persistence_actions   (Endpoint response actions)
+                   │    account_unexecuted_actions   (ledger completeness — not_executed reasons:
+                   │      manual action / surfaced-only (analyze_exfiltration_ips) /
+                   │      containment dismissed / not approved)
+                   │    collect_executed_actions     (stable ledger marker the projection keys on)
+                   │    record_containment_outcome   (audit turn in the incident conversation,
+                   │      incl. approved actions + the ledger)
+                   │    incident_closed              (workflow.output — carries recommended_actions
+                   │                                  + executed_actions)
                    │
                    └─ _respond emits independently (Promise.allSettled):
                         ├─ pnd.incidentClosed on an **approved** containment only
@@ -264,7 +303,7 @@ carry this run's identity — that is [ADR-017](#adr-017), on the identity leg a
 | The trigger PND subscribes to | [`discoveries/common/workflow_triggers/attack_discovery_created/`](../discoveries/common/workflow_triggers/attack_discovery_created/) |
 
 `@kbn/pnd-common` is the shared package both the server and the browser import. It holds the
-conversation-id derivation, the gate registry, the 14-row phase catalog, the five watch tiers, all
+conversation-id derivation, the gate registry, the 16-row phase catalog, the six watch tiers, all
 route-path and trigger-id constants, the autonomy uiSettings/privilege ids, and the zod + OpenAPI
 contracts for every internal route. It uses an **explicit export allow-list** in `index.ts` (never
 `export *`), so the optimizer can tree-shake it out of the page-load bundle — which is also why
@@ -273,14 +312,16 @@ consumers must import from the **package root** and never reach into `impl/`.
 ## Enablement matrix
 
 Four switches plus the per-space watch toggle gate this feature. **Lead with the AD 2.0 scope boundary** (below) and the fact that
-the per-space Advanced Setting defaults to `false`: those two facts explain almost every "nothing happens". The AlertZero loop needs **four** of them on: plugin, feature flag, Advanced Setting, and enabling Floor.
+the per-space Advanced Setting defaults to `false`: those two facts explain almost every "nothing happens". The AlertZero loop needs **four** of them on: plugin, feature flag, Advanced Setting, and enabling Floor. Two more switches gate the two newest pieces without gating the loop itself: the `recommendedActionsSkill` experimental flag (Phase 3's staged containment actions) and the per-space Attack Discovery Generation watch toggle (the scheduled generation loop).
 
 | Switch | Where | Default | What breaks when it is off / wrong |
 |---|---|---|---|
 | `xpack.pnd.enabled` | `kibana.yml` / `config/kibana.dev.yml` | `false` | The whole plugin. No `/app/pnd`, no `/internal/pnd/*` routes, no Kibana feature/privileges, the managed-workflow **owner** is not registered so `initializeManagedWorkflows` is not called and orphan cleanup prunes any previously installed PND watches. See [When disabled](#when-disabled). |
 | `securitySolution.attackDiscoveryWorkflowsEnabled` | `feature_flags.overrides` | `true` | Attack Discovery **2.0** itself. With it off, AD 2.0 internal routes 404 and no discovery is ever generated through the 2.0 pipeline, so `security.attackDiscoveryCreated` cannot fire. This is the `discoveries` plugin's own flag. |
 | `securitySolution:enableAttackDiscoveryWorkflows` | per-space Advanced Setting (`security_solution/server/ui_settings.ts`) | **`false`** | Which AD implementation the space runs. **Off (the default) → the AD UI silently falls back to AD 1.0 (`elastic_assistant`), which PND is deliberately not integrated with, so PND sees nothing.** This is correct behavior, not a bug. It reads as a bug to anyone who has not read this section. |
-| Watch toggle (Floor, etc.) | Watch catalog / `PATCH /internal/pnd/watches/{id}` `{ enabled: true }` | **off until an analyst enables it in that space** | Catalog watches are **not** installed at boot. Opening the catalog does not install them. Until Floor is enabled in the space, `security.attackDiscoveryCreated` has no per-space subscriber and the AlertZero loop stays empty. Each watch's **Enabled** switch is on its settings page (`/app/pnd/watches/{id}`), not on Workers. After you turn **one catalog watch** on, a modal offers to enable the remaining catalog watches in that space (Floor, Officer, Dark, Deep, Post-Incident). Dismissing leaves only the one you just enabled. Detection and auto-approver are not in that offer. This is a POC convenience on top of main's per-watch toggle — **not** a fifth demo gate. |
+| Watch toggle (Floor, etc.) | Watch catalog / `PATCH /internal/pnd/watches/{id}` `{ enabled: true }` | **off until an analyst enables it in that space** | Catalog watches are **not** installed at boot. Opening the catalog does not install them. Until Floor is enabled in the space, `security.attackDiscoveryCreated` has no per-space subscriber and the AlertZero loop stays empty. Each watch's **Enabled** switch is on its settings page (`/app/pnd/watches/{id}`), not on Workers. After you turn **one catalog watch** on, a modal offers to enable the remaining catalog watches in that space (Floor, Officer, Dark, Deep, Post-Incident, Attack Discovery Generation). Dismissing leaves only the one you just enabled. Detection and auto-approver are not in that offer. This is a POC convenience on top of main's per-watch toggle — **not** a fifth demo gate. |
+| `xpack.securitySolution.enableExperimental: ['recommendedActionsSkill']` | `kibana.yml` / `config/kibana.dev.yml` | **off** | The `recommended-actions` Agent Builder skill (`security_solution`). With it off, the skill is never registered, so the Floor's `recommend_actions` step stages nothing: the containment gate still parks (its `on-failure: { continue: true }` carries the run there), but the card says plainly that no actions were staged and an approval executes nothing. Only Phase 3's *staged actions* need this flag — the rest of the loop runs without it. |
+| Attack Discovery Generation watch toggle | Same per-space catalog toggle as the row above | **off until enabled in that space** | The **scheduled generation loop** specifically. This watch is a catalog watch like the others — enabling it in a space installs `system-security-watch-attack-discovery-generation-{spaceId}` and programs its Task Manager cadence. It is not required for the lifecycle: a discovery generated any other AD 2.0 way still wakes the Floor. The loop it drives needs the same two AD 2.0 switches above (the `discoveries` feature flag and the per-space Advanced Setting) or the persist step never emits. |
 | `xpack.pnd.ui.useMockData` | `kibana.yml` / `config/kibana.dev.yml` | **`false`** (live) | Whether the pre-existing Watch catalog and investigation routes serve fixtures. **The internal routes this epic added are live-only and ignore the flag.** Set `true` only to render the older UI without a running stack. |
 
 To enable everything for local development:
@@ -289,12 +330,16 @@ To enable everything for local development:
 xpack.pnd.enabled: true
 feature_flags.overrides:
   securitySolution.attackDiscoveryWorkflowsEnabled: true
+xpack.securitySolution.enableExperimental:
+  - recommendedActionsSkill # Phase 3's staged containment actions
 # and, per space, set securitySolution:enableAttackDiscoveryWorkflows: true
 # in Stack Management → Advanced Settings (it is a UI setting, not a yml key).
 # Then enable Watch Floor in that space's catalog (each watch's settings
 # header switch). All four AlertZero gates must be on: plugin, feature flag,
 # Advanced Setting, and the watch toggle. Enabling one catalog watch offers
-# to turn the other four on in this space; that offer is convenience, not a gate.
+# to turn the other five on in this space; that offer is convenience, not a
+# gate. For scheduled generation, also enable Attack Discovery Generation in
+# the space (same catalog toggle).
 ```
 
 ### `useMockData: false` is now the safe default
@@ -379,6 +424,12 @@ generate a discovery is covered:
 
 Paths B and C are **mutually exclusive by design**: the persist step deliberately no-ops for
 scheduled runs, so no discovery is ever emitted twice.
+
+PND's own Attack Discovery Generation watch is a **method-3 caller**, not a sixth path: its
+`run_attack_discovery` step is `security.attack-discovery.run` in sync mode, so its discoveries
+persist through the same persist step and emit from site **B** like every other run-step caller.
+Nothing about the emit sites changed to support it — which is the point of the split (see
+[the generation watch](#the-attack-discovery-generation-watch-two-workers-one-lane)).
 
 The two emit sites, both inside `discoveries` (bead `kibana-idjb.5`):
 
@@ -492,7 +543,10 @@ metadata can never ride on the YAML. It comes from three carriers instead:
 Every gate schema also carries a required `rationale: { type: string }` (mandatory, non-empty),
 which combined with `hitl.respondedBy` / `respondedAt` (stamped server-side by `markStepAsResponded`)
 is the audit trail. "Modify" in the UI means editing the resume payload before submitting, not a
-separate decision kind.
+separate decision kind. The containment gate is the one gate whose schema declares more than the
+`{ decision, rationale }` pair: an optional `approved_actions` array (objects, max 50) — the staged
+actions the analyst toggled on, echoed back **as the full objects the card rendered** so the
+post-gate execute steps run exactly what was approved. Absent or empty means nothing executes.
 
 ## The gate registry
 
@@ -811,8 +865,32 @@ are visible to the **analyst** and unreadable by the **agent** (register `#22`).
 | Surface | Path | What it shows |
 |---|---|---|
 | The queue at `/` | `public/pages/conversations` (page) + `public/components/conversation_queue` (live groups) + `public/components/queue` (shared primitives: `QueueRow`, `ThreadGroupCard`, `TypeSection`, `GroupControl`) | three grouping modes (type default, type+thread, thread); four clickable pending-count KPI tiles that show zeroes **when a filter is active** and hide when the queue is genuinely empty; watch chips; a `Resolved` section holding the answered gates. User copy says **action(s)** |
-| Lifecycle flyout | `public/components/lifecycle_flyout` | **two** tabs — Overview and Timeline — with the active tab in `?lifecycleTab=`. Overview is four sections: the fields-table summary, Attachments, Review tuning and Lifecycle (`sections/`), each carrying `data-test-subj="pndLifecycleSection-{id}"` |
+| Lifecycle flyout | `public/components/lifecycle_flyout` | **two** tabs — Overview and Timeline — with the active tab in `?lifecycleTab=`. Overview is five sections: the fields-table summary, Attachments, Review tuning, Containment actions and Lifecycle (`sections/`), each carrying `data-test-subj="pndLifecycleSection-{id}"`. Containment actions sits between Review tuning and Lifecycle on purpose: like Review tuning it is the record of what a gate decision does — the per-action ledger it renders is the expanded form of the status-badge evidence the Lifecycle section pins to its execute-approved-actions row |
 | Chats | `public/pages/chats` | two paged nested groups (incidents first, investigations below); four `EuiStat` KPI tiles (no trend arrows) in `pndChatsKpiSlot`; no type badges — nesting position carries the distinction |
+
+#### The approval card renders three branches, and the containment one is fail-closed
+
+`HitlActionCard` (`public/components/hitl_action_card`) decides how a gate is answered, in
+precedence order:
+
+1. **An `incident_contained` gate whose reasoning carries staged actions** behind the
+   `Staged containment actions JSON:` label anchor (recovered by `parseRecommendedActions` — the
+   same label-anchored `| json` contract style as the tuning facts) is drawn by
+   `RecommendedActionsDecisionForm`: **one toggle per staged `kibana_api` action, every toggle
+   starting off**; a `manual` action is listed read-only, because the workflow never executes it no
+   matter what is sent; `analyze_exfiltration_ips` is marked **surfaced-only** — its toggle records
+   endorsement, not execution. Choosing **dismiss disables every toggle and empties the set**, so a
+   dismissal can never smuggle an approval. The form reports the toggled-on actions as the full
+   objects under `approved_actions`, seeded as `[]` rather than absent so an approval that toggles
+   nothing on says so explicitly.
+2. Otherwise a gate whose schema `canRenderWithSchemaForm` accepts is drawn by `SchemaForm`.
+3. Anything else — including the `{}` every row carries when its gate declared no schema — falls
+   back to the fixed approve/dismiss controls.
+
+All three report the same value map, so submission does not know which branch drew. The first
+branch is **fail-closed twice over**: a Phase-3 row whose summary lost the anchor (or was parked by
+a pre-v21 Floor) falls back to the fixed controls, where an approval carries no `approved_actions`
+and the workflow executes nothing.
 
 Seven things to know before editing these surfaces:
 
@@ -870,13 +948,24 @@ state on its own, because the chip set is derived from the rows, so any chip alw
 row. That state is reachable only when a filter outlives its rows — answer the filtered watch's last
 gate, and the refetch returns a queue without that watch while the total is still non-zero.
 
-### The Lifecycle section's phase catalog: fourteen rows, and the twelve that left
+### The Lifecycle section's phase catalog: sixteen rows, and the twelve that left
 
 [`PHASE_CATALOG`](../../packages/kbn-pnd-common/impl/lifecycle/phase_catalog/index.ts) is
-**14 entries** — ten lifecycle steps plus one row per HITL gate — of which **12 are `live`** (eight
+**16 entries** — twelve lifecycle steps plus one row per HITL gate — of which **14 are `live`** (ten
 steps and all four gates) and two are `upstream`, performed by Attack Discovery before PND runs.
 `PHASE_LIVENESS` has deliberately no third member: *a row that nothing performs is not in this
 catalog.*
+
+The recommended-actions containment work took Phase 3 from one step row to three: `step-3-2`
+*Recommend containment actions* (keyed on the `recommend_actions` step), `step-3-5` relabelled
+from *Confirm containment* to *Review containment actions* (still the containment gate's step
+row), and `step-3-6` *Execute approved actions* — keyed on `collect_executed_actions`, the stable
+ledger collector, **not** on any `execute_*` block, because the foreach fan-out produces transient
+step names the projection could never reliably find. The `step-3-6` row is also where the flyout
+pins its per-action status-badge evidence. Note that `step-3-2` was one of the twelve slugs
+`kibana-phf4.12` deleted as `not_in_slice`; it returns as a **live** row because the slice now
+performs it, which is exactly the bar the deletion set — a deleted row was never a completed one,
+and a re-added one has to be.
 
 It was 26 rows until bead `kibana-phf4.12`, which **deleted** the twelve marked `not_in_slice` —
 `1.4`, `2.2`–`2.5`, `3.1`–`3.4`, `4.1`, `4.5`, `4.6` — rather than renumbering them. A catalog row is
@@ -887,7 +976,7 @@ to deep-link to (see [Managed Watch workflows](#managed-watch-workflows)).
 
 **Numbering went with them too**, and that is the part most likely to be "fixed" back. Keeping `1.1`,
 `1.2`, `1.3`, `2.1`, `2.6` … reads as missing work; renumbering contiguously would assert that these
-ten rows are the whole lifecycle *and* make our `2.3` mean something different from the source page's
+twelve rows are the whole lifecycle *and* make our `2.3` mean something different from the source page's
 `2.3` for anyone holding both documents. Dropping the field asserts neither: `id` carries identity and
 array order carries sequence. ⚠️ The `id` **slugs** still spell the old digits (`step-2-6`), so read
 the label, not the slug — our `step-2-6` is `assess_investigation`, the Watch's own true/false-positive
@@ -991,9 +1080,11 @@ design, which retires `kibana-phf4.14`. `PATCH /internal/pnd/watches/{watchId}` 
 now unconditionally rather than per-gate, but nothing states the guarantee to a user any more. That is
 register `#57`, and it is a question for design, not a gap to close by re-adding a settings table.
 
-- **Storage:** one PND-registered, space-scoped, `readonly: true` uiSetting per system watch (5 keys),
+- **Storage:** one PND-registered, space-scoped, `readonly: true` uiSetting per system watch (6 keys),
   keyed `pnd:autonomy:<watchId>` (`buildWatchAutonomyUiSettingKey`). `readonly` keeps them out of the
-  generic Advanced Settings editor.
+  generic Advanced Settings editor. The Attack Discovery Generation watch has a key like the rest,
+  and its dial is deliberately **inert**: the watch declares no `waitForInput` step, so there is no
+  gate for any level to answer — the YAML's own `watch_policy` comment says so.
 - **Write:** `PUT /internal/pnd/autonomy`, gated on the dedicated `pnd_manage_autonomy` privilege
   (sub-feature `pndManageAutonomy`, `includeIn: 'none'`, grantable independently of `pnd all`). The
   handler authorizes on its own privilege, then writes server-side via
@@ -1121,7 +1212,7 @@ All routes are `/internal`, versioned (`elastic-api-version: 1`), and take the *
 request**, never from a parameter. Contracts (zod + OpenAPI) live in `@kbn/pnd-common` (bead
 `kibana-idjb.2`); regenerate with `yarn openapi:generate` in that package.
 
-The table is the **complete** registered set — 26 rows against the 26 `register*Route(deps)` calls in
+The table is the **complete** registered set — 28 rows against the 28 `register*Route(deps)` calls in
 [`register_routes.ts`](server/routes/register_routes.ts) — because a partial route table is how a
 reviewer comes to believe a surface has no server behind it. Rows marked
 [#284440](https://github.com/elastic/kibana/pull/284440) are upstream's paths; round 3 kept every one of
@@ -1131,17 +1222,18 @@ them and replaced the mock behind one (see [the alignment rule](#the-alignment-r
 |---|---|---|
 | `GET /internal/pnd/autonomy` | The dial UI's read path | Live: `pnd_read` plus Workflows `read` / `readManaged` (execution reads as extended privileges) so `get()` can evaluate `authzResult`. Mock: `pnd_read` only. Flat `{ watchId, autonomyLevel, autoAccept }`. YAML no longer calls it. |
 | `PUT /internal/pnd/autonomy` | Persist an autonomy level — the **only** autonomy write path | Live: `pnd_manage_autonomy` plus Workflows `read` / `readManaged` (execution reads as extended privileges) so get-before-write can evaluate `authzResult`. Mock: `pnd_manage_autonomy` only. `watchId` allow-listed against `SYSTEM_SECURITY_WATCH_IDS`; level validated `manual\|assisted\|supervised` **before** the key is built (S4). `PATCH /internal/pnd/watches/{watchId}` rejects `autonomyLevel` with 400 rather than offering a second path (register `#36`). |
-| `PATCH /internal/pnd/watches/{watchId}` | Persist one Save from the Watch settings page, or the header Enabled switch | Live: `pnd_write` plus Workflows `read` / `readManaged` (and execution reads as extended privileges) so get-after-write can evaluate `authzResult`. Mock: `pnd_write` only. Body is **plural** — `skills` (maxItems 64) — so one draft-until-Save press carries the whole page (bead `kibana-phf4.21`); every element is validated **before** any of them mutates, so a rejected element lands nothing. Refuses `autonomyLevel` (register `#36`), `worker` (`#39`) and, since bead `kibana-phf4.33`, a non-empty `approvalGates` (`#57`) with 400 — an empty array says nothing about gates and stays a no-op. Settings other than `enabled` are mock-mode-only and answer 501 when `useMockData: false`. |
+| `PATCH /internal/pnd/watches/{watchId}` | Persist one Save from the Watch settings page, or the header Enabled switch | Live: `pnd_write` plus Workflows `read` / `readManaged` (and execution reads as extended privileges) so get-after-write can evaluate `authzResult`. Mock: `pnd_write` only. Body is **plural** — `skills` (maxItems 64) — so one draft-until-Save press carries the whole page (bead `kibana-phf4.21`); every element is validated **before** any of them mutates, so a rejected element lands nothing. Refuses `autonomyLevel` (register `#36`), `worker` (`#39`) and, since bead `kibana-phf4.33`, a non-empty `approvalGates` (`#57`) with 400 — an empty array says nothing about gates and stays a no-op. Settings persist as per-space managed-workflow **template values** through each watch's settings registration, which is also where per-field refusals live. The Attack Discovery Generation watch's registration is the one that accepts more than `enabled`: `triggers.scheduleId` (the Frequency select — `every-5m` / `every-15m` / `every-30m` / `hourly`) and `generation` (`alertSize` 1–500, `lookback`, `connectorId`; `''` means the server-resolved default AI connector). A `triggers` or `generation` write **re-asserts enablement** on the per-space document, because a managed re-render alone never reprograms Task Manager — the idempotent `updateWorkflow({ enabled: true })` is what makes the new cadence take effect. |
+| `POST /internal/pnd/watches/{watchId}/_schedule` | Register the Task Manager schedule for a watch's `scheduled` trigger in the caller's space | Same authz as the PATCH. Thin wrapper over `WatchesService.ensureSchedule`: a managed install writes the workflow document but never wires the scheduler, so a scheduled watch does not run until an enablement update reaches the Workflows management API — this route re-asserts `enabled: true` for the per-space document (idempotent; Task Manager updates the deterministic task in place). 404 when the watch is not installed in the space. |
 | `GET /internal/pnd/conversations/_derive` | UUIDv5 ids + rendered AD markdown | Resolves the AD **as the caller** (S3), 404 when not readable. The Watch Floor's first step. |
 | `GET /internal/pnd/conversations` | Derived-id set ∩ Agent Builder list | Returns typed `PndConversation`s in all four kinds (`investigation` / `incident` / `tuning` / `thread`); a `thread` row also carries its `gateId`, plus recovered `parentConversationId` / `parentConversationRelation` and (on incidents) `promotedFrom`. Registers **eight** derived ids per AD alert (three alert-keyed, four threads, one Deep Watch worker). `kind` / `page` / `perPage` page each chat-page group independently; omit them for the unpaged set lifecycle still reads. Read by four surfaces on one react-query key — the chats page, the lifecycle view, the flyout's Attachments section, and the queue, which uses it to **name** an investigation group and for nothing else. |
 | `POST /internal/pnd/threads/_ensure` | Materialise the `[Thread]` conversation for one proposal | `pnd_threads_write`. Body is `{ correlationId, gateId }` **only**; unknown properties are dropped rather than rejected, because a workflow `kibana.request` must never be 400ed for an extra field. Idempotent. |
 | `POST /internal/pnd/signals/_detection_change` | Emit a coverage-gap claim for a concluded investigation that never parked a HITL gate | `pnd_proposals_respond`. Called by the Floor's `not_an_incident` branch with `continue: true`. Body `{ correlationId, gapDescription, sourceRunId }`; `sourceWatchId` is stamped as Watch Floor. Always 200 `{ emitted }`. |
 | `GET /internal/pnd/conversations/{conversationId}/attachments` | List a conversation's Agent Builder attachments | `pnd_read`. A narrow projection, not a passthrough. |
 | `GET /internal/pnd/proposals` | Pending gates grouped by bucket | Enriched from the gate registry + `context.event` + reasoning; deduped by `(adId, gateId)`, newest kept (S10). |
-| `POST /internal/pnd/proposals/{sourceId}/_respond` | Resume a pending gate | Dual privilege; **workflow id re-derived from the persisted execution** and allow-listed to `PND_WATCH_WORKFLOW_IDS`; `stepId` must be a registered gate; always via `resumeWorkflowExecution` (S1). Emits `pnd.incidentClosed` on an **approved** containment only, and `security.detectionChangeSignal` at every Floor HITL terminal (a dismissal at open-investigation or promote-incident, and either decision at containment), independently and best-effort ([ADR-014](#adr-014)). |
+| `POST /internal/pnd/proposals/{sourceId}/_respond` | Resume a pending gate | Dual privilege; **workflow id re-derived from the persisted execution** and allow-listed to `PND_WATCH_WORKFLOW_IDS`; `stepId` must be a registered gate; always via `resumeWorkflowExecution` (S1). `input` takes an optional `approved_actions` (objects, max 50) beside the required `{ decision, rationale }` and forwards it on the resume — only the containment gate's schema declares the key, and the engine strips it on any gate that does not, so forwarding is safe. Emits `pnd.incidentClosed` on an **approved** containment only, and `security.detectionChangeSignal` at every Floor HITL terminal (a dismissal at open-investigation or promote-incident, and either decision at containment), independently and best-effort ([ADR-014](#adr-014)). |
 | `POST /internal/pnd/proposals/_auto_respond` | Auto-accept pending gates the current uiSettings level permits | `pnd_manage_autonomy` AND Workflows `execute` (S1/D1) plus managed definition read (`get()`) **and** managed-execution read (the parked-gate listing is the payload, same as `GET /proposals`). Re-enforces `alwaysGate` in the partition helper **and** in `approveGate` (S5 / S5-b). Body `{ watchId, origin: 'auto' \| 'dial' }`; origin selects `pnd-autonomy-auto` / `pnd-autonomy-dial`. Payload from `gate.autoApproveResponse`. Replaces `_sweep`. |
 | `GET /internal/pnd/runs` | Recent Watch runs (AD 2.0 "Generations" equivalent) | Closed `PndRunStatus` enum; `deepLinkPath = /{workflowId}?tab=executions&executionId={runId}`; filtered to caller-readable discoveries via `_find?ids=` (S3). **Dismissal is client-side only** (PND has no event writer): a documented divergence from AD Generations. |
-| `GET /internal/pnd/executions/{correlationId}` | Four-phase projection | Always-complete **14-row** `PHASE_CATALOG` skeleton (10 step rows + 4 gate rows), aggregating Watch Floor + Post-Incident step executions via the shared `correlateExecutions` helper; the two `upstream` rows read `upstream`, unrun live rows `not_started`. Same AD-as-caller authz as `_derive` (S3). |
+| `GET /internal/pnd/executions/{correlationId}` | Four-phase projection | Always-complete **16-row** `PHASE_CATALOG` skeleton (12 step rows + 4 gate rows), aggregating Watch Floor + Post-Incident step executions via the shared `correlateExecutions` helper; the two `upstream` rows read `upstream`, unrun live rows `not_started`. Also returns an optional `containmentActions` — the per-action execution ledger projected from the `collect_executed_actions` step's `containment_executed_actions` output (statuses `succeeded \| submitted \| failed \| skipped \| not_executed`), absent until that step has run. Same AD-as-caller authz as `_derive` (S3). |
 | `GET /internal/pnd/tuning/candidate-rules` | The distinct detection rules behind one discovery's constituent alerts — the menu `draft_tuning` chooses from instead of recalling a rule id (register `#24`) | `pnd_read`. The discovery resolves **as the caller** (S3) and an unreadable id is a **404, not an empty menu**, because an empty menu is a real answer here. The alert fan-out is refused above `PND_DISCOVERY_CONTEXT_MAX_ALERT_IDS` with a 400 raised *before* any query runs (a truncated menu would narrow the choice while the drafting step believed it saw every rule), and the distinct rules are capped by the aggregation's `terms` size at `PND_TUNING_CANDIDATE_RULES_MAX`. A genuine failure is a visible **500**, not `rules: []` — the opposite of `/discovery-context`, where an empty list is an absent overlay rather than a claim. Optional `ruleRef` filters to the DCS's rule; a `ruleRef` that matches nothing degrades to the **full** list rather than an empty one. |
 | `POST /internal/pnd/tuning/{proposalId}/_apply` | Apply the drafted rule tuning | `PATCH /api/detection_engine/rules` executed **in the approving user's request context** (S2), gated on rules-all. Follows a `body.id \| rule_id` contract. A `query` change is applied only when a **re-fetch of the rule confirms its `type` is `query`**; any other type — and an unconfirmable one — is a 400 naming the field, never a partial patch. |
 | `GET /internal/pnd/watches` | The Watch catalog | `pnd_read` **plus** Workflows' own `read` and `readManaged` in live mode, so PND cannot become a way around Workflows' managed-read authz. The two execution-read privileges are `extendedPrivileges`, not required: they never gate the route, they only let the projection down-scope run enrichment for a caller who cannot read executions ([`watch_route_security.ts`](server/routes/watches/watch_route_security.ts)). |
@@ -1224,7 +1316,7 @@ Agent-Builder-as-caller (D7).
 
 ## Managed Watch workflows
 
-Owner plugin id: `pnd`. Ten managed definitions — five catalog watches (Floor, Officer, Dark, Deep, Post-Incident), #283488's Detection Watch (a static global helper, **not** a catalog row), the per-run auto-approver, plus #283488's three detection-rule
+Owner plugin id: `pnd`. Eleven managed definitions — six catalog watches (Floor, Officer, Dark, Deep, Post-Incident, Attack Discovery Generation), #283488's Detection Watch (a static global helper, **not** a catalog row), the per-run auto-approver, plus #283488's three detection-rule
 workers — declared as inline YAML strings in
 [`kbn-workflows/managed/definitions/pnd/`](../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/)
 (the file is the runtime source of truth). [`initializeManagedWorkflows`](server/managed_workflows/initialize_managed_workflows.ts)
@@ -1245,16 +1337,60 @@ wipe the local workflows index, then re-enable Floor. Kibana start never fails o
 
 | Watch id | Tier | Managed `version` | Role |
 |---|---|---|---|
-| `system-security-watch-floor` | floor | **16** | **Watch Floor Worker** (Phases 1–3). Always-park gates, mint-before-first-gate, Deep Watch worker, two arm steps, Agent Builder title prefixes |
-| `system-security-watch-officer` | officer | 5 | Catalog stub |
-| `system-security-watch-dark` | dark | 5 | Catalog stub |
-| `system-security-watch-deep` | deep | **11** | **Invokable investigation worker** (inputs + `workflow.output` `{ isIncident, rationale, proposal }`); standalone `alert` + `manual` triggers survive |
-| `system-security-watch-post-incident` | post-incident | **12** | **Post-Incident Watch** (Phase 4), the 5th tier; subscribes to `security.detectionChangeSignal` ([ADR-014](#adr-014)) |
-| `system-security-watch-detection` | detection | 7 | Detection watch (#283488). ⚠️ **`manual` trigger only today** — its YAML declares no event trigger at all, so it does **not** subscribe to `security.detectionChangeSignal` and PND's post-incident watch is the signal's only consumer. The [2026-08-14 Detection Watch sync](#the-2026-08-14-detection-watch-sync) settles its MVP trigger as a custom event on incident **creation**, which is register `#63`'s divergence from our containment-time emit |
+| `system-security-watch-floor` | floor | **22** | **Watch Floor Worker** (Phases 1–3). Always-park gates, mint-before-first-gate, Deep Watch worker, two arm steps, Agent Builder title prefixes; since v21 Phase 3 is recommended-actions based — `recommend_actions` stages a machine-readable action list, the containment gate approves a per-action subset, and the approved actions execute post-gate as the approving analyst into a per-action ledger |
+| `system-security-watch-officer` | officer | 6 | Catalog stub |
+| `system-security-watch-dark` | dark | 6 | Catalog stub |
+| `system-security-watch-deep` | deep | **13** | **Invokable investigation worker** (inputs + `workflow.output` `{ isIncident, rationale, proposal }`); standalone `alert` + `manual` triggers survive |
+| `system-security-watch-post-incident` | post-incident | **14** | **Post-Incident Watch** (Phase 4), the 5th tier; subscribes to `security.detectionChangeSignal` ([ADR-014](#adr-014)) |
+| `system-security-watch-attack-discovery-generation` | attack-discovery-generation | **1** | **Attack Discovery Generation worker**, the 6th tier and the [only scheduled catalog watch](#the-attack-discovery-generation-watch-two-workers-one-lane). Scheduled + `manual` triggers, concurrency `{ key: watch-attack-discovery-generation, strategy: drop, max: 1 }`, one sync `security.attack-discovery.run` step, no gates |
+| `system-security-watch-detection` | detection | 8 | Detection watch (#283488). ⚠️ **`manual` trigger only today** — its YAML declares no event trigger at all, so it does **not** subscribe to `security.detectionChangeSignal` and PND's post-incident watch is the signal's only consumer. The [2026-08-14 Detection Watch sync](#the-2026-08-14-detection-watch-sync) settles its MVP trigger as a custom event on incident **creation**, which is register `#63`'s divergence from our containment-time emit |
 
 `kibana-phf4.12` retired the sixth non-watch definition, `system-security-lifecycle-stub`. It existed
 only to give the twelve documented-but-unbuilt catalog rows a `data.set` step to link to; deleting
 those rows deleted its reason to exist.
+
+### The Attack Discovery Generation watch: two workers, one lane
+
+`system-security-watch-attack-discovery-generation` is the sixth catalog watch and the only
+scheduled one. Its whole job is generation: a `scheduled` trigger (plus a `manual` trigger taking
+optional `connector_id` / `size` / `start` / `end`) fires a single **sync**
+`security.attack-discovery.run` step (`timeout: 10m`), then `emit_result` reports
+`{ discovery_count, execution_uuid, status }`. Persisting flows through the `discoveries` plugin's
+persist step, which emits one `security.attackDiscoveryCreated` per **net-new** discovery
+(feature-flag gated, emit site B) — that event, not this workflow, is what wakes one Watch Floor run
+per discovery. Overlapping ticks would stack redundant generations, so the YAML declares
+`concurrency: { key: watch-attack-discovery-generation, strategy: drop, max: 1 }` — a tick that
+arrives while one is in flight is dropped, never queued.
+
+**Everything configurable about it is a template value**, which is what makes the settings page a
+real control surface rather than a YAML editor: the cadence (`scheduleEvery`, offered by the
+Triggers section's Frequency select as `every-5m` / `every-15m` / `every-30m` / `hourly`) and the
+generation options (`alertSize` 1–500, `lookback`, `connectorId` — the empty string means the
+server-resolved default AI connector, and the run step treats `''` as absent). The watch detail
+page grows a **Generation** section for exactly these three, rendered only for this watch because
+only its settings registration projects a `generation` section. A saved `triggers` or `generation`
+edit re-renders the per-space install **and re-asserts enablement**, because a managed re-render
+alone never reprograms Task Manager — the idempotent `updateWorkflow({ enabled: true })` is what
+makes the new cadence take effect (the same call `POST /internal/pnd/watches/{watchId}/_schedule` /
+`WatchesService.ensureSchedule` exposes on its own).
+
+**Why two workers instead of a scheduled Floor trigger** (Paulo's design,
+[elastic/security-team#18972](https://github.com/elastic/security-team/issues/18972)): generation
+and the per-discovery HITL lifecycle are different workflows with incompatible lifetimes. A Floor
+run parks for up to 30 days on a human gate; a generation tick must fire every N minutes no matter
+what is parked — folding them into one workflow means a parked gate can stall or (under the drop
+concurrency policy the tick needs) silently **drop** the next generation. Splitting them also makes
+the engine's avoid-loop guard pass: when the persist step emits `security.attackDiscoveryCreated`,
+the Floor is not in the emitting run's event chain, so the Floor's subscription is not a self-loop.
+And the split keeps the roles legible — this worker generates, the Floor investigates and responds —
+which is the D21 vocabulary applied literally: two Workers, one Watch surface.
+
+The watch **parks no gates** (its autonomy dial exists and is inert — see
+[Autonomy](#autonomy)), yet it *is* on `SYSTEM_SECURITY_WATCH_IDS`: catalog membership is what
+drives its settings/autonomy keys and its catalog placeholder, and a resume allow-list entry for a
+watch with no `waitForInput` step is unreachable rather than dangerous. The historical combined
+prototype — a single `system-security-watch-attack-discovery` worker that generated *and* wrote
+investigations in one run — is retired; `docs/ad-worker-flow.mmd` now draws the split flow.
 
 The three detection-rule **workers**, Deep Watch, and the auto-approver are installed alongside the watches but carry
 `WORKER_VISIBILITY` and no `watch` selector, so they never render as a watch tier —
@@ -1262,7 +1398,7 @@ The three detection-rule **workers**, Deep Watch, and the auto-approver are inst
 
 | Worker id | Managed `version` | Called by |
 |---|---|---|
-| `system-security-watch-deep` | **11** | the Floor's `investigate` step (`workflow.execute`); also keeps standalone `alert` + `manual` triggers |
+| `system-security-watch-deep` | **13** | the Floor's `investigate` step (`workflow.execute`); also keeps standalone `alert` + `manual` triggers |
 | `system-security-watch-auto-approver` | **1** | the Floor's two `arm_auto_approver_*` steps (`workflow.executeAsync`); bounded ladder POSTs `_auto_respond`; never itself resumed |
 | `system-security-rule-tuning` | 9 | the Detection Watch, on its scheduled sweep |
 | `system-security-rule-creation` | 7 | the Detection Watch, when a caller supplies an ATT&CK technique |
@@ -1310,6 +1446,20 @@ emit rather than at the install. `7→8`: the anchored labels moved (`Proposed c
 current `parseTuningProposal` does not find and every card falls back to the legacy prose reader —
 while the apply route already accepts `query`, which is the widened boundary with none of the review
 flow that justifies widening it.
+
+Neither history above is exhaustive up to the table's current numbers — later rounds (the per-space
+install / template-values adoption, HITL step-timeout hardening, and this round's recommended-actions
+work) each carried their own bumps — but one recent Floor bump deserves the same silent-failure note
+as the two named above: **the run that took Floor to 21 is the recommended-actions rewrite of
+Phase 3**. An un-bumped edit there would leave an installed stack parking the *old* prose containment
+gate while the browser ships the per-action toggle form: `parseRecommendedActions` finds no
+`Staged containment actions JSON:` anchor, the card falls back to the fixed controls, and an approval
+carries no `approved_actions` — so nothing executes, with every symptom pointing at the skill rather
+than at the install. The same fallback is also the **designed** behavior for rows parked by an older
+Floor, which is exactly why the un-bumped failure mode is invisible. (`21→22` then gave
+`open_incident` the same `on-failure: { continue: true }` treatment as `draft_tuning`
+([ADR-011](#adr-011)) — a failed incident brief no longer kills the run before the containment
+gate, and `reason_incident_contained` says plainly when the brief is absent.)
 
 ### Who composes the preview body
 
@@ -1727,8 +1877,8 @@ Done differently on purpose. Each of these is a decision to defend, not a gap to
 | 44 | **At Supervised, PND still gates containment and tuning**, which is narrower than the 2026-08-10 Watch Floor AD WG's description of Supervised (attacks run all the way through post-incident follow-on, with the user reviewing after the fact) | D15 is Product-owned and says consequential actions always gate regardless of level, which is why `await_incident_contained` and `await_apply_tuning` carry `alwaysGate`, no gate has an `if` ancestor at all, and `_auto_respond` plus `approveGate` refuse them unconditionally (S5 / S5-b) — three independent layers, described under [Autonomy](#autonomy). A fourth layer, the Watch settings page's refusal to *offer or record* a weaker requirement, was retired with the Approval gates section itself in bead `kibana-phf4.33` (register `#57`), so the guarantee is now enforced only in code and stated to a customer nowhere. Both positions cannot hold unless "consequential" is narrower than those two gates, so this is [raised as an open question](#programme-decisions-absorbed-2026-08-11-and-2026-08-10) rather than silently reconciled — and we keep the conservative side, because being wrong in the direction of *one extra approval* is recoverable and being wrong in the other direction is a production rule change nobody saw. It matters more since bead `kibana-phf4.11` widened `PND_TUNABLE_RULE_FIELDS` to include `query`: under the WG's reading, Supervised would let an LLM-authored query change reach a production detection rule unattended. |
 | 45 | **One queue, at #284440's paths, with our design-aligned internals — and one proposal *pipe* behind two registered *paths*.** This row used to record a deliberate, temporary duplication: after the round-3 rebase (`kibana-phf4.24`) the tree carried **both** our queue (`pages/brief`, `PROPOSAL_SECTION_ORDER`, `GET /internal/pnd/proposals`) and upstream's ([#284440](https://github.com/elastic/kibana/pull/284440)'s `conversation_card/`, `conversation_queue/`, `pages/conversations/`, `components/modals/`, `filters/blast_radius/`, `hooks/use_investigations_api.ts` and the three re-registered `/internal/pnd/investigations*` routes). `kibana-phf4.29` then collapsed the two contracts (one parked-gate projection, `readPendingProposalRows`, feeding both proposal routes), and `kibana-phf4.30` collapsed the two components: `pages/brief/**` is gone, and `ConversationsPage` / `ConversationQueue` / `ConversationCard` / `BlastRadius` keep upstream's paths and exported names with our internals and the real `useProposals()` data path. `routes.tsx` points `/` at `ConversationsPage`. What `.30` deleted of **theirs**, each because its only caller went with it: `conversation_card/{conversation_meta_info,actions_group,action_icon_button,base_actions}` (the icon-button interaction model the 2026-08-11 spec replaced with *one* primary action opening the HITL card, and the relative timestamp the 2026-08-18 decision removed) and `components/modals/**` (`assign_action_modal` / `base_action_modal`, both `// TODO: use … API call hook` against no API). What it deleted of **ours**: `pages/brief/index.tsx`, `proposal_row/**`, `proposal_group_list/**`, `brief_header/**`, `components/landing_hero/**`, `helpers/{proposal_section_order,bucket_color,get_time_of_day}` | ⚠️ `hooks/use_investigations_api.ts` and the `MOCK_INVESTIGATIONS` samples are **not** dead code, and the reason changed with `kibana-phf4.32`: `pages/investigations/investigation_detail.tsx` is **deleted** (decision 1 of the 2026-08-17 sync makes the flyout the only detail surface), so no browser code calls these three hooks any more — but all three routes are still **registered** at upstream's exact paths, and deleting a correct, S11-guarded client for a live route is how the next surface that needs it ends up writing a second one. Upstream's two `/investigations/*` **browser** paths survive too, as deep links that open the flyout (register `#56`). And `components/conversation_row/**` is **not** a second queue row despite the name: it is epic 2's shared conversations-list row (`kibana-2r6y.16`), rendering a `PndConversation` for `pages/chats`, and `.30`'s acceptance criteria named it only because git's rename detection had reported `conversation_card/ → conversation_row/` during the `.24` rebase. Deleting it would break the chats page, and no design decision asks for that, so it stays. The remaining duplication is `list_investigations` / `get_investigation`, still fixtures-under-`useMockData` and `[]`/404 otherwise because no live `Investigation` object exists to project. After `kibana-phf4.32` that gap is **inert** rather than pending: no browser surface reads either route, and the flyout those URLs now open is keyed on an `correlationId` and reads `executions` / `proposals` / `conversations`, none of which need an `Investigation` object. Projecting one is a data-layer question for whoever first needs investigation *metadata* (title, status) in live mode — not a UI cleanup |
 | 46 | ✅ **Decision 7 itself is implemented, not diverged from** (bead `kibana-phf4.31`), and this row records the one thing implementing it *created*. The standing divergence it replaces was never a numbered entry — it was the `c3ea329` row of *The Brief's design baseline* table below ("three queue grouping modes"), which `kibana-phf4.31` rewrote in place rather than deleting; read the two together. ⚠️ **Amended by `kibana-tjil.8` / C4:** the investigation container is minted **before** the first gate parks, so `"Not yet in an investigation"` is no longer the normal state of a new discovery. What remains in that group is an uncorrelated run (`correlationId === ''`) and an unregistered `gateId` (fail-closed). Bead `.14` also restored **three selectable grouping modes** with group-by-type as the default, so investigation grouping is one mode, not a replacement for category grouping | **The orphan-as-normal-case justification `#27` recorded is closed.** Uncorrelated runs still have nowhere else to sit, and dropping them would hide a real failure. Membership is still read from `PND_GATE_REGISTRY` rather than from `GET /internal/pnd/conversations`, so a failed conversations read degrades a heading and never the grouping |
-| 49 | ✅ **Decision 1 is implemented (bead `kibana-phf4.32`): the flyout has two tabs, and none of the three that went away became unreachable.** The 2026-08-17 Experience/UX sync, decision 1: an **Overview** tab (description, related items, fields table, attachments) and a separate **Timeline** tab. Ours were Overview / Attachments / Review tuning / Timeline / Lifecycle ([`components/lifecycle_flyout`](public/components/lifecycle_flyout/lifecycle_flyout.tsx)) | The tab bar is now exactly `['overview', 'timeline']` (`LIFECYCLE_TAB_IDS`), and Overview is a **composition of four sections** under [`sections/`](public/components/lifecycle_flyout/sections), each with its own read, its own empty state, its own tests and a `data-test-subj="pndLifecycleSection-{id}"`: `summary` (the fields table, formerly the Overview tab's whole body), `attachments`, `tuning`, `lifecycle`. Where each went, and why it was not a mechanical merge: *Attachments* is a real read of a real API (`GET /internal/pnd/conversations/{id}/attachments`, register `#22`) and decision 1 lists attachments as Overview content, so it folded without argument. *Review tuning* is an **authorization** surface, not a description — it is where the analyst reads what a `tune` approval would write to a production detection rule, merged through `resolve_tuning_evidence` — so it keeps its own heading and its own section block rather than being blended into the fields table above it; the tuning evidence and both backtest counts are reachable in one scroll instead of behind a tab click. *Lifecycle* is the 14-row `PHASE_CATALOG` projection, a different question from *what happened when* (`#50`), with no case-flyout analogue at all, so folding it in was the only way to reach two tabs without losing it. The three retired ids are **kept as section ids**, so a `?lifecycleTab=tuning` link a colleague pasted before the sync still names content that exists and lands on Overview where it now lives (`readLifecycleTabId` was already total). ⚠️ Read the dates before citing the prototype at us: its own `src/pages/landing/flyout/caseFlyoutTabs.ts` still lists **five** tabs (`overview`, `attachments`, `timeline`, `actions`, `people`) after the 2026-08-17 sync decided two — the prototype lags its own decision, and the decision wins. Decision 1's *related items* and *fields table* are **not** two new surfaces: the summary section's `EuiDescriptionList` **is** the fields table, and PND has no related-items projection to draw — D1 says *"Bonnie still applying the design"*, so the structure is built and no visual detail the decision does not give was invented. |
-| 50 | **No "show more" on the Timeline tab.** Decision 2's second half asks for a standard *show more* after ~20–25 items; [`timeline_tab`](public/components/lifecycle_flyout/tabs/timeline_tab/index.tsx) renders every entry it has | **The cap has nothing to cap, and saying why matters more than adding one.** Our timeline is a projection of the fixed 14-row `PHASE_CATALOG`, filtered to the rows that recorded a `startedAt` — so it is bounded at **14** by construction, below the threshold, and a *show more* control would be a permanently-hidden affordance. The design's ~20–25 is written for a **case's user-action history**, which is unbounded because every comment, status change and assignment appends to it. The condition under which this becomes real work is worth writing down: the moment a Timeline tab renders conversation rounds, thread messages or `GET /internal/pnd/proposals/history` rows instead of catalog steps, the bound disappears and the cap is needed on the same day. Paired with `#47`, which is the component half of the same decision. |
+| 49 | ✅ **Decision 1 is implemented (bead `kibana-phf4.32`): the flyout has two tabs, and none of the three that went away became unreachable.** The 2026-08-17 Experience/UX sync, decision 1: an **Overview** tab (description, related items, fields table, attachments) and a separate **Timeline** tab. Ours were Overview / Attachments / Review tuning / Timeline / Lifecycle ([`components/lifecycle_flyout`](public/components/lifecycle_flyout/lifecycle_flyout.tsx)) | The tab bar is now exactly `['overview', 'timeline']` (`LIFECYCLE_TAB_IDS`), and Overview is a **composition of sections** under [`sections/`](public/components/lifecycle_flyout/sections) — four when this decision landed, five since the recommended-actions work added `actions` (Containment actions) — each with its own read, its own empty state, its own tests and a `data-test-subj="pndLifecycleSection-{id}"`: `summary` (the fields table, formerly the Overview tab's whole body), `attachments`, `tuning`, `actions`, `lifecycle`. Where each went, and why it was not a mechanical merge: *Attachments* is a real read of a real API (`GET /internal/pnd/conversations/{id}/attachments`, register `#22`) and decision 1 lists attachments as Overview content, so it folded without argument. *Review tuning* is an **authorization** surface, not a description — it is where the analyst reads what a `tune` approval would write to a production detection rule, merged through `resolve_tuning_evidence` — so it keeps its own heading and its own section block rather than being blended into the fields table above it; the tuning evidence and both backtest counts are reachable in one scroll instead of behind a tab click. *Lifecycle* is the (now 16-row) `PHASE_CATALOG` projection, a different question from *what happened when* (`#50`), with no case-flyout analogue at all, so folding it in was the only way to reach two tabs without losing it. The three retired ids are **kept as section ids**, so a `?lifecycleTab=tuning` link a colleague pasted before the sync still names content that exists and lands on Overview where it now lives (`readLifecycleTabId` was already total). ⚠️ Read the dates before citing the prototype at us: its own `src/pages/landing/flyout/caseFlyoutTabs.ts` still lists **five** tabs (`overview`, `attachments`, `timeline`, `actions`, `people`) after the 2026-08-17 sync decided two — the prototype lags its own decision, and the decision wins. Decision 1's *related items* and *fields table* are **not** two new surfaces: the summary section's `EuiDescriptionList` **is** the fields table, and PND has no related-items projection to draw — D1 says *"Bonnie still applying the design"*, so the structure is built and no visual detail the decision does not give was invented. |
+| 50 | **No "show more" on the Timeline tab.** Decision 2's second half asks for a standard *show more* after ~20–25 items; [`timeline_tab`](public/components/lifecycle_flyout/tabs/timeline_tab/index.tsx) renders every entry it has | **The cap has nothing to cap, and saying why matters more than adding one.** Our timeline is a projection of the fixed 16-row `PHASE_CATALOG`, filtered to the rows that recorded a `startedAt` — so it is bounded at **16** by construction, below the threshold, and a *show more* control would be a permanently-hidden affordance. The design's ~20–25 is written for a **case's user-action history**, which is unbounded because every comment, status change and assignment appends to it. The condition under which this becomes real work is worth writing down: the moment a Timeline tab renders conversation rounds, thread messages or `GET /internal/pnd/proposals/history` rows instead of catalog steps, the bound disappears and the cap is needed on the same day. Paired with `#47`, which is the component half of the same decision. |
 | 51 | **"Open in chat" is a route change to `/chats?conversationId=`, not a secondary overlay flyout.** The 2026-08-17 sync, decision 3: *"'open in chat' opens a secondary overlay flyout, not a content-push like today's alert add-to-chat"*. The queue card's chat button does `history.push({ pathname: '/chats', search: … })` ([`conversation_card.tsx`](public/components/conversation_card/conversation_card.tsx)) | **We are on the right side of what decision 3 rules out, and not yet on the side it asks for.** The thing it forbids is the content push; a route change is not one, and `/chats` is PND's only conversation surface. What blocks the overlay is concrete rather than a preference: `EmbeddableConversation` cannot be pointed at an existing `conversationId` (register `#8`), so an overlay flyout could hold only the same six-field projection plus attachments panel `ChatDetailPanel` already draws at `/chats` — a second surface for identical content, and a second thing to keep honest, buying nothing until `#8` closes. The one thing the overlay *would* buy is the context in `#52`, which is why the two are read together: an overlay preserves the queue behind it by construction, and that is the actual value of decision 3 to us. Note the flyout PND *does* have is already an overlay under this rule — the lifecycle opens over the queue via `?lifecycle=`, keeping the row on screen and letting Back close it — so the idiom exists and is not what is missing. |
 | 52 | **The known lost-context bug on "open in chat": we have the page-state half of it, not the no-way-back half.** The 2026-08-17 sync, decision 4: *"losing context on 'open in chat' is a known bug to fix — there must be a way to return to the originating context"* | **Checked rather than assumed, and the answer is one of each.** There **is** a way back, deliberately: the card pushes rather than replaces (*"Push rather than replace: Back returns the analyst to the queue they left"*), and Back restores the whole previous location — including `?lifecycle=` if an overlay was open behind the row. So the sharpest form of the bug, a one-way trip, is not ours. What **is** lost is everything the queue holds in React state rather than in the URL: the groups the analyst collapsed (`openOverrides` in `ConversationQueue`), the pressed blast-radius chip (`activeEntity`), the watch chip (`useWatchFilter`), the pending reveal, and the scroll position. There is also no in-app *back to the queue* control on `/chats` — the browser's Back button is the whole affordance, which is a real gap for anyone who arrived at `/chats` from the nav. Two fixes are on the table and they are not equivalent: lift that state into the URL (which makes it survive any navigation, and makes a queue view shareable), or land decision 3's overlay (`#51`), which sidesteps the question by never leaving the page. **The overlay is the better one** and it is why `#51` is not merely cosmetic. Recorded, not fixed: the fix belongs with whoever lands decision 3, and this row is the account of what "context" means here so it is not re-derived. |
 | 53 | ⚠️ **UNSETTLED — the object model. Recorded, and the gate deliberately not touched.** The 2026-08-17 sync, decision 5: queue rows are action **Proposals** under a parent **Investigation**; approving or taking an action marks the proposal **done** (it moves to results) and does **not** create an incident; **converting to an Incident** is a deliberate user action (re-templating the investigation) for true positives; an Incident is a wrapper/collection of proposals. The note's own action item is *"Nir + Paul to continue offline and confirm the model"* | **An unsettled note is not a decision, so nothing in the engine changed — and the compliance question was answered from the YAML rather than asserted. We already comply, and decision 5 needed only decision 6's copy change.** Read out of [`watch_floor.yaml`](../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_floor.yaml) and `PND_GATE_REGISTRY`: exactly one of the four gates creates an Incident, and it is `await_promote_incident` — `role: 'container'`, `parentKind: 'incident'`, and the only gate whose resume reaches `open_incident`, the step that opens the Incident conversation. That gate **is** decision 5's "deliberate user action": approving it converts, dismissing it opens nothing at all (`stop_if_dismissed_incident` records the refusal in the *investigation* conversation and ends the run, because *"creating one for a refused escalation would be a lie"*). The other three gates each mark their proposal done without creating anything — `incident_contained` closes an incident that already exists, `apply_tuning` writes to a detection rule, `open_investigation` opens the investigation container — and an answered gate leaves the queue for the Resolved section, which is decision 5's "moves to results". "Incident = a wrapper of proposals" is the registry's `parentKind: 'incident'` on the containment and tuning gates. One place model and engine differ and it is the decision's own carve-out: at a raised autonomy level `promote_incident` auto-accepts and the Incident is created with no user action, which decision 5 endorses (*"auto-incident creation aligns with higher autonomy"*). ⛔ **Until Nir and Paul confirm the model, the gate registry, the watch YAML and the four gate ids do not change** — a rename here repoints no conversation (every UUIDv5 namespace keys on the alert id) but it does change `autoAccept` map keys, `_respond`'s allow-list and the resume payloads of every parked run, so it is a migration dressed as a rename. |
@@ -1800,7 +1950,7 @@ nothing. A ticked box means the entry above says *(closed)*.
 ⚠️ The fourteen `lifecycle_stub.yaml` / `stub_step_*` entries that the baseline audit collapsed under
 one parent checkbox are **absent from this list rather than ticked**. `kibana-phf4.12` deleted the
 stub workflow and the twelve `not_in_slice` phase-catalog rows together, so there is no stub left to
-close — see [the phase catalog](#the-lifecycle-sections-phase-catalog-fourteen-rows-and-the-twelve-that-left).
+close — see [the phase catalog](#the-lifecycle-sections-phase-catalog-sixteen-rows-and-the-twelve-that-left).
 A deleted row is not a completed one, and the distinction is the whole reason this list keys on
 register numbers: numbers are permanent, positions are not.
 
@@ -1943,7 +2093,11 @@ PND's contract does not have and will not invent, so the label is the gate's own
 registry instead — `Open investigation`, `Open an incident`, `Confirm containment`,
 `Apply tuning`, in
 [`conversation_card/helpers/primary_action_label`](public/components/conversation_card/helpers/primary_action_label/index.ts),
-phrased as the phase catalog's four gate rows already phrase them. Its tone and glyph are the
+phrased as the phase catalog's gate rows phrased them when this port landed. (⚠️ One has since
+drifted: the catalog's containment *step* row and the registry's `actionLabel` now read *Review
+containment actions* — the recommended-actions relabel — while this component's own translation
+still says *Confirm containment*. The queue/chat row verb that reads `gate.actionLabel`
+(`components/queue/helpers/action_label`) already carries the new phrasing.) Its tone and glyph are the
 approval card's own `getHitlTone` / `getHitlActionIcon`, so the row and the modal it opens cannot
 disagree about how severe the decision is.
 
@@ -2172,7 +2326,7 @@ two-tab flyout against the prototype's still-five-tab `caseFlyoutTabs.ts` is the
 
 | Decision | Where it landed |
 |---|---|
-| **1** — the flyout goes to tabs: Overview and Timeline | ✅ **Implemented** (bead `kibana-phf4.32`): `LIFECYCLE_TAB_IDS` is `['overview', 'timeline']`, and the three tabs that went away are sections inside Overview. Register `#49` records where each landed and what a two-tab model has no slot for — *Review tuning* is an authorization surface rather than a description, and *Lifecycle* is the 14-row phase projection a case flyout has no analogue for. |
+| **1** — the flyout goes to tabs: Overview and Timeline | ✅ **Implemented** (bead `kibana-phf4.32`): `LIFECYCLE_TAB_IDS` is `['overview', 'timeline']`, and the three tabs that went away are sections inside Overview. Register `#49` records where each landed and what a two-tab model has no slot for — *Review tuning* is an authorization surface rather than a description, and *Lifecycle* is the (now 16-row) phase projection a case flyout has no analogue for. |
 | **2** — the timeline reuses the Cases timeline component, with *show more* after ~20–25 items | Two halves, two entries. The component is a **platform gap**: Cases exports five UI components and the timeline is not one of them (`#47`). The cap has nothing to cap — our timeline is bounded at 14 catalog rows by construction (`#50`). |
 | **3** — "open in chat" opens a secondary overlay flyout, not a content push | Register `#51`. Ours is a route change to `/chats?conversationId=`, which is not the content push the decision forbids; the overlay is blocked on `#8` (`EmbeddableConversation` takes no `conversationId`), so an overlay today could only re-draw what `/chats` already draws. |
 | **4** — losing context on "open in chat" is a known bug to fix | Register `#52`, **checked rather than assumed**: we do not have the one-way-trip form (the card pushes rather than replaces, so Back restores the whole previous location including `?lifecycle=`), and we do have the page-state form (collapsed groups, the pressed chip, the watch filter and the scroll position all live in React state). |
@@ -2414,6 +2568,16 @@ can cause an action to run with higher privileges, or a high-privileged approver
 `POST /internal/pnd/tuning/{proposalId}/_apply` route, which records and applies the change **from
 the approving user's request context** (bead `kibana-idjb.16`), so the identity that decided is the
 identity that acts, gated on rules-all.
+
+**The Floor's containment execution uses the other identity-correct placement.** Phase 3's
+`execute_*` steps (case creation, asset criticality, Endpoint response actions) sit **after**
+`await_incident_contained` on purpose: a resume re-keys the execution to the responder
+(`scheduleImmediateResume` clones the resumer's API key), so every post-gate step runs **as the
+approving analyst** — the identity that toggled the actions on is the identity the Kibana APIs see.
+That is the same S2 conclusion the rule PATCH reaches by routing through the approver's request; the
+containment writes reach it by staying downstream of the gate instead, which also means a
+low-privileged approver's toggles can 403 at execution time and land in the ledger as `failed`
+rather than silently out-privileging anyone.
 
 > **~~Known divergence to reconcile in Epic 2:~~ *(superseded — preserved as historical context.)***
 > Earlier revisions of this README said the merged Post-Incident Watch YAML still had an `apply_tuning`
@@ -3282,8 +3446,9 @@ not the word. See [the 2026-08-18 declutter](#what-the-2026-08-18-declutter-took
 
 | Term | Meaning |
 |---|---|
-| **Watch** | A managed workflow that subscribes to a signal and drives a lifecycle. PND ships five (floor, officer, dark, deep, post-incident) plus #283488's detection watch, so `PND_WATCH_WORKFLOWS` has **six** members while `SYSTEM_SECURITY_WATCH_IDS` (the S1 resume allow-list, and the set autonomy keys are built from) has **five** — the detection watch has no `waitForInput` step, so it needs no place on either. |
-| **Watch Floor Worker** | `system-security-watch-floor`; drives Phases 1–3 (Signal Triage → Investigation → Incident Response). Invokes Deep Watch as a worker; arms the auto-approver per run ([ADR-017](#adr-017)). |
+| **Watch** | A managed workflow that subscribes to a signal (or a schedule) and drives a lifecycle. PND ships six catalog watches (floor, officer, dark, deep, post-incident, attack-discovery-generation) plus #283488's detection watch, so `PND_WATCH_WORKFLOWS` has **seven** members while `SYSTEM_SECURITY_WATCH_IDS` (the S1 resume allow-list, and the set autonomy keys are built from) has **six** — the detection watch has no `waitForInput` step and is not a catalog watch, so it needs no place there. The generation watch has no gate either, but catalog membership is what drives its settings keys and placeholder, so it stays on the list (its resume entry is unreachable rather than dangerous). |
+| **Watch Floor Worker** | `system-security-watch-floor`; drives Phases 1–3 (Signal Triage → Investigation → Incident Response). Invokes Deep Watch as a worker; arms the auto-approver per run ([ADR-017](#adr-017)); executes the approved containment actions post-gate, as the approving analyst, into a per-action ledger. |
+| **Attack Discovery Generation watch** | `system-security-watch-attack-discovery-generation`; the 6th catalog watch and the only scheduled one. One sync `security.attack-discovery.run` step per tick (`concurrency: drop, max: 1`); each net-new persisted discovery emits `security.attackDiscoveryCreated`, waking one Floor run. No gates; cadence and generation options are template values. |
 | **Deep Watch** | `system-security-watch-deep`; invokable investigation worker returning `{ isIncident, rationale, proposal }`. Standalone `alert` + `manual` triggers survive. |
 | **Post-Incident Watch** | `system-security-watch-post-incident`; the new 5th tier, drives Phase 4 (Post-Incident Follow-on) on `security.detectionChangeSignal`. |
 | **Auto-approver** | `system-security-watch-auto-approver`; per-run child armed via `workflow.executeAsync`. Bounded ladder POSTs `_auto_respond`. Catalog-invisible; not on the resume allow-list. |

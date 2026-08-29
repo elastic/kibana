@@ -470,12 +470,22 @@ steps:
       # extra. At a raised autonomy level the gate was auto-accepted and never executed, so
       # all three render empty — the prompt says so explicitly, or the model reads the blanks
       # as a missing human.
+      # Continuing is what gets the run TO the containment gate (same reasoning as
+      # draft_tuning): a tool-call hallucination or an empty structured response from the
+      # incident agent must not kill the run after a human already approved the escalation.
+      # Phase 3 no longer depends on this brief — recommend_actions stages the containment
+      # actions from the attack discovery and the investigation assessment, and
+      # reason_incident_contained says plainly when the incident brief is absent. No retry:
+      # this turn creates a conversation at a FIXED id, so a retry after a partial failure
+      # re-runs the whole turn into a likely id conflict.
       - name: open_incident
         type: ai.agent
         agent-id: "{{ steps.derive_ids.output.incidentAgentId }}"
         create-conversation: true
         public-conversation: true
         timeout: "1800s"
+        on-failure:
+          continue: true
         with:
           conversation_id: "{{ steps.derive_ids.output.incidentConversationId }}"
           metadata:
@@ -797,6 +807,10 @@ steps:
           STAGED: the recommended-actions skill returned nothing for this incident, so there
           is nothing to execute. Approving closes out the incident without running anything;
           declining records your rationale in the thread.
+          {% endif %}{% if steps.open_incident.output.structured_output.summary == blank %}The
+          incident responder did not produce an incident brief (its agent turn failed and the
+          run continued), so the incident sections below are empty; the staged actions were
+          derived directly from the attack discovery and the investigation assessment.
           {% endif %}Approving executes ONLY the Kibana-executable actions you toggle on —
           an action left toggled off is never executed — then closes out the incident and
           emits pnd.incidentClosed, which wakes the Detection Watch to draft a rule tuning.

@@ -1,23 +1,37 @@
 flowchart TD
-  WF["Watch Floor orchestrator<br/>scheduled trigger · every 15m"]:::existing
-  WF -->|workflow.execute| RUN
-
-  subgraph ADW["AD Worker — system-security-watch-attack-discovery (managed worker)"]
-    RUN["run_attack_discovery<br/>security.attack-discovery.run (mode: sync)"]:::pnd
-    RUN ==>|fires pipeline| ENG
-    RUN -->|completed &amp; count &gt; 0| INV["write_investigation<br/>ai.agent · one per attack (foreach)"]:::pnd
-    RUN -->|completed &amp; count == 0| EMPTY["write_empty_run_investigation<br/>ai.agent · tracking investigation"]:::pnd
-    INV --> OUT["emit_result<br/>workflow.output"]:::pnd
-    EMPTY --> OUT
+  subgraph GEN["Attack Discovery Generation — system-security-watch-attack-discovery-generation (per-space catalog watch)"]
+    TICK["scheduled trigger · cadence is a template value<br/>(every-5m / 15m / 30m / hourly) · manual trigger<br/>concurrency {key, strategy: drop, max: 1}"]:::pnd
+    TICK --> RUN["run_attack_discovery<br/>security.attack-discovery.run (mode: sync, 10m)"]:::pnd
+    RUN --> OUT["emit_result<br/>workflow.output · discovery_count · execution_uuid · status"]:::pnd
   end
 
   subgraph ENGINE["AD engine — runs inside the run step (existing)"]
-    ENG["generation pipeline<br/>generate · validate · persist"]:::existing
+    ENG["generation pipeline<br/>retrieve · generate · validate · persist"]:::existing
   end
-  ENG ==>|persist| IDX[("shared ad-hoc<br/>Attack Discovery index")]:::store
 
-  OUT -. "discovery_count · execution_uuid · status" .-> WF
+  subgraph FLOOR["Watch Floor — system-security-watch-floor (one run per discovery)"]
+    WF["derive_ids · create_investigation_container"]:::pnd
+    WF --> G1{{"await_open_investigation<br/>HITL gate"}}:::gate
+    G1 --> DEEP["investigate<br/>workflow.execute · system-security-watch-deep"]:::pnd
+    DEEP --> G2{{"await_promote_incident<br/>HITL gate"}}:::gate
+    G2 --> INC["open_incident<br/>ai.agent · Incident conversation"]:::pnd
+    INC --> REC["recommend_actions<br/>ai.agent + skill://recommended-actions<br/>structured recommended_actions[]"]:::pnd
+    REC --> G3{{"await_incident_contained<br/>per-action containment gate (alwaysGate)<br/>{ decision, rationale, approved_actions[] }"}}:::gate
+    G3 -->|"approve · resume re-keys the run<br/>to the APPROVING ANALYST"| EXEC["execute approved actions<br/>case · asset criticality · isolate · kill process ·<br/>hunt persistence (Endpoint response actions)"]:::pnd
+    EXEC --> LEDGER["account_unexecuted_actions ·<br/>collect_executed_actions<br/>per-action ledger: succeeded | submitted |<br/>failed | skipped | not_executed"]:::pnd
+    LEDGER --> CLOSED["incident_closed<br/>workflow.output · recommended_actions + executed_actions"]:::pnd
+  end
+
+  subgraph POST["Post-Incident Watch — system-security-watch-post-incident"]
+    PI["draft_tuning → await_apply_tuning →<br/>post-incident rule tuning"]:::pnd
+  end
+
+  RUN ==>|fires pipeline| ENG
+  ENG ==>|persist| IDX[("shared ad-hoc<br/>Attack Discovery index")]:::store
+  ENG -. "security.attackDiscoveryCreated<br/>one per net-new discovery (FF-gated)" .-> WF
+  CLOSED -. "security.detectionChangeSignal<br/>(emitted by _respond at the gate terminals)" .-> PI
 
   classDef pnd fill:#e0d7ff,stroke:#6741d9,color:#241b53;
+  classDef gate fill:#ffe3e3,stroke:#c92a2a,color:#5f1414;
   classDef existing fill:#eef0f2,stroke:#495057,color:#20242a;
   classDef store fill:#ffe8a3,stroke:#e0900a,color:#5a3a00;

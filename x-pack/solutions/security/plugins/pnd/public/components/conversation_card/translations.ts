@@ -44,7 +44,7 @@ export const PRIMARY_ACTION_PROMOTE_INCIDENT = i18n.translate(
 export const PRIMARY_ACTION_CONFIRM_CONTAINMENT = i18n.translate(
   'xpack.pnd.brief.proposalRow.primaryActionConfirmContainment',
   {
-    defaultMessage: 'Confirm containment',
+    defaultMessage: 'Review containment actions',
   }
 );
 

@@ -35,8 +35,8 @@ describe('primaryActionLabel', () => {
    * whether containment already happened, and a label reading "Contain" would promise an action
    * this decision does not take.
    */
-  it('names the incident_contained gate as a confirmation, not as an act of containment', () => {
-    expect(primaryActionLabel('incident_contained')).toEqual('Confirm containment');
+  it('names the incident_contained gate as a review of the staged actions', () => {
+    expect(primaryActionLabel('incident_contained')).toEqual('Review containment actions');
   });
 
   it('names the apply_tuning gate with the tuning it applies', () => {

@@ -118,7 +118,7 @@ export const THREAD_GATE_LABEL: Readonly<Record<PndGateId, string>> = {
     defaultMessage: 'Apply a rule tuning',
   }),
   incident_contained: i18n.translate('xpack.pnd.chats.threadGate.incidentContained', {
-    defaultMessage: 'Confirm containment',
+    defaultMessage: 'Review containment actions',
   }),
   open_investigation: i18n.translate('xpack.pnd.chats.threadGate.openInvestigation', {
     defaultMessage: 'Open an investigation',
