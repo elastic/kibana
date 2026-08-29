@@ -323,6 +323,7 @@ export const queryMatrixScores = async (
    * all thrown away — the two are indistinguishable otherwise.
    */
   const excludedByModel = new Map<string, ExcludedScoreCounts>();
+  const exampleCoverage: Array<{ modelId: string; suiteId: string; examples: number }> = [];
 
   for (const suiteId of suiteIds) {
     const suiteBranch = branchBySuite?.[suiteId] ?? branch;
@@ -412,6 +413,21 @@ export const queryMatrixScores = async (
                 remedy
             );
           }
+
+          // The sweep knows when a run stopped early (docs=252/294) but that
+          // fact never reaches the score docs, so an incomplete experiment
+          // publishes a headline score indistinguishable from a complete one:
+          // 4.5-sonnet ranked 7.49 off 18 of 21 examples on 2026-08-29 while
+          // its peers ran all 21. minCoverage only catches near-empty rows.
+          // Count the examples this experiment actually carries and say so.
+          const exampleIds = new Set(
+            scores
+              .map((doc) => doc.example?.id)
+              .filter((id): id is string => typeof id === 'string')
+          );
+          if (exampleIds.size > 0) {
+            exampleCoverage.push({ modelId, suiteId, examples: exampleIds.size });
+          }
         } catch (error) {
           log.warning(
             `Per-prefix scores unavailable for experiment ${
@@ -429,6 +445,36 @@ export const queryMatrixScores = async (
         timestamp: latest.timestamp,
         datasets,
       });
+    }
+  }
+
+  // Treat the count most models reached as the suite's full size rather than
+  // hardcoding it: the matrix reads score docs, and the expected example count
+  // lives in the eval suite. 18 of 20 models covered all 21 examples on
+  // 2026-08-29, so a model below that modal count ran short.
+  const bySuite = new Map<string, number[]>();
+  for (const entry of exampleCoverage) {
+    const list = bySuite.get(entry.suiteId) ?? [];
+    list.push(entry.examples);
+    bySuite.set(entry.suiteId, list);
+  }
+  for (const [suiteId, sizes] of bySuite) {
+    const tally = new Map<number, number>();
+    for (const n of sizes) tally.set(n, (tally.get(n) ?? 0) + 1);
+    let full = 0;
+    let best = 0;
+    for (const [n, c] of tally) {
+      if (c > best || (c === best && n > full)) {
+        full = n;
+        best = c;
+      }
+    }
+    for (const entry of exampleCoverage) {
+      if (entry.suiteId === suiteId && entry.examples < full) {
+        log.warning(
+          `${entry.modelId} scored on ${entry.examples} of ${full} examples in ${suiteId} -- its score rests on an incomplete run and is not comparable to models that ran all ${full}`
+        );
+      }
     }
   }
 
