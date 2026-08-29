@@ -29,7 +29,7 @@ export function createOutputTokensEvaluator({
       name: 'Output Tokens',
       // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        | WHERE trace_id == "${traceId}"
         | STATS 
         output_tokens = SUM(TO_LONG(attributes.gen_ai.usage.output_tokens))`,
       extractResult: (response) => {
@@ -57,7 +57,7 @@ export function createInputTokensEvaluator({
       name: 'Input Tokens',
       // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        | WHERE trace_id == "${traceId}"
         | STATS 
         input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
       extractResult: (response) => {
@@ -86,7 +86,7 @@ export function createCachedTokensEvaluator({
       // `input_tokens` is a liveness probe: providers that never report caching (most EIS models)
       // omit cache_read entirely, which otherwise looks like a trace that has not finished indexing.
       buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        | WHERE trace_id == "${traceId}"
         | STATS 
         cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens)),
         input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,

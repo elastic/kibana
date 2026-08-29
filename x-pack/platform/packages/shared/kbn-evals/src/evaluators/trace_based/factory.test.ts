@@ -41,7 +41,7 @@ describe('createTraceBasedEvaluator', () => {
 
     mockConfig = {
       name: 'Test Evaluator',
-      buildQuery: (traceId: string) => `FROM traces-* | WHERE trace.id == "${traceId}"`,
+      buildQuery: (traceId: string) => `FROM traces-* | WHERE trace_id == "${traceId}"`,
       extractResult: (response) => response.values[0][0] as number | null,
     };
   });
@@ -65,7 +65,7 @@ describe('createTraceBasedEvaluator', () => {
     await evaluateWith(evaluator, VALID_TRACE_ID);
 
     expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledWith({
-      query: `FROM traces-* | WHERE trace.id == "${VALID_TRACE_ID}"`,
+      query: `FROM traces-* | WHERE trace_id == "${VALID_TRACE_ID}"`,
     });
   });
 
