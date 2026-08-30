@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isPlainObject, omit } from 'lodash';
+import { isPlainObject } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -20,9 +20,15 @@ import { CasesWorkflowExecutionMetadataSchema } from '../../../common/types/api/
 import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../common/types/api';
 import { AttachmentType } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
+import { getCasesClientInternalArgs } from '../../client/client';
+import { ensureAuthorizedToRunWorkflow } from '../../client/cases/ensure_authorized_to_run_workflow';
+import {
+  preflightWorkflowExecution,
+  recordWorkflowExecution,
+} from '../../client/user_actions/record_workflow_execution';
 import type { CasesRequestHandlerContext } from '../../types';
+import { buildActivityOrigin } from './build_activity_origin';
 import { parseSelectedAlertPairs, validateOrigin } from './validate_origin';
-import type { EnsureAuthorizedToRunWorkflowParams } from './authorize_workflow_run';
 
 interface RunWorkflowParams {
   workflowId: string;
@@ -37,27 +43,17 @@ interface CasesWorkflowRunServiceDeps {
   management: WorkflowsServerPluginSetup['management'];
   logger: Logger;
   audit: SecurityPluginSetup['audit'];
-  getWorkflowRunAuthorizer: (request: KibanaRequest) => Promise<{
-    ensureAuthorizedToRunWorkflow: (params: EnsureAuthorizedToRunWorkflowParams) => Promise<void>;
-  }>;
 }
 
 export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
   private readonly logger: Logger;
   private readonly audit: SecurityPluginSetup['audit'];
-  private readonly getWorkflowRunAuthorizer: CasesWorkflowRunServiceDeps['getWorkflowRunAuthorizer'];
 
-  constructor({
-    management,
-    logger,
-    audit,
-    getWorkflowRunAuthorizer,
-  }: CasesWorkflowRunServiceDeps) {
+  constructor({ management, logger, audit }: CasesWorkflowRunServiceDeps) {
     this.management = management;
     this.logger = logger;
     this.audit = audit;
-    this.getWorkflowRunAuthorizer = getWorkflowRunAuthorizer;
   }
 
   public async run({
@@ -113,11 +109,17 @@ export class CasesWorkflowRunService {
 
     const { caseIds } = body;
 
+    // Recover the internal CasesClientArgs from the request-scoped public client so we can
+    // call the module-private workflow functions (ensureAuthorizedToRunWorkflow,
+    // preflightWorkflowExecution, recordWorkflowExecution) directly without exposing them on
+    // the public CasesSubClient / UserActionsSubClient interfaces.
+    const clientArgs = getCasesClientInternalArgs(casesClient);
+
     // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
     // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
     // which IDs exist. One privilege round-trip for all owners via ensureAuthorized.
-    const { ensureAuthorizedToRunWorkflow } = await this.getWorkflowRunAuthorizer(request);
-    await ensureAuthorizedToRunWorkflow({ ids: caseIds });
+    // Returns entities so subsequent steps can reuse them without re-fetching the cases.
+    const authorizedEntities = await ensureAuthorizedToRunWorkflow({ ids: caseIds }, clientArgs);
 
     // `origin` is optional. When absent the run is a list-surface (bulk) run: the caller
     // was not looking at any specific sub-entity, alert inputs are not permitted, and no
@@ -126,7 +128,7 @@ export class CasesWorkflowRunService {
     // Parse and validate alertIds shape eagerly — any malformed entry throws 400 here,
     // before any case fetch, so the validated set equals what preprocessing later fetches.
     const selectedAlerts = parseSelectedAlertPairs(body.inputs);
-
+    let theCase: Awaited<ReturnType<typeof casesClient.cases.get>> | undefined;
     if (body.origin === undefined) {
       if (selectedAlerts.length > 0) {
         throw Boom.badRequest('Alert inputs can only be used with a single case.');
@@ -137,7 +139,7 @@ export class CasesWorkflowRunService {
           `Workflow origin type "${body.origin.type}" can only be used with a single case.`
         );
       }
-      const theCase = await casesClient.cases.get({ id: caseIds[0] });
+      theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: true });
       const attachedAlerts =
         selectedAlerts.length > 0
           ? await casesClient.attachments.getAllDocumentsAttachedToCase({
@@ -154,6 +156,9 @@ export class CasesWorkflowRunService {
       });
     }
 
+    // Fail fast before anything irreversible: check the per-case user-action limit for all cases.
+    await preflightWorkflowExecution({ caseIds }, clientArgs);
+
     const workflow = await this.management.getWorkflow(workflowId, spaceId);
     if (!workflow) {
       throw Boom.notFound(`Workflow "${workflowId}" was not found.`);
@@ -169,7 +174,9 @@ export class CasesWorkflowRunService {
     // the server re-injects the authorized set via eventOverrides after preprocessing.
     const { event: rawEvent, ...otherInputs } = body.inputs;
     const strippedEvent = isPlainObject(rawEvent)
-      ? omit(rawEvent as Record<string, unknown>, 'caseIds')
+      ? (({ caseIds: _dropped, ...rest }: Record<string, unknown>) => rest)(
+          rawEvent as Record<string, unknown>
+        )
       : rawEvent;
     const sanitizedInputs =
       strippedEvent !== undefined ? { ...otherInputs, event: strippedEvent } : otherInputs;
@@ -208,7 +215,43 @@ export class CasesWorkflowRunService {
       outcome: 'success',
     });
 
-    return { workflowExecutionId };
+    // Record the case activity immediately after the execution starts.
+    // A failure to record must NOT be reported as an execution failure — the run did succeed.
+    try {
+      await recordWorkflowExecution({
+        caseIds,
+        workflow: {
+          id: workflow.id,
+          name: workflow.name,
+          executionId: workflowExecutionId,
+        },
+        origin: buildActivityOrigin({ origin: body.origin, theCase }),
+        // Pass the pre-authorized entities so recordWorkflowExecution can skip the redundant
+        // getCases + ensureAuthorized round-trips that ensureAuthorizedToRunWorkflow already ran.
+        entities: authorizedEntities,
+      }, clientArgs);
+      return { workflowExecutionId, activityStatus: 'succeeded' };
+    } catch (error) {
+      this.logger.error(
+        `Workflow "${workflowId}" execution "${workflowExecutionId}" started but its case activity could not be recorded: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      for (const caseId of caseIds) {
+        this.logAuditEvent(auditLogger, {
+          message: `Failed to record workflow [${workflowId}] execution [${workflowExecutionId}] in case [${caseId}] activity`,
+          event: {
+            action: 'case_workflow_activity_create',
+            category: ['database'],
+            type: ['creation'],
+            outcome: 'failure',
+          },
+          error: { message: error instanceof Error ? error.message : String(error) },
+          kibana: { saved_object: { type: CASE_SAVED_OBJECT, id: caseId } },
+        });
+      }
+      return { workflowExecutionId, activityStatus: 'failed' };
+    }
   }
 
   private logWorkflowRunAuditEvents({

@@ -14,8 +14,6 @@ import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   MAX_CASES_PER_WORKFLOW_RUN,
   MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
-  MAX_WORKFLOW_INPUT_KEY_LENGTH,
-  MAX_WORKFLOW_INPUTS_BYTES,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from '../../../constants';
 
@@ -39,7 +37,7 @@ const idField = z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH);
  * typeKey/value) is derived server-side from the case at activity-write time so that
  * client-supplied label text cannot spoof the activity log.
  */
-const CaseWorkflowRunOriginSchema = z.discriminatedUnion('type', [
+export const CaseWorkflowRunOriginSchema = z.discriminatedUnion('type', [
   z
     .object({
       type: z.literal(CASE_WORKFLOW_ORIGIN_TYPE),
@@ -84,22 +82,13 @@ export const CasesWorkflowExecutionMetadataSchema = z
 
 export type CasesWorkflowExecutionMetadata = z.infer<typeof CasesWorkflowExecutionMetadataSchema>;
 
+/** Maximum byte length of the serialised `inputs` object. Enforced server-side; mirrored here for documentation. */
+const MAX_WORKFLOW_INPUT_KEY_LENGTH = 1024;
+
 export const RunCaseWorkflowRequestSchema = z
   .object({
-    caseIds: z
-      .array(idField)
-      .min(1)
-      .max(MAX_CASES_PER_WORKFLOW_RUN)
-      .refine((ids) => new Set(ids).size === ids.length, {
-        message: 'caseIds must not contain duplicates.',
-      }),
-    inputs: z
-      .record(z.string().max(MAX_WORKFLOW_INPUT_KEY_LENGTH), z.unknown())
-      .refine(
-        (inputs) =>
-          new TextEncoder().encode(JSON.stringify(inputs)).length <= MAX_WORKFLOW_INPUTS_BYTES,
-        { message: `Workflow inputs cannot exceed ${MAX_WORKFLOW_INPUTS_BYTES} bytes.` }
-      ),
+    caseIds: z.array(idField).min(1).max(MAX_CASES_PER_WORKFLOW_RUN),
+    inputs: z.record(z.string().max(MAX_WORKFLOW_INPUT_KEY_LENGTH), z.unknown()),
     origin: CaseWorkflowRunOriginSchema.optional(),
   })
   .strict();
@@ -109,6 +98,7 @@ export type RunCaseWorkflowRequest = z.infer<typeof RunCaseWorkflowRequestSchema
 export const RunCaseWorkflowResponseSchema = z
   .object({
     workflowExecutionId: z.string(),
+    activityStatus: z.enum(['succeeded', 'failed']),
   })
   .strict();
 
