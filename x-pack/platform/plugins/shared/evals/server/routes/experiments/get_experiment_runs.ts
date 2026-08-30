@@ -118,6 +118,7 @@ export const registerGetExperimentRunsRoute = ({
     .get({
       path: EVALS_EXPERIMENT_RUNS_URL,
       access: INTERNAL_API_ACCESS,
+      enableQueryVersion: true,
       security: {
         authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
