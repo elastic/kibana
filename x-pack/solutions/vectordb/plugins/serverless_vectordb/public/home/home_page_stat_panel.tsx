@@ -23,6 +23,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@kbn/i18n';
 
 export interface HomePageStatPanelMetric {
@@ -34,7 +35,7 @@ export interface HomePageStatPanelMetric {
 
 export interface HomePageStatPanelAction {
   key: string;
-  iconType?: string;
+  iconType?: EuiIconType;
   label: string;
   onClick: () => void;
   testSubj?: string;
@@ -42,7 +43,7 @@ export interface HomePageStatPanelAction {
 }
 
 export interface HomePageStatPanelProps {
-  iconType: string;
+  iconType: EuiIconType;
   title: string;
   testSubj: string;
   metrics: HomePageStatPanelMetric[];
@@ -89,14 +90,18 @@ export const HomePageStatPanel = ({
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj={testSubj}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiIcon type={iconType} size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <EuiTitle size="xxxs">
-            <h3>{title}</h3>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
+                <h3>{title}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         {actions.length > 0 && (
           <EuiFlexItem grow={false}>
@@ -147,11 +152,12 @@ export const HomePageStatPanel = ({
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="l" responsive={false} justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="l" responsive={false} wrap justifyContent="spaceBetween">
         {metrics.map(({ key, label, value, isLoading }) => (
           <EuiFlexItem key={key} grow>
             <EuiStat
               data-test-subj={`${testSubj}-${key}`}
+              css={{ whiteSpace: 'nowrap' }}
               title={
                 isLoading ? (
                   <EuiSkeletonText

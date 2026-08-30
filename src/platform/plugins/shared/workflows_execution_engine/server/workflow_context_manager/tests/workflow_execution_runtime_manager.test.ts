@@ -400,6 +400,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         workflowExecution.triggeredBy = 'cases.caseCreated';
         workflowExecution.context = {
           event: { eventChainDepth: 2 },
+          metadata: { eventTriggerId: 'cases.caseCreated' },
         } as EsWorkflowExecution['context'];
 
         await underTest.start();
@@ -413,7 +414,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       it('adds event_trigger_id when context.event has no chain depth', async () => {
         workflowExecution.triggeredBy = 'my.custom.trigger';
-        workflowExecution.context = {} as EsWorkflowExecution['context'];
+        workflowExecution.context = {
+          event: { caseId: 'case-1' },
+        } as EsWorkflowExecution['context'];
 
         await underTest.start();
 
@@ -422,6 +425,21 @@ describe('WorkflowExecutionRuntimeManager', () => {
           event_trigger_id: 'my.custom.trigger',
         });
         expect(mockTransaction.addLabels.mock.calls[0][0]).not.toHaveProperty('event_chain_depth');
+      });
+
+      it('does not add event_trigger_id for custom provenance without event evidence', async () => {
+        workflowExecution.triggeredBy = 'attack-discovery-pipeline';
+        workflowExecution.context = {} as EsWorkflowExecution['context'];
+
+        await underTest.start();
+
+        const labels = mockTransaction.addLabels.mock.calls[0][0] as Record<string, unknown>;
+        expect(labels).toMatchObject({
+          triggered_by: 'task_manager',
+          workflow_execution_id: workflowExecution.id,
+        });
+        expect(labels).not.toHaveProperty('event_trigger_id');
+        expect(labels).not.toHaveProperty('event_chain_depth');
       });
 
       it('does not add event labels for well-known triggeredBy values', async () => {

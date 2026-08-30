@@ -373,7 +373,7 @@ export class WorkflowExecutionRuntimeManager {
         };
 
         const { triggeredBy } = this.workflowExecution;
-        if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
           taskManagerLabels.event_trigger_id = triggeredBy;
         }
 
