@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
-import { ToolType } from '@kbn/agent-builder-common';
+import { internalTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -107,6 +107,8 @@ export const generateDashboardTool = (): BuiltinSkillBoundedTool<
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
     description: `Generate or update a dashboard from ordered operations.
+
+Do not call this tool until you have used \`${internalTools.readFile}\` on every \`referenced_files\` path from \`load_skill\` for this skill. Those files are not in the skill body — grid packing, chart-type practices, and Prettify rules live there.
 
 Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
 

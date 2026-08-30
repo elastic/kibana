@@ -7,7 +7,10 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
+import {
+  OPEN_DASHBOARD_CHAT_ACTION_ID,
+  PRETTIFY_DASHBOARD_ACTION_ID,
+} from '@kbn/dashboard-plugin/public';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
@@ -59,6 +62,24 @@ export class AgentBuilderDashboardsPlugin
           './dashboard_empty_screen/open_dashboard_chat_action'
         );
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
+      });
+      plugins.uiActions.registerActionAsync(PRETTIFY_DASHBOARD_ACTION_ID, async () => {
+        const { createPrettifyDashboardAction } = await import(
+          './prettify/prettify_dashboard_action'
+        );
+        const { captureDashboardElementPng } = await import('./prettify/capture_dashboard_element');
+        const { createChatImageFilesClient, uploadChatImage } = await import(
+          './prettify/upload_chat_image'
+        );
+        const filesClient = createChatImageFilesClient(plugins.files.filesClientFactory);
+        return createPrettifyDashboardAction({
+          openChat: plugins.agentBuilder.openChat,
+          canWriteDashboards:
+            core.application.capabilities.dashboard_v2?.showWriteControls === true,
+          captureDashboardImage: captureDashboardElementPng,
+          uploadImage: (blob) => uploadChatImage({ filesClient, blob }),
+          toasts: core.notifications.toasts,
+        });
       });
     }
 

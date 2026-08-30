@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import { platformCoreTools, internalTools } from '@kbn/agent-builder-common';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
-import { dashboardDesignGuidancePrompt } from './design';
-
-const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
+import {
+  DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME,
+  dashboardDesignPracticesReference,
+} from './design';
 
 const guidance = `## Building a Dashboard
 
@@ -22,8 +22,8 @@ Every dashboard MUST have a non-empty \`title\`. If the current dashboard's titl
 Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
 
 When a dashboard needs sections, prefer a single batched call:
-1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section.
-2. Use a follow-up \`add_panels\` with per-item \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
+1. To group **existing** panels: \`add_section\` without \`panels\` (pass \`id\`), then \`update_panel_layouts\` with \`sectionId\` to move them. \`add_section.panels\` creates new panels — never copy existing configs into it (that duplicates them and leaves the originals in place).
+2. \`add_section.panels\` only for **brand-new** panels created inside the section. Use a follow-up \`add_panels\` with per-item \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
 
 For a new dashboard:
 - Start with \`set_metadata\` and provide both \`title\` and \`description\`. Only include \`time_range\` when the user explicitly named a specific time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise — a data-aware default is applied automatically.
@@ -33,7 +33,8 @@ For a new dashboard:
 For an existing dashboard:
 - Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
-- Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
+- Use \`update_panel_layouts\` to resize, reposition, or **move** existing panels into a section. Do not recreate those panels via \`add_section.panels\` or \`add_panels\`.
+- If a requested change targets presentation or content (chart type, colors, legends, axis titles, metric chrome title, secondary metrics, trendlines, palettes), use \`edit_panels\` with a natural-language \`query\` and let the visualization author decide how to apply it. Do not invent first-class layout flags for those edits.
 
 ## Panel Inputs
 
@@ -71,9 +72,7 @@ Reach for custom content only when nothing above fits:
 
 For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
-${chartTypeSelectionGuidance}
-
-${dashboardDesignGuidancePrompt}
+When choosing a chart type, composing the dashboard, or packing the grid, apply \`${DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME}\` after you have read it with \`${internalTools.readFile}\`.
 
 ## ES|QL
 
@@ -83,9 +82,11 @@ Omit the \`esql\` field on visualization panels unless you received a validated 
 
 Controls are interactive filters pinned above the dashboard that let users explore data without editing queries. Add them with \`add_controls\` and remove them by id with \`remove_controls\`.
 
-**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs).
+**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs). Before \`add_controls\`, call \`${platformCoreTools.getIndexMapping}\` on the panel index. \`field_name\` must exist in that mapping **and** appear in panel ES|QL. Never invent ECS field names.
 
 Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.).
+
+On an existing dashboard, if a control errors or its field is missing from the mapping, \`remove_controls\` that id. Replace it only with a field that exists in the mapping and in panel ES|QL.
 
 **Control types:**
 - \`options_list_control\` — dropdown for categorical / keyword fields. The most common type (95% of cases).
@@ -114,13 +115,12 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 /**
  * Environment-agnostic dashboard *generation* guidance.
  *
- * The `guidance` describes how to build a dashboard, including the detailed design guidance
- * (composition + panel layout) inlined directly. It deliberately says nothing about how the
- * current dashboard is referenced or how the result is returned/surfaced. Those are
- * environment-specific and avoided here so the block can be reused across environments. Pair it with
- * an environment-specific rendering guidance block (e.g. the Kibana one) that explains how the
- * generated dashboard is surfaced.
+ * Visual good practices (chart types, composition, grid) live in referenced
+ * content so generate and Prettify share one copy. This `guidance` is
+ * the operations vocabulary only. Pair it with environment-specific rendering
+ * guidance for how the current dashboard is referenced and surfaced.
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
+  referencedContent: [dashboardDesignPracticesReference],
 };

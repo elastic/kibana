@@ -98,8 +98,14 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       selection:
         'Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.',
       config: {
+        rules: [
+          'Do not set a chart title. The primary metric name is the painted title; a dashboard chrome title on a metric is redundant.',
+          'A lone primary number is incomplete. From the same ES|QL columns, add a secondary metric with dynamic coloring (compare to the primary or a baseline — e.g. previous period, error rate next to request count, p95 next to avg) and/or a `background_chart` (`type: "trend"` sparkline, or `type: "bar"` when progress-to-max is meaningful). Skip adding a new secondary or background chart only if the panel already has one, or the query has no complementary field.',
+          'When a secondary metric is a trend (period-over-period change, compare-to-primary delta, or paired with a trend/sparkline background chart), hide its title: set `styling.secondary.label.visible: false` and omit `label` on the secondary metric. Keep the value and dynamic coloring. Show a secondary label only when the secondary is a different named measure (e.g. error rate next to request count).',
+        ],
         coloringRules: [
           'Metric placement: set `apply_color_to: "value"` only together with a color config; do not color the background unless the user asks. When not coloring, omit both `color` and `apply_color_to` — `apply_color_to` without a color makes Lens tint the value with a default green.',
+          'When editing an existing metric, do not preserve invented static colors or background fills from the existing config. Drop primary `color` and `apply_color_to` when they are `type: "static"` or `apply_color_to: "background"`, unless the user explicitly asked for that color. Dynamic coloring on a secondary compare is fine; copying a mustard/pink/custom primary fill is not.',
           'For clearly bounded metrics, use explicit 3-band `steps` by default. Examples: percent, ratio, CPU/memory/disk utilization, error rate, success rate, or SLO compliance.',
           'Metric charts use 3 bands; prefer "Status", "Negative", "Positive", or "Temperature" when thresholds have semantic meaning.',
           'For bounded adverse metrics like error rate %, higher values are worse; use a status/adverse palette with thresholds in the same percent scale as the metric output.',
@@ -146,10 +152,12 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         rules: [
           'For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
           'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.',
+          'When editing an existing XY chart, drop `styling.areas.fill: "solid"` unless the user asked for a solid fill.',
+          'Place the legend outside at the bottom. Omit `legend.layout.type`. On time series with <= 8 series, set `legend.statistics: ["avg", "min", "max", "last_non_null_value"]` even for one series; otherwise omit statistics. Hide a one-series categorical legend (`legend.visibility: "hidden"`).',
         ],
         coloringRules: [
           'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
-          'When editing an existing XY chart, preserve its existing explicit colors unless the user asks to change them; do not introduce new color overrides.',
+          'When editing an existing XY chart, do not preserve invented or custom series colors from the existing config. Drop explicit `color` overrides that are not the Lens default palette, unless the user explicitly asked for those colors.',
           'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
         ],
       },
@@ -196,6 +204,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           'Datatable placement: prefer `apply_color_to: "badge"`; avoid cell background or text coloring unless the user asks.',
           'Numeric datatable columns: when coloring is useful, use `apply_color_to: "badge"` with `color: { type: "auto" }` so Lens computes stops from table data.',
           'Categorical datatable columns: when coloring is useful, use `color: { mode: "categorical", palette: "<palette id>", mapping: [] }` so Lens assigns colors to actual values.',
+          'When editing an existing table, do not preserve invented custom cell or text colors. Drop explicit `color` that is not `type: "auto"` or a Lens categorical default with empty mapping, unless the user explicitly asked for those colors.',
         ],
         options: {
           coloring: {
@@ -211,6 +220,12 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Pie or donut showing part-to-whole proportions as slices. Choose for percentage breakdowns with a limited number of categories, ideally fewer than 7 (e.g. "traffic distribution by browser as a donut").',
+      config: {
+        coloringRules: [
+          'Omit explicit `color` properties and use the Lens default palette. Only add colors when the user explicitly requests them.',
+          'When editing an existing pie, do not preserve invented per-slice or custom colors. Drop explicit `color` and use the Lens default palette, unless the user explicitly asked for those colors.',
+        ],
+      },
     },
   },
   [SupportedChartType.Treemap]: {

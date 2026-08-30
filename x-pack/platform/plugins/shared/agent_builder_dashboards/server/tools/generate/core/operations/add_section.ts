@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { sectionGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { isSection, sectionGridSchema } from '@kbn/agent-builder-dashboards-common';
 import type { AttachmentPanel, DashboardSection } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import { createPanelInputMaterializer, applyCustomContentTemplates } from './panel_creation';
@@ -16,6 +16,14 @@ import { addSectionPanelItemSchema } from './panels';
 export const addSectionOperation = defineOperation({
   schema: z.object({
     operation: z.literal('add_section'),
+    id: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe(
+        'Optional section id so a later operation in this batch (update_panel_layouts.sectionId) can move existing panels into this section. Generated when omitted.'
+      ),
     title: z.string().max(256).describe('Section title.'),
     grid: sectionGridSchema,
     panels: z
@@ -23,12 +31,19 @@ export const addSectionOperation = defineOperation({
       .min(1)
       .optional()
       .describe(
-        'Optional inline panels (source: "config" or source: "request") to create inside the new section. Panel grids are section-relative.'
+        'Optional NEW panels to create inside the section (section-relative grids). Omit when grouping existing panels — pass `id` and move them with update_panel_layouts.sectionId. Copying existing configs here duplicates panels.'
       ),
   }),
   handler: async ({ dashboardData, operation, operationIndex, context }) => {
+    if (
+      operation.id &&
+      dashboardData.panels.some((widget) => isSection(widget) && widget.id === operation.id)
+    ) {
+      throw new Error(`Section "${operation.id}" already exists.`);
+    }
+
     let nextSection: DashboardSection = {
-      id: uuidv4(),
+      id: operation.id ?? uuidv4(),
       title: operation.title,
       collapsed: false,
       grid: operation.grid,
