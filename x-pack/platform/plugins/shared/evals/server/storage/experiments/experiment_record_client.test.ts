@@ -384,6 +384,40 @@ describe('ExperimentRecordClient', () => {
       expect(updated.completed_at).toBeUndefined();
     });
 
+    it('does not stamp started_at when a pending record fails before running', async () => {
+      const { client } = createClient();
+      await client.create({
+        experimentId: 'exp-1',
+        name: 'Queued run',
+        protocol: PROTOCOL,
+        status: 'pending',
+      });
+
+      const updated = await client.update('exp-1', { status: 'failed', error: 'provision error' });
+
+      expect(updated.status).toBe('failed');
+      expect(updated.started_at).toBeUndefined();
+      expect(updated.completed_at).toBeDefined();
+    });
+
+    it('surfaces the original error when the recovery read in the catch block also throws', async () => {
+      const { client, search, index } = createClient();
+      await client.create({ experimentId: 'exp-1', name: 'My experiment', protocol: PROTOCOL });
+
+      const originalError = new Error('original write error');
+      index.mockRejectedValueOnce(originalError);
+
+      const realImpl = search.getMockImplementation()!;
+      search
+        .mockImplementationOnce(realImpl) // pre-check
+        .mockImplementationOnce(realImpl) // OccWriter get
+        .mockRejectedValueOnce(new Error('secondary read error')); // recovery
+
+      await expect(client.update('exp-1', { status: 'completed' })).rejects.toThrow(
+        'original write error'
+      );
+    });
+
     it('prefers the caller-supplied completion time over its own clock', async () => {
       const { client } = createClient();
       await client.create({ experimentId: 'exp-1', name: 'My experiment', protocol: PROTOCOL });

@@ -175,7 +175,13 @@ export class ExperimentRecordClient {
       // A delete landing between the check above and the write makes the
       // writer throw its own untyped not-found error; re-read rather than
       // matching its message.
-      if (!(await this.getForWrite(id))) {
+      let exists: boolean;
+      try {
+        exists = !!(await this.getForWrite(id));
+      } catch {
+        throw error;
+      }
+      if (!exists) {
         throw new ExperimentRecordNotFoundError(experimentId);
       }
       throw error;
@@ -218,7 +224,9 @@ const applyUpdate = (
   const timestamp = new Date().toISOString();
 
   const startedAt =
-    patch.startedAt ?? current.started_at ?? (status !== 'pending' ? timestamp : undefined);
+    patch.startedAt ??
+    current.started_at ??
+    (current.status === 'pending' && status === 'running' ? timestamp : undefined);
   const completedAt = isTerminal(status)
     ? patch.completedAt ?? current.completed_at ?? timestamp
     : current.completed_at;

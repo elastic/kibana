@@ -623,7 +623,7 @@ export const parseExperimentTracesAggregation = (
     ...(aggs?.evaluator_traces?.buckets ?? []).map((bucket) => ({
       trace_id: bucket.key.trace_id ?? '',
       role: 'evaluator' as const,
-      evaluator_name: bucket.key.evaluator_name ?? '',
+      ...(bucket.key.evaluator_name && { evaluator_name: bucket.key.evaluator_name }),
     })),
   ];
 

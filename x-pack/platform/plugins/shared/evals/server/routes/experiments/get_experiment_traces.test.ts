@@ -105,7 +105,9 @@ describe('GET /internal/evals/experiments/{experimentId}/traces', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(404);
-    expect(response.payload).toEqual({ message: 'Experiment not found: experiment-abc' });
+    expect(response.payload).toEqual({
+      message: 'Experiment not found for experiment: experiment-abc',
+    });
     expect(esClient.search).not.toHaveBeenCalled();
   });
 

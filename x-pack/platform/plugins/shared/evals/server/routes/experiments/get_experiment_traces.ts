@@ -89,7 +89,7 @@ export const registerGetExperimentTracesRoute = ({
           if (matchedScores === 0) {
             const message = evaluator
               ? `Experiment not found for evaluator ${evaluator}: ${experimentId}`
-              : `Experiment not found: ${experimentId}`;
+              : `Experiment not found for experiment: ${experimentId}`;
             return response.notFound({ body: { message } });
           }
 
