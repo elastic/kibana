@@ -5,30 +5,65 @@
  * 2.0.
  */
 
-import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  ImportExceptionListItemSchemaDecoded,
+  NamespaceType,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { deleteExceptionListItemByList } from '../../delete_exception_list_items_by_list';
+import { getExceptionListItems } from '../../delete_exception_list_items_by_list';
+import { bulkDeleteExceptionListItems } from '../../bulk_delete_exception_list_items';
 
-/**
- * Helper to delete list items of exception lists to be updated
- * as a result of user selecting to overwrite
- * @param listsOfItemsToDelete {array} - information needed to delete exception list items
- * @param savedObjectsClient {object}
- * @returns {array} returns array of success and error formatted responses
- */
-export const deleteListItemsToBeOverwritten = async ({
+export type ExistingListItem = Pick<
+  ExceptionListItemSchema,
+  'id' | 'item_id' | 'list_id' | 'namespace_type'
+>;
+
+const getItemKey = ({
+  item_id: itemId,
+  list_id: listId,
+  namespace_type: namespaceType,
+}: Pick<ImportExceptionListItemSchemaDecoded, 'item_id' | 'list_id' | 'namespace_type'>): string =>
+  JSON.stringify([namespaceType, listId, itemId]);
+
+export const getListItemsToBeOverwritten = async ({
   listsOfItemsToDelete,
   savedObjectsClient,
 }: {
   listsOfItemsToDelete: Array<[string, NamespaceType]>;
   savedObjectsClient: SavedObjectsClientContract;
+}): Promise<ExistingListItem[]> => {
+  const existingItems: ExistingListItem[] = [];
+
+  for await (const [listId, namespaceType] of listsOfItemsToDelete) {
+    const items = await getExceptionListItems({ listId, namespaceType, savedObjectsClient });
+    existingItems.push(...items);
+  }
+
+  return existingItems;
+};
+
+/** Deletes snapshotted list items that are absent from a successful import. */
+export const deleteListItemsToBeOverwritten = async ({
+  existingItems,
+  importedItems,
+  savedObjectsClient,
+}: {
+  existingItems: ExistingListItem[];
+  importedItems: ImportExceptionListItemSchemaDecoded[];
+  savedObjectsClient: SavedObjectsClientContract;
 }): Promise<void> => {
-  for await (const list of listsOfItemsToDelete) {
-    await deleteExceptionListItemByList({
-      listId: list[0],
-      namespaceType: list[1],
-      savedObjectsClient,
-    });
+  const importedItemKeys = new Set(importedItems.map(getItemKey));
+  const staleItems = existingItems.filter((item) => !importedItemKeys.has(getItemKey(item)));
+
+  for (const namespaceType of ['single', 'agnostic'] as const) {
+    const ids = staleItems
+      .filter((item) => item.namespace_type === namespaceType)
+      .map(({ id }) => id);
+
+    if (ids.length > 0) {
+      await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+    }
   }
 };
