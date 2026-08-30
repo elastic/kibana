@@ -18,7 +18,7 @@ Create an MISP connector from the **{{connectors-ui}}** page. To open the page, 
 ### Connector configuration [misp-connector-configuration]
 
 MISP URL
-:   Base URL of your MISP instance, for example `https://misp.example.com` or `https://localhost`. Do not include a trailing slash or an `/attributes` path.
+:   Base URL of your MISP instance, for example `https://misp.example.com` or `https://localhost`. Don't include a trailing slash or an `/attributes` path.
 
 Authentication
 :   Automation API key. {{kib}} sends `Authorization: <key>` with no `Bearer` prefix (MISP rejects Bearer). Create the key under **Administration → List Auth Keys**.
