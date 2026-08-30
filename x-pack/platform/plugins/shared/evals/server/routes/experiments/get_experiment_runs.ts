@@ -14,7 +14,7 @@ import {
   buildExperimentRunsAggregation,
   parseExperimentRunsAggregation,
   buildExperimentRunsFetchQuery,
-  SCORES_SORT_ORDER,
+  RUNS_SORT_ORDER,
   GetEvaluationExperimentRunsRequestParams,
   GetEvaluationExperimentRunsRequestQuery,
 } from '@kbn/evals-common';
@@ -92,7 +92,10 @@ const groupDocumentsIntoRuns = (
 
   return runKeys.flatMap((runKey) => {
     const group = documentsByRun.get(runKeyOf(runKey));
-    if (!group || group.length === 0) {
+    // Drop any run whose document count is below the aggregation's score_count:
+    // this means the ES fetch was capped and the run is incomplete. Returning
+    // partial evaluator lists without a signal would silently mislead callers.
+    if (!group || group.length === 0 || group.length < runKey.score_count) {
       return [];
     }
     const [first] = group;
@@ -187,7 +190,7 @@ export const registerGetExperimentRunsRoute = ({
           );
           const searchResponse = await evalsContext.evaluationScoreService.search({
             query: buildExperimentRunsFetchQuery(query, runKeys),
-            sort: SCORES_SORT_ORDER,
+            sort: RUNS_SORT_ORDER,
             size: pageDocumentCount,
           });
 

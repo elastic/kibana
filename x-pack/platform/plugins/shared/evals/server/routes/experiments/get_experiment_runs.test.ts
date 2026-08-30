@@ -141,6 +141,11 @@ describe('GET /internal/evals/experiments/{experimentId}/runs', () => {
               repetition: 1,
               evaluator: { name: 'correctness', kind: 'llm', score: 0.7 },
             }),
+            scoreDocument({
+              exampleIndex: 0,
+              repetition: 1,
+              evaluator: { name: 'latency', kind: 'code', score: 0.8 },
+            }),
           ],
         },
       } as any);
@@ -193,10 +198,53 @@ describe('GET /internal/evals/experiments/{experimentId}/runs', () => {
             output: { answer: 'Answer 0, take 1' },
             model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' },
           },
-          evaluators: [{ name: 'correctness', kind: 'llm', score: 0.7 }],
+          evaluators: [
+            { name: 'correctness', kind: 'llm', score: 0.7 },
+            { name: 'latency', kind: 'code', score: 0.8 },
+          ],
         },
       ],
     });
+  });
+
+  it('drops a run whose documents were truncated by the MAX_SCORES_PER_QUERY cap', async () => {
+    // Simulates the cap: aggregation says run (0,1) has 2 scores but the ES
+    // fetch only returned 1 of them (the page hit the 10K document limit).
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+        aggregations: { runs: { buckets: [runBucket(0, 0), runBucket(0, 1)] } },
+      } as any)
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            scoreDocument({
+              exampleIndex: 0,
+              repetition: 0,
+              evaluator: { name: 'correctness', kind: 'llm', score: 0.9 },
+            }),
+            scoreDocument({
+              exampleIndex: 0,
+              repetition: 0,
+              evaluator: { name: 'latency', kind: 'code', score: 0.5 },
+            }),
+            // Only 1 of 2 expected docs for run (0, 1) came back — truncated.
+            scoreDocument({
+              exampleIndex: 0,
+              repetition: 1,
+              evaluator: { name: 'correctness', kind: 'llm', score: 0.7 },
+            }),
+          ],
+        },
+      } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    // Run (0, 1) is dropped rather than returned with a partial evaluator list.
+    expect(response.payload.runs).toHaveLength(1);
+    expect(response.payload.runs[0].task.repetition_index).toBe(0);
   });
 
   it('fetches full documents without excluding the unbounded source fields', async () => {

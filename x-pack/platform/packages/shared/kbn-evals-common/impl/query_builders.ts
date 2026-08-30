@@ -520,6 +520,13 @@ export const SCORES_SORT_ORDER: SortField[] = [
   { 'task.repetition_index': { order: 'asc' } },
 ];
 
+export const RUNS_SORT_ORDER: SortField[] = [
+  { 'example.dataset.name': { order: 'asc' } },
+  { 'example.index': { order: 'asc' } },
+  { 'task.repetition_index': { order: 'asc' } },
+  { 'evaluator.name': { order: 'asc' } },
+];
+
 // ---------------------------------------------------------------------------
 // Experiments listing query, aggregation, and response parser
 // ---------------------------------------------------------------------------

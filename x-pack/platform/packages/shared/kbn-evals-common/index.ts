@@ -23,6 +23,7 @@ export {
   parseExperimentRunsAggregation,
   buildExperimentRunsFetchQuery,
   SCORES_SORT_ORDER,
+  RUNS_SORT_ORDER,
   buildExperimentsListingFilterQuery,
   buildExperimentsListingAggregation,
   parseExperimentsListingResponse,
