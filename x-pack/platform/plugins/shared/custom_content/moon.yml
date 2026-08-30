@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/i18n'
-  - '@kbn/inference-plugin'
   - '@kbn/data-plugin'
   - '@kbn/esql-utils'
   - '@kbn/es-query'
@@ -44,6 +43,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util'
+  - '@kbn/esql-types'
 tags:
   - plugin
   - prod

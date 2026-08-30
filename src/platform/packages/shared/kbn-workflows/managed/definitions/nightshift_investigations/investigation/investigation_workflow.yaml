@@ -41,6 +41,29 @@ triggers:
       additionalProperties: false
 
 steps:
+  # The investigation agent is a per-space document, so it has to exist in whichever space this
+  # execution runs in. Callers going through NightshiftInvestigationsClient.start() install it
+  # themselves, but discovery triggers this workflow with `workflow.executeAsync`, which never
+  # touches that client — as does any hand-written workflow or manual run. Ensuring it here is the
+  # one place that covers every trigger. Idempotent, and it never overwrites admin edits.
+  #
+  # Runs before `emit_investigation_started` so that a failure here does not leave a stale
+  # `running` status with no terminal event. Without `on-failure: continue`, a failure also
+  # cannot leave a pending marker on a significant event for an investigation that will never
+  # produce anything: no `investigations` entry is written, so the next discovery cycle retries.
+  - name: ensure_investigation_agent
+    type: nightshift.ensureInvestigationAgent
+  - name: emit_investigation_started
+    type: kibana.request
+    with:
+      method: POST
+      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'running'
+    on-failure:
+      continue: true
   # Records a pending investigation on the Significant Event as soon as the workflow starts,
   # so the UI can show an in-progress indicator before the agent step finishes.
   # Only runs when a sig-event context was supplied (discovery or chat-agent paths).
@@ -53,7 +76,7 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_id: '{{ execution.id }}'
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
     on-failure:
       continue: true
@@ -76,7 +99,7 @@ steps:
       # up the agent execution's (auto-generated) id via findExecutions and follow its live
       # progress before this step returns.
       metadata:
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_id: '{{ execution.id }}'
       message: |
         Investigate the root cause of the following issue:
 
@@ -87,7 +110,41 @@ steps:
         {% for stream in inputs.stream_names %}- {{ stream }}
         {% endfor %}
         {% endif %}
-        {% if inputs.context %}
+        {% if inputs.context.source == 'alert' %}
+        This investigation was triggered by an alerting rule, so the condition that fired is
+        already known — do not spend effort rediscovering it. Start from the rule condition
+        stated above (the reason, and the observed value against its threshold) and work
+        outwards to what caused the metric to move.
+
+        You are not investigating a significant event. That is a separate curated entity in
+        this product, not another word for an alert that matters, and none is attached here.
+        Skip the step that reassesses a significant event. Omit `significant_event_updates`
+        from your output entirely — do not invent severity, summary, or status changes for
+        one.
+
+        Treat the affected entity fields as the scope of the problem: filter your ES|QL queries
+        to that entity first, and only widen when you need to establish whether neighbours are
+        affected too. Where an index pattern is given, use it as the starting point for queries
+        rather than guessing at index names.
+
+        Where affected entity fields are given, they are the known starting point for what this
+        problem impacts. The rule grouped on them, so they are established fact rather than a
+        hypothesis, and every one of them is impacted unless you find evidence otherwise. Name
+        them explicitly in your summary rather than leaving them implicit in the reason text, and
+        use the field name as well as the value (for example "service.name checkout") so each one
+        is unambiguous. Not every rule type records them, so do not invent entity fields that
+        were not given to you.
+
+        Then establish whether the impact is wider than what the rule saw. The rule only grouped
+        on the fields it was configured with, so it cannot tell you about anything else that is
+        affected. When you find an additional impacted entity, say what evidence identified it
+        and keep it distinct from the entities the alert already named.
+
+        Where rule parameters are given, they describe how the condition is evaluated
+        (aggregation, window, and threshold). Read them before concluding that a spike is
+        anomalous — a short window or a tight threshold can fire on normal variation, and "the
+        rule is too sensitive" is a legitimate conclusion supported by the data.
+        {% elsif inputs.context and inputs.context.size > 0 %}
         Additional context: {{ inputs.context | json }}
         {% endif %}
       # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema
@@ -553,6 +610,90 @@ steps:
                     - to
                     - reason
                     - evidence
+          impact:
+            type: object
+            description: >
+              Structured account of which services or components were impacted. At most 10 entries,
+              service-level preferred. Each entity carries one optional evidence artifact (an ES|QL
+              query with absolute time window preferred) for chart rendering — description is a short
+              label only. Seed from alert grouping or sig event causal features; finalize after
+              hypotheses are settled. Omit only when no signals exist.
+            properties:
+              entities:
+                type: array
+                maxItems: 10
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      maxLength: 512
+                    type:
+                      type: string
+                      maxLength: 255
+                      description: >
+                        Entity category. Default to "service". Use "host", "database", etc. only when
+                        no service-level entity applies.
+                    feature_id:
+                      type: string
+                      maxLength: 255
+                      description: KI feature_id when this entity came from a Knowledge Indicator.
+                    stream_name:
+                      type: string
+                      maxLength: 255
+                    evidence:
+                      type: object
+                      description: >
+                        One artifact linking this entity to the investigation. Prefer esql_query +
+                        time_range (absolute ISO 8601) so the UI can render a chart. description is
+                        a short label — no prose explanation of impact.
+                      properties:
+                        description:
+                          type: string
+                          maxLength: 10000
+                        esql_query:
+                          type: string
+                          maxLength: 10000
+                        time_range:
+                          type: object
+                          properties:
+                            from:
+                              type: string
+                              maxLength: 64
+                            to:
+                              type: string
+                              maxLength: 64
+                          required:
+                            - from
+                            - to
+                        code:
+                          type: object
+                          properties:
+                            source:
+                              type: string
+                              enum: [github_connector, code_search]
+                            repo:
+                              type: string
+                              maxLength: 255
+                            path:
+                              type: string
+                              maxLength: 512
+                            host:
+                              type: string
+                              maxLength: 255
+                            ref:
+                              type: string
+                              maxLength: 255
+                          required:
+                            - source
+                            - repo
+                            - path
+                      required:
+                        - description
+                  required:
+                    - name
+            required:
+              - entities
         required:
           - summary
           - hypotheses
@@ -583,7 +724,7 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_id: '{{ execution.id }}'
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         severity: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'severity' | map: 'to' | first }}"
@@ -616,3 +757,33 @@ steps:
         Read the current _gaps/overview page with platform_sig_events_memory_read. Compare the filtered gaps against it. If every gap is already reflected there, stop and write nothing. If there are genuinely new gaps, weave them into the existing sections (do not add a separate section) and save the page with platform_sig_events_memory_write using categories ["_system/gaps"].
     on-failure:
       continue: true
+
+  - name: emit_investigation_completed
+    type: kibana.request
+    if: '${{ steps.investigate.error == null }}'
+    with:
+      method: POST
+      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'completed'
+    on-failure:
+      continue: true
+
+  - name: emit_investigation_failed
+    type: kibana.request
+    if: '${{ steps.investigate.error != null }}'
+    with:
+      method: POST
+      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'failed'
+    on-failure:
+      continue: true
+
+  - name: fail_investigation
+    type: workflow.fail
+    if: '${{ steps.investigate.error != null }}'

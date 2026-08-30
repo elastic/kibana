@@ -16,7 +16,13 @@ import { apiTest, testData } from '../fixtures';
 const PREAUTH_HOLD_HEADER = 'x-elastic-preauth-hold';
 
 // Parks inside PKI authenticate (not onPreAuth). RST during onPreAuth makes Hapi skip Auth, so
-// the session is never at risk and this spec would pass even without the pki.ts guard.
+// the session is never at risk and this spec would exercise none of the interesting path.
+//
+// KibanaSocket resolves the session-level TLSSocket (see `resolveRawSocket`), which outlives the
+// destruction of any single HTTP/2 stream. So this spec locks the root-cause fix: an RST arriving
+// mid-authenticate must leave the socket readable, and the session intact. The pki.ts
+// degraded-socket guard still covers the residual cases (HTTP/1.1 closed sockets, streams already
+// destroyed before the request was constructed) and keeps its own unit coverage in pki.test.ts.
 apiTest.describe('PKI HTTP/2 stream cancel', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ esClient }) => {
     await esClient.security.putRoleMapping({
@@ -52,6 +58,7 @@ apiTest.describe('PKI HTTP/2 stream cancel', { tag: tags.stateful.classic }, () 
           parked: boolean;
           continuedAfterHold: boolean;
           authCompleted: boolean;
+          aborted: boolean;
           authorized: boolean | null;
           peerCertificateNull: boolean;
         };
@@ -73,22 +80,25 @@ apiTest.describe('PKI HTTP/2 stream cancel', { tag: tags.stateful.classic }, () 
         expect(parked.peerCertificateNull).toBe(false);
       });
 
-      await apiTest.step('RST until the parked socket is degraded', async () => {
+      await apiTest.step('RST the victim stream while the hold is parked', async () => {
         victim.stream.close(http2.constants.NGHTTP2_CANCEL);
-        // Requiring `continuedAfterHold === false` pins the degradation to the RST arriving
-        // while the hold is still parked. Without it, a hold that times out degrades the
-        // socket the same way once the request completes normally, and this step would pass
-        // without exercising the destroyed-socket-during-auth path.
+
+        // `aborted` proves the RST actually reached the server; `continuedAfterHold === false`
+        // pins it to the window where the hold is still parked inside PKI authenticate. Without
+        // both, this step would pass even if the RST never landed at all.
         await expect
           .poll(async () => {
             const hold = await getHoldStatus();
-            return (
-              hold.continuedAfterHold === false &&
-              hold.peerCertificateNull === true &&
-              hold.authorized !== true
-            );
+            return hold.aborted === true && hold.continuedAfterHold === false;
           })
           .toBe(true);
+
+        // The client certificate belongs to the TLS connection, not to the cancelled stream, so
+        // destroying one stream must leave the socket fully readable. This is the regression that
+        // invalidated PKI sessions under HTTP/2.
+        const afterRst = await getHoldStatus();
+        expect(afterRst.authorized).toBe(true);
+        expect(afterRst.peerCertificateNull).toBe(false);
       });
 
       await apiTest.step('release', async () => {

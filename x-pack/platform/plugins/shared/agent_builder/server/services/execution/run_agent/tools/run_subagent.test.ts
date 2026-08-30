@@ -202,7 +202,6 @@ describe('createSubagentTool', () => {
     expect(executeSubAgent).toHaveBeenCalledWith({
       agentId: 'test-agent',
       connectorId: 'selected-connector',
-      capabilities: undefined,
       parentExecutionId: 'parent-exec-id',
       prompt: 'Summarize data\n\nSummarize the following data...',
       abortSignal,
