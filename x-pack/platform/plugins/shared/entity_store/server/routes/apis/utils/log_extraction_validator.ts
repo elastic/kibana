@@ -62,7 +62,10 @@ function validateIndexPatternList(
   });
 }
 
-function validateDelayVsLookbackPeriod(data: LogExtractionInstallParams, ctx: z.RefinementCtx): void {
+function validateDelayVsLookbackPeriod(
+  data: LogExtractionInstallParams,
+  ctx: z.RefinementCtx
+): void {
   const hasDelay = data.delay !== undefined;
   const hasLookback = data.lookbackPeriod !== undefined;
   if (!hasDelay && !hasLookback) {
