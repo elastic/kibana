@@ -49,5 +49,4 @@ describe('investigation lifecycle contracts', () => {
       if: '${{ steps.investigate.error != null }}',
     });
   });
-
 });

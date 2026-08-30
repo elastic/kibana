@@ -265,10 +265,7 @@ export const investigationStateSchema = z.object({
    * evidence backing the proposal. Omit the array (or omit a field's entry) when no change is
    * warranted for that field. The workflow does not apply these proposals directly.
    */
-  trigger_feedback: z
-    .array(triggerFeedbackSchema)
-    .max(MAX_TRIGGER_FEEDBACK)
-    .optional(),
+  trigger_feedback: z.array(triggerFeedbackSchema).max(MAX_TRIGGER_FEEDBACK).optional(),
   /**
    * Structured account of which services or components were impacted. Optional so existing
    * persisted investigations remain valid. Seeded from alert grouping or sig event causal

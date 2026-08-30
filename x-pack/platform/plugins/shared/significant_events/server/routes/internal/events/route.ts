@@ -240,7 +240,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-      body: significantEventInvestigationSchema
+    body: significantEventInvestigationSchema
       .extend({
         trigger_feedback: z.array(triggerFeedbackSchema).max(3).optional(),
       })

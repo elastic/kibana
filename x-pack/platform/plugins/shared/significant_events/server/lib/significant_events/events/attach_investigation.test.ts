@@ -202,7 +202,11 @@ describe('attachInvestigationToEvent', () => {
   });
 
   it('carries forward the previous_event_uuid lineage', async () => {
-    const existing = createEvent({ event_uuid: 'event-3', event_id: 'agent-event-3', previous_event_uuid: 'event-2' });
+    const existing = createEvent({
+      event_uuid: 'event-3',
+      event_id: 'agent-event-3',
+      previous_event_uuid: 'event-2',
+    });
     const { client } = createEventClient([existing]);
 
     const result = await attachInvestigationToEvent({

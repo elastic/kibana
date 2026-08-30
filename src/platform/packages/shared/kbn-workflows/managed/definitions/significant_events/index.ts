@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import INVESTIGATION_COMPLETED_YAML from './investigation_completed.yaml';
 import DETECTION_YAML from './significant_events/detection.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
 import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
-import INVESTIGATION_COMPLETED_YAML from './investigation_completed.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 export {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
