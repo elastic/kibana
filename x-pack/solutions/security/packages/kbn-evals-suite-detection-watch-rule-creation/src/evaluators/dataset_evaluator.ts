@@ -35,6 +35,10 @@ import {
 
 export type RuleEvaluator = Evaluator<RuleCreationExample, RuleCreationResult>;
 
+// Every evaluator below is a higher-is-better gate (1 = expectation met). Declared once
+// here so each factory's object literal stays free of boilerplate.
+export const RULE_EVALUATOR_DIRECTION = 'maximize' as const;
+
 // ---------------------------------------------------------------------------
 // Skip wrapper — returns N/A for any example where the workflow produced no rule
 // ---------------------------------------------------------------------------
@@ -59,6 +63,7 @@ const skipNoRule = (evaluator: RuleEvaluator): RuleEvaluator => ({
 
 export const createQuerySyntaxValidityEvaluator = (): RuleEvaluator =>
   skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
     name: 'Query Syntax Validity',
     kind: 'CODE',
     evaluate: async ({ output }) => {
@@ -77,6 +82,7 @@ export const createQuerySyntaxValidityEvaluator = (): RuleEvaluator =>
 
 export const createFieldCoverageEvaluator = (): RuleEvaluator =>
   skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
     name: 'Field Coverage',
     kind: 'CODE',
     evaluate: async ({ output }) => {
@@ -87,6 +93,7 @@ export const createFieldCoverageEvaluator = (): RuleEvaluator =>
 
 export const createRuleTypeLanguageEvaluator = (): RuleEvaluator =>
   skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
     name: 'Rule Type & Language',
     kind: 'CODE',
     evaluate: async ({ output }) => {
@@ -99,6 +106,7 @@ export const createRuleTypeLanguageEvaluator = (): RuleEvaluator =>
 
 export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
   skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
     name: 'MITRE Accuracy',
     kind: 'CODE',
     evaluate: async ({ output, expected }) => {
@@ -134,6 +142,7 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
 
 export const createSeverityValidityEvaluator = (): RuleEvaluator =>
   skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
     name: 'Severity Validity',
     kind: 'CODE',
     evaluate: async ({ output }) => {
@@ -145,6 +154,7 @@ export const createSeverityValidityEvaluator = (): RuleEvaluator =>
 
 export const createRiskScoreValidityEvaluator = (): RuleEvaluator =>
   skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
     name: 'Risk Score Validity',
     kind: 'CODE',
     evaluate: async ({ output }) => {
@@ -156,6 +166,7 @@ export const createRiskScoreValidityEvaluator = (): RuleEvaluator =>
 
 export const createIntervalFormatEvaluator = (): RuleEvaluator =>
   skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
     name: 'Interval Format',
     kind: 'CODE',
     evaluate: async ({ output }) => {
@@ -168,6 +179,7 @@ export const createIntervalFormatEvaluator = (): RuleEvaluator =>
 
 export const createLookbackGapEvaluator = (): RuleEvaluator =>
   skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
     name: 'Lookback Gap',
     kind: 'CODE',
     evaluate: async ({ output }) => {
@@ -188,6 +200,7 @@ export const createLookbackGapEvaluator = (): RuleEvaluator =>
 
 export const createQueryExecutabilityEvaluator = (esClient: EsClient): RuleEvaluator =>
   skipNoRule({
+    direction: RULE_EVALUATOR_DIRECTION,
     name: 'Query Executability',
     kind: 'CODE',
     evaluate: async ({ output }) => {
@@ -233,6 +246,7 @@ const GAP_ADDRESSED_CRITERIA = (
 ];
 
 export const createGapAddressedEvaluator = (evaluators: DefaultEvaluators): RuleEvaluator => ({
+  direction: RULE_EVALUATOR_DIRECTION,
   name: 'Gap Addressed',
   kind: 'LLM',
   evaluate: async ({ output, input, expected }) => {

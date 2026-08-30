@@ -1,4 +1,11 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
  * Elastic License 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
@@ -7,7 +14,12 @@
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION, DRAFT_STEP_ID, REVIEW_STEP_ID } from './constants';
+import {
+  RULE_CREATION_WORKFLOW_ID,
+  WORKFLOWS_API_VERSION,
+  DRAFT_STEP_ID,
+  REVIEW_STEP_ID,
+} from './constants';
 
 // The model connector (used by the workflow's ai.agent step) is not checked here — if it is
 // misconfigured the workflow execution will fail loudly on its own. Only the judge connector
@@ -54,11 +66,11 @@ const parseStepNames = (yaml: string): string[] => {
   for (const line of yaml.split('\n')) {
     if (/^\S/.test(line)) {
       inSteps = /^steps:/.test(line);
-      continue;
-    }
-    const match = /^ {2}- name: (.+)$/.exec(line);
-    if (inSteps && match) {
-      names.push(match[1].trim());
+    } else {
+      const match = /^ {2}- name: (.+)$/.exec(line);
+      if (inSteps && match) {
+        names.push(match[1].trim());
+      }
     }
   }
   return names;
@@ -84,11 +96,14 @@ export const assertWorkflowInstalled = async ({
   log.info(`Checking managed workflow: ${RULE_CREATION_WORKFLOW_ID}`);
   let workflow: { yaml: string };
   try {
-    workflow = await fetch<{ yaml: string }>(`/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}`, {
-      method: 'GET',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-    });
+    workflow = await fetch<{ yaml: string }>(
+      `/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}`,
+      {
+        method: 'GET',
+        version: WORKFLOWS_API_VERSION,
+        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      }
+    );
     log.info('Managed workflow is installed — proceeding with eval run');
   } catch (err) {
     throw new Error(

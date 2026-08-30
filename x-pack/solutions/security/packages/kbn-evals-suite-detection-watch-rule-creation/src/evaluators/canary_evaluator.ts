@@ -9,6 +9,7 @@ import type { DefaultEvaluators } from '@kbn/evals';
 import {
   createGapAddressedEvaluator,
   createQuerySyntaxValidityEvaluator,
+  RULE_EVALUATOR_DIRECTION,
   type RuleEvaluator,
 } from './dataset_evaluator';
 
@@ -19,6 +20,7 @@ import {
  * discriminating.
  */
 export const createCanaryEvaluator = (evaluators: DefaultEvaluators): RuleEvaluator => ({
+  direction: RULE_EVALUATOR_DIRECTION,
   name: 'Canary Tripped',
   kind: 'LLM',
   evaluate: async (args) => {

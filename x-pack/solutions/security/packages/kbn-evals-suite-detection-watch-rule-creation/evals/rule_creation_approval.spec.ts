@@ -1,4 +1,11 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
  * Elastic License 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
@@ -95,7 +102,11 @@ evaluate.describe(
             log.info(`Swept leaked rule "${name}" (${rule.id}) by name`);
           }
         } catch (err) {
-          log.error(`Failed to sweep rule "${name}" by name: ${err instanceof Error ? err.message : String(err)}`);
+          log.error(
+            `Failed to sweep rule "${name}" by name: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
         }
       }
     });
@@ -150,7 +161,9 @@ evaluate.describe(
         log.info(`Verifying rule "${ruleName}" was created after approval`);
         const rule = await findRuleByName(fetch, ruleName);
         if (!rule) {
-          throw new Error(`Rule "${ruleName}" was not found in the detection engine after approval`);
+          throw new Error(
+            `Rule "${ruleName}" was not found in the detection engine after approval`
+          );
         }
         createdRuleIds.add(rule.id);
         log.info(`Confirmed rule "${ruleName}" exists — registered for afterEach sweep`);
@@ -180,7 +193,9 @@ evaluate.describe(
 
         // create_rule is if-guarded, not a workflow failure: rejection still completes.
         if (execution.status !== ExecutionStatus.COMPLETED) {
-          throw new Error(`Workflow did not complete after rejection — status: ${execution.status}`);
+          throw new Error(
+            `Workflow did not complete after rejection — status: ${execution.status}`
+          );
         }
 
         const ruleName = result.rule?.name;
