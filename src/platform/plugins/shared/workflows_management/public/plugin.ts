@@ -33,6 +33,7 @@ import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
 import { triggerSchemas } from './trigger_schemas';
+import { registerConnectorEventTriggersPublic } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
@@ -93,6 +94,12 @@ export class WorkflowsPlugin
     };
 
     registerConnectorType();
+
+    registerConnectorEventTriggersPublic({
+      inboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
+      registerTriggerDefinition: (definition) =>
+        plugins.workflowsExtensions.registerTriggerDefinition(definition),
+    });
 
     this.setupAgentBuilderStart(core);
 
