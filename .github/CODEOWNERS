@@ -506,6 +506,7 @@ src/platform/packages/shared/deeplinks/agent_builder @elastic/workchat-eng
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/context-engine @elastic/context-eng
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
+src/platform/packages/shared/deeplinks/evals @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/deeplinks/ml @elastic/search-ml-ux
@@ -1428,6 +1429,8 @@ x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
 x-pack/solutions/security/packages/navigation @elastic/security-pds-deployment
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
+x-pack/solutions/security/packages/security-mitre-attack-common @elastic/security-detection-engineering
+x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering
 x-pack/solutions/security/packages/side-nav @elastic/security-pds-deployment
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
@@ -3138,6 +3141,9 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
+
+# Nightshift investigations managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 
 # PND managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/pnd @elastic/security-solution
