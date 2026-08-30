@@ -369,15 +369,22 @@ export class TriggerEventHandler {
       spaceId
     );
 
+    const requiresConnectorId =
+      this.workflowsExtensions.getTriggerDefinition(triggerId)?.requiresConnectorId === true;
     const stats = createEmptyTriggerResolutionStats();
     stats.subscribedCount = allWorkflows.length;
     const workflows: WorkflowDetailDto[] = [];
 
     for (const workflow of allWorkflows) {
-      const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, eventContext, this.logger);
+      const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, eventContext, this.logger, {
+        requiresConnectorId,
+      });
       switch (outcome) {
         case 'disabled':
           stats.disabledCount += 1;
+          break;
+        case 'connector_id_mismatch':
+          stats.connectorIdMismatchCount += 1;
           break;
         case 'kql_false':
           stats.kqlFalseCount += 1;
