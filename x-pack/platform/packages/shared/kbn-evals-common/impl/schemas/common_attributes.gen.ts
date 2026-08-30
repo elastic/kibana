@@ -327,3 +327,94 @@ export const TraceSpan = lazySchema(() =>
   })
 );
 export type TraceSpan = z.infer<typeof TraceSpan>;
+
+/**
+ * How the experiment was set up: what ran, against what data, judged by whom. Snapshotted when the run starts, so it stays accurate after the live dataset or evaluators are edited or deleted.
+ */
+export const ExperimentRecordProtocol = lazySchema(() =>
+  z.object({
+    dataset: z.object({
+      id: z.string().max(1024),
+      name: z.string().max(256).optional(),
+      description: z.string().max(2048).optional(),
+      examples_count: z.number().int().min(0).optional(),
+    }),
+    task: z
+      .object({
+        model: Model.optional(),
+        configuration: z.object({}).catchall(z.unknown()).optional(),
+      })
+      .optional(),
+    evaluators: z
+      .array(
+        z.object({
+          name: z.string().max(256),
+          version: z.string().max(64).optional(),
+          kind: z.enum(['llm', 'code']).optional(),
+          /**
+           * Model the evaluator judges with. Only meaningful for `llm` evaluators; code evaluators invoke no model.
+           */
+          model: Model.optional(),
+          configuration: z.object({}).catchall(z.unknown()).optional(),
+        })
+      )
+      .max(100)
+      .optional(),
+    total_repetitions: z.number().int().min(1).optional(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
+export type ExperimentRecordProtocol = z.infer<typeof ExperimentRecordProtocol>;
+
+/**
+ * Where the run came from: CLI host, git state, CI build, or workflow execution.
+ */
+export const ExperimentRecordProvenance = lazySchema(() =>
+  z.object({
+    execution_id: z.string().max(1024).optional(),
+    suite_id: z.string().max(256).optional(),
+    hostname: z.string().max(256).optional(),
+    git: z
+      .object({
+        branch: z.string().max(256).nullable().optional(),
+        commit_sha: z.string().max(256).nullable().optional(),
+      })
+      .optional(),
+    ci: BuildkiteMetadata.optional(),
+  })
+);
+export type ExperimentRecordProvenance = z.infer<typeof ExperimentRecordProvenance>;
+
+/**
+ * Counters reported at finalization; how much of the planned run actually landed.
+ */
+export const ExperimentRecordCompleteness = lazySchema(() =>
+  z.object({
+    successful_tasks: z.number().int().min(0).optional(),
+    failed_tasks: z.number().int().min(0).optional(),
+    score_ingest_failures: z.number().int().min(0).optional(),
+  })
+);
+export type ExperimentRecordCompleteness = z.infer<typeof ExperimentRecordCompleteness>;
+
+/**
+ * A first-class experiment record: the protocol snapshot taken when the run started plus its lifecycle status, as opposed to the virtual experiments derived from score documents.
+ */
+export const EvaluationExperimentRecord = lazySchema(() =>
+  z.object({
+    id: z.string().max(256),
+    experiment_id: z.string().max(1024),
+    name: z.string().max(256),
+    description: z.string().max(2048).optional(),
+    protocol: ExperimentRecordProtocol,
+    status: z.enum(['pending', 'running', 'completed', 'failed']),
+    started_at: z.string().max(64).optional(),
+    completed_at: z.string().max(64).optional(),
+    provenance: ExperimentRecordProvenance.optional(),
+    completeness: ExperimentRecordCompleteness.optional(),
+    error: z.string().max(4096).optional(),
+    created_at: z.string().max(64),
+    updated_at: z.string().max(64),
+  })
+);
+export type EvaluationExperimentRecord = z.infer<typeof EvaluationExperimentRecord>;

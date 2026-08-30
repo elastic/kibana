@@ -563,3 +563,172 @@ components:
         - name
         - start_time
         - duration_ms
+
+    ExperimentRecordProtocol:
+      type: object
+      description: >-
+        How the experiment was set up: what ran, against what data, judged by
+        whom. Snapshotted when the run starts, so it stays accurate after the
+        live dataset or evaluators are edited or deleted.
+      properties:
+        dataset:
+          type: object
+          properties:
+            id:
+              type: string
+              maxLength: 1024
+            name:
+              type: string
+              maxLength: 256
+            description:
+              type: string
+              maxLength: 2048
+            examples_count:
+              type: integer
+              minimum: 0
+          required:
+            - id
+        task:
+          type: object
+          properties:
+            model:
+              $ref: '#/components/schemas/Model'
+            configuration:
+              type: object
+              additionalProperties: true
+        evaluators:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                maxLength: 256
+              version:
+                type: string
+                maxLength: 64
+              kind:
+                type: string
+                enum:
+                  - llm
+                  - code
+              model:
+                $ref: '#/components/schemas/Model'
+                description: >-
+                  Model the evaluator judges with. Only meaningful for `llm`
+                  evaluators; code evaluators invoke no model.
+              configuration:
+                type: object
+                additionalProperties: true
+            required:
+              - name
+        total_repetitions:
+          type: integer
+          minimum: 1
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - dataset
+
+    ExperimentRecordProvenance:
+      type: object
+      description: >-
+        Where the run came from: CLI host, git state, CI build, or workflow
+        execution.
+      properties:
+        execution_id:
+          type: string
+          maxLength: 1024
+        suite_id:
+          type: string
+          maxLength: 256
+        hostname:
+          type: string
+          maxLength: 256
+        git:
+          type: object
+          properties:
+            branch:
+              type: string
+              maxLength: 256
+              nullable: true
+            commit_sha:
+              type: string
+              maxLength: 256
+              nullable: true
+        ci:
+          $ref: '#/components/schemas/BuildkiteMetadata'
+
+    ExperimentRecordCompleteness:
+      type: object
+      description: >-
+        Counters reported at finalization; how much of the planned run actually
+        landed.
+      properties:
+        successful_tasks:
+          type: integer
+          minimum: 0
+        failed_tasks:
+          type: integer
+          minimum: 0
+        score_ingest_failures:
+          type: integer
+          minimum: 0
+
+    EvaluationExperimentRecord:
+      type: object
+      description: >-
+        A first-class experiment record: the protocol snapshot taken when the
+        run started plus its lifecycle status, as opposed to the virtual
+        experiments derived from score documents.
+      properties:
+        id:
+          type: string
+          maxLength: 256
+        experiment_id:
+          type: string
+          maxLength: 1024
+        name:
+          type: string
+          maxLength: 256
+        description:
+          type: string
+          maxLength: 2048
+        protocol:
+          $ref: '#/components/schemas/ExperimentRecordProtocol'
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - completed
+            - failed
+        started_at:
+          type: string
+          maxLength: 64
+        completed_at:
+          type: string
+          maxLength: 64
+        provenance:
+          $ref: '#/components/schemas/ExperimentRecordProvenance'
+        completeness:
+          $ref: '#/components/schemas/ExperimentRecordCompleteness'
+        error:
+          type: string
+          maxLength: 4096
+        created_at:
+          type: string
+          maxLength: 64
+        updated_at:
+          type: string
+          maxLength: 64
+      required:
+        - id
+        - experiment_id
+        - name
+        - protocol
+        - status
+        - created_at
+        - updated_at

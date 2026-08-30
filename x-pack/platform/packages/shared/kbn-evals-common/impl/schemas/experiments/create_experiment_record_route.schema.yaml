@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: Create Evaluation Experiment Record API endpoint
+  version: '1'
+paths:
+  /internal/evals/experiments/{experimentId}/_record:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: CreateEvaluationExperimentRecord
+      description: >-
+        Create the first-class record of an experiment when its run starts:
+        the protocol snapshot, provenance, and lifecycle status. One record
+        exists per experiment and space; a second create for the same
+        experiment is rejected with 409 rather than overwriting the first.
+      summary: Create evaluation experiment record
+      tags:
+        - Evals API
+      parameters:
+        - name: experimentId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 256
+                description:
+                  type: string
+                  maxLength: 2048
+                protocol:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/ExperimentRecordProtocol'
+                status:
+                  type: string
+                  enum:
+                    - pending
+                    - running
+                  default: running
+                  description: >-
+                    Initial lifecycle status. `pending` is for queued runs
+                    (e.g. workflow executions) that have not started executing
+                    yet; runs that begin immediately are created as `running`.
+                started_at:
+                  type: string
+                  maxLength: 64
+                  description: >-
+                    When execution began. Defaults to the creation time for
+                    records created as `running`.
+                provenance:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/ExperimentRecordProvenance'
+                space_ids:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: string
+                    maxLength: 256
+                  description: >-
+                    Additional spaces to assign the record to, mirroring the
+                    space assignment of the run's ingested scores. The caller's
+                    active space is always included, so the record can still be
+                    finalized from the space that created it.
+              required:
+                - name
+                - protocol
+      responses:
+        '200':
+          description: The created experiment record
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluationExperimentRecord'
+        '400':
+          description: All spaces (*) was given as a space id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                    maxLength: 256
+                  message:
+                    type: string
+                    maxLength: 1024
+        '403':
+          description: The caller lacks manage privileges in a requested space
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                    maxLength: 256
+                  message:
+                    type: string
+                    maxLength: 1024
+        '409':
+          description: A record for this experiment already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                    maxLength: 256
+                  message:
+                    type: string
+                    maxLength: 1024

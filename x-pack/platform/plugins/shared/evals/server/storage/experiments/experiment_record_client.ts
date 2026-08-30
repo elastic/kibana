@@ -41,6 +41,7 @@ export interface CreateExperimentRecordInput {
   status?: Extract<ExperimentRecordStatus, 'pending' | 'running'>;
   provenance?: ExperimentProvenance;
   startedAt?: string;
+  spaceIds?: string[];
 }
 
 /** Fields a status transition may change. */
@@ -108,6 +109,7 @@ export class ExperimentRecordClient {
     status = 'running',
     provenance,
     startedAt,
+    spaceIds,
   }: CreateExperimentRecordInput): Promise<ExperimentRecordDocument> {
     const timestamp = new Date().toISOString();
     const resolvedStartedAt = startedAt ?? (status === 'running' ? timestamp : undefined);
@@ -119,7 +121,7 @@ export class ExperimentRecordClient {
       status,
       ...(resolvedStartedAt ? { started_at: resolvedStartedAt } : {}),
       ...(provenance ? { provenance } : {}),
-      space_ids: [this.spaceId],
+      space_ids: Array.from(new Set([this.spaceId, ...(spaceIds ?? [])])),
       created_at: timestamp,
       updated_at: timestamp,
     };

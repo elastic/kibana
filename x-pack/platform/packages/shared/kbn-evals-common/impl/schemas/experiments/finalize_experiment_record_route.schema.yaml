@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: Finalize Evaluation Experiment Record API endpoint
+  version: '1'
+paths:
+  /internal/evals/experiments/{experimentId}/_record/_finalize:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: FinalizeEvaluationExperimentRecord
+      description: >-
+        Close out an experiment record when its run ends, recording the
+        terminal status and how much of the planned run actually landed.
+        Finalizing is idempotent, so a retried call after a network failure
+        does not error.
+      summary: Finalize evaluation experiment record
+      tags:
+        - Evals API
+      parameters:
+        - name: experimentId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - completed
+                    - failed
+                completeness:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/ExperimentRecordCompleteness'
+                error:
+                  type: string
+                  maxLength: 4096
+                  description: What failed, for records finalized as `failed`.
+                completed_at:
+                  type: string
+                  maxLength: 64
+                  description: >-
+                    When the run ended. Defaults to the time the record is
+                    finalized.
+              required:
+                - status
+      responses:
+        '200':
+          description: The finalized experiment record
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluationExperimentRecord'
+        '404':
+          description: No record exists for this experiment in the active space
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                    maxLength: 256
+                  message:
+                    type: string
+                    maxLength: 1024

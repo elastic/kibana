@@ -261,6 +261,21 @@ describe('ExperimentRecordClient', () => {
       expect(docs.get(created.id)?.document.space_ids).toEqual(['marketing']);
     });
 
+    it('always keeps its own space among explicitly assigned spaces', async () => {
+      const { client, docs } = createClient({ spaceId: 'marketing' });
+
+      const created = await client.create({
+        experimentId: 'exp-1',
+        name: 'My experiment',
+        protocol: PROTOCOL,
+        spaceIds: ['sales', 'marketing', 'ops'],
+      });
+
+      // The creating space comes first and duplicates collapse, so the record
+      // stays readable and finalizable from the space that created it.
+      expect(docs.get(created.id)?.document.space_ids).toEqual(['marketing', 'sales', 'ops']);
+    });
+
     it('rejects a second record for the same experiment', async () => {
       const { client } = createClient();
       await client.create({ experimentId: 'exp-1', name: 'First', protocol: PROTOCOL });
