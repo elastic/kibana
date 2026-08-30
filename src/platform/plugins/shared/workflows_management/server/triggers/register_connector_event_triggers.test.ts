@@ -101,6 +101,7 @@ describe('registerConnectorEventTriggers', () => {
         title: 'Dual received',
         description: 'A dual connector event',
         stability: 'tech_preview',
+        requiresConnectorId: true,
       })
     );
   });
