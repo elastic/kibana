@@ -22,8 +22,8 @@ export interface GetMappingConflictsParams {
 }
 
 /**
- * Detects fields mapped as multiple incompatible types across a source (ES|QL union types),
- * probing unfiltered so a conflict isolated in an older backing index is still seen.
+ * Detects fields mapped as multiple incompatible types across a source (ES|QL union types), probing
+ * unfiltered so a conflict isolated in an older backing index is still seen.
  */
 export async function getMappingConflicts({
   esClient,

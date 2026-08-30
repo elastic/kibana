@@ -273,7 +273,11 @@ export async function identifyKIQueries({
       logger,
     }),
     // Best-effort source-wide probe; drives full-source validation below and must not fail generation.
-    getMappingConflicts({ esClient, index: targetSources, signal }).catch((error) => {
+    getMappingConflicts({
+      esClient,
+      index: targetSources,
+      signal: AbortSignal.any([signal, AbortSignal.timeout(15_000)]),
+    }).catch((error) => {
       logger.debug(
         () =>
           `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${getErrorMessage(

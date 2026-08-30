@@ -35,7 +35,7 @@ Each field key is \`name (types)\`. When a field is mapped as multiple incompati
       getMappingConflicts({
         esClient,
         index: samplingSource,
-        signal,
+        signal: AbortSignal.any([signal, AbortSignal.timeout(15_000)]),
       }).catch((error) => {
         logger.debug(
           () =>
