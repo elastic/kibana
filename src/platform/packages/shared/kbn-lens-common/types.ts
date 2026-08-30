@@ -17,7 +17,7 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Filter, FilterMeta, TimeRange } from '@kbn/es-query/src/filters';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
   Datatable,
@@ -206,6 +206,25 @@ interface PersistableFilterMeta extends FilterMeta {
 export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
 }
+
+/**
+ * Column descriptor used by the `lens_map_to_columns` expression and the
+ * ES|QL conversion to map datatable columns back to Lens column definitions.
+ */
+export type OriginalColumn = {
+  id: string;
+  label: string;
+  variable?: string;
+  format?: SerializedFieldFormat;
+  dataType?: DataType;
+  customLabel?: boolean;
+  dropPartials?: boolean;
+} & (
+  | { operationType: 'date_histogram'; sourceField: string; interval: number }
+  | { operationType: string; sourceField?: string; interval: never }
+  // text-based ES|QL columns
+  | { operationType?: undefined; sourceField?: string }
+);
 
 export type SortingHint = string;
 

@@ -364,19 +364,6 @@ describe('validatePackageUpload', () => {
       });
     });
 
-    it('allows a registry package name when allowRegistryPackageUploads is true', async () => {
-      mockedGetConfig.mockReturnValue({ internal: { allowRegistryPackageUploads: true } });
-      mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
-
-      await expect(
-        validateUpload({
-          packageInfo: validPackage,
-          paths: [],
-          savedObjectsClient: soClient,
-        })
-      ).resolves.toBeUndefined();
-    });
-
     it('does not query the registry when re-uploading an existing upload package', async () => {
       mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
 
@@ -936,6 +923,55 @@ describe('validatePackageUpload', () => {
         name: 'logs-payroll.records-*',
         expand_wildcards: ['open', 'hidden'],
       });
+    });
+  });
+
+  describe('skipUploadPackageValidation escape hatch', () => {
+    it('skips every check without querying the registry, saved objects, or Elasticsearch', async () => {
+      mockedGetConfig.mockReturnValue({ internal: { skipUploadPackageValidation: true } });
+
+      // A package that violates every rule at once: invalid name, forbidden archive
+      // asset, shadowing a registry install, registry-existing name, a dataset owned
+      // by another installed package, and a matching unowned live data stream.
+      mockedFetchLatest.mockResolvedValue({ name: 'My-Integration', version: '1.0.0' });
+      mockedGetPackageSavedObjects.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: {
+              name: 'nginx',
+              installed_es: [
+                { id: 'logs-nginx.access', type: ElasticsearchAssetType.indexTemplate },
+              ],
+            },
+          },
+        ],
+      });
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-nginx.access-default',
+            template: 'logs-nginx.access',
+          }),
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'My-Integration',
+            data_streams: [{ dataset: 'nginx.access', type: 'logs' }],
+          },
+          paths: ['My-Integration-1.0.0/elasticsearch/index_template/logs.json'],
+          savedObjectsClient: soClient,
+          installedPkg: {
+            attributes: { name: 'My-Integration', install_source: 'registry' },
+          } as SavedObject<Installation>,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockedFetchLatest).not.toHaveBeenCalled();
+      expect(mockedGetPackageSavedObjects).not.toHaveBeenCalled();
+      expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
     });
   });
 
