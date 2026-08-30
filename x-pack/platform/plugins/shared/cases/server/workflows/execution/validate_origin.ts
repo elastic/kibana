@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { isPlainObject } from 'lodash';
 import type { CaseWorkflowRunOrigin, DocumentResponse } from '../../../common/types/api';
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
@@ -15,10 +14,7 @@ import {
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
 import type { Case } from '../../../common/types/domain';
-
-const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
-const getRecord = (value: unknown): Record<string, unknown> | undefined =>
-  isRecord(value) ? value : undefined;
+import { getRecord } from './alert_attachment_utils';
 
 interface AlertPair {
   _id: string;

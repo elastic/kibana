@@ -25,6 +25,7 @@ describe('run workflow route', () => {
     jest.clearAllMocks();
     service.run.mockResolvedValue({
       workflowExecutionId: 'execution-1',
+      activityStatus: 'succeeded',
     });
   });
 
@@ -77,6 +78,7 @@ describe('run workflow route', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: {
         workflowExecutionId: 'execution-1',
+        activityStatus: 'succeeded',
       },
     });
   });
