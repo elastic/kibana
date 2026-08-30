@@ -45,6 +45,7 @@ export const goldenClusterPrivileges = {
               `${EvaluationIndices.DATASETS}*`,
               `${EvaluationIndices.DATASET_EXAMPLES}*`,
               `${EvaluationIndices.EVALUATORS}*`,
+              `${EvaluationIndices.EXPERIMENTS}*`,
             ],
             privileges: [
               'auto_configure',

@@ -47,6 +47,7 @@ export type {
 } from './impl/query_builders';
 export { getDatasetId } from './impl/dataset_ids';
 export { getEvaluatorDefinitionId } from './impl/evaluator_ids';
+export { getExperimentRecordId } from './impl/experiment_record_ids';
 export { ALL_SPACES_ID, DEFAULT_SPACE_ID, resolveDatasetHomeSpace } from './impl/spaces';
 export {
   pairScores,
