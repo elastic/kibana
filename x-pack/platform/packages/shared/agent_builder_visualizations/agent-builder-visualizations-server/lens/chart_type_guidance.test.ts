@@ -19,7 +19,7 @@ describe('getChartTypeConfigPromptContent', () => {
     expect(prompt).toContain('CHART-SPECIFIC RULES FOR XY');
     expect(prompt).toContain('styling.areas.fill: "gradient"');
     expect(prompt).toContain('legend.statistics');
-    expect(prompt).toContain('Do NOT bind extra Y columns for those statistics');
+    expect(prompt).toContain('average <field> over time');
   });
 
   it('does not give the tagcloud author caption rules after selection', () => {
@@ -28,6 +28,13 @@ describe('getChartTypeConfigPromptContent', () => {
 });
 
 describe('getChartTypeSelectionPromptContent', () => {
+  it('tells the agent that time-series avg/min/max belong on xy', () => {
+    const prompt = getChartTypeSelectionPromptContent();
+
+    expect(prompt).toContain('xy:');
+    expect(prompt).toContain('in the legend');
+  });
+
   it('tells the agent to choose tagcloud only for short terms', () => {
     const prompt = getChartTypeSelectionPromptContent();
 

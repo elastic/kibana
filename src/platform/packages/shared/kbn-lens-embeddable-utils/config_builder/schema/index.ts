@@ -42,7 +42,12 @@ import type {
   XYLegendStatistic,
   XYLegendSize,
 } from './charts/xy';
-import { xyConfigSchema, xyConfigSchemaESQL, xyConfigSchemaNoESQL } from './charts/xy';
+import {
+  statisticsSchema,
+  xyConfigSchema,
+  xyConfigSchemaESQL,
+  xyConfigSchemaNoESQL,
+} from './charts/xy';
 import type {
   RegionMapConfig,
   RegionMapConfigESQL,
@@ -295,6 +300,8 @@ export {
   treemapConfigSchemaNoESQL,
   waffleConfigSchemaNoESQL,
   mosaicConfigSchemaNoESQL,
+  // XY legend statistics
+  statisticsSchema,
 };
 
 export type {

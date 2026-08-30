@@ -11,8 +11,8 @@ describe('buildEsqlAdditionalInstructions', () => {
   it('tells the model not to collapse a time series into overall avg/min/max', () => {
     const instructions = buildEsqlAdditionalInstructions();
 
-    expect(instructions).toContain('Time-series statistics');
-    expect(instructions).toContain('Do **not** add a second `STATS`');
-    expect(instructions).toContain('Lens legend statistics');
+    expect(instructions).toContain('measure vs legend');
+    expect(instructions).toContain('omit from the query');
+    expect(instructions).toContain('average <field> over time');
   });
 });

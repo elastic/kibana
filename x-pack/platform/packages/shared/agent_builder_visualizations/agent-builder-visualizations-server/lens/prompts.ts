@@ -44,7 +44,7 @@ ${existingConfig}
     `DATA SOURCE RULES:
 1. The ES|QL query is owned and injected by the system automatically. DO NOT output a 'data_source' field, and do not restate, copy, or modify the query anywhere in the config.
 2. The configuration is built around this query; its result columns are the only columns available to bind: ${esqlQueryJson}
-3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and every bound column must be an alias that appears in that query. Do not invent columns (e.g. Average/Min/Max Volume) that the query does not emit.
+3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and every bound column must be an alias that appears in that query.
 4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.`,
     titleRulesPromptContent,
     numberFormatRulesPromptContent,

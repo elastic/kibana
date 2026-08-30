@@ -21,6 +21,7 @@ import {
   waffleConfigSchemaESQL,
   mosaicConfigSchemaESQL,
 } from '@kbn/lens-embeddable-utils';
+import { seriesStatisticsLensConfigRule } from '../shared/series_statistics_prompt';
 
 interface ChartTypeRegistryEntry<T extends z.ZodType> {
   schema: T;
@@ -171,7 +172,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     schema: xyConfigSchemaESQL,
     prompt: {
       selection:
-        'Line, bar, or area charts with X and Y axes. Choose for time series, trends, comparisons across series, or distributions/histograms (e.g. "request count over time", "sales by region as a bar chart").',
+        'Line, bar, or area charts with X and Y axes. Choose for time series, trends, comparisons across series, or distributions/histograms (e.g. "request count over time", "average CPU over time", "sales by region as a bar chart"). Avg/min/max *in the legend* is still xy, not a combination chart.',
       review: {
         misses: [
           'A solid area fill on the painted chart is a miss.',
@@ -184,7 +185,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.',
           'For area series, set `styling.areas.fill: "gradient"` rather than solid.',
           'Default legend rules: Place outside at the bottom. Omit legend.layout.type. Set legend.visibility: "auto" unless legend statistics are set - then set it to "visible".',
-          'When the user asks for avg, min, max, last value, or other series statistics on a time-series trend, set legend.statistics (e.g. ["avg", "min", "max", "last_non_null_value"]) and legend.visibility: "visible". Do NOT bind extra Y columns for those statistics — they are computed by Lens from the series, not from extra ES|QL columns.',
+          seriesStatisticsLensConfigRule,
         ],
         coloringRules: [
           'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
