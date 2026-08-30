@@ -89,7 +89,7 @@ export const registerLensInternalVisualizationsGetAPIRoute: RegisterAPIRouteFn =
         const responseItem = getLensInternalResponseItem(builder, result.item, resultMeta);
 
         return res.ok<ExtendedLensResponseItem>({
-          body: responseItem,
+          body: lensGetResponseBodySchema.parse(responseItem),
         });
       } catch (error) {
         if (isBoom(error)) {

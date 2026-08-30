@@ -87,6 +87,11 @@ describe('<Wrapper />', () => {
     await waitFor(() => {
       expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(screen.getByTestId(DATA_VIEW_DEGRADED_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByText('Some data view fields are unavailable')).toBeInTheDocument();
+      expect(screen.getByText('.alerts-security.alerts-default')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Alerts are still listed below, but field-dependent features/)
+      ).toBeInTheDocument();
       expect(screen.getByTestId('alerts-page-content')).toBeInTheDocument();
       expect(screen.queryByTestId(DATA_VIEW_ERROR_TEST_ID)).not.toBeInTheDocument();
     });

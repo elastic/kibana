@@ -488,6 +488,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                   setFrozenDataPreference={setFrozenDataPreference}
                   dataView={dataView}
                   query={undefined}
+                  projectRouting={props.overrides?.projectRouting}
                   disabled={false}
                   timefilter={timefilter}
                 />
