@@ -25,7 +25,7 @@ interface UseRunCasesWorkflowResult {
   closeModal: () => void;
   /** The set of cases the modal was opened for (empty when closed). */
   selectedCases: CasesUI;
-  /** Executor that fans out one workflow run per selected case. */
+  /** Executor that starts one workflow execution covering all selected cases. */
   runWorkflow: RunWorkflowExecutor;
   /** Predicate limiting the workflow selector to configured tags. */
   filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
@@ -43,8 +43,8 @@ const NO_WORKFLOW_TAGS: readonly string[] = [];
 /**
  * Multi-case variant of `useRunCaseWorkflow`.
  * Keyed on a runtime-selected set of cases (`openModal` receives `CasesUI`),
- * runs one workflow execution per case through the Cases-owned endpoint, and
- * handles partial-failure toasting itself when more than one case is selected.
+ * starts a single workflow execution covering all selected cases through the
+ * Cases-owned endpoint, and owns the success/failure toast itself.
  */
 export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
   const canRunWorkflow = useCanRunCaseWorkflow();
