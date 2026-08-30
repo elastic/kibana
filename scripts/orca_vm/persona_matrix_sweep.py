@@ -92,6 +92,20 @@ HTTP_HANDLER_REMOTE = (
     "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/utils/"
     "http_handler_from_kbn_client.ts"
 )
+# Dataset. The base image predates the entity_risk_score contract fix, so its
+# pre-flight tool-availability check fails the whole suite before a single
+# example runs (security.entity_risk_score is force-disabled under the skills
+# flag this suite always enables).
+PATCHED_DATASET = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/"
+    "src/datasets/persona_matrix_prompts.ts"
+)
+DATASET_REMOTE = (
+    "Projects/kibana/x-pack/solutions/security/packages/"
+    "kbn-evals-suite-security-persona-matrix/src/datasets/persona_matrix_prompts.ts"
+)
 PATCHED_SCOUT_CONFIG = (
     KIBANA_MAIN.parent
     / "kibana.worktrees/persona-matrix-maxpayload"
@@ -290,6 +304,7 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_EXECUTOR_CLIENT), ip, EXECUTOR_CLIENT_REMOTE)
     scp(str(PATCHED_EXECUTOR_TYPES), ip, EXECUTOR_TYPES_REMOTE)
     scp(str(PATCHED_HTTP_HANDLER), ip, HTTP_HANDLER_REMOTE)
+    scp(str(PATCHED_DATASET), ip, DATASET_REMOTE)
     # Scout-readiness timeout overlay (PR #285302) — see PATCHED_EVAL_STACK.
     EVAL_STACK_REMOTE = (
         "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/cli/eval_stack.ts"
