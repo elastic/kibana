@@ -48,5 +48,5 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 1. Sign in to your MISP instance as an administrator.
 2. Open **Administration → List Auth Keys** (or **Sync Actions → List Auth Keys**, depending on version).
 3. Create an automation key for a user that can search attributes/events and, if you use write actions, create events, attributes, tags, sightings, and publish.
-4. Copy the raw key into the connector (no `Bearer` prefix).
+4. Copy the API key into the connector (no `Bearer` prefix).
 5. If the instance uses a self-signed certificate, set verification mode to **none** (or supply the PEM CA).
