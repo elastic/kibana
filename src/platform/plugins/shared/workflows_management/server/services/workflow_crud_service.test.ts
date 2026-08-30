@@ -2582,6 +2582,130 @@ describe('WorkflowCrudService', () => {
 
       applyYamlUpdateSpy.mockRestore();
     });
+
+    it('unschedules before committing enabled: false', async () => {
+      const taskScheduler = makeTaskScheduler();
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      } as any;
+      const existingSource = makeSource({
+        enabled: true,
+        valid: true,
+        triggerTypes: ['scheduled'],
+        definition: scheduledDefinition,
+      });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: existingSource,
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
+
+      expect(taskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
+      expect(client.index).toHaveBeenCalled();
+      expect(taskScheduler.unscheduleWorkflowTasks.mock.invocationCallOrder[0]).toBeLessThan(
+        client.index.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not commit enabled: false when unschedule fails', async () => {
+      const taskScheduler = makeTaskScheduler();
+      taskScheduler.unscheduleWorkflowTasks.mockRejectedValue(new Error('tm down'));
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+      mockedLogWorkflowChanges.mockClear();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ enabled: true }),
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await expect(
+        service.updateWorkflow('wf-1', { enabled: false }, 'default', request)
+      ).rejects.toThrow('tm down');
+      expect(client.index).not.toHaveBeenCalled();
+      expect(mockedLogWorkflowChanges).not.toHaveBeenCalled();
+    });
+
+    it('includes global space on the post-write scheduler re-read', async () => {
+      const taskScheduler = makeTaskScheduler();
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      } as any;
+      const existingSource = makeSource({
+        spaceId: '*',
+        enabled: true,
+        valid: true,
+        triggerTypes: ['scheduled'],
+        definition: scheduledDefinition,
+      });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: existingSource,
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+
+      expect(client.search).toHaveBeenCalledTimes(2);
+      expect(client.search.mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                { ids: { values: ['wf-1'] } },
+                {
+                  bool: {
+                    should: [{ term: { spaceId: 'default' } }, { term: { spaceId: '*' } }],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
+      expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'wf-1' }),
+        'default',
+        request
+      );
+    });
   });
 
   describe('disableAllWorkflows', () => {

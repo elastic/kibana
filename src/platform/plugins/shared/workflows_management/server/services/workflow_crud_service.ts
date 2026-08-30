@@ -794,6 +794,17 @@ export class WorkflowCrudService {
         : undefined;
 
     let previousVersion: number | undefined;
+    const willDisable =
+      workflow.enabled === false || yamlResult?.updatedDataPatch.enabled === false;
+    if (willDisable) {
+      const taskScheduler = this.deps.getTaskScheduler();
+      if (taskScheduler) {
+        // Unschedule before committing `enabled: false` so a Task Manager failure
+        // cannot leave a leftover scheduled task on a disabled workflow.
+        await taskScheduler.unscheduleWorkflowTasks(id);
+      }
+    }
+
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
       getOptions: { includeDeleted: true, includeGlobal: true },
       mutate: (existingSource: WorkflowProperties) => {
@@ -1007,7 +1018,7 @@ export class WorkflowCrudService {
   private async getEsWorkflowForScheduler(id: string, spaceId: string): Promise<EsWorkflow | null> {
     const { must } = buildWorkflowFilters({
       ids: [id],
-      space: { id: spaceId },
+      space: { id: spaceId, includeGlobal: true },
     });
     const response = await this.deps.workflowStorage.getClient().search({
       query: { bool: { must } },
