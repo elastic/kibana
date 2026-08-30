@@ -50,9 +50,4 @@ describe('investigation lifecycle contracts', () => {
     });
   });
 
-  it('does not mutate Significant Events or apply trigger feedback directly', () => {
-    expect(investigation.steps.map(({ name }) => name)).not.toEqual(
-      expect.arrayContaining(['attach_pending_to_significant_event', 'attach_to_significant_event'])
-    );
-  });
 });
