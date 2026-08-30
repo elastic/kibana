@@ -58,6 +58,13 @@ const reviewProblems = {
 };
 
 describe('generateDashboardTool', () => {
+  it('caps prettify follow-up generates in the trusted tool description', () => {
+    expect(generateDashboardTool().description).toContain('at most twice this round');
+    expect(generateDashboardTool().description).toContain(
+      'Do not call a third time to chase leftover review.problems'
+    );
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     executeDashboardOperationsMock.mockResolvedValue({

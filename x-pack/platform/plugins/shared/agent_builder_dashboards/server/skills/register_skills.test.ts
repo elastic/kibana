@@ -43,7 +43,12 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('**Layout**');
     expect(skill.content).toContain('**Chart styling**');
     expect(skill.content).toContain('**Structure**');
+    expect(skill.description).toContain('at most twice');
     expect(skill.content).toContain('once at the start of this conversation round');
+    expect(skill.content).toContain('at most twice');
+    expect(skill.content).toContain('A third call is forbidden');
+    expect(skill.content).toContain('once more');
+    expect(skill.content).toContain('Do not keep generating or rendering until the review is empty');
     expect(skill.content).toContain('hypotheses');
     expect(skill.content).not.toContain('first generate of a new dashboard only');
     expect(skill.content).not.toContain('Later updates omit');

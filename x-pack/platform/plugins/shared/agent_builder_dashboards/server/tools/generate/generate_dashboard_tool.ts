@@ -66,6 +66,8 @@ export const generateDashboardTool = (): BuiltinSkillBoundedTool<
 
 Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
 
+After a prettify/polish HITL answer, call this at most twice this round (initial apply + one review retry). Do not call a third time to chase leftover review.problems — those leftovers are informational. Review runs on every call; leftover problems do not authorize another generate.
+
 Use operations[] to:
 1. set metadata
 2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
