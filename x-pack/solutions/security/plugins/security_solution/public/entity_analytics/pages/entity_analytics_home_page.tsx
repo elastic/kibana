@@ -50,6 +50,7 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
+import { NeedsAttentionTile } from '../components/home/needs_attention_tile';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
@@ -334,6 +335,13 @@ const EntityAnalyticsHomePageContent = () => {
             />
           </EuiFlexItem>
         )}
+
+        <EuiFlexItem grow={false}>
+          <NeedsAttentionTile
+            spaceId={resolvedSpaceId}
+            watchlistId={selectedWatchlistId}
+          />
+        </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiFlexGroup wrap gutterSize="m">
