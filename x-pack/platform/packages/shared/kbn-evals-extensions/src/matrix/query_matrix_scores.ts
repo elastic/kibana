@@ -17,6 +17,8 @@ import { VERDICT_LADDERS, scoreVerdict } from './jury';
  * sample.
  */
 export interface ExcludedScoreCounts {
+  /** Dropped because evaluator.direction is minimize/neutral, not a quality score. */
+  nonQuality: number;
   nonEis: number;
   selfJudged: number;
   unmappedVerdict: number;
@@ -157,7 +159,12 @@ export const scoresByPrefixToDatasets = (
   options: ScoreAggregationOptions = {}
 ): AggregatedDatasetScores[] => {
   const byPrefix = new Map<string, Map<string, { sum: number; count: number }>>();
-  const excluded: ExcludedScoreCounts = { nonEis: 0, selfJudged: 0, unmappedVerdict: 0 };
+  const excluded: ExcludedScoreCounts = {
+    nonQuality: 0,
+    nonEis: 0,
+    selfJudged: 0,
+    unmappedVerdict: 0,
+  };
 
   for (const doc of scores) {
     const exampleId = doc.example?.id ?? '';
@@ -165,7 +172,10 @@ export const scoresByPrefixToDatasets = (
     if (!prefix) {
       continue;
     }
+    // Upstream now persists evaluator polarity on the score doc (#284027):
+    // maximize | minimize | neutral. Prefer it over guessing from the name.
     const evaluatorName = doc.evaluator?.name;
+    const direction = (doc.evaluator as { direction?: string } | undefined)?.direction;
     if (!evaluatorName) {
       continue;
     }
@@ -186,6 +196,13 @@ export const scoresByPrefixToDatasets = (
       continue;
     }
 
+    // A non-quality metric averaged into a 0-10 score is nonsense: Latency is
+    // minimize, Tool Calls is neutral. The name allowlist only approximates this;
+    // when the doc carries polarity, trust it and keep the average to maximize.
+    if (direction && direction !== 'maximize') {
+      excluded.nonQuality += 1;
+      continue;
+    }
     const score = options.useVerdictLadder
       ? resolveVerdictScore(evaluatorName, doc)
       : doc.evaluator?.score;

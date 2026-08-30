@@ -337,6 +337,31 @@ describe('scoresByPrefixToDatasets', () => {
     );
   });
 
+  it('drops non-quality evaluators using evaluator.direction', () => {
+    // Latency is minimize and Tool Calls is neutral upstream (#284027). Averaging
+    // either into a 0-10 quality score is meaningless, and the name allowlist only
+    // approximates it -- a renamed evaluator silently slips back in.
+    const withDirection = (id: string, name: string, s: number, direction: string) =>
+      ({
+        example: { id, index: 0, dataset: { id: 'ds', name: 'DS' } },
+        task: { model: { id: 'm1' }, trace_id: 't' },
+        evaluator: { name, score: s, direction },
+        metadata: {},
+      } as unknown as EvaluationScoreDocument);
+
+    const datasets = scoresByPrefixToDatasets(
+      [
+        withDirection('alert-analysis-a', 'correctness', 1, 'maximize'),
+        withDirection('alert-analysis-b', 'Latency', 900, 'minimize'),
+        withDirection('alert-analysis-c', 'Tool Calls', 42, 'neutral'),
+      ],
+      ['alert-analysis']
+    );
+
+    // Only the maximize evaluator survives; 900 and 42 would wreck the mean.
+    expect(datasets[0].evaluators).toEqual([{ evaluatorName: 'correctness', mean: 1, count: 1 }]);
+  });
+
   it('matches exact example ids and prefix-dash boundaries only', () => {
     const datasets = scoresByPrefixToDatasets(
       [score('alert-analysis', 'correctness', 1), score('alert-analysisx', 'correctness', 0)],
