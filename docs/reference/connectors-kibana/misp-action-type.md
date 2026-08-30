@@ -22,7 +22,7 @@ MISP URL
 
 Authentication
 :   Automation API key. {{kib}} sends the key as `Authorization: <key>`. Do not add a `Bearer` prefix. MISP rejects that form. Create the key from **Administration → List Auth Keys**.
-:   For self-signed TLS (common on local Docker MISP), set verification mode to **none**. Use **full** when the instance presents a publicly trusted certificate. Optionally provide a PEM CA for private CAs.
+:   For self-signed TLS (common on local Docker MISP), set verification mode to **none**. Use **full** when the instance presents a publicly trusted certificate. Optionally provide a Client Authentication Privacy Enhanced Mail (CA PEM) for private certificate authorities (CAs).
 
 ## Available actions [misp-available-actions]
 
