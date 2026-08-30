@@ -27,10 +27,20 @@ const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 const MAX_ALERTS_PER_RUN = 10000;
 /** Default cap on the ES response body size for non-streaming rule queries (50 MB). */
 const DEFAULT_MAX_QUERY_RESPONSE_SIZE_BYTES = 50 * 1024 * 1024;
+/**
+ * Max for the non-streaming (JSON) ES|QL path.
+ */
+export const NON_STREAMING_MAX_ROWS = 1000;
 
 const rulesRunSchema = schema.object({
   alerts: schema.object({
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
+  }),
+  /** Distinct groups per run can never exceed rows per run, so the ceiling is tied to `alerts.max`. */
+  maxGroupsPerExecution: schema.number({
+    defaultValue: MAX_ALERTS_PER_RUN,
+    min: 1,
+    max: MAX_ALERTS_PER_RUN,
   }),
   timeout: schema.maybe(schema.string({ validate: validateDuration })),
   query: schema.object({
@@ -100,3 +110,11 @@ export const configSchema = schema.object({
 export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type EsqlConfig = TypeOf<typeof esqlSchema>;
+
+export const getQueryRowLimit = (config: PluginConfig): number => {
+  const maxAlerts = config.rules.run.alerts.max;
+  if (config.esql.responseFormat === 'json') {
+    return Math.min(maxAlerts, NON_STREAMING_MAX_ROWS);
+  }
+  return maxAlerts;
+};
