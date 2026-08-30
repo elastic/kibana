@@ -12,7 +12,6 @@ import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type {
   ShowShareMenuOptions,
@@ -65,7 +64,7 @@ export class ShareMenuManager {
             menuItems,
             publicAPIEnabled: !isServerless,
           },
-          core.rendering
+          core
         );
       },
 
@@ -313,7 +312,7 @@ export class ShareMenuManager {
       menuItems: ShareConfigs[];
       onClose: () => void;
     },
-    rendering: RenderingService
+    core: Pick<CoreStart, 'notifications' | 'rendering'>
   ) {
     if (this.isOpen) {
       onClose();
@@ -340,6 +339,7 @@ export class ShareMenuManager {
           shareableUrlLocatorParams,
           isDirty,
           shareMenuItems: menuItems,
+          toastNotifications: core.notifications.toasts,
           onClose: () => {
             onClose();
             unmount();
@@ -347,7 +347,7 @@ export class ShareMenuManager {
           onSave,
         },
       }),
-      rendering
+      core.rendering
     );
 
     const openModal = () => {
