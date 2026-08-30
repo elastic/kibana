@@ -80,9 +80,13 @@ export KBN_EVALS_HTTP_RETRIES="${KBN_EVALS_HTTP_RETRIES:-3}"
 # Retries only help a request that FAILS. A converse call that never returns
 # parks the worker forever: a glm-5-2 run burned 45 minutes with 4 seconds of
 # CPU and six open sockets while /api/status still answered 200. Bound each
-# attempt so a hung endpoint becomes a retryable failure. 10 min is well above
-# the slowest legitimate example (~3 min) on these boxes.
-export KBN_EVALS_HTTP_TIMEOUT_MS="${KBN_EVALS_HTTP_TIMEOUT_MS:-600000}"
+# attempt so a hung endpoint becomes a retryable failure.
+#
+# 25 min, not 10: golden shows a LEGITIMATE glm-5-2 example taking 1198s
+# (20 min). A 10-min bound aborts real work and the retry aborts it again,
+# turning a slow success into a guaranteed failure. Keep this above the
+# measured worst case -- the suite-level budget catches a truly wedged run.
+export KBN_EVALS_HTTP_TIMEOUT_MS="${KBN_EVALS_HTTP_TIMEOUT_MS:-1500000}"
 export EVAL_REPETITIONS="${EVAL_REPETITIONS:-1}"
 export PERSONA_MATRIX_TIMEOUT_MINUTES="${PERSONA_MATRIX_TIMEOUT_MINUTES:-30}"
 export AGENT_BUILDER_INFERENCE_TIMEOUT_MS=600000

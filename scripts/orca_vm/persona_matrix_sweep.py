@@ -43,9 +43,13 @@ IMAGE = json.load(open(Path(__file__).parent / ".azure-state.json"))["imageId"]
 RG = "orca-eval-farm"
 VM_SIZE = "Standard_D8s_v5"
 
-# Per-model env for run_model.sh. Slow chat models blow the default 30-min
-# Playwright cap mid-suite (glm-5-2 died at example 16/21 on 2026-08-22).
-MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=60 PERSONA_MATRIX_CONCURRENCY=3"}
+# Per-model env for run_model.sh. Slow reasoning models blow the default 30-min
+# cap. Measured on golden (15 GLM runs, 2026-08-11..30): mean 341s per example,
+# max 1198s. 21 examples therefore need ~119 min, so the old 60-min cap could
+# never finish -- GLM has never exceeded 10/21 in three weeks of attempts.
+# 180 min leaves headroom above the measured worst case without hiding a hang:
+# a genuinely wedged run still dies on the per-request KBN_EVALS_HTTP_TIMEOUT_MS.
+MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=180 PERSONA_MATRIX_CONCURRENCY=3"}
 GOLDEN_ENV_LOCAL = "/tmp/golden-cluster-env.sh"
 SWEEP_DIR = Path.home() / "persona-sweep"
 KIBANA_MAIN = Path.home() / "Projects" / "kibana"

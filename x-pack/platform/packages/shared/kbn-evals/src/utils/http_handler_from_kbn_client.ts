@@ -101,7 +101,9 @@ export function httpHandlerFromKbnClient({
     // FAILS, and a converse call that never returns just parks the worker in
     // ep_poll forever. Observed on 2026-08-29: a glm-5-2 run sat 45 minutes with
     // 4 seconds of CPU and six open sockets while /api/status still answered 200.
-    // Bound each attempt so a dead endpoint becomes a retryable failure.
+    // Bound each attempt so a dead endpoint becomes a retryable failure. Set it
+    // ABOVE the slowest legitimate call: golden shows a real glm-5-2 example at
+    // 1198s, so too tight a bound aborts healthy work and the retry aborts again.
     const requestTimeoutMs = Number(process.env.KBN_EVALS_HTTP_TIMEOUT_MS ?? '0') || 0;
     let lastError: unknown;
 
