@@ -41,6 +41,18 @@ triggers:
       additionalProperties: false
 
 steps:
+  # The investigation agent is a per-space document, so it has to exist in whichever space this
+  # execution runs in. Callers going through NightshiftInvestigationsClient.start() install it
+  # themselves, but discovery triggers this workflow with `workflow.executeAsync`, which never
+  # touches that client — as does any hand-written workflow or manual run. Ensuring it here is the
+  # one place that covers every trigger. Idempotent, and it never overwrites admin edits.
+  #
+  # Runs before `emit_investigation_started` so that a failure here does not leave a stale
+  # `running` status with no terminal event. Without `on-failure: continue`, a failure also
+  # cannot leave a pending marker on a significant event for an investigation that will never
+  # produce anything: no `investigations` entry is written, so the next discovery cycle retries.
+  - name: ensure_investigation_agent
+    type: nightshift.ensureInvestigationAgent
   - name: emit_investigation_started
     type: kibana.request
     with:
@@ -52,7 +64,6 @@ steps:
         status: 'running'
     on-failure:
       continue: true
-
   # Records a pending investigation on the Significant Event as soon as the workflow starts,
   # so the UI can show an in-progress indicator before the agent step finishes.
   # Only runs when a sig-event context was supplied (discovery or chat-agent paths).
@@ -99,7 +110,41 @@ steps:
         {% for stream in inputs.stream_names %}- {{ stream }}
         {% endfor %}
         {% endif %}
-        {% if inputs.context %}
+        {% if inputs.context.source == 'alert' %}
+        This investigation was triggered by an alerting rule, so the condition that fired is
+        already known — do not spend effort rediscovering it. Start from the rule condition
+        stated above (the reason, and the observed value against its threshold) and work
+        outwards to what caused the metric to move.
+
+        You are not investigating a significant event. That is a separate curated entity in
+        this product, not another word for an alert that matters, and none is attached here.
+        Skip the step that reassesses a significant event. Omit `significant_event_updates`
+        from your output entirely — do not invent severity, summary, or status changes for
+        one.
+
+        Treat the affected entity fields as the scope of the problem: filter your ES|QL queries
+        to that entity first, and only widen when you need to establish whether neighbours are
+        affected too. Where an index pattern is given, use it as the starting point for queries
+        rather than guessing at index names.
+
+        Where affected entity fields are given, they are the known starting point for what this
+        problem impacts. The rule grouped on them, so they are established fact rather than a
+        hypothesis, and every one of them is impacted unless you find evidence otherwise. Name
+        them explicitly in your summary rather than leaving them implicit in the reason text, and
+        use the field name as well as the value (for example "service.name checkout") so each one
+        is unambiguous. Not every rule type records them, so do not invent entity fields that
+        were not given to you.
+
+        Then establish whether the impact is wider than what the rule saw. The rule only grouped
+        on the fields it was configured with, so it cannot tell you about anything else that is
+        affected. When you find an additional impacted entity, say what evidence identified it
+        and keep it distinct from the entities the alert already named.
+
+        Where rule parameters are given, they describe how the condition is evaluated
+        (aggregation, window, and threshold). Read them before concluding that a spike is
+        anomalous — a short window or a tight threshold can fire on normal variation, and "the
+        rule is too sensitive" is a legitimate conclusion supported by the data.
+        {% elsif inputs.context and inputs.context.size > 0 %}
         Additional context: {{ inputs.context | json }}
         {% endif %}
       # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema
