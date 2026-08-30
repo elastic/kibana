@@ -57,9 +57,7 @@ const isLegendStatistic = (value: string): value is XYLegendStatistic =>
   (XY_LEGEND_STATISTIC_OPTIONS as string[]).includes(value);
 
 const normalizeLegendStatistics = (values: string[] | undefined): XYLegendStatistic[] =>
-  (values ?? [])
-    .map((value) => value.trim().toLowerCase())
-    .filter(isLegendStatistic);
+  (values ?? []).map((value) => value.trim().toLowerCase()).filter(isLegendStatistic);
 
 const uniqueUpper = (values: string[]): string[] => [
   ...new Set(values.map((value) => value.toUpperCase())),
@@ -122,7 +120,9 @@ export function createSeriesStatisticsVsIntentEvaluator<
       const rawLegendStatistics = (expectedLegendStatisticsExtractor(expected) ?? []).map((value) =>
         value.trim().toLowerCase()
       );
-      const unknownLegendStatistics = rawLegendStatistics.filter((value) => !isLegendStatistic(value));
+      const unknownLegendStatistics = rawLegendStatistics.filter(
+        (value) => !isLegendStatistic(value)
+      );
       const expectedLegendStatistics = normalizeLegendStatistics(rawLegendStatistics);
       const expectedEsqlAggregations = uniqueUpper(
         expectedEsqlAggregationsExtractor(expected) ?? []
@@ -205,7 +205,9 @@ export function createSeriesStatisticsVsIntentEvaluator<
       const failureReasons: string[] = [];
       if (firstFailure?.leakedEsqlFns.length) {
         failureReasons.push(
-          `ES|QL included ${firstFailure.leakedEsqlFns.join('/')} — those belong on legend.statistics`
+          `ES|QL included ${firstFailure.leakedEsqlFns.join(
+            '/'
+          )} — those belong on legend.statistics`
         );
       }
       if (firstFailure?.missingLegendStatistics.length) {

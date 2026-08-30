@@ -240,14 +240,10 @@ const legendSeriesHeaderSchema = z
 const sharedLegendSchema = z
   .object({
     visibility: legendVisibilitySchemaWithAuto,
-    statistics: z
-      .array(statisticsSchema)
-      .max(statisticsOptionsSize)
-      .optional()
-      .meta({
-        description:
-          'Statistics to display in the legend (e.g. avg, min, max, last_non_null_value). Set these when the user asks for series statistics on a time-series trend — they are computed from the series, not from extra ES|QL columns.',
-      }),
+    statistics: z.array(statisticsSchema).max(statisticsOptionsSize).optional().meta({
+      description:
+        'Statistics to display in the legend (e.g. avg, min, max, last_non_null_value). Set these when the user asks for series statistics on a time-series trend — they are computed from the series, not from extra ES|QL columns.',
+    }),
     series_header: legendSeriesHeaderSchema.optional(),
   })
   .strict();

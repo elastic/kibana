@@ -21,9 +21,9 @@ describe('createControlFieldResolver', () => {
       logger: loggerMock.create(),
     });
 
-    await expect(
-      resolve({ fieldName: 'host', index: 'kibana_sample_data_logs' })
-    ).resolves.toEqual({ fieldName: 'host.keyword' });
+    await expect(resolve({ fieldName: 'host', index: 'kibana_sample_data_logs' })).resolves.toEqual(
+      { fieldName: 'host.keyword' }
+    );
     expect(fieldCaps).toHaveBeenCalledWith({
       index: 'kibana_sample_data_logs',
       fields: '*',

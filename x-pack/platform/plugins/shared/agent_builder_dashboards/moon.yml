@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/ui-callout'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
