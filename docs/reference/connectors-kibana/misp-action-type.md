@@ -9,7 +9,7 @@ applies_to:
 
 # MISP connector [misp-action-type]
 
-The MISP connector uses the [MISP automation API](https://www.circl.lu/doc/misp/automation/) so workflow authors and agents can enrich detections from a self-hosted MISP instance and write sightings, events, attributes, and tags back.
+The MISP connector uses the [Malware Information Sharing Platform (MISP) automation API](https://www.circl.lu/doc/misp/automation/) so workflow authors and agents can enrich detections from a self-hosted MISP instance and write sightings, events, attributes, and tags back.
 
 ## Create connectors in {{kib}} [define-misp-ui]
 
