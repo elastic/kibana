@@ -31,7 +31,17 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const shouldStopPolling = (status: ExecutionStatus) =>
   TerminalExecutionStatuses.includes(status) || status === ExecutionStatus.WAITING_FOR_INPUT;
 
-const stepOutputSchema = z.object({ structured_output: draftRuleSchema }).partial();
+// The ai.agent step's persisted output is
+// `{ message, structured_output: { rule, attachment_id, attachment_version }, metadata }` —
+// the rule is NESTED under structured_output.rule (see the managed yaml templates:
+// `steps.draft_creation.output.structured_output.rule.query`). Parsing structured_output
+// as the rule itself strips the wrapper and yields an empty object — every evaluator
+// then sees a rule with no fields (the false-zero failure this fixed).
+const stepOutputSchema = z
+  .object({
+    structured_output: z.object({ rule: draftRuleSchema }).partial(),
+  })
+  .partial();
 
 // Each step produces two entries in stepExecutions: an "enter" record (output: null)
 // and a "result" record (output: data). Find the result record for draft_creation.
@@ -39,7 +49,7 @@ const extractRuleFromSteps = (steps: WorkflowStepExecutionDto[]): DraftRule | un
   const draftSteps = steps.filter((s) => s.stepId === DRAFT_STEP_ID);
   const resultRecord = draftSteps.find((s) => s.output != null);
   const parsed = stepOutputSchema.safeParse(resultRecord?.output);
-  return parsed.success ? parsed.data.structured_output : undefined;
+  return parsed.success ? parsed.data.structured_output?.rule : undefined;
 };
 
 export interface RuleCreationResult {
