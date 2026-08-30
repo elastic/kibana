@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { SearchBar, FilterItems } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -620,16 +620,18 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   dateRangeTo={timeRange.to}
                   query={kquery}
                   indexPatterns={[dataView]}
-                  filters={[...defaultFilters, ...searchFilters]}
+                  filters={searchFilters}
+                  prependFilterBar={
+                    defaultFilters.length > 0 ? (
+                      <FilterItems
+                        filters={defaultFilters}
+                        indexPatterns={[dataView]}
+                        readOnly={true}
+                      />
+                    ) : undefined
+                  }
                   submitButtonStyle={'iconOnly'}
-                  onFiltersUpdated={(newFilters) => {
-                    setSearchFilters(
-                      newFilters.filter(
-                        (f) =>
-                          f.meta.controlledBy !== CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER
-                      )
-                    );
-                  }}
+                  onFiltersUpdated={setSearchFilters}
                   onQuerySubmit={(payload, isUpdate) => {
                     if (isUpdate) {
                       setTimeRange({ ...payload.dateRange });
