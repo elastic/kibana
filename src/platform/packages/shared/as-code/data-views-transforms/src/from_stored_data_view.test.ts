@@ -64,6 +64,22 @@ describe('fromStoredDataView', () => {
     expect(api).not.toHaveProperty('name');
   });
 
+  it('maps inline sourceFilters to field_filters and round-trips', () => {
+    const stored = {
+      title: 'logs-*',
+      sourceFilters: [{ value: 'secret.*' }, { value: 'large_field' }],
+    };
+
+    const api = fromStoredDataView(stored);
+
+    expect(api).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_filters: ['secret.*', 'large_field'],
+    });
+    expect(toStoredDataView(api)).toEqual(stored);
+  });
+
   it('maps inline spec with indexed field formats and attrs to field_settings', () => {
     expect(
       fromStoredDataView({

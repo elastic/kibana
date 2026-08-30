@@ -89,5 +89,6 @@ export interface APIAdHocDataView {
   dataSourceType?: string;
   esqlQuery?: string;
   allowHidden?: boolean;
+  fieldFilters?: AsCodeDataViewSpec['field_filters'];
   fieldSettings?: AsCodeDataViewSpec['field_settings'];
 }

@@ -134,6 +134,20 @@ describe('getDatasetIndex', () => {
     expect(result).not.toHaveProperty('allowHidden');
   });
 
+  test('threads field_filters into the adhoc data view index', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_filters: ['secret.*', 'large_field'],
+    });
+
+    expect(result).toEqual({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      fieldFilters: ['secret.*', 'large_field'],
+    });
+  });
+
   test('threads name into the adhoc dataview index when set', () => {
     const result = getDataSourceIndex({
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
@@ -567,6 +581,35 @@ describe('buildDataSourceStateNoESQL', () => {
     expect(result).not.toHaveProperty('allow_hidden_indices');
   });
 
+  test('emits field_filters for an adhoc dataview with source filters', () => {
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'logs-*',
+          sourceFilters: [{ value: 'secret.*' }, { value: 'large_field' }],
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+
+    expect(result).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: undefined,
+      field_filters: ['secret.*', 'large_field'],
+    });
+  });
+
   test('emits name for an adhoc dataview with a name', () => {
     const result = buildDataSourceStateNoESQL(
       formBasedLayer,
@@ -638,6 +681,17 @@ describe('getAdHocDataViewSpec', () => {
       timeFieldName: '@timestamp',
     });
     expect(spec).not.toHaveProperty('allowHidden');
+  });
+
+  test('preserves field filters', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      fieldFilters: ['secret.*', 'large_field'],
+    });
+
+    expect(spec.sourceFilters).toEqual([{ value: 'secret.*' }, { value: 'large_field' }]);
   });
 
   test('preserves name when provided', () => {
@@ -1005,6 +1059,20 @@ describe('generateAdHocDataViewId', () => {
     });
 
     expect(withoutRuntimeField).not.toBe(withRuntimeField);
+  });
+
+  test('form-based data views with different field filters get distinct ids', () => {
+    const base = {
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    };
+    const withoutFieldFilters = generateAdHocDataViewId(base);
+    const withFieldFilters = generateAdHocDataViewId({
+      ...base,
+      fieldFilters: ['secret.*'],
+    });
+
+    expect(withoutFieldFilters).not.toBe(withFieldFilters);
   });
 
   test('form-based data views over the same index+timeField but different allowHidden get distinct ids', () => {

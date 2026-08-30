@@ -165,6 +165,7 @@ export function generateAdHocDataViewId(
     | 'dataSourceType'
     | 'name'
     | 'allowHidden'
+    | 'fieldFilters'
     | 'fieldSettings'
   >
 ): string {
@@ -180,7 +181,7 @@ export function generateAdHocDataViewId(
   }
 
   // For form-based ad hoc data views, two over the same index+timeField can
-  // still differ in specifications (custom name, allowHidden, or runtime/scripted
+  // still differ in specifications (custom name, allowHidden, source filters, or runtime/scripted
   // field settings). Always append a hash of the canonical specification fields so
   // that identical specs map to the same id and different specs get distinct ids.
   // Mirrors the ES|QL `base-<hash>` pattern above.
@@ -190,6 +191,8 @@ export function generateAdHocDataViewId(
   const canonical = {
     name: dataView.name ?? dataView.index,
     allowHidden: dataView.allowHidden ? true : undefined, // treat false as undefined
+    fieldFilters:
+      dataView.fieldFilters && dataView.fieldFilters.length > 0 ? dataView.fieldFilters : undefined,
     fieldSettings:
       dataView.fieldSettings && Object.keys(dataView.fieldSettings).length > 0
         ? dataView.fieldSettings
@@ -206,7 +209,7 @@ export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
     title: dataView.index,
     name: dataView.name ?? dataView.index,
     timeFieldName: dataView.timeFieldName,
-    sourceFilters: [],
+    sourceFilters: dataView.fieldFilters?.map((value) => ({ value })) ?? [],
     ...fromApiFieldSettings(dataView.fieldSettings),
     allowNoIndex: false,
     ...(dataView.allowHidden !== undefined ? { allowHidden: dataView.allowHidden } : {}),
@@ -280,6 +283,8 @@ export function buildDataViewSpecDataSource(
   dataViewSpec: DataViewSpec & { title: string }
 ): Extract<DataSourceType, { type: typeof AS_CODE_DATA_VIEW_SPEC_TYPE }> {
   const fieldSettings = toApiFieldSettings(dataViewSpec);
+  const fieldFilters = dataViewSpec.sourceFilters?.map(({ value }) => value);
+
   return {
     type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: dataViewSpec.title,
@@ -288,6 +293,7 @@ export function buildDataViewSpecDataSource(
     ...(dataViewSpec.allowHidden !== undefined
       ? { allow_hidden_indices: dataViewSpec.allowHidden }
       : {}),
+    ...(fieldFilters?.length ? { field_filters: fieldFilters } : {}),
     ...(fieldSettings ? { field_settings: fieldSettings } : {}),
   };
 }
@@ -421,6 +427,9 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
         ...(dataSource.name ? { name: dataSource.name } : {}),
         ...(dataSource.allow_hidden_indices !== undefined
           ? { allowHidden: dataSource.allow_hidden_indices }
+          : {}),
+        ...(dataSource.field_filters !== undefined
+          ? { fieldFilters: dataSource.field_filters }
           : {}),
         ...(dataSource.field_settings ? { fieldSettings: dataSource.field_settings } : {}),
       };

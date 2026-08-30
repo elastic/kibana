@@ -96,6 +96,22 @@ describe('toStoredDataView', () => {
     expect(result).not.toHaveProperty('name');
   });
 
+  it('maps inline field_filters to sourceFilters', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_filters: ['secret.*', 'large_field'],
+    };
+
+    const result = toStoredDataView(dataView);
+
+    expect(result).toEqual({
+      title: 'logs-*',
+      sourceFilters: [{ value: 'secret.*' }, { value: 'large_field' }],
+    });
+    expect(result).not.toHaveProperty('id');
+  });
+
   it('converts index-pattern data_source without runtime fields', () => {
     const dataView: AsCodeDataViewSpec = {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,

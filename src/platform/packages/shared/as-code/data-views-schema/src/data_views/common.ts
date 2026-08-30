@@ -35,6 +35,12 @@ export const allowHiddenIndicesSchema = z.boolean().optional().meta({
   description: 'When `true`, allows the data view to match hidden indices.',
 });
 
+export const fieldFiltersSchema = z.array(z.string().min(1).max(1000)).max(10_000).optional().meta({
+  title: 'Field filters',
+  description:
+    "Field filters can be used to exclude one or more fields when fetching a document. They may contain wildcards, such as `user*` which filters fields starting with 'user'.",
+});
+
 export const nameSchema = z.string().min(1).max(256).optional().meta({
   title: 'Data view name',
   description: 'The name of the data view. Example: "Sample data view".',

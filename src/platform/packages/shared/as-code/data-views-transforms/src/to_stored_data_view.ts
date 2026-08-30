@@ -39,6 +39,11 @@ export function toStoredDataView(
   const runtimeFieldMap = toStoredRuntimeFields(dataView.field_settings);
   const fieldFormats = toStoredFieldFormats(dataView.field_settings);
   const fieldAttrs = toStoredFieldAttributes(dataView.field_settings);
+  // Referenced data views return above with only an ID. Inline and saved data views keep their
+  // field filters in this spec.
+  const sourceFilters: DataViewSpec['sourceFilters'] = dataView.field_filters?.map((value) => ({
+    value,
+  }));
 
   return {
     title: dataView.index_pattern,
@@ -50,20 +55,7 @@ export function toStoredDataView(
     ...(fieldFormats && Object.keys(fieldFormats).length > 0 && { fieldFormats }),
     ...(fieldAttrs && Object.keys(fieldAttrs).length > 0 && { fieldAttrs }),
     ...(dataView.name && { name: dataView.name }),
-    ...getSavedDataViewFields(dataView),
-  };
-}
-
-function isSavedDataView(
-  dataView: AsCodeDataView | AsCodeSavedDataView
-): dataView is AsCodeSavedDataView {
-  return 'id' in dataView || 'field_filters' in dataView;
-}
-
-function getSavedDataViewFields(dataView: AsCodeSavedDataView): Partial<DataViewSpec> {
-  if (!isSavedDataView(dataView)) return {};
-  return {
-    id: dataView.id,
-    sourceFilters: dataView.field_filters?.map((filter) => ({ value: filter })),
+    ...(sourceFilters !== undefined && { sourceFilters }),
+    ...('id' in dataView && dataView.id !== undefined && { id: dataView.id }),
   };
 }

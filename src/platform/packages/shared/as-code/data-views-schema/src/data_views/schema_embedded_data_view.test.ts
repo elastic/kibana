@@ -94,3 +94,25 @@ describe('dataViewSpecSchema name', () => {
     ).toThrow();
   });
 });
+
+describe('dataViewSpecSchema field_filters', () => {
+  it('accepts field filters on an inline data view spec', () => {
+    const input = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_filters: ['secret.*', 'large_field'],
+    };
+
+    expect(dataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('rejects an empty field filter', () => {
+    expect(() =>
+      dataViewSpecSchema.parse({
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'logs-*',
+        field_filters: [''],
+      })
+    ).toThrow();
+  });
+});
