@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { findRuleTemplates } from './find_rule_templates';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
@@ -88,18 +89,21 @@ describe('findRuleTemplates', () => {
     references: [],
   };
 
-  const searchResponse = (...templates: Array<typeof mockTemplate1>) => ({
+  const searchResponse = (
+    ...templates: Array<{ id: string; attributes: Record<string, unknown> }>
+  ): Awaited<ReturnType<SavedObjectsClientContract['search']>> => ({
     took: 1,
     timed_out: false,
     _shards: { total: 1, successful: 1, failed: 0 },
     hits: {
-      total: { value: templates.length, relation: 'eq' as const },
+      total: { value: templates.length, relation: 'eq' },
       hits: templates.map((template) => ({
+        _index: '.kibana',
         _id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:${template.id}`,
         _source: {
           type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
           [RULE_TEMPLATE_SAVED_OBJECT_TYPE]: template.attributes,
-          references: template.references,
+          references: [],
         },
       })),
     },

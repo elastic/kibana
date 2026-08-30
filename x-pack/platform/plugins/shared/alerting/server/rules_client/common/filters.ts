@@ -121,6 +121,7 @@ export const buildTemplateSearchQuery = (search?: string): QueryDslQueryContaine
       should: [
         {
           wildcard: {
+            // name.keyword is lowercase-normalized. Do not set case_insensitive.
             [`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.name.keyword`]: { value },
           },
         },

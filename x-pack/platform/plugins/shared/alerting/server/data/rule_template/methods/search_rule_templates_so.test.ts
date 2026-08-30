@@ -30,6 +30,7 @@ describe('searchRuleTemplatesSo', () => {
         total: { value: 1, relation: 'eq' },
         hits: [
           {
+            _index: '.kibana',
             _id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:template-1`,
             _source: {
               type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
