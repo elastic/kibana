@@ -96,4 +96,5 @@ describe('Cases page', () => {
     const getCasesArgs = mockGetCases.mock.calls[0][0];
     expect(getCasesArgs.ruleDetailsNavigation).toBeUndefined();
   });
+
 });
