@@ -12,7 +12,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { OnPostAuthHandler } from '@kbn/core-http-server';
-import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { addSpaceIdToPath, asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
@@ -25,8 +25,8 @@ const flushMicrotasks = async () => {
   await new Promise<void>((resolve) => setImmediate(resolve));
 };
 
-const space = (id: string, overrides: Partial<Space> = {}): Space => ({
-  id,
+const space = (id: string, overrides: Partial<Omit<Space, 'id'>> = {}): Space => ({
+  id: asSpaceId(id),
   name: id,
   disabledFeatures: [],
   ...overrides,

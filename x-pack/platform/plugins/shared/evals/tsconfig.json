@@ -23,6 +23,8 @@
     "@kbn/core-data-streams-server",
     "@kbn/i18n",
     "@kbn/react-query",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-router",
     "@kbn/i18n-react",
     "@kbn/core-logging-server-mocks",

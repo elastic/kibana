@@ -142,6 +142,7 @@ export const testMonitorPolicy = {
             screenshots: { type: 'text' },
             synthetics_args: { type: 'text' },
             ignore_https_errors: { type: 'bool' },
+            certificate_error_spki_allowlist: { type: 'yaml' },
             'throttling.config': { type: 'text' },
             'filter_journeys.tags': { type: 'yaml' },
             'filter_journeys.match': { type: 'text' },

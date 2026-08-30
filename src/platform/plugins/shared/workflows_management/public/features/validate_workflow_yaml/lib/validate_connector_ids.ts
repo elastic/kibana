@@ -52,27 +52,10 @@ const isNewerSpecVersionAvailable = (specVersion: string, activeSpecVersion: str
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null,
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
   connectorsManagementUrl: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
-
-  if (!dynamicConnectorTypes) {
-    const errorResult: YamlValidationResult = {
-      id: 'connector-id-validation',
-      severity: 'error',
-      message: 'Dynamic connector types not found',
-      owner: 'connector-id-validation',
-      startLineNumber: 0,
-      startColumn: 0,
-      endLineNumber: 0,
-      endColumn: 0,
-      afterMessage: null,
-      beforeMessage: null,
-      hoverMessage: null,
-    };
-    return [errorResult];
-  }
 
   const notReferenceConnectorIds = connectorIdItems.filter(
     (item) => !isTemplateReference(item.key)
@@ -117,6 +100,7 @@ export function validateConnectorIds(
           values: { displayName, id: connectorIdItem.key },
         }),
         owner: 'connector-id-validation',
+        ruleId: 'connectorNotFound',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
