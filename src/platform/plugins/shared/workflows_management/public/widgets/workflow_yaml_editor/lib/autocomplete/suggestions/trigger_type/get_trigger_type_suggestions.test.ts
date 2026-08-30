@@ -180,12 +180,45 @@ describe('get_trigger_type_suggestions', () => {
         expect(generateTriggerSnippet).toHaveBeenCalledTimes(3);
         expect(generateTriggerSnippet).toHaveBeenCalledWith('alert', {
           defaultCondition: undefined,
+          requiresConnectorId: undefined,
         });
         expect(generateTriggerSnippet).toHaveBeenCalledWith('scheduled', {
           defaultCondition: undefined,
+          requiresConnectorId: undefined,
         });
         expect(generateTriggerSnippet).toHaveBeenCalledWith('manual', {
           defaultCondition: undefined,
+          requiresConnectorId: undefined,
+        });
+      });
+
+      it('should pass requiresConnectorId for connector-event triggers', () => {
+        mockGetTriggerDefinitions.mockReturnValue([
+          mockTrigger({
+            id: 'inboundWebhook.received',
+            title: 'Inbound webhook received',
+            description: 'Emitted when an inbound webhook receives a request.',
+            stability: 'tech_preview',
+            requiresConnectorId: true,
+          }),
+        ]);
+        mockGetTriggerDefinition.mockImplementation((id) =>
+          id === 'inboundWebhook.received'
+            ? mockTrigger({
+                id: 'inboundWebhook.received',
+                title: 'Inbound webhook received',
+                description: 'Emitted when an inbound webhook receives a request.',
+                stability: 'tech_preview',
+                requiresConnectorId: true,
+              })
+            : undefined
+        );
+
+        getTriggerTypeSuggestions('inboundWebhook', mockRange);
+
+        expect(generateTriggerSnippet).toHaveBeenCalledWith('inboundWebhook.received', {
+          defaultCondition: undefined,
+          requiresConnectorId: true,
         });
       });
 

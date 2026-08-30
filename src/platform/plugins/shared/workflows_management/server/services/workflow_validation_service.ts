@@ -53,7 +53,10 @@ export class WorkflowValidationService {
     request: KibanaRequest
   ): Promise<z.ZodType> {
     const { connectorTypes } = await this.getAvailableConnectors(spaceId, request);
-    const registeredTriggerIds = this.getRegisteredCustomTriggerDefinitions().map((t) => t.id);
-    return getWorkflowZodSchema(connectorTypes, registeredTriggerIds);
+    const registeredTriggers = this.getRegisteredCustomTriggerDefinitions().map((t) => ({
+      id: t.id,
+      requiresConnectorId: t.requiresConnectorId,
+    }));
+    return getWorkflowZodSchema(connectorTypes, registeredTriggers);
   }
 }

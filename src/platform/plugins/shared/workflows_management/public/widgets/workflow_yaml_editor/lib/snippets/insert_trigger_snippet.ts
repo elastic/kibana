@@ -31,7 +31,8 @@ export function insertTriggerSnippet(
   yamlDocument: Document | null,
   triggerType: string,
   editor?: monaco.editor.IStandaloneCodeEditor,
-  defaultCondition?: string
+  defaultCondition?: string,
+  requiresConnectorId?: boolean
 ) {
   let document: Document;
   try {
@@ -110,6 +111,7 @@ export function insertTriggerSnippet(
     monacoSuggestionFormat: false,
     withTriggersSection: insertTriggersSection,
     defaultCondition,
+    requiresConnectorId,
   });
 
   // Create separate undo boundary for each snippet insertion

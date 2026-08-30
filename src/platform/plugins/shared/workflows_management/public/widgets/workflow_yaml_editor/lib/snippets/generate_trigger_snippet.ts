@@ -15,12 +15,17 @@ import { isTriggerType } from '@kbn/workflows';
 const CUSTOM_TRIGGER_CONDITION_COMMENT =
   'Filter the subscription by using KQL, use event.* to target event properties';
 
+/** Placeholder so the required field is present and schema-valid until the user picks an instance. */
+const CONNECTOR_ID_PLACEHOLDER = '# Enter connector id';
+
 interface GenerateTriggerSnippetOptions {
   full?: boolean;
   monacoSuggestionFormat?: boolean;
   withTriggersSection?: boolean;
   /** Default KQL condition for custom triggers (used when inserting trigger from UI). */
   defaultCondition?: string;
+  /** When true, include a `connector-id` field (connector-event triggers). */
+  requiresConnectorId?: boolean;
 }
 
 /**
@@ -39,6 +44,7 @@ export function generateTriggerSnippet(
     monacoSuggestionFormat,
     withTriggersSection,
     defaultCondition,
+    requiresConnectorId,
   }: GenerateTriggerSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
@@ -82,6 +88,7 @@ export function generateTriggerSnippet(
     default:
       // Custom triggers: include on/condition so users can add a KQL filter (use defaultCondition when provided)
       parameters = {
+        ...(requiresConnectorId ? { 'connector-id': CONNECTOR_ID_PLACEHOLDER } : {}),
         on: { condition: defaultCondition ?? '' },
       };
       break;

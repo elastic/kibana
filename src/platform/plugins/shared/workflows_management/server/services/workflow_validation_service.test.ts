@@ -11,7 +11,7 @@ import type { WorkflowValidationDeps } from './types';
 import { WorkflowValidationService } from './workflow_validation_service';
 
 const makeDeps = (
-  listedTriggers: Array<{ id: string }> = []
+  listedTriggers: Array<{ id: string; requiresConnectorId?: boolean }> = []
 ): {
   deps: WorkflowValidationDeps;
   actionsClient: { getAll: jest.Mock };
@@ -104,6 +104,55 @@ describe('WorkflowValidationService', () => {
         'enabled: true',
         'triggers:',
         '  - type: manual',
+        'steps:',
+        '  - name: step-one',
+        '    type: console',
+        '    with:',
+        '      message: "hello"',
+        '',
+      ].join('\n');
+
+      const result = await service.validateWorkflow(yaml, 'default', request);
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('fails save when a requiresConnectorId trigger is missing connector-id', async () => {
+      const { deps } = makeDeps([{ id: 'inboundWebhook.received', requiresConnectorId: true }]);
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      const yaml = [
+        'name: inbound',
+        'enabled: true',
+        'triggers:',
+        '  - type: inboundWebhook.received',
+        'steps:',
+        '  - name: step-one',
+        '    type: console',
+        '    with:',
+        '      message: "hello"',
+        '',
+      ].join('\n');
+
+      const result = await service.validateWorkflow(yaml, 'default', request);
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
+      expect(result.diagnostics.some((d) => d.message.includes('connector-id'))).toBe(true);
+    });
+
+    it('accepts a requiresConnectorId trigger when connector-id is present', async () => {
+      const { deps } = makeDeps([{ id: 'inboundWebhook.received', requiresConnectorId: true }]);
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      const yaml = [
+        'name: inbound',
+        'enabled: true',
+        'triggers:',
+        '  - type: inboundWebhook.received',
+        '    connector-id: webhook-1',
         'steps:',
         '  - name: step-one',
         '    type: console',

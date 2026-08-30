@@ -46,6 +46,19 @@ class TriggerSchemas {
   }
 
   /**
+   * Trigger entries for YAML schema generation, including `requiresConnectorId`.
+   */
+  public getRegisteredTriggersForSchema(): Array<{
+    id: string;
+    requiresConnectorId?: boolean;
+  }> {
+    return this.getTriggerDefinitions().map((t) => ({
+      id: t.id,
+      requiresConnectorId: t.requiresConnectorId,
+    }));
+  }
+
+  /**
    * Returns whether the given id is a registered (custom) trigger type.
    */
   public isRegisteredTriggerId(id: string): boolean {

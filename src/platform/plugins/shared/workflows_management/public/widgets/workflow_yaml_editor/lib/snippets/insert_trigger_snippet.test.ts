@@ -129,6 +129,29 @@ steps:
     );
   });
 
+  it('should pass requiresConnectorId to generateTriggerSnippet when provided', () => {
+    const inputYaml = `triggers:\n  - type: alert\n`;
+    const model = createFakeMonacoModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+
+    insertTriggerSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      'inboundWebhook.received',
+      undefined,
+      undefined,
+      true
+    );
+
+    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith(
+      'inboundWebhook.received',
+      expect.objectContaining({
+        full: true,
+        requiresConnectorId: true,
+      })
+    );
+  });
+
   it('should add the triggers section if it does not exist', () => {
     const inputYaml = `steps:\n  - type: http`;
     const model = createFakeMonacoModel(inputYaml);

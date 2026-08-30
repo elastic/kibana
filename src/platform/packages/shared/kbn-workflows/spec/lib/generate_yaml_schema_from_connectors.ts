@@ -35,7 +35,7 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
-import { getTriggerSchema } from '../schema/triggers';
+import { getTriggerSchema, type CustomTriggerSchemaInput } from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -45,8 +45,8 @@ export function getStepId(stepName: string): string {
 
 export function generateYamlSchemaFromConnectors(
   connectors: ConnectorContractUnion[],
-  /** Registered custom trigger type ids for YAML schema validation (e.g. example.custom_trigger) */
-  triggers: string[] = [],
+  /** Registered custom triggers for YAML schema validation (id, optional requiresConnectorId) */
+  triggers: CustomTriggerSchemaInput[] = [],
   /**
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
@@ -81,7 +81,7 @@ export function generateYamlSchemaFromConnectors(
  * Generates a schema for trusted workflow definitions that need the shared workflow envelope
  * validation without materializing the connector-expanded step union.
  */
-export function generateLightweightYamlSchema(triggers: string[] = []): z.ZodType {
+export function generateLightweightYamlSchema(triggers: CustomTriggerSchemaInput[] = []): z.ZodType {
   // Trigger schemas are lightweight: custom IDs add literal trigger variants and do
   // not materialize connector or step-definition schemas.
   const triggerSchema = getTriggerSchema(triggers);

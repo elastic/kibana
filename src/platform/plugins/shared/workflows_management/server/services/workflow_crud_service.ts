@@ -337,11 +337,14 @@ export class WorkflowCrudService {
     request?: KibanaRequest;
     yaml: string;
   }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> {
-    const registeredTriggerIds =
-      this.deps.workflowsExtensions?.getAllTriggerDefinitions().map((t) => t.id) ?? [];
+    const registeredTriggers =
+      this.deps.workflowsExtensions?.getAllTriggerDefinitions().map((t) => ({
+        id: t.id,
+        requiresConnectorId: t.requiresConnectorId,
+      })) ?? [];
     let zodSchema: z.ZodType;
     if (params.lightweightValidation) {
-      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds, { lightweight: true });
+      zodSchema = getWorkflowZodSchema({}, registeredTriggers, { lightweight: true });
     } else if (params.request) {
       zodSchema = await this.deps.validationService.getWorkflowZodSchema(
         { loose: false },
@@ -349,7 +352,7 @@ export class WorkflowCrudService {
         params.request
       );
     } else {
-      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds);
+      zodSchema = getWorkflowZodSchema({}, registeredTriggers);
     }
     const triggerDefinitions = params.lightweightValidation
       ? undefined

@@ -39,4 +39,29 @@ describe('generateTriggerSnippet', () => {
       expect(snippet).not.toContain('event.source:ui');
     });
   });
+
+  describe('requiresConnectorId', () => {
+    it('should include connector-id for connector-event triggers', () => {
+      const snippet = generateTriggerSnippet('inboundWebhook.received', {
+        full: true,
+        requiresConnectorId: true,
+      });
+      expect(snippet).toContain('type: inboundWebhook.received');
+      expect(snippet).toContain('connector-id:');
+      expect(snippet).toContain('condition:');
+    });
+
+    it('should not include connector-id for other custom triggers', () => {
+      const snippet = generateTriggerSnippet('cases.updated', { full: true });
+      expect(snippet).not.toContain('connector-id:');
+    });
+
+    it('should not include connector-id for built-in triggers even if the flag is set', () => {
+      const snippet = generateTriggerSnippet('manual', {
+        full: true,
+        requiresConnectorId: true,
+      });
+      expect(snippet).not.toContain('connector-id:');
+    });
+  });
 });

@@ -48,20 +48,46 @@ const CustomTriggerOnSchema = z
   })
   .optional();
 
+export interface CustomTriggerSchemaConfig {
+  id: string;
+  requiresConnectorId?: boolean;
+}
+
+export type CustomTriggerSchemaInput = string | CustomTriggerSchemaConfig;
+
+const CONNECTOR_ID_REQUIRED_ERROR = 'connector-id is required and must not be empty';
+
+const toCustomTriggerSchemaConfig = (
+  trigger: CustomTriggerSchemaInput
+): CustomTriggerSchemaConfig => (typeof trigger === 'string' ? { id: trigger } : trigger);
+
+const customTriggerSchema = ({ id, requiresConnectorId }: CustomTriggerSchemaConfig) => {
+  if (requiresConnectorId) {
+    return z.object({
+      type: z.literal(id),
+      'connector-id': z.string().trim().min(1, CONNECTOR_ID_REQUIRED_ERROR),
+      on: CustomTriggerOnSchema,
+    });
+  }
+
+  return z.object({
+    type: z.literal(id),
+    on: CustomTriggerOnSchema,
+  });
+};
+
 /**
  * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
  * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
  * Custom triggers allow an `on.condition` clause for KQL filtering.
+ * Triggers with `requiresConnectorId` must include a non-empty `connector-id`.
  */
-export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
-  if (customTriggerIds.length === 0) {
+export function getTriggerSchema(customTriggers: CustomTriggerSchemaInput[] = []): z.ZodType {
+  if (customTriggers.length === 0) {
     return TriggerSchema;
   }
-  const customSchemas = customTriggerIds.map((id) =>
-    z.object({
-      type: z.literal(id),
-      on: CustomTriggerOnSchema,
-    })
+  const customSchemas = customTriggers.map((trigger) =>
+    customTriggerSchema(toCustomTriggerSchemaConfig(trigger))
   );
   return z.discriminatedUnion('type', [
     AlertRuleTriggerSchema,

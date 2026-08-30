@@ -39,4 +39,61 @@ describe('custom trigger on.workflowEvents', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('does not require connector-id when the flag is omitted', () => {
+    expect(triggerSchema.safeParse({ type: 'cases.updated' }).success).toBe(true);
+  });
+});
+
+describe('custom trigger requiresConnectorId', () => {
+  const triggerSchema = getTriggerSchema([
+    { id: 'inboundWebhook.received', requiresConnectorId: true },
+    'cases.updated',
+  ]);
+
+  it('accepts a non-empty connector-id', () => {
+    const result = triggerSchema.safeParse({
+      type: 'inboundWebhook.received',
+      'connector-id': 'webhook-1',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts connector-id with optional on.condition', () => {
+    const result = triggerSchema.safeParse({
+      type: 'inboundWebhook.received',
+      'connector-id': 'webhook-1',
+      on: { condition: 'event.body.action: created' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a missing connector-id', () => {
+    const result = triggerSchema.safeParse({ type: 'inboundWebhook.received' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty or whitespace-only connector-id', () => {
+    expect(
+      triggerSchema.safeParse({
+        type: 'inboundWebhook.received',
+        'connector-id': '',
+      }).success
+    ).toBe(false);
+    expect(
+      triggerSchema.safeParse({
+        type: 'inboundWebhook.received',
+        'connector-id': '   ',
+      }).success
+    ).toBe(false);
+  });
+
+  it('leaves cases.updated and built-in triggers without a connector-id requirement', () => {
+    expect(triggerSchema.safeParse({ type: 'cases.updated' }).success).toBe(true);
+    expect(triggerSchema.safeParse({ type: 'manual' }).success).toBe(true);
+    expect(triggerSchema.safeParse({ type: 'alert' }).success).toBe(true);
+    expect(triggerSchema.safeParse({ type: 'scheduled', with: { every: '5m' } }).success).toBe(
+      true
+    );
+  });
 });

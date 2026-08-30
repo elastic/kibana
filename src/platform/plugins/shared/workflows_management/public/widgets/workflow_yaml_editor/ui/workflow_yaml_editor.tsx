@@ -656,7 +656,8 @@ export const WorkflowYAMLEditor = ({
           yamlDocumentCurrent,
           action.id,
           editor,
-          triggerDefinition?.snippets?.condition
+          triggerDefinition?.snippets?.condition,
+          triggerDefinition?.requiresConnectorId
         );
       } else {
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
