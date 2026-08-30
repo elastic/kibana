@@ -101,11 +101,21 @@ const CANCELLED_MESSAGE = 'Dataset evaluation was cancelled';
 /** Closes the experiment record after a cancellation and returns the step error. */
 const finalizeCancelledRecord = async (
   runtime: StepRuntime,
-  experimentId: string
+  experimentId: string,
+  partial?: { completed: number; failed: number; scoreIngestFailures: number }
 ): Promise<Error> => {
   await finalizeExperimentRecord(runtime, experimentId, {
     status: 'failed',
     error: CANCELLED_MESSAGE,
+    ...(partial
+      ? {
+          completeness: {
+            successful_tasks: partial.completed,
+            failed_tasks: partial.failed,
+            score_ingest_failures: partial.scoreIngestFailures,
+          },
+        }
+      : {}),
   });
   return new Error(CANCELLED_MESSAGE);
 };
@@ -405,7 +415,13 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         return { error: new Error(message) };
       }
       if (runtime.abortSignal.aborted) {
-        return { error: await finalizeCancelledRecord(runtime, input.experiment_id) };
+        return {
+          error: await finalizeCancelledRecord(runtime, input.experiment_id, {
+            completed: state.completed,
+            failed: state.failed,
+            scoreIngestFailures: state.score_ingest_failures ?? 0,
+          }),
+        };
       }
 
       const concurrency = input.concurrency ?? DEFAULT_CONCURRENCY;
@@ -438,7 +454,14 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       // between-polls guard above, so cancelling produces one step outcome
       // regardless of timing.
       if (batchResult.cancelled) {
-        return { error: await finalizeCancelledRecord(runtime, input.experiment_id) };
+        return {
+          error: await finalizeCancelledRecord(runtime, input.experiment_id, {
+            completed: state.completed + batchResult.completed,
+            failed: state.failed + batchResult.failed,
+            scoreIngestFailures:
+              (state.score_ingest_failures ?? 0) + batchResult.scoreIngestFailures,
+          }),
+        };
       }
 
       const cursor = state.cursor + batch.length;
