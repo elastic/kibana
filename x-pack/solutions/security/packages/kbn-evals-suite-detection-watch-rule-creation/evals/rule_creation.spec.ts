@@ -8,6 +8,7 @@
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { RuleCreationClient } from '../src/rule_creation_client';
 import { evaluate, tags } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluators/dataset_evaluator';
 import { createCanaryEvaluator } from '../src/evaluators/canary_evaluator';
@@ -22,24 +23,48 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       fetch,
       connector,
       log,
+      ruleCreationClient,
     }: {
       fetch: HttpHandler;
       connector: AvailableConnectorWithId;
       log: ToolingLog;
+      ruleCreationClient: RuleCreationClient;
     }) => {
       await ensureJudgeConnectorAccessible({ fetch, connector, log });
       await assertWorkflowInstalled({ fetch, log });
+
+      // TraceId presence assertion: a run whose executions carry no traceId silently
+      // degrades every trace-based evaluator (Tool Routing) to N/A — and N/A is not
+      // a failure, so the suite would still report a pass. Probe once here and fail
+      // setup loudly instead. See #284701 for the EDOT fallback this depends on.
+      const probe = await ruleCreationClient.run({
+        input: {
+          technique: 'T1078.001',
+          gap_description: 'TraceId presence probe — deterministic minimal gap for setup.',
+          evidence: 'None; this run exists to assert executions persist a traceId.',
+          confidence: 0.1,
+        },
+      });
+      if (!probe.traceId) {
+        throw new Error(
+          'Workflow execution carried no traceId — trace-based evaluators (Tool Routing) would ' +
+            'silently score N/A and the suite would report a false pass. This stack is not ' +
+            'persisting OTEL trace ids (see #284701); fix the stack, not the suite.'
+        );
+      }
+      log.info(`traceId presence verified (${probe.traceId}) — trace-based evaluators armed`);
     }
   );
 
   evaluate(
     'generates a valid ES|QL detection rule for the stated gap',
-    async ({ executorClient, evaluators, ruleCreationClient, esClient, log }) => {
+    async ({ executorClient, evaluators, ruleCreationClient, esClient, traceEsClient, log }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
         evaluators,
         executorClient,
         esClient,
+        traceEsClient,
         log,
       });
 
@@ -56,12 +81,13 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
   evaluate(
     'handles complex and multi-technique detection gaps',
-    async ({ executorClient, evaluators, ruleCreationClient, esClient, log }) => {
+    async ({ executorClient, evaluators, ruleCreationClient, esClient, traceEsClient, log }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
         evaluators,
         executorClient,
         esClient,
+        traceEsClient,
         log,
       });
 
@@ -79,12 +105,13 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
   evaluate(
     'quality gate trips on a deliberately vague gap (canary)',
-    async ({ executorClient, evaluators, ruleCreationClient, esClient, log }) => {
+    async ({ executorClient, evaluators, ruleCreationClient, esClient, traceEsClient, log }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
         evaluators,
         executorClient,
         esClient,
+        traceEsClient,
         log,
       });
 

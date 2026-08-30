@@ -15,10 +15,12 @@ import type {
   EvalsExecutorClient,
   Evaluator,
 } from '@kbn/evals';
+import type { Client as TraceEsClient } from '@elastic/elasticsearch';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationExample } from '../../datasets/golden';
 import type { RuleCreationClient, RuleCreationResult } from '../rule_creation_client';
+import { createToolRoutingEvaluator } from './tool_routing';
 import {
   calculateSetMetrics,
   extractMitreTechniques,
@@ -253,12 +255,14 @@ export const createEvaluateDataset =
     evaluators,
     executorClient,
     esClient,
+    traceEsClient,
     log,
   }: {
     ruleCreationClient: RuleCreationClient;
     evaluators: DefaultEvaluators;
     executorClient: EvalsExecutorClient;
     esClient: EsClient;
+    traceEsClient: TraceEsClient;
     log: ToolingLog;
   }) =>
   async ({
@@ -279,6 +283,7 @@ export const createEvaluateDataset =
       createIntervalFormatEvaluator(),
       createLookbackGapEvaluator(),
       createQueryExecutabilityEvaluator(esClient),
+      createToolRoutingEvaluator({ traceEsClient, log }),
       createGapAddressedEvaluator(evaluators),
     ];
 

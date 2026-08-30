@@ -1,7 +1,6 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
+ * Elastic License 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
 
@@ -20,6 +19,13 @@ const WORKFLOW_INPUT = {
   confidence: 0.85,
 };
 
+/**
+ * KQL phrase escaping for agent-generated rule names. The draft step derives the
+ * name from the gap description, so it can contain quotes or backslashes that
+ * would otherwise 400 the `_find` filter and surface as an opaque poll timeout.
+ */
+const escapeKqlPhrase = (value: string): string => value.replace(/([\\"])/g, '\\$1');
+
 const findRuleByName = async (
   fetch: HttpHandler,
   ruleName: string
@@ -28,16 +34,72 @@ const findRuleByName = async (
     `/api/detection_engine/rules/_find`,
     {
       method: 'GET',
-      query: { filter: `alert.attributes.name: "${ruleName}"`, per_page: 1 },
+      query: { filter: `alert.attributes.name: "${escapeKqlPhrase(ruleName)}"`, per_page: 1 },
     }
   );
   return data?.[0];
+};
+
+const deleteRule = async (fetch: HttpHandler, id: string): Promise<void> => {
+  await fetch(`/api/detection_engine/rules`, {
+    method: 'DELETE',
+    query: { id },
+  });
+};
+
+/**
+ * Deletes every rule this spec created (approved runs only). Runs after each test
+ * regardless of outcome, so a failure in the approve test cannot leak state into
+ * the reject test's non-existence assertion. Errors are logged, not thrown —
+ * cleanup must never mask the original failure.
+ */
+const sweepCreatedRules = async (
+  fetch: HttpHandler,
+  log: ToolingLog,
+  createdRuleIds: Set<string>
+): Promise<void> => {
+  for (const id of createdRuleIds) {
+    try {
+      await deleteRule(fetch, id);
+      log.info(`Swept rule ${id}`);
+    } catch (err) {
+      log.error(`Failed to sweep rule ${id}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+  createdRuleIds.clear();
 };
 
 evaluate.describe(
   'Rule Creation Worker — approval gate',
   { tag: tags.serverless.security.complete },
   () => {
+    // Rules created by an approved run outlive the test that created them. Inline
+    // cleanup only runs on success — a leaked rule from a failed approve test
+    // false-fails the reject test's non-existence assertion. afterEach cancels
+    // any still-running execution first (a paused workflow that resumes after the
+    // test body threw can still create a rule mid-sweep), then sweeps on every
+    // path, including assertion failure and timeout.
+    const createdRuleIds = new Set<string>();
+    let createdRuleName: string | undefined;
+
+    evaluate.afterEach(async ({ ruleCreationClient, fetch, log }) => {
+      await ruleCreationClient.cancelPending();
+      await sweepCreatedRules(fetch, log, createdRuleIds);
+      if (createdRuleName) {
+        const name = createdRuleName;
+        createdRuleName = undefined;
+        try {
+          const rule = await findRuleByName(fetch, name);
+          if (rule) {
+            await deleteRule(fetch, rule.id);
+            log.info(`Swept leaked rule "${name}" (${rule.id}) by name`);
+          }
+        } catch (err) {
+          log.error(`Failed to sweep rule "${name}" by name: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
+    });
+
     evaluate.beforeAll(
       async ({
         fetch,
@@ -58,9 +120,13 @@ evaluate.describe(
       async ({ ruleCreationClient, fetch, log }) => {
         const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
 
+        // Capture the name before the approval response: if respond() throws or the
+        // test fails mid-flight, afterEach still knows what to sweep by name.
+        createdRuleName = result.rule?.name;
+
         if (!result.pendingApproval) {
           throw new Error(
-            `Workflow did not reach review_creation — cannot test approval gate. Status was not WAITING_FOR_INPUT.`
+            `Execution did not pause at the approval gate (pendingApproval=${result.pendingApproval}) — cannot test the approve path`
           );
         }
 
@@ -74,42 +140,37 @@ evaluate.describe(
           throw new Error(`Workflow did not complete after approval — status: ${execution.status}`);
         }
 
-        if (!result.rule?.name) {
-          throw new Error('No rule name available to verify creation');
-        }
-
-        const ruleName = result.rule.name;
-        log.info(`Verifying rule "${ruleName}" was created in the detection engine`);
-
-        const rule = await findRuleByName(fetch, ruleName);
-        if (!rule) {
+        const ruleName = result.rule?.name;
+        if (!ruleName) {
           throw new Error(
-            `Rule "${ruleName}" was not found in the detection engine after approval`
+            'draft_creation produced no rule name — the approval path cannot be verified without it'
           );
         }
 
-        // Delete immediately — a leaked rule would false-fail the rejection
-        // test's name-based lookup, since both tests share WORKFLOW_INPUT.
-        log.info(`Rule "${ruleName}" confirmed in detection engine — cleaning up`);
-        await fetch(`/api/detection_engine/rules`, {
-          method: 'DELETE',
-          query: { id: rule.id },
-        });
+        log.info(`Verifying rule "${ruleName}" was created after approval`);
+        const rule = await findRuleByName(fetch, ruleName);
+        if (!rule) {
+          throw new Error(`Rule "${ruleName}" was not found in the detection engine after approval`);
+        }
+        createdRuleIds.add(rule.id);
+        log.info(`Confirmed rule "${ruleName}" exists — registered for afterEach sweep`);
       }
     );
 
     evaluate(
-      'rule is not saved in the detection engine when the user rejects',
+      'rule is not created when the user rejects',
       async ({ ruleCreationClient, fetch, log }) => {
         const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
 
+        // Capture for the same reason as the approve test: afterEach sweeps by name
+        // if this test dies before its own non-existence check completes.
+        createdRuleName = result.rule?.name;
+
         if (!result.pendingApproval) {
           throw new Error(
-            `Workflow did not reach review_creation — cannot test rejection gate. Status was not WAITING_FOR_INPUT.`
+            `Execution did not pause at the approval gate (pendingApproval=${result.pendingApproval}) — cannot test the reject path`
           );
         }
-
-        const ruleName = result.rule?.name;
 
         const execution = await ruleCreationClient.respond({
           workflowExecutionId: result.workflowExecutionId,
@@ -119,11 +180,10 @@ evaluate.describe(
 
         // create_rule is if-guarded, not a workflow failure: rejection still completes.
         if (execution.status !== ExecutionStatus.COMPLETED) {
-          throw new Error(
-            `Workflow did not complete after rejection — status: ${execution.status}`
-          );
+          throw new Error(`Workflow did not complete after rejection — status: ${execution.status}`);
         }
 
+        const ruleName = result.rule?.name;
         if (!ruleName) {
           log.info('No rule name from draft_creation — skipping detection engine check');
           return;

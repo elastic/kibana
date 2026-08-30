@@ -70,6 +70,7 @@ export const goldenDataset: RuleCreationExample[] = [
       esqlQuery: `FROM logs-endpoint.events.process-*
 | WHERE host.os.type == "linux"
   AND event.type == "start"
+  AND event.outcome == "failure"
   AND process.name IN ("su", "sudo")
   AND user.name IN ("root", "admin", "administrator", "guest")
 | STATS attempt_count = COUNT(*) BY host.name, user.name, process.name
@@ -100,7 +101,7 @@ export const goldenDataset: RuleCreationExample[] = [
 | WHERE host.os.type == "windows"
   AND event.type == "start"
   AND process.parent.name == "mmc.exe"
-  AND process.parent.args == "WF.msc"
+  AND process.parent.args : "WF.msc"
   AND process.name != "WerFault.exe"`,
     },
   },
@@ -128,7 +129,7 @@ export const goldenDataset: RuleCreationExample[] = [
 | WHERE event.code == "4104"
 | EVAL script_len = LENGTH(powershell.file.script_block_text)
 | WHERE script_len > 1000
-| EVAL numeric_ratio = (script_len - LENGTH(REPLACE(powershell.file.script_block_text, "0123456789", "")))::double / script_len::double
+| EVAL numeric_ratio = (script_len - LENGTH(REPLACE(powershell.file.script_block_text, "[0-9]", "")))::double / script_len::double
 | WHERE numeric_ratio > 0.5`,
     },
   },

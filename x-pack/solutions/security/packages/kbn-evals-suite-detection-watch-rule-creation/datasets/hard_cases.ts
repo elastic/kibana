@@ -47,7 +47,7 @@ export const hardCases: RuleCreationExample[] = [
 | WHERE host.os.type IN ("linux", "macos")
   AND event.type == "start"
   AND (
-    (process.name == "node" AND process.args == "install")
+    (process.name == "node" AND process.args : "install")
     OR process.parent.name == "node"
   )
 | STATS child_count = COUNT(*) BY host.id, process.parent.name, host.name

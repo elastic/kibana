@@ -110,12 +110,13 @@ export const buildFixtures = (): SeededIndex[] => [
       },
       // `gap-t1078-001` aggregates `COUNT(*) ... WHERE attempt_count > 5`, so a single matching
       // document is unwinnable by construction: the predicate matches but the threshold cannot.
-      // Six repeats of the same (host.name, user.name, process.name) tuple put the bucket at 7
-      // including the `sudo` document above, which clears the threshold with margin rather than
-      // sitting exactly on it.
+      // These are `outcome: "failure"` to match the golden query's auth-failure predicate; the
+      // `success`-outcome sudo document earlier in the list is deliberately excluded by that
+      // predicate — it is the over-breadth control. Six failure repeats clear the > 5 threshold
+      // on their own; the excluded success document adds nothing to the bucket count.
       ...Array.from({ length: 6 }, (_, i) => ({
         '@timestamp': nowIso(),
-        event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
+        event: { action: 'exec', type: 'start', category: 'process', outcome: 'failure' },
         process: {
           name: 'sudo',
           args: ['sudo', 'su', '-'],

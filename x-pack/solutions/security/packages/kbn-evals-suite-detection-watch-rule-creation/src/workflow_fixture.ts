@@ -1,14 +1,13 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
+ * Elastic License 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
 
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
+import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION, DRAFT_STEP_ID, REVIEW_STEP_ID } from './constants';
 
 // The model connector (used by the workflow's ai.agent step) is not checked here — if it is
 // misconfigured the workflow execution will fail loudly on its own. Only the judge connector
@@ -37,6 +36,35 @@ export const ensureJudgeConnectorAccessible = async ({
 };
 
 /**
+ * The step names the client and evaluators address. The managed workflow's yaml is the source of
+ * truth — this pins the contract the suite depends on so renaming a step in the yaml fails setup
+ * here instead of surfacing as opaque timeouts in every downstream lookup.
+ */
+const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, REVIEW_STEP_ID] as const;
+
+/**
+ * Parses the installed workflow's step names out of its yaml without a yaml dependency:
+ * every `  - name: <id>` under the `steps:` key is a step declaration. Any non-indented
+ * line moves the cursor to that top-level key, so `- name:` items under `outputs:` or
+ * `triggers:` are never collected.
+ */
+const parseStepNames = (yaml: string): string[] => {
+  const names: string[] = [];
+  let inSteps = false;
+  for (const line of yaml.split('\n')) {
+    if (/^\S/.test(line)) {
+      inSteps = /^steps:/.test(line);
+      continue;
+    }
+    const match = /^ {2}- name: (.+)$/.exec(line);
+    if (inSteps && match) {
+      names.push(match[1].trim());
+    }
+  }
+  return names;
+};
+
+/**
  * Asserts the managed rule-creation workflow the pnd plugin installs at start is present, and
  * returns its yaml.
  *
@@ -54,17 +82,14 @@ export const assertWorkflowInstalled = async ({
   log: ToolingLog;
 }): Promise<{ yaml: string }> => {
   log.info(`Checking managed workflow: ${RULE_CREATION_WORKFLOW_ID}`);
+  let workflow: { yaml: string };
   try {
-    const workflow = await fetch<{ yaml: string }>(
-      `/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}`,
-      {
-        method: 'GET',
-        version: WORKFLOWS_API_VERSION,
-        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      }
-    );
+    workflow = await fetch<{ yaml: string }>(`/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}`, {
+      method: 'GET',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+    });
     log.info('Managed workflow is installed — proceeding with eval run');
-    return workflow;
   } catch (err) {
     throw new Error(
       `Managed workflow "${RULE_CREATION_WORKFLOW_ID}" is not installed. It is installed at ` +
@@ -74,4 +99,20 @@ export const assertWorkflowInstalled = async ({
         `Original error: ${err instanceof Error ? err.message : String(err)}`
     );
   }
+
+  // The installed document must still expose the step ids the client and evaluators
+  // address by name. A rename in the managed yaml previously surfaced downstream as an
+  // opaque "step not found in waiting state" poll timeout, not a setup failure.
+  const stepNames = parseStepNames(workflow.yaml);
+  const missing = REQUIRED_STEP_IDS.filter((id) => !stepNames.includes(id));
+  if (missing.length > 0) {
+    throw new Error(
+      `Managed workflow "${RULE_CREATION_WORKFLOW_ID}" no longer declares step(s) ` +
+        `${missing.join(', ')} (found: ${stepNames.join(', ')}). The eval client and evaluators ` +
+        `address steps by id — update DRAFT_STEP_ID / REVIEW_STEP_ID in src/constants.ts when ` +
+        `the managed yaml renames them.`
+    );
+  }
+
+  return workflow;
 };

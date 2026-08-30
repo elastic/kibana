@@ -14,7 +14,7 @@ import {
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { API_VERSIONS, buildRespondToActionUrl } from '@kbn/inbox-common';
+import { API_VERSIONS, buildRespondToActionUrl, buildWorkflowSourceId } from '@kbn/inbox-common';
 import {
   DRAFT_STEP_ID,
   REVIEW_STEP_ID,
@@ -172,9 +172,11 @@ export class RuleCreationClient {
       );
     }
 
-    // Must match buildWorkflowSourceId in workflows_management/server/inbox/to_inbox_action.ts
-    // (plugin-private, no shared export).
-    const sourceId = `${RULE_CREATION_WORKFLOW_ID}:${workflowExecutionId}:${reviewStep.id}`;
+    const sourceId = buildWorkflowSourceId({
+      workflowId: RULE_CREATION_WORKFLOW_ID,
+      workflowRunId: workflowExecutionId,
+      stepExecutionId: reviewStep.id,
+    });
     await this.respondToApprovalGate({ sourceId, approved });
 
     return this.pollExecution({
