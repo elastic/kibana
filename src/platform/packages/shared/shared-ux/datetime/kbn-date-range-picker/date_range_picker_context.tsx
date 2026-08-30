@@ -302,9 +302,9 @@ export function DateRangePickerProvider({
     (range?: TimeRangeBounds, textOverride?: string) => {
       let rangeToApply: TimeRange;
 
-      if (range) {
+      if (range ?? textOverride) {
         const rangeText =
-          textOverride ?? `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
+          textOverride ?? `${range!.start} ${DATE_RANGE_INPUT_DELIMITER} ${range!.end}`;
         rangeToApply = textToTimeRange(rangeText, transformOptions);
         setText(rangeText);
       } else {
