@@ -69,10 +69,12 @@ describe('reviewDashboard', () => {
     const [systemMessage, humanMessage] = invoke.mock.calls[0][0] as Array<[string, string]>;
     expect(systemMessage[1]).toContain('List only problems');
     expect(systemMessage[1]).toContain('Do not validate field names');
-    expect(humanMessage[1]).toContain('full-width metric');
-    expect(humanMessage[1]).toContain('Do not flag control field names');
+    expect(humanMessage[1]).toContain('full-width single-value metric');
+    expect(humanMessage[1]).toContain('categorical breakdown is not this miss');
+    expect(humanMessage[1]).toContain('Do not flag missing field_name, index, or esql_query');
+    expect(humanMessage[1]).not.toContain('Required fields: type; field_name and index');
     expect(humanMessage[1]).toContain('Response Status');
-    expect(humanMessage[1]).not.toContain('esql_query');
+    expect(humanMessage[1]).not.toContain('"esql_query"');
     expect(humanMessage[1]).not.toContain('kibana_sample_data_logs');
     expect(humanMessage[1]).not.toContain('`response`');
     expect(modelProvider.selectModel).toHaveBeenCalledWith({ effortLevel: 'low' });

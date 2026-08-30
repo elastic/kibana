@@ -36,7 +36,10 @@ const compileTopicRules = (
  */
 export const getDashboardAuthoringPromptContent = (): string => {
   const sections = Object.entries(dashboardRuleRegistry).flatMap(([topic, { prompt }]) =>
-    compileTopicRules(topic, prompt.config?.rules ?? [])
+    compileTopicRules(topic, [
+      ...(prompt.config?.rules ?? []),
+      ...(prompt.config?.authoringOnly ?? []),
+    ])
   );
 
   if (!sections.length) {
@@ -47,10 +50,12 @@ export const getDashboardAuthoringPromptContent = (): string => {
 };
 
 /**
- * Compiles authoring `config.rules` plus `review.misses` and
- * `review.considerations` for every dashboard topic. Use this in a review
- * loop; do not also append {@link getDashboardAuthoringPromptContent} when
- * the skill body is already in the conversation.
+ * Compiles shared authoring `config.rules` plus `review.misses` and
+ * `review.considerations` for every dashboard topic. Omits
+ * `config.authoringOnly` — those are input-schema HOW the judge cannot
+ * verify from the compact summary. Use this in a review loop; do not also
+ * append {@link getDashboardAuthoringPromptContent} when the skill body is
+ * already in the conversation.
  */
 export const getDashboardReviewPromptContent = (): string => {
   const sections = Object.entries(dashboardRuleRegistry).flatMap(([topic, { prompt }]) =>

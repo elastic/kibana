@@ -7,8 +7,9 @@
 
 /**
  * Dashboard-level prompt topics. Same shape as the chart-type registry:
- * `config.rules` is HOW for the dashboard agent; `review.misses` /
- * `review.considerations` are compiled only into the review prompt.
+ * `config.rules` is HOW shared with review; `config.authoringOnly` is HOW
+ * for the dashboard agent only; `review.misses` / `review.considerations`
+ * are compiled only into the review prompt.
  */
 export interface DashboardRuleEntry {
   prompt: {
@@ -22,6 +23,11 @@ export interface DashboardRuleEntry {
     };
     config?: {
       rules?: string[];
+      /**
+       * HOW for the dashboard agent only. Not compiled into the review prompt —
+       * the judge cannot verify these from the compact summary.
+       */
+      authoringOnly?: string[];
     };
   };
 }
@@ -62,24 +68,28 @@ export const dashboardRuleRegistry: DashboardRuleRegistry = {
   [dashboardRuleTopics.grid]: {
     prompt: {
       selection:
-        '48-column packing: size panels by chart type, tile with no gaps, and keep metrics small.',
+        '48-column packing: size panels by chart type, tile with no gaps, keep single-value metrics small, and give metric breakdowns more room.',
       review: {
         misses: [
-          'A full-width metric or gauge is a miss — keep metrics at w: 6, 8, or 12 and gauges at w: 12.',
+          'A full-width single-value metric or gauge is a miss — a single KPI stays at w: 12; two or more KPI metrics on one row share the 48 columns equally (never w: 48). Gauges stay at w: 12. A metric with a categorical breakdown is not this miss — those may be w: 12 or 24.',
+          'A KPI-metric-only row of 2+ panels that leaves unused columns (sum(w) < 48) is a miss — e.g. four metrics at w: 6 occupying only x: 0–24. Required: 2→24, 3→16, 4→12, 6→8, 8→6. A single metric at w: 12 with empty space to the right is not this miss. Metric-breakdown panels are not this miss.',
+          'A metric breakdown packed at KPI size (w ≤ 12 and h ≤ 6) is a miss — give breakdown metrics at least w: 24, h: 8. Use the authoring_note or query to tell a single KPI from a breakdown.',
           'Visible gaps or dead space between panels is a miss — rows must tile left-to-right with no unused columns, and the next row y must be previous row y + max(h).',
           'A pie panel wider than w: 24 is a miss.',
+          'A heatmap, tagcloud, or region_map narrower than w: 24 is a miss — these stay at w: 24 (or w: 48 if they are the only panel on the row).',
         ],
       },
       config: {
         rules: [
           'The dashboard uses a 48-column grid. On a 16:9 screen, roughly 20–24 rows are visible without scrolling. Aim for 8–12 panels above the fold.',
           'Every add_panels.panels[] item and every add_section.panels[] item requires grid: { x, y, w, h }. The origin (0, 0) is the top-left corner.',
-          'Metric → w: 6, 8, or 12, h: 5–6. Keep them small; do not make metric or gauge panels full-width. 8 in a row: w: 6; 6 in a row: w: 8; 4 in a row: w: 12.',
+          'Metric (single KPI, no breakdown) → pick w from the count on that row so the row fills all 48 columns. 8→w:6; 6→w:8; 4→w:12; 3→w:16; 2→w:24. A single metric stays at w: 12. h: 5–6. Keep them small; do not make a single-value metric or gauge full-width.',
+          'Metric breakdown (one measure split by a category — Lens breakdown_by, e.g. "error count by status", "CPU by host") → give it more space so the tiles are readable: w: 24, h: 8–10. Do not pack breakdown metrics into the small KPI sizes (w: 6, h: 5–6).',
           'Gauge → w: 12, h: 8. Fit up to 4 per row.',
           'XY (line / area / bar) → w: 24, h: 10. Use full-width (w: 48) only for the primary time series.',
-          'Heatmap and tagcloud → w: 24, h: 10. Pie → w: 12 or 24, h: 10. Treemap / waffle / mosaic → w: 24, h: 10.',
+          'Heatmap, tagcloud, and region_map → w: 24, h: 10. Never narrower than 24. Use w: 48 only when the panel is alone on the row. Pie → w: 12 or 24, h: 10. Treemap / waffle / mosaic → w: 24, h: 10.',
           'Markdown → w: 24–48, h: 4–9, sized from content. Datatable → w: 24–48, h: 12–16; prefer full-width so columns are readable.',
-          'Prefer w values that divide 48 evenly: 6, 8, 12, 24, 48.',
+          'Prefer w values that divide 48 evenly: 6, 8, 12, 16, 24, 48.',
           'Eliminate dead space: when starting a new row, set y to the previous row y + max(h) across all panels in that row — do not use only one neighbor y + h.',
           'Align row heights: side-by-side panels that share y should generally have the same h. If they do not, fill the empty vertical space before the next full-width panel.',
           'Fill rows left to right from x: 0. Next x = previous x + w. When a panel would exceed column 48, start a new row. x + w must never exceed 48.',
@@ -98,6 +108,7 @@ export const dashboardRuleRegistry: DashboardRuleRegistry = {
           'A new multi-entity dashboard with no categorical controls is a miss — add 3–5 options_list_control dropdowns for useful low-cardinality fields.',
           'A control on a high-cardinality identifier (trace id, request id, UUID) is a miss.',
           'More than one time_slider_control is a miss.',
+          'Do not flag missing field_name, index, or esql_query — they are omitted from this summary. A listed control with type (and optional title) is complete.',
           'Do not flag control field names, ECS paths, or whether a field exists — the judge has no index mapping.',
         ],
         considerations: [
@@ -111,6 +122,8 @@ export const dashboardRuleRegistry: DashboardRuleRegistry = {
           'options_list_control — dropdown for categorical / keyword fields. The most common type (95% of cases).',
           'range_slider_control — numeric range slider. Add sparingly, only when filtering by a numeric threshold is useful across multiple panels (e.g. latency, bytes, duration).',
           'time_slider_control — global time sub-range picker. Add at most one per dashboard, only when time-range narrowing within the global window is useful.',
+        ],
+        authoringOnly: [
           'Required fields: type; field_name and index for options_list_control and range_slider_control (exact field name and the same index as the panels); optional title for those two types.',
           'Defaults applied by the server: width: "medium", grow: true. Override only if the user asks.',
           'Remove controls with remove_controls using the id values from the controls[] list in the tool result.',

@@ -29,8 +29,10 @@ describe('registerSkills', () => {
 
   it('inlines dashboard authoring rules in the skill body', () => {
     expect(skill.content).toContain('Lead with high-level metrics');
-    expect(skill.content).toContain('do not make metric or gauge panels full-width');
+    expect(skill.content).toContain('do not make a single-value metric or gauge full-width');
     expect(skill.content).toContain('3–5 `options_list_control` dropdowns');
+    expect(skill.content).toContain('show avg/min/max in the legend');
+    expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
     expect(skill.content).not.toContain('is a miss');
   });
 
