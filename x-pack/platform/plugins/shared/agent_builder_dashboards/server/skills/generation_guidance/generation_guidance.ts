@@ -6,7 +6,10 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import {
+  getChartTypeSelectionPromptContent,
+  seriesStatisticsAgentGuidance,
+} from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { getDashboardAuthoringPromptContent } from './dashboard_guidance';
@@ -49,7 +52,7 @@ For an existing dashboard:
 Choose the panel type in this priority order:
 
 1. **Lens** (\`source: "request"\`, \`renderer: "lens"\` or omit renderer) — default for metric, time series, bar, line, pie, area, and data table visualizations.
-2. **Vega** (\`source: "request"\`, \`renderer: "vega"\`) — for scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user explicitly asks for Vega.
+2. **Vega** (\`source: "request"\`, \`renderer: "vega"\`) — for scatter/bubble plots, small multiples/faceting, layered or combination charts of different measures, or when the user explicitly asks for Vega.
 3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — for static explanatory text, links, or simple formatted notes with no data.
 4. **Custom content** (\`source: "config"\`, \`type: "custom_content"\`) — a last resort for HTML-based layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or panels that mix narrative text with live data values.
 
@@ -77,7 +80,10 @@ Reach for custom content only when nothing above fits:
 
 For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
-Before \`add_panels\`, pick at most two primary time-series XY (the overview trend that matches the title or intent). On those panels, ask for a time-series of the measure and request legend statistics as a presentation hint (e.g. "show avg/min/max in the legend"). Do not ask the query to compute avg/min/max as extra ES|QL columns.
+Before \`add_panels\`, pick 1–2 primary time-series XY (the overview trend that matches the title or intent).
+On a new dashboard, phrase at least one and at most two of those primary time-series XY queries as "<measure> over time, show avg/min/max in the legend" (e.g. "log volume over time, show avg/min/max in the legend"). Skip categorical bar charts and queries whose measure is already AVG/MIN/MAX of a field.
+
+${seriesStatisticsAgentGuidance}
 
 ${chartTypeSelectionGuidance}
 
