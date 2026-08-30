@@ -21,7 +21,7 @@ MISP URL
 :   Base URL of your MISP instance, for example `https://misp.example.com` or `https://localhost`. Don't include a trailing slash or an `/attributes` path.
 
 Authentication
-:   Automation API key. {{kib}} sends `Authorization: <key>` with no `Bearer` prefix (MISP rejects Bearer). Create the key under **Administration → List Auth Keys**.
+:   Automation API key. {{kib}} sends the key as `Authorization: <key>`. Do not add a `Bearer` prefix. MISP rejects that form. Create the key from **Administration → List Auth Keys**.
 :   For self-signed TLS (common on local Docker MISP), set verification mode to **none**. Use **full** when the instance presents a publicly trusted certificate. Optionally provide a PEM CA for private CAs.
 
 ## Available actions [misp-available-actions]
