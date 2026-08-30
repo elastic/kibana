@@ -50,8 +50,8 @@ const generateDashboardSchema = z.object({
  * - the prior payload is read server-side from `dashboardAttachmentId`,
  * - the generated payload is persisted as a `dashboard` attachment,
  * - the result returns the attachment id, version, and a compact dashboard summary.
- *   New dashboards also get an experimental one-shot review (problems only;
- *   generate still succeeds if the judge fails). Updates skip the judge.
+ *   Create and update both get an experimental review of the full attachment
+ *   (problems only; generate still succeeds if the judge fails).
  *
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
@@ -143,13 +143,11 @@ Use operations[] to:
           finalDashboardData,
           new Map(panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote]))
         );
-        const review = isNewDashboard
-          ? await reviewDashboard({
-              summary: dashboard,
-              modelProvider,
-              logger,
-            })
-          : undefined;
+        const review = await reviewDashboard({
+          dashboard: finalDashboardData,
+          modelProvider,
+          logger,
+        });
 
         return {
           results: [

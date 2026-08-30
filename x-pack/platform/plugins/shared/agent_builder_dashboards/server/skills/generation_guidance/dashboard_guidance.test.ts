@@ -85,7 +85,7 @@ describe('dashboard guidance', () => {
       - After removals, shift neighbors left and pull later rows up so unused space is not left behind.
       - A full-width single-value metric or gauge is a miss — a single KPI stays at w: 12; two or more KPI metrics on one row share the 48 columns equally (never w: 48). Gauges stay at w: 12. A metric with a categorical breakdown is not this miss — those may be w: 12 or 24.
       - A KPI-metric-only row of 2+ panels that leaves unused columns (sum(w) < 48) is a miss — e.g. four metrics at w: 6 occupying only x: 0–24. Required: 2→24, 3→16, 4→12, 6→8, 8→6. A single metric at w: 12 with empty space to the right is not this miss. Metric-breakdown panels are not this miss.
-      - A metric breakdown packed at KPI size (w ≤ 12 and h ≤ 6) is a miss — give breakdown metrics at least w: 24, h: 8. Use the authoring_note or query to tell a single KPI from a breakdown.
+      - A metric breakdown packed at KPI size (w ≤ 12 and h ≤ 6) is a miss — give breakdown metrics at least w: 24, h: 8. Use the panel config (breakdown_by), query, or authoring_note to tell a single KPI from a breakdown.
       - Visible gaps or dead space between panels is a miss — rows must tile left-to-right with no unused columns, and the next row y must be previous row y + max(h).
       - A pie panel wider than w: 24 is a miss.
       - A heatmap, tagcloud, or region_map narrower than w: 24 is a miss — these stay at w: 24 (or w: 48 if they are the only panel on the row).
@@ -98,7 +98,7 @@ describe('dashboard guidance', () => {
       - A new multi-entity dashboard with no categorical controls is a miss — add 3–5 options_list_control dropdowns for useful low-cardinality fields.
       - A control on a high-cardinality identifier (trace id, request id, UUID) is a miss.
       - More than one time_slider_control is a miss.
-      - Do not flag missing field_name, index, or esql_query — they are omitted from this summary. A listed control with type (and optional title) is complete.
+      - Do not flag missing field_name, index, or esql_query — those are authoring-input details, not painted misses. A listed control with type (and optional title) is complete.
       - Do not flag control field names, ECS paths, or whether a field exists — the judge has no index mapping.
       Considerations:
       - Add a range_slider_control only when a numeric threshold is useful across multiple panels.

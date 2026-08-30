@@ -68,7 +68,7 @@ describe('generateDashboardTool', () => {
     reviewDashboardMock.mockResolvedValue(reviewProblems);
   });
 
-  it('attaches the post-generate review only when creating a new dashboard', async () => {
+  it('attaches the post-generate review when creating a new dashboard', async () => {
     const tool = generateDashboardTool();
     const result = await tool.handler(
       {
@@ -105,7 +105,7 @@ describe('generateDashboardTool', () => {
     });
     expect(reviewDashboardMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        summary: expect.objectContaining({ title: 'Logs' }),
+        dashboard: persistedDashboard,
       })
     );
     expect(executeDashboardOperationsMock).toHaveBeenCalledWith(
@@ -115,7 +115,7 @@ describe('generateDashboardTool', () => {
     );
   });
 
-  it('does not run the judge again when updating an existing dashboard', async () => {
+  it('attaches the post-generate review when updating an existing dashboard', async () => {
     const tool = generateDashboardTool();
     const result = await tool.handler(
       {
@@ -147,7 +147,11 @@ describe('generateDashboardTool', () => {
       } as never
     );
 
-    expect(reviewDashboardMock).not.toHaveBeenCalled();
+    expect(reviewDashboardMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dashboard: persistedDashboard,
+      })
+    );
     expect(result).toEqual({
       results: [
         expect.objectContaining({
@@ -156,12 +160,10 @@ describe('generateDashboardTool', () => {
             attachment_id: 'att-1',
             version: 2,
             dashboard: expect.objectContaining({ title: 'Logs' }),
+            review: reviewProblems,
           }),
         }),
       ],
     });
-    expect(
-      (result as { results: Array<{ data: { review?: unknown } }> }).results[0].data.review
-    ).toBeUndefined();
   });
 });

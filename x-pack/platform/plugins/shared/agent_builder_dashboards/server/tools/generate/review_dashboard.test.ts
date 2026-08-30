@@ -5,27 +5,43 @@
  * 2.0.
  */
 
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { reviewDashboard } from './review_dashboard';
-import type { DashboardSummary } from './summarize_dashboard';
 
-const summary: DashboardSummary = {
+const dashboard: DashboardAttachmentData = {
   title: 'Logs',
   panels: [
     {
       type: 'lens',
       id: 'm1',
       grid: { x: 0, y: 0, w: 48, h: 5 },
-      chart_type: 'metric',
+      config: {
+        type: 'metric',
+        title: 'Request count',
+        breakdown_by: { column: 'response.keyword' },
+      },
+    },
+    {
+      type: 'lens',
+      id: 'x1',
+      grid: { x: 0, y: 5, w: 48, h: 10 },
+      config: {
+        type: 'xy',
+        styling: { areas: { fill: 'solid' } },
+        legend: { visibility: 'visible', statistics: ['avg', 'min', 'max'] },
+      },
     },
   ],
-  controls: [
+  pinned_panels: [
     {
       id: 'c1',
       type: 'options_list_control',
-      title: 'Response Status',
-      esql_query: 'FROM kibana_sample_data_logs | STATS BY `response`',
+      config: {
+        title: 'Response Status',
+        esql_query: 'FROM kibana_sample_data_logs | STATS BY `response`',
+      },
     },
   ],
 };
@@ -51,7 +67,7 @@ describe('reviewDashboard', () => {
     } as unknown as ModelProvider;
 
     const review = await reviewDashboard({
-      summary,
+      dashboard,
       modelProvider,
       logger: loggerMock.create(),
     });
@@ -69,14 +85,15 @@ describe('reviewDashboard', () => {
     const [systemMessage, humanMessage] = invoke.mock.calls[0][0] as Array<[string, string]>;
     expect(systemMessage[1]).toContain('List only problems');
     expect(systemMessage[1]).toContain('Do not validate field names');
+    expect(humanMessage[1]).toContain('DASHBOARD ATTACHMENT:');
     expect(humanMessage[1]).toContain('full-width single-value metric');
     expect(humanMessage[1]).toContain('categorical breakdown is not this miss');
     expect(humanMessage[1]).toContain('Do not flag missing field_name, index, or esql_query');
     expect(humanMessage[1]).not.toContain('Required fields: type; field_name and index');
+    expect(humanMessage[1]).toContain('Request count');
+    expect(humanMessage[1]).toContain('breakdown_by');
+    expect(humanMessage[1]).toContain('"fill": "solid"');
     expect(humanMessage[1]).toContain('Response Status');
-    expect(humanMessage[1]).not.toContain('"esql_query"');
-    expect(humanMessage[1]).not.toContain('kibana_sample_data_logs');
-    expect(humanMessage[1]).not.toContain('`response`');
     expect(modelProvider.selectModel).toHaveBeenCalledWith({ effortLevel: 'low' });
     expect(modelProvider.getDefaultModel).not.toHaveBeenCalled();
   });
@@ -90,7 +107,7 @@ describe('reviewDashboard', () => {
 
     await expect(
       reviewDashboard({
-        summary,
+        dashboard,
         modelProvider,
         logger: loggerMock.create(),
       })

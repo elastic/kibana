@@ -62,8 +62,8 @@ const summarizePanel = (
 };
 
 /**
- * Compact projection of a dashboard payload for the LLM and the review judge.
- * The full payload stays on the attachment.
+ * Compact projection of a dashboard payload for the LLM transcript.
+ * The full payload stays on the attachment (and is what the review judge sees).
  */
 export const summarizeDashboard = (
   dashboardData: DashboardAttachmentData,

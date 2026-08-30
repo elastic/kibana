@@ -9,7 +9,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { summarizeDashboard } from './summarize_dashboard';
 
 describe('summarizeDashboard', () => {
-  it('includes chartType from the Lens config type so review can judge layout by chart family', () => {
+  it('includes chartType from the Lens config type so the transcript can name the chart family', () => {
     const summary = summarizeDashboard(
       {
         title: 'Logs',

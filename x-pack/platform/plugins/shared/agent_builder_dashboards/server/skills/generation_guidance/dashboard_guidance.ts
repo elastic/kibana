@@ -53,7 +53,7 @@ export const getDashboardAuthoringPromptContent = (): string => {
  * Compiles shared authoring `config.rules` plus `review.misses` and
  * `review.considerations` for every dashboard topic. Omits
  * `config.authoringOnly` — those are input-schema HOW the judge cannot
- * verify from the compact summary. Use this in a review loop; do not also
+ * verify as painted issues. Use this in a review loop; do not also
  * append {@link getDashboardAuthoringPromptContent} when the skill body is
  * already in the conversation.
  */
