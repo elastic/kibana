@@ -11,7 +11,7 @@ import { type LogExtractionConfig } from './constants';
 // Frozen snapshot of the defaults that pre-overrides-format code baked into stored docs
 // (docs with defaultsVersion !== 'latest'). Never change these values — they describe what
 // old code wrote, not what the current defaults are.
-const LEGACY_LOG_EXTRACTION_DEFAULTS = {
+export const LEGACY_LOG_EXTRACTION_DEFAULTS = {
   additionalIndexPatterns: [],
   excludedIndexPatterns: [],
   fieldHistoryLength: 10,

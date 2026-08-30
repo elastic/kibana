@@ -38,7 +38,7 @@ const indexPatternString = z.string().max(MAX_INDEX_PATTERN_LENGTH);
 const indexPatternsArray = z.array(indexPatternString).max(MAX_INDEX_PATTERNS);
 
 // Schema for shape validation (no defaults)
-const LogExtractionShape = z.object({
+export const LogExtractionShape = z.object({
   additionalIndexPatterns: indexPatternsArray,
   excludedIndexPatterns: indexPatternsArray,
   fieldHistoryLength: z.number().int(),

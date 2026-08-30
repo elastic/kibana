@@ -19,6 +19,7 @@ import {
   LATEST_LOG_EXTRACTION_DEFAULTS,
   type EntityStoreGlobalStateOverrides,
 } from './constants';
+import { LEGACY_LOG_EXTRACTION_DEFAULTS } from './legacy_defaults';
 
 describe('EntityStoreGlobalStateClient', () => {
   const namespace = 'default';
@@ -60,6 +61,17 @@ describe('EntityStoreGlobalStateClient', () => {
       await expect(client.find()).resolves.toBeUndefined();
     });
 
+    it('strips legacy-era defaults and inflates with current defaults for legacy docs', async () => {
+      mockStored({
+        defaultsVersion: 'legacy',
+        logsExtraction: { ...LEGACY_LOG_EXTRACTION_DEFAULTS, delay: '9m' },
+      });
+
+      const state = await client.find();
+
+      expect(state?.logsExtraction).toEqual({ ...LATEST_LOG_EXTRACTION_DEFAULTS, delay: '9m' });
+    });
+
     it('applies the latest defaults on top of stored overrides', async () => {
       mockStored({ logsExtraction: { frequency: '5m' } });
 
@@ -99,6 +111,19 @@ describe('EntityStoreGlobalStateClient', () => {
       });
     });
 
+    it('fresh install with no args always persists logsExtraction:{} so the SO schema is satisfied', async () => {
+      mockStored(undefined);
+
+      const state = await client.init();
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        EntityStoreGlobalStateTypeName,
+        expect.objectContaining({ defaultsVersion: 'latest', logsExtraction: {} }),
+        { id: soId }
+      );
+      expect(state.logsExtraction).toEqual(LATEST_LOG_EXTRACTION_DEFAULTS);
+    });
+
     it('re-init without params keeps the existing overrides', async () => {
       mockStored({ logsExtraction: { delay: '9m' } });
 
@@ -128,7 +153,7 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(state.logsExtraction.delay).toBe('9m');
     });
 
-    it('re-init with a full snapshot state (as installers send) keeps execution state', async () => {
+    it('re-init preserves execution timestamps when resetting historySnapshot status', async () => {
       mockStored({
         historySnapshot: {
           status: 'stopped',
@@ -152,7 +177,7 @@ describe('EntityStoreGlobalStateClient', () => {
       // a doc written before the overrides format has every default of that era baked in
       mockStored({
         defaultsVersion: 'legacy',
-        logsExtraction: { ...LATEST_LOG_EXTRACTION_DEFAULTS, delay: '9m' },
+        logsExtraction: { ...LEGACY_LOG_EXTRACTION_DEFAULTS, delay: '9m' },
       });
 
       await client.init();
@@ -170,7 +195,7 @@ describe('EntityStoreGlobalStateClient', () => {
 
     it('treats docs without a defaultsVersion as legacy format', async () => {
       mockStored({
-        logsExtraction: { ...LATEST_LOG_EXTRACTION_DEFAULTS, delay: '9m' },
+        logsExtraction: { ...LEGACY_LOG_EXTRACTION_DEFAULTS, delay: '9m' },
       });
 
       const state = await client.init();

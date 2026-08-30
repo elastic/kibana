@@ -21,17 +21,17 @@ import { EntityStoreGlobalStateTypeName } from './types';
 import { getLegacyLogExtractionOverrides } from './legacy_defaults';
 import { retryOnConflict } from '../../../infra/elasticsearch';
 
-// Read path: stored attributes in, full config out (missing fields get the current defaults).
-const getWithLatestDefaults = (state?: EntityStoreGlobalStateOverrides): EntityStoreGlobalState => {
-  const stored = state?.logsExtraction ?? {};
-  const overrides =
-    state?.defaultsVersion === 'latest' ? stored : getLegacyLogExtractionOverrides(stored);
+const getLogsExtractionOverrides = (attrs: EntityStoreGlobalStateOverrides) =>
+  attrs.defaultsVersion === 'latest'
+    ? attrs.logsExtraction ?? {}
+    : getLegacyLogExtractionOverrides(attrs.logsExtraction ?? {});
 
-  return EntityStoreGlobalState.parse({
-    historySnapshot: HistorySnapshotState.parse(state?.historySnapshot ?? {}),
-    logsExtraction: LogExtractionConfig.parse(overrides),
+// Read path: stored attributes in, full config out (missing fields get the current defaults).
+const getWithLatestDefaults = (state: EntityStoreGlobalStateOverrides): EntityStoreGlobalState =>
+  EntityStoreGlobalState.parse({
+    historySnapshot: HistorySnapshotState.parse(state.historySnapshot ?? {}),
+    logsExtraction: LogExtractionConfig.parse(getLogsExtractionOverrides(state)),
   });
-};
 
 export class EntityStoreGlobalStateClient {
   constructor(
@@ -56,8 +56,8 @@ export class EntityStoreGlobalStateClient {
   }
 
   async init(initialState?: EntityStoreGlobalStateOverrides): Promise<EntityStoreGlobalState> {
-    const existing = await this.find();
-    if (existing !== undefined) {
+    const raw = await this.findRaw();
+    if (raw !== undefined) {
       return this.update(initialState ?? {});
     }
 
@@ -89,17 +89,17 @@ export class EntityStoreGlobalStateClient {
           );
         }
 
-        const storedLogsOverrides =
-          raw.attributes.defaultsVersion === 'latest'
-            ? raw.attributes.logsExtraction ?? {}
-            : getLegacyLogExtractionOverrides(raw.attributes.logsExtraction ?? {});
-        const existing = getWithLatestDefaults(raw.attributes);
         return this.replace(
-          this.getSavedObjectId(),
           EntityStoreGlobalStateOverrides.parse({
             defaultsVersion: 'latest',
-            historySnapshot: { ...existing.historySnapshot, ...partial.historySnapshot },
-            logsExtraction: { ...storedLogsOverrides, ...partial.logsExtraction },
+            historySnapshot: {
+              ...HistorySnapshotState.parse(raw.attributes.historySnapshot ?? {}),
+              ...partial.historySnapshot,
+            },
+            logsExtraction: {
+              ...getLogsExtractionOverrides(raw.attributes),
+              ...partial.logsExtraction,
+            },
           }),
           raw.version
         );
@@ -109,13 +109,12 @@ export class EntityStoreGlobalStateClient {
   }
 
   private async replace(
-    id: string,
     overrides: EntityStoreGlobalStateOverrides,
     version?: string
   ): Promise<EntityStoreGlobalState> {
     const { attributes } = await this.soClient.update<EntityStoreGlobalStateOverrides>(
       EntityStoreGlobalStateTypeName,
-      id,
+      this.getSavedObjectId(),
       overrides,
       { refresh: 'wait_for', mergeAttributes: false, version }
     );

@@ -55,7 +55,7 @@ import {
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import { EntityStoreNotRunningError } from '../errors';
-import type { LogExtractionUpdateParams } from '../../routes/constants';
+import type { LogExtractionInstallParams } from '../../routes/constants';
 
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
  * sub-window does not re-trigger recovery from cursors persisted by an earlier sub-window. */
@@ -201,7 +201,7 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionUpdateParams): Promise<LogExtractionConfig> {
+  public async updateConfig(params: LogExtractionInstallParams): Promise<LogExtractionConfig> {
     const state = await this.globalStateClient.update({ logsExtraction: params });
     return state.logsExtraction;
   }
