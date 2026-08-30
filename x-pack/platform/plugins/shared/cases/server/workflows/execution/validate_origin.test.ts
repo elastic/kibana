@@ -8,10 +8,7 @@
 import type { DocumentResponse } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { getAlertInfoFromComments } from '../../common/utils';
-import {
-  parseSelectedAlertPairs,
-  validateOrigin as validateOriginWithAttachments,
-} from './validate_origin';
+import { parseSelectedAlertPairs, validateOrigin as validateOriginWithAttachments } from './validate_origin';
 
 const theCase = {
   id: 'case-1',
@@ -26,10 +23,7 @@ const theCase = {
  * identical to what alert preprocessing later fetches.
  */
 const validateOrigin = (
-  params: Omit<
-    Parameters<typeof validateOriginWithAttachments>[0],
-    'attachedAlerts' | 'selectedAlerts'
-  > & {
+  params: Omit<Parameters<typeof validateOriginWithAttachments>[0], 'attachedAlerts' | 'selectedAlerts'> & {
     inputs: Record<string, unknown>;
   }
 ): void => {
@@ -364,34 +358,30 @@ describe('parseSelectedAlertPairs', () => {
   });
 
   it('throws 400 when alertIds is not an array', () => {
-    expect(() => parseSelectedAlertPairs({ event: { alertIds: 'alert-1' } })).toThrow(
-      'inputs.event.alertIds must be an array.'
-    );
-    expect(() => parseSelectedAlertPairs({ event: { alertIds: 42 } })).toThrow(
-      'inputs.event.alertIds must be an array.'
-    );
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: 'alert-1' } })
+    ).toThrow('inputs.event.alertIds must be an array.');
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: 42 } })
+    ).toThrow('inputs.event.alertIds must be an array.');
   });
 
   it('throws 400 when an entry has a non-string _id', () => {
     expect(() =>
       parseSelectedAlertPairs({ event: { alertIds: [{ _id: 4242, _index: '.alerts' }] } })
-    ).toThrow(
-      'Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.'
-    );
+    ).toThrow('Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.');
   });
 
   it('throws 400 when an entry has a non-string _index', () => {
     expect(() =>
       parseSelectedAlertPairs({ event: { alertIds: [{ _id: 'alert-1', _index: 99 }] } })
-    ).toThrow(
-      'Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.'
-    );
+    ).toThrow('Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.');
   });
 
   it('throws 400 when an entry is not an object', () => {
-    expect(() => parseSelectedAlertPairs({ event: { alertIds: ['alert-1'] } })).toThrow(
-      'Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.'
-    );
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: ['alert-1'] } })
+    ).toThrow('Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.');
   });
 
   it(`throws 400 when alertIds exceeds MAX_ALERTS_PER_CASE entries`, () => {
@@ -399,20 +389,15 @@ describe('parseSelectedAlertPairs', () => {
       _id: `alert-${i}`,
       _index: '.alerts',
     }));
-    expect(() => parseSelectedAlertPairs({ event: { alertIds: oversized } })).toThrow(
-      /cannot contain more than/
-    );
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: oversized } })
+    ).toThrow(/cannot contain more than/);
   });
 
   it('returns the correct pairs for a valid array', () => {
     expect(
       parseSelectedAlertPairs({
-        event: {
-          alertIds: [
-            { _id: 'alert-1', _index: '.alerts-a' },
-            { _id: 'alert-2', _index: '.alerts-b' },
-          ],
-        },
+        event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-a' }, { _id: 'alert-2', _index: '.alerts-b' }] },
       })
     ).toEqual([
       { _id: 'alert-1', _index: '.alerts-a' },
