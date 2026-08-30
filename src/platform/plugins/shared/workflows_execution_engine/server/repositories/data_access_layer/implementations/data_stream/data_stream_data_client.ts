@@ -243,9 +243,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       // resolveBulkItemVersions uses positional indexes into the array it receives,
       // so pass only the items; look up requestIndex separately via plainItemsWithIndex.
       const { sendable, preFailed } = await this.resolveBulkItemVersions(
-        plainItemsWithIndex.map(({ item }) => item),
-        false,
-        this.deps.dataStreamName
+        plainItemsWithIndex.map(({ item }) => item)
       );
 
       preFailed.forEach(({ id, originalIndex, error }) => {
@@ -341,15 +339,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   //
   // originalIndex in both output arrays is the position of the item within `items`,
   // NOT a position in request.items — callers must map through plainItemsWithIndex.
-  //
-  // `fresh` controls whether version resolution bypasses the in-memory cache:
-  //   false — first pass, use cache then fall back to ES on misses (bulkGetVersions)
-  //   true  — retry pass, always fetch from ES to get the latest seqNo (bulkGetFreshVersions)
-  private async resolveBulkItemVersions(
-    items: BulkPlainItem<TExecution>[],
-    fresh: boolean,
-    writeIndex?: string
-  ): Promise<{
+  private async resolveBulkItemVersions(items: BulkPlainItem<TExecution>[]): Promise<{
     sendable: Array<{ item: SharedBulkItem<TExecution>; originalIndex: number }>;
     preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }>;
   }> {
@@ -392,12 +382,9 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     }
 
     if (pendingIds.size > 0) {
-      const versions = fresh
-        ? await this.deps.versionManager.bulkGetFreshVersions(
-            Array.from(pendingIds.keys()),
-            writeIndex
-          )
-        : await this.deps.versionManager.bulkGetVersions(Array.from(pendingIds.keys()));
+      const versions = await this.deps.versionManager.bulkGetVersions(
+        Array.from(pendingIds.keys())
+      );
 
       for (const [id, i] of pendingIds) {
         const version = versions[id];
