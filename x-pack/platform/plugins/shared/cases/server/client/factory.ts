@@ -62,11 +62,6 @@ import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
 import { getSavedObjectsTypes } from '../../common';
 import type {
-  EnsureAuthorizedToRunWorkflowParams,
-  WorkflowRunAuthorizationDeps,
-} from '../workflows/execution/authorize_workflow_run';
-import { ensureAuthorizedToRunWorkflow } from '../workflows/execution/authorize_workflow_run';
-import type {
   CasesActivityV2WriterContract,
   CasesAnalyticsV2DataViewRefresher,
   CasesAnalyticsV2WriterContract,
@@ -218,36 +213,6 @@ export class CasesClientFactory {
       closeReasonValidator: boundCloseReasonValidator,
       clientSource,
     });
-  }
-
-  /**
-   * Creates a request-scoped authorizer for the workflow-run entry point.
-   */
-  public async createWorkflowRunAuthorizer({
-    request,
-    savedObjectsService,
-  }: {
-    request: KibanaRequest;
-    savedObjectsService: SavedObjectsServiceStart;
-  }): Promise<{
-    ensureAuthorizedToRunWorkflow: (params: EnsureAuthorizedToRunWorkflowParams) => Promise<void>;
-  }> {
-    this.validateInitialization();
-
-    const authorization = await this.createAuthorization(request);
-    const unsecuredSavedObjectsClient = this.getUnsecuredSavedObjectsClient(
-      request,
-      savedObjectsService
-    );
-    const caseService = this.createCaseService(
-      unsecuredSavedObjectsClient,
-      this.createAttachmentService(unsecuredSavedObjectsClient)
-    );
-
-    const deps: WorkflowRunAuthorizationDeps = { authorization, caseService, logger: this.logger };
-    return {
-      ensureAuthorizedToRunWorkflow: (params) => ensureAuthorizedToRunWorkflow(params, deps),
-    };
   }
 
   private validateInitialization(): asserts this is this & { options: CasesClientFactoryArgs } {
