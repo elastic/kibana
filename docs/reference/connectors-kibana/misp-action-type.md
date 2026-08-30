@@ -13,7 +13,7 @@ The MISP connector uses the [MISP automation API](https://www.circl.lu/doc/misp/
 
 ## Create connectors in {{kib}} [define-misp-ui]
 
-You can create a MISP connector in **{{stack-manage-app}} > {{connectors-ui}}**.
+Create an MISP connector from the **{{connectors-ui}}** page. To open the page, find **{{connectors-ui}}** in the navigation or under **Alerts and Insights / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 
 ### Connector configuration [misp-connector-configuration]
 
