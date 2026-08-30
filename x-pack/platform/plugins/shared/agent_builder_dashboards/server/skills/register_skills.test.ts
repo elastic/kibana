@@ -36,12 +36,14 @@ describe('registerSkills', () => {
     expect(skill.content).not.toContain('is a miss');
   });
 
-  it('tells the agent to verify first-generate review problems before mentioning them', () => {
-    expect(skill.content).toContain('first generate of a new dashboard only');
+  it('tells the agent to apply agreed review problems with a follow-up generate', () => {
     expect(skill.content).toContain('data.review.problems');
-    expect(skill.content).toContain('hypotheses');
-    expect(skill.content).toContain('Only mention problems you can confirm');
-    expect(skill.content).toContain('Later updates omit');
+    expect(skill.content).toContain('hypothesis');
+    expect(skill.content).toContain('platform.dashboard.generate_dashboard again');
+    expect(skill.content).toContain('Do not loop');
+    expect(skill.content).not.toContain('first generate of a new dashboard only');
+    expect(skill.content).not.toContain('Later updates omit');
+    expect(skill.content).not.toContain('Do not call generation again just to fix them');
   });
 
   it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {

@@ -8,7 +8,11 @@
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { reviewDashboard } from './review_dashboard';
+import {
+  dashboardReviewLlmSchema,
+  normalizeDashboardReview,
+  reviewDashboard,
+} from './review_dashboard';
 
 const dashboard: DashboardAttachmentData = {
   title: 'Logs',
@@ -45,6 +49,48 @@ const dashboard: DashboardAttachmentData = {
     },
   ],
 };
+
+describe('dashboardReviewLlmSchema', () => {
+  it('accepts null panel_id and drops unknown topics so the judge tool call can validate', () => {
+    const parsed = dashboardReviewLlmSchema.parse({
+      problems: [
+        {
+          topic: 'grid',
+          severity: 'miss',
+          detail: 'Metric m1 is full-width.',
+          panel_id: null,
+        },
+        {
+          topic: 'xy',
+          severity: 'miss',
+          detail: 'Solid area fill.',
+          panel_id: 'x1',
+        },
+        {
+          topic: 'not_a_topic',
+          severity: 'miss',
+          detail: 'Dropped.',
+        },
+      ],
+    });
+
+    expect(normalizeDashboardReview(parsed)).toEqual({
+      problems: [
+        {
+          topic: 'grid',
+          severity: 'miss',
+          detail: 'Metric m1 is full-width.',
+        },
+        {
+          topic: 'xy',
+          severity: 'miss',
+          detail: 'Solid area fill.',
+          panel_id: 'x1',
+        },
+      ],
+    });
+  });
+});
 
 describe('reviewDashboard', () => {
   it('returns structured problems from the judge and does not invent field-name fixes', async () => {
@@ -86,6 +132,9 @@ describe('reviewDashboard', () => {
     expect(systemMessage[1]).toContain('List only problems');
     expect(systemMessage[1]).toContain('Do not validate field names');
     expect(humanMessage[1]).toContain('DASHBOARD ATTACHMENT:');
+    expect(humanMessage[1]).toContain('CHART REVIEW RULES:');
+    expect(humanMessage[1]).toContain('solid area fill');
+    expect(humanMessage[1]).toContain('legend.statistics');
     expect(humanMessage[1]).toContain('full-width single-value metric');
     expect(humanMessage[1]).toContain('categorical breakdown is not this miss');
     expect(humanMessage[1]).toContain('Do not flag missing field_name, index, or esql_query');
