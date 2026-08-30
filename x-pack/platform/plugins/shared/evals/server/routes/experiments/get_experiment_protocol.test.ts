@@ -136,7 +136,25 @@ describe('GET /internal/evals/experiments/{experimentId}/protocol', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(404);
-    expect(response.payload).toEqual({ message: 'Experiment not found: experiment-abc' });
+    expect(response.payload).toEqual({
+      message: 'Experiment not found for experiment: experiment-abc',
+    });
+  });
+
+  it('names the execution_id in the 404 message when execution_id filter matches nothing', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+    const response = await handler(
+      context,
+      makeRequest({ execution_id: 'missing-exec' }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.payload).toEqual({
+      message: 'Experiment not found for execution: missing-exec',
+    });
   });
 
   it('returns protocol and execution sections derived from score documents', async () => {

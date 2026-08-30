@@ -161,8 +161,10 @@ export const registerGetExperimentProtocolRoute = ({
 
           const firstDoc = searchResponse.hits?.hits[0]?._source as EvalDocSource | undefined;
           if (!firstDoc) {
+            const notFoundId = executionId ?? experimentId;
+            const notFoundLabel = executionId ? 'execution' : 'experiment';
             return response.notFound({
-              body: { message: `Experiment not found: ${experimentId}` },
+              body: { message: `Experiment not found for ${notFoundLabel}: ${notFoundId}` },
             });
           }
 

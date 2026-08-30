@@ -104,8 +104,29 @@ describe('GET /internal/evals/experiments/{experimentId}/runs', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(404);
-    expect(response.payload).toEqual({ message: 'Experiment not found: experiment-abc' });
+    expect(response.payload).toEqual({
+      message: 'Experiment not found for experiment: experiment-abc',
+    });
     expect(evaluationScoreService.search).toHaveBeenCalledTimes(1);
+  });
+
+  it('names the execution_id in the 404 message when execution_id filter matches nothing', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({
+      hits: { hits: [] },
+      aggregations: { runs: { buckets: [] } },
+    } as any);
+
+    const response = await handler(
+      context,
+      makeRequest({ execution_id: 'missing-exec' }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.payload).toEqual({
+      message: 'Experiment not found for execution: missing-exec',
+    });
   });
 
   it('returns runs grouping every evaluator result under its example x repetition', async () => {

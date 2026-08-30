@@ -168,8 +168,10 @@ export const registerGetExperimentRunsRoute = ({
           );
 
           if (total === 0) {
+            const notFoundId = executionId ?? experimentId;
+            const notFoundLabel = executionId ? 'execution' : 'experiment';
             return response.notFound({
-              body: { message: `Experiment not found: ${experimentId}` },
+              body: { message: `Experiment not found for ${notFoundLabel}: ${notFoundId}` },
             });
           }
 
