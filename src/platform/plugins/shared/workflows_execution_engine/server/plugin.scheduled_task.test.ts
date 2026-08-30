@@ -204,7 +204,7 @@ describe('workflow:scheduled task runner', () => {
     });
   });
 
-  it('requests task deletion when the workflow document is disabled', async () => {
+  it('skips the run without deleting the task when the workflow document is disabled', async () => {
     setupPlugin();
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
@@ -233,19 +233,18 @@ describe('workflow:scheduled task runner', () => {
 
     expect(result).toEqual({
       state: taskState,
-      shouldDeleteTask: true,
     });
     expect(mockGetWorkflow).toHaveBeenCalledWith(workflowId, spaceId, { includeGlobal: true });
     expect(mockCheckAndSkipIfExistingScheduledExecution).not.toHaveBeenCalled();
     expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
     expect(mockRunWorkflow).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
-      `Workflow ${workflowId} is disabled in space ${spaceId}; removing leftover scheduled task`
+      `Workflow ${workflowId} is disabled in space ${spaceId}; skipping leftover scheduled run`
     );
     expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
       workflow_id: workflowId,
       space_id: spaceId,
-      outcome: 'queued_deleted',
+      outcome: 'skipped',
     });
   });
 

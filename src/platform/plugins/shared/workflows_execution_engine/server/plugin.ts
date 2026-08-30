@@ -696,19 +696,20 @@ export class WorkflowsExecutionEnginePlugin
                     shouldDeleteTask: true,
                   };
                 }
-                // Document `enabled` is the source of truth; leftover TM tasks must be deleted, not executed.
+                // Document `enabled` is the source of truth. Skip this tick instead of
+                // shouldDeleteTask: TM delete is unversioned and uses the same deterministic
+                // task id as re-enable, so deleting here can remove a just-rescheduled task.
                 if (!workflow.enabled) {
                   logger.warn(
-                    `Workflow ${workflowId} is disabled in space ${spaceId}; removing leftover scheduled task`
+                    `Workflow ${workflowId} is disabled in space ${spaceId}; skipping leftover scheduled run`
                   );
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_id: workflowId,
                     space_id: spaceId,
-                    outcome: 'queued_deleted',
+                    outcome: 'skipped',
                   });
                   return {
                     state: taskInstance.state,
-                    shouldDeleteTask: true,
                   };
                 }
                 logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
