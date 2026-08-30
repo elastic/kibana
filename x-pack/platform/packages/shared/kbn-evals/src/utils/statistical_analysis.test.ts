@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EvaluationScoreDocument } from '@kbn/evals-common';
+import type { Direction, EvaluationScoreDocument } from '@kbn/evals-common';
 import { computePairedTTestResults, pairScores } from './statistical_analysis';
 
 const baseTaskModel = {
@@ -27,6 +27,7 @@ const createMockScore = ({
   evaluatorName = 'Correctness',
   repetitionIndex = 0,
   score = 0.5,
+  direction,
 }: Partial<{
   datasetId: string;
   datasetName: string;
@@ -34,6 +35,7 @@ const createMockScore = ({
   evaluatorName: string;
   repetitionIndex: number;
   score: number | null;
+  direction: Direction;
 }> = {}): EvaluationScoreDocument => ({
   '@timestamp': '2025-01-01T00:00:00Z',
   experiment_id: 'exp-1',
@@ -58,6 +60,7 @@ const createMockScore = ({
     explanation: 'Mock evaluation',
     metadata: { successful: 1, failed: 0 },
     trace_id: 'trace-eval-456',
+    ...(direction !== undefined && { direction }),
     model: baseEvaluatorModel,
   },
   metadata: {
@@ -215,5 +218,96 @@ describe('computePairedTTestResults', () => {
     const fromPairs = computePairedTTestResults(pairs);
 
     expect(fromPairs).toEqual(fromDocs);
+  });
+
+  it('defaults direction via legacy name heuristic when score docs omit the field', () => {
+    const quality = computePairedTTestResults(
+      [createMockScore({ evaluatorName: 'Correctness', score: 0.8 })],
+      [createMockScore({ evaluatorName: 'Correctness', score: 0.9 })]
+    );
+    expect(quality[0].direction).toBe('maximize');
+
+    const latency = computePairedTTestResults(
+      [createMockScore({ evaluatorName: 'Latency', score: 150 })],
+      [createMockScore({ evaluatorName: 'Latency', score: 100 })]
+    );
+    expect(latency[0].direction).toBe('minimize');
+  });
+
+  it('propagates direction: maximize from quality evaluator metadata', () => {
+    const scoresA = [createMockScore({ score: 0.7, direction: 'maximize' })];
+    const scoresB = [createMockScore({ score: 0.9, direction: 'maximize' })];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.direction).toBe('maximize');
+  });
+
+  it('propagates direction: minimize from lower-is-better evaluator metadata', () => {
+    const scoresA = [
+      createMockScore({ evaluatorName: 'Latency', score: 150, direction: 'minimize' }),
+    ];
+    const scoresB = [
+      createMockScore({ evaluatorName: 'Latency', score: 100, direction: 'minimize' }),
+    ];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.direction).toBe('minimize');
+  });
+
+  it('propagates direction: neutral from ambiguous evaluator metadata', () => {
+    const scoresA = [
+      createMockScore({ evaluatorName: 'Extracted feature count', score: 5, direction: 'neutral' }),
+    ];
+    const scoresB = [
+      createMockScore({ evaluatorName: 'Extracted feature count', score: 7, direction: 'neutral' }),
+    ];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.direction).toBe('neutral');
+  });
+
+  it('prefers a defined direction when only one side has the field', () => {
+    const scoresA = [
+      createMockScore({ evaluatorName: 'Latency', score: 150, direction: 'minimize' }),
+    ];
+    const scoresB = [createMockScore({ evaluatorName: 'Latency', score: 100 })];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.direction).toBe('minimize');
+  });
+
+  it('uses metadata over the name heuristic for Error handling quality', () => {
+    // Legacy regex matches "Error" and would treat this as lower-is-better.
+    const scoresA = [
+      createMockScore({
+        evaluatorName: 'Error handling quality',
+        score: 0.4,
+        direction: 'maximize',
+      }),
+    ];
+    const scoresB = [
+      createMockScore({
+        evaluatorName: 'Error handling quality',
+        score: 0.8,
+        direction: 'maximize',
+      }),
+    ];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.direction).toBe('maximize');
+  });
+
+  it('legacy name heuristic misclassifies Error handling quality when metadata is absent', () => {
+    const [result] = computePairedTTestResults(
+      [createMockScore({ evaluatorName: 'Error handling quality', score: 0.4 })],
+      [createMockScore({ evaluatorName: 'Error handling quality', score: 0.8 })]
+    );
+
+    expect(result.direction).toBe('minimize');
   });
 });
