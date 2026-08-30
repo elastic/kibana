@@ -109,7 +109,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['agentBuilder', 'workflows'],
   },
 
   auth: {

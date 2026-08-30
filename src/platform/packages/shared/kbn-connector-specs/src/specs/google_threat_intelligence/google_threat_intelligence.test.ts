@@ -43,6 +43,7 @@ describe('GoogleThreatIntelligenceConnector', () => {
     it('exposes the new connector only to Agent Builder', () => {
       expect(GoogleThreatIntelligenceConnector.metadata.supportedFeatureIds).toEqual([
         'agentBuilder',
+        'workflows',
       ]);
     });
 
