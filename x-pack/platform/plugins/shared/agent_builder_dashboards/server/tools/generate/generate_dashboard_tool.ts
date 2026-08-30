@@ -17,6 +17,7 @@ import { createCustomContentTemplateResolver } from '@kbn/custom-content-server'
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
+  createControlFieldResolver,
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
@@ -104,6 +105,11 @@ Use operations[] to:
             logger,
             modelProvider,
             esClient,
+          }),
+          resolveControlField: createControlFieldResolver({
+            esClient,
+            logger,
+            projectRouting: latestVersion?.data.project_routing,
           }),
         });
 

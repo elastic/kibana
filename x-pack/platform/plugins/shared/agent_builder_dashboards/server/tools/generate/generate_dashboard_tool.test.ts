@@ -108,6 +108,11 @@ describe('generateDashboardTool', () => {
         summary: expect.objectContaining({ title: 'Logs' }),
       })
     );
+    expect(executeDashboardOperationsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resolveControlField: expect.any(Function),
+      })
+    );
   });
 
   it('does not run the judge again when updating an existing dashboard', async () => {

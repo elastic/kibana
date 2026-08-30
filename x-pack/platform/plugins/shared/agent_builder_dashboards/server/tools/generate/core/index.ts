@@ -15,3 +15,4 @@ export type { VisPanelResolutionRequest } from './operations/panels';
 
 export { createVisPanelResolver } from './resolvers/vis_panel_resolver';
 export type { VisPanelResolverDeps } from './resolvers/vis_panel_resolver';
+export { createControlFieldResolver } from './resolvers/control_field_resolver';
