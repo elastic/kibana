@@ -15,6 +15,7 @@ import { DEFAULT_SPACE_ID } from './spaces';
 interface ExperimentFilterOptions {
   suiteId?: string;
   modelId?: string;
+  evaluatorName?: string;
   filterField?: 'experiment_id' | 'metadata.execution_id';
   spaceId?: string;
 }
@@ -124,6 +125,9 @@ export const buildExperimentFilterQuery = (
   }
   if (options?.modelId) {
     must.push({ term: { 'task.model.id': options.modelId } });
+  }
+  if (options?.evaluatorName) {
+    must.push({ term: { 'evaluator.name': options.evaluatorName } });
   }
   if (options?.spaceId) {
     must.push(buildSpaceFilter(options.spaceId));
@@ -534,6 +538,98 @@ export const RUNS_SORT_ORDER: SortField[] = [
   { 'task.repetition_index': { order: 'asc' } },
   { 'evaluator.name': { order: 'asc' } },
 ];
+
+// ---------------------------------------------------------------------------
+// Experiment traces (resolved through score documents) pagination
+// ---------------------------------------------------------------------------
+
+/**
+ * Ceiling on the distinct trace ids a single aggregation enumerates per role,
+ * matching MAX_SCORES_PER_QUERY: an experiment cannot reference more task
+ * traces than runs, nor more evaluator traces than score documents, and the
+ * score endpoints already stop at that many documents.
+ */
+const MAX_TRACES_PER_QUERY = 10_000;
+
+export type ExperimentTraceRole = 'task' | 'evaluator';
+
+export interface ExperimentTraceReference {
+  trace_id: string;
+  role: ExperimentTraceRole;
+  /** Name of the evaluator whose invocation the trace covers; evaluator traces only. */
+  evaluator_name?: string;
+}
+
+export interface ExperimentTracesPage {
+  /** Distinct traces matching the query, exact up to {@link MAX_TRACES_PER_QUERY} per role. */
+  total: number;
+  /** The requested page window: task traces first, then evaluator traces by evaluator name. */
+  traces: ExperimentTraceReference[];
+}
+
+/**
+ * Returns composite aggregations enumerating the distinct trace ids an
+ * experiment's score documents reference, per role. A run's task trace id is
+ * repeated on every one of its score documents (one per evaluator), so the
+ * composite bucket doubles as deduplication; documents without a trace id
+ * (tracing disabled) are skipped entirely. Evaluator traces sort by evaluator
+ * name first, keeping one evaluator's traces contiguous across pages.
+ */
+export const buildExperimentTracesAggregation = (role?: ExperimentTraceRole) => ({
+  ...(role !== 'evaluator' && {
+    task_traces: {
+      composite: {
+        size: MAX_TRACES_PER_QUERY,
+        sources: [{ trace_id: { terms: { field: 'task.trace_id' } } }],
+      },
+    },
+  }),
+  ...(role !== 'task' && {
+    evaluator_traces: {
+      composite: {
+        size: MAX_TRACES_PER_QUERY,
+        sources: [
+          { evaluator_name: { terms: { field: 'evaluator.name' } } },
+          { trace_id: { terms: { field: 'evaluator.trace_id' } } },
+        ],
+      },
+    },
+  }),
+});
+
+interface ExperimentTracesAggregations {
+  task_traces?: { buckets?: Array<{ key: { trace_id?: string } }> };
+  evaluator_traces?: { buckets?: Array<{ key: { evaluator_name?: string; trace_id?: string } }> };
+}
+
+/**
+ * Parses {@link buildExperimentTracesAggregation} into the trace references
+ * of the requested page and the exact total. Each composite enumerates every
+ * trace of its role in one response (bounded by {@link MAX_TRACES_PER_QUERY}),
+ * so the page is a slice over the concatenation: task traces, then evaluator
+ * traces.
+ */
+export const parseExperimentTracesAggregation = (
+  aggregations: Record<string, unknown> | undefined,
+  { page, perPage }: { page: number; perPage: number }
+): ExperimentTracesPage => {
+  const aggs = aggregations as ExperimentTracesAggregations | undefined;
+
+  const references: ExperimentTraceReference[] = [
+    ...(aggs?.task_traces?.buckets ?? []).map((bucket) => ({
+      trace_id: bucket.key.trace_id ?? '',
+      role: 'task' as const,
+    })),
+    ...(aggs?.evaluator_traces?.buckets ?? []).map((bucket) => ({
+      trace_id: bucket.key.trace_id ?? '',
+      role: 'evaluator' as const,
+      evaluator_name: bucket.key.evaluator_name ?? '',
+    })),
+  ];
+
+  const offset = (page - 1) * perPage;
+  return { total: references.length, traces: references.slice(offset, offset + perPage) };
+};
 
 // ---------------------------------------------------------------------------
 // Experiments listing query, aggregation, and response parser

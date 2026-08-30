@@ -25,6 +25,8 @@ import {
   buildExperimentRunsAggregation,
   parseExperimentRunsAggregation,
   buildExperimentRunsFetchQuery,
+  buildExperimentTracesAggregation,
+  parseExperimentTracesAggregation,
 } from './query_builders';
 
 describe('query_builders', () => {
@@ -169,6 +171,12 @@ describe('query_builders', () => {
       const query = buildExperimentFilterQuery('experiment-123', { spaceId: 'marketing' });
       expect(query.bool.must).toHaveLength(2);
       expect(query.bool.must[1]).toEqual(buildSpaceFilter('marketing'));
+    });
+
+    it('adds an evaluator name filter when evaluatorName is provided', () => {
+      const query = buildExperimentFilterQuery('experiment-123', { evaluatorName: 'correctness' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual({ term: { 'evaluator.name': 'correctness' } });
     });
   });
 
@@ -1219,6 +1227,88 @@ describe('query_builders', () => {
           ],
           minimum_should_match: 1,
         },
+      });
+    });
+  });
+
+  describe('buildExperimentTracesAggregation', () => {
+    it('enumerates both roles when no role is given', () => {
+      expect(buildExperimentTracesAggregation()).toEqual({
+        task_traces: {
+          composite: {
+            size: 10000,
+            sources: [{ trace_id: { terms: { field: 'task.trace_id' } } }],
+          },
+        },
+        evaluator_traces: {
+          composite: {
+            size: 10000,
+            sources: [
+              { evaluator_name: { terms: { field: 'evaluator.name' } } },
+              { trace_id: { terms: { field: 'evaluator.trace_id' } } },
+            ],
+          },
+        },
+      });
+    });
+
+    it('only enumerates task traces for role=task', () => {
+      const aggs = buildExperimentTracesAggregation('task');
+      expect(Object.keys(aggs)).toEqual(['task_traces']);
+    });
+
+    it('only enumerates evaluator traces for role=evaluator', () => {
+      const aggs = buildExperimentTracesAggregation('evaluator');
+      expect(Object.keys(aggs)).toEqual(['evaluator_traces']);
+    });
+  });
+
+  describe('parseExperimentTracesAggregation', () => {
+    const aggs = {
+      task_traces: {
+        buckets: [{ key: { trace_id: 'task-1' } }, { key: { trace_id: 'task-2' } }],
+      },
+      evaluator_traces: {
+        buckets: [
+          { key: { evaluator_name: 'correctness', trace_id: 'eval-1' } },
+          { key: { evaluator_name: 'latency', trace_id: 'eval-2' } },
+        ],
+      },
+    };
+
+    it('concatenates task traces before evaluator traces and reports the exact total', () => {
+      const { total, traces } = parseExperimentTracesAggregation(aggs, { page: 1, perPage: 10 });
+
+      expect(total).toBe(4);
+      expect(traces).toEqual([
+        { trace_id: 'task-1', role: 'task' },
+        { trace_id: 'task-2', role: 'task' },
+        { trace_id: 'eval-1', role: 'evaluator', evaluator_name: 'correctness' },
+        { trace_id: 'eval-2', role: 'evaluator', evaluator_name: 'latency' },
+      ]);
+    });
+
+    it('slices the requested page window across the role boundary', () => {
+      const { total, traces } = parseExperimentTracesAggregation(aggs, { page: 2, perPage: 2 });
+
+      expect(total).toBe(4);
+      expect(traces).toEqual([
+        { trace_id: 'eval-1', role: 'evaluator', evaluator_name: 'correctness' },
+        { trace_id: 'eval-2', role: 'evaluator', evaluator_name: 'latency' },
+      ]);
+    });
+
+    it('returns an empty window past the last page, keeping the total', () => {
+      const { total, traces } = parseExperimentTracesAggregation(aggs, { page: 5, perPage: 2 });
+
+      expect(total).toBe(4);
+      expect(traces).toEqual([]);
+    });
+
+    it('handles a missing aggregation response', () => {
+      expect(parseExperimentTracesAggregation(undefined, { page: 1, perPage: 10 })).toEqual({
+        total: 0,
+        traces: [],
       });
     });
   });
