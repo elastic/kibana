@@ -37,7 +37,6 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - Remember the dashboard's \`attachment_id\`. On later updates, pass the same \`attachment_id\` back as \`dashboardAttachmentId\` so generation edits the existing dashboard in place.
 - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
 - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
-- If the generation result includes \`data.review.problems\`, treat each miss or consideration as a hypothesis. The judge saw the full attachment but can still be wrong. Check each problem against the operations you just sent, the user request, and these authoring rules. Drop guesses (field names, mappings) you cannot confirm. For problems you agree are correct, call ${dashboardTools.generateDashboard} again with \`dashboardAttachmentId\` and batched correction operations. Do not loop: one correction pass is enough; if the same problems return, mention them and stop.
 - If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
 
 ## Rendering Edge Cases

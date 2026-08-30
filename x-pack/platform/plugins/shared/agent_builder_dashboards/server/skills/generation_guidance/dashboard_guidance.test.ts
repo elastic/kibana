@@ -257,6 +257,21 @@ describe('dashboard guidance', () => {
       - If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
       - Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before regenerating the dashboard with replacement operations.
 
+      ## Prettifying a Dashboard
+
+      If the user asked to prettify, polish, or fix visual issues: identify problems **once at the start of this conversation round** (from \`data.review.problems\` when you already have them, otherwise from the attached dashboard against these authoring rules). Do not apply correction operations yet.
+
+      Group the issues you agree with into these three categories — omit a category if it has no issues:
+      1. **Layout** — grid, sizing, gaps, alignment (topic \`grid\`).
+      2. **Chart styling** — painted chart internals: titles, legends, fills, invented colors (chart-type topics such as \`metric\`, \`xy\`, \`pie\`).
+      3. **Structure** — sections, controls, and composition (topics \`sections\`, \`controls\`, \`composition\`).
+
+      Call \`ask_user_question\` **once** this round (never in parallel with other tools) with one \`multi_select\` question asking which of these to fix. One option per non-empty category; put a short summary of that category's issues in the option description. The user can pick any combination or type a custom description of what they want.
+
+      After they answer, call platform.dashboard.generate_dashboard once with \`dashboardAttachmentId\` and batched operations for only the chosen categories (or their description). Do not ask again this round; if leftovers remain, mention them and stop.
+
+      If the request is not a prettify or polish: do not start that HITL. Treat \`data.review.problems\` as hypotheses. Apply a correction generate only for problems that are in scope of the user's stated request. One correction pass is enough.
+
       ## Kibana Workflow
 
       In Kibana, a dashboard request follows three stages: resolve inputs, generate (which also persists), then render.
@@ -284,7 +299,6 @@ describe('dashboard guidance', () => {
       - Remember the dashboard's \`attachment_id\`. On later updates, pass the same \`attachment_id\` back as \`dashboardAttachmentId\` so generation edits the existing dashboard in place.
       - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
       - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
-      - If the generation result includes \`data.review.problems\`, treat each miss or consideration as a hypothesis. The judge saw the full attachment but can still be wrong. Check each problem against the operations you just sent, the user request, and these authoring rules. Drop guesses (field names, mappings) you cannot confirm. For problems you agree are correct, call platform.dashboard.generate_dashboard again with \`dashboardAttachmentId\` and batched correction operations. Do not loop: one correction pass is enough; if the same problems return, mention them and stop.
       - If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
 
       ## Rendering Edge Cases
