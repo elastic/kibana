@@ -11,6 +11,8 @@ import {
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
+  EVALS_EXPERIMENT_RECORD_FINALIZE_URL,
+  EVALS_EXPERIMENT_RECORD_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENTS_URL,
@@ -194,6 +196,113 @@ describe('EvalsClient', () => {
       } satisfies Partial<IngestScoresError>);
     }
   );
+
+  describe('experiment records', () => {
+    const createBody = () => ({
+      name: 'My experiment',
+      protocol: {
+        dataset: { id: 'dataset-1', name: 'Dataset 1', examples_count: 2 },
+        task: { model: { id: 'gpt-4' } },
+        total_repetitions: 1,
+      },
+    });
+
+    it('createExperimentRecord posts to the record route', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(asKbnResponse({}, 200));
+      const client = new EvalsClient(kbnClient, log);
+
+      await client.createExperimentRecord('experiment-1', createBody());
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: EVALS_EXPERIMENT_RECORD_URL.replace('{experimentId}', 'experiment-1'),
+          method: 'POST',
+          body: createBody(),
+        })
+      );
+      expect(log.warning).not.toHaveBeenCalled();
+    });
+
+    it.each([404, 409] as const)(
+      'createExperimentRecord skips a %s response without warning',
+      async (status) => {
+        const kbnClient = createMockKbnClient();
+        const log = createLog();
+        kbnClient.request.mockRejectedValue(Object.assign(new Error('nope'), { status }));
+        const client = new EvalsClient(kbnClient, log);
+
+        await expect(
+          client.createExperimentRecord('experiment-1', createBody())
+        ).resolves.toBeUndefined();
+        expect(log.warning).not.toHaveBeenCalled();
+      }
+    );
+
+    it('createExperimentRecord warns instead of throwing on other failures', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockRejectedValue(Object.assign(new Error('boom'), { status: 500 }));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(
+        client.createExperimentRecord('experiment-1', createBody())
+      ).resolves.toBeUndefined();
+      expect(log.warning).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to create experiment record')
+      );
+    });
+
+    it('finalizeExperimentRecord posts to the finalize route', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(asKbnResponse({}, 200));
+      const client = new EvalsClient(kbnClient, log);
+
+      await client.finalizeExperimentRecord('experiment-1', {
+        status: 'completed',
+        completeness: { successful_tasks: 2, failed_tasks: 0, score_ingest_failures: 0 },
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: EVALS_EXPERIMENT_RECORD_FINALIZE_URL.replace('{experimentId}', 'experiment-1'),
+          method: 'POST',
+          body: {
+            status: 'completed',
+            completeness: { successful_tasks: 2, failed_tasks: 0, score_ingest_failures: 0 },
+          },
+        })
+      );
+    });
+
+    it('finalizeExperimentRecord skips a 404 (older Kibana or record never created)', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockRejectedValue(Object.assign(new Error('Not Found'), { status: 404 }));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(
+        client.finalizeExperimentRecord('experiment-1', { status: 'failed', error: 'boom' })
+      ).resolves.toBeUndefined();
+      expect(log.warning).not.toHaveBeenCalled();
+    });
+
+    it('finalizeExperimentRecord warns instead of throwing on other failures', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockRejectedValue(Object.assign(new Error('boom'), { status: 500 }));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(
+        client.finalizeExperimentRecord('experiment-1', { status: 'failed', error: 'boom' })
+      ).resolves.toBeUndefined();
+      expect(log.warning).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to finalize experiment record')
+      );
+    });
+  });
 
   it('getExperimentStats maps API response to ExperimentStats shape', async () => {
     const kbnClient = createMockKbnClient();

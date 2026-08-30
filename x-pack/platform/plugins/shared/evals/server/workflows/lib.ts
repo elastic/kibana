@@ -11,13 +11,17 @@ import {
   EVALS_EVALUATE_URL,
   EVALS_SCORES_URL,
   EVALS_DATASET_URL,
+  EVALS_EXPERIMENT_RECORD_FINALIZE_URL,
+  EVALS_EXPERIMENT_RECORD_URL,
   EVALS_EXPERIMENTS_COMPARE_URL,
   API_VERSIONS,
 } from '@kbn/evals-common';
 import type {
   CompareExperimentsResponse,
+  CreateEvaluationExperimentRecordRequestBodyInput,
   Direction,
   EvaluateResponse,
+  FinalizeEvaluationExperimentRecordRequestBodyInput,
   IngestScoresRequestBody,
   IngestScoresResponse,
   Model,
@@ -37,6 +41,26 @@ import type {
 const INTERNAL_API_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 } as const;
 
 const HOSTNAME = os.hostname();
+
+const MAX_ERROR_MESSAGE_LENGTH = 500;
+
+/** Extracts the clean, bounded message a run-progress consumer should see. */
+export const toErrorMessage = (error: unknown): string => {
+  let message: string;
+  if (error instanceof KibanaApiCallError) {
+    // `callKibanaApi` wraps non-2xx responses as `HTTP <status>: <json body>`. For the
+    // run-progress UI, surface the clean server-provided message (`body.message`) instead
+    // of the raw HTTP envelope. Fall back to the wrapped message if the body has none.
+    const body = error.body as { message?: unknown } | undefined;
+    message =
+      typeof body?.message === 'string' && body.message.trim() ? body.message : error.message;
+  } else {
+    message = error instanceof Error ? error.message : String(error);
+  }
+  return message.length > MAX_ERROR_MESSAGE_LENGTH
+    ? `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH)}…`
+    : message;
+};
 
 /** Runtime primitives a step handler passes down to the shared helpers. */
 export interface StepRuntime {
@@ -176,6 +200,70 @@ export const ingestScores = async (
     body: { ...body, space_ids: body.space_ids ?? [runtime.spaceId] },
   });
   return response;
+};
+
+/**
+ * Creates the experiment record when a run starts. Best effort: the record is
+ * bookkeeping around the run, so a record another execution of the same
+ * experiment already created (409 — e.g. a sibling dataset-fanout shard) or
+ * any other failure is logged rather than allowed to fail the evaluation.
+ */
+export const createExperimentRecord = async (
+  runtime: StepRuntime,
+  experimentId: string,
+  body: CreateEvaluationExperimentRecordRequestBodyInput
+): Promise<void> => {
+  try {
+    await runtime.callKibanaApi({
+      method: 'POST',
+      path: EVALS_EXPERIMENT_RECORD_URL.replace('{experimentId}', encodeURIComponent(experimentId)),
+      headers: INTERNAL_API_HEADERS,
+      // Same reasoning as ingestScores: the call is not space-prefixed, so the
+      // workflow's space is stamped explicitly.
+      body: { ...body, space_ids: body.space_ids ?? [runtime.spaceId] },
+    });
+  } catch (error) {
+    if (error instanceof KibanaApiCallError && error.status === 409) {
+      runtime.logger.debug(
+        `Experiment record for "${experimentId}" already exists; leaving it as-is`
+      );
+      return;
+    }
+    runtime.logger.warn(
+      `Failed to create experiment record for "${experimentId}": ${toErrorMessage(error)}`
+    );
+  }
+};
+
+/**
+ * Marks the experiment record as completed or failed. Best effort, like
+ * {@link createExperimentRecord}: a missing record (404, its creation may have
+ * failed) is skipped and any other failure is logged.
+ */
+export const finalizeExperimentRecord = async (
+  runtime: StepRuntime,
+  experimentId: string,
+  body: FinalizeEvaluationExperimentRecordRequestBodyInput
+): Promise<void> => {
+  try {
+    await runtime.callKibanaApi({
+      method: 'POST',
+      path: EVALS_EXPERIMENT_RECORD_FINALIZE_URL.replace(
+        '{experimentId}',
+        encodeURIComponent(experimentId)
+      ),
+      headers: INTERNAL_API_HEADERS,
+      body,
+    });
+  } catch (error) {
+    if (error instanceof KibanaApiCallError && error.status === 404) {
+      runtime.logger.debug(`No experiment record to finalize for "${experimentId}"`);
+      return;
+    }
+    runtime.logger.warn(
+      `Failed to finalize experiment record for "${experimentId}": ${toErrorMessage(error)}`
+    );
+  }
 };
 
 /** The snake_case evaluator-result shape used by the workflow step schemas. */
@@ -342,26 +430,9 @@ export interface EvaluateExampleResult {
   failed: number;
   repetitions: number;
   errors: string[];
+  /** Score documents the ingest route rejected on otherwise successful repetitions. */
+  scoreIngestFailures: number;
 }
-
-const MAX_ERROR_MESSAGE_LENGTH = 500;
-
-const toErrorMessage = (error: unknown): string => {
-  let message: string;
-  if (error instanceof KibanaApiCallError) {
-    // `callKibanaApi` wraps non-2xx responses as `HTTP <status>: <json body>`. For the
-    // run-progress UI, surface the clean server-provided message (`body.message`) instead
-    // of the raw HTTP envelope. Fall back to the wrapped message if the body has none.
-    const body = error.body as { message?: unknown } | undefined;
-    message =
-      typeof body?.message === 'string' && body.message.trim() ? body.message : error.message;
-  } else {
-    message = error instanceof Error ? error.message : String(error);
-  }
-  return message.length > MAX_ERROR_MESSAGE_LENGTH
-    ? `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH)}…`
-    : message;
-};
 
 /**
  * Reference data for evaluators is a dataset example's persisted `output` (the
@@ -387,6 +458,7 @@ export const runExampleEvaluation = async (
 ): Promise<EvaluateExampleResult> => {
   let scoresIngested = 0;
   let failed = 0;
+  let scoreIngestFailures = 0;
   const errors: string[] = [];
 
   for (let repetition = 0; repetition < params.repetitions; repetition++) {
@@ -442,6 +514,7 @@ export const runExampleEvaluation = async (
 
       const response = await ingestScores(runtime, scoreBody);
       scoresIngested += response.ingested;
+      scoreIngestFailures += response.failed.length;
     } catch (error) {
       failed += 1;
       const message = toErrorMessage(error);
@@ -452,7 +525,7 @@ export const runExampleEvaluation = async (
     }
   }
 
-  return { scoresIngested, failed, repetitions: params.repetitions, errors };
+  return { scoresIngested, failed, repetitions: params.repetitions, errors, scoreIngestFailures };
 };
 
 /** Shared per-example evaluation settings reused across a whole dataset run. */
@@ -474,6 +547,7 @@ export interface BatchEvaluationResult {
   completed: number;
   failed: number;
   scoresIngested: number;
+  scoreIngestFailures: number;
   errors: string[];
   cancelled?: boolean;
 }
@@ -494,6 +568,7 @@ export const evaluateWorkBatch = async (
   let completed = 0;
   let failed = 0;
   let scoresIngested = 0;
+  let scoreIngestFailures = 0;
   let cancelled = false;
   const errors: string[] = [];
 
@@ -510,6 +585,7 @@ export const evaluateWorkBatch = async (
           // receive ground truth without a separate per-item override here.
         });
         scoresIngested += result.scoresIngested;
+        scoreIngestFailures += result.scoreIngestFailures;
         // Surface every captured message, including partial (evaluator-level) failures on an
         // example that otherwise completed and ingested scores.
         errors.push(...result.errors);
@@ -531,7 +607,7 @@ export const evaluateWorkBatch = async (
     cancelled = true;
   }
 
-  return { completed, failed, scoresIngested, errors, cancelled };
+  return { completed, failed, scoresIngested, scoreIngestFailures, errors, cancelled };
 };
 
 export interface EvaluateDatasetParams extends DatasetEvaluationConfig {

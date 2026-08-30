@@ -17,8 +17,10 @@ import type {
   Evaluator,
   EvaluationDataset,
   EvaluationDatasetWithId,
+  ExperimentCompleteEvent,
   ExperimentTask,
   OnEvaluationComplete,
+  OnExperimentComplete,
   OnExperimentStart,
   DatasetRunResult,
   TaskOutput,
@@ -41,6 +43,9 @@ function computeExperimentId(
   );
 }
 
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 export class KibanaEvalsClient implements EvalsExecutorClient {
   private readonly datasetRunResults: DatasetRunResult[] = [];
 
@@ -60,6 +65,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       ) => Promise<EvaluationDataset | EvaluationDatasetWithId | null>;
       onEvaluationComplete?: OnEvaluationComplete;
       onExperimentStart?: OnExperimentStart;
+      onExperimentComplete?: OnExperimentComplete;
     }
   ) {}
 
@@ -177,7 +183,23 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         experimentName,
         this.options.model.id
       );
-      await this.options.onExperimentStart?.({ experimentId });
+      await this.options.onExperimentStart?.({
+        experimentId,
+        experimentName,
+        dataset: {
+          id: datasetId,
+          name: resolvedDataset.name,
+          description: resolvedDataset.description,
+          examplesCount: resolvedDataset.examples.length,
+        },
+        evaluators: evaluators.map((evaluator) => ({
+          name: evaluator.name,
+          kind: evaluator.kind,
+          version: evaluator.getVersion?.(),
+          model: evaluator.getModel?.(),
+        })),
+        metadata: experimentMetadata,
+      });
       const repetitions = this.options.repetitions ?? 3;
       const runConcurrency = Math.max(1, concurrency ?? 5);
       const limiter = pLimit(runConcurrency);
@@ -186,6 +208,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const runs: DatasetRunResult['runs'] = {};
 
       const runJobs: Array<Promise<void>> = [];
+      let successfulTasks = 0;
+      let failedTasks = 0;
 
       this.options.log.info(
         `🧪 Starting experiment "${experimentName} - Dataset: ${resolvedDataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
@@ -319,12 +343,38 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   }
                 }
               }
-            })
+            }).then(
+              () => {
+                successfulTasks += 1;
+              },
+              (error) => {
+                failedTasks += 1;
+                throw error;
+              }
+            )
           );
         });
       }
 
-      await Promise.all(runJobs);
+      // allSettled rather than all: the limiter keeps draining queued runs even
+      // after one rejects, so waiting for every run keeps the completeness
+      // counters whole and stops still-running jobs from racing teardown.
+      const settledRuns = await Promise.allSettled(runJobs);
+      const firstFailure = settledRuns.find(
+        (outcome): outcome is PromiseRejectedResult => outcome.status === 'rejected'
+      );
+
+      await this.notifyExperimentComplete({
+        experimentId,
+        status: firstFailure ? 'failed' : 'completed',
+        ...(firstFailure ? { error: toErrorMessage(firstFailure.reason) } : {}),
+        completeness: { successfulTasks, failedTasks },
+      });
+
+      if (firstFailure) {
+        throw firstFailure.reason;
+      }
+
       this.options.log.info(`✅ Experiment ${experimentId} completed`);
 
       const result: DatasetRunResult = {
@@ -345,6 +395,23 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       this.datasetRunResults.push(result);
       return result;
     });
+  }
+
+  /**
+   * The completion event is bookkeeping around the run, so a consumer that
+   * fails to handle it must not mask the experiment's own outcome.
+   */
+  private async notifyExperimentComplete(event: ExperimentCompleteEvent): Promise<void> {
+    if (!this.options.onExperimentComplete) {
+      return;
+    }
+    try {
+      await this.options.onExperimentComplete(event);
+    } catch (error) {
+      this.options.log.warning(
+        `onExperimentComplete callback failed for experiment "${event.experimentId}": ${error}`
+      );
+    }
   }
 
   async getDatasetRunResults(): Promise<DatasetRunResult[]> {

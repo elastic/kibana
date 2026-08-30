@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { EVALS_EVALUATE_URL, EVALS_SCORES_URL } from '@kbn/evals-common';
+import {
+  EVALS_EVALUATE_URL,
+  EVALS_EXPERIMENT_RECORD_FINALIZE_URL,
+  EVALS_EXPERIMENT_RECORD_URL,
+  EVALS_SCORES_URL,
+} from '@kbn/evals-common';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import type { EvalsTaskProvider, TaskProviderRegistry } from '../task_providers/types';
 import {
+  createExperimentRecord,
   evaluateWorkBatch,
+  finalizeExperimentRecord,
   normalizeReferenceData,
   runExampleEvaluation,
   type DatasetEvaluationConfig,
@@ -162,6 +170,38 @@ describe('runExampleEvaluation failure capture', () => {
 
     expect(result.failed).toBe(0);
     expect(result.errors).toEqual([]);
+    expect(result.scoreIngestFailures).toBe(0);
+  });
+
+  it('counts score documents the ingest route rejected on an otherwise successful example', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime: StepRuntime = {
+      ...createRuntime(recorded),
+      callKibanaApi: (async ({ path, body }: { path: string; body?: unknown }) => {
+        recorded.push({ path, body });
+        if (path === EVALS_EVALUATE_URL) {
+          return { status: 200, headers: {}, body: { results: [] } };
+        }
+        if (path === EVALS_SCORES_URL) {
+          return {
+            status: 207,
+            headers: {},
+            body: {
+              ingested: 1,
+              conflicted: 0,
+              failed: [{ index: 1, status: 400, reason: 'mapping rejected' }],
+            },
+          };
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      }) as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    const result = await runExampleEvaluation(createRegistry(), runtime, baseParams());
+
+    expect(result.failed).toBe(0);
+    expect(result.scoresIngested).toBe(1);
+    expect(result.scoreIngestFailures).toBe(1);
   });
 
   it('surfaces evaluator-level failures while still ingesting successful scores', async () => {
@@ -444,5 +484,123 @@ describe('evaluateWorkBatch reference data', () => {
     // ex-1 finished before the abort; ex-2 was never started.
     expect(result.completed).toBe(1);
     expect(runs).toBe(1);
+  });
+});
+
+describe('experiment record helpers', () => {
+  const RECORD_PATH = EVALS_EXPERIMENT_RECORD_URL.replace('{experimentId}', 'exp-1');
+  const FINALIZE_PATH = EVALS_EXPERIMENT_RECORD_FINALIZE_URL.replace('{experimentId}', 'exp-1');
+
+  const recordBody = {
+    name: 'My experiment',
+    protocol: {
+      dataset: { id: 'ds-1', name: 'ds', examples_count: 2 },
+      total_repetitions: 1,
+    },
+  };
+
+  const createRecordRuntime = (
+    recorded: RecordedCall[],
+    { failWith }: { failWith?: Error } = {}
+  ): StepRuntime => ({
+    ...createRuntime(recorded, 'marketing'),
+    callKibanaApi: (async ({ path, body }: { path: string; body?: unknown }) => {
+      recorded.push({ path, body });
+      if (failWith) {
+        throw failWith;
+      }
+      return { status: 200, headers: {}, body: {} };
+    }) as unknown as StepRuntime['callKibanaApi'],
+  });
+
+  it('createExperimentRecord posts the record stamped with the workflow space', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime = createRecordRuntime(recorded);
+
+    await createExperimentRecord(runtime, 'exp-1', recordBody);
+
+    expect(recorded).toHaveLength(1);
+    expect(recorded[0].path).toBe(RECORD_PATH);
+    expect(recorded[0].body).toEqual({ ...recordBody, space_ids: ['marketing'] });
+  });
+
+  it('createExperimentRecord keeps explicit space_ids over the workflow space', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime = createRecordRuntime(recorded);
+
+    await createExperimentRecord(runtime, 'exp-1', { ...recordBody, space_ids: ['sales'] });
+
+    expect(recorded[0].body).toEqual({ ...recordBody, space_ids: ['sales'] });
+  });
+
+  it('createExperimentRecord tolerates a record another execution already created (409)', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime = createRecordRuntime(recorded, {
+      failWith: new KibanaApiCallError({
+        status: 409,
+        headers: {},
+        body: { message: 'already exists' },
+        message: 'HTTP 409',
+      }),
+    });
+
+    await expect(createExperimentRecord(runtime, 'exp-1', recordBody)).resolves.toBeUndefined();
+    expect(runtime.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('createExperimentRecord logs and continues on other failures', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime = createRecordRuntime(recorded, { failWith: new Error('boom') });
+
+    await expect(createExperimentRecord(runtime, 'exp-1', recordBody)).resolves.toBeUndefined();
+    expect(runtime.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create experiment record')
+    );
+  });
+
+  it('finalizeExperimentRecord posts the terminal status', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime = createRecordRuntime(recorded);
+
+    await finalizeExperimentRecord(runtime, 'exp-1', {
+      status: 'completed',
+      completeness: { successful_tasks: 2, failed_tasks: 0, score_ingest_failures: 0 },
+    });
+
+    expect(recorded).toHaveLength(1);
+    expect(recorded[0].path).toBe(FINALIZE_PATH);
+    expect(recorded[0].body).toEqual({
+      status: 'completed',
+      completeness: { successful_tasks: 2, failed_tasks: 0, score_ingest_failures: 0 },
+    });
+  });
+
+  it('finalizeExperimentRecord tolerates a missing record (404)', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime = createRecordRuntime(recorded, {
+      failWith: new KibanaApiCallError({
+        status: 404,
+        headers: {},
+        body: { message: 'not found' },
+        message: 'HTTP 404',
+      }),
+    });
+
+    await expect(
+      finalizeExperimentRecord(runtime, 'exp-1', { status: 'failed', error: 'cancelled' })
+    ).resolves.toBeUndefined();
+    expect(runtime.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('finalizeExperimentRecord logs and continues on other failures', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime = createRecordRuntime(recorded, { failWith: new Error('boom') });
+
+    await expect(
+      finalizeExperimentRecord(runtime, 'exp-1', { status: 'failed', error: 'boom' })
+    ).resolves.toBeUndefined();
+    expect(runtime.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to finalize experiment record')
+    );
   });
 });
