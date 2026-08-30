@@ -9,17 +9,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BulkItem, BulkItemResponse, BulkRequestOptions, BulkResponse } from '..';
+import { retryOnConflicts } from './retry_on_conflicts';
 import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
+import type { BulkPlainItem, BulkRequestOptions, BulkResponse } from '../types';
 
-export interface SharedBulkItem<TExecution extends { id: string }> extends BulkItem<TExecution> {
-  operation: 'create' | 'update' | 'upsert';
-  document: Partial<TExecution> & { id: string };
-  index?: string;
-  seqNo?: number;
-  primaryTerm?: number;
-  retryOnConflict?: number;
-}
+export type SharedBulkItem<TExecution extends { id: string }> = BulkPlainItem<TExecution>;
 
 export interface SharedBulkRequestOptions<TExecution extends { id: string }>
   extends BulkRequestOptions<TExecution> {
@@ -73,7 +67,7 @@ const toBulkOperations = <TExecution extends { id: string }>(
       ];
 
     default:
-      throw new Error(`Invalid operation: ${(item as BulkItem<TExecution>).operation}`);
+      throw new Error(`Invalid operation: ${(item as SharedBulkItem<TExecution>).operation}`);
   }
 };
 
@@ -83,42 +77,25 @@ export async function sharedBulk<TExecution extends { id: string }>(
   logger: Logger
 ): Promise<BulkResponse> {
   if (request.items.length === 0) {
-    return {
-      items: [],
-      errors: false,
-    };
+    return { items: [], errors: false };
   }
 
-  const operations = request.items.flatMap(toBulkOperations);
+  // retryOnConflicts handles the conflict-retry loop. sharedBulk passes [] for indexes
+  // because it only receives BulkPlainItem — no updater items need mget resolution here.
+  return retryOnConflicts(esClient, logger, [], request, async (bulkRequest) => {
+    // Items passed back by retryOnConflicts are the original SharedBulkItem objects
+    // (cast to BulkPlainItem by retryOnConflicts — index is still present at runtime).
+    const operations = (bulkRequest.items as Array<SharedBulkItem<TExecution>>).flatMap(
+      toBulkOperations
+    );
 
-  const response = await retryTransientEsErrors(
-    () =>
-      esClient.bulk<TExecution, Partial<TExecution> & { id: string }>({
-        refresh: request.refresh,
-        operations,
-      }),
-    { logger }
-  );
-
-  const items: BulkItemResponse[] = [];
-
-  response.items.forEach((item) => {
-    const result = item.create ?? item.update;
-    if (!result?._id) {
-      throw new Error(`Unexpected bulk response item without _id: ${JSON.stringify(item)}`);
-    }
-
-    items.push({
-      id: result._id,
-      error: result.error,
-      index: result._index,
-      seqNo: result._seq_no,
-      primaryTerm: result._primary_term,
-    });
+    return retryTransientEsErrors(
+      () =>
+        esClient.bulk<TExecution, Partial<TExecution> & { id: string }>({
+          refresh: bulkRequest.refresh,
+          operations,
+        }),
+      { logger }
+    );
   });
-
-  return {
-    items,
-    errors: response.errors,
-  };
 }

@@ -147,6 +147,7 @@ export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflow
 export interface BulkPlainItem<TDocument extends { id: string }> {
   operation: 'create' | 'update' | 'upsert';
   document: Partial<TDocument> & { id: string };
+  index?: string;
   seqNo?: number;
   primaryTerm?: number;
   retryOnConflict?: number;

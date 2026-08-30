@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 import type {
   BulkItem,
   BulkItemResponse,
+  BulkItemResult,
   BulkPlainItem,
   BulkRequestOptions,
   BulkResponse,
@@ -30,7 +32,7 @@ export async function retryOnConflicts<TExecution extends { id: string }>(
   logger: Logger,
   indexes: string[],
   options: BulkRequestOptions<TExecution>,
-  action: (request: BulkRequestOptions<TExecution>) => Promise<BulkResponse>
+  action: (request: BulkRequestOptions<TExecution>) => Promise<estypes.BulkResponse>
 ): Promise<BulkResponse> {
   let queuedItems: Array<QueueItem<TExecution>> = options.items.map((item, index) => ({
     item,
@@ -131,6 +133,7 @@ export async function retryOnConflicts<TExecution extends { id: string }>(
               plainItem: {
                 operation: 'update',
                 document: { ...(patch as Partial<TExecution>), id: updaterItem.documentId },
+                index: found.index,
                 seqNo: found.seqNo,
                 primaryTerm: found.primaryTerm,
               },
@@ -150,8 +153,23 @@ export async function retryOnConflicts<TExecution extends { id: string }>(
 
       const nextQueue: Array<QueueItem<TExecution>> = [];
 
-      esResponse.items.forEach((responseItem, idx) => {
+      esResponse.items.forEach((esItem, idx) => {
         const { qi } = toSend[idx];
+        const esResult = esItem.create ?? esItem.index ?? esItem.update;
+
+        if (!esResult?._id) {
+          throw new Error(`Unexpected bulk response item without _id: ${JSON.stringify(esItem)}`);
+        }
+
+        const responseItem: BulkItemResponse = {
+          id: esResult._id,
+          error: esResult.error,
+          index: esResult._index,
+          seqNo: esResult._seq_no,
+          primaryTerm: esResult._primary_term,
+          result: esResult.result as BulkItemResult | undefined,
+        };
+
         const isConflict = responseItem.error?.type === 'version_conflict_engine_exception';
 
         if (isConflict && qi.remainingRetries > 0) {
