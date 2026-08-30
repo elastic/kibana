@@ -253,22 +253,13 @@ const eventsAttachInvestigationRoute = createServerRoute({
 
     const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
 
-    try {
-      return await attachInvestigationToEvent({
-        eventClient: getEventClient(),
-        eventId: params.path.id,
-        investigation,
-        triggerFeedback: triggerFeedback as SignificantEventTriggerFeedback | undefined,
-        logger,
-      });
-    } catch (error) {
-      logger.warn(
-        `Failed to attach completed investigation "${investigation.workflow_execution_id}" to significant event "${params.path.id}": ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      return { event_uuid: params.path.id, updated: 0, ignored: 1 };
-    }
+    return attachInvestigationToEvent({
+      eventClient: getEventClient(),
+      eventId: params.path.id,
+      investigation,
+      triggerFeedback: triggerFeedback as SignificantEventTriggerFeedback | undefined,
+      logger,
+    });
   },
 });
 

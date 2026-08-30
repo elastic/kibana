@@ -24,7 +24,7 @@ export const attachEventInvestigationToolHandler = async ({
   const { hits } = await eventClient.findByEventUuid(eventUuid);
   const event = hits[0];
   if (!event) {
-    return { event_uuid: eventUuid, updated: 0, ignored: 1 };
+    throw new Error(`Significant event "${eventUuid}" not found`);
   }
 
   return attachInvestigationToEvent({
