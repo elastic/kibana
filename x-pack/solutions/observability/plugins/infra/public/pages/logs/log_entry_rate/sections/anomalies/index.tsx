@@ -132,21 +132,9 @@ const AnomaliesResultsFailurePrompt: React.FunctionComponent<{ onRetry: () => vo
     data-test-subj="infraAnomaliesFailurePrompt"
     color="danger"
     iconType="warning"
-    title={
-      <h2>
-        {i18n.translate('xpack.infra.logs.analysis.anomalySectionLoadingFailureTitle', {
-          defaultMessage: 'Failed to load anomalies',
-        })}
-      </h2>
-    }
+    title={<h2>{anomalySectionLoadingFailureTitle}</h2>}
     titleSize="m"
-    body={
-      <p>
-        {i18n.translate('xpack.infra.logs.analysis.anomalySectionLoadingFailureBody', {
-          defaultMessage: 'Try again or adjust your time range.',
-        })}
-      </p>
-    }
+    body={<p>{anomalySectionLoadingFailureBody}</p>}
     actions={
       <EuiButton
         data-test-subj="infraAnomaliesFailurePromptRetryButton"
@@ -158,12 +146,25 @@ const AnomaliesResultsFailurePrompt: React.FunctionComponent<{ onRetry: () => vo
           element: INFRA_EBT_ELEMENTS.LOG_ANALYSIS_ANOMALIES_RESULTS,
         })}
       >
-        {i18n.translate('xpack.infra.logs.analysis.anomalySectionLoadingFailureRetryButtonLabel', {
-          defaultMessage: 'Retry',
-        })}
+        {anomalySectionLoadingFailureRetryButtonLabel}
       </EuiButton>
     }
   />
+);
+
+const anomalySectionLoadingFailureTitle = i18n.translate(
+  'xpack.infra.logs.analysis.anomalySectionLoadingFailureTitle',
+  { defaultMessage: 'Failed to load anomalies' }
+);
+
+const anomalySectionLoadingFailureBody = i18n.translate(
+  'xpack.infra.logs.analysis.anomalySectionLoadingFailureBody',
+  { defaultMessage: 'Try again or adjust your time range.' }
+);
+
+const anomalySectionLoadingFailureRetryButtonLabel = i18n.translate(
+  'xpack.infra.logs.analysis.anomalySectionLoadingFailureRetryButtonLabel',
+  { defaultMessage: 'Retry' }
 );
 
 const loadingAriaLabel = i18n.translate(

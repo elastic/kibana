@@ -57,9 +57,10 @@ const renderComponent = (props: Partial<typeof baseProps> = {}) =>
 describe('AnomaliesResults', () => {
   // There is no "failed with stale results" case to cover: useLogEntryAnomaliesResults
   // clears the list on any non-cancellation rejection, so a failure always implies an
-  // empty `anomalies` array. AC1 already covers that the prompt wins over the table.
+  // empty `anomalies` array. The first case below already pins the failure prompt as
+  // taking precedence over the table.
   describe('when the fetch fails', () => {
-    it('shows the failure prompt and not the empty or table states (AC1)', () => {
+    it('shows the failure prompt and not the empty or table states', () => {
       renderComponent({ hasFailedLoadingAnomaliesResults: true });
 
       expect(screen.getByTestId('infraAnomaliesFailurePrompt')).toBeInTheDocument();
@@ -67,7 +68,7 @@ describe('AnomaliesResults', () => {
       expect(screen.queryByTestId('infraAnomaliesNoDataPrompt')).not.toBeInTheDocument();
     });
 
-    it('calls the retry callback when the retry button is clicked (AC3)', () => {
+    it('calls the retry callback when the retry button is clicked', () => {
       const onRetry = jest.fn();
       renderComponent({
         hasFailedLoadingAnomaliesResults: true,
@@ -80,7 +81,7 @@ describe('AnomaliesResults', () => {
   });
 
   describe('when the fetch is successful but empty', () => {
-    it('shows the "no data" empty prompt and not the failure prompt (AC5)', () => {
+    it('shows the "no data" empty prompt and not the failure prompt', () => {
       renderComponent({ hasFailedLoadingAnomaliesResults: false, anomalies: [] });
 
       expect(screen.getByTestId('infraAnomaliesNoDataPrompt')).toBeInTheDocument();

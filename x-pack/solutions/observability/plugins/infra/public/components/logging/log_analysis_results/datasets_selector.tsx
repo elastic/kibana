@@ -9,7 +9,6 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 
 import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
@@ -51,63 +50,38 @@ export const DatasetsSelector: React.FunctionComponent<{
     [onChangeDatasetSelection]
   );
 
-  if (hasFailedLoading) {
-    return (
-      <EuiFormRow
-        isInvalid
-        error={
-          onRetry ? (
-            <FormattedMessage
-              id="xpack.infra.logs.analysis.datasetFilterLoadingFailureDetail"
-              defaultMessage="Failed to load datasets. {retryLink}"
-              values={{
-                retryLink: (
-                  <EuiLink
-                    color="danger"
-                    onClick={onRetry}
-                    data-test-subj="infraDatasetsSelectorRetryLink"
-                    {...getEbtProps({
-                      action: INFRA_EBT_ACTIONS.RETRY_LOAD,
-                      element: INFRA_EBT_ELEMENTS.LOG_ANALYSIS_DATASETS_SELECTOR,
-                    })}
-                  >
-                    {i18n.translate(
-                      'xpack.infra.logs.analysis.datasetFilterLoadingFailureRetryLinkLabel',
-                      { defaultMessage: 'Retry' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          ) : (
-            i18n.translate('xpack.infra.logs.analysis.datasetFilterLoadingFailure', {
-              defaultMessage: 'Failed to load datasets.',
-            })
-          )
-        }
-      >
-        <EuiComboBox
-          aria-label={datasetFilterPlaceholder}
-          isInvalid
-          isDisabled
-          onChange={handleChange}
-          options={[]}
-          placeholder={datasetFilterPlaceholder}
-          selectedOptions={selectedOptions}
-        />
-      </EuiFormRow>
-    );
-  }
+  const loadingFailureMessage = hasFailedLoading ? (
+    <>
+      {datasetFilterLoadingFailureMessage}{' '}
+      {onRetry ? (
+        <EuiLink
+          color="danger"
+          onClick={onRetry}
+          data-test-subj="infraDatasetsSelectorRetryLink"
+          {...getEbtProps({
+            action: INFRA_EBT_ACTIONS.RETRY_LOAD,
+            element: INFRA_EBT_ELEMENTS.LOG_ANALYSIS_DATASETS_SELECTOR,
+          })}
+        >
+          {datasetFilterLoadingFailureRetryLinkLabel}
+        </EuiLink>
+      ) : null}
+    </>
+  ) : undefined;
 
   return (
-    <EuiComboBox
-      aria-label={datasetFilterPlaceholder}
-      isLoading={isLoading}
-      onChange={handleChange}
-      options={options}
-      placeholder={datasetFilterPlaceholder}
-      selectedOptions={selectedOptions}
-    />
+    <EuiFormRow isInvalid={hasFailedLoading} error={loadingFailureMessage}>
+      <EuiComboBox
+        aria-label={datasetFilterPlaceholder}
+        isDisabled={hasFailedLoading}
+        isInvalid={hasFailedLoading}
+        isLoading={isLoading}
+        onChange={handleChange}
+        options={hasFailedLoading ? noOptions : options}
+        placeholder={datasetFilterPlaceholder}
+        selectedOptions={selectedOptions}
+      />
+    </EuiFormRow>
   );
 };
 
@@ -117,5 +91,21 @@ const datasetFilterPlaceholder = i18n.translate(
     defaultMessage: 'Filter by datasets',
   }
 );
+
+const datasetFilterLoadingFailureMessage = i18n.translate(
+  'xpack.infra.logs.analysis.datasetFilterLoadingFailure',
+  {
+    defaultMessage: 'Failed to load datasets.',
+  }
+);
+
+const datasetFilterLoadingFailureRetryLinkLabel = i18n.translate(
+  'xpack.infra.logs.analysis.datasetFilterLoadingFailureRetryLinkLabel',
+  {
+    defaultMessage: 'Retry',
+  }
+);
+
+const noOptions: DatasetOptionProps[] = [];
 
 const isDefined = <Value extends any>(value: Value): value is NonNullable<Value> => value != null;
