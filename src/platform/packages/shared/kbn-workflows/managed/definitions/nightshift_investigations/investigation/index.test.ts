@@ -14,7 +14,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
-  with?: { body?: Record<string, string> };
+  with?: { body?: { status?: string } };
 }
 
 const investigation = parse(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.yaml) as {
@@ -30,7 +30,7 @@ const requireStep = (name: string): WorkflowStep => {
 describe('investigation lifecycle contracts', () => {
   it('emits lifecycle events and fails unsuccessful executions', () => {
     expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(9);
-    expect(investigation.steps[0].name).toBe('emit_investigation_started');
+    expect(investigation.steps[0].name).toBe('ensure_investigation_agent');
 
     const expectedStatuses: Record<string, string> = {
       emit_investigation_started: 'running',

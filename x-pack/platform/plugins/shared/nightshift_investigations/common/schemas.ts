@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { INVESTIGATION_SUBJECT_TYPES } from './workflows/triggers';
 
 /**
@@ -30,6 +31,7 @@ export const investigationSubjectTypeSchema = z.enum(INVESTIGATION_SUBJECT_TYPES
 export const investigationSubjectSchema = z.object({
   type: investigationSubjectTypeSchema,
   id: z.string().min(1).max(500),
+  summary: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 
 export const alertSnapshotGroupSchema = z.object({

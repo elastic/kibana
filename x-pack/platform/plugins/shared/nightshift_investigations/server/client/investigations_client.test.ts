@@ -225,6 +225,64 @@ describe('NightshiftInvestigationsClient.get()', () => {
     });
   });
 
+  describe('subject reference', () => {
+    it('returns the summary verbatim, however long', async () => {
+      const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: 'event-42',
+                summary: long,
+              },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({
+        type: 'significant_event',
+        id: 'event-42',
+        summary: long,
+      });
+    });
+
+    it('adds the summary to an alert subject', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({
+        type: 'alert',
+        id: 'alert-99',
+        summary: 'CPU saturation',
+      });
+    });
+
+    it('omits the summary when the caller supplied none', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              message: 'Investigation requested for alert alert-99',
+              context: { source: 'alert', alert_id: 'alert-99' },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
+    });
+  });
+
   describe('terminal state handling', () => {
     it('sets completed_at when status is completed', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
@@ -679,6 +737,29 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
+  });
+
+  it('persists the subject summary into the workflow context', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1', summary: 'CPU saturation on checkout-api' },
+      context: alertContext,
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context.summary).toBe('CPU saturation on checkout-api');
+  });
+
+  it('omits the context summary when none was supplied', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context: alertContext });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context).not.toHaveProperty('summary');
   });
 
   it('includes concurrency_key in inputs when provided', async () => {

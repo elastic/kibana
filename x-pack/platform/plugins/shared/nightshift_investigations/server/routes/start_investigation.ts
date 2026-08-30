@@ -7,9 +7,15 @@
 
 import { badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { alertInvestigationContextSchema, freeFormContextSchema } from '../../common';
 import { InvalidInvestigationContextError } from '../client/investigations_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+
+const subjectIdAndSummary = {
+  id: z.string().min(1).max(500),
+  summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+};
 
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations',
@@ -41,7 +47,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
       z.object({
         subject: z.object({
           type: z.literal('alert'),
-          id: z.string().min(1).max(500),
+          ...subjectIdAndSummary,
         }),
         concurrency_key: z.string().max(500).optional(),
         context: alertInvestigationContextSchema,
@@ -49,7 +55,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
       z.object({
         subject: z.object({
           type: z.literal('significant_event'),
-          id: z.string().min(1).max(500),
+          ...subjectIdAndSummary,
         }),
         concurrency_key: z.string().max(500).optional(),
         context: freeFormContextSchema.optional(),
