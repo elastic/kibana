@@ -234,7 +234,8 @@ describe('TriggerEventHandler', () => {
       expect.anything(),
       'cases.updated',
       expect.objectContaining({ eventChainDepth: 3 }),
-      deps.logger
+      deps.logger,
+      { requiresConnectorId: false }
     );
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
     const contextArg = scheduleWorkflow.mock.calls[0][1] as { event: Record<string, unknown> };
@@ -302,6 +303,65 @@ describe('TriggerEventHandler', () => {
           scheduledSuccessCount: 1,
           workflowEventsIgnoreSkippedCount: 0,
           workflowEventsCycleSkippedCount: 0,
+        }),
+      })
+    );
+  });
+
+  it('should pass requiresConnectorId from the trigger definition', async () => {
+    const deps = createDeps({
+      workflowsExtensions: {
+        getTriggerDefinition: jest.fn().mockReturnValue({
+          id: 'inboundWebhook.received',
+          requiresConnectorId: true,
+        }),
+      } as any,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'inboundWebhook.received',
+      payload: { connectorId: 'webhook-1' },
+      request: mockRequest,
+    });
+
+    expect(mockClassifyWorkflowTriggerMatch).toHaveBeenCalledWith(
+      expect.anything(),
+      'inboundWebhook.received',
+      expect.anything(),
+      deps.logger,
+      { requiresConnectorId: true }
+    );
+  });
+
+  it('should not schedule workflows skipped by connector-id mismatch', async () => {
+    mockClassifyWorkflowTriggerMatch
+      .mockReturnValueOnce('connector_id_mismatch')
+      .mockReturnValueOnce('matched');
+    const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([
+        createMockWorkflow({ id: 'wf-other-connector' }),
+        createMockWorkflow({ id: 'wf-matching-connector' }),
+      ]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'inboundWebhook.received',
+      payload: { connectorId: 'webhook-1' },
+      request: mockRequest,
+    });
+
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+    expect(scheduleWorkflow.mock.calls[0][0]).toMatchObject({ id: 'wf-matching-connector' });
+    expect(getTelemetryMock()).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resolutionStats: expect.objectContaining({
+          connectorIdMismatchCount: 1,
+          matchedCount: 1,
         }),
       })
     );

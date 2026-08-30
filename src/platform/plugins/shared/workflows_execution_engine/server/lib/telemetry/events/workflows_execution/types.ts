@@ -592,6 +592,7 @@ export interface TriggerEventDispatchedParams {
   subscriberResolutionMs?: number;
   subscribedCount: number;
   disabledCount: number;
+  connectorIdMismatchCount: number;
   kqlFalseCount: number;
   kqlErrorCount: number;
   matchedCount: number;

@@ -14,16 +14,34 @@ import type { WorkflowDetailDto } from '@kbn/workflows';
 /**
  * Why a subscribed workflow did or did not match an emitted trigger event (for funnel telemetry).
  */
-export type WorkflowTriggerMatchOutcome = 'matched' | 'disabled' | 'kql_false' | 'kql_error';
+export type WorkflowTriggerMatchOutcome =
+  | 'matched'
+  | 'disabled'
+  | 'kql_false'
+  | 'kql_error'
+  | 'connector_id_mismatch';
+
+export interface ClassifyWorkflowTriggerMatchOptions {
+  /** When true, YAML `connector-id` must equal payload `connectorId` before KQL. */
+  requiresConnectorId?: boolean;
+}
+
+const readTrimmedString = (value: unknown): string =>
+  typeof value === 'string' ? value.trim() : '';
+
+const getYamlConnectorId = (trigger: object): string =>
+  readTrimmedString((trigger as Record<string, unknown>)['connector-id']);
 
 /**
- * Classifies a workflow for a given trigger id and event payload (enabled gate, trigger block, KQL).
+ * Classifies a workflow for a given trigger id and event payload
+ * (enabled gate, connector-id gate, trigger block, KQL).
  */
 export function classifyWorkflowTriggerMatch(
   workflow: WorkflowDetailDto,
   triggerId: string,
   payload: Record<string, unknown>,
-  logger?: Logger
+  logger?: Logger,
+  options?: ClassifyWorkflowTriggerMatchOptions
 ): WorkflowTriggerMatchOutcome {
   if (!workflow.enabled) {
     return 'disabled';
@@ -37,6 +55,14 @@ export function classifyWorkflowTriggerMatch(
   const matchingTrigger = triggers.find((t) => t && t.type === triggerId);
   if (!matchingTrigger) {
     return 'kql_false';
+  }
+
+  if (options?.requiresConnectorId) {
+    const yamlConnectorId = getYamlConnectorId(matchingTrigger);
+    const eventConnectorId = readTrimmedString(payload.connectorId);
+    if (yamlConnectorId === '' || eventConnectorId === '' || yamlConnectorId !== eventConnectorId) {
+      return 'connector_id_mismatch';
+    }
   }
 
   const onBlock = matchingTrigger && 'on' in matchingTrigger ? matchingTrigger.on : undefined;
@@ -77,7 +103,8 @@ export function workflowMatchesTriggerCondition(
   workflow: WorkflowDetailDto,
   triggerId: string,
   payload: Record<string, unknown>,
-  logger?: Logger
+  logger?: Logger,
+  options?: ClassifyWorkflowTriggerMatchOptions
 ): boolean {
-  return classifyWorkflowTriggerMatch(workflow, triggerId, payload, logger) === 'matched';
+  return classifyWorkflowTriggerMatch(workflow, triggerId, payload, logger, options) === 'matched';
 }
