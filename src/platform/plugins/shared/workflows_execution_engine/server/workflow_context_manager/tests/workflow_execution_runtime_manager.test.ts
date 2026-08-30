@@ -356,6 +356,32 @@ describe('WorkflowExecutionRuntimeManager', () => {
         }
       });
 
+      it('labels event-driven executions with event_trigger_id under the OTEL fallback', async () => {
+        addTransactionLabelsMock.mockClear();
+        workflowExecution.triggeredBy = 'cases.caseCreated';
+        workflowExecution.context = {
+          event: { eventChainDepth: 2 },
+          metadata: { eventTriggerId: 'cases.caseCreated' },
+        } as EsWorkflowExecution['context'];
+        const span = spanWithTraceId('0af7651916cd43dd8448eb211c80319c');
+
+        try {
+          await context.with(trace.setSpan(context.active(), span), async () => {
+            await underTest.start();
+          });
+
+          expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              triggered_by: 'task_manager',
+              event_trigger_id: 'cases.caseCreated',
+            })
+          );
+        } finally {
+          workflowExecution.triggeredBy = undefined;
+          workflowExecution.context = {} as EsWorkflowExecution['context'];
+        }
+      });
+
       it('does not persist a trace id when no OTEL span is active either', async () => {
         await underTest.start();
 

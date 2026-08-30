@@ -444,7 +444,7 @@ export class WorkflowExecutionRuntimeManager {
           triggered_by: isTriggeredByAlerting ? 'alerting' : 'task_manager',
         };
 
-        if (!isTriggeredByAlerting && isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
           otelLabels.event_trigger_id = triggeredBy;
         }
 
