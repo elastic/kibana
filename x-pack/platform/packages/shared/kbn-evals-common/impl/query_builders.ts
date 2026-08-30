@@ -296,6 +296,9 @@ export const buildProtocolAggregation = () => ({
   first_score: { min: { field: '@timestamp' } },
   last_score: { max: { field: '@timestamp' } },
   total_repetitions: { max: { field: 'metadata.total_repetitions' } },
+  // Fallback when metadata.total_repetitions is absent (pre-field documents):
+  // max(task.repetition_index) + 1 gives the true observed repetition count.
+  max_seen_repetition: { max: { field: 'task.repetition_index' } },
   datasets: {
     terms: { field: 'example.dataset.id', size: MAX_PROTOCOL_DATASETS },
     aggs: {
@@ -323,6 +326,7 @@ interface ProtocolAggregations {
   first_score?: { value_as_string?: string };
   last_score?: { value_as_string?: string };
   total_repetitions?: { value?: number | null };
+  max_seen_repetition?: { value?: number | null };
   datasets?: {
     buckets?: Array<{
       key: string;
@@ -382,11 +386,15 @@ export const parseProtocolAggregationResponse = (
     };
   });
 
+  const metadataRepetitions = aggs?.total_repetitions?.value;
+  const maxSeenIndex = aggs?.max_seen_repetition?.value;
+  const totalRepetitions = metadataRepetitions ?? (maxSeenIndex != null ? maxSeenIndex + 1 : 1);
+
   return {
     first_score_at: aggs?.first_score?.value_as_string,
     last_score_at: aggs?.last_score?.value_as_string,
     example_count: datasets.reduce((total, dataset) => total + dataset.evaluated_example_count, 0),
-    total_repetitions: aggs?.total_repetitions?.value ?? 1,
+    total_repetitions: totalRepetitions,
     datasets,
     evaluators,
   };

@@ -913,6 +913,7 @@ describe('query_builders', () => {
       expect(agg.first_score).toEqual({ min: { field: '@timestamp' } });
       expect(agg.last_score).toEqual({ max: { field: '@timestamp' } });
       expect(agg.total_repetitions).toEqual({ max: { field: 'metadata.total_repetitions' } });
+      expect(agg.max_seen_repetition).toEqual({ max: { field: 'task.repetition_index' } });
       expect(agg.datasets.terms.field).toBe('example.dataset.id');
       expect(agg.datasets.aggs.example_count).toEqual({ cardinality: { field: 'example.id' } });
       expect(agg.evaluators.terms.field).toBe('evaluator.name');
@@ -1075,6 +1076,29 @@ describe('query_builders', () => {
       expect(result.evaluators).toEqual([]);
       expect(result.first_score_at).toBeUndefined();
       expect(result.last_score_at).toBeUndefined();
+    });
+
+    it('derives total_repetitions from max_seen_repetition when metadata field is absent', () => {
+      // Simulates old score documents that predate the metadata.total_repetitions field.
+      // Without the fallback, total_repetitions would default to 1, making
+      // complete: true after only one of three repetitions finishes.
+      const result = parseProtocolAggregationResponse({
+        ...aggs,
+        total_repetitions: { value: null },
+        max_seen_repetition: { value: 2 }, // repetition_index is 0-based, so 3 repetitions
+      });
+
+      expect(result.total_repetitions).toBe(3);
+    });
+
+    it('keeps total_repetitions at 1 when both metadata and max_seen_repetition are absent', () => {
+      const result = parseProtocolAggregationResponse({
+        ...aggs,
+        total_repetitions: { value: null },
+        max_seen_repetition: { value: null },
+      });
+
+      expect(result.total_repetitions).toBe(1);
     });
 
     it('handles a missing aggregation response', () => {
