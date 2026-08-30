@@ -22,7 +22,7 @@ const getMappingConflictsMock = jest.mocked(getMappingConflicts);
 
 const stream = { name: 'logs.test-default' } as Streams.all.Definition;
 const esClient = {} as ElasticsearchClient;
-const logger = {} as Logger;
+const logger = { debug: jest.fn() } as unknown as Logger;
 const signal = new AbortController().signal;
 
 const formatted = { total: 1, sampled: 1, fields: {} };
@@ -62,5 +62,23 @@ describe('datasetAnalysisGenerator', () => {
     const conflictCall = getMappingConflictsMock.mock.calls[0][0];
     expect(conflictCall).not.toHaveProperty('start');
     expect(conflictCall).not.toHaveProperty('end');
+  });
+
+  it('still returns the analysis with no conflicts when the probe fails', async () => {
+    getMappingConflictsMock.mockRejectedValueOnce(new Error('probe boom'));
+
+    const result = await datasetAnalysisGenerator.generate({
+      stream,
+      start: 100,
+      end: 200,
+      esClient,
+      logger,
+      signal,
+    });
+
+    expect(result).toEqual({ analysis: formatted });
+    expect(formatDocumentAnalysisMock.mock.calls[0][1]).toEqual(
+      expect.objectContaining({ conflicts: {} })
+    );
   });
 });

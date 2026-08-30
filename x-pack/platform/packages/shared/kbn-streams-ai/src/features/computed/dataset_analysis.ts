@@ -18,9 +18,9 @@ export const datasetAnalysisGenerator: ComputedFeatureGenerator = {
   llmInstructions: `Contains the schema (excluding empty fields), field distributions, and sample values from the log dataset.
 Use the \`properties.analysis\` field to understand available fields and their value distributions.
 This is useful for understanding what fields are available for querying and what values they typically contain.
-Each field key is \`name (types)\`. When a field is mapped as multiple incompatible types across the dataset's backing indices (an ES|QL union type), its key carries a recommendation: \`name (type1, type2, recommended: <cast>)\`. A bare reference to such a field fails with an ambiguity error — cast it to the exact recommended type, e.g. \`field::<cast>\` (\`exception.message::keyword == "value"\`). The recommended value is authoritative, do not assume \`keyword\`: it is usually \`keyword\`, but e.g. an aggregate_metric_double/double union recommends \`aggregate_metric_double\`, and casting that to \`keyword\` would be lossy. This applies even when the sample values look single-typed, because the conflicting type may live in an older backing index.`,
+Each field key is \`name (types)\`. When a field is mapped as multiple incompatible types across the dataset's backing indices (an ES|QL union type), its key carries a recommendation: \`name (type1, type2, recommended: <cast>)\`. A bare reference to such a field fails with an ambiguity error — cast it to the exact recommended type, e.g. \`field::<cast>\` (\`exception.message::keyword == "value"\`). The recommended value is authoritative, do not assume \`keyword\`: it is usually \`keyword\`, but e.g. an aggregate_metric_double/double union recommends \`aggregate_metric_double\`, and casting that to \`keyword\` would be lossy. This applies even when the sample values look single-typed, because the conflicting type may live in an older backing index. When a key instead reads \`name (type1, type2 - ambiguous, no safe cast)\`, Elasticsearch could not resolve the union; no cast works, so do not reference that field at all — pick a different one.`,
 
-  generate: async ({ stream, start, end, esClient, signal }) => {
+  generate: async ({ stream, start, end, esClient, logger, signal }) => {
     const samplingSource = getStreamSamplingSource(stream);
 
     const [analysis, mappingConflicts] = await Promise.all([
@@ -31,10 +31,19 @@ Each field key is \`name (types)\`. When a field is mapped as multiple incompati
         end,
         signal,
       }),
+      // Best-effort: a probe failure must not drop the whole analysis.
       getMappingConflicts({
         esClient,
         index: samplingSource,
         signal,
+      }).catch((error) => {
+        logger.debug(
+          () =>
+            `Failed to probe mapping conflicts for [${samplingSource}]: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+        );
+        return [];
       }),
     ]);
 

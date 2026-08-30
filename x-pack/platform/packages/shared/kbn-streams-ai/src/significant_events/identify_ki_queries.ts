@@ -10,6 +10,7 @@ import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
+  extractReferencedColumns,
   findOverBroadMatchPredicates,
   renderOverBroadMatchError,
   getSourcesForStream,
@@ -283,7 +284,13 @@ export async function identifyKIQueries({
     }),
   ]);
 
-  const hasMappingConflicts = mappingConflicts.length > 0;
+  const conflictingFields = new Set(mappingConflicts.map(({ field }) => field));
+
+  // Relax the lookback filter only for candidates that actually reference a union field;
+  // a global toggle would force every validation to scan full history.
+  const validateOverFullSource = (esql: string): boolean =>
+    conflictingFields.size > 0 &&
+    extractReferencedColumns(esql).some((name) => conflictingFields.has(name));
 
   const existingQueriesList = existingQueries ?? [];
 
@@ -488,11 +495,10 @@ export async function identifyKIQueries({
                 await esClient.esql.query(
                   {
                     query: `${rewritten}\n| LIMIT 0`,
-                    // Union fields present: resolve over the full source. The
-                    // lookback filter prunes older indices via can_match, hiding
-                    // the conflict so a bare reference passes here yet breaks when
-                    // run unbounded.
-                    ...(hasMappingConflicts
+                    // The lookback filter prunes older indices via can_match, hiding a
+                    // union field's conflicting type so a bare reference passes here yet
+                    // breaks when run unbounded.
+                    ...(validateOverFullSource(rewritten)
                       ? {}
                       : {
                           filter: {

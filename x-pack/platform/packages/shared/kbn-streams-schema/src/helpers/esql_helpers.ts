@@ -618,6 +618,19 @@ export function findOverBroadMatchPredicates(esql: string): OverBroadMatchPredic
   return issues;
 }
 
+/**
+ * Every column identifier in the query (field references, output aliases, and `*`),
+ * de-duplicated; empty when it does not parse.
+ */
+export function extractReferencedColumns(esql: string): string[] {
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return [];
+
+  const names = new Set<string>();
+  walk(root, { visitColumn: (node) => names.add(node.name) });
+  return [...names];
+}
+
 /** Shared rejection message for {@link findOverBroadMatchPredicates} results, so callers stay identical. */
 export function renderOverBroadMatchError(predicates: OverBroadMatchPredicate[]): string {
   const rendered = predicates

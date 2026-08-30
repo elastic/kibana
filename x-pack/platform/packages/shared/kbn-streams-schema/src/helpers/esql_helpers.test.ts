@@ -10,6 +10,7 @@ import {
   ensureMetadata,
   extractBucketColumnName,
   extractBucketIntervalMs,
+  extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
   findOverBroadMatchPredicates,
@@ -460,5 +461,18 @@ describe('findOverBroadMatchPredicates', () => {
 
   it('returns an empty array for an unparseable query', () => {
     expect(findOverBroadMatchPredicates('THIS IS NOT ESQL {{{')).toEqual([]);
+  });
+});
+
+describe('extractReferencedColumns', () => {
+  it('collects field references across clauses, including a field under a cast', () => {
+    const columns = extractReferencedColumns(
+      'FROM logs | WHERE svc::keyword == "x" AND msg == "y"'
+    );
+    expect(new Set(columns)).toEqual(new Set(['svc', 'msg']));
+  });
+
+  it('returns an empty array for an unparseable query', () => {
+    expect(extractReferencedColumns('THIS IS NOT ESQL {{{')).toEqual([]);
   });
 });

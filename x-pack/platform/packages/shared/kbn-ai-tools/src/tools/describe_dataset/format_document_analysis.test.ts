@@ -61,7 +61,7 @@ describe('formatDocumentAnalysis', () => {
     });
   });
 
-  it('annotates conflicted field keys with source-wide types and recommended cast, even when the window shows a single type', () => {
+  it('annotates conflicts with the recommended cast, or an ambiguity marker when ES suggests none, even when the window shows a single type', () => {
     const analysis: DocumentAnalysis = {
       total: 10,
       sampled: 2,
@@ -95,7 +95,7 @@ describe('formatDocumentAnalysis', () => {
 
     expect(result.fields).toEqual({
       'exception.message (keyword, text, recommended: keyword)': ['boom (100%)'],
-      'client.ip (ip, keyword, recommended: keyword)': ['10.0.0.1 (50%)', '(no value) (50%)'],
+      'client.ip (ip, keyword - ambiguous, no safe cast)': ['10.0.0.1 (50%)', '(no value) (50%)'],
     });
   });
 

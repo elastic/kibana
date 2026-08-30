@@ -686,7 +686,7 @@ describe('identifyKIQueries agent', () => {
       },
     ];
 
-    it('validates over the full source (no time filter) when the stream has union-type fields', async () => {
+    it('drops the lookback filter for a candidate that references a union field', async () => {
       const { esClient, candidateCalls } = createScriptedClient(CONFLICT_COLUMNS);
 
       const { result } = await runIdentifyKIQueries({
@@ -699,6 +699,21 @@ describe('identifyKIQueries agent', () => {
       expect(result.queries).toHaveLength(1);
       expect(candidateCalls).toHaveLength(1);
       expect(candidateCalls[0]).not.toHaveProperty('filter');
+    });
+
+    it('keeps the lookback filter for a candidate that references no union field, even when the source has conflicts', async () => {
+      const { esClient, candidateCalls } = createScriptedClient(CONFLICT_COLUMNS);
+
+      const { result } = await runIdentifyKIQueries({
+        esClient,
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "boom"')]],
+      });
+
+      expect(result.queries).toHaveLength(1);
+      expect(candidateCalls).toHaveLength(1);
+      expect(candidateCalls[0].filter).toEqual({
+        range: { '@timestamp': { gte: 'now-10m', lte: 'now' } },
+      });
     });
 
     it('keeps the narrow lookback filter when the stream has no conflicts', async () => {
