@@ -696,6 +696,21 @@ export class WorkflowsExecutionEnginePlugin
                     shouldDeleteTask: true,
                   };
                 }
+                // Document `enabled` is the source of truth; leftover TM tasks must be deleted, not executed.
+                if (!workflow.enabled) {
+                  logger.warn(
+                    `Workflow ${workflowId} is disabled in space ${spaceId}; removing leftover scheduled task`
+                  );
+                  stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                    workflow_id: workflowId,
+                    space_id: spaceId,
+                    outcome: 'queued_deleted',
+                  });
+                  return {
+                    state: taskInstance.state,
+                    shouldDeleteTask: true,
+                  };
+                }
                 logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
                 // Overlap / recovery: always run so past-tick abandoned `pending` orphans are
