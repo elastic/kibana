@@ -27,6 +27,46 @@ interface QueueItem<TExecution extends { id: string }> {
   remainingRetries: number;
 }
 
+interface DocumentVersion {
+  index: string;
+  seqNo: number;
+  primaryTerm: number;
+}
+
+const fetchFreshVersions = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  ids: string[],
+  indexes: string[]
+): Promise<Map<string, DocumentVersion>> => {
+  const mgetDocs = ids.flatMap((id) =>
+    indexes.map((index) => ({ _id: id, _index: index, _source: false as const }))
+  );
+
+  const mgetResponse = await retryTransientEsErrors(() => esClient.mget({ docs: mgetDocs }), {
+    logger,
+  });
+
+  const versionById = new Map<string, DocumentVersion>();
+  for (const doc of mgetResponse.docs) {
+    if (
+      'found' in doc &&
+      doc.found &&
+      doc._seq_no !== undefined &&
+      doc._primary_term !== undefined &&
+      !versionById.has(doc._id)
+    ) {
+      versionById.set(doc._id, {
+        index: doc._index,
+        seqNo: doc._seq_no,
+        primaryTerm: doc._primary_term,
+      });
+    }
+  }
+
+  return versionById;
+};
+
 export async function retryOnConflicts<TExecution extends { id: string }>(
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -151,10 +191,20 @@ export async function retryOnConflicts<TExecution extends { id: string }>(
         items: toSend.map(({ plainItem }) => plainItem),
       });
 
+      // Separate conflicts into three buckets:
+      // - updater-origin: re-queue original BulkUpdaterItem so the next iteration re-mgets
+      // - plain OCC (seqNo set): mget fresh seqNo/primaryTerm before re-queuing
+      // - plain non-OCC (no seqNo, using retry_on_conflict): re-queue unchanged
+      const conflictingUpdaters: Array<QueueItem<TExecution>> = [];
+      interface ConflictingPlainOcc {
+        qi: QueueItem<TExecution>;
+        plainItem: BulkPlainItem<TExecution>;
+      }
+      const conflictingOcc: ConflictingPlainOcc[] = [];
       const nextQueue: Array<QueueItem<TExecution>> = [];
 
       esResponse.items.forEach((esItem, idx) => {
-        const { qi } = toSend[idx];
+        const { qi, plainItem } = toSend[idx];
         const esResult = esItem.create ?? esItem.index ?? esItem.update;
 
         if (!esResult?._id) {
@@ -173,12 +223,34 @@ export async function retryOnConflicts<TExecution extends { id: string }>(
         const isConflict = responseItem.error?.type === 'version_conflict_engine_exception';
 
         if (isConflict && qi.remainingRetries > 0) {
-          nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
+          if (isBulkUpdaterItem(qi.item)) {
+            conflictingUpdaters.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
+          } else if (plainItem.seqNo !== undefined) {
+            conflictingOcc.push({ qi, plainItem });
+          } else {
+            nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
+          }
         } else {
           result[qi.originalIndex] = responseItem;
           hasErrors = hasErrors || !!responseItem.error;
         }
       });
+
+      nextQueue.push(...conflictingUpdaters);
+
+      if (conflictingOcc.length > 0) {
+        const ids = conflictingOcc.map(({ plainItem }) => plainItem.document.id);
+        const versionById = await fetchFreshVersions(esClient, logger, ids, indexes);
+
+        conflictingOcc.forEach(({ qi, plainItem }) => {
+          const version = versionById.get(plainItem.document.id);
+          nextQueue.push({
+            item: version ? { ...plainItem, ...version } : plainItem,
+            originalIndex: qi.originalIndex,
+            remainingRetries: qi.remainingRetries - 1,
+          });
+        });
+      }
 
       queuedItems = nextQueue;
     }

@@ -16,10 +16,11 @@ import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_error
 import type { SharedBulkItem } from '../../lib/shared_bulk';
 import { sharedBulk } from '../../lib/shared_bulk';
 import type {
-  BulkItem,
   BulkItemResponse,
+  BulkPlainItem,
   BulkRequestOptions,
   BulkResponse,
+  BulkUpdaterItem,
   DataClient,
   ExecutionsCountRequest,
   ExecutionsDeleteByQueryRequest,
@@ -30,6 +31,7 @@ import type {
   ScriptUpdateRequest,
   ScriptUpdateResponse,
 } from '../../types';
+import { isBulkUpdaterItem } from '../../types';
 
 const notImplemented = (method: string): never => {
   throw new Error(`DataStreamDataClient.${method} is not implemented`);
@@ -188,104 +190,95 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     if (request.items.length === 0) {
       return { items: [], errors: false };
     }
-
-    const seenIds = new Set<string>();
-    for (const item of request.items) {
-      if (seenIds.has(item.document.id)) {
-        throw new Error(
-          `DataStreamDataClient.bulk: duplicate document id "${item.document.id}" in same request`
-        );
-      }
-      seenIds.add(item.document.id);
-    }
-
-    // Data streams require @timestamp on every document. Derive it from the item's
-    // dateField (createdAt for workflow executions, startedAt for step executions).
-    const itemsWithTimestamp = await this.assignTimestampToItems(request.items);
-
-    // Tracks an item through retries. originalIndex is its position in request.items
-    // so results can be written back to the correct slot regardless of retries.
-    // remainingRetries mirrors the caller's retryOnConflict budget per item.
-    interface RetryableItem {
-      item: SharedBulkItem<TExecution>;
-      originalIndex: number;
-      remainingRetries: number;
-    }
+    const meta = await this.deps.versionManager.getMeta();
+    const backingIndexes = meta.backingIndexes.slice(-2);
 
     const result = new Array<BulkItemResponse>(request.items.length);
     let hasErrors = false;
 
-    const queue: RetryableItem[] = itemsWithTimestamp.map((item, index) => ({
-      item,
-      originalIndex: index,
-      remainingRetries: item.retryOnConflict ?? 0,
-    }));
+    const updaterItemsWithIndex: Array<{
+      item: BulkUpdaterItem<TExecution>;
+      requestIndex: number;
+    }> = [];
+    const plainItemsWithIndex: Array<{ item: BulkPlainItem<TExecution>; requestIndex: number }> =
+      [];
 
-    // Resolve the write index once — it cannot change during a single bulk call.
-    // Passed down to bulkGetFreshVersions to avoid a getDataStream call per retry.
-    const { backingIndexes } = await this.deps.versionManager.getMeta();
-    const writeIndex = backingIndexes.at(-1);
+    for (let i = 0; i < request.items.length; i++) {
+      const item = request.items[i];
+      if (isBulkUpdaterItem(item)) {
+        updaterItemsWithIndex.push({ item, requestIndex: i });
+      } else {
+        plainItemsWithIndex.push({ item, requestIndex: i });
+      }
+    }
 
-    // On the first pass use the version cache; on retries bypass the cache so we
-    // always send the seqNo/primaryTerm that ES just wrote.
-    let fetchFreshVersions = false;
-
-    while (queue.length > 0) {
-      // Drain the queue into an immutable batch for this iteration. Any items that
-      // need retrying are pushed back to queue at the end of the loop.
-      const batch = queue.splice(0);
-
-      // resolveBulkItemVersions attaches the backing-index + seqNo + primaryTerm
-      // required by data streams for update/upsert operations. Items whose version
-      // cannot be found become preFailed (update) or are converted to create (upsert).
-      const { sendable, preFailed } = await this.resolveBulkItemVersions(
-        batch.map(({ item }) => item),
-        fetchFreshVersions,
-        writeIndex
-      );
-
-      const esResponse = await sharedBulk(
+    // Updater items: sharedBulk handles the mget + updater call + OCC retry loop.
+    if (updaterItemsWithIndex.length > 0) {
+      const updaterResponse = await sharedBulk(
         this.deps.esClient,
-        { ...request, items: sendable.map(({ item }) => item) },
-        this.deps.logger
+        { refresh: request.refresh, items: updaterItemsWithIndex.map(({ item }) => item) },
+        this.deps.logger,
+        backingIndexes
       );
 
-      const conflicting: RetryableItem[] = [];
+      updaterResponse.items.forEach((responseItem, idx) => {
+        result[updaterItemsWithIndex[idx].requestIndex] = responseItem;
+        hasErrors = hasErrors || !!responseItem.error;
+        if (
+          !responseItem.error &&
+          responseItem.seqNo !== undefined &&
+          responseItem.primaryTerm !== undefined
+        ) {
+          this.deps.versionManager.setVersion(responseItem.id, {
+            index: responseItem.index,
+            seqNo: responseItem.seqNo,
+            primaryTerm: responseItem.primaryTerm,
+          });
+        }
+      });
+    }
 
-      // esResponse.items maps 1:1 to sendable (not to batch). Use sendable[idx].originalIndex
-      // to get the correct batch entry — they diverge when preFailed items are present.
-      esResponse.items.forEach((responseItem, idx) => {
-        const pending = batch[sendable[idx].originalIndex];
-        const isConflict = responseItem.error?.type === 'version_conflict_engine_exception';
+    // Plain items: resolve backing-index + seqNo via the version manager, then bulk.
+    if (plainItemsWithIndex.length > 0) {
+      // resolveBulkItemVersions uses positional indexes into the array it receives,
+      // so pass only the items; look up requestIndex separately via plainItemsWithIndex.
+      const { sendable, preFailed } = await this.resolveBulkItemVersions(
+        plainItemsWithIndex.map(({ item }) => item),
+        false,
+        this.deps.dataStreamName
+      );
 
-        if (isConflict && pending.remainingRetries > 0) {
-          // Re-queue with a decremented budget. The next iteration will fetch a
-          // fresh seqNo/primaryTerm before retrying.
-          conflicting.push({ ...pending, remainingRetries: pending.remainingRetries - 1 });
-        } else {
-          if (responseItem.seqNo !== undefined && responseItem.primaryTerm !== undefined) {
+      preFailed.forEach(({ id, originalIndex, error }) => {
+        result[plainItemsWithIndex[originalIndex].requestIndex] = { id, index: '', error };
+        hasErrors = true;
+      });
+
+      if (sendable.length > 0) {
+        const bulkResponse = await sharedBulk(
+          this.deps.esClient,
+          { ...request, items: sendable.map(({ item }) => item) },
+          this.deps.logger,
+          backingIndexes
+        );
+
+        // bulkResponse.items is 1:1 with sendable; sendable[idx].originalIndex is the
+        // position in the plainItems array passed to resolveBulkItemVersions.
+        bulkResponse.items.forEach((responseItem, idx) => {
+          result[plainItemsWithIndex[sendable[idx].originalIndex].requestIndex] = responseItem;
+          hasErrors = hasErrors || !!responseItem.error;
+          if (
+            !responseItem.error &&
+            responseItem.seqNo !== undefined &&
+            responseItem.primaryTerm !== undefined
+          ) {
             this.deps.versionManager.setVersion(responseItem.id, {
               index: responseItem.index,
               seqNo: responseItem.seqNo,
               primaryTerm: responseItem.primaryTerm,
             });
           }
-          result[pending.originalIndex] = responseItem;
-          hasErrors = hasErrors || !!responseItem.error;
-        }
-      });
-
-      // preFailed.originalIndex is batch-relative; batch[originalIndex].originalIndex
-      // maps it back to the original request position.
-      preFailed.forEach(({ id, originalIndex, error }) => {
-        result[batch[originalIndex].originalIndex] = { id, error, index: '' };
-      });
-
-      if (conflicting.length > 0) {
-        queue.push(...conflicting);
+        });
       }
-
-      fetchFreshVersions = true;
     }
 
     return { items: result, errors: hasErrors };
@@ -342,42 +335,18 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     };
   }
 
-  private async assignTimestampToItems(
-    items: BulkItem<TExecution>[]
-  ): Promise<BulkItem<TExecution>[]> {
-    if (!this.deps.dateField) {
-      return items;
-    }
-
-    return items.map((item) => {
-      const timestampValue = item.document[this.deps.dateField];
-
-      if (typeof timestampValue !== 'string') {
-        return item;
-      }
-
-      return {
-        ...item,
-        document: {
-          ...item.document,
-          ...(timestampValue ? { '@timestamp': timestampValue } : {}),
-        },
-      };
-    });
-  }
-
-  // Classifies each item into sendable or preFailed and attaches the version info
-  // (backing index + seqNo + primaryTerm) required by data streams for CAS writes.
+  // Classifies plain items into sendable or preFailed, resolves the backing-index +
+  // seqNo + primaryTerm required by data streams for CAS writes, and injects @timestamp
+  // into creates and upserts that may become creates.
   //
   // originalIndex in both output arrays is the position of the item within `items`,
-  // NOT a position in request.items — callers must map through batch[] to get the
-  // true request position.
+  // NOT a position in request.items — callers must map through plainItemsWithIndex.
   //
   // `fresh` controls whether version resolution bypasses the in-memory cache:
   //   false — first pass, use cache then fall back to ES on misses (bulkGetVersions)
   //   true  — retry pass, always fetch from ES to get the latest seqNo (bulkGetFreshVersions)
   private async resolveBulkItemVersions(
-    items: BulkItem<TExecution>[],
+    items: BulkPlainItem<TExecution>[],
     fresh: boolean,
     writeIndex?: string
   ): Promise<{
@@ -388,14 +357,36 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }> = [];
     const pendingIds = new Map<string, number>();
 
+    const withTimestamp = (item: BulkPlainItem<TExecution>): BulkPlainItem<TExecution> => {
+      if (!this.deps.dateField) return item;
+      const ts = item.document[this.deps.dateField];
+      if (typeof ts !== 'string') return item;
+      return { ...item, document: { ...item.document, '@timestamp': ts } };
+    };
+
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
 
       if (item.operation === 'create') {
-        // Creates always target the write index; no version needed.
-        sendable.push({ item: { ...item, index: this.deps.dataStreamName }, originalIndex: i });
+        if (this.deps.dateField && typeof item.document[this.deps.dateField] !== 'string') {
+          preFailed.push({
+            id: item.document.id,
+            originalIndex: i,
+            error: {
+              type: 'illegal_argument_exception',
+              reason: `data stream requires field '${String(
+                this.deps.dateField
+              )}' to be set on create`,
+            },
+          });
+        } else {
+          sendable.push({
+            item: { ...withTimestamp(item), index: this.deps.dataStreamName },
+            originalIndex: i,
+          });
+        }
       } else {
-        // Version must be resolved from cache or ES before this item can be sent.
+        // update and upsert: version must be resolved before sending.
         pendingIds.set(item.document.id, i);
       }
     }
@@ -410,22 +401,22 @@ export class DataStreamDataClient<TExecution extends { id: string }>
 
       for (const [id, i] of pendingIds) {
         const version = versions[id];
+        const item = items[i];
 
         if (version) {
           // upsert with a known version becomes an update (document exists).
-          const operation = items[i].operation === 'upsert' ? 'update' : items[i].operation;
-          sendable.push({
-            item: { ...items[i], operation, ...version },
-            originalIndex: i,
-          });
+          const operation = item.operation === 'upsert' ? 'update' : item.operation;
+          sendable.push({ item: { ...item, operation, ...version }, originalIndex: i });
         } else {
           // No version found — document does not exist in the data stream.
           // upsert without a version becomes a create; plain update has nothing to update.
-          const item = items[i];
-
           if (item.operation === 'upsert') {
             sendable.push({
-              item: { ...item, operation: 'create', index: this.deps.dataStreamName },
+              item: {
+                ...withTimestamp(item),
+                operation: 'create',
+                index: this.deps.dataStreamName,
+              },
               originalIndex: i,
             });
           } else {
