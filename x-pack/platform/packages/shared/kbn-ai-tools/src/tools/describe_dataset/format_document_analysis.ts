@@ -65,7 +65,7 @@ function getFieldKey(field: DocumentAnalysis['fields'][number], conflict?: Field
     // No `suggestedCast` means ES could not resolve the union (unsupported member);
     // asserting `keyword` here would suggest a cast that itself fails.
     return conflict.suggestedCast
-      ? `${field.name} (${types}, recommended: ${conflict.suggestedCast})`
+      ? `${field.name} (${types} - recommended: ${conflict.suggestedCast})`
       : `${field.name} (${types} - ambiguous, no safe cast)`;
   }
 

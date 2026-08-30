@@ -94,7 +94,7 @@ describe('formatDocumentAnalysis', () => {
     });
 
     expect(result.fields).toEqual({
-      'exception.message (keyword, text, recommended: keyword)': ['boom (100%)'],
+      'exception.message (keyword, text - recommended: keyword)': ['boom (100%)'],
       'client.ip (ip, keyword - ambiguous, no safe cast)': ['10.0.0.1 (50%)', '(no value) (50%)'],
     });
   });
