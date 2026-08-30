@@ -9,7 +9,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 import type {
   BulkItem,
   BulkItemResponse,
@@ -43,9 +42,7 @@ const fetchFreshVersions = async (
     indexes.map((index) => ({ _id: id, _index: index, _source: false as const }))
   );
 
-  const mgetResponse = await retryTransientEsErrors(() => esClient.mget({ docs: mgetDocs }), {
-    logger,
-  });
+  const mgetResponse = await esClient.mget({ docs: mgetDocs });
 
   const versionById = new Map<string, DocumentVersion>();
   for (const doc of mgetResponse.docs) {
@@ -107,10 +104,7 @@ export async function retryOnConflicts<TExecution extends { id: string }>(
         }))
       );
 
-      const mgetResponse = await retryTransientEsErrors(
-        () => esClient.mget<TExecution>({ docs: mgetDocs }),
-        { logger }
-      );
+      const mgetResponse = await esClient.mget<TExecution>({ docs: mgetDocs });
 
       for (const doc of mgetResponse.docs) {
         if (

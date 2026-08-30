@@ -8,7 +8,6 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
 import type { DocumentVersionFields } from '../../types';
 
 export interface DocumentVersionManagerDeps {
@@ -37,13 +36,9 @@ export class DocumentVersionManager {
     const resolvedWriteIndex = writeIndex ?? (await this.getMeta()).backingIndexes.at(-1);
     const result: Record<string, Required<DocumentVersionFields>> = {};
 
-    const mgetResponse = await retryTransientEsErrors(
-      () =>
-        this.deps.esClient.mget({
-          docs: ids.map((id) => ({ _index: resolvedWriteIndex, _id: id, _source: false })),
-        }),
-      { logger: this.deps.logger }
-    );
+    const mgetResponse = await this.deps.esClient.mget({
+      docs: ids.map((id) => ({ _index: resolvedWriteIndex, _id: id, _source: false })),
+    });
 
     const missing: string[] = [];
     for (const doc of mgetResponse.docs) {
@@ -66,17 +61,13 @@ export class DocumentVersionManager {
     }
 
     if (missing.length > 0) {
-      const searchResponse = await retryTransientEsErrors(
-        () =>
-          this.deps.esClient.search({
-            index: this.deps.dataStreamName,
-            query: { ids: { values: missing } },
-            size: missing.length,
-            _source: false,
-            ignore_unavailable: true,
-          }),
-        { logger: this.deps.logger }
-      );
+      const searchResponse = await this.deps.esClient.search({
+        index: this.deps.dataStreamName,
+        query: { ids: { values: missing } },
+        size: missing.length,
+        _source: false,
+        ignore_unavailable: true,
+      });
 
       for (const hit of searchResponse.hits.hits) {
         if (hit._id && hit._seq_no !== undefined && hit._primary_term !== undefined) {
@@ -131,10 +122,9 @@ export class DocumentVersionManager {
   }
 
   async getMeta(): Promise<{ retentionTime: string | undefined; backingIndexes: string[] }> {
-    const { data_streams: dataStreams } = await retryTransientEsErrors(
-      () => this.deps.esClient.indices.getDataStream({ name: this.deps.dataStreamName }),
-      { logger: this.deps.logger }
-    );
+    const { data_streams: dataStreams } = await this.deps.esClient.indices.getDataStream({
+      name: this.deps.dataStreamName,
+    });
 
     const dataStream = dataStreams[0];
     const retentionTime = dataStream?.lifecycle?.data_retention as string | undefined;

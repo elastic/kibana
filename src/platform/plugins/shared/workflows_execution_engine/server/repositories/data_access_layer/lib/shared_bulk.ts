@@ -9,7 +9,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 import {
   type BulkItem,
   type BulkItemResponse,
@@ -112,9 +111,7 @@ const fetchFreshVersions = async (
     }));
   });
 
-  const mgetResponse = await retryTransientEsErrors(() => esClient.mget({ docs: mgetDocs }), {
-    logger,
-  });
+  const mgetResponse = await esClient.mget({ docs: mgetDocs });
 
   const versionById = new Map<string, DocumentVersion>();
   for (const doc of mgetResponse.docs) {
@@ -143,14 +140,10 @@ const sendBulkRequest = async <TExecution extends { id: string }>(
 ): Promise<estypes.BulkResponse> => {
   const operations = request.items.flatMap(toBulkOperations);
 
-  return retryTransientEsErrors(
-    () =>
-      esClient.bulk<TExecution, Partial<TExecution> & { id: string }>({
-        refresh: request.refresh,
-        operations,
-      }),
-    { logger }
-  );
+  return esClient.bulk<TExecution, Partial<TExecution> & { id: string }>({
+    refresh: request.refresh,
+    operations,
+  });
 };
 
 export async function sharedBulk<TExecution extends { id: string }>(
@@ -215,10 +208,7 @@ export async function sharedBulk<TExecution extends { id: string }>(
         }))
       );
 
-      const mgetResponse = await retryTransientEsErrors(
-        () => esClient.mget<TExecution>({ docs: mgetDocs }),
-        { logger }
-      );
+      const mgetResponse = await esClient.mget<TExecution>({ docs: mgetDocs });
 
       for (const doc of mgetResponse.docs) {
         if (

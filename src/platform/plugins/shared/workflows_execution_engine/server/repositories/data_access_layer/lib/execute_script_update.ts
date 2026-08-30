@@ -9,7 +9,6 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 import type { ScriptUpdateRequest, ScriptUpdateResponse, ScriptUpdateResult } from '../types';
 
 export interface ExecuteScriptUpdateParams {
@@ -53,23 +52,19 @@ export const executeScriptUpdate = async ({
   logger,
 }: ExecuteScriptUpdateParams): Promise<ScriptUpdateResponse> => {
   try {
-    const response = await retryTransientEsErrors(
-      () =>
-        esClient.update({
-          index: indexName,
-          id: request.id,
-          script: {
-            source: request.script,
-            lang: 'painless',
-            params: request.params,
-          },
-          ...(request.retryOnConflict !== undefined
-            ? { retry_on_conflict: request.retryOnConflict }
-            : {}),
-          ...(request.refresh !== undefined ? { refresh: request.refresh } : {}),
-        }),
-      { logger }
-    );
+    const response = await esClient.update({
+      index: indexName,
+      id: request.id,
+      script: {
+        source: request.script,
+        lang: 'painless',
+        params: request.params,
+      },
+      ...(request.retryOnConflict !== undefined
+        ? { retry_on_conflict: request.retryOnConflict }
+        : {}),
+      ...(request.refresh !== undefined ? { refresh: request.refresh } : {}),
+    });
 
     return {
       result: mapScriptUpdateResult(response.result),

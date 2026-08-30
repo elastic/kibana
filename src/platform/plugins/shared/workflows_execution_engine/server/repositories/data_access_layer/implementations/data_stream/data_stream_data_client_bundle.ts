@@ -19,6 +19,7 @@ import {
   DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './types';
+import { createRetryingEsClient } from '../../../../lib/create_retrying_es_client';
 import type {
   CreateDataClientDeps,
   DataClientBundle,
@@ -56,7 +57,10 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       coreStart.dataStreams.initializeClient(WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM),
     ]);
 
-    this.esClient = coreStart.elasticsearch.client.asInternalUser;
+    this.esClient = createRetryingEsClient(
+      coreStart.elasticsearch.client.asInternalUser,
+      this.deps.logger
+    );
   }
 
   async stop(): Promise<void> {}

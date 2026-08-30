@@ -11,7 +11,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { DocumentVersionManager } from './document_version_manager';
-import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
 
 import type { SharedBulkItem } from '../../lib/shared_bulk';
 import { sharedBulk } from '../../lib/shared_bulk';
@@ -60,15 +59,11 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   public async search(
     request: ExecutionsSearchRequest
   ): Promise<estypes.SearchResponse<TExecution>> {
-    const searchResponse: estypes.SearchResponse<TExecution> = await retryTransientEsErrors(
-      () =>
-        this.deps.esClient.search({
-          index: this.indexesToQuery,
-          ...request,
-          ignore_unavailable: true,
-        }),
-      { logger: this.deps.logger }
-    );
+    const searchResponse: estypes.SearchResponse<TExecution> = await this.deps.esClient.search({
+      index: this.indexesToQuery,
+      ...request,
+      ignore_unavailable: true,
+    });
 
     searchResponse.hits.hits.forEach((hit) => {
       if (hit._id && hit?._source && hit._seq_no !== undefined && hit._primary_term !== undefined) {
@@ -83,14 +78,10 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   }
 
   public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
-    return retryTransientEsErrors(
-      () =>
-        this.deps.esClient.count({
-          index: this.indexesToQuery,
-          ...request,
-        }),
-      { logger: this.deps.logger }
-    );
+    return this.deps.esClient.count({
+      index: this.indexesToQuery,
+      ...request,
+    });
   }
 
   public async getByIds(
@@ -125,15 +116,11 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       }
     }
 
-    const mgetResponse = await retryTransientEsErrors(
-      () =>
-        this.deps.esClient.mget<TExecution>({
-          docs: mgetDocs,
-          ...(options?.sourceIncludes?.length ? { _source_includes: options.sourceIncludes } : {}),
-          ...(options?.sourceExcludes?.length ? { _source_excludes: options.sourceExcludes } : {}),
-        }),
-      { logger: this.deps.logger }
-    );
+    const mgetResponse = await this.deps.esClient.mget<TExecution>({
+      docs: mgetDocs,
+      ...(options?.sourceIncludes?.length ? { _source_includes: options.sourceIncludes } : {}),
+      ...(options?.sourceExcludes?.length ? { _source_excludes: options.sourceExcludes } : {}),
+    });
 
     const items: Array<GetExecutionByIdsItem<TExecution>> = [];
     const foundIds = new Set<string>();
@@ -289,17 +276,13 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   public async deleteByQuery(
     _request: ExecutionsDeleteByQueryRequest
   ): Promise<estypes.DeleteByQueryResponse> {
-    const searchResponse = await retryTransientEsErrors(
-      () =>
-        this.deps.esClient.search({
-          index: this.deps.dataStreamName,
-          query: _request.query,
-          size: 10000,
-          seq_no_primary_term: true,
-          _source: false,
-        }),
-      { logger: this.deps.logger }
-    );
+    const searchResponse = await this.deps.esClient.search({
+      index: this.deps.dataStreamName,
+      query: _request.query,
+      size: 10000,
+      seq_no_primary_term: true,
+      _source: false,
+    });
 
     for (const hit of searchResponse.hits.hits) {
       if (hit._id && hit._seq_no !== undefined && hit._primary_term !== undefined) {

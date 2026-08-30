@@ -10,7 +10,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
 import { executeScriptUpdate } from '../../lib/execute_script_update';
 import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
 import { sharedBulk } from '../../lib/shared_bulk';
@@ -46,25 +45,17 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
   public async search(
     request: ExecutionsSearchRequest
   ): Promise<estypes.SearchResponse<TExecution>> {
-    return retryTransientEsErrors(
-      () =>
-        this.deps.esClient.search<TExecution>({
-          ...request,
-          index: this.deps.indexName,
-        }),
-      { logger: this.deps.logger }
-    );
+    return this.deps.esClient.search<TExecution>({
+      ...request,
+      index: this.deps.indexName,
+    });
   }
 
   public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
-    return retryTransientEsErrors(
-      () =>
-        this.deps.esClient.count({
-          ...request,
-          index: this.deps.indexName,
-        }),
-      { logger: this.deps.logger }
-    );
+    return this.deps.esClient.count({
+      ...request,
+      index: this.deps.indexName,
+    });
   }
 
   public async getByIds(
@@ -228,13 +219,9 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
   public async deleteByQuery(
     request: ExecutionsDeleteByQueryRequest
   ): Promise<estypes.DeleteByQueryResponse> {
-    return retryTransientEsErrors(
-      () =>
-        this.deps.esClient.deleteByQuery({
-          ...request,
-          index: this.deps.indexName,
-        }),
-      { logger: this.deps.logger }
-    );
+    return this.deps.esClient.deleteByQuery({
+      ...request,
+      index: this.deps.indexName,
+    });
   }
 }
