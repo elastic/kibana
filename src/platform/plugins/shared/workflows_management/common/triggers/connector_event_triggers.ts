@@ -70,6 +70,7 @@ export const getConnectorEventTriggerDefinitions = ({
       description: eventDefinition.description,
       eventSchema: toConnectorEventTriggerSchema(eventDefinition.eventSchema),
       stability: 'tech_preview' as const,
+      requiresConnectorId: true,
     }))
   );
 };

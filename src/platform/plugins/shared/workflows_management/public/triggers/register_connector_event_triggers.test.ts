@@ -38,6 +38,7 @@ describe('registerConnectorEventTriggersPublic', () => {
       expect.objectContaining({
         id: 'inboundWebhook.received',
         stability: 'tech_preview',
+        requiresConnectorId: true,
         icon: expect.anything(),
       })
     );

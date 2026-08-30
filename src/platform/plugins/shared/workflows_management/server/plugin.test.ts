@@ -148,6 +148,7 @@ describe('WorkflowsPlugin', () => {
       expect.objectContaining({
         id: 'inboundWebhook.received',
         stability: 'tech_preview',
+        requiresConnectorId: true,
       })
     );
   });
