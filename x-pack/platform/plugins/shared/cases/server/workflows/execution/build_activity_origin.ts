@@ -10,6 +10,7 @@ import type { WorkflowOrigin, Case } from '../../../common/types/domain';
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
 import { findAlertIndex } from './alert_attachment_utils';
 
@@ -52,6 +53,10 @@ export const buildActivityOrigin = ({
       return { ...activityOrigin, typeKey: obs.typeKey, value: obs.value };
     }
     return activityOrigin;
+  }
+
+  if (origin.type === OBSERVABLES_WORKFLOW_ORIGIN_TYPE) {
+    return { type: origin.type, id: origin.caseId, count: origin.observableIds.length };
   }
 
   return { type: origin.type, id: origin.caseId };

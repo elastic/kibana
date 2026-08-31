@@ -210,7 +210,7 @@ describe('buildActivityOrigin', () => {
   });
 
   describe('cases.observables origin', () => {
-    it('maps the API origin to the persisted activity shape using the caseId', () => {
+    it('maps the API origin to the persisted activity shape with count', () => {
       const origin = {
         type: OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
         caseId: 'case-1',
@@ -219,6 +219,20 @@ describe('buildActivityOrigin', () => {
       expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual({
         type: OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
         id: 'case-1',
+        count: 2,
+      });
+    });
+
+    it('records count for a single observable in the bulk selection', () => {
+      const origin = {
+        type: OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        observableIds: ['obs-1'],
+      };
+      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual({
+        type: OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
+        id: 'case-1',
+        count: 1,
       });
     });
   });

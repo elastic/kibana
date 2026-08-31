@@ -32,7 +32,8 @@ export const WorkflowPayloadRt = rt.strict({
  * - `cases.case`        — triggered from the case detail page.
  * - `cases.observable`  — triggered from the observables table for a specific observable;
  *                         carries optional `typeKey` + `value` for display.
- * - `cases.observables` — triggered from the observables table with a multi-observable selection.
+ * - `cases.observables` — triggered from the observables table with a multi-observable selection;
+ *                         carries optional `count` for display in the activity feed.
  * - `cases.alert`       — triggered from the alerts table for a single alert;
  *                         carries optional `index` for the deep link.
  * - `cases.alerts`      — triggered from the alerts table with a multi-alert selection.
@@ -58,11 +59,19 @@ export const WorkflowOriginRt = rt.union([
       }),
     ])
   ),
-  rt.strict({
-    type: rt.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
-    /** The primary identifier: caseId. */
-    id: rt.string,
-  }),
+  rt.exact(
+    rt.intersection([
+      rt.type({
+        type: rt.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
+        /** The primary identifier: caseId. */
+        id: rt.string,
+      }),
+      rt.partial({
+        /** Number of observables in the selection, for display in the activity feed. */
+        count: rt.number,
+      }),
+    ])
+  ),
   rt.exact(
     rt.intersection([
       rt.type({

@@ -98,7 +98,17 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
             values={{ name: workflowNameNode }}
           />
         );
-      case OBSERVABLES_WORKFLOW_ORIGIN_TYPE:
+      case OBSERVABLES_WORKFLOW_ORIGIN_TYPE: {
+        const count = origin.count;
+        if (count !== undefined) {
+          return (
+            <FormattedMessage
+              id="xpack.cases.caseView.userActions.ranWorkflowOnObservablesCountLabel"
+              defaultMessage="ran {name} on {count, plural, one {# observable} other {# observables}}"
+              values={{ name: workflowNameNode, count }}
+            />
+          );
+        }
         return (
           <FormattedMessage
             id="xpack.cases.caseView.userActions.ranWorkflowOnObservablesLabel"
@@ -106,6 +116,7 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
             values={{ name: workflowNameNode }}
           />
         );
+      }
       case ALERTS_WORKFLOW_ORIGIN_TYPE:
         return (
           <FormattedMessage
