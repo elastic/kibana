@@ -23,7 +23,6 @@ import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_po
 import { DeleteActionPolicyConfirmModal } from '../delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from '../../../pages/list_action_policies_page/components/update_api_key_confirmation_modal';
 import { UserCapabilities } from '../../../services/user_capabilities';
-import { useActionPolicyAutoAttach } from '../../../agent_builder/use_action_policy_auto_attach';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 
 interface Props {
@@ -40,7 +39,6 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
 
   const { data: policy, isLoading, isError } = useFetchActionPolicy(policyId);
-  useActionPolicyAutoAttach(policy);
   const { mutate: createActionPolicy } = useCreateActionPolicy();
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
   const {

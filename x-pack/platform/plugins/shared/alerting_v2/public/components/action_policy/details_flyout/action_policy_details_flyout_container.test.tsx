@@ -12,7 +12,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { paths } from '../../../constants';
 import { ActionPolicyDetailsFlyoutContainer } from './action_policy_details_flyout_container';
-import { useActionPolicyAutoAttach } from '../../../agent_builder/use_action_policy_auto_attach';
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePathPrepend = jest.fn((p: string) => p);
@@ -44,10 +43,6 @@ jest.mock('@kbn/core-di-browser', () => {
     CoreStart: (key: string) => key,
   };
 });
-
-jest.mock('../../../agent_builder/use_action_policy_auto_attach', () => ({
-  useActionPolicyAutoAttach: jest.fn(),
-}));
 
 jest.mock('../../../hooks/use_fetch_action_policy', () => ({
   useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
@@ -207,8 +202,6 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     throttle: undefined,
     ...overrides,
   } as ActionPolicyResponse);
-
-const mockUseActionPolicyAutoAttach = jest.mocked(useActionPolicyAutoAttach);
 
 const renderContainer = () =>
   render(
@@ -393,15 +386,5 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
 
     await userEvent.click(screen.getByTestId('flyout-cancel-snooze'));
     expect(mockUnsnoozePolicy).toHaveBeenCalledWith('policy-1');
-  });
-
-  describe('Agent Builder auto-attach', () => {
-    it('passes the loaded action policy to useActionPolicyAutoAttach', () => {
-      const policy = buildPolicy();
-      mockUseFetchActionPolicy.mockReturnValue({ data: policy });
-      renderContainer();
-
-      expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(policy);
-    });
   });
 });
