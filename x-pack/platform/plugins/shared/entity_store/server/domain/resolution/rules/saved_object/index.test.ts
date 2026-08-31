@@ -75,9 +75,9 @@ describe('EntityResolutionRuleType', () => {
     const latestVersion = Math.max(
       ...Object.keys(EntityResolutionRuleType.modelVersions ?? {}).map(Number)
     );
-    const latestCreate = (EntityResolutionRuleType.modelVersions as Record<number, TestModelVersion>)[
-      latestVersion
-    ].schemas?.create;
+    const latestCreate = (
+      EntityResolutionRuleType.modelVersions as Record<number, TestModelVersion>
+    )[latestVersion].schemas?.create;
 
     expect(latestCreate).toBe(createSchema);
 

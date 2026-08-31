@@ -241,9 +241,7 @@ export const assertNotResolved = async (
 ): Promise<void> => {
   const existing = await fetchEntitySource(esClient, entityId);
   if (!existing) {
-    throw new Error(
-      `Entity '${entityId}' was not found — cannot assert it stayed unresolved`
-    );
+    throw new Error(`Entity '${entityId}' was not found — cannot assert it stayed unresolved`);
   }
 
   const start = Date.now();
@@ -251,9 +249,7 @@ export const assertNotResolved = async (
   while (Date.now() - start < timeoutMs) {
     const source = await fetchEntitySource(esClient, entityId);
     if (!source) {
-      throw new Error(
-        `Entity '${entityId}' disappeared while asserting it stayed unresolved`
-      );
+      throw new Error(`Entity '${entityId}' disappeared while asserting it stayed unresolved`);
     }
     const resolvedTo = readResolvedTo(source);
     if (resolvedTo != null) {

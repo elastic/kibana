@@ -294,9 +294,7 @@ async function resolveMatchGroup(
     const aliasIds = [
       ...new Set([
         ...unresolved.map((entity) => entity.entityId),
-        ...existingTargets
-          .filter((entity) => !entity.resolvedTo)
-          .map((entity) => entity.entityId),
+        ...existingTargets.filter((entity) => !entity.resolvedTo).map((entity) => entity.entityId),
       ]),
     ].filter((id) => id !== target.entityId);
 

@@ -62,9 +62,7 @@ const MATCHER_RULE_IDS = [
   RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE,
 ] as const;
 
-const watermarkedRules = Object.fromEntries(
-  MATCHER_RULE_IDS.map((id) => [id, matcherState])
-);
+const watermarkedRules = Object.fromEntries(MATCHER_RULE_IDS.map((id) => [id, matcherState]));
 
 const createEsClient = () =>
   ({
@@ -127,9 +125,9 @@ describe('automatedResolutionMaintainerConfig', () => {
   });
 
   it('pins the matcher rule ids so adding a rule fails this test on purpose', () => {
-    expect(RESOLUTION_RULE_CONFIGS.filter((config) => config.match).map((config) => config.id)).toEqual(
-      [...MATCHER_RULE_IDS]
-    );
+    expect(
+      RESOLUTION_RULE_CONFIGS.filter((config) => config.match).map((config) => config.id)
+    ).toEqual([...MATCHER_RULE_IDS]);
   });
 
   it('runs every watermarked matcher rule and skips related_user when disabled', async () => {

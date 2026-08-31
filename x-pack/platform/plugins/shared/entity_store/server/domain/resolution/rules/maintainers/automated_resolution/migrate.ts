@@ -41,7 +41,8 @@ const toLastRun = (value: unknown): PerRuleLastRunStats | null => {
       skippedAmbiguousBuckets: value.skippedAmbiguousBuckets,
       skippedOversizedBuckets:
         typeof value.skippedOversizedBuckets === 'number' ? value.skippedOversizedBuckets : 0,
-      skippedNoopBuckets: typeof value.skippedNoopBuckets === 'number' ? value.skippedNoopBuckets : 0,
+      skippedNoopBuckets:
+        typeof value.skippedNoopBuckets === 'number' ? value.skippedNoopBuckets : 0,
       cascadeRetargeted: typeof value.cascadeRetargeted === 'number' ? value.cascadeRetargeted : 0,
       cascadesBlocked: typeof value.cascadesBlocked === 'number' ? value.cascadesBlocked : 0,
     };
@@ -73,10 +74,7 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   };
 };
 
-const sanitizeRules = (
-  value: unknown,
-  logger: Logger
-): Record<string, PerRuleState> => {
+const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleState> => {
   if (!isRecord(value)) {
     return {};
   }
@@ -114,9 +112,7 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
   const storedVersion = typeof source.version === 'number' ? source.version : 0;
 
   if (storedVersion > AUTOMATED_RESOLUTION_STATE_VERSION) {
-    const rules = isRecord(source.rules)
-      ? (source.rules as Record<string, PerRuleState>)
-      : {};
+    const rules = isRecord(source.rules) ? (source.rules as Record<string, PerRuleState>) : {};
     return { version: storedVersion, rules };
   }
 

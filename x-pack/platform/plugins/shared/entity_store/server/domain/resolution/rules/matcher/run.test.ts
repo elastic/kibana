@@ -90,9 +90,7 @@ const entityHit = (id: string, namespace: string, resolvedTo?: string) => ({
     entity: {
       id,
       namespace,
-      ...(resolvedTo
-        ? { relationships: { resolution: { resolved_to: resolvedTo } } }
-        : {}),
+      ...(resolvedTo ? { relationships: { resolution: { resolved_to: resolvedTo } } } : {}),
     },
   },
 });
@@ -746,10 +744,7 @@ describe('runEsqlMatcherRule', () => {
       return {
         hits: {
           hits: ids.map((id) =>
-            entityHit(
-              id,
-              id.includes('okta') || id.endsWith('-a') ? 'okta' : 'entra_id'
-            )
+            entityHit(id, id.includes('okta') || id.endsWith('-a') ? 'okta' : 'entra_id')
           ),
         },
       };
