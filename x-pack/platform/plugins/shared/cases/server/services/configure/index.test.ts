@@ -103,6 +103,7 @@ const basicConfigFields = {
       label: 'test observable type',
     },
   ],
+  workflowTags: [],
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
@@ -300,6 +301,7 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "workflowTags": Array [],
           }
         `);
       });
@@ -652,6 +654,7 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "workflowTags": Array [],
           }
         `);
       });

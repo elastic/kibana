@@ -22,6 +22,7 @@ export const initialConfiguration: CasesConfigurationUI = {
   id: '',
   owner: '',
   observableTypes: [],
+  workflowTags: [],
 };
 
 export const getConfigurationByOwner = ({
