@@ -328,6 +328,10 @@ export interface ProjectNavigationAgentBuilderPanel {
   kind: 'agentBuilder';
   id: string;
   target: 'agent_builder';
+  /**
+   * Chrome-owned host callback. Called with the element when the expanded panel mounts,
+   * and with `null` when that host unmounts (collapsed sidenav or another primary is open).
+   */
   hostRef: (element: HTMLElement | null) => void;
 }
 

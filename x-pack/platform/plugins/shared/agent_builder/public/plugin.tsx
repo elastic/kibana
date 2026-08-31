@@ -175,12 +175,15 @@ export class AgentBuilderPlugin
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+
+    // POC: server conversation list (same source as UnifiedSidebar), not local visit history.
+    // list() is unbounded today; later bound in ES (limit=5, sort=updated_at). Keep shareReplay.
     startDependencies.navigation.registerNavigationSection({
       kind: 'linkList',
       id: 'agentBuilderRecentlyViewed',
       target: 'agent_builder',
-      title: i18n.translate('xpack.agentBuilder.navigation.recentlyViewedTitle', {
-        defaultMessage: 'Recently viewed',
+      title: i18n.translate('xpack.agentBuilder.navigation.recentConversationsTitle', {
+        defaultMessage: 'Recent conversations',
       }),
       viewAllHref: core.application.getUrlForApp(AGENTBUILDER_APP_ID),
       items$: eventsService.activeConversation$.pipe(

@@ -15,9 +15,6 @@ import type { MenuItem, SecondaryMenuSection } from '../../types';
 export const getPopoverSections = (item: MenuItem): SecondaryMenuSection[] | undefined =>
   item.popoverSections ?? item.sections;
 
-/** Expanded side panel body. Popover-only recents do not count. */
-export const hasPanelSubmenu = (item: MenuItem): boolean => (item.sections?.length ?? 0) > 0;
-
 /**
  * Utility function for checking whether the menu item has a submenu.
  *

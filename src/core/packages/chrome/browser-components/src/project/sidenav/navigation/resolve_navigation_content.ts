@@ -116,22 +116,6 @@ export const resolvePanelContent = (
   );
 };
 
-const stripQuery = (url: string): string => url.split('?')[0];
-
-export const findActivePopoverItemId = (
-  resolved: readonly ResolvedLinksContent[],
-  currentUrl: string
-): string | undefined => {
-  const current = stripQuery(currentUrl);
-  for (const section of resolved) {
-    for (const item of section.items) {
-      if (stripQuery(item.href) === current) {
-        return item.id;
-      }
-    }
-  }
-};
-
 export const attachPopoverSections = (
   navigationItems: NavigationItems,
   resolved: readonly ResolvedLinksContent[]

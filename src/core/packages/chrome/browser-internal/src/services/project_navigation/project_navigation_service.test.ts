@@ -1019,3 +1019,35 @@ describe('getActiveSolutionNavId$()', () => {
     expect(activeId).toBe('oblt');
   });
 });
+
+describe('registerNavigationSection / registerNavigationPanel', () => {
+  it('does not emit on the section registry when a panel is registered', () => {
+    const { projectNavigation } = setup();
+    const sectionSnapshots: Array<readonly unknown[]> = [];
+    const subscription = projectNavigation
+      .getRegisteredNavigationSections$()
+      .subscribe((sections) => {
+        sectionSnapshots.push(sections);
+      });
+
+    projectNavigation.registerNavigationSection({
+      kind: 'linkList',
+      id: 'dashboardRecentlyViewed',
+      target: 'dashboards',
+      title: 'Recently viewed',
+      items$: of([]),
+    });
+    const afterSection = sectionSnapshots.length;
+
+    projectNavigation.registerNavigationPanel({
+      kind: 'agentBuilder',
+      id: 'agentBuilderPanel',
+      target: 'agent_builder',
+      hostRef: () => undefined,
+    });
+
+    expect(sectionSnapshots).toHaveLength(afterSection);
+    expect(sectionSnapshots.at(-1)).toHaveLength(1);
+    subscription.unsubscribe();
+  });
+});

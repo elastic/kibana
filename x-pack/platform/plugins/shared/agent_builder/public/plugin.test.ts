@@ -30,7 +30,7 @@ jest.mock('@kbn/shared-ux-utility', () => ({
 }));
 
 jest.mock('./services', () => {
-  const { BehaviorSubject } = jest.requireActual('rxjs');
+  const { BehaviorSubject: RxBehaviorSubject } = jest.requireActual('rxjs');
   return {
     AgentService: jest.fn(),
     AttachmentsService: jest.fn(() => ({ addAttachmentType: jest.fn() })),
@@ -53,7 +53,7 @@ jest.mock('./services', () => {
     OAuthClientsService: jest.fn(),
     PluginsService: jest.fn(),
     EventsService: jest.fn(() => ({
-      activeConversation$: new BehaviorSubject(null),
+      activeConversation$: new RxBehaviorSubject(null),
       setActiveConversation: jest.fn(),
       clearActiveConversation: jest.fn(),
     })),

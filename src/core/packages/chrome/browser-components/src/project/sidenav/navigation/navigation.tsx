@@ -22,7 +22,6 @@ import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import {
   attachPopoverSections,
-  findActivePopoverItemId,
   resolveLinksContent,
   resolvePanelContent,
   type ResolvedPanelContent,
@@ -73,7 +72,6 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
     const navigation$ = chrome.project.getNavigation$();
     const registeredSections$ = chrome.project.getRegisteredNavigationSections$();
     const registeredPanels$ = chrome.project.getRegisteredNavigationPanels$();
-    const currentUrl$ = chrome.project.getCurrentUrl$();
 
     const tree$ = navigation$.pipe(
       map(({ navigationTree }) => navigationTree),
@@ -96,9 +94,9 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
 
     const panelElements = new Map<string, ReactNode>();
 
-    const structure$ = combineLatest([navigation$, resolvedContent$]).pipe(
-      map(([nav, resolved]) => {
-        const items = attachPanelContent(
+    return combineLatest([navigation$, resolvedContent$]).pipe(
+      map(([nav, resolved]) => ({
+        ...attachPanelContent(
           attachPopoverSections(
             toNavigationItems(
               nav.navigationTree,
@@ -110,20 +108,8 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
           ),
           resolved.panels,
           panelElements
-        );
-        return {
-          items,
-          links: resolved.links,
-          solutionId: nav.solutionId,
-        };
-      })
-    );
-
-    return combineLatest([structure$, currentUrl$]).pipe(
-      map(([{ items, links, solutionId }, currentUrl]) => ({
-        ...items,
-        activeItemId: findActivePopoverItemId(links, currentUrl) ?? items.activeItemId,
-        solutionId,
+        ),
+        solutionId: nav.solutionId,
       }))
     );
   }, [chrome, basePath]);
@@ -146,9 +132,11 @@ const panelHostStyles = css`
   flex-direction: column;
 `;
 
-const NavigationPanelHost = ({ hostRef }: { hostRef: (element: HTMLElement | null) => void }) => (
-  <div ref={hostRef} css={panelHostStyles} />
-);
+export const NavigationPanelHost = ({
+  hostRef,
+}: {
+  hostRef: (element: HTMLElement | null) => void;
+}) => <div ref={hostRef} css={panelHostStyles} />;
 
 const attachPanelContent = (
   navigationItems: NavigationItems,
