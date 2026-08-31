@@ -16,7 +16,6 @@ import {
   combineLatestWith,
   debounceTime,
   distinctUntilChanged,
-  firstValueFrom,
   map,
   merge,
   mergeMap,
@@ -88,11 +87,9 @@ import {
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
-  incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   initialPinnedPanels: DashboardState['pinned_panels'],
-  trackPanel: ReturnType<typeof initializeTrackPanel>['api'],
-  historyUpdated$: Observable<void>
+  trackPanel: ReturnType<typeof initializeTrackPanel>['api']
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -285,11 +282,6 @@ export function initializeLayoutManager(
     trackPanel.setScrollToPanelId(first.embeddableId);
     trackPanel.setHighlightPanelId(first.embeddableId);
   };
-
-  // On initialization, place incoming embeddables if there is at least one
-  firstValueFrom(historyUpdated$).then(() => {
-    addIncomingEmbeddables(incomingEmbeddables);
-  });
 
   // --------------------------------------------------------------------------------------
   // API definition
