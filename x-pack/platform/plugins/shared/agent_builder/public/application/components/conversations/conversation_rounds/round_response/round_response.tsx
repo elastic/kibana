@@ -105,6 +105,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
             isVisible
             isLastRound={isLastRound}
             rawRound={rawRound}
+            actionStackGutterSize="s"
           />
         </EuiFlexItem>
       )}

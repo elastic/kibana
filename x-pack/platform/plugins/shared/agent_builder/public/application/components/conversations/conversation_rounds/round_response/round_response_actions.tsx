@@ -65,6 +65,7 @@ interface RoundResponseActionsProps {
   rawRound?: ConversationRound;
   /** Which side of the round `content` comes from, so the copy wording matches it. */
   copyTarget?: keyof typeof copyLabels;
+  actionStackGutterSize: 'none' | 's';
 }
 
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
@@ -73,6 +74,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   isLastRound,
   rawRound,
   copyTarget = 'response',
+  actionStackGutterSize,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { addSuccessToast } = useToasts();
@@ -152,7 +154,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const showFeedback = Boolean(rawRound) && rawRound?.status === ConversationRoundStatus.completed;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize={actionStackGutterSize} responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
           direction="rowReverse"

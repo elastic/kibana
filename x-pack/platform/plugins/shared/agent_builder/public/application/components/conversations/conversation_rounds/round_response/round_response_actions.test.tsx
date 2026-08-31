@@ -74,7 +74,7 @@ describe('RoundResponseActions', () => {
   });
 
   it('labels the copy action for the agent response by default', async () => {
-    render(<RoundResponseActions content="the answer" isVisible />);
+    render(<RoundResponseActions content="the answer" isVisible actionStackGutterSize="s" />);
 
     const copyButton = screen.getByRole('button', { name: 'Copy response' });
     await userEvent.click(copyButton);
@@ -84,7 +84,14 @@ describe('RoundResponseActions', () => {
   });
 
   it('labels the copy action for the user prompt when copyTarget is prompt', async () => {
-    render(<RoundResponseActions content="my question" isVisible copyTarget="prompt" />);
+    render(
+      <RoundResponseActions
+        content="my question"
+        isVisible
+        copyTarget="prompt"
+        actionStackGutterSize="none"
+      />
+    );
 
     const copyButton = screen.getByRole('button', { name: 'Copy prompt' });
     await userEvent.click(copyButton);

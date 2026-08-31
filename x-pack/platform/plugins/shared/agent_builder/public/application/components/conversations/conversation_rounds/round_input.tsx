@@ -80,10 +80,19 @@ export const RoundInput = ({
     inline-size: 100%;
   `;
 
+  const stackItemSpacingStyles = css`
+    margin-block-start: ${euiTheme.size.xxs};
+  `;
+
+  const actionContentStyles = css`
+    inline-size: 100%;
+    margin-block-start: ${euiTheme.size.xxs};
+  `;
+
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="xs"
+      gutterSize="none"
       alignItems="flexStart"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
@@ -112,7 +121,7 @@ export const RoundInput = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       {hasAttachmentReferences && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={stackItemSpacingStyles}>
           <RoundAttachmentReferences
             attachmentRefs={attachmentRefs}
             conversationAttachments={conversationAttachments}
@@ -122,8 +131,13 @@ export const RoundInput = ({
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <RoundResponseActions content={input} isVisible={isHovering} copyTarget="prompt" />
+      <EuiFlexItem grow={false} css={actionContentStyles}>
+        <RoundResponseActions
+          content={input}
+          isVisible={isHovering}
+          copyTarget="prompt"
+          actionStackGutterSize="none"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
