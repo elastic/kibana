@@ -66,7 +66,7 @@ describe('investigation lifecycle contracts', () => {
     });
   });
 
-  it('persists the investigation saved object before emit, retrying then failing the run', () => {
+  it('persists the investigation record before emit, retrying then failing the run', () => {
     expect(investigation.steps[1].name).toBe('persist_investigation_started');
     const persistStarted = requireStep('persist_investigation_started');
 

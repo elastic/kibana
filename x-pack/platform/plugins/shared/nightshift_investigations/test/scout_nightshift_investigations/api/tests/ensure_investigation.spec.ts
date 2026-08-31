@@ -48,7 +48,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns 404 when no saved object and no matching workflow execution exist',
+      'returns 404 when no investigation record and no matching workflow execution exist',
       async ({ apiClient }) => {
         const response = await ensureInvestigation(apiClient, cookieHeader, 'non-existent-id');
         expect(response).toHaveStatusCode(404);

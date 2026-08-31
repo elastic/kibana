@@ -47,14 +47,14 @@ steps:
   # touches that client — as does any hand-written workflow or manual run. Ensuring it here is the
   # one place that covers every trigger. Idempotent, and it never overwrites admin edits.
   #
-  # Runs before persist / emit so that a failure here does not leave a stale `running` saved
-  # object or lifecycle event. Without `on-failure: continue`, a failure also cannot leave a
+  # Runs before persist / emit so that a failure here does not leave a stale `running`
+  # investigation record or lifecycle event. Without `on-failure: continue`, a failure also cannot leave a
   # pending marker on a significant event for an investigation that will never produce anything:
   # no `investigations` entry is written, so the next discovery cycle retries.
   - name: ensure_investigation_agent
     type: nightshift.ensureInvestigationAgent
 
-  # Creates the nightshift-investigation saved object for this run if it does not exist yet.
+  # Creates the investigation record for this run if it does not exist yet.
   # Runs before emit so any run that proceeds past this step is guaranteed to be visible to the
   # investigations API regardless of how it was triggered (start endpoint,
   # nightshift.triggerInvestigation step, or a direct workflow execution). Retries transient
@@ -721,7 +721,7 @@ steps:
     on-failure:
       continue: true
 
-  # Persists the investigation structured output to the nightshift-investigation saved object.
+  # Persists the investigation structured output onto the investigation record.
   # Runs after `investigate` when the agent completed successfully. Writes completed status +
   # all structured output fields. Retries transient failures, then fails the run: a completed
   # investigation whose record cannot be written must not be lost silently. The persist route

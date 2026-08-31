@@ -47,7 +47,7 @@ export const updateInvestigationRoute = createNightshiftInvestigationsServerRout
     access: 'internal',
     summary: 'Update investigation state',
     description:
-      'Updates the investigation saved object with structured output and/or terminal status. Called by workflow steps at completion.',
+      'Updates the investigation record with structured output and/or terminal status. Called by workflow steps at completion.',
   },
   security: {
     authz: {

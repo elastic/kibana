@@ -79,9 +79,7 @@ export const waitForInvestigation = async (kbnClient: KbnClient, id: string): Pr
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
-  throw new Error(
-    `Investigation saved object "${id}" did not appear within ${maxAttempts} attempts`
-  );
+  throw new Error(`Investigation record "${id}" did not appear within ${maxAttempts} attempts`);
 };
 
 export interface SeedInvestigationOptions {

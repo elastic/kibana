@@ -16,7 +16,7 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
     access: 'internal',
     summary: 'Ensure the investigation record for a workflow execution exists',
     description:
-      'Creates the investigation saved object for a workflow execution if it does not exist yet. ' +
+      'Creates the investigation record for a workflow execution if it does not exist yet. ' +
       'Called by the investigation workflow (after ensuring the agent exists) so every run is ' +
       'tracked regardless of how it was triggered. All attributes derive from the execution document, ' +
       'never from the request.',
