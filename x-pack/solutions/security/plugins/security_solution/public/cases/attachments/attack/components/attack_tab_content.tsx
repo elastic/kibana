@@ -272,22 +272,32 @@ const getDetectedOn = (
 };
 
 /**
- * The attack summary as plain text. The live summary is de-anonymised here; the snapshot was
- * already de-anonymised at attach time, so de-anonymising it again would corrupt it.
+ * The attack summary as plain text, with the `{{ field value }}` tokens the markdown carries
+ * reduced to their values so no markdown syntax reaches the cell.
+ *
+ * The live summary is de-anonymised here; the snapshot was de-anonymised at attach time, so
+ * de-anonymising it again would rewrite any of its words that happen to be a replacement key.
  */
 const getSummary = (
   attack: AttackDiscoveryAlert | undefined,
   metadata: AttackAttachmentMetadata
 ): string | undefined => {
-  const markdown =
-    attack != null
-      ? replaceAnonymizedValuesWithOriginalValues({
-          messageContent: attack.summaryMarkdown,
-          replacements: attack.replacements,
-        })
-      : metadata.summaryMarkdown;
+  const liveMarkdown = attack?.summaryMarkdown;
 
-  return markdown != null && markdown.length > 0 ? getSummaryPlainText(markdown) : undefined;
+  if (liveMarkdown != null && liveMarkdown.length > 0) {
+    return getSummaryPlainText(
+      replaceAnonymizedValuesWithOriginalValues({
+        messageContent: liveMarkdown,
+        replacements: attack?.replacements,
+      })
+    );
+  }
+
+  const snapshotMarkdown = metadata.summaryMarkdown;
+
+  return snapshotMarkdown != null && snapshotMarkdown.length > 0
+    ? getSummaryPlainText(snapshotMarkdown)
+    : undefined;
 };
 
 const getAlertCount = (

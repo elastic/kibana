@@ -58,6 +58,7 @@ const EUI_COLUMN_SORTING_TEST_ID = 'dataGridColumnSortingButton';
 const EUI_DISPLAY_SELECTOR_TEST_ID = 'dataGridDisplaySelectorButton';
 const EUI_FULL_SCREEN_TEST_ID = 'dataGridFullScreenButton';
 const EUI_PAGINATION_TEST_ID = 'tablePaginationPopoverButton';
+const EUI_CELL_EXPAND_TEST_ID = 'euiDataGridCellExpandButton';
 const euiHeaderActionsTestId = (columnId: string) => `dataGridHeaderCellActionButton-${columnId}`;
 const euiColumnToggleTestId = (columnId: string) =>
   `dataGridColumnSelectorToggleColumnVisibility-${columnId}`;
@@ -257,16 +258,6 @@ describe('AttackTabContent', () => {
       expect(screen.getByTestId(ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID)).toHaveTextContent('—');
     });
 
-    it('renders the summary as plain text with no markdown field syntax', () => {
-      mockFindResult([]);
-
-      renderTab();
-
-      const summary = screen.getByTestId(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID);
-      expect(summary).toHaveTextContent('An adversary dumped lsass.exe memory');
-      expect(summary.textContent).not.toContain('{{');
-    });
-
     it('hides the risk score, status and provenance columns until they are picked', () => {
       renderTab();
 
@@ -310,6 +301,102 @@ describe('AttackTabContent', () => {
       );
 
       expect(screen.getByTestId(EUI_PAGINATION_TEST_ID)).toHaveTextContent('Rows per page: 50');
+    });
+  });
+
+  describe('the summary column', () => {
+    const summaryCell = () => screen.getByTestId(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID);
+
+    it('prefers the live summary, de-anonymised', () => {
+      mockFindResult([
+        {
+          ...liveAttack,
+          summaryMarkdown: 'The adversary escalated on {{ host.name ea25b45c }}',
+          replacements: { ea25b45c: 'win-01' },
+        },
+      ]);
+
+      renderTab();
+
+      expect(summaryCell()).toHaveTextContent('The adversary escalated on win-01');
+    });
+
+    it('renders the snapshotted summary when the live document cannot be resolved', () => {
+      mockFindResult([]);
+
+      renderTab();
+
+      expect(summaryCell()).toHaveTextContent('An adversary dumped lsass.exe memory');
+    });
+
+    it('renders plain text with no markdown field syntax', () => {
+      mockFindResult([]);
+
+      renderTab();
+
+      expect(summaryCell().textContent).not.toContain('{{');
+      expect(summaryCell().textContent).not.toContain('}}');
+    });
+
+    it('does not de-anonymise the snapshotted summary a second time', () => {
+      // The snapshot was de-anonymised at attach time, so it holds original values. A word of it
+      // that also happens to be a replacement key must survive verbatim.
+      mockFindResult([{ ...liveAttack, summaryMarkdown: '', replacements: { admin: 'root' } }]);
+
+      renderAttachments([
+        buildAttachment({
+          metadata: {
+            title: 'Snapshotted attack title',
+            summaryMarkdown: 'admin escalated privileges',
+            alertCount: 1,
+            timestamp: '2024-04-01T09:00:00.000Z',
+            index: '.alerts-security.attack.discovery.alerts-default',
+          },
+        }),
+      ]);
+
+      expect(summaryCell()).toHaveTextContent('admin escalated privileges');
+    });
+
+    it('renders the empty value for an attachment written before summaries were captured', () => {
+      mockFindResult([]);
+
+      renderAttachments([
+        buildAttachment({
+          metadata: {
+            title: 'Attached before summaries were captured',
+            alertCount: 1,
+            timestamp: '2024-04-01T09:00:00.000Z',
+            index: '.alerts-security.attack.discovery.alerts-default',
+          },
+        }),
+      ]);
+
+      expect(summaryCell()).toHaveTextContent('—');
+    });
+
+    it('clips the summary to a single line', () => {
+      renderTab();
+
+      expect(summaryCell()).toHaveStyleRule('overflow', 'hidden');
+      expect(summaryCell()).toHaveStyleRule('text-overflow', 'ellipsis');
+      expect(summaryCell()).toHaveStyleRule('white-space', 'nowrap');
+    });
+
+    it('reveals the untruncated summary through the cell expansion popover', async () => {
+      const longSummary = `The adversary authenticated as {{ user.name svc-backup }} and then ${'moved laterally through the estate '.repeat(
+        8
+      )}before exfiltrating data.`;
+      mockFindResult([{ ...liveAttack, summaryMarkdown: longSummary }]);
+
+      renderTab();
+
+      await userEvent.hover(summaryCell());
+      await userEvent.click(await screen.findByTestId(EUI_CELL_EXPAND_TEST_ID));
+
+      const [, expanded] = screen.getAllByTestId(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID);
+      expect(expanded).toHaveTextContent('before exfiltrating data.');
+      expect(expanded).not.toHaveStyleRule('white-space', 'nowrap');
     });
   });
 
