@@ -386,17 +386,14 @@ export const EcfDeploymentSection = ({
           {hasEcfUnified && (
             <EcfFamilyPanel
               description={
-                dataFormat === 'otel' ? (
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description.otel"
-                    defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the OTel-native template, per the data format chosen in Step 1. The trigger source (S3 or CloudWatch) is configured per service in Service settings."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description.ecs"
-                    defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the ECS-compatible template, per the data format chosen in Step 1. The trigger source (S3 or CloudWatch) is configured per service in Service settings."
-                  />
-                )
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description"
+                  defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the <b>{templateName}</b> template, per the data format chosen in Step 1. Trigger source (S3 or CloudWatch) is configured per service in Service settings. Launch CloudFormation to deploy."
+                  values={{
+                    b: (chunks) => <strong>{chunks}</strong>,
+                    templateName: dataFormat === 'otel' ? 'OTel-native' : 'ECS-compatible',
+                  }}
+                />
               }
               launchUrl={unifiedLaunchUrl}
               isLaunched={launchedFamilies.includes('unified')}
