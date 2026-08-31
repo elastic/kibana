@@ -147,7 +147,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
     const { container, getByText } = await renderPopulatedPage();
     const allCards = countCards(container);
 
-    fireEvent.click(getByText('Model family'));
+    fireEvent.click(getByText('Model provider'));
     await waitFor(() => expect(getByText('Anthropic')).toBeInTheDocument());
 
     fireEvent.click(getByText('Anthropic'));
