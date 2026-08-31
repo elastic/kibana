@@ -296,6 +296,25 @@ export interface CasesTelemetry {
     totalCasesCreated: number;
     totalRules: number;
   };
+  workflows: {
+    /** Total and time-bucketed workflow run counts (one per case per execution). */
+    runs: Count;
+    /** Number of distinct cases that have had at least one workflow run. */
+    totalCasesWithRuns: number;
+    /** Cardinality of distinct usernames that have triggered a workflow from a case. */
+    totalUniqueUsers: number;
+    /** Breakdown of runs by origin surface. `bulk` is runs with no origin (list-level). */
+    byOriginType: {
+      case: number;
+      observable: number;
+      observables: number;
+      alert: number;
+      alerts: number;
+      bulk: number;
+    };
+    /** Number of case configurations that have at least one workflow tag set. */
+    configurationsWithWorkflowTags: number;
+  };
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;

@@ -18,7 +18,9 @@ import {
   CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE,
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
+  CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE,
 } from '../../common/constants';
+import { CASE_WORKFLOW_RUN_ORIGIN_TYPES } from '../../common/constants/workflow';
 import { registerTemplateAnalytics } from './templates';
 
 export const registerAnalytics = ({
@@ -36,6 +38,16 @@ export const registerAnalytics = ({
         _meta: {
           description: 'The solution ID (owner) that rendered the Cases page',
           optional: false,
+        },
+      },
+      workflow_run_availability: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Whether the "Run workflow" action is available to the current user on this case, ' +
+            'and if not, the first blocking reason. One of: "available", "no_update_privilege", ' +
+            '"config_disabled", "ui_setting_disabled", "no_execute_privilege".',
+          optional: true,
         },
       },
     },
@@ -267,6 +279,48 @@ export const registerAnalytics = ({
         },
         _meta: {
           description: 'The bounded set of filter dimensions actively applied at load time',
+          optional: false,
+        },
+      },
+    },
+  });
+
+  analyticsService.registerEventType({
+    eventType: CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE,
+    schema: {
+      owner: {
+        type: 'keyword',
+        _meta: {
+          description: 'The solution ID (owner) in which the workflow was triggered',
+          optional: false,
+        },
+      },
+      origin_type: {
+        type: 'keyword',
+        _meta: {
+          description:
+            `The surface from which the workflow was triggered. One of: ${[
+              ...CASE_WORKFLOW_RUN_ORIGIN_TYPES,
+              'bulk',
+            ].join(', ')}. ` +
+            '"bulk" means the run was started from the cases-list bulk action without a specific case origin.',
+          optional: false,
+        },
+      },
+      case_count: {
+        type: 'integer',
+        _meta: {
+          description:
+            'Number of cases included in this workflow run (1 for single-case surfaces, >1 for list bulk).',
+          optional: false,
+        },
+      },
+      tag_filter_active: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Whether the owner has configured available workflow tags in Case Settings, ' +
+            'causing the workflow picker to be pre-filtered. Tag values are never reported.',
           optional: false,
         },
       },

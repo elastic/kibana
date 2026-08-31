@@ -258,4 +258,60 @@ export const casesSchema: CasesTelemetrySchema = {
     totalCasesCreated: long,
     totalRules: long,
   },
+  workflows: {
+    runs: countSchema,
+    totalCasesWithRuns: {
+      type: 'long',
+      _meta: { description: 'Number of distinct cases that have had at least one workflow run' },
+    },
+    totalUniqueUsers: {
+      type: 'long',
+      _meta: {
+        description: 'Cardinality of distinct usernames that have triggered a workflow from a case',
+      },
+    },
+    byOriginType: {
+      case: {
+        type: 'long',
+        _meta: { description: 'Runs triggered from the case detail page' },
+      },
+      observable: {
+        type: 'long',
+        _meta: { description: 'Runs triggered from the observables table for a single observable' },
+      },
+      observables: {
+        type: 'long',
+        _meta: {
+          description:
+            'Runs triggered from the observables table with a multi-observable selection',
+        },
+      },
+      alert: {
+        type: 'long',
+        _meta: { description: 'Runs triggered from the alerts table for a single alert' },
+      },
+      alerts: {
+        type: 'long',
+        _meta: {
+          description: 'Runs triggered from the alerts table with a multi-alert selection',
+        },
+      },
+      bulk: {
+        type: 'long',
+        _meta: {
+          description:
+            'Runs triggered from the cases-list bulk action (no single-case origin). ' +
+            'Derived as total minus the sum of all origin buckets.',
+        },
+      },
+    },
+    configurationsWithWorkflowTags: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of case configurations that have at least one workflow tag set. ' +
+          'Tag values are never reported.',
+      },
+    },
+  },
 };
