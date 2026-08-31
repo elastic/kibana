@@ -9,49 +9,22 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
-import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
-import { useAgentId } from '../../../../hooks/use_conversation';
-import { RoundAuthorHeader } from '../round_author_header';
+import { RoundResponseActions } from './round_response_actions';
 import { RoundResponse } from './round_response';
 
-jest.mock('../../../../hooks/agents/use_agent_by_id', () => ({
-  useAgentBuilderAgentById: jest.fn(),
-}));
-
-jest.mock('../../../../hooks/use_conversation', () => ({
-  useAgentId: jest.fn(),
-}));
-
-jest.mock('../round_author_header', () => ({
-  RoundAuthorHeader: jest.fn(() => null),
-}));
-
 jest.mock('./chat_message_text', () => ({
-  ChatMessageText: () => null,
+  ChatMessageText: jest.fn(() => null),
 }));
 
 jest.mock('./streaming_text', () => ({
-  StreamingText: () => null,
+  StreamingText: jest.fn(() => null),
 }));
 
 jest.mock('./round_response_actions', () => ({
-  RoundResponseActions: () => null,
+  RoundResponseActions: jest.fn(() => null),
 }));
 
-const useAgentIdMock = jest.mocked(useAgentId);
-const useAgentBuilderAgentByIdMock = jest.mocked(useAgentBuilderAgentById);
-const roundAuthorHeaderMock = jest.mocked(RoundAuthorHeader);
-const agent: AgentDefinition = {
-  id: 'agent-1',
-  type: 'chat',
-  name: 'Threat Hunting Agent',
-  description: '',
-  readonly: false,
-  configuration: {
-    tools: [],
-  },
-};
+const roundResponseActionsMock = jest.mocked(RoundResponseActions);
 
 const createRound = (): ConversationRound =>
   ({
@@ -77,16 +50,10 @@ const createRound = (): ConversationRound =>
 
 describe('RoundResponse', () => {
   beforeEach(() => {
-    useAgentIdMock.mockReturnValue('agent-1');
-    useAgentBuilderAgentByIdMock.mockReturnValue({
-      agent,
-      isLoading: false,
-      error: null,
-    } as ReturnType<typeof useAgentBuilderAgentById>);
-    roundAuthorHeaderMock.mockClear();
+    roundResponseActionsMock.mockClear();
   });
 
-  it('passes the current agent name to the author header', () => {
+  it('renders response actions after a completed response', () => {
     const round = createRound();
 
     render(
@@ -97,25 +64,20 @@ describe('RoundResponse', () => {
         isLoading={false}
         isLastRound={false}
         rawRound={round}
-        startedAt={round.started_at}
       />
     );
 
-    expect(useAgentBuilderAgentByIdMock).toHaveBeenCalledWith('agent-1');
-    expect(roundAuthorHeaderMock).toHaveBeenCalledWith(
+    expect(roundResponseActionsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        agent,
+        content: 'hi',
+        isVisible: true,
+        rawRound: round,
       }),
       expect.anything()
     );
   });
 
-  it('does not render the author header when the agent is not available', () => {
-    useAgentBuilderAgentByIdMock.mockReturnValue({
-      agent: null,
-      isLoading: false,
-      error: null,
-    } as ReturnType<typeof useAgentBuilderAgentById>);
+  it('does not render response actions while loading', () => {
     const round = createRound();
 
     render(
@@ -123,13 +85,12 @@ describe('RoundResponse', () => {
         hasError={false}
         response={round.response}
         steps={round.steps}
-        isLoading={false}
+        isLoading={true}
         isLastRound={false}
         rawRound={round}
-        startedAt={round.started_at}
       />
     );
 
-    expect(roundAuthorHeaderMock).not.toHaveBeenCalled();
+    expect(roundResponseActionsMock).not.toHaveBeenCalled();
   });
 });

@@ -21,12 +21,15 @@ import { AgentPromptType, type PromptResponse } from '@kbn/agent-builder-common/
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
+import { RoundAuthorHeader } from './round_author_header';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
 import { AuthorizationPrompt, ConfirmationPrompt, AskUserQuestionPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './todos_step_display';
 import { isPendingCurrentRound } from './round_author';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { useAgentId } from '../../../hooks/use_conversation';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -113,6 +116,8 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     status,
     pending_prompts: pendingPrompts,
   } = rawRound;
+  const agentId = useAgentId();
+  const { agent } = useAgentBuilderAgentById(agentId);
   const todosStep = useMemo(() => findTodosStep(steps), [steps]);
 
   const {
@@ -214,6 +219,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         />
       </EuiFlexItem>
 
+      {agent && (
+        <EuiFlexItem grow={false}>
+          <RoundAuthorHeader startedAt={startedAt} agent={agent} />
+        </EuiFlexItem>
+      )}
+
       {/* Steps container — always rendered above the error block so steps
           stay anchored where the user last saw them. */}
       {steps.length > 0 && (
@@ -308,7 +319,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               attachmentRefs={attachmentRefs}
               conversationId={conversationId}
               rawRound={rawRound}
-              startedAt={startedAt}
             />
           </EuiFlexItem>
           <EuiSpacer />

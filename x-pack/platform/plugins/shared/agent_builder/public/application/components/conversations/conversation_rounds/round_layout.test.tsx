@@ -6,15 +6,21 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import {
   ConversationOriginType,
   ConversationRoundStatus,
   type ConversationRound,
 } from '@kbn/agent-builder-common';
+import { createReasoningStep } from '@kbn/agent-builder-common/chat/conversation';
+import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { RoundLayout } from './round_layout';
 import { RoundInput } from './round_input';
+import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
+import { RoundAuthorHeader } from './round_author_header';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { useAgentId } from '../../../hooks/use_conversation';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { pendingRoundId } from '../../../utils/new_conversation';
 
@@ -23,7 +29,19 @@ jest.mock('./round_input', () => ({
 }));
 
 jest.mock('./round_response/round_response', () => ({
-  RoundResponse: jest.fn(() => null),
+  RoundResponse: jest.fn(({ response }) => (
+    <div data-test-subj="agentBuilderRoundResponse">{response.message}</div>
+  )),
+}));
+
+jest.mock('./round_events/round_events', () => ({
+  RoundEvents: jest.fn(() => <div data-test-subj="agentBuilderThinkingPanel">Reasoning</div>),
+}));
+
+jest.mock('./round_author_header', () => ({
+  RoundAuthorHeader: jest.fn(({ agent }) => (
+    <div data-test-subj="agentBuilderAssistantAttribution">{agent.name}</div>
+  )),
 }));
 
 jest.mock('./round_error/round_error', () => ({
@@ -42,11 +60,33 @@ jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
 }));
 
+jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
+  useAgentBuilderAgentById: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_conversation', () => ({
+  useAgentId: jest.fn(),
+}));
+
 const useConversationStreamMock = useConversationStream as jest.MockedFunction<
   typeof useConversationStream
 >;
+const useAgentIdMock = jest.mocked(useAgentId);
+const useAgentBuilderAgentByIdMock = jest.mocked(useAgentBuilderAgentById);
 const roundInputMock = RoundInput as jest.MockedFunction<typeof RoundInput>;
+const roundEventsMock = RoundEvents as jest.MockedFunction<typeof RoundEvents>;
 const roundResponseMock = RoundResponse as jest.MockedFunction<typeof RoundResponse>;
+const roundAuthorHeaderMock = jest.mocked(RoundAuthorHeader);
+const agent: AgentDefinition = {
+  id: 'agent-1',
+  type: 'chat',
+  name: 'Threat Hunting Agent',
+  description: '',
+  readonly: false,
+  configuration: {
+    tools: [],
+  },
+};
 
 const createRound = (version: number): ConversationRound =>
   ({
@@ -74,6 +114,12 @@ const createRound = (version: number): ConversationRound =>
 describe('RoundLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useAgentIdMock.mockReturnValue('agent-1');
+    useAgentBuilderAgentByIdMock.mockReturnValue({
+      agent,
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useAgentBuilderAgentById>);
     useConversationStreamMock.mockReturnValue({
       sendMessage: jest.fn(),
       isResponseLoading: false,
@@ -192,11 +238,48 @@ describe('RoundLayout', () => {
     );
     expect(roundInputProps).not.toHaveProperty('authorProfile');
     expect(roundInputProps).not.toHaveProperty('isCurrentUser');
-    expect(roundResponseMock.mock.calls[0][0]).toEqual(
+    expect(roundAuthorHeaderMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({
+        agent,
         startedAt: round.started_at,
       })
     );
+    expect(roundResponseMock.mock.calls[0][0]).not.toHaveProperty('startedAt');
+  });
+
+  it('renders the agent attribution before reasoning and response content', () => {
+    const round = {
+      ...createRound(1),
+      steps: [createReasoningStep({ reasoning: 'Checking indices' })],
+    };
+
+    render(
+      <RoundLayout
+        allRounds={[round]}
+        conversationId="conversation-1"
+        isCurrentRound={false}
+        rawRound={round}
+        roundIndex={0}
+        scrollContainerHeight={100}
+      />
+    );
+
+    const attribution = screen.getByTestId('agentBuilderAssistantAttribution');
+    const thinkingPanel = screen.getByTestId('agentBuilderThinkingPanel');
+    const response = screen.getByTestId('agentBuilderRoundResponse');
+
+    expect(roundAuthorHeaderMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agent,
+        startedAt: round.started_at,
+      }),
+      expect.anything()
+    );
+    expect(roundEventsMock).toHaveBeenCalled();
+    expect(attribution.compareDocumentPosition(thinkingPanel)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(attribution.compareDocumentPosition(response)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('passes pending round context to the input renderer', () => {
