@@ -203,16 +203,21 @@ export const FieldSelect: FC<FieldSelectProps> = ({
     ? currentIndexPattern.getFieldByName(selectedField)?.displayName ?? selectedField
     : undefined;
 
+  const activeField: EuiComboBoxOptionOption<FieldChoiceWithOperationType> | undefined =
+    selectedOperationType && selectedField
+      ? {
+          label: selectedFieldLabel ?? selectedField,
+          value: {
+            type: 'field',
+            field: selectedField,
+            operationType: selectedOperationType,
+          },
+        }
+      : undefined;
+
   return (
     <FieldPicker<FieldChoiceWithOperationType>
-      activeField={
-        (selectedOperationType && selectedField
-          ? {
-              label: selectedFieldLabel ?? selectedField,
-              value: { type: 'field', field: selectedField },
-            }
-          : undefined) as unknown as VisFieldOption<FieldChoiceWithOperationType>
-      }
+      activeField={activeField}
       options={memoizedFieldOptions as Array<VisFieldOption<FieldChoiceWithOperationType>>}
       onChoose={(choice) => {
         if (choice && choice.field !== selectedField) {

@@ -293,7 +293,7 @@ describe('FieldInput', () => {
     expect(instance.find(EuiComboBox).first().prop('selectedOptions')).toEqual([
       {
         label: 'dest',
-        value: { type: 'field', field: 'dest' },
+        value: { type: 'field', field: 'dest', operationType: 'terms' },
       },
     ]);
   });
