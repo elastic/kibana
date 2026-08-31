@@ -90,4 +90,29 @@ spaceTest.describe('Discover session dashboard editing', { tag: '@local-stateful
       await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
     }
   );
+
+  spaceTest(
+    'resets to a normal Discover session after leaving a dashboard edit session',
+    async ({ page, pageObjects }) => {
+      const { dashboard, discover, unifiedTabs } = pageObjects;
+
+      await dashboard.openNewDashboard();
+      await dashboard.addSavedSearch(testData.SAVED_SEARCH_TITLE);
+      await dashboard.waitForRenderComplete();
+
+      await dashboard.clickPanelAction(
+        'embeddablePanelAction-editPanel',
+        testData.SAVED_SEARCH_TITLE
+      );
+      await discover.openInlineEditorInDiscover();
+
+      expect(await discover.getCurrentQueryName()).toBe(`Editing ${testData.SAVED_SEARCH_TITLE}`);
+      await expect(page.testSubj.locator('unifiedTabs_tabsBar')).toBeVisible();
+
+      await discover.goto({ queryMode: 'classic' });
+
+      expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled']);
+      await expect(page.testSubj.locator('discoverSaveButton')).toHaveText('Save');
+    }
+  );
 });

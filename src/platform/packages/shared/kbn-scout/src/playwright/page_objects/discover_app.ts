@@ -660,6 +660,12 @@ export class DiscoverApp {
     await this.page.testSubj.locator('discoverCancelButton').click();
   }
 
+  /** Opens a linked panel's inline Dashboard edit session in the full Discover editor. */
+  async openInlineEditorInDiscover() {
+    await this.page.testSubj.click('discoverEmbeddableInlineEditEditInDiscoverLink');
+    await this.waitUntilTabIsLoaded();
+  }
+
   /**
    * Saves the current Discover table (including any ES|QL controls) as a by-value
    * panel on a brand-new dashboard, then navigates to that dashboard.
