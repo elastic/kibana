@@ -348,6 +348,7 @@ const handleConversationExecution = async ({
                 agentId,
                 round: event.data.round,
                 modelProvider: connectorProvider,
+                conversationAttachments: event.data.attachments ?? conversation.attachments ?? [],
               });
             }
           } catch (error) {
