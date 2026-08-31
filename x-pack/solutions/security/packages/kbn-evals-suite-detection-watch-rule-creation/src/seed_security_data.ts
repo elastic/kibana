@@ -44,7 +44,7 @@ const nowIso = () => new Date().toISOString();
  * that matches every document is indistinguishable from a rule that matches the right ones, so a
  * fixture of pure attack traffic cannot detect an over-broad query.
  */
-const JS_PROTO = ['java', 'script'].join(':');
+const JS_PROTO = ['javas', 'cript'].join('');
 
 export const buildFixtures = (): SeededIndex[] => [
   {
