@@ -124,6 +124,8 @@ jobs:
           github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           script: |
             core.setOutput('diverted', 'false');
+            core.info('Automatic Libra cohort routing is disabled.');
+            return;
 
             const pullRequest = context.payload.pull_request;
             const payloadLabels = (pullRequest?.labels || []).map((label) => label.name);

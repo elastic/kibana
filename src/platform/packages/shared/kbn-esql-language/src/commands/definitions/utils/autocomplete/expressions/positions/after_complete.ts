@@ -13,12 +13,15 @@ import { isParameterType } from '../../../../types';
 import { getTimeUnitLiterals } from '../../../literals';
 import type { ExpressionContext } from '../types';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
-import { commaCompleteItem } from '../../../../../registry/complete_items';
+import {
+  commaCompleteItem,
+  commaWithAutoSuggestCompleteItem,
+} from '../../../../../registry/complete_items';
 import { getExpressionType } from '../../../expressions';
 import { getLogicalContinuationSuggestions } from '../operators/utils';
 import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
 import { SuggestionBuilder } from '../suggestion_builder';
-import { logicalOperators } from '../../../../all_operators';
+import { inOperators, logicalOperators } from '../../../../all_operators';
 import {
   hasArbitraryExpressionSignature,
   isAmbiguousPosition,
@@ -26,6 +29,10 @@ import {
   hasVariadicSignature,
   isTypeAcceptedAtPosition,
 } from '../../../signatures';
+import { isTupleExpression } from '../utils';
+
+// TODO: Remove this flag when multi-column IN subqueries become generally available in Elasticsearch.
+export const PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED = false;
 
 /**
  * Handler for autocomplete suggestions after complete expressions.
@@ -40,6 +47,12 @@ import {
 export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
   const { expressionRoot, context, options } = ctx;
   const { functionParameterContext } = options;
+
+  if (isTupleExpression(expressionRoot)) {
+    return new SuggestionBuilder(ctx)
+      .addOperators({ allowed: inOperators.map(({ name }) => name) })
+      .build();
+  }
 
   // Postfix unary operators (IS NULL, IS NOT NULL) are complete boolean expressions
   // They should only suggest logical operators (AND, OR) and comma in function contexts
@@ -181,7 +194,7 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     });
   }
 
-  // Add comma if needed (only in function context)
+  // Add comma after function arguments.
   if (functionParameterContext) {
     builder.addCommaIfNeeded({
       position: 'after_complete',
@@ -196,6 +209,16 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       expressionType,
       isCursorFollowedByComma: options.isCursorFollowedByComma,
     });
+  }
+
+  // This context requires `)` after the cursor, so an existing comma cannot reach this branch.
+  if (
+    PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED &&
+    options.allowSubquery &&
+    !functionParameterContext &&
+    ctx.parenthesizedExpressionPosition === 'inside'
+  ) {
+    builder.addSuggestions([commaWithAutoSuggestCompleteItem]);
   }
 
   return builder.build();

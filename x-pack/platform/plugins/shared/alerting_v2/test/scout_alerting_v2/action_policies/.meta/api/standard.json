@@ -1,8 +1,7 @@
 {
-  "sha1": "d04ae0fd97f6713e4985608232d1ca5ac7eaa0fc",
+  "sha1": "ac61a3fda4284fcfb4b5c8d33e936c59e97c9d8f",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -2996,8 +2995,8 @@
       }
     },
     {
-      "id": "2fa1e7a47503ebc-1213d7779379485",
-      "title": "Upsert action policy API validation: rejects destination with unknown type",
+      "id": "2fa1e7a47503ebc-d0683b3ec7678a9",
+      "title": "Upsert action policy API validation: rejects id over the maximum length",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3009,6 +3008,19 @@
       }
     },
     {
+      "id": "2fa1e7a47503ebc-1213d7779379485",
+      "title": "Upsert action policy API validation: rejects destination with unknown type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
+        "line": 237,
+        "column": 88
+      }
+    },
+    {
       "id": "2fa1e7a47503ebc-d5b3163d42164a7",
       "title": "Upsert action policy API validation: rejects body with unknown top-level keys (strict schema)",
       "expectedStatus": "passed",
@@ -3017,8 +3029,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 240,
-        "column": 82
+        "line": 249,
+        "column": 49
       }
     },
     {
@@ -3030,8 +3042,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 251,
-        "column": 23
+        "line": 259,
+        "column": 64
       }
     },
     {
@@ -3043,8 +3055,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 266,
-        "column": 23
+        "line": 275,
+        "column": 24
       }
     },
     {
@@ -3056,8 +3068,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 280,
-        "column": 21
+        "line": 289,
+        "column": 22
       }
     },
     {
@@ -3069,8 +3081,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 289,
-        "column": 5
+        "line": 297,
+        "column": 12
       }
     },
     {
@@ -3082,8 +3094,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 296,
-        "column": 47
+        "line": 306,
+        "column": 19
       }
     }
   ]

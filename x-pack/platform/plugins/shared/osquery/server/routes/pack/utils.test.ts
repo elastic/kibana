@@ -93,32 +93,37 @@ describe('Pack utils', () => {
   });
 
   describe('convertSOQueriesToPackConfig (legacy / no packSchedule)', () => {
+    const FIXED_FALLBACK = '2026-01-01T00:00:00.000Z';
+
     test('converts to pack with converting query to single line', () => {
       const { queries } = convertSOQueriesToPackConfig(getTestQueries(), {
         isRruleFeatureEnabled: true,
+        fallbackStartDate: FIXED_FALLBACK,
       });
-      expect(queries).toStrictEqual(getOneLiner({}));
+      expect(queries).toStrictEqual(getOneLiner({ start_date: FIXED_FALLBACK }));
     });
 
     test('snapshot true / removed true → result type omitted from output', () => {
       const { queries } = convertSOQueriesToPackConfig(
         getTestQueries({ snapshot: true, removed: true }),
-        { isRruleFeatureEnabled: true }
+        { isRruleFeatureEnabled: true, fallbackStartDate: FIXED_FALLBACK }
       );
-      expect(queries).toStrictEqual(getOneLiner({}));
+      expect(queries).toStrictEqual(getOneLiner({ start_date: FIXED_FALLBACK }));
     });
     test('converts with results snapshot set false', () => {
       const { queries } = convertSOQueriesToPackConfig(
         getTestQueries({ snapshot: false, removed: true }),
-        { isRruleFeatureEnabled: true }
+        { isRruleFeatureEnabled: true, fallbackStartDate: FIXED_FALLBACK }
       );
-      expect(queries).toStrictEqual(getOneLiner({ snapshot: false, removed: true }));
+      expect(queries).toStrictEqual(
+        getOneLiner({ snapshot: false, removed: true, start_date: FIXED_FALLBACK })
+      );
     });
 
     test('passes through schedule_id and start_date', () => {
       const { queries } = convertSOQueriesToPackConfig(
         getTestQueries({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' }),
-        { isRruleFeatureEnabled: true }
+        { isRruleFeatureEnabled: true, fallbackStartDate: FIXED_FALLBACK }
       );
       expect(queries).toStrictEqual(
         getOneLiner({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' })
@@ -129,9 +134,12 @@ describe('Pack utils', () => {
       const output = convertSOQueriesToPackConfig(getTestQueries(), {
         spaceId: 'my-space',
         isRruleFeatureEnabled: true,
+        fallbackStartDate: FIXED_FALLBACK,
       });
       expect(output.default_space_id).toBe('my-space');
-      expect(output.queries).toStrictEqual(getOneLiner({ space_id: 'my-space' }));
+      expect(output.queries).toStrictEqual(
+        getOneLiner({ space_id: 'my-space', start_date: FIXED_FALLBACK })
+      );
     });
   });
 
@@ -342,8 +350,9 @@ describe('Pack utils', () => {
 
     // The V4 backfill stamps START_DATE_EPOCH_FALLBACK on docs lacking
     // created_at. That meaningless 1970 value must not be projected onto the
-    // interval-mode wire — the wire builder suppresses exactly this sentinel.
-    test('interval mode — epoch-fallback start_date suppressed, real start_date emitted', () => {
+    // interval-mode wire — it is replaced by the pack's created_at (fallback).
+    test('interval mode — epoch-fallback start_date replaced with pack created_at, real start_date emitted', () => {
+      const packCreatedAt = '2026-05-01T08:00:00.000Z';
       const out = convertSOQueriesToPackConfig(
         [
           {
@@ -363,13 +372,61 @@ describe('Pack utils', () => {
             start_date: '2026-06-18T11:37:48.355Z',
           },
         ],
-        { isRruleFeatureEnabled: true }
+        { isRruleFeatureEnabled: true, fallbackStartDate: packCreatedAt }
       );
 
-      // The epoch sentinel is stripped from the wire.
-      expect(out.queries.epoch).not.toHaveProperty('start_date');
-      // A genuine start_date on a sibling still reaches the wire.
+      // The epoch sentinel is replaced with the pack's created_at.
+      expect(out.queries.epoch.start_date).toBe(packCreatedAt);
+      // A genuine start_date on a sibling still reaches the wire unchanged.
       expect(out.queries.real.start_date).toBe('2026-06-18T11:37:48.355Z');
+    });
+
+    // Packs predating created_at have no anchor. The value must be STABLE: a
+    // time-of-write now() defeats the reconciler's isEqual gate, rewriting the
+    // policy and re-anchoring execution numbering on every restart.
+    test('interval mode — deterministic epoch anchor when there is no fallbackStartDate either', () => {
+      const build = () =>
+        convertSOQueriesToPackConfig(
+          [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sid-1' }],
+          { isRruleFeatureEnabled: true }
+        );
+
+      const first = build();
+      const second = build();
+
+      expect(first.queries.q1.start_date).toBe(START_DATE_EPOCH_FALLBACK);
+      expect(first.queries.q1.start_date).toBe(second.queries.q1.start_date);
+    });
+
+    // `created_at` is `schema.maybe(schema.string())`, so it can be '' (which
+    // `??` misses) or malformed — and an unparseable anchor makes the agent
+    // report execution count 0, the very bug this fallback exists to fix.
+    test.each([
+      ['empty string', ''],
+      ['not a date', 'not-a-date'],
+      ['date only, no time', '2026-05-01'],
+      ['calendar-invalid', '2026-02-30T00:00:00.000Z'],
+    ])(
+      'interval mode — %s fallbackStartDate falls through to the epoch sentinel',
+      (_label, bad) => {
+        const out = convertSOQueriesToPackConfig(
+          [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sid-1' }],
+          { isRruleFeatureEnabled: true, fallbackStartDate: bad }
+        );
+
+        expect(out.queries.q1.start_date).toBe(START_DATE_EPOCH_FALLBACK);
+      }
+    );
+
+    // Absent start_date (pre-backfill packs) falls back to pack created_at.
+    test('interval mode — absent start_date replaced with fallbackStartDate', () => {
+      const packCreatedAt = '2026-04-15T12:00:00.000Z';
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sid-1' }],
+        { isRruleFeatureEnabled: true, fallbackStartDate: packCreatedAt }
+      );
+
+      expect(out.queries.q1.start_date).toBe(packCreatedAt);
     });
 
     // The wire gate enforces this even if the SO already has RRULE state.
@@ -575,9 +632,10 @@ describe('Pack utils', () => {
     });
 
     test('does not regress other field shapes when schedule_id is present (flag off)', () => {
+      const fallback = '2026-03-01T00:00:00.000Z';
       const out = convertSOQueriesToPackConfig(
         [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-1' }],
-        { isRruleFeatureEnabled: false }
+        { isRruleFeatureEnabled: false, fallbackStartDate: fallback }
       );
 
       expect(out.queries.q1).toEqual({
@@ -585,6 +643,7 @@ describe('Pack utils', () => {
         query: 'SELECT 1',
         interval: 60,
         schedule_id: 'sched-1',
+        start_date: fallback,
       });
     });
   });

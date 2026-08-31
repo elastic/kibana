@@ -8,6 +8,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server';
 import type { ConcurrencySettings, EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
@@ -22,6 +24,27 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
 const PROMOTE_QUEUED_RUN_RETRY_DELAY_MS = 250;
 const PROMOTE_QUEUED_RUN_MAX_ATTEMPTS = 4;
 
+const RECOVERABLE_RUN_SOON_STATUS_CODES = new Set([429, 502, 503, 504]);
+
+export const isRecoverablePromoteRunSoonError = (error: unknown): boolean => {
+  if (
+    error instanceof Error &&
+    (SavedObjectsErrorHelpers.isEsUnavailableError(error) ||
+      SavedObjectsErrorHelpers.isTooManyRequestsError(error))
+  ) {
+    return true;
+  }
+  const statusCode =
+    typeof error === 'number'
+      ? error
+      : error &&
+        typeof error === 'object' &&
+        typeof (error as { statusCode?: unknown }).statusCode === 'number'
+      ? (error as { statusCode: number }).statusCode
+      : undefined;
+  return statusCode !== undefined && RECOVERABLE_RUN_SOON_STATUS_CODES.has(statusCode);
+};
+
 const promoteQueuedRunTaskWithRetry = async (
   workflowTaskManager: WorkflowTaskManager,
   params: { executionId: string; triggeredBy: string }
@@ -35,6 +58,9 @@ const promoteQueuedRunTaskWithRetry = async (
       await workflowTaskManager.promoteQueuedRunTask(params);
       return;
     } catch (error) {
+      if (error instanceof TaskAlreadyRunningError) {
+        return;
+      }
       lastError = error;
     }
   }
@@ -133,14 +159,34 @@ export async function drainConcurrencyQueueSlots(params: {
             );
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
+
+            if (isRecoverablePromoteRunSoonError(error)) {
+              logger.warn(
+                `Promoted queued workflow execution ${nextQueuedId} but failed to runSoon workflow:run (${message}); reverting to queued`
+              );
+              await workflowExecutionRepository.updateWorkflowExecution(
+                { id: nextQueuedId, status: ExecutionStatus.QUEUED },
+                { refresh: 'wait_for' }
+              );
+              return;
+            }
+
             logger.warn(
-              `Promoted queued workflow execution ${nextQueuedId} but failed to runSoon workflow:run (${message}); reverting to queued`
+              `Promoted queued workflow execution ${nextQueuedId} but failed to runSoon workflow:run (${message}); marking failed`
             );
             await workflowExecutionRepository.updateWorkflowExecution(
-              { id: nextQueuedId, status: ExecutionStatus.QUEUED },
+              {
+                id: nextQueuedId,
+                status: ExecutionStatus.FAILED,
+                error: {
+                  type: 'QueuePromoteRunSoonError',
+                  message:
+                    'Failed to start queued workflow execution due to an unrecoverable error.',
+                },
+                finishedAt: new Date().toISOString(),
+              },
               { refresh: 'wait_for' }
             );
-            return;
           }
         }
       }
