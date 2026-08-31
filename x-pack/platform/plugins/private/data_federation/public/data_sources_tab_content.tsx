@@ -15,7 +15,10 @@ import { dataSourceFromListItem } from './create_data_source_flyout/data_source_
 import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
 import { ConfirmDeleteDataSourcesModal } from './confirm_delete_data_sources_modal';
 import { DataSourcesTable } from './data_sources_table';
-import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
+import {
+  extractFlyoutSaveErrorMessage,
+  formatFlyoutSaveError,
+} from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
 
@@ -123,11 +126,11 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
       setPendingDeleteDataSource(null);
       void loadDataSources();
     } catch (e) {
-      const message = getFlyoutSaveErrorMessage(e);
-      setDeleteDataSourceError(message);
+      const formatted = formatFlyoutSaveError(extractFlyoutSaveErrorMessage(e));
+      setDeleteDataSourceError(formatted.toastText);
       toasts.addDanger({
         title: mainTranslations.confirmDeleteDataSource.errorTitle,
-        text: message,
+        text: formatted.toastText,
       });
     } finally {
       setIsDeletingDataSource(false);
@@ -155,11 +158,11 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
       setPendingDeleteDataSources(null);
       void loadDataSources();
     } catch (e) {
-      const message = getFlyoutSaveErrorMessage(e);
-      setDeleteDataSourcesError(message);
+      const formatted = formatFlyoutSaveError(extractFlyoutSaveErrorMessage(e));
+      setDeleteDataSourcesError(formatted.toastText);
       toasts.addDanger({
         title: mainTranslations.confirmDeleteDataSources.errorTitle,
-        text: message,
+        text: formatted.toastText,
       });
     } finally {
       setIsDeletingDataSources(false);
@@ -185,7 +188,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
         onClose({ savedChanges: true });
         return null;
       } catch (e) {
-        return getFlyoutSaveErrorMessage(e);
+        return extractFlyoutSaveErrorMessage(e);
       }
     },
     [dataSourcesClient, flyout.mode, onClose]

@@ -11,12 +11,12 @@ import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSection,
   EuiSpacer,
   EuiStepsHorizontal,
-  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -29,7 +29,10 @@ import { validateIndexNameRules } from '../../common';
 import { CreateDataSourceFlyout } from '../create_data_source_flyout';
 import { applyCustomJsonToFormSettings } from '../create_dataset_flyout/settings_custom_json_utils';
 import { buildDatasetPayloadFromWizardValues } from './review_step_utils';
-import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
+import {
+  extractFlyoutSaveErrorMessage,
+  formatFlyoutSaveErrorForCallout,
+} from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
 import {
   ADDITIONAL_SETTINGS_STEP,
@@ -141,6 +144,10 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     () => parseWizardStepFromSearch(location.search, flowVariant) ?? LOGISTICS_STEP
   );
   const [saveError, setSaveError] = useState<string | undefined>();
+  const saveErrorCallout = useMemo(
+    () => (saveError ? formatFlyoutSaveErrorForCallout(saveError) : undefined),
+    [saveError]
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateDataSourceFlyoutOpen, setIsCreateDataSourceFlyoutOpen] = useState(false);
   const dataSourceStepRef = useRef<DataSourceStepHandle>(null);
@@ -243,7 +250,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         });
         return null;
       } catch (error) {
-        return getFlyoutSaveErrorMessage(error);
+        return extractFlyoutSaveErrorMessage(error);
       }
     },
     [dataSourcesClient, reloadDataSources, setValue]
@@ -718,15 +725,6 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         <EuiStepsHorizontal steps={stepDefinitions} />
         <EuiSpacer size="xl" />
 
-        {saveError ? (
-          <>
-            <EuiText color="danger" size="s" data-test-subj="datasetWizardSaveError">
-              {saveError}
-            </EuiText>
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-
         <div data-test-subj="datasetWizardStepContent">{renderStepContent()}</div>
 
         {showTestConfiguration && isTestConfigPanelOpen ? (
@@ -737,6 +735,21 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
               isLoading={isTestConfigLoading}
               onClose={handleCloseTestConfiguration}
             />
+          </>
+        ) : null}
+
+        {saveErrorCallout ? (
+          <>
+            <EuiSpacer size="l" />
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              size="s"
+              title={saveErrorCallout.title}
+              data-test-subj="datasetWizardSaveError"
+            >
+              <p>{saveErrorCallout.body}</p>
+            </EuiCallOut>
           </>
         ) : null}
 

@@ -46,6 +46,7 @@ import { CreateDataSourceFlyoutAuthenticationSelect } from '../../create_data_so
 import { createDataSourceFlyoutStrings } from '../../create_data_source_flyout/create_data_source_flyout_i18n';
 import { emptyDataSourceFlyoutFormValues } from '../../create_data_source_flyout/data_source_flyout_initial_values';
 import type { CreateDataSourceFlyoutFormValues } from '../../create_data_source_flyout/types';
+import { formatFlyoutSaveErrorForCallout } from '../../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../../types';
 import { DataSourceSuperSelect } from '../data_source_super_select';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
@@ -182,6 +183,10 @@ export const DataSourceStep = forwardRef<DataSourceStepHandle, DataSourceStepPro
 
     const [mode, setMode] = useState<DataSourceStepMode>(matchingDataSource ? 'existing' : 'new');
     const [createError, setCreateError] = useState<string | undefined>();
+    const createErrorCallout = useMemo(
+      () => (createError ? formatFlyoutSaveErrorForCallout(createError) : undefined),
+      [createError]
+    );
     const [isSelectionInvalid, setIsSelectionInvalid] = useState(false);
     const [connectionTestResult, setConnectionTestResult] = useState<ConnectionTestResult>();
     const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -370,15 +375,17 @@ export const DataSourceStep = forwardRef<DataSourceStepHandle, DataSourceStepPro
         </EuiText>
         <EuiSpacer size="l" />
 
-        {createError ? (
+        {createErrorCallout ? (
           <>
             <EuiCallOut
               announceOnMount
               color="danger"
               size="s"
-              title={createError}
+              title={createErrorCallout.title}
               data-test-subj="datasetWizardDataSourceCreateError"
-            />
+            >
+              <p>{createErrorCallout.body}</p>
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         ) : null}

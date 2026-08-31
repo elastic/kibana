@@ -139,51 +139,53 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const reviewTabContentAreaHeight = useMemo(
+  const reviewTabScrollableMaxHeight = useMemo(
     () => getSchemaSamplePreviewTableHeight(euiTheme, TEST_CONFIGURATION_PREVIEW_ROW_COUNT),
     [euiTheme]
   );
 
-  const reviewTabPanelHeight = useMemo(
-    () =>
-      `calc(${euiTheme.size.m} + ${euiTheme.size.m} + ${euiTheme.size.l} + ${reviewTabContentAreaHeight})`,
-    [euiTheme.size.l, euiTheme.size.m, reviewTabContentAreaHeight]
-  );
-
   const reviewTabPanelStyles = useMemo(
     () => css`
-      height: ${reviewTabPanelHeight};
-      max-height: ${reviewTabPanelHeight};
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
     `,
-    [reviewTabPanelHeight]
+    []
   );
 
-  const reviewTabContentAreaStyles = useMemo(
+  const reviewSummaryScrollAreaStyles = useMemo(
     () => css`
-      height: ${reviewTabContentAreaHeight};
-      min-height: ${reviewTabContentAreaHeight};
-      max-height: ${reviewTabContentAreaHeight};
+      max-height: ${reviewTabScrollableMaxHeight};
       overflow: auto;
       padding-right: ${euiTheme.size.xs};
       box-sizing: border-box;
     `,
-    [euiTheme.size.xs, reviewTabContentAreaHeight]
+    [euiTheme.size.xs, reviewTabScrollableMaxHeight]
+  );
+
+  const reviewScrollableTabPanelStyles = useMemo(
+    () => css`
+      display: flex;
+      flex-direction: column;
+      max-height: calc(
+        ${euiTheme.size.m} + ${euiTheme.size.m} + ${euiTheme.size.l} + ${reviewTabScrollableMaxHeight}
+      );
+      box-sizing: border-box;
+    `,
+    [euiTheme.size.l, euiTheme.size.m, reviewTabScrollableMaxHeight]
   );
 
   const reviewTabCodeBlockAreaStyles = useMemo(
     () => css`
-      height: ${reviewTabContentAreaHeight};
-      min-height: ${reviewTabContentAreaHeight};
-      max-height: ${reviewTabContentAreaHeight};
+      height: ${reviewTabScrollableMaxHeight};
+      min-height: ${reviewTabScrollableMaxHeight};
+      max-height: ${reviewTabScrollableMaxHeight};
       overflow: hidden;
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
     `,
-    [reviewTabContentAreaHeight]
+    [reviewTabScrollableMaxHeight]
   );
 
   const logisticsRows = useMemo(
@@ -208,7 +210,7 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
   const SummaryTab = () => (
     <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewSummaryTab">
       <EuiSpacer size="m" />
-      <div css={reviewTabContentAreaStyles} data-test-subj="datasetWizardReviewSummaryScroll">
+      <div css={reviewSummaryScrollAreaStyles} data-test-subj="datasetWizardReviewSummaryScroll">
         <EuiFlexGroup alignItems="flexStart">
           <EuiFlexItem grow={1}>
             <EuiTitle size="xs">
@@ -240,7 +242,7 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
   );
 
   const PreviewTab = () => (
-    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewPreviewTab">
+    <div css={reviewScrollableTabPanelStyles} data-test-subj="datasetWizardReviewPreviewTab">
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.reviewPreviewDescription()}</p>
@@ -274,7 +276,7 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
   );
 
   const RequestTab = () => (
-    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewRequestTab">
+    <div css={reviewScrollableTabPanelStyles} data-test-subj="datasetWizardReviewRequestTab">
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.reviewRequestDescription()}</p>

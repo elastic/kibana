@@ -20,7 +20,10 @@ import {
 } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import type { DatasetWizardFlowVariant } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import { DatasetsTable, type DataSetListRow } from './datasets_table';
-import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
+import {
+  extractFlyoutSaveErrorMessage,
+  formatFlyoutSaveError,
+} from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
 
@@ -130,11 +133,11 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
       setPendingDeleteDataSet(null);
       void loadDataSets();
     } catch (e) {
-      const message = getFlyoutSaveErrorMessage(e);
-      setDeleteDataSetError(message);
+      const formatted = formatFlyoutSaveError(extractFlyoutSaveErrorMessage(e));
+      setDeleteDataSetError(formatted.toastText);
       toasts.addDanger({
         title: mainTranslations.confirmDeleteDataSet.errorTitle,
-        text: message,
+        text: formatted.toastText,
       });
     } finally {
       setIsDeletingDataSet(false);
@@ -154,11 +157,11 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
       setPendingDeleteDataSets(null);
       void loadDataSets();
     } catch (e) {
-      const message = getFlyoutSaveErrorMessage(e);
-      setDeleteDataSetsError(message);
+      const formatted = formatFlyoutSaveError(extractFlyoutSaveErrorMessage(e));
+      setDeleteDataSetsError(formatted.toastText);
       toasts.addDanger({
         title: mainTranslations.confirmDeleteDataSets.errorTitle,
-        text: message,
+        text: formatted.toastText,
       });
     } finally {
       setIsDeletingDataSets(false);

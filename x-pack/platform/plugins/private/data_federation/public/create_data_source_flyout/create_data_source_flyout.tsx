@@ -38,7 +38,10 @@ import {
   validateIndexNameRules,
 } from '../../common';
 import type { DataSourceType } from '../../common/datasource_types';
-import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
+import {
+  extractFlyoutSaveErrorMessage,
+  formatFlyoutSaveErrorForCallout,
+} from '../get_flyout_save_error_message';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
 import {
   applyAuthenticationModeToDataSource,
@@ -103,6 +106,10 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   });
 
   const [saveError, setSaveError] = useState<string | undefined>();
+  const saveErrorCallout = useMemo(
+    () => (saveError ? formatFlyoutSaveErrorForCallout(saveError) : undefined),
+    [saveError]
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [connectionTestResult, setConnectionTestResult] = useState<'success' | 'error'>();
 
@@ -225,7 +232,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         setSaveError(message);
       }
     } catch (error) {
-      setSaveError(getFlyoutSaveErrorMessage(error));
+      setSaveError(extractFlyoutSaveErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -277,11 +284,17 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="div" id="createDataSourceForm">
-          {saveError ? (
+          {saveErrorCallout ? (
             <>
-              <EuiText color="danger" size="s" data-test-subj="createDataSourceFlyoutSaveError">
-                {saveError}
-              </EuiText>
+              <EuiCallOut
+                announceOnMount
+                color="danger"
+                size="s"
+                title={saveErrorCallout.title}
+                data-test-subj="createDataSourceFlyoutSaveError"
+              >
+                <p>{saveErrorCallout.body}</p>
+              </EuiCallOut>
               <EuiSpacer size="m" />
             </>
           ) : null}

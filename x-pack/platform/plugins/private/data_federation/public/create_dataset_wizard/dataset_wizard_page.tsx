@@ -14,7 +14,10 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_ID, type DataSetWithName, type DataSource } from '../../common';
 import { getClonedDatasetName } from '../get_cloned_dataset_name';
-import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
+import {
+  extractFlyoutSaveErrorMessage,
+  formatFlyoutSaveError,
+} from '../get_flyout_save_error_message';
 import { mainTranslations } from '../main_i18n';
 import type { DataFederationKibanaServices } from '../types';
 import { useLoadList } from '../use_load_list';
@@ -153,12 +156,13 @@ export const DatasetWizardPage: FunctionComponent = () => {
         history.push('/');
         return null;
       } catch (e) {
-        const message = getFlyoutSaveErrorMessage(e);
+        const rawMessage = extractFlyoutSaveErrorMessage(e);
+        const formatted = formatFlyoutSaveError(rawMessage);
         toasts.addDanger({
-          title: isEditMode ? datasetWizardStrings.saveButton() : datasetWizardStrings.addButton(),
-          text: message,
+          title: formatted.title,
+          text: formatted.toastText,
         });
-        return message;
+        return rawMessage;
       }
     },
     [datasetsClient, history, isEditMode, reloadDataSets, toasts]

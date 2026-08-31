@@ -124,7 +124,7 @@ const SettingsSummarySection = ({ rows }: { rows: ReviewSummaryRow[] }) => {
 export const ReviewStepFlow1: FunctionComponent<ReviewStepProps> = ({ values, dataSources }) => {
   const { euiTheme } = useEuiTheme();
 
-  const reviewTabPanelStyles = useMemo(
+  const reviewScrollableTabPanelStyles = useMemo(
     () => css`
       max-height: ${REVIEW_TAB_MAX_HEIGHT_PX}px;
       height: ${REVIEW_TAB_MAX_HEIGHT_PX}px;
@@ -135,10 +135,18 @@ export const ReviewStepFlow1: FunctionComponent<ReviewStepProps> = ({ values, da
     []
   );
 
-  const reviewTabScrollAreaStyles = useMemo(
+  const reviewTabPanelStyles = useMemo(
     () => css`
-      flex: 1 1 auto;
-      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    `,
+    []
+  );
+
+  const reviewSummaryScrollAreaStyles = useMemo(
+    () => css`
+      max-height: ${REVIEW_TAB_MAX_HEIGHT_PX}px;
       overflow: auto;
       padding-right: ${euiTheme.size.xs};
     `,
@@ -179,7 +187,7 @@ export const ReviewStepFlow1: FunctionComponent<ReviewStepProps> = ({ values, da
   const SummaryTab = () => (
     <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewSummaryTab">
       <EuiSpacer size="m" />
-      <div css={reviewTabScrollAreaStyles} data-test-subj="datasetWizardReviewSummaryScroll">
+      <div css={reviewSummaryScrollAreaStyles} data-test-subj="datasetWizardReviewSummaryScroll">
         <EuiFlexGroup alignItems="flexStart">
           <EuiFlexItem grow={1}>
             <EuiTitle size="xs">
@@ -211,7 +219,7 @@ export const ReviewStepFlow1: FunctionComponent<ReviewStepProps> = ({ values, da
   );
 
   const PreviewTab = () => (
-    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewPreviewTab">
+    <div css={reviewScrollableTabPanelStyles} data-test-subj="datasetWizardReviewPreviewTab">
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.reviewPreviewDescription()}</p>
@@ -231,7 +239,7 @@ export const ReviewStepFlow1: FunctionComponent<ReviewStepProps> = ({ values, da
   );
 
   const RequestTab = () => (
-    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewRequestTab">
+    <div css={reviewScrollableTabPanelStyles} data-test-subj="datasetWizardReviewRequestTab">
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.reviewRequestDescription()}</p>

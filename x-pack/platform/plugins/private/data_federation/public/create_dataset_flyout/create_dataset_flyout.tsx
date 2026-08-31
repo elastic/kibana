@@ -10,6 +10,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +30,10 @@ import { useController, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
 import { DATA_SOURCE_TYPES_TO_HELP_TEXT, validateIndexNameRules } from '../../common';
-import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
+import {
+  extractFlyoutSaveErrorMessage,
+  formatFlyoutSaveErrorForCallout,
+} from '../get_flyout_save_error_message';
 import {
   buildDatasetSettingsFromFormValues,
   type CreateDatasetFormValues,
@@ -72,6 +76,10 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
   const isEditMode = initialDataSet !== undefined;
   const initialIdNormalized = initialDataSet?.name?.trim().toLowerCase() ?? '';
   const [saveError, setSaveError] = useState<string | undefined>();
+  const saveErrorCallout = useMemo(
+    () => (saveError ? formatFlyoutSaveErrorForCallout(saveError) : undefined),
+    [saveError]
+  );
   const [isSaving, setIsSaving] = useState(false);
   const flyoutTopRef = useRef<HTMLDivElement>(null);
 
@@ -194,7 +202,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
         setSaveError(message);
       }
     } catch (error) {
-      setSaveError(getFlyoutSaveErrorMessage(error));
+      setSaveError(extractFlyoutSaveErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -228,11 +236,17 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
       <EuiFlyoutBody>
         <div ref={flyoutTopRef} />
         <EuiForm component="form" id="createDatasetForm" onSubmit={handleSubmit(onSubmit)}>
-          {saveError ? (
+          {saveErrorCallout ? (
             <>
-              <EuiText color="danger" size="s" data-test-subj="createDatasetFlyoutSaveError">
-                {saveError}
-              </EuiText>
+              <EuiCallOut
+                announceOnMount
+                color="danger"
+                size="s"
+                title={saveErrorCallout.title}
+                data-test-subj="createDatasetFlyoutSaveError"
+              >
+                <p>{saveErrorCallout.body}</p>
+              </EuiCallOut>
               <EuiSpacer size="m" />
             </>
           ) : null}
