@@ -37,8 +37,10 @@ export const withScoreCollection = (
       const bucket = sink.get(evaluator.name) ?? [];
       bucket.push(result.score ?? null);
       sink.set(evaluator.name, bucket);
-      const exampleId = (args as { expected?: { id?: string } }).expected?.id;
-      if (exampleId) pairedSink.set(`${evaluator.name}::${exampleId}`, result.score ?? null);
+      // EvaluatorParams carries no example id (the executor holds it), so key by the
+      // input payload — stable and unique per example in this suite's datasets.
+      const exampleKey = JSON.stringify(args.input ?? {});
+      pairedSink.set(`${evaluator.name}::${exampleKey}`, result.score ?? null);
       return result;
     },
   })) as RuleEvaluator[];
