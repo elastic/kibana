@@ -6,7 +6,7 @@
  */
 
 import type { AppHeaderMenu } from '@kbn/app-header';
-import { renderHook } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { useMetricsAppHeaderMenu } from './use_metrics_app_header_menu';
@@ -86,8 +86,17 @@ jest.mock('../../../hooks/use_kibana_space', () => ({
   useActiveKibanaSpace: () => mockActiveSpace,
 }));
 
+const mockAnomalyFlyoutCapture: {
+  hideJobType?: boolean;
+  hideSelectGroup?: boolean;
+} = {};
+
 jest.mock('../../../components/ml/anomaly_detection/anomaly_detection_flyout', () => ({
-  AnomalyDetectionFlyout: () => null,
+  AnomalyDetectionFlyout: (props: { hideJobType?: boolean; hideSelectGroup?: boolean }) => {
+    mockAnomalyFlyoutCapture.hideJobType = props.hideJobType;
+    mockAnomalyFlyoutCapture.hideSelectGroup = props.hideSelectGroup;
+    return null;
+  },
 }));
 
 jest.mock('../../../alerting/common/components/metrics_alert_dropdown', () => ({
@@ -122,6 +131,8 @@ describe('useMetricsAppHeaderMenu', () => {
     mockMlVisibility.isTopbarMenuVisible = true;
     mockMetricsViewState.metricsView = { indices: 'metrics-*' };
     mockActiveSpace.space = { id: 'default' };
+    delete mockAnomalyFlyoutCapture.hideJobType;
+    delete mockAnomalyFlyoutCapture.hideSelectGroup;
   });
 
   it('builds Inventory actions with anomaly detection, alerts, overflow settings, and add data', () => {
@@ -198,6 +209,26 @@ describe('useMetricsAppHeaderMenu', () => {
       inspect.run();
     }
     expect(mockInspectorOpen).toHaveBeenCalled();
+  });
+
+  it('shows anomaly job type and group pickers only on Inventory', () => {
+    render(renderMenuHook('/inventory').result.current.flyouts);
+    expect(mockAnomalyFlyoutCapture).toEqual({
+      hideJobType: false,
+      hideSelectGroup: false,
+    });
+
+    render(renderMenuHook('/hosts').result.current.flyouts);
+    expect(mockAnomalyFlyoutCapture).toEqual({
+      hideJobType: true,
+      hideSelectGroup: true,
+    });
+
+    render(renderMenuHook('/detail/host/web-01').result.current.flyouts);
+    expect(mockAnomalyFlyoutCapture).toEqual({
+      hideJobType: true,
+      hideSelectGroup: true,
+    });
   });
 
   it('keeps manage-rules when the user cannot create alerts', () => {

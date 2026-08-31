@@ -26,6 +26,7 @@ import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { getMetricsHeaderMenuVisibility } from './get_metrics_header_menu_visibility';
+import { isMetricsInventoryPath } from './metrics_header_paths';
 
 const ANOMALY_DETECTION_LABEL = i18n.translate('xpack.infra.ml.anomalyDetectionButton', {
   defaultMessage: 'Anomaly detection',
@@ -255,8 +256,8 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
         trigger="none"
         isOpen={isAnomalyFlyoutOpen}
         onClose={closeAnomalyFlyout}
-        hideJobType={visibility.hideAnomalyJobTypeAndGroup}
-        hideSelectGroup={visibility.hideAnomalyJobTypeAndGroup}
+        hideJobType={!isMetricsInventoryPath(pathname)}
+        hideSelectGroup={!isMetricsInventoryPath(pathname)}
       />
       <MetricsAlertFlyout visibleFlyoutType={visibleFlyoutType} onClose={closeAlertFlyout} />
     </>

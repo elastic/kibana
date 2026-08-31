@@ -8,18 +8,16 @@
 import { getMetricsHeaderMenuVisibility } from './get_metrics_header_menu_visibility';
 
 describe('getMetricsHeaderMenuVisibility', () => {
-  it('shows anomaly detection with job type controls on Inventory', () => {
+  it('shows anomaly detection on Inventory without hosts onboarding', () => {
     expect(getMetricsHeaderMenuVisibility('/inventory')).toEqual({
       showAnomalyDetection: true,
-      hideAnomalyJobTypeAndGroup: false,
       showHostsOnboarding: false,
     });
   });
 
-  it('shows anomaly detection without job type controls on Hosts', () => {
+  it('shows anomaly detection and hosts onboarding on Hosts', () => {
     expect(getMetricsHeaderMenuVisibility('/hosts')).toEqual({
       showAnomalyDetection: true,
-      hideAnomalyJobTypeAndGroup: true,
       showHostsOnboarding: true,
     });
   });
@@ -27,7 +25,6 @@ describe('getMetricsHeaderMenuVisibility', () => {
   it('treats host detail like Hosts for onboarding and anomaly detection', () => {
     expect(getMetricsHeaderMenuVisibility('/detail/host/web-01')).toEqual({
       showAnomalyDetection: true,
-      hideAnomalyJobTypeAndGroup: true,
       showHostsOnboarding: true,
     });
   });
@@ -35,12 +32,10 @@ describe('getMetricsHeaderMenuVisibility', () => {
   it('hides anomaly detection and hosts onboarding on Explorer and Settings', () => {
     expect(getMetricsHeaderMenuVisibility('/explorer')).toEqual({
       showAnomalyDetection: false,
-      hideAnomalyJobTypeAndGroup: false,
       showHostsOnboarding: false,
     });
     expect(getMetricsHeaderMenuVisibility('/settings')).toEqual({
       showAnomalyDetection: false,
-      hideAnomalyJobTypeAndGroup: false,
       showHostsOnboarding: false,
     });
   });
@@ -48,7 +43,6 @@ describe('getMetricsHeaderMenuVisibility', () => {
   it('does not treat container detail as a hosts onboarding path', () => {
     expect(getMetricsHeaderMenuVisibility('/detail/container/abc')).toEqual({
       showAnomalyDetection: false,
-      hideAnomalyJobTypeAndGroup: false,
       showHostsOnboarding: false,
     });
   });
