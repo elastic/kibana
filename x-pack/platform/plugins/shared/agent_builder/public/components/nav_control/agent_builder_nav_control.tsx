@@ -102,7 +102,7 @@ export function AgentBuilderNavControl() {
   );
 
   const showTooltip = !isSidebarOpen && tooltipVisible;
-  const variant = isSidebarOpen ? 'accent' : 'outlined';
+  const variant = isSidebarOpen ? 'accent' : 'base';
   const buttonLabelNode = (
     <FormattedMessage id="xpack.agentBuilder.navControl.linkLabel" defaultMessage="AI Agent" />
   );
@@ -122,7 +122,7 @@ export function AgentBuilderNavControl() {
   ) : (
     <AiButton
       buttonRef={buttonRef}
-      variant="outlined"
+      variant="base"
       size="s"
       iconType="productAgent"
       onClick={handleClick}
