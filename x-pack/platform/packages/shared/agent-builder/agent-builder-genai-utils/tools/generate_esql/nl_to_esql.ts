@@ -171,9 +171,11 @@ export const generateEsql = async ({
 
         // Doc selection needs only the NL query, so it starts immediately —
         // concurrently with index discovery when needed, or alone when index is known.
-        const requestDocModel = model.chatModel.withStructuredOutput(requestDocumentationSchema, {
-          name: 'request_documentation',
-        });
+        const requestDocModel = model.chatModel
+          .withStructuredOutput(requestDocumentationSchema, {
+            name: 'request_documentation',
+          })
+          .withConfig({ sessionId: cacheSessionId, cacheControl });
         const docPromise = requestDocModel
           .invoke(createRequestDocumentationPromptNoResource({ nlQuery, documentation }))
           .then(({ commands = [], functions = [] }) => {
