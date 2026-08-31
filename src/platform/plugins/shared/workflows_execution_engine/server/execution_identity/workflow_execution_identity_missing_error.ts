@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowExecutionIdentityMissingError } from './workflow_execution_identity_missing_error';
-export { WorkflowExecutionIdentityEncryptionUnavailableError } from './workflow_execution_identity_encryption_unavailable_error';
+/** Thrown when a schedule request cannot be built because no stored key exists. */
+export class WorkflowExecutionIdentityMissingError extends Error {
+  constructor(message = 'Workflow execution identity has no usable API key.') {
+    super(message);
+    this.name = 'WorkflowExecutionIdentityMissingError';
+  }
+}

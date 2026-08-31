@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowExecutionIdentityMissingError } from './workflow_execution_identity_missing_error';
-export { WorkflowExecutionIdentityEncryptionUnavailableError } from './workflow_execution_identity_encryption_unavailable_error';
+/** Thrown when the identity store cannot be used because encryption is unavailable. */
+export class WorkflowExecutionIdentityEncryptionUnavailableError extends Error {
+  constructor(message = 'Encrypted saved objects are unavailable; cannot use execution identity.') {
+    super(message);
+    this.name = 'WorkflowExecutionIdentityEncryptionUnavailableError';
+  }
+}
