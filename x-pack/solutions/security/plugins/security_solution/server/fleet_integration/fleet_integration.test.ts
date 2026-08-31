@@ -1126,6 +1126,35 @@ describe('Fleet integrations', () => {
         );
         expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
       });
+
+      it('populates meta without throwing when the incoming policy has no meta object', async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        // Simulate a partial/bulk update that omits the `meta` object entirely.
+        // `meta` is typed as required, but runtime data from bulk updates can omit it,
+        // so we cast to a partial shape to reproduce that scenario.
+        const policyValue = policyConfig.inputs[0]!.config!.policy.value as Partial<PolicyConfig>;
+        delete policyValue.meta;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        const updatedMeta = updatedPolicyConfig.inputs[0]!.config!.policy.value.meta;
+        expect(updatedMeta).toBeDefined();
+        expect(updatedMeta.license).toEqual('enterprise');
+        expect(updatedMeta.cluster_name).toEqual('updated-name');
+        expect(updatedMeta.cluster_uuid).toEqual('updated-uuid');
+      });
     });
 
     describe('when device control features are disabled', () => {
