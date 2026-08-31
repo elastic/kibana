@@ -141,8 +141,13 @@ export const useConversationTitle = () => {
 };
 
 export const useConversationReadOnly = () => {
-  const { conversation } = useConversation();
-  return conversation?.read_only ?? false;
+  const conversationId = useConversationId();
+  const { conversation, isLoading } = useConversation();
+
+  return {
+    isReadOnly: conversation?.read_only ?? false,
+    isLoading: Boolean(conversationId) && isLoading,
+  };
 };
 
 export const useConversationRounds = () => {

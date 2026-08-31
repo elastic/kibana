@@ -106,7 +106,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
-  const isConversationReadOnly = useConversationReadOnly();
+  const { isReadOnly: isConversationReadOnly, isLoading: isConversationReadOnlyLoading } =
+    useConversationReadOnly();
   const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
     useConversationContext();
   const submitMessage = useSubmitMessage();
@@ -205,7 +206,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     onSubmit?.();
   };
 
-  if (isConversationReadOnly) {
+  if (isConversationReadOnly || isConversationReadOnlyLoading) {
     return null;
   }
 

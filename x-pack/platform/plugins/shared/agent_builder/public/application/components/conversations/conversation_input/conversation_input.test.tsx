@@ -110,7 +110,7 @@ describe('ConversationInput', () => {
     mockedUseValidateAgentId.mockReturnValue(((agentId?: string): agentId is string =>
       Boolean(agentId)) as never);
     mockedUseAgentId.mockReturnValue('elastic-ai-agent');
-    mockedUseConversationReadOnly.mockReturnValue(false);
+    mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: false });
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
     mockedUseHasActiveConversation.mockReturnValue(false);
     mockedUseIsAwaitingPrompt.mockReturnValue(false);
@@ -155,7 +155,15 @@ describe('ConversationInput', () => {
   });
 
   it('hides the message input for read-only conversations', () => {
-    mockedUseConversationReadOnly.mockReturnValue(true);
+    mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: true, isLoading: false });
+
+    render(<ConversationInput />);
+
+    expect(screen.queryByTestId('mock-message-editor-submit')).not.toBeInTheDocument();
+  });
+
+  it('hides the message input while the conversation is loading', () => {
+    mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: true });
 
     render(<ConversationInput />);
 

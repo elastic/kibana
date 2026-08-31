@@ -44,7 +44,7 @@ interface ConversationHeaderProps {
   ariaLabelledBy?: string;
 }
 export const ConversationHeader = ({ ariaLabelledBy }: ConversationHeaderProps) => {
-  const isReadOnly = useConversationReadOnly();
+  const { isReadOnly } = useConversationReadOnly();
 
   return (
     <EuiFlexGroup
