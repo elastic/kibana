@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -20,10 +20,7 @@ import { APM_EBT_ACTIONS } from '../../ebt_constants';
 import { DisabledPrompt } from '../disabled_prompt';
 import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 import { ContextualServiceMapControls } from './contextual_service_map_controls';
-import {
-  CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
-  CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
-} from './constants';
+import { useContextualServiceMapState } from './use_contextual_service_map_state';
 
 export const DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT = 400;
 
@@ -74,49 +71,17 @@ export function ContextualServiceMapSection({
 }: ContextualServiceMapSectionProps) {
   const license = useLicenseContext();
   const { core, config } = useApmPluginContext();
-  const [baseMaxHops, setBaseMaxHops] = useState(CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS);
-  const [maxVisibleNodes, setMaxVisibleNodes] = useState(CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES);
-  const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(() => new Set());
-
-  const resetExpansions = useCallback(() => {
-    setExpandedNodeIds(new Set());
-  }, []);
-
-  const onExpand = useCallback((nodeId: string) => {
-    setExpandedNodeIds((prev) => {
-      const next = new Set(prev);
-      next.add(nodeId);
-      return next;
-    });
-  }, []);
-
-  const onCollapse = useCallback((nodeId: string) => {
-    setExpandedNodeIds((prev) => {
-      const next = new Set(prev);
-      next.delete(nodeId);
-      return next;
-    });
-  }, []);
-
-  const onBaseMaxHopsChange = useCallback(
-    (value: number) => {
-      setBaseMaxHops(value);
-      resetExpansions();
-    },
-    [resetExpansions]
-  );
-
-  const onMaxVisibleNodesChange = useCallback(
-    (value: number) => {
-      setMaxVisibleNodes(value);
-      resetExpansions();
-    },
-    [resetExpansions]
-  );
-
-  useEffect(() => {
-    resetExpansions();
-  }, [serviceName, resetExpansions]);
+  const {
+    baseMaxHops,
+    maxVisibleNodes,
+    expandedNodeIds,
+    hasExpandedNodes,
+    onExpand,
+    onCollapse,
+    onBaseMaxHopsChange,
+    onMaxVisibleNodesChange,
+    resetExpansions,
+  } = useContextualServiceMapState({ serviceName });
 
   if (!serviceName) {
     return null;
@@ -203,7 +168,7 @@ export function ContextualServiceMapSection({
       onBaseMaxHopsChange={onBaseMaxHopsChange}
       onMaxVisibleNodesChange={onMaxVisibleNodesChange}
       onCollapseAll={resetExpansions}
-      hasExpandedNodes={expandedNodeIds.size > 0}
+      hasExpandedNodes={hasExpandedNodes}
     />
   );
 
