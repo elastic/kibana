@@ -38,6 +38,40 @@ interface EsqlResponse {
  * (STATS COUNT(*) always returns a row — an unmeasured trace otherwise reads
  * as a confident zero).
  */
+/**
+ * The draft step's Agent Builder conversation id, when the step persisted one. Exported so
+ * the suite's setup probe joins spans exactly the way the evaluator does — a probe that
+ * proves reachability on a different key would arm the evaluators dishonestly.
+ */
+export const extractConversationId = (
+  output: RuleCreationResult | undefined
+): string | undefined => {
+  const draft = (output?.stepExecutions ?? []).find(
+    (s) => s.stepId === DRAFT_STEP_ID && s.output != null
+  );
+  const id = (draft?.output as { conversation_id?: unknown } | null)?.conversation_id;
+  return typeof id === 'string' ? id : undefined;
+};
+
+/** Join clauses tried, in order, to reach a run's agent tool spans. */
+export const toolSpanJoinClauses = ({
+  traceId,
+  conversationId,
+}: {
+  traceId?: string;
+  conversationId?: string;
+}): Array<{ name: string; where: string }> => [
+  ...(traceId ? [{ name: 'workflow trace id', where: `trace.id == "${traceId}"` }] : []),
+  ...(conversationId
+    ? [
+        {
+          name: 'gen_ai.conversation.id',
+          where: `attributes.gen_ai.conversation.id == "${conversationId}"`,
+        },
+      ]
+    : []),
+];
+
 export function createToolRoutingEvaluator({
   traceEsClient,
   log,
@@ -45,14 +79,6 @@ export function createToolRoutingEvaluator({
   traceEsClient: EsClient;
   log: ToolingLog;
 }): Evaluator {
-  const extractConversationId = (output: RuleCreationResult | undefined): string | undefined => {
-    const draft = (output?.stepExecutions ?? []).find(
-      (s) => s.stepId === DRAFT_STEP_ID && s.output != null
-    );
-    const id = (draft?.output as { conversation_id?: unknown } | null)?.conversation_id;
-    return typeof id === 'string' ? id : undefined;
-  };
-
   const countToolSpans = async (where: string): Promise<number | undefined> => {
     const response = (await traceEsClient.esql.query({
       query: `FROM traces-*\n| WHERE ${where} AND ${TOOL_KIND}\n| STATS tool_calls = COUNT(*),\n  required_tool_calls = COUNT(CASE(attributes.gen_ai.tool.name == "${RULE_CREATION_TOOL_ID}", 1, NULL))`,
@@ -86,45 +112,21 @@ export function createToolRoutingEvaluator({
         };
       }
 
-      // Stage 1: workflow trace id
-      if (traceId) {
+      // Stages, in order, using the shared join clauses.
+      for (const clause of toolSpanJoinClauses({ traceId, conversationId })) {
         try {
-          const score = await countToolSpans(`trace.id == "${traceId}"`);
+          const score = await countToolSpans(clause.where);
           if (score !== undefined) {
             return {
               score,
               label: undefined,
-              explanation: 'joined on workflow trace id',
+              explanation: `joined on ${clause.name}`,
               metadata: undefined,
             };
           }
         } catch (error) {
           log.debug(
-            `Tool Routing trace-id join failed: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        }
-      }
-
-      // Stage 2: Agent Builder conversation id
-      if (conversationId) {
-        try {
-          const score = await countToolSpans(
-            `attributes.gen_ai.conversation.id == "${conversationId}"`
-          );
-          if (score !== undefined) {
-            return {
-              score,
-              label: undefined,
-              explanation:
-                'joined on gen_ai.conversation.id (agent conversation forked its own trace)',
-              metadata: undefined,
-            };
-          }
-        } catch (error) {
-          log.debug(
-            `Tool Routing conversation-id join failed: ${
+            `Tool Routing ${clause.name} join failed: ${
               error instanceof Error ? error.message : String(error)
             }`
           );
@@ -162,3 +164,57 @@ export function createToolRoutingEvaluator({
     },
   };
 }
+
+/**
+ * Setup-time assertion that a run's agent tool spans are actually reachable in the tracing
+ * cluster, using the SAME join clauses the Tool Routing evaluator scores with.
+ *
+ * A traceId on the execution document only proves the workflow was traced; it says nothing
+ * about whether Agent Builder exported the tool spans the evaluator counts. Asserting the
+ * weaker property armed the evaluators on a run that had no agent output at all
+ * (measured: build 459, where 6 of 25 runs produced no rule yet setup passed).
+ */
+export const assertToolSpansReachable = async ({
+  traceEsClient,
+  probe,
+  log,
+}: {
+  traceEsClient: EsClient;
+  probe: RuleCreationResult;
+  log: ToolingLog;
+}): Promise<void> => {
+  if (probe.skipped) {
+    log.info('Trace reachability probe was declined by the quality gate — skipping span check');
+    return;
+  }
+
+  const clauses = toolSpanJoinClauses({
+    traceId: probe.traceId,
+    conversationId: extractConversationId(probe),
+  });
+
+  for (const clause of clauses) {
+    try {
+      const response = (await traceEsClient.esql.query({
+        query: `FROM traces-*\n| WHERE ${clause.where} AND ${TOOL_KIND}\n| STATS tool_spans = COUNT(*)`,
+      })) as unknown as EsqlResponse;
+      if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
+        log.info(`Tool spans reachable via ${clause.name}`);
+        return;
+      }
+    } catch (error) {
+      log.debug(
+        `Reachability probe on ${clause.name} failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  throw new Error(
+    `No agent TOOL spans are reachable for the setup probe (tried: ${
+      clauses.map((c) => c.name).join(', ') || 'no join keys at all'
+    }). Trace-based evaluators would score N/A on every example and the suite would still ` +
+      'report a pass. Check that Agent Builder spans are exported to TRACING_ES_URL.'
+  );
+};
