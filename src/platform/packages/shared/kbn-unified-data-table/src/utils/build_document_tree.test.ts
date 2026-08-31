@@ -108,6 +108,34 @@ describe('flattenedToNestedDocument', () => {
       expect(tree).toEqual({ name: 'Alice' });
     });
 
+    it('keeps the parent scalar and the multi-field when both are selected', () => {
+      const tree = flattenedToNestedDocument({
+        row: {
+          id: '1',
+          raw: { _id: '1', _index: 'test' },
+          flattened: {
+            'aws.s3.bucket.name.keyword': 'bucket3',
+            'aws.s3.bucket.name': 'bucket3',
+          },
+        },
+        dataView: dataViewMock,
+        columnsMeta: undefined,
+        shouldShowFieldHandler: (fieldName) => fieldName !== 'aws.s3.bucket.name.keyword',
+        selectedColumns: ['aws.s3.bucket.name', 'aws.s3.bucket.name.keyword'],
+      }).tree;
+
+      expect(tree).toEqual({
+        aws: {
+          s3: {
+            bucket: {
+              name: 'bucket3',
+              'name.keyword': 'bucket3',
+            },
+          },
+        },
+      });
+    });
+
     it('caches per filter, so changing the selection is not served a stale tree', () => {
       // Same row object across builds: proves the cache keys on the filter, not just row.raw.
       const row: DataTableRecord = {

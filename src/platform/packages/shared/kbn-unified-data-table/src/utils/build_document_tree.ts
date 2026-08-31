@@ -14,7 +14,6 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { setWith } from '@kbn/safer-lodash-set';
 import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
 
 // Max number of values the document will show. The rest will be truncated.
@@ -235,13 +234,42 @@ const tryParsePerfectJson = (value: unknown, budget: ValueBudget): unknown => {
   return undefined;
 };
 
-// Build the nested document from the flat, dotted-key map.
+// Build the nested document from the flat, dotted-key map. Parents are applied
+// first so a scalar (`aws.s3.bucket.name`) is not overwritten by a child key
+// (`aws.s3.bucket.name.keyword`). Numeric segments stay object keys, never array
+// indices — lodash `set` would otherwise build a sparse array for `latency.50`.
 const unflattenKeys = (source: Record<string, unknown>): Record<string, unknown> => {
   const target: Record<string, unknown> = {};
-  for (const key of Object.keys(source)) {
-    setWith(target, key, source[key], Object);
+  const keys = Object.keys(source).sort(
+    (left, right) => left.split('.').length - right.split('.').length
+  );
+  for (const key of keys) {
+    setNested(target, key.split('.'), source[key]);
   }
   return target;
+};
+
+const setNested = (target: Record<string, unknown>, path: string[], value: unknown): void => {
+  let current = target;
+  for (let i = 0; i < path.length - 1; i++) {
+    const segment = path[i];
+    const existing = current[segment];
+    if (isPlainObject(existing)) {
+      current = existing;
+      continue;
+    }
+    if (existing === undefined) {
+      const next: Record<string, unknown> = {};
+      current[segment] = next;
+      current = next;
+      continue;
+    }
+    // A scalar already occupies this path (parent field + multi-field). Keep the
+    // scalar and store the remainder as a dotted key so both values stay visible.
+    current[path.slice(i).join('.')] = value;
+    return;
+  }
+  current[path[path.length - 1]] = value;
 };
 
 // A flattened field is kept when it is a selected column, or a descendant of a selected object
