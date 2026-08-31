@@ -158,3 +158,90 @@ test.describe(
     );
   }
 );
+
+test.describe(
+  'Observability Alerts nav — classic sidebar',
+  { tag: [...tags.stateful.classic] },
+  () => {
+    test.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.setSolutionView('classic');
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: false });
+      await kbnClient.uiSettings.update({ [SHOW_CLASSIC_ALERTS_TABLE_SETTING]: false });
+    });
+
+    test(
+      'shows Alerts as a sub-nav link under Observability with no feature flags',
+      async ({ browserAuth, pageObjects, page }) => {
+        await browserAuth.loginAsAdmin();
+        await page.gotoApp('observability/alerts');
+
+        const alertsLink = page.locator(
+          '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"]'
+        );
+        await expect(alertsLink).toBeVisible();
+        await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
+
+        const activeAlertsLink = page.locator(
+          '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"][data-test-subj~="nav-item-isActive"]'
+        );
+        await expect(activeAlertsLink).toBeVisible();
+      }
+    );
+
+    test(
+      'Alerts link is unchanged when alerting v2 is enabled',
+      async ({ browserAuth, pageObjects, page, kbnClient }) => {
+        await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: true });
+
+        await browserAuth.loginAsAdmin();
+        await page.gotoApp('observability/alerts');
+
+        const alertsLink = page.locator(
+          '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"]'
+        );
+        await expect(alertsLink).toBeVisible();
+        await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
+
+        const activeAlertsLink = page.locator(
+          '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"][data-test-subj~="nav-item-isActive"]'
+        );
+        await expect(activeAlertsLink).toBeVisible();
+
+        const alertsPanel = page.locator(
+          '[data-test-subj~="nav-item-id-alerting"][data-test-subj~="nav-item-renderAs-panelOpener"]'
+        );
+        await expect(alertsPanel).not.toBeVisible();
+      }
+    );
+
+    test(
+      'Alerts link is unchanged when both flags are enabled',
+      async ({ browserAuth, pageObjects, page, kbnClient }) => {
+        await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: true });
+        await kbnClient.uiSettings.update({ [SHOW_CLASSIC_ALERTS_TABLE_SETTING]: true });
+
+        await browserAuth.loginAsAdmin();
+        await page.gotoApp('observability/alerts');
+
+        const alertsLink = page.locator(
+          '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"]'
+        );
+        await expect(alertsLink).toBeVisible();
+        await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
+
+        const activeAlertsLink = page.locator(
+          '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"][data-test-subj~="nav-item-isActive"]'
+        );
+        await expect(activeAlertsLink).toBeVisible();
+
+        const alertsPanel = page.locator(
+          '[data-test-subj~="nav-item-id-alerting"][data-test-subj~="nav-item-renderAs-panelOpener"]'
+        );
+        await expect(alertsPanel).not.toBeVisible();
+      }
+    );
+  }
+);
