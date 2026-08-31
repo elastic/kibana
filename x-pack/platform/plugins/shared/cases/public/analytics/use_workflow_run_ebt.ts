@@ -8,17 +8,26 @@
 import { useCallback } from 'react';
 import { CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE } from '../../common/constants';
 import type { CaseWorkflowRunOrigin } from '../../common/types/api';
-import { CASE_WORKFLOW_RUN_ORIGIN_TYPES } from '../../common/constants/workflow';
+import type { CASE_WORKFLOW_RUN_ORIGIN_TYPES } from '../../common/constants/workflow';
 import { useKibana } from '../common/lib/kibana';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { getEbtOwner } from './get_ebt_owner';
 import { useGetCaseConfiguration } from '../containers/configure/use_get_case_configuration';
 
 /**
- * The bounded set of values for `origin_type`. Includes every `CaseWorkflowRunOrigin['type']`
- * value plus `'bulk'` for list-surface runs that carry no origin.
+ * Telemetry-only sentinel for runs that carry no `CaseWorkflowRunOrigin`: cases-list bulk runs
+ * (which span multiple cases and so cannot express a single-case origin) and any run whose origin
+ * is absent. Deliberately not a `cases.`-prefixed domain value — it is not a real origin type.
  */
-export type WorkflowRunOriginType = (typeof CASE_WORKFLOW_RUN_ORIGIN_TYPES)[number] | 'bulk';
+export const UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE = 'unattributed' as const;
+
+/**
+ * The bounded set of values for `origin_type`. Includes every `CaseWorkflowRunOrigin['type']`
+ * value plus `UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE` for runs that carry no origin.
+ */
+export type WorkflowRunOriginType =
+  | (typeof CASE_WORKFLOW_RUN_ORIGIN_TYPES)[number]
+  | typeof UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE;
 
 export interface WorkflowRunEbtParams {
   /** Which surface the run was triggered from. */
@@ -54,8 +63,8 @@ export const useWorkflowRunTriggeredEBT = (): ((params: WorkflowRunEbtParams) =>
 
 /**
  * Derives a `WorkflowRunOriginType` from a `CaseWorkflowRunOrigin`, falling
- * back to `'bulk'` when the origin is absent.
+ * back to `UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE` when the origin is absent.
  */
 export const getWorkflowRunOriginType = (
   origin: CaseWorkflowRunOrigin | undefined
-): WorkflowRunOriginType => origin?.type ?? 'bulk';
+): WorkflowRunOriginType => origin?.type ?? UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE;

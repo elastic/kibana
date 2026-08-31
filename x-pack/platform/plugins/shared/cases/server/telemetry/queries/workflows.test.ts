@@ -86,7 +86,7 @@ describe('workflows', () => {
           observables: 0,
           alert: 0,
           alerts: 0,
-          bulk: 0,
+          unattributed: 0,
         },
         configurationsWithWorkflowTags: 0,
       });
@@ -125,13 +125,13 @@ describe('workflows', () => {
           alert: 0,
           alerts: 1,
           // 10 total − (6 + 2 + 1) = 1
-          bulk: 1,
+          unattributed: 1,
         },
         configurationsWithWorkflowTags: 4,
       });
     });
 
-    it('derives bulk count as total minus sum of origin buckets', async () => {
+    it('derives unattributed count as total minus sum of origin buckets', async () => {
       savedObjectsRepository.find.mockReset();
       savedObjectsRepository.find
         .mockResolvedValueOnce(
@@ -148,10 +148,10 @@ describe('workflows', () => {
 
       const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
 
-      expect(result.byOriginType.bulk).toBe(0);
+      expect(result.byOriginType.unattributed).toBe(0);
     });
 
-    it('clamps bulk to 0 when origin sum somehow exceeds total', async () => {
+    it('clamps unattributed to 0 when origin sum somehow exceeds total', async () => {
       savedObjectsRepository.find.mockReset();
       savedObjectsRepository.find
         .mockResolvedValueOnce(
@@ -164,7 +164,7 @@ describe('workflows', () => {
 
       const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
 
-      expect(result.byOriginType.bulk).toBe(0);
+      expect(result.byOriginType.unattributed).toBe(0);
     });
   });
 });
