@@ -80,7 +80,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
 
   return (
     <EuiForm>
-      {onOpenProjectScope ? (
+      {isCpsEnabled && onOpenProjectScope ? (
         <>
           <AnalysisSetupProjectScopeForm
             isCpsEnabled={isCpsEnabled}
