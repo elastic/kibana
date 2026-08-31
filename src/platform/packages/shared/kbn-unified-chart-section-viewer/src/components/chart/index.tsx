@@ -38,6 +38,7 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     chartLayers: LensSeriesLayer[];
     yBounds?: LensYBoundsConfig;
     legend?: LensLegendConfig;
+    yAxisTitle?: string;
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
@@ -65,6 +66,7 @@ export const Chart = ({
   syncTooltips,
   yBounds,
   legend,
+  yAxisTitle,
   extraDisabledActions,
   quickActionIds,
   isLoading = false,
@@ -92,6 +94,7 @@ export const Chart = ({
     chartLayers,
     yBounds,
     legend,
+    yAxisTitle,
     error,
     userMessages,
     profileId,

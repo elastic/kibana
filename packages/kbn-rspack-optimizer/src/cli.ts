@@ -14,6 +14,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
+import { KIBANA_GROUPS, type KibanaGroup } from '@kbn/projects-solutions-groups';
 import { runBuild } from './run_build';
 import {
   validateLimitsForAllBundles,
@@ -127,6 +128,16 @@ export function runRspackCli(options: CliOptions = {}): void {
           ? Path.resolve(flags.limits)
           : options.defaultLimitsPath ?? DEFAULT_LIMITS_PATH;
 
+      // Parsed (and validated) up front so an invalid group errors in every mode. The
+      // limits modes operate on the canonical full plugin set, so a filtered build there
+      // would validate against — or rewrite limits.yml from — an incomplete set of bundles.
+      const allowlistPluginGroups = parsePluginGroups(flags['plugin-groups']);
+      if (allowlistPluginGroups && (validateLimits || updateLimits || updateLimitsFromMetrics)) {
+        throw createFlagError(
+          '--plugin-groups cannot be combined with --validate-limits, --update-limits, or --update-limits-from-metrics (these operate on the full plugin set)'
+        );
+      }
+
       // --validate-limits: quick check, no build needed
       if (validateLimits) {
         const allPlugins = await discoverPlugins({
@@ -194,6 +205,7 @@ export function runRspackCli(options: CliOptions = {}): void {
         cache,
         examples: effectiveExamples,
         testPlugins: effectiveTestPlugins,
+        allowlistPluginGroups,
         themeTags: themes,
         log,
         profile: false,
@@ -233,7 +245,14 @@ export function runRspackCli(options: CliOptions = {}): void {
           'validate-limits',
           'inspect-workers',
         ],
-        string: ['themes', 'output-root', 'limits', 'profile-focus', 'update-limits-from-metrics'],
+        string: [
+          'themes',
+          'output-root',
+          'limits',
+          'profile-focus',
+          'update-limits-from-metrics',
+          'plugin-groups',
+        ],
         alias: {
           w: 'watch',
         },
@@ -255,6 +274,8 @@ export function runRspackCli(options: CliOptions = {}): void {
             --examples                Include example plugins
             --test-plugins            Include test plugins
             --themes <tags>           Comma-separated theme tags to build (default: all)
+            --plugin-groups <groups>  Comma-separated plugin groups to build (default: all).
+                                      Mirrors the server's plugins.allowlistPluginGroups setting.
             --output-root <dir>       Output root directory (default: repo root)
             --no-cache                Disable filesystem caching
             --no-hmr                  Disable Hot Module Replacement in watch mode
@@ -311,6 +332,28 @@ export function runRspackCli(options: CliOptions = {}): void {
       },
     }
   );
+}
+
+function parsePluginGroups(flag: unknown): KibanaGroup[] | undefined {
+  if (typeof flag !== 'string' || flag.length === 0) {
+    return undefined;
+  }
+
+  const groups = flag
+    .split(',')
+    .map((g) => g.trim())
+    .filter(Boolean);
+
+  const invalid = groups.filter((g) => !KIBANA_GROUPS.includes(g as KibanaGroup));
+  if (invalid.length) {
+    throw createFlagError(
+      `--plugin-groups received unknown group(s): ${invalid.join(
+        ', '
+      )}. Valid groups: ${KIBANA_GROUPS.join(', ')}`
+    );
+  }
+
+  return groups as KibanaGroup[];
 }
 
 /**
