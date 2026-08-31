@@ -33,9 +33,10 @@ describe('chart type guidance', () => {
       - Only include goal/target-related fields when the user explicitly asks for a goal or threshold.",
           "heatmap": "",
           "metric": "CHART-SPECIFIC RULES FOR METRIC:
-      - Do not set a chart title. The primary metric name is the painted title; a dashboard chrome title on a metric is redundant.
-      - A single primary number is fine. Enrich it from the same ES|QL only when it adds meaning: a \`background_chart\` (\`type: \\"trend\\"\`) when the query can show change over time; a secondary metric with dynamic coloring when there is a status, threshold, or comparison (previous period, error rate next to request count, p95 next to avg); \`type: \\"bar\\"\` only when progress-to-max is meaningful. Do not invent a second index or a complementary field.
-      - When a secondary metric is a trend (period-over-period change, compare-to-primary delta, or paired with a trend/sparkline background chart), hide its title: set \`styling.secondary.label.visible: false\` and omit \`label\` on the secondary metric. Keep the value and dynamic coloring. Show a secondary label only when the secondary is a different named measure (e.g. error rate next to request count).",
+      - Do not set a panel chart title on a dashboard; the primary metric painted title is the title.
+      - A single primary metric is valid, but when meaningful, enrich it from the same ES|QL with a trend background or secondary metric. Never invent another index or field.
+      - Use \`type: \\"bar\\"\` only for meaningful progress-to-max.
+      - For trend/delta secondary metrics, hide the label with \`styling.secondary.label.visible: false\` and omit \`label\`. Show labels only for distinct named measures.",
           "mosaic": "",
           "pie": "",
           "region_map": "",
@@ -51,9 +52,10 @@ describe('chart type guidance', () => {
         },
         "review": "CHART REVIEW RULES:
       ### metric
-      - Do not set a chart title. The primary metric name is the painted title; a dashboard chrome title on a metric is redundant.
-      - A single primary number is fine. Enrich it from the same ES|QL only when it adds meaning: a \`background_chart\` (\`type: \\"trend\\"\`) when the query can show change over time; a secondary metric with dynamic coloring when there is a status, threshold, or comparison (previous period, error rate next to request count, p95 next to avg); \`type: \\"bar\\"\` only when progress-to-max is meaningful. Do not invent a second index or a complementary field.
-      - When a secondary metric is a trend (period-over-period change, compare-to-primary delta, or paired with a trend/sparkline background chart), hide its title: set \`styling.secondary.label.visible: false\` and omit \`label\` on the secondary metric. Keep the value and dynamic coloring. Show a secondary label only when the secondary is a different named measure (e.g. error rate next to request count).
+      - Do not set a panel chart title on a dashboard; the primary metric painted title is the title.
+      - A single primary metric is valid, but when meaningful, enrich it from the same ES|QL with a trend background or secondary metric. Never invent another index or field.
+      - Use \`type: \\"bar\\"\` only for meaningful progress-to-max.
+      - For trend/delta secondary metrics, hide the label with \`styling.secondary.label.visible: false\` and omit \`label\`. Show labels only for distinct named measures.
       Critical:
       - A painted dashboard chrome title on a metric is a critical issue — the primary metric name is already the title.
       - Invented static colors or BACKGROUND fills on the primary metric are a critical issue.
