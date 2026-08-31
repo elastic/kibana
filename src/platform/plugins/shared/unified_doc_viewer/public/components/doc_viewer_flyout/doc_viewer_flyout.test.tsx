@@ -8,7 +8,7 @@
  */
 
 import React, { type ForwardedRef } from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -27,6 +27,8 @@ jest.mock('@elastic/eui', () => {
     ...actual,
     EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => (
       <OriginalFlyout {...props} ref={ref}>
+        <button data-test-subj="euiResizableButton">Resize handle</button>
+        <button onClick={() => props.onResize?.(700)}>Trigger resize</button>
         {props.flyoutMenuProps && (
           <actual.EuiFlyoutMenu {...props.flyoutMenuProps} hideCloseButton />
         )}
@@ -86,8 +88,52 @@ const buildProps = (
 describe('UnifiedDocViewerFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     unifiedDocViewerServices = createUnifiedDocViewerServices();
     setUnifiedDocViewerServices(unifiedDocViewerServices);
+  });
+
+  describe('flyout width persistence', () => {
+    const storageKey = 'docViewerFlyoutTestWidth';
+
+    const renderFlyout = () => {
+      render(
+        <UnifiedDocViewerFlyout
+          {...buildProps({ flyoutWidthLocalStorageKey: storageKey })}
+        />
+      );
+
+      return {
+        resizeHandle: screen.getByTestId('euiResizableButton'),
+        triggerResize: screen.getByRole('button', { name: 'Trigger resize' }),
+      };
+    };
+
+    it('does not persist a resize without a preceding handle interaction', () => {
+      const { triggerResize } = renderFlyout();
+
+      fireEvent.click(triggerResize);
+
+      expect(localStorage.getItem(storageKey)).toBeNull();
+    });
+
+    it('persists a resize after a pointer interaction with the handle', () => {
+      const { resizeHandle, triggerResize } = renderFlyout();
+
+      fireEvent.pointerDown(resizeHandle);
+      fireEvent.click(triggerResize);
+
+      expect(localStorage.getItem(storageKey)).toBe('700');
+    });
+
+    it('persists a keyboard resize from the handle', () => {
+      const { resizeHandle, triggerResize } = renderFlyout();
+
+      fireEvent.keyDown(resizeHandle, { key: 'ArrowLeft' });
+      fireEvent.click(triggerResize);
+
+      expect(localStorage.getItem(storageKey)).toBe('700');
+    });
   });
 
   it('uses the refreshed hit from hits and shows pagination when the current hit is found', () => {
