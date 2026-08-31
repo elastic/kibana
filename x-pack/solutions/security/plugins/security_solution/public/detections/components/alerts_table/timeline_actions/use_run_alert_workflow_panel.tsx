@@ -16,6 +16,7 @@ import {
 } from '@kbn/workflows-ui';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
+import { useCaseAlertWorkflowRun } from '@kbn/cases-plugin/public';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
@@ -43,10 +44,27 @@ export interface AlertWorkflowsPanelProps {
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /**
+   * When set, the panel was opened from a single-alert row action. The executor routes through
+   * the Cases API with a `cases.alert` origin so the run appears in the case activity feed.
+   * Absent for bulk actions (even a single-alert bulk selection uses `cases.alerts`).
+   * Outside a case the value is ignored — the panel falls back to the generic Workflows API.
+   */
+  originAlertId?: string;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
-export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkflowsPanelProps) => {
+export const AlertWorkflowsPanel = ({
+  alertIds,
+  onClose,
+  onExecute,
+  originAlertId,
+}: AlertWorkflowsPanelProps) => {
+  // When rendered inside a case's attachment surface, route through the Cases API so the run
+  // is authorized, audited, and recorded in the case activity feed. The panel falls back to its
+  // built-in executor (generic Workflows API) when `runWorkflow` is undefined.
+  const caseRunWorkflow = useCaseAlertWorkflowRun({ alertId: originAlertId });
+
   const inputs = useMemo(
     () => ({
       event: {
@@ -60,6 +78,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
   return (
     <RunWorkflowPanel
       inputs={inputs}
+      runWorkflow={caseRunWorkflow}
       visibility={ALERT_WORKFLOW_VISIBILITY}
       sortWorkflow={sortAlertWorkflow}
       filterWorkflow={isAlertWorkflow}
@@ -122,6 +141,7 @@ export const useRunAlertWorkflowPanel = ({
           <AlertWorkflowsPanel
             alertIds={[{ _id: ecsRowData._id, _index: ecsRowData._index ?? '' }]}
             onClose={closePopover}
+            originAlertId={ecsRowData._id}
           />
         ),
       },

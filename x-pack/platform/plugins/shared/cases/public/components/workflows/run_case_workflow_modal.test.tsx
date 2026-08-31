@@ -24,7 +24,7 @@ jest.mock('@kbn/workflows-ui', () => ({
     <div data-test-subj="run-workflow-panel-mock">
       <span data-test-subj="panel-inputs">{JSON.stringify(inputs)}</span>
       <button data-test-subj="panel-close" type="button" onClick={onClose}>
-        Close
+        {'Close'}
       </button>
       <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
     </div>
