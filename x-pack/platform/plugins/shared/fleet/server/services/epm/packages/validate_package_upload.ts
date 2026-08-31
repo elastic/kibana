@@ -80,6 +80,12 @@ export async function validatePackageUpload({
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
 }): Promise<void> {
+  // Test/development escape hatch (e.g. elastic-package stacks, FTR suites): skip
+  // every upload validation so uploads behave as if this validator did not exist.
+  if (appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
+    return;
+  }
+
   assertValidUploadPackageName(packageInfo.name);
   assertNoForbiddenArchiveAssets(paths);
   assertValidUploadDataStreams(packageInfo.data_streams ?? []);
@@ -180,10 +186,6 @@ async function assertNotRegistryOrBundledName(
   installedPkg?: SavedObject<Installation>
 ): Promise<void> {
   if (await isTrustedUploadInstallation(installedPkg)) {
-    return;
-  }
-
-  if (appContextService.getConfig()?.internal?.allowRegistryPackageUploads) {
     return;
   }
 
