@@ -185,68 +185,6 @@ describe('TaskManagerRunner', () => {
       expect(store.update).not.toHaveBeenCalled();
     });
 
-    test('logs a warning for mget claim strategy when a ready-to-run task has a null startedAt', async () => {
-      const { runner, logger, store } = await pendingStageSetup({
-        instance: {
-          schedule: {
-            interval: '10m',
-          },
-          status: TaskStatus.Running,
-          // a claim anomaly can leave a ready-to-run mget task without a startedAt,
-          // which breaks the running-task invariant; the runner should surface it
-          startedAt: null,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `1m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      const result = await runner.markTaskAsRunning();
-
-      expect(result).toBe(true);
-      expect(store.update).not.toHaveBeenCalled();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Task bar "foo" is ready to run (mget) without a startedAt, which breaks the running-task invariant'
-        ),
-        expect.objectContaining({ tags: ['bar', 'foo'] })
-      );
-    });
-
-    test('does not log for mget claim strategy when startedAt is already set', async () => {
-      const startedAt = new Date('1970-01-01T00:00:00.000Z');
-      const { runner, logger } = await pendingStageSetup({
-        instance: {
-          schedule: {
-            interval: '10m',
-          },
-          status: TaskStatus.Running,
-          startedAt,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `1m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      const result = await runner.markTaskAsRunning();
-
-      expect(result).toBe(true);
-      expect(logger.warn).not.toHaveBeenCalled();
-      expect(runner.startedAt).toEqual(startedAt);
-    });
-
     describe('cost', () => {
       test('task instance cost takes precedence over task definition cost', async () => {
         const { runner } = await pendingStageSetup({
@@ -3413,10 +3351,133 @@ describe('TaskManagerRunner', () => {
       );
       expect(frameworkErrorLogs).toEqual([]);
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         `Skipping the update of expired/cancelled task bar:${id} because it was reclaimed by another Kibana while running.`,
         { tags: [id, 'bar'] }
       );
+    });
+
+    test('resolves a version conflict when updating a recurring task after a successful run', async () => {
+      const id = 'conflict-success';
+      const startedAt = new Date();
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          schedule: { interval: '1m' },
+          startedAt,
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: { foo: 'bar' } };
+              },
+            }),
+          },
+        },
+      });
+
+      const currentTask = {
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '5m' },
+        runAt: minutesFromNow(5),
+      };
+
+      store.partialUpdate
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object conflict'))
+        )
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolving task document version conflict after task run for task "bar:${id}"`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolved task document version conflict after task run for task "bar:${id}"`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(store.get).toHaveBeenCalledWith(id);
+      expect(store.partialUpdate).toHaveBeenCalledTimes(2);
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          version: 'WzIsMV0=',
+          schedule: { interval: '5m' },
+          runAt: currentTask.runAt,
+          state: { foo: 'bar' },
+        }),
+        { validate: false, doc: currentTask }
+      );
+    });
+
+    test('resolves a version_conflict_engine_exception when updating a recurring task', async () => {
+      const id = 'conflict-engine';
+      const startedAt = new Date();
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          schedule: { interval: '1m' },
+          startedAt,
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      const currentTask = {
+        ...instance,
+        version: 'WzMsMV0=',
+      };
+
+      store.partialUpdate
+        .mockRejectedValueOnce({
+          type: 'task',
+          id,
+          status: 409,
+          error: {
+            type: 'version_conflict_engine_exception',
+            reason: `[task:${id}]: version conflict`,
+          },
+        })
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolving task document version conflict after task run for task "bar:${id}"`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolved task document version conflict after task run for task "bar:${id}"`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(store.get).toHaveBeenCalledWith(id);
+      expect(store.partialUpdate).toHaveBeenCalledTimes(2);
     });
 
     test('Prints debug logs on task start/end', async () => {

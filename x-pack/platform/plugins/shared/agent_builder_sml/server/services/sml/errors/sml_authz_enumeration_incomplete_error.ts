@@ -7,5 +7,5 @@
 
 import { SmlError } from './sml_error';
 
-/** Thrown when `_terms_enum` returns `complete: false`. Fails closed to avoid over-authorizing against a partial permission universe. */
+/** Thrown when privilege enumeration is incomplete (shard failures). Fails closed to avoid over-authorizing against a partial permission universe. */
 export class SmlAuthzEnumerationIncompleteError extends SmlError {}

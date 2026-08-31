@@ -9,13 +9,15 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, AnalyticsServiceSetup } from '@kbn/core/server';
 import { FEEDBACK_SUBMITTED_EVENT_TYPE } from '../src';
 
+const MAX_FEEDBACK_CONTEXT_ENTRIES = 16;
+
 const feedbackQuestionSchema = schema.object({
   id: schema.string({ minLength: 1, maxLength: 256 }),
   question: schema.string({ maxLength: 1024 }),
   answer: schema.string({ maxLength: 16384 }),
 });
 
-const feedbackBodySchema = schema.object({
+export const feedbackBodySchema = schema.object({
   app_id: schema.string({ minLength: 1, maxLength: 256 }),
   user_email: schema.maybe(schema.string({ maxLength: 256 })),
   solution: schema.string({ maxLength: 256 }),
@@ -24,6 +26,19 @@ const feedbackBodySchema = schema.object({
   organization_id: schema.maybe(schema.string({ maxLength: 256 })),
   allow_email_contact: schema.boolean(),
   url: schema.string({ maxLength: 2048 }),
+  context: schema.maybe(
+    schema.recordOf(
+      schema.string({ minLength: 1, maxLength: 64 }),
+      schema.oneOf([schema.string({ maxLength: 256 }), schema.boolean(), schema.number()]),
+      {
+        validate: (value) => {
+          if (Object.keys(value).length > MAX_FEEDBACK_CONTEXT_ENTRIES) {
+            return `context cannot have more than ${MAX_FEEDBACK_CONTEXT_ENTRIES} entries`;
+          }
+        },
+      }
+    )
+  ),
 });
 
 export function registerSendFeedbackRoute(router: IRouter, analytics: AnalyticsServiceSetup) {

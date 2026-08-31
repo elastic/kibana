@@ -7,7 +7,8 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { serializers } from '../../../../shared_imports';
 import type { TemplateDeserialized } from '../../../../../common';
@@ -95,7 +96,7 @@ export const SimulateTemplate = React.memo(
 
     if (isEmpty && hasFilters) {
       return (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount={false}
           title={
             <FormattedMessage
@@ -103,7 +104,6 @@ export const SimulateTemplate = React.memo(
               defaultMessage="Select at least one option to preview."
             />
           }
-          iconType="pin"
           size="s"
         />
       );

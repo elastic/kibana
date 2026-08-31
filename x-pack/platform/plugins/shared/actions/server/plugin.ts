@@ -80,6 +80,11 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
+import {
+  createInboundEventsClient,
+  dispatchConnectorEvents,
+  type ConnectorEventEmitter,
+} from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -173,6 +178,12 @@ export interface PluginSetupContract {
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
 
   registerConnectorLifecycleListener(listener: ConnectorLifecycleListener): void;
+
+  /**
+   * Registers the single consumer that receives connector events from the public inbound hub.
+   * Throws if an emitter is already registered (exactly one emitter is supported).
+   */
+  registerConnectorEventEmitter(emitter: ConnectorEventEmitter): void;
 }
 
 export interface PluginStartContract {
@@ -291,6 +302,7 @@ export class ActionsPlugin
   private inMemoryMetrics: InMemoryMetrics;
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
+  private connectorEventEmitter?: ConnectorEventEmitter;
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
   // Process-wide: a warm client must outlive a single action, and the per-action context is
   // discarded when the action returns, so the plugin instance owns the pool.
@@ -480,14 +492,39 @@ export class ActionsPlugin
     });
 
     // Routes
+    const router = core.http.createRouter<ActionsRequestHandlerContext>();
+    const inboundEventsEnabled = actionsConfigUtils.isInboundEventsEnabled();
+    const inboundEvents = inboundEventsEnabled
+      ? {
+          maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
+          client: createInboundEventsClient({
+            logger: this.logger,
+            inboundEventsEnabled: true,
+            isActionTypeEnabled: (actionTypeId) =>
+              actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+            maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
+            getStartServices: core.getStartServices,
+            inMemoryConnectors: this.inMemoryConnectors,
+            emitConnectorEvents: (params) =>
+              dispatchConnectorEvents({
+                emitter: this.connectorEventEmitter,
+                params,
+                logger: this.logger,
+              }),
+          }),
+          getSpaceId: (request: KibanaRequest) =>
+            this.spaces?.spacesService.getSpaceId(request) ?? 'default',
+        }
+      : undefined;
     defineRoutes({
-      router: core.http.createRouter<ActionsRequestHandlerContext>(),
+      router,
       licenseState: this.licenseState,
       actionsConfigUtils,
       usageCounter: this.usageCounter,
       logger: this.logger,
       core,
       oauthRateLimiter,
+      inboundEvents,
     });
 
     return {
@@ -550,6 +587,14 @@ export class ActionsPlugin
       },
       registerConnectorLifecycleListener: (listener: ConnectorLifecycleListener) => {
         this.connectorLifecycleListeners.push(listener);
+      },
+      registerConnectorEventEmitter: (emitter: ConnectorEventEmitter) => {
+        if (this.connectorEventEmitter !== undefined) {
+          throw new Error(
+            'A connector event emitter is already registered; only one emitter is supported.'
+          );
+        }
+        this.connectorEventEmitter = emitter;
       },
     };
   }

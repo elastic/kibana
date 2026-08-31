@@ -94,6 +94,12 @@ export const getEvaluatorViewTraceAriaLabel = (evaluatorName: string) =>
     values: { evaluatorName },
   });
 
+export const getJudgedByLabel = (modelId: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.judgedByLabel', {
+    defaultMessage: 'judged by {modelId}',
+    values: { modelId },
+  });
+
 export const getEvaluatorAccordionAriaLabel = (evaluatorName: string) =>
   i18n.translate('xpack.evals.exampleScoresTable.evaluatorAccordionAriaLabel', {
     defaultMessage: 'Toggle details for evaluator {evaluatorName}',

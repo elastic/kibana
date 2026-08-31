@@ -31,6 +31,9 @@ export const registerAgentStatusRoute = (
           requiredPrivileges: ['securitySolution'],
         },
       },
+      options: {
+        httpResponseLogLevel: 'info',
+      },
     })
     .addVersion(
       {

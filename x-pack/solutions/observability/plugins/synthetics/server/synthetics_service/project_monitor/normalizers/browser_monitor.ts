@@ -53,6 +53,11 @@ export const getNormalizeBrowserFields = ({
     [ConfigKey.THROTTLING_CONFIG]: throttling,
     [ConfigKey.IGNORE_HTTPS_ERRORS]:
       monitor.ignoreHTTPSErrors || defaultFields[ConfigKey.IGNORE_HTTPS_ERRORS],
+    [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: monitor.certificateErrorSpkiAllowlist
+      ? Array.isArray(monitor.certificateErrorSpkiAllowlist)
+        ? monitor.certificateErrorSpkiAllowlist
+        : [monitor.certificateErrorSpkiAllowlist]
+      : defaultFields[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST],
     [ConfigKey.SCREENSHOTS]: monitor.screenshot || defaultFields[ConfigKey.SCREENSHOTS],
     [ConfigKey.PLAYWRIGHT_OPTIONS]: Object.keys(monitor.playwrightOptions || {}).length
       ? JSON.stringify(monitor.playwrightOptions)

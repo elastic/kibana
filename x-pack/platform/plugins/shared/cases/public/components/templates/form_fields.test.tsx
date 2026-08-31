@@ -205,7 +205,7 @@ describe('form fields', () => {
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>,
-      { wrapperProps: { features: { alerts: { sync: false, enabled: true } } } }
+      { wrapperProps: { owner: ['observability'] } }
     );
 
     expect(screen.queryByTestId('caseSyncAlerts')).not.toBeInTheDocument();
