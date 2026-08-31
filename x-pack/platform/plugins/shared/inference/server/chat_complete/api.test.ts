@@ -750,6 +750,50 @@ describe('createChatCompleteApi', () => {
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
     });
 
+    it('fails closed when reading the setting fails', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockRejectedValue(new Error('ui settings down'));
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('connectorId');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.internalError,
+        message: 'Failed to verify the default AI connector restriction',
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when resolving the default connector fails', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockRejectedValue(new Error('so client down'));
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.internalError,
+        message: 'Failed to verify the default AI connector restriction',
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
     it('blocks an inference endpoint whose id differs from the default connector id', async () => {
       const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
       const getDefaultConnectorId = jest.fn().mockResolvedValue('other-endpoint');

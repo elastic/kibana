@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
 import {
+  createInferenceInternalError,
   createInferenceRequestError,
   InferenceTaskErrorCode,
   getConnectorFamily,
@@ -347,9 +348,12 @@ function resolveAndCreatePipeline({
   getDefaultConnectorId?: () => Promise<string | undefined>;
 }) {
   return from(
-    throwIfConnectorNotAllowed({ connectorId, isDefaultConnectorOnly, getDefaultConnectorId }).then(
-      () => endpointIdCache.has(connectorId)
-    )
+    throwIfConnectorNotAllowed({
+      connectorId,
+      isDefaultConnectorOnly,
+      getDefaultConnectorId,
+      logger,
+    }).then(() => endpointIdCache.has(connectorId))
   ).pipe(
     switchMap((isInferenceEndpoint) => {
       let resolvedAsInferenceEndpoint = isInferenceEndpoint;
@@ -497,15 +501,27 @@ async function throwIfConnectorNotAllowed({
   connectorId,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  logger,
 }: {
   connectorId: string;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  logger: Logger;
 }): Promise<void> {
-  if (!isDefaultConnectorOnly || !getDefaultConnectorId || !(await isDefaultConnectorOnly())) {
+  if (!isDefaultConnectorOnly || !getDefaultConnectorId) {
     return;
   }
-  const defaultConnectorId = await getDefaultConnectorId();
+  let defaultConnectorId: string | undefined;
+  try {
+    if (!(await isDefaultConnectorOnly())) {
+      return;
+    }
+    defaultConnectorId = await getDefaultConnectorId();
+  } catch (error) {
+    // fail closed: block the call when the restriction cannot be verified
+    logger.error(`Failed to verify the default AI connector restriction: ${error.message}`);
+    throw createInferenceInternalError('Failed to verify the default AI connector restriction');
+  }
   if (connectorId === defaultConnectorId) {
     return;
   }
