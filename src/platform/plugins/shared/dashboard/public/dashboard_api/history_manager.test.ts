@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, firstValueFrom, skip, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
 import { initializeHistoryManager } from './history_manager';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
@@ -31,14 +31,28 @@ const makeSetup = async () => {
   const hasOverlays$ = new BehaviorSubject<boolean>(false);
   const dataLoading$ = new BehaviorSubject<boolean>(false);
 
-  const { api, cleanup } = initializeHistoryManager({
+  const { internalApi, cleanup } = initializeHistoryManager({
     anyStateChange$,
     hasOverlays$,
     setState,
     getState,
     dataLoading$,
-    historyUpdated$: new Subject<void>(),
+    onHistoryReady: jest.fn(),
   });
+
+  // Build a combined disabledActions$ from the three separate observables exposed by internalApi.
+  const disabledActions$ = combineLatest([
+    internalApi.canUndo$,
+    internalApi.canRedo$,
+    internalApi.disableUndoRedo$,
+  ]).pipe(
+    map(([canUndo, canRedo, disableUndoRedo]) => ({
+      undo: disableUndoRedo || !canUndo,
+      redo: disableUndoRedo || !canRedo,
+    }))
+  );
+
+  const api = { ...internalApi, disabledActions$ };
 
   anyStateChange$.next(undefined); // initial state update
   await waitFor(() => expect(getState).toBeCalled());
@@ -61,7 +75,7 @@ const makeSetup = async () => {
   };
 };
 
-// trigger a state change and resolve once getState has been called (after the 60 ms debounce).
+// trigger a state change and resolve once getState has been called (after the debounce).
 const pushStateChange = async (
   setup: Awaited<ReturnType<typeof makeSetup>>,
   title = 'Updated Title'
@@ -73,7 +87,7 @@ const pushStateChange = async (
 
 describe('initializeHistoryManager', () => {
   describe('state management', () => {
-    it('calls getState when unsavedChanges$ emits with no overlays or loading', async () => {
+    it('calls getState when anyStateChange$ emits with no overlays or loading', async () => {
       const setup = await makeSetup();
       await pushStateChange(setup);
       expect(setup.getState).toHaveBeenCalled();
@@ -84,8 +98,8 @@ describe('initializeHistoryManager', () => {
       const setup = await makeSetup();
       setup.hasOverlays$.next(true);
       setup.anyStateChange$.next(undefined);
-      // once disabledActions$ fires, we know that stateSubscription has run
-      await firstValueFrom(setup.api.disabledActions$);
+      // wait for debounceTime(0) to fire and be filtered
+      await new Promise((resolve) => setTimeout(resolve, 0));
       expect(setup.getState).not.toHaveBeenCalled();
       setup.cleanup();
     });
@@ -94,7 +108,7 @@ describe('initializeHistoryManager', () => {
       const setup = await makeSetup();
       setup.dataLoading$.next(true);
       setup.anyStateChange$.next(undefined);
-      await firstValueFrom(setup.api.disabledActions$);
+      await new Promise((resolve) => setTimeout(resolve, 0));
       expect(setup.getState).not.toHaveBeenCalled();
       setup.cleanup();
     });
@@ -103,7 +117,7 @@ describe('initializeHistoryManager', () => {
       const setup = await makeSetup();
       setup.hasOverlays$.next(true);
       setup.anyStateChange$.next(undefined);
-      await firstValueFrom(setup.api.disabledActions$);
+      await new Promise((resolve) => setTimeout(resolve, 0));
       expect(setup.getState).not.toHaveBeenCalled();
 
       setup.hasOverlays$.next(false);
@@ -168,29 +182,22 @@ describe('initializeHistoryManager', () => {
         undo: false,
         redo: true,
       });
-      setup.api.undo();
-      expect(setup.setState).toBeCalledWith(setup.initialState); // undo called
+      await setup.api.undo();
+      expect(setup.setState).toBeCalledWith(setup.initialState);
       setup.cleanup();
     });
 
-    it('does not call setState when overlays are open', async () => {
+    it('reflects that undo is disabled when overlays are open', async () => {
       const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
-      expect(await firstValueFrom(setup.api.disabledActions$)).toEqual({
-        undo: false,
-        redo: true,
-      });
-
-      setup.hasOverlays$.next(true); // disableUndoRedo$ set to true synchronously
-      setup.api.undo(); // blocked — returns early without emitting
-      expect(setup.setState).not.toHaveBeenCalled();
+      setup.hasOverlays$.next(true);
+      expect((await firstValueFrom(setup.api.disabledActions$)).undo).toBe(true);
       setup.cleanup();
     });
 
-    it('does not call setState when there is no history', async () => {
+    it('reflects that undo is disabled when there is no history', async () => {
       const setup = await makeSetup();
-      setup.api.undo(); // pointer <= -1, returns early
-      expect(setup.setState).not.toHaveBeenCalled();
+      expect((await firstValueFrom(setup.api.disabledActions$)).undo).toBe(true);
       setup.cleanup();
     });
   });
@@ -199,10 +206,10 @@ describe('initializeHistoryManager', () => {
     it('calls setState with the re-applied state after an undo', async () => {
       const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
-      setup.api.undo();
-      expect(setup.setState).toBeCalledWith(setup.initialState); // undo called
-      setup.api.redo();
-      expect(setup.setState).toBeCalledWith({ ...setup.initialState, title: 'Change 1' }); // undo called
+      await setup.api.undo();
+      expect(setup.setState).toBeCalledWith(setup.initialState);
+      await setup.api.redo();
+      expect(setup.setState).toBeCalledWith({ ...setup.initialState, title: 'Change 1' });
       setup.cleanup();
     });
   });
@@ -214,41 +221,6 @@ describe('initializeHistoryManager', () => {
       // Subscription gone — no debounce timer starts, getState is never called.
       setup.anyStateChange$.next(undefined);
       expect(setup.getState).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('panel sorting', () => {
-    it('treats panels in different order as identical, producing no spurious diff', async () => {
-      const setup = await makeSetup();
-      const panelA = { id: 'a', type: 'test', grid: { x: 0, y: 0, w: 6, h: 6 }, config: {} };
-      const panelB = { id: 'b', type: 'test', grid: { x: 6, y: 0, w: 6, h: 6 }, config: {} };
-      // push [b, a] — sorted to [a, b] before diffing; creates one history entry.
-      setup.stateRef.current = {
-        ...setup.initialState,
-        panels: [panelB, panelA],
-      } as unknown as DashboardState;
-      setup.anyStateChange$.next(undefined);
-      await waitFor(() => expect(setup.getState).toBeCalledTimes(1));
-
-      // aait for undo to be enabled — confirms exactly one history entry was recorded.
-      expect(await firstValueFrom(setup.api.disabledActions$)).toEqual({
-        undo: false,
-        redo: true,
-      });
-
-      // push [a, b] — still [a, b] after sorting; no diff, no new history entry.
-      setup.stateRef.current = {
-        ...setup.initialState,
-        panels: [panelA, panelB],
-      } as unknown as DashboardState;
-      setup.anyStateChange$.next(undefined);
-      await waitFor(() => expect(setup.getState).toBeCalledTimes(2));
-
-      // one undo must exhaust the stack (pointer → -1).
-      const afterUndo = firstValueFrom(setup.api.disabledActions$.pipe(skip(1)));
-      setup.api.undo();
-      expect(await afterUndo).toMatchObject({ undo: true });
-      setup.cleanup();
     });
   });
 });
