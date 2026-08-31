@@ -28,6 +28,18 @@ function formatNumber(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '-';
 }
 
+function formatOutcome(
+  delta: number,
+  direction: string,
+  pValue: number | null,
+  threshold: number
+): string {
+  if (pValue === null || !Number.isFinite(pValue) || pValue >= threshold) return '-';
+  if (direction === 'neutral') return '-';
+  const isImprovement = direction === 'maximize' ? delta > 0 : delta < 0;
+  return isImprovement ? 'Improvement' : 'Regression';
+}
+
 function formatDifference(value: number): string {
   if (!Number.isFinite(value)) {
     return '-';
@@ -163,9 +175,9 @@ export function formatMarkdownCompareReport({
   const renderTable = (rows: PairedTTestResult[]) => {
     const tableLines: string[] = [];
     tableLines.push(
-      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | p-value | Sig |`
+      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | p-value | Sig | Outcome |`
     );
-    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
+    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- |');
     rows.forEach((r) => {
       const delta = r.meanA - r.meanB;
       const cols = [
@@ -177,6 +189,7 @@ export function formatMarkdownCompareReport({
         formatDifference(delta),
         formatPValue(r.pValue),
         formatSig(r.pValue, significanceThreshold),
+        formatOutcome(delta, r.direction, r.pValue, significanceThreshold),
       ];
       tableLines.push(`| ${cols.join(' | ')} |`);
     });

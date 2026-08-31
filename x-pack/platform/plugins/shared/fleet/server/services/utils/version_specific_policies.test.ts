@@ -83,15 +83,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.3',
-          inputs: [
-            {
-              meta: {
-                package: {
-                  agentVersion: '>=9.3.0',
-                },
-              },
-            },
-          ],
+          inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.3',
         policy_base_id: 'policy1',
@@ -100,6 +93,7 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policy1#9.2',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policy1#9.2',
         policy_base_id: 'policy1',
@@ -108,6 +102,7 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policy1#8.9',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policy1#8.9',
         policy_base_id: 'policy1',
@@ -121,11 +116,7 @@ describe('getVersionSpecificPolicies', () => {
       fleetServerPolicy,
       {
         id: 'policy1',
-        inputs: [
-          {
-            meta: { package: { agentVersion: '>=9.3.0' } },
-          },
-        ],
+        inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }],
       } as any,
       ['9.4', '9.1']
     );
@@ -133,15 +124,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.4',
-          inputs: [
-            {
-              meta: {
-                package: {
-                  agentVersion: '>=9.3.0',
-                },
-              },
-            },
-          ],
+          inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.4',
         policy_base_id: 'policy1',
@@ -150,6 +134,7 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policy1#9.1',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policy1#9.1',
         policy_base_id: 'policy1',
@@ -166,11 +151,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.3',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.3',
         policy_base_id: 'policy1',
@@ -178,11 +160,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.2',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.2',
         policy_base_id: 'policy1',
@@ -191,6 +170,7 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policy1#8.9',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policy1#8.9',
         policy_base_id: 'policy1',
@@ -209,11 +189,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.4',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.4',
         policy_base_id: 'policy1',
@@ -221,11 +198,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policy1#9.1',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policy1#9.1',
         policy_base_id: 'policy1',
@@ -236,25 +210,14 @@ describe('getVersionSpecificPolicies', () => {
   it('should create version specific policies with common agent versions and both package and template level condition', async () => {
     const policies = await getVersionSpecificPolicies(soClient, fleetServerPolicy, {
       id: 'policyBothConditions',
-      inputs: [
-        {
-          meta: { package: { agentVersion: '>=9.3.0' } },
-        },
-        {},
-      ],
+      inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }, {}],
     } as any);
     expect(policies).toEqual([
       {
         data: {
           id: 'policyBothConditions#9.3',
-          inputs: [
-            {
-              meta: { package: { agentVersion: '>=9.3.0' } },
-            },
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ meta: { package: { agentVersion: '>=9.3.0' } } }, { type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policyBothConditions#9.3',
         policy_base_id: 'policyBothConditions',
@@ -262,11 +225,8 @@ describe('getVersionSpecificPolicies', () => {
       {
         data: {
           id: 'policyBothConditions#9.2',
-          inputs: [
-            {
-              type: 'cel',
-            },
-          ],
+          inputs: [{ type: 'cel' }],
+          secret_references: [],
         },
         policy_id: 'policyBothConditions#9.2',
         policy_base_id: 'policyBothConditions',
@@ -275,11 +235,49 @@ describe('getVersionSpecificPolicies', () => {
         data: {
           id: 'policyBothConditions#8.9',
           inputs: [],
+          secret_references: [],
         },
         policy_id: 'policyBothConditions#8.9',
         policy_base_id: 'policyBothConditions',
       },
     ]);
+  });
+
+  it('uses the rebuilt policy secret_references when the policy is rebuilt for the agent version', async () => {
+    const { agentPolicyService: mockedAgentPolicyService } = jest.requireMock(
+      '../agent_policy'
+    ) as any;
+    mockedAgentPolicyService.getFullAgentPolicy.mockImplementation(
+      async (_: any, id: string, { agentVersion }: { agentVersion: string }) => ({
+        id,
+        inputs: agentVersion.startsWith('9.')
+          ? [{ type: 'cel', credential: '$co.elastic.secret{secret-for-9x}' }]
+          : [],
+        secret_references: agentVersion.startsWith('9.') ? [{ id: 'secret-for-9x' }] : [],
+      })
+    );
+
+    const localFleetServerPolicy = {
+      data: { inputs: [], secret_references: [{ id: 'base-secret' }] },
+    } as any;
+    const fullPolicy = {
+      id: 'policy1',
+      inputs: [{}],
+      secret_references: [{ id: 'base-secret' }],
+    } as any;
+
+    const policies = await getVersionSpecificPolicies(
+      soClient,
+      localFleetServerPolicy,
+      fullPolicy,
+      ['9.3', '8.9']
+    );
+
+    const policy93 = policies.find((p) => p.policy_id === 'policy1#9.3');
+    const policy89 = policies.find((p) => p.policy_id === 'policy1#8.9');
+
+    expect(policy93!.data.secret_references).toEqual([{ id: 'secret-for-9x' }]);
+    expect(policy89!.data.secret_references).toEqual([]);
   });
 });
 
