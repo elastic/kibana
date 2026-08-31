@@ -125,7 +125,7 @@ export function RumHome() {
 function DashboardToolbar() {
 
   return (
-    <div style={{ width: '100%' }}>
+    <>
    <EuiFlexGroup wrap alignItems="flexEnd" gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <RumDatePicker />
