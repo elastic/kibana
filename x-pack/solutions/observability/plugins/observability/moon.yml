@@ -169,6 +169,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/global-search-plugin'
+  - '@kbn/core-lifecycle-browser'
 tags:
   - plugin
   - prod
