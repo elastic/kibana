@@ -23,7 +23,6 @@ const ANALYZE_MESSAGE = i18n.translate('xpack.ux.analyzeDataButtonLabel.message'
     'Go to Explore Data, where you can select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
 
-// TODO: should this be used for other components rather than UX dashboard only?
 export function useAppMenu(enableInspector: boolean) {
   const { application, http, inspector } = useKibanaServices();
   const { urlParams } = useLegacyUrlParams();
@@ -64,7 +63,7 @@ export function useAppMenu(enableInspector: boolean) {
       items.unshift({
         id: 'inspect',
         label: i18n.translate('xpack.ux.inspectButtonText', {
-          defaultMessage: 'Inspect'
+          defaultMessage: 'Inspect',
         }),
         iconType: 'inspect',
         run: () => inspector.open(inspectorAdapters),

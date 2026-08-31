@@ -32,7 +32,7 @@ export function RumHome() {
     useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
   const { hasData, loading: isLoading, dataViewTitle } = useHasRumData();
-  
+
   const noDataConfig: NoDataConfig | undefined = !hasData
     ? {
         action: {
@@ -94,13 +94,12 @@ export function RumHome() {
     <PageTemplateComponent
       noDataConfig={isLoading ? undefined : noDataConfig}
       isPageDataLoaded={isLoading === false}
-      //add this to remove the padding from the page section
       pageSectionProps={{
         paddingSize: 'none',
       }}
     >
       <AppHeader title={DASHBOARD_LABEL} menu={appMenu} spacing="standard" />
-      
+
       <EuiPageSection paddingSize="m" restrictWidth={false}>
         <DashboardToolbar />
         {isLoading && <EmptyStateLoading />}
@@ -126,7 +125,7 @@ function DashboardToolbar() {
         <EuiFlexItem>
           <UxEnvironmentFilter />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <RumDatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>

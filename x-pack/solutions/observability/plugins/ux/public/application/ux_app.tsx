@@ -70,7 +70,7 @@ function UxApp() {
 
   return (
     <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome/>
+      <RumHome />
     </div>
   );
 }
@@ -154,7 +154,7 @@ export function UXAppRoot({
                     <InspectorContextProvider>
                       <UrlParamsProvider>
                         <CsmSharedContextProvider>
-                          <UxApp/>
+                          <UxApp />
                         </CsmSharedContextProvider>
                       </UrlParamsProvider>
                     </InspectorContextProvider>
