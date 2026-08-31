@@ -102,7 +102,7 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('`marketing`');
   });
 
-  it('renders a query template with a filter that also matches indices without a spaces field', () => {
+  it('renders a query template with a filter that also matches indices that are not space-aware', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
@@ -119,9 +119,34 @@ describe('getAiIndicesInstructions', () => {
       filter: {
         bool: {
           should: [
-            { term: { spaces: 'marketing' } },
-            { term: { spaces: '*' } },
-            { bool: { must_not: { exists: { field: 'spaces' } } } },
+            // A document with no privilege entries — including every document of an index that
+            // does not map the field — is visible from any space.
+            {
+              bool: {
+                must_not: {
+                  nested: {
+                    path: 'permissions.kibana.privileges',
+                    query: { match_all: {} },
+                    ignore_unmapped: true,
+                  },
+                },
+              },
+            },
+            {
+              nested: {
+                path: 'permissions.kibana.privileges',
+                ignore_unmapped: true,
+                query: {
+                  bool: {
+                    should: [
+                      { term: { 'permissions.kibana.privileges.space': 'marketing' } },
+                      { term: { 'permissions.kibana.privileges.space': '*' } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              },
+            },
           ],
           minimum_should_match: 1,
         },

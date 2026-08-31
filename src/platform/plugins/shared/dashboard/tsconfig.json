@@ -12,6 +12,7 @@
     "test/scout_oas_schema/**/*",
     "test/scout_oas_schema/**/*.json",
     "test/scout_anonymous_authc/**/*",
+    "test/scout_search_sessions/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -105,6 +106,7 @@
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
+    "@kbn/core-chrome-layout-constants",
     "@kbn/cps",
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",

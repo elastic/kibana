@@ -28,7 +28,7 @@ export interface ContinuationCycle {
 
   /** Whether this cycle should reuse an established event ID. Defaults to true. */
   expectReuse?: boolean;
-  /** Whether this cycle must perform a topology-filtered event search. */
+  /** Whether follow-up cycles must perform a topology-filtered event search. */
   expectTopologyEventSearch?: boolean;
   /** Event IDs explicitly supplied by the agent to events_write, before handler deduplication. */
   requestedEventIds?: string[];
@@ -204,6 +204,7 @@ export type ContinuationEvaluator = Evaluator<
 export const continuationStabilityEvaluator: ContinuationEvaluator = {
   name: 'continuation_stability',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output }) => Promise.resolve(scoreContinuationStability(output.cycles ?? [])),
 };
 
@@ -211,6 +212,7 @@ export const continuationStabilityEvaluator: ContinuationEvaluator = {
 export const continuationRoutingEvaluator: ContinuationEvaluator = {
   name: 'continuation_routing',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output }) => Promise.resolve(scoreContinuationRouting(output.cycles ?? [])),
 };
 
@@ -218,6 +220,7 @@ export const continuationRoutingEvaluator: ContinuationEvaluator = {
 export const continuationTopologyStabilityEvaluator: ContinuationEvaluator = {
   name: 'continuation_topology_stability',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output }) =>
     Promise.resolve(scoreContinuationTopologyStability(output.cycles ?? [])),
 };
