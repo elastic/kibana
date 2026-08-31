@@ -6,6 +6,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaResponseFactory } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
@@ -24,6 +25,7 @@ import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
   MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
+  MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
   MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
   aiIndexByIdPath,
@@ -44,6 +46,8 @@ import type {
   PutAiIndexFeedbackAnalysisResponse,
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
+import type { ImprovementAction } from '../../common/http_api/improvement_actions';
+import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import type { GetKiResponse, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 import { MAX_KI_ID_LENGTH } from '../../common/step_types/ki';
 import { apiPrivileges } from '../../common/features';
@@ -66,6 +70,7 @@ import {
 import type { AiIndexService } from '../ai_indices/service';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
+import { validateSignalFilter } from '../ai_indices/signal_filter';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
@@ -117,6 +122,12 @@ const signalTimeRangeSchema = schema.oneOf(
   }
 );
 
+// Derived from the taxonomy rather than re-listed, so a new action cannot be
+// added to the vocabulary and silently stay unconfigurable here.
+const improvementActionSchema = schema.oneOf(
+  IMPROVEMENT_ACTIONS.map((action) => schema.literal(action)) as [Type<ImprovementAction>]
+);
+
 const feedbackAnalysisSchema = schema.object(
   {
     enabled: schema.boolean({
@@ -146,6 +157,23 @@ const feedbackAnalysisSchema = schema.object(
       { defaultValue: { interval: DEFAULT_FEEDBACK_ANALYSIS_INTERVAL } }
     ),
     signal_time_range: signalTimeRangeSchema,
+    signal_filter: schema.maybe(
+      schema.string({
+        maxLength: MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
+        validate: validateSignalFilter,
+        meta: {
+          description:
+            'KQL narrowing which signals this index analyzes, for example `tags: query_error`.',
+        },
+      })
+    ),
+    allowed_actions: schema.arrayOf(improvementActionSchema, {
+      defaultValue: [...IMPROVEMENT_ACTIONS],
+      maxSize: IMPROVEMENT_ACTIONS.length,
+      meta: {
+        description: 'Improvement actions the analysis may propose. An empty list is observe-only.',
+      },
+    }),
   },
   {
     validate: ({ schedule, signal_time_range: signalTimeRange }) =>

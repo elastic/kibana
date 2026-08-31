@@ -55,7 +55,9 @@ record:
   "enabled": true,
   "agent_id": "my-analysis-agent",
   "schedule": { "interval": "24h" },
-  "signal_time_range": { "type": "relative", "from": "now-30d" }
+  "signal_time_range": { "type": "relative", "from": "now-30d" },
+  "signal_filter": "tags: query_error",
+  "allowed_actions": ["add_ki", "edit_ki"]
 }
 ```
 
@@ -73,6 +75,20 @@ record:
   are harmless, because re-proposals are de-duplicated downstream. An
   `absolute` window is an open-ended "since this date", so it is always
   accepted.
+- `signal_filter` is KQL narrowing which signals a run analyzes, applied on top
+  of `signal_time_range`. It is validated as KQL when written, so a typo cannot
+  silently disable every scheduled run. It belongs here rather than in the
+  generation pipeline: generation is global and stateful, so dropping a signal
+  at write time would drop it for every consumer, permanently, whereas a read
+  filter is per index and reversible.
+- `allowed_actions` defaults to the full [improvement action
+  taxonomy](common/http_api/improvement_actions.ts) and bounds what the
+  analysis may propose for this index. Deployments routinely want an agent that
+  may suggest KIs but never touch workflows, and an agent asked in a prompt to
+  avoid an action is not prevented from taking it — so the allowed set is
+  config that the apply step enforces, not prompt text. An empty list is
+  observe-only: the run still reports what it found but may not propose a
+  change.
 
 The dedicated `PUT .../feedback_analysis` route replaces only this block,
 leaving the rest of the record untouched. Unlike a full AI index replace it is

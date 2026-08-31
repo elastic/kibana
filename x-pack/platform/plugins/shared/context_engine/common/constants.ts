@@ -74,6 +74,7 @@ export const MAX_AI_INDEX_SOURCES = 100;
 
 export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
 export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;
+export const MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH = 4096;
 
 /**
  * Floor on the feedback-analysis schedule interval. Every run is an LLM

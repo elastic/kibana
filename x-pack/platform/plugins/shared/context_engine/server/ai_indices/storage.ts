@@ -44,6 +44,11 @@ const storageSettings = {
           signal_time_range: types.object({
             properties: { type: types.keyword({}), from: types.keyword({}) },
           }),
+          // Read back and handed to the analysis run, never queried, and long
+          // enough to exceed the default `ignore_above`. Indexing it would only
+          // cost space and silently drop the longer filters.
+          signal_filter: types.keyword({ index: false, doc_values: false }),
+          allowed_actions: types.keyword({}),
         },
       }),
     },

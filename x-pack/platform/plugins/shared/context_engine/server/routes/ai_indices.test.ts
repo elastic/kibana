@@ -22,6 +22,7 @@ import {
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
@@ -195,7 +196,7 @@ describe('ai indices routes', () => {
       body: { enabled: true },
     });
 
-    expect(response.notFound).toHaveBeenCalledTimes(7);
+    expect(response.notFound).toHaveBeenCalledTimes(8);
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
@@ -780,11 +781,12 @@ describe('ai indices routes', () => {
       return validate.request.body.validate(body);
     };
 
-    it('defaults the schedule and the signal time range', () => {
+    it('defaults the schedule, the signal time range, and the allowed actions', () => {
       expect(validateBody({ enabled: true })).toEqual({
         enabled: true,
         schedule: { interval: '24h' },
         signal_time_range: { type: 'relative', from: 'now-30d' },
+        allowed_actions: [...IMPROVEMENT_ACTIONS],
       });
     });
 
@@ -847,6 +849,34 @@ describe('ai indices routes', () => {
       expect(() =>
         validateBody({ enabled: true, signal_time_range: { type: 'relative', from: '30d' } })
       ).toThrow();
+    });
+
+    it('accepts a KQL signal filter', () => {
+      expect(
+        validateBody({ enabled: true, signal_filter: 'tags: query_error and data.tool: "search"' })
+      ).toMatchObject({ signal_filter: 'tags: query_error and data.tool: "search"' });
+    });
+
+    it('rejects a signal filter that is not valid KQL', () => {
+      expect(() => validateBody({ enabled: true, signal_filter: 'tags: (query_error' })).toThrow(
+        /valid KQL query/
+      );
+    });
+
+    it('accepts a subset of the improvement actions', () => {
+      expect(validateBody({ enabled: true, allowed_actions: ['add_ki', 'edit_ki'] })).toMatchObject(
+        { allowed_actions: ['add_ki', 'edit_ki'] }
+      );
+    });
+
+    it('accepts an empty allowed action list as observe-only', () => {
+      expect(validateBody({ enabled: true, allowed_actions: [] })).toMatchObject({
+        allowed_actions: [],
+      });
+    });
+
+    it('rejects an action outside the taxonomy', () => {
+      expect(() => validateBody({ enabled: true, allowed_actions: ['delete_index'] })).toThrow();
     });
   });
 
