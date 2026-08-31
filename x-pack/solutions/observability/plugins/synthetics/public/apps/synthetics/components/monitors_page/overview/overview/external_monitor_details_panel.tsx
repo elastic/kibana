@@ -22,15 +22,16 @@ import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge'
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import type { Ping } from '../../../../../../../common/runtime_types';
 import type { OverviewStatusMetaData } from '../types';
+import { getRemoteOriginFieldLabel } from '../../../../utils/remote/remote_origin_copy';
 
 interface Props {
   monitor: OverviewStatusMetaData;
   latestPing?: Ping;
 }
 
-// Details for monitors that have no local saved object — both remote (CCS)
-// monitors and local Heartbeat / Elastic Agent managed monitors. The
-// "Remote cluster" row below is the remote-only sub-case.
+// Details for monitors that have no local saved object — both remote (CCS
+// cluster / CPS linked project) monitors and local Heartbeat / Elastic Agent
+// managed monitors. The origin row below is the remote-only sub-case.
 export function ExternalMonitorDetailsPanel({ monitor, latestPing }: Props) {
   const formatter = useDateFormat();
   const url = latestPing?.url?.full ?? monitor.urls;
@@ -95,7 +96,7 @@ export function ExternalMonitorDetailsPanel({ monitor, latestPing }: Props) {
 
         {monitor.remote?.remoteName && (
           <>
-            <EuiDescriptionListTitle>{REMOTE_CLUSTER_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListTitle>{getRemoteOriginFieldLabel()}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               {monitor.remote.remoteName}
             </EuiDescriptionListDescription>
@@ -133,10 +134,3 @@ const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.flyout.externalDetails.
 const TAGS_LABEL = i18n.translate('xpack.synthetics.flyout.externalDetails.tags', {
   defaultMessage: 'Tags',
 });
-
-const REMOTE_CLUSTER_LABEL = i18n.translate(
-  'xpack.synthetics.flyout.externalDetails.remoteCluster',
-  {
-    defaultMessage: 'Remote cluster',
-  }
-);

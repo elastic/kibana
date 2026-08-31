@@ -175,6 +175,19 @@ describe('MetricsGrid', () => {
     });
   });
 
+  it('passes the effective aggregation label as yAxisTitle to each chart', () => {
+    renderMetricsGrid();
+
+    // Both metric items are counters; the default counter aggregation is SUM.
+    metricItems.forEach((_, index) => {
+      expect(Chart).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ yAxisTitle: 'Sum' }),
+        expect.anything()
+      );
+    });
+  });
+
   it.each([
     ['system util', ['system', 'util']],
     ['system*util', ['system', 'util']],
