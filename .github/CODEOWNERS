@@ -1414,6 +1414,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/conte
 x-pack/solutions/security/packages/kbn-pnd-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engineering

@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
+import type { IconType } from '@elastic/eui';
 import type { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
@@ -85,6 +86,7 @@ export interface ConversationListItemRowProps {
   read?: boolean;
   isPinned?: boolean;
   permissions: ConversationPermissions;
+  icon: IconType;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -99,6 +101,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   read,
   isPinned = false,
   permissions,
+  icon,
 }) => {
   const canRename = permissions.rename;
   const canDelete = permissions.delete;
@@ -367,7 +370,18 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
               action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_RESUME,
             })}
           >
-            <EuiTextTruncate text={title || conversationId} />
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={icon} size="s" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem
+                css={css`
+                  min-width: 0;
+                `}
+              >
+                <EuiTextTruncate text={title || conversationId} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </Link>
         </EuiFlexItem>
 
