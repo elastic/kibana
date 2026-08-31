@@ -164,9 +164,7 @@ class SmlIndexerImpl implements SmlIndexer {
     // scoped clients handle it themselves and throw if one is passed.
     const [firstSpace] = spaces;
     const internalNamespace =
-      !clientHasSpacesExtension && firstSpace && firstSpace !== 'default'
-        ? firstSpace
-        : undefined;
+      !clientHasSpacesExtension && firstSpace && firstSpace !== 'default' ? firstSpace : undefined;
     const wrappedClient = internalNamespace
       ? (new Proxy(savedObjectsClient, {
           get(target, prop) {
