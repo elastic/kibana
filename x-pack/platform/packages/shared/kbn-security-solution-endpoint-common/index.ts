@@ -14,7 +14,6 @@
 // silently widen it.
 //
 // Still to be lifted by the commits that follow:
-//   - route path constants
 //   - per-action request schemas (@kbn/config-schema and generated zod)
 
 export type { EndpointAuthz, EndpointAuthzKeyList, EndpointPrivileges } from './src/types/authz';
@@ -53,3 +52,26 @@ export type {
 } from './src/constants';
 
 export { isActionSupportedByAgentType } from './src/support_map';
+
+export {
+  ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
+  ACTION_AGENT_FILE_INFO_ROUTE,
+  ACTION_DETAILS_ROUTE,
+  ACTION_STATE_ROUTE,
+  ACTION_STATUS_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
+  BASE_ENDPOINT_ROUTE,
+  BASE_INTERNAL_ENDPOINT_ROUTE,
+  CANCEL_ROUTE,
+  EXECUTE_ROUTE,
+  GET_FILE_ROUTE,
+  GET_PROCESSES_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+  KILL_PROCESS_ROUTE,
+  MEMORY_DUMP_ROUTE,
+  RUN_SCRIPT_ROUTE,
+  SCAN_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
+  UPLOAD_ROUTE,
+} from './src/routes';
