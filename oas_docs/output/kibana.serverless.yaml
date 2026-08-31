@@ -49703,6 +49703,7 @@ paths:
                           elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
                           kafka: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
                           logstash: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                          otlp: '#/components/schemas/Kibana_HTTP_APIs_output_response_otlp'
                           remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                         propertyName: type
                       oneOf:
@@ -49710,6 +49711,7 @@ paths:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
+                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_otlp'
                     maxItems: 10000
                     type: array
                   page:
@@ -49796,6 +49798,7 @@ paths:
                   elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_new_output_elasticsearch'
                   kafka: '#/components/schemas/Kibana_HTTP_APIs_new_output_kafka'
                   logstash: '#/components/schemas/Kibana_HTTP_APIs_new_output_logstash'
+                  otlp: '#/components/schemas/Kibana_HTTP_APIs_new_output_otlp'
                   remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_new_output_remote_elasticsearch'
                 propertyName: type
               oneOf:
@@ -49803,6 +49806,7 @@ paths:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_new_output_remote_elasticsearch'
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_new_output_logstash'
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_new_output_kafka'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_new_output_otlp'
       responses:
         '200':
           content:
@@ -49829,6 +49833,7 @@ paths:
                         elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
                         kafka: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
                         logstash: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                        otlp: '#/components/schemas/Kibana_HTTP_APIs_output_response_otlp'
                         remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                       propertyName: type
                     oneOf:
@@ -49836,6 +49841,7 @@ paths:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_otlp'
                 required:
                   - item
           description: Successful response
@@ -50024,6 +50030,7 @@ paths:
                         elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
                         kafka: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
                         logstash: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                        otlp: '#/components/schemas/Kibana_HTTP_APIs_output_response_otlp'
                         remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                       propertyName: type
                     oneOf:
@@ -50031,6 +50038,7 @@ paths:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_otlp'
                 required:
                   - item
           description: Successful response
@@ -50120,6 +50128,7 @@ paths:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_update_output_remote_elasticsearch'
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_update_output_logstash'
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_update_output_kafka'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_update_output_otlp'
       responses:
         '200':
           content:
@@ -50146,6 +50155,7 @@ paths:
                         elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_elasticsearch'
                         kafka: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
                         logstash: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
+                        otlp: '#/components/schemas/Kibana_HTTP_APIs_output_response_otlp'
                         remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                       propertyName: type
                     oneOf:
@@ -50153,6 +50163,7 @@ paths:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_remote_elasticsearch'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_logstash'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_kafka'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_response_otlp'
                 required:
                   - item
           description: Successful response
@@ -106929,6 +106940,99 @@ components:
         - hosts
       title: new_output_logstash
       type: object
+    Kibana_HTTP_APIs_new_output_otlp:
+      additionalProperties: false
+      properties:
+        allow_edit:
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        id:
+          type: string
+        is_default:
+          default: false
+          type: boolean
+        is_default_monitoring:
+          default: false
+          type: boolean
+        is_internal:
+          type: boolean
+        is_preconfigured:
+          type: boolean
+        name:
+          type: string
+        otlp_exporter:
+          discriminator:
+            mapping:
+              grpc: '#/components/schemas/Kibana_HTTP_APIs_otlp_grpc_exporter'
+              http/protobuf: '#/components/schemas/Kibana_HTTP_APIs_otlp_http_exporter'
+            propertyName: protocol
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_grpc_exporter'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_http_exporter'
+        secrets:
+          additionalProperties: false
+          type: object
+          properties:
+            otlp_exporter:
+              additionalProperties: false
+              type: object
+              properties:
+                tls:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    key_pem:
+                      anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            hash:
+                              type: string
+                            id:
+                              type: string
+                          required:
+                            - id
+                        - type: string
+                    tpm:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        auth:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                hash:
+                                  type: string
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        owner_auth:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                hash:
+                                  type: string
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+        type:
+          enum:
+            - otlp
+          type: string
+      required:
+        - name
+        - type
+        - otlp_exporter
+      title: new_output_otlp
+      type: object
     Kibana_HTTP_APIs_new_output_remote_elasticsearch:
       additionalProperties: false
       properties:
@@ -107884,6 +107988,972 @@ components:
       description: Time shift
       title: Operation Time Shift Setting
       type: string
+    Kibana_HTTP_APIs_otlp_grpc_exporter:
+      additionalProperties: false
+      properties:
+        authority:
+          maxLength: 256
+          nullable: true
+          type: string
+        balancer_name:
+          maxLength: 256
+          nullable: true
+          type: string
+        compression:
+          enum:
+            - gzip
+            - snappy
+            - zstd
+            - none
+          type: string
+        endpoint:
+          maxLength: 2048
+          type: string
+        headers:
+          additionalProperties:
+            maxLength: 1000
+            type: string
+          nullable: true
+          type: object
+        keepalive:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            permit_without_stream:
+              type: boolean
+            time:
+              maxLength: 64
+              nullable: true
+              type: string
+            timeout:
+              maxLength: 64
+              nullable: true
+              type: string
+        protocol:
+          enum:
+            - grpc
+          type: string
+        read_buffer_size:
+          nullable: true
+          type: number
+        retry_on_failure:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            initial_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            max_elapsed_time:
+              maxLength: 64
+              nullable: true
+              type: string
+            max_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            multiplier:
+              nullable: true
+              type: number
+            randomization_factor:
+              nullable: true
+              type: number
+        sending_queue:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            batch:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                flush_timeout:
+                  maxLength: 64
+                  nullable: true
+                  type: string
+                max_size:
+                  nullable: true
+                  type: number
+                min_size:
+                  nullable: true
+                  type: number
+                partition:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    metadata_keys:
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      nullable: true
+                      type: array
+                sizer:
+                  enum:
+                    - items
+                    - bytes
+                  type: string
+            block_on_overflow:
+              type: boolean
+            enabled:
+              type: boolean
+            num_consumers:
+              nullable: true
+              type: number
+            queue_size:
+              nullable: true
+              type: number
+            sizer:
+              enum:
+                - requests
+                - items
+                - bytes
+              type: string
+            wait_for_result:
+              type: boolean
+        timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        tls:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            ca_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            ca_pem:
+              maxLength: 65536
+              nullable: true
+              type: string
+            cert_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            cert_pem:
+              maxLength: 65536
+              nullable: true
+              type: string
+            cipher_suites:
+              items:
+                maxLength: 256
+                type: string
+              maxItems: 100
+              nullable: true
+              type: array
+            curve_preferences:
+              items:
+                enum:
+                  - X25519
+                  - P521
+                  - P256
+                  - P384
+                type: string
+              maxItems: 4
+              nullable: true
+              type: array
+            include_insecure_cipher_suites:
+              type: boolean
+            include_system_ca_certs_pool:
+              type: boolean
+            insecure:
+              type: boolean
+            insecure_skip_verify:
+              type: boolean
+            key_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            max_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            min_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            reload_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            server_name_override:
+              maxLength: 256
+              nullable: true
+              type: string
+            tpm:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                path:
+                  maxLength: 4096
+                  nullable: true
+                  type: string
+        user_agent:
+          maxLength: 256
+          nullable: true
+          type: string
+        wait_for_ready:
+          type: boolean
+        write_buffer_size:
+          nullable: true
+          type: number
+      required:
+        - endpoint
+        - protocol
+      title: otlp_grpc_exporter
+      type: object
+    Kibana_HTTP_APIs_otlp_http_exporter:
+      additionalProperties: false
+      properties:
+        compression:
+          enum:
+            - gzip
+            - none
+          type: string
+        compression_params:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            level:
+              type: number
+        cookies:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            enabled:
+              type: boolean
+        disable_keep_alives:
+          type: boolean
+        encoding:
+          enum:
+            - proto
+            - json
+          type: string
+        endpoint:
+          maxLength: 2048
+          type: string
+        force_attempt_http2:
+          type: boolean
+        headers:
+          additionalProperties:
+            maxLength: 1000
+            type: string
+          nullable: true
+          type: object
+        http2_ping_timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        http2_read_idle_timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        idle_conn_timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        logs_endpoint:
+          maxLength: 2048
+          nullable: true
+          type: string
+        max_conns_per_host:
+          nullable: true
+          type: number
+        max_idle_conns:
+          nullable: true
+          type: number
+        max_idle_conns_per_host:
+          nullable: true
+          type: number
+        metrics_endpoint:
+          maxLength: 2048
+          nullable: true
+          type: string
+        profiles_endpoint:
+          maxLength: 2048
+          nullable: true
+          type: string
+        protocol:
+          enum:
+            - http/protobuf
+          type: string
+        proxy_url:
+          maxLength: 2048
+          nullable: true
+          type: string
+        read_buffer_size:
+          nullable: true
+          type: number
+        retry_on_failure:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            initial_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            max_elapsed_time:
+              maxLength: 64
+              nullable: true
+              type: string
+            max_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            multiplier:
+              nullable: true
+              type: number
+            randomization_factor:
+              nullable: true
+              type: number
+        sending_queue:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            batch:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                flush_timeout:
+                  maxLength: 64
+                  nullable: true
+                  type: string
+                max_size:
+                  nullable: true
+                  type: number
+                min_size:
+                  nullable: true
+                  type: number
+                partition:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    metadata_keys:
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      nullable: true
+                      type: array
+                sizer:
+                  enum:
+                    - items
+                    - bytes
+                  type: string
+            block_on_overflow:
+              type: boolean
+            enabled:
+              type: boolean
+            num_consumers:
+              nullable: true
+              type: number
+            queue_size:
+              nullable: true
+              type: number
+            sizer:
+              enum:
+                - requests
+                - items
+                - bytes
+              type: string
+            wait_for_result:
+              type: boolean
+        timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        tls:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            ca_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            ca_pem:
+              maxLength: 65536
+              nullable: true
+              type: string
+            cert_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            cert_pem:
+              maxLength: 65536
+              nullable: true
+              type: string
+            cipher_suites:
+              items:
+                maxLength: 256
+                type: string
+              maxItems: 100
+              nullable: true
+              type: array
+            curve_preferences:
+              items:
+                enum:
+                  - X25519
+                  - P521
+                  - P256
+                  - P384
+                type: string
+              maxItems: 4
+              nullable: true
+              type: array
+            include_insecure_cipher_suites:
+              type: boolean
+            include_system_ca_certs_pool:
+              type: boolean
+            insecure:
+              type: boolean
+            insecure_skip_verify:
+              type: boolean
+            key_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            max_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            min_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            reload_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            server_name_override:
+              maxLength: 256
+              nullable: true
+              type: string
+            tpm:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                path:
+                  maxLength: 4096
+                  nullable: true
+                  type: string
+        traces_endpoint:
+          maxLength: 2048
+          nullable: true
+          type: string
+        write_buffer_size:
+          nullable: true
+          type: number
+      required:
+        - endpoint
+        - protocol
+      title: otlp_http_exporter
+      type: object
+    Kibana_HTTP_APIs_otlp_response_grpc_exporter:
+      additionalProperties: true
+      properties:
+        authority:
+          maxLength: 256
+          nullable: true
+          type: string
+        balancer_name:
+          maxLength: 256
+          nullable: true
+          type: string
+        compression:
+          enum:
+            - gzip
+            - snappy
+            - zstd
+            - none
+          type: string
+        endpoint:
+          maxLength: 2048
+          type: string
+        headers:
+          additionalProperties:
+            maxLength: 1000
+            type: string
+          nullable: true
+          type: object
+        keepalive:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            permit_without_stream:
+              type: boolean
+            time:
+              maxLength: 64
+              nullable: true
+              type: string
+            timeout:
+              maxLength: 64
+              nullable: true
+              type: string
+        protocol:
+          enum:
+            - grpc
+          type: string
+        read_buffer_size:
+          nullable: true
+          type: number
+        retry_on_failure:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            initial_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            max_elapsed_time:
+              maxLength: 64
+              nullable: true
+              type: string
+            max_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            multiplier:
+              nullable: true
+              type: number
+            randomization_factor:
+              nullable: true
+              type: number
+        sending_queue:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            batch:
+              additionalProperties: true
+              nullable: true
+              type: object
+              properties:
+                flush_timeout:
+                  maxLength: 64
+                  nullable: true
+                  type: string
+                max_size:
+                  nullable: true
+                  type: number
+                min_size:
+                  nullable: true
+                  type: number
+                partition:
+                  additionalProperties: true
+                  nullable: true
+                  type: object
+                  properties:
+                    metadata_keys:
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      nullable: true
+                      type: array
+                sizer:
+                  enum:
+                    - items
+                    - bytes
+                  type: string
+            block_on_overflow:
+              type: boolean
+            enabled:
+              type: boolean
+            num_consumers:
+              nullable: true
+              type: number
+            queue_size:
+              nullable: true
+              type: number
+            sizer:
+              enum:
+                - requests
+                - items
+                - bytes
+              type: string
+            wait_for_result:
+              type: boolean
+        timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        tls:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            ca_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            ca_pem:
+              maxLength: 65536
+              nullable: true
+              type: string
+            cert_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            cert_pem:
+              maxLength: 65536
+              nullable: true
+              type: string
+            cipher_suites:
+              items:
+                maxLength: 256
+                type: string
+              maxItems: 100
+              nullable: true
+              type: array
+            curve_preferences:
+              items:
+                enum:
+                  - X25519
+                  - P521
+                  - P256
+                  - P384
+                type: string
+              maxItems: 4
+              nullable: true
+              type: array
+            include_insecure_cipher_suites:
+              type: boolean
+            include_system_ca_certs_pool:
+              type: boolean
+            insecure:
+              type: boolean
+            insecure_skip_verify:
+              type: boolean
+            key_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            max_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            min_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            reload_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            server_name_override:
+              maxLength: 256
+              nullable: true
+              type: string
+            tpm:
+              additionalProperties: true
+              nullable: true
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                path:
+                  maxLength: 4096
+                  nullable: true
+                  type: string
+        user_agent:
+          maxLength: 256
+          nullable: true
+          type: string
+        wait_for_ready:
+          type: boolean
+        write_buffer_size:
+          nullable: true
+          type: number
+      required:
+        - endpoint
+        - protocol
+      title: otlp_response_grpc_exporter
+      type: object
+    Kibana_HTTP_APIs_otlp_response_http_exporter:
+      additionalProperties: true
+      properties:
+        compression:
+          enum:
+            - gzip
+            - none
+          type: string
+        compression_params:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            level:
+              type: number
+        cookies:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            enabled:
+              type: boolean
+        disable_keep_alives:
+          type: boolean
+        encoding:
+          enum:
+            - proto
+            - json
+          type: string
+        endpoint:
+          maxLength: 2048
+          type: string
+        force_attempt_http2:
+          type: boolean
+        headers:
+          additionalProperties:
+            maxLength: 1000
+            type: string
+          nullable: true
+          type: object
+        http2_ping_timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        http2_read_idle_timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        idle_conn_timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        logs_endpoint:
+          maxLength: 2048
+          nullable: true
+          type: string
+        max_conns_per_host:
+          nullable: true
+          type: number
+        max_idle_conns:
+          nullable: true
+          type: number
+        max_idle_conns_per_host:
+          nullable: true
+          type: number
+        metrics_endpoint:
+          maxLength: 2048
+          nullable: true
+          type: string
+        profiles_endpoint:
+          maxLength: 2048
+          nullable: true
+          type: string
+        protocol:
+          enum:
+            - http/protobuf
+          type: string
+        proxy_url:
+          maxLength: 2048
+          nullable: true
+          type: string
+        read_buffer_size:
+          nullable: true
+          type: number
+        retry_on_failure:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            initial_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            max_elapsed_time:
+              maxLength: 64
+              nullable: true
+              type: string
+            max_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            multiplier:
+              nullable: true
+              type: number
+            randomization_factor:
+              nullable: true
+              type: number
+        sending_queue:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            batch:
+              additionalProperties: true
+              nullable: true
+              type: object
+              properties:
+                flush_timeout:
+                  maxLength: 64
+                  nullable: true
+                  type: string
+                max_size:
+                  nullable: true
+                  type: number
+                min_size:
+                  nullable: true
+                  type: number
+                partition:
+                  additionalProperties: true
+                  nullable: true
+                  type: object
+                  properties:
+                    metadata_keys:
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      nullable: true
+                      type: array
+                sizer:
+                  enum:
+                    - items
+                    - bytes
+                  type: string
+            block_on_overflow:
+              type: boolean
+            enabled:
+              type: boolean
+            num_consumers:
+              nullable: true
+              type: number
+            queue_size:
+              nullable: true
+              type: number
+            sizer:
+              enum:
+                - requests
+                - items
+                - bytes
+              type: string
+            wait_for_result:
+              type: boolean
+        timeout:
+          maxLength: 64
+          nullable: true
+          type: string
+        tls:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            ca_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            ca_pem:
+              maxLength: 65536
+              nullable: true
+              type: string
+            cert_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            cert_pem:
+              maxLength: 65536
+              nullable: true
+              type: string
+            cipher_suites:
+              items:
+                maxLength: 256
+                type: string
+              maxItems: 100
+              nullable: true
+              type: array
+            curve_preferences:
+              items:
+                enum:
+                  - X25519
+                  - P521
+                  - P256
+                  - P384
+                type: string
+              maxItems: 4
+              nullable: true
+              type: array
+            include_insecure_cipher_suites:
+              type: boolean
+            include_system_ca_certs_pool:
+              type: boolean
+            insecure:
+              type: boolean
+            insecure_skip_verify:
+              type: boolean
+            key_file:
+              maxLength: 4096
+              nullable: true
+              type: string
+            max_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            min_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            reload_interval:
+              maxLength: 64
+              nullable: true
+              type: string
+            server_name_override:
+              maxLength: 256
+              nullable: true
+              type: string
+            tpm:
+              additionalProperties: true
+              nullable: true
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                path:
+                  maxLength: 4096
+                  nullable: true
+                  type: string
+        traces_endpoint:
+          maxLength: 2048
+          nullable: true
+          type: string
+        write_buffer_size:
+          nullable: true
+          type: number
+      required:
+        - endpoint
+        - protocol
+      title: otlp_response_http_exporter
+      type: object
     Kibana_HTTP_APIs_output_response_elasticsearch:
       additionalProperties: true
       properties:
@@ -108261,6 +109331,99 @@ components:
         - type
         - hosts
       title: output_response_logstash
+      type: object
+    Kibana_HTTP_APIs_output_response_otlp:
+      additionalProperties: true
+      properties:
+        allow_edit:
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        id:
+          type: string
+        is_default:
+          default: false
+          type: boolean
+        is_default_monitoring:
+          default: false
+          type: boolean
+        is_internal:
+          type: boolean
+        is_preconfigured:
+          type: boolean
+        name:
+          type: string
+        otlp_exporter:
+          discriminator:
+            mapping:
+              grpc: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_grpc_exporter'
+              http/protobuf: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_http_exporter'
+            propertyName: protocol
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_grpc_exporter'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_http_exporter'
+        secrets:
+          additionalProperties: true
+          type: object
+          properties:
+            otlp_exporter:
+              additionalProperties: true
+              type: object
+              properties:
+                tls:
+                  additionalProperties: true
+                  type: object
+                  properties:
+                    key_pem:
+                      anyOf:
+                        - additionalProperties: true
+                          type: object
+                          properties:
+                            hash:
+                              type: string
+                            id:
+                              type: string
+                          required:
+                            - id
+                        - type: string
+                    tpm:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        auth:
+                          anyOf:
+                            - additionalProperties: true
+                              type: object
+                              properties:
+                                hash:
+                                  type: string
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        owner_auth:
+                          anyOf:
+                            - additionalProperties: true
+                              type: object
+                              properties:
+                                hash:
+                                  type: string
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+        type:
+          enum:
+            - otlp
+          type: string
+      required:
+        - name
+        - type
+        - otlp_exporter
+      title: output_response_otlp
       type: object
     Kibana_HTTP_APIs_output_response_remote_elasticsearch:
       additionalProperties: true
@@ -114850,6 +116013,95 @@ components:
             - logstash
           type: string
       title: update_output_logstash
+      type: object
+    Kibana_HTTP_APIs_update_output_otlp:
+      additionalProperties: false
+      properties:
+        allow_edit:
+          items:
+            type: string
+          maxItems: 1000
+          type: array
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        is_internal:
+          type: boolean
+        is_preconfigured:
+          type: boolean
+        name:
+          type: string
+        otlp_exporter:
+          discriminator:
+            mapping:
+              grpc: '#/components/schemas/Kibana_HTTP_APIs_otlp_grpc_exporter'
+              http/protobuf: '#/components/schemas/Kibana_HTTP_APIs_otlp_http_exporter'
+            propertyName: protocol
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_grpc_exporter'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_http_exporter'
+        secrets:
+          additionalProperties: false
+          type: object
+          properties:
+            otlp_exporter:
+              additionalProperties: false
+              type: object
+              properties:
+                tls:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    key_pem:
+                      anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            hash:
+                              type: string
+                            id:
+                              type: string
+                          required:
+                            - id
+                        - type: string
+                    tpm:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        auth:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                hash:
+                                  type: string
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        owner_auth:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                hash:
+                                  type: string
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+        type:
+          enum:
+            - otlp
+          type: string
+      required:
+        - otlp_exporter
+      title: update_output_otlp
       type: object
     Kibana_HTTP_APIs_update_output_remote_elasticsearch:
       additionalProperties: false
