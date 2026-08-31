@@ -210,7 +210,6 @@ triggers:
       ),
     ],
   },
-  snippets: { condition: 'event.changedFields: "priority_as_keyword"' },
 };
 
 export const CommentsAddedTriggerId = 'cases.commentsAdded' as const;
