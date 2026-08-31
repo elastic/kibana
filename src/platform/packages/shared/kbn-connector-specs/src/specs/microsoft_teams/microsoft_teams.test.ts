@@ -1312,12 +1312,17 @@ describe('MicrosoftTeams', () => {
 
       const result = await MicrosoftTeams.actions.createChat.handler(mockContext, {
         chatType: 'oneOnOne',
-        memberIds: ['user-guid-456'],
+        memberIds: ['my-user-guid-123', 'user-guid-456'],
       });
 
       expect(mockClient.post).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/chats', {
         chatType: 'oneOnOne',
         members: [
+          {
+            '@odata.type': '#microsoft.graph.aadUserConversationMember',
+            roles: ['owner'],
+            'user@odata.bind': "https://graph.microsoft.com/v1.0/users('my-user-guid-123')",
+          },
           {
             '@odata.type': '#microsoft.graph.aadUserConversationMember',
             roles: ['owner'],
@@ -1341,13 +1346,18 @@ describe('MicrosoftTeams', () => {
 
       const result = await MicrosoftTeams.actions.createChat.handler(mockContext, {
         chatType: 'group',
-        memberIds: ['user-a', 'user-b'],
+        memberIds: ['my-user-id', 'user-a', 'user-b'],
         topic: 'Incident Response',
       });
 
       expect(mockClient.post).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/chats', {
         chatType: 'group',
         members: [
+          {
+            '@odata.type': '#microsoft.graph.aadUserConversationMember',
+            roles: ['owner'],
+            'user@odata.bind': "https://graph.microsoft.com/v1.0/users('my-user-id')",
+          },
           {
             '@odata.type': '#microsoft.graph.aadUserConversationMember',
             roles: ['owner'],
@@ -1369,7 +1379,7 @@ describe('MicrosoftTeams', () => {
 
       await MicrosoftTeams.actions.createChat.handler(mockContext, {
         chatType: 'group',
-        memberIds: ['user-a', 'user-b'],
+        memberIds: ['my-user-id', 'user-a', 'user-b'],
       });
 
       const callArgs = mockClient.post.mock.calls[0];
@@ -1381,11 +1391,11 @@ describe('MicrosoftTeams', () => {
 
       await MicrosoftTeams.actions.createChat.handler(mockContext, {
         chatType: 'oneOnOne',
-        memberIds: ['alice@contoso.com'],
+        memberIds: ['me@contoso.com', 'alice@contoso.com'],
       });
 
       const callArgs = mockClient.post.mock.calls[0];
-      const member = callArgs[1].members[0];
+      const member = callArgs[1].members[1];
       expect(member['user@odata.bind']).toBe(
         "https://graph.microsoft.com/v1.0/users('alice%40contoso.com')"
       );
@@ -1397,7 +1407,7 @@ describe('MicrosoftTeams', () => {
       await expect(
         MicrosoftTeams.actions.createChat.handler(mockContext, {
           chatType: 'oneOnOne',
-          memberIds: ['user-x'],
+          memberIds: ['my-user-id', 'user-x'],
         })
       ).rejects.toThrow('BadRequest');
     });

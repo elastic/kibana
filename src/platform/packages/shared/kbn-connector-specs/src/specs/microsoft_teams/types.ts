@@ -269,14 +269,14 @@ export const CreateChatInputSchema = lazySchema(() =>
     chatType: z
       .enum(['oneOnOne', 'group'])
       .describe(
-        'The type of chat to create: "oneOnOne" for a 1:1 direct message (exactly one other member required) or "group" for a group chat (two or more other members required).'
+        'The type of chat to create: "oneOnOne" for a 1:1 direct message (exactly two member IDs required: yourself and the other person) or "group" for a group chat (three or more member IDs required: yourself and two or more others).'
       ),
     memberIds: z
       .array(z.string().max(MAX_ID))
-      .min(1)
+      .min(2)
       .max(20)
       .describe(
-        'User IDs (GUIDs or UPNs) of the people to invite, not including yourself. For "oneOnOne" provide exactly one ID; for "group" provide two or more. Use getUser to resolve an email to a GUID.'
+        'User IDs (GUIDs or UPNs) of all chat members, including yourself. For "oneOnOne" provide exactly two IDs (your own and the other person\'s); for "group" provide three or more. Use getUser to resolve an email or UPN to a GUID.'
       ),
     topic: z
       .string()

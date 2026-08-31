@@ -518,7 +518,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Create a new Microsoft Teams chat (1:1 or group). Returns the created chat object with its id, which can be passed to sendChatMessage. For a 1:1 chat, provide exactly one user ID in memberIds; the signed-in user is automatically included as a member. For a group chat, provide two or more user IDs. Use getUser to resolve an email address to a user ID before calling this action.',
+        "Create a new Microsoft Teams chat (1:1 or group). Returns the created chat object with its id, which can be passed to sendChatMessage. For a 1:1 chat, provide both your own user ID and the other person's user ID in memberIds (two total). For a group chat, include your own ID plus two or more other user IDs. Use getUser to resolve an email or UPN to a user ID before calling this action.",
       input: CreateChatInputSchema,
       output: lazySchema(() =>
         z
@@ -569,7 +569,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     'SEND PATTERNS (write):',
     '- Post to a channel: listJoinedTeams → listChannels → sendChannelMessage (with teamId + channelId + content)',
     '- Send to an existing chat: listChats → sendChatMessage (with chatId + content)',
-    '- DM a user by email: getUser (with UPN/email) → createChat (with returned id as memberIds) → sendChatMessage (with returned chatId)',
+    "- DM a user by email: getUser (your own UPN/email) + getUser (other person's UPN/email) → createChat (both IDs in memberIds) → sendChatMessage (with returned chatId)",
     '- Update a posted message: updateMessage (with messageId + teamId+channelId for channel, or chatId for chat)',
     '',
     'AUTH DIFFERENCES (delegated vs app-only):',
