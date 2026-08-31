@@ -63,7 +63,7 @@ export function ContentPackObjectsList({
         announceOnMount
         size="s"
         iconType="info"
-        title={i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCalloutNoTab', {
+        title={i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCallout', {
           defaultMessage:
             'Content packs include stream structure only: routing, mappings, and child streams. Significant events and other detections are not included and are managed separately.',
         })}

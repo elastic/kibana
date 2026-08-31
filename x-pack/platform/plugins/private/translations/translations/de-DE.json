@@ -54577,7 +54577,7 @@
     "xpack.streams.contentPackObjectsList.includeMappings": "Mappings des Root-Streams und der ausgewählten Child-Streams einbeziehen",
     "xpack.streams.contentPackObjectsList.selectAll": "Alles auswählen",
     "xpack.streams.contentPackObjectsList.selectStreamsPartitions": "Partitionen für Streams auswählen",
-    "xpack.streams.contentPackObjectsList.structuralOnlyCalloutNoTab": "Inhaltspakete enthalten nur die Stream-Struktur: Routing, Mappings und Child-Streams. Signifikante Ereignisse und andere Erkennungen sind nicht enthalten und werden separat verwaltet.",
+    "xpack.streams.contentPackObjectsList.structuralOnlyCallout": "Inhaltspakete enthalten nur die Stream-Struktur: Routing, Mappings und Child-Streams. Signifikante Ereignisse und andere Erkennungen sind nicht enthalten und werden separat verwaltet.",
     "xpack.streams.contentPackObjectsList.unselectAll": "Alle abwählen",
     "xpack.streams.createPolicyModal.backButton": "Zurück",
     "xpack.streams.createPolicyModal.duplicateNameError": "Dieser Richtlinienname wird bereits verwendet.",

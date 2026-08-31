@@ -54761,7 +54761,7 @@
     "xpack.streams.contentPackObjectsList.includeMappings": "包含根流和选定子流的映射",
     "xpack.streams.contentPackObjectsList.selectAll": "全选",
     "xpack.streams.contentPackObjectsList.selectStreamsPartitions": "选择流分区",
-    "xpack.streams.contentPackObjectsList.structuralOnlyCalloutNoTab": "内容包仅包含流结构：路由、映射和子流。重大事件和其他检测不包含在内，且需单独管理。",
+    "xpack.streams.contentPackObjectsList.structuralOnlyCallout": "内容包仅包含流结构：路由、映射和子流。重大事件和其他检测不包含在内，且需单独管理。",
     "xpack.streams.contentPackObjectsList.unselectAll": "全部取消选择",
     "xpack.streams.createPolicyModal.backButton": "返回",
     "xpack.streams.createPolicyModal.duplicateNameError": "该策略名称已被使用。",

@@ -54755,7 +54755,7 @@
     "xpack.streams.contentPackObjectsList.includeMappings": "ルートストリームと選択された子ストリームのマッピングを含める",
     "xpack.streams.contentPackObjectsList.selectAll": "すべて選択",
     "xpack.streams.contentPackObjectsList.selectStreamsPartitions": "ストリームのパーティションを選択",
-    "xpack.streams.contentPackObjectsList.structuralOnlyCalloutNoTab": "コンテンツパックにはストリーム構造のみが含まれています：ルーティング、マッピング、子ストリーム。重要イベントやその他の検出は含まれず、別途管理されます。",
+    "xpack.streams.contentPackObjectsList.structuralOnlyCallout": "コンテンツパックにはストリーム構造のみが含まれています：ルーティング、マッピング、子ストリーム。重要イベントやその他の検出は含まれず、別途管理されます。",
     "xpack.streams.contentPackObjectsList.unselectAll": "すべて選択解除",
     "xpack.streams.createPolicyModal.backButton": "戻る",
     "xpack.streams.createPolicyModal.duplicateNameError": "このポリシー名はすでに使用されています。",

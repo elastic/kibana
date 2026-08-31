@@ -54340,7 +54340,7 @@
     "xpack.streams.contentPackObjectsList.includeMappings": "Inclure les mappings du flux racine et des flux enfants sélectionnés",
     "xpack.streams.contentPackObjectsList.selectAll": "Tout sélectionner",
     "xpack.streams.contentPackObjectsList.selectStreamsPartitions": "Sélectionnez les partitions des flux",
-    "xpack.streams.contentPackObjectsList.structuralOnlyCalloutNoTab": "Les packs de contenu incluent uniquement la structure du flux : routage, mappings et flux enfants. Les événements importants et autres détections ne sont pas inclus et sont gérés séparément.",
+    "xpack.streams.contentPackObjectsList.structuralOnlyCallout": "Les packs de contenu incluent uniquement la structure du flux : routage, mappings et flux enfants. Les événements importants et autres détections ne sont pas inclus et sont gérés séparément.",
     "xpack.streams.contentPackObjectsList.unselectAll": "Désélectionner tout",
     "xpack.streams.createPolicyModal.backButton": "Retour",
     "xpack.streams.createPolicyModal.duplicateNameError": "Ce nom de politique est déjà utilisé.",
