@@ -123,16 +123,16 @@ export const createModelProvider = ({
       connectorId = recommendedEndpoint[0].connectorId;
     }
 
-    const defaultConnectorId = await getDefaultConnectorId();
+    const resolvedDefaultConnectorId = await getDefaultConnectorId();
     if (!connectorId) {
-      connectorId = defaultConnectorId;
+      connectorId = resolvedDefaultConnectorId;
       logger.info(
         `[model_provider] No dedicated fast inference endpoint found for feature "${AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID}" — falling back to default connector: ${connectorId}. Fast model and default model are the SAME.`
       );
     } else {
-      const isSame = connectorId === defaultConnectorId;
+      const isSame = connectorId === resolvedDefaultConnectorId;
       logger.info(
-        `[model_provider] Fast connector: ${connectorId}, default connector: ${defaultConnectorId}. ${
+        `[model_provider] Fast connector: ${connectorId}, default connector: ${resolvedDefaultConnectorId}. ${
           isSame
             ? 'Fast model and default model are the SAME.'
             : 'Fast model is a DISTINCT connector — latency gains expected.'
