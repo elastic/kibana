@@ -10,6 +10,7 @@ import { tags, type ApiClientFixture, type EsClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
+import { createSystemIndicesEsClient } from '../../fixtures/system_indices_es_client';
 
 const RUN_QUOTAS_ENDPOINT = 'internal/significant_events/run_quotas';
 const EXECUTIONS_INDEX = '.workflows-executions';
@@ -26,38 +27,17 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
-    const seedRoleName = `run_quota_seed_role_${randomUUID()}`;
-    const seedUserName = `run_quota_seed_user_${randomUUID()}`;
-    const seedPassword = randomUUID();
-    const seedRequestOptions = {
-      headers: {
-        authorization: `Basic ${Buffer.from(`${seedUserName}:${seedPassword}`).toString('base64')}`,
-      },
-    };
+    let seedEsClient: EsClient;
     const executionIds = new Set<string>();
     const stepExecutionIds = new Set<string>();
     const eventIds = new Set<string>();
 
-    apiTest.beforeAll(async ({ samlAuth, esClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
       ({ cookieHeader } = await samlAuth.asStreamsAdmin());
-      await esClient.security.putRole({
-        name: seedRoleName,
-        indices: [
-          {
-            names: [EXECUTIONS_INDEX, STEP_EXECUTIONS_INDEX, EVENTS_DATA_STREAM],
-            privileges: ['all'],
-            allow_restricted_indices: true,
-          },
-        ],
-      });
-      await esClient.security.putUser({
-        username: seedUserName,
-        password: seedPassword,
-        roles: [seedRoleName],
-      });
+      seedEsClient = await createSystemIndicesEsClient(esClient, config);
     });
 
-    apiTest.afterAll(async ({ apiClient, esClient }) => {
+    apiTest.afterAll(async ({ apiClient }) => {
       await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: { enabled: false },
@@ -65,28 +45,20 @@ apiTest.describe(
       });
       await Promise.all([
         ...[...executionIds].map((id) =>
-          esClient.delete({ index: EXECUTIONS_INDEX, id }, { ...seedRequestOptions, ignore: [404] })
+          seedEsClient.delete({ index: EXECUTIONS_INDEX, id }, { ignore: [404] })
         ),
         ...[...stepExecutionIds].map((id) =>
-          esClient.delete(
-            { index: STEP_EXECUTIONS_INDEX, id },
-            { ...seedRequestOptions, ignore: [404] }
-          )
+          seedEsClient.delete({ index: STEP_EXECUTIONS_INDEX, id }, { ignore: [404] })
         ),
       ]);
       if (eventIds.size > 0) {
-        await esClient.deleteByQuery(
-          {
-            index: EVENTS_DATA_STREAM,
-            conflicts: 'proceed',
-            refresh: true,
-            query: { terms: { event_id: [...eventIds] } },
-          },
-          seedRequestOptions
-        );
+        await seedEsClient.deleteByQuery({
+          index: EVENTS_DATA_STREAM,
+          conflicts: 'proceed',
+          refresh: true,
+          query: { terms: { event_id: [...eventIds] } },
+        });
       }
-      await esClient.security.deleteUser({ username: seedUserName }, { ignore: [404] });
-      await esClient.security.deleteRole({ name: seedRoleName }, { ignore: [404] });
     });
 
     const quotaHeaders = (executionId: string) => ({
@@ -95,22 +67,18 @@ apiTest.describe(
       'x-kibana-workflow-execution-id': executionId,
     });
 
-    const indexExecution = async (esClient: EsClient, execution: Record<string, unknown>) => {
+    const indexExecution = async (execution: Record<string, unknown>) => {
       const id = execution.id as string;
       executionIds.add(id);
-      await esClient.index(
-        {
-          index: EXECUTIONS_INDEX,
-          id,
-          refresh: true,
-          document: execution,
-        },
-        seedRequestOptions
-      );
+      await seedEsClient.index({
+        index: EXECUTIONS_INDEX,
+        id,
+        refresh: true,
+        document: execution,
+      });
     };
 
     const seedDetectionChain = async ({
-      esClient,
       prefix,
       quotaSlot,
       parentTriggeredBy = 'scheduled',
@@ -118,7 +86,6 @@ apiTest.describe(
       parentWorkflowId = SCHEDULED_REVIEW_WORKFLOW_ID,
       taskRunAt = new Date().toISOString(),
     }: {
-      esClient: EsClient;
       prefix: string;
       quotaSlot: number;
       parentTriggeredBy?: string;
@@ -128,7 +95,7 @@ apiTest.describe(
     }) => {
       const parentId = `${prefix}-parent`;
       const childId = `${prefix}-child`;
-      await indexExecution(esClient, {
+      await indexExecution({
         id: parentId,
         workflowId: parentWorkflowId,
         spaceId: SPACE_ID,
@@ -136,7 +103,7 @@ apiTest.describe(
         triggeredBy: parentTriggeredBy,
         taskRunAt,
       });
-      await indexExecution(esClient, {
+      await indexExecution({
         id: childId,
         workflowId: DISCOVERY_WORKFLOW_ID,
         spaceId: childSpaceId,
@@ -160,9 +127,9 @@ apiTest.describe(
 
     apiTest(
       'records a driver heartbeat and replays a stable detection decision for a replacement execution',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient }) => {
         const prefix = `scout-detection-${randomUUID()}`;
-        const first = await seedDetectionChain({ esClient, prefix, quotaSlot: 0 });
+        const first = await seedDetectionChain({ prefix, quotaSlot: 0 });
         const before = await readGroup(apiClient, 'detection');
 
         const enable = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
@@ -201,7 +168,7 @@ apiTest.describe(
         expect(firstConsume.body.allowed).toBe(true);
 
         const replacementId = `${prefix}-replacement`;
-        await indexExecution(esClient, {
+        await indexExecution({
           id: replacementId,
           workflowId: DISCOVERY_WORKFLOW_ID,
           spaceId: SPACE_ID,
@@ -221,7 +188,6 @@ apiTest.describe(
         expect((await readGroup(apiClient, 'detection')).counted).toBe(before.counted + 1);
 
         const denied = await seedDetectionChain({
-          esClient,
           prefix: `${prefix}-denied`,
           quotaSlot: 1,
           taskRunAt: first.taskRunAt,
@@ -238,7 +204,7 @@ apiTest.describe(
 
     apiTest(
       'accepts the managed default-space KI chain and rejects forged worker provenance',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient }) => {
         const before = await readGroup(apiClient, 'ki_extraction');
         const limitResponse = await apiClient.put(RUN_QUOTAS_ENDPOINT, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
@@ -254,7 +220,7 @@ apiTest.describe(
         const prefix = `scout-ki-${randomUUID()}`;
         const parentId = `${prefix}-parent`;
         const childId = `${prefix}-child`;
-        await indexExecution(esClient, {
+        await indexExecution({
           id: parentId,
           workflowId: KI_DRIVER_WORKFLOW_ID,
           spaceId: SPACE_ID,
@@ -262,7 +228,7 @@ apiTest.describe(
           triggeredBy: 'scheduled',
           taskRunAt: new Date().toISOString(),
         });
-        await indexExecution(esClient, {
+        await indexExecution({
           id: childId,
           workflowId: KI_ONBOARDING_WORKFLOW_ID,
           spaceId: SPACE_ID,
@@ -286,19 +252,16 @@ apiTest.describe(
 
         for (const invalid of [
           await seedDetectionChain({
-            esClient,
             prefix: `scout-manual-${randomUUID()}`,
             quotaSlot: 2,
             parentTriggeredBy: 'manual',
           }),
           await seedDetectionChain({
-            esClient,
             prefix: `scout-custom-${randomUUID()}`,
             quotaSlot: 3,
             parentWorkflowId: 'custom-scheduled-parent',
           }),
           await seedDetectionChain({
-            esClient,
             prefix: `scout-space-${randomUUID()}`,
             quotaSlot: 4,
             childSpaceId: 'other-space',
@@ -323,7 +286,7 @@ apiTest.describe(
 
     apiTest(
       'reserves eligible investigations, replays decisions, denies normal events at the cap, and grants critical overrides',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient }) => {
         const before = await readGroup(apiClient, 'investigation');
         const limitResponse = await apiClient.put(RUN_QUOTAS_ENDPOINT, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
@@ -337,7 +300,7 @@ apiTest.describe(
         expect(limitResponse).toHaveStatusCode(200);
 
         const prefix = `scout-reserve-${randomUUID()}`;
-        const chain = await seedDetectionChain({ esClient, prefix, quotaSlot: 5 });
+        const chain = await seedDetectionChain({ prefix, quotaSlot: 5 });
         const events = [
           { suffix: 'first', severity: '60-high' },
           { suffix: 'denied', severity: '60-high' },
@@ -351,28 +314,25 @@ apiTest.describe(
 
         const stepId = `${prefix}-store-step`;
         stepExecutionIds.add(stepId);
-        await esClient.index(
-          {
-            index: STEP_EXECUTIONS_INDEX,
+        await seedEsClient.index({
+          index: STEP_EXECUTIONS_INDEX,
+          id: stepId,
+          refresh: true,
+          document: {
             id: stepId,
-            refresh: true,
-            document: {
-              id: stepId,
-              stepId: 'store_significant_events',
-              stepExecutionIndex: 0,
-              output: {
-                significant_events: events.map(({ eventId, eventUuid }) => ({
-                  event_id: eventId,
-                  event_uuid: eventUuid,
-                  status: 'open',
-                  written: true,
-                })),
-              },
+            stepId: 'store_significant_events',
+            stepExecutionIndex: 0,
+            output: {
+              significant_events: events.map(({ eventId, eventUuid }) => ({
+                event_id: eventId,
+                event_uuid: eventUuid,
+                status: 'open',
+                written: true,
+              })),
             },
           },
-          seedRequestOptions
-        );
-        await indexExecution(esClient, {
+        });
+        await indexExecution({
           id: chain.childId,
           workflowId: DISCOVERY_WORKFLOW_ID,
           spaceId: SPACE_ID,
@@ -385,22 +345,19 @@ apiTest.describe(
         });
         await Promise.all(
           events.map(({ eventId, eventUuid, severity }) =>
-            esClient.create(
-              {
-                index: EVENTS_DATA_STREAM,
-                id: eventUuid,
-                refresh: true,
-                document: {
-                  '@timestamp': new Date().toISOString(),
-                  event_id: eventId,
-                  event_uuid: eventUuid,
-                  status: 'open',
-                  severity,
-                  kibana: { space_ids: [SPACE_ID] },
-                },
+            seedEsClient.create({
+              index: EVENTS_DATA_STREAM,
+              id: eventUuid,
+              refresh: true,
+              document: {
+                '@timestamp': new Date().toISOString(),
+                event_id: eventId,
+                event_uuid: eventUuid,
+                status: 'open',
+                severity,
+                kibana: { space_ids: [SPACE_ID] },
               },
-              seedRequestOptions
-            )
+            })
           )
         );
 

@@ -15,6 +15,10 @@ Array [
     "taskType": "agent_builder_sml:sml_crawler",
   },
   Object {
+    "priority": 1,
+    "taskType": "significant-events:run-quota-housekeeping",
+  },
+  Object {
     "priority": 40,
     "taskType": "alerting:attack-discovery",
   },
