@@ -8,9 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  CHECKPOINT_WAIT_TIMEOUT,
   ERROR_RETRY_MAX_DELAY_MS,
   NUDGE_CREATE_TIMEOUT_MS,
   NUDGE_WRITE_TIMEOUT_MS,
+  REQUEST_TIMEOUT_MS,
   TaskManagerClaimNudgeService,
 } from './claim_nudge_service';
 
@@ -108,6 +110,12 @@ describe('TaskManagerClaimNudgeService', () => {
         requestTimeout: NUDGE_WRITE_TIMEOUT_MS,
         maxRetries: 0,
       });
+
+      // Asserting the wiring above only pins that the constants are passed through. The claim in the
+      // title is about their size: a nudge is an optimization, so it must never outlast the poll
+      // cycle it is trying to beat.
+      expect(NUDGE_WRITE_TIMEOUT_MS).toBeLessThanOrEqual(1_000);
+      expect(NUDGE_CREATE_TIMEOUT_MS).toBeLessThanOrEqual(5_000);
     });
 
     it('generates a new nonce on every call', async () => {
@@ -251,7 +259,8 @@ describe('TaskManagerClaimNudgeService', () => {
         }
 
         service.stop();
-        return { global_checkpoints: [1], timed_out: true };
+        // Advanced checkpoints, so only `timed_out` can suppress the nudge here.
+        return { global_checkpoints: [2], timed_out: true };
       });
 
       const nudgeSpy = jest.fn();
@@ -281,8 +290,13 @@ describe('TaskManagerClaimNudgeService', () => {
           wait_for_advance: true,
           wait_for_index: true,
           checkpoints: [],
+          timeout: CHECKPOINT_WAIT_TIMEOUT,
         }),
-        expect.objectContaining({ retryOnTimeout: false, maxRetries: 0 })
+        expect.objectContaining({
+          retryOnTimeout: false,
+          maxRetries: 0,
+          requestTimeout: REQUEST_TIMEOUT_MS,
+        })
       );
     });
 
@@ -624,9 +638,9 @@ describe('TaskManagerClaimNudgeService', () => {
       expect(capturedSignal?.aborted).toBe(true);
     });
 
-    it('does not restart the watch loop after stop() aborts the in-flight request', async () => {
+    it('treats the abort from stop() as a clean exit rather than a failure to retry', async () => {
       const esClient = createEsClientMock();
-      const { service } = createService({ esClient });
+      const { service, logger } = createService({ esClient });
 
       (esClient.fleet.globalCheckpoints as jest.Mock).mockImplementation(
         async (_params, options: { signal: AbortSignal }) => {
@@ -646,6 +660,11 @@ describe('TaskManagerClaimNudgeService', () => {
       await flushPromises();
 
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
+      // The call count alone is over-determined: `started`, the aborted signal and the catch's early
+      // return each stop the loop on their own. Only the early return keeps the abort out of the
+      // backoff path, so pin that it was logged as a clean stop and never counted as an error.
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('stopped.'));
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 });

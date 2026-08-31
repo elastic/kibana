@@ -196,7 +196,9 @@ describe('claim nudge', () => {
     }
   });
 
-  it('a schedule() call without requestImmediateClaim relies on regular polling (no nudge)', async () => {
+  // Only that the task still runs. That no nudge was sent is pinned by the unit test
+  // 'does not notify the claim nudge when requestImmediateClaim is not set'.
+  it('still runs a schedule() task without requestImmediateClaim', async () => {
     const taskManagerPlugin = await startKibanaWith({
       claim_strategy: 'mget',
       poll_interval: 1000,

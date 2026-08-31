@@ -36,9 +36,9 @@ const CLAIM_NUDGE_SETTINGS: estypes.IndicesIndexSettings = {
 };
 // Long-poll timeout for `_fleet/global_checkpoints`. Kept under 60s so idle proxies/load
 // balancers (which see no bytes while the request waits) don't close the connection first.
-const CHECKPOINT_WAIT_TIMEOUT = '50s';
+export const CHECKPOINT_WAIT_TIMEOUT = '50s';
 // Headroom above CHECKPOINT_WAIT_TIMEOUT so the client doesn't time out before the server does.
-const REQUEST_TIMEOUT_MS = 65_000;
+export const REQUEST_TIMEOUT_MS = 65_000;
 const ERROR_RETRY_BASE_DELAY_MS = 1_000;
 export const ERROR_RETRY_MAX_DELAY_MS = 60_000;
 const ERROR_LOG_THROTTLE_MS = 60_000;

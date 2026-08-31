@@ -257,8 +257,10 @@ describe('TaskStore', () => {
       expect(attributes.state).toEqual('{}');
     });
 
-    test('defaults to refresh:false', async () => {
-      await testSchedule({ taskType: 'yawn', params: {}, state: {} });
+    // An optionless `schedule()` is already covered above; this pins the case the `?? false` in
+    // `schedule` exists for, where options are supplied but say nothing about refreshing.
+    test('defaults to refresh:false when options omit refresh', async () => {
+      await testSchedule({ taskType: 'yawn', params: {}, state: {} }, {});
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         'task',
         expect.anything(),

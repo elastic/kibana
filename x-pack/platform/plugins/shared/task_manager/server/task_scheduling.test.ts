@@ -180,7 +180,8 @@ describe('TaskScheduling', () => {
     await taskScheduling.schedule(task, { requestImmediateClaim: true });
 
     expect(mockTaskStore.schedule).toHaveBeenCalledWith(expect.anything(), undefined);
-    expect(claimNudgeService.notify).not.toHaveBeenCalled();
+    // This instance has no nudge service, so asserting on its mock would prove nothing. The spy is
+    // reachable either way, and fires if the early return in `notifyClaimNudge` is removed.
     expect(recordClaimNudgeSpy).not.toHaveBeenCalled();
   });
 
@@ -269,6 +270,31 @@ describe('TaskScheduling', () => {
         taskType: 'foo',
         params: {},
         state: {},
+      },
+      { requestImmediateClaim: true }
+    );
+
+    expect(claimNudgeService.notify).not.toHaveBeenCalled();
+  });
+
+  test('does not notify the claim nudge when a 409 reschedules an existing recurring task', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [getTask()], errors: [] });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    // The interval branch, where the 409 path does move `runAt`. Even then the caller asked to
+    // schedule a task that already exists, so there is nothing newly claimable to nudge for.
+    await taskScheduling.ensureScheduled(
+      {
+        id: 'my-foo-id',
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
       },
       { requestImmediateClaim: true }
     );
@@ -1527,7 +1553,7 @@ describe('TaskScheduling', () => {
       const result = await taskScheduling.runSoon(id);
 
       expect(result).toEqual({ id, forced: false });
-      expect(claimNudgeService.notify).not.toHaveBeenCalled();
+      // As above: the nudge service is absent from this instance, so only the spy is meaningful.
       expect(recordClaimNudgeSpy).not.toHaveBeenCalled();
       expect(mockTaskStore.update).toHaveBeenCalledWith(expect.anything(), {
         validate: false,
