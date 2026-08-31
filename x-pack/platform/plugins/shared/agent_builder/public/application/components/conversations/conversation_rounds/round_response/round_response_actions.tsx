@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
@@ -76,7 +76,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   copyTarget = 'response',
   actionStackGutterSize,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { addSuccessToast } = useToasts();
   const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
   const { services } = useKibana();
@@ -231,16 +230,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           )}
           {showFeedback && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                gutterSize="s"
-                alignItems="center"
-                responsive={false}
-                css={css`
-                  padding-left: ${euiTheme.size.s};
-                  margin-left: ${euiTheme.size.xxs};
-                  border-left: ${euiTheme.border.thin};
-                `}
-              >
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <ThumbButton
                     direction="up"
