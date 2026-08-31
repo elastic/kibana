@@ -30,6 +30,7 @@ import {
   getMlManagementBreadcrumb,
 } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { getIsMlCpsEnabled } from '../../../services/ml_server_info';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
@@ -206,10 +207,15 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
       cps,
     },
   } = useMlKibana();
+  const isMlCpsEnabled = getIsMlCpsEnabled();
+
   const projectRouting =
     typeof projectRoutingFromUrl === 'string' && projectRoutingFromUrl !== ''
       ? projectRoutingFromUrl
-      : cps?.cpsManager?.getDefaultProjectRouting() ?? undefined;
+      : isMlCpsEnabled && cps?.cpsManager
+      ? cps?.cpsManager?.getDefaultProjectRouting() ?? undefined
+      : undefined;
+
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),
     // TODO useRouteResolver should be responsible for the redirect
