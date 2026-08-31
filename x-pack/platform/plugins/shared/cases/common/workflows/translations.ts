@@ -599,6 +599,12 @@ export const COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION = i18n.
   }
 );
 
+export const EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.extendedFieldsUpdated.eventSchema.changedFields', {
+    defaultMessage:
+      'The extended-field keys whose values changed. Use this field in trigger conditions (e.g. event.changedFields: "priority_as_keyword"). Use a cases.getCase step to read current values.',
+  });
+
 export const CUSTOM_FIELD_CAN_BE_USED_MESSAGE = (fieldName: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.customFieldCanBeUsedMessage', {
     defaultMessage: 'Custom field "{fieldName}" can be updated by this step.',
