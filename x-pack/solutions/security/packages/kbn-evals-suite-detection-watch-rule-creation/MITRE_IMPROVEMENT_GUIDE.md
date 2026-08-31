@@ -117,3 +117,40 @@ combined band). The unpaired table CANNOT prove v4 > v2. The paired
 per-example readout is the instrument that can — `PAIRED_SCORES` payloads
 land with the next instrumented run (keyed by input payload; the first
 wiring keyed on `expected.id`, which does not exist in `EvaluatorParams`).
+
+## EXPERIMENT VERDICT (paired A/B, builds 493 vs 490, same instrumentation)
+
+| technique | v3 baseline | v4 candidate | delta |
+|---|---|---|---|
+| T1027 | 0.667 | 0.667 | 0 |
+| T1053.005 | 0.500 | 0.500 | 0 |
+| T1195.002 | 0.500 | 1.000 | +0.500 |
+| T1218.011 | 1.000 | 1.000 | 0 |
+| T1548.002 | 1.000 | 0.286 | **-0.714** |
+| T1562.008 | 1.000 | 1.000 | 0 |
+| T1609 | 0.333 | 0.500 | +0.167 |
+
+**Paired mean -0.007 ±0.274 (n=7). Verdict: NOT DISTINGUISHABLE.**
+
+The unpaired dataset means (hard 0.838 v4 vs 0.764 v3) looked like an
+improvement; the paired readout shows it is one example gained (T1195.002
++0.5) and one lost (T1548.002 -0.71) plus noise. **v4 is not a proven
+improvement over v3** — and this is exactly why the paired instrument was
+built: the unpaired table would have shipped a false positive.
+
+### What IS proven across this experiment
+- v3 or v4 both lift hard-cases MITRE far above the v2 baseline that ships
+  today (0.76-0.84 vs 0.683): the quality-gate + threat-mapping prompt work
+  (commit adaefc0) is the real, replicated win. v4's extra precision rules
+  add nothing measurable on top of v3.
+- Per-example variance dominates (sd 0.36 on paired deltas at n=7): single
+  examples flip between runs. Detecting a real +0.1 prompt improvement
+  needs ~50 paired examples, not 7.
+
+### Guidance (what to tell the workflow author)
+1. Keep the v3 prompt (already on this branch) — do not bother with v4's
+   wrong-neighbor table; it did not survive measurement.
+2. To make prompt A/B decisions at all, use the paired readout
+   (`PAIRED_SCORES` + `paired_ab.py`), never dataset means.
+3. MITRE per-example noise (one example = ±0.5 swings) is the binding
+   constraint; raise example count before iterating on prompt wording.
