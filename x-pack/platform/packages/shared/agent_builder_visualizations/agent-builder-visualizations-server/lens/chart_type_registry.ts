@@ -184,7 +184,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           'For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
           'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.',
           'For area series, set `styling.areas.fill: "gradient"` rather than solid.',
-          'Default legend rules: Place outside at the bottom. Omit legend.layout.type. Set legend.visibility: "auto" unless legend statistics are set - then set it to "visible".',
+          'Default legend rules: Place outside at the bottom. Omit legend.layout.type. Do not set legend.visibility unless legend statistics are set - then set it to "visible".',
           seriesStatisticsLensConfigRule,
         ],
         coloringRules: [

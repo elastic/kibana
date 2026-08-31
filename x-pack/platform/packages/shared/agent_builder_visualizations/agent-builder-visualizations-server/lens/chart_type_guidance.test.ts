@@ -46,7 +46,7 @@ describe('chart type guidance', () => {
       - For horizontal bars, use type: \\"bar_horizontal\\" with x = category field and y = metric field. Example: \\"top OS by count as horizontal bar\\" → type: \\"bar_horizontal\\", x: { column: \\"OS\\" }, y: [{ column: \\"Count\\" }]. Do NOT put the metric on x.
       - Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.
       - For area series, set \`styling.areas.fill: \\"gradient\\"\` rather than solid.
-      - Default legend rules: Place outside at the bottom. Omit legend.layout.type. Set legend.visibility: \\"auto\\" unless legend statistics are set - then set it to \\"visible\\".
+      - Default legend rules: Place outside at the bottom. Omit legend.layout.type. Do not set legend.visibility unless legend statistics are set - then set it to \\"visible\\".
       - If the request asks for series statistics *in the legend* (avg, min, max, median, last_value, last_non_null_value, first_value, count, total, standard_deviation, … — any legend.statistics option) without naming a field to aggregate, set legend.statistics to those options and legend.visibility: \\"visible\\". If the request is \\"average <field> over time\\", bind the AVG column from the query — do not treat that as legend statistics. Never invent statistic columns the query does not emit.",
         },
         "review": "CHART REVIEW RULES:
@@ -67,7 +67,7 @@ describe('chart type guidance', () => {
       - For horizontal bars, use type: \\"bar_horizontal\\" with x = category field and y = metric field. Example: \\"top OS by count as horizontal bar\\" → type: \\"bar_horizontal\\", x: { column: \\"OS\\" }, y: [{ column: \\"Count\\" }]. Do NOT put the metric on x.
       - Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.
       - For area series, set \`styling.areas.fill: \\"gradient\\"\` rather than solid.
-      - Default legend rules: Place outside at the bottom. Omit legend.layout.type. Set legend.visibility: \\"auto\\" unless legend statistics are set - then set it to \\"visible\\".
+      - Default legend rules: Place outside at the bottom. Omit legend.layout.type. Do not set legend.visibility unless legend statistics are set - then set it to \\"visible\\".
       - If the request asks for series statistics *in the legend* (avg, min, max, median, last_value, last_non_null_value, first_value, count, total, standard_deviation, … — any legend.statistics option) without naming a field to aggregate, set legend.statistics to those options and legend.visibility: \\"visible\\". If the request is \\"average <field> over time\\", bind the AVG column from the query — do not treat that as legend statistics. Never invent statistic columns the query does not emit.
       Critical:
       - A solid area fill on the painted chart is a critical issue.
