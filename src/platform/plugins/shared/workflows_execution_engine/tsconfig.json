@@ -41,7 +41,8 @@
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
     "@kbn/i18n",
-    "@kbn/encrypted-saved-objects-plugin"
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": ["target/**/*"]
 }
