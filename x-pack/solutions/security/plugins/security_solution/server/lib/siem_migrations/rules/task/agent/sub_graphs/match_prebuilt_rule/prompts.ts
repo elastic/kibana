@@ -161,25 +161,32 @@ Call searchPrebuiltRules with a meaningfully different query — not a light rew
 };
 
 /**
- * Nudge injected by the agent node when the model returned no match after its very first search
- * and did not itself decide to search again. Asks it to try one more time from a different keyword
- * angle rather than concluding immediately. Includes the remaining search budget derived from
- * `MAX_TOOL_CALL_ATTEMPTS` so the model knows it has not exhausted the cap.
- *
- * Only ever injected on `previousSearchAttempts.length === 1` (the caller's guard), so
- * `remainingSearches` is always `MAX_TOOL_CALL_ATTEMPTS - 1`.
+ * Graph-injected retry prompt after a no-match JSON answer: asks the model to search once more
+ * from a different keyword angle. `matchPrebuiltRuleRouter` uses the prefix to tell a declined
+ * retry (this prompt already shown, model answered JSON again) from a no-match that followed a search.
  */
-export const formatRetrySearchNudgePrompt = (
+export const RETRY_SEARCH_PROMPT_PREFIX =
+  'Your last search returned candidates but none were a match.';
+
+export const isRetrySearchPromptMessage = (message: { content?: unknown }): boolean =>
+  typeof message.content === 'string' && message.content.startsWith(RETRY_SEARCH_PROMPT_PREFIX);
+
+/**
+ * Injected by the agent node when the router sends the run back after a no-match JSON answer.
+ * Remaining searches is leftover `MAX_TOOL_CALL_ATTEMPTS` so the 1st and 2nd no-match can
+ * each re-search; the 3rd no-match has no budget left and finalizes.
+ */
+export const formatRetrySearchPrompt = (
   previousSearchAttempts: PreviousSearchAttempt[]
 ): string => {
-  const triedQuery = `"${previousSearchAttempts[0].query}"`;
+  const queries = previousSearchAttempts.map(({ query }) => `"${query}"`).join(', ');
   const remainingSearches = MAX_TOOL_CALL_ATTEMPTS - previousSearchAttempts.length;
   return (
-    'Your first search returned candidates but none were a match. ' +
+    `${RETRY_SEARCH_PROMPT_PREFIX} ` +
     'Before concluding there is no matching prebuilt rule, try one more search from a ' +
     'different keyword angle — focus on the attack category, the detection technique, ' +
     'or a related technology rather than rewording the same query.\n' +
-    `Queries already tried: ${triedQuery}. Do not reuse or lightly reword any of them.\n` +
+    `Queries already tried: ${queries}. Do not reuse or lightly reword any of them.\n` +
     `You may call searchPrebuiltRules at most ${remainingSearches} more time(s) after this.`
   );
 };

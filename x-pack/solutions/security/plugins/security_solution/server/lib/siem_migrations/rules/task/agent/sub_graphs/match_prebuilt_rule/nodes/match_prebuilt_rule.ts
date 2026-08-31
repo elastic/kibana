@@ -27,7 +27,7 @@ import {
   MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2,
   MATCH_PREBUILT_RULE_SYSTEM_PROMPT_V2,
   formatPreviousQueriesPrompt,
-  formatRetrySearchNudgePrompt,
+  formatRetrySearchPrompt,
   formatSearchInstructionsPrompt,
 } from '../prompts';
 import {
@@ -134,9 +134,9 @@ export const getMatchPrebuiltRuleAgentNode = ({
       const isRetryAfterNoMatch =
         AIMessage.isInstance(lastMessage) && !lastMessage.tool_calls?.length;
 
-      // Match prompt with candidates, query prompt on empty search, retry prompt on retry.
+      // Match prompt with candidates, query prompt on empty search, retry prompt after a no-match.
       const injectedMessages = isRetryAfterNoMatch
-        ? [new HumanMessage(formatRetrySearchNudgePrompt(previousSearchAttempts))]
+        ? [new HumanMessage(formatRetrySearchPrompt(previousSearchAttempts))]
         : hasCandidatesToEvaluate(matchPrebuiltRulesMessages)
         ? await matchPrompt.formatMessages({
             previousQueries: formatPreviousQueriesPrompt(previousSearchAttempts),
@@ -177,15 +177,15 @@ export const getFinalizeMatchNode = ({ telemetryClient }: GetFinalizeMatchNodePa
     // `undefined` when the model never produced valid JSON or exhausted the search budget without a final answer.
     const matchResult = state.match_prebuilt_rules_result;
 
-    const latestCandidates = getLatestCandidates(state.match_prebuilt_rules_messages);
+    const searchCandidates = getSearchCandidates(state.match_prebuilt_rules_messages);
 
     const matchedName = matchResult?.match?.trim() || '';
     const matchedRule = matchedName
-      ? latestCandidates.find((rule) => rule.name === matchedName)
+      ? searchCandidates.find((rule) => rule.name === matchedName)
       : undefined;
 
     telemetryClient.reportPrebuiltRulesMatch({
-      preFilterRules: latestCandidates,
+      preFilterRules: searchCandidates,
       ...(matchedRule ? { postFilterRule: matchedRule } : {}),
     });
 
@@ -198,16 +198,17 @@ export const getFinalizeMatchNode = ({ telemetryClient }: GetFinalizeMatchNodePa
   };
 };
 
-const getLatestCandidates = (messages: BaseMessage[]): RuleSemanticSearchResult[] => {
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const message = messages[i];
+const getSearchCandidates = (messages: BaseMessage[]): RuleSemanticSearchResult[] => {
+  const byName = new Map<string, RuleSemanticSearchResult>();
+  for (const message of messages) {
     if (ToolMessage.isInstance(message) && Array.isArray(message.artifact)) {
-      return message.artifact as RuleSemanticSearchResult[];
+      for (const rule of message.artifact as RuleSemanticSearchResult[]) {
+        // Later searches override the same name so telemetry reflects the freshest hit.
+        byName.set(rule.name, rule);
+      }
     }
   }
-  // No search ran this subgraph invocation (the model never called the tool), so there's nothing
-  // to resolve a match against: []
-  return [];
+  return [...byName.values()];
 };
 
 /** True when the last search returned candidates; checks only the last message, not earlier searches. */

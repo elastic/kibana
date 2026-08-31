@@ -8,7 +8,7 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { BaseMessage } from '@langchain/core/messages';
-import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
@@ -19,6 +19,7 @@ import {
   type MatchPrebuiltRuleState,
 } from './state';
 import { getFinalizeMatchNode, getMatchPrebuiltRuleAgentNode } from './nodes';
+import { isRetrySearchPromptMessage } from './prompts';
 
 interface GetMatchPrebuiltRuleGraphParams {
   model: ChatModel;
@@ -73,13 +74,24 @@ const matchPrebuiltRuleRouter = (state: MatchPrebuiltRuleState) => {
   if (hasToolCalls && searchCount <= MAX_TOOL_CALL_ATTEMPTS) {
     return 'tools';
   }
-  // Retry once more from a different keyword angle when the model found candidates but none matched.
-  // Skip when the last search was empty — the agent node already handles that via the query prompt.
+  // Inject a retry prompt when:
+  // - parsed JSON with an empty match, and
+  // - searchCount < MAX_TOOL_CALL_ATTEMPTS, and
+  // - the last search returned candidates
+  // Do not inject when: last search was empty (query prompt handles that), the previous
+  // message was already a retry prompt (model declined; searchCount would not move),
+  // or this is the 3rd no-match (`searchCount` has reached MAX).
   const matchResult = state.match_prebuilt_rules_result;
+  const previousMessage = messages.at(-2);
+  const lastTurnWasRetryPrompt =
+    previousMessage !== undefined &&
+    HumanMessage.isInstance(previousMessage) &&
+    isRetrySearchPromptMessage(previousMessage);
   if (
     matchResult !== undefined &&
     !matchResult.match?.trim() &&
-    searchCount < MAX_TOOL_CALL_ATTEMPTS
+    searchCount < MAX_TOOL_CALL_ATTEMPTS &&
+    !lastTurnWasRetryPrompt
   ) {
     const lastToolMessage = [...messages].reverse().find(ToolMessage.isInstance);
     const lastSearchHadCandidates =

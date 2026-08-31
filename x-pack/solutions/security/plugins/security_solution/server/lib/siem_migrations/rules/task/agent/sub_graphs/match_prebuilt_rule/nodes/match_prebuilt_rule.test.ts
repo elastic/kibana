@@ -8,6 +8,7 @@
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages';
 import { getFinalizeMatchNode, getMatchPrebuiltRuleAgentNode } from './match_prebuilt_rule';
 import { MAX_TOOL_CALL_ATTEMPTS, type MatchPrebuiltRuleState } from '../state';
+import { RETRY_SEARCH_PROMPT_PREFIX } from '../prompts';
 
 const mockRule = {
   rule_id: 'test-rule',
@@ -220,6 +221,27 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
     expect(result.match_prebuilt_rules_result).toBeUndefined();
   });
 
+  it('injects the retry prompt when the last message is a no-match JSON answer', async () => {
+    const priorMessages = [
+      new SystemMessage('system'),
+      new HumanMessage('human'),
+      toolCallMessage('office macro child process'),
+      searchToolMessage([mockOtherRule]),
+      finalMessage(''),
+    ];
+    mockInvoke.mockResolvedValueOnce(toolCallMessage('office document macro execution sysmon'));
+
+    const result = await node({ ...baseState, match_prebuilt_rules_messages: priorMessages });
+
+    const [invokedMessages] = mockInvoke.mock.calls[0];
+    expect(String(invokedMessages.at(-1)?.content)).toContain(RETRY_SEARCH_PROMPT_PREFIX);
+    expect(String(invokedMessages.at(-1)?.content)).toContain(
+      `You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS - 1} more time(s) after this.`
+    );
+    expect(result.match_prebuilt_rules_messages).toHaveLength(2);
+    expect(result.match_prebuilt_rules_result).toBeUndefined();
+  });
+
   it('retries with a corrective message when the final answer is not valid JSON, then returns the parsed retry', async () => {
     const priorMessages = [
       new SystemMessage('system'),
@@ -311,7 +333,7 @@ describe('getFinalizeMatchNode', () => {
     jest.clearAllMocks();
   });
 
-  it('resolves the match from the latest search ToolMessage artifact', async () => {
+  it('resolves the match from search ToolMessage artifacts', async () => {
     const state = {
       ...baseState,
       match_prebuilt_rules_messages: [
@@ -353,7 +375,31 @@ describe('getFinalizeMatchNode', () => {
 
     expect(result.elastic_rule?.prebuilt_rule_id).toBe('test-rule');
     expect(mockReportPrebuiltRulesMatch).toHaveBeenCalledWith({
-      preFilterRules: [mockRule],
+      preFilterRules: [mockOtherRule, mockRule],
+      postFilterRule: mockRule,
+    });
+  });
+
+  it('resolves a match named from an earlier search after a later search returned different candidates', async () => {
+    const state = {
+      ...baseState,
+      match_prebuilt_rules_messages: [
+        new SystemMessage('system'),
+        new HumanMessage('human'),
+        toolCallMessage('office macro child process'),
+        searchToolMessage([mockRule]),
+        toolCallMessage('office document macro execution sysmon'),
+        searchToolMessage([mockOtherRule]),
+        finalMessage('Suspicious MS Office Child Process'),
+      ],
+      match_prebuilt_rules_result: matchResult('Suspicious MS Office Child Process'),
+    };
+
+    const result = await node(state);
+
+    expect(result.elastic_rule?.prebuilt_rule_id).toBe('test-rule');
+    expect(mockReportPrebuiltRulesMatch).toHaveBeenCalledWith({
+      preFilterRules: [mockRule, mockOtherRule],
       postFilterRule: mockRule,
     });
   });
@@ -395,7 +441,7 @@ describe('getFinalizeMatchNode', () => {
     expect(result.comments?.[0].message).toContain('No related prebuilt rule found');
   });
 
-  it("returns a no-match summary when the model's matched name isn't in the latest candidates", async () => {
+  it("returns a no-match summary when the model's matched name isn't in any search candidates", async () => {
     const state = {
       ...baseState,
       match_prebuilt_rules_messages: [

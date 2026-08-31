@@ -275,6 +275,59 @@ describe('getRuleMigrationAgentV2', () => {
       expect(response.translation_result).toEqual('untranslatable');
     });
 
+    it('finalizes after a declined retry prompt instead of looping', async () => {
+      mockRetriever.prebuiltRules.search.mockResolvedValue([mockIncorrectRuleName]);
+      const graph = await setupAgent([
+        { nodeId: 'createSemanticQuery', response: mockSemanticQueryResponse },
+        {
+          nodeId: 'agent',
+          turns: [
+            { toolCalls: [searchToolCall('office document macro child process')] },
+            { content: mockPrebuiltRuleNoMatchResponse },
+            { content: mockPrebuiltRuleNoMatchResponse },
+          ],
+        },
+      ]);
+      const response = await graph.invoke({
+        id: 'test',
+        original_rule: mockOriginalRule,
+        resources: {},
+      });
+      // search, no-match JSON, declined retry prompt (no-match JSON again) — then finalize.
+      expect(fakeLLM.getNodeCallCount('agent')).toBe(3);
+      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
+      expect(response.elastic_rule?.prebuilt_rule_id).toBeUndefined();
+      expect(response.translation_result).toEqual('untranslatable');
+    });
+
+    it('re-searches after two no-matches then finalizes on the third', async () => {
+      mockRetriever.prebuiltRules.search.mockResolvedValue([mockIncorrectRuleName]);
+      const graph = await setupAgent([
+        { nodeId: 'createSemanticQuery', response: mockSemanticQueryResponse },
+        {
+          nodeId: 'agent',
+          turns: [
+            { toolCalls: [searchToolCall('office document macro child process')] },
+            { content: mockPrebuiltRuleNoMatchResponse },
+            { toolCalls: [searchToolCall('office macro execution sysmon')] },
+            { content: mockPrebuiltRuleNoMatchResponse },
+            { toolCalls: [searchToolCall('office child process creation')] },
+            { content: mockPrebuiltRuleNoMatchResponse },
+          ],
+        },
+      ]);
+      const response = await graph.invoke({
+        id: 'test',
+        original_rule: mockOriginalRule,
+        resources: {},
+      });
+      // 1st and 2nd no-match each trigger a re-search; 3rd no-match finalizes.
+      expect(fakeLLM.getNodeCallCount('agent')).toBe(6);
+      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(3);
+      expect(response.elastic_rule?.prebuilt_rule_id).toBeUndefined();
+      expect(response.translation_result).toEqual('untranslatable');
+    });
+
     it('gives up after MAX_TOOL_CALL_ATTEMPTS searches if the model keeps calling the tool', async () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockIncorrectRuleName]);
       const graph = await setupAgent([
