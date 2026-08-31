@@ -17,6 +17,12 @@ const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
 const ALERTS_ICON = 'warning';
 
+/** Matches `/app/observability/alerts` and sub-routes (serverless active-state behavior). */
+const getAlertsIsActive: NonNullable<RootNodeDefinition['getIsActive']> = ({
+  pathNameSerialized,
+  prepend,
+}) => pathNameSerialized.startsWith(prepend('/app/observability/alerts'));
+
 /**
  * Returns the solution-nav Alerts entry for Observability.
  *
@@ -33,7 +39,7 @@ const ALERTS_ICON = 'warning';
  */
 export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
   if (!isAlertingV2Enabled(core)) {
-    return [{ link: ALERTS_LINK, icon: ALERTS_ICON }];
+    return [{ link: ALERTS_LINK, icon: ALERTS_ICON, getIsActive: getAlertsIsActive }];
   }
 
   return [
@@ -42,6 +48,7 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
       link: ALERTS_LINK,
       icon: ALERTS_ICON,
       renderAs: 'panelOpener',
+      getIsActive: getAlertsIsActive,
       children: [
         {
           breadcrumbStatus: 'hidden' as const,
@@ -51,6 +58,7 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
               title: i18n.translate('xpack.observability.nav.inbox', {
                 defaultMessage: 'Inbox',
               }),
+              badgeType: 'new' as const,
             },
             ...(shouldShowClassicObservabilityAlertsTable(core)
               ? [
@@ -71,7 +79,7 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
           breadcrumbStatus: 'hidden' as const,
           children: [
             { link: 'management:rules' as const },
-            { link: 'management:rule_library' as const },
+            { link: 'management:rule_library' as const, badgeType: 'new' as const },
           ],
         },
         {
@@ -80,7 +88,7 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
           }),
           breadcrumbStatus: 'hidden' as const,
           children: [
-            { link: 'management:action_policies' as const },
+            { link: 'management:action_policies' as const, badgeType: 'new' as const },
             { link: 'management:maintenanceWindows' as const },
           ],
         },
@@ -89,7 +97,7 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
             defaultMessage: 'Operations',
           }),
           breadcrumbStatus: 'hidden' as const,
-          children: [{ link: 'management:execution_history' as const }],
+          children: [{ link: 'management:execution_history' as const, badgeType: 'new' as const }],
         },
       ],
     },

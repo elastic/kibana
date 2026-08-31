@@ -11,23 +11,33 @@
  * `parallel_tests/` would leak the setting change into other workers.
  */
 
+import {
+  ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID,
+} from '@kbn/alerting-v2-constants';
 import { spaceTest as test, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
-const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
-const SHOW_CLASSIC_ALERTS_TABLE_SETTING = 'alerting:v2:showClassicAlertsTable';
+const ALERTS_PANEL_ID = 'alerting';
+const ALERTS_DEEP_LINK = 'observability-overview:alerts';
 
 test.describe(
   'Observability Alerts nav — alerting v2 feature flag',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ scoutSpace }) => {
+    test.beforeAll(async ({ scoutSpace, kbnClient }) => {
       await scoutSpace.setSolutionView('oblt');
+      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: false });
+      await kbnClient.uiSettings.update({
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
+      });
     });
 
     test.afterAll(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: false });
-      await kbnClient.uiSettings.update({ [SHOW_CLASSIC_ALERTS_TABLE_SETTING]: false });
+      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: false });
+      await kbnClient.uiSettings.update({
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
+      });
     });
 
     test('shows a plain Alerts link when alerting v2 is disabled', async ({
@@ -40,11 +50,11 @@ test.describe(
 
       const nav = pageObjects.observabilityNavigation;
 
-      const alertsLink = nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts');
+      const alertsLink = nav.navItemInPrimaryByDeepLinkId(ALERTS_DEEP_LINK);
       await expect(alertsLink).toBeVisible();
       await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
 
-      const alertsPanel = nav.navItemInPrimaryById('alerting');
+      const alertsPanel = nav.navItemInPrimaryById(ALERTS_PANEL_ID);
       await expect(alertsPanel).not.toBeVisible();
     });
 
@@ -53,8 +63,10 @@ test.describe(
       pageObjects,
       kbnClient,
     }) => {
-      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: true });
-      await kbnClient.uiSettings.update({ [SHOW_CLASSIC_ALERTS_TABLE_SETTING]: false });
+      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: true });
+      await kbnClient.uiSettings.update({
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
+      });
 
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
@@ -63,19 +75,18 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('Alerts panel opener is visible', async () => {
-        await expect(nav.navItemInPrimaryById('alerting')).toBeVisible();
+        await expect(nav.navItemInPrimaryById(ALERTS_PANEL_ID)).toBeVisible();
       });
 
       await test.step('panel contains Inbox but not Alerts V1', async () => {
-        await nav.navItemInPrimaryById('alerting').click();
-        const panel = nav.sidePanel('alerting');
-        await expect(panel).toBeVisible();
+        await nav.navItemInPrimaryById(ALERTS_PANEL_ID).click();
+        await expect(nav.sidePanel(ALERTS_PANEL_ID)).toBeVisible();
 
         await expect(
-          panel.locator('[data-test-subj~="nav-item-deepLinkId-management:episodes"]')
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, 'management:episodes')
         ).toBeVisible();
         await expect(
-          panel.locator('[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"]')
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)
         ).not.toBeVisible();
       });
     });
@@ -85,8 +96,10 @@ test.describe(
       pageObjects,
       kbnClient,
     }) => {
-      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: true });
-      await kbnClient.uiSettings.update({ [SHOW_CLASSIC_ALERTS_TABLE_SETTING]: true });
+      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: true });
+      await kbnClient.uiSettings.update({
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: true,
+      });
 
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
@@ -95,42 +108,38 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('panel contains both Inbox and Alerts V1', async () => {
-        await nav.navItemInPrimaryById('alerting').click();
-        const panel = nav.sidePanel('alerting');
-        await expect(panel).toBeVisible();
+        await nav.navItemInPrimaryById(ALERTS_PANEL_ID).click();
+        await expect(nav.sidePanel(ALERTS_PANEL_ID)).toBeVisible();
 
         await expect(
-          panel.locator('[data-test-subj~="nav-item-deepLinkId-management:episodes"]')
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, 'management:episodes')
         ).toBeVisible();
         await expect(
-          panel.locator('[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"]')
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)
         ).toBeVisible();
       });
 
       await test.step('panel contains Rule Management section', async () => {
-        const panel = nav.sidePanel('alerting');
         await expect(
-          panel.locator('[data-test-subj~="nav-item-deepLinkId-management:rules"]')
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, 'management:rules')
         ).toBeVisible();
         await expect(
-          panel.locator('[data-test-subj~="nav-item-deepLinkId-management:rule_library"]')
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, 'management:rule_library')
         ).toBeVisible();
       });
 
       await test.step('panel contains Notifications and Suppressions section', async () => {
-        const panel = nav.sidePanel('alerting');
         await expect(
-          panel.locator('[data-test-subj~="nav-item-deepLinkId-management:action_policies"]')
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, 'management:action_policies')
         ).toBeVisible();
         await expect(
-          panel.locator('[data-test-subj~="nav-item-deepLinkId-management:maintenanceWindows"]')
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, 'management:maintenanceWindows')
         ).toBeVisible();
       });
 
       await test.step('panel contains Operations section', async () => {
-        const panel = nav.sidePanel('alerting');
         await expect(
-          panel.locator('[data-test-subj~="nav-item-deepLinkId-management:execution_history"]')
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, 'management:execution_history')
         ).toBeVisible();
       });
     });
@@ -140,8 +149,10 @@ test.describe(
       pageObjects,
       kbnClient,
     }) => {
-      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: false });
-      await kbnClient.uiSettings.update({ [SHOW_CLASSIC_ALERTS_TABLE_SETTING]: false });
+      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: false });
+      await kbnClient.uiSettings.update({
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
+      });
 
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
@@ -149,102 +160,10 @@ test.describe(
 
       const nav = pageObjects.observabilityNavigation;
 
-      const alertsLink = nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts');
+      const alertsLink = nav.navItemInPrimaryByDeepLinkId(ALERTS_DEEP_LINK);
       await expect(alertsLink).toBeVisible();
 
-      const alertsPanel = nav.navItemInPrimaryById('alerting');
-      await expect(alertsPanel).not.toBeVisible();
-    });
-  }
-);
-
-test.describe(
-  'Observability Alerts nav — classic sidebar',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.setSolutionView('classic');
-    });
-
-    test.afterAll(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: false });
-      await kbnClient.uiSettings.update({ [SHOW_CLASSIC_ALERTS_TABLE_SETTING]: false });
-    });
-
-    test('shows Alerts as a sub-nav link under Observability with no feature flags', async ({
-      browserAuth,
-      pageObjects,
-      page,
-    }) => {
-      await browserAuth.loginAsAdmin();
-      await page.gotoApp('observability/alerts');
-
-      const alertsLink = page.locator(
-        '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"]'
-      );
-      await expect(alertsLink).toBeVisible();
-      await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
-
-      const activeAlertsLink = page.locator(
-        '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"][data-test-subj~="nav-item-isActive"]'
-      );
-      await expect(activeAlertsLink).toBeVisible();
-    });
-
-    test('Alerts link is unchanged when alerting v2 is enabled', async ({
-      browserAuth,
-      pageObjects,
-      page,
-      kbnClient,
-    }) => {
-      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: true });
-
-      await browserAuth.loginAsAdmin();
-      await page.gotoApp('observability/alerts');
-
-      const alertsLink = page.locator(
-        '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"]'
-      );
-      await expect(alertsLink).toBeVisible();
-      await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
-
-      const activeAlertsLink = page.locator(
-        '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"][data-test-subj~="nav-item-isActive"]'
-      );
-      await expect(activeAlertsLink).toBeVisible();
-
-      const alertsPanel = page.locator(
-        '[data-test-subj~="nav-item-id-alerting"][data-test-subj~="nav-item-renderAs-panelOpener"]'
-      );
-      await expect(alertsPanel).not.toBeVisible();
-    });
-
-    test('Alerts link is unchanged when both flags are enabled', async ({
-      browserAuth,
-      pageObjects,
-      page,
-      kbnClient,
-    }) => {
-      await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING]: true });
-      await kbnClient.uiSettings.update({ [SHOW_CLASSIC_ALERTS_TABLE_SETTING]: true });
-
-      await browserAuth.loginAsAdmin();
-      await page.gotoApp('observability/alerts');
-
-      const alertsLink = page.locator(
-        '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"]'
-      );
-      await expect(alertsLink).toBeVisible();
-      await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
-
-      const activeAlertsLink = page.locator(
-        '[data-test-subj~="nav-item-deepLinkId-observability-overview:alerts"][data-test-subj~="nav-item-isActive"]'
-      );
-      await expect(activeAlertsLink).toBeVisible();
-
-      const alertsPanel = page.locator(
-        '[data-test-subj~="nav-item-id-alerting"][data-test-subj~="nav-item-renderAs-panelOpener"]'
-      );
+      const alertsPanel = nav.navItemInPrimaryById(ALERTS_PANEL_ID);
       await expect(alertsPanel).not.toBeVisible();
     });
   }

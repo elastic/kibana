@@ -126,6 +126,14 @@ export class ObservabilityNavigation {
     return this.page.testSubj.locator(`~kbnChromeNav-sidePanel_${id}`);
   }
 
+  navItemInPanelByDeepLinkId(panelId: string, deepLinkId: string): Locator {
+    return this.sidePanel(panelId).locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`);
+  }
+
+  navItemInPanelById(panelId: string, id: string): Locator {
+    return this.sidePanel(panelId).locator(`[data-test-subj~="nav-item-id-${id}"]`);
+  }
+
   nestedPanel(id: string): Locator {
     return this.morePopover.locator(`[data-test-subj="kbnChromeNav-nestedPanel-${id}"]`);
   }
