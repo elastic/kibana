@@ -11,6 +11,24 @@ applies_to:
 
 The MySQL connector connects directly to a MySQL database so you can search, query, and explore schema from chat conversations. Workflow authors can also run write or DDL statements through **Execute SQL**.
 
+## Requirements [mysql-requirements]
+
+The MySQL connector connects directly to MySQL over the native MySQL protocol (default port 3306). Your MySQL server must be network-accessible from your Kibana instance. TLS is required by default.
+
+To use the MySQL connector, you need:
+
+1. A MySQL server accessible from your Kibana instance.
+2. A MySQL user with access to the databases you want to query.
+3. The server hostname, port, database name, and credentials.
+
+## Get connection details [mysql-api-credentials]
+
+To configure the connector:
+
+1. Identify the hostname or IP address of your MySQL server.
+2. Create a MySQL user with the appropriate permissions for your use case (see [Database user permissions](#mysql-security)).
+3. Note the server port (default: 3306) and the default database name.
+
 ## Create connectors in {{kib}} [define-mysql-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
@@ -42,6 +60,8 @@ TLS
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
 
+## MySQL Connector actions [mysql-connector-actions]
+
 The MySQL connector has the following actions:
 
 Query
@@ -72,16 +92,6 @@ Execute SQL
 :   Run any SQL statement against the MySQL database. No restrictions — `INSERT`, `UPDATE`, `DELETE`, `DROP`, and DDL are all permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer **Query** for read-only access.
     - **sql** (required): The SQL statement to execute.
 
-
-## Requirements [mysql-requirements]
-
-The MySQL connector connects directly to MySQL over the native MySQL protocol (default port 3306). Your MySQL server must be network-accessible from your Kibana instance. TLS is required by default.
-
-To use the MySQL connector, you need:
-
-1. A MySQL server accessible from your Kibana instance.
-2. A MySQL user with access to the databases you want to query.
-3. The server hostname, port, database name, and credentials.
 
 ## Database user permissions [mysql-security]
 
@@ -115,11 +125,3 @@ If your use case requires write access or access across multiple databases, gran
 GRANT SELECT, INSERT, UPDATE, DELETE ON my_database.* TO 'kibana_user'@'%';
 FLUSH PRIVILEGES;
 ```
-
-## Get connection details [mysql-api-credentials]
-
-To configure the connector:
-
-1. Identify the hostname or IP address of your MySQL server.
-2. Create a MySQL user with the appropriate permissions for your use case (see [Database user permissions](#mysql-security)).
-3. Note the server port (default: 3306) and the default database name.
