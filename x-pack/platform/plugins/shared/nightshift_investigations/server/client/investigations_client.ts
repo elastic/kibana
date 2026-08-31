@@ -7,7 +7,6 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -58,7 +57,7 @@ export {
   InvestigationUnavailableError,
 };
 
-/** Used when persist omitted `error`, or when reconciling a failed workflow execution. */
+/** Used when persist omitted `error`. */
 const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
 
 const LIST_RECORD_FIELDS = [
@@ -125,35 +124,6 @@ function toInvestigationResponse(record: InvestigationRecord): GetInvestigationR
     conversation_id: record.conversation_id,
     impact: record.impact,
   };
-}
-
-function toInvestigationStatus(status: ExecutionStatus, logger: Logger): InvestigationStatus {
-  switch (status) {
-    case ExecutionStatus.PENDING:
-    case ExecutionStatus.QUEUED:
-      return 'pending';
-    case ExecutionStatus.RUNNING:
-    case ExecutionStatus.WAITING:
-    case ExecutionStatus.WAITING_FOR_INPUT:
-    case ExecutionStatus.WAITING_FOR_CHILD:
-      return 'running';
-    case ExecutionStatus.COMPLETED:
-      return 'completed';
-    case ExecutionStatus.FAILED:
-    case ExecutionStatus.TIMED_OUT:
-      return 'failed';
-    case ExecutionStatus.CANCELLED:
-    case ExecutionStatus.SKIPPED:
-      return 'cancelled';
-    default: {
-      // TypeScript will error here if a new ExecutionStatus value is added without a case above.
-      const _exhaustiveCheck: never = status;
-      logger.warn(
-        `Unknown workflow ExecutionStatus "${_exhaustiveCheck}" for investigation, treating as running`
-      );
-      return 'running';
-    }
-  }
 }
 
 function isTerminalStatus(status: InvestigationStatus): boolean {
@@ -506,6 +476,12 @@ export class NightshiftInvestigationsClient {
     }
   }
 
+  /**
+   * Returns the stored investigation. `running` is not checked against the workflow engine, so it
+   * can linger after edge cases where no persist step ran: user cancel, cancel-in-progress that
+   * ensure() did not see, timeout, or a worker dying mid-run. Complete/fail still go through
+   * PATCH; a superseded run is cancelled in ensure().
+   */
   async get(investigationId: string): Promise<GetInvestigationResponse> {
     const record = await this.investigationRepository.get(investigationId);
 
@@ -513,80 +489,7 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const response = toInvestigationResponse(record);
-
-    if (record.status === 'running') {
-      const reconciled = await this.reconcileStaleRunningStatus(
-        investigationId,
-        record.version
-      ).catch((err) => {
-        this.logger.warn(
-          `Failed to reconcile status for investigation "${investigationId}": ${err.message}`
-        );
-        return undefined;
-      });
-      if (reconciled) {
-        response.status = reconciled.status;
-        response.completed_at = reconciled.completed_at;
-        response.error = reconciled.error;
-      }
-    }
-
-    return response;
-  }
-
-  private async reconcileStaleRunningStatus(
-    investigationId: string,
-    version: string | undefined
-  ): Promise<{ status: InvestigationStatus; completed_at?: string; error?: string } | undefined> {
-    if (!this.workflowsManagement) {
-      return undefined;
-    }
-
-    const spaceId = this.getSpaceId();
-    const execution = await this.workflowsManagement.management.getWorkflowExecution(
-      investigationId,
-      spaceId,
-      { includeOutput: false }
-    );
-
-    if (!execution) {
-      this.logger.warn(
-        `Investigation "${investigationId}" is marked running but its workflow execution no longer exists; the status cannot be reconciled`
-      );
-      return undefined;
-    }
-
-    const workflowStatus = toInvestigationStatus(execution.status, this.logger);
-    if (!isTerminalStatus(workflowStatus)) {
-      return undefined;
-    }
-
-    // Raw engine error text may contain internal details (credentials, hosts, stack
-    // internals): log it, never persist it. Only workflow-authored errors reach the API.
-    const correction: InvestigationPatch = {
-      status: workflowStatus,
-      completed_at: execution.finishedAt ?? new Date().toISOString(),
-      ...(workflowStatus === 'failed' && { error: FALLBACK_INVESTIGATION_ERROR }),
-    };
-
-    if (workflowStatus === 'failed' && execution.error?.message) {
-      this.logger.warn(`Investigation "${investigationId}" failed: ${execution.error.message}`);
-    }
-
-    await this.investigationRepository
-      .update(investigationId, correction, { version })
-      .catch((err) => {
-        this.logger.warn(
-          `Failed to reconcile stale status for investigation "${investigationId}": ${err.message}`
-        );
-      });
-
-    return {
-      status: workflowStatus,
-      completed_at: correction.completed_at,
-      error: correction.error,
-    };
+    return toInvestigationResponse(record);
   }
 
   async list({
@@ -613,33 +516,12 @@ export class NightshiftInvestigationsClient {
       fields: [...LIST_RECORD_FIELDS],
     });
 
-    const results = result.results.map((record) => toListInvestigationItem(record));
-
-    // Cross-check `running` items against the workflow engine (same reconciliation as get(),
-    // page-bounded) so list and get never disagree about a stale status. Failures fall back to
-    // the stored status — the list must not fail just because the engine is unreachable.
-    await Promise.all(
-      result.results.map(async (record, index) => {
-        if (record.status !== 'running') {
-          return;
-        }
-        const item = results[index];
-        const reconciled = await this.reconcileStaleRunningStatus(record.id, record.version).catch(
-          (err) => {
-            this.logger.warn(
-              `Failed to reconcile status for investigation "${record.id}" in list: ${err.message}`
-            );
-            return undefined;
-          }
-        );
-        if (reconciled) {
-          item.status = reconciled.status;
-          item.completed_at = reconciled.completed_at;
-          item.error = reconciled.error;
-        }
-      })
-    );
-
-    return { results, page: result.page, size: result.size, total: result.total };
+    // Stored `running` is not reconciled with the engine — same edge cases as get().
+    return {
+      results: result.results.map((record) => toListInvestigationItem(record)),
+      page: result.page,
+      size: result.size,
+      total: result.total,
+    };
   }
 }

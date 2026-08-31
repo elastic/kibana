@@ -183,109 +183,14 @@ describe('NightshiftInvestigationsClient.get()', () => {
     expect(result.subject).toEqual({ type: 'alert', id: 'alert-42' });
   });
 
-  it('does not call workflow execution when the record is found with terminal status', async () => {
-    repository.get.mockResolvedValue(makeRecord());
-    await makeClient().get('inv-1');
+  it('returns the stored running status without consulting the workflow engine', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
+
+    const result = await makeClient().get('inv-1');
+
+    expect(result.status).toBe('running');
     expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
-  });
-
-  describe('stale-running reconciliation', () => {
-    it('reconciles when the store says running but workflow is completed', async () => {
-      repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
-      mockManagement.getWorkflowExecution.mockResolvedValue({
-        status: ExecutionStatus.COMPLETED,
-        finishedAt: '2024-01-01T02:00:00Z',
-      });
-
-      const result = await makeClient().get('inv-1');
-
-      expect(result.status).toBe('completed');
-      expect(result.completed_at).toBe('2024-01-01T02:00:00Z');
-      expect(repository.update).toHaveBeenCalledWith(
-        'inv-1',
-        expect.objectContaining({ status: 'completed', completed_at: '2024-01-01T02:00:00Z' }),
-        { version: '1' }
-      );
-    });
-
-    it('reconciles when the store says running but workflow has failed', async () => {
-      repository.get.mockResolvedValue(
-        makeRecord({ status: 'running', completed_at: undefined, error: undefined })
-      );
-      mockManagement.getWorkflowExecution.mockResolvedValue({
-        status: ExecutionStatus.FAILED,
-        finishedAt: '2024-01-01T03:00:00Z',
-        error: { message: 'Internal credential error: secret-token-xyz' },
-      });
-
-      const result = await makeClient().get('inv-1');
-
-      expect(result.status).toBe('failed');
-      expect(result.error).toBe('Investigation failed');
-      expect(result.error).not.toContain('secret-token-xyz');
-      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('secret-token-xyz'));
-      expect(repository.update).toHaveBeenCalledWith(
-        'inv-1',
-        expect.objectContaining({ status: 'failed', error: 'Investigation failed' }),
-        { version: '1' }
-      );
-    });
-
-    it('does not reconcile when workflow is also still running', async () => {
-      repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
-      mockManagement.getWorkflowExecution.mockResolvedValue({
-        status: ExecutionStatus.RUNNING,
-      });
-
-      const result = await makeClient().get('inv-1');
-
-      expect(result.status).toBe('running');
-      expect(repository.update).not.toHaveBeenCalled();
-    });
-
-    it('falls back to the stored status when the engine lookup fails', async () => {
-      repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
-      mockManagement.getWorkflowExecution.mockRejectedValue(new Error('engine unavailable'));
-
-      const result = await makeClient().get('inv-1');
-
-      expect(result.status).toBe('running');
-      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('engine unavailable'));
-    });
-
-    it('warns and keeps running when the workflow execution no longer exists', async () => {
-      repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
-      mockManagement.getWorkflowExecution.mockResolvedValue(undefined);
-
-      const result = await makeClient().get('inv-1');
-
-      expect(result.status).toBe('running');
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('workflow execution no longer exists')
-      );
-      expect(repository.update).not.toHaveBeenCalled();
-    });
-
-    it('does not fail if the store update during reconciliation throws', async () => {
-      repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
-      mockManagement.getWorkflowExecution.mockResolvedValue({
-        status: ExecutionStatus.COMPLETED,
-        finishedAt: '2024-01-01T02:00:00Z',
-      });
-      repository.update.mockRejectedValue(new Error('store update failed'));
-
-      const result = await makeClient().get('inv-1');
-      expect(result.status).toBe('completed');
-    });
-
-    it('does not reconcile when workflowsManagement is unavailable', async () => {
-      repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
-      const client = makeClient({ workflowsManagement: undefined });
-
-      const result = await client.get('inv-1');
-      expect(result.status).toBe('running');
-      expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
-    });
+    expect(repository.update).not.toHaveBeenCalled();
   });
 });
 
@@ -353,62 +258,18 @@ describe('NightshiftInvestigationsClient.list()', () => {
     });
   });
 
-  describe('stale-running reconciliation', () => {
-    it('reconciles running items whose workflow has finished', async () => {
-      repository.find.mockResolvedValue(
-        findResult([
-          makeRecord({ status: 'running', completed_at: undefined }, { id: 'inv-running' }),
-        ])
-      );
-      mockManagement.getWorkflowExecution.mockResolvedValue({
-        status: ExecutionStatus.COMPLETED,
-        finishedAt: '2024-01-01T02:00:00Z',
-      });
+  it('returns stored running items without consulting the workflow engine', async () => {
+    repository.find.mockResolvedValue(
+      findResult([
+        makeRecord({ status: 'running', completed_at: undefined }, { id: 'inv-running' }),
+      ])
+    );
 
-      const result = await makeClient().list({});
+    const result = await makeClient().list({});
 
-      expect(result.results[0].status).toBe('completed');
-      expect(result.results[0].completed_at).toBe('2024-01-01T02:00:00Z');
-      expect(repository.update).toHaveBeenCalledWith(
-        'inv-running',
-        expect.objectContaining({ status: 'completed' }),
-        { version: '1' }
-      );
-    });
-
-    it('keeps running items whose workflow is still running', async () => {
-      repository.find.mockResolvedValue(
-        findResult([
-          makeRecord({ status: 'running', completed_at: undefined }, { id: 'inv-running' }),
-        ])
-      );
-      mockManagement.getWorkflowExecution.mockResolvedValue({
-        status: ExecutionStatus.RUNNING,
-      });
-
-      const result = await makeClient().list({});
-
-      expect(result.results[0].status).toBe('running');
-      expect(repository.update).not.toHaveBeenCalled();
-    });
-
-    it('falls back to the stored status when the engine lookup fails', async () => {
-      repository.find.mockResolvedValue(
-        findResult([
-          makeRecord({ status: 'running', completed_at: undefined }, { id: 'inv-running' }),
-        ])
-      );
-      mockManagement.getWorkflowExecution.mockRejectedValue(new Error('engine unavailable'));
-
-      const result = await makeClient().list({});
-
-      expect(result.results[0].status).toBe('running');
-    });
-
-    it('does not query the engine when no item is running', async () => {
-      await makeClient().list({});
-      expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
-    });
+    expect(result.results[0].status).toBe('running');
+    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('source-filters find to list fields', async () => {
