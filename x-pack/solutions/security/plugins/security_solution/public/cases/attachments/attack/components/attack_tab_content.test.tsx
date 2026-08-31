@@ -6,13 +6,21 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { AttackTabContent } from './attack_tab_content';
 import {
+  ATTACK_TAB_COLUMN_ALERTS_TEST_ID,
+  ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID,
+  ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID,
+  ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID,
+  ATTACK_TAB_COLUMN_RISK_SCORE_TEST_ID,
+  ATTACK_TAB_COLUMN_SUMMARY_TEST_ID,
+  ATTACK_TAB_COLUMN_TITLE_TEST_ID,
   ATTACK_TAB_EMPTY_TEST_ID,
+  ATTACK_TAB_GRID_TEST_ID,
   ATTACK_TAB_ROW_STATUS_TEST_ID,
   ATTACK_TAB_ROW_TITLE_TEST_ID,
   ATTACK_TAB_ROW_UNRESOLVED_TEST_ID,
@@ -27,6 +35,7 @@ import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
 import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
+import { ATTACK_TAB_COLUMN_ID } from '../utils';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
@@ -43,6 +52,16 @@ jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: () => true,
 }));
 
+/** EUI's own handles on the data grid controls, which have no constant of ours to come from. */
+const EUI_COLUMN_SELECTOR_TEST_ID = 'dataGridColumnSelectorButton';
+const EUI_COLUMN_SORTING_TEST_ID = 'dataGridColumnSortingButton';
+const EUI_DISPLAY_SELECTOR_TEST_ID = 'dataGridDisplaySelectorButton';
+const EUI_FULL_SCREEN_TEST_ID = 'dataGridFullScreenButton';
+const EUI_PAGINATION_TEST_ID = 'tablePaginationPopoverButton';
+const euiHeaderActionsTestId = (columnId: string) => `dataGridHeaderCellActionButton-${columnId}`;
+const euiColumnToggleTestId = (columnId: string) =>
+  `dataGridColumnSelectorToggleColumnVisibility-${columnId}`;
+
 const useFindAttackDiscoveriesMock = useFindAttackDiscoveries as jest.Mock;
 const useAssistantAvailabilityMock = useAssistantAvailability as jest.Mock;
 const useRemoveAttackAttachmentMock = useRemoveAttackAttachment as jest.Mock;
@@ -54,14 +73,15 @@ const buildAttachment = (overrides: Record<string, unknown> = {}) => ({
   id: 'so-1',
   type: SECURITY_ATTACK_ATTACHMENT_TYPE,
   attachmentId: 'attack-id-1',
-  createdAt: '2026-08-20T10:00:00.000Z',
+  createdAt: '2024-05-02T10:00:00.000Z',
   createdBy: { fullName: 'Ada Lovelace', username: 'ada', email: null },
   metadata: {
     title: 'Snapshotted attack title',
-    summaryMarkdown: 'An adversary dumped LSASS memory',
+    summaryMarkdown: 'An adversary dumped {{ process.name lsass.exe }} memory',
     riskScore: 42,
     alertCount: 4,
     entityCount: 2,
+    timestamp: '2024-04-01T09:00:00.000Z',
     index: '.alerts-security.attack.discovery.alerts-default',
   },
   ...overrides,
@@ -77,9 +97,11 @@ const buildCaseData = (comments: unknown[]) =>
 const liveAttack = {
   id: 'attack-id-1',
   title: 'Live attack title',
+  summaryMarkdown: 'The adversary escalated on {{ host.name win-01 }}',
   riskScore: 77,
   alertIds: ['a', 'b', 'c'],
   alertWorkflowStatus: 'acknowledged',
+  timestamp: '2024-05-01T08:30:00.000Z',
   index: '.alerts-security.attack.discovery.alerts-default',
   replacements: {},
 };
@@ -103,6 +125,21 @@ const renderTab = (props?: Partial<CommonAttachmentListViewProps>) =>
     </TestProviders>
   );
 
+const renderAttachments = (comments: unknown[]) =>
+  render(
+    <TestProviders>
+      <AttackTabContent caseData={buildCaseData(comments)} />
+    </TestProviders>
+  );
+
+const cellTexts = (testId: string) => screen.getAllByTestId(testId).map((cell) => cell.textContent);
+
+/** Sorts the grid through the column header's own actions, as a user would. */
+const sortColumn = async (columnId: string, label: string) => {
+  await userEvent.click(screen.getByTestId(euiHeaderActionsTestId(columnId)));
+  await userEvent.click(await screen.findByText(label));
+};
+
 describe('AttackTabContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -121,11 +158,7 @@ describe('AttackTabContent', () => {
   });
 
   it('renders an empty state and fires no query when no attacks are attached', () => {
-    render(
-      <TestProviders>
-        <AttackTabContent caseData={buildCaseData([])} />
-      </TestProviders>
-    );
+    renderAttachments([]);
 
     expect(screen.getByTestId(ATTACK_TAB_EMPTY_TEST_ID)).toHaveTextContent(
       'No attacks have been attached to this case yet.'
@@ -146,20 +179,14 @@ describe('AttackTabContent', () => {
   it('keeps attachments matching the search term', () => {
     renderTab({ searchTerm: 'snapshotted' });
 
-    expect(screen.getByTestId(ATTACK_TAB_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(ATTACK_TAB_GRID_TEST_ID)).toBeInTheDocument();
   });
 
   it('queries every attached attack id in a single request', () => {
-    render(
-      <TestProviders>
-        <AttackTabContent
-          caseData={buildCaseData([
-            buildAttachment(),
-            buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
-          ])}
-        />
-      </TestProviders>
-    );
+    renderAttachments([
+      buildAttachment(),
+      buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
+    ]);
 
     expect(useFindAttackDiscoveriesMock).toHaveBeenCalledTimes(1);
     expect(useFindAttackDiscoveriesMock).toHaveBeenCalledWith(
@@ -172,25 +199,229 @@ describe('AttackTabContent', () => {
     );
   });
 
-  it('renders one row per attached attack with the live attack state', () => {
-    renderTab();
+  it('ignores attachments of other types', () => {
+    renderAttachments([buildAttachment({ type: 'security.alert' })]);
 
-    expect(screen.getByTestId(ATTACK_TAB_TABLE_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(ATTACK_TAB_ROW_TITLE_TEST_ID)).toHaveTextContent('Live attack title');
-    // Risk score and alert count come from the live document, not the snapshot.
-    expect(screen.getByText('77')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
-    expect(screen.getByTestId(ATTACK_TAB_ROW_STATUS_TEST_ID)).toHaveTextContent('acknowledged');
-    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getByTestId(ATTACK_TAB_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 
-  it('exposes the show attack button on each row', () => {
-    renderTab();
+  describe('the grid', () => {
+    it('renders the default columns from the live attack document', () => {
+      renderTab();
 
-    expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
+      expect(screen.getByTestId(ATTACK_TAB_GRID_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID)).toHaveTextContent(
+        'May 1, 2024 @ 08:30:00.000'
+      );
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_TITLE_TEST_ID)).toHaveTextContent(
+        'Live attack title'
+      );
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_ALERTS_TEST_ID)).toHaveTextContent('3');
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID)).toHaveTextContent(
+        'The adversary escalated on win-01'
+      );
+    });
+
+    it('renders the detection time rather than the time the attack was attached', () => {
+      renderTab();
+
+      // `createdAt` is May 2nd; the attack was detected on May 1st.
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID)).not.toHaveTextContent(
+        'May 2, 2024'
+      );
+    });
+
+    it('falls back to the snapshotted detection time when the live document has none', () => {
+      mockFindResult([]);
+
+      renderTab();
+
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID)).toHaveTextContent(
+        'Apr 1, 2024 @ 09:00:00.000'
+      );
+    });
+
+    it('renders the empty value when neither the document nor the snapshot has a detection time', () => {
+      mockFindResult([]);
+
+      renderAttachments([
+        buildAttachment({
+          metadata: {
+            title: 'Attached before timestamps were captured',
+            alertCount: 1,
+            index: '.alerts-security.attack.discovery.alerts-default',
+          },
+        }),
+      ]);
+
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID)).toHaveTextContent('—');
+    });
+
+    it('renders the summary as plain text with no markdown field syntax', () => {
+      mockFindResult([]);
+
+      renderTab();
+
+      const summary = screen.getByTestId(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID);
+      expect(summary).toHaveTextContent('An adversary dumped lsass.exe memory');
+      expect(summary.textContent).not.toContain('{{');
+    });
+
+    it('hides the risk score, status and provenance columns until they are picked', () => {
+      renderTab();
+
+      expect(screen.queryByTestId(ATTACK_TAB_COLUMN_RISK_SCORE_TEST_ID)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(ATTACK_TAB_ROW_STATUS_TEST_ID)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('offers a column selector and a sort selector, and no full screen or display controls', () => {
+      renderTab();
+
+      expect(screen.getByTestId(EUI_COLUMN_SELECTOR_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(EUI_COLUMN_SORTING_TEST_ID)).toBeInTheDocument();
+      expect(screen.queryByTestId(EUI_FULL_SCREEN_TEST_ID)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(EUI_DISPLAY_SELECTOR_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('renders a hidden column, and its Unknown attaching user, once it is picked', async () => {
+      renderAttachments([
+        buildAttachment({ createdBy: { fullName: null, username: null, email: null } }),
+      ]);
+
+      await userEvent.click(screen.getByTestId(EUI_COLUMN_SELECTOR_TEST_ID));
+      await userEvent.click(
+        await screen.findByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.attachedBy))
+      );
+
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID)).toHaveTextContent(
+        'Unknown'
+      );
+    });
+
+    it('paginates 50 rows at a time', () => {
+      // The grid only renders its pagination bar once there are more rows than the smallest
+      // page size option.
+      renderAttachments(
+        Array.from({ length: 12 }, (_, index) =>
+          buildAttachment({ id: `so-${index}`, attachmentId: `attack-id-${index}` })
+        )
+      );
+
+      expect(screen.getByTestId(EUI_PAGINATION_TEST_ID)).toHaveTextContent('Rows per page: 50');
+    });
   });
 
-  describe('removal', () => {
+  describe('sorting', () => {
+    const attachmentsByDetectionTime = [
+      buildAttachment({
+        id: 'so-oldest',
+        attachmentId: 'attack-oldest',
+        metadata: {
+          title: 'Oldest',
+          alertCount: 1,
+          timestamp: '2024-01-01T00:00:00.000Z',
+          index: '.alerts-security.attack.discovery.alerts-default',
+        },
+      }),
+      buildAttachment({
+        id: 'so-newest',
+        attachmentId: 'attack-newest',
+        metadata: {
+          title: 'Newest',
+          alertCount: 1,
+          timestamp: '2024-03-01T00:00:00.000Z',
+          index: '.alerts-security.attack.discovery.alerts-default',
+        },
+      }),
+      buildAttachment({
+        id: 'so-undated',
+        attachmentId: 'attack-undated',
+        metadata: {
+          title: 'Undated',
+          alertCount: 1,
+          index: '.alerts-security.attack.discovery.alerts-default',
+        },
+      }),
+    ];
+
+    beforeEach(() => {
+      mockFindResult([]);
+    });
+
+    it('sorts by the detection time, newest first, by default', () => {
+      renderAttachments(attachmentsByDetectionTime);
+
+      expect(cellTexts(ATTACK_TAB_COLUMN_TITLE_TEST_ID)).toEqual(['Newest', 'Oldest', 'Undated']);
+    });
+
+    it('keeps rows with no detection time last when sorted oldest first', async () => {
+      renderAttachments(attachmentsByDetectionTime);
+
+      await sortColumn('detectedOn', 'Sort A-Z');
+
+      expect(cellTexts(ATTACK_TAB_COLUMN_TITLE_TEST_ID)).toEqual(['Oldest', 'Newest', 'Undated']);
+    });
+  });
+
+  describe('unresolved attacks', () => {
+    it('falls back to the snapshotted metadata and disables navigation', () => {
+      mockFindResult([]);
+
+      renderTab();
+
+      expect(screen.getByTestId(ATTACK_TAB_ROW_TITLE_TEST_ID)).toHaveTextContent(
+        'Snapshotted attack title'
+      );
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_ALERTS_TEST_ID)).toHaveTextContent('4');
+      expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeDisabled();
+    });
+
+    it('explains itself through a tooltip reachable by keyboard', () => {
+      mockFindResult([]);
+
+      renderTab();
+
+      expect(screen.getByTestId(ATTACK_TAB_ROW_UNRESOLVED_TEST_ID)).toHaveAttribute(
+        'tabindex',
+        '0'
+      );
+    });
+
+    it('keeps an unresolved row alongside a resolved one', () => {
+      mockFindResult([liveAttack]);
+
+      renderAttachments([
+        buildAttachment(),
+        buildAttachment({
+          id: 'so-2',
+          attachmentId: 'attack-id-2',
+          metadata: {
+            title: 'Deleted attack',
+            alertCount: 1,
+            timestamp: '2024-04-30T09:00:00.000Z',
+            index: '.alerts-security.attack.discovery.alerts-default',
+          },
+        }),
+      ]);
+
+      expect(screen.getAllByTestId(ATTACK_TAB_ROW_TITLE_TEST_ID)).toHaveLength(2);
+      expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
+      expect(screen.getByTestId('comment-action-show-attack-so-2')).toBeDisabled();
+    });
+
+    it('does not mark rows unresolved while the query is still loading', () => {
+      mockFindResult([], { isLoading: true, status: 'loading', data: undefined });
+
+      renderTab();
+
+      expect(screen.queryByTestId(ATTACK_TAB_ROW_UNRESOLVED_TEST_ID)).not.toBeInTheDocument();
+      expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
+    });
+  });
+
+  describe('row actions', () => {
     const openRemovalPrompt = async () => {
       await userEvent.click(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`));
     };
@@ -198,6 +429,12 @@ describe('AttackTabContent', () => {
     const confirmRemoval = async () => {
       await userEvent.click(screen.getByText('Remove'));
     };
+
+    it('exposes the show attack button on each row', () => {
+      renderTab();
+
+      expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
+    });
 
     it('exposes the remove attack button on each row', () => {
       renderTab();
@@ -248,84 +485,5 @@ describe('AttackTabContent', () => {
 
       expect(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`)).toBeEnabled();
     });
-  });
-
-  it('falls back to the snapshotted metadata and disables navigation for an unresolved attack', () => {
-    mockFindResult([]);
-
-    renderTab();
-
-    expect(screen.getByTestId(ATTACK_TAB_ROW_TITLE_TEST_ID)).toHaveTextContent(
-      'Snapshotted attack title'
-    );
-    expect(screen.getByTestId(ATTACK_TAB_ROW_UNRESOLVED_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByText('42')).toBeInTheDocument();
-    expect(screen.getByText('4')).toBeInTheDocument();
-    expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeDisabled();
-  });
-
-  it('keeps an unresolved row alongside a resolved one', () => {
-    mockFindResult([liveAttack]);
-
-    render(
-      <TestProviders>
-        <AttackTabContent
-          caseData={buildCaseData([
-            buildAttachment(),
-            buildAttachment({
-              id: 'so-2',
-              attachmentId: 'attack-id-2',
-              metadata: {
-                title: 'Deleted attack',
-                alertCount: 1,
-                index: '.alerts-security.attack.discovery.alerts-default',
-              },
-            }),
-          ])}
-        />
-      </TestProviders>
-    );
-
-    const titles = screen.getAllByTestId(ATTACK_TAB_ROW_TITLE_TEST_ID);
-    expect(titles).toHaveLength(2);
-    expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
-    expect(screen.getByTestId('comment-action-show-attack-so-2')).toBeDisabled();
-  });
-
-  it('does not mark rows unresolved while the query is still loading', () => {
-    mockFindResult([], { isLoading: true, status: 'loading', data: undefined });
-
-    renderTab();
-
-    expect(screen.queryByTestId(ATTACK_TAB_ROW_UNRESOLVED_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
-  });
-
-  it('falls back to Unknown when the attaching user has no name', () => {
-    mockFindResult([liveAttack]);
-
-    render(
-      <TestProviders>
-        <AttackTabContent
-          caseData={buildCaseData([
-            buildAttachment({ createdBy: { fullName: null, username: null, email: null } }),
-          ])}
-        />
-      </TestProviders>
-    );
-
-    expect(
-      within(screen.getByTestId(ATTACK_TAB_TABLE_TEST_ID)).getByText('Unknown')
-    ).toBeInTheDocument();
-  });
-
-  it('ignores attachments of other types', () => {
-    render(
-      <TestProviders>
-        <AttackTabContent caseData={buildCaseData([buildAttachment({ type: 'security.alert' })])} />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId(ATTACK_TAB_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 });

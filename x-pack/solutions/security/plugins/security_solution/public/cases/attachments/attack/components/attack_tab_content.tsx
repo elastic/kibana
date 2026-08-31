@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import type {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+  EuiDataGridColumnSortingConfig,
+  EuiDataGridControlColumn,
+  EuiDataGridSorting,
+  EuiDataGridStyle,
+  EuiDataGridToolBarVisibilityOptions,
+} from '@elastic/eui';
 import {
+  EuiDataGrid,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
+  EuiProgress,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
@@ -22,7 +32,17 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { AttackAttachmentMetadata } from '../../../../../common/cases/attachments/attack';
 import {
+  ATTACK_TAB_COLUMN_ACTIONS_TEST_ID,
+  ATTACK_TAB_COLUMN_ALERTS_TEST_ID,
+  ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID,
+  ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID,
+  ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID,
+  ATTACK_TAB_COLUMN_RISK_SCORE_TEST_ID,
+  ATTACK_TAB_COLUMN_STATUS_TEST_ID,
+  ATTACK_TAB_COLUMN_SUMMARY_TEST_ID,
+  ATTACK_TAB_COLUMN_TITLE_TEST_ID,
   ATTACK_TAB_EMPTY_TEST_ID,
+  ATTACK_TAB_GRID_TEST_ID,
   ATTACK_TAB_ROW_STATUS_TEST_ID,
   ATTACK_TAB_ROW_TITLE_TEST_ID,
   ATTACK_TAB_ROW_UNRESOLVED_TEST_ID,
@@ -31,6 +51,7 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
+import { getSummaryPlainText } from '../../../../attack_discovery/components/attack_entity_summary';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { RuleStatus } from '../../../../timelines/components/timeline/body/renderers/rule_status';
@@ -38,8 +59,13 @@ import { ShowAttackButton } from './show_attack_button';
 import type { RemoveAttackConfirmation } from './remove_attack_button';
 import { RemoveAttackButton } from './remove_attack_button';
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
-import type { AttackCaseAttachmentRow } from '../utils';
-import { isAttackAttachment, matchesSearchTerm } from '../utils';
+import type { AttackCaseAttachmentRow, AttackTabColumnId } from '../utils';
+import {
+  ATTACK_TAB_COLUMN_ID,
+  DEFAULT_ATTACK_TAB_COLUMN_IDS,
+  isAttackAttachment,
+  matchesSearchTerm,
+} from '../utils';
 
 /** One attached attack: the snapshot persisted on the attachment, plus the live document when it resolves. */
 interface AttackRow {
@@ -56,8 +82,25 @@ interface AttackRow {
   isUnresolved: boolean;
 }
 
-const PAGINATION = { initialPageSize: 10, pageSizeOptions: [10, 25, 50] };
-const SORTING = { sort: { field: 'createdAt' as const, direction: 'desc' as const } };
+/** Matches the alerts grid directly above this section in the tab. */
+const GRID_STYLE: EuiDataGridStyle = {
+  border: 'none',
+  fontSize: 's',
+  header: 'underline',
+};
+
+/** Matches the alerts grid. `EuiDataGrid` has no grouping or CSV export of its own to hide. */
+const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
+  showColumnSelector: true,
+  showSortSelector: true,
+  showDisplaySelector: false,
+  showFullScreenSelector: false,
+};
+
+const DEFAULT_PAGE_SIZE = 50;
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+
+const ACTIONS_COLUMN_WIDTH = 96;
 
 const UNKNOWN_USER = i18n.translate(
   'xpack.securitySolution.attackDiscovery.cases.tab.unknownUser',
@@ -78,6 +121,123 @@ const UNRESOLVED_TOOLTIP = i18n.translate(
   }
 );
 
+const COLUMN_HEADERS: Record<AttackTabColumnId, string> = {
+  [ATTACK_TAB_COLUMN_ID.actions]: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.tab.actionsColumn',
+    { defaultMessage: 'Actions' }
+  ),
+  [ATTACK_TAB_COLUMN_ID.detectedOn]: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.tab.detectedOnColumn',
+    { defaultMessage: 'Detected on' }
+  ),
+  [ATTACK_TAB_COLUMN_ID.title]: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.tab.titleColumn',
+    { defaultMessage: 'Title' }
+  ),
+  [ATTACK_TAB_COLUMN_ID.alerts]: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.tab.alertsColumn',
+    { defaultMessage: 'Alerts' }
+  ),
+  [ATTACK_TAB_COLUMN_ID.summary]: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.tab.summaryColumn',
+    { defaultMessage: 'Summary' }
+  ),
+  [ATTACK_TAB_COLUMN_ID.riskScore]: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.tab.riskScoreColumn',
+    { defaultMessage: 'Risk score' }
+  ),
+  [ATTACK_TAB_COLUMN_ID.status]: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.tab.statusColumn',
+    { defaultMessage: 'Status' }
+  ),
+  [ATTACK_TAB_COLUMN_ID.attachedBy]: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.tab.attachedByColumn',
+    { defaultMessage: 'Attached by' }
+  ),
+  [ATTACK_TAB_COLUMN_ID.attachedAt]: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.tab.attachedAtColumn',
+    { defaultMessage: 'Attached at' }
+  ),
+};
+
+const CELL_TEST_IDS: Record<AttackTabColumnId, string> = {
+  [ATTACK_TAB_COLUMN_ID.actions]: ATTACK_TAB_COLUMN_ACTIONS_TEST_ID,
+  [ATTACK_TAB_COLUMN_ID.detectedOn]: ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID,
+  [ATTACK_TAB_COLUMN_ID.title]: ATTACK_TAB_COLUMN_TITLE_TEST_ID,
+  [ATTACK_TAB_COLUMN_ID.alerts]: ATTACK_TAB_COLUMN_ALERTS_TEST_ID,
+  [ATTACK_TAB_COLUMN_ID.summary]: ATTACK_TAB_COLUMN_SUMMARY_TEST_ID,
+  [ATTACK_TAB_COLUMN_ID.riskScore]: ATTACK_TAB_COLUMN_RISK_SCORE_TEST_ID,
+  [ATTACK_TAB_COLUMN_ID.status]: ATTACK_TAB_COLUMN_STATUS_TEST_ID,
+  [ATTACK_TAB_COLUMN_ID.attachedBy]: ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID,
+  [ATTACK_TAB_COLUMN_ID.attachedAt]: ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID,
+};
+
+/**
+ * `actions` is absent: it is a leading control column, which the grid renders outside the
+ * visible-column list and therefore outside the column picker.
+ */
+const GRID_COLUMNS: EuiDataGridColumn[] = [
+  {
+    id: ATTACK_TAB_COLUMN_ID.detectedOn,
+    displayAsText: COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.detectedOn],
+    initialWidth: 200,
+    isExpandable: false,
+  },
+  {
+    id: ATTACK_TAB_COLUMN_ID.title,
+    displayAsText: COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.title],
+    initialWidth: 320,
+    isExpandable: false,
+  },
+  {
+    id: ATTACK_TAB_COLUMN_ID.alerts,
+    displayAsText: COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.alerts],
+    initialWidth: 90,
+    isExpandable: false,
+  },
+  {
+    // The only expandable column: its value is prose the cell can only show one line of.
+    id: ATTACK_TAB_COLUMN_ID.summary,
+    displayAsText: COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.summary],
+    isSortable: false,
+  },
+  {
+    id: ATTACK_TAB_COLUMN_ID.riskScore,
+    displayAsText: COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.riskScore],
+    initialWidth: 110,
+    isExpandable: false,
+  },
+  {
+    id: ATTACK_TAB_COLUMN_ID.status,
+    displayAsText: COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.status],
+    initialWidth: 130,
+    isExpandable: false,
+  },
+  {
+    id: ATTACK_TAB_COLUMN_ID.attachedBy,
+    displayAsText: COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.attachedBy],
+    initialWidth: 160,
+    isExpandable: false,
+  },
+  {
+    id: ATTACK_TAB_COLUMN_ID.attachedAt,
+    displayAsText: COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.attachedAt],
+    initialWidth: 200,
+    isExpandable: false,
+  },
+];
+
+const DEFAULT_SORTING: EuiDataGridColumnSortingConfig[] = [
+  { id: ATTACK_TAB_COLUMN_ID.detectedOn, direction: 'desc' },
+];
+
+/** Clips the summary to the single line the row is tall, matching the alerts grid's rule cell. */
+const truncateCss = css`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 const getAttachedBy = (createdBy: AttackCaseAttachmentRow['createdBy']): string =>
   createdBy?.fullName || createdBy?.username || createdBy?.email || UNKNOWN_USER;
 
@@ -97,6 +257,120 @@ const getTitle = (
     messageContent: attack.title,
     replacements: attack.replacements,
   });
+};
+
+/**
+ * The time the attack itself was detected, which is not the time it was attached to the case.
+ * `undefined` for an attachment written before the snapshot carried a timestamp.
+ */
+const getDetectedOn = (
+  attack: AttackDiscoveryAlert | undefined,
+  metadata: AttackAttachmentMetadata
+): string | undefined => {
+  const timestamp = attack?.timestamp ?? metadata.timestamp;
+  return timestamp != null && timestamp.length > 0 ? timestamp : undefined;
+};
+
+/**
+ * The attack summary as plain text. The live summary is de-anonymised here; the snapshot was
+ * already de-anonymised at attach time, so de-anonymising it again would corrupt it.
+ */
+const getSummary = (
+  attack: AttackDiscoveryAlert | undefined,
+  metadata: AttackAttachmentMetadata
+): string | undefined => {
+  const markdown =
+    attack != null
+      ? replaceAnonymizedValuesWithOriginalValues({
+          messageContent: attack.summaryMarkdown,
+          replacements: attack.replacements,
+        })
+      : metadata.summaryMarkdown;
+
+  return markdown != null && markdown.length > 0 ? getSummaryPlainText(markdown) : undefined;
+};
+
+const getAlertCount = (
+  attack: AttackDiscoveryAlert | undefined,
+  metadata: AttackAttachmentMetadata
+): number | undefined => attack?.alertIds?.length ?? metadata.alertCount;
+
+const getRiskScore = (
+  attack: AttackDiscoveryAlert | undefined,
+  metadata: AttackAttachmentMetadata
+): number | undefined => attack?.riskScore ?? metadata.riskScore;
+
+/** The value a column sorts on, or `undefined` when the row has nothing to sort by. */
+const getSortValue = (
+  { attack, metadata, attachedBy, createdAt }: AttackRow,
+  columnId: string
+): string | number | undefined => {
+  switch (columnId) {
+    case ATTACK_TAB_COLUMN_ID.detectedOn:
+      return getDetectedOn(attack, metadata);
+    case ATTACK_TAB_COLUMN_ID.title:
+      return getTitle(attack, metadata);
+    case ATTACK_TAB_COLUMN_ID.alerts:
+      return getAlertCount(attack, metadata);
+    case ATTACK_TAB_COLUMN_ID.riskScore:
+      return getRiskScore(attack, metadata);
+    case ATTACK_TAB_COLUMN_ID.status:
+      return attack?.alertWorkflowStatus;
+    case ATTACK_TAB_COLUMN_ID.attachedBy:
+      return attachedBy;
+    case ATTACK_TAB_COLUMN_ID.attachedAt:
+      return createdAt;
+    default:
+      return undefined;
+  }
+};
+
+const compareBySortColumn = (
+  a: AttackRow,
+  b: AttackRow,
+  { id, direction }: EuiDataGridColumnSortingConfig
+): number => {
+  const left = getSortValue(a, id);
+  const right = getSortValue(b, id);
+
+  if (left == null && right == null) {
+    return 0;
+  }
+  // A row with nothing to sort by is ordered last whichever way the column is sorted — hence
+  // ahead of the direction flip — so an attachment written before the metadata carried the
+  // field never displaces one that has it.
+  if (left == null) {
+    return 1;
+  }
+  if (right == null) {
+    return -1;
+  }
+
+  const order =
+    typeof left === 'number' && typeof right === 'number'
+      ? left - right
+      : String(left).localeCompare(String(right));
+
+  return direction === 'asc' ? order : -order;
+};
+
+/**
+ * Sorts client-side over the merged rows, because half of what a row is made of — the
+ * attachment provenance, and the snapshot an unresolved row falls back to — exists only here.
+ */
+const compareRows = (
+  a: AttackRow,
+  b: AttackRow,
+  sortingColumns: EuiDataGridColumnSortingConfig[]
+): number => {
+  for (const sortingColumn of sortingColumns) {
+    const order = compareBySortColumn(a, b, sortingColumn);
+    if (order !== 0) {
+      return order;
+    }
+  }
+
+  return 0;
 };
 
 /**
@@ -223,60 +497,217 @@ const AttackTabTable = ({
     [attachments, attacksById, hasSettled]
   );
 
-  const columns = useMemo<Array<EuiBasicTableColumn<AttackRow>>>(
+  const [sortingColumns, setSortingColumns] =
+    useState<EuiDataGridColumnSortingConfig[]>(DEFAULT_SORTING);
+
+  const sorting = useMemo<EuiDataGridSorting>(
+    () => ({ columns: sortingColumns, onSort: setSortingColumns }),
+    [sortingColumns]
+  );
+
+  const rows = useMemo(
+    () => [...items].sort((a, b) => compareRows(a, b, sortingColumns)),
+    [items, sortingColumns]
+  );
+
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([
+    ...DEFAULT_ATTACK_TAB_COLUMN_IDS,
+  ]);
+
+  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
+  const onChangeItemsPerPage = useCallback((nextPageSize: number) => {
+    setPageSize(nextPageSize);
+    setPageIndex(0);
+  }, []);
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
+      onChangeItemsPerPage,
+      onChangePage: setPageIndex,
+    }),
+    [onChangeItemsPerPage, pageIndex, pageSize]
+  );
+
+  const renderCellValue = useCallback(
+    ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
+      const row = rows[rowIndex];
+      if (row == null) {
+        return null;
+      }
+      return <AttackCell row={row} columnId={columnId} isDetails={isDetails} />;
+    },
+    [rows]
+  );
+
+  const leadingControlColumns = useMemo<EuiDataGridControlColumn[]>(
     () => [
       {
-        name: i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.titleColumn', {
-          defaultMessage: 'Title',
-        }),
-        field: 'metadata.title',
-        sortable: (row: AttackRow) => getTitle(row.attack, row.metadata),
-        render: (_title: string, row: AttackRow) => {
-          const title = (
-            <EuiText size="s" color={row.isUnresolved ? 'subdued' : 'default'}>
-              <span data-test-subj={ATTACK_TAB_ROW_TITLE_TEST_ID}>
-                {getTitle(row.attack, row.metadata)}
-              </span>
-            </EuiText>
-          );
+        id: ATTACK_TAB_COLUMN_ID.actions,
+        width: ACTIONS_COLUMN_WIDTH,
+        headerCellRender: () => <>{COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.actions]}</>,
+        rowCellRender: ({ rowIndex }) => {
+          const row = rows[rowIndex];
+          if (row == null) {
+            return null;
+          }
 
-          return row.isUnresolved ? (
-            <EuiToolTip content={UNRESOLVED_TOOLTIP}>
-              {/* Focusable so the explanation is reachable by keyboard: the title is not interactive. */}
-              <span data-test-subj={ATTACK_TAB_ROW_UNRESOLVED_TEST_ID} tabIndex={0}>
-                {title}
-              </span>
-            </EuiToolTip>
-          ) : (
-            title
+          return (
+            <EuiFlexGroup
+              alignItems="center"
+              data-test-subj={ATTACK_TAB_COLUMN_ACTIONS_TEST_ID}
+              gutterSize="xs"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <ShowAttackButton
+                  id={row.savedObjectId}
+                  attackId={row.attachmentId}
+                  indexName={row.attack?.index ?? row.metadata.index}
+                  attackTitle={getTitle(row.attack, row.metadata)}
+                  isDisabled={row.isUnresolved}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {/* Removal stays available for an unresolved attack — the attachment can always be
+                    taken off the case; only the "also remove its alerts" offer needs the document. */}
+                <RemoveAttackButton
+                  id={row.savedObjectId}
+                  attackId={row.attachmentId}
+                  attackTitle={getTitle(row.attack, row.metadata)}
+                  comments={comments}
+                  isDisabled={isRemoving}
+                  onConfirm={(confirmation) => onRemoveConfirmed(row.savedObjectId, confirmation)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },
-      {
-        name: i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.riskScoreColumn', {
-          defaultMessage: 'Risk score',
-        }),
-        field: 'metadata.riskScore',
-        sortable: (row: AttackRow) => row.attack?.riskScore ?? row.metadata.riskScore ?? -1,
-        render: (_riskScore: number | undefined, { attack, metadata }: AttackRow) =>
-          attack?.riskScore ?? metadata.riskScore ?? getEmptyValue(),
-      },
-      {
-        name: i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.alertsColumn', {
-          defaultMessage: 'Alerts',
-        }),
-        field: 'metadata.alertCount',
-        sortable: (row: AttackRow) => row.attack?.alertIds?.length ?? row.metadata.alertCount ?? -1,
-        render: (_alertCount: number | undefined, { attack, metadata }: AttackRow) =>
-          attack?.alertIds?.length ?? metadata.alertCount ?? getEmptyValue(),
-      },
-      {
-        name: i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.statusColumn', {
-          defaultMessage: 'Status',
-        }),
-        field: 'attack.alertWorkflowStatus',
-        sortable: (row: AttackRow) => row.attack?.alertWorkflowStatus ?? '',
-        render: (_status: string | undefined, { attack }: AttackRow) => (
+    ],
+    [comments, isRemoving, onRemoveConfirmed, rows]
+  );
+
+  return (
+    <EuiFlexItem
+      data-test-subj={ATTACK_TAB_TABLE_TEST_ID}
+      css={css`
+        position: relative;
+      `}
+    >
+      {isLoading ? <EuiProgress color="accent" position="absolute" size="xs" /> : null}
+      <EuiDataGrid
+        aria-label={TABLE_CAPTION}
+        columns={GRID_COLUMNS}
+        columnVisibility={columnVisibility}
+        data-test-subj={ATTACK_TAB_GRID_TEST_ID}
+        gridStyle={GRID_STYLE}
+        leadingControlColumns={leadingControlColumns}
+        pagination={pagination}
+        renderCellValue={renderCellValue}
+        rowCount={rows.length}
+        sorting={sorting}
+        toolbarVisibility={TOOLBAR_VISIBILITY}
+      />
+    </EuiFlexItem>
+  );
+};
+
+AttackTabTable.displayName = 'AttackTabTable';
+
+/**
+ * Renders one grid cell. Every value prefers the live attack document and falls back to the
+ * snapshot persisted on the attachment, so a row is never blank because a field arrived in a
+ * later release.
+ */
+const AttackCell = ({
+  row,
+  columnId,
+  isDetails,
+}: {
+  row: AttackRow;
+  columnId: string;
+  isDetails: boolean;
+}) => {
+  const { attack, metadata, isUnresolved } = row;
+
+  const testSubj = CELL_TEST_IDS[columnId as AttackTabColumnId];
+  const color = isUnresolved ? 'subdued' : 'default';
+
+  switch (columnId) {
+    case ATTACK_TAB_COLUMN_ID.detectedOn: {
+      const detectedOn = getDetectedOn(attack, metadata);
+      return (
+        <EuiText color={color} data-test-subj={testSubj} size="s">
+          {detectedOn != null ? (
+            <FormattedRelativePreferenceDate value={detectedOn} />
+          ) : (
+            getEmptyValue()
+          )}
+        </EuiText>
+      );
+    }
+
+    case ATTACK_TAB_COLUMN_ID.title: {
+      const title = (
+        <EuiText color={color} data-test-subj={testSubj} size="s">
+          <span data-test-subj={ATTACK_TAB_ROW_TITLE_TEST_ID}>{getTitle(attack, metadata)}</span>
+        </EuiText>
+      );
+
+      return isUnresolved ? (
+        <EuiToolTip content={UNRESOLVED_TOOLTIP}>
+          {/* Focusable so the explanation is reachable by keyboard: the title is not interactive. */}
+          <span data-test-subj={ATTACK_TAB_ROW_UNRESOLVED_TEST_ID} tabIndex={0}>
+            {title}
+          </span>
+        </EuiToolTip>
+      ) : (
+        title
+      );
+    }
+
+    case ATTACK_TAB_COLUMN_ID.alerts: {
+      const alertCount = getAlertCount(attack, metadata);
+      return (
+        <EuiText color={color} data-test-subj={testSubj} size="s">
+          {alertCount ?? getEmptyValue()}
+        </EuiText>
+      );
+    }
+
+    case ATTACK_TAB_COLUMN_ID.summary: {
+      const summary = getSummary(attack, metadata);
+      return (
+        <EuiText
+          color={color}
+          css={isDetails ? undefined : truncateCss}
+          data-test-subj={testSubj}
+          size="s"
+        >
+          {summary ?? getEmptyValue()}
+        </EuiText>
+      );
+    }
+
+    case ATTACK_TAB_COLUMN_ID.riskScore: {
+      const riskScore = getRiskScore(attack, metadata);
+      return (
+        <EuiText color={color} data-test-subj={testSubj} size="s">
+          {riskScore ?? getEmptyValue()}
+        </EuiText>
+      );
+    }
+
+    case ATTACK_TAB_COLUMN_ID.status:
+      return (
+        <EuiText color={color} data-test-subj={testSubj} size="s">
           <span data-test-subj={ATTACK_TAB_ROW_STATUS_TEST_ID}>
             {attack?.alertWorkflowStatus != null ? (
               <RuleStatus value={attack.alertWorkflowStatus} />
@@ -284,75 +715,29 @@ const AttackTabTable = ({
               getEmptyValue()
             )}
           </span>
-        ),
-      },
-      {
-        name: i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.attachedByColumn', {
-          defaultMessage: 'Attached by',
-        }),
-        field: 'attachedBy',
-        sortable: true,
-      },
-      {
-        name: i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.attachedAtColumn', {
-          defaultMessage: 'Attached at',
-        }),
-        field: 'createdAt',
-        sortable: true,
-        render: (createdAt: string) => <FormattedRelativePreferenceDate value={createdAt} />,
-      },
-      {
-        name: i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.actionsColumn', {
-          defaultMessage: 'Actions',
-        }),
-        width: '112px',
-        align: 'right',
-        render: (row: AttackRow) => (
-          <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <ShowAttackButton
-                id={row.savedObjectId}
-                attackId={row.attachmentId}
-                indexName={row.attack?.index ?? row.metadata.index}
-                attackTitle={getTitle(row.attack, row.metadata)}
-                isDisabled={row.isUnresolved}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {/* Removal stays available for an unresolved attack — the attachment can always be
-                  taken off the case; only the "also remove its alerts" offer needs the document. */}
-              <RemoveAttackButton
-                id={row.savedObjectId}
-                attackId={row.attachmentId}
-                attackTitle={getTitle(row.attack, row.metadata)}
-                comments={comments}
-                isDisabled={isRemoving}
-                onConfirm={(confirmation) => onRemoveConfirmed(row.savedObjectId, confirmation)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      },
-    ],
-    [comments, isRemoving, onRemoveConfirmed]
-  );
+        </EuiText>
+      );
 
-  return (
-    <EuiFlexItem data-test-subj={ATTACK_TAB_TABLE_TEST_ID}>
-      <EuiInMemoryTable
-        tableCaption={TABLE_CAPTION}
-        columns={columns}
-        items={items}
-        itemId="savedObjectId"
-        loading={isLoading}
-        pagination={PAGINATION}
-        sorting={SORTING}
-      />
-    </EuiFlexItem>
-  );
+    case ATTACK_TAB_COLUMN_ID.attachedBy:
+      return (
+        <EuiText color={color} data-test-subj={testSubj} size="s">
+          {row.attachedBy}
+        </EuiText>
+      );
+
+    case ATTACK_TAB_COLUMN_ID.attachedAt:
+      return (
+        <EuiText color={color} data-test-subj={testSubj} size="s">
+          <FormattedRelativePreferenceDate value={row.createdAt} />
+        </EuiText>
+      );
+
+    default:
+      return null;
+  }
 };
 
-AttackTabTable.displayName = 'AttackTabTable';
+AttackCell.displayName = 'AttackCell';
 
 // eslint-disable-next-line import/no-default-export
 export default AttackTabContent;
