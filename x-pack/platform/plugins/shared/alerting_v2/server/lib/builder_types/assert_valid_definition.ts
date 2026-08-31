@@ -7,6 +7,10 @@
 
 import type { RegisteredBuilderType } from './types';
 
+/**
+ * Structural sanity checks for a builder type definition. Throws so a
+ * misconfigured plugin fails at setup rather than at request time.
+ */
 export function assertValidDefinition(definition: RegisteredBuilderType): void {
   if (typeof definition.type !== 'string' || definition.type.trim().length === 0) {
     throw new Error('Builder type definition requires a non-empty type');

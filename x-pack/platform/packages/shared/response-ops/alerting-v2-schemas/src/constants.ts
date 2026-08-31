@@ -85,7 +85,15 @@ export const MAX_ALERT_EVENT_DATA_KEYS = 100;
  */
 export const MAX_ARTIFACT_DATA_FIELDS = 32;
 
+/** Maximum length of `metadata.builder_type`. */
 export const MAX_BUILDER_TYPE_LENGTH = 64;
+
+/**
+ * Maximum number of top-level keys in `metadata.builder_fields`. Only an
+ * envelope bound: the real shape is enforced by the schema the builder type
+ * registered, and a rule naming an unregistered `builder_type` is rejected
+ * outright, so no builder fields ever reach storage unvalidated.
+ */
 export const MAX_BUILDER_FIELDS_KEYS = 64;
 
 /** Maximum number of destinations per action policy. */

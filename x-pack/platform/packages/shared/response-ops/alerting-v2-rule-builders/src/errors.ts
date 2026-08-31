@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+/**
+ * Thrown when validated `builder_fields` still cannot produce a query — in
+ * practice an ES|QL fragment (a filter or an evaluation expression) that a
+ * bounded schema accepts as a string but the parser rejects.
+ *
+ * Generation fails loudly rather than dropping the offending clause: silently
+ * discarding a `WHERE` would widen the rule to match rows the author excluded.
+ */
 export class BuilderQueryGenerationError extends Error {
   constructor(message: string, public readonly path?: string) {
     super(message);

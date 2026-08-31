@@ -14,15 +14,26 @@ import { z } from '@kbn/zod/v4';
 
 type JsonSchemaNode = Record<string, unknown>;
 
+/** Framework ceilings a registered schema is checked against. */
 export interface BoundedSchemaLimits {
+  /** Ceiling for any single string's `maxLength`. */
   stringLength: number;
+  /** Ceiling for any array's `maxItems`. */
   arrayItems: number;
+  /** Ceiling for the worst-case serialized size the schema implies. */
   totalBytes: number;
 }
 
+/**
+ * How the checked schema is named in error messages. Defaults describe an
+ * artifact `dataSchema`, so artifact errors read exactly as before.
+ */
 export interface BoundedSchemaSubject {
+  /** Kind of registration, e.g. `Artifact type` or `Builder type`. */
   kind?: string;
+  /** Property holding the schema, e.g. `dataSchema`. */
   schemaProperty?: string;
+  /** Root path in messages, i.e. the validated field, e.g. `data`. */
   rootPath?: string;
   limits?: BoundedSchemaLimits;
 }
@@ -38,10 +49,22 @@ const ARTIFACT_SUBJECT: Required<BoundedSchemaSubject> = {
   },
 };
 
+/** Message prefix shared by every failure, e.g. `Artifact type "host" dataSchema`. */
 type Ctx = Required<BoundedSchemaSubject> & { typeName: string };
 
 const prefix = (ctx: Ctx): string => `${ctx.kind} "${ctx.typeName}" ${ctx.schemaProperty}`;
 
+/**
+ * Converts a registered Zod schema to JSON Schema and rejects unbounded /
+ * oversized constructs. Called once at registration; never at request time, so
+ * downstream validation can trust that every registered schema is bounded.
+ *
+ * Supported subset: `.strict()` objects, strings with `.max()`, arrays with
+ * `.max()`, numbers, booleans, literals and enums (`z.literal`, `z.enum`), and
+ * unions (`z.union`, `.nullable()`, emitted as anyOf/oneOf). Intersections
+ * (`allOf`), negations (`not`), recursion, and `z.any` / `z.unknown` are
+ * rejected.
+ */
 export function assertBoundedSchema(
   schema: z.ZodType,
   typeName: string,

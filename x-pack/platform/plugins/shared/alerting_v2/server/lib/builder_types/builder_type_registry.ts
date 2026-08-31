@@ -31,6 +31,11 @@ const BUILDER_FIELDS_SUBJECT = {
   },
 } as const;
 
+/**
+ * Server-side registry of rule builder type definitions. Populated during
+ * plugin setup via `registerBuilderType`; read-only afterward, when it both
+ * validates `builder_fields` and generates the queries derived from them.
+ */
 @injectable()
 export class BuilderTypeRegistry {
   private readonly types = new Map<string, RegisteredBuilderType>();
@@ -58,6 +63,17 @@ export class BuilderTypeRegistry {
     return [...this.types.values()];
   }
 
+  /**
+   * Validates `builderFields` against the schema registered for `builderType`
+   * and returns the query generated from them.
+   *
+   * Callers only invoke this when the fields are being written, so a rule whose
+   * builder plugin has since been disabled can still be edited in every other
+   * respect.
+   *
+   * @throws `Boom` 400 for an unregistered type, fields that fail the
+   * registered schema, or a builder that cannot render its fields as ES|QL.
+   */
   public generate(builderType: string, builderFields: OpaqueBuilderFields): GeneratedQuery {
     const definition = this.types.get(builderType);
     if (!definition) {
