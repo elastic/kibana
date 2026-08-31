@@ -15,6 +15,7 @@ import { FlyoutTemplate } from './flyout_template';
 import {
   type SharedStoryArgs,
   buildFlyoutProps,
+  buildTitleIconProps,
   usePaginationProps,
   unstructuredBlocks,
   headerZone,
@@ -22,9 +23,12 @@ import {
   footerZone,
   fillContent,
   bodyText,
+  HEADER_DESCRIPTION,
 } from './stories_helpers';
 
-type Args = SharedStoryArgs;
+type Args = SharedStoryArgs & {
+  headerIsCollapsed: boolean;
+};
 
 const meta: Meta<Args> = {
   title: 'Flyout Template/Template',
@@ -224,4 +228,55 @@ export const MenuBarHistory: Story = {
     footer: true,
   },
   render: WithHistoryRender,
+};
+
+/** Long enough that the body overflows at any realistic viewport height, so collapse can engage. */
+const OVERFLOWING_PARAGRAPH_COUNT = 12;
+
+const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
+  const pagination = usePaginationProps(args);
+  return (
+    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+      {/* Not `headerZone`: this story owns the `collapsed` prop and a title long enough to wrap. */}
+      <FlyoutTemplate.Header
+        title="Flyout title is quite long, so that it takes up 2 lines of text and then some"
+        {...buildTitleIconProps(args)}
+        description={args.description ? HEADER_DESCRIPTION : undefined}
+        collapsed={args.headerIsCollapsed}
+      />
+      {bodyZone(
+        <>
+          {unstructuredBlocks(args.numUnstructuredBlocks)}
+          {Array.from({ length: OVERFLOWING_PARAGRAPH_COUNT }, (_, index) => (
+            <React.Fragment key={index}>
+              {bodyText(fillContent(`Paragraph ${index + 1}.`))}
+              <EuiSpacer size="s" />
+            </React.Fragment>
+          ))}
+        </>
+      )}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+export const HeaderCollapseOnScroll: Story = {
+  argTypes: {
+    numPages: { table: { disable: true } },
+    headerIsCollapsed: {
+      name: 'Force collapsed',
+      control: { type: 'boolean' },
+      table: { category: 'Header' },
+    },
+  },
+  args: {
+    numLeadingActions: 0,
+    numTrailingActions: 0,
+    numUnstructuredBlocks: 2,
+    titleIcon: true,
+    description: true,
+    footer: true,
+    headerIsCollapsed: false,
+  },
+  render: HeaderCollapseOnScrollRender,
 };
