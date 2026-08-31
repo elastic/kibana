@@ -99,7 +99,7 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
-import { findAgentlessPolicies } from './outputs/helpers';
+import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 import {
   validateOutputSslPaths,
@@ -137,6 +137,19 @@ export function outputIdToUuid(id: string) {
 
 const isBeatsSOOutput = (attrs: OutputSOAttributes): attrs is BeatsOutputSOAttributes =>
   isBeatsOutput(attrs);
+
+/** Throws OutputInvalidError when OTLP output is not allowed; no-ops for non-OTLP types. */
+const assertOtlpOutputAllowed = async (
+  output: { type: ValueOf<OutputType> },
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+): Promise<void> => {
+  if (!isOtlpOutput(output)) return;
+  const { result, error } = await checkOtlpOutputAllowed(esClient, soClient);
+  if (!result) {
+    throw new OutputInvalidError(error!);
+  }
+};
 
 const isOtlpSOOutput = (attrs: OutputSOAttributes): attrs is OutputSoOtlpAttributes =>
   isOtlpOutput(attrs);
@@ -664,9 +677,7 @@ class OutputService {
 
     validateFleetSavedObjectId(options?.id);
 
-    if (isOtlpOutput(output) && !appContextService.getExperimentalFeatures().enableOtlpOutput) {
-      throw new OutputInvalidError('OTLP output type is not enabled');
-    }
+    await assertOtlpOutputAllowed(output, esClient, soClient);
 
     await validateOutputServerless(this, output);
     const isPreconfigured =
@@ -830,13 +841,8 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
-    // OTLP has no plaintext alternative: no OTLP-capable Fleet Server predates the 8.12.0
-    // output-secrets floor, so its credentials are always stored as references.
-    const useSecretStorage =
-      isOtlpOutput(output) || (await isOutputSecretStorageEnabled(esClient, soClient));
-
     // Store secret values if enabled; if not, store plain text values
-    if (useSecretStorage) {
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
@@ -1127,12 +1133,7 @@ class OutputService {
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
     const isTypeChanged = mergedType !== originalOutput.type;
 
-    if (
-      mergedType === outputType.Otlp &&
-      !appContextService.getExperimentalFeatures().enableOtlpOutput
-    ) {
-      throw new OutputInvalidError('OTLP output type is not enabled');
-    }
+    await assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
 
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
@@ -1478,13 +1479,8 @@ class OutputService {
     }
     await remoteSyncIntegrationsCheck(esClient, data);
 
-    // OTLP has no plaintext alternative: no OTLP-capable Fleet Server predates the 8.12.0
-    // output-secrets floor, so its credentials are always stored as references.
-    const useSecretStorage =
-      isOtlpOutput(typedFullUpdateData) || (await isOutputSecretStorageEnabled(esClient, soClient));
-
     // Store secret values if enabled; if not, store plain text values
-    if (useSecretStorage) {
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,

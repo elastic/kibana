@@ -25,9 +25,13 @@ import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
-import { findAgentlessPolicies } from './outputs/helpers';
+import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
 import { outputSavedObjectToOutput } from './output';
-import { extractAndWriteOutputSecrets, extractAndUpdateOutputSecrets } from './secrets';
+import {
+  extractAndWriteOutputSecrets,
+  extractAndUpdateOutputSecrets,
+  isOutputSecretStorageEnabled,
+} from './secrets';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
@@ -39,12 +43,18 @@ jest.mock('./outputs/helpers');
 const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
   typeof findAgentlessPolicies
 >;
+const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
+  typeof checkOtlpOutputAllowed
+>;
 
 const mockedExtractAndWriteOutputSecrets = extractAndWriteOutputSecrets as jest.MockedFunction<
   typeof extractAndWriteOutputSecrets
 >;
 const mockedExtractAndUpdateOutputSecrets = extractAndUpdateOutputSecrets as jest.MockedFunction<
   typeof extractAndUpdateOutputSecrets
+>;
+const mockedIsOutputSecretStorageEnabled = isOutputSecretStorageEnabled as jest.MockedFunction<
+  typeof isOutputSecretStorageEnabled
 >;
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
@@ -541,6 +551,8 @@ describe('Output Service', () => {
     } as any);
     mockedPackagePolicyService.fetchAllItems.mockResolvedValue((async function* () {})());
     mockedFindAgentlessPolicies.mockResolvedValue([]);
+    mockedCheckOtlpOutputAllowed.mockResolvedValue({ result: true });
+    mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -1407,6 +1419,7 @@ describe('Output Service', () => {
           enableOtlpOutput: true,
         } as any);
         mockedExtractAndWriteOutputSecrets.mockResolvedValue({ output: { type: 'otlp' } } as any);
+        mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
       });
 
       afterEach(() => {
@@ -1415,9 +1428,10 @@ describe('Output Service', () => {
 
       it('should throw if OTLP output type is not enabled', async () => {
         const soClient = getMockedSoClient();
-        mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-          enableOtlpOutput: false,
-        } as any);
+        mockedCheckOtlpOutputAllowed.mockResolvedValueOnce({
+          result: false,
+          error: 'OTLP output type is not enabled',
+        });
 
         await expect(
           outputService.create(
@@ -3340,6 +3354,7 @@ describe('Output Service', () => {
           secretsToDelete: [],
           outputUpdate: {},
         } as any);
+        mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
       });
 
       afterEach(() => {
@@ -3348,9 +3363,10 @@ describe('Output Service', () => {
 
       it('Should throw if OTLP output type is not enabled on update', async () => {
         const soClient = getMockedSoClient({});
-        mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-          enableOtlpOutput: false,
-        } as any);
+        mockedCheckOtlpOutputAllowed.mockResolvedValueOnce({
+          result: false,
+          error: 'OTLP output type is not enabled',
+        });
 
         await expect(
           outputService.update(soClient, esClientMock, 'existing-otlp-output', {
@@ -3389,7 +3405,7 @@ describe('Output Service', () => {
       it('Should clear beats fields when changing an ES output to OTLP', async () => {
         const soClient = getMockedSoClient({});
         mockedAgentPolicyService.list.mockResolvedValue({
-          items: [{}],
+          items: [{ id: 'policy-id' }],
         } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
         mockedAgentPolicyService.getByIds.mockResolvedValue([]);
         mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
@@ -3457,6 +3473,11 @@ describe('Output Service', () => {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
         });
+<<<<<<< HEAD
+=======
+
+        mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+>>>>>>> a197df3a3cc0 (Gate OTLP output usage on min fleet-server versions)
       });
 
       it('Should always extract tls key_pem as ESO secret ref on OTLP update', async () => {

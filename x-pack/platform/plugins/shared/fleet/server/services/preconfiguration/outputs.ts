@@ -44,6 +44,7 @@ import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/c
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { checkOtlpOutputAllowed } from '../outputs/helpers';
 import {
   isAgentlessEnabled,
   isManagedBulkEnabled,
@@ -197,7 +198,19 @@ export async function createOrUpdatePreconfiguredOutputs(
     { ignoreNotFound: true }
   );
 
+  // Resolve OTLP eligibility once before the pMap — the version check does a paginated
+  // package-policy list and must not run concurrently for each OTLP output.
+  // Lazy: skip the check entirely when no OTLP outputs are present.
+  const otlpCheck = outputs.some(isOtlpOutput)
+    ? await checkOtlpOutputAllowed(esClient, soClient)
+    : { result: true as const };
+
   const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
+    if (isOtlpOutput(output) && !otlpCheck.result) {
+      logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${otlpCheck.error}`);
+      return;
+    }
+
     const existingOutput = existingOutputs.find((o) => o.id === output.id);
 
     const { id, config, ...outputData } = output;

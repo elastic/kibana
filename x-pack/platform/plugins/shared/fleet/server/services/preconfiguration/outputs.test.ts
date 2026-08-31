@@ -318,28 +318,27 @@ describe('Outputs preconfiguration', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "allow_edit": Array [
-            "hosts",
-            "ca_sha256",
-            "ca_trusted_fingerprint",
-          ],
-          "ca_sha256": undefined,
-          "ca_trusted_fingerprint": undefined,
-          "hosts": Array [
-            "http://elasticsearc:9201",
-          ],
-          "id": "fleet-default-output",
-          "is_default": true,
-          "is_default_monitoring": true,
-          "is_default_otel": false,
-          "is_preconfigured": true,
-          "name": "default",
-          "type": "elasticsearch",
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "allow_edit": Array [
+              "hosts",
+              "ca_sha256",
+              "ca_trusted_fingerprint",
+            ],
+            "ca_sha256": undefined,
+            "ca_trusted_fingerprint": undefined,
+            "hosts": Array [
+              "http://elasticsearc:9201",
+            ],
+            "id": "fleet-default-output",
+            "is_default": true,
+            "is_default_monitoring": true,
+            "is_preconfigured": true,
+            "name": "default",
+            "type": "elasticsearch",
+          },
+        ]
+      `);
       expect(result[0].allow_edit).toEqual(['hosts', 'ca_sha256', 'ca_trusted_fingerprint']);
     });
 
