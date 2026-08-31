@@ -8,7 +8,8 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useFormErrorsContext } from '../form';
 
@@ -35,13 +36,11 @@ export const FormErrorsCallout: FunctionComponent = () => {
 
   return (
     <>
-      <EuiCallOut
+      <KbnDangerCallout
         data-test-subj="policyFormErrorsCallout"
-        color="danger"
         title={i18nTexts.callout.title}
-      >
-        {i18nTexts.callout.body}
-      </EuiCallOut>
+        text={i18nTexts.callout.body}
+      />
       <EuiSpacer />
     </>
   );

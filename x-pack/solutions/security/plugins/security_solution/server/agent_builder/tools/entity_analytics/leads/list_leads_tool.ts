@@ -76,7 +76,7 @@ export const listLeadsTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (!privileges.adhoc.has_read_permissions || !privileges.scheduled.has_read_permissions) {
+        if (!privileges.has_read_permissions) {
           success = false;
           errorMessage = 'You do not have permission to read leads in this space.';
           return {

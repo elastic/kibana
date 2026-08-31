@@ -13,6 +13,7 @@ import type {
   DatasourceMap,
   VisualizationMap,
 } from '@kbn/lens-common';
+import { getChartScopedFilterQuery } from '@kbn/lens-common';
 import { removePinnedFilters } from './save_modal_container';
 
 const removeNonSerializable = (obj: Parameters<JSON['stringify']>[0]) =>
@@ -39,7 +40,7 @@ export const isLensEqual = (
     return false;
   }
 
-  if (!isEqual(doc1.state.query, doc2.state.query)) {
+  if (!isEqual(normalizeChartFilter(doc1.state.query), normalizeChartFilter(doc2.state.query))) {
     return false;
   }
 
@@ -98,6 +99,16 @@ export const isLensEqual = (
 
   return true;
 };
+
+/**
+ * Canonicalizes the chart-scoped filter slot for comparison: `undefined`,
+ * the empty KQL/Lucene default (`{ query: '', ... }`) and legacy aggregate
+ * (ES|QL) copies all mean "no chart filter" and must compare equal.
+ */
+function normalizeChartFilter(query: LensDocument['state']['query']) {
+  const filter = getChartScopedFilterQuery(query);
+  return filter && filter.query !== '' ? filter : undefined;
+}
 
 function injectDocFilterReferences(
   injectFilterReferences: FilterManager['inject'],

@@ -95,7 +95,7 @@ export const ConversationSidebarView: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const validateAgentId = useValidateAgentId();
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
   const routeAccessConfig = useRouteAccessConfig();
 
   const { conversations = [] } = useConversationList({ agentId });
@@ -204,7 +204,12 @@ export const ConversationSidebarView: React.FC = () => {
     // We also check that lastAgentId itself is valid before redirecting: if local storage
     // holds a stale/invalid ID too, navigating to it would trigger this effect again and
     // cause an infinite redirect loop.
+
+    // Gate on isLastAgentIdReady so the redirect only fires with a validated lastAgentId
+    // (see useLastAgentId contract). Redirecting to the pre-ready value would send
+    // restricted users to their localStorage id and then bounce them via AgentRouteGuard.
     if (
+      isLastAgentIdReady &&
       isAgentsFetched &&
       !conversationId &&
       !validateAgentId(agentId) &&
@@ -213,6 +218,7 @@ export const ConversationSidebarView: React.FC = () => {
       navigateToAgentBuilderUrl(appPaths.agent.root({ agentId: lastAgentId }));
     }
   }, [
+    isLastAgentIdReady,
     isAgentsFetched,
     conversationId,
     agentId,

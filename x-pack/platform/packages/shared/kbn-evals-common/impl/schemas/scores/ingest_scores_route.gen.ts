@@ -61,11 +61,27 @@ export const IngestScoresRequestBody = lazySchema(() =>
           }),
           evaluator: z.object({
             name: z.string().max(256),
+            /**
+             * The evaluator version that produced the score, so a run stays reproducible after the definition moves on.
+             */
+            version: z.string().max(64).optional(),
             score: z.number().nullable().optional(),
             label: z.string().max(256).nullable().optional(),
             explanation: z.string().max(4096).nullable().optional(),
             metadata: z.object({}).catchall(z.unknown()).optional(),
             trace_id: z.string().max(256).nullable().optional(),
+            /**
+             * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
+             */
+            direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
+            /**
+             * Model this evaluator judged with. When omitted, the top-level `evaluator_model` is used unless `kind` is `code`.
+             */
+            model: Model.optional(),
+            /**
+             * Whether the evaluator invoked a model. `code` suppresses the top-level `evaluator_model` fallback so deterministic evaluators are not attributed a judge.
+             */
+            kind: z.enum(['llm', 'code']).optional(),
           }),
         })
       )

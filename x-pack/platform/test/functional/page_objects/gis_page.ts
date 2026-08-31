@@ -523,10 +523,8 @@ export class GisPageObject extends FtrService {
   async setLayerQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapLayerPanelOpenFilterEditorButton');
-    const filterEditorContainer = await this.testSubjects.find('mapFilterEditor');
-    const queryBarInFilterEditor = await this.testSubjects.findDescendant(
-      'queryInput',
-      filterEditorContainer
+    const queryBarInFilterEditor = await this.find.displayedByCssSelector(
+      '[data-test-subj="mapFilterEditor"] [data-test-subj="queryInput"]'
     );
     await queryBarInFilterEditor.click();
     const input = await this.find.activeElement();

@@ -12,7 +12,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiCallOut,
   EuiCode,
   EuiFlyoutHeader,
   EuiTitle,
@@ -22,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useAppContext } from '../../../app_context';
@@ -122,29 +122,23 @@ const callOut = (
 ) => {
   if (onlyDeprecationLogWritingEnabled) {
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount={false}
         title={i18nTexts.onlyLogWritingEnabledTitle}
-        color="warning"
-        iconType="question"
         data-test-subj="deprecationWarningCallout"
-      >
-        <p>{i18nTexts.onlyLogWritingEnabledBody}</p>
-      </EuiCallOut>
+        text={i18nTexts.onlyLogWritingEnabledBody}
+      />
     );
   }
 
   if (!hasPrivileges && isDeprecationLogIndexingEnabled) {
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount={false}
-        iconType="question"
-        color="warning"
         title={i18nTexts.deniedPrivilegeTitle}
         data-test-subj="noIndexPermissionsCallout"
-      >
-        <p>{i18nTexts.deniedPrivilegeDescription(privilegesMissing)}</p>
-      </EuiCallOut>
+        text={i18nTexts.deniedPrivilegeDescription(privilegesMissing)}
+      />
     );
   }
 

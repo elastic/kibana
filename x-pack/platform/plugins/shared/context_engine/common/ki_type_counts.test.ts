@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { groupKiTypeCountsForSummary, KI_OTHERS_TYPE } from './ki_type_counts';
+import { takeTopKiTypeCounts } from './ki_type_counts';
 
-describe('groupKiTypeCountsForSummary', () => {
-  it('returns all types when the total matches the visible sum', () => {
+describe('takeTopKiTypeCounts', () => {
+  it('returns all counts when there are five or fewer types', () => {
     expect(
-      groupKiTypeCountsForSummary(
-        [
-          { type: 'index_metadata', count: 10 },
-          { type: 'document', count: 8 },
-          { type: 'detection', count: 7 },
-        ],
-        25
-      )
+      takeTopKiTypeCounts([
+        { type: 'index_metadata', count: 10 },
+        { type: 'document', count: 8 },
+        { type: 'detection', count: 7 },
+      ])
     ).toEqual([
       { type: 'index_metadata', count: 10 },
       { type: 'document', count: 8 },
@@ -25,28 +22,26 @@ describe('groupKiTypeCountsForSummary', () => {
     ]);
   });
 
-  it('groups overflow types into others when total exceeds the visible sum', () => {
+  it('returns only the top five types by count', () => {
     expect(
-      groupKiTypeCountsForSummary(
-        [
-          { type: 'faq', count: 6 },
-          { type: 'policy', count: 5 },
-          { type: 'playbook', count: 4 },
-          { type: 'detection', count: 3 },
-          { type: 'document', count: 2 },
-        ],
-        21
-      )
+      takeTopKiTypeCounts([
+        { type: 'faq', count: 6 },
+        { type: 'policy', count: 5 },
+        { type: 'playbook', count: 4 },
+        { type: 'detection', count: 3 },
+        { type: 'document', count: 2 },
+        { type: 'index_metadata', count: 1 },
+      ])
     ).toEqual([
       { type: 'faq', count: 6 },
       { type: 'policy', count: 5 },
       { type: 'playbook', count: 4 },
       { type: 'detection', count: 3 },
-      { type: KI_OTHERS_TYPE, count: 3 },
+      { type: 'document', count: 2 },
     ]);
   });
 
   it('returns empty array when input is empty', () => {
-    expect(groupKiTypeCountsForSummary([], 0)).toEqual([]);
+    expect(takeTopKiTypeCounts([])).toEqual([]);
   });
 });

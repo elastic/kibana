@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import {
   CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
   SECURITY_SOLUTION_OWNER,
@@ -14,6 +14,7 @@ import {
 
 import { plugin } from './plugin';
 import { useKibana } from '../../../../lib/kibana';
+import { SELECT_TIMELINE_MODAL_TITLE, INSERT_TIMELINE_ATTACH_HINT } from './translations';
 
 jest.mock('../../../../lib/kibana');
 jest.mock('../../../link_to', () => ({
@@ -47,5 +48,34 @@ describe('timeline markdown plugin', () => {
       owner: SECURITY_SOLUTION_OWNER,
       plugin_type: 'timeline',
     });
+    expect(screen.getByText(SELECT_TIMELINE_MODAL_TITLE)).toBeInTheDocument();
+  });
+
+  it('does not show the attach hint when attachments are disabled', () => {
+    const Editor = plugin({ canSeeTimeline: true }).editor;
+    if (!Editor) {
+      throw new Error('Timeline markdown plugin editor is not defined');
+    }
+
+    render(<Editor node={{} as never} onSave={jest.fn()} onCancel={jest.fn()} />);
+
+    expect(screen.queryByText(INSERT_TIMELINE_ATTACH_HINT)).not.toBeInTheDocument();
+  });
+
+  it('shows the attach hint when attachments are enabled', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        analytics: { reportEvent },
+        cases: { config: { attachmentsEnabled: true } },
+      },
+    });
+    const Editor = plugin({ canSeeTimeline: true }).editor;
+    if (!Editor) {
+      throw new Error('Timeline markdown plugin editor is not defined');
+    }
+
+    render(<Editor node={{} as never} onSave={jest.fn()} onCancel={jest.fn()} />);
+
+    expect(screen.getByText(INSERT_TIMELINE_ATTACH_HINT)).toBeInTheDocument();
   });
 });

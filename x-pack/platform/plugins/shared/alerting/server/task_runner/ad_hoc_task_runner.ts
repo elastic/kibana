@@ -6,6 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -18,7 +19,12 @@ import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { AdHocRunStatus } from '../../common/constants';
 import { adHocRunStatus } from '../../common/constants';
-import type { RuleRunnerErrorStackTraceLog, RunRuleResult, TaskRunnerContext } from './types';
+import type {
+  RuleRunnerErrorStackTraceLog,
+  RuleTaskInstance,
+  RunRuleResult,
+  TaskRunnerContext,
+} from './types';
 import { getExecutorServices } from './get_executor_services';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type {
@@ -197,6 +203,15 @@ export class AdHocTaskRunner implements CancellableTask {
     // spaceId is persisted on the ad-hoc run saved object, written by validated
     // request handlers. Brand it once here at the SO load boundary.
     const spaceId = brandSpaceId(adHocRunData.spaceId);
+    // The shared alerts client / action scheduler read `params.spaceId` as a
+    // branded SpaceId, so carry the branded value on the task instance passed to
+    // them (ad-hoc params otherwise only carry an unbranded, optional spaceId).
+    // `alertId` is not on ad-hoc task params; use the rule id so the shared
+    // RuleTaskInstance shape stays consistent with scheduled rule runs.
+    const taskInstance: RuleTaskInstance = {
+      ...this.taskInstance,
+      params: { ...this.taskInstance.params, alertId: rule.id, spaceId },
+    };
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
     const ruleTypeRunnerContext = {
@@ -237,7 +252,7 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleType,
       runTimestamp: this.runDate,
       startedAt: new Date(scheduleToRun.runAt),
-      taskInstance: this.taskInstance,
+      taskInstance,
     });
 
     const executorServices = getExecutorServices({
@@ -300,10 +315,13 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleType,
       logger: this.logger,
       taskRunnerContext: this.context,
-      taskInstance: this.taskInstance,
+      taskInstance,
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
       apiKeyId,
+      // Mirror the backfill run's own credential treatment onto the connector tasks: the request
+      // is marked by getFakeKibanaRequest from the ad hoc run's snapshotted `uiamApiKeyExternal`.
+      uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
       ruleConsumer: rule.consumer,
       executionId: this.executionId,
       ruleLabel,
@@ -415,7 +433,8 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      const { rule, apiKeyToUse, uiamApiKey, schedule, start, end } = adHocRunData;
+      const { rule, apiKeyToUse, uiamApiKey, uiamApiKeyExternal, schedule, start, end } =
+        adHocRunData;
       this.adHocRunData = adHocRunData;
 
       let ruleType: UntypedNormalizedRuleType;
@@ -523,6 +542,7 @@ export class AdHocTaskRunner implements CancellableTask {
         apiKeyToUse,
         {
           uiamApiKey,
+          uiamApiKeyExternal,
           apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
           apiKeyOwner: rule.apiKeyOwner,
           ruleId: rule.id,

@@ -6,8 +6,10 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SessionViewIndex } from '../../common/types/v1';
@@ -61,10 +63,45 @@ export const getIndexPattern = (eventIndex?: string | null) => {
   return clusterStr + index;
 };
 
+/**
+ * Session View cannot yet fan a session's reads out across CPS-linked projects: the process tree
+ * reads and the alert overlay resolve against the origin project only, so a session that lives in a
+ * linked project (its `index` carries a project/CCS prefix) would render an incomplete and
+ * potentially misleading view. Until cross-project support lands, surface a clear "unsupported"
+ * message instead of a partial tree.
+ */
+const CrossProjectUnsupportedPrompt = () => (
+  <EuiEmptyPrompt
+    data-test-subj="sessionView:crossProjectUnsupported"
+    iconType="info"
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.sessionView.crossProjectUnsupportedTitle"
+          defaultMessage="Session View is not available for linked projects"
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.sessionView.crossProjectUnsupportedBody"
+          defaultMessage="This session is in a linked project. Open it from that project to view it (cross-project search isn't supported yet)."
+        />
+      </p>
+    }
+  />
+);
+
 export const getSessionViewLazy = (
   props: SessionViewDeps & { usageCollection?: UsageCollectionStart }
 ) => {
   const index = getIndexPattern(props.index);
+
+  if (isNonLocalIndexName(index)) {
+    return <CrossProjectUnsupportedPrompt />;
+  }
+
   const trackEvent = (key: SessionViewTelemetryKey) => {
     if (props.usageCollection) {
       props.usageCollection.reportUiCounter(USAGE_COLLECTION_APP_NAME, METRIC_TYPE.CLICK, key);

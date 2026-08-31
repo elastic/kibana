@@ -11,9 +11,12 @@ import {
   buildExtendedFieldsBackfill,
   buildExtendedFieldsDefaults,
   collectNormalizedRefNames,
+  diffExtendedFields,
   excludeRefFieldsToDefinitions,
+  getAuthorableFieldNameViolation,
   getFieldCamelKey,
   getFieldSnakeKey,
+  getFoldedFieldName,
   getV2FieldType,
   getYamlDefaultAsString,
   normalizeFieldDefinitionName,
@@ -59,6 +62,39 @@ describe('template field key utils', () => {
       expect(getFieldCamelKey(name, type)).toBe(
         snakeKey.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
       );
+    });
+  });
+
+  describe('getFoldedFieldName', () => {
+    it('folds hyphen, underscore, and camelCase spellings onto the same form', () => {
+      expect(getFoldedFieldName('my-field')).toBe('myField');
+      expect(getFoldedFieldName('my_field')).toBe('myField');
+      expect(getFoldedFieldName('myField')).toBe('myField');
+    });
+
+    it('names with equal folds produce equal camel read keys for the same type', () => {
+      // The load-bearing claim behind the twin check: if two names fold together, the UI
+      // reads their values through the same camel key.
+      expect(getFieldCamelKey('my-field', 'keyword')).toBe(getFieldCamelKey('my_field', 'keyword'));
+    });
+  });
+
+  describe('getAuthorableFieldNameViolation', () => {
+    it('returns null for a clean snake_case name', () => {
+      expect(getAuthorableFieldNameViolation('risk_score', 'keyword')).toBeNull();
+    });
+
+    it('returns "charset" for a name with characters outside the authoring charset', () => {
+      expect(getAuthorableFieldNameViolation('risk-score', 'keyword')).toBe('charset');
+      expect(getAuthorableFieldNameViolation('bad name', 'keyword')).toBe('charset');
+    });
+
+    it('returns "length" when the derived key exceeds the maximum', () => {
+      expect(getAuthorableFieldNameViolation('a'.repeat(300), 'keyword')).toBe('length');
+    });
+
+    it('reports charset before length when both are violated', () => {
+      expect(getAuthorableFieldNameViolation(`${'a'.repeat(300)}-x`, 'keyword')).toBe('charset');
     });
   });
 
@@ -476,6 +512,110 @@ describe('template field key utils', () => {
 
     it('drops a persisted key with no default when its value is empty', () => {
       expect(pickExtendedFieldsDifferingFromDefaults({ notes_as_keyword: '' }, {})).toEqual({});
+    });
+  });
+
+  describe('diffExtendedFields', () => {
+    it('returns empty diff when both sides are null/undefined', () => {
+      expect(diffExtendedFields(null, undefined)).toEqual({ changedFields: [] });
+    });
+
+    it('returns empty diff when both sides are empty objects', () => {
+      expect(diffExtendedFields({}, {})).toEqual({ changedFields: [] });
+    });
+
+    it('returns empty diff for identical maps', () => {
+      expect(diffExtendedFields({ a: 'x', b: 'y' }, { a: 'x', b: 'y' })).toEqual({
+        changedFields: [],
+      });
+    });
+
+    it('detects a modified key', () => {
+      const result = diffExtendedFields({ priority: 'low' }, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('detects an added key (absent → value)', () => {
+      const result = diffExtendedFields({}, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('detects a removed key (value → absent)', () => {
+      const result = diffExtendedFields({ priority: 'high' }, {});
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('treats absent → empty-string as a change', () => {
+      const result = diffExtendedFields({}, { priority: '' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('treats empty-string → absent as a change', () => {
+      const result = diffExtendedFields({ priority: '' }, {});
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('treats empty-string → non-empty as a change', () => {
+      const result = diffExtendedFields({ priority: '' }, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('treats non-empty → empty-string as a change', () => {
+      const result = diffExtendedFields({ priority: 'high' }, { priority: '' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('does not report unchanged sibling keys', () => {
+      const result = diffExtendedFields(
+        { priority: 'low', severity: 'medium' },
+        { priority: 'high', severity: 'medium' }
+      );
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('returns changedFields sorted alphabetically', () => {
+      const result = diffExtendedFields({ c: '1', a: '2', b: '3' }, { c: 'x', a: 'y', b: 'z' });
+      expect(result.changedFields).toEqual(['a', 'b', 'c']);
+    });
+
+    it('treats own key with undefined value as absent', () => {
+      const prev: Record<string, unknown> = {};
+      Object.defineProperty(prev, 'priority', { value: undefined, enumerable: true });
+      const result = diffExtendedFields(prev, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('ignores inherited properties', () => {
+      const proto = { inherited_key: 'should-be-ignored' };
+      const prev = Object.create(proto) as Record<string, unknown>;
+      prev.priority = 'low';
+      const result = diffExtendedFields(prev, { priority: 'low' });
+      expect(result.changedFields).toEqual([]);
+    });
+
+    it('coerces numeric values via String() — equal after coercion is not a change', () => {
+      const result = diffExtendedFields({ count: 5 }, { count: '5' });
+      expect(result.changedFields).toEqual([]);
+    });
+
+    it('coerces numeric values via String() — different after coercion is a change', () => {
+      const result = diffExtendedFields({ count: 5 }, { count: '6' });
+      expect(result.changedFields).toEqual(['count']);
+    });
+
+    it('coerces boolean values', () => {
+      const result = diffExtendedFields({ flag: true }, { flag: 'true' });
+      expect(result.changedFields).toEqual([]);
+    });
+
+    it('handles null previous as empty map', () => {
+      const result = diffExtendedFields(null, { priority: 'high' });
+      expect(result.changedFields).toEqual(['priority']);
+    });
+
+    it('handles undefined next as empty map', () => {
+      const result = diffExtendedFields({ priority: 'high' }, undefined);
+      expect(result.changedFields).toEqual(['priority']);
     });
   });
 });

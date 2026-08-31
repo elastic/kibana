@@ -68,34 +68,32 @@ describe('taskTypeDictionary', () => {
       const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
       const result = sanitizeTaskDefinitions(taskDefinitions);
 
-      expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_0",
+      expect(result).toEqual([
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_0',
         },
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_1",
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_1',
         },
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_2",
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_2',
         },
-      ]
-    `);
+      ]);
     });
 
     it('throws a validation exception for invalid task definition', () => {

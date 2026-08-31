@@ -17,6 +17,7 @@ import type {
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
+import { EpisodeTriage, PolicyCatalog } from '../state';
 import { getUnmatchedEpisodes } from './utils/unmatched_episodes';
 
 @injectable()
@@ -31,9 +32,15 @@ export class StoreActionsStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { suppressed = [], throttled = [], dispatch = [], dispatchable = [], policies } = state;
+    const {
+      triage = EpisodeTriage.empty(),
+      throttled = [],
+      dispatch = [],
+      policies = PolicyCatalog.empty(),
+    } = state;
+    const { suppressed } = triage;
 
-    const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
+    const unmatched = getUnmatchedEpisodes(triage.dispatchable, dispatch, throttled);
 
     if (
       suppressed.length === 0 &&
@@ -81,7 +88,7 @@ export class StoreActionsStep implements DispatcherStep {
           )
         ),
         ...dispatch.map((group) => {
-          const groupingMode = policies?.get(group.policyId)?.groupingMode ?? 'per_episode';
+          const groupingMode = policies.groupingModeOf(group.policyId);
           const firstEpisode = group.episodes[0];
           const spaceId = firstEpisode?.space_id ?? 'default';
           const action: AlertAction = {

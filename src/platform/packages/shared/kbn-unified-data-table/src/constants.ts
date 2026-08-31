@@ -63,3 +63,6 @@ export const toolbarVisibility = {
     allowReorder: true,
   },
 };
+
+// EUI does not expose react-window's outerRef, so query its wrapper directly.
+export const VIRTUALIZED_SELECTOR = '.euiDataGrid__virtualized';

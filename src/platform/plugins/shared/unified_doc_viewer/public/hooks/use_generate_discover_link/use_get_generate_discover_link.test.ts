@@ -8,7 +8,8 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { where } from '@kbn/esql-composer';
+import { Builder, esql } from '@elastic/esql';
+import { esqlEquals } from '../../utils/esql_expressions';
 import { useGetGenerateDiscoverLink } from '.';
 
 jest.mock('../../plugin', () => ({
@@ -77,29 +78,22 @@ describe('useGetGenerateDiscoverLink', () => {
     expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalled();
   });
 
-  it('generates a discover link with whereClause and params', () => {
-    const { result } = renderHook(() => useGetGenerateDiscoverLink({ indexPattern: 'traces-*' }));
-    const url = result.current.generateDiscoverLink({ 'service.name': 1 });
-    expect(url).toBe(DISCOVER_URL);
-    expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalled();
-  });
-
-  it('filters out undefined values from whereClause to avoid invalid ESQL parameters', () => {
+  it('generates a discover link with a whereClause', () => {
     const { result } = renderHook(() => useGetGenerateDiscoverLink({ indexPattern: 'traces-*' }));
     const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
 
-    result.current.generateDiscoverLink({
-      'trace.id': 'abc123',
-      'span.id': undefined,
-      'event.name': undefined,
-      'exception.message': 'Test error',
-    });
+    const url = result.current.generateDiscoverLink(
+      Builder.expression.func.binary('and', [
+        esql.exp`${esql.col(['trace', 'id'])} == ${esql.str('abc123')}`,
+        esql.exp`${esql.col(['exception', 'message'])} == ${esql.str('Test error')}`,
+      ])
+    );
 
-    expect(mockGetRedirectUrl).toHaveBeenCalled();
-    const esql = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
+    expect(url).toBe(DISCOVER_URL);
+    const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
-    expect(esql).toBe(`FROM traces-*
+    expect(esqlQuery).toBe(`FROM traces-*
   | WHERE trace.id == "abc123" AND exception.message == "Test error"`);
   });
 
@@ -111,14 +105,48 @@ describe('useGetGenerateDiscoverLink', () => {
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
 
     const url = result.current.generateDiscoverLink(
-      where('trace.id == ?traceId', { traceId: 'abc123' })
+      esql.exp`${esql.col(['trace', 'id'])} == ${esql.str('abc123')}`
     );
 
     expect(url).toBe(DISCOVER_URL);
-    const esql = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
+    const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
-    expect(esql).toBe(`SET unmapped_fields = "NULLIFY";
-FROM traces-*
+    expect(esqlQuery).toBe(`SET unmapped_fields = "NULLIFY"; FROM traces-*
   | WHERE trace.id == "abc123"`);
+  });
+
+  it('nullifies unmapped error.* columns in the Discover href (#281060)', () => {
+    const { result } = renderHook(() =>
+      useGetGenerateDiscoverLink({ indexPattern: 'logs-*', unmappedFieldsPolicy: 'NULLIFY' })
+    );
+    const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
+    mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
+
+    result.current.generateDiscoverLink(
+      esql.exp`${esql.col(['service', 'name'])} == ${esql.str('payment')} AND ${esql.col([
+        'error',
+        'culprit',
+      ])} == ${esql.str('charge')}`
+    );
+
+    const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
+
+    expect(esqlQuery).toBe(`SET unmapped_fields = "NULLIFY"; FROM logs-*
+  | WHERE service.name == "payment" AND error.culprit == "charge"`);
+  });
+
+  it('preserves backslashes in the Discover href query without double-escaping', () => {
+    const { result } = renderHook(() => useGetGenerateDiscoverLink({ indexPattern: 'logs-*' }));
+    const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
+    mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
+
+    result.current.generateDiscoverLink(
+      esqlEquals('error.culprit', String.raw`handlers\windows\run.cs`)
+    );
+
+    const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
+
+    expect(esqlQuery).toBe(String.raw`FROM logs-*
+  | WHERE error.culprit == "handlers\\windows\\run.cs"`);
   });
 });

@@ -60,6 +60,7 @@
     "@kbn/home-plugin",
     "@kbn/logging",
     "@kbn/shared-ux-ai-components",
-    "@kbn/deeplinks-management"
+    "@kbn/deeplinks-management",
+    "@kbn/ui-callout"
   ]
 }
