@@ -17,29 +17,27 @@ import {
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
-// Caps the sample at ~100K tokens (JSON runs ~3 chars/token) to leave headroom for output and
-// tool calls. Bounded separately from the per-document limits because the workflow persists this
-// payload across steps.
+// Caps the sample at ~100K tokens.
 export const MAX_INFERENCE_DOCUMENTS_BYTES = 288 * 1024;
 export const MAX_INFERENCE_DOCUMENT_BYTES = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxDocumentBytes;
 export const MAX_INFERENCE_DOCUMENT_FIELDS = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxFields;
 export const MAX_INFERENCE_FIELD_NAME_LENGTH = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxFieldNameLength;
 
-// Each concept in ECS and OTel form; the formatter strips `resource.attributes.` / `attributes.`
-// prefixes when matching, so `service.name` also matches `resource.attributes.service.name`.
+// The formatter strips `resource.attributes.` / `attributes.` prefixes when matching, so
+// `service.name` also covers `resource.attributes.service.name`.
 const INFERENCE_PRIORITY_FIELDS: readonly string[] = [
-  'message', // ECS
-  'body.text', // OTel
-  'error.message', // ECS
-  'exception.message', // OTel
-  'error.stack_trace', // ECS
-  'exception.stacktrace', // OTel
-  'error.type', // ECS
-  'exception.type', // OTel
-  'log.level', // ECS
-  'severity_text', // OTel
-  'severity_number', // OTel
-  'service.name', // ECS + OTel (resource.attributes.service.name)
+  'message',
+  'body.text',
+  'error.message',
+  'exception.message',
+  'error.stack_trace',
+  'exception.stacktrace',
+  'error.type',
+  'exception.type',
+  'log.level',
+  'severity_text',
+  'severity_number',
+  'service.name',
   '@timestamp',
 ];
 
