@@ -370,6 +370,7 @@ export class WorkflowExecutionQueryService {
       logger: this.deps.logger,
       workflowId: params.workflowId,
       stepId: params.stepId,
+      stepType: params.stepType,
       additionalQuery: workflowRunFilter || undefined,
       spaceId,
       sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,

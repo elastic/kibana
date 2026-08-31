@@ -790,14 +790,10 @@ describe('NightshiftInvestigationsClient.list()', () => {
         {
           workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
           stepId: 'investigate',
+          stepType: 'ai.agent',
           workflowExecutionIds: ['exec-1', 'exec-2'],
-          sourceIncludes: [
-            'workflowRunId',
-            'startedAt',
-            'stepType',
-            'output.structured_output.severity',
-          ],
-          size: 8,
+          sourceIncludes: ['workflowRunId', 'startedAt', 'output.structured_output.severity'],
+          size: 4,
         },
         SPACE_ID
       );
@@ -823,7 +819,9 @@ describe('NightshiftInvestigationsClient.list()', () => {
       expect(result.results[0].severity).toBe('40-medium');
     });
 
-    it('ignores the step-level timeout wrapper sharing the investigate step id', async () => {
+    // The search filters on stepType, so a wrapper never reaches this code in practice. Asserted
+    // anyway so the resolver stays correct on its own if that filter is ever relaxed.
+    it('ignores a step-level timeout wrapper if one reaches the resolver', async () => {
       mockManagement.getWorkflowExecutions.mockResolvedValue(
         makeListResult({
           results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],

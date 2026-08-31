@@ -54,23 +54,23 @@ const SORT_FIELD_MAP: Record<
 };
 
 /**
- * Step-execution documents fetched per listed investigation. One run always writes two under the
- * `investigate` step id — the engine's step-level timeout wrapper shares it with the `ai.agent`
- * attempt — and each retry adds another, so this is that baseline of 2 plus headroom for two
- * retries. Runs past the budget lose their severity in the list, which {@link getSeverities} logs.
+ * Step-execution documents fetched per listed investigation. The search filters on the `ai.agent`
+ * step type, so the engine's step-level timeout wrapper — which shares the `investigate` step id —
+ * is excluded server-side and only the agent's own attempts count against this. One attempt is the
+ * norm, so this leaves headroom for a retry. Runs past the budget lose their severity in the list,
+ * which {@link getSeverities} logs.
  */
-const STEP_EXECUTIONS_PER_INVESTIGATION = 4;
+const STEP_EXECUTIONS_PER_INVESTIGATION = 2;
 
 /**
  * `_source` paths the severity lookup reads. Deliberately narrow: an `investigate` step's full
  * output holds the summary, every hypothesis with its evidence, and the recommendations, which
- * runs to megabytes per document and is not worth transferring to read one enum. `stepType` picks
- * the agent attempt out of the timeout wrapper, `startedAt` orders retries.
+ * runs to megabytes per document and is not worth transferring to read one enum. `startedAt`
+ * orders retries.
  */
 const SEVERITY_SOURCE_INCLUDES = [
   'workflowRunId',
   'startedAt',
-  'stepType',
   'output.structured_output.severity',
 ];
 
@@ -109,7 +109,10 @@ function asSeverity(v: unknown, logger: Logger): Severity | undefined {
   if (v === undefined) return undefined;
   const parsed = severitySchema.safeParse(v);
   if (parsed.success) return parsed.data;
-  logger.warn(`Investigation reported an unrecognized severity ${JSON.stringify(v)}, dropping it`);
+  logger.warn(
+    `Investigation reported an unrecognized severity ${JSON.stringify(v)}, dropping it: ` +
+      z.prettifyError(parsed.error)
+  );
   return undefined;
 }
 
@@ -533,6 +536,7 @@ export class NightshiftInvestigationsClient {
         {
           workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
           stepId: INVESTIGATE_STEP_ID,
+          stepType: AI_AGENT_STEP_TYPE,
           workflowExecutionIds: investigationIds,
           sourceIncludes: SEVERITY_SOURCE_INCLUDES,
           size,

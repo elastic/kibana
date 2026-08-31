@@ -464,6 +464,18 @@ describe('WorkflowExecutionQueryService', () => {
       expect(call.query.bool.must).toContainEqual({ terms: { workflowRunId: [] } });
     });
 
+    it('restricts the search to a single step type', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', stepId: 'investigate', stepType: 'ai.agent' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must).toContainEqual({ term: { stepType: 'ai.agent' } });
+    });
+
     it('returns only the requested source paths when sourceIncludes is set', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
 

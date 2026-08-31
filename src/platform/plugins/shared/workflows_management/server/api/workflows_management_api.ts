@@ -163,6 +163,12 @@ export interface SearchStepExecutionsParams {
   workflowId: string;
   stepId?: string;
   /**
+   * When set, only step executions of this type, e.g. `ai.agent`. A step id can be shared by more
+   * than one document — the engine's step-level timeout wrapper reuses it — so this narrows a
+   * search to the one that carries the step's own result.
+   */
+  stepType?: string;
+  /**
    * When set, restricts the search to step executions belonging to these workflow runs. An empty
    * array matches nothing. Keep it to a page of ids — it becomes a single ES `terms` clause.
    */
