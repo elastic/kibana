@@ -58,6 +58,16 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
           ],
         },
         {
+          title: i18n.translate('xpack.observability.nav.ruleManagement', {
+            defaultMessage: 'Rule Management',
+          }),
+          breadcrumbStatus: 'hidden' as const,
+          children: [
+            { link: 'management:rules' as const },
+            { link: 'management:rule_library' as const },
+          ],
+        },
+        {
           title: i18n.translate('xpack.observability.nav.notificationsAndSuppressions', {
             defaultMessage: 'Notifications and Suppressions',
           }),

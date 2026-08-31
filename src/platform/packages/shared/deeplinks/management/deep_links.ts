@@ -79,6 +79,7 @@ export type ManagementId =
   | 'action_policies'
   | 'execution_history'
   | 'rules'
+  | 'rule_library'
   | 'triggersActions'
   | 'triggersActionsAlerts'
   | 'triggersActionsConnectors'
