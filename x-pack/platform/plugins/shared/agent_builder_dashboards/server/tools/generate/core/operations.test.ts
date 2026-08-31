@@ -2349,6 +2349,77 @@ describe('add_controls / remove_controls operations', () => {
     expect(after2.pinned_panels).toHaveLength(2);
   });
 
+  it('add_controls skips a field that is not aggregatable and records a failure', async () => {
+    const resolveControlField = jest.fn(async ({ fieldName }: { fieldName: string }) =>
+      fieldName === 'method'
+        ? { error: 'Field "method" is not an aggregatable field on this index.' }
+        : { fieldName }
+    );
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
+            {
+              type: 'options_list_control',
+              field_name: 'method',
+              index: 'kibana_sample_data_logs',
+            },
+          ],
+        },
+      ],
+      logger,
+      resolveControlField,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const kept = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect((kept.config as Record<string, unknown>).esql_query).toBe(
+      'FROM kibana_sample_data_logs | STATS BY host'
+    );
+    expect(failures).toEqual([
+      {
+        type: 'add_controls',
+        identifier: 'controls[1]',
+        error: 'Field "method" is not an aggregatable field on this index.',
+      },
+    ]);
+  });
+
+  it('add_controls rewrites a text field to the aggregatable keyword sibling', async () => {
+    const resolveControlField = jest.fn(async ({ fieldName }: { fieldName: string }) =>
+      fieldName === 'host' ? { fieldName: 'host.keyword' } : { fieldName }
+    );
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'host',
+              index: 'kibana_sample_data_logs',
+              title: 'Host',
+            },
+          ],
+        },
+      ],
+      logger,
+      resolveControlField,
+    });
+
+    expect(failures).toEqual([]);
+    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect((control.config as Record<string, unknown>).esql_query).toBe(
+      'FROM kibana_sample_data_logs | STATS BY `host.keyword`'
+    );
+  });
+
   it('remove_controls removes by id and leaves others intact', async () => {
     const { dashboardData: withControls } = await executeDashboardOperations({
       dashboardData: emptyDashboard,

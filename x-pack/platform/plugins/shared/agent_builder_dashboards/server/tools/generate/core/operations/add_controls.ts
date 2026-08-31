@@ -20,7 +20,7 @@ import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import type { PanelFailure } from '../utils';
-import { defineOperation } from './types';
+import { defineOperation, type ResolveControlField } from './types';
 
 const controlWidthSchema = z
   .enum(['small', 'medium', 'large'])
@@ -107,6 +107,46 @@ const filterDuplicateTimeSliders = ({
   });
 };
 
+const resolveControlFields = async ({
+  controls,
+  resolveControlField,
+  failures,
+}: {
+  controls: ControlInput[];
+  resolveControlField?: ResolveControlField;
+  failures: PanelFailure[];
+}): Promise<ControlInput[]> => {
+  if (!resolveControlField) {
+    return controls;
+  }
+
+  const resolved: ControlInput[] = [];
+  for (const [controlInputIndex, control] of controls.entries()) {
+    if (!('field_name' in control)) {
+      resolved.push(control);
+      continue;
+    }
+
+    const result = await resolveControlField({
+      fieldName: control.field_name,
+      index: control.index,
+    });
+
+    if (result.error !== undefined) {
+      failures.push({
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+        identifier: `controls[${controlInputIndex}]`,
+        error: result.error,
+      });
+      continue;
+    }
+
+    resolved.push({ ...control, field_name: result.fieldName });
+  }
+
+  return resolved;
+};
+
 const buildStoredControl = (control: ControlInput): DashboardPinnedPanel => {
   const { type, width = 'medium', grow = true } = control;
   const id = uuidv4();
@@ -170,11 +210,16 @@ export const addControlsOperation = defineOperation({
         'Controls to append. Use options_list_control for categorical/keyword fields, range_slider_control for numeric fields, time_slider_control for time sub-range filtering (at most one per dashboard).'
       ),
   }),
-  handler: ({ dashboardData, operation, context }) => {
+  handler: async ({ dashboardData, operation, context }) => {
     const existingControls = dashboardData.pinned_panels ?? [];
+    const resolvedControls = await resolveControlFields({
+      controls: operation.controls,
+      resolveControlField: context.resolveControlField,
+      failures: context.failures,
+    });
     const controlsToAdd = filterDuplicateTimeSliders({
       existingControls,
-      controlsToAdd: operation.controls,
+      controlsToAdd: resolvedControls,
       failures: context.failures,
     });
 

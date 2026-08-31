@@ -21,6 +21,7 @@ import { createCustomContentTemplateResolver } from '@kbn/custom-content-server'
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
+  createControlFieldResolver,
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
@@ -122,7 +123,7 @@ Use operations[] to:
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
-      { logger, attachments, events, esClient, modelProvider }
+      { logger, attachments, events, esClient, modelProvider, resultStore }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
@@ -149,6 +150,10 @@ Use operations[] to:
             logger,
             modelProvider,
             esClient,
+          }),
+          resolveControlField: createControlFieldResolver({
+            resultStore,
+            logger,
           }),
         });
 

@@ -12,6 +12,12 @@ import type { ResolvePanelContent } from './panels';
 import type { PanelFailure } from '../utils';
 import type { PanelAuthoringNote } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
+import type { ResolveAggregatableControlFieldResult } from './resolve_aggregatable_control_field';
+
+export type ResolveControlField = (params: {
+  fieldName: string;
+  index: string;
+}) => Promise<ResolveAggregatableControlFieldResult>;
 
 export type ResolveCustomContentTemplate = (params: {
   prompt: string;
@@ -28,6 +34,7 @@ export interface OperationExecutionContext {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
+  resolveControlField?: ResolveControlField;
 }
 
 export interface OperationHandlerParams<TOperation> {
