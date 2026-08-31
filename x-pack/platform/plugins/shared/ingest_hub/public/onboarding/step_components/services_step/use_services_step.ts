@@ -18,8 +18,13 @@ export { CATEGORY_ORDER };
 export type SignalFilter = SignalType | 'all';
 
 export function useServicesStep({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, setSelectedServiceIds, awsServiceMatrix: rawMatrix } = useOnboardingFlow();
-  const { selectedServiceIds } = servicesStep;
+  const {
+    servicesStep,
+    setSelectedServiceIds,
+    setDataFormat,
+    awsServiceMatrix: rawMatrix,
+  } = useOnboardingFlow();
+  const { selectedServiceIds, dataFormat } = servicesStep;
 
   const awsServiceMatrix = useMemo(() => rawMatrix ?? [], [rawMatrix]);
 
@@ -32,10 +37,11 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     return awsServiceMatrix.filter(
       (s) =>
         s.showInUI &&
+        (s.dataFormat ?? 'ecs') === dataFormat &&
         (signalFilter === 'all' || s.signalTypes.includes(signalFilter)) &&
         (q === '' || s.name.toLowerCase().includes(q))
     );
-  }, [awsServiceMatrix, signalFilter, searchQuery]);
+  }, [awsServiceMatrix, signalFilter, searchQuery, dataFormat]);
 
   const categories = useMemo(() => {
     const present = new Set(filteredServices.map((s) => s.category));
@@ -69,9 +75,12 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
   const signalFilteredServices = useMemo(
     () =>
       awsServiceMatrix.filter(
-        (s) => s.showInUI && (signalFilter === 'all' || s.signalTypes.includes(signalFilter))
+        (s) =>
+          s.showInUI &&
+          (s.dataFormat ?? 'ecs') === dataFormat &&
+          (signalFilter === 'all' || s.signalTypes.includes(signalFilter))
       ),
-    [awsServiceMatrix, signalFilter]
+    [awsServiceMatrix, signalFilter, dataFormat]
   );
 
   const categoryStats = useMemo(() => {
@@ -138,5 +147,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     handleSelectAllInCategory,
     handleDeselectAllInCategory,
     handleNext,
+    dataFormat,
+    setDataFormat,
   };
 }

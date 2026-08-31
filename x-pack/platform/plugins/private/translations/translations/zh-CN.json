@@ -22268,7 +22268,6 @@
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink": "了解详情",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText": "默认情况下，所有日志和指标数据存储在热层中。{learnMore}如何更改此集成的数据保留策略。",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeHelpLabel": "请为此策略选择数据流类型。此设置将更改集成的数据流的名称。{learnMore}。",
-    "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeInputLabel": "数据流类型",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel": "描述",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyIlmPolicyText": "请选择一个 ILM 策略，以应用于该命名空间的所有数据流。{learnMore}",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditDataStreamTypeHelpLabel": "此集成无法更改数据流类型。请创建新的集成策略以使用不同输入类型。",
