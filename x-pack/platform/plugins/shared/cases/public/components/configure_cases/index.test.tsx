@@ -443,6 +443,8 @@ describe('ConfigureCases', () => {
         closureType: 'close-by-user',
         customFields: [],
         templates: [],
+        observableTypes: [],
+        workflowTags: [],
         id: '',
         version: '',
       });
@@ -540,6 +542,8 @@ describe('ConfigureCases', () => {
         closureType: 'close-by-pushing',
         customFields: [],
         templates: [],
+        observableTypes: [],
+        workflowTags: [],
         id: '',
         version: '',
       });
@@ -728,6 +732,8 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[5] },
           ],
           templates: [],
+          observableTypes: [],
+          workflowTags: [],
           id: '',
           version: '',
         });
@@ -799,6 +805,8 @@ describe('ConfigureCases', () => {
               },
             },
           ],
+          observableTypes: [],
+          workflowTags: [],
           id: '',
           version: '',
         });
@@ -854,6 +862,8 @@ describe('ConfigureCases', () => {
               defaultValue: 'This is a default value',
             },
           ],
+          observableTypes: [],
+          workflowTags: [],
           templates: [
             {
               key: 'test_template_4',
@@ -957,6 +967,8 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[5] },
           ],
           templates: [],
+          observableTypes: [],
+          workflowTags: [],
           id: '',
           version: '',
         });
@@ -1019,6 +1031,8 @@ describe('ConfigureCases', () => {
             },
           ],
           templates: [],
+          observableTypes: [],
+          workflowTags: [],
           id: '',
           version: '',
         });
@@ -1146,6 +1160,8 @@ describe('ConfigureCases', () => {
               },
             },
           ],
+          observableTypes: [],
+          workflowTags: [],
           id: '',
           version: '',
         });
@@ -1194,6 +1210,8 @@ describe('ConfigureCases', () => {
             { ...templatesConfigurationMock[3] },
             { ...templatesConfigurationMock[4] },
           ],
+          observableTypes: [],
+          workflowTags: [],
           id: '',
           version: '',
         });
@@ -1260,6 +1278,8 @@ describe('ConfigureCases', () => {
             },
             { ...templatesConfigurationMock[3] },
           ],
+          observableTypes: [],
+          workflowTags: [],
           id: '',
           version: '',
         });
@@ -1383,6 +1403,7 @@ describe('ConfigureCases', () => {
           customFields: [],
           templates: [],
           observableTypes: updatedObservableTypes,
+          workflowTags: [],
           id: '',
           version: '',
         });
@@ -1421,6 +1442,7 @@ describe('ConfigureCases', () => {
           customFields: [],
           closureType: 'close-by-user',
           observableTypes: [observableTypesMock[1]],
+          workflowTags: [],
           templates: [],
           id: '',
           version: '',

@@ -23,6 +23,7 @@ jest.mock('../cases_context/use_cases_context');
 jest.mock('./use_cases_workflow_executor', () => ({
   useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
 }));
+jest.mock('../../containers/configure/use_get_case_configuration');
 
 const mockUseWorkflowsCapabilities = jest.fn();
 const mockUseWorkflowsUIEnabledSetting = jest.fn();
@@ -36,22 +37,28 @@ jest.mock('@kbn/workflows-ui', () => ({
 
 const { useCasesContext } = jest.requireMock('../cases_context/use_cases_context');
 const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
+const { useGetCaseConfiguration } = jest.requireMock(
+  '../../containers/configure/use_get_case_configuration'
+);
 
 const setupMocks = ({
   permissionsUpdate = true,
   runWorkflowsEnabled = true,
   workflowsUIEnabled = true,
   canExecuteWorkflow = true,
+  workflowTags = [] as string[],
 }: {
   permissionsUpdate?: boolean;
   runWorkflowsEnabled?: boolean;
   workflowsUIEnabled?: boolean;
   canExecuteWorkflow?: boolean;
+  workflowTags?: string[];
 } = {}) => {
   useCasesContext.mockReturnValue({ permissions: { update: permissionsUpdate } });
   useCasesConfig.mockReturnValue({ runWorkflowsEnabled });
   mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow });
   mockUseWorkflowsUIEnabledSetting.mockReturnValue(workflowsUIEnabled);
+  useGetCaseConfiguration.mockReturnValue({ data: { workflowTags } });
 };
 
 // ---- tests ----
