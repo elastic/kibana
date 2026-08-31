@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KQLSyntaxError } from '@kbn/es-query';
+import { fromKueryExpression, KQLSyntaxError } from '@kbn/es-query';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { HostsContent } from './hosts_content';
@@ -73,10 +73,16 @@ describe('HostsContent', () => {
   });
 
   it('renders an invalid KQL callout instead of the hosts content', () => {
-    const error = Object.assign(new Error('Expected a field but end of input found.'), {
-      shortMessage: 'Invalid query',
-    });
-    Object.setPrototypeOf(error, KQLSyntaxError.prototype);
+    let error: KQLSyntaxError;
+    try {
+      fromKueryExpression('host.name: (');
+      throw new Error('Expected fromKueryExpression to throw');
+    } catch (e) {
+      if (!(e instanceof KQLSyntaxError)) {
+        throw e;
+      }
+      error = e;
+    }
     mockUseUnifiedSearchContext.mockReturnValue({
       error,
     } as unknown as ReturnType<typeof useUnifiedSearchContext>);
@@ -84,6 +90,7 @@ describe('HostsContent', () => {
     renderContent();
 
     expect(screen.getByTestId('hostsViewErrorCallout')).toBeInTheDocument();
+    expect(screen.getByText('Invalid KQL expression')).toBeInTheDocument();
     expect(screen.getByTestId('hostsViewErrorDetailsButton')).toBeInTheDocument();
     expect(screen.queryByTestId('hostsKpiGrid')).not.toBeInTheDocument();
     expect(screen.queryByTestId('hostsTable')).not.toBeInTheDocument();

@@ -76,11 +76,16 @@ export class HostsPage {
     await this.tableLoaded.waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
+  /**
+   * Submits a KQL query. If the search bar already has a value (for example the
+   * host filter from `goToPage({ hostNames })`), the new query is AND-combined
+   * with the current value so that filter is preserved.
+   */
   public async submitQuery(query: string) {
     const currentQuery = await this.searchBar.inputValue();
     const combinedQuery = currentQuery ? `(${currentQuery}) and (${query})` : query;
     await this.searchBar.clear();
-    await this.searchBar.pressSequentially(combinedQuery);
+    await this.searchBar.fill(combinedQuery);
     await this.querySubmitButton.click();
     await Promise.race([
       this.tableLoaded.waitFor({ timeout: EXTENDED_TIMEOUT }),
