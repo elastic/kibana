@@ -8,12 +8,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../common/ui/fixtures';
+import { spaceTest, testData } from '../../../common/ui/fixtures';
 
 const DASHBOARD_SAVED_SEARCH_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 const SAVED_SEARCH_NAME = 'Rendering Test: saved search';
-const DEFAULT_DATA_VIEW = 'logstash-*';
 const DEFAULT_TIME_RANGE = {
   from: '2015-09-22T00:00:00.000Z',
   to: '2015-09-23T00:00:00.000Z',
@@ -25,7 +24,7 @@ spaceTest.describe(
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(DEFAULT_DATA_VIEW);
+      await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
     });
 
