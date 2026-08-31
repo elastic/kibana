@@ -29,7 +29,7 @@ import type {
   AttachmentRequestV2,
   AttachmentsFindResponseV2,
 } from '../../../common/types/api';
-import { AttachmentPatchRequestRt, AttachmentRequestRt } from '../../../common/types/api';
+import { AttachmentPatchRequestRtV2, AttachmentRequestRtV2 } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import type {
   AttachmentAttributesV2,
@@ -104,6 +104,10 @@ export function getAttachmentTypeTransformers(
  * Converts an already-validated v1 (or unified) attachment payload to unified.
  * Checks v1 alert id/index pairing here so callers can convert before the
  * client without dropping that 400.
+ *
+ * TODO(https://github.com/elastic/security-team/issues/16996 Phase 3): legacy
+ * `actions` still folds forward to `security.endpoint` here unconditionally;
+ * Phase 3 rejects it at validation instead.
  */
 export const toUnifiedAttachmentPayload = (
   attachment: AttachmentRequestV2
@@ -140,6 +144,30 @@ export const toUnifiedAttachmentPayload = (
   return transformer.toUnifiedPayload(attachment);
 };
 
+/**
+ * Inverse of {@link toUnifiedAttachmentPayload}: projects an already-unified
+ * (or already-legacy) attachment request back to its legacy v1 shape. Used to
+ * keep the persisted `payload.comment` on a `CommentUserAction` — the audit
+ * trail record, which predates the unified framework and is exercised by the
+ * saved-objects import/export contract — in the legacy wire shape even though
+ * the attachment itself is now stored unified. Unified-only types (no legacy
+ * form) pass through unchanged.
+ */
+export const toLegacyAttachmentRequest = (attachment: AttachmentRequestV2): AttachmentRequestV2 => {
+  if (isUnifiedOnlyAttachment(attachment)) {
+    return attachment;
+  }
+
+  const attachmentType = getAttachmentTypeFromAttributes(attachment);
+  const transformer = getAttachmentTypeTransformers(attachmentType, attachment.owner);
+
+  if (transformer.isLegacyPayload(attachment)) {
+    return attachment;
+  }
+
+  return transformer.toLegacyPayload(attachment) as AttachmentRequestV2;
+};
+
 export const toUnifiedAttachmentPatchPayload = (
   patch: AttachmentPatchRequestV2
 ): UnifiedAttachmentPayload & { id: string; version: string } => {
@@ -151,15 +179,19 @@ export const toUnifiedAttachmentPatchPayload = (
   };
 };
 
-/** Public `/comments` POST body: decode the v1 shape, then convert to unified. */
+/**
+ * Public `/comments` POST body: decode the v1-or-unified shape, then convert
+ * to unified. Must decode against the v2 union — a v1-only codec 400s on any
+ * unified body (e.g. `osquery`, `entity`, `file`) that a caller sends today.
+ */
 export const toUnifiedAttachmentRequest = (body: unknown): UnifiedAttachmentPayload =>
-  toUnifiedAttachmentPayload(decodeWithExcessOrThrow(AttachmentRequestRt)(body));
+  toUnifiedAttachmentPayload(decodeWithExcessOrThrow(AttachmentRequestRtV2)(body));
 
-/** Public `/comments` PATCH body: decode the v1 shape, then convert to unified. */
+/** Public `/comments` PATCH body: decode the v1-or-unified shape, then convert to unified. */
 export const toUnifiedAttachmentPatchRequest = (
   body: unknown
 ): UnifiedAttachmentPayload & { id: string; version: string } =>
-  toUnifiedAttachmentPatchPayload(decodeWithExcessOrThrow(AttachmentPatchRequestRt)(body));
+  toUnifiedAttachmentPatchPayload(decodeWithExcessOrThrow(AttachmentPatchRequestRtV2)(body));
 
 /**
  * Rebuilds the v1 wire attributes for a hybrid attachment. Unified-only

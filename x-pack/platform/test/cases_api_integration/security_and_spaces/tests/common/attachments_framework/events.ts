@@ -275,7 +275,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('mixed legacy + unified events on the same case', () => {
-      it('reads a legacy `event` through the v2 read path (legacy type preserved in legacy mode)', async () => {
+      it('reads a legacy `event` through the v2 read path (public GET rebuilds the v1 wire shape)', async () => {
         await seedEvents(['legacy-event-1'], LEGACY_EVENTS_INDEX);
         const postedCase = await createCase(supertest, postCaseReq);
         const legacyCase = await createComment({

@@ -83,6 +83,10 @@ export const resolveCaseRoute = createCasesRoute({
         includeComments: request.query.includeComments,
       });
 
+      // `access: 'internal'` — its consumers want unified comments (`useGetCase`
+      // renders them; the workflow `caseIdSelection` handler ignores comments),
+      // so this is left unprojected (see `find_user_actions`'s `latestAttachments`
+      // for the same internal-only pattern).
       return response.ok({
         body: res,
       });

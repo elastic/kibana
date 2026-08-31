@@ -32,6 +32,7 @@ import {
   getAttachmentTypeFromAttributes,
   getAttachmentTypeTransformers,
   toLegacyAttachmentAttributes,
+  toLegacyAttachmentRequest,
   toLegacyAttachmentResponse,
   toLegacyCaseResponse,
   toUnifiedAttachmentPayload,
@@ -472,6 +473,53 @@ describe('toUnifiedAttachmentPayload', () => {
     };
 
     expect(toUnifiedAttachmentPayload(payload)).toEqual(payload);
+  });
+
+  // TODO(https://github.com/elastic/security-team/issues/16996 Phase 3): this
+  // fold will be replaced by a 400 rejection once the legacy `actions` write
+  // path is retired.
+  it('folds a legacy `actions` request forward to `security.endpoint`', () => {
+    expect(toUnifiedAttachmentPayload(actionComment)).toEqual({
+      type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+      attachmentId: 'legacy-actions',
+      owner: actionComment.owner,
+      data: { content: actionComment.comment },
+      metadata: {
+        command: actionComment.actions.type,
+        targets: actionComment.actions.targets.map((target) => ({
+          ...target,
+          agentType: 'endpoint',
+        })),
+      },
+    });
+  });
+});
+
+describe('toLegacyAttachmentRequest', () => {
+  it('projects a unified comment back to the legacy user-comment shape', () => {
+    const unifiedPayload = toUnifiedAttachmentPayload(comment);
+
+    expect(toLegacyAttachmentRequest(unifiedPayload)).toEqual(comment);
+  });
+
+  it('projects a unified alert back to the legacy alert shape', () => {
+    const unifiedPayload = toUnifiedAttachmentPayload(alertComment);
+
+    expect(toLegacyAttachmentRequest(unifiedPayload)).toEqual(alertComment);
+  });
+
+  it('leaves an already-legacy `actions` request unchanged', () => {
+    expect(toLegacyAttachmentRequest(actionComment)).toEqual(actionComment);
+  });
+
+  it('leaves a unified-only entity payload unchanged', () => {
+    const payload = {
+      type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+      attachmentId: 'entity-1',
+      owner: 'securitySolution',
+    };
+
+    expect(toLegacyAttachmentRequest(payload)).toEqual(payload);
   });
 });
 

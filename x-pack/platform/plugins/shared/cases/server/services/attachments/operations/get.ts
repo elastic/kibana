@@ -133,6 +133,8 @@ export class AttachmentGetter {
     merged: Array<MixSavedObjectResponse>
   ): BulkOptionalAttributes<AttachmentAttributesV2> {
     const validatedAttachments: Array<AttachmentSavedObjectTransformedV2> = [];
+    const attachmentsEnabled =
+      getAttachmentSavedObjectType(this.context.config) === CASE_ATTACHMENT_SAVED_OBJECT;
 
     for (const so of merged) {
       if (isSOError(so)) {
@@ -143,6 +145,7 @@ export class AttachmentGetter {
         ) as SavedObject<AttachmentAttributesV2>;
         const transformed = toUnifiedAttributes({
           attributes: injectedSo.attributes,
+          attachmentsEnabled,
         });
         if (transformed.isUnified) {
           validatedAttachments.push(
@@ -521,6 +524,8 @@ export class AttachmentGetter {
       ) as SavedObject<AttachmentAttributesV2>;
       const transformed = toUnifiedAttributes({
         attributes: injectedRes.attributes,
+        attachmentsEnabled:
+          getAttachmentSavedObjectType(this.context.config) === CASE_ATTACHMENT_SAVED_OBJECT,
       });
       if (transformed.isUnified) {
         return Object.assign(injectedRes, { attributes: transformed.attributes });
@@ -821,12 +826,16 @@ export class AttachmentGetter {
   private transformAndDecodeFileAttachments(
     response: SavedObjectsFindResponse<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
   ): AttachmentSavedObjectTransformedV2[] {
+    const attachmentsEnabled =
+      getAttachmentSavedObjectType(this.context.config) === CASE_ATTACHMENT_SAVED_OBJECT;
+
     return response.saved_objects.map((so) => {
       const injectedSo = injectAttachmentSOAttributesFromRefs(
         so as SavedObject<AttachmentPersistedAttributes>
       ) as SavedObject<AttachmentAttributesV2>;
 
       const transformed = toUnifiedAttributes({
+        attachmentsEnabled,
         attributes: injectedSo.attributes,
       });
       if (transformed.isUnified) {

@@ -10,7 +10,6 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
-import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentActionsReq } from '../../../../common/lib/mock';
@@ -85,14 +84,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    // TODO(https://github.com/elastic/security-team/issues/16996 Phase 3): legacy
+    // `actions` writes now fold to `security.endpoint` unconditionally (same as
+    // FF-ON, see `common/attachments_framework/endpoint.ts`), so the FF-OFF
+    // byte-clean carve-out no longer holds. Until Phase 3 rejects `actions` at
+    // validation, this is a runtime guard that the FF-OFF write path still
+    // succeeds (does not 500) — the resulting shape is intentionally unasserted.
     describe('legacy `actions` writes (FF OFF)', () => {
-      // Legacy `actions` POSTs bypass the unified Zod schema (the legacy
-      // validator branches only cover externalReference / persistableState);
-      // with the FF off the cases server persists the payload as-is on
-      // `cases-comments` without invoking `actionsAttachmentTransformer`. The
-      // transformer-level rejections (empty targets, non-security owner) are
-      // exercised in the flag-ON FTR companion.
-      it('accepts a legacy `actions` POST', async () => {
+      it('accepts a legacy `actions` POST (folds forward, no 500)', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         const patched = await createComment({
@@ -103,39 +102,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(patched.comments?.length).to.be(1);
-        expect(patched.comments![0].type).to.be(AttachmentType.actions);
-      });
-
-      it('persists the legacy `actions` shape byte-clean on cases-comments', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        const patched = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentActionsReq,
-        });
-
-        const attachmentId = patched.comments![0].id;
-
-        const esResponse = await getSOFromKibanaIndex({
-          es,
-          soType: CASE_COMMENT_SAVED_OBJECT,
-          soId: attachmentId,
-        });
-
-        const storedAttributes = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT] as
-          | Record<string, unknown>
-          | undefined;
-        expect(storedAttributes).to.be.ok();
-
-        expect(storedAttributes!.type).to.be(AttachmentType.actions);
-        expect(storedAttributes!.comment).to.be(postCommentActionsReq.comment);
-        expect(storedAttributes!.actions).to.eql(postCommentActionsReq.actions);
-
-        // Must not leak any unified-only fields onto the legacy `actions` SO row.
-        expect(storedAttributes!).not.to.have.property('attachmentId');
-        expect(storedAttributes!).not.to.have.property('metadata');
-        expect(storedAttributes!).not.to.have.property('data');
       });
     });
 
