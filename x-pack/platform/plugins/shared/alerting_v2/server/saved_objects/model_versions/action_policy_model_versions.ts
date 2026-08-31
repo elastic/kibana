@@ -106,7 +106,7 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
         type: 'data_backfill',
         backfillFn: (doc) => {
           const matcher = (doc.attributes as { matcher?: unknown }).matcher;
-          if (!matcher || typeof matcher !== 'string') return { attributes: {} };
+          if (typeof matcher !== 'string') return { attributes: {} };
           return { attributes: { matcher: { expression: matcher } } };
         },
       },
