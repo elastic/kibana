@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -1096,8 +1096,8 @@ describe('#update', () => {
       undefined
     );
 
-    await client.update('default', {
-      id: 'default',
+    await client.update(DEFAULT_SPACE_ID, {
+      id: DEFAULT_SPACE_ID,
       name: 'Default',
       description: '',
       color: '#FFFFFF',

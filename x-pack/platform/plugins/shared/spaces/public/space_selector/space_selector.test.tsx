@@ -146,7 +146,7 @@ describe('initial solution setup', () => {
   const customBranding$ = customBrandingServiceMock.createStartContract().customBranding$;
   const spaces = [
     {
-      id: 'space-1',
+      id: asSpaceId('space-1'),
       name: 'Space 1',
       description: 'This is the first space',
       disabledFeatures: [],
