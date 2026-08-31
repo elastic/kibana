@@ -238,6 +238,20 @@ describe('AlertingDateRangePicker', () => {
     );
   });
 
+  it('collapses the date range picker when requested', () => {
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+        collapsed
+      />
+    );
+
+    expect(lastPickerProps?.collapsed).toBe(true);
+  });
+
   it('omits the manual refresh button when onRefresh is absent', () => {
     render(
       <AlertingDateRangePicker

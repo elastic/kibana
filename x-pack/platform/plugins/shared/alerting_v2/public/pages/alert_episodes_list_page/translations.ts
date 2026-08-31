@@ -83,6 +83,13 @@ export const EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const EPISODES_FILTER_BAR_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.searchAriaLabel',
+  {
+    defaultMessage: 'Filter alert episodes',
+  }
+);
+
 export const BULK_ACKNOWLEDGE = i18n.translate(
   'xpack.alertingV2.episodes.bulkActions.acknowledge',
   { defaultMessage: 'Acknowledge' }
