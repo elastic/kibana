@@ -414,5 +414,43 @@ describe('classifyWorkflowTriggerMatch', () => {
         classifyWorkflowTriggerMatch(createMockWorkflow(), 'cases.updated', {}, mockLogger)
       ).toBe('matched');
     });
+
+    it('matches the same-type trigger whose connector-id equals the payload, not the first block', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': 'webhook-1',
+              on: { condition: 'event.body.action: created' },
+            },
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': 'webhook-2',
+              on: { condition: 'event.body.action: paid' },
+            },
+          ],
+          steps: [],
+        },
+      });
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'paid' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('matched');
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'created' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('kql_false');
+    });
   });
 });

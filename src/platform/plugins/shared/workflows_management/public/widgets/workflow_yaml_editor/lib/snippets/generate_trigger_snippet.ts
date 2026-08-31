@@ -15,8 +15,7 @@ import { isTriggerType } from '@kbn/workflows';
 const CUSTOM_TRIGGER_CONDITION_COMMENT =
   'Filter the subscription by using KQL, use event.* to target event properties';
 
-/** Placeholder so the required field is present and schema-valid until the user picks an instance. */
-const CONNECTOR_ID_PLACEHOLDER = '# Enter connector id';
+const CONNECTOR_ID_PLACEHOLDER = '# Enter connector id here';
 
 interface GenerateTriggerSnippetOptions {
   full?: boolean;

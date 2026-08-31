@@ -57,6 +57,14 @@ describe('custom trigger requiresConnectorId', () => {
       'connector-id': 'webhook-1',
     });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual(
+        expect.objectContaining({
+          type: 'inboundWebhook.received',
+          'connector-id': 'webhook-1',
+        })
+      );
+    }
   });
 
   it('accepts connector-id with optional on.condition', () => {

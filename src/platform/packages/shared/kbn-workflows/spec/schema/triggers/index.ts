@@ -35,18 +35,28 @@ export const WORKFLOW_EVENTS_VALUES_SET = new Set<string>(WORKFLOW_EVENTS_VALUES
 export const WorkflowEventsSchema = z.enum(WORKFLOW_EVENTS_VALUES);
 
 /** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
-const CustomTriggerOnSchema = z
-  .object({
-    condition: z.string().optional(),
-    /**
-     * How this trigger responds when the event was emitted from a workflow-attributed chain:
-     * `ignore` — do not schedule;
-     * `avoid-loop` — schedule with cycle guard (default when omitted);
-     * `allow-all` — schedule without cycle guard (max chain depth still applies).
-     */
-    workflowEvents: WorkflowEventsSchema.optional(),
-  })
-  .optional();
+const CustomTriggerOnObjectSchema = z.object({
+  condition: z.string().optional(),
+  /**
+   * How this trigger responds when the event was emitted from a workflow-attributed chain:
+   * `ignore` — do not schedule;
+   * `avoid-loop` — schedule with cycle guard (default when omitted);
+   * `allow-all` — schedule without cycle guard (max chain depth still applies).
+   */
+  workflowEvents: WorkflowEventsSchema.optional(),
+});
+const CustomTriggerOnSchema = CustomTriggerOnObjectSchema.optional();
+export type CustomTriggerOn = z.infer<typeof CustomTriggerOnObjectSchema>;
+
+/**
+ * Runtime YAML shape for a registered (non-built-in) trigger.
+ * `connector-id` is required in the Zod schema when `requiresConnectorId` is set.
+ */
+export interface CustomTrigger {
+  type: string;
+  'connector-id'?: string;
+  on?: CustomTriggerOn;
+}
 
 export interface CustomTriggerSchemaConfig {
   id: string;

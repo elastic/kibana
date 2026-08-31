@@ -47,7 +47,7 @@ describe('generateTriggerSnippet', () => {
         requiresConnectorId: true,
       });
       expect(snippet).toContain('type: inboundWebhook.received');
-      expect(snippet).toContain('connector-id:');
+      expect(snippet).toContain('connector-id: "# Enter connector UUID here"');
       expect(snippet).toContain('condition:');
     });
 

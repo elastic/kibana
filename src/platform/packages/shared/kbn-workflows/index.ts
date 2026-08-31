@@ -91,6 +91,8 @@ export {
   TriggerTypes,
   WORKFLOW_EVENTS_VALUES_SET,
   WorkflowEventsSchema,
+  type CustomTrigger,
+  type CustomTriggerOn,
   type CustomTriggerSchemaConfig,
   type CustomTriggerSchemaInput,
   type TriggerType,

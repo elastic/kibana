@@ -28,7 +28,10 @@ import {
 } from './event_context/event_chain_context';
 import { initializeTriggerEventsClient, writeTriggerEvent } from './event_logs';
 import type { TriggerEventsDataStreamClient } from './event_logs/trigger_events_data_stream';
-import { classifyWorkflowTriggerMatch } from './filter_workflows_by_trigger_condition';
+import {
+  classifyWorkflowTriggerMatch,
+  findMatchingWorkflowTrigger,
+} from './filter_workflows_by_trigger_condition';
 import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
 import {
   createEmptyTriggerResolutionStats,
@@ -115,22 +118,21 @@ function isWorkflowSourcedChainContext(context: EventChainContext | undefined): 
 
 function getMatchingTriggerOn(
   workflow: WorkflowDetailDto,
-  triggerId: string
+  triggerId: string,
+  payload: Record<string, unknown>,
+  requiresConnectorId: boolean
 ): Record<string, unknown> | null {
-  const matchingTrigger = workflow.definition?.triggers?.find(
-    (t) => t != null && typeof t === 'object' && 'type' in t && t.type === triggerId
+  const matchingTrigger = findMatchingWorkflowTrigger(
+    workflow.definition?.triggers,
+    triggerId,
+    payload,
+    requiresConnectorId
   );
-  if (
-    matchingTrigger == null ||
-    typeof matchingTrigger !== 'object' ||
-    !('on' in matchingTrigger) ||
-    matchingTrigger.on == null ||
-    typeof matchingTrigger.on !== 'object' ||
-    Array.isArray(matchingTrigger.on)
-  ) {
+  const onBlock = matchingTrigger?.on;
+  if (onBlock == null || typeof onBlock !== 'object' || Array.isArray(onBlock)) {
     return null;
   }
-  return matchingTrigger.on as Record<string, unknown>;
+  return onBlock as Record<string, unknown>;
 }
 
 function buildNextVisitedWorkflowIds(
@@ -140,8 +142,15 @@ function buildNextVisitedWorkflowIds(
   return normalizeEventChainVisitedWorkflowIds(context?.visitedWorkflowIds, maxEventChainDepth);
 }
 
-function getWorkflowEventsMode(workflow: WorkflowDetailDto, triggerId: string) {
-  return resolveWorkflowEventsModeFromOn(getMatchingTriggerOn(workflow, triggerId));
+function getWorkflowEventsMode(
+  workflow: WorkflowDetailDto,
+  triggerId: string,
+  payload: Record<string, unknown>,
+  requiresConnectorId: boolean
+) {
+  return resolveWorkflowEventsModeFromOn(
+    getMatchingTriggerOn(workflow, triggerId, payload, requiresConnectorId)
+  );
 }
 
 type ScheduleContextSkipReason = 'workflow_events_ignore' | 'depth' | 'cycle';
@@ -434,7 +443,14 @@ export class TriggerEventHandler {
     | { outcome: 'scheduled'; event: Record<string, unknown> }
     | { outcome: 'skipped'; reason: ScheduleContextSkipReason } {
     const { payload, timestamp, spaceId, eventChainContext, triggerId } = eventParams;
-    const workflowEventsMode = getWorkflowEventsMode(workflow, triggerId);
+    const requiresConnectorId =
+      this.workflowsExtensions.getTriggerDefinition(triggerId)?.requiresConnectorId === true;
+    const workflowEventsMode = getWorkflowEventsMode(
+      workflow,
+      triggerId,
+      payload,
+      requiresConnectorId
+    );
 
     if (workflowEventsMode === 'ignore' && isWorkflowSourcedChainContext(eventChainContext)) {
       this.logger.warn(
