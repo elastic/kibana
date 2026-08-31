@@ -7,6 +7,9 @@
 
 import { css } from '@emotion/react';
 
+// Reading-width cap for the source-error callout; not an EUI spacing or breakpoint token.
+export const ERROR_CALLOUT_MAX_WIDTH = '42em';
+
 // Pin AppHeader; `isEmptyState` would center the header with the body.
 export const filledPageSectionContentCss = css`
   display: flex;
