@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
@@ -16,6 +16,7 @@ import type {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import {
+  EuiCheckbox,
   EuiDataGrid,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -23,6 +24,7 @@ import {
   EuiProgress,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,9 +45,11 @@ import {
   ATTACK_TAB_COLUMN_TITLE_TEST_ID,
   ATTACK_TAB_EMPTY_TEST_ID,
   ATTACK_TAB_GRID_TEST_ID,
+  ATTACK_TAB_ROW_SELECT_TEST_ID,
   ATTACK_TAB_ROW_STATUS_TEST_ID,
   ATTACK_TAB_ROW_TITLE_TEST_ID,
   ATTACK_TAB_ROW_UNRESOLVED_TEST_ID,
+  ATTACK_TAB_SELECT_ALL_TEST_ID,
   ATTACK_TAB_TABLE_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -102,6 +106,16 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 const ACTIONS_COLUMN_WIDTH = 96;
 
+/**
+ * The selection control column's id. It is deliberately not an `ATTACK_TAB_COLUMN_ID`: those
+ * key the user's persisted column selection, and this column is never pickable.
+ */
+const SELECTION_COLUMN_ID = 'selection';
+const SELECTION_COLUMN_WIDTH = 36;
+
+/** Shared so clearing the selection never re-renders a grid that already has none. */
+const NO_SELECTION: ReadonlySet<string> = new Set();
+
 const UNKNOWN_USER = i18n.translate(
   'xpack.securitySolution.attackDiscovery.cases.tab.unknownUser',
   {
@@ -112,6 +126,19 @@ const UNKNOWN_USER = i18n.translate(
 const TABLE_CAPTION = i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.caption', {
   defaultMessage: 'Attacks attached to this case',
 });
+
+const SELECT_ALL_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.cases.tab.selectAllAttacks',
+  {
+    defaultMessage: 'Select all attacks',
+  }
+);
+
+const getSelectAttackLabel = (attackTitle: string): string =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.selectAttack', {
+    defaultMessage: 'Select {attackTitle}',
+    values: { attackTitle },
+  });
 
 const UNRESOLVED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.attackDiscovery.cases.tab.unresolvedTooltip',
@@ -430,7 +457,7 @@ export const AttackTabContent: React.FC<CommonAttachmentListViewProps> = ({
     );
   }
 
-  return <AttackTabTable attachments={attachments} caseData={caseData} />;
+  return <AttackTabTable attachments={attachments} caseData={caseData} searchTerm={searchTerm} />;
 };
 
 AttackTabContent.displayName = 'AttackTabContent';
@@ -442,9 +469,11 @@ AttackTabContent.displayName = 'AttackTabContent';
 const AttackTabTable = ({
   attachments,
   caseData,
+  searchTerm,
 }: {
   attachments: AttackCaseAttachmentRow[];
   caseData: CommonAttachmentListViewProps['caseData'];
+  searchTerm: CommonAttachmentListViewProps['searchTerm'];
 }) => {
   const { http } = useKibana().services;
   const { isAssistantEnabled } = useAssistantAvailability();
@@ -526,13 +555,30 @@ const AttackTabTable = ({
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
 
+  // Keyed by saved object id, the same handle the row actions and the bulk removal use.
+  const [selectedRowIds, setSelectedRowIds] = useState<ReadonlySet<string>>(NO_SELECTION);
+
+  const clearSelection = useCallback(() => setSelectedRowIds(NO_SELECTION), []);
+
+  // A row the search has filtered out must not stay part of a bulk action the user can no
+  // longer see.
+  useEffect(() => {
+    clearSelection();
+  }, [clearSelection, searchTerm]);
+
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  const onChangeItemsPerPage = useCallback((nextPageSize: number) => {
-    setPageSize(nextPageSize);
-    setPageIndex(0);
-  }, []);
+  const onChangeItemsPerPage = useCallback(
+    (nextPageSize: number) => {
+      setPageSize(nextPageSize);
+      setPageIndex(0);
+      // Repaginating reshuffles which rows a user can see at once, so the selection they built
+      // against the old layout no longer describes anything they are looking at.
+      clearSelection();
+    },
+    [clearSelection]
+  );
 
   const pagination = useMemo(
     () => ({
@@ -556,8 +602,67 @@ const AttackTabTable = ({
     [rows]
   );
 
+  const toggleRowSelected = useCallback((savedObjectId: string) => {
+    setSelectedRowIds((current) => {
+      const next = new Set(current);
+      if (!next.delete(savedObjectId)) {
+        next.add(savedObjectId);
+      }
+      return next;
+    });
+  }, []);
+
+  // Counted against the rows rather than the selection, so an attachment removed from the case
+  // while selected cannot leave the header checkbox stuck.
+  const selectedRowCount = useMemo(
+    () => rows.filter(({ savedObjectId }) => selectedRowIds.has(savedObjectId)).length,
+    [rows, selectedRowIds]
+  );
+
+  const areAllRowsSelected = rows.length > 0 && selectedRowCount === rows.length;
+
+  const toggleAllRowsSelected = useCallback(() => {
+    // Every filtered row, not just the page on screen: the user asked for "all", and the rows
+    // the grid is paginating over are all in hand here.
+    setSelectedRowIds(
+      areAllRowsSelected ? NO_SELECTION : new Set(rows.map(({ savedObjectId }) => savedObjectId))
+    );
+  }, [areAllRowsSelected, rows]);
+
+  const selectAllId = useGeneratedHtmlId({ prefix: 'attackTabSelectAll' });
+
   const leadingControlColumns = useMemo<EuiDataGridControlColumn[]>(
     () => [
+      {
+        id: SELECTION_COLUMN_ID,
+        width: SELECTION_COLUMN_WIDTH,
+        headerCellRender: () => (
+          <EuiCheckbox
+            aria-label={SELECT_ALL_LABEL}
+            checked={areAllRowsSelected}
+            data-test-subj={ATTACK_TAB_SELECT_ALL_TEST_ID}
+            id={selectAllId}
+            indeterminate={selectedRowCount > 0 && !areAllRowsSelected}
+            onChange={toggleAllRowsSelected}
+          />
+        ),
+        rowCellRender: ({ rowIndex }) => {
+          const row = rows[rowIndex];
+          if (row == null) {
+            return null;
+          }
+
+          return (
+            <EuiCheckbox
+              aria-label={getSelectAttackLabel(getTitle(row.attack, row.metadata))}
+              checked={selectedRowIds.has(row.savedObjectId)}
+              data-test-subj={`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${row.savedObjectId}`}
+              id={`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${row.savedObjectId}`}
+              onChange={() => toggleRowSelected(row.savedObjectId)}
+            />
+          );
+        },
+      },
       {
         id: ATTACK_TAB_COLUMN_ID.actions,
         width: ACTIONS_COLUMN_WIDTH,
@@ -601,7 +706,18 @@ const AttackTabTable = ({
         },
       },
     ],
-    [comments, isRemoving, onRemoveConfirmed, rows]
+    [
+      areAllRowsSelected,
+      comments,
+      isRemoving,
+      onRemoveConfirmed,
+      rows,
+      selectAllId,
+      selectedRowCount,
+      selectedRowIds,
+      toggleAllRowsSelected,
+      toggleRowSelected,
+    ]
   );
 
   return (

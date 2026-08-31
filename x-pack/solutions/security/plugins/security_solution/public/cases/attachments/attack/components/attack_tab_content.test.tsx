@@ -22,9 +22,11 @@ import {
   ATTACK_TAB_COLUMN_TITLE_TEST_ID,
   ATTACK_TAB_EMPTY_TEST_ID,
   ATTACK_TAB_GRID_TEST_ID,
+  ATTACK_TAB_ROW_SELECT_TEST_ID,
   ATTACK_TAB_ROW_STATUS_TEST_ID,
   ATTACK_TAB_ROW_TITLE_TEST_ID,
   ATTACK_TAB_ROW_UNRESOLVED_TEST_ID,
+  ATTACK_TAB_SELECT_ALL_TEST_ID,
   ATTACK_TAB_TABLE_TEST_ID,
   REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
   REMOVE_ATTACK_BUTTON_TEST_ID,
@@ -62,8 +64,10 @@ const EUI_COLUMN_SORTING_TEST_ID = 'dataGridColumnSortingButton';
 const EUI_DISPLAY_SELECTOR_TEST_ID = 'dataGridDisplaySelectorButton';
 const EUI_FULL_SCREEN_TEST_ID = 'dataGridFullScreenButton';
 const EUI_PAGINATION_TEST_ID = 'tablePaginationPopoverButton';
+const EUI_TEN_ROWS_PER_PAGE_TEST_ID = 'tablePagination-10-rows';
 const EUI_CELL_EXPAND_TEST_ID = 'euiDataGridCellExpandButton';
 const euiHeaderActionsTestId = (columnId: string) => `dataGridHeaderCellActionButton-${columnId}`;
+const euiPaginationButtonTestId = (pageNumber: number) => `pagination-button-${pageNumber - 1}`;
 const euiColumnToggleTestId = (columnId: string) =>
   `dataGridColumnSelectorToggleColumnVisibility-${columnId}`;
 
@@ -658,6 +662,147 @@ describe('AttackTabContent', () => {
       renderTab();
 
       expect(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`)).toBeEnabled();
+    });
+  });
+
+  describe('the selection control column', () => {
+    const selectAllCheckbox = () => screen.getByTestId(ATTACK_TAB_SELECT_ALL_TEST_ID);
+
+    const rowCheckbox = (savedObjectId: string) =>
+      screen.getByTestId(`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${savedObjectId}`);
+
+    const twoAttachments = () => [
+      buildAttachment(),
+      buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
+    ];
+
+    /** Twelve unresolvable attachments, so every row sorts on the same snapshotted timestamp. */
+    const renderTwelveAttachments = () => {
+      mockFindResult([]);
+
+      return renderAttachments(
+        Array.from({ length: 12 }, (_, index) =>
+          buildAttachment({ id: `so-${index}`, attachmentId: `attack-id-${index}` })
+        )
+      );
+    };
+
+    const showTenRowsPerPage = async () => {
+      await userEvent.click(screen.getByTestId(EUI_PAGINATION_TEST_ID));
+      await userEvent.click(await screen.findByTestId(EUI_TEN_ROWS_PER_PAGE_TEST_ID));
+    };
+
+    const goToPage = async (pageNumber: number) => {
+      await userEvent.click(screen.getByTestId(euiPaginationButtonTestId(pageNumber)));
+    };
+
+    it('leads the row, ahead of the actions column', () => {
+      renderTab();
+
+      const cells = Array.from(
+        screen.getByTestId(ATTACK_TAB_GRID_TEST_ID).querySelectorAll('[role="gridcell"]')
+      );
+
+      expect(cells.indexOf(gridCellOf(`${ATTACK_TAB_ROW_SELECT_TEST_ID}-so-1`))).toBeLessThan(
+        cells.indexOf(gridCellOf(ATTACK_TAB_COLUMN_ACTIONS_TEST_ID))
+      );
+    });
+
+    it('labels every checkbox with the attack it selects', () => {
+      renderAttachments(twoAttachments());
+
+      expect(selectAllCheckbox()).toHaveAccessibleName('Select all attacks');
+      expect(rowCheckbox('so-1')).toHaveAccessibleName('Select Live attack title');
+      // Unresolved, so the checkbox names it from the snapshot rather than going unlabelled.
+      expect(rowCheckbox('so-2')).toHaveAccessibleName('Select Snapshotted attack title');
+    });
+
+    it('selects and deselects a single row', async () => {
+      renderTab();
+
+      expect(rowCheckbox('so-1')).not.toBeChecked();
+
+      await userEvent.click(rowCheckbox('so-1'));
+      expect(rowCheckbox('so-1')).toBeChecked();
+
+      await userEvent.click(rowCheckbox('so-1'));
+      expect(rowCheckbox('so-1')).not.toBeChecked();
+    });
+
+    it('reflects a partial selection in the header checkbox', async () => {
+      renderAttachments(twoAttachments());
+
+      await userEvent.click(rowCheckbox('so-1'));
+      expect(selectAllCheckbox()).toBePartiallyChecked();
+
+      await userEvent.click(rowCheckbox('so-2'));
+      expect(selectAllCheckbox()).toBeChecked();
+    });
+
+    it('selects every filtered row, including the ones on a later page', async () => {
+      renderTwelveAttachments();
+      await showTenRowsPerPage();
+
+      await userEvent.click(selectAllCheckbox());
+
+      expect(rowCheckbox('so-0')).toBeChecked();
+
+      await goToPage(2);
+
+      expect(rowCheckbox('so-10')).toBeChecked();
+      expect(rowCheckbox('so-11')).toBeChecked();
+    });
+
+    it('deselects every row when the header checkbox is cleared', async () => {
+      renderAttachments(twoAttachments());
+
+      await userEvent.click(selectAllCheckbox());
+      await userEvent.click(selectAllCheckbox());
+
+      expect(rowCheckbox('so-1')).not.toBeChecked();
+      expect(rowCheckbox('so-2')).not.toBeChecked();
+    });
+
+    it('keeps the selection when navigating between pages', async () => {
+      renderTwelveAttachments();
+      await showTenRowsPerPage();
+
+      await userEvent.click(rowCheckbox('so-0'));
+      await goToPage(2);
+      await goToPage(1);
+
+      expect(rowCheckbox('so-0')).toBeChecked();
+    });
+
+    it('clears the selection when the page size changes', async () => {
+      renderTwelveAttachments();
+
+      await userEvent.click(rowCheckbox('so-0'));
+      expect(rowCheckbox('so-0')).toBeChecked();
+
+      await showTenRowsPerPage();
+
+      expect(rowCheckbox('so-0')).not.toBeChecked();
+    });
+
+    it('clears the selection when the search term changes', async () => {
+      const caseData = buildCaseData([buildAttachment()]);
+      const { rerender } = render(
+        <TestProviders>
+          <AttackTabContent caseData={caseData} />
+        </TestProviders>
+      );
+
+      await userEvent.click(rowCheckbox('so-1'));
+      expect(rowCheckbox('so-1')).toBeChecked();
+
+      rerender(
+        <TestProviders>
+          <AttackTabContent caseData={caseData} searchTerm="snapshotted" />
+        </TestProviders>
+      );
+
+      expect(rowCheckbox('so-1')).not.toBeChecked();
     });
   });
 });
