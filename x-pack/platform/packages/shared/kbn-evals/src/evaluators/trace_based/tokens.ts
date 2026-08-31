@@ -27,6 +27,7 @@ export function createOutputTokensEvaluator({
     log,
     config: {
       name: 'Output Tokens',
+      direction: 'minimize',
       // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
@@ -55,6 +56,7 @@ export function createInputTokensEvaluator({
     log,
     config: {
       name: 'Input Tokens',
+      direction: 'minimize',
       // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
@@ -83,6 +85,7 @@ export function createCachedTokensEvaluator({
     log,
     config: {
       name: 'Cached Tokens',
+      direction: 'neutral',
       // `input_tokens` is a liveness probe: providers that never report caching (most EIS models)
       // omit cache_read entirely, which otherwise looks like a trace that has not finished indexing.
       buildQuery: (traceId) => `FROM traces-*
