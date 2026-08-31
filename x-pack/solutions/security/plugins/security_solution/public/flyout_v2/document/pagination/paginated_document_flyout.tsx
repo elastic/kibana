@@ -6,9 +6,19 @@
  */
 
 import React, { memo } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { DocumentFlyoutWrapper } from '../main/document_flyout_wrapper';
+import { FLYOUT_V2_PAGINATION_QUERY_ERROR_TEST_ID } from '../main/components/test_ids';
 import { useFlyoutPagination } from './use_flyout_pagination';
+
+const QUERY_ERROR = i18n.translate(
+  'xpack.securitySolution.flyoutV2.document.pagination.queryError',
+  {
+    defaultMessage: 'Unable to fetch the requested document.',
+  }
+);
 
 export interface PaginatedDocumentFlyoutProps {
   /**
@@ -34,8 +44,24 @@ export interface PaginatedDocumentFlyoutProps {
  */
 export const PaginatedDocumentFlyout = memo(
   ({ renderCellActions, onAlertUpdated }: PaginatedDocumentFlyoutProps) => {
-    const { flyoutDocumentId, flyoutDocumentIndexName, isFlyoutDocumentLoading } =
-      useFlyoutPagination();
+    const {
+      flyoutDocumentId,
+      flyoutDocumentIndexName,
+      isFlyoutDocumentLoading,
+      hasFlyoutQueryError,
+    } = useFlyoutPagination();
+
+    if (hasFlyoutQueryError) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          title={QUERY_ERROR}
+          data-test-subj={FLYOUT_V2_PAGINATION_QUERY_ERROR_TEST_ID}
+        />
+      );
+    }
 
     return (
       <DocumentFlyoutWrapper

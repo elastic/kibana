@@ -83,4 +83,24 @@ describe('PaginatedDocumentFlyout', () => {
       expect.objectContaining({ documentId: undefined, indexName: undefined })
     );
   });
+
+  it('renders an error instead of the previously displayed document when the cross-page query errors', () => {
+    const store = createPaginationStore();
+    act(() => {
+      store.setState({
+        flyoutDocumentIndex: 0,
+        flyoutDocumentId: 'alert-1',
+        flyoutDocumentIndexName: 'index-1',
+      });
+    });
+
+    const { getByTestId, queryByTestId } = renderWithStore(store);
+
+    act(() => {
+      store.setState({ flyoutDocumentIndex: 60, hasFlyoutQueryError: true });
+    });
+
+    expect(getByTestId('securitySolutionFlyoutV2PaginationQueryError')).toBeInTheDocument();
+    expect(queryByTestId('documentFlyoutWrapperStub')).not.toBeInTheDocument();
+  });
 });
