@@ -338,6 +338,8 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 | --- | --- |
 | `user.id` | Unique identifier of the user across sessions (See [user profiles](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles.md)). |
 | `user.name` | Login name of the user.<br>Example: `jdoe` |
+| `user.email` | Email address of the user at the time of the event, when provided by the identity source. |
+| `user.full_name` | Full name of the user at the time of the event, when provided by the identity source. |
 | `user.roles[]` | Set of user roles at the time of the event.<br>Example: `[kibana_admin, reporting_user]` |
 
 

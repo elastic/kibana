@@ -119,9 +119,7 @@ export class SecurityNavControlService {
       ),
     });
 
-    if (core.chrome.next.isEnabled) {
-      this.registerChromeNextUserMenu(core, authc);
-    }
+    this.registerChromeNextUserMenu(core, authc);
 
     this.navControlRegistered = true;
   }

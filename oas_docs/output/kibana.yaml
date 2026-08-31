@@ -2331,7 +2331,14 @@ paths:
                       delete: true
                       rename: true
                     rounds:
-                      - id: 170ec3b2-0f5a-4538-8b60-549572386d2a
+                      - feedback:
+                          chips:
+                            - accurate
+                            - useful
+                          comment: ''
+                          submitted_at: '2025-09-19T17:46:12.000Z'
+                          vote: up
+                        id: 170ec3b2-0f5a-4538-8b60-549572386d2a
                         input:
                           message: Hello, how are you?
                         response:
@@ -3260,14 +3267,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
@@ -3737,14 +3736,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
@@ -10096,6 +10087,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 150
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -38307,6 +38300,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -45587,7 +45597,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a package by uploading a .zip or .tar.gz archive (max 100MB).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50646,6 +50656,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -51675,7 +51702,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all OR fleet-agent-policies-all.
+        Update output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: put-fleet-outputs-outputid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -96436,7 +96463,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -96920,7 +96947,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -97303,7 +97330,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -104261,6 +104288,11 @@ components:
                 properties:
                   description:
                     type: string
+                  engine:
+                    enum:
+                      - v1
+                      - v2
+                    type: string
                   service:
                     type: string
                   title:
@@ -106809,6 +106841,7 @@ components:
                     aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                     aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                     apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                    custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                     discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                     esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                     field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -106834,6 +106867,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -107098,6 +107132,49 @@ components:
         - config
       title: APM Service map
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: false
+          type: object
+          properties:
+            description:
+              description: A short description of the panel.
+              type: string
+            esql_query:
+              items:
+                maxLength: 1000000
+                type: string
+              maxItems: 1
+              type: array
+            hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
+              type: boolean
+            hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            template:
+              maxLength: 510000
+              type: string
+            title:
+              description: The panel title.
+              type: string
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - custom_content
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: Custom content
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session:
       additionalProperties: false
       properties:
@@ -107200,6 +107277,15 @@ components:
                                   - normal
                                 type: string
                             description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                          documents_display_mode:
+                            anyOf:
+                              - enum:
+                                  - table
+                                type: string
+                              - enum:
+                                  - json
+                                type: string
+                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -107216,6 +107302,17 @@ components:
                                   - auto
                                 type: string
                             description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                          json_mode_settings:
+                            additionalProperties: false
+                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
+                            type: object
+                            properties:
+                              hide_nulls:
+                                description: When true, fields with null values are hidden while in JSON mode.
+                                type: boolean
+                              wrap_lines:
+                                description: When false, long values are truncated to a single line instead of wrapping while in JSON mode.
+                                type: boolean
                           query:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
                           row_height:
@@ -107309,6 +107406,15 @@ components:
                                   - normal
                                 type: string
                             description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                          documents_display_mode:
+                            anyOf:
+                              - enum:
+                                  - table
+                                type: string
+                              - enum:
+                                  - json
+                                type: string
+                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -107318,6 +107424,17 @@ components:
                                   - auto
                                 type: string
                             description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                          json_mode_settings:
+                            additionalProperties: false
+                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
+                            type: object
+                            properties:
+                              hide_nulls:
+                                description: When true, fields with null values are hidden while in JSON mode.
+                                type: boolean
+                              wrap_lines:
+                                description: When false, long values are truncated to a single line instead of wrapping while in JSON mode.
+                                type: boolean
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -107458,6 +107575,15 @@ components:
                             - normal
                           type: string
                       description: 'Data grid row spacing: `compact`, `expanded`, or `normal`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                    documents_display_mode:
+                      anyOf:
+                        - enum:
+                            - table
+                          type: string
+                        - enum:
+                            - json
+                          type: string
+                      description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                     header_row_height:
                       anyOf:
                         - maximum: 5
@@ -107467,6 +107593,17 @@ components:
                             - auto
                           type: string
                       description: 'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                    json_mode_settings:
+                      additionalProperties: false
+                      description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
+                      type: object
+                      properties:
+                        hide_nulls:
+                          description: When true, fields with null values are hidden while in JSON mode.
+                          type: boolean
+                        wrap_lines:
+                          description: When false, long values are truncated to a single line instead of wrapping while in JSON mode.
+                          type: boolean
                     row_height:
                       anyOf:
                         - maximum: 20
@@ -108787,6 +108924,7 @@ components:
                 aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                 aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                 field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -108812,6 +108950,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -131678,9 +131817,8 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_MachineLearningRuleCreateFields'
     Security_Detections_API_MaxSignals:
-      default: 100
       description: |
-        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value).
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value). Defaults to `100`.
         > info
         > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
@@ -141256,7 +141394,7 @@ components:
           metadata:
             execution_context:
               name: osquery
-              url: /app/osquery/live_queries/new
+              url: /app/osquery/new
           queries:
             - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
               agents:
@@ -142883,7 +143021,7 @@ components:
       type: object
       properties:
         agentCount:
-          description: The number of agents targeted by the query.
+          description: For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.
           type: integer
         errorCount:
           description: The number of agent responses with errors.
@@ -145207,7 +145345,8 @@ components:
           type: string
         preventCrossProjectSearch:
           default: false
-          description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false (flat-world).
+          deprecated: true
+          description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
           example: true
           type: boolean
         preventInitialBackfill:
@@ -145215,6 +145354,12 @@ components:
           description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
           example: true
           type: boolean
+        projectRoutings:
+          description: ES ProjectRouting expression controlling which linked projects the L1 rollup reads. When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; `_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.
+          example: _alias:_origin
+          maxLength: 8192
+          nullable: true
+          type: string
         syncDelay:
           default: 1m
           description: The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.
@@ -145682,6 +145827,12 @@ components:
         - additionalProperties: true
           type: object
           properties:
+            certificate_error_spki_allowlist:
+              default: []
+              description: PEM certificates whose public keys (SPKI) are allowlisted so Chromium bypasses certificate errors for matching presented certificates. This does not add a CA to Chromium's trust store.
+              items:
+                type: string
+              type: array
             ignore_https_errors:
               default: false
               description: Ignore HTTPS errors.
