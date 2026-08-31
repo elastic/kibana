@@ -1132,6 +1132,7 @@ describe('SyntheticsPrivateLocation', () => {
         policiesToUpdate: [expect.objectContaining({ id: 'm1-loc-1', condition: null })],
       });
       expect(result.cleared).toBe(1);
+      expect(result.failed).toBe(0);
     });
   });
 

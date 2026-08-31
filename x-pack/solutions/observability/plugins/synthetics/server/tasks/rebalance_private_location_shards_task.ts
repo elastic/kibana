@@ -26,6 +26,7 @@ import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_m
 import type { SyntheticsServerSetup } from '../types';
 import {
   isRebalancePrivateLocationShardsEnabled,
+  REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
   REBALANCE_SHARDS_TASK_ID,
   REBALANCE_SHARDS_TASK_TYPE,
 } from './rebalance_shards_enabled';
@@ -41,6 +42,11 @@ interface RebalanceTaskState extends Record<string, unknown> {
    * streak restarts next time they recover.
    */
   healthySince?: Record<string, number>;
+  /**
+   * True after a disabled cycle finished draining with no failed writes.
+   * Reset when the switch turns back on.
+   */
+  pinsCleared?: boolean;
 }
 
 /**
@@ -90,10 +96,10 @@ export class RebalancePrivateLocationShardsTask {
     try {
       signal.throwIfAborted();
       if (!isRebalancePrivateLocationShardsEnabled(taskInstance)) {
-        const { cleared } =
-          await this.syntheticsMonitorClient.privateLocationAPI.clearShardConditions();
-        this.debugLog(`disabled; cleared ${cleared} agent pin(s)`);
-        return { state: await this.returnedState(taskInstance), schedule };
+        return {
+          state: await this.runDisabledDrain(taskInstance),
+          schedule,
+        };
       }
 
       const soClient = coreStart.savedObjects.createInternalRepository();
@@ -103,7 +109,12 @@ export class RebalancePrivateLocationShardsTask {
       );
 
       if (scalableLocations.length === 0) {
-        return { state: await this.returnedState(taskInstance), schedule };
+        return {
+          state: await this.returnedState(taskInstance, {
+            [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+          }),
+          schedule,
+        };
       }
 
       const now = Date.now();
@@ -185,7 +196,10 @@ export class RebalancePrivateLocationShardsTask {
       }
 
       return {
-        state: await this.returnedState(taskInstance, { healthySince: nextHealthySince }),
+        state: await this.returnedState(taskInstance, {
+          healthySince: nextHealthySince,
+          [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+        }),
         schedule,
       };
     } catch (error) {
@@ -230,6 +244,33 @@ export class RebalancePrivateLocationShardsTask {
     // must stay claimable so a disabled cycle can drain leftover agent pins.
     await taskManager.bulkEnable([REBALANCE_SHARDS_TASK_ID], false);
     this.debugLog('Rebalance private location shards task scheduled');
+  }
+
+  /**
+   * While off: drain leftover pins once, then skip Fleet listing until the
+   * switch turns back on. A mid-run PUT true drops the latch so a later off
+   * will scan again.
+   */
+  private async runDisabledDrain(
+    taskInstance: ConcreteTaskInstance
+  ): Promise<Record<string, unknown>> {
+    if (taskInstance.state[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY] === true) {
+      this.debugLog('disabled; pins already cleared');
+      return this.returnedState(taskInstance);
+    }
+
+    const { cleared, failed = 0 } =
+      await this.syntheticsMonitorClient.privateLocationAPI.clearShardConditions();
+    this.debugLog(`disabled; cleared ${cleared} agent pin(s)`);
+
+    const live = await this.returnedState(taskInstance);
+    if (isRebalancePrivateLocationShardsEnabled({ state: live })) {
+      return { ...live, [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false };
+    }
+    if (failed > 0) {
+      return live;
+    }
+    return { ...live, [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true };
   }
 
   // Re-read: TM persists run() state and would clobber a mid-run bulkUpdateState PUT.

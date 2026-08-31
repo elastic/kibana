@@ -855,31 +855,33 @@ export class SyntheticsPrivateLocation {
    * monitors run unfiltered (classic). Used when shard rebalancing is turned
    * off. Dedupes by agent policy so a shared policy is listed once.
    */
-  async clearShardConditions(): Promise<{ cleared: number }> {
+  async clearShardConditions(): Promise<{ cleared: number; failed: number }> {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
     const agentPolicyIds = [...new Set(locations.map((location) => location.agentPolicyId))];
 
     let cleared = 0;
+    let failed = 0;
     for (const agentPolicyId of agentPolicyIds) {
       const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({ agentPolicyId });
       const updatesBySpace = toClearedConditionUpdates(pkgPolicies);
 
       for (const [spaceId, policiesToUpdate] of updatesBySpace) {
-        const failed = await this.packagePolicyService.bulkUpdateInSpace({
+        const failedBatch = await this.packagePolicyService.bulkUpdateInSpace({
           policiesToUpdate,
           spaceId,
         });
-        cleared += policiesToUpdate.length - failed.length;
-        if (failed.length > 0) {
+        cleared += policiesToUpdate.length - failedBatch.length;
+        failed += failedBatch.length;
+        if (failedBatch.length > 0) {
           this.server.logger.warn(
-            `[clearShardConditions] Failed to clear ${failed.length} monitor pin(s) on agent policy ${agentPolicyId}`
+            `[clearShardConditions] Failed to clear ${failedBatch.length} monitor pin(s) on agent policy ${agentPolicyId}`
           );
         }
       }
     }
 
-    return { cleared };
+    return { cleared, failed };
   }
 }
 

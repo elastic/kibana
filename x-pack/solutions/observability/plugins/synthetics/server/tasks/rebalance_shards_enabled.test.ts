@@ -8,6 +8,7 @@
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   REBALANCE_SHARDS_ENABLED_STATE_KEY,
+  REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
   REBALANCE_SHARDS_TASK_ID,
   getRebalancePrivateLocationShardsEnabled,
   isRebalancePrivateLocationShardsEnabled,
@@ -63,6 +64,29 @@ describe('rebalance shards enabled setting', () => {
     expect(mapper({ keep: 1 }, REBALANCE_SHARDS_TASK_ID)).toEqual({
       keep: 1,
       [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+    });
+  });
+
+  it('drops the pinsCleared latch when turning the switch back on', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockResolvedValue({
+      state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
+    } as never);
+
+    await setRebalancePrivateLocationShardsEnabled(taskManager, true);
+    const mapper = taskManager.bulkUpdateState.mock.calls[0][1];
+    expect(
+      mapper(
+        {
+          keep: 1,
+          [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+        },
+        REBALANCE_SHARDS_TASK_ID
+      )
+    ).toEqual({
+      keep: 1,
+      [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true,
+      [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
     });
   });
 });

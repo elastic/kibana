@@ -10,6 +10,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 export const REBALANCE_SHARDS_TASK_TYPE = 'Synthetics:Rebalance-Private-Location-Shards';
 export const REBALANCE_SHARDS_TASK_ID = `${REBALANCE_SHARDS_TASK_TYPE}-single-instance`;
 export const REBALANCE_SHARDS_ENABLED_STATE_KEY = 'rebalancePrivateLocationShardsEnabled';
+export const REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY = 'pinsCleared';
 
 /**
  * Cluster-wide kill-switch, stored on the singleton rebalance task's state —
@@ -36,9 +37,17 @@ export const setRebalancePrivateLocationShardsEnabled = async (
   taskManager: TaskManagerStartContract,
   enabled: boolean
 ): Promise<boolean> => {
-  await taskManager.bulkUpdateState([REBALANCE_SHARDS_TASK_ID], (state) => ({
-    ...state,
-    [REBALANCE_SHARDS_ENABLED_STATE_KEY]: enabled,
-  }));
+  await taskManager.bulkUpdateState([REBALANCE_SHARDS_TASK_ID], (state) => {
+    const next: Record<string, unknown> = {
+      ...state,
+      [REBALANCE_SHARDS_ENABLED_STATE_KEY]: enabled,
+    };
+    // Turning on must drop the drain latch so a later off run scans again
+    // for pins stamped while the switch was on.
+    if (enabled) {
+      next[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY] = false;
+    }
+    return next;
+  });
   return getRebalancePrivateLocationShardsEnabled(taskManager);
 };

@@ -16,7 +16,10 @@ import {
   DEFAULT_REBALANCE_SCHEDULE,
   runRebalanceShardsTaskSoon,
 } from './rebalance_private_location_shards_task';
-import { REBALANCE_SHARDS_ENABLED_STATE_KEY } from './rebalance_shards_enabled';
+import {
+  REBALANCE_SHARDS_ENABLED_STATE_KEY,
+  REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
+} from './rebalance_shards_enabled';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
@@ -36,7 +39,7 @@ const mockTaskManagerStart = taskManagerMock.createStart();
 const mockSoRepo = savedObjectsRepositoryMock.create();
 const mockLogger = loggerMock.create();
 const mockRebalanceShards = jest.fn().mockResolvedValue({ total: 0, moved: 0 });
-const mockClearShardConditions = jest.fn().mockResolvedValue({ cleared: 0 });
+const mockClearShardConditions = jest.fn().mockResolvedValue({ cleared: 0, failed: 0 });
 
 const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
@@ -94,7 +97,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
     jest.useFakeTimers().setSystemTime(NOW);
     mockTaskManagerStart.get.mockReset();
     mockRebalanceShards.mockResolvedValue({ total: 0, moved: 0 });
-    mockClearShardConditions.mockResolvedValue({ cleared: 0 });
+    mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 0 });
   });
 
   afterEach(() => jest.useRealTimers());
@@ -133,7 +136,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
     it('clears leftover agent pins and skips rebalance when the kill-switch is off', async () => {
       const getPrivateLocationsSpy = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
       const getAgentInfo = jest.spyOn(getAgentInfoModule, 'getAgentInfo');
-      mockClearShardConditions.mockResolvedValue({ cleared: 3 });
+      mockClearShardConditions.mockResolvedValue({ cleared: 3, failed: 0 });
 
       const result = await run({ keep: 1, [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
 
@@ -141,10 +144,54 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(getPrivateLocationsSpy).not.toHaveBeenCalled();
       expect(getAgentInfo).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
-      expect(result.state).toEqual({ keep: 1, [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
+      expect(result.state).toEqual({
+        keep: 1,
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+      });
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('disabled; cleared 3 agent pin(s)')
       );
+    });
+
+    it('skips the Fleet drain on later disabled cycles once pins are cleared', async () => {
+      const result = await run({
+        keep: 1,
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+      });
+
+      expect(mockClearShardConditions).not.toHaveBeenCalled();
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
+      expect(result.state).toEqual({
+        keep: 1,
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+      });
+    });
+
+    it('does not latch pinsCleared when some Fleet writes fail, so the next cycle retries', async () => {
+      mockClearShardConditions.mockResolvedValue({ cleared: 2, failed: 1 });
+
+      const result = await run({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
+
+      expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
+      expect(result.state).toEqual({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
+    });
+
+    it('does not latch pinsCleared when a mid-run PUT turns the switch back on', async () => {
+      mockClearShardConditions.mockResolvedValue({ cleared: 1, failed: 0 });
+      mockTaskManagerStart.get.mockResolvedValue({
+        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
+      } as never);
+
+      const result = await run({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
+
+      expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
+      expect(result.state).toEqual({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true,
+        [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+      });
     });
 
     it('does not clobber a mid-run kill-switch PUT when returning state', async () => {
@@ -155,7 +202,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
       const result = await run({ keep: 1 });
 
-      expect(result.state).toEqual({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false, extra: 1 });
+      expect(result.state).toEqual({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        extra: 1,
+        [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+      });
     });
 
     it('early-exits and does not read agents when there are no scalable locations', async () => {
@@ -168,7 +219,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
       expect(getAgentInfo).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
-      expect(result.state).toEqual({ foo: 1 });
+      expect(result.state).toEqual({ foo: 1, [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false });
     });
 
     it('rebalances a healthy location, passing healthy/recovery agents and capacities', async () => {
@@ -198,6 +249,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         [healthySinceKey('ap-1', 'agent-1')]: NOW - RECOVERY_STABILITY_MS - 1,
         [healthySinceKey('ap-1', 'agent-2')]: NOW,
       });
+      expect(result.state[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]).toBe(false);
     });
 
     it('skips the data-plane liveness query when every agent is fresh', async () => {
@@ -294,6 +346,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         [healthySinceKey('ap-a', 'agent-a')]: NOW,
         [healthySinceKey('ap-b', 'agent-b')]: NOW,
       });
+      expect(result.state[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]).toBe(false);
     });
 
     it('does not throw when getPrivateLocations fails; returns the prior state', async () => {
