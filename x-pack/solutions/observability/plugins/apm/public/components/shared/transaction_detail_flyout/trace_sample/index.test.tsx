@@ -70,6 +70,7 @@ describe('TransactionDetailFlyoutTraceSample', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedUseTransactionDetailFlyoutContext.mockReturnValue({
+      deps: { core: { notifications: { toasts: { addDanger: jest.fn() } } } },
       filters: FILTERS,
       openFullTraceFlyout: jest.fn(),
     });
@@ -110,6 +111,7 @@ describe('TransactionDetailFlyoutTraceSample', () => {
   it('opens the full-trace flyout when a waterfall node is clicked', () => {
     const openFullTraceFlyout = jest.fn();
     mockedUseTransactionDetailFlyoutContext.mockReturnValue({
+      deps: { core: { notifications: { toasts: { addDanger: jest.fn() } } } },
       filters: FILTERS,
       openFullTraceFlyout,
     });

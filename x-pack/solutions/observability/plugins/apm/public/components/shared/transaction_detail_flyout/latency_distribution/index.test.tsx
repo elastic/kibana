@@ -41,7 +41,10 @@ const FILTERS = {
 
 describe('TransactionDetailFlyoutLatencyDistribution', () => {
   beforeEach(() => {
-    mockedUseTransactionDetailFlyoutContext.mockReturnValue({ filters: FILTERS });
+    mockedUseTransactionDetailFlyoutContext.mockReturnValue({
+      deps: { core: { notifications: { toasts: { addDanger: jest.fn() } } } },
+      filters: FILTERS,
+    });
     mockedUseTransactionDetailFlyoutDistributionChartData.mockReturnValue({
       chartData: [
         {

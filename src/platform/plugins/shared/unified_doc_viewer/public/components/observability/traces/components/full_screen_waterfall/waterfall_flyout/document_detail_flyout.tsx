@@ -22,6 +22,7 @@ interface FlyoutContentProps {
   data: DocumentFlyoutData;
   dataView: DocViewRenderProps['dataView'];
   activeSection?: TraceOverviewSections;
+  traceId: string;
 }
 
 interface FlyoutConfig {
@@ -33,11 +34,16 @@ const getFlyoutConfig = (type: TraceDocFlyoutType): FlyoutConfig => {
   if (type === 'span') {
     return {
       contentId: FlyoutContentId.SPAN_DETAIL,
-      render: ({ data, dataView, activeSection }) => {
+      render: ({ data, dataView, activeSection, traceId }) => {
         if (!data.hit) return null;
 
         return (
-          <SpanFlyoutContent hit={data.hit} dataView={dataView} activeSection={activeSection} />
+          <SpanFlyoutContent
+            hit={data.hit}
+            dataView={dataView}
+            activeSection={activeSection}
+            traceId={traceId}
+          />
         );
       },
     };
@@ -100,7 +106,7 @@ export function DocumentDetailFlyout({
       size={size}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
-      {flyoutConfig.render({ data, dataView, activeSection })}
+      {flyoutConfig.render({ data, dataView, activeSection, traceId })}
     </WaterfallFlyout>
   );
 }

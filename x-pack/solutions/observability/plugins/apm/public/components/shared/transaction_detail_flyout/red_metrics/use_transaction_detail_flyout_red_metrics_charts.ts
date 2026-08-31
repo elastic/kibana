@@ -12,7 +12,6 @@ import type { LatencyAggregationType } from '../../../../../common/latency_aggre
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { ChartType, getTimeSeriesColor } from '../../charts/helper/get_timeseries_color';
 import type { TransactionDetailFlyoutFilters } from '../types';
@@ -101,15 +100,14 @@ export function useTransactionDetailFlyoutRedMetricsCharts({
     ]
   );
 
-  const previousPeriodLabel = usePreviousPeriodLabel();
   const latencyChartsData = useMemo(
     () =>
       getLatencyChartSelector({
         latencyChart: latencyData,
         latencyAggregationType,
-        previousPeriodLabel,
+        previousPeriodLabel: '',
       }),
-    [latencyData, latencyAggregationType, previousPeriodLabel]
+    [latencyData, latencyAggregationType]
   );
 
   const {

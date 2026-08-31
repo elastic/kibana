@@ -8,6 +8,8 @@
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick, WaterfallGetErrorMarkerHref } from '@kbn/apm-types';
+import type { CoreStart } from '@kbn/core/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -38,6 +40,14 @@ interface Props {
    * rely on `onErrorClick` → document flyout instead of route-param-based hrefs.
    */
   getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
+  /**
+   * Host-provided services for embedders without ApmPluginContext (e.g. Discover).
+   * Falls back to useApmPluginContext when omitted (APM app).
+   */
+  deps?: {
+    core: CoreStart;
+    share?: SharePublicStart;
+  };
 }
 
 export function TraceWaterfallFlyout({
@@ -49,9 +59,12 @@ export function TraceWaterfallFlyout({
   contextSpanIds,
   historyKey = TRACE_WATERFALL_FLYOUT_HISTORY_KEY,
   getErrorMarkerHref,
+  deps,
 }: Props) {
   const { callApmApi } = getApmInternalServices();
-  const { core } = useApmPluginContext();
+  const apmPluginContext = useApmPluginContext();
+  const core = deps?.core ?? apmPluginContext.core;
+  const share = deps?.share ?? apmPluginContext.share;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView, apmIndices } = useAdHocApmDataView();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
@@ -110,6 +123,7 @@ export function TraceWaterfallFlyout({
       historyKey={historyKey}
       onClose={onClose}
       size="m"
+      ownFocus={false}
       aria-label={i18n.translate('xpack.apm.traceWaterfallFlyout.ariaLabel', {
         defaultMessage: 'Full trace waterfall flyout',
       })}
@@ -141,7 +155,13 @@ export function TraceWaterfallFlyout({
           }}
         />
       </EuiFlyoutBody>
-      <TraceWaterfallFlyoutFooter traceId={traceId} rangeFrom={rangeFrom} rangeTo={rangeTo} />
+      <TraceWaterfallFlyoutFooter
+        traceId={traceId}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        share={share}
+        http={core.http}
+      />
       {selectedDocId && dataView && (
         <UnifiedDocViewerObservabilityTraceDocFlyout
           type={activeFlyoutType}

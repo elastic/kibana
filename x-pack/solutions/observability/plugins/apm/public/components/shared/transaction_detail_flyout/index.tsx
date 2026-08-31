@@ -90,6 +90,7 @@ export function TransactionDetailFlyout({
           onClose={() => setFullTraceFlyout(null)}
           contextSpanIds={fullTraceFlyout.contextSpanIds}
           historyKey={historyKey}
+          deps={deps}
         />
       ) : null}
     </TransactionDetailFlyoutContextProvider>

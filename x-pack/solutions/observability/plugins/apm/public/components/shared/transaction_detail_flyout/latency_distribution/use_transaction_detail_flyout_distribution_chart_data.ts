@@ -12,11 +12,11 @@ import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations
 import { EVENT_OUTCOME } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../../common/latency_distribution_chart_types';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getTransactionDistributionChartData } from '../../../app/correlations/get_transaction_distribution_chart_data';
 import { isErrorMessage } from '../../../app/correlations/utils/is_error_message';
+import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
 import type { TransactionDetailFlyoutFilters } from '../types';
 
 export function useTransactionDetailFlyoutDistributionChartData({
@@ -29,6 +29,11 @@ export function useTransactionDetailFlyoutDistributionChartData({
 }: TransactionDetailFlyoutFilters) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { euiTheme } = useEuiTheme();
+  const {
+    deps: {
+      core: { notifications },
+    },
+  } = useTransactionDetailFlyoutContext();
 
   const params = useMemo(
     () => ({
@@ -42,10 +47,6 @@ export function useTransactionDetailFlyoutDistributionChartData({
     }),
     [serviceName, transactionName, transactionType, environment, start, end]
   );
-
-  const {
-    core: { notifications },
-  } = useApmPluginContext();
 
   const {
     data: overallLatencyData = {},

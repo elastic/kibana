@@ -14,11 +14,6 @@ import { useTransactionDetailFlyoutRedMetricsCharts } from './use_transaction_de
 
 jest.mock('../transaction_detail_flyout_context');
 jest.mock('./use_transaction_detail_flyout_red_metrics_charts');
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: { uiSettings: { get: () => 'UTC' } },
-  }),
-}));
 jest.mock('../../../../context/chart_pointer_event/chart_pointer_event_context', () => ({
   ChartPointerEventContextProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
@@ -55,6 +50,7 @@ const CHARTS_RESULT = {
 describe('TransactionDetailFlyoutRedMetrics', () => {
   beforeEach(() => {
     mockedUseTransactionDetailFlyoutContext.mockReturnValue({
+      deps: { core: { uiSettings: { get: () => 'UTC' } } },
       filters: FILTERS,
     });
     mockedUseTransactionDetailFlyoutRedMetricsCharts.mockReturnValue(CHARTS_RESULT);

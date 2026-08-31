@@ -25,7 +25,6 @@ import {
   asPercent,
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { errorRateI18n } from '../../charts/failed_transaction_rate_chart';
 import { getTimeZone } from '../../charts/helper/timezone';
@@ -126,11 +125,11 @@ function yLabelFormatErrorRate(y?: number | null) {
 export function TransactionDetailFlyoutRedMetrics() {
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
   const { euiTheme } = useEuiTheme();
-  const { filters } = useTransactionDetailFlyoutContext();
   const {
-    core: { uiSettings },
-  } = useApmPluginContext();
-  const timeZone = getTimeZone(uiSettings);
+    deps: { core },
+    filters,
+  } = useTransactionDetailFlyoutContext();
+  const timeZone = getTimeZone(core.uiSettings);
 
   const {
     latencyTimeseries,
