@@ -118,8 +118,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: {
           request: {
             query: schema.object({
-              dataStreams: schema.string(),
-              start: schema.string(),
+              // Comma-joined list of index patterns. Bounded to cap the fan-out of the
+              // msearch the handler builds from it (one sub-query per pattern).
+              dataStreams: schema.string({ maxLength: 4096 }),
+              // Single ISO8601 timestamp.
+              start: schema.string({ maxLength: 64 }),
             }),
           },
           response: {

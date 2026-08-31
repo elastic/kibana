@@ -150,5 +150,19 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx');
       expect(missingDataStreams.status).to.eql(400);
     });
+
+    it('rejects an over-long dataStreams value', async () => {
+      // Exceeds the schema's 4096 maxLength — guards against an unbounded msearch fan-out.
+      const tooManyPatterns = new Array(200).fill('logs-datastreams.test_logs-*').join(',');
+      expect(tooManyPatterns.length).to.be.greaterThan(4096);
+
+      const { status } = await getHasData(tooManyPatterns, START_BEFORE_DOCS);
+      expect(status).to.eql(400);
+    });
+
+    it('rejects an over-long start value', async () => {
+      const { status } = await getHasData(logsPattern, 'x'.repeat(100));
+      expect(status).to.eql(400);
+    });
   });
 }
