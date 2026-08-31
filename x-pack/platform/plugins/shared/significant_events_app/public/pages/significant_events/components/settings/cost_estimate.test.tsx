@@ -58,6 +58,8 @@ const response = ({
   allSpacesTracked = true,
   totalSpaceCount = 2,
   coveredSpaceCount = 2,
+  canManageTokenTracking = true,
+  monthCoveredSince = '2026-08-01T00:00:00.000Z',
   todayFigure = figure(),
   monthFigure = figure({ estimatedCost: 1.23 }),
 }: {
@@ -66,6 +68,8 @@ const response = ({
   allSpacesTracked?: boolean;
   totalSpaceCount?: number;
   coveredSpaceCount?: number;
+  canManageTokenTracking?: boolean;
+  monthCoveredSince?: string | null;
   todayFigure?: CostFigureResponse;
   monthFigure?: CostFigureResponse;
 } = {}): SignificantEventsCostResponse => {
@@ -105,10 +109,12 @@ const response = ({
     'non_chat_inference_excluded',
     'token_index_write_failures_unrecorded',
     'cache_write_tokens_unavailable',
+    'tracking_changes_outside_control_unobserved',
   ] as const;
 
   return {
     asOf: '2026-08-31T12:00:00.000Z',
+    canManageTokenTracking,
     spaceCoverage: {
       totalSpaceCount,
       coveredSpaceCount,
@@ -124,6 +130,8 @@ const response = ({
       ],
       untrackedSpaces: allSpacesTracked ? [] : [{ id: 'space-a', name: 'Space A' }],
       unavailableSpaceCount: 0,
+      auditUnavailable: false,
+      auditScope: 'significant_events_control_only',
       newSpaces: [],
       fullTrackingSince: '2026-08-01T00:00:00.000Z',
     },
@@ -142,7 +150,9 @@ const response = ({
         unknownFeatureDocumentCount: 0,
         tierCrossings: [],
         priceStale: false,
+        priceUnavailable: false,
         serviceMapStale: false,
+        serviceMapUnavailable: false,
         priceFetchedAt: '2026-08-31T12:00:00.000Z',
         currency,
         knownGaps: [...knownGaps],
@@ -161,14 +171,17 @@ const response = ({
           start: '2026-08-01T00:00:00.000Z',
           end: '2026-09-01T00:00:00.000Z',
           label: monthLabel,
-          fullCoverage: monthLabel === 'month_to_date',
+          fullCoverage: false,
+          ...(monthCoveredSince ? { coveredSince: monthCoveredSince } : {}),
         },
         total: monthFigure,
         groups: tokenGroups,
         unknownFeatureDocumentCount: 0,
         tierCrossings: [],
         priceStale: false,
+        priceUnavailable: false,
         serviceMapStale: false,
+        serviceMapUnavailable: false,
         priceFetchedAt: '2026-08-31T12:00:00.000Z',
         currency,
         knownGaps: [...knownGaps],
@@ -283,6 +296,7 @@ describe('CostEstimate', () => {
     setup(
       response({
         monthLabel: 'unverified_period',
+        monthCoveredSince: null,
         monthFigure: figure({
           estimatedCost: 0,
           coverage: 'partial',
@@ -293,13 +307,29 @@ describe('CostEstimate', () => {
     );
 
     expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent('~$0.21 today');
-    expect(screen.queryByText(/this month/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent(
+      'Unable to calculate recorded this month'
+    );
     expect(screen.queryByText('$0.00')).not.toBeInTheDocument();
     expect(
       screen.getByText(
-        'A calendar-month figure will appear after tracking has been audited for the full period.'
+        'There is no full-month all-space enablement record from this control. The recorded monthly figure is an unverified floor.'
       )
     ).toBeInTheDocument();
+  });
+
+  it('discloses that the MTD watermark only covers this control', () => {
+    setup(
+      response({
+        todayFigure: figure({ coverage: 'partial' }),
+        monthFigure: figure({ coverage: 'partial', estimatedCost: 1.23 }),
+      })
+    );
+
+    expect(
+      screen.getByText(/Changes made through Gen AI Settings or APIs may not be reflected/)
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent('Partial floor');
   });
 
   it('discloses partial space coverage and other-provider usage', () => {
@@ -317,7 +347,9 @@ describe('CostEstimate', () => {
 
     expect(screen.getByText(/Based on 1 of 2 spaces/)).toBeInTheDocument();
     expect(
-      screen.getByText('20% of recorded tokens used third-party providers, which cannot be priced.')
+      screen.getByText(
+        'Today: 20% of recorded tokens used third-party providers, which cannot be priced.'
+      )
     ).toBeInTheDocument();
   });
 
@@ -394,10 +426,78 @@ describe('CostEstimate', () => {
     setup(data);
 
     expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent('Partial floor');
-    expect(screen.getByText(/2 recorded calls have an unknown cost category/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Today: 2 recorded calls have an unknown cost category/)
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Lower-tier prices were used for calls above a prompt threshold: openai-gpt-5.4 (3).'
+        'Today: lower-tier prices were used for calls above a prompt threshold: openai-gpt-5.4 (3).'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('surfaces month-specific warnings when today is clean', () => {
+    const data = response();
+    data.month.tokenIndex.unknownFeatureDocumentCount = 2;
+    data.month.tokenIndex.tierCrossings = [
+      {
+        modelId: 'openai-gpt-5.4',
+        threshold: 272000,
+        documentCount: 3,
+      },
+    ];
+    data.month.tokenIndex.total = figure({
+      coverage: 'partial',
+      nonEisTokenCount: 30,
+      unpricedTokenCount: 30,
+    });
+
+    setup(data);
+
+    expect(
+      screen.getByText(/This month: 2 recorded calls have an unknown cost category/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'This month: lower-tier prices were used for calls above a prompt threshold: openai-gpt-5.4 (3).'
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'This month: 20% of recorded tokens used third-party providers, which cannot be priced.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('distinguishes unavailable reference data from stale cached data', () => {
+    const data = response({
+      todayFigure: figure({ estimatedCost: null, coverage: 'unavailable' }),
+      monthFigure: figure({ estimatedCost: null, coverage: 'unavailable' }),
+    });
+    data.today.tokenIndex.priceUnavailable = true;
+    data.month.tokenIndex.priceUnavailable = true;
+
+    setup(data);
+
+    expect(
+      screen.getByText('Public inference list prices could not be retrieved.')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        'The current price table could not be refreshed, so cached prices were used.'
+      )
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides tracking controls without global Advanced Settings management', () => {
+    setup(response({ canManageTokenTracking: false }));
+
+    expect(
+      screen.queryByTestId('significantEventsAllSpacesTrackingSwitch')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Changing token tracking requires Streams and Advanced Settings management in all spaces.'
       )
     ).toBeInTheDocument();
   });

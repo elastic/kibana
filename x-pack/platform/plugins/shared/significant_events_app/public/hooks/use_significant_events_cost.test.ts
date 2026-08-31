@@ -26,6 +26,8 @@ describe('significant events cost hooks', () => {
   const fetch = jest.fn();
   const invalidateQueries = jest.fn();
   const mutateAsync = jest.fn();
+  const addSuccess = jest.fn();
+  const addWarning = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,8 +42,8 @@ describe('significant events cost hooks', () => {
       core: {
         notifications: {
           toasts: {
-            addSuccess: jest.fn(),
-            addWarning: jest.fn(),
+            addSuccess,
+            addWarning,
             addError: jest.fn(),
           },
         },
@@ -94,6 +96,7 @@ describe('significant events cost hooks', () => {
     };
     fetch.mockResolvedValue({
       enabled: true,
+      auditRecorded: true,
       updatedSpaceIds: ['default'],
       failedSpaces: [],
     });
@@ -110,5 +113,30 @@ describe('significant events cost hooks', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: SIGNIFICANT_EVENTS_COST_QUERY_KEY,
     });
+  });
+
+  it('warns when settings changed but the coverage audit was not recorded', () => {
+    useSetSignificantEventsTokenTracking();
+
+    const options = mockUseMutation.mock.calls[0][0] as unknown as {
+      onSuccess: (result: {
+        enabled: boolean;
+        auditRecorded: boolean;
+        updatedSpaceIds: string[];
+        failedSpaces: [];
+      }) => void;
+    };
+    options.onSuccess({
+      enabled: true,
+      auditRecorded: false,
+      updatedSpaceIds: ['default'],
+      failedSpaces: [],
+    });
+
+    expect(addWarning).toHaveBeenCalledWith({
+      title:
+        'Token tracking changed, but its coverage record could not be saved. Retry the same action.',
+    });
+    expect(addSuccess).not.toHaveBeenCalled();
   });
 });

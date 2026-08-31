@@ -390,13 +390,12 @@ export class InferencePriceService {
   private async refresh(): Promise<PriceServiceResult> {
     try {
       const fetchedAtMs = this.now();
-      const response = await this.fetchWithTimeout();
+      const { response, text } = await this.fetchWithTimeout();
       if (!response.ok) {
         throw new Error(
           `Inference price request failed with ${response.status} ${response.statusText}`
         );
       }
-      const text = await readLimitedResponseText(response, this.maxResponseBytes);
       const catalog = parseInferencePrices({
         response: JSON.parse(text),
         effectiveAt: new Date(fetchedAtMs),
@@ -426,7 +425,10 @@ export class InferencePriceService {
     }
   }
 
-  private async fetchWithTimeout(): Promise<PriceFetchResponse> {
+  private async fetchWithTimeout(): Promise<{
+    response: PriceFetchResponse;
+    text: string;
+  }> {
     const controller = new AbortController();
     let timedOut = false;
     const timeout = setTimeout(() => {
@@ -435,7 +437,11 @@ export class InferencePriceService {
     }, this.fetchTimeoutMs);
     timeout.unref?.();
     try {
-      return await this.fetch(this.url, { signal: controller.signal });
+      const response = await this.fetch(this.url, { signal: controller.signal });
+      const text = response.ok
+        ? await readLimitedResponseText(response, this.maxResponseBytes)
+        : '';
+      return { response, text };
     } catch (error) {
       if (timedOut) {
         throw new Error(`Inference price request timed out after ${this.fetchTimeoutMs}ms`);

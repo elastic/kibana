@@ -75,14 +75,17 @@ export interface TokenIndexCostResult {
   unknownFeatureDocumentCount: number;
   tierCrossings: TierCrossing[];
   priceStale: boolean;
+  priceUnavailable: boolean;
   serviceMapStale: boolean;
-  priceFetchedAt: string;
+  serviceMapUnavailable: boolean;
+  priceFetchedAt: string | null;
   currency: ParsedPriceCatalog['currency'];
   knownGaps: [
     'mid_stream_failures_unrecorded',
     'non_chat_inference_excluded',
     'token_index_write_failures_unrecorded',
-    'cache_write_tokens_unavailable'
+    'cache_write_tokens_unavailable',
+    'tracking_changes_outside_control_unobserved'
   ];
 }
 
@@ -362,7 +365,10 @@ const cellsFromBucket = (bucket: FeatureBucket): TokenCell[] =>
     },
   }));
 
-const periodHasFullTracking = (period: CostPeriod, spaceCoverage: SpaceTrackingCoverage): boolean =>
+const periodHasRecordedTrackingWatermark = (
+  period: CostPeriod,
+  spaceCoverage: SpaceTrackingCoverage
+): boolean =>
   spaceCoverage.currentSpaceTracking === 'enabled' &&
   spaceCoverage.allSpacesTracked &&
   spaceCoverage.fullTrackingSince !== undefined &&
@@ -376,6 +382,7 @@ const buildFigure = ({
   baseCoverageComplete,
   costVisible,
   priceStale,
+  sourceUnavailable,
 }: {
   cells: Iterable<TokenCell>;
   truncated: boolean;
@@ -384,6 +391,7 @@ const buildFigure = ({
   baseCoverageComplete: boolean;
   costVisible: boolean;
   priceStale: boolean;
+  sourceUnavailable: boolean;
 }): CostFigure => {
   let tokens = emptyTokenCounts();
   let estimatedCost = 0;
@@ -440,7 +448,12 @@ const buildFigure = ({
 
   const totalTokenCount = billableTokenCount(tokens);
   const incomplete =
-    !baseCoverageComplete || priceStale || truncated || invalid || unpricedTokenCount > 0;
+    !baseCoverageComplete ||
+    priceStale ||
+    sourceUnavailable ||
+    truncated ||
+    invalid ||
+    unpricedTokenCount > 0;
   const coverage: CostCoverageState = !costVisible
     ? 'unavailable'
     : totalTokenCount === 0
@@ -492,16 +505,20 @@ const buildFigure = ({
 export const aggregateSignificantEventsTokenCost = async ({
   esClient,
   priceResult,
+  priceUnavailable = false,
   serviceMap,
   serviceMapStale = false,
+  serviceMapUnavailable = false,
   spaceCoverage,
   period,
   logger,
 }: {
   esClient: ElasticsearchClient;
   priceResult: PriceServiceResult;
+  priceUnavailable?: boolean;
   serviceMap: InferenceServiceMap;
   serviceMapStale?: boolean;
+  serviceMapUnavailable?: boolean;
   spaceCoverage: SpaceTrackingCoverage;
   period: CostPeriod;
   logger: Pick<Logger, 'error' | 'warn'>;
@@ -552,9 +569,12 @@ export const aggregateSignificantEventsTokenCost = async ({
     );
   }
 
-  const fullTracking = periodHasFullTracking(period, spaceCoverage);
+  const hasRecordedTrackingWatermark = periodHasRecordedTrackingWatermark(period, spaceCoverage);
   const costVisible = spaceCoverage.currentSpaceTracking === 'enabled';
-  const baseCoverageComplete = fullTracking && spaceCoverage.unavailableSpaceCount === 0;
+  // This audit is written only by the Significant Events all-spaces control. Other UI-settings
+  // writers are not observable here, so it can permit an MTD label but never prove completeness.
+  const baseCoverageComplete = false;
+  const sourceUnavailable = priceUnavailable || serviceMapUnavailable;
   const groups = Object.fromEntries(
     RUN_BUDGET_GROUP_IDS.map((group) => [
       group,
@@ -566,6 +586,7 @@ export const aggregateSignificantEventsTokenCost = async ({
         baseCoverageComplete,
         costVisible,
         priceStale: priceResult.stale || serviceMapStale,
+        sourceUnavailable,
       }),
     ])
   ) as Record<RunBudgetGroupId, CostFigure>;
@@ -587,7 +608,11 @@ export const aggregateSignificantEventsTokenCost = async ({
     period: {
       ...period,
       label:
-        period.kind === 'today' ? 'today' : fullTracking ? 'month_to_date' : 'unverified_period',
+        period.kind === 'today'
+          ? 'today'
+          : hasRecordedTrackingWatermark
+          ? 'month_to_date'
+          : 'unverified_period',
       fullCoverage: baseCoverageComplete,
       ...(spaceCoverage.fullTrackingSince ? { coveredSince: spaceCoverage.fullTrackingSince } : {}),
     },
@@ -599,19 +624,23 @@ export const aggregateSignificantEventsTokenCost = async ({
       baseCoverageComplete: baseCoverageComplete && unknownFeatureDocumentCount === 0,
       costVisible,
       priceStale: priceResult.stale || serviceMapStale,
+      sourceUnavailable,
     }),
     groups,
     unknownFeatureDocumentCount: costVisible ? unknownFeatureDocumentCount : 0,
     tierCrossings: costVisible ? tierCrossings : [],
     priceStale: priceResult.stale,
+    priceUnavailable,
     serviceMapStale,
-    priceFetchedAt: priceResult.fetchedAt,
+    serviceMapUnavailable,
+    priceFetchedAt: priceResult.fetchedAt || null,
     currency: priceResult.catalog.currency,
     knownGaps: [
       'mid_stream_failures_unrecorded',
       'non_chat_inference_excluded',
       'token_index_write_failures_unrecorded',
       'cache_write_tokens_unavailable',
+      'tracking_changes_outside_control_unobserved',
     ],
   };
 };

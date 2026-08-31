@@ -90,7 +90,9 @@ const tokenIndexResult = (
     unknownFeatureDocumentCount: 0,
     tierCrossings: [],
     priceStale: false,
+    priceUnavailable: false,
     serviceMapStale: false,
+    serviceMapUnavailable: false,
     priceFetchedAt: '2026-08-31T12:00:00.000Z',
     currency: { code: 'USD', symbol: '$', assumed: true, unit: '1M Token' },
     knownGaps: [
@@ -98,6 +100,7 @@ const tokenIndexResult = (
       'non_chat_inference_excluded',
       'token_index_write_failures_unrecorded',
       'cache_write_tokens_unavailable',
+      'tracking_changes_outside_control_unobserved',
     ],
   };
 };
@@ -334,6 +337,24 @@ describe('detectTrackingGapRanges', () => {
         source: 'inferred',
       },
     ]);
+  });
+
+  it('uses next-day token surplus for workflows that cross UTC midnight', () => {
+    expect(
+      detectTrackingGapRanges({
+        workflowByDay: new Map([
+          ['2026-08-10', 100],
+          ['2026-08-11', 40],
+        ]),
+        tokenIndexByDay: new Map([
+          ['2026-08-10', 0],
+          ['2026-08-11', 140],
+        ]),
+        audit: undefined,
+        currentSpaceIds: ['default'],
+        period: PERIOD,
+      })
+    ).toEqual([]);
   });
 
   it('prefers exact audit boundaries over an overlapping inferred day', () => {

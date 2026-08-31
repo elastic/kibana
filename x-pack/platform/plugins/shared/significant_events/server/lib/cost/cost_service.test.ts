@@ -111,6 +111,8 @@ const completeSpaceCoverage = (
   unavailableSpaceCount: 0,
   allSpacesTracked: true,
   fullTrackingSince: '2026-08-01T00:00:00.000Z',
+  auditUnavailable: false,
+  auditScope: 'significant_events_control_only',
   untrackedSpaces: [],
   newSpaces: [],
   ...overrides,
@@ -243,12 +245,12 @@ describe('aggregateSignificantEventsTokenCost', () => {
     });
 
     expect(result.source).toBe('token_index');
-    expect(result.groups.detection.coverage).toBe('complete');
+    expect(result.groups.detection.coverage).toBe('partial');
     expect(result.groups.detection.estimatedCost).toBeCloseTo(310 / 1_000_000 + 1200 / 1_000_000);
     expect(result.total.estimatedCost).toBe(result.groups.detection.estimatedCost);
     expect(result.groups.memory).toMatchObject({
-      coverage: 'complete',
-      estimatedCost: 0,
+      coverage: 'unavailable',
+      estimatedCost: null,
     });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('5 thinking tokens'));
 
@@ -353,7 +355,7 @@ describe('aggregateSignificantEventsTokenCost', () => {
     expect(result.unknownFeatureDocumentCount).toBe(4);
     expect(result.total.estimatedCost).toBeGreaterThan(0);
     expect(result.total.coverage).toBe('partial');
-    expect(result.groups.detection.estimatedCost).toBe(0);
+    expect(result.groups.detection.estimatedCost).toBeNull();
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('unknown inference feature ids')
     );
@@ -444,7 +446,7 @@ describe('aggregateSignificantEventsTokenCost', () => {
     });
   });
 
-  it('permits a complete zero only with audited coverage for the full period', async () => {
+  it('uses the audit watermark for the MTD label without claiming complete coverage', async () => {
     const { client } = esClientFor({});
 
     const result = await aggregateSignificantEventsTokenCost({
@@ -452,13 +454,22 @@ describe('aggregateSignificantEventsTokenCost', () => {
       priceResult: priceResult(),
       serviceMap: serviceMap(),
       spaceCoverage: completeSpaceCoverage(),
-      period: PERIOD,
+      period: {
+        kind: 'month',
+        start: '2026-08-01T00:00:00.000Z',
+        end: '2026-09-01T00:00:00.000Z',
+      },
       logger,
     });
 
+    expect(result.period).toMatchObject({
+      label: 'month_to_date',
+      fullCoverage: false,
+      coveredSince: '2026-08-01T00:00:00.000Z',
+    });
     expect(result.total).toMatchObject({
-      coverage: 'complete',
-      estimatedCost: 0,
+      coverage: 'unavailable',
+      estimatedCost: null,
     });
   });
 });

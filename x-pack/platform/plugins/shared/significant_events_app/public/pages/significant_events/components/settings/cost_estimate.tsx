@@ -29,6 +29,7 @@ import type {
   CostFigureResponse,
   RunBudgetGroupId,
   SignificantEventsCostResponse,
+  TokenIndexCostResponse,
 } from '@kbn/significant-events-plugin/common';
 import {
   useSetSignificantEventsTokenTracking,
@@ -332,6 +333,7 @@ export const CostEstimate = ({
     prefix: 'disableTokenTrackingTitle',
   });
   const data = canManage ? cost.data : undefined;
+  const canManageTokenTracking = data?.canManageTokenTracking === true;
   const untrackedNewSpaces = useMemo(() => {
     if (!data) {
       return [];
@@ -351,17 +353,17 @@ export const CostEstimate = ({
         figure: data.today.tokenIndex.total,
         currency: data.today.tokenIndex.currency,
       }) ?? unable;
-    if (data.month.tokenIndex.period.label !== 'month_to_date') {
-      return i18n.translate('xpack.significantEventsApp.cost.todayHeadline', {
-        defaultMessage: '{today} today',
-        values: { today },
-      });
-    }
     const month =
       formatApproximateCost({
         figure: data.month.tokenIndex.total,
         currency: data.month.tokenIndex.currency,
       }) ?? unable;
+    if (data.month.tokenIndex.period.label !== 'month_to_date') {
+      return i18n.translate('xpack.significantEventsApp.cost.todayAndRecordedMonthHeadline', {
+        defaultMessage: '{today} today · {month} recorded this month',
+        values: { today, month },
+      });
+    }
     return i18n.translate('xpack.significantEventsApp.cost.todayAndMonthHeadline', {
       defaultMessage: '{today} today · {month} this month',
       values: { today, month },
@@ -376,27 +378,65 @@ export const CostEstimate = ({
       return [];
     }
     const warnings: string[] = [];
-    if (data.today.tokenIndex.unknownFeatureDocumentCount > 0) {
+    const addPeriodWarnings = (tokenIndex: TokenIndexCostResponse, period: string) => {
+      if (tokenIndex.unknownFeatureDocumentCount > 0) {
+        warnings.push(
+          i18n.translate('xpack.significantEventsApp.cost.unknownFeatureWarning', {
+            defaultMessage:
+              '{period}: {count, plural, one {# recorded call has} other {# recorded calls have}} an unknown cost category, so the headline and group totals may not reconcile.',
+            values: {
+              period,
+              count: tokenIndex.unknownFeatureDocumentCount,
+            },
+          })
+        );
+      }
+      if (tokenIndex.tierCrossings.length > 0) {
+        warnings.push(
+          i18n.translate('xpack.significantEventsApp.cost.priceTierCrossingWarning', {
+            defaultMessage:
+              '{period}: lower-tier prices were used for calls above a prompt threshold: {crossings}.',
+            values: {
+              period,
+              crossings: tokenIndex.tierCrossings
+                .map(({ modelId, documentCount }) => `${modelId} (${documentCount})`)
+                .join(', '),
+            },
+          })
+        );
+      }
+      if (tokenIndex.total.nonEisTokenCount > 0) {
+        warnings.push(
+          i18n.translate('xpack.significantEventsApp.cost.nonEisClause', {
+            defaultMessage:
+              '{period}: {percentage}% of recorded tokens used {sources}, which cannot be priced.',
+            values: {
+              period,
+              percentage: Math.round(
+                (tokenIndex.total.nonEisTokenCount / billableTokens(tokenIndex.total)) * 100
+              ),
+              sources: nonEisSourceLabel(tokenIndex.total),
+            },
+          })
+        );
+      }
+    };
+    addPeriodWarnings(
+      data.today.tokenIndex,
+      i18n.translate('xpack.significantEventsApp.cost.todayPeriodLabel', {
+        defaultMessage: 'Today',
+      })
+    );
+    addPeriodWarnings(
+      data.month.tokenIndex,
+      i18n.translate('xpack.significantEventsApp.cost.monthPeriodLabel', {
+        defaultMessage: 'This month',
+      })
+    );
+    if (data.today.tokenIndex.priceUnavailable) {
       warnings.push(
-        i18n.translate('xpack.significantEventsApp.cost.unknownFeatureWarning', {
-          defaultMessage:
-            '{count, plural, one {# recorded call has} other {# recorded calls have}} an unknown cost category, so the headline and group totals may not reconcile.',
-          values: {
-            count: data.today.tokenIndex.unknownFeatureDocumentCount,
-          },
-        })
-      );
-    }
-    if (data.today.tokenIndex.tierCrossings.length > 0) {
-      warnings.push(
-        i18n.translate('xpack.significantEventsApp.cost.priceTierCrossingWarning', {
-          defaultMessage:
-            'Lower-tier prices were used for calls above a prompt threshold: {crossings}.',
-          values: {
-            crossings: data.today.tokenIndex.tierCrossings
-              .map(({ modelId, documentCount }) => `${modelId} (${documentCount})`)
-              .join(', '),
-          },
+        i18n.translate('xpack.significantEventsApp.cost.unavailablePriceWarning', {
+          defaultMessage: 'Public inference list prices could not be retrieved.',
         })
       );
     }
@@ -405,6 +445,13 @@ export const CostEstimate = ({
         i18n.translate('xpack.significantEventsApp.cost.stalePriceWarning', {
           defaultMessage:
             'The current price table could not be refreshed, so cached prices were used.',
+        })
+      );
+    }
+    if (data.today.tokenIndex.serviceMapUnavailable) {
+      warnings.push(
+        i18n.translate('xpack.significantEventsApp.cost.unavailableServiceMapWarning', {
+          defaultMessage: 'Inference endpoint details could not be retrieved.',
         })
       );
     }
@@ -422,6 +469,14 @@ export const CostEstimate = ({
           defaultMessage:
             'Token tracking state could not be read in {count, plural, one {# space} other {# spaces}}.',
           values: { count: data.spaceCoverage.unavailableSpaceCount },
+        })
+      );
+    }
+    if (data.spaceCoverage.auditUnavailable) {
+      warnings.push(
+        i18n.translate('xpack.significantEventsApp.cost.unavailableTrackingAuditWarning', {
+          defaultMessage:
+            'The tracking audit could not be read, so the monthly coverage period is unverified.',
         })
       );
     }
@@ -444,7 +499,7 @@ export const CostEstimate = ({
             </h4>
           </EuiTitle>
         </EuiFlexItem>
-        {canManage && data && (
+        {canManageTokenTracking && data && (
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={i18n.translate(
@@ -488,6 +543,23 @@ export const CostEstimate = ({
           })}
         />
       )}
+      {data && !canManageTokenTracking && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="primary"
+            iconType="info"
+            title={i18n.translate(
+              'xpack.significantEventsApp.cost.trackingPrivilegeRequiredTitle',
+              {
+                defaultMessage:
+                  'Changing token tracking requires Streams and Advanced Settings management in all spaces.',
+              }
+            )}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {data && untrackedNewSpaces.length > 0 && (
         <>
@@ -504,11 +576,13 @@ export const CostEstimate = ({
               },
             })}
           >
-            <EuiButton size="s" onClick={enableAll} isLoading={isUpdating}>
-              {i18n.translate('xpack.significantEventsApp.cost.enableAllSpacesButtonLabel', {
-                defaultMessage: 'Enable for all spaces',
-              })}
-            </EuiButton>
+            {canManageTokenTracking && (
+              <EuiButton size="s" onClick={enableAll} isLoading={isUpdating}>
+                {i18n.translate('xpack.significantEventsApp.cost.enableAllSpacesButtonLabel', {
+                  defaultMessage: 'Enable for all spaces',
+                })}
+              </EuiButton>
+            )}
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
@@ -531,11 +605,13 @@ export const CostEstimate = ({
                 })
           }
         >
-          <EuiButton size="s" onClick={enableAll} isLoading={isUpdating}>
-            {i18n.translate('xpack.significantEventsApp.cost.enableTrackingButtonLabel', {
-              defaultMessage: 'Enable in all spaces',
-            })}
-          </EuiButton>
+          {canManageTokenTracking && (
+            <EuiButton size="s" onClick={enableAll} isLoading={isUpdating}>
+              {i18n.translate('xpack.significantEventsApp.cost.enableTrackingButtonLabel', {
+                defaultMessage: 'Enable in all spaces',
+              })}
+            </EuiButton>
+          )}
         </EuiCallOut>
       )}
 
@@ -579,16 +655,33 @@ export const CostEstimate = ({
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {data.month.tokenIndex.period.label !== 'month_to_date' && (
-            <EuiText size="xs" color="subdued">
-              <p>
-                {i18n.translate('xpack.significantEventsApp.cost.monthFigureWithheld', {
-                  defaultMessage:
-                    'A calendar-month figure will appear after tracking has been audited for the full period.',
-                })}
-              </p>
-            </EuiText>
-          )}
+          <EuiText size="xs" color="subdued">
+            <p>
+              {data.month.tokenIndex.period.label === 'month_to_date' &&
+              data.month.tokenIndex.period.coveredSince
+                ? i18n.translate('xpack.significantEventsApp.cost.monthAuditDisclosure', {
+                    defaultMessage:
+                      'Tracking was last enabled across all spaces through this control on {date, date, medium}. It is currently enabled in {covered} of {total} spaces. Changes made through Gen AI Settings or APIs may not be reflected.',
+                    values: {
+                      date: new Date(data.month.tokenIndex.period.coveredSince),
+                      covered: data.spaceCoverage.coveredSpaceCount,
+                      total: data.spaceCoverage.totalSpaceCount,
+                    },
+                  })
+                : data.month.tokenIndex.period.coveredSince
+                ? i18n.translate('xpack.significantEventsApp.cost.partialMonthAuditDisclosure', {
+                    defaultMessage:
+                      'This control recorded all-space tracking from {date, date, medium}. The recorded monthly figure is an unverified floor.',
+                    values: {
+                      date: new Date(data.month.tokenIndex.period.coveredSince),
+                    },
+                  })
+                : i18n.translate('xpack.significantEventsApp.cost.missingMonthAuditDisclosure', {
+                    defaultMessage:
+                      'There is no full-month all-space enablement record from this control. The recorded monthly figure is an unverified floor.',
+                  })}
+            </p>
+          </EuiText>
           <EuiText size="xs" color="subdued">
             <p>
               {data.spaceCoverage.coveredSpaceCount < data.spaceCoverage.totalSpaceCount &&
@@ -629,24 +722,6 @@ export const CostEstimate = ({
                 </ul>
               </EuiCallOut>
             </>
-          )}
-          {data.today.tokenIndex.total.nonEisTokenCount > 0 && (
-            <EuiText size="xs" color="subdued">
-              <p>
-                {i18n.translate('xpack.significantEventsApp.cost.nonEisClause', {
-                  defaultMessage:
-                    '{percentage}% of recorded tokens used {sources}, which cannot be priced.',
-                  values: {
-                    percentage: Math.round(
-                      (data.today.tokenIndex.total.nonEisTokenCount /
-                        billableTokens(data.today.tokenIndex.total)) *
-                        100
-                    ),
-                    sources: nonEisSourceLabel(data.today.tokenIndex.total),
-                  },
-                })}
-              </p>
-            </EuiText>
           )}
           <EuiSpacer size="m" />
           <EuiFlexGroup>

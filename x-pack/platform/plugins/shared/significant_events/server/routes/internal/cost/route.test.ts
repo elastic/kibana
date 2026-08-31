@@ -10,6 +10,8 @@ import type { SignificantEventsServer } from '../../../types';
 import { internalCostRoutes } from './route';
 
 const mockAssertGlobal = jest.fn();
+const mockAssertTokenTrackingGlobal = jest.fn();
+const mockCanManageTokenTrackingGlobal = jest.fn();
 const mockCreateAccess = jest.fn().mockReturnValue({ access: true });
 const mockCreateAuditRepository = jest.fn().mockReturnValue({ repository: true });
 const mockSetTracking = jest.fn();
@@ -20,6 +22,9 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
 
 jest.mock('../../../lib/run_quotas/privileges', () => ({
   assertCanManageSignificantEventsGlobally: (...args: unknown[]) => mockAssertGlobal(...args),
+  assertCanManageTokenTrackingGlobally: (...args: unknown[]) =>
+    mockAssertTokenTrackingGlobal(...args),
+  canManageTokenTrackingGlobally: (...args: unknown[]) => mockCanManageTokenTrackingGlobal(...args),
 }));
 
 jest.mock('../../../lib/cost/space_coverage', () => ({
@@ -61,6 +66,8 @@ describe('cost routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAssertGlobal.mockResolvedValue(undefined);
+    mockAssertTokenTrackingGlobal.mockResolvedValue(undefined);
+    mockCanManageTokenTrackingGlobal.mockResolvedValue(true);
   });
 
   it.each([getRoute, putTrackingRoute])(
@@ -77,6 +84,7 @@ describe('cost routes', () => {
 
     await expect(getRoute.handler(params as never)).resolves.toEqual({
       asOf: '2026-08-31T12:00:00.000Z',
+      canManageTokenTracking: true,
     });
 
     expect(mockAssertGlobal).toHaveBeenCalledWith(
@@ -96,6 +104,7 @@ describe('cost routes', () => {
     const params = createHandlerParams();
     mockSetTracking.mockResolvedValue({
       enabled: true,
+      auditRecorded: true,
       updatedSpaceIds: ['default', 'space-a'],
       failedSpaces: [],
     });
@@ -107,6 +116,7 @@ describe('cost routes', () => {
       } as never)
     ).resolves.toEqual({
       enabled: true,
+      auditRecorded: true,
       updatedSpaceIds: ['default', 'space-a'],
       failedSpaces: [],
     });
@@ -116,6 +126,10 @@ describe('cost routes', () => {
       auditRepository: { repository: true },
       enabled: true,
       changedBy: 'elastic',
+    });
+    expect(mockAssertTokenTrackingGlobal).toHaveBeenCalledWith({
+      request: params.request,
+      server: params.server,
     });
     expect(params.invalidate).toHaveBeenCalledTimes(1);
   });
@@ -140,5 +154,19 @@ describe('cost routes', () => {
 
     await expect(getRoute.handler(params as never)).rejects.toThrow('forbidden');
     expect(params.getCost).not.toHaveBeenCalled();
+  });
+
+  it('does not change tracking without global Streams and Advanced Settings management', async () => {
+    const params = createHandlerParams();
+    mockAssertTokenTrackingGlobal.mockRejectedValue(new Error('forbidden'));
+
+    await expect(
+      putTrackingRoute.handler({
+        ...params,
+        params: { body: { enabled: true } },
+      } as never)
+    ).rejects.toThrow('forbidden');
+
+    expect(mockSetTracking).not.toHaveBeenCalled();
   });
 });

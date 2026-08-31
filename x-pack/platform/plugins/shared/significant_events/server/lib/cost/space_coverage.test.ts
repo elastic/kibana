@@ -109,6 +109,8 @@ describe('space tracking coverage', () => {
       totalSpaceCount: 2,
       unavailableSpaceCount: 0,
       allSpacesTracked: false,
+      auditUnavailable: false,
+      auditScope: 'significant_events_control_only',
       untrackedSpaces: [{ id: 'space-a', name: 'Space A' }],
       newSpaces: spaces,
     });
@@ -255,5 +257,57 @@ describe('setTokenUsageTrackingInAllSpaces', () => {
     ]);
     expect(state.get('default')).toBe(false);
     expect(state.get('space-a')).toBe(true);
+  });
+
+  it('repairs a missing audit transition when a settings write succeeded before audit failed', async () => {
+    const repository = createInMemoryRunQuotaRepository();
+    const { access, state } = createAccess({
+      initial: { default: false, 'space-a': false },
+    });
+    await setTokenUsageTrackingInAllSpaces({
+      access,
+      auditRepository: repository.client,
+      enabled: false,
+      changedBy: 'operator',
+      now: new Date('2026-08-01T00:00:00.000Z'),
+    });
+    jest.spyOn(repository.client, 'update').mockRejectedValueOnce(new Error('audit unavailable'));
+
+    await expect(
+      setTokenUsageTrackingInAllSpaces({
+        access,
+        auditRepository: repository.client,
+        enabled: true,
+        changedBy: 'operator',
+        now: new Date('2026-08-02T00:00:00.000Z'),
+      })
+    ).resolves.toMatchObject({
+      auditRecorded: false,
+      auditError: 'audit unavailable',
+    });
+    expect([...state.values()]).toEqual([true, true]);
+
+    const repaired = await setTokenUsageTrackingInAllSpaces({
+      access,
+      auditRepository: repository.client,
+      enabled: true,
+      changedBy: 'operator',
+      now: new Date('2026-08-03T00:00:00.000Z'),
+    });
+
+    expect(repaired.audit?.events.slice(-2)).toEqual([
+      {
+        spaceId: 'default',
+        enabled: true,
+        changedAt: '2026-08-03T00:00:00.000Z',
+        changedBy: 'operator',
+      },
+      {
+        spaceId: 'space-a',
+        enabled: true,
+        changedAt: '2026-08-03T00:00:00.000Z',
+        changedBy: 'operator',
+      },
+    ]);
   });
 });

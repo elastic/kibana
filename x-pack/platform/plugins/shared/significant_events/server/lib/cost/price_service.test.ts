@@ -290,6 +290,33 @@ describe('InferencePriceService', () => {
     await result;
   });
 
+  it('keeps the timeout active while streaming the response body', async () => {
+    jest.useFakeTimers();
+    const fetch = jest.fn((_url: string, { signal }: { signal: AbortSignal }) => {
+      const body = new ReadableStream<Uint8Array>({
+        start: (controller) => {
+          signal.addEventListener('abort', () => {
+            const error = new Error('aborted');
+            error.name = 'AbortError';
+            controller.error(error);
+          });
+        },
+      });
+      return Promise.resolve(new Response(body));
+    });
+    const service = new InferencePriceService({
+      logger,
+      fetch,
+      now: () => now,
+      fetchTimeoutMs: 100,
+    });
+
+    const result = expect(service.getPrices()).rejects.toThrow('timed out after 100ms');
+    await jest.advanceTimersByTimeAsync(101);
+
+    await result;
+  });
+
   it('rejects streamed responses that exceed the configured byte limit', async () => {
     const fetch = jest.fn().mockResolvedValue(new Response('12345'));
     const service = new InferencePriceService({

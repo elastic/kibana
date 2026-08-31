@@ -161,12 +161,16 @@ const priceStep = ({
   bucket,
   serviceMap,
   serviceMapStale,
+  serviceMapUnavailable,
   priceResult,
+  priceUnavailable,
 }: {
   bucket: StepBucket;
   serviceMap: InferenceServiceMap;
   serviceMapStale: boolean;
+  serviceMapUnavailable: boolean;
   priceResult: PriceServiceResult;
+  priceUnavailable: boolean;
 }): WorkflowStepAttribution => {
   const [stepId, connectorId] = bucket.key;
   const tokens: TokenCounts = {
@@ -200,7 +204,9 @@ const priceStep = ({
     calculation.invalid ||
     calculation.unpricedTokenCount > 0 ||
     priceResult.stale ||
-    serviceMapStale
+    priceUnavailable ||
+    serviceMapStale ||
+    serviceMapUnavailable
       ? 'partial'
       : 'complete';
   return {
@@ -417,9 +423,18 @@ export const detectTrackingGapRanges = ({
   const inferred = [...workflowByDay.entries()].flatMap(
     ([day, workflowTokens]): TrackingGapRange[] => {
       const tokenIndexTokens = tokenIndexByDay.get(day) ?? 0;
+      const nextDay = new Date(`${day}T00:00:00.000Z`);
+      nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+      const nextDayKey = nextDay.toISOString().slice(0, 10);
+      const nextDaySurplus = Math.max(
+        0,
+        (tokenIndexByDay.get(nextDayKey) ?? 0) - (workflowByDay.get(nextDayKey) ?? 0)
+      );
+      const missingTokens = Math.max(0, workflowTokens - tokenIndexTokens);
       const gap =
         workflowTokens > 0 &&
-        (tokenIndexTokens === 0 || tokenIndexTokens / workflowTokens < NEAR_ZERO_INDEX_RATIO);
+        (tokenIndexTokens === 0 || tokenIndexTokens / workflowTokens < NEAR_ZERO_INDEX_RATIO) &&
+        nextDaySurplus < missingTokens * (1 - NEAR_ZERO_INDEX_RATIO);
       if (!gap) {
         return [];
       }
@@ -545,8 +560,10 @@ const fetchTrackingGaps = async ({
 export const getWorkflowAttribution = async ({
   esClient,
   priceResult,
+  priceUnavailable = false,
   serviceMap,
   serviceMapStale = false,
+  serviceMapUnavailable = false,
   tokenIndex,
   period,
   audit,
@@ -554,8 +571,10 @@ export const getWorkflowAttribution = async ({
 }: {
   esClient: ElasticsearchClient;
   priceResult: PriceServiceResult;
+  priceUnavailable?: boolean;
   serviceMap: InferenceServiceMap;
   serviceMapStale?: boolean;
+  serviceMapUnavailable?: boolean;
   tokenIndex: TokenIndexCostResult;
   period: CostPeriod;
   audit: CostTrackingAuditAttributes | undefined;
@@ -591,7 +610,9 @@ export const getWorkflowAttribution = async ({
         bucket: stepBucket,
         serviceMap,
         serviceMapStale,
+        serviceMapUnavailable,
         priceResult,
+        priceUnavailable,
       })
     );
     if (steps.length === 0) {

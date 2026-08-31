@@ -59,7 +59,9 @@ export const useSetSignificantEventsTokenTracking = () => {
         }
       )) as SetTokenUsageTrackingResponse,
     onSuccess: (result) => {
+      let hasWarning = false;
       if (result.failedSpaces.length > 0) {
+        hasWarning = true;
         toasts.addWarning({
           title: i18n.translate(
             'xpack.significantEventsApp.cost.trackingPartialSuccessToastTitle',
@@ -70,6 +72,17 @@ export const useSetSignificantEventsTokenTracking = () => {
             }
           ),
         });
+      }
+      if (!result.auditRecorded) {
+        hasWarning = true;
+        toasts.addWarning({
+          title: i18n.translate('xpack.significantEventsApp.cost.trackingAuditFailedToastTitle', {
+            defaultMessage:
+              'Token tracking changed, but its coverage record could not be saved. Retry the same action.',
+          }),
+        });
+      }
+      if (hasWarning) {
         return;
       }
       toasts.addSuccess({

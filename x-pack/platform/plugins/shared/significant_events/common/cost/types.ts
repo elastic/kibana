@@ -50,8 +50,10 @@ export interface TokenIndexCostResponse {
     documentCount: number;
   }>;
   priceStale: boolean;
+  priceUnavailable: boolean;
   serviceMapStale: boolean;
-  priceFetchedAt: string;
+  serviceMapUnavailable: boolean;
+  priceFetchedAt: string | null;
   currency: {
     code: 'USD' | null;
     symbol: '$' | null;
@@ -62,7 +64,8 @@ export interface TokenIndexCostResponse {
     'mid_stream_failures_unrecorded',
     'non_chat_inference_excluded',
     'token_index_write_failures_unrecorded',
-    'cache_write_tokens_unavailable'
+    'cache_write_tokens_unavailable',
+    'tracking_changes_outside_control_unobserved'
   ];
 }
 
@@ -118,6 +121,8 @@ export interface CostSpaceTrackingCoverageResponse {
   unavailableSpaceCount: number;
   allSpacesTracked: boolean;
   fullTrackingSince?: string;
+  auditUnavailable: boolean;
+  auditScope: 'significant_events_control_only';
   untrackedSpaces: Array<{ id: string; name: string }>;
   newSpaces: Array<{ id: string; name: string }>;
 }
@@ -129,6 +134,7 @@ export interface CostPeriodResponse {
 
 export interface SignificantEventsCostResponse {
   asOf: string;
+  canManageTokenTracking?: boolean;
   spaceCoverage: CostSpaceTrackingCoverageResponse;
   today: CostPeriodResponse;
   month: CostPeriodResponse;
@@ -137,6 +143,7 @@ export interface SignificantEventsCostResponse {
 
 export interface SetTokenUsageTrackingResponse {
   enabled: boolean;
+  auditRecorded: boolean;
   updatedSpaceIds: string[];
   failedSpaces: Array<{
     id: string;

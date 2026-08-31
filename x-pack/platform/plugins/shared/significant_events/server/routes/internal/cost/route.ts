@@ -7,7 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { assertCanManageSignificantEventsGlobally } from '../../../lib/run_quotas/privileges';
+import {
+  assertCanManageSignificantEventsGlobally,
+  assertCanManageTokenTrackingGlobally,
+  canManageTokenTrackingGlobally,
+} from '../../../lib/run_quotas/privileges';
 import {
   createCostTrackingAuditRepository,
   createSpaceTrackingAccess,
@@ -36,11 +40,15 @@ const getCostRoute = createServerRoute({
       server,
       message: 'Viewing deployment-wide cost requires Streams manage in all spaces',
     });
-    return costService.getCost({
+    const cost = await costService.getCost({
       request,
       server,
       currentSpaceId: await getSpaceId(request),
     });
+    return {
+      ...cost,
+      canManageTokenTracking: await canManageTokenTrackingGlobally({ request, server }),
+    };
   },
 });
 
@@ -63,11 +71,7 @@ const putTokenUsageTrackingRoute = createServerRoute({
   handler: async ({ params, request, server, getScopedClients, costService, logger }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
-    await assertCanManageSignificantEventsGlobally({
-      request,
-      server,
-      message: 'Changing deployment-wide token tracking requires Streams manage in all spaces',
-    });
+    await assertCanManageTokenTrackingGlobally({ request, server });
     let result: Awaited<ReturnType<typeof setTokenUsageTrackingInAllSpaces>>;
     try {
       result = await setTokenUsageTrackingInAllSpaces({
@@ -90,8 +94,14 @@ const putTokenUsageTrackingRoute = createServerRoute({
         } spaces: ${result.failedSpaces.map(({ id }) => id).join(', ')}`
       );
     }
+    if (result.auditError) {
+      logger.warn(
+        `Token usage tracking was updated, but its coverage audit could not be recorded: ${result.auditError}`
+      );
+    }
     return {
       enabled: result.enabled,
+      auditRecorded: result.auditRecorded,
       updatedSpaceIds: result.updatedSpaceIds,
       failedSpaces: result.failedSpaces,
     };

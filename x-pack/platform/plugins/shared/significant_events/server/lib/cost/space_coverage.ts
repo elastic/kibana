@@ -36,6 +36,8 @@ export interface SpaceTrackingCoverage {
   unavailableSpaceCount: number;
   allSpacesTracked: boolean;
   fullTrackingSince?: string;
+  auditUnavailable: boolean;
+  auditScope: 'significant_events_control_only';
   untrackedSpaces: CostTrackingSpace[];
   newSpaces: CostTrackingSpace[];
 }
@@ -51,6 +53,8 @@ export interface SetAllSpacesTrackingResult {
   updatedSpaceIds: string[];
   failedSpaces: Array<CostTrackingSpace & { error: string }>;
   audit?: CostTrackingAuditAttributes;
+  auditRecorded: boolean;
+  auditError?: string;
 }
 
 export const createCostTrackingAuditRepository = (
@@ -108,11 +112,13 @@ export const createSpaceTrackingAccess = ({
 export const getSpaceTrackingCoverage = async ({
   access,
   audit,
+  auditUnavailable = false,
   currentSpaceId,
   logger,
 }: {
   access: SpaceTrackingAccess;
   audit: CostTrackingAuditAttributes | undefined;
+  auditUnavailable?: boolean;
   currentSpaceId: string;
   logger: Pick<Logger, 'warn'>;
 }): Promise<SpaceTrackingCoverage> => {
@@ -145,7 +151,9 @@ export const getSpaceTrackingCoverage = async ({
     totalSpaceCount: states.length,
     unavailableSpaceCount,
     allSpacesTracked,
-    ...(allSpacesTracked
+    auditUnavailable,
+    auditScope: 'significant_events_control_only',
+    ...(allSpacesTracked && !auditUnavailable
       ? {
           fullTrackingSince: resolveFullTrackingCoverageStart({
             audit,
@@ -203,40 +211,57 @@ export const setTokenUsageTrackingInAllSpaces = async ({
   );
 
   if (updatedSpaces.length === 0) {
-    return { enabled, updatedSpaceIds: [], failedSpaces };
+    return { enabled, updatedSpaceIds: [], failedSpaces, auditRecorded: true };
   }
 
   const changedAt = now.toISOString();
   const updatedSpaceIds = new Set(updatedSpaces.map(({ id }) => id));
-  const audit = await mutateCostTrackingAudit(auditRepository, (current) => {
-    const knownSpaceIds = new Set(current.knownSpaces.map(({ id }) => id));
-    const existingEventKeys = new Set(
-      current.events.map(
-        (event) => `${event.spaceId}:${event.enabled}:${event.changedAt}:${event.changedBy}`
-      )
-    );
-    const events = updatedSpaces.flatMap(({ id }) => {
-      if (previousTracking.get(id) === enabled && knownSpaceIds.has(id)) {
-        return [];
-      }
-      const event = { spaceId: id, enabled, changedAt, changedBy };
-      const key = `${event.spaceId}:${event.enabled}:${event.changedAt}:${event.changedBy}`;
-      return existingEventKeys.has(key) ? [] : [event];
+  let audit: CostTrackingAuditAttributes | undefined;
+  let auditError: string | undefined;
+  try {
+    audit = await mutateCostTrackingAudit(auditRepository, (current) => {
+      const knownSpaceIds = new Set(current.knownSpaces.map(({ id }) => id));
+      const latestEventBySpace = new Map(
+        current.events.map((event) => [event.spaceId, event] as const)
+      );
+      const existingEventKeys = new Set(
+        current.events.map(
+          (event) => `${event.spaceId}:${event.enabled}:${event.changedAt}:${event.changedBy}`
+        )
+      );
+      const events = updatedSpaces.flatMap(({ id }) => {
+        const latestEvent = latestEventBySpace.get(id);
+        if (
+          previousTracking.get(id) === enabled &&
+          knownSpaceIds.has(id) &&
+          latestEvent?.enabled === enabled
+        ) {
+          return [];
+        }
+        const event = { spaceId: id, enabled, changedAt, changedBy };
+        const key = `${event.spaceId}:${event.enabled}:${event.changedAt}:${event.changedBy}`;
+        return existingEventKeys.has(key) ? [] : [event];
+      });
+      const nextKnownSpaces = [
+        ...current.knownSpaces,
+        ...spaces.filter(({ id }) => updatedSpaceIds.has(id) && !knownSpaceIds.has(id)),
+      ];
+      return {
+        events: [...current.events, ...events].slice(-COST_TRACKING_AUDIT_MAX_EVENTS),
+        knownSpaces: nextKnownSpaces,
+      };
     });
-    const nextKnownSpaces = spaces.filter(
-      ({ id }) => updatedSpaceIds.has(id) || knownSpaceIds.has(id)
-    );
-    return {
-      events: [...current.events, ...events].slice(-COST_TRACKING_AUDIT_MAX_EVENTS),
-      knownSpaces: nextKnownSpaces,
-    };
-  });
+  } catch (error) {
+    auditError = errorMessage(error);
+  }
 
   return {
     enabled,
     updatedSpaceIds: updatedSpaces.map(({ id }) => id),
     failedSpaces,
     audit,
+    auditRecorded: auditError === undefined,
+    ...(auditError ? { auditError } : {}),
   };
 };
 

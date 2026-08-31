@@ -30,8 +30,10 @@ export {
 export {
   assertCanManageRunQuotas,
   assertCanManageSignificantEventsGlobally,
+  assertCanManageTokenTrackingGlobally,
   canManageRunQuotas,
   canManageSignificantEventsGlobally,
+  canManageTokenTrackingGlobally,
 } from './privileges';
 export type {
   RunQuotaExecutionReader,
