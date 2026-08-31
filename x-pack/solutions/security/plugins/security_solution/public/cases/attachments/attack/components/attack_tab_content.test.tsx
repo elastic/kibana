@@ -12,6 +12,7 @@ import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { AttackTabContent } from './attack_tab_content';
 import {
+  ATTACK_TAB_COLUMN_ACTIONS_TEST_ID,
   ATTACK_TAB_COLUMN_ALERTS_TEST_ID,
   ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID,
   ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID,
@@ -27,6 +28,8 @@ import {
   ATTACK_TAB_TABLE_TEST_ID,
   REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
   REMOVE_ATTACK_BUTTON_TEST_ID,
+  REMOVE_ATTACK_MODAL_TEST_ID,
+  SHOW_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
@@ -45,8 +48,9 @@ jest.mock('../hooks/use_removable_alert_attachments');
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
 }));
+const mockOpenAttackFlyout = jest.fn();
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: () => ({ openAttackFlyout: jest.fn() }),
+  useFlyoutApi: () => ({ openAttackFlyout: mockOpenAttackFlyout }),
 }));
 jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: () => true,
@@ -134,6 +138,24 @@ const renderAttachments = (comments: unknown[]) =>
   );
 
 const cellTexts = (testId: string) => screen.getAllByTestId(testId).map((cell) => cell.textContent);
+
+/** Both row actions are keyed by the attachment saved object id, not the attack document id. */
+const showAttackButton = (savedObjectId: string) =>
+  screen.getByTestId(`${SHOW_ATTACK_BUTTON_TEST_ID}-${savedObjectId}`);
+
+const removeAttackButton = (savedObjectId: string) =>
+  screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-${savedObjectId}`);
+
+/** The grid cell wrapping a rendered cell body, which is where the grid puts column order. */
+const gridCellOf = (testId: string): HTMLElement => {
+  const cell = screen.getByTestId(testId).closest('[role="gridcell"]');
+
+  if (!(cell instanceof HTMLElement)) {
+    throw new Error(`No grid cell wraps ${testId}`);
+  }
+
+  return cell;
+};
 
 /** Sorts the grid through the column header's own actions, as a user would. */
 const sortColumn = async (columnId: string, label: string) => {
@@ -462,7 +484,7 @@ describe('AttackTabContent', () => {
         'Snapshotted attack title'
       );
       expect(screen.getByTestId(ATTACK_TAB_COLUMN_ALERTS_TEST_ID)).toHaveTextContent('4');
-      expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeDisabled();
+      expect(showAttackButton('so-1')).toBeDisabled();
     });
 
     it('explains itself through a tooltip reachable by keyboard', () => {
@@ -494,8 +516,8 @@ describe('AttackTabContent', () => {
       ]);
 
       expect(screen.getAllByTestId(ATTACK_TAB_ROW_TITLE_TEST_ID)).toHaveLength(2);
-      expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
-      expect(screen.getByTestId('comment-action-show-attack-so-2')).toBeDisabled();
+      expect(showAttackButton('so-1')).toBeEnabled();
+      expect(showAttackButton('so-2')).toBeDisabled();
     });
 
     it('does not mark rows unresolved while the query is still loading', () => {
@@ -504,29 +526,94 @@ describe('AttackTabContent', () => {
       renderTab();
 
       expect(screen.queryByTestId(ATTACK_TAB_ROW_UNRESOLVED_TEST_ID)).not.toBeInTheDocument();
-      expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
+      expect(showAttackButton('so-1')).toBeEnabled();
     });
   });
 
-  describe('row actions', () => {
+  describe('the row actions control column', () => {
     const openRemovalPrompt = async () => {
-      await userEvent.click(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`));
+      await userEvent.click(removeAttackButton('so-1'));
     };
 
     const confirmRemoval = async () => {
       await userEvent.click(screen.getByText('Remove'));
     };
 
+    it('renders both actions on every row', () => {
+      renderAttachments([
+        buildAttachment(),
+        buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
+      ]);
+
+      expect(screen.getAllByTestId(ATTACK_TAB_COLUMN_ACTIONS_TEST_ID)).toHaveLength(2);
+      expect(showAttackButton('so-1')).toBeInTheDocument();
+      expect(removeAttackButton('so-1')).toBeInTheDocument();
+      expect(showAttackButton('so-2')).toBeInTheDocument();
+      expect(removeAttackButton('so-2')).toBeInTheDocument();
+    });
+
+    it('leads the row, ahead of the first data column', () => {
+      renderTab();
+
+      const cells = Array.from(
+        screen.getByTestId(ATTACK_TAB_GRID_TEST_ID).querySelectorAll('[role="gridcell"]')
+      );
+
+      expect(cells.indexOf(gridCellOf(ATTACK_TAB_COLUMN_ACTIONS_TEST_ID))).toBeLessThan(
+        cells.indexOf(gridCellOf(ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID))
+      );
+    });
+
     it('exposes the show attack button on each row', () => {
       renderTab();
 
-      expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
+      expect(showAttackButton('so-1')).toBeEnabled();
     });
 
     it('exposes the remove attack button on each row', () => {
       renderTab();
 
-      expect(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`)).toBeEnabled();
+      expect(removeAttackButton('so-1')).toBeEnabled();
+    });
+
+    it('keeps both actions in the keyboard tab order', async () => {
+      renderTab();
+
+      showAttackButton('so-1').focus();
+      expect(showAttackButton('so-1')).toHaveFocus();
+
+      await userEvent.tab();
+
+      expect(removeAttackButton('so-1')).toHaveFocus();
+    });
+
+    it('opens the attack flyout when the show action is activated by keyboard', async () => {
+      renderTab();
+
+      showAttackButton('so-1').focus();
+      await userEvent.keyboard('{Enter}');
+
+      expect(mockOpenAttackFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ attackId: 'attack-id-1' })
+      );
+    });
+
+    it('opens the removal prompt when the remove action is activated by keyboard', async () => {
+      renderTab();
+
+      removeAttackButton('so-1').focus();
+      await userEvent.keyboard('{Enter}');
+
+      expect(await screen.findByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('offers to remove the related alerts when removing a single attack', async () => {
+      renderTab();
+
+      await openRemovalPrompt();
+
+      expect(screen.getByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID)).toBeEnabled();
     });
 
     it('removes only the attack attachment when the checkbox is left unchecked', async () => {
