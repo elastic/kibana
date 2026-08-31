@@ -94,7 +94,9 @@ export const buildEntityQuery = (opts: BuildEntityQueryOptions): BuiltQuery => {
       queryLines.push(`| WHERE ${metaClause}`);
     }
     queryLines.push(
-      `| KEEP entity.id, ${identityFields.map((_, i) => `??f${i}`).join(', ')}, first_seen, last_seen, doc_count`,
+      `| KEEP entity.id, ${identityFields
+        .map((_, i) => `??f${i}`)
+        .join(', ')}, first_seen, last_seen, doc_count`,
       `| SORT entity.id`,
       `| LIMIT 500`
     );

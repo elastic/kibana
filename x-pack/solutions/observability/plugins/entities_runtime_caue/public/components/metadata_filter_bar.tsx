@@ -194,10 +194,9 @@ export const MetadataFilterBar = ({ fields, onChange }: Props) => {
                 <EuiButtonIcon
                   iconType="trash"
                   color="danger"
-                  aria-label={i18n.translate(
-                    'xpack.entitiesRuntimeCaue.metadataFilter.removeRow',
-                    { defaultMessage: 'Remove condition' }
-                  )}
+                  aria-label={i18n.translate('xpack.entitiesRuntimeCaue.metadataFilter.removeRow', {
+                    defaultMessage: 'Remove condition',
+                  })}
                   onClick={() => removeRow(index)}
                   data-test-subj={`metadataFilterRemove-${index}`}
                 />

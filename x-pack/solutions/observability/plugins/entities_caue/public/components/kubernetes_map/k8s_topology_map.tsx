@@ -33,7 +33,7 @@ export const K8sTopologyMap = ({ items }: Props) => {
   // service map; nodesep is tighter because namespaces fan out more widely.
   const layoutNodes = useMemo(
     () => applyDagreLayout(rawNodes, edges),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [rawNodes, edges]
   );
 

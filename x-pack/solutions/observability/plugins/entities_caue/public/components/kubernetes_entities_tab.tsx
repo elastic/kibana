@@ -54,7 +54,7 @@ const columns: Array<EuiBasicTableColumn<K8sEntity>> = [
     sortable: true,
     width: '160px',
     render: (value: string | string[] | null) =>
-      Array.isArray(value) ? (value[0] ?? '—') : (value ?? '—'),
+      Array.isArray(value) ? value[0] ?? '—' : value ?? '—',
   },
   {
     field: 'entity.lifecycle.first_seen',
