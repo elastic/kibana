@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
 import type { AutoCompleteEntitiesApiResponse, Field } from '../lib/autocomplete_entities/types';
@@ -95,13 +95,8 @@ export class AutocompleteInfo {
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
   public readonly isLoading$ = this._isLoading$.asObservable();
 
-  /**
-   * Emits after every successful autocomplete entities refresh, so consumers
-   * (e.g. the ES|QL sources cache) can invalidate data cached off the previous
-   * refresh and stay on the same clock as REST autocomplete.
-   */
-  private readonly _entitiesRefreshed$ = new Subject<void>();
-  public readonly entitiesRefreshed$ = this._entitiesRefreshed$.asObservable();
+  private entitiesRefreshGeneration = 0;
+  public readonly getEntitiesRefreshGeneration = (): number => this.entitiesRefreshGeneration;
 
   public retrieve(settings: Settings, settingsToRetrieve: DevToolsSettings['autocomplete']) {
     this.clearSubscriptions();
@@ -113,7 +108,7 @@ export class AutocompleteInfo {
       })
       .then((data) => {
         this.load(data);
-        this._entitiesRefreshed$.next();
+        this.entitiesRefreshGeneration += 1;
         // Schedule next request.
         this.pollTimeoutId = setTimeout(() => {
           // This looks strange/inefficient, but it ensures correct behavior because we don't want to send

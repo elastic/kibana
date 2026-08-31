@@ -189,7 +189,7 @@ export const MonacoEditor = ({
     http,
     licensing,
     data,
-    entitiesRefreshed$: autocompleteInfo.entitiesRefreshed$,
+    getEntitiesRefreshGeneration: autocompleteInfo.getEntitiesRefreshGeneration,
   });
 
   const suggestionProvider = useMemo(

@@ -8,8 +8,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { Subject } from 'rxjs';
-import type { Observable } from 'rxjs';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import { serviceContextMock } from '../../../contexts/services_context.mock';
@@ -26,12 +24,12 @@ jest.mock('@kbn/esql-utils', () => ({
 const mockGetESQLSources = getESQLSources as jest.MockedFunction<typeof getESQLSources>;
 const mockGetEsqlColumns = getEsqlColumns as jest.MockedFunction<typeof getEsqlColumns>;
 
-const createParams = (entitiesRefreshed$: Observable<void> = new Subject()) => {
+const createParams = (getEntitiesRefreshGeneration: () => number = () => 0) => {
   const {
     services: { application, http, licensing, data },
   } = serviceContextMock.create();
 
-  return { application, http, licensing, data, entitiesRefreshed$ };
+  return { application, http, licensing, data, getEntitiesRefreshGeneration };
 };
 
 describe('useConsoleEsqlCallbacks', () => {
@@ -79,28 +77,34 @@ describe('useConsoleEsqlCallbacks', () => {
     expect(mockGetESQLSources).toHaveBeenCalledTimes(2);
   });
 
-  it('refetches sources when the entities refresh signal fires', async () => {
-    const entitiesRefreshed$ = new Subject<void>();
-    const { result } = renderHook(() => useConsoleEsqlCallbacks(createParams(entitiesRefreshed$)));
+  it('refetches sources when the entities refresh generation changes', async () => {
+    let entitiesRefreshGeneration = 0;
+    const getEntitiesRefreshGeneration = () => entitiesRefreshGeneration;
+    const { result } = renderHook(() =>
+      useConsoleEsqlCallbacks(createParams(getEntitiesRefreshGeneration))
+    );
 
     await result.current.getSources!();
     expect(mockGetESQLSources).toHaveBeenCalledTimes(1);
 
-    entitiesRefreshed$.next();
+    entitiesRefreshGeneration += 1;
     await result.current.getSources!();
 
     expect(mockGetESQLSources).toHaveBeenCalledTimes(2);
   });
 
-  it('refetches sources once per refresh signal, not per keystroke', async () => {
-    const entitiesRefreshed$ = new Subject<void>();
-    const { result } = renderHook(() => useConsoleEsqlCallbacks(createParams(entitiesRefreshed$)));
+  it('refetches sources once after refreshes, not per keystroke', async () => {
+    let entitiesRefreshGeneration = 0;
+    const getEntitiesRefreshGeneration = () => entitiesRefreshGeneration;
+    const { result } = renderHook(() =>
+      useConsoleEsqlCallbacks(createParams(getEntitiesRefreshGeneration))
+    );
 
     await result.current.getSources!();
     await result.current.getSources!();
     expect(mockGetESQLSources).toHaveBeenCalledTimes(1);
 
-    entitiesRefreshed$.next();
+    entitiesRefreshGeneration += 2;
     await result.current.getSources!();
     await result.current.getSources!();
 

@@ -66,26 +66,26 @@ class HandledRejection {
 }
 
 describe('AutocompleteInfo', () => {
-  it('emits entitiesRefreshed$ after a successful retrieve', async () => {
+  it('increments the entities refresh generation after a successful retrieve', async () => {
     const http = { get: jest.fn().mockResolvedValue(entitiesResponse) };
     const autocompleteInfo = new AutocompleteInfo();
     autocompleteInfo.setup(http as unknown as HttpSetup);
-    const emissions: void[] = [];
-    autocompleteInfo.entitiesRefreshed$.subscribe(() => emissions.push(undefined));
     const settings = createSettings();
 
     try {
+      expect(autocompleteInfo.getEntitiesRefreshGeneration()).toBe(0);
+
       autocompleteInfo.retrieve(settings, settings.getAutocomplete());
       await flushAsync();
 
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(emissions).toHaveLength(1);
+      expect(autocompleteInfo.getEntitiesRefreshGeneration()).toBe(1);
     } finally {
       autocompleteInfo.clearSubscriptions();
     }
   });
 
-  it('does not emit entitiesRefreshed$ when retrieve fails', async () => {
+  it('does not increment the entities refresh generation when retrieve fails', async () => {
     const http = {
       get: jest
         .fn()
@@ -93,15 +93,13 @@ describe('AutocompleteInfo', () => {
     };
     const autocompleteInfo = new AutocompleteInfo();
     autocompleteInfo.setup(http as unknown as HttpSetup);
-    const emissions: void[] = [];
-    autocompleteInfo.entitiesRefreshed$.subscribe(() => emissions.push(undefined));
     const settings = createSettings();
 
     try {
       autocompleteInfo.retrieve(settings, settings.getAutocomplete());
       await flushAsync();
 
-      expect(emissions).toHaveLength(0);
+      expect(autocompleteInfo.getEntitiesRefreshGeneration()).toBe(0);
     } finally {
       autocompleteInfo.clearSubscriptions();
     }
