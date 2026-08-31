@@ -6,9 +6,38 @@
  */
 
 import { get } from 'lodash';
-import type { EsClient } from '@kbn/scout-security';
+import type { ApiServicesFixture, EsClient } from '@kbn/scout-security';
+import { apiTest as baseApiTest } from '@kbn/scout-security';
+import {
+  getDetectionAlertsApiService,
+  getDetectionRuleApiService,
+  type DetectionAlertsApiService,
+  type DetectionRuleApiService,
+} from '@kbn/scout-security/src/playwright/fixtures/worker/apis';
 import { ENTITY_LATEST, ENTITY_STORE_ROUTES, getEntitiesAlias } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
+
+export type CpsApiServicesFixture = ApiServicesFixture & {
+  detectionRule: DetectionRuleApiService;
+  detectionAlerts: DetectionAlertsApiService;
+};
+
+export const apiTest = baseApiTest.extend<{}, { apiServices: CpsApiServicesFixture }>({
+  apiServices: [
+    async (
+      { apiServices, kbnClient, esClient, log },
+      use: (extendedApiServices: CpsApiServicesFixture) => Promise<void>
+    ) => {
+      const extendedApiServices: CpsApiServicesFixture = {
+        ...apiServices,
+        detectionRule: getDetectionRuleApiService({ kbnClient, log }),
+        detectionAlerts: getDetectionAlertsApiService({ esClient, log }),
+      };
+      await use(extendedApiServices);
+    },
+    { scope: 'worker' },
+  ],
+});
 
 const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

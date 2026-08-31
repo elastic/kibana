@@ -2708,6 +2708,8 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/w
 /x-pack/platform/test/alerting_api_integration/security_and_spaces/group10/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engineering
 /x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engineering
 /x-pack/platform/plugins/shared/alerting/server/rules_client/lib/change_tracking @elastic/security-detection-engineering
+x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/detection_engine/ @elastic/security-detection-engineering
+x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/fixtures/cps_rule_helpers.ts @elastic/security-detection-engineering
 
 # Enterprise Search
 # search

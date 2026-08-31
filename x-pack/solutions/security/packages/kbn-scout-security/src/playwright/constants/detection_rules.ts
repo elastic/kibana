@@ -16,6 +16,7 @@ export interface CustomQueryRule {
   type: 'query';
   query: string;
   from: string;
+  interval?: string;
   investigation_fields?: { field_names: string[] };
 }
 
