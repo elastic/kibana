@@ -67,13 +67,9 @@ export {
   getInlineActionStepDefinition,
   getDefaultInlineActionStepDefinition,
   isActionValid,
-  isExplicitlyLinkedToRule,
-  isRuleScopedCatchAllMatcher,
-  summarizeExplicitlyLinkedActionPolicies,
 } from './actions_form';
 export type {
   ActionDraft,
-  LinkedActionPolicySummary,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,

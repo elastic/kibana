@@ -12,12 +12,6 @@ export {
 } from './helpers/build_inline_workflow_yaml';
 export { buildRuleScopedMatcher } from './helpers/rule_scoped_action_policies';
 export {
-  isExplicitlyLinkedToRule,
-  isRuleScopedCatchAllMatcher,
-  summarizeExplicitlyLinkedActionPolicies,
-} from './helpers/explicitly_linked_action_policies';
-export type { LinkedActionPolicySummary } from './helpers/explicitly_linked_action_policies';
-export {
   DISPATCH_PAYLOAD_VARIABLES,
   INLINE_ACTION_STEP_DEFINITIONS,
   getDefaultInlineActionStepDefinition,
