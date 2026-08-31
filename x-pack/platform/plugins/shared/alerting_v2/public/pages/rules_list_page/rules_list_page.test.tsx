@@ -707,7 +707,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone');
+      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone rule');
     });
   });
 

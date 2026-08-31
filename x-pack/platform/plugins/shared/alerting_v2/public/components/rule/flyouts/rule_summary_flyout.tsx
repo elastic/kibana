@@ -102,7 +102,7 @@ export const RuleSummaryFlyout = ({
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
-                    defaultMessage: 'Quick edit rule',
+                    defaultMessage: 'Edit rule',
                   })}
                   disableScreenReaderOutput
                 >
@@ -111,7 +111,7 @@ export const RuleSummaryFlyout = ({
                     color="text"
                     onClick={() => onQuickEdit(rule)}
                     aria-label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
-                      defaultMessage: 'Quick edit rule',
+                      defaultMessage: 'Edit rule',
                     })}
                     data-test-subj="ruleSummaryFlyoutQuickEditButton"
                   />
