@@ -101,7 +101,7 @@ export const CONDITION_OPERATOR_OPTIONS = [
 
 export const THRESHOLD_STEP_TITLE = i18n.translate(
   'xpack.alertingV2.ruleBuilder.threshold.stepTitle',
-  { defaultMessage: 'Alert Condition' }
+  { defaultMessage: 'Condition' }
 );
 
 export const STAT_LABEL_REQUIRED_ERROR = i18n.translate(

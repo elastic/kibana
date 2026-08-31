@@ -31,12 +31,12 @@ const makeSteps = (titles: string[], currentIndex: number): MinimalStep[] =>
   }));
 
 const RULE_STEPS = [
-  'Alert Condition',
+  'Condition',
   'Recovery Condition',
   'Details & Artifacts',
   'Notifications',
 ];
-const RULE_STEPS_SHORT = ['Alert Condition', 'Details & Artifacts', 'Notifications'];
+const RULE_STEPS_SHORT = ['Condition', 'Details & Artifacts', 'Notifications'];
 
 // ---------------------------------------------------------------------------
 // Interactive story — click through steps to see the animation
