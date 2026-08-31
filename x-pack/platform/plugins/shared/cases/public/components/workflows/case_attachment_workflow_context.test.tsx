@@ -16,6 +16,11 @@ jest.mock('../../common/lib/kibana');
 jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
   useRefreshCaseViewPage: () => jest.fn(),
 }));
+jest.mock('../../analytics/use_workflow_run_ebt', () => ({
+  useWorkflowRunTriggeredEBT: () => jest.fn(),
+  getWorkflowRunOriginType: jest.requireActual('../../analytics/use_workflow_run_ebt')
+    .getWorkflowRunOriginType,
+}));
 
 describe('useCaseAttachmentWorkflowContext', () => {
   it('returns undefined when rendered outside a CaseAttachmentWorkflowProvider', () => {
