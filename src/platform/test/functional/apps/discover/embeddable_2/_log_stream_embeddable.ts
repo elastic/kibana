@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Fine integration test.
+ */
+
 import moment from 'moment';
 import { log, timerange } from '@kbn/synthtrace-client';
 import path from 'path';

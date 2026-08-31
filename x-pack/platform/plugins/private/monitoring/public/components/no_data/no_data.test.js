@@ -9,6 +9,15 @@ import React from 'react';
 import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { NoData } from '.';
 
+jest.mock('@elastic/eui-illustrations', () => ({
+  megaphone: {
+    id: 'megaphone',
+    title: 'Megaphone',
+    light: '<svg></svg>',
+    dark: '<svg></svg>',
+  },
+}));
+
 jest.mock('../../legacy_shims', () => ({
   Legacy: {
     shims: {

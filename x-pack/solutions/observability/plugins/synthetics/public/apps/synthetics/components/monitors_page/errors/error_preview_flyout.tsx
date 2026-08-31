@@ -115,7 +115,7 @@ export const ErrorPreviewFlyout = ({
                   <EuiToolTip content={COPY_LABEL} disableScreenReaderOutput>
                     <EuiButtonIcon
                       data-test-subj="syntheticsErrorPreviewFlyoutButton"
-                      iconType="copyClipboard"
+                      iconType="copy"
                       onClick={copy}
                       aria-label={COPY_LABEL}
                       size="xs"
@@ -170,7 +170,7 @@ export const ErrorPreviewFlyout = ({
               data-test-subj="syntheticsErrorPreviewFlyoutButton"
               fill
               href={errorDetailsUrl}
-              iconType="popout"
+              iconType="external"
               iconSide="right"
             >
               {VIEW_DETAILS_LABEL}

@@ -39,6 +39,8 @@ function getConfig(overrides = {}) {
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     incrementalId: { enabled: true },
+    templates: { enabled: true },
+    runWorkflows: { enabled: true },
     ...overrides,
   };
 }
@@ -119,9 +121,7 @@ describe('Cases Ui Plugin', () => {
       expect(setup).toMatchInlineSnapshot(`
         Object {
           "attachmentFramework": Object {
-            "registerExternalReference": [Function],
-            "registerPersistableState": [Function],
-            "registerUnified": [Function],
+            "registerAttachment": [Function],
           },
         }
       `);
@@ -255,9 +255,10 @@ describe('Cases Ui Plugin', () => {
           getRelatedCases: expect.any(Function),
         },
         config: {
-          templatesEnabled: false,
+          templatesEnabled: true,
           attachmentsEnabled: false,
           chatEnabled: false,
+          runWorkflowsEnabled: true,
           casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {

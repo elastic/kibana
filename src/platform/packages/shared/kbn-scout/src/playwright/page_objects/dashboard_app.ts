@@ -54,6 +54,8 @@ export class DashboardApp {
   private readonly confirmSaveButton;
   private readonly quickSaveSecondaryButton;
   private readonly interactiveSaveMenuItem;
+  /** Unsaved-changes badge on the save split button. */
+  public readonly unsavedChangesIndicator;
 
   // Library flyout
   private readonly savedObjectsFinderTable;
@@ -111,6 +113,9 @@ export class DashboardApp {
       'dashboardQuickSaveMenuItem-secondary-button'
     );
     this.interactiveSaveMenuItem = this.page.testSubj.locator('dashboardInteractiveSaveMenuItem');
+    this.unsavedChangesIndicator = this.page.testSubj.locator(
+      'split-button-notification-indicator'
+    );
 
     // Library flyout
     this.savedObjectsFinderTable = this.page.testSubj.locator('savedObjectsFinderTable');
@@ -144,9 +149,14 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
-  async openDashboardWithId(id: string) {
+  async openDashboardWithId(
+    id: string,
+    opts: { waitForRender?: boolean } = { waitForRender: true }
+  ) {
     await this.page.gotoApp('dashboards', { hash: `/view/${id}` });
-    await this.waitForRenderComplete();
+    if (opts.waitForRender) {
+      await this.waitForRenderComplete();
+    }
   }
 
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
@@ -235,7 +245,7 @@ export class DashboardApp {
   async clickCancelOutOfEditMode() {
     await expect(this.viewOnlyModeButton).toBeVisible();
     await this.viewOnlyModeButton.click();
-    await expect(this.editModeButton).toBeHidden();
+    await expect(this.editModeButton).toBeVisible();
   }
 
   async ensureViewMode() {
@@ -569,6 +579,20 @@ export class DashboardApp {
   }
 
   /**
+   * Id of the dashboard's control, including one that is not in a control group, such as an
+   * ES|QL control saved as a top-level `esql_control` panel. Expects a single control, so
+   * assert the count in the test first.
+   */
+  async getDashboardControlId(): Promise<string> {
+    const controlId = await this.getDashboardControlsLocator().getAttribute('data-control-id');
+    if (!controlId) {
+      throw new Error('Dashboard control is rendered but has an empty data-control-id');
+    }
+
+    return controlId;
+  }
+
+  /**
    * Gets the count of dashboard controls
    */
   async getControlCount(): Promise<number> {
@@ -597,6 +621,30 @@ export class DashboardApp {
 
     const option = this.page.testSubj.locator(`optionsList-control-selection-${availableOption}`);
     await option.click();
+  }
+
+  /**
+   * Closes the options-list popover if it is open, and waits for it to disappear.
+   *
+   * Dismisses with Escape rather than by toggling the control button: selecting an option
+   * re-renders the control, so a click aimed at the button can land on a detached node and
+   * leave the popover open.
+   */
+  async optionsListEnsurePopoverIsClosed() {
+    if (await this.optionsListControlSearchInput.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await this.optionsListControlSearchInput.waitFor({ state: 'hidden' });
+    }
+  }
+
+  /**
+   * Locator for the selected-options label of an options-list control, e.g. `AE`
+   * for a single selection or `AE, CN` for multiple.
+   */
+  getOptionsListSelectionsLocator(controlId: string) {
+    return this.page.testSubj
+      .locator(`optionsList-control-${controlId}`)
+      .getByTestId('optionsListSelections');
   }
 
   async getSavedSearchRowCount(): Promise<number> {
@@ -922,9 +970,11 @@ export class DashboardApp {
       const actionInPanel = panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
       await actionInPanel.click();
     } else {
-      // Open context menu and click action
+      // Open context menu and click action. The menu renders in a portal outside the panel, so it
+      // cannot be panel-scoped; filtering to the visible match skips the hidden quick-action
+      // buttons that every other panel on the dashboard renders under the same test subject.
       await this.openPanelContextMenu(title);
-      await this.page.testSubj.click(actionTestSubj);
+      await this.page.testSubj.locator(actionTestSubj).filter({ visible: true }).click();
       // Wait for context menu to close after clicking the action
       await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
     }
@@ -955,6 +1005,29 @@ export class DashboardApp {
     await expect(this.page.testSubj.locator('unlinkPanelSuccess')).toBeVisible();
     // Verify the panel is now unlinked
     await this.expectNotLinkedToLibrary(title);
+  }
+
+  /** Opens the inspector flyout for the given panel (or the first panel if omitted). */
+  async openInspector(title?: string) {
+    await this.clickPanelAction('embeddablePanelAction-openInspector', title);
+    await this.page.testSubj.locator('inspectorPanel').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * From the dashboard listing page, discards the unsaved draft for the given dashboard title.
+   * Navigates to the listing first, then clicks the discard button if it exists (guard against
+   * tests that failed before a draft was created).
+   */
+  async discardUnsavedDashboard(title = 'New Dashboard') {
+    await this.page.gotoApp('dashboards');
+    const discardButton = this.page.testSubj.locator(
+      `discard-unsaved-${title.replace(/\s/g, '-')}`
+    );
+    if (await discardButton.isVisible()) {
+      await discardButton.click();
+      await this.page.testSubj.click('confirmModalConfirmButton');
+      await discardButton.waitFor({ state: 'hidden' });
+    }
   }
 
   /**
@@ -1070,11 +1143,11 @@ export class DashboardApp {
   }
 
   async addNewLensPanel() {
-    await this.addNewPanel('Visualization');
+    await this.addNewPanel('Create visualization');
   }
 
   async addNewESQLPanel() {
-    await this.addNewPanel('Visualization (query)');
+    await this.addNewPanel('Create visualization (query)');
   }
 
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
@@ -1197,6 +1270,9 @@ export class DashboardApp {
       await toggleAction.click();
     } else {
       await panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
+      await expect(
+        panelWrapper.locator('[data-test-subj="embeddablePanelContextMenuOpen"]')
+      ).toBeVisible();
       await this.page.testSubj.click('embeddablePanelAction-togglePanel');
     }
   }

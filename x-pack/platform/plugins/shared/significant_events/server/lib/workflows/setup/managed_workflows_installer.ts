@@ -8,12 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { installWorkflows } from './install_workflows';
-import { installInvestigationWorkflow } from '../../../memory_and_investigation/lib/investigation/install_investigation_workflow';
 
 export interface ManagedWorkflowsInstaller {
   /**
-   * Installs the full managed-workflow set (base, memory, and investigation workflows) and closes
-   * the reconciliation window exactly once. Resolves when this install completes and rejects if it
+   * Installs the full managed-workflow set (base and memory workflows) and closes the
+   * reconciliation window exactly once. Resolves when this install completes and rejects if it
    * fails.
    */
   install: () => Promise<void>;
@@ -45,7 +44,7 @@ export const createManagedWorkflowsInstaller = ({
   const runInstall = async (): Promise<void> => {
     if (!(await isAvailable())) {
       logger.debug(
-        'significant_events: availability flag disabled, skipping managed workflow installation'
+        'significantEvents: availability flag disabled, skipping managed workflow installation'
       );
       return;
     }
@@ -53,7 +52,6 @@ export const createManagedWorkflowsInstaller = ({
     const client = await getClient();
 
     await installWorkflows({ client });
-    await installInvestigationWorkflow({ client });
 
     // Log success only after the whole sequence (including reconciliation) has actually landed, and
     // only once at INFO. Re-installs on later flag flips are routine, so keep them at debug.

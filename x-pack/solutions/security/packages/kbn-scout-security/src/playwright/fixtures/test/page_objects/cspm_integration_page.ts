@@ -6,7 +6,6 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { EuiSuperSelectWrapper } from '@kbn/scout/src/playwright/eui_components/super_select';
 
 /**
  * CSPM / Fleet UI `data-test-subj` values are duplicated here on purpose so
@@ -41,7 +40,7 @@ export class CspmIntegrationPage {
   constructor(private readonly page: ScoutPage) {}
 
   async navigate() {
-    await this.page.gotoApp('fleet/integrations/cloud_security_posture/add-integration/cspm');
+    await this.page.gotoApp('integrations/detail/cloud_security_posture/add-integration/cspm');
     // Wait for the provider selector tabs to be visible before continuing
     await this.page
       .getByTestId(AWS_PROVIDER_TEST_SUBJ)
@@ -107,19 +106,8 @@ export class CspmIntegrationPage {
         ? AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ
         : AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
 
-    // Use EUI wrapper for reliable super select interaction
-    const superSelect = new EuiSuperSelectWrapper(this.page, { dataTestSubj: selectTestSubj });
-
-    // Open the dropdown
-    await superSelect.toggleDropdown();
-
-    // Find and click the option by visible text (connector names are dynamic)
-    const dropdown = this.page.locator('[role="listbox"]');
-    await dropdown.waitFor({ state: 'visible' });
-    await dropdown.locator(`[role="option"]`).filter({ hasText: connectorName }).click();
-
-    // Wait for dropdown to close
-    await dropdown.waitFor({ state: 'detached' });
+    // Connector names are dynamic, so select by visible label.
+    await this.page.components.superSelect(selectTestSubj).selectOptionByLabel(connectorName);
   }
 
   async fillIntegrationName(name: string) {

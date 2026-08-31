@@ -118,7 +118,7 @@ export const Presets: Story = {
     presets: [
       { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
       { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
-      { start: 'now/d', end: 'now/d', label: 'Today' },
+      { start: 'now/d', end: 'now/d', label: 'Today', isEditable: false },
     ],
     timeZone: 'Europe/Amsterdam',
     onPresetSave: action('onPresetSave'),
@@ -192,7 +192,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
       onPresetSave?.(option);
       setPresets((prev) => {
         const deduped = prev.filter((p) => timeRangeKey(p) !== timeRangeKey(option));
-        return [...deduped, option];
+        return [option, ...deduped];
       });
     },
     [onPresetSave]

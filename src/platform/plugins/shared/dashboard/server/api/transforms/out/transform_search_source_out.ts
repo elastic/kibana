@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { prettifyError } from '@kbn/zod';
 import { asCodeFilterSchema, type AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { fromStoredFilter } from '@kbn/as-code-filters-transforms';
 import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
@@ -56,20 +57,20 @@ export function transformSearchSourceOut(
   searchSource.filter?.forEach((storedFilter) => {
     try {
       let asCodeFilter = fromStoredFilter(storedFilter, logger);
-      asCodeFilter = asCodeFilterSchema.validate(asCodeFilter);
+      asCodeFilter = asCodeFilterSchema.parse(asCodeFilter);
       validFilters.push(asCodeFilter);
     } catch (error) {
       invalidFilters.push({
         filter: storedFilter,
-        message: error.message,
+        message: prettifyError(error),
       });
     }
   });
 
   if (invalidFilters.length) {
-    const warningMessage = `Unexpected error transforming filter state on read. Errors: [${invalidFilters
+    const warningMessage = `Unexpected error transforming filter state on read.\n\n${invalidFilters
       .map(({ message }, index) => `[filters.${index + 1}]: ${message}`)
-      .join(', ')}]`;
+      .join('\n\n')}`;
     logger.warn(warningMessage);
     warnings.push({
       type: 'dropped_property',
@@ -82,9 +83,11 @@ export function transformSearchSourceOut(
   let query: AsCodeQuery | undefined;
   const storedQuery = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
   try {
-    query = strictValidationSchema.validateKey('query', toAsCodeQuery(storedQuery));
+    query = strictValidationSchema.shape.query.parse(toAsCodeQuery(storedQuery));
   } catch (error) {
-    const warningMessage = `Unexpected error transforming query state on read. Error: ${error.message}`;
+    const warningMessage = `Unexpected error transforming query state on read.\n\n${prettifyError(
+      error
+    )}`;
     logger.warn(warningMessage);
     warnings.push({
       type: 'dropped_property',

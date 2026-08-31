@@ -25,9 +25,8 @@ function ReadOnlyFormRow({ label, value }: { label: string; value: string }) {
             tooltipProps={{ disableScreenReaderOutput: true }}
           >
             {(copy) => (
-              /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
               <EuiButtonIcon
-                iconType="copyClipboard"
+                iconType="copy"
                 display="empty"
                 onClick={copy}
                 aria-label={copyLabel}

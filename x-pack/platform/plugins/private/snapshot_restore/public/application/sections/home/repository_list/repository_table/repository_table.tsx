@@ -207,7 +207,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
               <EuiToolTip content={moreActionsLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   aria-label={moreActionsLabel}
-                  iconType="boxesHorizontal"
+                  iconType="boxesVertical"
                   color="primary"
                   onClick={() =>
                     setOpenActionsRowName(openActionsRowName === name ? undefined : name)
@@ -417,7 +417,6 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         key="reloadButton"
-        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"

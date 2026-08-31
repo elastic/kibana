@@ -16,15 +16,18 @@ jest.mock('@kbn/kibana-react-plugin/public');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const setup = () => {
+const setup = ({ isAddDataPageV2Enabled = false }: { isAddDataPageV2Enabled?: boolean } = {}) => {
   const get = jest.fn().mockResolvedValue({ item: { version: '0.2.1' } });
   const navigateToApp = jest.fn();
-  const getUrlForApp = jest.fn(() => '/app/observabilityOnboarding?category=cloud');
+  const getUrlForApp = jest.fn(
+    () => `/app/observabilityOnboarding${isAddDataPageV2Enabled ? '' : '?category=cloud'}`
+  );
 
   mockUseKibana.mockReturnValue({
     services: {
       http: { get },
       application: { navigateToApp, getUrlForApp },
+      featureFlags: { getBooleanValue: jest.fn().mockReturnValue(isAddDataPageV2Enabled) },
     },
   } as unknown as ReturnType<typeof useKibana<ObservabilityOnboardingAppServices>>);
 
@@ -56,8 +59,8 @@ describe('CloudwatchIntegrationRedirect', () => {
     });
 
     await waitFor(() =>
-      expect(navigateToApp).toHaveBeenCalledWith('fleet', {
-        path: '/integrations/aws_cloudwatch_input_otel-0.2.1/add-integration',
+      expect(navigateToApp).toHaveBeenCalledWith('integrations', {
+        path: '/detail/aws_cloudwatch_input_otel-0.2.1/add-integration',
         state: {
           onCancelNavigateTo: ['observabilityOnboarding', { path: '?category=cloud' }],
           onCancelUrl: '/app/observabilityOnboarding?category=cloud',
@@ -113,6 +116,48 @@ describe('CloudwatchIntegrationRedirect', () => {
     });
   });
 
+  // On the V2 Add Data page there are no category tabs, so the V1 Cloud tab
+  // param must not leak into the return URL.
+  it('drops the category param from the cancel state when the V2 page is enabled', async () => {
+    const { navigateToApp, getUrlForApp } = setup({ isAddDataPageV2Enabled: true });
+
+    render(<CloudwatchIntegrationRedirect />);
+
+    await waitFor(() =>
+      expect(navigateToApp).toHaveBeenCalledWith('integrations', {
+        path: '/detail/aws_cloudwatch_input_otel-0.2.1/add-integration',
+        state: {
+          onCancelNavigateTo: ['observabilityOnboarding', { path: '' }],
+          onCancelUrl: '/app/observabilityOnboarding',
+          telemetrySource: 'aws_quickstart',
+        },
+        replace: true,
+      })
+    );
+    expect(getUrlForApp).toHaveBeenCalledWith(OBSERVABILITY_ONBOARDING_APP_ID, { path: '' });
+  });
+
+  it('returns to the Add data page from the error state when the V2 page is enabled', async () => {
+    const { get, navigateToApp } = setup({ isAddDataPageV2Enabled: true });
+    get.mockRejectedValueOnce(new Error('boom'));
+
+    render(<CloudwatchIntegrationRedirect />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('cloudwatchIntegrationRedirectBack')).toBeInTheDocument()
+    );
+    expect(screen.getByTestId('cloudwatchIntegrationRedirectBack')).toHaveTextContent(
+      'Back to Add data'
+    );
+
+    fireEvent.click(screen.getByTestId('cloudwatchIntegrationRedirectBack'));
+
+    expect(navigateToApp).toHaveBeenCalledWith(OBSERVABILITY_ONBOARDING_APP_ID, {
+      path: '',
+      replace: true,
+    });
+  });
+
   it('retries version resolution and redirects when the user clicks try again', async () => {
     const { get, navigateToApp } = setup();
     get.mockRejectedValueOnce(new Error('boom'));
@@ -127,9 +172,9 @@ describe('CloudwatchIntegrationRedirect', () => {
 
     await waitFor(() =>
       expect(navigateToApp).toHaveBeenCalledWith(
-        'fleet',
+        'integrations',
         expect.objectContaining({
-          path: '/integrations/aws_cloudwatch_input_otel-0.2.1/add-integration',
+          path: '/detail/aws_cloudwatch_input_otel-0.2.1/add-integration',
         })
       )
     );

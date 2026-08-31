@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiAvatar,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -23,7 +22,7 @@ interface SourceRowProps {
   /** Plain-text label, used for the remove action and as the default content. */
   label: string;
   typeLabel: string;
-  iconType: string;
+  icon: ReactNode;
   /** Overrides how the label is rendered, e.g. as a code block. */
   children?: ReactNode;
   onRemove?: () => void;
@@ -33,7 +32,7 @@ interface SourceRowProps {
 export const SourceRow = ({
   label,
   typeLabel,
-  iconType,
+  icon,
   children,
   onRemove,
   'data-test-subj': dataTestSubj,
@@ -46,17 +45,7 @@ export const SourceRow = ({
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiAvatar
-            type="space"
-            size="m"
-            color="subdued"
-            name={typeLabel}
-            iconType={iconType}
-            iconColor="primary"
-            iconSize="m"
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
         {/* minWidth: 0 lets the flex item shrink so long queries truncate instead of overflowing the panel */}
         <EuiFlexItem css={{ minWidth: 0 }}>
           <EuiText size="s" className="eui-textTruncate">

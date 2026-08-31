@@ -33,7 +33,9 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 
 :: Include pre-defined node option
 set "NODE_OPTIONS=--no-warnings --max-http-header-size=65536 %NODE_OPTIONS%"
-IF "%KBN_DISALLOW_CODE_GEN_FROM_STRINGS%"=="true" (
+:: Code generation from strings (eval / new Function) is disallowed by default.
+:: Opt out by setting KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false.
+IF NOT "%KBN_DISALLOW_CODE_GEN_FROM_STRINGS%"=="false" (
   set "NODE_OPTIONS=--disallow-code-generation-from-strings %NODE_OPTIONS%"
 )
 

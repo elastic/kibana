@@ -6,12 +6,9 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-episodes-ui/constants';
-import {
-  parseEpisodeDataJson,
-  getValueByFieldPath,
-  formatGroupingValueForDisplay,
-} from '@kbn/alerting-v2-episodes-ui/utils/episode_grouping_data';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { parseEpisodeDataJson, getValueByFieldPath } from '@kbn/alerting-v2-utils';
+import { formatGroupingValueForDisplay } from '@kbn/alerting-v2-episodes-ui/utils/episode_grouping_data';
 
 export interface BuildSeriesGroupingValuesQueryOptions {
   ruleId: string;

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-
-export type TransportType = 'aws-s3' | 'aws-cloudwatch';
 
 export const AWS_REGION_OPTIONS = [
   'ap-southeast-1',
@@ -23,193 +21,186 @@ export const AWS_REGION_OPTIONS = [
 ].map((r) => ({ label: r }));
 
 export interface FieldMeta {
-  label: string;
-  placement: 'inline' | 'flyout';
-  type?: 'text' | 'boolean';
-  defaultValue?: boolean;
-  transport?: TransportType;
-  placeholder?: string;
-  helpText?: string;
+  def: RegistryVarsEntry;
+  isBool: boolean;
+  multi: boolean;
+  /** Whether the manifest marks this var as user-visible (show_user: true). */
+  showUser: boolean;
 }
 
-export const FIELD_CONFIG: Record<string, FieldMeta> = {
-  bucket_arn: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.bucketArn.label', {
-      defaultMessage: 'Bucket ARN',
-    }),
-    placement: 'inline',
-    transport: 'aws-s3',
-    placeholder: 'arn:aws:s3:::my-bucket',
-  },
-  log_group_arn: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.logGroupArn.label', {
-      defaultMessage: 'Log Group ARN',
-    }),
-    placement: 'inline',
-    transport: 'aws-cloudwatch',
-    placeholder: 'arn:aws:logs:us-east-1:123456789012:log-group:my-log-group',
-  },
-  region: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.region.label', {
-      defaultMessage: 'AWS Region',
-    }),
-    placement: 'flyout',
-    transport: 'aws-s3',
-  },
-  region_name: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.regionName.label', {
-      defaultMessage: 'AWS Region',
-    }),
-    placement: 'flyout',
-    transport: 'aws-cloudwatch',
-  },
-  aws_region: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.awsRegion.label', {
-      defaultMessage: 'AWS Region',
-    }),
-    placement: 'flyout',
-  },
-  regions: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.regions.label', {
-      defaultMessage: 'Regions',
-    }),
-    placement: 'flyout',
-    helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.regions.helpText', {
-      defaultMessage: 'Optional. Restrict collection to specific AWS regions.',
-    }),
-    placeholder: 'us-east-1',
-  },
-  detector_id: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.detectorId.label', {
-      defaultMessage: 'Detector ID',
-    }),
-    placement: 'inline',
-    placeholder: 'abc123...',
-  },
-  metrics: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.metrics.label', {
-      defaultMessage: 'Metrics',
-    }),
-    placement: 'flyout',
-    helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.metrics.helpText', {
-      defaultMessage: 'Optional. Specify custom CloudWatch metrics to collect.',
-    }),
-  },
-  // ── Boolean mandatory fields ────────────────────────────────────────────
-  preserve_original_event: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.preserveOriginalEvent.label', {
-      defaultMessage: 'Preserve original event',
-    }),
-    placement: 'flyout',
-    type: 'boolean',
-    defaultValue: false,
-    helpText: i18n.translate(
-      'xpack.ingestHub.serviceSettingsStep.field.preserveOriginalEvent.helpText',
-      { defaultMessage: 'Store the raw event in event.original before any transformation.' }
-    ),
-  },
-  collect_s3_logs: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.collectS3Logs.label', {
-      defaultMessage: 'Collect S3 logs',
-    }),
-    placement: 'flyout',
-    type: 'boolean',
-    defaultValue: false,
-    transport: 'aws-s3',
-    helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.collectS3Logs.helpText', {
-      defaultMessage: 'Enable log collection from the S3 bucket.',
-    }),
-  },
-  preserve_duplicate_custom_fields: {
-    label: i18n.translate(
-      'xpack.ingestHub.serviceSettingsStep.field.preserveDuplicateCustomFields.label',
-      { defaultMessage: 'Preserve duplicate custom fields' }
-    ),
-    placement: 'flyout',
-    type: 'boolean',
-    defaultValue: false,
-    helpText: i18n.translate(
-      'xpack.ingestHub.serviceSettingsStep.field.preserveDuplicateCustomFields.helpText',
-      {
-        defaultMessage:
-          'Preserve custom fields that would otherwise be dropped as duplicates of ECS fields.',
-      }
-    ),
-  },
-  collect_esm_metrics: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.collectEsmMetrics.label', {
-      defaultMessage: 'Collect enhanced monitoring metrics',
-    }),
-    placement: 'flyout',
-    type: 'boolean',
-    defaultValue: false,
-    helpText: i18n.translate(
-      'xpack.ingestHub.serviceSettingsStep.field.collectEsmMetrics.helpText',
-      { defaultMessage: 'Enable collection of Lambda enhanced monitoring (ESM) metrics.' }
-    ),
-  },
-  leaderelection: {
-    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.leaderelection.label', {
-      defaultMessage: 'Leader election',
-    }),
-    placement: 'flyout',
-    type: 'boolean',
-    defaultValue: false,
-    helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.leaderelection.helpText', {
-      defaultMessage:
-        'Enable leader election to avoid duplicate billing data when multiple agents run in the same account.',
-    }),
-  },
-};
+/**
+ * ECF trigger vars are `multi: false` in the upstream package manifest, but ECF can route
+ * multiple sources per service. We override `multi: true` so the flyout renders an "Add row"
+ * list and buildStreamVars emits a string array.
+ *
+ * TODO: remove this override once elastic/integrations sets `multi: true` for these vars
+ * in all AWS package data streams that ECF services use.
+ */
+export const ECF_TRIGGER_VAR_NAMES = new Set(['bucket_arn', 'log_group_arn']);
 
-export function hasTransportChoice(service: AwsServiceMatrixEntry): boolean {
-  const inputs = service.inputs ?? [];
-  return inputs.includes('aws-s3') && inputs.includes('aws-cloudwatch');
-}
-
-export function getDefaultTransport(
-  service: AwsServiceMatrixEntry | undefined
-): TransportType | null {
-  const inputs = service?.inputs ?? [];
-  if (inputs.includes('aws-s3')) return 'aws-s3';
-  if (inputs.includes('aws-cloudwatch')) return 'aws-cloudwatch';
-  return null;
-}
-
-export function getInlineFields(
+/**
+ * Resolve display metadata for a var from the package manifest.
+ *
+ * Mirrors Fleet's positional scoping: scope is determined by which input's bucket the var sits in,
+ * not by a field on the var entry. When `activeInput` is non-null the lookup is direct
+ * (varDefsByInput[activeInput][fieldName]); when null, the first match across all inputs is used
+ * (for services with a single input or when no input is in scope yet).
+ */
+export function resolveFieldMeta(
   service: AwsServiceMatrixEntry,
-  activeTransport: TransportType | null
-): string[] {
-  return (service.requiredConfig ?? []).filter((f) => {
-    const meta = FIELD_CONFIG[f];
-    if (!meta) return false;
-    if (meta.placement !== 'inline') return false;
-    if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
-    return true;
-  });
+  activeInput: string | null,
+  fieldName: string
+): FieldMeta | undefined {
+  const varDefsByInput = service.varDefsByInput;
+  if (!varDefsByInput) return undefined;
+
+  let def: RegistryVarsEntry | undefined;
+  if (activeInput !== null) {
+    def = varDefsByInput[activeInput]?.[fieldName];
+  } else {
+    for (const byName of Object.values(varDefsByInput)) {
+      if (fieldName in byName) {
+        def = byName[fieldName];
+        break;
+      }
+    }
+  }
+  if (!def) return undefined;
+
+  return {
+    def,
+    isBool: def.type === 'bool',
+    multi: def.multi === true || ECF_TRIGGER_VAR_NAMES.has(fieldName),
+    showUser: def.show_user === true,
+  };
 }
 
+/**
+ * Convert a string draft value to the typed value Fleet's component and buildStreamVars expect.
+ * bool → boolean, multi → string[], otherwise string.
+ */
+export function toTyped(raw: string | undefined, meta: FieldMeta): string | boolean | string[] {
+  if (meta.isBool) return raw === undefined ? meta.def.default === true : raw === 'true';
+  if (meta.multi) {
+    if (raw)
+      return raw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    if (raw === undefined && Array.isArray(meta.def.default)) return meta.def.default as string[];
+    return [];
+  }
+  // For unset fields, surface the manifest default (string or number/duration) so the flyout pre-fills.
+  if (raw === undefined && meta.def.default != null) return String(meta.def.default);
+  return raw ?? '';
+}
+
+/**
+ * Convert Fleet's typed onChange value back to the stringly-typed draft.
+ */
+export function toDraft(value: unknown): string {
+  if (Array.isArray(value)) return value.join(',');
+  return value === undefined || value === null ? '' : String(value);
+}
+
+export function hasInputChoice(service: AwsServiceMatrixEntry): boolean {
+  return (service.inputs ?? []).length >= 2;
+}
+
+/** Returns the single input to check field visibility against when the flyout has no toggle. */
+export function getDefaultInput(service: AwsServiceMatrixEntry | undefined): string | null {
+  // Use the first manifest-enabled input; fall back to the first available input.
+  return service?.defaultEnabledInputs?.[0] ?? service?.inputs?.[0] ?? null;
+}
+
+// TODO: add the "Create dedicated index template for custom dataset (recommended)" switch
+// that Fleet shows in advanced options for input packages when data_stream.dataset is customised
+// (package_policy_input_stream.tsx, rendered after advancedVars when showPipelinesAndMappings is true).
+// It is a Fleet UI construct, not a manifest var — needs Fleet's useIndexTemplateExists hook.
 export function getFlyoutFields(
   service: AwsServiceMatrixEntry,
-  activeTransport: TransportType | null
+  activeInput: string | null
 ): string[] {
-  return (service.requiredConfig ?? []).filter((f) => {
-    const meta = FIELD_CONFIG[f];
+  const allFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  return allFields.filter((f) => {
+    const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
-    if (meta.placement !== 'flyout') return false;
-    if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
+    // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
+    if (meta.isBool) return false;
+    // show_user:false vars intentionally surface here (under Advanced options via isAdvancedVar)
+    // to match the Integrations UI which shows all vars regardless of show_user.
     return true;
   });
 }
 
-export function getMandatoryBooleanFields(
+export const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
+
+function hasConfigurableFlyoutFieldsForInput(
   service: AwsServiceMatrixEntry,
-  activeTransport: TransportType | null
+  activeInput: string | null
+): boolean {
+  if (getRequiredTextFields(service, activeInput).length > 0) return true;
+  if (getRequiredBooleanFields(service, activeInput).length > 0) return true;
+  const flyoutFields = getFlyoutFields(service, activeInput);
+  const requiredSet = new Set(getRequiredTextFields(service, activeInput));
+  return flyoutFields.some((f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f));
+}
+
+/** Returns true when the flyout has at least one visible field for the given service. */
+export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boolean {
+  const allInputs = service.inputs;
+  if (!allInputs || allInputs.length === 0) {
+    return hasConfigurableFlyoutFieldsForInput(service, getDefaultInput(service));
+  }
+  return allInputs.some((input) => hasConfigurableFlyoutFieldsForInput(service, input));
+}
+
+export function getRegionFieldName(
+  service: AwsServiceMatrixEntry,
+  activeInput: string | null
+): string {
+  const rc = service.requiredConfig ?? [];
+  if (activeInput === 'aws-s3' && rc.includes('region')) return 'region';
+  if (activeInput === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
+  if (rc.includes('aws_region')) return 'aws_region';
+  if (rc.includes('region')) return 'region'; // input packages (e.g. otelcol)
+  return 'aws_region';
+}
+
+export function getRequiredTextFields(
+  service: AwsServiceMatrixEntry,
+  activeInput: string | null
 ): string[] {
-  return (service.mandatoryFields ?? []).filter((f) => {
-    const meta = FIELD_CONFIG[f];
+  return (service.requiredConfig ?? []).filter((f) => {
+    const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
-    if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
+    if (!meta.showUser) return false;
+    if (meta.isBool) return false;
+    if (REGION_FIELD_NAMES.has(f)) return false;
+    return true;
+  });
+}
+
+/**
+ * Mirrors Fleet's isAdvancedVar logic: a var is shown by default when show_user is true,
+ * or when it is required and has no default. Everything else goes behind "Advanced options".
+ */
+export function isAdvancedVar(def: RegistryVarsEntry): boolean {
+  if (def.show_user || (def.required && def.default === undefined)) {
+    return false;
+  }
+  return true;
+}
+
+export function getRequiredBooleanFields(
+  service: AwsServiceMatrixEntry,
+  activeInput: string | null
+): string[] {
+  return (service.requiredConfig ?? []).filter((f) => {
+    const meta = resolveFieldMeta(service, activeInput, f);
+    if (!meta) return false;
+    if (!meta.showUser) return false;
+    if (!meta.isBool) return false;
     return true;
   });
 }

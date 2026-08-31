@@ -17,9 +17,8 @@ import type {
   CaseConnectors,
 } from '../../../../containers/types';
 import type { CurrentUserProfile } from '../../../types';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../../../client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../../../client/attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../../../../client/attachment_framework/unified_attachment_registry';
+import type { CasesPermissions } from '../../../../../common/ui/types';
 import { isUserActionTypeSupported } from '../../../user_actions/helpers';
 import { builderMap } from '../../../user_actions/builder';
 
@@ -32,9 +31,8 @@ interface UseBuildUserActionsArgs {
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   appId: string;
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  permissions: CasesPermissions;
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
@@ -52,9 +50,8 @@ export const useBuildUserActions = ({
   userProfiles,
   currentUserProfile,
   appId,
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
+  permissions,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
@@ -83,9 +80,8 @@ export const useBuildUserActions = ({
         caseData,
         casesConfiguration,
         caseConnectors,
-        externalReferenceAttachmentTypeRegistry,
-        persistableStateAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
+        permissions,
         userAction,
         userProfiles,
         currentUserProfile,
@@ -106,9 +102,8 @@ export const useBuildUserActions = ({
     caseData,
     casesConfiguration,
     caseConnectors,
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
+    permissions,
     userProfiles,
     currentUserProfile,
     attachments,

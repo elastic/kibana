@@ -10,20 +10,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { v4 } from 'uuid';
-import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import {
   AttachmentBridge,
   consumeSidebarRestoreFor,
+  findLinkedWorkflowAttachment,
+  hasPersistedConversation,
   ProposalManager,
   setActiveProposalManager,
-  setLastCreateAttachmentId,
+  setLastCreateSessionId,
   setSidebarOpen,
+  WORKFLOW_EDITOR_ATTACHMENT_ID,
 } from '../../../../features/ai_integration';
 import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
@@ -70,9 +70,6 @@ export const useAgentBuilderIntegration = ({
   const { workflowsManagement, application } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
   const hasShowPrivilege = application.capabilities.agentBuilder?.show === true;
-  const isExperimentalEnabled = useUiSetting<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
   const telemetry = useTelemetry();
   const dispatch = useDispatch();
   const proposalManagerRef = useRef<ProposalManager | null>(null);
@@ -81,6 +78,8 @@ export const useAgentBuilderIntegration = ({
   const chatOpenedReportedRef = useRef(false);
   const sessionAutoOpenedRef = useRef(false);
   const conversationIdRef = useRef<string | undefined>(undefined);
+  const syncAttachmentIdRef = useRef<string | undefined>(undefined);
+  const attachmentTargetResolvedRef = useRef(true);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
@@ -90,10 +89,16 @@ export const useAgentBuilderIntegration = ({
   workflowNameRef.current = workflowName;
   const [isChatAccessible, setIsChatAccessible] = useState(false);
 
-  const attachmentId = workflowId ?? unsavedWorkflowIdRef.current;
+  // Drives the chat session tag, which `carryConversationToWorkflow` rewrites
+  // onto the saved workflow across the first save.
+  const sessionId = workflowId ?? unsavedWorkflowIdRef.current;
+
+  // Fixed, so saving a new workflow cannot move the attachment the conversation
+  // is already writing into.
+  const attachmentId = WORKFLOW_EDITOR_ATTACHMENT_ID;
 
   useEffect(() => {
-    if (!agentBuilder || !isExperimentalEnabled || !hasShowPrivilege) {
+    if (!agentBuilder || !hasShowPrivilege) {
       setIsChatAccessible(false);
       return;
     }
@@ -116,18 +121,11 @@ export const useAgentBuilderIntegration = ({
     return () => {
       cancelled = true;
     };
-  }, [agentBuilder, hasShowPrivilege, isExperimentalEnabled]);
+  }, [agentBuilder, hasShowPrivilege]);
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (
-      !isEditorMounted ||
-      !editor ||
-      !agentBuilder ||
-      !isExperimentalEnabled ||
-      !hasShowPrivilege ||
-      !isChatAccessible
-    ) {
+    if (!isEditorMounted || !editor || !agentBuilder || !hasShowPrivilege || !isChatAccessible) {
       return;
     }
 
@@ -213,14 +211,15 @@ export const useAgentBuilderIntegration = ({
     // workflowId presence would race that consume after setWorkflow re-fires
     // this effect.
     if (!workflowId) {
-      setLastCreateAttachmentId(attachmentId);
+      setLastCreateSessionId(sessionId);
     }
 
     const bridge = new AttachmentBridge();
-    bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker, {
+    bridge.start(manager, editorRef, tracker, {
+      activeConversation$: agentBuilder.events.ui.activeConversation$,
+      getChatEvents$: agentBuilder.events.getChatEvents$.bind(agentBuilder.events),
       attachmentId,
       workflowId,
-      getChatEvents$: agentBuilder.events.getChatEvents$?.bind(agentBuilder.events),
       onProposalReceived: ({ proposalId, toolId }) => {
         telemetry.reportAiProposalReceived({
           workflowId,
@@ -232,12 +231,6 @@ export const useAgentBuilderIntegration = ({
       },
     });
     attachmentBridgeRef.current = bridge;
-
-    const conversationIdSub = agentBuilder.events.chat$.subscribe((event) => {
-      if (isConversationIdSetEvent(event)) {
-        conversationIdRef.current = event.data.conversation_id;
-      }
-    });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__wfTestBridge = {
@@ -255,7 +248,7 @@ export const useAgentBuilderIntegration = ({
     const buildAttachment = (yaml: string) =>
       buildWorkflowAttachment({
         yaml,
-        attachmentId,
+        attachmentId: syncAttachmentIdRef.current ?? attachmentId,
         workflowId,
         workflowName: workflowNameRef.current,
         diagnostics: serializeClientDiagnostics(validationErrorsRef.current),
@@ -269,14 +262,73 @@ export const useAgentBuilderIntegration = ({
     });
 
     const syncAttachment = (yaml: string) => {
+      if (!attachmentTargetResolvedRef.current) return;
       const attachment = buildAttachment(yaml);
       agentBuilder.setChatConfig({
-        sessionTag: `workflow-editor:${attachmentId}`,
+        sessionTag: `workflow-editor:${sessionId}`,
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         attachments: [attachment],
       });
       agentBuilder.addAttachment(attachment);
     };
+
+    // The sidebar restores this session's last conversation, which may already
+    // hold the attachment to write into. Adding one before it loads makes a
+    // second.
+    attachmentTargetResolvedRef.current = !hasPersistedConversation(sessionId);
+    let originLinkRequested = false;
+
+    // The chat UI publishes the conversation for every surface it renders, and
+    // mints the id before the first request, so this covers new and resumed
+    // conversations alike.
+    const activeConversationSub = agentBuilder.events.ui.activeConversation$.subscribe(
+      (activeConversation) => {
+        // `null` means no chat surface is bound, which says nothing about the
+        // conversation the sidebar will restore.
+        if (!activeConversation) return;
+        if (activeConversation.id) {
+          conversationIdRef.current = activeConversation.id;
+        }
+
+        if (activeConversation.id && !activeConversation.conversation) {
+          attachmentTargetResolvedRef.current = false;
+          return;
+        }
+
+        const linked = findLinkedWorkflowAttachment({
+          attachments: activeConversation.conversation?.attachments,
+          attachmentId,
+          workflowId,
+        });
+        const previousAttachmentId = syncAttachmentIdRef.current ?? attachmentId;
+        const linkedAttachmentChanged = linked !== undefined && linked.id !== previousAttachmentId;
+        if (linked) {
+          if (linkedAttachmentChanged) {
+            agentBuilder.removeAttachment(previousAttachmentId);
+          }
+          syncAttachmentIdRef.current = linked.id;
+          bridge.setAttachmentId(linked.id);
+        }
+
+        if (!attachmentTargetResolvedRef.current || linkedAttachmentChanged) {
+          attachmentTargetResolvedRef.current = true;
+          const yaml = editorRef.current?.getModel()?.getValue();
+          if (yaml !== undefined) syncAttachment(yaml);
+        }
+
+        // A create-session attachment predates the workflow, so nothing has
+        // pointed it at one yet.
+        const conversationId = activeConversation.id;
+        if (!conversationId || !workflowId || originLinkRequested) return;
+        if (!linked || linked.origin === workflowId) return;
+        originLinkRequested = true;
+        void agentBuilder
+          .updateAttachmentOrigin(conversationId, linked.id, workflowId)
+          .catch(() => {
+            originLinkRequested = false;
+          });
+      }
+    );
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let modelListener: monaco.IDisposable | null = null;
@@ -308,12 +360,14 @@ export const useAgentBuilderIntegration = ({
       chatOpenedReportedRef.current = false;
       sessionAutoOpenedRef.current = false;
       conversationIdRef.current = undefined;
+      syncAttachmentIdRef.current = undefined;
+      attachmentTargetResolvedRef.current = true;
 
       if (debounceTimer) {
         clearTimeout(debounceTimer);
       }
       modelListener?.dispose();
-      conversationIdSub.unsubscribe();
+      activeConversationSub.unsubscribe();
       // Don't close the sidebar here — this runs on every deps change
       // (including the workflowId flip after Save). Close lives in the
       // unmount-only effect below.
@@ -333,10 +387,10 @@ export const useAgentBuilderIntegration = ({
     isEditorMounted,
     editorRef,
     agentBuilder,
-    isExperimentalEnabled,
     hasShowPrivilege,
     isChatAccessible,
     attachmentId,
+    sessionId,
     workflowId,
     telemetry,
     dispatch,
@@ -344,26 +398,31 @@ export const useAgentBuilderIntegration = ({
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
-      if (!agentBuilder || !isExperimentalEnabled || !isChatAccessible) {
+      if (!agentBuilder || !isChatAccessible) {
         return;
       }
 
       const currentYaml = editorRef.current?.getModel()?.getValue() ?? '';
 
       const { chatRef } = agentBuilder.openChat({
-        sessionTag: `workflow-editor:${attachmentId}`,
+        sessionTag: `workflow-editor:${sessionId}`,
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
-        attachments: [
-          buildWorkflowAttachment({
-            yaml: currentYaml,
-            attachmentId,
-            workflowId,
-            workflowName,
-            diagnostics: serializeClientDiagnostics(validationErrors),
-          }),
-        ],
+        // Left empty while a restored conversation is still loading; the
+        // active-conversation subscription adds the attachment once it knows
+        // which one this session shares.
+        attachments: attachmentTargetResolvedRef.current
+          ? [
+              buildWorkflowAttachment({
+                yaml: currentYaml,
+                attachmentId: syncAttachmentIdRef.current ?? attachmentId,
+                workflowId,
+                workflowName,
+                diagnostics: serializeClientDiagnostics(validationErrors),
+              }),
+            ]
+          : [],
         onClose: () => setSidebarOpen(false),
       });
       chatRefHandle.current = chatRef;
@@ -382,10 +441,10 @@ export const useAgentBuilderIntegration = ({
     },
     [
       agentBuilder,
-      isExperimentalEnabled,
       isChatAccessible,
       editorRef,
       attachmentId,
+      sessionId,
       workflowId,
       workflowName,
       validationErrors,
@@ -397,7 +456,7 @@ export const useAgentBuilderIntegration = ({
   // the save thunk requested we restore. Never on an existing workflow the
   // user navigated to directly. Guarded per-mount so a manual close stays.
   useEffect(() => {
-    if (!isEditorMounted || !agentBuilder || !isExperimentalEnabled || !isChatAccessible) return;
+    if (!isEditorMounted || !agentBuilder || !isChatAccessible) return;
     if (hasAutoOpenedRef.current) return;
 
     const shouldRestoreForSavedWorkflow =
@@ -407,14 +466,7 @@ export const useAgentBuilderIntegration = ({
 
     hasAutoOpenedRef.current = true;
     openAgentChat({ isAutoOpen: true });
-  }, [
-    isEditorMounted,
-    agentBuilder,
-    isExperimentalEnabled,
-    isChatAccessible,
-    workflowId,
-    openAgentChat,
-  ]);
+  }, [isEditorMounted, agentBuilder, isChatAccessible, workflowId, openAgentChat]);
 
   // Close the sidebar on unmount (leaving the workflow scope). Empty deps so
   // it does not fire on prop changes. `application.navigateToApp` remounts
@@ -430,7 +482,7 @@ export const useAgentBuilderIntegration = ({
 
   return {
     openAgentChat,
-    isAgentBuilderAvailable: agentBuilder != null && isExperimentalEnabled && isChatAccessible,
+    isAgentBuilderAvailable: agentBuilder != null && isChatAccessible,
     proposalManager: proposalManagerRef.current,
   };
 };
@@ -466,6 +518,9 @@ const buildWorkflowAttachment = ({
 }) => ({
   id: attachmentId,
   type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+  // Lets a later session find this attachment. A workflow being created has no
+  // id yet; `updateAttachmentOrigin` links it after the first save.
+  ...(workflowId ? { origin: workflowId } : {}),
   data: {
     yaml,
     workflowId,

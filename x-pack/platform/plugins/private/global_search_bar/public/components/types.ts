@@ -33,5 +33,5 @@ export interface SearchBarProps extends SearchProps {
 
 /* @internal */
 export interface SearchModalProps extends SearchProps {
-  onClose: () => void;
+  onClose: () => void | Promise<void>;
 }

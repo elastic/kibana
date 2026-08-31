@@ -14,35 +14,12 @@ import type {
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   CodeAnalysisGroundingProps,
   DetectionScanProps,
-  EndpointLatencyProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   AgentToolEventWriteProps,
-  AgentToolDiscoveryWriteProps,
   AgentToolEventSearchProps,
 } from './types';
-
-const endpointLatencySchema: RootSchema<EndpointLatencyProps> = {
-  name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  endpoint: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Streams endpoint',
-    },
-  },
-  duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-    },
-  },
-};
 
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
@@ -92,6 +69,13 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
       type: 'keyword',
       _meta: {
         description: 'The name of the Stream',
+      },
+    },
+    external_content_tool_continuations: {
+      type: 'long',
+      _meta: {
+        description:
+          'Reasoning turns that contained external content and pending task tools and were correctly continued',
       },
     },
     tool_usage: {
@@ -710,42 +694,8 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
   },
 };
 
-const agentToolDiscoveryWriteSchema: RootSchema<AgentToolDiscoveryWriteProps> = {
-  success: {
-    type: 'boolean',
-    _meta: { description: 'Whether the discovery write succeeded' },
-  },
-  kind: {
-    type: 'keyword',
-    _meta: {
-      description: 'The kind of discovery document written: discovery, clearance, or handled',
-    },
-  },
-  event_id: {
-    type: 'keyword',
-    _meta: { description: 'The stable event id' },
-  },
-  stream_names: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: { description: 'A stream name' },
-    },
-    _meta: { description: 'The streams associated with the discovery' },
-  },
-  written: {
-    type: 'boolean',
-    _meta: { description: 'Whether a document was actually written (false when deduplicated)' },
-  },
-  error_message: {
-    type: 'text',
-    _meta: { description: 'Error message when the discovery write fails', optional: true },
-  },
-};
-
 export {
   agentBuilderKnowledgeIndicatorCreatedSchema,
-  agentToolDiscoveryWriteSchema,
   agentToolEventCreateSchema,
   agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,
@@ -755,7 +705,6 @@ export {
   codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
-  endpointLatencySchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,

@@ -62,6 +62,26 @@ const rowTimestamp = new FieldRow({
   isPinned: false,
   columnsMeta: undefined,
 });
+// machine.os and geo.src both exist in stubLogstashDataView, so the data view's
+// formatter is used (avoids needing a real fieldFormats mock).
+const rowMachineOs = new FieldRow({
+  name: 'machine.os',
+  flattenedValue: 'osx',
+  hit,
+  dataView,
+  fieldFormats: {} as FieldFormatsStart,
+  isPinned: false,
+  columnsMeta: undefined,
+});
+const rowGeoSrc = new FieldRow({
+  name: 'geo.src',
+  flattenedValue: 'US',
+  hit,
+  dataView,
+  fieldFormats: {} as FieldFormatsStart,
+  isPinned: false,
+  columnsMeta: undefined,
+});
 
 describe('useTableFilters', () => {
   beforeAll(() => {
@@ -205,6 +225,56 @@ describe('useTableFilters', () => {
     jest.advanceTimersByTime(600);
     expect(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM)).toBe('2021');
     expect(storage.get(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES)).toBe('["date"]');
+  });
+
+  it('should filter by wildcard search term', () => {
+    const { result } = renderHook(() => useTableFilters());
+
+    // Anchored wildcard: '^machine.*os$' matches 'machine.os' but not 'geo.src'
+    act(() => {
+      result.current.onChangeSearchTerm('machine*os');
+    });
+
+    expect(result.current.onFilterField(rowMachineOs)).toBe(true);
+    expect(result.current.onFilterField(rowGeoSrc)).toBe(false);
+  });
+
+  it('should treat spaces as wildcards in search term', () => {
+    const { result } = renderHook(() => useTableFilters());
+
+    // Unanchored space wildcard: '.*machine.*os.*' matches 'machine.os' but not 'geo.src'
+    act(() => {
+      result.current.onChangeSearchTerm('machine os');
+    });
+
+    expect(result.current.onFilterField(rowMachineOs)).toBe(true);
+    expect(result.current.onFilterField(rowGeoSrc)).toBe(false);
+  });
+
+  it('should match with fuzzy search allowing one typo', () => {
+    const { result } = renderHook(() => useTableFilters());
+
+    // 'm4chine.os' has one substitution from 'machine.os' (Levenshtein distance 1)
+    act(() => {
+      result.current.onChangeSearchTerm('m4chine.os');
+    });
+
+    expect(result.current.onFilterField(rowMachineOs)).toBe(true);
+    expect(result.current.onFilterField(rowGeoSrc)).toBe(false);
+  });
+
+  it('should not filter when search term is only whitespace', () => {
+    const { result } = renderHook(() => useTableFilters());
+
+    act(() => {
+      result.current.onChangeSearchTerm('   ');
+    });
+
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
+    expect(result.current.onFilterField(rowBytes)).toBe(true);
+    expect(result.current.onFilterField(rowTimestamp)).toBe(true);
+    expect(result.current.onFilterField(rowMachineOs)).toBe(true);
+    expect(result.current.onFilterField(rowGeoSrc)).toBe(true);
   });
 
   it('should restore previous filters', () => {

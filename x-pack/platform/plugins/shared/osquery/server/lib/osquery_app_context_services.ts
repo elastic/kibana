@@ -12,7 +12,6 @@ import type {
   LoggerFactory,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   AgentService,
@@ -28,6 +27,7 @@ import type { Space, SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ConfigType } from '../../common/config';
 import type { ExperimentalFeatures } from '../../common';
 import type { TelemetryEventsSender } from './telemetry/sender';
+import type { StartPlugins, OsqueryPluginStart } from '../types';
 import { getIntegrationNamespaces } from '../utils/get_integration_namespaces';
 
 export type OsqueryAppContextServiceStartContract = Partial<
@@ -133,11 +133,12 @@ export interface OsqueryAppContext {
   config(): ConfigType;
   experimentalFeatures: ExperimentalFeatures;
   security: SecurityPluginStart;
-  getStartServices: CoreSetup['getStartServices'];
+  getStartServices: CoreSetup<StartPlugins, OsqueryPluginStart>['getStartServices'];
   telemetryEventsSender: TelemetryEventsSender;
   licensing: LicensingPluginSetup;
   /**
    * Object readiness is tied to plugin start method
    */
   service: OsqueryAppContextService;
+  cpsEnabled: boolean;
 }

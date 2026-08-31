@@ -17,7 +17,7 @@ const baseRule = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'My Rule', tags: ['prod', 'infra'] },
+  metadata: { name: 'My Rule', version: 1, tags: ['prod', 'infra'] },
 } as RuleApiResponse;
 
 const wrap = (ui: React.ReactElement, rule: RuleApiResponse = baseRule) =>
@@ -57,7 +57,7 @@ describe('RuleTagsList', () => {
   it('returns null when tags are empty', () => {
     const { container } = wrap(<RuleTagsList />, {
       ...baseRule,
-      metadata: { name: 'No Tags', tags: [] },
+      metadata: { name: 'No Tags', version: 1, tags: [] },
     } as RuleApiResponse);
     expect(container.innerHTML).toBe('');
   });
@@ -75,17 +75,17 @@ describe('RuleTitleWithBadges', () => {
     expect(screen.getByTestId('ruleName')).toHaveTextContent('My Rule');
   });
 
-  it('renders kind as Signal for signal rules', () => {
+  it('renders kind badge as Events for signal rules', () => {
     wrap(<RuleTitleWithBadges />);
-    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Signal');
+    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Events');
   });
 
-  it('renders kind as Alert for alert rules', () => {
+  it('renders kind badge as Alerts for alert rules', () => {
     wrap(<RuleTitleWithBadges />, { ...baseRule, kind: 'alert' } as RuleApiResponse);
-    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alert');
+    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alerts');
   });
 
-  it('renders kind-specific tooltip for signal rules', async () => {
+  it('renders kind-specific tooltip for Events rules', async () => {
     wrap(<RuleTitleWithBadges />);
 
     fireEvent.mouseOver(screen.getByTestId('kindBadge'));
@@ -95,7 +95,7 @@ describe('RuleTitleWithBadges', () => {
     });
   });
 
-  it('renders kind-specific tooltip for alert rules', async () => {
+  it('renders kind-specific tooltip for Alerts rules', async () => {
     wrap(<RuleTitleWithBadges />, { ...baseRule, kind: 'alert' } as RuleApiResponse);
 
     fireEvent.mouseOver(screen.getByTestId('kindBadge'));

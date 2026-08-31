@@ -20,6 +20,7 @@ export const internalCreateExceptionListSchema = t.intersection([
         endpoint_host_isolation_exceptions: null,
         endpoint_blocklists: null,
         endpoint_trusted_devices: null,
+        endpoint_custom_yara_signatures: null,
       }),
     })
   ),

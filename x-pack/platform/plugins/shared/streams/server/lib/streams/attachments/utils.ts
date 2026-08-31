@@ -15,7 +15,6 @@ import type {
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { SanitizedRule } from '@kbn/alerting-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type {
   AttachmentLink,
   AttachmentDocument,
@@ -276,15 +275,8 @@ export const getSuggestedRules = async ({
       ? tags.map((tag) => `${soType}.attributes.tags:"${tag}"`).join(' OR ')
       : undefined;
 
-  // Exclude streams ESQL rules from the results (significant events)
-  const excludeStreamsEsqlRulesFilter = `NOT ${soType}.attributes.alertTypeId:"${STREAMS_ESQL_RULE_TYPE_ID}"`;
-
   // Combine filters with AND
-  const filters = [
-    tagsFilter,
-    buildExcludeIdsFilter(soType, excludeIds),
-    excludeStreamsEsqlRulesFilter,
-  ].filter(Boolean);
+  const filters = [tagsFilter, buildExcludeIdsFilter(soType, excludeIds)].filter(Boolean);
   const combinedFilter = filters.length > 0 ? `(${filters.join(') AND (')})` : undefined;
 
   const { data } = await rulesClient.find({

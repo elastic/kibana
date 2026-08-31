@@ -1,5 +1,11 @@
 # Alerting v2 — Error contract
 
+> This document covers `ALERTING_ERROR_CODES` — the codes that travel out
+> over HTTP. `error_codes.ts` hosts a second catalog, `ALERTING_LOG_CODES`,
+> which is never serialized into a response; those codes are attached to
+> `logger.warn(...)` / `logger.error(...)` and are documented in
+> [`../services/logger_service/README.md`](../services/logger_service/README.md).
+
 All HTTP routes emit error responses that conform to the shared
 `errorResponseSchema` (defined in
 [`@kbn/alerting-v2-schemas`](../../../../../packages/shared/response-ops/alerting-v2-schemas/src/error_response_schema.ts)):
@@ -21,7 +27,7 @@ on `code`. The `message` field is intentionally NOT part of the API contract. Do
 - Branch on `code`, not on `message`.
 - Treat `message` as human-facing text only.
 - Treat `details` as structured context whose shape depends on `code`.
-- Prefer a domain-specific code from `ALERTING_V2_ERROR_CODES` over a generic
+- Prefer a domain-specific code from `ALERTING_ERROR_CODES` over a generic
   fallback.
 
 ## How error codes are produced
@@ -37,7 +43,7 @@ on `code`. The `message` field is intentionally NOT part of the API contract. Do
 
 Two helper sources of codes:
 
-- `server/lib/errors/error_codes.ts` — `ALERTING_V2_ERROR_CODES`: the
+- `server/lib/errors/error_codes.ts` — `ALERTING_ERROR_CODES`: the
   authoritative catalog of domain-specific codes.
 - `server/routes/derive_error_code.ts` — `deriveErrorCodeFromStatus(statusCode)`:
   the floor mapping from HTTP status to a generic code (`NOT_FOUND`,
@@ -56,7 +62,10 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `RULE_ALREADY_EXISTS`               | 409    | `createRule` collides with an existing id                                                                                           | `{ rule_id }`                              |
 | `RULE_VERSION_CONFLICT`             | 409    | An update / delete races another writer (`if_seq_no` mismatch)                                                                      | `{ rule_id }`                              |
 | `INVALID_RULE_DATA`                 | 400    | The submitted body fails the domain-level schema check                                                                              | `{ context, errors }` (tree-shaped errors) |
+| `INVALID_ARTIFACT_DATA`             | 400    | A registered artifact's `data` failed its type-specific schema                                                                      | `{ artifact_id, artifact_type, errors? }` |
 | `INVALID_STATE_TRANSITION`          | 400    | `state_transition` is incompatible with the rule's `kind`                                                                           | `{ rule_id, kind, transition }`            |
+| `INVALID_SIGNAL_RULE`               | 400    | An update would leave a signal rule in an invalid shape                                                                             | `{ rule_id, rule_kind }`                   |
+| `INVALID_RULE_QUERY_CONFIG`         | 400    | An update would desynchronize a `recovery_strategy`/`no_data_strategy` from its `query.recovery`/`query.no_data` block              | `{ rule_id }`                              |
 | `BULK_QUERY_MATCH_LIMIT_EXCEEDED`   | 400    | By-query bulk operation with `force: true` matched more resources than the per-request cap; rejected before any resource is mutated | `{ match_count, limit }`                   |
 | `IMMUTABLE_FIELDS_CHANGED`          | 400    | PUT (upsert) request changes a field flagged as immutable                                                                           | `{ fields }`                               |
 | `INVALID_FILTER_FIELD`              | 400    | The `filter` references a field that is not in the allow-list                                                                       | `{ field, allowed_fields }`                |
@@ -67,16 +76,19 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `RULE_ALREADY_RUNNING`              | 409    | `runRuleNow` targeted a rule whose executor task is already running                                                                 | `{ rule_id }`                              |
 | `RULE_RUN_CONFLICT`                 | 409    | `runRuleNow` raced another writer updating the executor task; retry                                                                 | `{ rule_id }`                              |
 | `RULE_RUN_ERROR`                    | 500    | `runRuleNow` failed for an unexpected reason (e.g. executor task missing)                                                           | `{ rule_id }`                              |
+| `RULE_CHANGE_NOT_FOUND`             | 404    | `getRuleChange` cannot find a change-history event by id for the given rule                                                         | `{ rule_id, event_id }`                    |
+| `RULE_CHANGE_HISTORY_UNAVAILABLE`   | 503    | The change-history data stream is not initialized (or change history is disabled)                                                   | _(none)_                                   |
 
 ### Action policies (`server/lib/action_policy_client/`)
 
-| Code                             | Status | When                                                               | `details`              |
-| -------------------------------- | ------ | ------------------------------------------------------------------ | ---------------------- |
-| `ACTION_POLICY_NOT_FOUND`        | 404    | `get` / `update` / `delete` cannot find an action policy by id     | `{ action_policy_id }` |
-| `ACTION_POLICY_ALREADY_EXISTS`   | 409    | `createActionPolicy` collides with an existing id                  | `{ action_policy_id }` |
-| `ACTION_POLICY_VERSION_CONFLICT` | 409    | An update / delete races another writer                            | `{ action_policy_id }` |
-| `INVALID_ACTION_POLICY_DATA`     | 400    | The submitted body fails the domain-level schema check             | `{ context, errors }`  |
-| `INVALID_DATE_STRING`            | 400    | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing | `{ value }`            |
+| Code                             | Status               | When                                                                                                                                                                                                                                                                    | `details`                              |
+| -------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `ACTION_POLICY_NOT_FOUND`        | 404                  | `get` / `update` / `delete` cannot find an action policy by id                                                                                                                                                                                                          | `{ action_policy_id }`                 |
+| `ACTION_POLICY_ALREADY_EXISTS`   | 409                  | `createActionPolicy` collides with an existing id                                                                                                                                                                                                                       | `{ action_policy_id }`                 |
+| `ACTION_POLICY_VERSION_CONFLICT` | 409                  | An update / delete races another writer                                                                                                                                                                                                                                 | `{ action_policy_id }`                 |
+| `INVALID_ACTION_POLICY_DATA`     | 400                  | The submitted body fails the domain-level schema check                                                                                                                                                                                                                  | `{ context, errors }`                  |
+| `INVALID_DATE_STRING`            | 400                  | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing                                                                                                                                                                                                      | `{ value }`                            |
+| `API_KEY_INVALIDATION_FAILED`    | 500 / 200 (per-item) | Delete-only. The policy's API key could not be queued for invalidation, so the policy was deliberately left in place — deleting it would strand a valid key with nothing referencing it. Safe to retry. The single delete returns 500; bulk delete reports it per item. | `{ action_policy_id }` (single delete) |
 
 ### Alert actions (`server/lib/alert_actions_client/`)
 
@@ -154,10 +166,10 @@ site:
 
 ```ts
 import Boom from '@hapi/boom';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 
 throw Boom.notFound(`Rule with id=${id} not found`, {
-  code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+  code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
   details: { rule_id: id },
 });
 ```
@@ -167,7 +179,7 @@ the standard body. No additional route-layer mapping is needed.
 
 ## How to add a new code
 
-1. Add a new entry to `ALERTING_V2_ERROR_CODES` in `error_codes.ts`. Use
+1. Add a new entry to `ALERTING_ERROR_CODES` in `error_codes.ts`. Use
    `UPPER_SNAKE_CASE`. Add a one-line JSDoc explaining when it fires.
 2. Use it via `Boom.<status>(msg, { code, details })` at the throw site.
 3. Add a unit test that asserts the boomified error carries the expected

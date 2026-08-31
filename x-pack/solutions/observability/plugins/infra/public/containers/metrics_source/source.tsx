@@ -23,7 +23,13 @@ import { MetricsDataViewProvider } from './metrics_view';
 
 const API_URL = `/api/metrics/source`;
 
-export const useSourceFetcher = ({ sourceId }: { sourceId: string }) => {
+export const useSourceFetcher = ({
+  sourceId,
+  includeStatus = true,
+}: {
+  sourceId: string;
+  includeStatus?: boolean;
+}) => {
   const [source, setSource] = useState<MetricsSourceConfiguration | undefined>(undefined);
   const {
     services: { http, telemetry },
@@ -43,6 +49,9 @@ export const useSourceFetcher = ({ sourceId }: { sourceId: string }) => {
           `${API_URL}/${sourceId}`,
           {
             method: 'GET',
+            query: {
+              includeStatus,
+            },
           }
         );
         telemetry?.reportPerformanceMetricEvent(
@@ -106,9 +115,16 @@ export const useSourceFetcher = ({ sourceId }: { sourceId: string }) => {
   };
 };
 
-export const useSource = ({ sourceId }: { sourceId: string }) => {
+export const useSource = ({
+  sourceId,
+  includeStatus = true,
+}: {
+  sourceId: string;
+  includeStatus?: boolean;
+}) => {
   const { persistSourceConfiguration, source, error, isLoading, loadSource } = useSourceFetcher({
     sourceId,
+    includeStatus,
   });
 
   const sourceExists = source ? !!source.version : undefined;
@@ -131,10 +147,10 @@ export const [SourceProvider, useSourceContext] = createContainer(useSource);
 
 export const withSourceProvider =
   <ComponentProps extends {}>(Component: React.FC<ComponentProps>) =>
-  (sourceId = 'default') => {
+  (sourceId = 'default', includeStatus = true) => {
     return function ComponentWithSourceProvider(props: ComponentProps) {
       return (
-        <SourceProvider sourceId={sourceId}>
+        <SourceProvider sourceId={sourceId} includeStatus={includeStatus}>
           <MetricsDataViewProvider>
             <Component {...props} />
           </MetricsDataViewProvider>

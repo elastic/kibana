@@ -16,6 +16,7 @@ import { OBSERVABILITY_ONBOARDING_APP_ID } from '@kbn/deeplinks-observability';
 import { SEARCH_GETTING_STARTED } from '@kbn/deeplinks-search';
 import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { HOME_APP_ID } from '@kbn/deeplinks-shared';
+import { VECTORDB_APP_ID } from '@kbn/deeplinks-vectordb';
 import type { WorkplaceAIApp } from '@kbn/deeplinks-workplace-ai';
 import { i18n } from '@kbn/i18n';
 
@@ -26,6 +27,7 @@ type GetStartedAppId =
   | typeof OBSERVABILITY_ONBOARDING_APP_ID
   | typeof SEARCH_GETTING_STARTED
   | typeof SECURITY_APP_ID
+  | typeof VECTORDB_APP_ID
   | WorkplaceAIApp;
 
 interface GetStartedTarget {
@@ -39,6 +41,7 @@ const SERVERLESS_TARGETS: Record<string, GetStartedTarget> = {
   observability: { appId: OBSERVABILITY_ONBOARDING_APP_ID },
   search: { appId: SEARCH_GETTING_STARTED },
   security: { appId: SECURITY_APP_ID, path: '/get_started' },
+  vectordb: { appId: VECTORDB_APP_ID, path: '/getting_started' },
   workplaceai: { appId: WORKPLACE_AI_APP_ID },
 };
 
@@ -121,7 +124,7 @@ export const useFooterLinks = ({
     }
 
     // "Connection details" link
-    if (isServerless === true && cloud?.isCloudEnabled === true) {
+    if (cloud?.isCloudEnabled === true) {
       items.push({
         id: 'connectionDetails',
         label: i18n.translate('xpack.spaces.contextSwitcher.footerLinks.connectionDetailsLabel', {

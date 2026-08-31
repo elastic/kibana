@@ -11,8 +11,12 @@
     "server": true,
     "requiredPlugins": [
       "embeddable",
-      "inference",
-      "data"
+      "data",
+      "esql",
+      "uiActions"
+    ],
+    "optionalPlugins": [
+      "agentBuilder"
     ]
   }
 }

@@ -75,6 +75,39 @@ describe('updateCasesStepDefinition', () => {
     });
   });
 
+  it('passes extended_fields through to bulkUpdate', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = jest
+      .fn()
+      .mockResolvedValue([{ ...createCaseResponseFixture, id: 'case-1' }]);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get, bulkUpdate },
+    } as unknown as CasesClient);
+    const definition = updateCasesStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        cases: [
+          {
+            case_id: 'case-1',
+            updates: {
+              extended_fields: { priority_as_keyword: 'low' },
+            },
+          },
+        ],
+      })
+    );
+
+    expect(bulkUpdate).toHaveBeenCalledWith({
+      cases: [
+        expect.objectContaining({
+          id: 'case-1',
+          extended_fields: { priority_as_keyword: 'low' },
+        }),
+      ],
+    });
+  });
+
   it('returns translated error when bulk update throws', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const bulkUpdate = jest.fn().mockRejectedValue(new Error('bulk update failed'));

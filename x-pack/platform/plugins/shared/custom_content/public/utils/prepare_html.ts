@@ -6,7 +6,7 @@
  */
 
 import DOMPurify from 'dompurify';
-import type { EuiThemeColorModeStandard } from '@elastic/eui';
+import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
@@ -23,8 +23,44 @@ export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): 
   return inject + html;
 }
 
-export function prepareHtml(html: string, colorMode?: EuiThemeColorModeStandard): string {
-  return injectCsp(sanitizeHtml(stripMarkdownFences(html)), colorMode);
+export function injectStyleTag(html: string, style: string): string {
+  const styleTag = `<style>${style}</style>`;
+  const headMatch = html.match(/<head[^>]*>/i);
+  if (headMatch?.index !== undefined) {
+    const at = headMatch.index + headMatch[0].length;
+    return html.slice(0, at) + styleTag + html.slice(at);
+  }
+  return styleTag + html;
+}
+
+export function buildThemeCss(
+  euiTheme: EuiThemeComputed,
+  colorMode: EuiThemeColorModeStandard
+): string {
+  const isDark = colorMode === 'DARK';
+  const c = euiTheme.colors;
+  const vars: Array<[string, string]> = [
+    ['--cc-color-text', c.textParagraph],
+    ['--cc-color-background', isDark ? c.emptyShade : 'transparent'],
+    ['--cc-color-surface', isDark ? c.lightestShade : c.emptyShade],
+    ['--cc-color-primary', c.primary],
+    ['--cc-color-accent', c.accentSecondary],
+    ['--cc-color-accent-2', c.accent],
+    ['--cc-color-warning', c.warning],
+    ['--cc-color-danger', c.danger],
+    ['--cc-color-border', c.borderBasePlain],
+  ];
+  return `:root{${vars.map(([k, v]) => `${k}:${v}`).join(';')}}`;
+}
+
+export function applyHtmlTheme(
+  html: string,
+  colorMode: EuiThemeColorModeStandard,
+  euiTheme: EuiThemeComputed
+): string {
+  // CSP is injected last so the meta tag precedes every other node in <head>. A meta CSP only
+  // governs resources fetched after it is parsed, so anything inserted ahead of it is ungoverned.
+  return injectCsp(injectStyleTag(html, buildThemeCss(euiTheme, colorMode)), colorMode);
 }
 
 export function sanitizeHtml(html: string): string {
@@ -32,38 +68,5 @@ export function sanitizeHtml(html: string): string {
     FORBID_TAGS: ['a'],
     WHOLE_DOCUMENT: true,
     FORCE_BODY: false,
-  }) as string;
-}
-
-const FENCE_OPEN = /^```(?:html|HTML)?\s*\n?/;
-const FENCE_CLOSE = /\n?```\s*$/;
-const FENCE_MARKER = /```(?:html|HTML)?/g;
-// Only strip markers near an edge — likely the wrapping fence, not fenced code meant to display.
-const FENCE_EDGE_WINDOW = 200;
-
-export function stripMarkdownFences(raw: string): string {
-  const trimmed = raw.trim().replace(FENCE_OPEN, '').replace(FENCE_CLOSE, '');
-  return trimmed
-    .replace(FENCE_MARKER, (match, offset: number) => {
-      const distanceFromEdge = Math.min(offset, trimmed.length - offset - match.length);
-      return distanceFromEdge <= FENCE_EDGE_WINDOW ? '' : match;
-    })
-    .trim();
-}
-
-// The rendering iframe is scripting-disabled and sanitizeHtml() strips <script> tags outright,
-// so a template relying on one wouldn't error — it would just silently render blank. Catching it
-// here, before that silent stripping, turns it into a clear error instead.
-const SCRIPT_TAG_PATTERN = /<script[\s>]/i;
-
-export function containsScript(template: string): boolean {
-  return SCRIPT_TAG_PATTERN.test(template);
-}
-
-// LLMs can return plain text, markdown, or empty strings — any of which would render blank.
-// Require at least one HTML tag so the retry path kicks in for those non-renderable outputs.
-const HTML_TAG_PATTERN = /<[a-zA-Z]/;
-
-export function isValidTemplate(template: string): boolean {
-  return HTML_TAG_PATTERN.test(template);
+  });
 }

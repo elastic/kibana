@@ -9,7 +9,7 @@ import { combineReducers, applyMiddleware, createStore, compose } from 'redux-v4
 import thunk from 'redux-thunk-v2';
 import { ui, DEFAULT_MAP_UI_STATE } from './ui';
 import { map, DEFAULT_MAP_STATE } from './map'; // eslint-disable-line import/named
-import { nonSerializableInstances } from './non_serializable_instances';
+import { nonSerializableInstancesReducers } from './non_serializable_instances';
 
 export const DEFAULT_MAP_STORE_STATE = {
   ui: { ...DEFAULT_MAP_UI_STATE },
@@ -22,7 +22,7 @@ export function createMapStore() {
   const combinedReducers = combineReducers({
     map,
     ui,
-    nonSerializableInstances,
+    nonSerializableInstances: nonSerializableInstancesReducers,
   });
 
   const storeConfig = {};

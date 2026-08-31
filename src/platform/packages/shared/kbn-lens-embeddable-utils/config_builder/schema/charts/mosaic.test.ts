@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { MosaicConfig, MosaicConfigESQL, MosaicConfigNoESQL } from './mosaic';
 import { mosaicConfigSchema } from './mosaic';
@@ -42,7 +43,7 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      const validated = mosaicConfigSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.type).toBe('mosaic');
       expect(validated.metric).toHaveProperty('operation', 'count');
       expect(validated.group_by).toHaveLength(1);
@@ -57,7 +58,10 @@ describe('Mosaic Schema', () => {
         },
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).toThrow();
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
+        `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
+      );
     });
 
     it('validates configuration with both outer and inner grouping', () => {
@@ -86,7 +90,7 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      const validated = mosaicConfigSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.metric).toHaveProperty('operation', 'sum');
       expect(validated.group_by).toHaveLength(1);
       expect(validated.group_breakdown_by).toHaveLength(1);
@@ -124,7 +128,7 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      const validated = mosaicConfigSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.group_by).toHaveLength(2);
       expect(validated.group_breakdown_by).toHaveLength(1);
     });
@@ -166,7 +170,7 @@ describe('Mosaic Schema', () => {
         },
       };
 
-      const validated = mosaicConfigSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.title).toBe('Sales Mosaic');
       expect(validated.legend?.nested).toBe(true);
       expect(validated.styling?.values?.visible).toBe(false);
@@ -182,7 +186,12 @@ describe('Mosaic Schema', () => {
         group_by: [],
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).toThrow();
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Either a group_by or a group_breakdown_by dimension must be specified
+        ✖ Too small: expected array to have >=1 items
+          → at group_by"
+      `);
     });
 
     it('throws on empty group_breakdown_by array', () => {
@@ -202,7 +211,11 @@ describe('Mosaic Schema', () => {
         group_breakdown_by: [],
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).toThrow();
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at group_breakdown_by"
+      `);
     });
 
     describe('Grouping Cardinality Validation', () => {
@@ -222,7 +235,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows multiple collapsed dimensions in group_by', () => {
@@ -253,7 +266,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('throws when group_by has multiple non-collapsed dimensions', () => {
@@ -277,8 +290,9 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
         );
       });
 
@@ -309,8 +323,9 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
         );
       });
 
@@ -339,7 +354,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows multiple collapsed dimensions in group_breakdown_by', () => {
@@ -380,7 +395,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('throws when group_breakdown_by has multiple non-collapsed dimensions', () => {
@@ -414,8 +429,9 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_breakdown_by"`
         );
       });
 
@@ -456,8 +472,9 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_breakdown_by"`
         );
       });
 
@@ -470,8 +487,9 @@ describe('Mosaic Schema', () => {
           },
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
-          /Either a group_by or a group_breakdown_by dimension must be specified/i
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
         );
       });
 
@@ -506,7 +524,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows valid combination with both outer and inner having multiple collapsed dimensions', () => {
@@ -560,7 +578,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
     });
   });
@@ -587,8 +605,9 @@ describe('Mosaic Schema', () => {
         },
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).toThrow(
-        /Either a group_by or a group_breakdown_by dimension must be specified/i
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
+        `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
       );
     });
 
@@ -613,7 +632,7 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+      expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
     });
   });
 });

@@ -45,16 +45,18 @@ For every failure, try to retrieve:
 
 Things to specifically check in the artifacts before forming a root-cause hypothesis:
 
-- **Did the expected element render at all?** If yes and the selector missed it → flaky selector (Tier 2 fix territory). If no → real rendering / race / data issue (Tier 1 territory).
+- **Did the expected element render at all?** If yes and the selector missed it → flaky selector (Tier 2 fix territory). If no, distinguish **not yet** (a missing test-side wait) from **never** (the awaited state is unreachable — e.g. the component doesn't re-render when its async data arrives): read the component that renders the element, or find trace evidence of it appearing later. A missing wait in the test does not by itself prove the element would eventually have rendered.
 - **Is there an error visible in the UI** (toast, banner, console error in the HTML report)? If yes → product side, not test side.
 - **Is the page in an unexpected state** (different URL, different user's data, different space)? → cleanup or isolation issue, often points at `afterEach` / `afterAll`.
 - **Does the screenshot timestamp match the failure timestamp**? Stale artifacts from a prior step can mislead.
 
 If artifacts are not available (expired, not uploaded, no `read_artifacts` token), say so in the report rather than fabricating a hypothesis. "Screenshot would have resolved this; not available" is a valid open question.
 
-### List failure artifacts
+### List and download failure artifacts
 
 `bk artifacts list <build> -p <pipeline> --job-uuid <jobId> --json` returns a JSON listing of every artifact uploaded for the failing job. Pass `--job-uuid <jobId>` for the failed attempt (without it, `bk` only returns the latest attempt and hides retried failures). If a build retried to green, failure artifacts only live on the failed job's listing; don't conclude "no screenshot" until you've scoped to the right job UUID.
+
+Each listing entry carries an artifact ID. `bk artifacts download` has no destination argument — it writes to the current directory — so `cd` into your target dir first and pass `-y` so it doesn't stall on a confirmation prompt: `cd <dest-dir> && bk artifacts download <artifact-id> --build <build> -p <pipeline> -y`. Download only the artifacts you will actually read — the failure screenshot, the DOM/HTML snapshot, the relevant `target/test_failures/*.log` — not the whole listing. For a large text log, `grep`/`sed` around the failure timestamp instead of reading it end to end. Use these commands directly instead of rediscovering the syntax from scratch; only fall back to `bk ... --help` if one doesn't work as documented here.
 
 ### Where the Kibana & Elasticsearch logs live
 
@@ -92,28 +94,32 @@ Work through all of these questions:
 
 ### Does the test follow best practices?
 
-Common best-practice violations that cause flakiness:
+Check the test against these best practices — the ones flaky tests most often violate. A violation you find is a lead worth investigating, not proof of the root cause:
 
-- **Pick the right test type** (`docs/extend/testing/scout-best-practices#pick-the-right-test-type`). UI tests are notoriously more flaky than component, API, and Jest unit/integration tests.
-- **Prefer APIs for setup and teardown** (`docs/extend/testing/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`). Driving setup/teardown through the UI is slower and flakier.
-- **Wait for UI updates after actions** (`docs/extend/testing/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it`). Confirm the action produced the expected result and the UI has rendered before continuing.
+- **Pick the right test type** (`docs/extend/testing/scout-best-practices#pick-the-right-test-type`): UI tests are notoriously more flaky than component, API, and Jest unit/integration tests — if the behavior can be verified without a browser, test it at that lower level.
+- **Prefer APIs for setup and teardown** (`docs/extend/testing/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`): driving setup/teardown through the UI is slower and flakier.
+- **Wait for UI updates after actions** (`docs/extend/testing/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it`): confirm the action produced the expected result and the UI has rendered before continuing.
 - **Wait for complex UI to finish rendering** (`docs/extend/testing/ui-best-practices#wait-for-complex-components-to-fully-render`).
-- **Don't use manual retry loops** (`docs/extend/testing/ui-best-practices#dont-use-manual-retry-loops`). If a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the retry pitfall below).
+- **Don't use manual retry loops** (`docs/extend/testing/ui-best-practices#dont-use-manual-retry-loops`): if a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the fix guardrails below).
+- **Expect a shared test environment** (`docs/extend/testing/scout-best-practices#expect-a-shared-test-environment`): tests can't assume a clean deployment — other suites leave objects behind, and Cloud ships preinstalled content (Fleet dashboards, prebuilt detection rules, preconfigured connectors). Assertions over lists must tolerate entries the test didn't create: narrow queries to the test's own data, address objects by identity (not position), assert containment (not totality), and never assert that data is absent cluster-wide (empty prompts, "no data" redirects).
+- **Don't leak state into the next suite** (`docs/extend/testing/scout-best-practices#dont-leak-state-into-the-next-suite`): whatever a suite creates or changes is still there for the suites that run after it on the same servers. Namespace resource names per run, use a suite-unique time window for fixed-timestamp data, tear down the underlying resource (not just the saved object tracking it), and revert behavior-changing state (settings, feature flags, index templates).
 
 Scout and FTR tests should also follow the general best practices in `docs/extend/testing/scout-best-practices.md`, the UI best practices in `docs/extend/testing/ui-best-practices.md`, and the API best practices in `docs/extend/testing/api-best-practices.md`.
+
+### Fix guardrails
+
+Any fix you recommend must stay within the shared fix guardrails at `.github/workflows/shared/flaky-test-fix-guardrails.md` — the single source of truth for fix anti-patterns, shared with the automated fixer and verifier workflows. Read that file before writing a fix recommendation.
 
 ### Investigation pitfalls
 
 Watch out for these pitfalls when investigating the failure:
 
-- **Ignoring the bigger picture**: ensure you have as much data as you can about the test environment and related failures (in the same test file, test config or elsewhere).
-- **Recommending a timeout bump as the primary fix**: timeout bumps consistently fail to hold in Kibana. Investigate what never happened — confirm the slow operation is intrinsic to the product (e.g. index creation, SLO calculation) rather than a missing `waitForResponse`/`waitForSelector` upstream.
-- **Never recommend wrapping an assertion _or an interaction_ in a retry as the fix.** This covers both the obvious form — wrapping `expect` / `existOrFail` in `retry()` / `retry.tryForTime` — and the subtler one: re-issuing a `click`, `setValue`/type, or `goto`/navigation inside a retry so a "missed" interaction lands on a later attempt (e.g. `retry.tryForTime(() => { await testSubjects.click(x); await testSubjects.existOrFail(y); })`). Real users don't click or type the same thing repeatedly, so retrying the interaction hides a genuine actionability bug that a real user would hit (element off-screen or at the viewport edge, the wrong sub-element being targeted, an unstable re-render). Instead, diagnose _what specifically fails_ and fix that: scroll/ensure the element is stably actionable before acting, target the correct element, or wait on an explicit readiness `data-test-subj` signal.
-- **Never recommend only test-side async hooks (`await`, `waitFor`, `waitUntil`) when there is evidence of a production-side race.** This is the most common pattern that looks like a fix but isn't — popular precisely because it appears principled, but it lets the test wait _longer_ without fixing the race.
-- **Weakening assertions**: don't recommend making assertions more lenient or narrowing their scope just to make the test pass — this hides regressions instead of catching them. Generic test-only refactors that loosen assertions often regress.
-- **Reducing coverage surface**: don't recommend stripping tags to skip the test in certain environments (e.g. Cloud) or project types (e.g. serverless Security) unless you have a real reason it shouldn't run there. "It's flaky here" is not a real reason.
-- **Trusting flaky-test-runner alone**: a green 30/30 or 60/60 run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs).
+- **Ignoring the bigger picture**: gather a solid baseline of data about the test environment and related failures (in the same test file, test config or elsewhere) before concluding.
+- **Trusting flaky-test-runner alone**: a fully green run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs). It is also a local pipeline that cannot reproduce a real Elastic Cloud environment (see `references/pipelines.md`) — for a failure that happens on Cloud pipelines, a green flaky-runner result says little about whether the fix holds there.
 - **Assuming "fix the test, not the product"**: always ask first whether the product could be at fault. Test-only fixes are meaningfully less durable than fixes that change production code.
+- **Reading fault from the throwing stack frame**: a waiting-side timeout always throws from the waiter (FTR/Playwright service code), so the frame tells you who threw, not whose fault it is. It is not evidence against a product bug.
+- **Blaming a prior fix without matching signatures**: before concluding an earlier fix "didn't hold", confirm the recurrence carries the _same_ error signature (same element/assertion/call site) that fix targeted. A fix can be correct and the test still flaky at a _different_ step — that is a new, separate flake, not a failed fix; diagnose it on its own merits. If the test keeps surfacing fresh races at successive steps, consider reducing UI interactions (API-driven setup/teardown, or splitting the test) rather than stacking waits.
+- **Counting a pre-fix Cloud build as a recurrence**: a Cloud image trails `main`, so a failure reported soon after a fix merged may have run a checkout that predates the fix. Resolve the run's `Build hash` and confirm the build contains the fix via the GitHub compare API (see `references/pipelines.md`) before treating the failure as a recurrence — otherwise it is propagation lag, not the fix failing.
 - **Reporting false certainty**: "I don't know, here are the two plausible explanations and what would distinguish them" is more useful to the owning team than a confident wrong answer.
 
 ### Is a fix worth it?

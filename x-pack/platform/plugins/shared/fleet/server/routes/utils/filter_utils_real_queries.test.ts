@@ -747,6 +747,29 @@ describe('validateKuery validates real kueries', () => {
         `KQLSyntaxError: This type 'non_existent_parameter' is not allowed`
       );
     });
+
+    it('Rejects filtering on default_api_key (not a searchable field)', async () => {
+      const validationObj = validateKuery(
+        `default_api_key: *`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toContain(
+        `KQLSyntaxError: This type 'default_api_key' is not allowed`
+      );
+    });
+
+    it('Still allows filtering on default_api_key_id', async () => {
+      const validationObj = validateKuery(
+        `default_api_key_id: abc123`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
   });
 
   describe('Package policies', () => {

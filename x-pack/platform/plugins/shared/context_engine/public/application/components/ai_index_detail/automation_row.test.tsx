@@ -12,6 +12,26 @@ import React from 'react';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { AutomationRow } from './automation_row';
 
+jest.mock('./workflow_yaml_preview_flyout', () => ({
+  WorkflowYamlPreviewFlyout: ({
+    workflowId,
+    workflowName,
+    onClose,
+  }: {
+    workflowId: string;
+    workflowName: string;
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="contextWorkflowYamlPreviewFlyout">
+      <span>{workflowName}</span>
+      <span>{workflowId}</span>
+      <button type="button" onClick={onClose}>
+        Close preview
+      </button>
+    </div>
+  ),
+}));
+
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
     <I18nProvider>
@@ -84,19 +104,20 @@ describe('AutomationRow', () => {
     expect(screen.queryByText('Disabled')).not.toBeInTheDocument();
   });
 
-  it('renders the Edit workflow link with the given editHref and target="_blank"', () => {
+  it('renders the Edit workflow link with the given editHref for in-app navigation', () => {
     renderAutomationRow({ editHref: '/app/workflows/edit/123' });
 
     const link = screen.getByTestId('contextOpenWorkflowButton');
     expect(link).toHaveAttribute('href', '/app/workflows/edit/123');
-    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).not.toHaveAttribute('target');
   });
 
-  it('renders no actions when isEditing is false', () => {
+  it('renders no edit actions when isEditing is false', () => {
     renderAutomationRow({ isEditing: false });
 
     expect(screen.queryByTestId('contextOpenWorkflowButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextRemoveAutomationButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextPreviewWorkflowButton')).toBeInTheDocument();
   });
 
   it('renders the actions when isEditing is true', () => {
@@ -134,5 +155,24 @@ describe('AutomationRow', () => {
     expect(
       screen.getByRole('button', { name: 'Remove automation My Workflow' })
     ).toBeInTheDocument();
+  });
+
+  it('opens the workflow yaml preview flyout when the eye button is clicked', () => {
+    renderAutomationRow({ name: 'My Workflow', isEditing: false });
+
+    fireEvent.click(screen.getByTestId('contextPreviewWorkflowButton'));
+
+    const flyout = screen.getByTestId('contextWorkflowYamlPreviewFlyout');
+    expect(flyout).toBeInTheDocument();
+    expect(flyout).toHaveTextContent('workflow-value-id');
+  });
+
+  it('closes the workflow yaml preview flyout', () => {
+    renderAutomationRow({ isEditing: false });
+
+    fireEvent.click(screen.getByTestId('contextPreviewWorkflowButton'));
+    fireEvent.click(screen.getByRole('button', { name: 'Close preview' }));
+
+    expect(screen.queryByTestId('contextWorkflowYamlPreviewFlyout')).not.toBeInTheDocument();
   });
 });

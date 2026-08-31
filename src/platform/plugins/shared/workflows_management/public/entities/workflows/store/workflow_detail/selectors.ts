@@ -110,6 +110,10 @@ export const selectIsSavingYaml = createSelector(
 );
 
 export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
+export const selectConnectorsLoadState = createSelector(
+  selectDetail,
+  (detail) => detail.connectorsLoadState
+);
 export const selectWorkflows = createSelector(selectDetail, (detail) => detail.workflows);
 export const selectSchema = createSelector(selectDetail, (detail) => detail.schema);
 
@@ -134,7 +138,7 @@ export const selectIsWorkflowTab = createSelector(
  * These selectors are used to get the correct data for the editor based on the active tab (current workflow or previous execution).
  */
 
-const selectIsEditorExecutionYaml = createSelector(
+export const selectIsEditorExecutionYaml = createSelector(
   selectIsExecutionsTab,
   selectExecution,
   (isExecutionsTab, execution) => Boolean(isExecutionsTab && execution?.yaml)

@@ -28,9 +28,11 @@ const PopoverContent = styled(EuiText)`
 export function HelpPopoverButton({
   buttonTextEnabled = false,
   onClick,
+  tooltipContent,
 }: {
   buttonTextEnabled?: boolean;
   onClick: EuiLinkButtonProps['onClick'];
+  tooltipContent?: ReactNode;
 }) {
   const buttonText = i18n.translate('xpack.apm.helpPopover.ariaLabel', {
     defaultMessage: 'Help',
@@ -51,7 +53,7 @@ export function HelpPopoverButton({
   }
 
   return (
-    <EuiToolTip content={buttonText} disableScreenReaderOutput>
+    <EuiToolTip content={tooltipContent ?? buttonText} disableScreenReaderOutput>
       <EuiButtonIcon
         data-test-subj="apmHelpPopoverButtonButton"
         className="apmHelpPopover__buttonIcon"

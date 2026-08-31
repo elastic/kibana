@@ -31,7 +31,13 @@ export {
 } from './saved_objects';
 
 export type { RruleSchedule } from './task';
-export { TaskStatus, TaskPriority, TaskCost, InstanceTaskCost } from './task';
+export {
+  TaskStatus,
+  TaskPriority,
+  TaskCost,
+  InstanceTaskCost,
+  getTaskCostFromInstance,
+} from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
@@ -56,6 +62,7 @@ export {
 export { aggregateTaskOverduePercentilesForType } from './queries/aggregate_task_overdue_percentiles_for_type';
 
 export { runInvalidate } from './invalidate_api_keys/lib';
+export { getUiamApiKeySecret } from './lib/api_key_utils';
 export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,

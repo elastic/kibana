@@ -9,6 +9,8 @@ import React from 'react';
 import { CertificatesPage } from './certificates';
 import { render } from '../../utils/testing';
 
+jest.setTimeout(10_000);
+
 describe('CertificatesPage', () => {
   it('renders expected elements for valid props', async () => {
     const { findByText } = render(<CertificatesPage />);

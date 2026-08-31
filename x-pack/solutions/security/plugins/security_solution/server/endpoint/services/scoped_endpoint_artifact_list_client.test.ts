@@ -95,6 +95,19 @@ jest.mock('../../lists_integration/endpoint/validators/endpoint_exceptions_valid
   ),
 }));
 
+jest.mock('../../lists_integration/endpoint/validators/custom_yara_signatures_validator', () => ({
+  CustomYaraSignaturesValidator: Object.assign(
+    jest.fn().mockImplementation(() => ({
+      validatePreSingleListFind: jest.fn().mockResolvedValue(undefined),
+    })),
+    {
+      isCustomYaraSignature: jest.fn(
+        ({ listId }: { listId: string }) => listId === 'endpoint_custom_yara_signatures'
+      ),
+    }
+  ),
+}));
+
 const { buildSpaceDataFilter } = jest.requireMock(
   '../../lists_integration/endpoint/utils/build_space_data_filter'
 ) as { buildSpaceDataFilter: jest.Mock };
@@ -124,6 +137,10 @@ const { EventFilterValidator } = jest.requireMock(
 const { EndpointExceptionsValidator } = jest.requireMock(
   '../../lists_integration/endpoint/validators/endpoint_exceptions_validator'
 ) as { EndpointExceptionsValidator: jest.Mock & { isEndpointException: jest.Mock } };
+
+const { CustomYaraSignaturesValidator } = jest.requireMock(
+  '../../lists_integration/endpoint/validators/custom_yara_signatures_validator'
+) as { CustomYaraSignaturesValidator: jest.Mock & { isCustomYaraSignature: jest.Mock } };
 
 describe('ScopedEndpointArtifactListClient', () => {
   let mockExceptionListClient: jest.Mocked<ExceptionListClient>;
@@ -181,6 +198,7 @@ describe('ScopedEndpointArtifactListClient', () => {
       ['eventFilters', EventFilterValidator],
       ['blocklists', BlocklistValidator],
       ['endpointExceptions', EndpointExceptionsValidator],
+      ['customYaraSignatures', CustomYaraSignaturesValidator],
     ] as const)('validates access before querying for %s', async (artifactKey, ValidatorMock) => {
       await client.findEndpointArtifactListItems({
         ...baseOptions,
@@ -245,6 +263,7 @@ describe('ScopedEndpointArtifactListClient', () => {
         ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
         ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
         ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+        ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       ];
 
       for (const listId of allListIds) {
@@ -252,7 +271,7 @@ describe('ScopedEndpointArtifactListClient', () => {
       }
 
       expect(buildSpaceDataFilter).toHaveBeenCalledTimes(1);
-      expect(mockExceptionListClient.findExceptionListItem).toHaveBeenCalledTimes(6);
+      expect(mockExceptionListClient.findExceptionListItem).toHaveBeenCalledTimes(7);
     });
 
     it('propagates validator errors without crashing', async () => {
@@ -288,6 +307,7 @@ describe('ScopedEndpointArtifactListClient', () => {
       EventFilterValidator.isEventFilter.mockReturnValueOnce(false);
       BlocklistValidator.isBlocklist.mockReturnValueOnce(false);
       EndpointExceptionsValidator.isEndpointException.mockReturnValueOnce(false);
+      CustomYaraSignaturesValidator.isCustomYaraSignature.mockReturnValueOnce(false);
 
       await expect(
         client.findEndpointArtifactListItems({

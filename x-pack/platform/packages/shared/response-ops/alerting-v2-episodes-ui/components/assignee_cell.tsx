@@ -6,11 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonCircle,
+  EuiSkeletonText,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { UserAvatar, UserToolTip } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 import * as i18n from './translations';
 
 export interface AlertEpisodeAssigneeCellProps {
@@ -43,7 +50,22 @@ export const AlertEpisodeAssigneeCell = ({
   }
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="s" />;
+    // Mirrors the loaded avatar + username layout.
+    return (
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
+        data-test-subj="alertingV2EpisodeAssigneeCellLoading"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiSkeletonCircle size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem css={{ maxWidth: 120 }}>
+          <EuiSkeletonText lines={1} size="s" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   if (isError) {
@@ -73,23 +95,21 @@ export const AlertEpisodeAssigneeCell = ({
   const avatar = profile.data?.avatar;
 
   return (
-    <UserToolTip user={user} avatar={avatar} position="top">
-      <EuiFlexGroup
-        gutterSize="xs"
-        alignItems="center"
-        responsive={false}
-        css={{ minWidth: 0 }}
-        data-test-subj="alertingV2EpisodeAssigneeCell"
-      >
-        <EuiFlexItem grow={false}>
-          <UserAvatar user={user} avatar={avatar} size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-          <EuiText size="s" className="eui-textTruncate" title={username}>
-            {username}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </UserToolTip>
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      css={{ minWidth: 0 }}
+      data-test-subj="alertingV2EpisodeAssigneeCell"
+    >
+      <EuiFlexItem grow={false}>
+        <UserAvatar user={user} avatar={avatar} size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+        <EuiText size="s" className="eui-textTruncate" title={username}>
+          {username}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

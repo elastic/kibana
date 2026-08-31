@@ -9,7 +9,7 @@
     "id": "dataViewsAsCode",
     "browser": false,
     "server": true,
-    "requiredPlugins": ["dataViews"],
+    "requiredPlugins": ["dataViews", "fieldFormats"],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": [],
     "extraPublicDirs": []

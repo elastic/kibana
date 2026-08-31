@@ -17,7 +17,12 @@ import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS, ESQLLang } from '../esql';
 import { wrapAsMonacoSuggestions } from '../esql/lib/converters/suggestions';
 import { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';
 import { buildConsoleTheme } from './theme';
-import { checkForTripleQuotesAndEsqlQuery, unescapeInvalidChars } from './utils';
+import {
+  checkForTripleQuotesAndEsqlQuery,
+  findRequestLineNumber,
+  getFallbackRequestStartPosition,
+  unescapeInvalidChars,
+} from './utils';
 import type { LangModuleType } from '../../types';
 
 const workerProxyService = new ConsoleWorkerProxyService();
@@ -32,47 +37,50 @@ import { foldingRangeProvider } from './folding_range_provider';
 
 export const CONSOLE_TRIGGER_CHARS = ['/', '.', '_', ',', '?', '=', '&', '"'];
 
-const requestMethodRe = /^\s*(GET|POST|PUT|DELETE|HEAD|PATCH)\b/i;
-const esqlRequestLineRe = /^\s*post\s+\/?_query(?:\/async)?(?:\s|\?|$)/i;
 /**
- * Safeguards for request-line lookup. We scan backwards from the cursor until we find the nearest
- * request method line (GET/POST/...), but we cap the amount of work to avoid a potentially large
- * number of `getLineContent()` calls on very long documents.
- *
- * If these limits are hit, ES|QL context detection is skipped and we fall back to the
- * actions provider (preserving completion behavior, just without ES|QL suggestions).
+ * Anchor for the ES|QL context check. A `document`-direction scan is required: the string-aware
+ * scanner then sees everything from the document start, so request-like lines *inside* strings
+ * can neither activate nor suppress ES|QL suggestions. A partially scanned document has unknown
+ * initial string state, so it must not be classified from an untrusted suffix.
  */
-const MAX_REQUEST_LINE_LOOKBACK_LINES = 2000;
-const MAX_REQUEST_LINE_LOOKBACK_CHARS = 100_000;
-
-const findEsqlRequestLineNumber = (
+const findRequestAnchorLineNumber = (
   model: monaco.editor.ITextModel,
   positionLineNumber: number
 ): number | undefined => {
-  for (
-    let lineNumber = positionLineNumber, scannedLines = 0, scannedChars = 0;
-    lineNumber >= 1 &&
-    scannedLines < MAX_REQUEST_LINE_LOOKBACK_LINES &&
-    scannedChars < MAX_REQUEST_LINE_LOOKBACK_CHARS;
-    lineNumber--, scannedLines++
-  ) {
-    const line = model.getLineContent(lineNumber);
-    scannedChars += line.length + 1;
-    if (requestMethodRe.test(line)) {
-      // Only treat this as an ES|QL request if the request line matches POST _query(/async)?...
-      return esqlRequestLineRe.test(line) ? lineNumber : undefined;
-    }
+  const getLineContent = (lineNumber: number) => model.getLineContent(lineNumber);
+  return findRequestLineNumber(getLineContent, positionLineNumber, { direction: 'document' });
+};
+
+/**
+ * Documents whose above-cursor prefix exceeds the lookback caps cannot be classified from a line
+ * scan. Anchor those via the worker's parsed requests instead: the parser is capped-scan
+ * independent, and the resolver rejects recovery artifacts inside triple-quoted strings.
+ */
+const getRequestAnchorPosition = async (
+  model: monaco.editor.ITextModel,
+  position: monaco.Position
+): Promise<monaco.IPosition | undefined> => {
+  const anchorLineNumber = findRequestAnchorLineNumber(model, position.lineNumber);
+  if (anchorLineNumber !== undefined) {
+    return { lineNumber: anchorLineNumber, column: 1 };
   }
+  const parsedRequests = await getParsedRequestsProvider(model).getRequests();
+  return getFallbackRequestStartPosition(
+    parsedRequests,
+    model,
+    position.lineNumber,
+    position.column
+  );
 };
 
 const getRequestTextBeforeCursor = (
   model: monaco.editor.ITextModel,
-  requestLineNumber: number,
+  anchorPosition: monaco.IPosition,
   position: monaco.Position
 ): string => {
   return model.getValueInRange({
-    startLineNumber: requestLineNumber,
-    startColumn: 1,
+    startLineNumber: anchorPosition.lineNumber,
+    startColumn: anchorPosition.column,
     endLineNumber: position.lineNumber,
     endColumn: position.column,
   });
@@ -113,8 +121,8 @@ export const ConsoleLang: LangModuleType = {
         token: monaco.CancellationToken
       ) => {
         // NOTE: Materializing the full editor content (e.g. via `model.getValue()`) can be very
-        // expensive for large inputs (like pasted JSON with huge string fields). We only do ES|QL
-        // context detection when the cursor is within a POST /_query request.
+        // expensive for large inputs (like pasted JSON with huge string fields). The anchored
+        // range below is bounded by the request-line lookback caps.
         const delegateToActionsProvider = () => {
           const actions = actionsProvider.current;
           return (
@@ -124,14 +132,14 @@ export const ConsoleLang: LangModuleType = {
           );
         };
 
-        const esqlRequestLineNumber = findEsqlRequestLineNumber(model, position.lineNumber);
-        if (!esqlRequestLineNumber) {
+        const requestAnchorPosition = await getRequestAnchorPosition(model, position);
+        if (requestAnchorPosition === undefined) {
           return delegateToActionsProvider();
         }
 
         const requestTextBeforeCursor = getRequestTextBeforeCursor(
           model,
-          esqlRequestLineNumber,
+          requestAnchorPosition,
           position
         );
         const { insideTripleQuotes, insideEsqlQuery, esqlQueryIndex } =

@@ -31,7 +31,7 @@ describe('builtinWorkflowInputDefinitions', () => {
   it('registers alertingV2NotificationGroup with severity on episode items', () => {
     const schema = builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
     const episodeItems = schema.properties?.episodes?.items as {
-      properties?: Record<string, { type?: string; enum?: unknown[] }>;
+      properties?: Record<string, { type?: string | string[]; enum?: unknown[] }>;
     };
     expect(episodeItems?.properties?.severity?.type).toBe('string');
     expect(episodeItems?.properties?.severity?.enum).toEqual([
@@ -41,6 +41,14 @@ describe('builtinWorkflowInputDefinitions', () => {
       'high',
       'critical',
     ]);
+  });
+
+  it('allows null rule_id on episode items to support external alerts', () => {
+    const schema = builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
+    const episodeItems = schema.properties?.episodes?.items as {
+      properties?: Record<string, { type?: string | string[] }>;
+    };
+    expect(episodeItems?.properties?.rule_id?.type).toEqual(['string', 'null']);
   });
 
   it('keeps Monaco $ref enum values in sync with registry keys', () => {

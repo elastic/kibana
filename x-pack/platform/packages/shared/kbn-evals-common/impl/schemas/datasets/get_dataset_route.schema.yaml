@@ -18,6 +18,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
       responses:
         '200':
           description: Successful response
@@ -32,6 +33,12 @@ paths:
                     type: string
                   description:
                     type: string
+                  tags:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetTags'
+                  maturity:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetMaturity'
+                  space_ids:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/RedactedSpaceIds'
                   examples:
                     type: array
                     items:

@@ -38,26 +38,28 @@ Refresh flow:
 yarn kbn bootstrap
 ```
 
-2. Regenerate captured OAS snapshots using the same include paths as Buildkite:
+2. Regenerate captured OAS snapshots. Read the include paths from the Buildkite step:
 
 ```bash
-node scripts/capture_oas_snapshot \
-  --include-path /api/status \
-  --include-path /api/alerting/rule/ \
-  --include-path /api/alerting/rules \
-  --include-path /api/actions \
-  --include-path /api/security/role \
-  --include-path /api/spaces \
-  --include-path /api/streams \
-  --include-path /api/fleet \
-  --include-path /api/saved_objects \
-  --include-path /api/maintenance_window \
-  --include-path /api/agent_builder \
-  --include-path /api/workflows \
-  --include-path /api/security/entity_store \
-  --include-path /api/dashboards \
-  --include-path /api/visualizations
+CI_STEP=.buildkite/scripts/steps/checks/capture_oas_snapshot.sh
+
+INCLUDE_PATHS=$(grep -oE -- '--include-path /api[^ \\"]*' "$CI_STEP" | awk '{print $2}')
+COUNT=$(printf '%s\n' "$INCLUDE_PATHS" | grep -c '^/api/')
+BAD=$(printf '%s\n' "$INCLUDE_PATHS" | grep -cvE '^/api/[A-Za-z0-9._{}/-]+$')
+
+[ "$COUNT" -ge 15 ] || { echo "Only $COUNT include paths read from $CI_STEP. Stop and check that script."; exit 1; }
+[ "$BAD" -eq 0 ] || { echo "$BAD malformed include path(s) in $CI_STEP. Stop."; exit 1; }
+
+printf '%s\n' "$INCLUDE_PATHS" | sed 's|^|--include-path |' | xargs node scripts/capture_oas_snapshot
 ```
+
+CI owns this list. This skill reads it. Never write to `.buildkite/` from here.
+
+Run the block as written. Don't swap it for a literal list of paths. To see the current paths, read `$CI_STEP`.
+
+Why the guards. A path missing from the list is dropped with no error, so a bad read silently narrows the capture. Missing routes then vanish from `oas_docs/output/*.yaml` after `make api-docs`, and the API contract check reads them as removed endpoints. The first guard catches a reformatted or moved script. The second rejects anything that isn't a plain API path, since the paths are split into command arguments.
+
+Two details that look like they could be simplified but can't. `grep -cv` is used instead of `grep -qv` because some grep builds (ugrep) return the wrong status for `-qv`. `xargs` does the argument splitting because zsh and bash disagree on splitting unquoted variables.
 
 3. Run the OpenAPI bundling scripts:
 
@@ -105,22 +107,15 @@ Environment refresh:
 
 ```bash
 yarn kbn bootstrap
-node scripts/capture_oas_snapshot \
-  --include-path /api/status \
-  --include-path /api/alerting/rule/ \
-  --include-path /api/alerting/rules \
-  --include-path /api/actions \
-  --include-path /api/security/role \
-  --include-path /api/spaces \
-  --include-path /api/streams \
-  --include-path /api/fleet \
-  --include-path /api/saved_objects \
-  --include-path /api/maintenance_window \
-  --include-path /api/agent_builder \
-  --include-path /api/workflows \
-  --include-path /api/security/entity_store \
-  --include-path /api/dashboards \
-  --include-path /api/visualizations
+
+CI_STEP=.buildkite/scripts/steps/checks/capture_oas_snapshot.sh
+INCLUDE_PATHS=$(grep -oE -- '--include-path /api[^ \\"]*' "$CI_STEP" | awk '{print $2}')
+COUNT=$(printf '%s\n' "$INCLUDE_PATHS" | grep -c '^/api/')
+BAD=$(printf '%s\n' "$INCLUDE_PATHS" | grep -cvE '^/api/[A-Za-z0-9._{}/-]+$')
+[ "$COUNT" -ge 15 ] || { echo "Only $COUNT include paths read from $CI_STEP. Stop and check that script."; exit 1; }
+[ "$BAD" -eq 0 ] || { echo "$BAD malformed include path(s) in $CI_STEP. Stop."; exit 1; }
+printf '%s\n' "$INCLUDE_PATHS" | sed 's|^|--include-path |' | xargs node scripts/capture_oas_snapshot
+
 bash .buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
 bash .buildkite/scripts/steps/openapi_bundling/final_merge.sh
 cd oas_docs && make api-docs

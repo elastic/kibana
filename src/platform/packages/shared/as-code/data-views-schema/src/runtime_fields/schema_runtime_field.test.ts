@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { z } from '@kbn/zod';
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import {
   PRIMITIVE_RUNTIME_FIELD_TYPES,
   RUNTIME_FIELD_COMPOSITE_TYPE,
 } from '@kbn/data-views-plugin/common';
-import type { TypeOf } from '@kbn/config-schema';
 import type {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
@@ -20,13 +21,13 @@ import { runtimeFieldSchema } from './schema_embedded_runtime_field';
 import { savedRuntimeFieldSchema } from './schema_saved_runtime_fields';
 
 const buildPrimitiveRuntimeField = (
-  params: Partial<TypeOf<typeof primitiveRuntimeFieldSchema>>
+  params: Partial<z.output<typeof primitiveRuntimeFieldSchema>>
 ) => {
   return { type: 'keyword' as const, script: 'some script', ...params };
 };
 
 const buildCompositeRuntimeField = (
-  params: Partial<TypeOf<typeof compositeRuntimeFieldSchema>>
+  params: Partial<z.output<typeof compositeRuntimeFieldSchema>>
 ) => {
   return {
     type: RUNTIME_FIELD_COMPOSITE_TYPE,
@@ -48,7 +49,7 @@ describe.each([
       };
 
       // When/Then
-      expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(/\[type/i);
+      expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(/type/i);
     });
   });
 
@@ -60,7 +61,7 @@ describe.each([
       };
 
       // When/Then
-      expect(runtimeFieldSchemaType.validate(runtimeField)).toEqual(runtimeField);
+      expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(runtimeField);
     });
   });
 
@@ -73,7 +74,7 @@ describe.each([
       };
 
       // When/Then
-      expect(runtimeFieldSchemaType.validate(runtimeField)).toEqual(runtimeField);
+      expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(runtimeField);
     });
 
     describe('when it does NOT have fields', () => {
@@ -84,8 +85,8 @@ describe.each([
         };
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(
-          /\[fields\]: expected value of type/
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+          /fields|required|invalid/i
         );
       });
     });
@@ -99,8 +100,8 @@ describe.each([
         });
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(
-          /\[fields\]: expected value of type/
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+          /fields|required|invalid/i
         );
       });
     });
@@ -119,8 +120,8 @@ describe.each([
           });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(
-            /\[fields.my_runtime_subfield/
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+            /my_runtime_subfield|fields|type/i
           );
         });
       });
@@ -138,8 +139,8 @@ describe.each([
           });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(
-            /\[fields.my_runtime_subfield/
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+            /my_runtime_subfield|fields|type/i
           );
         });
       });
@@ -152,7 +153,9 @@ describe.each([
           });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(/key\(""\)/);
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+            /invalid_key|invalid|key|""/i
+          );
         });
       });
 
@@ -165,7 +168,9 @@ describe.each([
           });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(/key\(/);
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+            /too_big|maximum|1000|length|key/i
+          );
         });
       });
 
@@ -177,7 +182,7 @@ describe.each([
           });
 
           // When/Then
-          expect(runtimeFieldSchemaType.validate(runtimeField)).toEqual(runtimeField);
+          expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(runtimeField);
         });
       });
     });
@@ -191,9 +196,7 @@ describe.each([
         });
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(
-          /Additional properties are not allowed \('[^']+' was unexpected\)/
-        );
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(/format/i);
       });
     });
 
@@ -205,8 +208,8 @@ describe.each([
         });
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(
-          /Additional properties are not allowed \('[^']+' was unexpected\)/
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+          new RegExp(field)
         );
       });
     });
@@ -222,7 +225,7 @@ describe.each([
       type: RUNTIME_FIELD_COMPOSITE_TYPE,
       build: buildCompositeRuntimeField,
       buildWithFields: (
-        field: Partial<TypeOf<typeof compositeRuntimeFieldSchema>['fields'][string]>
+        field: Partial<z.output<typeof compositeRuntimeFieldSchema>['fields'][string]>
       ) =>
         buildCompositeRuntimeField({
           fields: { my_runtime_subfield: { type: 'keyword', ...field } },
@@ -235,7 +238,7 @@ describe.each([
         const runtimeField = build({ script: undefined });
 
         // When/Then
-        expect(runtimeFieldSchemaType.validate(runtimeField)).toEqual(runtimeField);
+        expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(runtimeField);
       });
     });
 
@@ -245,8 +248,8 @@ describe.each([
         const runtimeField = build({ script: '' });
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(
-          /\[script\]: value has length/
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+          /script|Too small|length|empty/i
         );
       });
     });
@@ -258,8 +261,8 @@ describe.each([
         const runtimeField = build({ script: { source: 'some script' } });
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(
-          /\[script\]: expected value of type/
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+          /script|string|invalid_type|expected/i
         );
       });
     });
@@ -270,7 +273,7 @@ describe.each([
         const runtimeField = build({ script: 'some script' });
 
         // When/Then
-        expect(runtimeFieldSchemaType.validate(runtimeField)).toEqual(runtimeField);
+        expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(runtimeField);
       });
     });
 
@@ -282,7 +285,7 @@ describe.each([
           const runtimeField = buildWithFields({ format: { type: 1, params: 1 } });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(/format/);
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(/format/);
         });
       });
 
@@ -295,7 +298,7 @@ describe.each([
             });
 
             // When/Then
-            expect(runtimeFieldSchemaType.validate(runtimeField)).toEqual(runtimeField);
+            expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(runtimeField);
           });
         });
       });
@@ -308,7 +311,7 @@ describe.each([
           });
 
           // When/Then
-          expect(runtimeFieldSchemaType.validate(runtimeField)).toEqual(runtimeField);
+          expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(runtimeField);
         });
       });
     });
@@ -320,7 +323,7 @@ describe.each([
           const runtimeField = buildWithFields({ [field]: undefined });
 
           // When/Then
-          expect(runtimeFieldSchemaType.validate(runtimeField)).toEqual(runtimeField);
+          expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(runtimeField);
         });
       });
 
@@ -330,7 +333,9 @@ describe.each([
           const runtimeField = buildWithFields({ [field]: 1 });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(new RegExp(field));
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+            new RegExp(field)
+          );
         });
       });
 
@@ -341,7 +346,9 @@ describe.each([
             const runtimeField = buildWithFields({ [field]: '' });
 
             // When/Then
-            expect(() => runtimeFieldSchemaType.validate(runtimeField)).toThrow(new RegExp(field));
+            expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatch(
+              new RegExp(field)
+            );
           });
         });
 
@@ -351,7 +358,7 @@ describe.each([
             const runtimeField = buildWithFields({ [field]: 'my_runtime_field' });
 
             // When/Then
-            expect(runtimeFieldSchemaType.validate(runtimeField)).toEqual(runtimeField);
+            expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(runtimeField);
           });
         });
       });
