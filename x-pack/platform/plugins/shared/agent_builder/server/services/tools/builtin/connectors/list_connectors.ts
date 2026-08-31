@@ -10,7 +10,6 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult, formatSchemaForLlm } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import type { ActionScope } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
@@ -54,18 +53,6 @@ export const createListConnectorsTool = ({
   schema,
   tags: ['connector'],
   excludeFromMcp: true,
-  availability: {
-    cacheMode: 'global',
-    handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-      return enabled
-        ? { status: 'available' }
-        : {
-            status: 'unavailable',
-            reason: 'Connector tools require Agent Builder experimental features to be enabled',
-          };
-    },
-  },
   handler: async (_input, { request, logger }) => {
     try {
       const actions = await getActions();
