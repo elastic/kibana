@@ -62,32 +62,20 @@ export const STATUS_LABEL = i18n.translate('llmTraceWaterfall.statusLabel', {
   defaultMessage: 'Status:',
 });
 
-export const INPUT_TOKENS_DESC = i18n.translate('llmTraceWaterfall.inputTokensDescription', {
-  defaultMessage: 'Input tokens',
-});
-
-export const OUTPUT_TOKENS_DESC = i18n.translate('llmTraceWaterfall.outputTokensDescription', {
-  defaultMessage: 'Output tokens',
-});
-
-export const TOTAL_TOKENS_DESC = i18n.translate('llmTraceWaterfall.totalTokensDescription', {
-  defaultMessage: 'Total tokens',
-});
-
-export const TOOL_INPUT_HEADING = i18n.translate('llmTraceWaterfall.toolInputHeading', {
-  defaultMessage: 'Tool Input',
-});
-
-export const TOOL_OUTPUT_HEADING = i18n.translate('llmTraceWaterfall.toolOutputHeading', {
-  defaultMessage: 'Tool Output',
-});
-
-export const LLM_ATTRIBUTES_HEADING = i18n.translate('llmTraceWaterfall.llmAttributesHeading', {
-  defaultMessage: 'LLM Attributes',
-});
-
 export const HTTP_ATTRIBUTES_HEADING = i18n.translate('llmTraceWaterfall.httpAttributesHeading', {
-  defaultMessage: 'HTTP Attributes',
+  defaultMessage: 'HTTP attributes',
+});
+
+export const ATTRIBUTE_FIELD_COLUMN = i18n.translate('llmTraceWaterfall.attributeFieldColumn', {
+  defaultMessage: 'Field',
+});
+
+export const ATTRIBUTE_VALUE_COLUMN = i18n.translate('llmTraceWaterfall.attributeValueColumn', {
+  defaultMessage: 'Value',
+});
+
+export const NO_ATTRIBUTES = i18n.translate('llmTraceWaterfall.noAttributes', {
+  defaultMessage: 'No attributes available for this span.',
 });
 
 export const getSpanCount = (count: number) =>
@@ -110,13 +98,13 @@ export const getTotalDuration = (duration: string) =>
 
 export const getOtherAttributesHeading = (count: number) =>
   i18n.translate('llmTraceWaterfall.otherAttributesHeading', {
-    defaultMessage: 'Other Attributes ({count})',
+    defaultMessage: 'Other attributes ({count})',
     values: { count },
   });
 
 export const getResourceAttributesHeading = (count: number) =>
   i18n.translate('llmTraceWaterfall.resourceAttributesHeading', {
-    defaultMessage: 'Resource Attributes ({count})',
+    defaultMessage: 'Resource attributes ({count})',
     values: { count },
   });
 
@@ -126,32 +114,12 @@ export const getCopyAttributeAriaLabel = (key: string) =>
     values: { key },
   });
 
-export const IO_TAB_LABEL = i18n.translate('llmTraceWaterfall.ioTabLabel', {
-  defaultMessage: 'Input / Output',
+export const GENAI_TAB_LABEL = i18n.translate('llmTraceWaterfall.genAiTabLabel', {
+  defaultMessage: 'GenAI',
 });
 
 export const ATTRIBUTES_TAB_LABEL = i18n.translate('llmTraceWaterfall.attributesTabLabel', {
   defaultMessage: 'Attributes',
-});
-
-export const NO_IO_DATA = i18n.translate('llmTraceWaterfall.noIoData', {
-  defaultMessage: 'No input/output data available for this span.',
-});
-
-export const PROMPT_ID_LABEL = i18n.translate('llmTraceWaterfall.promptIdLabel', {
-  defaultMessage: 'Prompt:',
-});
-
-export const MODEL_LABEL = i18n.translate('llmTraceWaterfall.modelLabel', {
-  defaultMessage: 'Model:',
-});
-
-export const PROMPT_TEMPLATE_HEADING = i18n.translate('llmTraceWaterfall.promptTemplateHeading', {
-  defaultMessage: 'Prompt Template',
-});
-
-export const PROMPT_VARIABLES_HEADING = i18n.translate('llmTraceWaterfall.promptVariablesHeading', {
-  defaultMessage: 'Prompt Variables',
 });
 
 export const SPAN_LIST_ARIA_LABEL = i18n.translate('llmTraceWaterfall.spanListAriaLabel', {

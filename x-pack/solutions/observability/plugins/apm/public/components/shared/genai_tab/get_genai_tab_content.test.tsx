@@ -22,6 +22,7 @@ const genAi: GenAiFields = {
   response: {},
   inputMessages: [],
   outputMessages: [],
+  toolDefinitions: [],
 };
 
 describe('getGenAiTabContent', () => {

@@ -12,6 +12,8 @@ import {
   getMessageCopyText,
   hasGenAiData,
   parseGenAiMessages,
+  parseSystemInstructions,
+  parseToolDefinitions,
 } from './get_genai_fields';
 
 describe('hasGenAiData', () => {
@@ -354,5 +356,84 @@ describe('null-valued gen_ai fields (Discover records)', () => {
     });
 
     expect(fields.response.finish_reasons).toEqual(['stop']);
+  });
+});
+
+describe('parseSystemInstructions', () => {
+  it('unwraps Agent Builder text-parts JSON array', () => {
+    expect(
+      parseSystemInstructions(JSON.stringify([{ type: 'text', content: 'You are helpful.' }]))
+    ).toBe('You are helpful.');
+  });
+
+  it('joins multiple text parts', () => {
+    expect(
+      parseSystemInstructions(
+        JSON.stringify([
+          { type: 'text', content: 'Line 1' },
+          { type: 'text', content: 'Line 2' },
+        ])
+      )
+    ).toBe('Line 1\nLine 2');
+  });
+
+  it('returns plain strings unchanged', () => {
+    expect(parseSystemInstructions('You are helpful.')).toBe('You are helpful.');
+  });
+
+  it('returns undefined for empty input', () => {
+    expect(parseSystemInstructions(undefined)).toBeUndefined();
+    expect(parseSystemInstructions('')).toBeUndefined();
+  });
+});
+
+describe('parseToolDefinitions', () => {
+  it('parses a tool definition map', () => {
+    const tools = parseToolDefinitions(
+      JSON.stringify({
+        'platform.core.execute_esql': {
+          description: 'Run ES|QL',
+          schema: { type: 'object' },
+        },
+      })
+    );
+    expect(tools).toEqual([
+      {
+        name: 'platform.core.execute_esql',
+        description: 'Run ES|QL',
+        schema: { type: 'object' },
+      },
+    ]);
+  });
+
+  it('returns empty array for invalid JSON', () => {
+    expect(parseToolDefinitions('{broken')).toEqual([]);
+    expect(parseToolDefinitions(undefined)).toEqual([]);
+  });
+});
+
+describe('tool fields on getGenAiFields', () => {
+  it('extracts tool definitions and tool call I/O from bare keys', () => {
+    const fields = getGenAiFields({
+      'gen_ai.tool.definitions': JSON.stringify({
+        search: { description: 'Search docs', schema: { type: 'object' } },
+      }),
+      'gen_ai.tool.name': 'search',
+      'gen_ai.tool.call.arguments': '{"q":"logs"}',
+      'gen_ai.tool.call.result': '{"hits":1}',
+    });
+
+    expect(fields.toolDefinitions).toHaveLength(1);
+    expect(fields.toolDefinitions?.[0].name).toBe('search');
+    expect(fields.toolName).toBe('search');
+    expect(fields.toolCallArguments).toBe('{"q":"logs"}');
+    expect(fields.toolCallResult).toBe('{"hits":1}');
+  });
+
+  it('unwraps system_instructions parts for Agent Builder chat spans', () => {
+    const fields = getGenAiFields({
+      'gen_ai.system_instructions': JSON.stringify([{ type: 'text', content: 'Be concise.' }]),
+    });
+    expect(fields.systemInstructions).toBe('Be concise.');
   });
 });

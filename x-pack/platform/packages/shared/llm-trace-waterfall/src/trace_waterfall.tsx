@@ -276,16 +276,6 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({
             values={{ traceId: traceId ?? '-' }}
           />
         </p>
-        <p>
-          <FormattedMessage
-            id="llmTraceWaterfall.noSpansFoundHelp"
-            defaultMessage="This usually means the trace was created before OTEL tracing was enabled, or the spans have not been exported yet. Ensure {configKey} is set in {configFile} and the EDOT collector is running."
-            values={{
-              configKey: <strong>telemetry.tracing.enabled: true</strong>,
-              configFile: <code>kibana.yml</code>,
-            }}
-          />
-        </p>
       </EuiCallOut>
     );
   }
@@ -353,7 +343,6 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({
     </>
   );
 
-  const useTabs = layout === 'horizontal';
   const resizableDirection = layout === 'horizontal' ? 'horizontal' : 'vertical';
   const waterfallInitialSize = layout === 'horizontal' ? 60 : 55;
   const detailInitialSize = layout === 'horizontal' ? 40 : 45;
@@ -466,11 +455,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({
                       paddingTop: layout === 'vertical' ? 8 : 0,
                     }}
                   >
-                    <SpanDetail
-                      span={selectedSpan}
-                      onClose={() => setSelectedSpanId(null)}
-                      useTabs={useTabs}
-                    />
+                    <SpanDetail span={selectedSpan} onClose={() => setSelectedSpanId(null)} />
                   </div>
                 </EuiResizablePanel>
               </>

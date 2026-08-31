@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { EbtClickAttrsElementOnly } from '@kbn/ebt-click';
 import { asInteger } from '../../utils';
-import type { GenAiFields } from './get_genai_fields';
+import type { GenAiFields, GenAiToolDefinition } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
 import { GenAiMessages } from './genai_messages';
 import { GenAiSection } from './genai_section';
@@ -38,6 +38,14 @@ const detailTableCss = css`
   }
 `;
 
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <EuiText size="xs">
+      <strong>{children}</strong>
+    </EuiText>
+  );
+}
+
 const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
   {
     field: 'label' as const,
@@ -45,11 +53,7 @@ const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
       defaultMessage: 'Field',
     }),
     width: '160px',
-    render: (label: React.ReactNode) => (
-      <EuiText size="xs">
-        <strong>{label}</strong>
-      </EuiText>
-    ),
+    render: (label: React.ReactNode) => <FieldLabel>{label}</FieldLabel>,
   },
   {
     field: 'content' as const,
@@ -59,6 +63,99 @@ const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
     render: (content: React.ReactNode) => content,
   },
 ];
+
+function ToolDefinitionsSection({ tools }: { tools: GenAiToolDefinition[] }) {
+  if (tools.length === 0) return null;
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <GenAiSection
+        id="tools"
+        title={i18n.translate('apmUiShared.genAi.section.tools', {
+          defaultMessage: 'Tools ({count})',
+          values: { count: tools.length },
+        })}
+        initialIsOpen={false}
+      >
+        {tools.map((tool) => (
+          <React.Fragment key={tool.name}>
+            <EuiAccordion
+              id={`genAiToolDef-${tool.name}`}
+              data-test-subj={`genAiToolDef-${tool.name}`}
+              buttonContent={<FieldLabel>{tool.name}</FieldLabel>}
+              paddingSize="s"
+            >
+              {tool.description && (
+                <>
+                  <GenAiFieldValue value={tool.description} />
+                  {tool.schema != null && <EuiSpacer size="s" />}
+                </>
+              )}
+              {tool.schema != null && <GenAiFieldValue value={tool.schema} />}
+            </EuiAccordion>
+            <EuiSpacer size="s" />
+          </React.Fragment>
+        ))}
+      </GenAiSection>
+    </>
+  );
+}
+
+function ToolCallSection({
+  toolName,
+  argumentsJson,
+  resultJson,
+}: {
+  toolName?: string;
+  argumentsJson?: string;
+  resultJson?: string;
+}) {
+  if (!argumentsJson && !resultJson) return null;
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <GenAiSection
+        id="toolCall"
+        title={
+          toolName
+            ? i18n.translate('apmUiShared.genAi.section.toolCallNamed', {
+                defaultMessage: 'Tool call: {toolName}',
+                values: { toolName },
+              })
+            : i18n.translate('apmUiShared.genAi.section.toolCall', {
+                defaultMessage: 'Tool call',
+              })
+        }
+      >
+        {argumentsJson && (
+          <div data-test-subj="genAiToolCallArguments">
+            <FieldLabel>
+              {i18n.translate('apmUiShared.genAi.toolCall.arguments', {
+                defaultMessage: 'Arguments',
+              })}
+            </FieldLabel>
+            <EuiSpacer size="xs" />
+            <GenAiFieldValue value={argumentsJson} />
+          </div>
+        )}
+        {resultJson && (
+          <div data-test-subj="genAiToolCallResult">
+            {argumentsJson && <EuiSpacer size="s" />}
+            <FieldLabel>
+              {i18n.translate('apmUiShared.genAi.toolCall.result', {
+                defaultMessage: 'Result',
+              })}
+            </FieldLabel>
+            <EuiSpacer size="xs" />
+            <GenAiFieldValue value={resultJson} />
+          </div>
+        )}
+      </GenAiSection>
+    </>
+  );
+}
 
 interface Props {
   genAi: GenAiFields;
@@ -85,6 +182,10 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
     outputMessages,
     systemInstructions,
     conversationId,
+    toolDefinitions = [],
+    toolName,
+    toolCallArguments,
+    toolCallResult,
   } = genAi;
 
   // ── Field rows (single flat table — the former Summary fields lead) ───────
@@ -227,6 +328,14 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
           </GenAiSection>
         </>
       )}
+
+      <ToolDefinitionsSection tools={toolDefinitions} />
+
+      <ToolCallSection
+        toolName={toolName}
+        argumentsJson={toolCallArguments}
+        resultJson={toolCallResult}
+      />
     </>
   );
 }

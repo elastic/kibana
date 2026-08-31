@@ -27,6 +27,7 @@ const baseFields: GenAiFields = {
   response: {},
   inputMessages: [],
   outputMessages: [],
+  toolDefinitions: [],
 };
 
 function renderTab(fields: Partial<GenAiFields> = {}) {
@@ -144,5 +145,30 @@ describe('GenAiTab', () => {
     renderTab({ responseModel: undefined, requestParams: {}, response: {} });
     expect(screen.getByTestId('genAiDetails')).toBeInTheDocument();
     expect(screen.queryByTestId('genAiSection-conversation')).toBeNull();
+  });
+
+  it('renders tool definitions section', () => {
+    renderTab({
+      toolDefinitions: [
+        {
+          name: 'platform.core.execute_esql',
+          description: 'Run ES|QL',
+          schema: { type: 'object', properties: { query: { type: 'string' } } },
+        },
+      ],
+    });
+    expect(screen.getByTestId('genAiSection-tools')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiToolDef-platform.core.execute_esql')).toBeInTheDocument();
+  });
+
+  it('renders tool call arguments and result', () => {
+    renderTab({
+      toolName: 'platform.core.execute_esql',
+      toolCallArguments: '{"query":"FROM logs"}',
+      toolCallResult: '{"rows":[]}',
+    });
+    expect(screen.getByTestId('genAiSection-toolCall')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiToolCallArguments')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiToolCallResult')).toBeInTheDocument();
   });
 });

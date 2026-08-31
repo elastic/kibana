@@ -22,10 +22,22 @@ const makeSpan = (overrides: Partial<TraceSpan> = {}): TraceSpan => ({
 });
 
 const llmSpan = (id = 'llm-1') =>
-  makeSpan({ span_id: id, name: 'llm.chat', attributes: { 'gen_ai.system': 'openai' } });
+  makeSpan({
+    span_id: id,
+    name: 'chat gpt-4.1',
+    attributes: { 'gen_ai.operation.name': 'chat', 'elastic.inference.span.kind': 'LLM' },
+  });
 
 const toolSpan = (id = 'tool-1') =>
-  makeSpan({ span_id: id, name: 'tool.execute', attributes: { 'gen_ai.tool.name': 'search' } });
+  makeSpan({
+    span_id: id,
+    name: 'execute_tool platform.core.execute_esql',
+    attributes: {
+      'gen_ai.operation.name': 'execute_tool',
+      'gen_ai.tool.name': 'platform.core.execute_esql',
+      'elastic.inference.span.kind': 'TOOL',
+    },
+  });
 
 const searchSpan = (id = 'search-1') => makeSpan({ span_id: id, name: 'esql-retrieval' });
 

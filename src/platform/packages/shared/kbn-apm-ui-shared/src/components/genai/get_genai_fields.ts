@@ -24,6 +24,10 @@ import {
   ATTRIBUTE_GEN_AI_RESPONSE_MODEL,
   ATTRIBUTE_GEN_AI_SYSTEM,
   ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS,
+  ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS,
+  ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT,
+  ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS,
+  ATTRIBUTE_GEN_AI_TOOL_NAME,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
 } from '@kbn/apm-types/es_fields';
@@ -33,6 +37,12 @@ export interface GenAiMessage {
   content?: string;
   parts?: Array<{ type: string; content?: string; [key: string]: unknown }>;
   [key: string]: unknown;
+}
+
+export interface GenAiToolDefinition {
+  name: string;
+  description?: string;
+  schema?: unknown;
 }
 
 export interface GenAiFields {
@@ -58,6 +68,10 @@ export interface GenAiFields {
   inputMessages: GenAiMessage[];
   outputMessages: GenAiMessage[];
   systemInstructions?: string;
+  toolDefinitions: GenAiToolDefinition[];
+  toolName?: string;
+  toolCallArguments?: string;
+  toolCallResult?: string;
 }
 
 const GEN_AI_PATTERN = /(^|\.)gen[_.]ai[._]/;
@@ -168,6 +182,86 @@ export function getMessageCopyText(message: GenAiMessage): string {
   return JSON.stringify(message, null, 2);
 }
 
+/** Unwraps structured OTel system instructions into plain text. */
+export function parseSystemInstructions(raw: unknown): string | undefined {
+  if (raw == null || raw === '') return undefined;
+  if (typeof raw !== 'string') {
+    try {
+      return parseSystemInstructions(JSON.stringify(raw));
+    } catch {
+      return undefined;
+    }
+  }
+
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith('[') && !trimmed.startsWith('{')) {
+    return raw;
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (Array.isArray(parsed)) {
+      const text = parsed
+        .filter(
+          (part): part is { type: string; content: string } =>
+            part != null &&
+            typeof part === 'object' &&
+            part.type === 'text' &&
+            typeof part.content === 'string'
+        )
+        .map((part) => part.content)
+        .join('\n');
+      return text.length > 0 ? text : raw;
+    }
+    if (parsed && typeof parsed === 'object' && typeof parsed.content === 'string') {
+      return parsed.content;
+    }
+  } catch {
+    // keep raw
+  }
+
+  return raw;
+}
+
+/** Parses OTel tool definition maps for display. */
+export function parseToolDefinitions(raw: unknown): GenAiToolDefinition[] {
+  if (raw == null || raw === '') return [];
+
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return [];
+    }
+
+    return Object.entries(parsed as Record<string, unknown>).flatMap(([name, value]) => {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        return [];
+      }
+      const definition = value as { description?: unknown; schema?: unknown };
+      return [
+        {
+          name,
+          description:
+            typeof definition.description === 'string' ? definition.description : undefined,
+          schema: definition.schema,
+        },
+      ];
+    });
+  } catch {
+    return [];
+  }
+}
+
+function asJsonString(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'string') return value;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
   const f = (key: string) => first(metadata, key);
 
@@ -198,6 +292,10 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
     outputMessages: parseGenAiMessages(
       allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES)
     ),
-    systemInstructions: f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS) as string | undefined,
+    systemInstructions: parseSystemInstructions(f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS)),
+    toolDefinitions: parseToolDefinitions(f(ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS)),
+    toolName: f(ATTRIBUTE_GEN_AI_TOOL_NAME) as string | undefined,
+    toolCallArguments: asJsonString(f(ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS)),
+    toolCallResult: asJsonString(f(ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT)),
   };
 }

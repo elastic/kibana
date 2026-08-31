@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/react-query'
   - '@kbn/data-plugin'
+  - '@kbn/apm-ui-shared'
 tags:
   - shared-browser
   - package
