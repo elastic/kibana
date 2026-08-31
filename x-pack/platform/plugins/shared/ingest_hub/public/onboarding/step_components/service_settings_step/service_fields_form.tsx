@@ -59,12 +59,6 @@ function getInputDisplayLabel(input: string, inputTitles?: Record<string, string
       return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.cloudwatch', {
         defaultMessage: 'Collect logs via CloudWatch',
       });
-    case 'otelcol':
-      // buildAwsServiceMatrix always populates inputTitles.otelcol from pt.title, so the
-      // inputTitles?.[input] lookup above returns before this branch is ever reached.
-      return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.otelcol', {
-        defaultMessage: 'Collect metrics via CloudWatch',
-      });
     default:
       return input;
   }
