@@ -142,10 +142,7 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const ruleTaskInstance: RuleTaskInstance = taskInstanceToAlertTaskInstance(
-      taskInstance,
-      alert
-    );
+    const ruleTaskInstance: RuleTaskInstance = taskInstanceToAlertTaskInstance(taskInstance, alert);
 
     expect(ruleTaskInstance).toEqual({
       ...taskInstance,
