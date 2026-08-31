@@ -6,9 +6,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { LensPageObjects } from '../fixtures';
 import {
   applyLensInlineEditorAndWaitClosed,
-  buildBytesMetricVisualization,
   cancelLensInlineEditorAndWaitClosed,
   createLogstashLensEditorSuiteSetup,
   createXyLensPanelFromDashboard,
@@ -18,6 +18,28 @@ import {
 } from '../fixtures';
 
 const SECONDARY_METRIC_PANEL = 'lnsMetric_secondaryMetricDimensionPanel';
+
+/**
+ * Builds a fresh Lens Metric visualization with only a primary "Average of bytes" dimension.
+ * Mirrors FTR lens group13 `createNewLens`; the specs below add the secondary dimension
+ * later through the inline-editing flyout.
+ */
+async function buildBytesMetricVisualization({
+  visualize,
+  lens,
+}: Pick<LensPageObjects, 'visualize' | 'lens'>) {
+  await visualize.goto();
+  await visualize.openNewVisualizationWizard();
+  await visualize.clickVisType('lens');
+
+  await lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'average',
+    field: 'bytes',
+  });
+  await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
+  await lens.waitForVisualization('mtrVis');
+}
 const XY_SPLIT_PANEL = 'lnsXY_splitDimensionPanel';
 
 // Baseline metric tile state produced by `buildBytesMetricVisualization` over the

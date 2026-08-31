@@ -226,25 +226,6 @@ export async function buildMetricVisualization({ visualize, lens }: VisualizeAnd
 }
 
 /**
- * Builds a fresh Lens Metric visualization with only a primary "Average of bytes" dimension.
- * Mirrors FTR lens group13 `createNewLens`. Unlike {@link buildMetricVisualization} it adds
- * no secondary dimension — inline-editing suites add that later through the flyout.
- */
-export async function buildBytesMetricVisualization({ visualize, lens }: VisualizeAndLens) {
-  await visualize.goto();
-  await visualize.openNewVisualizationWizard();
-  await visualize.clickVisType('lens');
-
-  await lens.configureDimension({
-    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-    operation: 'average',
-    field: 'bytes',
-  });
-  await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
-  await lens.waitForVisualization('mtrVis');
-}
-
-/**
  * Saves the currently open *saved* Lens visualization as a new copy and adds it to a new
  * dashboard. Re-saving an existing saved visualization disables the add-to-dashboard radios
  * until "Save as new visualization" is checked (FTR passed `saveAsNew: true` for the same
