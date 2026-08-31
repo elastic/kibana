@@ -5,21 +5,37 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiForm, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiSpacer } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { ProjectRouting } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { QualityWarning, SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
+import type { LoadedProjectScopeProjects } from './analysis_setup_project_scope';
+import { AnalysisSetupProjectScopeForm } from './analysis_setup_project_scope';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
 import type {
   AvailableIndex,
+  ProjectRoutingValidationError,
   TimeRangeValidationError,
   ValidationIndicesError,
   ValidationUIError,
 } from './validation';
-import { timeRangeValidationErrorRT, validationIndicesErrorRT } from './validation';
+import {
+  projectRoutingValidationErrorRT,
+  timeRangeValidationErrorRT,
+  validationIndicesErrorRT,
+} from './validation';
+
+interface ProjectScopeProps {
+  isCpsEnabled: boolean;
+  isCpsManagerReady: boolean;
+  projectRouting: ProjectRouting;
+  onOpenProjectScope: (projects: LoadedProjectScopeProjects) => void;
+}
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
@@ -30,6 +46,7 @@ interface InitialConfigurationStepProps {
   validatedIndices: AvailableIndex[];
   setupStatus: SetupStatus;
   setValidatedIndices: (selectedIndices: AvailableIndex[]) => void;
+  projectScope: ProjectScopeProps;
   validationErrors?: ValidationUIError[];
   previousQualityWarnings?: QualityWarning[];
 }
@@ -52,38 +69,49 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setValidatedIndices,
   validationErrors = [],
   previousQualityWarnings = [],
+  projectScope,
 }: InitialConfigurationStepProps) => {
   const disabled = useMemo(() => !editableFormStatus.includes(setupStatus.type), [setupStatus]);
 
-  const [indexValidationErrors, timeRangeValidationErrors, globalValidationErrors] = useMemo(
-    () => partitionValidationErrors(validationErrors),
-    [validationErrors]
-  );
+  const [
+    indexValidationErrors,
+    timeRangeValidationErrors,
+    projectRoutingValidationErrors,
+    globalValidationErrors,
+  ] = useMemo(() => partitionValidationErrors(validationErrors), [validationErrors]);
 
   return (
-    <>
-      <EuiForm>
-        <AnalysisSetupTimerangeForm
-          disabled={disabled}
-          setStartTime={setStartTime}
-          setEndTime={setEndTime}
-          startTime={startTime}
-          endTime={endTime}
-          validationErrors={timeRangeValidationErrors}
-        />
-        <EuiSpacer size="xl" />
-        <AnalysisSetupIndicesForm
-          disabled={disabled}
-          indices={validatedIndices}
-          isValidating={isValidating}
-          onChangeSelectedIndices={setValidatedIndices}
-          previousQualityWarnings={previousQualityWarnings}
-          validationErrors={indexValidationErrors}
-        />
+    <EuiForm>
+      {projectScope.isCpsEnabled ? (
+        <>
+          <AnalysisSetupProjectScopeForm
+            disabled={disabled}
+            validationErrors={projectRoutingValidationErrors}
+            {...projectScope}
+          />
+          <EuiSpacer size="xl" />
+        </>
+      ) : null}
+      <AnalysisSetupTimerangeForm
+        disabled={disabled}
+        setStartTime={setStartTime}
+        setEndTime={setEndTime}
+        startTime={startTime}
+        endTime={endTime}
+        validationErrors={timeRangeValidationErrors}
+      />
+      <EuiSpacer size="xl" />
+      <AnalysisSetupIndicesForm
+        disabled={disabled}
+        indices={validatedIndices}
+        isValidating={isValidating}
+        onChangeSelectedIndices={setValidatedIndices}
+        previousQualityWarnings={previousQualityWarnings}
+        validationErrors={indexValidationErrors}
+      />
 
-        <ValidationErrors errors={globalValidationErrors} />
-      </EuiForm>
-    </>
+      <ValidationErrors errors={globalValidationErrors} />
+    </EuiForm>
   );
 };
 
@@ -110,13 +138,13 @@ const ValidationErrors: React.FC<{ errors: ValidationUIError[] }> = ({ errors })
 
   return (
     <>
-      <EuiCallOut color="danger" iconType="warning" title={errorCalloutTitle}>
+      <KbnDangerCallout title={errorCalloutTitle}>
         <ul>
           {errors.map((error, i) => (
             <li key={i}>{formatValidationError(error)}</li>
           ))}
         </ul>
-      </EuiCallOut>
+      </KbnDangerCallout>
       <EuiSpacer />
     </>
   );
@@ -147,16 +175,23 @@ const formatValidationError = (error: ValidationUIError): React.ReactNode => {
 
 const partitionValidationErrors = (validationErrors: ValidationUIError[]) =>
   validationErrors.reduce<
-    [ValidationIndicesError[], TimeRangeValidationError[], ValidationUIError[]]
+    [
+      ValidationIndicesError[],
+      TimeRangeValidationError[],
+      ProjectRoutingValidationError[],
+      ValidationUIError[]
+    ]
   >(
-    ([indicesErrors, timeRangeErrors, otherErrors], error) => {
+    ([indicesErrors, timeRangeErrors, projectRoutingErrors, otherErrors], error) => {
       if (validationIndicesErrorRT.is(error)) {
-        return [[...indicesErrors, error], timeRangeErrors, otherErrors];
+        return [[...indicesErrors, error], timeRangeErrors, projectRoutingErrors, otherErrors];
       } else if (timeRangeValidationErrorRT.is(error)) {
-        return [indicesErrors, [...timeRangeErrors, error], otherErrors];
+        return [indicesErrors, [...timeRangeErrors, error], projectRoutingErrors, otherErrors];
+      } else if (projectRoutingValidationErrorRT.is(error)) {
+        return [indicesErrors, timeRangeErrors, [...projectRoutingErrors, error], otherErrors];
       } else {
-        return [indicesErrors, timeRangeErrors, [...otherErrors, error]];
+        return [indicesErrors, timeRangeErrors, projectRoutingErrors, [...otherErrors, error]];
       }
     },
-    [[], [], []]
+    [[], [], [], []]
   );
