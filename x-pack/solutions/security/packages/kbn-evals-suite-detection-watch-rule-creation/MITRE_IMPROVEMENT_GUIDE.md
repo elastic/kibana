@@ -92,3 +92,12 @@ dataset, keys `evaluator::exampleId`). To compare two arms:
 
 Why not just raise n? Detecting +0.10 unpaired needs n≈90 per dataset
 (18 examples x 5 reps) — roughly 6x the runtime cost of pairing.
+
+### Executing the comparison
+
+`~/.hermes/scripts/paired_ab.py <baseline_log.json> <candidate_log.json> [substr]`
+implements this protocol against two saved job logs (extracted via the Buildkite
+API). Smoke-tested: it refuses to call a +0.33 delta at n=3 distinguishable,
+which is the discipline this guide exists to enforce. `run_mitre_ab.sh` next to
+it outlines the v3-baseline rerun, since the v3 baseline must carry the
+PAIRED_SCORES instrumentation to be comparable.
