@@ -7,7 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ERROR_RETRY_MAX_DELAY_MS, TaskManagerClaimNudgeService } from './claim_nudge_service';
+import {
+  ERROR_RETRY_MAX_DELAY_MS,
+  NUDGE_CREATE_TIMEOUT_MS,
+  NUDGE_WRITE_TIMEOUT_MS,
+  TaskManagerClaimNudgeService,
+} from './claim_nudge_service';
 
 // `lodash.random` binds `Math.random` at load time, so spying on the global doesn't work.
 // Mock it directly; defaults to returning its input so backoff tests land exactly on the
@@ -77,13 +82,33 @@ describe('TaskManagerClaimNudgeService', () => {
 
       await service.notify();
 
-      expect(esClient.index).toHaveBeenCalledWith({
-        index: INDEX,
-        id: 'global',
-        document: {
-          updated_at: expect.any(String),
-          nonce: expect.any(String),
+      expect(esClient.index).toHaveBeenCalledWith(
+        {
+          index: INDEX,
+          id: 'global',
+          document: {
+            updated_at: expect.any(String),
+            nonce: expect.any(String),
+          },
         },
+        expect.any(Object)
+      );
+    });
+
+    it('bounds both requests and disables retries, so a slow cluster cannot stall runSoon', async () => {
+      const esClient = createEsClientMock();
+      (esClient.indices.create as jest.Mock).mockResolvedValue(undefined);
+      const { service } = createService({ esClient });
+
+      await service.notify();
+
+      expect(esClient.indices.create).toHaveBeenCalledWith(expect.any(Object), {
+        requestTimeout: NUDGE_CREATE_TIMEOUT_MS,
+        maxRetries: 0,
+      });
+      expect(esClient.index).toHaveBeenCalledWith(expect.any(Object), {
+        requestTimeout: NUDGE_WRITE_TIMEOUT_MS,
+        maxRetries: 0,
       });
     });
 
@@ -105,17 +130,20 @@ describe('TaskManagerClaimNudgeService', () => {
 
       await service.notify();
 
-      expect(esClient.indices.create).toHaveBeenCalledWith({
-        index: INDEX,
-        mappings: {
-          dynamic: false,
-          properties: {
-            updated_at: { type: 'date' },
-            nonce: { type: 'keyword', ignore_above: 1024 },
+      expect(esClient.indices.create).toHaveBeenCalledWith(
+        {
+          index: INDEX,
+          mappings: {
+            dynamic: false,
+            properties: {
+              updated_at: { type: 'date' },
+              nonce: { type: 'keyword', ignore_above: 1024 },
+            },
           },
+          settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
         },
-        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
-      });
+        expect.any(Object)
+      );
     });
 
     it('omits shard settings on serverless, where Elasticsearch rejects them', async () => {
@@ -124,10 +152,13 @@ describe('TaskManagerClaimNudgeService', () => {
 
       await service.notify();
 
-      expect(esClient.indices.create).toHaveBeenCalledWith({
-        index: INDEX,
-        mappings: expect.any(Object),
-      });
+      expect(esClient.indices.create).toHaveBeenCalledWith(
+        {
+          index: INDEX,
+          mappings: expect.any(Object),
+        },
+        expect.any(Object)
+      );
     });
 
     it('only attempts to create the index once', async () => {
@@ -150,7 +181,7 @@ describe('TaskManagerClaimNudgeService', () => {
       expect(esClient.index).toHaveBeenCalledTimes(1);
     });
 
-    it('surfaces index creation failures and retries them on the next call', async () => {
+    it('drops the nudge when index creation fails, rather than letting the write auto-create', async () => {
       const esClient = createEsClientMock();
       (esClient.indices.create as jest.Mock)
         .mockRejectedValueOnce(new Error('ES unavailable'))

@@ -10,6 +10,7 @@ import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { MGET_DEFAULT_POLL_INTERVAL } from '../config';
 
 const GLOBAL_CLAIM_NUDGE_ID = 'global';
 // The signal document is never read back — only the index's global checkpoint matters — but the
@@ -43,6 +44,16 @@ const ERROR_RETRY_BASE_DELAY_MS = 1_000;
 export const ERROR_RETRY_MAX_DELAY_MS = 60_000;
 // Avoid flooding the logs with a warning on every failed long-poll iteration.
 const ERROR_LOG_THROTTLE_MS = 60_000;
+// `runSoon` awaits the nudge, so both requests below get one bounded attempt rather than the
+// client's default 30s and three retries. Aborting doesn't cancel the work — Elasticsearch still
+// applies it — so a longer wait would only delay the caller, not land more nudges.
+//
+// Matches the default poll_interval: past that the regular poll has already claimed the task, so
+// there is nothing left for a slower write to win.
+export const NUDGE_WRITE_TIMEOUT_MS = MGET_DEFAULT_POLL_INTERVAL;
+// More generous, because a timeout here drops every nudge coalesced onto the in-flight create, and
+// it is paid at most once per process. Large clusters can take seconds to publish the new index.
+export const NUDGE_CREATE_TIMEOUT_MS = 3_000;
 
 /**
  * Long-polls a dedicated, low-volume Elasticsearch index via the Fleet
@@ -137,17 +148,23 @@ export class TaskManagerClaimNudgeService {
 
     // Contents don't matter; the write itself is the signal. `nonce` ensures each call is a
     // real change rather than a no-op.
-    await this.esClient.index<ClaimNudgeSignal>({
-      index: this.index,
-      id: GLOBAL_CLAIM_NUDGE_ID,
-      document,
-    });
+    await this.esClient.index<ClaimNudgeSignal>(
+      {
+        index: this.index,
+        id: GLOBAL_CLAIM_NUDGE_ID,
+        document,
+      },
+      { requestTimeout: NUDGE_WRITE_TIMEOUT_MS, maxRetries: 0 }
+    );
   }
 
   /**
    * Creates the signal index if needed (nothing else does, unlike saved-object indices). Only
    * `notify()` calls this — the watch loop relies on `wait_for_index: true` instead. Memoized
    * so a healthy node only pays for it once.
+   *
+   * A failure aborts the nudge rather than falling through to the write, which would let
+   * Elasticsearch auto-create the index without the mappings and settings above.
    */
   private async ensureIndexExists() {
     if (!this.ensureIndexPromise) {
@@ -163,11 +180,14 @@ export class TaskManagerClaimNudgeService {
 
   private async createIndex() {
     try {
-      await this.esClient.indices.create({
-        index: this.index,
-        mappings: CLAIM_NUDGE_MAPPINGS,
-        ...(this.isServerless ? {} : { settings: CLAIM_NUDGE_SETTINGS }),
-      });
+      await this.esClient.indices.create(
+        {
+          index: this.index,
+          mappings: CLAIM_NUDGE_MAPPINGS,
+          ...(this.isServerless ? {} : { settings: CLAIM_NUDGE_SETTINGS }),
+        },
+        { requestTimeout: NUDGE_CREATE_TIMEOUT_MS, maxRetries: 0 }
+      );
     } catch (err) {
       // Every Kibana node races to create the index; losing that race is the expected outcome.
       if (err?.body?.error?.type !== 'resource_already_exists_exception') {

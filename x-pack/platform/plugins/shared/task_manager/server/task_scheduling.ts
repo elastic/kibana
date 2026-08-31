@@ -146,7 +146,11 @@ export class TaskScheduling {
       await this.claimNudgeService.notify();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      this.logger.warn(`Failed to notify Task Manager claim nudge for task ${taskId}: ${message}`);
+      // Deliberately not "failed": the nudge is bounded to a short timeout, and aborting it does
+      // not stop Elasticsearch from applying the write, so it may well have landed anyway.
+      this.logger.warn(
+        `Could not confirm the Task Manager claim nudge for task ${taskId}; it will run on the next poll cycle: ${message}`
+      );
     }
   }
 
