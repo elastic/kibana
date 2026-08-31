@@ -99,7 +99,10 @@ export function RumHome() {
     <PageTemplateComponent
       noDataConfig={isLoading ? undefined : noDataConfig}
       isPageDataLoaded={isLoading === false}
-      isEmptyState={isLoading}
+      //add this to remove the padding from the page section
+      pageSectionProps={{
+        paddingSize: 'none',
+      }}
     >
       <div> FOOOOOOOOO</div>
       <AppHeader title={DASHBOARD_LABEL} menu={appMenu} spacing="largeBleed" />
