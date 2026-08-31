@@ -183,9 +183,7 @@ describe('Navigation Tree', () => {
           {
             title: 'Alerts',
             breadcrumbStatus: 'hidden',
-            children: [
-              { link: 'alertingV2:episodes', title: 'Inbox' },
-            ],
+            children: [{ link: 'alertingV2:episodes', title: 'Inbox' }],
           },
           {
             title: 'Rule Management',

@@ -102,9 +102,19 @@ const pluginModule = new ContainerModule(({ bind }) => {
       visibleIn: [],
       deepLinks: [
         { id: 'rules', title: 'Rules', path: '/rules', visibleIn: ['projectSideNav'] },
-        { id: 'rule_library', title: 'Rule library', path: '/rule-library', visibleIn: ['projectSideNav'] },
+        {
+          id: 'rule_library',
+          title: 'Rule library',
+          path: '/rule-library',
+          visibleIn: ['projectSideNav'],
+        },
         { id: 'episodes', title: 'Inbox', path: '/episodes', visibleIn: ['projectSideNav'] },
-        { id: 'action_policies', title: 'Action policies', path: '/action-policies', visibleIn: ['projectSideNav'] },
+        {
+          id: 'action_policies',
+          title: 'Action policies',
+          path: '/action-policies',
+          visibleIn: ['projectSideNav'],
+        },
         {
           id: 'execution_history',
           title: 'Execution history',

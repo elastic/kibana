@@ -36,9 +36,7 @@ describe('getAlertingV2AlertsNavPanel', () => {
           {
             title: 'Alerts',
             breadcrumbStatus: 'hidden',
-            children: [
-              { link: 'alertingV2:episodes', title: 'Inbox' },
-            ],
+            children: [{ link: 'alertingV2:episodes', title: 'Inbox' }],
           },
           {
             title: 'Rule Management',
@@ -88,9 +86,7 @@ describe('getAlertingV2AlertsNavPanel', () => {
     expect(alertsSection).toEqual({
       title: 'Alerts',
       breadcrumbStatus: 'hidden',
-      children: [
-        { link: 'alertingV2:episodes', title: 'Inbox' },
-      ],
+      children: [{ link: 'alertingV2:episodes', title: 'Inbox' }],
     });
   });
 });

@@ -257,8 +257,11 @@ export const mountAlertingV2StandaloneApp = async ({
 
   const observabilitySharedToken = PluginStart('observabilityShared');
   const PageTemplate = container.isBound(observabilitySharedToken)
-    ? (container.get(observabilitySharedToken) as { navigation: { PageTemplate: React.ComponentType<any> } })
-        .navigation.PageTemplate
+    ? (
+        container.get(observabilitySharedToken) as {
+          navigation: { PageTemplate: React.ComponentType<any> };
+        }
+      ).navigation.PageTemplate
     : KibanaPageTemplate;
 
   element.classList.add(APP_WRAPPER_CLASS);

@@ -465,50 +465,40 @@ export class Plugin
                     {
                       label: '',
                       sortKey: 100,
-                      entries: [
-                        ...overviewLink,
-                        ...sloLink,
-                        ...casesLink,
-                        ...aiAssistantLink,
-                      ],
+                      entries: [...overviewLink, ...sloLink, ...casesLink, ...aiAssistantLink],
                     },
                     {
-                      label: i18n.translate(
-                        'xpack.observability.alertsSectionTitle',
-                        { defaultMessage: 'Alerts' }
-                      ),
+                      label: i18n.translate('xpack.observability.alertsSectionTitle', {
+                        defaultMessage: 'Alerts',
+                      }),
                       sortKey: 150,
                       entries: [
                         {
                           app: 'alertingV2',
-                          label: i18n.translate(
-                            'xpack.observability.alertsInboxLinkTitle',
-                            { defaultMessage: 'Inbox' }
-                          ),
+                          label: i18n.translate('xpack.observability.alertsInboxLinkTitle', {
+                            defaultMessage: 'Inbox',
+                          }),
                           path: '/episodes',
                         },
                         {
                           app: 'management',
-                          label: i18n.translate(
-                            'xpack.observability.alertsRulesV1LinkTitle',
-                            { defaultMessage: 'Rules V1' }
-                          ),
+                          label: i18n.translate('xpack.observability.alertsRulesV1LinkTitle', {
+                            defaultMessage: 'Rules V1',
+                          }),
                           path: '/insightsAndAlerting/triggersActions',
                         },
                         {
                           app: 'alertingV2',
-                          label: i18n.translate(
-                            'xpack.observability.alertsRulesV2LinkTitle',
-                            { defaultMessage: 'Rules V2' }
-                          ),
+                          label: i18n.translate('xpack.observability.alertsRulesV2LinkTitle', {
+                            defaultMessage: 'Rules V2',
+                          }),
                           path: '/rules',
                         },
                         {
                           app: 'alertingV2',
-                          label: i18n.translate(
-                            'xpack.observability.alertsRuleLibraryLinkTitle',
-                            { defaultMessage: 'Rule library' }
-                          ),
+                          label: i18n.translate('xpack.observability.alertsRuleLibraryLinkTitle', {
+                            defaultMessage: 'Rule library',
+                          }),
                           path: '/rule-library',
                         },
                         {
