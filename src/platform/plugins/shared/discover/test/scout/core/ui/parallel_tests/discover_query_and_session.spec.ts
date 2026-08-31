@@ -14,7 +14,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../fixtures';
+import { spaceTest, testData } from '../../../common/ui/fixtures';
 
 const EMPTY_RANGE = {
   from: 'Jun 11, 1999 @ 09:22:11.000',

@@ -12,7 +12,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../fixtures';
+import { spaceTest, testData } from '../../../common/ui/fixtures';
 
 spaceTest.describe('Discover date nanos mixed', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {

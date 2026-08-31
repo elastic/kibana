@@ -8,6 +8,10 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
+import {
+  DATE_NANOS_MIXED_ES_ARCHIVE,
+  LONG_WINDOW_LOGSTASH_ES_ARCHIVE,
+} from '../../../common/ui/fixtures/constants';
 
 globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) => {
   log.debug('[setup:logstash] loading logstash_functional ES data (only if it does not exist)...');
@@ -15,4 +19,16 @@ globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) =>
     'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
   );
   log.debug('[setup:logstash] logstash_functional ES data ready');
+
+  log.debug(
+    '[setup:long_window_logstash] loading long_window_logstash ES data (only if it does not exist)...'
+  );
+  await esArchiver.loadIfNeeded(LONG_WINDOW_LOGSTASH_ES_ARCHIVE);
+  log.debug('[setup:long_window_logstash] long_window_logstash ES data ready');
+
+  log.debug(
+    '[setup:date_nanos_mixed] loading date_nanos_mixed ES data (only if it does not exist)...'
+  );
+  await esArchiver.loadIfNeeded(DATE_NANOS_MIXED_ES_ARCHIVE);
+  log.debug('[setup:date_nanos_mixed] date_nanos_mixed ES data ready');
 });

@@ -13,7 +13,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { spaceTest } from '../../../common/ui/fixtures';
 
 const RESIZE_DISTANCE = 100;
 

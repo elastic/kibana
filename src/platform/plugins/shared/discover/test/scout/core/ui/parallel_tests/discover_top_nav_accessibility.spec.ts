@@ -13,7 +13,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { spaceTest } from '../../../common/ui/fixtures';
 
 const focusAndPress = async (page: ScoutPage, testSubj: string) => {
   const button = page.testSubj.locator(testSubj);

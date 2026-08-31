@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../fixtures';
+import { spaceTest, testData } from '../../../common/ui/fixtures';
 
 spaceTest.describe('Discover histogram', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
