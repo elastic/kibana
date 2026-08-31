@@ -9,6 +9,12 @@ import expect from '@kbn/expect';
 import { DEFAULT_INPUT_VALUE } from '@kbn/console-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+declare global {
+  interface Window {
+    __openedDocUrl: string | null;
+  }
+}
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
@@ -48,22 +54,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open API Reference documentation page when open documentation button is clicked', async () => {
       await PageObjects.console.clearEditorText();
       await PageObjects.console.enterText('GET _search');
+
+      // Capture the URL the app opens instead of loading the external docs site,
+      // whose page-load behavior leaves the WebDriver renderer unresponsive.
+      await browser.execute(() => {
+        window.__openedDocUrl = null;
+        window.open = (url) => {
+          window.__openedDocUrl = url == null ? null : String(url);
+          return null;
+        };
+      });
+
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickOpenDocumentationButton();
 
-      await retry.tryForTime(10000, async () => {
-        await browser.switchTab(1);
+      await retry.waitFor('documentation URL to be opened', async () => {
+        const url = await browser.execute(() => window.__openedDocUrl);
+        return typeof url === 'string' && url.includes('/docs/api');
       });
-
-      // Retry until the documentation is loaded
-      await retry.try(async () => {
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain('/docs/api');
-      });
-
-      // Close the documentation tab
-      await browser.closeCurrentWindow();
-      await browser.switchTab(0);
     });
   });
 }
