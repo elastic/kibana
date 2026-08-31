@@ -13,14 +13,21 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import type { ToastsStart } from '@kbn/core/public';
 import {
   PRETTIFY_DASHBOARD_ACTION_ID,
   type DashboardApi,
   type PrettifyDashboardActionContext,
 } from '@kbn/dashboard-plugin/public';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import { apiPublishesEsqlUsage } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { IdGenerator } from '../attachment_types';
+import {
+  captureDashboardScreenshot,
+  showCaptureFailure,
+  type CaptureResult,
+} from './capture_dashboard_screenshot';
 
 export const PRETTIFY_DASHBOARD_PROMPT = '/dashboard-management prettify this dashboard';
 
@@ -29,6 +36,12 @@ export interface PrettifyDashboardActionDeps {
   getAgentBuilderAccess: AgentBuilderPluginStart['getAgentBuilderAccess'];
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
+  files: FilesStart;
+  toasts: ToastsStart;
+  captureScreenshot?: (deps: {
+    dashboardApi: DashboardApi;
+    files: FilesStart;
+  }) => Promise<CaptureResult>;
 }
 
 const isPrettifiable = (
@@ -52,6 +65,9 @@ export const createPrettifyDashboardAction = ({
   getAgentBuilderAccess,
   canWriteDashboards,
   draftAttachmentId,
+  files,
+  toasts,
+  captureScreenshot = captureDashboardScreenshot,
 }: PrettifyDashboardActionDeps): ActionDefinition<PrettifyDashboardActionContext> => {
   return {
     id: PRETTIFY_DASHBOARD_ACTION_ID,
@@ -87,19 +103,25 @@ export const createPrettifyDashboardAction = ({
         return;
       }
 
+      const dashboardAttachment = {
+        id: draftAttachmentId.current,
+        origin: dashboardApi.savedObjectId$.getValue(),
+        type: DASHBOARD_ATTACHMENT_TYPE,
+        data: dashboardStateToAttachmentData(dashboardApi.getSerializedState().attributes),
+      };
+
+      const capture = await captureScreenshot({ dashboardApi, files });
+      if (!capture.ok) {
+        showCaptureFailure(toasts, capture.reason);
+        return;
+      }
+
       openChat({
         newConversation: true,
         initialMessage: PRETTIFY_DASHBOARD_PROMPT,
         autoSendInitialMessage: true,
         sessionTag: 'dashboard',
-        attachments: [
-          {
-            id: draftAttachmentId.current,
-            origin: dashboardApi.savedObjectId$.getValue(),
-            type: DASHBOARD_ATTACHMENT_TYPE,
-            data: dashboardStateToAttachmentData(dashboardApi.getSerializedState().attributes),
-          },
-        ],
+        attachments: [dashboardAttachment, capture.attachment],
       });
     },
   };

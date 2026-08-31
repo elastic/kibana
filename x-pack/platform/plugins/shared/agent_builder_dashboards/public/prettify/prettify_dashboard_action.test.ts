@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { EmbeddableChatAccess } from '@kbn/agent-builder-browser';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { PRETTIFY_DASHBOARD_ACTION_ID } from '@kbn/dashboard-plugin/public';
@@ -16,6 +17,7 @@ import {
   createPrettifyDashboardAction,
   PRETTIFY_DASHBOARD_PROMPT,
 } from './prettify_dashboard_action';
+import type { CaptureResult } from './capture_dashboard_screenshot';
 
 const esqlLens = {
   type: LENS_EMBEDDABLE_TYPE,
@@ -71,6 +73,20 @@ const createDraftAttachmentId = (id = 'draft-attachment-id'): IdGenerator => ({
   next: () => id,
 });
 
+const successfulCapture = {
+  ok: true as const,
+  attachment: {
+    id: 'image-1',
+    type: AttachmentType.image,
+    description: 'Dashboard screenshot',
+    data: {
+      file_id: 'file-1',
+      name: 'dashboard-screenshot.png',
+      mime_type: 'image/png' as const,
+    },
+  },
+} satisfies CaptureResult;
+
 const createAction = ({
   openChat = jest.fn(),
   getAgentBuilderAccess = jest.fn(
@@ -81,15 +97,24 @@ const createAction = ({
   ),
   canWriteDashboards = true,
   draftAttachmentId = createDraftAttachmentId(),
+  captureScreenshot = jest.fn(async (): Promise<CaptureResult> => successfulCapture),
+  addDanger = jest.fn(),
 } = {}) => {
+  const files = { filesClientFactory: { asScoped: jest.fn() } } as never;
+  const toasts = { addDanger } as never;
   return {
     openChat,
     getAgentBuilderAccess,
+    captureScreenshot,
+    addDanger,
     action: createPrettifyDashboardAction({
       openChat,
       getAgentBuilderAccess,
       canWriteDashboards,
       draftAttachmentId,
+      files,
+      toasts,
+      captureScreenshot,
     }),
   };
 };
@@ -204,15 +229,16 @@ describe('createPrettifyDashboardAction', () => {
     ).resolves.toBe(false);
   });
 
-  it('opens chat with a shared draft dashboard attachment', async () => {
+  it('opens chat with the dashboard and a screenshot attachment', async () => {
     const draftAttachmentId = createDraftAttachmentId('shared-draft-id');
-    const { action, openChat } = createAction({ draftAttachmentId });
+    const { action, openChat, captureScreenshot } = createAction({ draftAttachmentId });
     const dashboardApi = createDashboardApi();
 
     await action.execute!({
       dashboardApi,
     });
 
+    expect(captureScreenshot).toHaveBeenCalledTimes(1);
     expect(openChat).toHaveBeenCalledTimes(1);
     expect(openChat).toHaveBeenCalledWith({
       newConversation: true,
@@ -234,8 +260,28 @@ describe('createPrettifyDashboardAction', () => {
             ],
           }),
         },
+        successfulCapture.attachment,
       ],
     });
+  });
+
+  it('does not open chat and shows a toast when capture fails', async () => {
+    const { action, openChat, addDanger } = createAction({
+      captureScreenshot: jest.fn(
+        async (): Promise<CaptureResult> => ({
+          ok: false,
+          reason: 'timeout',
+        })
+      ),
+    });
+
+    await action.execute!({
+      dashboardApi: createDashboardApi(),
+    });
+
+    expect(openChat).not.toHaveBeenCalled();
+    expect(addDanger).toHaveBeenCalledTimes(1);
+    expect(addDanger.mock.calls[0][0].title).toBe('Could not capture the dashboard');
   });
 
   it('does not open chat when the dashboard is ineligible', async () => {

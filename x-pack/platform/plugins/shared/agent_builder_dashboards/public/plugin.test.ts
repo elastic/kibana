@@ -43,6 +43,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
         getAgentBuilderAccess: jest.fn(),
       },
       dashboard: {},
+      files: {},
       share: {
         url: {
           locators: {

@@ -81,6 +81,8 @@ export class AgentBuilderDashboardsPlugin
             getAgentBuilderAccess: plugins.agentBuilder.getAgentBuilderAccess,
             canWriteDashboards,
             draftAttachmentId,
+            files: plugins.files,
+            toasts: core.notifications.toasts,
           });
         });
       }
