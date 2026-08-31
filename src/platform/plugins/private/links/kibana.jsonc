@@ -15,7 +15,6 @@
       "embeddable",
       "kibanaReact",
       "kibanaUtils",
-      "presentationUtil",
       "uiActions",
       "visualizations"
     ],

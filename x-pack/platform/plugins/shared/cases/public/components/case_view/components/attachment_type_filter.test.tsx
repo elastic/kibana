@@ -24,30 +24,30 @@ const buildRegistry = () => {
   const registry = new UnifiedAttachmentTypeRegistry();
   registry.register({
     id: 'comment',
-    displayName: 'Comment',
-    icon: 'editorComment',
-    getAttachmentViewObject: () => ({ event: 'added a comment' }),
+    getLabel: () => 'Comment',
+    getIcon: () => 'comment',
+    getCreationActivity: () => ({ event: 'added a comment' }),
     schema: z.object({}),
   });
   registry.register({
     id: 'security.alert',
-    displayName: 'Alert',
-    icon: 'bell',
-    getAttachmentViewObject: () => ({ event: 'added an alert' }),
+    getLabel: () => 'Alert',
+    getIcon: () => 'bell',
+    getCreationActivity: () => ({ event: 'added an alert' }),
     schema: z.object({}),
   });
   registry.register({
     id: 'security.event',
-    displayName: 'Event',
-    icon: 'bell',
-    getAttachmentViewObject: () => ({ event: 'added an event' }),
+    getLabel: () => 'Event',
+    getIcon: () => 'bell',
+    getCreationActivity: () => ({ event: 'added an event' }),
     schema: z.object({}),
   });
   registry.register({
     id: 'observability.alert',
-    displayName: 'Alert',
-    icon: 'bell',
-    getAttachmentViewObject: () => ({ event: 'added an alert' }),
+    getLabel: () => 'Alert',
+    getIcon: () => 'bell',
+    getCreationActivity: () => ({ event: 'added an alert' }),
     schema: z.object({}),
   });
   return registry;

@@ -8,13 +8,14 @@
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import type { AppCategory } from '@kbn/core/types';
+import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 import { APP_ID } from '../constants';
 import {
   ALERTING_V2_API_PRIVILEGES,
   ALERTING_V2_FEATURES,
+  getFeatureManagementApps,
   type AlertingV2FeatureDefinition,
 } from '../../../common/feature_privileges';
-import { ALERTING_V2_SECTION_ID } from '../../../common/management_apps';
 
 export { ALERTING_V2_API_PRIVILEGES };
 
@@ -26,7 +27,7 @@ const category: AppCategory = {
 };
 
 const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => {
-  const managementApps = [feature.managementApp];
+  const managementApps = [...getFeatureManagementApps(feature)];
   const app = [APP_ID];
 
   return {
@@ -43,6 +44,9 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
         management: {
           [ALERTING_V2_SECTION_ID]: managementApps,
         },
+        ...(feature.privileges.all.aiIndex
+          ? { aiIndex: { ...feature.privileges.all.aiIndex } }
+          : {}),
         ...(feature.privileges.all.alerts ? { alerts: { ...feature.privileges.all.alerts } } : {}),
         savedObject: {
           all: [...feature.privileges.all.savedObject.all],
@@ -56,6 +60,9 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
         management: {
           [ALERTING_V2_SECTION_ID]: managementApps,
         },
+        ...(feature.privileges.read.aiIndex
+          ? { aiIndex: { ...feature.privileges.read.aiIndex } }
+          : {}),
         ...(feature.privileges.read.alerts
           ? { alerts: { ...feature.privileges.read.alerts } }
           : {}),

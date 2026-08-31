@@ -11,6 +11,7 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -101,6 +102,9 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
     const usesEsql$ = new BehaviorSubject<boolean>(
       initialVisInstance.type.usesEsql?.(initialVisInstance.params) ?? false
     );
+    const query$ = new BehaviorSubject<AggregateQuery | undefined>(
+      initialVisInstance.type.getEsqlQuery?.(initialVisInstance.params)
+    );
 
     const getUsedDataViews = async (visInstance: Vis) => {
       if (visInstance.type.getUsedIndexPattern) {
@@ -136,6 +140,11 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           const usesEsql = vis.type.usesEsql?.(vis.params) ?? false;
           if (usesEsql$.getValue() !== usesEsql) {
             usesEsql$.next(usesEsql);
+          }
+
+          const nextQuery = vis.type.getEsqlQuery?.(vis.params);
+          if (!isEqual(query$.getValue(), nextQuery)) {
+            query$.next(nextQuery);
           }
 
           try {
@@ -277,6 +286,8 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       dataViews$,
       projectRoutingOverrides$,
       usesEsql$,
+      // `undefined` until the vis type reports an ES|QL query; `apiPublishesESQLQuery` is the runtime check.
+      query$: query$ as VisualizeApi['query$'],
       rendered$: hasRendered$,
       supportedTriggers: () => [
         ON_OPEN_PANEL_MENU,
@@ -321,6 +332,12 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
         } as SerializedVis);
         if (visUpdates.title) {
           titleManager.api.setTitle(visUpdates.title);
+        }
+      },
+      cancelRequests: () => {
+        const abortController = expressionAbortController$.getValue();
+        if (abortController) {
+          abortController.abort();
         }
       },
       openInspector: () => {
@@ -403,6 +420,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
               unifiedSearch,
               projectRouting,
               isApproximate,
+              esqlVariables: data.esqlVariables,
               vis: vis$.getValue(),
               settings,
               disableTriggers,

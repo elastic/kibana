@@ -6,6 +6,4 @@
  */
 
 export { SourcePicker } from './source_picker';
-export { SourceTypeBadge } from './source_type_badge';
-export { getSourceTypeLabel } from './types';
 export type { SelectedSource, SourceType } from './types';

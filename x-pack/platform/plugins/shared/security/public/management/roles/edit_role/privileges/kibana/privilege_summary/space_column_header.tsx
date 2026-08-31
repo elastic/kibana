@@ -14,7 +14,7 @@ import { isGlobalPrivilegeDefinition } from '@kbn/security-role-management-model
 import type { SpacesApiUi } from '@kbn/spaces-plugin/public';
 
 import { SpacesPopoverList } from '../../../spaces_popover_list';
-import type { DisplaySpace } from '../display_space';
+import { createUnresolvedSpaceEntry, type DisplaySpace } from '../display_space';
 
 export interface SpaceColumnHeaderProps {
   spaces: DisplaySpace[];
@@ -28,13 +28,7 @@ export const SpaceColumnHeader = (props: SpaceColumnHeaderProps) => {
   const { spacesApiUi } = props;
   const isGlobal = isGlobalPrivilegeDefinition(props.entry);
   const entrySpaces = props.entry.spaces.map((spaceId): DisplaySpace => {
-    return (
-      props.spaces.find((s) => s.id === spaceId) ?? {
-        id: spaceId,
-        name: spaceId,
-        disabledFeatures: [],
-      }
-    );
+    return props.spaces.find((s) => s.id === spaceId) ?? createUnresolvedSpaceEntry(spaceId);
   });
   const LazySpaceAvatar = useMemo(() => spacesApiUi.components.getSpaceAvatar, [spacesApiUi]);
 

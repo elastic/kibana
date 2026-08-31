@@ -18,7 +18,13 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import { getAlertingRuleId, getTraceId, setCurrentTransaction } from './apm_internal';
+import {
+  getActiveOtelSpanId,
+  getActiveOtelTraceId,
+  getAlertingRuleId,
+  getTraceId,
+  setCurrentTransaction,
+} from './apm_internal';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { StepIoService } from './step_io_service';
@@ -340,8 +346,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Workflow transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the workflow transaction
-        const realTraceId = getTraceId(workflowTransaction);
+        // Capture trace ID from the workflow transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(workflowTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from workflow transaction', {
@@ -366,7 +373,7 @@ export class WorkflowExecutionRuntimeManager {
         };
 
         const { triggeredBy } = this.workflowExecution;
-        if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
           taskManagerLabels.event_trigger_id = triggeredBy;
         }
 
@@ -386,8 +393,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Task transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the task transaction
-        const realTraceId = getTraceId(existingTransaction);
+        // Capture trace ID from the task transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(existingTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from task transaction', {
@@ -403,10 +411,49 @@ export class WorkflowExecutionRuntimeManager {
       // It will be overridden if the workflow fails
       existingTransaction.outcome = 'success';
     } else {
-      // Fallback if no task transaction exists - proceed without tracing
-      this.workflowLogger?.logWarn(
-        'No active Task Manager transaction found, proceeding without APM tracing'
-      );
+      // No APM transaction. Under EDOT-only instrumentation this is the normal path rather
+      // than an error: spans are exported by OTEL, there is just no APM agent to read them
+      // from. Read the trace id from the active OTEL span context so the execution stays
+      // linkable to its own trace.
+      const otelTraceId = getActiveOtelTraceId();
+
+      if (otelTraceId) {
+        this.workflowLogger?.logDebug('Captured OTEL trace ID (no APM transaction)', {
+          trace: { trace_id: otelTraceId },
+        });
+        this.workflowExecutionState.updateWorkflowExecution({
+          traceId: otelTraceId,
+          entryTransactionId: getActiveOtelSpanId(),
+        });
+
+        // Mirror the APM branches: addTransactionLabels also writes to the
+        // active OTEL span, keeping trace -> execution lookup searchable.
+        // Under EDOT-only instrumentation there is no APM transaction, so
+        // alert-triggered executions land here too; attribute them via the
+        // execution's `triggeredBy` instead of mislabeling them as task manager.
+        const { triggeredBy } = this.workflowExecution;
+        const isTriggeredByAlerting = triggeredBy === 'alert';
+
+        const otelLabels: Record<string, string | number | boolean> = {
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          service_name: 'kibana',
+          transaction_hierarchy: isTriggeredByAlerting
+            ? 'alerting->workflow->steps'
+            : 'task->steps',
+          triggered_by: isTriggeredByAlerting ? 'alerting' : 'task_manager',
+        };
+
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
+          otelLabels.event_trigger_id = triggeredBy;
+        }
+
+        addTransactionLabels(otelLabels);
+      } else {
+        this.workflowLogger?.logWarn(
+          'No active Task Manager transaction or OTEL span found, proceeding without tracing'
+        );
+      }
     }
 
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {

@@ -65,6 +65,13 @@ export function createGetServicesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Services',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieves a list of services from APM, logs, and metrics data sources.
     
 For APM services, includes anomaly severity, active alert counts, and key performance metrics (latency, transaction error rate, throughput).

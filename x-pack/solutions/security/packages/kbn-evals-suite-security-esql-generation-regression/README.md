@@ -169,7 +169,7 @@ node scripts/discover_eis_models.js
 export KIBANA_TESTING_AI_CONNECTORS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js)"
 
 # Start the full stack (EDOT + Scout + EIS CCM) and run the suite
-EVALUATION_CONNECTOR_ID=eis-google-gemini-3-1-pro \
+EVAL_CONNECTOR_ID=eis-google-gemini-3-1-pro \
 TRACING_ES_URL="http://elastic:changeme@localhost:9200" \
 node scripts/evals start \
   --suite security-esql-generation-regression \
@@ -179,10 +179,10 @@ node scripts/evals start \
 
 `evals start` detects the `eis-` prefix and enables EIS CCM on Scout automatically. If Scout is already running with a different `KIBANA_TESTING_AI_CONNECTORS` payload it is detected as stale and restarted with the new one.
 
-### 3) Run with a non-EIS connector (LiteLLM / kibana.dev.yml entries)
+### 3) Run with a non-EIS connector (OpenRouter / kibana.dev.yml entries)
 
 ```bash
-nvm use && EVALUATION_CONNECTOR_ID=<connector-id> \
+nvm use && EVAL_CONNECTOR_ID=<connector-id> \
   node scripts/evals run --suite security-esql-generation-regression
 ```
 
@@ -191,7 +191,7 @@ nvm use && EVALUATION_CONNECTOR_ID=<connector-id> \
 Set `ESQL_GENERATION_DATASET_LIMIT=1` and `ESQL_GENERATION_DATASET_OFFSET=<n>` to run exactly one example:
 
 ```bash
-nvm use && EVALUATION_CONNECTOR_ID=<connector-id> \
+nvm use && EVAL_CONNECTOR_ID=<connector-id> \
   ESQL_GENERATION_DATASET_LIMIT=1 ESQL_GENERATION_DATASET_OFFSET=2 \
   node scripts/evals run --suite security-esql-generation-regression
 ```
@@ -202,10 +202,10 @@ nvm use && EVALUATION_CONNECTOR_ID=<connector-id> \
 
 | Variable                         | Description                                | Default                                  |
 | -------------------------------- | ------------------------------------------ | ---------------------------------------- |
-| `EVALUATION_CONNECTOR_ID`        | Connector ID for the task model (required) | —                                        |
+| `EVAL_CONNECTOR_ID`              | Connector ID for the task model (required) | —                                        |
 | `EVALUATIONS_ES_URL`             | Elasticsearch URL for storing results      | `http://elastic:changeme@localhost:9220` |
 | `EVALUATIONS_ES_API_KEY`         | API key for the results cluster            | (none)                                   |
-| `EVALUATION_REPETITIONS`         | Number of times to run each example        | `1`                                      |
+| `EVAL_REPETITIONS`               | Number of times to run each example        | `1`                                      |
 | `ESQL_GENERATION_DATASET_LIMIT`  | Max examples to load                       | (all 31)                                 |
 | `ESQL_GENERATION_DATASET_OFFSET` | Skip first N examples                      | `0`                                      |
 

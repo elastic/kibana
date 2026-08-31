@@ -9,12 +9,16 @@
 
 import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import type { AppHeaderConfig } from '@kbn/core-chrome-browser';
+import type { ChromeAppHeaderConfig } from '@kbn/core-chrome-browser';
 
-export const useChromeAppHeaderRegistration = (config: AppHeaderConfig) => {
+/**
+ * Low-level registration hook for wrappers that need Chrome-owned header placement.
+ * Prefer rendering `AppHeader` directly. New uses should be reviewed by `@elastic/appex-sharedux`.
+ */
+export const useChromeAppHeaderRegistration = (config: ChromeAppHeaderConfig) => {
   const chrome = useChromeService();
   const unregisterRef = useRef<(() => void) | undefined>(undefined);
-  const isActive = chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
+  const isActive = chrome.getChromeStyle() === 'project';
 
   useLayoutEffect(() => {
     unregisterRef.current?.();
@@ -36,12 +40,29 @@ export const useChromeAppHeaderRegistration = (config: AppHeaderConfig) => {
   }, [chrome, config, isActive]);
 };
 
-export const ChromeAppHeaderRegistration = React.memo<AppHeaderConfig>((props) => {
-  const { title, back, tabs, badges, menu, favorite, metadata, spacing } = props;
+/**
+ * Registers header configuration for Chrome-owned top-bar placement.
+ * Prefer rendering `AppHeader` directly. Use this only when sticky or shared top navigation, or
+ * other layout constraints, require Chrome to own the header slot. New uses should be reviewed by
+ * `@elastic/appex-sharedux`.
+ */
+export const ChromeAppHeaderRegistration = React.memo<ChromeAppHeaderConfig>((props) => {
+  const { title, back, tabs, badges, menu, favorite, share, description, metadata, spacing } =
+    props;
 
-  const config = useMemo(
-    () => ({ title, back, tabs, badges, menu, favorite, metadata, spacing }),
-    [title, back, tabs, badges, menu, favorite, metadata, spacing]
+  const config = useMemo<ChromeAppHeaderConfig>(
+    () => ({
+      title,
+      back,
+      tabs,
+      badges,
+      menu,
+      favorite,
+      share,
+      ...(description ? { description } : { metadata }),
+      spacing,
+    }),
+    [title, back, tabs, badges, menu, favorite, share, description, metadata, spacing]
   );
 
   useChromeAppHeaderRegistration(config);

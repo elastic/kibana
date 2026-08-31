@@ -166,7 +166,7 @@ export function StreamListView() {
 
   const {
     ui: { manage: canManageStreamsKibana },
-    features: { significantEvents, queryStreams },
+    features: { queryStreams },
   } = useStreamsPrivileges();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
@@ -276,9 +276,9 @@ export function StreamListView() {
   const settingsLabel = i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
     defaultMessage: 'Settings',
   });
-  const significantEventsLabel = i18n.translate(
-    'xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel',
-    { defaultMessage: 'Significant Events' }
+  const createClassicStreamLabel = i18n.translate(
+    'xpack.streams.streamsListView.createClassicStreamButtonLabel',
+    { defaultMessage: 'Create classic stream' }
   );
   const createLabel = i18n.translate('xpack.streams.streamsListView.createButtonLabel', {
     defaultMessage: 'Create',
@@ -292,10 +292,8 @@ export function StreamListView() {
     { defaultMessage: 'Classic stream' }
   );
 
-  const showSignificantEventsDiscovery = Boolean(significantEvents?.available);
   const showQueryStreams = Boolean(queryStreams?.enabled);
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
-  const significantEventsDiscoveryHref = router.link('/_discovery');
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [
@@ -309,17 +307,6 @@ export function StreamListView() {
         testId: 'streamsAppSettingsButton',
       },
     ];
-
-    if (showSignificantEventsDiscovery) {
-      items.push({
-        id: 'significantEventsDiscovery',
-        order: 2,
-        label: significantEventsLabel,
-        iconType: 'significantEvents',
-        href: significantEventsDiscoveryHref,
-        testId: 'streamsSignificantEventsDiscoveryButton',
-      });
-    }
 
     if (showQueryStreams) {
       return {
@@ -351,18 +338,24 @@ export function StreamListView() {
     }
 
     return {
+      primaryActionItem: {
+        id: 'createClassicStream',
+        label: createClassicStreamLabel,
+        iconType: 'plus',
+        run: () => setIsClassicStreamCreationFlyoutOpen(true),
+        disableButton: !canCreateClassicStream,
+        testId: 'streamsAppCreateClassicStreamButton',
+      },
       items,
     };
   }, [
     canCreateClassicStream,
     classicStreamMenuItemLabel,
+    createClassicStreamLabel,
     createLabel,
     queryStreamMenuItemLabel,
     settingsLabel,
     showQueryStreams,
-    showSignificantEventsDiscovery,
-    significantEventsDiscoveryHref,
-    significantEventsLabel,
   ]);
 
   // Canvas / Sources / Pipelines / Destinations — the prototype's own tabs,

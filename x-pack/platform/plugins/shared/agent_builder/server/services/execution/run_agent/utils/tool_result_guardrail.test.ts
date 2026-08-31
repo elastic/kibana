@@ -121,7 +121,6 @@ describe('buildGuardedToolContent', () => {
     const huge = 'x'.repeat(500 * 4);
     const results = [otherResult({ text: huge })];
 
-    // 'read_file' is an internal tool id, and isExcludedFromFilestore(toolName) === isInternalTool(toolName).
     const content = buildGuardedToolContent({
       results,
       toolId: 'read_file',

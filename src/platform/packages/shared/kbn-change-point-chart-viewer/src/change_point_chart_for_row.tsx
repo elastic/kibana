@@ -43,7 +43,7 @@ export const ChangePointChartForRow: React.FC<ChangePointChartForRowProps> = ({
   if (!card || !seriesColumns) {
     return (
       <EuiEmptyPrompt
-        iconType="visLine"
+        iconType="chartLine"
         title={
           <h3>
             {i18n.translate('changePointChartViewer.flyout.noChartTitle', {

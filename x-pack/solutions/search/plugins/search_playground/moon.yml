@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-playground'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-playground'
   description: Moon project for @kbn/search-playground
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/solutions/search/plugins/search_playground
 dependsOn:
   - '@kbn/config-schema'
@@ -70,6 +70,9 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/evals-plugin'
   - '@kbn/core-chrome-browser'
+  - '@kbn/ui-callout'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
 tags:
   - plugin
   - prod

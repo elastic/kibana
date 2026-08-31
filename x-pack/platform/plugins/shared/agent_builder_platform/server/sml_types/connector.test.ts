@@ -9,16 +9,28 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { createConnectorSmlType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
   getConnectorSpec: jest.fn(),
 }));
 
+jest.mock('../skills/connector_authoring/utils', () => ({
+  isChatCallableConnectorType: jest.fn(),
+}));
+
 const { getConnectorSpec } = jest.requireMock('@kbn/connector-specs');
+const { isChatCallableConnectorType } = jest.requireMock('../skills/connector_authoring/utils');
+
+const mockFinder = {
+  find: jest.fn(),
+  close: jest.fn().mockResolvedValue(undefined),
+};
 
 const mockSavedObjectsClient = {
   get: jest.fn(),
+  createPointInTimeFinder: jest.fn().mockReturnValue(mockFinder),
 };
 
 const mockGetActionSavedObjectsClient = jest.fn().mockResolvedValue(mockSavedObjectsClient);
@@ -53,14 +65,186 @@ describe('connectorSmlType', () => {
   });
 
   describe('id', () => {
-    it('equals connector', () => {
-      expect(connectorSmlType.id).toBe('connector');
+    it('equals CONNECTOR_KI_TYPE', () => {
+      expect(connectorSmlType.id).toBe(CONNECTOR_KI_TYPE);
     });
   });
 
   describe('list', () => {
-    it('yields nothing — connector indexing is event-driven only', async () => {
+    const makeSo = (
+      id: string,
+      namespaces: string[],
+      updatedAt: string,
+      actionTypeId = '.mcp'
+    ) => ({
+      id,
+      updated_at: updatedAt,
+      namespaces,
+      attributes: { actionTypeId },
+    });
+
+    beforeEach(() => {
+      mockFinder.find.mockReset();
+      mockFinder.close.mockReset().mockResolvedValue(undefined);
+      isChatCallableConnectorType.mockReturnValue(true);
+    });
+
+    it('yields items from a single page', async () => {
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z'),
+            makeSo('conn-2', ['space-a'], '2024-01-02T00:00:00.000Z'),
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
       const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result).toEqual([
+        { id: 'conn-1', updatedAt: '2024-01-01T00:00:00.000Z', spaces: ['default'] },
+        { id: 'conn-2', updatedAt: '2024-01-02T00:00:00.000Z', spaces: ['space-a'] },
+      ]);
+    });
+
+    it('yields items across multiple pages', async () => {
+      async function* twoPages() {
+        yield { saved_objects: [makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z')] };
+        yield { saved_objects: [makeSo('conn-2', ['default'], '2024-01-02T00:00:00.000Z')] };
+      }
+      mockFinder.find.mockReturnValue(twoPages());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result).toHaveLength(2);
+      expect(result.map((r) => r.id)).toEqual(['conn-1', 'conn-2']);
+    });
+
+    it('yields nothing when there are no connectors', async () => {
+      async function* empty() {}
+      mockFinder.find.mockReturnValue(empty());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+      expect(result).toEqual([]);
+    });
+
+    it('calls createPointInTimeFinder with action type across all namespaces', async () => {
+      async function* empty() {}
+      mockFinder.find.mockReturnValue(empty());
+
+      await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(mockSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'action', namespaces: ['*'] })
+      );
+    });
+
+    it('closes the finder after iteration completes', async () => {
+      async function* singlePage() {
+        yield { saved_objects: [makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z')] };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(mockFinder.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the finder even when iteration throws', async () => {
+      async function* throwing() {
+        yield { saved_objects: [makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z')] };
+        throw new Error('ES error');
+      }
+      mockFinder.find.mockReturnValue(throwing());
+
+      await expect(collectPages(connectorSmlType.list(createContext() as never))).rejects.toThrow(
+        'ES error'
+      );
+
+      expect(mockFinder.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('propagates error when createPointInTimeFinder throws (e.g. action type mappings absent)', async () => {
+      mockSavedObjectsClient.createPointInTimeFinder.mockImplementationOnce(() => {
+        throw new Error("Unknown saved object type: 'action' is not a registered type");
+      });
+
+      await expect(collectPages(connectorSmlType.list(createContext() as never))).rejects.toThrow(
+        "Unknown saved object type: 'action' is not a registered type"
+      );
+    });
+
+    it('falls back to empty spaces array when namespaces is undefined', async () => {
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            {
+              id: 'conn-1',
+              updated_at: '2024-01-01T00:00:00.000Z',
+              attributes: { actionTypeId: '.mcp' },
+            },
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result[0].spaces).toEqual([]);
+    });
+
+    it('excludes connectors whose actionTypeId is not chat-callable', async () => {
+      isChatCallableConnectorType.mockImplementation((id: string) => id === '.mcp');
+
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            makeSo('conn-chat', ['default'], '2024-01-01T00:00:00.000Z', '.mcp'),
+            makeSo('conn-nonchat', ['default'], '2024-01-02T00:00:00.000Z', '.email'),
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('conn-chat');
+    });
+
+    it('passes actionTypeId to isChatCallableConnectorType for each connector', async () => {
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z', '.slack'),
+            makeSo('conn-2', ['default'], '2024-01-02T00:00:00.000Z', '.mcp'),
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(isChatCallableConnectorType).toHaveBeenCalledWith('.slack');
+      expect(isChatCallableConnectorType).toHaveBeenCalledWith('.mcp');
+    });
+
+    it('yields nothing when no connectors pass the chat-callable filter', async () => {
+      isChatCallableConnectorType.mockReturnValue(false);
+
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z', '.email'),
+            makeSo('conn-2', ['default'], '2024-01-02T00:00:00.000Z', '.pagerduty'),
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
       expect(result).toEqual([]);
     });
   });
@@ -90,7 +274,6 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'My MCP Connector',
         content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
-        discovery_labels: [{ kind: 'shortcut', value: 'connector/My MCP Connector' }],
       });
       expect(result).not.toHaveProperty('permissions');
     });
@@ -186,19 +369,15 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
-        discovery_labels: [{ kind: 'shortcut', value: 'connector/Basic Connector' }],
       });
     });
   });
 
   describe('getPermissions', () => {
-    it('returns the saved_object:action/get Kibana privilege', () => {
-      // The actions plugin gates connector reads on saved-object read access for the `action`
-      // type — `saved_object:action/get` is the correct privilege string. Pinning it here
-      // so a regression to a non-existent privilege name fails loudly.
+    it('returns the ai_index:connector/read action', () => {
       const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: 'saved_object:action/get' }] },
+        kibana: { privileges: { name: ['ai_index:connector/read'] } },
       });
     });
   });

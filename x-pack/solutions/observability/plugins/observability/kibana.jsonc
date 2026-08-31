@@ -20,7 +20,6 @@
       "embeddable",
       "fieldFormats",
       "uiActions",
-      "presentationUtil",
       "features",
       "files",
       "inspector",
@@ -51,6 +50,7 @@
       "discover",
       "exploratoryView",
       "home",
+      "globalSearch",
       "usageCollection",
       "cloud",
       "spaces",
@@ -59,7 +59,7 @@
       "investigate",
       "cps",
       "ingestHub",
-      "significant_events"
+      "significantEvents"
     ],
     "requiredBundles": [
       "aiops",
@@ -70,7 +70,7 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "significant_events",
+      "significantEvents",
       "stackAlerts",
       "observabilityAgentBuilder"
     ],

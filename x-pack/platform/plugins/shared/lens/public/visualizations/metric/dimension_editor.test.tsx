@@ -190,7 +190,8 @@ describe('dimension editor', () => {
         const optionsList = await screen.findByTestId(
           'comboBoxOptionsList lns-icon-select-optionsList'
         );
-        const option = within(optionsList).getByText(icon, { exact: true });
+        fireEvent.change(iconInput, { target: { value: icon } });
+        const option = await within(optionsList).findByText(icon, { exact: true });
         if (option) {
           await userEvent.click(option);
         } else {

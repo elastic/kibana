@@ -17,25 +17,29 @@ import {
   AWS_ONBOARDING_TELEMETRY_STORAGE_KEY,
 } from '@kbn/fleet-plugin/common';
 import type { ObservabilityOnboardingAppServices } from '..';
+import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../common/feature_flags';
 
 const AWS_CLOUDWATCH_OTEL_PACKAGE = 'aws_cloudwatch_input_otel';
-const BACK_LINK_PATH = '?category=cloud';
 const RESOLVE_TIMEOUT_MS = 30_000;
 
 export const CloudwatchIntegrationRedirect: React.FC = () => {
   const {
-    services: { http, application, analytics },
+    services: { http, application, analytics, featureFlags },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const [hasError, setHasError] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
-  const goBackToCloud = useCallback(() => {
+  const isAddDataPageV2Enabled = featureFlags.getBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
+  // The V2 page has no category tabs, so the Cloud tab param only applies to V1.
+  const backLinkPath = isAddDataPageV2Enabled ? '' : '?category=cloud';
+
+  const goBack = useCallback(() => {
     application.navigateToApp(OBSERVABILITY_ONBOARDING_APP_ID, {
-      path: BACK_LINK_PATH,
+      path: backLinkPath,
       replace: true,
     });
-  }, [application]);
+  }, [application, backLinkPath]);
 
   const retry = useCallback(() => {
     setHasError(false);
@@ -63,11 +67,11 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
         }
 
         const onCancelUrl = application.getUrlForApp(OBSERVABILITY_ONBOARDING_APP_ID, {
-          path: BACK_LINK_PATH,
+          path: backLinkPath,
         });
 
         const routeState: CreatePackagePolicyRouteState = {
-          onCancelNavigateTo: [OBSERVABILITY_ONBOARDING_APP_ID, { path: BACK_LINK_PATH }],
+          onCancelNavigateTo: [OBSERVABILITY_ONBOARDING_APP_ID, { path: backLinkPath }],
           onCancelUrl,
           telemetrySource: 'aws_quickstart',
         };
@@ -83,7 +87,7 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
           reportAwsOnboardingFlowEntered(analytics, sessionStorage, version);
         }
 
-        application.navigateToApp('fleet', {
+        application.navigateToApp('integrations', {
           path: addIntegrationPath,
           state: routeState,
           replace: true,
@@ -103,7 +107,7 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [http, application, attempt, analytics]);
+  }, [http, application, attempt, analytics, backLinkPath]);
 
   if (hasError) {
     return (
@@ -121,13 +125,21 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
         }
         body={
           <p>
-            {i18n.translate(
-              'xpack.observability_onboarding.cloudwatchIntegrationRedirect.errorBody',
-              {
-                defaultMessage:
-                  'We could not open the Amazon CloudWatch integration. Try again, or go back to the Cloud category.',
-              }
-            )}
+            {isAddDataPageV2Enabled
+              ? i18n.translate(
+                  'xpack.observability_onboarding.cloudwatchIntegrationRedirect.errorBodyAddData',
+                  {
+                    defaultMessage:
+                      'We could not open the Amazon CloudWatch integration. Try again, or go back to the Add data page.',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.observability_onboarding.cloudwatchIntegrationRedirect.errorBody',
+                  {
+                    defaultMessage:
+                      'We could not open the Amazon CloudWatch integration. Try again, or go back to the Cloud category.',
+                  }
+                )}
           </p>
         }
         actions={[
@@ -145,12 +157,17 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
           <EuiButtonEmpty
             key="back"
             data-test-subj="cloudwatchIntegrationRedirectBack"
-            onClick={goBackToCloud}
+            onClick={goBack}
           >
-            {i18n.translate(
-              'xpack.observability_onboarding.cloudwatchIntegrationRedirect.backButton',
-              { defaultMessage: 'Back to Cloud' }
-            )}
+            {isAddDataPageV2Enabled
+              ? i18n.translate(
+                  'xpack.observability_onboarding.cloudwatchIntegrationRedirect.backToAddDataButton',
+                  { defaultMessage: 'Back to Add data' }
+                )
+              : i18n.translate(
+                  'xpack.observability_onboarding.cloudwatchIntegrationRedirect.backButton',
+                  { defaultMessage: 'Back to Cloud' }
+                )}
           </EuiButtonEmpty>,
         ]}
       />

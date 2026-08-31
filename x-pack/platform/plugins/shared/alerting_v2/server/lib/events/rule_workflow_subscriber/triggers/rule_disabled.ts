@@ -14,14 +14,16 @@ import {
   RULE_DISABLED_EVENT_TYPE,
   type RuleDisabledEvent,
 } from '../../rule_event_publisher/events';
+import { toLifecycleWorkflowPayload } from './to_lifecycle_payload';
 import type { RuleWorkflowTriggerBinding } from './types';
 
 export { RuleDisabledTriggerId } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `rule.disabled` event to the `alerting.ruleDisabled`
- * workflow trigger. The publisher already shapes the payload, so the
- * subscriber forwards it unchanged.
+ * workflow trigger. The internal event payload also carries the full domain
+ * rule; `toPayload` projects identity plus tags so the snapshot never reaches
+ * workflows.
  */
 export const ruleDisabledTrigger: RuleWorkflowTriggerBinding<
   RuleDisabledEvent,
@@ -30,5 +32,5 @@ export const ruleDisabledTrigger: RuleWorkflowTriggerBinding<
   eventType: RULE_DISABLED_EVENT_TYPE,
   triggerId: RuleDisabledTriggerId,
   definition: ruleDisabledTriggerCommonDefinition,
-  toPayload: (event) => event.payload,
+  toPayload: toLifecycleWorkflowPayload,
 };

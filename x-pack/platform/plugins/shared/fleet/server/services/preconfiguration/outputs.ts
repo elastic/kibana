@@ -34,6 +34,7 @@ import {
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../constants';
+import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
@@ -141,6 +142,29 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
     return { ...output, allow_edit: merged };
   });
 }
+
+/**
+ * Builds a predicate matching outputs that route through the managed `_bulk` endpoint.
+ */
+export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
+  const managedBulkUrls = new Set(
+    (config ? getPreconfiguredOutputFromConfig(config) : [])
+      .filter(({ id }) => AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(id))
+      .flatMap(({ hosts }) => hosts ?? [])
+      .flatMap((host) => {
+        try {
+          return [normalizeHostsForAgents(host)];
+        } catch {
+          // cloud.managed_otlp.url is only schema.string(); never throw on the full-policy path
+          return [];
+        }
+      })
+  );
+
+  return ({ type, hosts }: Pick<Output, 'type' | 'hosts'>) =>
+    type === outputType.Elasticsearch &&
+    (hosts?.some((host) => managedBulkUrls.has(host)) ?? false);
+};
 
 export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
@@ -293,14 +317,11 @@ export async function cleanPreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingOutputs = await outputService.list();
-  const existingPreconfiguredOutput = existingOutputs.items.filter(
-    (o) => o.is_preconfigured === true
-  );
+  const existingPreconfiguredOutputs = await outputService.listPreconfigured();
 
   const logger = appContextService.getLogger();
 
-  for (const output of existingPreconfiguredOutput) {
+  for (const output of existingPreconfiguredOutputs.items) {
     const hasBeenDelete = !outputs.find(({ id }) => output.id === id);
     if (!hasBeenDelete) {
       continue;
@@ -487,7 +508,9 @@ async function isPreconfiguredOutputDifferentFromCurrent(
           existingOutput.otel_disable_beatsauth,
           preconfiguredOutput.otel_disable_beatsauth
         ))) ||
-    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
+    // Kafka does not support proxies; proxy_id is always cleared on save (#267281)
+    (existingOutput.type !== 'kafka' &&
+      isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)) ||
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
     (preconfiguredOutput.preset &&
       isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||

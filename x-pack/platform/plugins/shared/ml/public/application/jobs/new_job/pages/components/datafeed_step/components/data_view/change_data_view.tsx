@@ -15,7 +15,6 @@ import {
   EuiButtonEmpty,
   EuiModal,
   EuiButton,
-  EuiCallOut,
   EuiSpacer,
   EuiModalHeader,
   EuiLoadingSpinner,
@@ -23,6 +22,7 @@ import {
   EuiModalBody,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -191,6 +191,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
               {validating === true ? (
                 <>
                   <EuiLoadingSpinner />
+                  &nbsp;
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.validatingText"
                     defaultMessage="Checking data view and job compatibility"
@@ -245,7 +246,7 @@ const ValidationMessage: FC<{
 }> = ({ validationResponse, dataViewTitle }) => {
   if (validationResponse === null) {
     return (
-      <EuiCallOut
+      <KbnInfoCallout
         announceOnMount
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.title',
@@ -253,19 +254,19 @@ const ValidationMessage: FC<{
             defaultMessage: 'Data view valid',
           }
         )}
-        color="primary"
-      >
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.message"
-          defaultMessage="No detectors have been configured; this data view can be applied to the job."
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.message"
+            defaultMessage="No detectors have been configured; this data view can be applied to the job."
+          />
+        }
+      />
     );
   }
   if (validationResponse.valid === true) {
     if (validationResponse.documentsFound === true) {
       return (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.title',
@@ -273,17 +274,17 @@ const ValidationMessage: FC<{
               defaultMessage: 'Data view valid',
             }
           )}
-          color="primary"
-        >
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.message"
-            defaultMessage="This data view can be applied to this job."
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.message"
+              defaultMessage="This data view can be applied to this job."
+            />
+          }
+        />
       );
     } else {
       return (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.title',
@@ -291,19 +292,19 @@ const ValidationMessage: FC<{
               defaultMessage: 'Data view possibly invalid',
             }
           )}
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.message"
-            defaultMessage="This data view produced no results when previewing the datafeed. There may be no documents in {dataViewTitle}."
-            values={{ dataViewTitle }}
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.message"
+              defaultMessage="This data view produced no results when previewing the datafeed. There may be no documents in {dataViewTitle}."
+              values={{ dataViewTitle }}
+            />
+          }
+        />
       );
     }
   } else {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.title',
@@ -311,7 +312,6 @@ const ValidationMessage: FC<{
             defaultMessage: 'Data view invalid',
           }
         )}
-        color="danger"
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.message"
@@ -329,7 +329,7 @@ const ValidationMessage: FC<{
         <EuiSpacer size="s" />
 
         {validationResponse.error ? extractErrorMessage(validationResponse.error) : null}
-      </EuiCallOut>
+      </KbnDangerCallout>
     );
   }
 };

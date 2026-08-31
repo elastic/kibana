@@ -67,7 +67,7 @@ const LicenseAccessDenied = React.memo(() => {
           id="platform.plugins.shared.workflows_management.ui.upgradeLicense.subscriptionPlansButton"
           defaultMessage="Subscription plans"
         />
-        <EuiIcon type="popout" aria-hidden={true} />
+        <EuiIcon type="external" aria-hidden={true} />
       </EuiButton>,
       // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiButtonEmpty
@@ -163,7 +163,7 @@ const ServerlessTierAccessDenied = React.memo<{
             id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.manageSubscriptionButton"
             defaultMessage="Manage subscription"
           />
-          <EuiIcon type="popout" aria-hidden={true} />
+          <EuiIcon type="external" aria-hidden={true} />
         </EuiButton>,
       ];
     }

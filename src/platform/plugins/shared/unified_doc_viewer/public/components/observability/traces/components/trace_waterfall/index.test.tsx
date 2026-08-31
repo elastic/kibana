@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
+import { apmSharedMock } from '@kbn/apm-shared/public/mocks';
 import type { TraceWaterfallRestorableState } from '.';
 import { TraceWaterfall } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
 import type { FullScreenWaterfallProps } from '../full_screen_waterfall';
-import { apmSharedMock } from '@kbn/apm-shared/public/mocks';
 
 jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
@@ -69,10 +69,6 @@ const mockFullScreenWaterfall = jest.fn(
 
 jest.mock('../full_screen_waterfall', () => ({
   FullScreenWaterfall: (props: FullScreenWaterfallProps) => mockFullScreenWaterfall(props),
-}));
-
-jest.mock('@kbn/esql-composer', () => ({
-  where: jest.fn(),
 }));
 
 describe('TraceWaterfall', () => {

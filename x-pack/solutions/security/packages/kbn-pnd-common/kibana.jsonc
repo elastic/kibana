@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/pnd-common",
+  "owner": ["@elastic/security-solution"],
+  "group": "security",
+  "visibility": "shared"
+}

@@ -14,8 +14,7 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   canReadManagedWorkflowExecutions,
-  hasWorkflowReadPrivilege,
-  WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY,
+  WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY,
 } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -24,7 +23,7 @@ export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies
     .get({
       path: '/api/workflows/stats',
       access: 'public',
-      security: WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY,
+      security: WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY,
       summary: 'Get workflow statistics',
       description:
         'Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.',
@@ -43,9 +42,6 @@ export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          if (!hasWorkflowReadPrivilege(request)) {
-            return response.forbidden();
-          }
           const spaceId = spaces.getSpaceId(request);
           const includeExecutionStats =
             request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;

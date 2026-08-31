@@ -50,6 +50,13 @@ export const createDeleteStreamTool = ({
     - User wants to remove processors or field mappings — use the appropriate focused tool
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Delete Stream',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   schema: deleteStreamSchema,
   confirmation: {
     askUser: 'always',

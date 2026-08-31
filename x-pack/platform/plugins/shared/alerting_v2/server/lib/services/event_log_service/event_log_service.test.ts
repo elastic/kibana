@@ -89,7 +89,7 @@ describe('EventLogService', () => {
       expect(args.track_total_hits).toBe(true);
     });
 
-    it('matches both dispatched and throttled when outcome is omitted', async () => {
+    it('matches dispatched, throttled, and dispatch_failed when outcome is omitted', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
@@ -106,6 +106,7 @@ describe('EventLogService', () => {
               'event.action': [
                 ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
                 ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+                ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
               ],
             },
           },
@@ -113,19 +114,19 @@ describe('EventLogService', () => {
       );
     });
 
-    it('narrows to a single event.action when outcome is provided', async () => {
+    it('narrows event.action to the provided outcomes', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
         startDate: SINCE,
-        outcome: 'dispatched',
+        outcomes: ['dispatched'],
       });
 
       const [args] = mockEsClient.search.mock.calls[0] as [any];
       expect(args.query.bool.filter).toEqual(
-        expect.arrayContaining([{ term: { 'event.action': 'dispatched' } }])
+        expect.arrayContaining([{ terms: { 'event.action': ['dispatched'] } }])
       );
     });
 
@@ -264,81 +265,6 @@ describe('EventLogService', () => {
         eventLogService.findActionPolicyExecutionEvents({
           spaceId: 'default',
           startDate: SINCE,
-        })
-      ).rejects.toThrow('boom');
-    });
-  });
-
-  describe('countActionPolicyExecutionEventsSince', () => {
-    it('runs a count-only search with size=0 and track_total_hits', async () => {
-      const { eventLogService, mockEsClient } = createEventLogService();
-      mockEsClient.search.mockResolvedValue(buildSearchResponse([], 0));
-
-      await eventLogService.countActionPolicyExecutionEventsSince({
-        spaceId: 'default',
-        since: SINCE,
-      });
-
-      const [args] = mockEsClient.search.mock.calls[0] as [any];
-      expect(args.size).toBe(0);
-      expect(args.from).toBeUndefined();
-      expect(args.track_total_hits).toBe(true);
-      expect(args.query.bool.filter).toEqual(
-        expect.arrayContaining([{ range: { '@timestamp': { gte: SINCE } } }])
-      );
-    });
-
-    it('forwards outcome and ids into the underlying ES query', async () => {
-      const { eventLogService, mockEsClient } = createEventLogService();
-      mockEsClient.search.mockResolvedValue(buildSearchResponse([], 0));
-
-      await eventLogService.countActionPolicyExecutionEventsSince({
-        spaceId: 'default',
-        since: SINCE,
-        outcome: 'throttled',
-        policyIds: ['p1'],
-        ruleIds: ['r1'],
-      });
-
-      const [args] = mockEsClient.search.mock.calls[0] as [any];
-      expect(args.query.bool.filter).toEqual(
-        expect.arrayContaining([{ term: { 'event.action': 'throttled' } }])
-      );
-      const boolClause = args.query.bool.filter.find((f: any) => f?.bool?.should);
-      expect(boolClause).toBeDefined();
-    });
-
-    it('returns total as count', async () => {
-      const { eventLogService, mockEsClient } = createEventLogService();
-      mockEsClient.search.mockResolvedValue(buildSearchResponse([], 42));
-
-      const result = await eventLogService.countActionPolicyExecutionEventsSince({
-        spaceId: 'default',
-        since: SINCE,
-      });
-
-      expect(result).toEqual({ count: 42 });
-    });
-
-    it('returns total.value when ES returns the object form', async () => {
-      const { eventLogService, mockEsClient } = createEventLogService();
-      mockEsClient.search.mockResolvedValue(buildSearchResponse([], { value: 13, relation: 'eq' }));
-
-      const result = await eventLogService.countActionPolicyExecutionEventsSince({
-        spaceId: 'default',
-        since: SINCE,
-      });
-      expect(result.count).toBe(13);
-    });
-
-    it('propagates errors from the ES client', async () => {
-      const { eventLogService, mockEsClient } = createEventLogService();
-      mockEsClient.search.mockRejectedValue(new Error('boom'));
-
-      await expect(
-        eventLogService.countActionPolicyExecutionEventsSince({
-          spaceId: 'default',
-          since: SINCE,
         })
       ).rejects.toThrow('boom');
     });

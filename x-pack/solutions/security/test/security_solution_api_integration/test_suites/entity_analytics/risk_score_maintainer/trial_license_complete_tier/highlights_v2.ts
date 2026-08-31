@@ -438,9 +438,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.vulnerabilities).toBeUndefined();
       expect(body.summary.vulnerabilitiesTotal).toBeUndefined();
 
-      // Anomalies
-      expect(body.summary.anomalies).toBeDefined();
-      expect(body.summary.anomalies).toHaveLength(0);
+      // Anomalies are explicitly null when there are no ML findings
+      expect(body.summary.anomalies).toBeNull();
 
       // Prompt and replacements
       expect(body.replacements).toBeDefined();
@@ -492,7 +491,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.assetCriticality).toEqual([]);
       expect(body.summary.vulnerabilities).toBeUndefined();
       expect(body.summary.vulnerabilitiesTotal).toBeUndefined();
-      expect(body.summary.anomalies).toEqual([]);
+      // Anomalies are explicitly null when there are no ML findings
+      expect(body.summary.anomalies).toBeNull();
       expect(body.prompt).toContain(
         'Generate structured information for an entity so a Security analyst can act.'
       );

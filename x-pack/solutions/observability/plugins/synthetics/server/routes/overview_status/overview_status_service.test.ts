@@ -1463,6 +1463,117 @@ describe('current status route', () => {
       expect(result.up).toBe(1);
     });
 
+    it('discovers CPS linked-project monitors that have no local saved object', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'linked-monitor-1',
+                locationId: 'us-west-1',
+              },
+              status: {
+                key: 'us-west-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      'monitor.name': 'Linked HTTP check',
+                      'monitor.type': 'http',
+                      config_id: 'linked-config-1',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [
+                  { key: 'obs-prod:.ds-synthetics-http-default-2026.01.01-000001', doc_count: 1 },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+          isCpsEnabled: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      const linked = result.upConfigs['obs-prod-linked-config-1-us-west-1'];
+      expect(linked).toBeDefined();
+      expect(linked.name).toBe('Linked HTTP check');
+      expect(linked.remote).toEqual({ remoteName: 'obs-prod' });
+      expect(result.up).toBe(1);
+    });
+
+    it('collects _index and applies remoteNames on serverless when CPS is on', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: { remoteNames: ['obs-prod'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+          isCpsEnabled: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      expect(searchCall.aggs.monitors.aggs.index_name).toBeDefined();
+      const filters = searchCall.query.bool.filter;
+      const remoteFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.wildcard?._index === 'obs-prod:*')
+      );
+      expect(remoteFilter).toBeDefined();
+    });
+
+    it('does not collect _index or apply remoteNames on serverless when CPS is off', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: { remoteNames: ['obs-prod'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      expect(searchCall.aggs.monitors.aggs.index_name).toBeUndefined();
+      const filters = searchCall.query.bool.filter ?? [];
+      const remoteFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.wildcard?._index === 'obs-prod:*')
+      );
+      expect(remoteFilter).toBeUndefined();
+    });
+
     it('keeps two remote monitors with the same configId+locationId from different clusters', async () => {
       // Regression: two remote clusters can host the same imported monitor in
       // the same locationId. Before keying the bucket by remoteName the second
@@ -1579,7 +1690,6 @@ describe('current status route', () => {
                       'monitor.status': 'down',
                       'monitor.name': 'Local No SO Monitor',
                       'monitor.type': 'http',
-                      config_id: 'local-no-so',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
@@ -2025,8 +2135,8 @@ describe('current status route', () => {
 
       const result = await overviewStatusService.getOverviewStatus();
 
-      // Active-space filter is still applied (single-space view) and the request
-      // omits the CCS-only `index_name` sub-agg.
+      // Active-space filter is still applied (single-space view). `_index`
+      // collection is CPS-gated, so it stays off when `isCpsEnabled` is unset.
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
       const spaceFilter = filters.find((f: any) =>
@@ -2044,6 +2154,10 @@ describe('current status route', () => {
       // the CCS-gated `index_name`). Location-less pings don't rely on it — they
       // fall back to the placeholder label.
       expect(monitorAggs.location_name).toBeDefined();
+      // `space_id` presence tells a deleted Kibana monitor's leftover pings
+      // (always stamped with `meta.space_id`) apart from autodiscovery pings.
+      // Heartbeat detection is always-on, so it runs even on serverless.
+      expect(monitorAggs.space_id).toBeDefined();
 
       // No remote decoration without CCS.
       expect(result.upConfigs.id1).toBeDefined();
@@ -2487,6 +2601,9 @@ describe('current status route', () => {
   });
 
   describe('Heartbeat / Elastic Agent managed monitors', () => {
+    // A genuine autodiscovery ping carries neither `config_id` nor
+    // `meta.space_id` — its identity is `monitor.id`. Tests that want to model a
+    // Kibana-pushed (deleted) monitor add those markers explicitly.
     const heartbeatBucket = (overrides: { monitorId: string; status: string; metrics?: any }) => ({
       key: { monitorId: overrides.monitorId, locationId: japanLoc.id },
       status: {
@@ -2498,7 +2615,6 @@ describe('current status route', () => {
               'monitor.name': 'k8s autodiscovered monitor',
               'monitor.type': 'http',
               'monitor.interval': 600,
-              config_id: overrides.monitorId,
               tags: ['kube-system'],
               ...overrides.metrics,
             },
@@ -2543,6 +2659,63 @@ describe('current status route', () => {
       expect(entry.schedule).toBe('10');
       expect(entry.tags).toEqual(['kube-system']);
       expect(entry.locations).toEqual([{ id: japanLoc.id, label: 'My K8s Cluster', status: 'up' }]);
+      expect(result.up).toBe(1);
+    });
+
+    const runWithBuckets = async (buckets: any[]) => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(getEsResponse({ buckets }));
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      return service.getOverviewStatus();
+    };
+
+    // Kibana stamps both `config_id` and `meta.space_id` onto every monitor it
+    // pushes. A monitor deleted from Kibana leaves behind pings that still carry
+    // them until they age out; a standalone Heartbeat user could also set either
+    // field. In all those cases the ping must NOT be surfaced as an
+    // autodiscovery (`heartbeat`) monitor — only a ping with neither marker is.
+    it('does not surface a no-saved-object ping that carries meta.space_id as heartbeat', async () => {
+      const result = await runWithBuckets([
+        {
+          ...heartbeatBucket({ monitorId: 'has-space', status: 'up' }),
+          space_id: { buckets: [{ key: 'default', doc_count: 1 }] },
+        },
+      ]);
+
+      expect(result.upConfigs['heartbeat-has-space-asia_japan']).toBeUndefined();
+      expect(result.up).toBe(0);
+    });
+
+    it('does not surface a no-saved-object ping that carries config_id as heartbeat', async () => {
+      const result = await runWithBuckets([
+        heartbeatBucket({
+          monitorId: 'has-config',
+          status: 'up',
+          metrics: { config_id: 'so-uuid-1234' },
+        }),
+      ]);
+
+      expect(result.upConfigs['heartbeat-has-config-asia_japan']).toBeUndefined();
+      expect(result.upConfigs['heartbeat-so-uuid-1234-asia_japan']).toBeUndefined();
+      expect(result.up).toBe(0);
+    });
+
+    it('surfaces a ping with neither config_id nor meta.space_id as heartbeat', async () => {
+      const result = await runWithBuckets([heartbeatBucket({ monitorId: 'bare', status: 'up' })]);
+
+      const entry = result.upConfigs['heartbeat-bare-asia_japan'];
+      expect(entry).toBeDefined();
+      expect(entry.origin).toBe('heartbeat');
       expect(result.up).toBe(1);
     });
 

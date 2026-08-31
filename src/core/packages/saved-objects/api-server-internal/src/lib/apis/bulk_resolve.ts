@@ -12,7 +12,6 @@ import {
   errorContent,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import { type SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkResolveResponse,
@@ -51,7 +50,7 @@ export const performBulkResolve = async <T>(
       const errorResult = result as BulkResolveError;
       const { type, id, error } = errorResult;
       return {
-        saved_object: { type, id, error: errorContent(error) } as unknown as SavedObject<T>,
+        saved_object: { type, id, error: errorContent(error) },
         outcome: 'exactMatch',
       };
     }

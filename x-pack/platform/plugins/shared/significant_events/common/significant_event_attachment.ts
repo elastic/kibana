@@ -9,7 +9,6 @@ import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/atta
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 export const SIGNIFICANT_EVENT_ATTACHMENT_TYPE = 'platform.sig_event' as const;
-export const SIGNIFICANT_EVENT_SML_TYPE = 'significant_event' as const;
 
 export type SignificantEventAttachment = Attachment<
   typeof SIGNIFICANT_EVENT_ATTACHMENT_TYPE,

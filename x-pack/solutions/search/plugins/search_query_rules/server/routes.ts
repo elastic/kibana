@@ -23,6 +23,16 @@ import { putRuleset } from './lib/put_query_rules_ruleset_set';
 import { errorHandler } from './utils/error_handler';
 import { checkPrivileges } from './utils/privilege_check';
 
+const RESOURCE_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
+
+const resourceIdSchema = schema.string({
+  maxLength: 512,
+  validate: (value) =>
+    RESOURCE_ID_REGEX.test(value)
+      ? undefined
+      : 'must only contain letters, numbers, hyphens (-), and underscores (_)',
+});
+
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
     {
@@ -74,7 +84,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
+          ruleset_id: resourceIdSchema,
         }),
       },
     },
@@ -114,7 +124,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
+          ruleset_id: resourceIdSchema,
         }),
         query: schema.object({
           forceWrite: schema.boolean({ defaultValue: false }),
@@ -194,7 +204,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          rulesetId: schema.string(),
+          rulesetId: resourceIdSchema,
         }),
       },
     },
@@ -231,7 +241,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
+          ruleset_id: resourceIdSchema,
         }),
       },
     },
@@ -266,8 +276,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
-          rule_id: schema.string(),
+          ruleset_id: resourceIdSchema,
+          rule_id: resourceIdSchema,
         }),
       },
     },
@@ -303,8 +313,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
-          rule_id: schema.string(),
+          ruleset_id: resourceIdSchema,
+          rule_id: resourceIdSchema,
         }),
       },
     },
@@ -426,7 +436,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          rulesetId: schema.string(),
+          rulesetId: resourceIdSchema,
         }),
       },
     },

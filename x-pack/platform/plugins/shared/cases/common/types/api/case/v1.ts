@@ -23,6 +23,9 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
   CASE_EXTENDED_FIELDS,
 } from '../../../constants';
 import {
@@ -457,8 +460,16 @@ export const CasesSearchRequestSearchFieldsRt = rt.keyof({
 });
 
 const ExtendedFieldFilterRt = rt.strict({
-  label: rt.string,
-  value: rt.string,
+  label: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.label',
+    min: 1,
+    max: MAX_TEMPLATE_DEFINITION_LENGTH,
+  }),
+  value: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.value',
+    min: 1,
+    max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  }),
 });
 
 export const CasesSearchRequestRt = rt.intersection([
@@ -489,8 +500,14 @@ export const CasesSearchRequestRt = rt.intersection([
     rt.partial({
       /**
        * Extended field filters parsed from label:value syntax in the search bar.
+       * Same-label values are OR'd; distinct labels are AND'd.
        */
-      extendedFieldFilters: rt.array(ExtendedFieldFilterRt),
+      extendedFieldFilters: limitedArraySchema({
+        codec: ExtendedFieldFilterRt,
+        fieldName: 'extendedFieldFilters',
+        min: 0,
+        max: MAX_EXTENDED_FIELD_FILTERS,
+      }),
     })
   ),
 ]);
@@ -503,6 +520,25 @@ export const CasesFindResponseRt = rt.intersection([
     total: rt.number,
   }),
   CasesStatusResponseRt,
+]);
+
+/**
+ * Response of the internal `_search` API. A superset of the public `_find` response: it adds
+ * `mttr` so the (internal-only) cases list metrics bar can reflect the same query as the table.
+ * `mttr` deliberately lives here and NOT on `CasesFindResponseRt` so the public `_find` contract
+ * (and its generated OpenAPI) never advertises a field the public API does not return.
+ */
+export const CasesSearchResponseRt = rt.intersection([
+  CasesFindResponseRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * The average resolve time in seconds of the cases matching the search, ignoring the
+       * status filter (like the status counts). Null when no matching case has been closed.
+       */
+      mttr: rt.union([rt.number, rt.null]),
+    })
+  ),
 ]);
 
 export const CasesSimilarResponseRt = rt.strict({
@@ -683,6 +719,7 @@ export type CasesFindRequestWithCustomFields = rt.TypeOf<typeof CasesFindRequest
 export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
+export type CasesSearchResponse = rt.TypeOf<typeof CasesSearchResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type UpdateSummary = rt.TypeOf<typeof UpdateSummaryRt>;

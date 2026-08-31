@@ -12,6 +12,7 @@ import ReactDOM from 'react-dom';
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
+import type { DeveloperToolbarStart } from '@kbn/developer-toolbar-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
@@ -25,6 +26,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   cloud?: CloudStart;
+  developerToolbar?: DeveloperToolbarStart;
 }
 
 export const plugin: PluginInitializer<
@@ -32,40 +34,42 @@ export const plugin: PluginInitializer<
   void,
   PluginSetupDependencies,
   PluginStartDependencies
-> = (initializerContext: PluginInitializerContext<ConfigType>) => ({
-  setup(coreSetup, plugins) {
-    // Register Mock IDP login page
-    coreSetup.http.anonymousPaths.register(MOCK_IDP_LOGIN_PATH);
-    coreSetup.application.register({
-      id: 'mock_idp',
-      title: 'Mock IDP',
-      chromeless: true,
-      appRoute: MOCK_IDP_LOGIN_PATH,
-      visibleIn: [],
-      mount: async (params) => {
-        const [[coreStart], { LoginPage }] = await Promise.all([
-          coreSetup.getStartServices(),
-          import('./login_page'),
-        ]);
+> = (initializerContext: PluginInitializerContext<ConfigType>) => {
+  return {
+    setup(coreSetup, plugins) {
+      // Register Mock IDP login page
+      coreSetup.http.anonymousPaths.register(MOCK_IDP_LOGIN_PATH);
+      coreSetup.application.register({
+        id: 'mock_idp',
+        title: 'Mock IDP',
+        chromeless: true,
+        appRoute: MOCK_IDP_LOGIN_PATH,
+        visibleIn: [],
+        mount: async (params) => {
+          const [[coreStart], { LoginPage }] = await Promise.all([
+            coreSetup.getStartServices(),
+            import('./login_page'),
+          ]);
 
-        ReactDOM.render(
-          <KibanaThemeProvider {...coreStart}>
-            <KibanaContextProvider services={coreStart}>
-              <I18nProvider>
-                <LoginPage config={initializerContext.config.get()} />
-              </I18nProvider>
-            </KibanaContextProvider>
-          </KibanaThemeProvider>,
-          params.element
-        );
+          ReactDOM.render(
+            <KibanaThemeProvider {...coreStart}>
+              <KibanaContextProvider services={coreStart}>
+                <I18nProvider>
+                  <LoginPage config={initializerContext.config.get()} />
+                </I18nProvider>
+              </KibanaContextProvider>
+            </KibanaThemeProvider>,
+            params.element
+          );
 
-        return () => ReactDOM.unmountComponentAtNode(params.element);
-      },
-    });
-  },
-  start(coreStart, plugins) {
-    // The role switcher header control is intentionally not registered: this environment always
-    // signs in as admin, so switching roles from the header isn't needed.
-  },
-  stop() {},
-});
+          return () => ReactDOM.unmountComponentAtNode(params.element);
+        },
+      });
+    },
+    start(coreStart, plugins) {
+      // The role switcher header control is intentionally not registered: this environment always
+      // signs in as admin, so switching roles from the header isn't needed.
+    },
+    stop() {},
+  };
+};

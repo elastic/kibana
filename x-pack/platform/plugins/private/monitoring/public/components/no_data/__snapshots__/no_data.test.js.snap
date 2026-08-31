@@ -15,64 +15,111 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary-hasDismissButton"
-      data-size="m"
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
       data-test-subj="autoOpsPromotionCallout"
-      style="--euiCallOutTypeColor:#0B64DD;margin:0 24px"
+      style="position:relative;padding-inline-end:calc(8px * 5);background-color:#F6F9FC;margin:0 24px"
     >
       <div
-        class="css-1slkmya-wrapper"
+        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-flexStart-row"
       >
         <div
-          class="css-wlziyu-body"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+          style="width:calc(16px * 5);height:calc(16px * 5)"
         >
           <span
             aria-hidden="true"
-            class="css-1cmanx3-icon-l-icon"
-            color="#0B64DD"
-            data-euiicon-type="info"
-          />
-          <div
-            class="css-ak2bmi-content"
+            class="euiIllustration emotion-euiIllustration-fullWidth"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
-            >
-              New! Connect this cluster to AutoOps
-            </p>
-            <button
-              aria-label="Dismiss this callout"
-              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary-euiCallOut__dismissButton"
-              data-test-subj="euiDismissCalloutButton"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="cross"
-              />
-            </button>
+            <svg />
+          </span>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          style="min-width:0"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-flexStart-column"
+          >
             <div
-              class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
-              data-test-subj="autoOpsPromotionCallout__content"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <p>
-                Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 
-                <a
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="autoOpsPromotionCalloutCloudConnectLink"
-                  href="/app/cloud_connect"
-                  rel="noreferrer"
+              <div
+                class="euiText emotion-euiText-s"
+              >
+                <p
+                  style="margin-bottom:4px"
                 >
-                  Cloud Connect
-                </a>
-                .
-              </p>
+                  <strong>
+                    New! Connect this cluster to AutoOps
+                  </strong>
+                </p>
+                <p>
+                  Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 
+                  <a
+                    class="euiLink emotion-euiLink-primary"
+                    data-test-subj="autoOpsPromotionCalloutDocsLink"
+                    href="https://www.elastic.co/docs/deploy-manage/cloud-connect"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Cloud Connect
+                    <span
+                      class="css-1j75qc1"
+                      data-euiicon-type="external"
+                      role="presentation"
+                    />
+                    <span
+                      class="emotion-euiScreenReaderOnly"
+                    >
+                      (external, opens in a new tab or window)
+                    </span>
+                  </a>
+                  .
+                </p>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <a
+                class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+                data-test-subj="autoOpsPromotionCalloutConnectBtn"
+                href="/app/cloud_connect"
+                rel="noreferrer"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate css-1ryezsz-s"
+                  >
+                    Get Started
+                  </span>
+                </span>
+              </a>
             </div>
           </div>
         </div>
       </div>
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id_euiToolTipAnchor"
+        style="position:absolute;top:8px;inset-inline-end:8px"
+      >
+        <button
+          aria-label="Dismiss AutoOps promotion"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+          data-test-subj="autoOpsPromotionCallout-dismiss"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="cross"
+          />
+        </button>
+      </span>
     </div>
     <div
       class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -93,6 +140,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
               class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
             >
               <span
+                aria-hidden="true"
                 data-euiicon-type="monitoringApp"
               />
             </div>
@@ -189,64 +237,111 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary-hasDismissButton"
-      data-size="m"
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
       data-test-subj="autoOpsPromotionCallout"
-      style="--euiCallOutTypeColor:#0B64DD;margin:0 24px"
+      style="position:relative;padding-inline-end:calc(8px * 5);background-color:#F6F9FC;margin:0 24px"
     >
       <div
-        class="css-1slkmya-wrapper"
+        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-flexStart-row"
       >
         <div
-          class="css-wlziyu-body"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+          style="width:calc(16px * 5);height:calc(16px * 5)"
         >
           <span
             aria-hidden="true"
-            class="css-1cmanx3-icon-l-icon"
-            color="#0B64DD"
-            data-euiicon-type="info"
-          />
-          <div
-            class="css-ak2bmi-content"
+            class="euiIllustration emotion-euiIllustration-fullWidth"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
-            >
-              New! Connect this cluster to AutoOps
-            </p>
-            <button
-              aria-label="Dismiss this callout"
-              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary-euiCallOut__dismissButton"
-              data-test-subj="euiDismissCalloutButton"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="cross"
-              />
-            </button>
+            <svg />
+          </span>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          style="min-width:0"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-flexStart-column"
+          >
             <div
-              class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
-              data-test-subj="autoOpsPromotionCallout__content"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <p>
-                Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 
-                <a
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="autoOpsPromotionCalloutCloudConnectLink"
-                  href="/app/cloud_connect"
-                  rel="noreferrer"
+              <div
+                class="euiText emotion-euiText-s"
+              >
+                <p
+                  style="margin-bottom:4px"
                 >
-                  Cloud Connect
-                </a>
-                .
-              </p>
+                  <strong>
+                    New! Connect this cluster to AutoOps
+                  </strong>
+                </p>
+                <p>
+                  Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 
+                  <a
+                    class="euiLink emotion-euiLink-primary"
+                    data-test-subj="autoOpsPromotionCalloutDocsLink"
+                    href="https://www.elastic.co/docs/deploy-manage/cloud-connect"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Cloud Connect
+                    <span
+                      class="css-1j75qc1"
+                      data-euiicon-type="external"
+                      role="presentation"
+                    />
+                    <span
+                      class="emotion-euiScreenReaderOnly"
+                    >
+                      (external, opens in a new tab or window)
+                    </span>
+                  </a>
+                  .
+                </p>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <a
+                class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+                data-test-subj="autoOpsPromotionCalloutConnectBtn"
+                href="/app/cloud_connect"
+                rel="noreferrer"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate css-1ryezsz-s"
+                  >
+                    Get Started
+                  </span>
+                </span>
+              </a>
             </div>
           </div>
         </div>
       </div>
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id_euiToolTipAnchor"
+        style="position:absolute;top:8px;inset-inline-end:8px"
+      >
+        <button
+          aria-label="Dismiss AutoOps promotion"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+          data-test-subj="autoOpsPromotionCallout-dismiss"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="cross"
+          />
+        </button>
+      </span>
     </div>
     <div
       class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -267,6 +362,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
               class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
             >
               <span
+                aria-hidden="true"
                 data-euiicon-type="monitoringApp"
               />
             </div>

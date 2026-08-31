@@ -42,18 +42,6 @@ jest.mock('../src/input/load_oas', () => ({
   }),
 }));
 
-jest.mock('../src/terraform/check_terraform_impact', () => ({
-  checkTerraformImpact: jest.fn(),
-}));
-
-jest.mock('../src/terraform/load_terraform_apis', () => ({
-  loadTerraformApis: jest.fn().mockReturnValue([]),
-}));
-
-jest.mock('../src/terraform/build_match_path', () => ({
-  buildMatchPath: jest.fn().mockReturnValue(undefined),
-}));
-
 jest.mock('../src/allowlist/load_allowlist', () => ({
   loadAllowlist: jest.fn(),
 }));
@@ -71,7 +59,6 @@ import { writeFileSync, rmSync } from 'fs';
 import { runOasdiff, runOasdiffStructural, parseOasdiff, applyAllowlist } from '../src/diff';
 import type { BreakingChange } from '../src/diff';
 import { loadOas } from '../src/input/load_oas';
-import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { formatFailure } from '../src/report/format_failure';
 
@@ -84,9 +71,6 @@ const mockRunOasdiffStructural = runOasdiffStructural as jest.MockedFunction<
 >;
 const mockParseOasdiff = parseOasdiff as jest.MockedFunction<typeof parseOasdiff>;
 const mockLoadOas = loadOas as jest.MockedFunction<typeof loadOas>;
-const mockCheckTerraformImpact = checkTerraformImpact as jest.MockedFunction<
-  typeof checkTerraformImpact
->;
 const mockLoadAllowlist = loadAllowlist as jest.MockedFunction<typeof loadAllowlist>;
 const mockApplyAllowlist = applyAllowlist as jest.MockedFunction<typeof applyAllowlist>;
 const mockFormatFailure = formatFailure as jest.MockedFunction<typeof formatFailure>;
@@ -122,6 +106,14 @@ describe('check_contracts', () => {
       paths: {},
       components: { schemas: {} },
     });
+    // Whole-surface defaults: allowlist passes everything through and
+    // formatFailure is a stub. Individual tests override as needed.
+    mockLoadAllowlist.mockReturnValue({ entries: [] });
+    mockApplyAllowlist.mockImplementation((changes) => ({
+      breakingChanges: changes,
+      allowlistedChanges: [],
+    }));
+    mockFormatFailure.mockReturnValue('FAILURE REPORT');
   });
 
   const defaultFlags = {
@@ -212,66 +204,14 @@ describe('check_contracts', () => {
     expect(mockLog.success).toHaveBeenCalledWith('No breaking changes detected');
   });
 
-  it('reports success when breaking changes do not affect terraform', async () => {
-    const changes: BreakingChange[] = [
-      { type: 'path_removed', path: '/api/some/internal', reason: 'Endpoint removed' },
-    ];
+  it('always diffs the whole surface (never scopes oasdiff to a matchPath)', async () => {
     mockRunOasdiff.mockReturnValue([]);
-    mockParseOasdiff.mockReturnValue(changes);
-    mockCheckTerraformImpact.mockReturnValue({ hasImpact: false, impactedChanges: [] });
+    mockParseOasdiff.mockReturnValue([]);
 
     await runCallback({ flags: defaultFlags, log: mockLog });
 
-    expect(mockLog.success).toHaveBeenCalledWith(
-      expect.stringContaining('none affect Terraform provider APIs')
-    );
-  });
-
-  it('reports success when all TF-impacting changes are allowlisted', async () => {
-    const changes: BreakingChange[] = [
-      { type: 'path_removed', path: '/api/spaces/space', reason: 'Endpoint removed' },
-    ];
-    mockRunOasdiff.mockReturnValue([]);
-    mockParseOasdiff.mockReturnValue(changes);
-    mockCheckTerraformImpact.mockReturnValue({
-      hasImpact: true,
-      impactedChanges: [
-        { change: changes[0], terraformResource: 'elasticstack_kibana_space', owners: [] },
-      ],
-    });
-    mockLoadAllowlist.mockReturnValue({ entries: [] });
-    mockApplyAllowlist.mockReturnValue({ breakingChanges: [], allowlistedChanges: changes });
-
-    await runCallback({ flags: defaultFlags, log: mockLog });
-
-    expect(mockLog.success).toHaveBeenCalledWith(
-      'All Terraform-impacting breaking changes are allowlisted'
-    );
-  });
-
-  it('throws when unallowlisted TF-impacting breaking changes exist', async () => {
-    const changes: BreakingChange[] = [
-      { type: 'path_removed', path: '/api/spaces/space', reason: 'Endpoint removed' },
-    ];
-    const terraformImpact = {
-      hasImpact: true,
-      impactedChanges: [
-        { change: changes[0], terraformResource: 'elasticstack_kibana_space', owners: [] },
-      ],
-    };
-    mockRunOasdiff.mockReturnValue([]);
-    mockParseOasdiff.mockReturnValue(changes);
-    mockCheckTerraformImpact.mockReturnValue(terraformImpact);
-    mockLoadAllowlist.mockReturnValue({ entries: [] });
-    mockApplyAllowlist.mockReturnValue({ breakingChanges: changes, allowlistedChanges: [] });
-    mockFormatFailure.mockReturnValue('FAILURE REPORT');
-
-    await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
-      'Found 1 breaking change(s) affecting Terraform provider APIs'
-    );
-
-    expect(mockFormatFailure).toHaveBeenCalledWith(changes, terraformImpact);
-    expect(mockLog.error).toHaveBeenCalledWith('FAILURE REPORT');
+    expect(mockRunOasdiff).toHaveBeenCalledWith(expect.any(String), expect.any(String));
+    expect(mockRunOasdiffStructural).toHaveBeenCalledWith(expect.any(String), expect.any(String));
   });
 
   it('uses default specPath based on distribution', async () => {
@@ -417,36 +357,213 @@ describe('check_contracts', () => {
     });
   });
 
-  it('logs allowlisted change count when some are allowlisted', async () => {
-    const changes: BreakingChange[] = [
-      { type: 'path_removed', path: '/api/spaces/space', reason: 'Endpoint removed' },
-      {
-        type: 'method_removed',
-        path: '/api/fleet/agents',
-        method: 'POST',
-        reason: 'Method removed',
-      },
-    ];
-    mockRunOasdiff.mockReturnValue([]);
-    mockParseOasdiff.mockReturnValue(changes);
-    mockCheckTerraformImpact.mockReturnValue({
-      hasImpact: true,
-      impactedChanges: changes.map((c) => ({
-        change: c,
-        terraformResource: 'test_resource',
-        owners: [],
-      })),
-    });
-    mockLoadAllowlist.mockReturnValue({ entries: [] });
-    mockApplyAllowlist.mockReturnValue({
-      breakingChanges: [changes[0]],
-      allowlistedChanges: [changes[1]],
-    });
-    mockFormatFailure.mockReturnValue('FAILURE REPORT');
+  describe('allowlist suppression (whole surface)', () => {
+    const stableChange: BreakingChange = {
+      type: 'path_removed',
+      path: '/api/spaces/space',
+      reason: 'Endpoint removed',
+    };
+    const anotherChange: BreakingChange = {
+      type: 'method_removed',
+      path: '/api/fleet/agents',
+      method: 'POST',
+      reason: 'Method removed',
+    };
 
-    await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow();
+    beforeEach(() => {
+      mockRunOasdiff.mockReturnValue([]);
+    });
 
-    expect(mockLog.info).toHaveBeenCalledWith('1 allowlisted change(s) ignored');
+    it('applies the allowlist to every parsed change', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange, anotherChange]);
+      mockApplyAllowlist.mockReturnValue({
+        breakingChanges: [stableChange, anotherChange],
+        allowlistedChanges: [],
+      });
+
+      await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow();
+
+      expect(mockApplyAllowlist).toHaveBeenCalledWith([stableChange, anotherChange], {
+        entries: [],
+      });
+    });
+
+    it('reports success when every breaking change is allowlisted', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange]);
+      mockApplyAllowlist.mockReturnValue({
+        breakingChanges: [],
+        allowlistedChanges: [stableChange],
+      });
+
+      await runCallback({ flags: defaultFlags, log: mockLog });
+
+      expect(mockLog.success).toHaveBeenCalledWith('All breaking changes are allowlisted');
+    });
+
+    it('logs the count of allowlisted changes that are ignored', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange, anotherChange]);
+      mockApplyAllowlist.mockReturnValue({
+        breakingChanges: [stableChange],
+        allowlistedChanges: [anotherChange],
+      });
+
+      await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow();
+
+      expect(mockLog.info).toHaveBeenCalledWith('1 allowlisted change(s) ignored');
+    });
+  });
+
+  describe('tier classification (whole surface)', () => {
+    const stableChange: BreakingChange = {
+      type: 'method_removed',
+      path: '/api/x',
+      method: 'POST',
+      reason: 'stable break',
+    };
+    const techPreviewChange: BreakingChange = {
+      type: 'method_removed',
+      path: '/api/tp',
+      method: 'POST',
+      reason: 'tech_preview break',
+    };
+    const experimentalChange: BreakingChange = {
+      type: 'method_removed',
+      path: '/api/exp',
+      method: 'POST',
+      reason: 'experimental break',
+    };
+
+    const baseSpec = (paths: Record<string, unknown>) => ({
+      openapi: '3.0.0',
+      info: { title: 't', version: '1' },
+      paths,
+      components: { schemas: {} },
+    });
+
+    const currentSpec = {
+      openapi: '3.0.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: { schemas: {} },
+    };
+
+    // check_contracts loads the current spec first, then the base spec; the base
+    // is where resolveTier reads x-state from.
+    const primeLoadOas = (base: ReturnType<typeof baseSpec>) => {
+      mockLoadOas.mockResolvedValueOnce(currentSpec).mockResolvedValueOnce(base);
+    };
+
+    beforeEach(() => {
+      mockRunOasdiff.mockReturnValue([]);
+      mockRunOasdiffStructural.mockReturnValue(undefined);
+    });
+
+    it('catches a stable breaking change and throws', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange]);
+      primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
+
+      await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
+        'Detected 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
+      );
+      expect(mockLog.error).toHaveBeenCalledWith('FAILURE REPORT');
+    });
+
+    it('catches a tech_preview breaking change and throws', async () => {
+      mockParseOasdiff.mockReturnValue([techPreviewChange]);
+      primeLoadOas(baseSpec({ '/api/tp': { post: { 'x-state': 'Technical Preview' } } }));
+
+      await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
+        '0 stable, 1 tech_preview'
+      );
+    });
+
+    it('defaults an unmarked API to stable and catches it', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange]);
+      primeLoadOas(baseSpec({ '/api/x': { post: {} } }));
+
+      await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
+        '1 stable, 0 tech_preview'
+      );
+    });
+
+    it('reports an experimental breaking change but does not gate on it', async () => {
+      mockParseOasdiff.mockReturnValue([experimentalChange]);
+      primeLoadOas(baseSpec({ '/api/exp': { post: { 'x-state': 'Experimental' } } }));
+
+      await runCallback({
+        flags: { ...defaultFlags, reportPath: 'target/reports/stack-impact.json' },
+        log: mockLog,
+      });
+
+      expect(mockLog.info).toHaveBeenCalledWith(
+        '1 experimental-tier breaking change(s) reported (informational, not blocking)'
+      );
+      expect(mockLog.success).toHaveBeenCalledWith(
+        'No breaking changes detected in stable or tech_preview APIs'
+      );
+
+      // The experimental change is still written to the report so the PR notifier
+      // can surface it as informational; it just does not fail the check.
+      const reportCall = mockWriteFileSync.mock.calls.find(([path]) =>
+        String(path).endsWith('stack-impact.json')
+      );
+      expect(reportCall).toBeDefined();
+      expect(JSON.parse(reportCall![1] as string)).toEqual({
+        entries: [
+          {
+            path: '/api/exp',
+            method: 'POST',
+            reason: 'experimental break',
+            tier: 'experimental',
+          },
+        ],
+      });
+    });
+
+    it('gates on stable and tech_preview while reporting experimental in a mixed run', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange, techPreviewChange, experimentalChange]);
+      primeLoadOas(
+        baseSpec({
+          '/api/x': { post: { 'x-state': 'Generally available' } },
+          '/api/tp': { post: { 'x-state': 'Technical Preview' } },
+          '/api/exp': { post: { 'x-state': 'Experimental' } },
+        })
+      );
+
+      await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
+        'Detected 2 breaking change(s) in stable/tech_preview APIs: 1 stable, 1 tech_preview'
+      );
+      expect(mockLog.info).toHaveBeenCalledWith(
+        '1 experimental-tier breaking change(s) reported (informational, not blocking)'
+      );
+    });
+
+    it('writes a tier-classified report when reportPath is set', async () => {
+      mockParseOasdiff.mockReturnValue([stableChange]);
+      primeLoadOas(baseSpec({ '/api/x': { post: { 'x-state': 'Generally available' } } }));
+
+      await expect(
+        runCallback({
+          flags: { ...defaultFlags, reportPath: 'target/reports/stack-impact.json' },
+          log: mockLog,
+        })
+      ).rejects.toThrow();
+
+      const reportCall = mockWriteFileSync.mock.calls.find(([path]) =>
+        String(path).endsWith('stack-impact.json')
+      );
+      expect(reportCall).toBeDefined();
+      expect(JSON.parse(reportCall![1] as string)).toEqual({
+        entries: [
+          {
+            path: '/api/x',
+            method: 'POST',
+            reason: 'stable break',
+            tier: 'stable',
+          },
+        ],
+      });
+    });
   });
 
   describe('additionalProperties tightening (E2E reverse-index path)', () => {
@@ -502,32 +619,21 @@ describe('check_contracts', () => {
         allowlistedChanges: [],
       }));
 
-      mockCheckTerraformImpact.mockImplementation((changes) => ({
-        hasImpact: changes.length > 0,
-        impactedChanges: changes.map((change) => ({
-          change,
-          terraformResource: 'elasticstack_kibana_data_view',
-          owners: ['@elastic/kibana-data-discovery'],
-        })),
-      }));
-      mockLoadAllowlist.mockReturnValue({ entries: [] });
-      mockFormatFailure.mockReturnValue('FAILURE REPORT');
-
       await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
-        'Found 1 breaking change(s)'
+        'Detected 1 breaking change(s) in stable/tech_preview APIs: 1 stable, 0 tech_preview'
       );
 
       expect(mockFormatFailure).toHaveBeenCalledTimes(1);
-      const breakingChanges = mockFormatFailure.mock.calls[0][0];
-      expect(breakingChanges).toEqual([
+      const entries = mockFormatFailure.mock.calls[0][0];
+      expect(entries).toEqual([
         {
-          type: 'request_body_tightened',
           path: consumerPath,
           method: 'POST',
           reason:
             'Request body schema disallows extra fields (additionalProperties: false). Clients sending unknown keys will now receive 400.',
           oasdiffId: 'kbn:request-additional-properties-tightened',
           source: `/components/schemas/${componentName}`,
+          tier: 'stable',
         },
       ]);
     });

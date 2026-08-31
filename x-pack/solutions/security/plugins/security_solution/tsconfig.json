@@ -88,6 +88,7 @@
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",
+    "@kbn/ui-callout",
     "@kbn/securitysolution-list-api",
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
@@ -280,7 +281,7 @@
     "@kbn/ai-assistant-common",
     "@kbn/product-doc-common",
     "@kbn/kql",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/core-security-common",
     "@kbn/entity-store",
     "@kbn/as-code-filters-transforms",
@@ -289,8 +290,6 @@
     "@kbn/esql-language",
     "@kbn/workflows-ui",
     "@kbn/workflows",
-    "@kbn/deeplinks-workflows",
-    "@kbn/core-rendering-browser",
     "@kbn/controls-constants",
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
@@ -309,5 +308,7 @@
     "@kbn/discoveries-schemas",
     "@kbn/chart-icons",
     "@kbn/core-mount-utils-browser",
+    "@kbn/ui-callout",
+    "@kbn/shared-ux-utility",
   ]
 }

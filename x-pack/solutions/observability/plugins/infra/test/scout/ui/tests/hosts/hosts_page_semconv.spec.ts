@@ -11,8 +11,6 @@ import { test } from '../../fixtures';
 import {
   SEMCONV_HOSTS,
   SEMCONV_HOST1_NAME,
-  DATE_WITH_SEMCONV_DATA_FROM,
-  DATE_WITH_SEMCONV_DATA_TO,
   EXTENDED_TIMEOUT,
   KPI_RENDER_TIMEOUT,
 } from '../../fixtures/constants';
@@ -21,13 +19,19 @@ import {
   ingestSemconvHostsSynthtraceData,
 } from '../../fixtures/sequential_hosts_synthtrace';
 
+const SEMCONV_HOSTS_DATA_FROM = '2024-04-06T18:20:00.000Z';
+const SEMCONV_HOSTS_DATA_TO = '2024-04-06T18:21:00.000Z';
+
 test.describe(
   'Hosts Page - OTel Semconv Data',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, kbnUrl, log, config }) => {
       log.info('Sequential suite: ingesting semconv host metrics');
-      await ingestSemconvHostsSynthtraceData({ esClient, kbnUrl, log, config });
+      await ingestSemconvHostsSynthtraceData(
+        { esClient, kbnUrl, log, config },
+        { from: SEMCONV_HOSTS_DATA_FROM, to: SEMCONV_HOSTS_DATA_TO }
+      );
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
@@ -38,8 +42,8 @@ test.describe(
       test.setTimeout(120_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
-        from: DATE_WITH_SEMCONV_DATA_FROM,
-        to: DATE_WITH_SEMCONV_DATA_TO,
+        from: SEMCONV_HOSTS_DATA_FROM,
+        to: SEMCONV_HOSTS_DATA_TO,
         preferredSchema: 'semconv',
       });
       await expect(hostsPage.tableRows).toHaveCount(SEMCONV_HOSTS.length);

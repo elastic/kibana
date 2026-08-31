@@ -107,7 +107,7 @@ export const InboxActionsPage: React.FC = () => {
                     ? i18n.REASONING_COLLAPSE_LABEL
                     : i18n.REASONING_EXPAND_LABEL
                 }
-                iconType={expandedRows[item.id] ? 'arrowDown' : 'arrowRight'}
+                iconType={expandedRows[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
               />
             </EuiToolTip>
           ) : null,
@@ -230,7 +230,7 @@ export const InboxActionsPage: React.FC = () => {
           />
         ) : !isLoading && items.length === 0 ? (
           <EuiEmptyPrompt
-            iconType="email"
+            iconType="mail"
             title={<h3>{i18n.EMPTY_TITLE}</h3>}
             body={<p>{i18n.EMPTY_BODY}</p>}
           />
