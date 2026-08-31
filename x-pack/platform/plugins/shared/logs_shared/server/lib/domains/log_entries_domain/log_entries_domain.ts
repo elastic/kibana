@@ -137,7 +137,7 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
     startTime: number,
     endTime: number,
     runtimeMappings: estypes.MappingRuntimeFields,
-    projectRouting?: string
+    projectRouting?: estypes.ProjectRouting
   ) {
     let datasetBuckets: LogEntryDatasetBucket[] = [];
     let afterLatestBatchKey: CompositeDatasetKey | undefined;

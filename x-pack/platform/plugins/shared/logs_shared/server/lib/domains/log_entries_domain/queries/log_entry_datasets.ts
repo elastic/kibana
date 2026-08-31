@@ -18,7 +18,7 @@ export const createLogEntryDatasetsQuery = (
   runtimeMappings: estypes.MappingRuntimeFields,
   size: number,
   afterKey?: CompositeDatasetKey,
-  projectRouting?: string
+  projectRouting?: estypes.ProjectRouting
 ) => ({
   ...defaultRequestParameters,
   body: {
