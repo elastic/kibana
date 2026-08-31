@@ -13,6 +13,7 @@ import { Handle, Position } from '@xyflow/react';
 import React, { memo } from 'react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { deslugifyStepName } from './deslugify_step_name';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -26,6 +27,9 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
   const { label, stepExecution } = node.data;
   const { euiTheme } = useEuiTheme();
   const { colors } = euiTheme;
+  // Display-only, mirrors workflow_graph_node.tsx: `label` itself must stay
+  // untouched since it's used to key execution status.
+  const displayLabel = deslugifyStepName(label);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
 
@@ -95,9 +99,9 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
               textOverflow: 'ellipsis',
               minWidth: 0,
             }}
-            title={label}
+            title={displayLabel}
           >
-            {label}
+            {displayLabel}
           </span>
         </div>
       </div>

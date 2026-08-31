@@ -24,7 +24,9 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
         // codeql[js/kibana/unbounded-array-in-schema] FTR test-only API, input from test code not end users
         body: schema.arrayOf(
           schema.object({
+            // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
             type: schema.string(),
+            // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
             id: schema.string(),
           })
         ),

@@ -10,19 +10,34 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { useRuleAutoAttach } from '../../../agent_builder/use_rule_auto_attach';
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'http') {
-      return { basePath: { prepend: (p: string) => `/base${p}` } };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
+jest.mock('../../../agent_builder/use_rule_auto_attach', () => ({
+  useRuleAutoAttach: jest.fn(),
 }));
 
+jest.mock('@kbn/core-di-browser', () => {
+  return {
+    useService: (token: unknown) => {
+      if (token === 'http') {
+        return { basePath: { prepend: (p: string) => `/base${p}` } };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
+
 jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
-  RuleActionsMenu: ({ rule, onEdit, onClone, onDelete, onToggleEnabled }: any) => (
+  RuleActionsMenu: ({
+    rule,
+    onEdit,
+    onClone,
+    onDelete,
+    onToggleEnabled,
+    onRun,
+    onUpdateApiKey,
+  }: any) => (
     <div data-test-subj={`ruleActionsMenu-${rule.id}`}>
       <button data-test-subj="mockEdit" onClick={() => onEdit(rule)}>
         Edit
@@ -36,11 +51,19 @@ jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
       <button data-test-subj="mockToggleEnabled" onClick={() => onToggleEnabled(rule)}>
         Toggle
       </button>
+      <button data-test-subj="mockRun" onClick={() => onRun(rule)}>
+        Run
+      </button>
+      {onUpdateApiKey ? (
+        <button data-test-subj="mockUpdateApiKey" onClick={() => onUpdateApiKey(rule)}>
+          Update API key
+        </button>
+      ) : null}
     </div>
   ),
 }));
 
-jest.mock('../../rule_details/rule_header_description', () => ({
+jest.mock('../../rule_details/rule_summary_header', () => ({
   RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
   RuleTitleWithBadges: ({ variant }: { variant?: string }) => (
     <span data-test-subj="mockRuleTitleWithBadges" data-variant={variant}>
@@ -66,6 +89,8 @@ const baseRule = {
   metadata: { name: 'My Rule' },
 } as RuleApiResponse;
 
+const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
+
 const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummaryFlyout>> = {}) => {
   const props = {
     rule: baseRule,
@@ -75,6 +100,7 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummary
     onClone: jest.fn(),
     onDelete: jest.fn(),
     onToggleEnabled: jest.fn(),
+    onRun: jest.fn(),
     ...overrides,
   };
 
@@ -154,6 +180,16 @@ describe('RuleSummaryFlyout', () => {
     expect(props.onQuickEdit).toHaveBeenCalledWith(baseRule);
   });
 
+  it('hides the quick edit and actions menu when canWrite is false', () => {
+    renderFlyout({ canWrite: false });
+
+    expect(screen.queryByTestId('ruleSummaryFlyoutQuickEditButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionsMenu-rule-1')).not.toBeInTheDocument();
+    // Read-only affordances remain available.
+    expect(screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutCloseButton')).toBeInTheDocument();
+  });
+
   it('forwards action callbacks to the RuleActionsMenu with the rule', () => {
     const { props } = renderFlyout();
 
@@ -168,5 +204,30 @@ describe('RuleSummaryFlyout', () => {
 
     fireEvent.click(screen.getByTestId('mockToggleEnabled'));
     expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
+
+    fireEvent.click(screen.getByTestId('mockRun'));
+    expect(props.onRun).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('forwards onUpdateApiKey to the RuleActionsMenu when provided', () => {
+    const onUpdateApiKey = jest.fn();
+    renderFlyout({ onUpdateApiKey });
+
+    fireEvent.click(screen.getByTestId('mockUpdateApiKey'));
+    expect(onUpdateApiKey).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('omits the update API key action when onUpdateApiKey is not provided', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('mockUpdateApiKey')).not.toBeInTheDocument();
+  });
+
+  describe('Agent Builder auto-attach', () => {
+    it('passes the loaded rule to useRuleAutoAttach', () => {
+      renderFlyout();
+
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule);
+    });
   });
 });

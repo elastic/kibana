@@ -16,9 +16,12 @@ import { useDimensionsSelector } from './use_dimensions_selector';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { DEBOUNCE_TIME, MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 import type { DimensionEntry } from '../dimensions_selector_helpers';
+import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-  <IntlProvider locale="en">{children}</IntlProvider>
+  <IntlProvider locale="en">
+    <EventBasedTelemetryProvider>{children}</EventBasedTelemetryProvider>
+  </IntlProvider>
 );
 
 const dim = (name: string, type: string = 'keyword'): Dimension => ({ name, type });

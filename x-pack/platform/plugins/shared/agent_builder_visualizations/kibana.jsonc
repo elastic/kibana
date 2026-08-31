@@ -11,13 +11,15 @@
     "configPath": ["xpack", "agentBuilderVisualizations"],
     "requiredPlugins": [
       "agentBuilder",
-      "agentContextLayer",
+      "agentBuilderSml",
       "lens",
       "data",
       "dataViews",
       "uiActions",
       "unifiedSearch",
-      "embeddable",
+      "embeddable"
+    ],
+    "requiredBundles": [
       "presentationUtil"
     ]
   }

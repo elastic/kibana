@@ -29,6 +29,11 @@ const TOOLBAR_SUBJECTS = getContentListToolbarSubjects();
 const CONTENT_LIST_TABLE = CONTENT_LIST_TEST_SUBJECTS.table;
 const CONTENT_LIST_TABLE_SKELETON = CONTENT_LIST_TEST_SUBJECTS.tableSkeleton;
 const CONTENT_LIST_ITEM_LINK = CONTENT_LIST_TEST_SUBJECTS.itemLink;
+const TABLE_LOADING_SELECTOR = [
+  '[data-test-subj~="listingTable-isLoading"]',
+  `[data-test-subj~="${CONTENT_LIST_TABLE_SKELETON}"]`,
+  '.euiBasicTable-loading',
+].join(', ');
 const CONTENT_LIST_SEARCH_BOX = TOOLBAR_SUBJECTS.searchBox;
 const CONTENT_LIST_TAGS_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.tagsFilter;
 const CONTENT_LIST_SELECTION_BAR_DELETE = getContentListSelectionBarSubjects(
@@ -123,6 +128,14 @@ export class ListingTableService extends FtrService {
   }
 
   public async waitUntilTableIsLoaded() {
+    if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 1000)) {
+      await this.retry.try(async () => {
+        if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 100)) {
+          throw new Error('Waiting for table loading to finish');
+        }
+      });
+    }
+
     await this.retry.try(async () => {
       if (await this.testSubjects.exists('listingTable-isLoaded', { timeout: 1000 })) {
         return true;

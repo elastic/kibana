@@ -418,7 +418,12 @@ export const EsqlQueryExpression: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow id="timeWindowUnit">
+          <EuiFormRow
+            id="timeWindowUnit"
+            aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.timeWindowUnitAriaLabel', {
+              defaultMessage: 'Time window unit',
+            })}
+          >
             <EuiSelect
               name="timeWindowUnit"
               data-test-subj="timeWindowUnitSelect"

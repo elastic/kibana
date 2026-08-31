@@ -20,6 +20,7 @@ interface BaseLifecycleSegment {
 export interface TimelineSegment extends BaseLifecycleSegment {
   leftValue?: string;
   stepIndex?: number;
+  columnStart?: number;
 }
 
 export interface DownsamplingSegment extends BaseLifecycleSegment {
@@ -103,7 +104,7 @@ const partitionPhases = (phases: SegmentPhase[]) => {
 
 // An invalid/negative age (e.g. frozen_after=-1d) is positioned at the timeline start rather than
 // dropped, so clamp negatives to 0 for all layout math while the raw label is still shown to the user.
-const positionMs = (label?: string): number | undefined => {
+export const positionMs = (label?: string): number | undefined => {
   const ms = toMillis(label);
   return ms === undefined ? undefined : Math.max(ms, 0);
 };
@@ -369,7 +370,7 @@ export const buildIlmDownsamplingSegments = (
   return segments;
 };
 
-const DELETE_COLUMN_WIDTH = '50px';
+export const DELETE_COLUMN_WIDTH = '50px';
 
 export const getGridTemplateColumns = (segments: TimelineSegment[]) =>
   segments

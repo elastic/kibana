@@ -8,5 +8,7 @@
 export interface SnapshotRepositoriesInfo {
   hasDefaultRepository: boolean;
   defaultRepository?: string;
+  /** Whether the cluster has at least one snapshot repository configured. */
+  hasRepositories: boolean;
   canCreateRepository: boolean;
 }

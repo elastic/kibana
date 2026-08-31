@@ -35,7 +35,7 @@ export class DeleteSLO {
     private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi,
     private logger: Logger,
-    private abortController: AbortController = new AbortController()
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   public async execute(
@@ -60,13 +60,13 @@ export class DeleteSLO {
       retryTransientEsErrors(() =>
         this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id: wildcardPipelineId },
-          { ignore: [404], signal: this.abortController.signal }
+          { ignore: [404], signal: this.signal }
         )
       ),
       retryTransientEsErrors(() =>
         this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id: customWildcardPipelineId },
-          { ignore: [404], signal: this.abortController.signal }
+          { ignore: [404], signal: this.signal }
         )
       ),
       this.repository.deleteById(slo.id, { ignoreNotFound: true }),
@@ -100,7 +100,7 @@ export class DeleteSLO {
           },
         },
       },
-      { signal: this.abortController.signal }
+      { signal: this.signal }
     );
   }
 
@@ -126,7 +126,7 @@ export class DeleteSLO {
           },
         },
       },
-      { signal: this.abortController.signal }
+      { signal: this.signal }
     );
   }
 

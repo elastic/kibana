@@ -13,8 +13,11 @@ import {
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createRule,
+  createStepLogger,
 } from '../fixtures/test_utils';
 import type { ActiveMaintenanceWindow } from '../../services/maintenance_window_service/types';
+
+const logger = createStepLogger();
 
 const buildMw = (overrides: Partial<ActiveMaintenanceWindow> = {}): ActiveMaintenanceWindow => ({
   id: 'mw-1',
@@ -40,7 +43,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('returns continue with no data when there are no dispatchable episodes', async () => {
     const state = createDispatcherPipelineState({ dispatchable: [] });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
     expect(service.getEnabledMaintenanceWindows).not.toHaveBeenCalled();
@@ -54,7 +57,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       rules: new Map([['rule-1', createRule()]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
   });
@@ -65,10 +68,10 @@ describe('ApplyMaintenanceWindowStep', () => {
     const ep = createAlertEpisode();
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
   });
@@ -79,16 +82,16 @@ describe('ApplyMaintenanceWindowStep', () => {
     const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.dispatchable).toHaveLength(0);
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.suppressed?.[0]).toEqual(
+    expect(result.data?.triage?.dispatchable).toHaveLength(0);
+    expect(result.data?.triage?.suppressed).toHaveLength(1);
+    expect(result.data?.triage?.suppressed[0]).toEqual(
       expect.objectContaining({ rule_id: ep.rule_id, reason: 'maintenance_window:mw-1' })
     );
   });
@@ -99,10 +102,10 @@ describe('ApplyMaintenanceWindowStep', () => {
     const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T09:00:00.000Z' });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
   });
@@ -120,15 +123,15 @@ describe('ApplyMaintenanceWindowStep', () => {
     });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.dispatchable).toHaveLength(0);
+    expect(result.data?.triage?.suppressed).toHaveLength(1);
+    expect(result.data?.triage?.dispatchable).toHaveLength(0);
   });
 
   it('keeps episodes where the episode-data KQL filter does not match', async () => {
@@ -144,10 +147,10 @@ describe('ApplyMaintenanceWindowStep', () => {
     });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
   });
@@ -167,29 +170,34 @@ describe('ApplyMaintenanceWindowStep', () => {
     });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed?.[0]).toEqual(
+    expect(result.data?.triage?.suppressed[0]).toEqual(
       expect.objectContaining({ reason: 'maintenance_window:mw-matching' })
     );
   });
 
-  it('keeps episodes when the rule is missing from the rules map', async () => {
+  it('passes through an internal episode whose rule is missing from the rules map (rule deleted)', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw()]);
 
-    const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
+    const ep = createAlertEpisode({
+      last_event_timestamp: '2026-01-22T07:30:00.000Z',
+      space_id: 'default',
+    });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
       rules: new Map(),
+      suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
+    // Internal episodes with a deleted rule bypass MW; evaluate_matchers will skip them.
     expect(result).toEqual({ type: 'continue' });
   });
 
@@ -203,15 +211,15 @@ describe('ApplyMaintenanceWindowStep', () => {
     };
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [previouslySuppressed],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed).toHaveLength(2);
-    expect(result.data?.suppressed?.[0]).toEqual(previouslySuppressed);
+    expect(result.data?.triage?.suppressed).toHaveLength(2);
+    expect(result.data?.triage?.suppressed[0]).toEqual(previouslySuppressed);
   });
 
   it('suppresses an episode whose timestamp is inside an MW window that has already closed by now', async () => {
@@ -223,15 +231,15 @@ describe('ApplyMaintenanceWindowStep', () => {
     const state = createDispatcherPipelineState({
       input: createDispatcherPipelineInput({ startedAt: new Date('2026-01-22T12:05:00.000Z') }),
       dispatchable: [ep],
-      rules: new Map([[ep.rule_id, createRule({ id: ep.rule_id, spaceId: 'default' })]]),
+      rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
       suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
-    expect(result.data?.suppressed).toHaveLength(1);
-    expect(result.data?.suppressed?.[0]).toEqual(
+    expect(result.data?.triage?.suppressed).toHaveLength(1);
+    expect(result.data?.triage?.suppressed[0]).toEqual(
       expect.objectContaining({ reason: 'maintenance_window:mw-closed' })
     );
   });
@@ -245,8 +253,110 @@ describe('ApplyMaintenanceWindowStep', () => {
       rules: new Map([['rule-1', createRule()]]),
     });
 
-    await step.execute(state);
+    await step.execute(state, logger);
 
     expect(service.getEnabledMaintenanceWindows).toHaveBeenCalledWith();
+  });
+
+  describe('external episode maintenance window matching', () => {
+    it('suppresses an external episode in the same space as the MW (no rule KQL scope)', async () => {
+      service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ spaceId: 'default' })]);
+
+      const ep = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        last_event_timestamp: '2026-01-22T07:30:00.000Z',
+      });
+      const state = createDispatcherPipelineState({
+        dispatchable: [ep],
+        rules: new Map(),
+        suppressed: [],
+      });
+
+      const result = await step.execute(state, logger);
+
+      if (result.type !== 'continue') throw new Error('expected continue');
+      expect(result.data?.triage?.dispatchable).toHaveLength(0);
+      expect(result.data?.triage?.suppressed).toHaveLength(1);
+      expect(result.data?.triage?.suppressed[0]).toEqual(
+        expect.objectContaining({ reason: 'maintenance_window:mw-1' })
+      );
+    });
+
+    it('does not suppress an external episode when the MW is in a different space', async () => {
+      service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ spaceId: 'other-space' })]);
+
+      const ep = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        last_event_timestamp: '2026-01-22T07:30:00.000Z',
+      });
+      const state = createDispatcherPipelineState({
+        dispatchable: [ep],
+        rules: new Map(),
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result).toEqual({ type: 'continue' });
+    });
+
+    it('suppresses an external episode matched by a KQL-scoped MW against episode data', async () => {
+      service.getEnabledMaintenanceWindows.mockResolvedValue([
+        buildMw({
+          spaceId: 'default',
+          scope: { alertingV2: { kql: 'data.severity: "critical"' } },
+        }),
+      ]);
+
+      const ep = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        last_event_timestamp: '2026-01-22T07:30:00.000Z',
+        data: { severity: 'critical' },
+      });
+      const state = createDispatcherPipelineState({
+        dispatchable: [ep],
+        rules: new Map(),
+        suppressed: [],
+      });
+
+      const result = await step.execute(state, logger);
+
+      if (result.type !== 'continue') throw new Error('expected continue');
+      expect(result.data?.triage?.dispatchable).toHaveLength(0);
+      expect(result.data?.triage?.suppressed).toHaveLength(1);
+      expect(result.data?.triage?.suppressed[0]).toEqual(
+        expect.objectContaining({ reason: 'maintenance_window:mw-1' })
+      );
+    });
+
+    it('does not suppress an external episode when the KQL scope does not match', async () => {
+      service.getEnabledMaintenanceWindows.mockResolvedValue([
+        buildMw({
+          spaceId: 'default',
+          scope: { alertingV2: { kql: 'data.severity: "critical"' } },
+        }),
+      ]);
+
+      const ep = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        last_event_timestamp: '2026-01-22T07:30:00.000Z',
+        data: { severity: 'low' },
+      });
+      const state = createDispatcherPipelineState({
+        dispatchable: [ep],
+        rules: new Map(),
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result).toEqual({ type: 'continue' });
+    });
   });
 });

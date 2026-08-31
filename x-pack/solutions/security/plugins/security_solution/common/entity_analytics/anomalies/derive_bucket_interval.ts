@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
 
 interface BucketInterval {
   value: number;
   unit: 'h' | 'd';
+  ms: number;
 }
 
 export const deriveBucketInterval = (fromMs: number, toMs: number): BucketInterval => {
   const spanMs = Math.max(0, toMs - fromMs);
   if (spanMs <= 2 * DAY_MS) {
-    return { value: 1, unit: 'h' };
+    return { value: 1, unit: 'h', ms: HOUR_MS };
   }
-  if (spanMs <= 30 * DAY_MS) {
-    return { value: 1, unit: 'd' };
+  if (spanMs <= 45 * DAY_MS) {
+    return { value: 1, unit: 'd', ms: DAY_MS };
   }
-  return { value: 7, unit: 'd' };
+  return { value: 7, unit: 'd', ms: 7 * DAY_MS };
 };

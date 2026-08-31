@@ -103,16 +103,43 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
 
+  // Whether the pack SO actually persisted a pack-level schedule (`schedule_type`
+  // set), vs. a legacy pack (pre-9.5, no pack-level schedule fields at all) for
+  // which the client synthesizes an interval-mode default purely so the form has
+  // something to render. Only a real pack-level schedule is a legitimate
+  // inheritance target for a non-override query — see elastic/kibana#277700.
+  // A brand-new pack has no legacy baggage, so it's treated as explicit too:
+  // its first save always writes a real `schedule_type`.
+  const packHasExplicitSchedule =
+    isRruleSchedulingEnabled && (!editMode || defaultValue?.schedule_type !== undefined);
+
+  // Computed once and reused for both `defaultValues.schedule` and
+  // `originalStartDate` so they can't diverge on independent `new Date()` calls.
+  const deserializedSchedule = useMemo(
+    () =>
+      isRruleSchedulingEnabled
+        ? deserializeSchedule(
+            defaultValue
+              ? {
+                  schedule_type: defaultValue.schedule_type,
+                  interval: defaultValue.interval,
+                  rrule_schedule: defaultValue.rrule_schedule,
+                }
+              : undefined
+          )
+        : undefined,
+
+    [isRruleSchedulingEnabled, defaultValue]
+  );
+
   const deserializer = (payload: PackItem) => {
     const defaultPolicyIds = filter(
       payload.policy_ids,
       (policyId) => payload.shards?.[policyId] == null
     );
 
-    // Flag-off leak fix: strip the rrule-era schedule fields off the
-    // spread so a flag-off form never carries `schedule_type` / pack-level
-    // `interval` / `rrule_schedule` into state — and therefore never re-emits
-    // them on submit. Flag-off is byte-identical to the pre-rrule contract.
+    // Strip rrule-era fields before spreading so a flag-off form never
+    // carries them into state or re-emits them on submit.
     const {
       schedule_type: payloadScheduleType,
       interval: payloadInterval,
@@ -125,13 +152,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
       shards: omit(payload.shards, '*') ?? {},
-      schedule: isRruleSchedulingEnabled
-        ? deserializeSchedule({
-            schedule_type: payloadScheduleType,
-            interval: payloadInterval,
-            rrule_schedule: payloadRruleSchedule,
-          })
-        : undefined,
+      schedule: deserializedSchedule,
     };
   };
 
@@ -147,7 +168,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           enabled: true,
           queries: [],
           pack_type: 'policy',
-          schedule: isRruleSchedulingEnabled ? deserializeSchedule(undefined) : undefined,
+          schedule: deserializedSchedule,
         },
   });
 
@@ -162,7 +183,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     watch,
     trigger,
     setValue,
-    formState: { isSubmitting, isDirty },
+    formState: { isSubmitting, isDirty, dirtyFields },
   } = hooksForm;
   const { policy_ids: policyIds, shards, pack_type: packType, schedule, queries } = watch();
 
@@ -171,12 +192,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       return undefined;
     }
 
-    return deserializeSchedule({
-      schedule_type: defaultValue.schedule_type,
-      interval: defaultValue.interval,
-      rrule_schedule: defaultValue.rrule_schedule,
-    }).startDate;
-  }, [editMode, defaultValue]);
+    return deserializedSchedule?.startDate;
+  }, [editMode, defaultValue, deserializedSchedule]);
 
   const scheduleErrors = useMemo(() => {
     if (!isRruleSchedulingEnabled || !schedule) {
@@ -222,24 +239,41 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     );
   }, [packType, shards]);
 
+  // RHF clears dirtyFields.schedule when the value equals the synthesized default
+  // (e.g. a legacy pack whose default interval is 3600s), so value-equality alone
+  // would drop a deliberate "set it to 3600" choice. Track raw interaction instead.
+  const scheduleInteractedRef = useRef(false);
   const handleScheduleChange = useCallback(
     (next: ScheduleFormData) => {
+      scheduleInteractedRef.current = true;
       setValue('schedule', next, { shouldDirty: true });
     },
     [setValue]
   );
 
+  // Surface schedule errors so a blocked submit is never a silent no-op.
+  const showScheduleErrorsToast = useCallback(
+    (errors: string[]) => {
+      setShowScheduleErrors(true);
+      toasts.addDanger({
+        title: SCHEDULE_ERRORS_TOAST_TITLE,
+        text: errors.join('\n'),
+      });
+    },
+    [toasts]
+  );
+
   const onSubmit = useCallback(
     async (values: PackFormData) => {
-      // Submit-boundary gate: a controlled ScheduleSection object
-      // doesn't `register` cleanly with RHF, so the inline field errors are not
-      // enough to block submit. Re-validate the whole schedule here and abort
-      // when it fails — the inline errors already do the visual work.
+      // RHF field errors alone don't block submit for the controlled
+      // ScheduleSection object; re-validate here before allowing submit.
       if (isRruleSchedulingEnabled && values.schedule) {
         const submitScheduleErrors = validateScheduleFormData(values.schedule, {
           originalStartDate,
         });
         if (submitScheduleErrors.length > 0) {
+          showScheduleErrorsToast(submitScheduleErrors);
+
           return;
         }
       }
@@ -266,13 +300,21 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           : [];
         const policies = [...payloadAgentPolicyIds, ...mappedShards];
 
+        // Emit schedule fields only when the user touched the schedule or the pack
+        // already has one — otherwise an untouched legacy pack triggers a spurious
+        // legacy→interval transition that strips every bare per-query interval.
+        const scheduleIsDirtyOrExplicit =
+          Boolean(dirtyFields.schedule) || scheduleInteractedRef.current || packHasExplicitSchedule;
         const scheduleFields =
-          isRruleSchedulingEnabled && scheduleFormState ? serializeSchedule(scheduleFormState) : {};
+          isRruleSchedulingEnabled && scheduleFormState && scheduleIsDirtyOrExplicit
+            ? serializeSchedule(scheduleFormState)
+            : {};
 
         return {
           ...restPayload,
           policy_ids: policies ?? [],
-          queries: convertSOQueriesToPack(payloadQueries),
+          // On edit, round-trip each query's id so the server preserves schedule_id.
+          queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
           ...scheduleFields,
         };
@@ -290,11 +332,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [
       createAsync,
       defaultValue?.saved_object_id,
+      dirtyFields.schedule,
       editMode,
       getShards,
       isRruleSchedulingEnabled,
       originalStartDate,
+      packHasExplicitSchedule,
       shards,
+      showScheduleErrorsToast,
       updateAsync,
     ]
   );
@@ -322,11 +367,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     if (scheduleErrors.length > 0) {
-      setShowScheduleErrors(true);
-      toasts.addDanger({
-        title: SCHEDULE_ERRORS_TOAST_TITLE,
-        text: scheduleErrors.join('\n'),
-      });
+      showScheduleErrorsToast(scheduleErrors);
 
       return;
     }
@@ -338,7 +379,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     handleSubmitForm();
-  }, [agentCount, handleSubmitForm, scheduleErrors, toasts, trigger]);
+  }, [agentCount, handleSubmitForm, scheduleErrors, showScheduleErrorsToast, trigger]);
 
   const handleConfirmConfirmationClick = useCallback(async () => {
     setShowConfirmationModal(false);
@@ -455,7 +496,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
         <EuiHorizontalRule />
 
-        <QueriesField euiFieldProps={euiFieldProps} />
+        <QueriesField
+          euiFieldProps={euiFieldProps}
+          packHasExplicitSchedule={packHasExplicitSchedule}
+        />
       </FormProvider>
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />

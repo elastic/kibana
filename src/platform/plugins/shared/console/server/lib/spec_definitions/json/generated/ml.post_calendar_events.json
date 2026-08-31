@@ -6,6 +6,30 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "events": [
+        {
+          "calendar_id": "",
+          "event_id": "",
+          "description": "",
+          "end_time": "",
+          "start_time": "",
+          "skip_result": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "skip_model_update": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "force_time_shift": ""
+        }
+      ]
+    },
     "methods": [
       "POST"
     ],

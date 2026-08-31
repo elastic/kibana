@@ -28,6 +28,7 @@ const logoSlot = css({
 export interface ChromeNextGlobalHeaderShellProps {
   logo?: ReactNode;
   switcher?: ReactNode;
+  projectPicker?: ReactNode;
   search?: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
@@ -64,6 +65,13 @@ const useGlobalHeaderStyles = () => {
     const spacer = css`
       flex: 1 1 auto;
       min-width: 0;
+    `;
+
+    const projectPickerSlot = css`
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      margin-inline-start: ${euiTheme.size.xs};
     `;
 
     const rightGroup = css`
@@ -106,6 +114,7 @@ const useGlobalHeaderStyles = () => {
       root,
       leftGroup,
       switcherSlot,
+      projectPickerSlot,
       spacer,
       rightGroup,
       searchSlot,
@@ -118,7 +127,7 @@ const useGlobalHeaderStyles = () => {
 };
 
 export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShellProps>(
-  ({ logo, switcher, search, help, actions, userMenu }) => {
+  ({ logo, switcher, projectPicker, search, help, actions, userMenu }) => {
     const sideNavWidth = useSideNavWidth();
     const styles = useGlobalHeaderStyles();
     const logoWidth = sideNavWidth <= COLLAPSED_WIDTH ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
@@ -139,6 +148,11 @@ export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShel
           )}
         </div>
         <div css={styles.separator} />
+        {projectPicker && (
+          <div css={styles.projectPickerSlot} data-test-subj="chromeNextGlobalHeaderProjectPicker">
+            {projectPicker}
+          </div>
+        )}
         <div css={styles.spacer} />
         <div css={styles.rightGroup}>
           {search && (

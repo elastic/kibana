@@ -8,7 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../common/constants';
 import { setAttackStatusStepCommonDefinition } from '../../../../common/workflows/step_types/set_attack_status_step/set_attack_status_step_common';
-import { toAlertApiExecutionError } from '../to_alert_api_execution_error';
+import { toApiExecutionError } from '../../utils/to_api_execution_error';
 
 export const setAttackStatusStepDefinition = createServerStepDefinition({
   ...setAttackStatusStepCommonDefinition,
@@ -41,7 +41,7 @@ export const setAttackStatusStepDefinition = createServerStepDefinition({
         },
       };
     } catch (error) {
-      throw toAlertApiExecutionError(error, 'set attack status');
+      throw toApiExecutionError(error, 'set attack status');
     }
   },
 });

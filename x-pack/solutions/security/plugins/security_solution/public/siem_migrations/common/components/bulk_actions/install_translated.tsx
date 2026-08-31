@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, memo } from 'react';
 import { EuiFlexItem, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
-import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import type { BulkActionsItem } from './types';
 
 interface InstallTranslatedButtonProps {
@@ -18,6 +17,12 @@ interface InstallTranslatedButtonProps {
   isLoading: boolean;
   numberOfTranslatedItems: number;
   selectedItems: BulkActionsItem[];
+  /**
+   * Predicate that determines whether a selected item can be installed. This differs per
+   * migration type (e.g. rules can only install fully translated items, whereas dashboards
+   * can also install partially translated ones), so the caller owns the definition.
+   */
+  isInstallable: (item: BulkActionsItem) => boolean;
 }
 
 export const InstallTranslatedButton = memo(
@@ -28,18 +33,14 @@ export const InstallTranslatedButton = memo(
     isLoading,
     numberOfTranslatedItems,
     selectedItems,
+    isInstallable,
   }: InstallTranslatedButtonProps) => {
     const numberOfSelectedItems = selectedItems.length;
-    const installTranslatedItemsSelected = useMemo(
-      () =>
-        selectedItems.filter(
-          (item) =>
-            item.translation_result === MigrationTranslationResult.FULL ||
-            item.translation_result === MigrationTranslationResult.PARTIAL
-        ).length,
-      [selectedItems]
+    const installableSelectedCount = useMemo(
+      () => selectedItems.filter(isInstallable).length,
+      [selectedItems, isInstallable]
     );
-    const isSelected = installTranslatedItemsSelected > 0;
+    const hasInstallableSelection = installableSelectedCount > 0;
     const onClick = useCallback(() => {
       if (numberOfSelectedItems === 0) {
         installTranslatedItems?.();
@@ -51,12 +52,10 @@ export const InstallTranslatedButton = memo(
     let buttonText = i18n.INSTALL_TRANSLATED_ITEMS_EMPTY_STATE;
     if (numberOfSelectedItems > 0) {
       buttonText = i18n.INSTALL_SELECTED_ITEMS(
-        isSelected ? installTranslatedItemsSelected : numberOfSelectedItems
+        hasInstallableSelection ? installableSelectedCount : numberOfSelectedItems
       );
     } else if (numberOfTranslatedItems > 0) {
-      buttonText = i18n.INSTALL_TRANSLATED_ITEMS(
-        isSelected ? installTranslatedItemsSelected : numberOfTranslatedItems
-      );
+      buttonText = i18n.INSTALL_TRANSLATED_ITEMS(numberOfTranslatedItems);
     }
 
     const ariaLabel =
@@ -67,12 +66,17 @@ export const InstallTranslatedButton = memo(
     const dataTestSubj =
       numberOfSelectedItems === 0 ? 'installTranslatedItemsButton' : 'installSelectedItemsButton';
 
+    // When the user has a selection but none of the selected items can be installed, the action
+    // would be a no-op on the server, so we disable the button.
+    const hasSelectionButNoneInstallable = numberOfSelectedItems > 0 && !hasInstallableSelection;
+    const isDisabled = disableInstallTranslatedItemsButton || hasSelectionButNoneInstallable;
+
     return (
       <EuiFlexItem grow={false}>
         <EuiButton
           iconType="plusCircle"
           onClick={onClick}
-          disabled={disableInstallTranslatedItemsButton}
+          disabled={isDisabled}
           isLoading={isLoading}
           data-test-subj={dataTestSubj}
           aria-label={ariaLabel}

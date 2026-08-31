@@ -10,6 +10,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { registerClustersRoute } from './clusters';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { CloudConnectApiKey } from '../types';
+import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 jest.mock('../services/cloud_connect_client');
 jest.mock('../lib/create_storage_service');
@@ -109,6 +110,13 @@ describe('Clusters Routes', () => {
         (call) => call[0].path === '/internal/cloud_connect/cluster_details'
       );
       routeHandler = getCall![1];
+    });
+
+    it('should require the cloudConnect read privilege', () => {
+      const getCall = mockRouter.get.mock.calls.find(
+        (call) => call[0].path === '/internal/cloud_connect/cluster_details'
+      );
+      expect(getCall![0].security).toEqual(CLOUD_CONNECT_READ_SECURITY);
     });
 
     it('should return cluster details with subscription state on happy path', async () => {
@@ -465,6 +473,13 @@ describe('Clusters Routes', () => {
       routeHandler = deleteCall![1];
     });
 
+    it('should require the cloudConnect manage privilege', () => {
+      const deleteCall = mockRouter.delete.mock.calls.find(
+        (call) => call[0].path === '/internal/cloud_connect/cluster'
+      );
+      expect(deleteCall![0].security).toEqual(CLOUD_CONNECT_MANAGE_SECURITY);
+    });
+
     it('should disconnect cluster on happy path', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'test-api-key-123',
@@ -581,6 +596,13 @@ describe('Clusters Routes', () => {
         (call) => call[0].path === '/internal/cloud_connect/cluster_details'
       );
       routeHandler = putCall![1];
+    });
+
+    it('should require the cloudConnect manage privilege', () => {
+      const putCall = mockRouter.put.mock.calls.find(
+        (call) => call[0].path === '/internal/cloud_connect/cluster_details'
+      );
+      expect(putCall![0].security).toEqual(CLOUD_CONNECT_MANAGE_SECURITY);
     });
 
     it('should update services on happy path', async () => {

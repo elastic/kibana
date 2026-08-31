@@ -11,7 +11,7 @@ import { randomUUID } from 'crypto';
 import { withInferenceContext } from '@kbn/inference-tracing';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
-import { DATASET_UUID_NAMESPACE } from '@kbn/evals-common';
+import { DEFAULT_SPACE_ID, getDatasetId } from '@kbn/evals-common';
 import type {
   EvalsExecutorClient,
   Evaluator,
@@ -26,10 +26,6 @@ import type {
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 
 const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
-
-function computeDatasetId(name: string): string {
-  return uuidv5(name, DATASET_UUID_NAMESPACE);
-}
 
 function computeExperimentId(
   executionId: string | undefined,
@@ -54,7 +50,11 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       model: Model;
       executionId?: string;
       repetitions?: number;
-      upsertDataset?: (dataset: EvaluationDataset) => Promise<void>;
+      /**
+       * Persists the dataset and resolves to the id the server stored it under,
+       * which scores are stamped with. An id it didn't return would detach them.
+       */
+      upsertDataset?: (dataset: EvaluationDataset) => Promise<string>;
       getDatasetByName?: (
         datasetName: string
       ) => Promise<EvaluationDataset | EvaluationDatasetWithId | null>;
@@ -66,9 +66,9 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
   private async resolveDataset(
     dataset: EvaluationDataset,
     trustUpstreamDataset: boolean
-  ): Promise<EvaluationDataset> {
+  ): Promise<{ dataset: EvaluationDataset; upstreamId?: string }> {
     if (!trustUpstreamDataset) {
-      return dataset;
+      return { dataset };
     }
 
     if (!this.options.getDatasetByName) {
@@ -84,11 +84,16 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       );
     }
 
-    const { name, description, examples } = upstreamDataset;
+    const { id, name, description, tags, maturity, examples } = upstreamDataset;
     return {
-      name,
-      description,
-      examples,
+      dataset: {
+        name,
+        description,
+        tags,
+        maturity,
+        examples,
+      },
+      upstreamId: id,
     };
   }
 
@@ -156,10 +161,17 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<DatasetRunResult> {
     return withInferenceContext(async () => {
-      const resolvedDataset = await this.resolveDataset(dataset, trustUpstreamDataset);
-      await this.options.upsertDataset?.(resolvedDataset);
+      const { dataset: resolvedDataset, upstreamId } = await this.resolveDataset(
+        dataset,
+        trustUpstreamDataset
+      );
+      const upsertedId = await this.options.upsertDataset?.(resolvedDataset);
 
-      const datasetId = computeDatasetId(resolvedDataset.name);
+      // Scores are stamped with this id, so it has to be the one the server
+      // stored the dataset under. Deriving it locally is a last resort: ids
+      // follow the owning space, which only the server knows here.
+      const datasetId =
+        upsertedId || upstreamId || getDatasetId(DEFAULT_SPACE_ID, resolvedDataset.name);
       const experimentId = computeExperimentId(
         this.options.executionId,
         experimentName,
@@ -207,6 +219,10 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 }
               );
 
+              // Prefer the trace id the task itself surfaced (e.g. converse's response
+              // trace_id) over the eval client's own task-span trace id. See #276308.
+              const taskOrClientTraceId = (taskOutput as { traceId?: string })?.traceId || traceId;
+
               runs[runKey] = {
                 exampleIndex,
                 repetition: rep,
@@ -214,7 +230,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
                 output: taskOutput,
-                traceId,
+                traceId: taskOrClientTraceId,
               };
 
               this.options.log.info(
@@ -233,7 +249,10 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       const _traceId = getCurrentTraceId();
                       const _result = await evaluator.evaluate({
                         input: example.input,
-                        output: { ...taskOutput, traceId },
+                        output: {
+                          ...taskOutput,
+                          traceId: taskOrClientTraceId,
+                        },
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
                       });
@@ -246,17 +265,39 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   this.options.log.info(
                     `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
                   );
-                  return { evaluatorName: evaluator.name, result, evaluatorTraceId };
+                  return {
+                    evaluatorName: evaluator.name,
+                    direction: evaluator.direction,
+                    result,
+                    evaluatorTraceId,
+                    kind: evaluator.kind,
+                    // Read after `evaluate` so evaluators that learn their model from
+                    // the `_evaluate` response have it by now.
+                    model: evaluator.getModel?.(),
+                    version: evaluator.getVersion?.(),
+                  };
                 })
               );
 
-              for (const { evaluatorName, result, evaluatorTraceId } of results) {
+              for (const {
+                evaluatorName,
+                direction,
+                result,
+                evaluatorTraceId,
+                kind,
+                model,
+                version,
+              } of results) {
                 const evalRun = {
                   name: evaluatorName,
+                  ...(version && { version }),
                   result,
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
                   exampleId: example.id,
+                  direction,
+                  kind,
+                  ...(model && { model }),
                 };
                 evaluationRuns.push(evalRun);
 

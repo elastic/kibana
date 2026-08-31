@@ -19,6 +19,7 @@ import {
   DEFAULT_INTERVAL_SECONDS,
   type FrequencyMode,
   type RecurrenceFormState,
+  type RepeatUnit,
   type ScheduleFormData,
   type SplayFormStateUI,
   WEEKDAY_TOKENS,
@@ -26,6 +27,7 @@ import {
   createDefaultScheduleFormData,
   createDefaultSplay,
 } from '../../components/schedule_section/types';
+import { ONE_DAY_MS } from '../../components/schedule_section/slot_utils';
 
 const WEEKDAY_TO_TOKEN: Record<Weekday, WeekdayStr> = {
   [Weekday.MO]: 'MO',
@@ -82,7 +84,11 @@ const resolveDate = (value: unknown): Date | undefined => {
 
 /**
  * Map UI frequency token + recurrence form state → RFC 5545 RRULE fields. The
- * `'custom'` UI mode collapses to `WEEKLY + BYDAY` per the form spec.
+ * `'custom'` UI mode collapses to `WEEKLY + BYDAY`, `MONTHLY`, or `YEARLY`
+ * depending on {@link RecurrenceFormState.repeatUnit} (D39). The Month(s) /
+ * Year(s) units emit no `BYMONTHDAY` / `BYMONTH` override — the recurrence
+ * day-of-month (and, for years, month) is derived implicitly from `DTSTART`
+ * per RFC 5545, so there is no separate day/month picker to serialize.
  */
 const recurrenceToRRuleFields = (recurrence: RecurrenceFormState): RRuleFields => {
   const fields: RRuleFields = (() => {
@@ -90,6 +96,22 @@ const recurrenceToRRuleFields = (recurrence: RecurrenceFormState): RRuleFields =
       case 'daily':
         return { freq: Frequency.DAILY };
       case 'custom': {
+        const repeatUnit = recurrence.repeatUnit ?? 'weeks';
+
+        if (repeatUnit === 'months') {
+          return {
+            freq: Frequency.MONTHLY,
+            ...(recurrence.interval > 1 ? { interval: recurrence.interval } : {}),
+          };
+        }
+
+        if (repeatUnit === 'years') {
+          return {
+            freq: Frequency.YEARLY,
+            ...(recurrence.interval > 1 ? { interval: recurrence.interval } : {}),
+          };
+        }
+
         const byweekday =
           recurrence.byweekday.length > 0
             ? recurrence.byweekday
@@ -136,11 +158,13 @@ export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormStat
   let frequency: FrequencyMode = base.frequency;
   let byweekday: WeekdayStr[] = base.byweekday;
   let interval = base.interval;
+  let repeatUnit: RepeatUnit = base.repeatUnit ?? 'weeks';
 
   const foldedUnknown: Record<string, string> = {};
 
   if (fields.freq === Frequency.WEEKLY && fields.byweekday && fields.byweekday.length > 0) {
     frequency = 'custom';
+    repeatUnit = 'weeks';
     byweekday = fields.byweekday
       .map((day) => WEEKDAY_TO_TOKEN[day])
       .filter((token): token is WeekdayStr => token !== undefined);
@@ -200,12 +224,47 @@ export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormStat
     if (fields.bymonth && fields.bymonth.length > 0) {
       foldedUnknown.BYMONTH = fields.bymonth.join(',');
     }
+  } else if (
+    fields.freq === Frequency.MONTHLY &&
+    (!fields.bymonthday || fields.bymonthday.length === 0) &&
+    (!fields.bymonth || fields.bymonth.length === 0) &&
+    (!fields.byweekday || fields.byweekday.length === 0) &&
+    !fields._unknown?.BYDAY
+  ) {
+    // MONTHLY with no BYMONTHDAY/BYMONTH/BYDAY override renders as Custom +
+    // Month(s) — the recurrence day-of-month is implicitly DTSTART's (D39).
+    frequency = 'custom';
+    repeatUnit = 'months';
+    byweekday = [];
+
+    if (fields.interval && fields.interval > 1) {
+      interval = fields.interval;
+    }
+  } else if (
+    fields.freq === Frequency.YEARLY &&
+    (!fields.bymonthday || fields.bymonthday.length === 0) &&
+    (!fields.bymonth || fields.bymonth.length === 0) &&
+    (!fields.byweekday || fields.byweekday.length === 0) &&
+    !fields._unknown?.BYDAY
+  ) {
+    // YEARLY with no BYMONTH/BYMONTHDAY/BYDAY override renders as Custom +
+    // Year(s) — the recurrence month/day is implicitly DTSTART's (D39). Same
+    // `_unknown.BYDAY` guard as MONTHLY above.
+    frequency = 'custom';
+    repeatUnit = 'years';
+    byweekday = [];
+
+    if (fields.interval && fields.interval > 1) {
+      interval = fields.interval;
+    }
   } else {
-    // Future-proofing: any other supported frequency (MINUTELY/HOURLY/MONTHLY/
-    // YEARLY) is not yet rendered in the form. Land on 'daily' as the safest
-    // editable default and preserve the distinguishing parts in `_unknown` so
-    // the user is warned and the round-trip stays lossless if they don't
-    // touch the frequency selector.
+    // Future-proofing: any other supported frequency (MINUTELY/HOURLY, or a
+    // MONTHLY/YEARLY shape with an explicit BYMONTHDAY/BYMONTH/BYDAY override
+    // — the generalized Custom mode has no day-of-month/month picker, only
+    // the implicit DTSTART-derived value) is not rendered in the form. Land
+    // on 'daily' as the safest editable default and preserve the
+    // distinguishing parts in `_unknown` so the user is warned and the
+    // round-trip stays lossless if they don't touch the frequency selector.
     frequency = 'daily';
     const freqLabel = FREQUENCY_TO_STRING[fields.freq];
     if (freqLabel) {
@@ -238,6 +297,7 @@ export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormStat
     frequency,
     interval,
     byweekday,
+    ...(frequency === 'custom' ? { repeatUnit } : {}),
     ...(Object.keys(mergedUnknown).length > 0 ? { _unknown: mergedUnknown } : {}),
   };
 };
@@ -376,8 +436,6 @@ export const deserializeSchedule = (
     // When the saved object has no end_date, seed the toggle-off placeholder
     // with `startDate + 1d` so flipping "Stop after" on lands in a valid
     // state (UNTIL must be strictly after DTSTART for the rule to ever fire).
-    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
     return {
       scheduleType: 'rrule',
       interval: DEFAULT_INTERVAL_SECONDS,

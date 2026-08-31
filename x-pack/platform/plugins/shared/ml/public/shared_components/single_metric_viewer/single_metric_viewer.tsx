@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { FC } from 'react';
+import type { FC, Ref } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiResizeObserver } from '@elastic/eui';
@@ -81,9 +81,15 @@ export interface SingleMetricViewerProps {
    */
   lastRefresh?: number;
   onRenderComplete?: () => void;
+  onLoading?: (loading: boolean) => void;
   onError?: (error?: Error) => void;
   onForecastIdChange?: (forecastId: string | undefined) => void;
   uuid: string;
+  /**
+   * Reporting readiness for screenshotting. Defaults to false so PDF/PNG waits.
+   */
+  isRenderComplete?: boolean;
+  wrapperRef?: Ref<HTMLDivElement>;
 }
 
 type Zoom = AppStateZoom | undefined;
@@ -101,6 +107,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   lastRefresh,
   onError,
   onForecastIdChange,
+  onLoading,
   onRenderComplete,
   forecastId,
   selectedDetectorIndex,
@@ -108,6 +115,8 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   selectedJobId,
   shouldShowForecastButton,
   uuid,
+  isRenderComplete,
+  wrapperRef,
 }) => {
   const timeseriesExplorerStyles = useTimeseriesExplorerStyles();
   const annotationStyles = useAnnotationStyles();
@@ -255,10 +264,18 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
             padding: '8px',
           }}
           data-test-subj={`mlSingleMetricViewer_${uuid}`}
-          ref={resizeRef}
+          ref={(el) => {
+            resizeRef(el);
+            if (typeof wrapperRef === 'function') {
+              wrapperRef(el);
+            } else if (wrapperRef) {
+              (wrapperRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            }
+          }}
           css={[timeseriesExplorerStyles, annotationStyles]}
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
           data-rendering-count={1}
+          data-render-complete={isRenderComplete ?? false}
         >
           <KibanaRenderContextProvider {...startServices}>
             <KibanaContextProvider
@@ -296,6 +313,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                       functionDescription={functionDescription}
                       selectedJob={selectedJobWrapper.job}
                       selectedJobStats={selectedJobWrapper.stats}
+                      onLoading={onLoading}
                       onRenderComplete={onRenderComplete}
                       onForecastComplete={onForecastComplete}
                       shouldShowForecastButton={shouldShowForecastButton}

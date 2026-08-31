@@ -27,7 +27,9 @@
       "kql"
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "esql",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaUtils",

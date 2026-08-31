@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ColumnState } from '@kbn/lens-common';
+import { LENS_DATATABLE_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { DatatableConfig } from '../../../../schema';
 import {
   fromColorMappingAPIToLensState,
@@ -39,7 +40,10 @@ function buildColorProps(
   }
 
   if (isColorByValueColor(config.color)) {
-    return { colorMode, palette: fromColorByValueAPIToLensState(config.color) };
+    return {
+      colorMode,
+      palette: fromColorByValueAPIToLensState(config.color, LENS_DATATABLE_DEFAULT_COLOR_STEPS),
+    };
   }
 
   // defer resolution of default color configuration (mapping/palette) to runtime

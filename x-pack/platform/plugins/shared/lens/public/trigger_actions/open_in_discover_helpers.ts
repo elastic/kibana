@@ -29,6 +29,7 @@ import {
 } from '@kbn/esql-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
+// TODO replace with DiscoverAppLocatorParams type from discover plugin
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
   filters?: Filter[];
@@ -127,9 +128,9 @@ async function getDiscoverLocationParams({
     ? embeddable.parentApi
     : undefined;
 
-  const isApproximate = apiPublishesApproximation(embeddable.parentApi)
+  const esqlApproximation = apiPublishesApproximation(embeddable.parentApi)
     ? embeddable.parentApi.isApproximate$.value
-    : undefined;
+    : false;
 
   return {
     ...args,
@@ -139,7 +140,7 @@ async function getDiscoverLocationParams({
     esqlControls: presentationContainer
       ? getEsqlControls(presentationContainer, args.query)
       : undefined,
-    isApproximate,
+    esqlApproximation,
   };
 }
 

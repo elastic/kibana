@@ -26,7 +26,7 @@ import { ACTIVITY_INDEX_MAPPING } from '../mappings/activity';
  *
  * No `index.mode: lookup`: `.cases-activity` is the fact table in the
  * analytics model. ES|QL queries
- * `FROM .cases-activity | LOOKUP JOIN .cases ON cases.id`; the
+ * `FROM .cases-activity | LOOKUP JOIN .cases ON case.id`; the
  * lookup-mode index is on the `.cases` side.
  *
  * Failure policy: throws on unexpected errors so callers can decide how

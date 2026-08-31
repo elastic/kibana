@@ -12,11 +12,10 @@ import { EuiFormRow, EuiFieldText, EuiText, useEuiTheme, EuiComboBox } from '@el
 import type { PaletteRegistry } from '@kbn/coloring';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type {
+  ColumnState,
   VisualizationDimensionEditorProps,
   DatatableVisualizationState,
 } from '@kbn/lens-common';
-
-import type { ColumnState } from '../../../../common/expressions';
 
 import {
   getDefaultSummaryLabel,

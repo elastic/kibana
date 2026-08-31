@@ -81,6 +81,11 @@ describe('ThemeService', () => {
         expect(setDarkModeMock).toHaveBeenCalledWith(false);
       });
 
+      it('reflects the color mode on the root background', async () => {
+        themeService.setup({ injectedMetadata });
+        expect(document.documentElement.style.backgroundColor).toEqual('rgb(246, 249, 252)'); // borealis light page background
+      });
+
       it('does not call onSystemThemeChange', async () => {
         themeService.setup({ injectedMetadata });
         expect(onSystemThemeChangeMock).not.toHaveBeenCalled();
@@ -124,6 +129,11 @@ describe('ThemeService', () => {
         themeService.setup({ injectedMetadata });
         expect(setDarkModeMock).toHaveBeenCalledTimes(1);
         expect(setDarkModeMock).toHaveBeenCalledWith(true);
+      });
+
+      it('reflects the color mode on the root background', async () => {
+        themeService.setup({ injectedMetadata });
+        expect(document.documentElement.style.backgroundColor).toEqual('rgb(7, 16, 31)'); // borealis dark page background
       });
 
       it('does not call onSystemThemeChange', async () => {
@@ -301,6 +311,7 @@ describe('ThemeService', () => {
 
       expect(window.__kbnThemeTag__).toEqual('borealisdark');
       expect(getTheme()).toEqual({ darkMode: true, name: 'borealis' });
+      expect(document.documentElement.style.backgroundColor).toEqual('rgb(7, 16, 31)');
     });
 
     it('emits the updated theme on `theme$`', () => {

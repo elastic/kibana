@@ -11,12 +11,10 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,8 +29,6 @@ interface StepLayoutProps {
   step: WizardStep;
   title: string;
   description: React.ReactNode;
-  docsLabel: string;
-  docsHref: string;
   onBack?: () => void;
   onNext?: () => void;
   onComplete?: () => void;
@@ -45,14 +41,11 @@ export const StepLayout = ({
   step,
   title,
   description,
-  docsLabel,
-  docsHref,
   onBack,
   onNext,
   onComplete,
   children,
 }: StepLayoutProps) => {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { notifications },
   } = useKibana();
@@ -82,19 +75,9 @@ export const StepLayout = ({
               <h1>{title}</h1>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued" css={{ maxWidth: euiTheme.base * 36 }}>
+            <EuiText size="m" color="subdued" grow={false}>
               <p>{description}</p>
             </EuiText>
-            <EuiSpacer size="m" />
-            <EuiLink
-              href={docsHref}
-              external
-              target="_blank"
-              data-test-subj="stepLayoutDocsLink"
-              data-telemetry-id={`${telemetryIdPrefix}-docsLink`}
-            >
-              {docsLabel}
-            </EuiLink>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -123,8 +106,8 @@ export const StepLayout = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="xl" />
-        <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+        <EuiSpacer size="l" />
+        <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
           <EuiFlexItem grow={true}>{children}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StepRail

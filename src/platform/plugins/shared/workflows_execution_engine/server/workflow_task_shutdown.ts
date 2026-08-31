@@ -18,7 +18,7 @@ export const isWorkflowTaskManagerAbortSignal = (signal: AbortSignal): boolean =
   signal.reason instanceof WorkflowTaskManagerAbortError;
 
 export const createWorkflowTaskAbortController = (
-  taskManagerAbortController: AbortController
+  taskManagerAbortSignal: AbortSignal
 ): AbortController => {
   const workflowAbortController = new AbortController();
 
@@ -28,11 +28,11 @@ export const createWorkflowTaskAbortController = (
     }
   };
 
-  if (taskManagerAbortController.signal.aborted) {
+  if (taskManagerAbortSignal.aborted) {
     abortWorkflow();
     return workflowAbortController;
   }
 
-  taskManagerAbortController.signal.addEventListener('abort', abortWorkflow, { once: true });
+  taskManagerAbortSignal.addEventListener('abort', abortWorkflow, { once: true });
   return workflowAbortController;
 };

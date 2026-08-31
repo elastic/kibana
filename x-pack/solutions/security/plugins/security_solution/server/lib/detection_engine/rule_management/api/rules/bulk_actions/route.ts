@@ -39,6 +39,7 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
 import { duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 import { duplicateRule } from '../../../logic/actions/duplicate_rule';
+import { sendRuleDuplicateTelemetryEvent } from '../../../logic/detection_rules_client/rule_lifecycle_telemetry';
 import { bulkEditRules } from '../../../logic/bulk_actions/bulk_edit_rules';
 import {
   dryRunValidateBulkEditRule,
@@ -251,6 +252,7 @@ export const performBulkActionRoute = (
           const endpointService = ctx.securitySolution.getEndpointService();
           const spaceId = ctx.securitySolution.getSpaceId();
           const logger = ctx.securitySolution.getLogger();
+          const analytics = ctx.securitySolution.getAnalytics();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -397,6 +399,12 @@ export const performBulkActionRoute = (
                       await deleteOrphanedExceptions({ exceptions, exceptionsClient, logger });
                       throw createError;
                     });
+
+                  sendRuleDuplicateTelemetryEvent(
+                    analytics,
+                    { createdRule, sourceRule: rule },
+                    logger
+                  );
 
                   return createdRule;
                 },

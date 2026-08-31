@@ -23,8 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const authorizationIndex = '.kibana-test-authorization';
 
-  // Failing: See https://github.com/elastic/kibana/issues/258921
-  describe.skip('execute', () => {
+  describe('execute', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -32,10 +31,12 @@ export default function ({ getService }: FtrProviderContext) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await objectRemover.removeAll();
     });
 
     for (const scenario of [...UserAtSpaceScenarios, systemActionScenario]) {

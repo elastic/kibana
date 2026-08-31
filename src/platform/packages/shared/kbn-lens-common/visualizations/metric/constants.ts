@@ -16,6 +16,11 @@ import type {
 
 export const LENS_METRIC_ID = 'lnsMetric';
 
+/**
+ * Default number of color bands (palette steps) for the metric color-by-value palette.
+ */
+export const LENS_METRIC_DEFAULT_COLOR_STEPS = 3;
+
 export const LENS_METRIC_GROUP_ID = {
   METRIC: 'metric',
   SECONDARY_METRIC: 'secondaryMetric',

@@ -77,7 +77,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   app: [PLUGIN_ID],
   alerting: [degradedDocsAlertingFeatures],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   privileges: {
     all: {
@@ -96,7 +96,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
     },
     read: {

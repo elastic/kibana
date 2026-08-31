@@ -286,6 +286,30 @@ describe('LifecyclePhase', () => {
       expect(onRefreshDefaultRepository).toHaveBeenCalledTimes(1);
     });
 
+    it('should link to the repositories list when other repositories already exist', () => {
+      render(
+        <LifecyclePhase
+          label="frozen"
+          color="#00FFFF"
+          showDefaultRepositoryCallout
+          createDefaultRepositoryHref="/app/management/data/snapshot_restore/add_repository"
+          manageRepositoriesUrl="/app/management/data/snapshot_restore/repositories"
+          hasExistingRepositories
+          canManageLifecycle
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button'));
+
+      expect(screen.getByTestId('lifecyclePhase-frozen-manageRepositoriesButton')).toHaveAttribute(
+        'href',
+        '/app/management/data/snapshot_restore/repositories'
+      );
+      expect(
+        screen.queryByTestId('lifecyclePhase-frozen-createDefaultRepositoryButton')
+      ).not.toBeInTheDocument();
+    });
+
     it('should display warning icon for frozen phase enterprise callout', () => {
       render(
         <LifecyclePhase

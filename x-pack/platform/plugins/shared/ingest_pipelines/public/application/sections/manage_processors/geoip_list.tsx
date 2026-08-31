@@ -6,13 +6,12 @@
  */
 
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiPageTemplate,
   EuiSpacer,
@@ -21,17 +20,28 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { getDatabaseText } from './utils';
 import type { GeoipDatabase } from '../../../../common/types';
 import { SectionLoading, useKibana } from '../../../shared_imports';
+import { PipelineAppHeader } from '../../components';
 import { getTypeLabel } from './constants';
 import { EmptyList } from './empty_list';
 import { AddDatabaseModal } from './add_database_modal';
 import { DeleteDatabaseModal } from './delete_database_modal';
 import { getErrorMessage } from './get_error_message';
+
+const addDatabaseButtonLabel = i18n.translate(
+  'xpack.ingestPipelines.manageProcessors.geoip.addDatabaseButtonLabel',
+  { defaultMessage: 'Add database' }
+);
+
+const manageProcessorsTitle = i18n.translate('xpack.ingestPipelines.manageProcessors.pageTitle', {
+  defaultMessage: 'Manage Processors',
+});
 
 const styles = {
   table: css`
@@ -41,6 +51,7 @@ const styles = {
 
 export const GeoipList: React.FunctionComponent = () => {
   const { services } = useKibana();
+  const history = useHistory();
   const { data, isLoading, error, resendRequest } = services.api.useLoadDatabases();
   const [showModal, setShowModal] = useState<'add' | 'delete' | null>(null);
   const [databaseToDelete, setDatabaseToDelete] = useState<GeoipDatabase | null>(null);
@@ -48,27 +59,34 @@ export const GeoipList: React.FunctionComponent = () => {
     setDatabaseToDelete(item);
     setShowModal('delete');
   };
+  const openAddDatabaseModal = () => {
+    setShowModal('add');
+  };
   let content: JSX.Element;
   const addDatabaseButton = (
     <EuiButton
       fill
       iconType="plusCircle"
-      onClick={() => {
-        setShowModal('add');
-      }}
+      onClick={openAddDatabaseModal}
       data-test-subj="addGeoipDatabaseButton"
     >
-      <FormattedMessage
-        id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseButtonLabel"
-        defaultMessage="Add database"
-      />
+      {addDatabaseButtonLabel}
     </EuiButton>
   );
+  const showAddInHeader = Boolean(data && data.length > 0) && !error;
+  const menu: AppHeaderMenu | undefined = showAddInHeader
+    ? {
+        primaryActionItem: {
+          id: 'addDatabase',
+          label: addDatabaseButtonLabel,
+          iconType: 'plusCircle',
+          testId: 'addGeoipDatabaseButton',
+          run: openAddDatabaseModal,
+        },
+      }
+    : undefined;
   const tableProps: EuiInMemoryTableProps<GeoipDatabase> = {
     'data-test-subj': 'geoipDatabaseList',
-    tableCaption: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.tableCaption', {
-      defaultMessage: 'List of geoIP databases',
-    }),
     rowProps: () => ({
       'data-test-subj': 'geoipDatabaseListRow',
     }),
@@ -175,27 +193,32 @@ export const GeoipList: React.FunctionComponent = () => {
   } else {
     content = (
       <>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.ingestPipelines.manageProcessors.geoip.tableTitle"
-                  defaultMessage="IP Location"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{addDatabaseButton}</EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.ingestPipelines.manageProcessors.geoip.tableTitle"
+              defaultMessage="IP Location"
+            />
+          </h2>
+        </EuiTitle>
 
         <EuiSpacer size="l" />
-        <EuiInMemoryTable css={styles.table} {...tableProps} />
+        <EuiInMemoryTable
+          css={styles.table}
+          tableCaption={i18n.translate(
+            'xpack.ingestPipelines.manageProcessors.geoip.list.tableCaption',
+            {
+              defaultMessage: 'List of geoIP databases',
+            }
+          )}
+          {...tableProps}
+        />
       </>
     );
   }
   return (
     <>
+      <PipelineAppHeader title={manageProcessorsTitle} history={history} menu={menu} />
       {content}
       {showModal === 'add' && (
         <AddDatabaseModal

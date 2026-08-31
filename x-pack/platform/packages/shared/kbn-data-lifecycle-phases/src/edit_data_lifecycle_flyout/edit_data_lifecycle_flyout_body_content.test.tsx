@@ -53,6 +53,45 @@ describe('EditDataLifecycleFlyoutBodyContent', () => {
     expect(screen.getByTestId('editDataLifecycle-noInheritedPolicyPanel')).toBeInTheDocument();
   });
 
+  it('disables the ILM method card when ilmCardDisabled is set', () => {
+    renderWithTheme(
+      <EditDataLifecycleFlyoutBodyContent
+        inheritLifecycle={false}
+        ilmCardDisabled
+        lifecycleMethod="dlm"
+        showLifecycleMethodPicker
+        method={{ value: 'dlm', onChange: () => {} }}
+      />
+    );
+
+    expect(screen.getByRole('radio', { name: /ILM policy/i })).toBeDisabled();
+    expect(screen.getByRole('radio', { name: /Data stream lifecycle/i })).not.toBeDisabled();
+  });
+
+  it('renders the ILM policy selector read-only when ilmReadOnly is set', () => {
+    const retentionOptions: RetentionOption[] = [
+      { name: 'policy-a', descriptionParts: ['30d'], inspectable: false },
+    ];
+
+    renderWithTheme(
+      <EditDataLifecycleFlyoutBodyContent
+        inheritLifecycle={false}
+        ilmReadOnly
+        lifecycleMethod="ilm"
+        showLifecycleMethodPicker
+        method={{ value: 'ilm', onChange: () => {} }}
+        ilm={{
+          retentionOptions,
+          selectedPolicyName: 'policy-a',
+          onSelect: () => {},
+        }}
+      />
+    );
+
+    expect(screen.queryByTestId('retentionSelectorSearchInput')).not.toBeInTheDocument();
+    expect(screen.getByTestId('retentionSelectableRow-policy_a')).toBeInTheDocument();
+  });
+
   it('renders a loading panel when inheriting and inherited lifecycle is still resolving', () => {
     const retentionOptions: RetentionOption[] = [
       { name: 'policy-a', descriptionParts: ['30d'], inspectable: false },

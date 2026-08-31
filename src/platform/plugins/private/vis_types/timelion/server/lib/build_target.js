@@ -11,6 +11,7 @@ import moment from 'moment-timezone';
 import splitInterval from './split_interval';
 
 export default function (tlConfig) {
+  const maxBuckets = tlConfig.settings?.['timelion:max_buckets'] ?? 2000;
   const targetSeries = [];
   // The code between this call and the reset in the finally block is not allowed to get async,
   // otherwise the timezone setting can leak out of this function.
@@ -25,6 +26,12 @@ export default function (tlConfig) {
     let current = min.startOf(intervalParts.unit);
 
     while (current.valueOf() < max.valueOf()) {
+      if (targetSeries.length >= maxBuckets) {
+        throw new Error(
+          `Target series would exceed max_buckets (${maxBuckets}). ` +
+            'Choose a larger interval or a shorter time span.'
+        );
+      }
       targetSeries.push(current.valueOf());
       current = current.add(intervalParts.count, intervalParts.unit);
     }

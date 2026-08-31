@@ -246,75 +246,106 @@ describe('rule_request_mappers', () => {
     it('passes artifacts through to API request', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+      ]);
     });
 
     it('merges split artifact fields into API request', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
         runbookArtifacts: [
-          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+          {
+            id: 'runbook-id',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            data: { content: 'Runbook steps' },
+          },
         ],
         dashboardArtifacts: [
-          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+          {
+            id: 'dashboard-id',
+            type: DASHBOARD_ARTIFACT_TYPE,
+            data: { dashboardId: 'dashboard-123' },
+          },
         ],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
       expect(result.artifacts).toEqual([
-        { id: 'artifact-1', type: 'host', value: 'host-a' },
-        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
-        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+        {
+          id: 'runbook-id',
+          type: RUNBOOK_ARTIFACT_TYPE,
+          data: { content: 'Runbook steps' },
+        },
+        {
+          id: 'dashboard-id',
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboardId: 'dashboard-123' },
+        },
       ]);
     });
 
-    it('replaces existing runbook artifact value while preserving artifact id', () => {
+    it('passes runbook artifact data through unchanged including whitespace', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'existing-runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Existing runbook  ' },
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          {
+            id: 'existing-runbook-id',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            data: { content: '  Existing runbook  ' },
+          },
         ],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
       expect(result.artifacts).toEqual([
-        { id: 'artifact-1', type: 'host', value: 'host-a' },
-        { id: 'existing-runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Existing runbook' },
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+        {
+          id: 'existing-runbook-id',
+          type: RUNBOOK_ARTIFACT_TYPE,
+          data: { content: '  Existing runbook  ' },
+        },
       ]);
     });
 
-    it('removes empty runbook artifact and keeps other artifacts', () => {
+    it('passes empty-looking runbook artifacts through without filtering', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' },
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
         ],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
+      ]);
     });
 
-    it('omits artifacts when only runbook artifact is empty', () => {
+    it('passes through a sole empty-looking runbook artifact', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
+        artifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } }],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.artifacts).toBeUndefined();
+      expect(result.artifacts).toEqual([
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
+      ]);
     });
 
     it('omits artifacts when artifacts are empty', () => {
@@ -337,6 +368,7 @@ describe('rule_request_mappers', () => {
     it('maps recovery query and sets recovery_strategy: "query"', () => {
       const formValues: FormValues = {
         ...baseFormValues,
+        kind: 'alert',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 10' },
@@ -360,84 +392,155 @@ describe('rule_request_mappers', () => {
       expect(result.recovery_strategy).toBeUndefined();
     });
 
-    it('keeps non-empty runbook artifact value unchanged', () => {
+    it('includes no_data_strategy when set on alert rule', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        noDataStrategy: 'recover',
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.no_data_strategy).toBe('recover');
+    });
+
+    it('omits no_data_strategy when undefined', () => {
+      const result = mapFormValuesToRuleRequest(baseFormValues);
+
+      expect(result.no_data_strategy).toBeUndefined();
+    });
+
+    it('omits recovery_strategy for signal rules even when set', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'signal',
+        recoveryStrategy: 'no_breach',
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.recovery_strategy).toBeUndefined();
+    });
+
+    it('passes non-empty runbook artifact data through unchanged', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Valid runbook' },
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          {
+            id: 'runbook-id',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            data: { content: 'Valid runbook' },
+          },
         ],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
       expect(result.artifacts).toEqual([
-        { id: 'artifact-1', type: 'host', value: 'host-a' },
-        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Valid runbook' },
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+        {
+          id: 'runbook-id',
+          type: RUNBOOK_ARTIFACT_TYPE,
+          data: { content: 'Valid runbook' },
+        },
       ]);
     });
 
-    it('creates runbook artifact id when runbook artifact id is empty', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        artifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook with missing id' }],
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.artifacts).toHaveLength(1);
-      expect(result.artifacts?.[0]).toEqual({
-        id: expect.stringMatching(/^runbook-\d+-[a-z0-9]+$/),
-        type: RUNBOOK_ARTIFACT_TYPE,
-        value: 'Runbook with missing id',
-      });
-    });
-
-    it('trims dashboard artifact value while preserving artifact id', () => {
+    it('passes empty runbook artifact id through without generating a replacement', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
+          {
+            id: '',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            data: { content: 'Runbook with missing id' },
+          },
         ],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
       expect(result.artifacts).toEqual([
-        { id: 'artifact-1', type: 'host', value: 'host-a' },
-        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+        {
+          id: '',
+          type: RUNBOOK_ARTIFACT_TYPE,
+          data: { content: 'Runbook with missing id' },
+        },
       ]);
     });
 
-    it('removes empty dashboard artifact and keeps other artifacts', () => {
+    it('passes dashboard artifact data through unchanged including whitespace', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '   ' },
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          {
+            id: 'dashboard-id',
+            type: DASHBOARD_ARTIFACT_TYPE,
+            data: { dashboardId: '  dashboard-123  ' },
+          },
         ],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+        {
+          id: 'dashboard-id',
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboardId: '  dashboard-123  ' },
+        },
+      ]);
     });
 
-    it('creates dashboard artifact id when dashboard artifact id is empty', () => {
+    it('passes empty-looking dashboard artifacts through without filtering', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
+        artifacts: [
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          {
+            id: 'dashboard-id',
+            type: DASHBOARD_ARTIFACT_TYPE,
+            data: { dashboardId: '   ' },
+          },
+        ],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.artifacts).toHaveLength(1);
-      expect(result.artifacts?.[0]).toEqual({
-        id: expect.stringMatching(/^dashboard-\d+-[a-z0-9]+$/),
-        type: DASHBOARD_ARTIFACT_TYPE,
-        value: 'dashboard-123',
-      });
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+        {
+          id: 'dashboard-id',
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboardId: '   ' },
+        },
+      ]);
+    });
+
+    it('passes empty dashboard artifact id through without generating a replacement', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          {
+            id: '',
+            type: DASHBOARD_ARTIFACT_TYPE,
+            data: { dashboardId: 'dashboard-123' },
+          },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([
+        {
+          id: '',
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboardId: 'dashboard-123' },
+        },
+      ]);
     });
   });
 
@@ -508,7 +611,7 @@ describe('rule_request_mappers', () => {
         kind: 'alert',
         grouping: { fields: ['host.name'] },
         recoveryStrategy: 'no_breach',
-        noDataStrategy: 'emit',
+        noDataStrategy: 'recover',
         stateTransitionAlertDelayMode: 'duration',
         stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 2, pendingTimeframe: '5m' },
@@ -518,12 +621,36 @@ describe('rule_request_mappers', () => {
 
       expect(result.grouping).toEqual({ fields: ['host.name'] });
       expect(result.recovery_strategy).toBe('no_breach');
-      expect(result.no_data_strategy).toBe('emit');
+      expect(result.no_data_strategy).toBe('recover');
       expect(result.state_transition).toEqual({
         pending_count: 2,
         pending_timeframe: '5m',
         recovering_count: 0,
       });
+    });
+
+    it('preserves recovery_strategy: none', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        recoveryStrategy: 'none',
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.recovery_strategy).toBe('none');
+    });
+
+    it('nullifies recovery_strategy when form recoveryStrategy is unset (do not recover)', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        recoveryStrategy: undefined,
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.recovery_strategy).toBeNull();
     });
 
     it('nullifies empty grouping fields instead of leaving as undefined', () => {
@@ -565,9 +692,28 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toBeNull();
     });
 
+    it('nullifies no_data_strategy when absent', () => {
+      const result = mapFormValuesToUpdateRequest(baseFormValues);
+
+      expect(result.no_data_strategy).toBeNull();
+    });
+
+    it('preserves no_data_strategy when set on alert rule', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        noDataStrategy: 'recover',
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.no_data_strategy).toBe('recover');
+    });
+
     it('infers recovery_strategy: query when user adds recovery via form (recoveryStrategy undefined)', () => {
       const formValues: FormValues = {
         ...baseFormValues,
+        kind: 'alert',
         query: {
           format: 'composed',
           base: 'FROM logs-*',
@@ -760,6 +906,30 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
+    it('maps no_data_strategy from rule response', () => {
+      const rule = {
+        ...baseRuleResponse,
+        no_data_strategy: 'last_known_status',
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.noDataStrategy).toBe('last_known_status');
+    });
+
+    it('defaults noDataStrategy to none for alert rules without no_data_strategy', () => {
+      const result = mapRuleResponseToFormValues(baseRuleResponse);
+
+      expect(result.noDataStrategy).toBe('none');
+    });
+
+    it('defaults noDataStrategy to undefined for signal rules without no_data_strategy', () => {
+      const rule = { ...baseRuleResponse, kind: 'signal' } as RuleResponse;
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.noDataStrategy).toBeUndefined();
+    });
+
     it('treats pending_count: 0 and recovering_count: 0 as immediate mode', () => {
       const rule = {
         ...baseRuleResponse,
@@ -782,20 +952,22 @@ describe('rule_request_mappers', () => {
       const rule = {
         ...baseRuleResponse,
         artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
-          { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          { id: 'runbook-id', type: 'runbook', data: { content: 'Runbook from API' } },
+          { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
         ],
       } as RuleResponse;
 
       const result = mapRuleResponseToFormValues(rule);
 
-      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+      ]);
       expect(result.runbookArtifacts).toEqual([
-        { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
+        { id: 'runbook-id', type: 'runbook', data: { content: 'Runbook from API' } },
       ]);
       expect(result.dashboardArtifacts).toEqual([
-        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+        { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
       ]);
     });
 

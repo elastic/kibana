@@ -6,7 +6,7 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import * as selectors from '../store/selectors';
 import { SideEffectContext } from './side_effect_context';

@@ -148,6 +148,22 @@ describe('createModelProvider', () => {
       expect(model.connector).toEqual(createConnectorMock());
     });
 
+    it('passes maxContentLength to the chat model options', async () => {
+      const deps = setupDeps();
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, maxContentLength: 10 * 1024 * 1024 });
+      await provider.getDefaultModel();
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chatModelOptions: expect.objectContaining({
+            maxContentLength: 10 * 1024 * 1024,
+          }),
+        })
+      );
+    });
+
     it('throws when no connector can be resolved', async () => {
       resolveSelectedConnectorIdMock.mockResolvedValue(undefined);
       const deps = setupDeps();

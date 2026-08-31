@@ -69,7 +69,7 @@ export function useDevToolsRequest({
           i18n.translate(
             'xpack.fleet.editPackagePolicy.devtoolsRequestAgentlessPolicyDescription',
             {
-              defaultMessage: 'These Kibana requests create a new agentless policy.',
+              defaultMessage: 'These Kibana requests create a new managed integration.',
             }
           ),
         ];
@@ -127,7 +127,7 @@ export function useDevToolsRequest({
         i18n.translate(
           'xpack.fleet.editPackagePolicy.devtoolsRequestUpdateAgentlessPolicyDescription',
           {
-            defaultMessage: 'This Kibana request updates an agentless policy.',
+            defaultMessage: 'This Kibana request updates a managed integration.',
           }
         ),
       ];

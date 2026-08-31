@@ -18,8 +18,8 @@ interface HostDoc {
 }
 
 const ipToHostSchema = schema.object({
-  ip: schema.string(),
-  index_pattern: schema.string(),
+  ip: schema.string({ maxLength: 64 }),
+  index_pattern: schema.string({ maxLength: 1000 }),
 });
 
 export const initIpToHostName = ({ framework }: InfraBackendLibs) => {

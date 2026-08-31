@@ -6,16 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Headers, RouteRegistrar, RouteSecurity } from '@kbn/core/server';
+import type { RouteRegistrar, RouteSecurity } from '@kbn/core/server';
 import type { CasesRequestHandlerContext } from '../../types';
 import type { RegisterRoutesDeps } from './types';
-import {
-  escapeHatch,
-  getIsKibanaRequest,
-  getWarningHeader,
-  logDeprecatedEndpoint,
-  wrapError,
-} from './utils';
+import { escapeHatch, getWarningHeader, logDeprecatedEndpoint, wrapError } from './utils';
 
 const getEndpoint = (method: string, path: string): string => `${method.toUpperCase()} ${path}`;
 
@@ -47,20 +41,20 @@ const increaseTelemetryCounters = ({
 
 const logAndIncreaseDeprecationTelemetryCounters = ({
   logger,
-  headers,
   method,
   path,
+  isKibanaRequest,
   telemetryUsageCounter,
 }: {
   logger: RegisterRoutesDeps['logger'];
-  headers: Headers;
   method: string;
   path: string;
+  isKibanaRequest: boolean;
   telemetryUsageCounter?: Exclude<RegisterRoutesDeps['telemetryUsageCounter'], undefined>;
 }) => {
   const endpoint = getEndpoint(method, path);
 
-  logDeprecatedEndpoint(logger, headers, `The endpoint ${endpoint} is deprecated.`);
+  logDeprecatedEndpoint(logger, isKibanaRequest, `The endpoint ${endpoint} is deprecated.`);
 
   if (telemetryUsageCounter) {
     telemetryUsageCounter.incrementCounter({
@@ -89,7 +83,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
       },
       async (context, request, response) => {
         let responseHeaders = {};
-        const isKibanaRequest = getIsKibanaRequest(request.headers);
+        const isKibanaRequest = request.isInternalApiRequest;
 
         if (!context.cases) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
@@ -102,7 +96,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
               logger,
               path,
               method,
-              headers: request.headers,
+              isKibanaRequest,
             });
 
             responseHeaders = {

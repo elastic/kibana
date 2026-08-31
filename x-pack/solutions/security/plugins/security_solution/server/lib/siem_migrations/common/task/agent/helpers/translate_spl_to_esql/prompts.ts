@@ -24,12 +24,10 @@ Here are some context for you to reference for your task, read it carefully as y
 <splunk_query>
 {splunk_query}
 </splunk_query>
-<index_knowledge_base>
-The following is the index knowledge base containing mappings, sample documents and any extra knowledge for the target index. This can be used to ensure correct field names and sometimes values that are used when generating the query.
-\`\`\`json
-{index_knowledge_base}
-\`\`\`
-</index_knowledge_base>
+<translation_context>
+The following translation context may include source index mappings, sample documents, integration documentation, lookup resource metadata, or other information that can help translate the query.
+{translation_context}
+</translation_context>
 <placeholders_syntax>
 If you encounter any placeholders for macros or lookups in the SPL query, leave them as-is in the ES|QL query output. They are markers that need to be preserved.
 They are wrapped in brackets ("[]") and always start with "macro:" or "lookup:". Mention all placeholders you left in the final summary.
@@ -39,6 +37,13 @@ Examples of macros and lookups placeholders:
 - [lookup:someLookup_name]
 </placeholders_syntax>
 <lookup_syntax>
+<lookup_join_rules>
+  - Use LOOKUP JOIN for lookup indices. Do not use ENRICH.
+  - Lookup fields are declared as field elements; field @name is the lookup-side ES|QL field name and field @type is its datatype.
+  - When source and lookup field names differ, use LOOKUP JOIN lookup_index ON source_field == lookup_field.
+  - When source and lookup field names are the same, use LOOKUP JOIN lookup_index ON field_name.
+  - If source and lookup field types differ, create a source-side EVAL field with the matching type before LOOKUP JOIN.
+</lookup_join_rules>
 If in an SPL query you identify a lookup call, it should be translated the following way:
 \`\`\`spl
 ... | lookup users uid OUTPUTNEW username, department

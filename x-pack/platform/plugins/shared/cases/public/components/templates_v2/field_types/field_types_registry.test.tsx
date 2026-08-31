@@ -52,6 +52,10 @@ fields:
     control: TEXTAREA
     label: Textarea label
     type: keyword
+  - name: requires_escalation
+    control: TOGGLE
+    label: Toggle label
+    type: boolean
 `;
 
 const invalidTemplateDefinition = `
@@ -80,6 +84,7 @@ describe('controlRegistry', () => {
     expect(screen.getByLabelText('Input text label')).toBeInTheDocument();
     expect(screen.getByLabelText('Input number label')).toBeInTheDocument();
     expect(screen.getByLabelText('Textarea label')).toBeInTheDocument();
+    expect(screen.getByText('Toggle label')).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'low' })).toBeInTheDocument();
   });
 
@@ -98,6 +103,7 @@ describe('controlRegistry', () => {
       'Input text label',
       'Input number label',
       'Textarea label',
+      'Toggle label',
     ]);
   });
 });

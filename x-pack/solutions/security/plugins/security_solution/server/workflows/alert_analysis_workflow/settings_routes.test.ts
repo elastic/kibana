@@ -12,12 +12,14 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
 } from '@kbn/management-settings-ids';
 import type { StartPlugins } from '../../plugin';
 import type {
@@ -45,6 +47,8 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     uninstall: jest.Mock;
     ready: jest.Mock;
     getWorkflowStatus: jest.Mock;
+    getInstalledWorkflowState: jest.Mock;
+    listInstalledWorkflowStates: jest.Mock;
     execute: jest.Mock;
   };
 
@@ -84,6 +88,8 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       uninstall: jest.fn().mockResolvedValue(undefined),
       ready: jest.fn().mockResolvedValue(undefined),
       getWorkflowStatus: jest.fn().mockResolvedValue({ status: 'intact' }),
+      getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
+      listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
       execute: jest.fn().mockResolvedValue('mock-execution-id'),
     };
 
@@ -115,7 +121,9 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         .mockResolvedValueOnce(0.7) // autoCloseConfidenceScoreMinThreshold
         .mockResolvedValueOnce(0.9) // autoCloseConfidenceScoreMaxThreshold
         .mockResolvedValueOnce('connector-abc') // connectorId
-        .mockResolvedValueOnce(true); // createConversation
+        .mockResolvedValueOnce('elastic-ai-agent') // agentId
+        .mockResolvedValueOnce(true) // createConversation
+        .mockResolvedValueOnce('alert-analysis'); // tagPrefix
     };
 
     it('returns the current space-scoped settings', async () => {
@@ -134,7 +142,9 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
             autoCloseConfidenceScoreMinThreshold: 0.7,
             autoCloseConfidenceScoreMaxThreshold: 0.9,
             connectorId: 'connector-abc',
+            agentId: 'elastic-ai-agent',
             createConversation: true,
+            tagPrefix: 'alert-analysis',
           },
           workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
         },
@@ -172,7 +182,9 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       autoCloseConfidenceScoreMinThreshold: 0.75,
       autoCloseConfidenceScoreMaxThreshold: 0.95,
       connectorId: 'connector-xyz',
+      agentId: 'my-custom-agent',
       createConversation: false,
+      tagPrefix: 'alert-analysis',
     };
 
     it('persists settings without reinstalling the workflow', async () => {
@@ -190,8 +202,10 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]:
           settings.autoCloseConfidenceScoreMaxThreshold,
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: settings.connectorId,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: settings.agentId,
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
           settings.createConversation,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: settings.tagPrefix,
       });
       // The globally-installed workflow reads settings from uiSettings on its next run, so saving
       // never reinstalls or rewrites the workflow document.
@@ -221,6 +235,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
           autoCloseEnabled: settings.autoCloseEnabled,
           createConversation: settings.createConversation,
           connectorConfigured: true,
+          customAgent: true,
         })
       );
     });
@@ -262,7 +277,9 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         .mockResolvedValueOnce(0.85) // autoCloseConfidenceScoreMinThreshold
         .mockResolvedValueOnce(1) // autoCloseConfidenceScoreMaxThreshold
         .mockResolvedValueOnce('connector-abc') // connectorId
-        .mockResolvedValueOnce(true); // createConversation
+        .mockResolvedValueOnce('elastic-ai-agent') // agentId
+        .mockResolvedValueOnce(true) // createConversation
+        .mockResolvedValueOnce('alert-analysis'); // tagPrefix
     };
 
     const getHandler = () =>
@@ -283,7 +300,9 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
           autoCloseConfidenceScoreMinThreshold: 0.85,
           autoCloseConfidenceScoreMaxThreshold: 1,
           connectorId: 'connector-abc',
+          agentId: 'elastic-ai-agent',
           createConversation: true,
+          tagPrefix: 'alert-analysis',
         },
       });
     });

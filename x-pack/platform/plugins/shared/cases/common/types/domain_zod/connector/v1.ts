@@ -139,6 +139,22 @@ export const CaseUserActionConnectorSchema = z.discriminatedUnion('type', [
 
 const IdSchema = z.object({ id: z.string() });
 
+/**
+ * Connector shape for template definitions: `type` + `id` + per-type `fields`, without `name`
+ * (resolved from `id` at create time). Reuses the per-type field blocks so connector shape has a
+ * single source of truth.
+ */
+export const CaseConnectorWithoutNameSchema = z.discriminatedUnion('type', [
+  ConnectorCasesWebhookTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorJiraTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorNoneTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorResilientTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorServiceNowITSMTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorServiceNowSIRTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorSwimlaneTypeFieldsSchema.extend(IdSchema.shape),
+  ConnectorTheHiveTypeFieldsSchema.extend(IdSchema.shape),
+]);
+
 export const CaseConnectorSchema = z.discriminatedUnion('type', [
   ConnectorCasesWebhookTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
   ConnectorJiraTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
@@ -188,6 +204,7 @@ export type ConnectorMappingSource = z.infer<typeof ConnectorMappingSourceSchema
 export type ConnectorMappingTarget = z.infer<typeof ConnectorMappingTargetSchema>;
 export type CaseUserActionConnector = z.infer<typeof CaseUserActionConnectorSchema>;
 export type CaseConnector = z.infer<typeof CaseConnectorSchema>;
+export type CaseConnectorWithoutName = z.infer<typeof CaseConnectorWithoutNameSchema>;
 export type ConnectorTypeFields = z.infer<typeof ConnectorTypeFieldsSchema>;
 export type JiraFieldsType = z.infer<typeof JiraFieldsSchema>;
 export type ResilientFieldsType = z.infer<typeof ResilientFieldsSchema>;

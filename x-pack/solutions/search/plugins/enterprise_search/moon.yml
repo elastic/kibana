@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/enterprise-search-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/enterprise-search-plugin'
   description: Moon project for @kbn/enterprise-search-plugin
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/solutions/search/plugins/enterprise_search
 dependsOn:
   - '@kbn/core'
@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/cell-actions'
   - '@kbn/ui-actions-plugin'
   - '@kbn/alerting-v2-utils'
+  - '@kbn/deeplinks-workflows'
   - '@kbn/fleet-plugin'
   - '@kbn/search-shared-ui'
   - '@kbn/charts-theme'
@@ -88,6 +89,7 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/ml-common-types'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

@@ -37,6 +37,7 @@ const getDefaultEntityFromStoreResult = () => ({
   firstSeen: null,
   lastSeen: null,
   isLoading: false,
+  isInitialLoading: false,
   error: null,
   refetch: jest.fn(),
 });

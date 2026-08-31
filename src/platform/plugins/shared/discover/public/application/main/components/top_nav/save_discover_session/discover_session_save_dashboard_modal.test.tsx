@@ -61,6 +61,18 @@ describe('DiscoverSessionSaveDashboardModal', () => {
     setStubKibanaServices();
   });
 
+  it('shows the store time switch when isTimeBased is true', async () => {
+    renderSaveModal({ isTimeBased: true });
+    await screen.findByTestId('savedObjectSaveModal');
+    expect(screen.getByTestId('storeTimeWithSearch')).toBeInTheDocument();
+  });
+
+  it('hides the store time switch when isTimeBased is false', async () => {
+    renderSaveModal({ isTimeBased: false });
+    await screen.findByTestId('savedObjectSaveModal');
+    expect(screen.queryByTestId('storeTimeWithSearch')).not.toBeInTheDocument();
+  });
+
   it('passes modal state to onSave', async () => {
     const { onSave } = renderSaveModal();
 

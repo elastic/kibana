@@ -1,12 +1,16 @@
 # https://moonrepo.dev/docs/config/workspace
-$schema: https://moonrepo.dev/schemas/workspace.json
+$schema: https://moonrepo.dev/schemas/v2/workspace.json
 
 projects:
+  # Glob-based discovery skips dotfile directories, so `.buildkite` is registered
+  # explicitly via `sources` below.
   globs:
     - src/**/moon.yml
     - x-pack/**/moon.yml
     - examples/**/moon.yml
     - packages/**/moon.yml
+  sources:
+    kibana-buildkite: .buildkite
 vcs:
   defaultBranch: main
   client: git
@@ -16,6 +20,17 @@ pipeline:
   syncWorkspace: false
   syncProjectDependencies: false
   syncProjects: false
+
+# https://moonrepo.dev/docs/config/workspace#experiments
+# Benchmarked during the 2.4.6 upgrade, only the two low-risk wins are enabled.
+experiments:
+  asyncGraphBuilding: true # ~-13% on graph/query workloads, low risk
+  nativeFileHashing: true # small consistent win, low risk
+  asyncAffectedTracking: false # governs affected/test selection; no measured gain and a bug means missed CI tests
+  casOutputsCache: false # changes local output-cache format (interacts with the HTTP remote cache); only a noisy cold-build gain
+
+# https://moonrepo.dev/docs/guides/daemon
+unstable_daemon: false # explicitly unstable; can serve a stale graph; local-dev only
 
 # https://moonrepo.dev/docs/guides/remote-cache
 # Auth credentials will be missing on local environments, but that's OK.

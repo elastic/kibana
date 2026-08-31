@@ -77,7 +77,9 @@ async function handleFromAutocomplete(
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
   const subquerySuggestions =
-    commandText.length > command.name.length ? buildSubqueryCompleteItems() : undefined;
+    commandText.length > command.name.length
+      ? buildSubqueryCompleteItems({ previewCommands: ['row', 'ts'] })
+      : undefined;
   const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
     callbacks,
     context,

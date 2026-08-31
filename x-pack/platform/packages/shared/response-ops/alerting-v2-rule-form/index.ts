@@ -61,23 +61,25 @@ export type {
 
 export {
   buildInlineWorkflowYaml,
+  buildRuleScopedMatcher,
   InlineWorkflowEditor,
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,
   getDefaultInlineActionStepDefinition,
   isActionValid,
-  buildRuleScopedMatcher,
-  selectRuleSimpleActionPolicies,
+  isExplicitlyLinkedToRule,
+  isRuleScopedCatchAllMatcher,
+  summarizeExplicitlyLinkedActionPolicies,
 } from './actions_form';
 export type {
   ActionDraft,
-  ActionDraftOrigin,
-  RuleScopedSimpleActionPolicy,
+  LinkedActionPolicySummary,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,
 } from './actions_form';
-export { getRuleNotificationDraftsQueryKey } from './flyout/compose_discover/compose_discover_form/use_rule_notification_drafts';
+export { useMatchedActionPolicies } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
+export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 
 // Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
 export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';
@@ -93,9 +95,37 @@ export type {
   ConditionOperator,
 } from './flyout/compose_discover/rule_builder/threshold/form_types';
 
-export { resolveDashboardsByIds } from './form/field_groups/search_related_dashboards';
+export {
+  resolveDashboardsByIds,
+  searchRelatedDashboard,
+} from './form/field_groups/search_related_dashboards';
 export type {
   Dashboard,
   MissingDashboard,
   ResolveDashboardsResult,
 } from './form/field_groups/search_related_dashboards';
+export { partitionArtifactsByDashboardType } from './form/field_groups/dashboard_artifact_selection';
+export { mapArtifacts } from './form/utils/artifact_mappers';
+export type { RuleArtifactPayload } from './form/utils/artifact_mappers';
+export { getRunbookContent, getDashboardId } from './form';
+export type { RunbookArtifactData, DashboardArtifactData } from './form';
+
+export { composeFormToCreateRequest } from './flyout/compose_discover/compose_mappers';
+
+// Sequence builder
+export type { SequenceFormValues, SequenceRule, HopWindow } from './sequence/form_types';
+export {
+  RULE_DRAG_MIME_TYPE,
+  generateStepId,
+  DEFAULT_SEQUENCE_FORM_VALUES,
+  isSequenceValid,
+  totalLookbackSeconds,
+  getCommonGroupingFields,
+  formatLookbackString,
+} from './sequence/form_types';
+export { buildSequenceRuleQueryData } from './sequence/build_esql';
+export { SequenceNode } from './sequence/sequence_node';
+export type { SequenceNodeType } from './sequence/sequence_node';
+export { SequenceEdge, WINDOW_OPTIONS } from './sequence/sequence_edge';
+export type { SequenceEdgeType } from './sequence/sequence_edge';
+export { layoutSequence } from './sequence/layout_sequence';

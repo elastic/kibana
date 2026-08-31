@@ -14,7 +14,6 @@ import {
   getResolutionGroupTab,
   getRiskInputTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
-import { useHasAnomalies } from '../../../entity_analytics/api/hooks/use_has_anomalies';
 import { useAnomalyPrivileges } from '../../../entity_analytics/api/hooks/use_anomaly_privileges';
 import { UserAssetTableType } from '../../../explore/users/store/model';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
@@ -48,11 +47,6 @@ export const useTabs = (
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
-  const hasAnomalies = useHasAnomalies({
-    entityId: entityStoreEntityId ?? '',
-    entityType: EntityType.user,
-    enabled: loadAnomalies,
-  });
 
   return useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -71,7 +65,7 @@ export const useTabs = (
       );
     }
 
-    if (loadAnomalies && hasAnomalies) {
+    if (loadAnomalies) {
       tabs.push(
         getAnomaliesTab({
           entityId: entityStoreEntityId,
@@ -119,7 +113,6 @@ export const useTabs = (
     isRiskScoreExist,
     entityStoreEntityId,
     loadAnomalies,
-    hasAnomalies,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     name,

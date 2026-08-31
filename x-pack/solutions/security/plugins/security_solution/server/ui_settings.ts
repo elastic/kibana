@@ -8,20 +8,28 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_EXCLUDED_GAP_REASONS, gapReasonType } from '@kbn/alerting-plugin/common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
 } from '@kbn/management-settings-ids';
 import { snakeCase } from 'lodash';
+import {
+  TAG_PREFIX_MAX_LENGTH,
+  TAG_PREFIX_PATTERN,
+  TAG_PREFIX_VALIDATION_MESSAGE,
+} from '../common/workflows/alert_analysis_workflow';
 import { DefaultClosingReasonSchema } from '../common/types';
 import {
   APP_ID,
@@ -45,8 +53,10 @@ import {
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
+  ENABLE_SIEM_READINESS_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
   ENABLE_NEW_FLYOUT_SETTING,
   ENABLE_NEWS_FEED_SETTING,
@@ -69,6 +79,53 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
+
+/**
+ * Definition for the per-space `securitySolution:enableAttackDiscoveryWorkflows`
+ * Advanced Setting.
+ *
+ * Registered synchronously as part of the `securityUiSettings` object, positioned
+ * immediately after `enableAlertsAndAttacksAlignment`. The Advanced Settings UI
+ * renders settings in server registration order (the `order` field is not honored
+ * by the current management UI), so registering it here — rather than via a
+ * deferred continuation — is what keeps it in the expected position.
+ *
+ * The toggle is always visible and defaults to `false`. Ideally it would be
+ * hidden when the global `attackDiscoveryWorkflowsEnabled` feature flag is off,
+ * but two platform constraints prevent that: (1) UI settings must be registered
+ * synchronously during plugin setup, and feature-flag evaluation requires
+ * `FeatureFlagsStart` (only available after setup completes); (2) the Advanced
+ * Settings page has no API to show/hide individual settings based on feature
+ * flags. The FF is only ever `false` when an administrator disables it globally;
+ * in that case the toggle is a harmless noop. Behavior is gated by `FF &&
+ * setting` at every server and client read site (see `isWorkflowsEnabledForSpace`).
+ *
+ * @security_note This setting is enforced server-side: `assertWorkflowsEnabled`
+ * (which calls `isWorkflowsEnabledForSpace`) returns 404 on every internal AD
+ * route when the setting is off, regardless of the caller's privilege level.
+ * The real security boundary for *who may run* Attack Discovery is role-based
+ * privileges (`securitySolution-attackDiscoveryAll` + `workflowsManagement:*`),
+ * enforced separately.  The per-space toggle controls *whether the feature is
+ * active for that space*; RBAC controls *who may use it*.
+ */
+export const attackDiscoveryWorkflowsSetting: UiSettingsParams<boolean> = {
+  name: i18n.translate('xpack.securitySolution.uiSettings.enableAttackDiscoveryWorkflows.name', {
+    defaultMessage: 'Attack Discovery Workflows',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.uiSettings.enableAttackDiscoveryWorkflows.description',
+    {
+      defaultMessage:
+        'Enable Attack Discovery Workflows for this space. When enabled, Attack Discovery uses orchestrated workflows for alert retrieval and analysis. Has no effect when Attack Discovery Workflows are disabled at the deployment level.',
+    }
+  ),
+  type: 'boolean',
+  value: false,
+  category: [APP_ID],
+  requiresPageReload: true,
+  schema: schema.boolean(),
+  solutionViews: ['classic', 'security'],
+};
 
 /**
  * This helper is used to preserve settings order in the UI
@@ -225,14 +282,19 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
-        technicalPreview: true,
       },
     }),
+    // Registered here (immediately after `enableAlertsAndAttacksAlignment`, before
+    // `enableAssetInventory`) so it renders in that position: the Advanced Settings
+    // UI displays settings in server registration order, not by the `order` field.
+    // When `enableAlertsAndAttacksAlignment` is disabled its entry is absent, so this
+    // setting falls into the same slot, immediately before `enableAssetInventory`.
+    [ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING]: attackDiscoveryWorkflowsSetting,
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Security Asset Inventory',
@@ -241,6 +303,25 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
           defaultMessage: `Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
+        }
+      ),
+      type: 'boolean',
+      value: false,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
+    },
+    [ENABLE_SIEM_READINESS_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableSiemReadinessLabel', {
+        defaultMessage: 'Enable SIEM Readiness',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableSiemReadinessDescription',
+        {
+          defaultMessage:
+            'Enable the SIEM Readiness experience within the Security Solution. When enabled, you can access SIEM Readiness from the Launchpad menu.',
         }
       ),
       type: 'boolean',
@@ -314,7 +395,7 @@ export const initUiSettings = (
         technicalPreview: true,
       },
     }),
-    ...(experimentalFeatures.newFlyoutSystemEnabled && {
+    ...(!experimentalFeatures.newFlyoutSystemDisabled && {
       [ENABLE_NEW_FLYOUT_SETTING]: {
         name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
           defaultMessage: 'Enable new flyout',
@@ -328,7 +409,7 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
@@ -350,12 +431,11 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
-        technicalPreview: true,
       },
     }),
     [NEWS_FEED_URL_SETTING]: {
@@ -828,6 +908,29 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     technicalPreview: true,
     readonly: true,
   },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowAgentIdLabel', {
+      defaultMessage: 'Alert analysis workflow agent',
+    }),
+    // The agent id is redacted from telemetry (see `sensitive` below); we only report whether a
+    // non-default agent is configured, never which one.
+    sensitive: true,
+    value: agentBuilderDefaultAgentId,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAgentIdDescription',
+      {
+        defaultMessage:
+          'The Agent Builder agent used by the alert analysis workflow to classify alerts.',
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.string({ minLength: 1, maxLength: 64 }),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
   [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]: {
     name: i18n.translate(
       'xpack.securitySolution.uiSettings.alertAnalysisWorkflowCreateConversationLabel',
@@ -845,6 +948,35 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     category: [APP_ID],
     requiresPageReload: false,
     schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowTagPrefixLabel', {
+      defaultMessage: 'Alert analysis workflow tag prefix',
+    }),
+    value: 'alert-analysis',
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowTagPrefixDescription',
+      {
+        defaultMessage:
+          'Prefix for the tags the alert analysis workflow adds to alerts it analyzes (for example {example}). Changing it means alerts tagged under the old prefix are no longer recognized as analyzed.',
+        values: { example: 'alert-analysis.classification.false_positive' },
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    // The prefix is interpolated verbatim into the workflow's Liquid tag expressions, so it is
+    // constrained to a safe tag-namespace charset here too (this path is writable through the
+    // settings API, not just the workflow settings page).
+    schema: schema.string({
+      minLength: 1,
+      maxLength: TAG_PREFIX_MAX_LENGTH,
+      validate: (value) =>
+        TAG_PREFIX_PATTERN.test(value) ? undefined : TAG_PREFIX_VALIDATION_MESSAGE,
+    }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
     readonly: true,

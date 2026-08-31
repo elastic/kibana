@@ -7,10 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject } from '@kbn/core/server';
+import type { SavedObject, SavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { SavedObjectWithMetadata } from '../../common/types/v1';
 
-export function toSavedObjectWithMeta(so: SavedObject): SavedObjectWithMetadata {
+export function toSavedObjectWithMeta(
+  so: SavedObject | SavedObjectErrorResult
+): SavedObjectWithMetadata {
+  if (isSavedObjectErrorResult(so)) {
+    return {
+      id: so.id,
+      type: so.type,
+      error: so.error,
+      meta: {},
+    } as SavedObjectWithMetadata;
+  }
   return {
     id: so.id,
     type: so.type,
@@ -20,7 +31,6 @@ export function toSavedObjectWithMeta(so: SavedObject): SavedObjectWithMetadata 
     managed: so.managed,
     attributes: so.attributes,
     created_at: so.created_at,
-    error: so.error,
     meta: {},
   };
 }

@@ -21,6 +21,8 @@ describe('alert analysis workflow install', () => {
     uninstall: jest.fn().mockResolvedValue(undefined),
     ready: jest.fn().mockResolvedValue(undefined),
     getWorkflowStatus: jest.fn().mockResolvedValue(undefined),
+    getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
+    listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
     execute: jest.fn().mockResolvedValue('execution-id'),
   });
 
@@ -35,7 +37,7 @@ describe('alert analysis workflow install', () => {
   });
 
   describe('readSecurityAlertAnalysisWorkflowSettings', () => {
-    it('reads the six settings from the given uiSettings client', async () => {
+    it('reads the settings from the given uiSettings client', async () => {
       const uiSettingsClient = {
         get: jest
           .fn()
@@ -44,7 +46,9 @@ describe('alert analysis workflow install', () => {
           .mockResolvedValueOnce(0.8)
           .mockResolvedValueOnce(0.95)
           .mockResolvedValueOnce('connector-abc')
-          .mockResolvedValueOnce(false),
+          .mockResolvedValueOnce('elastic-ai-agent')
+          .mockResolvedValueOnce(false)
+          .mockResolvedValueOnce('alert-analysis'),
       };
 
       const result = await readSecurityAlertAnalysisWorkflowSettings(uiSettingsClient);
@@ -55,7 +59,9 @@ describe('alert analysis workflow install', () => {
         autoCloseConfidenceScoreMinThreshold: 0.8,
         autoCloseConfidenceScoreMaxThreshold: 0.95,
         connectorId: 'connector-abc',
+        agentId: 'elastic-ai-agent',
         createConversation: false,
+        tagPrefix: 'alert-analysis',
       });
     });
   });

@@ -7,25 +7,41 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import { CustomFieldTypes } from '../../../../../../../common/types/domain';
+import { FieldType } from '../../../../../../../common/types/domain/template/fields';
 import { renderWithTestingProviders } from '../../../../../../common/mock';
 import { basicCase } from '../../../../../../containers/mock';
+import { useCasesConfig } from '../../../../../../common/lib/kibana';
+import { useGlobalInlineFields } from '../../../../../all_cases/hooks/use_global_inline_fields';
 import { ListItemOptionalFields } from './list_item_optional_fields';
 import * as i18n from '../../../translations';
 
-const buildExtendedFields = (count: number): Record<string, string> =>
-  Object.fromEntries(
-    Array.from({ length: count }, (_, index) => [`field_${index}_as_keyword`, `value-${index}`])
-  );
+jest.mock('../../../../../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../../../../../common/lib/kibana'),
+  useCasesConfig: jest.fn(),
+}));
+jest.mock('../../../../../all_cases/hooks/use_global_inline_fields', () => ({
+  ...jest.requireActual('../../../../../all_cases/hooks/use_global_inline_fields'),
+  useGlobalInlineFields: jest.fn(),
+}));
+
+const useCasesConfigMock = useCasesConfig as jest.Mock;
+const useGlobalInlineFieldsMock = useGlobalInlineFields as jest.Mock;
 
 describe('ListItemOptionalFields', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: false });
+    useGlobalInlineFieldsMock.mockReturnValue({ globalInlineFields: [], isLoading: false });
+  });
+
   it('returns null when no fields are checked', () => {
     const { container } = renderWithTestingProviders(
       <ListItemOptionalFields
         theCase={basicCase}
         selectedFields={[{ field: 'tags', name: i18n.TAGS, isChecked: false }]}
+        userProfiles={new Map()}
       />
     );
 
@@ -37,6 +53,7 @@ describe('ListItemOptionalFields', () => {
       <ListItemOptionalFields
         theCase={{ ...basicCase, tags: ['coke', 'pepsi'] }}
         selectedFields={[{ field: 'tags', name: i18n.TAGS, isChecked: true }]}
+        userProfiles={new Map()}
       />
     );
 
@@ -52,6 +69,7 @@ describe('ListItemOptionalFields', () => {
           customFields: [{ key: 'priority', value: 'high', type: CustomFieldTypes.TEXT }],
         }}
         selectedFields={[{ field: 'priority', name: 'Priority', isChecked: true }]}
+        userProfiles={new Map()}
       />
     );
 
@@ -60,67 +78,95 @@ describe('ListItemOptionalFields', () => {
     );
   });
 
-  it('renders extended fields as a count with a tooltip listing field labels', async () => {
+  it('renders extended field values from extendedFields when templates v2 is enabled', () => {
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: true });
+    useGlobalInlineFieldsMock.mockReturnValue({
+      globalInlineFields: [
+        { name: 'priority', type: 'keyword', control: FieldType.INPUT_TEXT, label: 'Priority' },
+      ],
+      isLoading: false,
+    });
+
     renderWithTestingProviders(
       <ListItemOptionalFields
-        theCase={{
-          ...basicCase,
-          extendedFields: {
-            summary_as_keyword: 'hello',
-            effort_as_integer: '3',
-          },
-          extendedFieldsLabels: {
-            summary_as_keyword: 'Summary',
-            effort_as_integer: 'Effort',
-          },
-        }}
-        selectedFields={[{ field: 'extendedFields', name: i18n.EXTENDED_FIELDS, isChecked: true }]}
+        theCase={{ ...basicCase, extendedFields: { priorityAsKeyword: 'high' } } as never}
+        selectedFields={[{ field: 'priority_as_keyword', name: 'Priority', isChecked: true }]}
+        userProfiles={new Map()}
       />
     );
 
-    const extendedFields = screen.getByTestId('cases-list-item-field-extended-fields');
-    expect(extendedFields).toHaveTextContent('Extended fields: 2');
-    expect(
-      screen.getByTestId('cases-list-item-field-extended-fields-tooltip-anchor')
-    ).toHaveTextContent('2');
-    expect(extendedFields).not.toHaveTextContent('hello');
-    expect(extendedFields).not.toHaveTextContent('Summary:');
-
-    await userEvent.hover(
-      screen.getByTestId('cases-list-item-field-extended-fields-tooltip-anchor')
+    expect(screen.getByTestId('cases-list-item-field-priority_as_keyword')).toHaveTextContent(
+      'Priority: high'
     );
-
-    expect(await screen.findByText('Summary')).toBeInTheDocument();
-    expect(screen.getByText('Effort')).toBeInTheDocument();
   });
 
-  it('shows the total count and lists all field labels in the tooltip when there are many extended fields', async () => {
-    renderWithTestingProviders(
+  it('omits an extended field with no stored value', () => {
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: true });
+    useGlobalInlineFieldsMock.mockReturnValue({
+      globalInlineFields: [
+        { name: 'priority', type: 'keyword', control: FieldType.INPUT_TEXT, label: 'Priority' },
+      ],
+      isLoading: false,
+    });
+
+    const { container } = renderWithTestingProviders(
       <ListItemOptionalFields
-        theCase={{
-          ...basicCase,
-          extendedFields: buildExtendedFields(7),
-        }}
-        selectedFields={[{ field: 'extendedFields', name: i18n.EXTENDED_FIELDS, isChecked: true }]}
+        theCase={{ ...basicCase, extendedFields: {} } as never}
+        selectedFields={[{ field: 'priority_as_keyword', name: 'Priority', isChecked: true }]}
+        userProfiles={new Map()}
       />
     );
 
-    const extendedFields = screen.getByTestId('cases-list-item-field-extended-fields');
-    expect(extendedFields).toHaveTextContent('Extended fields: 7');
-    expect(
-      screen.getByTestId('cases-list-item-field-extended-fields-tooltip-anchor')
-    ).toHaveTextContent('7');
-    expect(extendedFields).not.toHaveTextContent('value-0');
-    expect(
-      screen.queryByTestId('cases-list-item-field-extended-fields-more')
-    ).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
+  });
 
-    await userEvent.hover(
-      screen.getByTestId('cases-list-item-field-extended-fields-tooltip-anchor')
+  it('renders avatars for a user-picker extended field using the resolved profile', () => {
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: true });
+    useGlobalInlineFieldsMock.mockReturnValue({
+      globalInlineFields: [
+        {
+          name: 'reviewers',
+          type: 'keyword',
+          control: FieldType.USER_PICKER,
+          label: 'Reviewers',
+        },
+      ],
+      isLoading: false,
+    });
+
+    const uid = 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0';
+    const userProfiles = new Map([
+      [
+        uid,
+        {
+          uid,
+          enabled: true,
+          data: {},
+          user: {
+            username: 'damaged_raccoon',
+            email: 'damaged_raccoon@elastic.co',
+            full_name: 'Damaged Raccoon',
+          },
+        },
+      ],
+    ]) as never;
+
+    renderWithTestingProviders(
+      <ListItemOptionalFields
+        theCase={
+          {
+            ...basicCase,
+            extendedFields: {
+              reviewersAsKeyword: JSON.stringify([{ uid, name: 'stale name' }]),
+            },
+          } as never
+        }
+        selectedFields={[{ field: 'reviewers_as_keyword', name: 'Reviewers', isChecked: true }]}
+        userProfiles={userProfiles}
+      />
     );
 
-    expect(await screen.findByText('Field 0')).toBeInTheDocument();
-    expect(screen.getByText('Field 6')).toBeInTheDocument();
-    expect(screen.queryByText('value-0')).not.toBeInTheDocument();
+    expect(screen.getByTestId('cases-list-item-field-reviewers_as_keyword')).toBeInTheDocument();
+    expect(screen.getByText('DR')).toBeInTheDocument();
   });
 });

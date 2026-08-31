@@ -26,6 +26,7 @@ import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
+import { registerGetWorkflowTool } from './tools/get_workflow_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
 import { getWorkflowExecutionStatusTool } from './tools/get_workflow_execution_status';
@@ -57,7 +58,7 @@ export class AgentBuilderWorkflowsPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderWorkflowsPluginSetup {
-    const { agentBuilder, agentContextLayer, workflowsManagement } = setupDeps;
+    const { agentBuilder, agentBuilderSml, workflowsManagement } = setupDeps;
     const api = workflowsManagement.management;
     this.api = api;
 
@@ -67,6 +68,7 @@ export class AgentBuilderWorkflowsPlugin
 
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
+    registerGetWorkflowTool(agentBuilder, api, getSecurity);
     registerGetStepDefinitionsTool(agentBuilder, api);
     registerGetTriggerDefinitionsTool(agentBuilder, api);
     registerGetConnectorsTool(agentBuilder, api);
@@ -81,7 +83,7 @@ export class AgentBuilderWorkflowsPlugin
     agentBuilder.skills.register(workflowAuthoringSkill);
 
     // Workflow SML type for the agent context layer
-    agentContextLayer.registerType(createWorkflowSmlType(api));
+    agentBuilderSml.registerType(createWorkflowSmlType(api));
 
     // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
@@ -89,7 +91,7 @@ export class AgentBuilderWorkflowsPlugin
       resumeWorkflowExecutionTool({ workflowsManagement }),
       listWorkflowExecutionsTool({ workflowsManagement, getSecurity }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
-      executeWorkflowTool({ workflowsManagement }),
+      executeWorkflowTool({ workflowsManagement, getSecurity }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 
@@ -103,7 +105,7 @@ export class AgentBuilderWorkflowsPlugin
     this.security = startDeps.security;
     if (this.api) {
       this.api.setSmlIndexAttachment(
-        startDeps.agentContextLayer.indexAttachment,
+        startDeps.agentBuilderSml.indexAttachment,
         this.logger.get('sml')
       );
     }

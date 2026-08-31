@@ -39,7 +39,12 @@ const renderComponent = (
 
 describe('LinkedActionPoliciesStep', () => {
   it('always renders the title and subtext', () => {
-    mockUseMatchedActionPolicies.mockReturnValue({ isLoading: false, error: null, items: [] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [],
+      total: 0,
+    });
 
     renderComponent();
 
@@ -48,7 +53,12 @@ describe('LinkedActionPoliciesStep', () => {
   });
 
   it('shows a loading spinner while fetching', () => {
-    mockUseMatchedActionPolicies.mockReturnValue({ isLoading: true, error: null, items: [] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: true,
+      error: null,
+      items: [],
+      total: 0,
+    });
 
     renderComponent();
 
@@ -56,7 +66,12 @@ describe('LinkedActionPoliciesStep', () => {
   });
 
   it('shows an empty state when no policies match', () => {
-    mockUseMatchedActionPolicies.mockReturnValue({ isLoading: false, error: null, items: [] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [],
+      total: 0,
+    });
 
     renderComponent();
 
@@ -78,6 +93,7 @@ describe('LinkedActionPoliciesStep', () => {
           category: 'global-filtered',
         },
       ],
+      total: 2,
     });
 
     renderComponent();
@@ -93,6 +109,7 @@ describe('LinkedActionPoliciesStep', () => {
       isLoading: false,
       error: new Error('Network error'),
       items: [],
+      total: 0,
     });
 
     renderComponent();
@@ -102,7 +119,12 @@ describe('LinkedActionPoliciesStep', () => {
 
   it('passes name and tags from form values when ruleId is not provided', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
-    mockUseMatchedActionPolicies.mockReturnValue({ isLoading: false, error: null, items: [] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [],
+      total: 0,
+    });
 
     renderComponent({ ruleId: undefined });
 
@@ -113,7 +135,12 @@ describe('LinkedActionPoliciesStep', () => {
 
   it('passes current form name and tags alongside ruleId so unsaved changes are reflected', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
-    mockUseMatchedActionPolicies.mockReturnValue({ isLoading: false, error: null, items: [] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [],
+      total: 0,
+    });
 
     renderComponent({ ruleId: 'rule-abc' });
 

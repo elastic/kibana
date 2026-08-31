@@ -19,6 +19,7 @@ const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);
 const stream = { name: 'logs.test-default' } as Streams.all.Definition;
 const esClient = {} as ElasticsearchClient;
 const logger = {} as Logger;
+const signal = new AbortController().signal;
 
 describe('logSamplesGenerator', () => {
   beforeEach(() => {
@@ -46,6 +47,7 @@ describe('logSamplesGenerator', () => {
       end: 200,
       esClient,
       logger,
+      signal,
     });
 
     expect(getSampleDocumentsEsqlMock).toHaveBeenCalledWith({
@@ -54,6 +56,7 @@ describe('logSamplesGenerator', () => {
       start: 100,
       end: 200,
       sampleSize: 5,
+      abortSignal: signal,
     });
     expect(result).toEqual({
       samples: [{ 'service.name': 'checkout', message: 'checkout succeeded' }],

@@ -191,6 +191,40 @@ describe('FileUpload', () => {
     expect(onDone).not.toHaveBeenCalled();
   });
 
+  it('does not call onFilesSelected on mount', async () => {
+    const onFilesSelected = jest.fn();
+
+    await initTestBed({ onFilesSelected });
+
+    expect(onFilesSelected).not.toHaveBeenCalled();
+  });
+
+  it('calls onFilesSelected with the picked files before upload', async () => {
+    const onFilesSelected = jest.fn();
+    const picked = { name: 'test', size: 1 } as File;
+
+    const { actions } = await initTestBed({ onFilesSelected });
+
+    await actions.addFiles([picked]);
+
+    expect(onFilesSelected).toHaveBeenCalledTimes(1);
+    expect(onFilesSelected).toHaveBeenCalledWith([picked]);
+    expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('calls onFilesSelected with an empty array when the selection is cleared', async () => {
+    const onFilesSelected = jest.fn();
+
+    const { actions } = await initTestBed({ onFilesSelected });
+
+    await actions.addFiles([{ name: 'test', size: 1 } as File]);
+    onFilesSelected.mockClear();
+
+    await actions.addFiles([]);
+
+    expect(onFilesSelected).toHaveBeenCalledWith([]);
+  });
+
   it('only shows the cancel control in compressed mode', async () => {
     const { actions, testSubjects, exists } = await initTestBed({ compressed: true });
     const assertButtons = () => {

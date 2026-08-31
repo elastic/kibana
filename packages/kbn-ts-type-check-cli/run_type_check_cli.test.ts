@@ -259,6 +259,7 @@ describe('run_type_check_cli', () => {
       'tsc',
       expect.objectContaining({
         args: expect.arrayContaining(['-b', 'packages/foo/tsconfig.type_check.json', '--pretty']),
+        env: { GOMEMLIMIT: '12288MiB' },
       })
     );
   });
@@ -463,6 +464,7 @@ describe('run_type_check_cli', () => {
       'tsc',
       expect.objectContaining({
         args: expect.arrayContaining(['-b', 'tsconfig.refs.json', '--pretty']),
+        env: { GOMEMLIMIT: '12288MiB' },
       })
     );
     expect(ctx.log.info).toHaveBeenCalledWith(

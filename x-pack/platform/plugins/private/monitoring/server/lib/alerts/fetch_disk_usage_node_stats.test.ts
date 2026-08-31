@@ -94,6 +94,7 @@ describe('fetchDiskUsageNodeStats', () => {
       size: 0,
       query: {
         bool: {
+          must_not: [{ term: { 'elasticsearch.node.roles': 'data_frozen' } }],
           filter: [
             { terms: { cluster_uuid: ['cluster123'] } },
             {

@@ -1,0 +1,5 @@
+com.example.synthetic.ObfuscatedException: Problem when compiling program
+	at com.example.synthetic.ObfuscatedException.doWork(ObfuscatedException.kt:50)
+Suppressed: com.example.synthetic.ObfuscatedException: Suppressed error
+	at com.example.synthetic.ObfuscatedException.doWork(ObfuscatedException.kt:50)
+	... 7 more

@@ -6,8 +6,12 @@
  */
 
 import { normalizeRelativePathSegments } from '@kbn/agent-builder-common';
+import { labels } from '../../utils/i18n';
 
 export { normalizeRelativePathSegments };
+
+export const getReferencedFileDisplayName = (name: string): string =>
+  name ? `${name}.md` : labels.skills.referencedFileSection.unnamedFilePlaceholder;
 
 /**
  * Builds a human-friendly display path: `{skillFolder}/{subPath}/{fileName}.md`.

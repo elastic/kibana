@@ -34,3 +34,7 @@ export type {
   AgentlessEnrollmentConnector,
   AgentlessEnrollmentSelectedInput,
 } from './agentless_enrollment_flyout';
+export { AgentlessStatusDetailsFlyout } from './agentless_status_details_flyout';
+export type { AgentlessStatusDetailsFlyoutProps } from './agentless_status_details_flyout';
+export { DataStreamTypeSelector } from './data_stream_type_selector';
+export type { DataStreamTypeSelectorProps } from './data_stream_type_selector';

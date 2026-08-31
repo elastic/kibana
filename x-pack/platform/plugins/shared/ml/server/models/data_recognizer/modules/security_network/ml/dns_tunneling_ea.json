@@ -23,7 +23,7 @@
         ]
       }
     ],
-    "influencers": ["destination.ip", "host.name", "host.id", "dns_question_etld"]
+    "influencers": ["destination.ip", "host.name", "host.id", "dns_question_etld", "dns.question.type", "dns.question.name", "source.ip"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -36,7 +36,7 @@
     "created_by": "ml-module-security-network",
     "security_app_display_name": "DNS Tunneling",
     "managed": true,
-    "job_revision": 4,
+    "job_revision": 5,
     "threat_tactics": ["TA0011", "TA0010"],
     "threat_techniques": ["T1071", "T1071.004", "T1572", "T1041"]
   }

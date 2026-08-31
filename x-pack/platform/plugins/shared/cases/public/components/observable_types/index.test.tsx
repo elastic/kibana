@@ -44,6 +44,25 @@ describe('ObservableTypes', () => {
       expect(await screen.findByTestId('observable-types-list')).toBeInTheDocument();
     });
 
+    it('renders observable types inside a subdued panel by default', async () => {
+      renderWithTestingProviders(
+        <ObservableTypes {...{ ...props, observableTypes: observableTypesMock }} />
+      );
+
+      expect(await screen.findByTestId('observable-types-panel')).toBeInTheDocument();
+    });
+
+    it('does not render the subdued panel when useLineSeparators is true', async () => {
+      renderWithTestingProviders(
+        <ObservableTypes
+          {...{ ...props, observableTypes: observableTypesMock, useLineSeparators: true }}
+        />
+      );
+
+      expect(await screen.findByTestId('observable-types-list')).toBeInTheDocument();
+      expect(screen.queryByTestId('observable-types-panel')).not.toBeInTheDocument();
+    });
+
     it('shows error when custom fields reaches the limit', async () => {
       const generatedMockCustomFields = [];
 

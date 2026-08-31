@@ -41,6 +41,9 @@ const renderModal = (props: Partial<React.ComponentProps<typeof CreateIndexModal
     services: {
       notificationService,
     },
+    config: {
+      enableIndexMode: true,
+    },
   } as unknown as AppDependencies;
 
   return render(

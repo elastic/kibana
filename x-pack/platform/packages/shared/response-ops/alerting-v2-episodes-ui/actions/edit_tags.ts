@@ -15,7 +15,10 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  type BulkCreateAlertActionBody,
+} from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { uniqueByGroup, successOrPartialToast } from './helpers';
@@ -47,7 +50,7 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
     });
     if (tags == null) return;
 
-    const items = uniqueByGroup(episodes).map((ep) => ({
+    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
       tags,
@@ -55,8 +58,8 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
     if (!items.length) return;
 
     try {
-      const { processed, total } = await bulkCreateAlertActions(deps.http, items as any);
-      deps.notifications.toasts.add(successOrPartialToast(processed, total));
+      const response = await bulkCreateAlertActions(deps.http, items);
+      deps.notifications.toasts.add(successOrPartialToast(response));
       onSuccess?.();
     } catch {
       deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);

@@ -11,7 +11,14 @@
     "@kbn/as-code-data-views-transforms",
     "@kbn/config-schema",
     "@kbn/kibana-utils-plugin",
-    "@kbn/as-code-shared-schemas"
+    "@kbn/as-code-shared-schemas",
+    "@kbn/usage-collection-plugin",
+    "@kbn/as-code-shared-telemetry",
+    "@kbn/as-code-utils",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/field-formats-plugin",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

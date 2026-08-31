@@ -17,8 +17,8 @@ import {
   newLineAndPipeCompleteItems,
   commaCompleteItem,
 } from '../complete_items';
-import { getLastNonWhitespaceChar } from '../../definitions/utils/autocomplete/helpers';
 import { endsWithWhitespace } from '../../definitions/utils/regex';
+import { getLastNonWhitespaceChar } from '../../definitions/utils/shared';
 
 export async function autocomplete(
   query: string,

@@ -6,7 +6,7 @@
  */
 
 import { parse as parseYaml } from 'yaml';
-import { buildFieldDefinitionYaml } from './build_field_definition_yaml';
+import { buildFieldDefinitionYaml } from '../../common/utils/field_definitions';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { FieldType, FieldSchema } from '../../../common/types/domain/template/fields';
 
@@ -150,7 +150,7 @@ describe('buildFieldDefinitionYaml', () => {
   });
 
   describe('TOGGLE custom field', () => {
-    it('maps to keyword / RADIO_GROUP with true/false options', () => {
+    it('maps to boolean / TOGGLE', () => {
       const { yaml } = buildFieldDefinitionYaml({
         key: 'cf_toggle',
         label: 'Toggle Field',
@@ -158,14 +158,12 @@ describe('buildFieldDefinitionYaml', () => {
         required: false,
       });
       const parsed = parse(yaml);
-      expect(parsed.type).toBe('keyword');
-      // A legacy boolean toggle maps to a radio group (not a dropdown) — the EUI-appropriate
-      // control for two mutually exclusive values.
-      expect(parsed.control).toBe(FieldType.RADIO_GROUP);
-      expect(parsed.metadata?.options).toEqual(['true', 'false']);
+      expect(parsed.type).toBe('boolean');
+      expect(parsed.control).toBe(FieldType.TOGGLE);
+      expect(parsed.metadata).toBeUndefined();
     });
 
-    it('produces a definition that validates as a RADIO_GROUP field', () => {
+    it('produces a definition that validates as a TOGGLE field', () => {
       const { yaml } = buildFieldDefinitionYaml({
         key: 'cf_toggle',
         label: 'Toggle Field',
@@ -185,7 +183,7 @@ describe('buildFieldDefinitionYaml', () => {
         required: false,
         defaultValue: true,
       });
-      expect(parse(yaml).metadata?.default).toBe('true');
+      expect(parse(yaml).metadata?.default).toBe(true);
     });
 
     it('includes default when defaultValue is false', () => {
@@ -196,10 +194,10 @@ describe('buildFieldDefinitionYaml', () => {
         required: false,
         defaultValue: false,
       });
-      expect(parse(yaml).metadata?.default).toBe('false');
+      expect(parse(yaml).metadata?.default).toBe(false);
     });
 
-    it('omits default key from metadata when defaultValue is null', () => {
+    it('omits metadata when defaultValue is null', () => {
       const { yaml } = buildFieldDefinitionYaml({
         key: 'cf_toggle',
         label: 'Toggle Field',
@@ -208,8 +206,41 @@ describe('buildFieldDefinitionYaml', () => {
         defaultValue: null,
       });
       const parsed = parse(yaml);
-      expect(parsed.metadata?.options).toEqual(['true', 'false']);
-      expect(parsed.metadata?.default).toBeUndefined();
+      expect(parsed.metadata).toBeUndefined();
+    });
+
+    it('maps the string "false" default to boolean false (no truthy coercion)', () => {
+      const { yaml } = buildFieldDefinitionYaml({
+        key: 'cf_toggle',
+        label: 'Toggle Field',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+        // Persisted config allows string defaults; a naive Boolean('false') would wrongly yield true.
+        defaultValue: 'false',
+      });
+      expect(parse(yaml).metadata?.default).toBe(false);
+    });
+
+    it('maps the string "true" default to boolean true', () => {
+      const { yaml } = buildFieldDefinitionYaml({
+        key: 'cf_toggle',
+        label: 'Toggle Field',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+        defaultValue: 'true',
+      });
+      expect(parse(yaml).metadata?.default).toBe(true);
+    });
+
+    it('omits metadata when the toggle default is an unrecognized value', () => {
+      const { yaml } = buildFieldDefinitionYaml({
+        key: 'cf_toggle',
+        label: 'Toggle Field',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+        defaultValue: 'maybe',
+      });
+      expect(parse(yaml).metadata).toBeUndefined();
     });
   });
 
@@ -233,8 +264,8 @@ describe('buildFieldDefinitionYaml', () => {
     const scenarios = [
       { type: CustomFieldTypes.TEXT, defaultValue: 'hello', expected: 'hello' },
       { type: CustomFieldTypes.NUMBER, defaultValue: 42, expected: 42 },
-      { type: CustomFieldTypes.TOGGLE, defaultValue: true, expected: 'true' },
-      { type: CustomFieldTypes.TOGGLE, defaultValue: false, expected: 'false' },
+      { type: CustomFieldTypes.TOGGLE, defaultValue: true, expected: true },
+      { type: CustomFieldTypes.TOGGLE, defaultValue: false, expected: false },
     ];
 
     it.each(scenarios)(

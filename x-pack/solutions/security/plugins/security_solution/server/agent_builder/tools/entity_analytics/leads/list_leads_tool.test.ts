@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { ExperimentalFeatures } from '../../../../../common';
-import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks__/test_helpers';
-import { listLeadsTool } from './list_leads_tool';
+import {
+  createToolHandlerContext,
+  createToolTestMocks,
+  setupMockCoreStartServices,
+} from '../../../__mocks__/test_helpers';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
+import { listLeadsTool, SECURITY_LIST_LEADS_TOOL_ID } from './list_leads_tool';
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 import type { Lead } from '../../../../../common/entity_analytics/lead_generation/types';
@@ -20,23 +26,31 @@ jest.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privil
 const mockCreateLeadDataClient = createLeadDataClient as jest.Mock;
 const mockGetUserLeadPrivileges = getUserLeadPrivileges as jest.Mock;
 
-const makeTestLead = (overrides: Partial<Lead> = {}): Lead => ({
-  id: 'lead-1',
-  title: 'Suspicious lateral movement detected',
-  byline: 'User admin shows brute-force indicators',
-  description: 'Detailed investigation guide.',
-  entities: [{ type: 'user', name: 'admin' }],
-  tags: ['brute_force', 'T1110'],
-  priority: 8,
-  chatRecommendations: ['Check risk score history'],
-  timestamp: new Date().toISOString(),
-  staleness: 'fresh',
-  status: 'active',
-  observations: [],
-  executionUuid: '550e8400-e29b-41d4-a716-446655440000',
-  sourceType: 'adhoc',
-  ...overrides,
-});
+const makeTestLead = (overrides: Partial<Lead> = {}): Lead => {
+  const timestamp = overrides.timestamp ?? new Date().toISOString();
+  return {
+    id: 'lead-1',
+    title: 'Suspicious lateral movement detected',
+    byline: 'User admin shows brute-force indicators',
+    description: 'Detailed investigation guide.',
+    entity: { type: 'user', name: 'admin', id: 'user:admin' },
+    tags: ['brute_force', 'T1110'],
+    priority: 8,
+    chatRecommendations: ['Check risk score history'],
+    staleness: 'fresh',
+    status: 'active',
+    observations: [],
+    topRelatedEntities: [],
+    relatedEntityCounts: {},
+    executionUuid: '550e8400-e29b-41d4-a716-446655440000',
+    sourceType: 'adhoc',
+    ...overrides,
+    timestamp,
+    createdAt: overrides.createdAt ?? timestamp,
+    changedAt: overrides.changedAt ?? timestamp,
+    version: overrides.version ?? 1,
+  };
+};
 
 const makeStatusResult = (overrides: Record<string, unknown> = {}) => ({
   isEnabled: true,
@@ -54,9 +68,11 @@ describe('listLeadsTool', () => {
 
   let mockFindLeads: jest.Mock;
   let mockGetStatus: jest.Mock;
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
 
     mockFindLeads = jest.fn();
     mockGetStatus = jest.fn();
@@ -65,8 +81,8 @@ describe('listLeadsTool', () => {
       getStatus: mockGetStatus,
     });
     mockGetUserLeadPrivileges.mockResolvedValue({
-      adhoc: { has_read_permissions: true, has_write_permissions: true },
-      scheduled: { has_read_permissions: true, has_write_permissions: true },
+      has_read_permissions: true,
+      has_write_permissions: true,
       has_all_required: true,
       privileges: {},
     });
@@ -101,8 +117,8 @@ describe('listLeadsTool', () => {
 
     it('returns permission error when user lacks read permissions', async () => {
       mockGetUserLeadPrivileges.mockResolvedValue({
-        adhoc: { has_read_permissions: false, has_write_permissions: false },
-        scheduled: { has_read_permissions: false, has_write_permissions: false },
+        has_read_permissions: false,
+        has_write_permissions: false,
         has_all_required: false,
         privileges: {},
       });
@@ -147,7 +163,7 @@ describe('listLeadsTool', () => {
         status: lead.status,
         staleness: lead.staleness,
         tags: lead.tags,
-        entities: lead.entities,
+        entity: lead.entity,
         observations: lead.observations,
         chatRecommendations: lead.chatRecommendations,
         sourceType: lead.sourceType,
@@ -208,6 +224,74 @@ describe('listLeadsTool', () => {
       expect(mockCreateLeadDataClient).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: mockEsClient.asCurrentUser })
       );
+    });
+
+    describe('telemetry', () => {
+      it('reports success=true with resultCount matching the returned leads length', async () => {
+        mockFindLeads.mockResolvedValue({
+          leads: [makeTestLead(), makeTestLead({ id: 'lead-2' })],
+          total: 2,
+          page: 1,
+          perPage: 20,
+        });
+        mockGetStatus.mockResolvedValue(makeStatusResult({ totalLeads: 2 }));
+
+        await tool.handler({}, handlerContext());
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_LIST_LEADS_TOOL_ID,
+            actionType: 'read',
+            spaceId: 'default',
+            success: true,
+            resultCount: 2,
+            errorMessage: undefined,
+          }
+        );
+      });
+
+      it('reports success=false when the caller lacks read privilege', async () => {
+        mockGetUserLeadPrivileges.mockResolvedValue({
+          has_read_permissions: false,
+          has_write_permissions: false,
+          has_all_required: false,
+          privileges: {},
+        });
+
+        await tool.handler({}, handlerContext());
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_LIST_LEADS_TOOL_ID,
+            actionType: 'read',
+            spaceId: 'default',
+            success: false,
+            resultCount: 0,
+            errorMessage: 'You do not have permission to read leads in this space.',
+          }
+        );
+      });
+
+      it('reports success=false and errorMessage when findLeads throws', async () => {
+        mockFindLeads.mockRejectedValue(new Error('boom'));
+        mockGetStatus.mockResolvedValue(makeStatusResult());
+
+        await tool.handler({}, handlerContext());
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_LIST_LEADS_TOOL_ID,
+            actionType: 'read',
+            spaceId: 'default',
+            success: false,
+            resultCount: 0,
+            errorMessage: 'boom',
+          }
+        );
+      });
     });
   });
 });

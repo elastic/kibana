@@ -33,6 +33,7 @@ export const TooltipOrPopoverIcon = ({
 
   return mode === 'popover' ? (
     <EuiPopover
+      aria-label={title}
       css={popoverCss}
       attachToAnchor={true}
       anchorPosition="downCenter"

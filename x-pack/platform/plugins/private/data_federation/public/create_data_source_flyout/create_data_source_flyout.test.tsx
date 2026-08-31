@@ -10,9 +10,13 @@ import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import type { ToastsStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSourcesClient } from '../data_sources_client';
+import type { DatasetsClient } from '../datasets_client';
 import type { DataSource } from '../../common/datasource_types';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
+import type { DataFederationKibanaServices } from '../types';
 
 const createToastsMock = (): ToastsStart =>
   ({
@@ -27,10 +31,42 @@ const createClientMock = (): DataSourcesClient =>
     delete: jest.fn().mockResolvedValue(undefined),
   } as unknown as DataSourcesClient);
 
+const createDatasetsClientMock = (): DatasetsClient =>
+  ({
+    add: jest.fn().mockResolvedValue(undefined),
+    get: jest.fn().mockResolvedValue([]),
+    delete: jest.fn().mockResolvedValue(undefined),
+  } as unknown as DatasetsClient);
+
+const createDocLinksMock = (): DocLinksStart =>
+  ({
+    links: {
+      dataFederation: {
+        overview: 'https://example.com/data-federation',
+        quickstart: 'https://example.com/data-federation-quickstart',
+        dataSources: 'https://example.com/data-federation-sources',
+        datasets: 'https://example.com/data-federation-datasets',
+        datasetSettings: 'https://example.com/data-federation-datasets#dataset-settings',
+        authentication: 'https://example.com/data-federation-sources#authentication',
+        staticCredentials: 'https://example.com/data-federation-static-credentials',
+        federatedIdentity: 'https://example.com/data-federation-federated-identity',
+        querying: 'https://example.com/data-federation-querying',
+        security: 'https://example.com/data-federation-security',
+      },
+    },
+  } as unknown as DocLinksStart);
+
 describe('CreateDataSourceFlyout', () => {
   it('renders core actions and disables save while saving', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: client,
+      datasetsClient: createDatasetsClientMock(),
+      toasts,
+      docLinks: createDocLinksMock(),
+      featureFlags: {},
+    };
     let resolveSave: (value: string | null) => void;
     const savePromise = new Promise<string | null>((resolve) => {
       resolveSave = resolve;
@@ -51,14 +87,14 @@ describe('CreateDataSourceFlyout', () => {
 
     const { getByTestId } = render(
       <EuiProvider>
-        <CreateDataSourceFlyout
-          dataSourcesClient={client}
-          toasts={toasts}
-          onClose={jest.fn()}
-          onSave={onSave}
-          existingDataSourceNames={[]}
-          initialDataSource={initialDataSource}
-        />
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={onSave}
+            existingDataSourceNames={[]}
+            initialDataSource={initialDataSource}
+          />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -79,17 +115,24 @@ describe('CreateDataSourceFlyout', () => {
   it('shows the S3 region field without expanding connection settings, and requires it on create', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: client,
+      datasetsClient: createDatasetsClientMock(),
+      toasts,
+      docLinks: createDocLinksMock(),
+      featureFlags: {},
+    };
     const onSave = jest.fn().mockResolvedValue(null);
 
     const { getByTestId, queryByText } = render(
       <EuiProvider>
-        <CreateDataSourceFlyout
-          dataSourcesClient={client}
-          toasts={toasts}
-          onClose={jest.fn()}
-          onSave={onSave}
-          existingDataSourceNames={[]}
-        />
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={onSave}
+            existingDataSourceNames={[]}
+          />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 

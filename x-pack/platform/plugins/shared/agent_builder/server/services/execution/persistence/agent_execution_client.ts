@@ -13,6 +13,8 @@ import type { AgentExecution, FindExecutionsOptions } from '@kbn/agent-builder-s
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
 import { agentExecutionIndexName, createStorage } from './agent_execution_storage';
 
+const UPDATE_RETRY_ON_CONFLICT = 3;
+
 type CreateExecutionParams = Pick<
   AgentExecution,
   | 'executionId'
@@ -21,26 +23,30 @@ type CreateExecutionParams = Pick<
   | 'agentParams'
   | 'metadata'
   | 'executionMode'
+  | 'interactivity'
   | 'parentExecutionId'
 >;
 
 /**
  * Lightweight snapshot returned by {@link AgentExecutionClient.peek}.
- * Includes only the status, error, and event count — no events payload.
+ * Includes only the status, error, event count, and last heartbeat — no events payload.
  */
 export interface ExecutionPeek {
   status: ExecutionStatus;
   error?: SerializedExecutionError;
   eventCount: number;
+  lastHeartbeat?: string;
 }
 
 const fromEs = (source: AgentExecutionProperties): AgentExecution => {
   return {
     executionId: source.execution_id,
     '@timestamp': source['@timestamp'],
+    ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
     status: source.status,
     agentId: source.agent_id,
     executionMode: source.execution_mode ?? AgentExecutionMode.conversation,
+    ...(source.interactivity ? { interactivity: source.interactivity } : {}),
     ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
     spaceId: source.space_id,
     agentParams: source.agent_params,
@@ -70,6 +76,9 @@ export interface AgentExecutionClient {
 
   /** Append events to an execution document using a scripted update. */
   appendEvents(executionId: string, events: ChatEvent[]): Promise<void>;
+
+  /** Update the execution's `last_heartbeat` to the current time (liveness signal). */
+  updateHeartbeat(executionId: string): Promise<void>;
 
   /**
    * Lightweight status check (real-time GET with `_source_includes`).
@@ -125,6 +134,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     agentParams,
     metadata,
     executionMode,
+    interactivity,
     parentExecutionId,
   }: CreateExecutionParams): Promise<AgentExecution> {
     if (metadata) {
@@ -139,9 +149,11 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     const document: AgentExecutionProperties = {
       execution_id: executionId,
       '@timestamp': now,
+      last_heartbeat: now,
       status: ExecutionStatus.scheduled,
       agent_id: agentId,
       execution_mode: executionMode,
+      ...(interactivity ? { interactivity } : {}),
       parent_execution_id: parentExecutionId,
       space_id: spaceId,
       agent_params: agentParams,
@@ -153,6 +165,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     await this.storage.getClient().index({
       id: executionId,
       document,
+      op_type: 'create',
     });
 
     return fromEs(document);
@@ -174,6 +187,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     await this.esClient.update({
       index: agentExecutionIndexName,
       id: executionId,
+      retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
       doc: {
         status,
         ...(error ? { error } : {}),
@@ -188,6 +202,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     await this.esClient.update({
       index: agentExecutionIndexName,
       id: executionId,
+      retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
       script: {
         source: `
           if (ctx._source.events == null) { ctx._source.events = []; }
@@ -199,12 +214,23 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     });
   }
 
+  async updateHeartbeat(executionId: string): Promise<void> {
+    await this.esClient.update({
+      index: agentExecutionIndexName,
+      id: executionId,
+      retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
+      doc: {
+        last_heartbeat: new Date().toISOString(),
+      },
+    });
+  }
+
   async peek(executionId: string): Promise<ExecutionPeek | undefined> {
     try {
       const response = await this.esClient.get<AgentExecutionProperties>({
         index: agentExecutionIndexName,
         id: executionId,
-        _source_includes: ['status', 'error', 'event_count'] as string[],
+        _source_includes: ['status', 'error', 'event_count', 'last_heartbeat'] as string[],
       });
       const source = response._source;
       if (!source) {
@@ -214,6 +240,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
         status: source.status,
         eventCount: source.event_count ?? 0,
         ...(source.error ? { error: source.error } : {}),
+        ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
       };
     } catch (err) {
       if (err?.meta?.statusCode === 404) {

@@ -620,8 +620,8 @@ class AgentPolicyInfoBuilder {
     if (!agentPolicyIdPromise) {
       const fleetServices = this.endpointService.getInternalFleetServices(undefined, true);
 
-      agentPolicyIdPromise = fleetServices.agent
-        .getAgent(agentId)
+      agentPolicyIdPromise = fleetServices
+        .fetchAgent(agentId)
         .then((agent) => {
           if (!agent.policy_id) {
             throw new EndpointError(

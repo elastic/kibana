@@ -8,19 +8,17 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeader,
   EuiPageTemplate,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { AppHeader } from '@kbn/app-header';
+import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
 import {
@@ -33,13 +31,14 @@ import {
   parseWorkflowsUrlSearchParams,
   serializeWorkflowsUrlSearchParams,
 } from './url_search_params';
-import { PLUGIN_ID } from '../../../common';
+import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { ImportWorkflowsFlyout } from '../../features/import_workflows/ui/import_workflows_flyout';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
 import { WorkflowList } from '../../features/workflow_list';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { getAddConnectorsMenuItem } from '../../shared/ui/get_add_connectors_menu_item';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
@@ -139,6 +138,7 @@ export function WorkflowsPage() {
 
   /** Import uses bulk APIs that require both create and update; gate UI to match server authz. */
   const canImportWorkflows = Boolean(canCreateWorkflow && canUpdateWorkflow);
+  const addConnectorsMenuItem = useMemo(() => getAddConnectorsMenuItem(application), [application]);
   const isExecutionStatsBarEnabled = featureFlags?.getBooleanValue(
     WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
     false
@@ -148,66 +148,52 @@ export function WorkflowsPage() {
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
   const shouldShowFilters = !shouldShowEmptyState || showManagedWorkflowsFilter;
 
+  const appMenu = useMemo<AppMenuConfig>(() => {
+    const items: AppMenuItemType[] = [];
+    if (canImportWorkflows) {
+      items.push({
+        id: 'importWorkflows',
+        order: 1,
+        label: i18n.translate('workflows.importWorkflowsButton', {
+          defaultMessage: 'Import',
+        }),
+        iconType: 'download',
+        overflow: true,
+        run: () => setShowImportFlyout(true),
+        testId: 'importWorkflowsButton',
+      });
+    }
+    if (addConnectorsMenuItem) {
+      items.push(addConnectorsMenuItem);
+    }
+
+    return {
+      primaryActionItem: canCreateWorkflow
+        ? {
+            id: 'createWorkflow',
+            label: i18n.translate('workflows.createWorkflowButton', {
+              defaultMessage: 'Create workflow',
+            }),
+            iconType: 'plus',
+            run: navigateToCreateWorkflow,
+            testId: 'createWorkflowButton',
+          }
+        : undefined,
+      items,
+    };
+  }, [addConnectorsMenuItem, canCreateWorkflow, canImportWorkflows, navigateToCreateWorkflow]);
+
   return (
     <EuiPageTemplate
       offset={0}
       css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
       data-test-subj="workflowsPage"
     >
-      {/* negative margin to compensate for header's bottom padding and reduce space between header and content */}
-      <EuiPageTemplate.Header
-        bottomBorder={false}
-        css={{ marginBottom: `-${euiTheme.size.l}` }}
-        restrictWidth={false}
-      >
-        <EuiFlexGroup justifyContent={'spaceBetween'}>
-          <EuiFlexItem>
-            <EuiPageHeader
-              pageTitle={
-                <FormattedMessage id="workflows.pageTitle" defaultMessage="Workflows" ignoreTag />
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              {canImportWorkflows ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="importAction"
-                    size="m"
-                    onClick={() => setShowImportFlyout(true)}
-                    data-test-subj="importWorkflowsButton"
-                  >
-                    <FormattedMessage
-                      id="workflows.importWorkflowsButton"
-                      defaultMessage="Import"
-                      ignoreTag
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ) : null}
-              {canCreateWorkflow ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    iconType="plusInCircle"
-                    color="primary"
-                    size="m"
-                    fill
-                    onClick={navigateToCreateWorkflow}
-                    data-test-subj="createWorkflowButton"
-                  >
-                    <FormattedMessage
-                      id="workflows.createWorkflowButton"
-                      defaultMessage="Create workflow"
-                      ignoreTag
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageTemplate.Header>
+      <AppHeader
+        title={i18n.translate('workflows.pageTitle', { defaultMessage: 'Workflows' })}
+        menu={appMenu}
+        docLink={WORKFLOWS_DOCUMENTATION_URL}
+      />
       <EuiPageTemplate.Section restrictWidth={false}>
         {shouldShowFilters ? (
           <>

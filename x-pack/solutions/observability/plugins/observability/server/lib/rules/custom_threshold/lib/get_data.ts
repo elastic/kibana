@@ -10,6 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import { unflattenObject } from '@kbn/object-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type {
   CustomMetricExpressionParams,
@@ -104,14 +105,14 @@ interface ElasticsearchError {
   };
 }
 
-const NO_DATA_RESPONSE = {
+const createNoDataResponse = (): GetDataResponse => ({
   [UNGROUPED_FACTORY_KEY]: {
     value: null,
     trigger: false,
     warn: false,
     bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
-};
+});
 
 // ES BucketHelpers throws this when top_metrics returns null (no docs); the same prefix appears in
 // two other BucketHelpers errors, but only the null-value branch fires for last_value aggs, so the
@@ -190,13 +191,13 @@ export const getData = async (
   ) => {
     // This is absolutely NO DATA
     if (successfulShards === 0) {
-      return NO_DATA_RESPONSE;
+      return createNoDataResponse();
     }
     if (aggs.groupings) {
       const { groupings } = aggs;
       const nextAfterKey = groupings.after_key;
       if (groupings.buckets.length === 0 && Object.keys(previous).length === 0) {
-        return NO_DATA_RESPONSE;
+        return createNoDataResponse();
       }
 
       for (const bucket of groupings.buckets) {
@@ -241,7 +242,7 @@ export const getData = async (
             bucketKey: bucket.key,
             flattenGrouping,
             container: containerList,
-            ...additionalContextSource,
+            ...(additionalContextSource ? unflattenObject(additionalContextSource) : {}),
           };
         }
       }
@@ -281,7 +282,7 @@ export const getData = async (
         },
       };
     } else {
-      return NO_DATA_RESPONSE;
+      return createNoDataResponse();
     }
   };
 
@@ -314,7 +315,7 @@ export const getData = async (
   } catch (error) {
     if (isLastValueNoDataError(error)) {
       logger.debug(`Swallowed ES bucket_script error for last_value no-data condition: ${error}`);
-      return NO_DATA_RESPONSE;
+      return createNoDataResponse();
     }
     throw error;
   }
@@ -325,5 +326,5 @@ export const getData = async (
   } else if (_shards.successful) {
     return previousResults;
   }
-  return NO_DATA_RESPONSE;
+  return createNoDataResponse();
 };

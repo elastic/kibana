@@ -6,13 +6,14 @@
  */
 
 import numeral from '@elastic/numeral';
-import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
-import apm from 'elastic-apm-node';
 import type { ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { getEcsGroupsFromFlattenGrouping, getFormattedGroups } from '@kbn/alerting-rule-utils';
 import type { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
+import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { IBasePath } from '@kbn/core/server';
+import { PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import { i18n } from '@kbn/i18n';
 import { flattenObject } from '@kbn/object-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
@@ -23,11 +24,17 @@ import {
   ALERT_GROUPING,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { addSpaceIdToPath } from '@kbn/core-spaces-common';
+import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import apm from 'elastic-apm-node';
 import { upperCase } from 'lodash';
+import {
+  SLO_DATA_VIEW_ID_FIELD,
+  SLO_ID_FIELD,
+  SLO_INSTANCE_ID_FIELD,
+  SLO_REVISION_FIELD,
+} from '../../../../common/burn_rate_rule/field_names';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
@@ -35,12 +42,6 @@ import {
   MEDIUM_PRIORITY_ACTION,
   SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
-import {
-  SLO_DATA_VIEW_ID_FIELD,
-  SLO_ID_FIELD,
-  SLO_INSTANCE_ID_FIELD,
-  SLO_REVISION_FIELD,
-} from '../../../../common/burn_rate_rule/field_names';
 import type { Duration, SLODefinition } from '../../../domain/models';
 import { DefaultSLODefinitionRepository } from '../../../services';
 import type { EsSummaryDocument } from '../../../services/summary_transform_generator/helpers/create_temp_summary';
@@ -65,7 +66,7 @@ export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & 
   [ALERT_GROUP]?: Group[];
 };
 
-export const getRuleExecutor = (basePath: IBasePath) =>
+export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = false) =>
   async function executor(
     options: RuleExecutorOptions<
       BurnRateRuleParams,
@@ -84,7 +85,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       BurnRateAllowedActionGroups
     >
   > {
-    const { services, params, logger, startedAt, spaceId, getTimeRange } = options;
+    const { services, params, logger, startedAt, spaceId, getTimeRange, isServerless } = options;
 
     const { savedObjectsClient: soClient, scopedClusterClient: esClient, alertsClient } = services;
 
@@ -92,6 +93,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       throw new AlertsClientError();
     }
 
+    const projectRouting = isServerless && isCpsEnabled ? PROJECT_ROUTING_ORIGIN : undefined;
     const sloRepository = new DefaultSLODefinitionRepository(soClient, logger);
     let slo: SLODefinition;
     try {
@@ -100,9 +102,16 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         () => sloRepository.findById(params.sloId)
       );
     } catch (err) {
+      // `cause` is what lets the alerting framework act on *why* the lookup failed. This fetch
+      // authenticates with the rule's API key, so a missing SLO is only one possible cause: when UIAM
+      // no longer knows that key, Elasticsearch answers 401 with an `authentication_error_code`, and
+      // the framework's healer re-grants the key off that structured error. Interpolating only
+      // `err.message` leaves the code in prose that nothing can match, stranding the rule on a
+      // credential no scheduled run can repair.
       throw createTaskRunError(
         new Error(
-          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`
+          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`,
+          { cause: err }
         ),
         TaskErrorSource.USER
       );
@@ -120,7 +129,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     // doesn't matter for our use case since we allow the user to customize the window sizes,
     const { dateEnd } = getTimeRange('1m');
     const results = await withSpan({ name: BURN_RATE_EXECUTOR_SPAN_NAMES.EVAL, type: 'rule' }, () =>
-      evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd))
+      evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd), projectRouting)
     );
 
     const dependencies = params.dependencies;
@@ -135,7 +144,8 @@ export const getRuleExecutor = (basePath: IBasePath) =>
                   esClient.asCurrentUser,
                   sloRepository,
                   dependencies,
-                  new Date(dateEnd)
+                  new Date(dateEnd),
+                  projectRouting
                 )
             )
           ).activeRules
@@ -177,7 +187,12 @@ export const getRuleExecutor = (basePath: IBasePath) =>
                 break; // once limit is reached, we break out of the loop and don't schedule any more alerts
               }
 
-              const sloSummary = await getSloSummary(esClient.asCurrentUser, slo, instanceId);
+              const sloSummary = await getSloSummary(
+                esClient.asCurrentUser,
+                slo,
+                instanceId,
+                projectRouting
+              );
 
               const reason = buildReason(
                 instanceId,

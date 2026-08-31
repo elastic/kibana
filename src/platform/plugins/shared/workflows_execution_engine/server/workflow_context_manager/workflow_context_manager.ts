@@ -88,6 +88,27 @@ export class WorkflowContextManager {
     return WorkflowScopeStack.fromStackFrames(this.stackFrames);
   }
 
+  /**
+   * Stable identifier for this node's execution — used as the consumer key
+   * in {@link StepIoService.prepareForRead} and {@link StepIoService.releaseReadPins}.
+   * Built from the same `(node.stepId, stackFrames)` the factory uses for
+   * `StepExecutionRuntime.stepExecutionId`, so they are provably identical.
+   * Lazily computed once and cached — the values are immutable after construction.
+   */
+  private get consumerExecutionId(): string {
+    if (!this._consumerExecutionId) {
+      const executionId = this.workflowExecutionState.getWorkflowExecution().id;
+      this._consumerExecutionId = buildStepExecutionId(
+        executionId,
+        this.node.stepId,
+        this.stackFrames
+      );
+    }
+    return this._consumerExecutionId;
+  }
+
+  private _consumerExecutionId: string | undefined;
+
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionState = init.workflowExecutionState;
@@ -109,12 +130,27 @@ export class WorkflowContextManager {
    * (`renderValueAccordingToContext`, `evaluateBooleanExpressionInContext`, etc.)
    * remain synchronous. When nothing has been evicted, this is a no-op with
    * zero overhead.
+   *
+   * Also read-pins the node's referenced outputs for the duration of this
+   * node's execution so the concurrent eviction loop cannot evict them between
+   * the pre-warm and the synchronous `getContext()` call that follows.
    */
   public async ensureContextReady(): Promise<void> {
     await this.stepIoService.prepareForRead({
       node: this.node,
       predecessorsResolver: () => this.predecessors,
+      consumerId: this.consumerExecutionId,
     });
+  }
+
+  /**
+   * Releases the read-pins set by {@link ensureContextReady} for this node.
+   * Must be called when the node finishes (success or error) so its pinned
+   * outputs become eviction candidates again. Idempotent — safe to call even
+   * if `ensureContextReady` was skipped (eviction-disabled fast path).
+   */
+  public releaseReadPins(): void {
+    this.stepIoService.releaseReadPins(this.consumerExecutionId);
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -267,9 +303,8 @@ export class WorkflowContextManager {
    * request for authentication and propagating event-chain headers so the receiving handler
    * keeps the same chain-depth context.
    *
-   * The transport (currently `fetch`) is an implementation detail; the public surface is
-   * intentionally narrow so it can be swapped to an in-process call later without affecting
-   * callers. Throws on non-2xx responses.
+   * The transport (Core's HTTP self client) is an implementation detail; the public surface is
+   * intentionally narrow so it can change without affecting callers. Throws on non-2xx responses.
    */
   public async callKibanaApi<T = unknown>(
     params: CallKibanaApiParams
@@ -278,8 +313,8 @@ export class WorkflowContextManager {
       {
         fakeRequest: this.fakeRequest,
         coreStart: this.coreStart,
-        cloudSetup: this.dependencies.cloudSetup,
         workflowRunId: this.workflowExecutionState.getWorkflowExecution().id,
+        spaceId: this.getWorkflowSpaceId(),
       },
       params
     );
@@ -491,9 +526,7 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
-    let scopeStack = WorkflowScopeStack.fromStackFrames(
-      this.workflowExecutionState.getWorkflowExecution().scopeStack
-    );
+    let scopeStack = WorkflowScopeStack.fromStackFrames(this.stackFrames);
 
     const executionId = this.workflowExecutionState.getWorkflowExecution().id;
     const scopeEntries: Array<ScopeEntry> = [];

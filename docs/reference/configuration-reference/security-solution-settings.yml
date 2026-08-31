@@ -54,12 +54,20 @@ groups:
 
       - setting: xpack.securitySolution.maxUploadResponseActionFileBytes
         description: |
-          Allow to configure the max file upload size for use with the Upload File Response action available with the Defend Integration. To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
+          Configure the maximum file size for use with the `upload` response action available with the Elastic Defend integration. To learn more, check [Endpoint response actions](docs-content://solutions/security/endpoint-response-actions.md#_upload).
+
+          The default and maximum values vary by version:
+
+          * {applies_to}`stack: ga 9.5+` {applies_to}`serverless:` **Default**: `500000000` bytes (500 MB). **Maximum**: no limit.
+          * {applies_to}`stack: ga 8.9-9.4` **Default**: `26214400` bytes (25 MB). **Maximum**: `104857600` bytes (100 MB).
         datatype: int
         applies_to:
           stack: ga 8.9
           ech: ga
           self: ga
+        note: |
+          :applies_to: {stack: ga 9.5+, serverless: ga}
+          Setting this value too high may cause timeouts, depending on your cluster's setup and resources.
 
       - setting: xpack.securitySolution.disableEndpointRuleAutoInstall
         description: |

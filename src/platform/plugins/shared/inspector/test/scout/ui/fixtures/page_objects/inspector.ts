@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from '@kbn/scout';
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 export type InspectorView = 'Requests' | 'Data';
 
@@ -21,8 +20,11 @@ export class Inspector {
   public readonly panel: Locator;
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
+  public readonly tablePaginationPopoverButton: Locator;
 
   public readonly requests: {
+    readonly requestChooser: Locator;
+    readonly documentsRequest: Locator;
     readonly statisticsTab: Locator;
     readonly requestTab: Locator;
     readonly responseTab: Locator;
@@ -34,8 +36,11 @@ export class Inspector {
     this.panel = page.testSubj.locator('inspectorPanel');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
+    this.tablePaginationPopoverButton = page.testSubj.locator('tablePaginationPopoverButton');
 
     this.requests = {
+      requestChooser: page.testSubj.locator('inspectorRequestChooser'),
+      documentsRequest: page.testSubj.locator('inspectorRequestChooserDocuments'),
       statisticsTab: page.testSubj.locator('inspectorRequestDetailStatistics'),
       requestTab: page.testSubj.locator('inspectorRequestDetailRequest'),
       responseTab: page.testSubj.locator('inspectorRequestDetailResponse'),
@@ -44,9 +49,26 @@ export class Inspector {
     };
   }
 
-  async open() {
-    await this.page.testSubj.click('openInspectorButton');
+  async open(openButtonTestSubj: string = 'openInspectorButton') {
+    await this.page.testSubj.click(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
+  }
+
+  async setTablePageSize(size: number) {
+    await this.tablePaginationPopoverButton.click();
+    const option = this.page.testSubj.locator(`tablePagination-${size}-rows`);
+    await option.click();
+    // Wait for the page-size popover to close before callers read the table.
+    await option.waitFor({ state: 'hidden' });
+  }
+
+  /** Switches the inspector table to the given 0-based page and waits until it is current. */
+  async goToTablePage(pageIndex: number) {
+    const pageButton = this.page.testSubj.locator(`pagination-button-${pageIndex}`);
+    await pageButton.click();
+    await this.page
+      .locator(`[data-test-subj="pagination-button-${pageIndex}"][aria-current="page"]`)
+      .waitFor({ state: 'visible' });
   }
 
   async close() {
@@ -59,8 +81,31 @@ export class Inspector {
     return this.requests.timestamp.innerText();
   }
 
-  async switchToView(view: InspectorView) {
+  async openInspectorView(view: InspectorView) {
+    await this.panel.waitFor({ state: 'visible' });
     await this.viewChooser.click();
-    await this.page.testSubj.locator(VIEW_CHOOSER_TEST_SUBJECTS[view]).click();
+    await this.page.testSubj.click(VIEW_CHOOSER_TEST_SUBJECTS[view]);
+  }
+
+  async openInspectorRequestsView() {
+    await this.openInspectorView('Requests');
+  }
+
+  async openRequestsStatisticsTab() {
+    await this.requests.statisticsTab.click();
+  }
+
+  async getTableData(): Promise<string[][]> {
+    await this.panel.locator('tbody').waitFor({ state: 'visible' });
+    const tableRows = this.panel.locator('tbody tr');
+
+    return tableRows.evaluateAll((rows) =>
+      rows.map((row) =>
+        Array.from(row.querySelectorAll('td')).map((cell) => {
+          const euiTableCellContent = cell.querySelector('.euiTableCellContent');
+          return (euiTableCellContent ?? cell).textContent?.trim() ?? '';
+        })
+      )
+    );
   }
 }

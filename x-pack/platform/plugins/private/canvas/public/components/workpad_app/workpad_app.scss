@@ -2,7 +2,6 @@ $canvasLayoutFontSize: $euiFontSizeS;
 
 .canvasLayout {
   display: flex;
-  background: $euiPageBackgroundColor;
   flex-grow: 1;
   overflow: hidden;
 }
@@ -33,8 +32,6 @@ $canvasLayoutFontSize: $euiFontSizeS;
   flex-basis: auto;
   padding: $euiSizeS $euiSize;
   font-size: $canvasLayoutFontSize;
-  border-bottom: $euiBorderThin;
-  background: $euiColorLightestShade;
   user-select: none;
 }
 
@@ -49,8 +46,6 @@ $canvasLayoutFontSize: $euiFontSizeS;
 }
 
 .canvasLayout__stageContentOverflow {
-  @include euiScrollBar;
-
   position: absolute;
   top: 0;
   left: 0;
@@ -65,10 +60,8 @@ $canvasLayoutFontSize: $euiFontSizeS;
   flex-grow: 0;
   flex-basis: auto;
   width: 350px;
-  background: $euiColorLightestShade;
   display: flex;
   position: relative;
-  border-left: $euiBorderThin;
 
   .euiPanel {
     margin-bottom: $euiSizeS;
@@ -82,7 +75,6 @@ $canvasLayoutFontSize: $euiFontSizeS;
   flex-grow: 0;
   flex-basis: auto;
   width: 100%;
-  background-color: $euiPageBackgroundColor;
   z-index: $euiZNavigation;
   font-size: $canvasLayoutFontSize;
 }

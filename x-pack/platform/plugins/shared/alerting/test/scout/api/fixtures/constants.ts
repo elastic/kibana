@@ -35,7 +35,10 @@ export const ES_QUERY_RULE_PARAMS = {
   thresholdComparator: '>',
   threshold: [0],
   searchType: 'esQuery',
-  excludeHitsFromPreviousRun: true,
+  // Keep every run counting the full time window so the alert stays active across the
+  // create-time auto-run and the setup's _run_soon; excluding prior hits can leave the
+  // second run with zero new docs, recovering the alert before setup can find it.
+  excludeHitsFromPreviousRun: false,
   aggType: 'count',
   groupBy: 'all',
 } as const;

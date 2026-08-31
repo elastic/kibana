@@ -250,7 +250,7 @@ describe('exportLiveQueryResultsRoute', () => {
     expect(mockHandler).not.toHaveBeenCalled();
   });
 
-  it('proceeds without metadata enrichment when action details lookup fails', async () => {
+  it('refuses the export when the action details lookup fails', async () => {
     const router = httpServiceMock.createRouter();
     const osqueryContext = createOsqueryContext();
 
@@ -278,15 +278,47 @@ describe('exportLiveQueryResultsRoute', () => {
     const response = httpServerMock.createResponseFactory();
     await registeredHandler(context, request, response);
 
-    // Handler should still be called (graceful degradation)
-    expect(mockHandler).toHaveBeenCalledWith(
-      context,
-      request,
-      response,
+    // A failed lookup cannot tell "not yours" apart from "transient failure", and the
+    // actionId is the only bound on the documents the export reads, so exporting anyway
+    // would run an unauthorized id against the agent indices.
+    expect(mockHandler).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+  });
+
+  it('returns 404 when no action details exist for the parent id', async () => {
+    const router = httpServiceMock.createRouter();
+    const osqueryContext = createOsqueryContext();
+
+    exportLiveQueryResultsRoute(router as never, osqueryContext);
+
+    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+      .mock.calls[0][1];
+
+    // An unknown or out-of-space parent id resolves to no actionDetails at all, which must
+    // not fall through to the export with a caller-supplied actionId.
+    const context = {
+      core: Promise.resolve({}),
+      search: Promise.resolve({ search: jest.fn().mockReturnValue(of({})) }),
+    };
+
+    const request = {
+      ...httpServerMock.createKibanaRequest({
+        params: { id: 'does-not-exist', actionId: 'action-abc' },
+        query: { format: 'ndjson' },
+        body: {},
+      }),
+      events: { aborted$: NEVER, completed$: NEVER },
+    };
+
+    const response = httpServerMock.createResponseFactory();
+    await registeredHandler(context, request, response);
+
+    expect(response.notFound).toHaveBeenCalledWith(
       expect.objectContaining({
-        metadata: expect.objectContaining({ action_id: 'action-abc' }),
+        body: expect.objectContaining({ message: 'Live query action not found' }),
       })
     );
+    expect(mockHandler).not.toHaveBeenCalled();
   });
 
   it('escapes special characters in actionId for the base filter', async () => {

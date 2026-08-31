@@ -10,6 +10,8 @@ Some additional benefits to using the core data streams service:
 - Core can coordinate updates to existing data streams a bit better i.e. avoid a flood of requests from multi Kibana clusters
 - Change detection data streams are easier to detect/keep track of via Core registrations
 
+**Hidden ≠ system.** Core registration creates Kibana-managed (usually hidden) data streams; it does **not** register an Elasticsearch system data stream. Privileged streams need a matching ES `SystemDataStreamDescriptor` so `GET _data_stream/<name>` reports `system: true`. See [`@kbn/data-streams` README — System data streams](../../../../platform/packages/private/kbn-data-streams/README.md#system-data-streams).
+
 ## Examples
 
 Please refer to [examples/data_streams_example/server/index.ts](../../../../../examples/data_streams_example/server/index.ts)

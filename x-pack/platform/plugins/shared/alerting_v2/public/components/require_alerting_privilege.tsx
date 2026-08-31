@@ -14,13 +14,17 @@ import { RequiredPrivilegesPrompt } from './required_privileges_prompt';
 
 export interface RequireAlertingPrivilegeProps {
   /**
-   * Set of features whose minimum (`read`) UI capability is required to view
-   * the children. The user must hold every feature's capability (AND
-   * semantics).
+   * Set of features whose UI capability is required to view the children. The
+   * user must hold every feature's capability (AND semantics).
    */
   features: readonly AlertingV2Feature[];
   /** Human-readable name of the gated page, surfaced in the interstitial. */
   pageName: string;
+  /**
+   * The gate requires the `write` (all) capability for every
+   * feature instead of the minimum `read` capability.
+   */
+  capability?: 'all' | 'read';
   children: React.ReactNode;
 }
 
@@ -32,16 +36,19 @@ export interface RequireAlertingPrivilegeProps {
 export const RequireAlertingPrivilege = ({
   features,
   pageName,
+  capability = 'read',
   children,
 }: RequireAlertingPrivilegeProps) => {
   const userCapabilities = useService(UserCapabilities);
-  const hasPrivilege = features.every((feature) => userCapabilities.canRead(feature));
+  const hasPrivilege = features.every((feature) =>
+    capability === 'all' ? userCapabilities.canWrite(feature) : userCapabilities.canRead(feature)
+  );
 
   if (!hasPrivilege) {
     return (
       <RequiredPrivilegesPrompt
         pageName={pageName}
-        requiredPrivileges={getAlertingRequiredPrivileges(features)}
+        requiredPrivileges={getAlertingRequiredPrivileges(features, capability)}
       />
     );
   }

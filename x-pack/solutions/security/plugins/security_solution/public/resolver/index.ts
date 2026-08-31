@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { ResolverPluginSetup } from './types';
 import { resolverStoreFactory } from './store';
 import { ResolverWithoutProviders } from './view/resolver_without_providers';

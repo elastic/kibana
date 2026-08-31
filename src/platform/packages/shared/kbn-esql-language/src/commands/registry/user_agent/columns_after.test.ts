@@ -22,12 +22,12 @@ const col = (suffix: string): ESQLColumnData => ({
 });
 
 const ALL_DEFAULT_COLUMNS = [
+  col('device.name'),
   col('name'),
-  col('version'),
+  col('os.full'),
   col('os.name'),
   col('os.version'),
-  col('os.full'),
-  col('device.name'),
+  col('version'),
 ];
 
 describe('USER_AGENT > columnsAfter', () => {
@@ -45,6 +45,21 @@ describe('USER_AGENT > columnsAfter', () => {
     expect(result.slice(0, previousColumns.length)).toEqual(previousColumns);
   });
 
+  it('stores raw (unescaped) column names when the target is a reserved keyword', () => {
+    const command = synth.cmd`USER_AGENT user_agent = agent`;
+    const result = columnsAfter(command, previousColumns);
+
+    const names = result.slice(previousColumns.length).map(({ name }) => name);
+    expect(names).toEqual([
+      'user_agent.device.name',
+      'user_agent.name',
+      'user_agent.os.full',
+      'user_agent.os.name',
+      'user_agent.os.version',
+      'user_agent.version',
+    ]);
+  });
+
   it('filters columns to only those in the properties list', () => {
     const command = synth.cmd`USER_AGENT ua = uaString WITH { "properties": ["name"] }`;
     const result = columnsAfter(command, previousColumns);
@@ -57,9 +72,9 @@ describe('USER_AGENT > columnsAfter', () => {
     const result = columnsAfter(command, previousColumns);
 
     expect(result.slice(previousColumns.length)).toEqual([
+      col('os.full'),
       col('os.name'),
       col('os.version'),
-      col('os.full'),
       col('version'),
     ]);
   });

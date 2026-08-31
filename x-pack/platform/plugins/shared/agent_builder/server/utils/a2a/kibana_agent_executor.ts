@@ -29,7 +29,8 @@ export class KibanaAgentExecutor implements AgentExecutor {
     private logger: Logger,
     private getInternalServices: () => InternalStartServices,
     private kibanaRequest: KibanaRequest,
-    private agentId: string
+    private agentId: string,
+    private blocking: boolean = true
   ) {}
 
   async execute(requestContext: RequestContext, eventBus: ExecutionEventBus): Promise<void> {
@@ -50,14 +51,29 @@ export class KibanaAgentExecutor implements AgentExecutor {
       const { events$ } = await execution.executeAgent({
         mode: AgentExecutionMode.conversation,
         request: this.kibanaRequest,
+        useTaskManager: !this.blocking,
+        executionId: this.blocking ? undefined : taskId,
+        // Persisted so KibanaTaskStore can echo the same contextId back on `tasks/get` polls.
+        metadata: { a2aContextId: contextId },
         params: {
           agentId: this.agentId,
           nextInput: { message: userText },
           conversationId: a2aConversationId,
-          capabilities: { visualizations: false },
           autoCreateConversationWithId: true,
         },
       });
+
+      if (!this.blocking) {
+        eventBus.publish({
+          id: taskId,
+          contextId,
+          kind: 'task',
+          status: { state: 'working', timestamp: new Date().toISOString() },
+        });
+        eventBus.finished();
+        this.logger.debug(`A2A: Task ${taskId} scheduled`);
+        return;
+      }
 
       // Process execution response
       const events = await firstValueFrom(events$.pipe(toArray()));

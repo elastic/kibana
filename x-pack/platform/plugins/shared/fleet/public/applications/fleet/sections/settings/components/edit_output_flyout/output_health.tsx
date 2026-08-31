@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiCallOut, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -45,41 +46,37 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
 
   const EditOutputStatus: { [status: string]: JSX.Element | null } = {
     DEGRADED: (
-      <EuiCallOut
+      <KbnDangerCallout
         title="Error"
-        color="danger"
-        iconType="error"
         data-test-subj="outputHealthDegradedCallout"
-      >
-        <p className="eui-textBreakWord">
-          {i18n.translate('xpack.fleet.output.calloutText', {
-            defaultMessage: 'Unable to connect to "{name}" at {host}.',
-            values: {
-              name: output.name,
-              host: output.hosts?.join(',') ?? '',
-            },
-          })}
-        </p>
-        <p>
-          {i18n.translate('xpack.fleet.output.calloutPromptText', {
-            defaultMessage: 'Please check the details are correct.',
-          })}
-        </p>
-      </EuiCallOut>
+        text={
+          <>
+            <p className="eui-textBreakWord">
+              {i18n.translate('xpack.fleet.output.calloutText', {
+                defaultMessage: 'Unable to connect to "{name}" at {host}.',
+                values: {
+                  name: output.name,
+                  host: output.hosts?.join(',') ?? '',
+                },
+              })}
+            </p>
+            <p>
+              {i18n.translate('xpack.fleet.output.calloutPromptText', {
+                defaultMessage: 'Please check the details are correct.',
+              })}
+            </p>
+          </>
+        }
+      />
     ),
     HEALTHY: (
-      <EuiCallOut
+      <KbnSuccessCallout
         title="Healthy"
-        color="success"
-        iconType="check"
         data-test-subj="outputHealthHealthyCallout"
-      >
-        <p>
-          {i18n.translate('xpack.fleet.output.successCalloutText', {
-            defaultMessage: 'Connection with remote output established.',
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.fleet.output.successCalloutText', {
+          defaultMessage: 'Connection with remote output established.',
+        })}
+      />
     ),
   };
 

@@ -25,7 +25,7 @@ const baseRuleResponse: RuleResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1'] },
+  metadata: { name: 'Test Rule', version: 1, owner: 'test-owner', tags: ['tag1'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '2m' },
   query: {
@@ -33,10 +33,10 @@ const baseRuleResponse: RuleResponse = {
     base: BASE,
     breach: { segment: ALERT_SEGMENT },
   },
-  createdBy: 'test',
-  createdAt: '2026-01-01T00:00:00Z',
-  updatedBy: 'test',
-  updatedAt: '2026-01-01T00:00:00Z',
+  created_by: 'test',
+  created_at: '2026-01-01T00:00:00Z',
+  updated_by: 'test',
+  updated_at: '2026-01-01T00:00:00Z',
 };
 
 const baseFormValues: FormValues = {
@@ -140,6 +140,30 @@ describe('composeFormToCreateRequest', () => {
     expect(result.grouping).toBeUndefined();
   });
 
+  it('includes no_data_strategy when set on alert rule', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      noDataStrategy: 'recover',
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.no_data_strategy).toBe('recover');
+  });
+
+  it('omits no_data_strategy when undefined', () => {
+    const result = composeFormToCreateRequest(baseFormValues);
+    expect(result.no_data_strategy).toBeUndefined();
+  });
+
+  it('omits recovery_strategy for signal rules even when set', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      kind: 'signal',
+      recoveryStrategy: 'no_breach',
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.recovery_strategy).toBeUndefined();
+  });
+
   it('returns undefined state_transition for signal rules', () => {
     const values: FormValues = { ...baseFormValues, kind: 'signal' };
     const result = composeFormToCreateRequest(values);
@@ -173,58 +197,78 @@ describe('composeFormToCreateRequest', () => {
     );
   });
 
-  it('trims runbook and dashboard artifacts', () => {
+  it('passes runbook and dashboard artifacts through with data unchanged', () => {
     const values: FormValues = {
       ...baseFormValues,
       runbookArtifacts: [
-        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Runbook steps  ' },
+        {
+          id: 'runbook-id',
+          type: RUNBOOK_ARTIFACT_TYPE,
+          data: { content: '  Runbook steps  ' },
+        },
       ],
       dashboardArtifacts: [
-        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
+        {
+          id: 'dashboard-id',
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboardId: '  dashboard-123  ' },
+        },
       ],
     };
 
     const result = composeFormToCreateRequest(values);
 
     expect(result.artifacts).toEqual([
-      { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
-      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+      {
+        id: 'runbook-id',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: '  Runbook steps  ' },
+      },
+      {
+        id: 'dashboard-id',
+        type: DASHBOARD_ARTIFACT_TYPE,
+        data: { dashboardId: '  dashboard-123  ' },
+      },
     ]);
   });
 
-  it('removes empty runbook and dashboard artifacts while preserving other artifacts', () => {
+  it('passes empty-looking runbook and dashboard artifacts through without filtering', () => {
     const values: FormValues = {
       ...baseFormValues,
-      runbookArtifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
-      dashboardArtifacts: [{ id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '' }],
-      artifacts: [{ id: 'other-id', type: 'other', value: 'kept' }],
-    };
-
-    const result = composeFormToCreateRequest(values);
-
-    expect(result.artifacts).toEqual([{ id: 'other-id', type: 'other', value: 'kept' }]);
-  });
-
-  it('generates missing IDs for runbook and dashboard artifacts', () => {
-    const values: FormValues = {
-      ...baseFormValues,
-      runbookArtifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' }],
-      dashboardArtifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
+      runbookArtifacts: [
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
+      ],
+      dashboardArtifacts: [
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+      ],
+      artifacts: [{ id: 'other-id', type: 'other', data: { value: 'kept' } }],
     };
 
     const result = composeFormToCreateRequest(values);
 
     expect(result.artifacts).toEqual([
-      expect.objectContaining({
-        id: expect.stringMatching(/^runbook-/),
-        type: RUNBOOK_ARTIFACT_TYPE,
-        value: 'Runbook steps',
-      }),
-      expect.objectContaining({
-        id: expect.stringMatching(/^dashboard-/),
-        type: DASHBOARD_ARTIFACT_TYPE,
-        value: 'dashboard-123',
-      }),
+      { id: 'other-id', type: 'other', data: { value: 'kept' } },
+      { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
+      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+    ]);
+  });
+
+  it('passes empty artifact ids through without generating replacements', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      runbookArtifacts: [
+        { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
+      ],
+      dashboardArtifacts: [
+        { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
+      ],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([
+      { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
+      { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
     ]);
   });
 });
@@ -258,11 +302,29 @@ describe('composeFormToUpdateRequest', () => {
     const values: FormValues = {
       ...baseFormValues,
       recoveryStrategy: 'no_breach',
-      noDataStrategy: 'emit',
+      noDataStrategy: 'recover',
     };
     const result = composeFormToUpdateRequest(values);
     expect(result.recovery_strategy).toBe('no_breach');
-    expect(result.no_data_strategy).toBe('emit');
+    expect(result.no_data_strategy).toBe('recover');
+  });
+
+  it('preserves recovery_strategy: none', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      recoveryStrategy: 'none',
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBe('none');
+  });
+
+  it('nullifies recovery_strategy when form recoveryStrategy is unset (do not recover)', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      recoveryStrategy: undefined,
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBeNull();
   });
 
   it('infers recovery_strategy: query when user adds recovery via form (recoveryStrategy undefined)', () => {
@@ -324,6 +386,25 @@ describe('mapRuleToComposeFormValues', () => {
       expect(result.query.base).toBe(BASE);
       expect(result.query.breach.segment).toBe(ALERT_SEGMENT);
     }
+  });
+
+  it('round-trips an omitted composed breach through the form as an empty segment', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      query: { format: 'composed', base: BASE },
+    };
+
+    const formValues = mapRuleToComposeFormValues(rule);
+
+    expect(formValues.query).toEqual({
+      format: 'composed',
+      base: BASE,
+      breach: { segment: '' },
+    });
+    expect(composeFormToCreateRequest(formValues).query).toEqual({
+      format: 'composed',
+      base: BASE,
+    });
   });
 
   it('maps recovery segment from composed query when recovery_strategy: query', () => {
@@ -435,19 +516,39 @@ describe('mapRuleToComposeFormValues', () => {
     const rule = {
       ...baseRuleResponse,
       artifacts: [
-        { id: 'host-id', type: 'host', value: 'host-a' },
-        { id: 'runbook-id', type: 'runbook', value: 'steps here' },
-        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+        { id: 'host-id', type: 'host', data: { value: 'host-a' } },
+        { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
+        { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
       ],
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
-    expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', value: 'host-a' }]);
+    expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', data: { value: 'host-a' } }]);
     expect(result.runbookArtifacts).toEqual([
-      { id: 'runbook-id', type: 'runbook', value: 'steps here' },
+      { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
     ]);
     expect(result.dashboardArtifacts).toEqual([
-      { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+      { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
     ]);
+  });
+
+  it('maps no_data_strategy from rule response', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      no_data_strategy: 'recover',
+    };
+    const result = mapRuleToComposeFormValues(rule);
+    expect(result.noDataStrategy).toBe('recover');
+  });
+
+  it('defaults noDataStrategy to none for alert rules without no_data_strategy', () => {
+    const result = mapRuleToComposeFormValues(baseRuleResponse);
+    expect(result.noDataStrategy).toBe('none');
+  });
+
+  it('defaults noDataStrategy to undefined for signal rules without no_data_strategy', () => {
+    const rule: RuleResponse = { ...baseRuleResponse, kind: 'signal' };
+    const result = mapRuleToComposeFormValues(rule);
+    expect(result.noDataStrategy).toBeUndefined();
   });
 
   it('derives recoveries delay mode from recovering_count', () => {
@@ -471,16 +572,16 @@ describe('mapRuleToComposeFormValues', () => {
   it('preserves no_data_strategy from API response', () => {
     const rule: RuleResponse = {
       ...baseRuleResponse,
-      no_data_strategy: 'emit',
+      no_data_strategy: 'last_known_status',
     };
     const result = mapRuleToComposeFormValues(rule);
-    expect(result.noDataStrategy).toBe('emit');
+    expect(result.noDataStrategy).toBe('last_known_status');
   });
 
   it('preserves no_data query block for standalone queries', () => {
     const rule: RuleResponse = {
       ...baseRuleResponse,
-      no_data_strategy: 'emit',
+      no_data_strategy: 'last_known_status',
       query: {
         format: 'standalone',
         breach: { query: 'FROM logs-* | WHERE level == "error"' },
@@ -507,21 +608,31 @@ describe('round-trip: non-representable fields survive load → save', () => {
     expect(request.recovery_strategy).toBe('no_breach');
   });
 
-  it('preserves no_data_strategy through load → save cycle', () => {
+  it('preserves recovery_strategy: none through load → save cycle', () => {
     const rule: RuleResponse = {
       ...baseRuleResponse,
-      no_data_strategy: 'emit',
+      recovery_strategy: 'none',
     };
     const formValues = mapRuleToComposeFormValues(rule);
     const request = composeFormToCreateRequest(formValues);
-    expect(request.no_data_strategy).toBe('emit');
+    expect(request.recovery_strategy).toBe('none');
+  });
+
+  it('preserves no_data_strategy through load → save cycle', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      no_data_strategy: 'last_known_status',
+    };
+    const formValues = mapRuleToComposeFormValues(rule);
+    const request = composeFormToCreateRequest(formValues);
+    expect(request.no_data_strategy).toBe('last_known_status');
   });
 
   it('preserves no_data query block through load → save cycle', () => {
     const rule: RuleResponse = {
       ...baseRuleResponse,
       recovery_strategy: 'query',
-      no_data_strategy: 'emit',
+      no_data_strategy: 'last_known_status',
       query: {
         format: 'standalone',
         breach: { query: 'FROM logs-* | WHERE status == "error"' },
@@ -538,7 +649,7 @@ describe('round-trip: non-representable fields survive load → save', () => {
       no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
     });
     expect(request.recovery_strategy).toBe('query');
-    expect(request.no_data_strategy).toBe('emit');
+    expect(request.no_data_strategy).toBe('last_known_status');
   });
 
   it('does not emit recovery_strategy when not set and no recovery block', () => {

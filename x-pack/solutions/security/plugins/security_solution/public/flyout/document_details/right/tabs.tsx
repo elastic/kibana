@@ -45,15 +45,10 @@ const detailsFlyoutCellActionRenderer: CellActionRenderer = ({ field, value, chi
  * `flyout_v2`; this component only reads the context and forwards the values as props.
  */
 const TableTabContent = memo(() => {
-  const { searchHit, scopeId, isRulePreview } = useDocumentDetailsContext();
+  const { searchHit, scopeId } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   return (
-    <TableTab
-      hit={hit}
-      scopeId={scopeId}
-      isRulePreview={isRulePreview}
-      renderCellActions={detailsFlyoutCellActionRenderer}
-    />
+    <TableTab hit={hit} scopeId={scopeId} renderCellActions={detailsFlyoutCellActionRenderer} />
   );
 });
 TableTabContent.displayName = 'TableTabContent';
@@ -104,3 +99,6 @@ export const jsonTab: RightPanelTabType = {
   ),
   content: <JsonTabContent />,
 };
+
+export const allThreeTabs: RightPanelTabType[] = [overviewTab, tableTab, jsonTab];
+export const twoTabs: RightPanelTabType[] = [tableTab, jsonTab];

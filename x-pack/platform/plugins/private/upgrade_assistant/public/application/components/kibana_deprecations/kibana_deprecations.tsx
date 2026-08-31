@@ -9,7 +9,8 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
-import { EuiCode, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiCode, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -291,21 +292,22 @@ export const KibanaDeprecationsList = ({
 
       {(!hasPrivileges || kibanaDeprecationErrors.length > 0) && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
             title={i18nTexts.kibanaDeprecationErrorTitle}
-            color="warning"
-            iconType="warning"
             data-test-subj="kibanaDeprecationErrors"
-          >
-            <>
-              {!hasPrivileges && <p>{i18nTexts.missingPermissionDescription(privilegesMissing)}</p>}
+            text={
+              <>
+                {!hasPrivileges && (
+                  <p>{i18nTexts.missingPermissionDescription(privilegesMissing)}</p>
+                )}
 
-              {kibanaDeprecationErrors.length > 0 && (
-                <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>
-              )}
-            </>
-          </EuiCallOut>
+                {kibanaDeprecationErrors.length > 0 && (
+                  <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>
+                )}
+              </>
+            }
+          />
 
           <EuiSpacer />
         </>

@@ -93,7 +93,3 @@ export const TEMPLATE_NOT_SELECTED_DESCRIPTION = i18n.translate(
     defaultMessage: 'Select a template in the first step above to edit extended fields.',
   }
 );
-
-export const EXTENDED_FIELDS_TITLE = i18n.translate('xpack.cases.create.extendedFieldsTitle', {
-  defaultMessage: 'Extended fields',
-});

@@ -47,6 +47,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--xpack.alerting.rules.minimumScheduleInterval.value="2s"`,
+        // Pin the Cases templates flag ON so the case-settings docs screenshots
+        // capture the v2 templates / field-library pages regardless of the plugin
+        // default. The flag only affects Cases, so other docs suites are unaffected.
+        `--xpack.cases.templates.enabled=true`,
       ],
     },
   };

@@ -10,34 +10,39 @@
 import type { Subject } from 'rxjs';
 
 import type {
-  OptionsListSelection,
-  OptionsListSortingType,
   DataControlState,
   OptionsListDSLControlState,
+  OptionsListSelection,
+  OptionsListSortingType,
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
+  CanCancelRequests,
   HasType,
   HasUniqueId,
   PublishesRelatedPanels,
   PublishesUnsavedChanges,
   PublishingSubject,
+  SupportsJsonExport,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
+
+import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../../types';
 import type { DataControlApi, PublishesField } from '../types';
 import type { EditorState } from './editor_state_manager';
 import type { SelectionsState } from './selections_manager';
 import type { TemporaryState } from './temporay_state_manager';
-import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../../types';
 
 export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlState> &
+  CanCancelRequests &
   DataControlApi &
   PublishesUnsavedChanges &
   PublishesRelatedPanels & {
     setSelectedOptions: (options: OptionsListSelection[]) => void;
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;
-  };
+  } & SupportsJsonExport;
 
 /**
  * A type consisting of only the properties that the options list control puts into state managers
@@ -69,6 +74,7 @@ export type DSLOptionsListComponentApi = HasType &
   DSLOptionsListComponentStateSetters &
   OptionsListSelectionsApi & {
     loadMoreSubject: Subject<void>;
+    viewMode$: PublishingSubject<ViewMode>;
   };
 
 export interface OptionsListCustomStrings {

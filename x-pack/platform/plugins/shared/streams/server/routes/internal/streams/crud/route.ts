@@ -8,18 +8,22 @@
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type {
+  ClassicIngestStreamEffectiveLifecycle,
+  EffectiveFailureStore,
+} from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { StreamSummary } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
-import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
+import { getDataStreamLifecycle, getFailureStore } from '../../../../lib/streams/stream_crud';
 
 export interface ListStreamDetail {
   stream: Streams.all.Definition;
   effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
+  effective_failure_store?: EffectiveFailureStore;
   data_stream?: estypes.IndicesDataStream;
   privileges: {
     read_failure_store: boolean;
@@ -83,12 +87,20 @@ export const listStreamsRoute = createServerRoute({
 
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
       const privileges = streamPrivilegesMap.get(stream.name);
+      const canReadFailureStore = privileges?.read_failure_store ?? false;
 
       return {
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
+        ...(canReadFailureStore
+          ? {
+              effective_failure_store: getFailureStore({
+                dataStream: match ?? null,
+              }),
+            }
+          : {}),
         data_stream: match,
-        privileges: { read_failure_store: privileges?.read_failure_store ?? false },
+        privileges: { read_failure_store: canReadFailureStore },
       };
     });
 

@@ -17,7 +17,7 @@ import {
 } from './route_config';
 
 const allEnabled: RouteAccessConfig = {
-  featureFlags: { experimental: true, uiamOAuthClientManagement: true },
+  featureFlags: { experimental: true },
   capabilities: { isUIAMEnabled: true },
 };
 const enabledRoutesWithExperimental = getEnabledRoutes(allEnabled);
@@ -188,39 +188,17 @@ describe('route_config', () => {
     const findMcpRoute = (routes: ReturnType<typeof getEnabledRoutes>) =>
       routes.find((r) => r.path === mcpClientsPath);
 
-    const config = (
-      uiamOAuthClientManagement: boolean,
-      isUIAMEnabled: boolean
-    ): RouteAccessConfig => ({
-      featureFlags: { experimental: true, uiamOAuthClientManagement },
+    const config = (isUIAMEnabled: boolean): RouteAccessConfig => ({
+      featureFlags: { experimental: true },
       capabilities: { isUIAMEnabled },
     });
 
-    it('includes MCP clients route when both uiamOAuthClientManagement and UIAM are enabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(true, true)))).toBeDefined();
+    it('includes MCP clients route when UIAM is enabled', () => {
+      expect(findMcpRoute(getEnabledRoutes(config(true)))).toBeDefined();
     });
 
     it('excludes MCP clients route when UIAM is disabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(true, false)))).toBeUndefined();
-    });
-
-    it('excludes MCP clients route when uiamOAuthClientManagement is disabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(false, true)))).toBeUndefined();
-    });
-
-    it('excludes MCP clients route when both are disabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(false, false)))).toBeUndefined();
-    });
-
-    it('includes MCP clients route even when experimental is disabled (no longer experimental-gated)', () => {
-      expect(
-        findMcpRoute(
-          getEnabledRoutes({
-            featureFlags: { experimental: false, uiamOAuthClientManagement: true },
-            capabilities: { isUIAMEnabled: true },
-          })
-        )
-      ).toBeDefined();
+      expect(findMcpRoute(getEnabledRoutes(config(false)))).toBeUndefined();
     });
   });
 

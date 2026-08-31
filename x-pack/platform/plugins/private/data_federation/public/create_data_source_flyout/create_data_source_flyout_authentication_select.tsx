@@ -27,18 +27,18 @@ import {
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
 
-const CLOUD_SECURITY_DOCS_URL = 'https://www.elastic.co/docs/solutions/security/cloud';
-
 export function CreateDataSourceFlyoutAuthenticationSelect({
   dataSourceType,
   authenticationMode,
   enableFederatedIdentity,
   onAuthenticationModeChange,
+  authenticationDocsUrl,
 }: {
   dataSourceType: DataSourceType;
   authenticationMode: CreateDataSourceAuthenticationMode;
   enableFederatedIdentity?: boolean;
   onAuthenticationModeChange: (mode: CreateDataSourceAuthenticationMode) => void;
+  authenticationDocsUrl: string;
 }) {
   const options = useMemo(
     () => getCreateDataSourceAuthenticationOptions(dataSourceType, { enableFederatedIdentity }),
@@ -60,7 +60,7 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            href={CLOUD_SECURITY_DOCS_URL}
+            href={authenticationDocsUrl}
             target="_blank"
             external={false}
             rel="noopener noreferrer"

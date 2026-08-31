@@ -31,9 +31,9 @@ import {
   useStateFromPublishingSubject,
   apiPublishesApproximation,
 } from '@kbn/presentation-publishing';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { isOperation } from '../../../types_guards';
 import { LayerHeader } from './layer_header';
@@ -104,9 +104,7 @@ export function LayerPanel(props: LayerPanelProps) {
       : new BehaviorSubject(undefined)
   );
   const isApproximate = useStateFromPublishingSubject(
-    apiPublishesApproximation(parentApi)
-      ? parentApi?.isApproximate$
-      : new BehaviorSubject(undefined)
+    apiPublishesApproximation(parentApi) ? parentApi?.isApproximate$ : new BehaviorSubject(false)
   );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -329,13 +327,9 @@ export function LayerPanel(props: LayerPanelProps) {
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() ||
-    isOfAggregateQueryType(editorProps.attributes?.state.query) ||
-    false;
+    datasource?.isTextBasedLanguage() || isTextBasedAttributes(editorProps.attributes) || false;
   const shouldRenderESQLEditor =
-    isTextBasedLanguage &&
-    canEditTextBasedQuery &&
-    isOfAggregateQueryType(editorProps.attributes?.state.query);
+    isTextBasedLanguage && canEditTextBasedQuery && isTextBasedAttributes(editorProps.attributes);
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -903,7 +897,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 indexPatterns: dataViews.indexPatterns,
                 activeData: layerVisualizationConfigProps.activeData,
                 esqlVariables,
-                isApproximate: isApproximate ?? undefined,
+                isApproximate,
                 dataSectionExtra: !isFullscreen &&
                   openDimension.isComplete &&
                   activeVisualization.DimensionEditorDataExtraComponent && (

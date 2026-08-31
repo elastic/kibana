@@ -117,6 +117,7 @@ describe('fromConnectorSpecSchema', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const serialized = serializeConnectorSpec(testSpec);
@@ -169,6 +170,7 @@ describe('fromConnectorSpecSchema', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const serialized = serializeConnectorSpec(testSpec);

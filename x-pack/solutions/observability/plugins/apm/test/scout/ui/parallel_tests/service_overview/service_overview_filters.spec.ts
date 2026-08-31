@@ -150,8 +150,7 @@ test.describe(
       });
 
       await test.step('Verify URL is updated', async () => {
-        await page.waitForURL(/2021-10-09/, { timeout: EXTENDED_TIMEOUT });
-        expect(page.url()).toContain('2021-10-09');
+        await expect(page).toHaveURL(/2021-10-09/, { timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('Verify page still renders correctly', async () => {

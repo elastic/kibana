@@ -18,15 +18,32 @@ export interface WorkflowExecutionsSearchBarProps {
   query: Query;
   timeRange: TimeRange;
   filters: Filter[];
+  isRefreshPaused: boolean;
+  refreshInterval: number;
   onQueryChange: (payload: { query?: Query; dateRange: TimeRange }) => void;
   onQuerySubmit: (payload: { query?: Query; dateRange: TimeRange }) => void;
   onFiltersUpdated: (filters: Filter[]) => void;
+  onRefreshChange: (options: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 export const WorkflowExecutionsSearchBar = React.memo<WorkflowExecutionsSearchBarProps>(
-  ({ dataView, query, timeRange, filters, onQueryChange, onQuerySubmit, onFiltersUpdated }) => {
-    const { unifiedSearch } = useKibana().services;
-    const { SearchBar } = unifiedSearch.ui;
+  ({
+    dataView,
+    filters,
+    isRefreshPaused,
+    onFiltersUpdated,
+    onQueryChange,
+    onQuerySubmit,
+    onRefreshChange,
+    query,
+    refreshInterval,
+    timeRange,
+  }) => {
+    const {
+      unifiedSearch: {
+        ui: { SearchBar },
+      },
+    } = useKibana().services;
 
     return (
       <div data-test-subj="workflowExecutionsSearchBar">
@@ -36,16 +53,21 @@ export const WorkflowExecutionsSearchBar = React.memo<WorkflowExecutionsSearchBa
           data-test-subj="workflowExecutionsQueryInput"
           dateRangeFrom={timeRange.from}
           dateRangeTo={timeRange.to}
+          disableSubscribingToGlobalDataServices
           displayStyle="inPage"
+          enableDateRangePicker
           filters={filters}
           indexPatterns={[dataView]}
+          isRefreshPaused={isRefreshPaused}
           onFiltersUpdated={onFiltersUpdated}
           onQueryChange={onQueryChange}
           onQuerySubmit={onQuerySubmit}
+          onRefreshChange={onRefreshChange}
           placeholder={i18n.translate('workflowsManagement.executionsPage.searchPlaceholder', {
             defaultMessage: 'Filter your data using KQL syntax',
           })}
           query={query}
+          refreshInterval={refreshInterval}
           showDatePicker
           showFilterBar
           showQueryMenu

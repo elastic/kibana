@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base
 dependsOn:
   - '@kbn/core-http-server'
+  - '@kbn/security-plugin-types-server'
   - '@kbn/inference-tracing'
   - '@kbn/utility-types'
   - '@kbn/workflows'

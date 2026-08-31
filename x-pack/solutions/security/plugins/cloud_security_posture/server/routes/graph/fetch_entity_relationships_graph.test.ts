@@ -17,6 +17,7 @@ import type { EntityId, RelationshipEsqlRow, EntityRecord } from './types';
 import { hashIds } from './utils';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
+import { RELATIONSHIP_FIELDS_FORK_BATCH_SIZE } from './constants';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
 describe('fetchEntityRelationships', () => {
@@ -53,11 +54,15 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      // ENTITY_RELATIONSHIP_FIELDS has more than 8 entries, so the query is batched into
+      // multiple FORK-bounded ES|QL calls (see RELATIONSHIP_FIELDS_FORK_BATCH_SIZE).
+      const batchCount = Math.ceil(
+        ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
+      );
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(batchCount);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
@@ -74,8 +79,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: false,
+        entityStoreIndexName: null,
       });
 
       // Should not call ESQL when index does not exist
@@ -95,8 +99,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds: [{ id: 'entity-1', isOrigin: false }],
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
@@ -123,11 +126,13 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const batchCount = Math.ceil(
+        ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
+      );
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(batchCount);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const filterArg = esqlCallArgs[0].filter as any;
 
@@ -173,11 +178,13 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const batchCount = Math.ceil(
+        ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
+      );
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(batchCount);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
 
       // Filter should be undefined when no entityIds provided
@@ -201,10 +208,94 @@ describe('fetchEntityRelationships', () => {
           esClient,
           logger,
           entityIds,
-          spaceId: 'default',
-          entityStoreIndexExists: true,
+          entityStoreIndexName: '.entities.v2.latest.default-00001',
         })
       ).rejects.toThrow('Connection refused');
+    });
+
+    it('rejects the whole call when one of multiple batches fails', async () => {
+      const goodBatch = { records: [{ relationship: 'owns' } as unknown as RelationshipEsqlRow] };
+      const genericError = new Error('Batch 2 failed');
+      let call = 0;
+      esClient.asCurrentUser.helpers.esql.mockImplementation(() => ({
+        toRecords: jest.fn().mockImplementation(() => {
+          call += 1;
+          return call === 1 ? Promise.resolve(goodBatch) : Promise.reject(genericError);
+        }),
+        toArrowTable: jest.fn(),
+        toArrowReader: jest.fn(),
+      }));
+
+      await expect(
+        fetchEntityRelationships({
+          esClient,
+          logger,
+          entityIds: [{ id: 'entity-1', isOrigin: true }],
+          entityStoreIndexName: '.entities.v2.latest.default-00001',
+        })
+      ).rejects.toThrow('Batch 2 failed');
+    });
+  });
+
+  describe('FORK branch-limit batching', () => {
+    it('splits ENTITY_RELATIONSHIP_FIELDS into multiple ES|QL queries bounded by the FORK branch limit', async () => {
+      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      esClient.asCurrentUser.helpers.esql.mockReturnValue({
+        toRecords: toRecordsMock,
+        toArrowTable: jest.fn(),
+        toArrowReader: jest.fn(),
+      });
+
+      await fetchEntityRelationships({
+        esClient,
+        logger,
+        entityIds: [{ id: 'entity-1', isOrigin: true }],
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
+      });
+
+      const calls = esClient.asCurrentUser.helpers.esql.mock.calls;
+      const expectedBatchCount = Math.ceil(
+        ENTITY_RELATIONSHIP_FIELDS.length / RELATIONSHIP_FIELDS_FORK_BATCH_SIZE
+      );
+      expect(calls).toHaveLength(expectedBatchCount);
+
+      // Every FORK branch count per query must stay within the branch limit, and every
+      // relationship field must appear in exactly one batch's query.
+      const fieldsSeenPerQuery = calls.map(([{ query }]: any[]) =>
+        ENTITY_RELATIONSHIP_FIELDS.filter((field) => query.includes(`_rel_targets_${field}`))
+      );
+      fieldsSeenPerQuery.forEach((fields: string[]) => {
+        expect(fields.length).toBeLessThanOrEqual(RELATIONSHIP_FIELDS_FORK_BATCH_SIZE);
+      });
+      const allFieldsCovered = fieldsSeenPerQuery.flat();
+      expect(new Set(allFieldsCovered)).toEqual(new Set(ENTITY_RELATIONSHIP_FIELDS));
+      expect(allFieldsCovered).toHaveLength(ENTITY_RELATIONSHIP_FIELDS.length);
+    });
+
+    it('merges records from all batches into a single result', async () => {
+      const batch1Records = [{ relationship: 'owns' } as unknown as RelationshipEsqlRow];
+      const batch2Records = [{ relationship: 'administers' } as unknown as RelationshipEsqlRow];
+      let call = 0;
+      esClient.asCurrentUser.helpers.esql.mockImplementation(() => ({
+        toRecords: jest.fn().mockImplementation(() => {
+          call += 1;
+          return Promise.resolve({
+            columns: [{ name: `col${call}`, type: 'keyword' }],
+            records: call === 1 ? batch1Records : batch2Records,
+          });
+        }),
+        toArrowTable: jest.fn(),
+        toArrowReader: jest.fn(),
+      }));
+
+      const result = await fetchEntityRelationships({
+        esClient,
+        logger,
+        entityIds: [{ id: 'entity-1', isOrigin: true }],
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
+      });
+
+      expect(result.records).toEqual([...batch1Records, ...batch2Records]);
     });
   });
 
@@ -223,8 +314,7 @@ describe('fetchEntityRelationships', () => {
         esClient,
         logger,
         entityIds,
-        spaceId: 'default',
-        entityStoreIndexExists: true,
+        entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
 
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];

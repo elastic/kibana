@@ -7,26 +7,21 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
-import {
-  escapeKuery,
-  escapeQuotes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { isEmpty, uniq } from 'lodash';
 
 import yaml from 'yaml';
 
+import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
 import {
-  ALL_SPACES_ID,
-  AGENT_POLICY_VERSION_SEPARATOR,
-  FIPS_AGENT_KUERY,
-  inputsFormat,
-} from '../../../common/constants';
-import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+} from '../../../common/services/version_specific_policies_utils';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
+import { redactProxySecretsFromPolicy } from '../../services/agent_policies/full_agent_policy';
+import { listFleetProxies } from '../../services/fleet_proxies';
 import {
   appContextService,
   agentPolicyService,
@@ -34,6 +29,7 @@ import {
   licenseService,
 } from '../../services';
 import { type AgentClient } from '../../services/agents';
+import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
 import { UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
@@ -87,12 +83,6 @@ import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents
 
 const deduplicateIds = (ids: string[]) => uniq(ids);
 
-function getPolicyOrVersionSpecificKuery(policyId: string): string {
-  return `(policy_id:"${escapeQuotes(policyId)}" or policy_id:${escapeKuery(
-    policyId
-  )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
-}
-
 interface AssignedAgentsCountAggregation {
   buckets: Record<
     string,
@@ -120,7 +110,7 @@ export async function populateAssignedAgentsCount(
   const policyKueryById = new Map(
     agentPolicies.map((agentPolicy) => [
       agentPolicy.id,
-      getPolicyOrVersionSpecificKuery(agentPolicy.id),
+      buildPolicyIdOrVariantsKuery(agentPolicy.id),
     ])
   );
 
@@ -429,13 +419,14 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       }
     }
 
-    if (
-      appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI &&
-      request.body.supports_agentless
-    ) {
-      throw new FleetError(
-        'To create agentless agent policies, use the Fleet agentless policies API.'
-      );
+    // The cheap `supports_agentless` detection runs regardless of the flag so
+    // legacy agentless usage is measurable (deprecation warn) before the flag is
+    // flipped fleet-wide — the flip is what starts rejecting these callers.
+    if (request.body.supports_agentless) {
+      if (appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
+        throw new FleetError('To create managed integrations, use the managed integrations API.');
+      }
+      logLegacyAgentlessWriteDeprecation('create agent policy');
     }
 
     const agentPolicy = await createAgentPolicyWithPackages({
@@ -643,9 +634,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       false
     );
     if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
-      throw new FleetError(
-        'To update agentless agent policies, use the Fleet agentless policies API.'
-      );
+      throw new FleetError('To update managed integrations, use the managed integrations API.');
     }
 
     const agentPolicy = await agentPolicyService.update(
@@ -701,6 +690,20 @@ export const copyAgentPolicyHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
+    if (appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
+      const sourceAgentPolicy = await agentPolicyService.get(
+        soClient,
+        request.params.agentPolicyId,
+        false
+      );
+      // A missing source falls through to `copy`, which reports the not-found error.
+      if (sourceAgentPolicy?.supports_agentless) {
+        throw new FleetError(
+          `Managed integrations cannot be copied. To create a managed integration, use the managed integrations API. Offending ID: ${request.params.agentPolicyId}.`
+        );
+      }
+    }
+
     const agentPolicy = await agentPolicyService.copy(
       soClient,
       esClient,
@@ -767,6 +770,8 @@ export const getFullAgentPolicy: FleetRequestHandler<
     });
   }
 
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
+
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -781,9 +786,16 @@ export const getFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const body: GetFullAgentPolicyResponse = {
-      item: fleetServerPolicy.data as unknown as FullAgentPolicy,
-    };
+    const item = fleetServerPolicy.data as unknown as FullAgentPolicy;
+    let redactedItem = item;
+    if (!canReadSettings) {
+      const { items: proxies } = await listFleetProxies(soClient);
+      const proxyUrlsWithCertKey = new Set(
+        proxies.filter((p) => p.certificate_key).map((p) => p.url)
+      );
+      redactedItem = redactProxySecretsFromPolicy(item, proxyUrlsWithCertKey);
+    }
+    const body: GetFullAgentPolicyResponse = { item: redactedItem };
     return response.ok({ body });
   }
 
@@ -794,7 +806,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (fullAgentConfigMap) {
       const body: GetFullAgentConfigMapResponse = {
@@ -812,6 +824,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
     });
     if (fullAgentPolicy) {
       const body: GetFullAgentPolicyResponse = {
@@ -846,6 +859,8 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     });
   }
 
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
+
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -860,8 +875,16 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const fullAgentPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
+    const storedPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
+    let policyToSerialize = storedPolicy;
+    if (!canReadSettings) {
+      const { items: proxies } = await listFleetProxies(soClient);
+      const proxyUrlsWithCertKey = new Set(
+        proxies.filter((p) => p.certificate_key).map((p) => p.url)
+      );
+      policyToSerialize = redactProxySecretsFromPolicy(storedPolicy, proxyUrlsWithCertKey);
+    }
+    const body = fullAgentPolicyToYaml(policyToSerialize, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,
@@ -876,7 +899,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (!fullAgentConfigMap) {
       return response.customError({
@@ -896,6 +919,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
     });
     if (!fullAgentPolicy) {
       return response.customError({

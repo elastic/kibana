@@ -7,10 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-const PREFIX = 'xpack.dataLifecyclePhases.inheritLifecycleSection';
-
 export const inheritLifecycleSectionStrings = {
-  viewSourceLink: i18n.translate(`${PREFIX}.viewSourceLink`, {
-    defaultMessage: 'View source',
-  }),
+  viewSourceLink: i18n.translate(
+    'xpack.dataLifecyclePhases.inheritLifecycleSection.viewSourceLink',
+    {
+      defaultMessage: 'View source',
+    }
+  ),
 };

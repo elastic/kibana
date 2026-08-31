@@ -11,9 +11,9 @@ import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATE_TAG_LENGTH,
-  MAX_DESCRIPTION_LENGTH,
   MAX_TITLE_LENGTH,
   MAX_FIELD_DEFINITIONS_PER_OWNER,
 } from '../../../../common/constants';
@@ -22,7 +22,7 @@ export const templateSchema = schema.object({
   templateId: schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH }),
   name: schema.string({ maxLength: MAX_TEMPLATE_NAME_LENGTH }),
   owner: schema.string({ maxLength: 30 }),
-  definition: schema.string({ maxLength: MAX_DESCRIPTION_LENGTH }),
+  definition: schema.string({ maxLength: MAX_TEMPLATE_DEFINITION_LENGTH }),
   templateVersion: schema.number(),
   deletedAt: schema.nullable(schema.string({ maxLength: 30 })),
   description: schema.maybe(schema.string({ maxLength: MAX_TEMPLATE_DESCRIPTION_LENGTH })),
@@ -34,16 +34,11 @@ export const templateSchema = schema.object({
   author: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
   usageCount: schema.maybe(schema.number()),
   fieldCount: schema.maybe(schema.number()),
+  // NOTE: 9.4 production stored this field as plain keyword strings (not nested objects), so the
+  // schema here must tolerate string arrays for forward-compatibility with documents written by
+  // older nodes. This was incorrectly typed as an object array in PR #269962.
   fieldNames: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        name: schema.string({ maxLength: MAX_TITLE_LENGTH }),
-        label: schema.string({ maxLength: MAX_TITLE_LENGTH }),
-        type: schema.string({ maxLength: 50 }),
-        control: schema.string({ maxLength: 50 }),
-      }),
-      { maxSize: MAX_FIELD_DEFINITIONS_PER_OWNER }
-    )
+    schema.arrayOf(schema.string(), { maxSize: MAX_FIELD_DEFINITIONS_PER_OWNER })
   ),
   lastUsedAt: schema.maybe(schema.string({ maxLength: 30 })),
   isDefault: schema.maybe(schema.boolean()),

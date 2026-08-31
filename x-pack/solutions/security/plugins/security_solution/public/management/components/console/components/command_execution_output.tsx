@@ -32,9 +32,14 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
     const dispatch = useConsoleStateDispatch();
     const RenderComponent = command.commandDefinition.RenderComponent;
     const [isLongRunningCommand, setIsLongRunningCommand] = useState(false);
+    const [pendingStartedAt, setPendingStartedAt] = useState<string | undefined>(undefined);
 
-    const isRunning = useMemo(() => {
+    const isPending = useMemo(() => {
       return state.status === 'pending';
+    }, [state.status]);
+
+    const isCreating = useMemo(() => {
+      return state.status === 'creating';
     }, [state.status]);
 
     /** Updates the Command's status */
@@ -65,12 +70,22 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
       [dispatch, id]
     );
 
+    // When the command status goes into `pending`, set the `pendingStartedAt` so that we can track when
+    // the command becomes a "long running command" and show a hint.
+    useEffect(() => {
+      if (isPending && !pendingStartedAt) {
+        setPendingStartedAt(new Date().toISOString());
+      } else if (!isPending) {
+        setPendingStartedAt(undefined);
+      }
+    }, [isPending, pendingStartedAt]);
+
     // keep track if this becomes a long running command
     useEffect(() => {
       let timeoutId: ReturnType<typeof setTimeout>;
 
-      if (isRunning && !isLongRunningCommand) {
-        const elapsedSeconds = moment().diff(moment(enteredAt), 'seconds');
+      if (isPending && pendingStartedAt && !isCreating && !isLongRunningCommand) {
+        const elapsedSeconds = moment().diff(moment(pendingStartedAt), 'seconds');
 
         if (elapsedSeconds >= 15) {
           setIsLongRunningCommand(true);
@@ -87,7 +102,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
           clearTimeout(timeoutId);
         }
       };
-    }, [enteredAt, isLongRunningCommand, isRunning]);
+    }, [pendingStartedAt, isCreating, isLongRunningCommand, isPending]);
 
     return (
       <CommandOutputContainer>
@@ -108,9 +123,9 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
             ResultComponent={CommandExecutionResult}
           />
 
-          {isRunning && <EuiLoadingChart className="busy-indicator" />}
+          {isPending && <EuiLoadingChart className="busy-indicator" />}
 
-          {isRunning && isLongRunningCommand && (
+          {isPending && isLongRunningCommand && (
             <>
               <EuiSpacer size="s" />
               <LongRunningCommandHint />

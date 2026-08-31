@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
+import { createReducer } from 'redux-toolkit-v1';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import type {
@@ -147,4 +147,9 @@ export * from './actions';
 export * from './effects';
 export * from './selectors';
 export * from './helpers';
-export { fetchDeleteMonitor, fetchUpsertMonitor, createGettingStartedMonitor } from './api';
+export {
+  fetchDeleteMonitor,
+  fetchBulkUpdateMonitors,
+  fetchUpsertMonitor,
+  createGettingStartedMonitor,
+} from './api';

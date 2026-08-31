@@ -247,6 +247,23 @@ describe('searchCasesTool handler — by_alert mode', () => {
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.total).toBe(0);
   });
+
+  it('rejects more than 100 alert_ids at the schema level', () => {
+    const casesClient = createCasesClientMock();
+    const { tool } = buildTool(casesClient);
+
+    const tooMany = tool.schema.safeParse({
+      mode: 'by_alert',
+      alert_ids: Array.from({ length: 101 }, (_, i) => `alert-${i}`),
+    });
+    expect(tooMany.success).toBe(false);
+
+    const atLimit = tool.schema.safeParse({
+      mode: 'by_alert',
+      alert_ids: Array.from({ length: 100 }, (_, i) => `alert-${i}`),
+    });
+    expect(atLimit.success).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------

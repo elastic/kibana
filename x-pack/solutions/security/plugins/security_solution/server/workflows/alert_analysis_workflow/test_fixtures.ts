@@ -37,11 +37,11 @@ export const createWorkflowSystemAction = (
     },
   } as NonNullable<RuleAlertType['systemActions']>[number]);
 
-export const createConnectorAction = (): RuleAlertType['actions'][number] =>
+export const createConnectorAction = (id = 'connector-id'): RuleAlertType['actions'][number] =>
   ({
     actionTypeId: '.server-log',
     group: 'default',
-    id: 'connector-id',
+    id,
     params: {
       message: 'Rule {{rule.name}} matched',
     },

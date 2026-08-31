@@ -24,6 +24,7 @@ import type { RuleObjectId } from '../../../../../common/api/detection_engine';
 import noChangeHistoryImg from './images/no_change_history.png';
 import { SecurityPageName } from '../../../../app/types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RuleChangesHistoryEventTypes } from '../../../../common/lib/telemetry/events/rule_changes_history/types';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
@@ -53,6 +54,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
   const { euiTheme } = useEuiTheme();
   const {
     application: { navigateToApp },
+    telemetry,
   } = useKibana().services;
   const handleClose = useCallback(() => {
     navigateToApp(APP_UI_ID, {
@@ -108,9 +110,18 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
   const handleSelectItem = useCallback(
     (item: RuleHistoryItem) => {
       lockSelectionDecision();
+
+      if (item.id === selectedItem?.id) {
+        return;
+      }
+
       setSelectedItem(item);
+
+      telemetry.reportEvent(RuleChangesHistoryEventTypes.ChangesHistoryDiffOpened, {
+        isPrebuiltRule: item.rule.rule_source.type === 'external',
+      });
     },
-    [lockSelectionDecision, setSelectedItem]
+    [lockSelectionDecision, selectedItem, setSelectedItem, telemetry]
   );
 
   const styles = useMemo(

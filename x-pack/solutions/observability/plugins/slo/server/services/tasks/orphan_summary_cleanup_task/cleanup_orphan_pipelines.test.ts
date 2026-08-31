@@ -95,12 +95,14 @@ describe('cleanupOrphanPipelines', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let logger: jest.Mocked<MockedLogger>;
   let abortController: AbortController;
+  let signal: AbortSignal;
 
   beforeEach(() => {
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
     abortController = new AbortController();
+    signal = abortController.signal;
     jest.clearAllMocks();
   });
 
@@ -109,13 +111,13 @@ describe('cleanupOrphanPipelines', () => {
 
     const result = await cleanupOrphanPipelines(
       {},
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
     expect(esClient.ingest.getPipeline).toHaveBeenCalledWith(
       { id: '.slo-observability.*.pipeline-*', summary: true },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
     expect(soClient.find).not.toHaveBeenCalled();
     expect(esClient.ingest.deletePipeline).not.toHaveBeenCalled();
@@ -133,10 +135,7 @@ describe('cleanupOrphanPipelines', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanPipelines(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.ingest.deletePipeline).not.toHaveBeenCalled();
   });
@@ -153,15 +152,12 @@ describe('cleanupOrphanPipelines', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanPipelines(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.ingest.deletePipeline).toHaveBeenCalledTimes(1);
     expect(esClient.ingest.deletePipeline).toHaveBeenCalledWith(
       { id: '.slo-observability.*.pipeline-orphan-slo-1' },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
   });
 
@@ -180,10 +176,7 @@ describe('cleanupOrphanPipelines', () => {
       per_page: 2,
     } as any);
 
-    await cleanupOrphanPipelines(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.ingest.deletePipeline).toHaveBeenCalledTimes(2);
     const deletedIds = esClient.ingest.deletePipeline.mock.calls.map(
@@ -212,15 +205,12 @@ describe('cleanupOrphanPipelines', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanPipelines(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.ingest.deletePipeline).toHaveBeenCalledTimes(1);
     expect(esClient.ingest.deletePipeline).toHaveBeenCalledWith(
       { id: '.slo-observability.*.pipeline-my-slo-1' },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
   });
 
@@ -250,7 +240,7 @@ describe('cleanupOrphanPipelines', () => {
 
     const result = await cleanupOrphanPipelines(
       { pageSize: 1, maxPages: 2 },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({
@@ -281,7 +271,7 @@ describe('cleanupOrphanPipelines', () => {
 
     await cleanupOrphanPipelines(
       { after: sliPipeline('slo2', 1) },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(soClient.find).toHaveBeenCalledWith(
@@ -290,7 +280,7 @@ describe('cleanupOrphanPipelines', () => {
     expect(esClient.ingest.deletePipeline).toHaveBeenCalledTimes(1);
     expect(esClient.ingest.deletePipeline).toHaveBeenCalledWith(
       { id: '.slo-observability.*.pipeline-slo3-1' },
-      expect.objectContaining({ ignore: [404], signal: abortController.signal })
+      expect.objectContaining({ ignore: [404], signal })
     );
   });
 
@@ -299,7 +289,7 @@ describe('cleanupOrphanPipelines', () => {
 
     const result = await cleanupOrphanPipelines(
       { after: '.slo-observability.sli.pipeline-prev-1' },
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({
@@ -315,7 +305,7 @@ describe('cleanupOrphanPipelines', () => {
 
     const result = await cleanupOrphanPipelines(
       {},
-      { esClient, soClient: soClient as any, logger, abortController }
+      { esClient, soClient: soClient as any, logger, signal }
     );
 
     expect(result).toEqual({ aborted: true, completed: false, nextState: { after: undefined } });
@@ -326,7 +316,7 @@ describe('cleanupOrphanPipelines', () => {
     esClient.ingest.getPipeline.mockRejectedValueOnce(new Error('Network error'));
 
     await expect(
-      cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, abortController })
+      cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal })
     ).rejects.toThrow('Network error');
   });
 
@@ -346,10 +336,7 @@ describe('cleanupOrphanPipelines', () => {
       .mockRejectedValueOnce(new Error('Delete failed'))
       .mockResolvedValueOnce({ acknowledged: true } as any);
 
-    await cleanupOrphanPipelines(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.ingest.deletePipeline).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledWith(
@@ -373,10 +360,7 @@ describe('cleanupOrphanPipelines', () => {
       per_page: 1,
     } as any);
 
-    await cleanupOrphanPipelines(
-      {},
-      { esClient, soClient: soClient as any, logger, abortController }
-    );
+    await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
     expect(esClient.ingest.deletePipeline).not.toHaveBeenCalled();
   });
@@ -392,7 +376,7 @@ describe('cleanupOrphanPipelines', () => {
       soClient.find.mockRejectedValueOnce(new Error('saved objects index unavailable'));
 
       await expect(
-        cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, abortController })
+        cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal })
       ).rejects.toThrow('saved objects index unavailable');
 
       expect(esClient.ingest.deletePipeline).not.toHaveBeenCalled();
@@ -418,10 +402,7 @@ describe('cleanupOrphanPipelines', () => {
         per_page: 1,
       } as any);
 
-      await cleanupOrphanPipelines(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({ filter: 'slo.attributes.id:(my-slo-id-42)' })
@@ -441,10 +422,7 @@ describe('cleanupOrphanPipelines', () => {
         per_page: 1,
       } as any);
 
-      await cleanupOrphanPipelines(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ namespaces: ['*'] }));
     });
@@ -460,10 +438,7 @@ describe('cleanupOrphanPipelines', () => {
         ])
       );
 
-      await cleanupOrphanPipelines(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(soClient.find).not.toHaveBeenCalled();
       expect(esClient.ingest.deletePipeline).not.toHaveBeenCalled();
@@ -474,10 +449,7 @@ describe('cleanupOrphanPipelines', () => {
         mockGetPipelineResponse([sliPipeline('my-slo', 0), summaryPipeline('my-slo', 0)])
       );
 
-      await cleanupOrphanPipelines(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(soClient.find).not.toHaveBeenCalled();
       expect(esClient.ingest.deletePipeline).not.toHaveBeenCalled();
@@ -499,14 +471,11 @@ describe('cleanupOrphanPipelines', () => {
         per_page: 1,
       } as any);
 
-      await cleanupOrphanPipelines(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      );
+      await cleanupOrphanPipelines({}, { esClient, soClient: soClient as any, logger, signal });
 
       expect(esClient.ingest.deletePipeline).toHaveBeenCalledWith(
         { id: '.slo-observability.*.pipeline-my-slo-1' },
-        expect.objectContaining({ ignore: [404], signal: abortController.signal })
+        expect.objectContaining({ ignore: [404], signal })
       );
     });
   });

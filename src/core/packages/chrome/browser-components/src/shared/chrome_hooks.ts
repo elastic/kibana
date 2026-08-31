@@ -29,8 +29,6 @@ import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeComponentsDeps } from '../context';
 
-export { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
-
 /**
  * Returns the current classic breadcrumbs set via `chrome.setBreadcrumbs()`.
  * Used by `ClassicHeader`.
@@ -43,7 +41,7 @@ export function useClassicBreadcrumbs(): ChromeBreadcrumb[] {
 
 /**
  * Returns the current project-style breadcrumbs derived from the active
- * navigation tree node. Used by `ProjectHeader`.
+ * navigation tree node.
  */
 export function useProjectBreadcrumbs(): ChromeBreadcrumb[] {
   const chrome = useChromeService();
@@ -265,17 +263,6 @@ export function useHasAppMenuConfig(): boolean {
 }
 
 /**
- * Returns `true` when an app menu is currently active — either a legacy action
- * menu mount point (`application.currentActionMenu$`) or a new `AppMenuConfig`
- * registered via `chrome.setAppMenu()`.
- */
-export function useHasAppMenu(): boolean {
-  const hasLegacyActionMenu = useHasLegacyActionMenu();
-  const hasAppMenuConfig = useHasAppMenuConfig();
-  return hasLegacyActionMenu || hasAppMenuConfig;
-}
-
-/**
  * Returns the current global search configuration, or `undefined` if none is set.
  * Used by `SearchButton` (global header).
  */
@@ -292,6 +279,16 @@ export function useGlobalSearch(): GlobalSearchConfig | undefined {
 export function useContextSwitcher(): ReactNode {
   const chrome = useChromeService();
   const content$ = useMemo(() => chrome.next.contextSwitcher.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
+/**
+ * Returns the current project picker content set via
+ * `chrome.next.projectPicker.set()`, or null if not set.
+ */
+export function useProjectPicker(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.projectPicker.get$(), [chrome]);
   return useObservable(content$, null);
 }
 

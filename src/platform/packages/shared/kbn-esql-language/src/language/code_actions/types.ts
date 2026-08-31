@@ -14,6 +14,10 @@ export interface QuickFixMessage {
   code: ESQLMessage['code'];
   data?: ESQLMessage['data'];
   location?: ESQLMessage['location'];
+  startLineNumber?: number;
+  startColumn?: number;
+  endLineNumber?: number;
+  endColumn?: number;
 }
 
 export interface QuickFix {

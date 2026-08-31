@@ -16,6 +16,8 @@ import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { getAttacksListAggregations } from './aggregations';
 import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
 
+const ATTACKS_LIST_QUERY_ID = 'attacks-kpi-attacks-list';
+
 /** The default page size */
 const DEFAULT_PAGE_SIZE = 5;
 
@@ -75,6 +77,7 @@ export const useAttacksListData = ({
     query,
     aggs,
     queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+    uniqueQueryId: ATTACKS_LIST_QUERY_ID,
   });
 
   const {

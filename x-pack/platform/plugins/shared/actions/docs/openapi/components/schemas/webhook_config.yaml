@@ -2,12 +2,27 @@ title: Connector request properties for a Webhook connector
 description: Defines properties for connectors when type is `.webhook`.
 type: object
 properties:
+  accessTokenUrl:
+    type: string
+    description: >
+      The URL used to request an OAuth2 access token.
+      If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
+  additionalFields:
+    type: string
+    nullable: true
+    description: >
+      Additional fields, encoded as a JSON object, sent as part of the OAuth2 access token request body.
   authType:
     $ref: 'auth_type.yaml'
   ca:
     $ref: 'ca.yaml'
   certType:
     $ref: 'cert_type.yaml'
+  clientId:
+    type: string
+    description: >
+      The client identifier for OAuth2 authentication.
+      If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
   hasAuth:
     $ref: 'has_auth.yaml'
   headers:
@@ -20,8 +35,15 @@ properties:
     enum:
       - post
       - put
+      - patch
+      - get
+      - delete
     description: >
-      The HTTP request method, either `post` or `put`.
+      The HTTP request method: `post`, `put`, `patch`, `get`, or `delete`.
+  scope:
+    type: string
+    description: >
+      The scope requested when acquiring the OAuth2 access token.
   url:
     type: string
     description: >

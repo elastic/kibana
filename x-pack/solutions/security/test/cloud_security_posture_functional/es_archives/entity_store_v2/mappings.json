@@ -4,7 +4,7 @@
     "aliases": {
       "entities-latest-default": {}
     },
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "settings": {
       "index": {
         "mode": "lookup"
@@ -444,6 +444,17 @@
                   }
                 },
                 "accesses_infrequently": {
+                  "properties": {
+                    "raw_identifiers": {
+                      "type": "object",
+                      "dynamic": true
+                    },
+                    "ids": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "administers": {
                   "properties": {
                     "raw_identifiers": {
                       "type": "object",

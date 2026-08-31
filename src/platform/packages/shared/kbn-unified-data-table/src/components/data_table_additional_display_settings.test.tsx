@@ -23,6 +23,8 @@ const defaultDisplaySettingsProps = {
   lineCountInput: 10,
   rowHeight: RowHeightMode.custom,
   sampleSize: 10,
+  documentsDisplayMode: 'table' as const,
+  jsonModeSettings: {},
 };
 
 const getSampleSizeNumberInput = () => screen.getByRole('spinbutton', { name: 'Sample size' });
@@ -286,6 +288,114 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       );
 
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
+    });
+  });
+
+  describe('view mode', () => {
+    const renderWithAllControls = (
+      props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}
+    ) =>
+      renderDisplaySettings({
+        onChangeSampleSize: jest.fn(),
+        onChangeRowHeight: jest.fn(),
+        onChangeRowHeightLines: jest.fn(),
+        onChangeHeaderRowHeight: jest.fn(),
+        onChangeHeaderRowHeightLines: jest.fn(),
+        onChangeDocumentsDisplayMode: jest.fn(),
+        onChangeJsonModeSettings: jest.fn(),
+        densityControl: <div data-test-subj="mockDensityControl">density</div>,
+        ...props,
+      });
+
+    it('should not render the view mode toggle when onChangeDocumentsDisplayMode is undefined', () => {
+      renderWithAllControls({ onChangeDocumentsDisplayMode: undefined });
+
+      expect(screen.queryByTestId('unifiedDataTableViewModeSettings')).not.toBeInTheDocument();
+    });
+
+    it('should render the view mode toggle with "Table" selected initially', () => {
+      renderWithAllControls();
+
+      expect(screen.getByTestId('unifiedDataTableViewModeSettings')).toBeVisible();
+      expect(screen.getByTestId('unifiedDataTableViewModeSettings_viewMode_table')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
+
+    it('should show the default controls and hide the JSON-only settings while in "Table" mode', () => {
+      renderWithAllControls();
+
+      expect(screen.getByTestId('mockDensityControl')).toBeVisible();
+      expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
+      expect(screen.getByTestId('unifiedDataTableRowHeightSettings')).toBeVisible();
+      expect(screen.getByText('Sample size')).toBeVisible();
+      expect(screen.queryByTestId('unifiedDataTableHideNullsSettings')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDataTableWrapLinesSettings')).not.toBeInTheDocument();
+    });
+
+    it('should call onChangeDocumentsDisplayMode when the view mode is switched to JSON', async () => {
+      const onChangeDocumentsDisplayMode = jest.fn();
+
+      renderWithAllControls({ onChangeDocumentsDisplayMode });
+
+      await userEvent.click(screen.getByTestId('unifiedDataTableViewModeSettings_viewMode_json'));
+
+      expect(onChangeDocumentsDisplayMode).toHaveBeenCalledWith('json');
+    });
+
+    it('should only show sample size, view mode, hide-nulls, and wrap-lines in "JSON" mode', () => {
+      renderWithAllControls({
+        documentsDisplayMode: 'json',
+      });
+
+      expect(screen.getByText('Sample size')).toBeVisible();
+      expect(screen.getByTestId('unifiedDataTableViewModeSettings')).toBeVisible();
+      expect(screen.queryByTestId('unifiedDataTableRowHeightSettings')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDataTableHeaderRowHeightSettings')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mockDensityControl')).not.toBeInTheDocument();
+
+      // The JSON-only button groups appear with "Hide nulls" off and "Wrap lines" on by default
+      expect(screen.getByTestId('unifiedDataTableHideNulls_off')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+      expect(screen.getByTestId('unifiedDataTableWrapLines_on')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
+
+    it('should reflect the provided jsonModeSettings on the button groups', () => {
+      renderWithAllControls({
+        documentsDisplayMode: 'json',
+        jsonModeSettings: { hideNulls: true, wrapLines: false },
+      });
+
+      expect(screen.getByTestId('unifiedDataTableHideNulls_on')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+      expect(screen.getByTestId('unifiedDataTableWrapLines_off')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
+
+    it('should call onChangeJsonModeSettings when a JSON setting is toggled', async () => {
+      const onChangeJsonModeSettings = jest.fn();
+
+      renderWithAllControls({
+        documentsDisplayMode: 'json',
+        jsonModeSettings: { wrapLines: true },
+        onChangeJsonModeSettings,
+      });
+
+      await userEvent.click(screen.getByTestId('unifiedDataTableHideNulls_on'));
+
+      expect(onChangeJsonModeSettings).toHaveBeenCalledWith({ hideNulls: true, wrapLines: true });
     });
   });
 });

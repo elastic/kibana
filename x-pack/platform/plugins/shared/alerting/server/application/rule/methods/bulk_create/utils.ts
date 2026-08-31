@@ -10,6 +10,7 @@ import Semver from 'semver';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import {
   validateRuleTypeParams,
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   getDefaultMonitoringRuleDomainProperties,
 } from '../../../../lib';
@@ -24,11 +25,10 @@ import {
   addMissingUiamKeyTagIfNeeded,
   apiKeyAsRuleDomainProperties,
 } from '../../../../rules_client/common';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
+import type { BulkOperationError } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRuleAttributes } from '../../transforms';
-import type { PreparedRule, PrepareRuleArgs, ApiKeyEntry } from './types';
+import type { PreparedRule, PrepareRuleArgs } from './types';
 
 export const prepareRule = async <Params extends RuleParams>({
   context,
@@ -51,6 +51,9 @@ export const prepareRule = async <Params extends RuleParams>({
 
     const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
     const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+    await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+      request: context.request,
+    });
 
     await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
     await validateAndAuthorizeSystemActions({
@@ -147,6 +150,9 @@ export const prepareRule = async <Params extends RuleParams>({
       schedule: data.schedule,
       consumer: data.consumer,
       ruleTypeId: data.alertTypeId,
+      producer: ruleType.producer,
+      createdAt: createTime,
+      templateId: rule.templateId,
     };
     return { prepared };
   } catch (err) {
@@ -162,22 +168,4 @@ export const prepareRule = async <Params extends RuleParams>({
     };
     return { error };
   }
-};
-
-export const invalidateKeys = async (
-  entries: Iterable<ApiKeyEntry>,
-  context: RulesClientContext
-): Promise<void> => {
-  const keys: string[] = [];
-  for (const { apiKey, uiamApiKey, apiKeyCreatedByUser } of entries) {
-    if (apiKey && !apiKeyCreatedByUser) keys.push(apiKey);
-    if (uiamApiKey && !apiKeyCreatedByUser) keys.push(uiamApiKey);
-  }
-  if (keys.length === 0) return;
-  // Writes pending-invalidation SOs; logs errors internally, never throws.
-  await bulkMarkApiKeysForInvalidation(
-    { apiKeys: [...new Set(keys)] },
-    context.logger,
-    context.unsecuredSavedObjectsClient
-  );
 };

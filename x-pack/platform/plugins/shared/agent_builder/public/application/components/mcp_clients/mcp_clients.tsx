@@ -12,6 +12,8 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MANAGEMENT_APP_ID } from '@kbn/management-plugin/public';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { McpClientsTable } from './mcp_clients_table';
 import { labels } from '../../utils/i18n';
 import { useMcpClientsActions } from '../../context/mcp_clients_provider';
@@ -56,12 +58,27 @@ export const AgentBuilderMcpClients = () => {
         pageTitle={labels.tools.mcpClients.title}
         description={labels.tools.mcpClients.description}
         rightSideItems={[
-          <EuiButton fill onClick={createMcpClient} data-test-subj="mcpClientsAddButton">
+          <EuiButton
+            fill
+            onClick={createMcpClient}
+            data-test-subj="mcpClientsAddButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_CREATE_OPEN,
+              detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+            })}
+          >
             {labels.tools.mcpClients.addMcpClientButtonLabel}
           </EuiButton>,
           <EuiButtonEmpty
             href={applicationConnectionsUrl}
             data-test-subj="mcpClientsManageApplicationConnectionsButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action:
+                AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_APPLICATION_CONNECTIONS_LINK,
+              detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+            })}
           >
             {labels.tools.mcpClients.manageApplicationConnectionsButtonLabel}
           </EuiButtonEmpty>,

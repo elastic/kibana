@@ -16,7 +16,8 @@ import {
 import { basicCase } from '../../../containers/mock';
 import { getVisualizationAttachmentType } from '.';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { renderWithTestingProviders } from '../../../common/mock';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { allCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 
 describe('getVisualizationAttachmentType', () => {
   const mockEmbeddableComponent = jest
@@ -34,6 +35,7 @@ describe('getVisualizationAttachmentType', () => {
     version: '1',
     savedObjectId: 'test',
     caseData: { title: basicCase.title, id: basicCase.id },
+    permissions: allCasesPermissions(),
     rowContext: {
       appId: 'cases',
       manageMarkdownEditIds: [],
@@ -45,33 +47,76 @@ describe('getVisualizationAttachmentType', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(KibanaServices, 'get').mockReturnValue({
+      lens: { canUseEditor: () => true },
+    } as unknown as ReturnType<typeof KibanaServices.get>);
   });
 
   it('create the attachment type correctly', () => {
     const lensType = getVisualizationAttachmentType();
 
+    expect(lensType.getIcon(attachmentViewProps)).toBe('lensApp');
+    expect(lensType.getLabel()).toBe('Visualizations');
     expect(lensType).toStrictEqual({
       id: LENS_ATTACHMENT_TYPE,
-      icon: 'document',
-      displayName: 'Visualizations',
-      getAttachmentViewObject: expect.any(Function),
-      getAttachmentRemovalObject: expect.any(Function),
-      getAttachmentTabViewObject: expect.any(Function),
+      getIcon: expect.any(Function),
+      getLabel: expect.any(Function),
+      getCreationActivity: expect.any(Function),
+      getRemovalActivity: expect.any(Function),
+      getAttachmentList: expect.any(Function),
       schema: expect.any(Object),
+      workflowSchema: expect.any(Object),
     });
   });
 
-  describe('getAttachmentViewObject', () => {
+  describe('workflowSchema', () => {
+    const getWorkflowSchema = () => {
+      const { workflowSchema } = getVisualizationAttachmentType();
+      if (!workflowSchema) {
+        throw new Error('expected lens to expose a workflow schema');
+      }
+      return workflowSchema;
+    };
+
+    const referencePayload = {
+      type: LENS_ATTACHMENT_TYPE,
+      owner: 'securitySolution',
+      attachmentId: 'lens-so-id',
+      metadata: { title: 'My visualization', soType: 'lens' },
+    };
+
+    it('accepts a by-reference payload', () => {
+      expect(getWorkflowSchema().safeParse(referencePayload).success).toBe(true);
+    });
+
+    it('rejects a by-reference payload carrying an inline data snapshot', () => {
+      expect(
+        getWorkflowSchema().safeParse({ ...referencePayload, data: { attributes: {} } }).success
+      ).toBe(false);
+    });
+
+    it('rejects the by-value persistable-state arm', () => {
+      expect(
+        getWorkflowSchema().safeParse({
+          type: LENS_ATTACHMENT_TYPE,
+          owner: 'securitySolution',
+          data: { state: {} },
+        }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('getCreationActivity', () => {
     it('renders the event correctly', () => {
       const lensType = getVisualizationAttachmentType();
-      const event = lensType.getAttachmentViewObject(attachmentViewProps).event;
+      const event = lensType.getCreationActivity(attachmentViewProps).event;
 
       expect(event).toBe('added visualization');
     });
 
     it('renders the saved-object event correctly', () => {
       const lensType = getVisualizationAttachmentType();
-      const event = lensType.getAttachmentViewObject({
+      const event = lensType.getCreationActivity({
         ...attachmentViewProps,
         attachmentId: 'lens-1',
         metadata: { title: 'My lens', soType: 'lens' },
@@ -83,17 +128,10 @@ describe('getVisualizationAttachmentType', () => {
       expect(screen.getByText('added visualization My lens')).toBeInTheDocument();
     });
 
-    it('renders the timelineAvatar correctly', () => {
-      const lensType = getVisualizationAttachmentType();
-      const avatar = lensType.getAttachmentViewObject(attachmentViewProps).timelineAvatar;
-
-      expect(avatar).toBe('lensApp');
-    });
-
     it('does not hide the default actions', () => {
       const lensType = getVisualizationAttachmentType();
       const hideDefaultActions =
-        lensType.getAttachmentViewObject(attachmentViewProps).hideDefaultActions;
+        lensType.getCreationActivity(attachmentViewProps).hideDefaultActions;
 
       expect(hideDefaultActions).toBe(false);
     });
@@ -101,7 +139,7 @@ describe('getVisualizationAttachmentType', () => {
     it('set the custom actions correctly', () => {
       const lensType = getVisualizationAttachmentType();
       const actions = lensType
-        .getAttachmentViewObject(attachmentViewProps)
+        .getCreationActivity(attachmentViewProps)
         .getActions?.(attachmentViewProps)!;
 
       expect(actions.length).toBe(1);
@@ -115,21 +153,49 @@ describe('getVisualizationAttachmentType', () => {
 
     it('does not set custom actions for a saved-object attachment without inline data', () => {
       const lensType = getVisualizationAttachmentType();
-      const attachmentViewObject = lensType.getAttachmentViewObject({
+      const creationActivity = lensType.getCreationActivity({
         ...attachmentViewProps,
         data: undefined,
         attachmentId: 'lens-1',
         metadata: { title: 'My lens', soType: 'lens' },
       });
 
-      expect(attachmentViewObject.getActions).toBeUndefined();
-      expect('children' in attachmentViewObject).toBe(false);
+      expect(creationActivity.getActions).toBeUndefined();
+      expect('children' in creationActivity).toBe(false);
+    });
+
+    it('getActions omits the open-in-lens action without lens editor permission', () => {
+      jest.spyOn(KibanaServices, 'get').mockReturnValue({
+        lens: { canUseEditor: () => false },
+      } as unknown as ReturnType<typeof KibanaServices.get>);
+
+      const lensType = getVisualizationAttachmentType();
+      const actions = lensType
+        .getCreationActivity(attachmentViewProps)
+        .getActions?.(attachmentViewProps)!;
+
+      expect(actions.length).toBe(0);
+    });
+
+    it('does not set custom actions for an ES|QL visualization', () => {
+      const lensType = getVisualizationAttachmentType();
+      const creationActivity = lensType.getCreationActivity({
+        ...attachmentViewProps,
+        data: {
+          state: {
+            attributes: { state: { datasourceStates: { textBased: { layers: {} } } } },
+            timeRange: {},
+          },
+        },
+      });
+
+      expect(creationActivity.getActions).toBeUndefined();
     });
 
     it('renders the open visualization button correctly', () => {
       const lensType = getVisualizationAttachmentType();
       const actions = lensType
-        .getAttachmentViewObject(attachmentViewProps)
+        .getCreationActivity(attachmentViewProps)
         .getActions?.(attachmentViewProps)!;
 
       const openLensButton = actions[0];
@@ -146,7 +212,7 @@ describe('getVisualizationAttachmentType', () => {
     it('renders the children correctly', async () => {
       const lensType = getVisualizationAttachmentType();
       // eslint-disable-next-line testing-library/no-node-access
-      const Component = lensType.getAttachmentViewObject(attachmentViewProps).children!;
+      const Component = lensType.getCreationActivity(attachmentViewProps).children!;
 
       const services = createStartServicesMock();
       services.lens.EmbeddableComponent = mockEmbeddableComponent;
@@ -174,7 +240,7 @@ describe('getVisualizationAttachmentType', () => {
         },
       };
       // eslint-disable-next-line testing-library/no-node-access
-      const Component = lensType.getAttachmentViewObject(viewProps).children!;
+      const Component = lensType.getCreationActivity(viewProps).children!;
 
       const services = createStartServicesMock();
       services.lens.EmbeddableComponent = mockEmbeddableComponent;
@@ -210,7 +276,7 @@ describe('getVisualizationAttachmentType', () => {
         },
       };
       // eslint-disable-next-line testing-library/no-node-access
-      const Component = lensType.getAttachmentViewObject(viewProps).children!;
+      const Component = lensType.getCreationActivity(viewProps).children!;
 
       const services = createStartServicesMock();
       services.lens.EmbeddableComponent = mockEmbeddableComponent;
@@ -233,10 +299,10 @@ describe('getVisualizationAttachmentType', () => {
     });
   });
 
-  describe('getAttachmentRemovalObject', () => {
+  describe('getRemovalActivity', () => {
     it('renders the removal event correctly', () => {
       const lensType = getVisualizationAttachmentType();
-      const event = lensType.getAttachmentRemovalObject?.(attachmentViewProps);
+      const event = lensType.getRemovalActivity?.(attachmentViewProps);
 
       expect(event).toEqual({ event: 'removed visualization' });
     });

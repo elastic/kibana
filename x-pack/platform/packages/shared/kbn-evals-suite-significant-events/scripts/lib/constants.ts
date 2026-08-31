@@ -7,8 +7,8 @@
 import type { IndicesUpdateAliasesAddAction } from '@elastic/elasticsearch/lib/api/types';
 import type { Scenario } from './types';
 import {
-  DISCOVERIES_DATA_STREAM,
   DETECTIONS_DATA_STREAM,
+  EVENTS_DATA_STREAM,
   KNOWLEDGE_INDICATORS_DATA_STREAM,
 } from '../../src/data_generators/snapshot_indices';
 
@@ -41,31 +41,20 @@ export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
 
 // Streams that only exist when the user runs the full discovery workflow.
 // Capture skips them silently when absent; restore skips them when not in the snapshot.
-export const SIGEVENTS_OPTIONAL_STREAMS = [
-  DISCOVERIES_DATA_STREAM,
-  DETECTIONS_DATA_STREAM,
-] as const;
+export const SIGEVENTS_OPTIONAL_STREAMS = [EVENTS_DATA_STREAM, DETECTIONS_DATA_STREAM] as const;
 
 export const SIGNIFICANT_EVENTS_DATA_STREAMS = [
   KNOWLEDGE_INDICATORS_DATA_STREAM,
   ...SIGEVENTS_OPTIONAL_STREAMS,
 ] as const;
 
-export const VALID_SYSTEM_INDICES = ['.kibana_streams_tasks-*'] as const;
-
 export const VALID_ALERT_INDICES = ['.internal.alerts-streams.alerts-default-*'] as const;
 
-type ValidStreamsSystemIndices = (typeof VALID_SYSTEM_INDICES)[number];
 type ValidStreamsAlertIndices = (typeof VALID_ALERT_INDICES)[number];
-type ValidStreamsIndices = ValidStreamsSystemIndices | ValidStreamsAlertIndices;
 
 export type StreamsIndexAliasConfig = Pick<IndicesUpdateAliasesAddAction, 'alias' | 'is_hidden'>;
 
-export const INDEX_ALIAS_CONFIG: Record<ValidStreamsIndices, StreamsIndexAliasConfig> = {
-  '.kibana_streams_tasks-*': {
-    alias: '.kibana_streams_tasks',
-    is_hidden: true,
-  },
+export const INDEX_ALIAS_CONFIG: Record<ValidStreamsAlertIndices, StreamsIndexAliasConfig> = {
   '.internal.alerts-streams.alerts-default-*': {
     alias: '.alerts-streams.alerts-default',
   },

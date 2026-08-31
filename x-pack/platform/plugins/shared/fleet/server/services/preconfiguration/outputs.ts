@@ -30,13 +30,19 @@ import {
   DEFAULT_OUTPUT_ID,
   DEFAULT_OUTPUT,
   ECH_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../constants';
+import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { isAgentlessEnabled } from '../utils/agentless';
+import {
+  isAgentlessEnabled,
+  isManagedBulkEnabled,
+  getManagedBulkEndpoint,
+} from '../utils/agentless';
 
 import { applyAllowEditOverrides, isDifferent } from './utils';
 
@@ -50,6 +56,7 @@ const PRIVATELINK_OUTPUT_IDS = new Set([
 
 export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   const { outputs: outputsOrUndefined } = config;
+  const managedBulkEndpoint = getManagedBulkEndpoint();
 
   const outputs: PreconfiguredOutput[] = (outputsOrUndefined || []).concat([
     ...(config?.agents.elasticsearch.hosts
@@ -61,6 +68,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             ca_sha256: config?.agents.elasticsearch.ca_sha256,
             ca_trusted_fingerprint: config?.agents.elasticsearch.ca_trusted_fingerprint,
             is_preconfigured: true,
+            allow_edit: ['hosts', 'ca_sha256', 'ca_trusted_fingerprint'],
           } as PreconfiguredOutput,
         ]
       : []),
@@ -69,7 +77,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
       ? [
           {
             id: ECH_AGENTLESS_OUTPUT_ID,
-            name: 'Internal output for agentless',
+            name: 'Internal output for managed integrations',
             type: 'elasticsearch' as const,
             hosts: appContextService.getCloud()?.elasticsearchUrl
               ? [appContextService.getCloud()!.elasticsearchUrl]
@@ -77,6 +85,26 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             ca_sha256: config?.agents.elasticsearch.ca_sha256,
             is_default: false,
             is_default_monitoring: false,
+            is_preconfigured: true,
+            allow_edit: ['hosts', 'ca_sha256'],
+          } as PreconfiguredOutput,
+        ]
+      : []),
+    // Include agentless managed bulk output in ECH.
+    // Serverless: the equivalent output is injected by project-controller (see SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID).
+    ...(isManagedBulkEnabled() &&
+    !appContextService.getCloud()?.isServerlessEnabled &&
+    managedBulkEndpoint
+      ? [
+          {
+            id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+            name: 'Bulk output for managed integrations',
+            type: 'elasticsearch' as const,
+            hosts: [managedBulkEndpoint],
+            // No ca_sha256 — the managed bulk endpoint uses a public cert trusted by system CAs.
+            is_default: false,
+            is_default_monitoring: false,
+            is_internal: true,
             is_preconfigured: true,
           } as PreconfiguredOutput,
         ]
@@ -114,6 +142,29 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
     return { ...output, allow_edit: merged };
   });
 }
+
+/**
+ * Builds a predicate matching outputs that route through the managed `_bulk` endpoint.
+ */
+export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
+  const managedBulkUrls = new Set(
+    (config ? getPreconfiguredOutputFromConfig(config) : [])
+      .filter(({ id }) => AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(id))
+      .flatMap(({ hosts }) => hosts ?? [])
+      .flatMap((host) => {
+        try {
+          return [normalizeHostsForAgents(host)];
+        } catch {
+          // cloud.managed_otlp.url is only schema.string(); never throw on the full-policy path
+          return [];
+        }
+      })
+  );
+
+  return ({ type, hosts }: Pick<Output, 'type' | 'hosts'>) =>
+    type === outputType.Elasticsearch &&
+    (hosts?.some((host) => managedBulkUrls.has(host)) ?? false);
+};
 
 export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
@@ -266,14 +317,11 @@ export async function cleanPreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingOutputs = await outputService.list();
-  const existingPreconfiguredOutput = existingOutputs.items.filter(
-    (o) => o.is_preconfigured === true
-  );
+  const existingPreconfiguredOutputs = await outputService.listPreconfigured();
 
   const logger = appContextService.getLogger();
 
-  for (const output of existingPreconfiguredOutput) {
+  for (const output of existingPreconfiguredOutputs.items) {
     const hasBeenDelete = !outputs.find(({ id }) => output.id === id);
     if (!hasBeenDelete) {
       continue;
@@ -460,7 +508,9 @@ async function isPreconfiguredOutputDifferentFromCurrent(
           existingOutput.otel_disable_beatsauth,
           preconfiguredOutput.otel_disable_beatsauth
         ))) ||
-    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
+    // Kafka does not support proxies; proxy_id is always cleared on save (#267281)
+    (existingOutput.type !== 'kafka' &&
+      isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)) ||
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
     (preconfiguredOutput.preset &&
       isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||

@@ -44,7 +44,7 @@ export const NoDataEmptyPrompt = memo<NoDataEmptyPromptProps>(
           <EuiEmptyPrompt
             css={emptyPromptCss}
             data-test-subj={dataTestSubj}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             title={
               <h2 data-test-subj={getTestId('title')}>{SCRIPT_LIBRARY_LABELS.emptyStateTitle}</h2>
             }

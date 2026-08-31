@@ -4,6 +4,14 @@
     "INDEX_PATTERN_NAME"
   ],
   "max_empty_searches": 10,
+  "runtime_mappings": {
+    "winlog_logon_type": {
+      "type": "keyword",
+      "script": {
+        "source": "if (doc.containsKey('winlog.event_data.LogonType') && doc['winlog.event_data.LogonType'].size() != 0) { emit(doc['winlog.event_data.LogonType'].value); } else { emit('None'); }"
+      }
+    }
+  },
   "query": {
     "bool": {
       "filter": [

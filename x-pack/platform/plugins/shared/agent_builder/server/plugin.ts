@@ -9,6 +9,12 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import {
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  SUPPORTED_IMAGE_MIME_TYPES,
+  MAX_IMAGE_BYTES,
+} from '@kbn/agent-builder-common/attachments';
+import { createConversationPublicClient } from './services/conversation/conversation_public_client';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -20,6 +26,7 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
+import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
@@ -37,6 +44,8 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import { AGENTBUILDER_FEATURE_ID } from '../common/features';
+import { runToolIdBackfill } from './backfills/tool_id_backfill';
 
 export class AgentBuilderPlugin
   implements
@@ -67,6 +76,20 @@ export class AgentBuilderPlugin
     setupDeps: AgentBuilderSetupDependencies
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
+
+    setupDeps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+      http: {
+        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+      },
+    });
+
     // Create usage counter for telemetry (if usageCollection is available)
     if (setupDeps.usageCollection) {
       this.usageCounter = createAgentBuilderUsageCounter(setupDeps.usageCollection);
@@ -95,6 +118,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       cloud: setupDeps.cloud,
       usageApi: setupDeps.usageApi,
+      actions: setupDeps.actions,
     });
 
     registerTaskDefinitions({
@@ -109,6 +133,8 @@ export class AgentBuilderPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
+
+    coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
@@ -163,11 +189,11 @@ export class AgentBuilderPlugin
     });
 
     const smlTools = createSmlTools({
-      getAgentContextLayer: () => {
+      getAgentBuilderSml: () => {
         if (!this.startDeps) {
-          throw new Error('Agent Context Layer not available — plugin has not started');
+          throw new Error('Agent Builder SML not available — plugin has not started');
         }
-        return this.startDeps.agentContextLayer;
+        return this.startDeps.agentBuilderSml;
       },
     });
     smlTools.forEach((tool) => {
@@ -178,6 +204,10 @@ export class AgentBuilderPlugin
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
+      },
+      getInference: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.inference;
       },
     });
     connectorTools.forEach((tool) => {
@@ -190,6 +220,7 @@ export class AgentBuilderPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
@@ -206,6 +237,11 @@ export class AgentBuilderPlugin
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
       },
+      conversationTemplates: {
+        register: serviceSetups.conversationTemplates.register.bind(
+          serviceSetups.conversationTemplates
+        ),
+      },
       topSnippets: this.config.topSnippets,
     };
   }
@@ -219,18 +255,31 @@ export class AgentBuilderPlugin
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
-    const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
-    const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
+    const {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+      security: securityPlugin,
+    } = startDeps;
+    const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
     this.cleanupLegacySmlTasks(taskManager).catch((error) => {
       this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
     });
 
+    this.runBackfill(elasticsearch).catch((error) => {
+      this.logger.error(`Backfill failed: ${(error as Error).message}`);
+    });
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      securityPlugin,
       elasticsearch,
+      http,
       inference,
       spaces,
       actions,
@@ -244,8 +293,16 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
     });
 
-    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
-      startServices;
+    const {
+      tools,
+      agents,
+      skills,
+      runnerFactory,
+      execution,
+      plugins,
+      conversations,
+      conversationTemplates,
+    } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -264,6 +321,7 @@ export class AgentBuilderPlugin
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
+        ensure: agents.ensure,
         runAgent: runner.runAgent.bind(runner),
       },
       tools: {
@@ -288,18 +346,27 @@ export class AgentBuilderPlugin
       conversations: {
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
-          return {
-            get: client.get.bind(client),
-            list: client.list.bind(client),
-          };
+          const agentRegistry = await agents.getRegistry({ request });
+          return createConversationPublicClient({ client, agentRegistry });
         },
       },
+      conversationTemplates,
     };
   }
 
   async stop() {
     await this.teardownTracing?.();
   }
+
+  /**
+   * Applies all registered tool ID backfills.
+   */
+  private async runBackfill(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
+    const logger = this.logger.get('backfill');
+    const esClient = elasticsearch.client.asInternalUser;
+    await runToolIdBackfill(logger, esClient);
+  }
+
   /**
    * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
    * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.

@@ -155,7 +155,7 @@ export function SaveDashboardModal({
   return (
     <EuiModal
       onClose={onClose}
-      data-test-subj="apmSelectServiceDashboard"
+      data-test-subj="apmSelectServiceDashboardModal"
       aria-labelledby={modalTitleId}
     >
       <EuiModalHeader>
@@ -173,6 +173,7 @@ export function SaveDashboardModal({
       <EuiModalBody>
         <EuiFlexGroup direction="column" justifyContent="center">
           <EuiComboBox
+            data-test-subj="apmSelectServiceDashboard"
             isLoading={status === FETCH_STATUS.LOADING || isLoading}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
             placeholder={selectDashboardLabel}

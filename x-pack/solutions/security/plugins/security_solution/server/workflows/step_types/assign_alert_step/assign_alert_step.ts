@@ -8,7 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../common/constants';
 import { assignAlertStepCommonDefinition } from '../../../../common/workflows/step_types/assign_alert_step/assign_alert_step_common';
-import { toAlertApiExecutionError } from '../to_alert_api_execution_error';
+import { toApiExecutionError } from '../../utils/to_api_execution_error';
 
 export const assignAlertStepDefinition = createServerStepDefinition({
   ...assignAlertStepCommonDefinition,
@@ -45,7 +45,7 @@ export const assignAlertStepDefinition = createServerStepDefinition({
         },
       };
     } catch (error) {
-      throw toAlertApiExecutionError(error, 'assign alert');
+      throw toApiExecutionError(error, 'assign alert');
     }
   },
 });

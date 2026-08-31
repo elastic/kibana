@@ -46,7 +46,7 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
     queryClient.clear();
   });
 
-  it('renders the header with rule title, tags and status badges on success', async () => {
+  it('renders the header with rule title and status badges on success', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -81,9 +81,6 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
     await waitFor(() =>
       expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('My rule')
     );
-    await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTags')).toBeInTheDocument()
-    );
   });
 
   it('surfaces episode severity in the header after status', async () => {
@@ -117,7 +114,7 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
     );
   });
 
-  it('renders the loading title fallback while data is loading', () => {
+  it('renders a skeleton title while data is loading', () => {
     runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
     fetchEpisodeActionsMock.mockImplementation(() => new Promise(() => {}));
     fetchGroupActionsMock.mockImplementation(() => new Promise(() => {}));
@@ -129,7 +126,8 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
       { wrapper }
     );
 
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('Loading…');
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitleSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeDetailsHeaderTitle')).not.toBeInTheDocument();
   });
 
   it('renders the episode fallback title when the rule fetch returns 404', async () => {

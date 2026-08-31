@@ -43,10 +43,31 @@ export interface FeatureFlagsSetupDeps {
  * The browser-side Feature Flags Service
  * @internal
  */
+type FeatureFlagValue = boolean | string | number;
+type FeatureFlagValueType = 'boolean' | 'string' | 'number';
+
+interface ReportedFlagValue {
+  type: FeatureFlagValueType;
+  value: FeatureFlagValue;
+}
+
+const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType => {
+  if (typeof value === 'boolean') {
+    return 'boolean';
+  }
+
+  if (typeof value === 'number') {
+    return 'number';
+  }
+
+  return 'string';
+};
+
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
   private readonly contextChanged$ = new Subject<void>();
+  private readonly lastReportedValues = new Map<string, ReportedFlagValue>();
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private overrides: Record<string, unknown> = {};
@@ -202,7 +223,7 @@ export class FeatureFlagsService {
    * @param fallbackValue The fallback value
    * @internal
    */
-  private evaluateFlag<T extends string | boolean | number>(
+  private evaluateFlag<T extends FeatureFlagValue>(
     evaluationFn: (flagName: string, fallbackValue: T) => T,
     flagName: string,
     fallbackValue: T
@@ -215,15 +236,36 @@ export class FeatureFlagsService {
           evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
+    this.reportValueIfChanged(flagName, value);
+
+    return value;
+  }
+
+  private reportValueIfChanged(flagName: string, value: FeatureFlagValue): void {
+    if (!this.shouldReportValue(flagName, value)) {
+      return;
+    }
+
     // Increment usage counter
     // TODO: When UI has OTel instrumented, we can increment the counter in the browser directly.
     this.http
       ?.post(buildPath('/internal/feature-flags/{flagName}/counter', { flagName }), {
         body: JSON.stringify({ value }),
       })
-      .catch();
+      .catch(() => {});
+  }
 
-    return value;
+  private shouldReportValue(flagName: string, value: FeatureFlagValue): boolean {
+    const type = getFeatureFlagValueType(value);
+    const lastReportedValue = this.lastReportedValues.get(flagName);
+    // Object.is takes care string, number (incl. NaN), boolean comparison
+    if (lastReportedValue?.type === type && Object.is(lastReportedValue.value, value)) {
+      return false;
+    }
+
+    // Counter reporting is best effort; record before posting to cap attempts at one per unique value.
+    this.lastReportedValues.set(flagName, { type, value });
+    return true;
   }
 
   /**

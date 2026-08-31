@@ -56,11 +56,13 @@ const configSchema = schema.object({
    */
   available: schema.boolean({ defaultValue: true }),
   /**
-   * Global workflow executions list (`/app/workflows/executions`). Not exposed in Advanced Settings;
-   * enable via `workflowsManagement.globalExecutionsView.enabled` in `kibana.yml`.
+  /**
+   * External HITL resume (API-key public routes + channel notifications).
+   * Disable via `workflowsManagement.hitlExternalResume.enabled` and
+   * `workflowsExecutionEngine.hitlExternalResume.enabled` in `kibana.yml`.
    */
-  globalExecutionsView: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+  hitlExternalResume: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   /**
    * Workflow Template Library — fetches the curated catalog and exposes it at
@@ -76,7 +78,4 @@ export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
-  exposeToBrowser: {
-    globalExecutionsView: true,
-  },
 };

@@ -21,6 +21,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
+  /**
+   * Purpose: Runtime field smoke test
+   *
+   * Migration: migrate to scout
+   */
   describe('Test data view runtime field', () => {
     let controlId: string;
 

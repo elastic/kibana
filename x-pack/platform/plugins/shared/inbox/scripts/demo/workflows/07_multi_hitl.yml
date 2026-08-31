@@ -35,7 +35,7 @@ steps:
   - name: log_severity
     type: console
     with:
-      message: "Severity set to {{ steps.triage_severity.output.severity }}"
+      message: "Severity set to {{ steps.triage_severity.output.response.severity }}"
   # Reasoning for the *second* HITL gate. Because step 2 stays pending after
   # step 1 is answered, this `reasoning` blob is what the inbox renders in the
   # "Awaiting response" flyout — exercising the soft-interface on a live
@@ -75,4 +75,4 @@ steps:
   - name: log_decision
     type: console
     with:
-      message: "Isolation approved? {{ steps.approve_isolation.output.approved }}"
+      message: "Isolation approved? {{ steps.approve_isolation.output.response.approved }}"

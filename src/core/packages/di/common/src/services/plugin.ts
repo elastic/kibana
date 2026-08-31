@@ -7,39 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Container, ServiceIdentifier } from 'inversify';
+import type { Container } from 'inversify';
+import { createToken } from '../token';
+import type { ServiceToken } from '../token';
 
 /**
  * Plugin's setup contract.
  * @public
  */
-export const Setup = Symbol.for('Setup') as ServiceIdentifier;
+export const Setup = createToken('Setup');
 
 /**
  * Plugin's start contract.
  * @public
  */
-export const Start = Symbol.for('Start') as ServiceIdentifier;
+export const Start = createToken('Start');
 
 /**
  * Plugin's setup lifecycle hook.
  * @public
  */
-export const OnSetup = Symbol.for('OnSetup') as ServiceIdentifier<(container: Container) => void>;
+export const OnSetup = createToken<(container: Container) => void>('OnSetup');
 
 /**
  * Plugin's start lifecycle hook.
  * @public
  */
-export const OnStart = Symbol.for('OnStart') as ServiceIdentifier<(container: Container) => void>;
+export const OnStart = createToken<(container: Container) => void>('OnStart');
 
 /**
  * Plugin's setup dependency.
  * @param plugin The dependency plugin name.
  * @public
  */
-export function PluginSetup<T>(plugin: keyof any): ServiceIdentifier<T> {
-  return Symbol.for(`plugin.setup.${String(plugin)}`);
+export function PluginSetup<T>(plugin: keyof any): ServiceToken<T> {
+  return createToken<T>(`plugin.setup.${String(plugin)}`);
 }
 
 /**
@@ -47,6 +49,6 @@ export function PluginSetup<T>(plugin: keyof any): ServiceIdentifier<T> {
  * @param plugin The dependency plugin name.
  * @public
  */
-export function PluginStart<T>(plugin: keyof any): ServiceIdentifier<T> {
-  return Symbol.for(`plugin.start.${String(plugin)}`);
+export function PluginStart<T>(plugin: keyof any): ServiceToken<T> {
+  return createToken<T>(`plugin.start.${String(plugin)}`);
 }

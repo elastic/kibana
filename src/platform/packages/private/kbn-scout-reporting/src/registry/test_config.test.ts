@@ -13,6 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'node:fs';
 import fg from 'fast-glob';
 import path from 'node:path';
+import { testChannels } from '@kbn/scout-info';
 
 jest.mock('node:fs');
 jest.mock('fast-glob');
@@ -23,6 +24,7 @@ jest.mock('../helpers/read_manifest', () => ({
 const dummyManifestProps = {
   exists: false,
   sha1: '000000000000000-000000000000000',
+  testChannels: testChannels.default,
   tests: [],
 };
 
@@ -106,6 +108,7 @@ describe('test_config module', () => {
         const scoutRoot = path.join(moduleRoot, `test/${scoutDirName}`);
         const validManifestContent = {
           sha1: 'b72df4fa5abc546e5f21e6c2f6eaaaa523755720',
+          testChannels: testChannels.default,
           tests: [
             {
               id: 'f44f18cc703276d-178a4921f7b18d0',

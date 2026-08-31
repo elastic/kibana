@@ -27,6 +27,9 @@ interface Args extends SuggestionsSelectProps {
 const stories: Meta<Args> = {
   title: 'shared/SuggestionsSelect',
   component: SuggestionsSelect,
+  // This story builds its own providers from `args`; opt out of the global jest decorator
+  // (jest_preview.tsx) so we don't mount the redundant APM route tree.
+  parameters: { skipApmJestDecorator: true },
   decorators: [
     (StoryComponent, { args }) => {
       const { terms } = args;

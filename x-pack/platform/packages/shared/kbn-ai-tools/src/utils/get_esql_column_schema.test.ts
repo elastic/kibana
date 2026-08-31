@@ -8,6 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsqlColumnSchema } from './get_esql_column_schema';
 
+const signal = new AbortController().signal;
+
 const createEsClient = () => {
   const query = jest.fn();
   return {
@@ -25,18 +27,16 @@ describe('getEsqlColumnSchema', () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce({ columns: [], values: [] });
 
-    await getEsqlColumnSchema({ esClient, index: 'logs-*' });
+    await getEsqlColumnSchema({ esClient, signal, index: 'logs-*' });
 
-    expect(query).toHaveBeenCalledWith({
-      query: 'FROM logs-* | LIMIT 0',
-    });
+    expect(query).toHaveBeenCalledWith({ query: 'FROM logs-* | LIMIT 0' }, { signal });
   });
 
   it('never passes drop_null_columns: true (regression: ES prunes every column when LIMIT 0)', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce({ columns: [], values: [] });
 
-    await getEsqlColumnSchema({ esClient, index: 'logs-*', start: 100, end: 200 });
+    await getEsqlColumnSchema({ esClient, signal, index: 'logs-*', start: 100, end: 200 });
 
     expect(query.mock.calls[0][0]).not.toHaveProperty('drop_null_columns');
   });
@@ -45,7 +45,7 @@ describe('getEsqlColumnSchema', () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce({ columns: [], values: [] });
 
-    await getEsqlColumnSchema({ esClient, index: ['logs-a', 'logs-b'] });
+    await getEsqlColumnSchema({ esClient, signal, index: ['logs-a', 'logs-b'] });
 
     expect(query.mock.calls[0][0].query).toBe('FROM logs-a, logs-b | LIMIT 0');
   });
@@ -54,7 +54,7 @@ describe('getEsqlColumnSchema', () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce({ columns: [], values: [] });
 
-    await getEsqlColumnSchema({ esClient, index: 'logs-*', start: 100, end: 200 });
+    await getEsqlColumnSchema({ esClient, signal, index: 'logs-*', start: 100, end: 200 });
 
     expect(query.mock.calls[0][0]).toEqual({
       query: 'FROM logs-* | LIMIT 0',
@@ -80,7 +80,7 @@ describe('getEsqlColumnSchema', () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce({ columns: [], values: [] });
 
-    await getEsqlColumnSchema({ esClient, index: 'logs-*', start: 100 });
+    await getEsqlColumnSchema({ esClient, signal, index: 'logs-*', start: 100 });
 
     expect(query.mock.calls[0][0]).not.toHaveProperty('filter');
   });
@@ -96,7 +96,7 @@ describe('getEsqlColumnSchema', () => {
       values: [],
     });
 
-    const schema = await getEsqlColumnSchema({ esClient, index: 'logs-*' });
+    const schema = await getEsqlColumnSchema({ esClient, signal, index: 'logs-*' });
 
     expect(schema).toEqual([
       { name: '@timestamp', type: 'date' },
@@ -112,7 +112,7 @@ describe('getEsqlColumnSchema', () => {
       values: [],
     });
 
-    const schema = await getEsqlColumnSchema({ esClient, index: 'missing-*' });
+    const schema = await getEsqlColumnSchema({ esClient, signal, index: 'missing-*' });
 
     expect(schema).toEqual([]);
   });

@@ -427,6 +427,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         <EuiPortal>
           <AgentReassignAgentPolicyModal
             agents={agents}
+            agentCount={agentCount}
             onClose={() => {
               setIsReassignFlyoutOpen(false);
               refreshAgents();

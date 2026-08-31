@@ -128,7 +128,8 @@ export const buildComponentQuery = (
   now: number,
   timeRangeMs: number,
   fixedInterval: string,
-  enrolledAt?: string
+  enrolledAt?: string,
+  offlineAt?: string
 ) => {
   const config = COMPONENT_METRICS[componentType];
   if (!config) {
@@ -138,6 +139,12 @@ export const buildComponentQuery = (
   const enrolledAtMs = enrolledAt ? Date.parse(enrolledAt) : NaN;
   const timeRangeGte = now - timeRangeMs;
   const gte = !isNaN(enrolledAtMs) && enrolledAtMs > timeRangeGte ? enrolledAtMs : timeRangeGte;
+
+  // Cap the upper bound at the last check-in time for offline collectors so we show their last
+  // reported values rather than leaking live metrics from a newly enrolled collector on the same
+  // host (same service.instance.id / hostname). See https://github.com/elastic/kibana/issues/274843
+  const offlineAtMs = offlineAt ? Date.parse(offlineAt) : NaN;
+  const lte = !isNaN(offlineAtMs) ? offlineAtMs : now;
   const subAggs: Record<string, unknown> = {};
   for (const group of config.metricGroups) {
     for (const { field, aggType } of group.metrics) {
@@ -161,7 +168,7 @@ export const buildComponentQuery = (
             filter: [
               { term: { 'service.instance.id': serviceInstanceId } },
               { term: { [config.filterField]: componentId } },
-              { range: { '@timestamp': { gte, lte: now } } },
+              { range: { '@timestamp': { gte, lte } } },
             ],
           },
         },
@@ -219,7 +226,7 @@ export const useComponentMetrics = ({
   fixedInterval: string;
 }): UseComponentMetricsResult => {
   const { data } = useStartServices();
-  const { serviceInstanceId, enrolledAt } = useCollectorContext();
+  const { serviceInstanceId, enrolledAt, offlineAt } = useCollectorContext();
 
   const [groups, setGroups] = useState<MetricGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -247,7 +254,8 @@ export const useComponentMetrics = ({
           now,
           timeRangeMs,
           fixedInterval,
-          enrolledAt
+          enrolledAt,
+          offlineAt
         );
 
         if (!searchRequest) {
@@ -293,6 +301,7 @@ export const useComponentMetrics = ({
     componentType,
     serviceInstanceId,
     enrolledAt,
+    offlineAt,
     data.search,
     timeRangeMs,
     fixedInterval,

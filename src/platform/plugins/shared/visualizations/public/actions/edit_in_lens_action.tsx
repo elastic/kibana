@@ -72,7 +72,6 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
   public id = ACTION_EDIT_IN_LENS;
   public readonly type = ACTION_EDIT_IN_LENS;
   public order = 49;
-  public showNotification = true;
   public currentAppId: string | undefined;
 
   constructor(private readonly timefilter: TimefilterContract) {}

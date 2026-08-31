@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
-  NodeDataModel,
   EdgeDataModel,
+  NodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from './test_ids';
+import { GRAPH_PREVIEW_LOADING_TEST_ID, GRAPH_PREVIEW_TEST_ID } from './test_ids';
 
 /**
  * Props for the GraphPreview component.
@@ -53,7 +53,7 @@ const LoadingComponent = () => (
   <EuiSkeletonText
     data-test-subj={GRAPH_PREVIEW_LOADING_TEST_ID}
     contentAriaLabel={i18n.translate(
-      'xpack.securitySolution.flyout.right.visualizations.graphPreview.loadingAriaLabel',
+      'xpack.securitySolution.flyout.visualizations.graphPreview.loadingAriaLabel',
       {
         defaultMessage: 'graph preview',
       }
@@ -71,11 +71,20 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
 
     return isLoading ? (
       <LoadingComponent />
-    ) : isError || memoizedNodes.length === 0 ? (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.right.visualizations.graphPreview.errorDescription"
-        defaultMessage="An error is preventing this alert from being visualized."
-      />
+    ) : isError ? (
+      <EuiPanel>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.visualizations.graphPreview.errorDescription"
+          defaultMessage="An error is preventing this graph from being visualized."
+        />
+      </EuiPanel>
+    ) : memoizedNodes.length === 0 ? (
+      <EuiPanel>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.visualizations.graphPreview.emptyDescription"
+          defaultMessage="No graph nodes found."
+        />
+      </EuiPanel>
     ) : (
       <React.Suspense
         fallback={
@@ -93,7 +102,7 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
           edges={memoizedEdges}
           interactive={false}
           aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.visualizations.graphPreview.graphAriaLabel',
+            'xpack.securitySolution.flyout.visualizations.graphPreview.graphAriaLabel',
             {
               defaultMessage: 'Graph preview',
             }

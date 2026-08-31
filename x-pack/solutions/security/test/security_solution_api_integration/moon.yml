@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-detection-engineering'
   sourceRoot: x-pack/solutions/security/test/security_solution_api_integration
 dependsOn:
+  - '@kbn/change-history'
   - '@kbn/test-suites-xpack-security-endpoint'
   - '@kbn/dev-utils'
   - '@kbn/test'
@@ -54,7 +55,7 @@ dependsOn:
   - '@kbn/openapi-common'
   - '@kbn/scout-info'
   - '@kbn/security-plugin-types-common'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/config-schema'
   - '@kbn/test-suites-xpack-platform'
   - '@kbn/response-ops-rule-params'

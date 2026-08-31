@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import type {
-  AgentAnswerStepConfiguration,
-  AgentResearchStepConfiguration,
-} from '@kbn/agent-builder-common';
-
-export type ResolvedAnswerStepConfiguration = Required<
-  Omit<AgentAnswerStepConfiguration, 'replace_default_instructions'>
->;
-export type ResolvedResearchStepConfiguration = Required<
-  Omit<AgentResearchStepConfiguration, 'replace_default_instructions'>
->;
-
 export interface ResolvedConfiguration {
-  research: ResolvedResearchStepConfiguration;
-  answer: ResolvedAnswerStepConfiguration;
+  instructions: string;
+  /**
+   * Context Engine ids of the AI indices this agent may use. These are ids, not Elasticsearch
+   * index names.
+   */
+  aiIndices: string[];
 }

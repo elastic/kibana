@@ -1,10 +1,13 @@
 {
-  "sha1": "1e3b03d7beebba8d142d6a3eedb51b0de65b26da",
+  "sha1": "50d921bdc5648542005f2042dd471f1f4aaa7fc0",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "f4c048e25988cb5-605d7a7bf19c60f",
       "title": "Hosts Page - Flyout Overview Tab - KPI charts and collapsible sections",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -13,14 +16,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 90,
-        "column": 9
+        "line": 100,
+        "column": 7
       }
     },
     {
       "id": "f4c048e25988cb5-35a9aa41665f195",
       "title": "Hosts Page - Flyout Overview Tab - Services section",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -29,14 +32,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 130,
+        "line": 128,
         "column": 9
       }
     },
     {
       "id": "f4c048e25988cb5-d9d5a1fb8867828",
       "title": "Hosts Page - Flyout Metadata Tab",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -45,14 +48,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 144,
-        "column": 9
+        "line": 140,
+        "column": 15
       }
     },
     {
       "id": "f4c048e25988cb5-45117973f50ff3b",
       "title": "Hosts Page - Flyout Metrics Tab",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -61,14 +64,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 158,
-        "column": 9
+        "line": 149,
+        "column": 11
       }
     },
     {
       "id": "f4c048e25988cb5-f6e05596318ee58",
       "title": "Hosts Page - Flyout Processes Tab",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -77,14 +80,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 173,
-        "column": 9
+        "line": 161,
+        "column": 59
       }
     },
     {
       "id": "f4c048e25988cb5-da68e3d67e89a90",
       "title": "Hosts Page - Flyout Logs Tab",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -93,14 +96,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 188,
+        "line": 172,
         "column": 9
       }
     },
     {
       "id": "f4c048e25988cb5-9ceded1164e0270",
       "title": "Hosts Page - Flyout Open as page and return",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -109,14 +112,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 201,
+        "line": 181,
         "column": 9
       }
     },
     {
       "id": "f4c048e25988cb5-58869cff261d35c",
       "title": "Hosts Page - Flyout Dashboards Tab",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -125,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_flyout.spec.ts",
-        "line": 228,
-        "column": 9
+        "line": 205,
+        "column": 10
       }
     },
     {
@@ -141,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_empty_state.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 39,
+        "column": 25
       }
     },
     {
@@ -157,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 54,
+        "column": 7
       }
     },
     {
@@ -173,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 71,
-        "column": 9
+        "line": 58,
+        "column": 63
       }
     },
     {
@@ -189,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 86,
-        "column": 9
+        "line": 69,
+        "column": 24
       }
     },
     {
@@ -205,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 110,
-        "column": 9
+        "line": 91,
+        "column": 20
       }
     },
     {
@@ -221,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/hosts/hosts_page_semconv.spec.ts",
-        "line": 115,
-        "column": 9
+        "line": 93,
+        "column": 24
       }
     },
     {
@@ -237,8 +240,164 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/no_data_inventory.spec.ts",
+        "line": 40,
+        "column": 15
+      }
+    },
+    {
+      "id": "25ea4843af6f22b-15e3b46b8c1be75",
+      "title": "Logs link-to redirects redirects /link-to to Discover with the parsed query and time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/logs_link_to.spec.ts",
+        "line": 27,
+        "column": 30
+      }
+    },
+    {
+      "id": "25ea4843af6f22b-8e73eecd198b40c",
+      "title": "Logs link-to redirects redirects node /link-to to Discover with the pod and trace query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/logs_link_to.spec.ts",
+        "line": 43,
+        "column": 24
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-20a206532367023",
+      "title": "Infrastructure source configuration renders the waffle map with the default metric indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 84,
+        "column": 21
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-d80426ca6f02c40",
+      "title": "Infrastructure source configuration persists a changed source name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-7467e2dbdfde0a6",
+      "title": "Infrastructure source configuration reflects a non-matching metric index pattern across settings and the inventory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 92,
+        "column": 52
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-43d99d512722dde",
+      "title": "Infrastructure source configuration resets unsaved changes when discarding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 109,
+        "column": 27
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-328d867a0fbf5e5",
+      "title": "Infrastructure source configuration reflects a remote-cluster metric index pattern across settings and the inventory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 122,
+        "column": 27
+      }
+    },
+    {
+      "id": "a4872f4d1d8cdd8-1cf2ef5666231a9",
+      "title": "Infrastructure source configuration warns when editing an index pattern used by an alerting rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
+        "line": 135,
+        "column": 90
+      }
+    },
+    {
+      "id": "1386c73831872dc-dd263064bd88283",
+      "title": "Infra Not Found page Logs app renders the not-found page only for unknown routes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/page_not_found.spec.ts",
+        "line": 30,
+        "column": 13
+      }
+    },
+    {
+      "id": "1386c73831872dc-e30bbe2d49ea67c",
+      "title": "Infra Not Found page Metrics app renders the not-found page only for unknown routes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/page_not_found.spec.ts",
         "line": 45,
-        "column": 9
+        "column": 20
       }
     }
   ]

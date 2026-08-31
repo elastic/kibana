@@ -6,7 +6,7 @@
  */
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { setAlertsToUntracked } from './set_alerts_to_untracked';
 
 let clusterClient: ElasticsearchClientMock;
@@ -469,6 +469,11 @@ describe('setAlertsToUntracked()', () => {
             ],
             filter: [
               {
+                terms: {
+                  [SPACE_IDS]: ['default'],
+                },
+              },
+              {
                 bool: {
                   must: {
                     term: {
@@ -497,6 +502,11 @@ describe('setAlertsToUntracked()', () => {
               },
             ],
             filter: [
+              {
+                terms: {
+                  [SPACE_IDS]: ['default'],
+                },
+              },
               {
                 bool: {
                   must: {
@@ -604,6 +614,11 @@ describe('setAlertsToUntracked()', () => {
             ],
             filter: [
               {
+                terms: {
+                  [SPACE_IDS]: ['default'],
+                },
+              },
+              {
                 bool: {
                   must: {
                     term: {
@@ -620,5 +635,130 @@ describe('setAlertsToUntracked()', () => {
 
     expect(clusterClient.search).not.toHaveBeenCalledWith();
     expect(result).toEqual([]);
+  });
+
+  describe('space isolation (direct UUID path)', () => {
+    test('should include space filter in updateByQuery when spaceId is provided', async () => {
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        spaceId: 'space1',
+      });
+
+      expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+      expect(clusterClient.updateByQuery.mock.lastCall![0].query).toMatchObject({
+        bool: {
+          must: expect.any(Array),
+          filter: [
+            {
+              terms: {
+                [SPACE_IDS]: ['space1'],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('should include space filter in authorization search when spaceId is provided', async () => {
+      clusterClient.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations: {
+          ruleTypeIds: {
+            buckets: [{ key: 'some-rule', consumers: { buckets: [{ key: 'o11y' }] } }],
+          },
+        },
+      });
+
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        spaceId: 'space1',
+        bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
+      });
+
+      // First search is for authorization aggregation
+      expect(clusterClient.search.mock.calls[0][0]).toMatchObject({
+        query: {
+          bool: {
+            must: expect.any(Array),
+            filter: [
+              {
+                terms: {
+                  [SPACE_IDS]: ['space1'],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('should not include space filter when spaceId is absent', async () => {
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+      });
+
+      const query = clusterClient.updateByQuery.mock.lastCall![0].query as {
+        bool: { filter?: unknown };
+      };
+      expect(query.bool.filter).toBeUndefined();
+    });
+
+    test('should include space filter in post-update search when spaceId is provided', async () => {
+      clusterClient.updateByQuery.mockResponseOnce({ total: 1, updated: 1 });
+
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        spaceId: 'space1',
+      });
+
+      // The search after update should also carry the space filter
+      expect(clusterClient.search.mock.lastCall![0]).toMatchObject({
+        query: {
+          bool: {
+            must: expect.any(Array),
+            filter: [
+              {
+                terms: {
+                  [SPACE_IDS]: ['space1'],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('should NOT include the all-spaces wildcard in the space filter', async () => {
+      // Untracking must never match globally visible ('*') alerts (e.g. internally managed
+      // Streams "Significant Events" alerts). Only the caller's own space is allowed.
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        spaceId: 'space1',
+      });
+
+      const query = clusterClient.updateByQuery.mock.lastCall![0].query as {
+        bool: { filter: Array<{ terms: Record<string, string[]> }> };
+      };
+      expect(query.bool.filter[0].terms[SPACE_IDS]).toEqual(['space1']);
+      expect(query.bool.filter[0].terms[SPACE_IDS]).not.toContain('*');
+    });
   });
 });

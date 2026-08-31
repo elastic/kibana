@@ -13,6 +13,7 @@ import { ApmRuleType } from '@kbn/rule-data-utils';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import type {
   ANOMALY_DETECTOR_TYPE,
+  ANOMALY_TIMESTAMP,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
@@ -47,6 +48,10 @@ export const CHART_LAYOUTS: Partial<Record<ApmRuleType | AnomalyDetectorType, Ch
     primary: 'throughput',
     secondary: ['latency', 'failedTransactionRate'],
   },
+  [AnomalyDetectorType.txLowCount]: {
+    primary: 'throughput',
+    secondary: ['latency', 'failedTransactionRate'],
+  },
   [AnomalyDetectorType.txFailureRate]: {
     primary: 'failedTransactionRate',
     secondary: ['throughput', 'latency'],
@@ -62,6 +67,7 @@ export interface AlertDetailsAppSectionProps extends ObsAlertDetailsAppSectionPr
   }>;
   alert: TopAlert<{
     [ANOMALY_DETECTOR_TYPE]?: string;
+    [ANOMALY_TIMESTAMP]?: string;
     [ERROR_GROUP_ID]?: string;
     [SERVICE_NAME]: string;
     [SERVICE_ENVIRONMENT]: string;

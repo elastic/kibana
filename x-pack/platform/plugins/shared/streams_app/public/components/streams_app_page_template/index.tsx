@@ -9,6 +9,8 @@ import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
 import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/css';
+import type { AppHeaderProps } from '@kbn/app-header';
+import { AppHeader } from '@kbn/app-header';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +26,8 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
     </EuiPageTemplate>
   );
 }
+
+export const StreamsAppHeader = (props: AppHeaderProps) => <AppHeader {...props} />;
 
 StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
 StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;

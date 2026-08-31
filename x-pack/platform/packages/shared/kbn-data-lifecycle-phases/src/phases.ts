@@ -41,6 +41,29 @@ export const PHASE_NAMES: Record<IlmPhase, string> = {
 };
 
 /**
+ * Lowercase phase words ("hot", "warm", …) for interpolation into a sentence, e.g. help text like
+ * "Must occur after the {phase} phase (40d).". Kept separate from `PHASE_NAMES` so the word is
+ * localized without the mid-sentence capitalization of a standalone label.
+ */
+export const PHASE_NAMES_LOWERCASE: Record<IlmPhase, string> = {
+  hot: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseHot', {
+    defaultMessage: 'hot',
+  }),
+  warm: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseWarm', {
+    defaultMessage: 'warm',
+  }),
+  cold: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseCold', {
+    defaultMessage: 'cold',
+  }),
+  frozen: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseFrozen', {
+    defaultMessage: 'frozen',
+  }),
+  delete: i18n.translate('xpack.dataLifecyclePhases.phaseNameLowercaseDelete', {
+    defaultMessage: 'delete',
+  }),
+};
+
+/**
  * Full phase labels ("Hot phase", "Warm phase", …). Used in selects and the policy editor.
  */
 export const PHASE_TITLES: Record<IlmPhase, string> = {

@@ -178,7 +178,9 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
 
           return (
             <EuiToolTip content={statusTooltip} position="top">
-              <EuiBadge color={badgeColor}>{statusLabel}</EuiBadge>
+              <EuiBadge color={badgeColor} tabIndex={0}>
+                {statusLabel}
+              </EuiBadge>
             </EuiToolTip>
           );
         },
@@ -339,6 +341,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
               loading={isLogsLoading}
               items={logsData?.data ?? []}
               itemId="id"
+              tableCaption={i18n.GAP_AUTO_FILL_LOGS_TABLE_CAPTION}
               columns={columns as EuiBasicTableColumn<SchedulerLog>[]}
               pagination={{
                 pageIndex,

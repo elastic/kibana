@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isBinaryExpression, isUnaryExpression } from '@elastic/esql';
 import type { SupportedDataType } from '../../../../../types';
 import { supportsArithmeticOperations } from '../../../../../types';
 import type { ExpressionContext, FunctionParameterContext } from '../../types';
@@ -14,6 +15,7 @@ import {
   arithmeticOperators,
   comparisonFunctions,
   logicalOperators,
+  matchOperators,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
@@ -34,6 +36,17 @@ export interface OperatorRuleContext {
 interface EvaluatedOperatorRuleContext extends OperatorRuleContext {
   isHomogeneous: boolean;
 }
+
+const stringPredicateOperatorNames = [
+  ...matchOperators.map(({ name }) => name),
+  ...patternMatchOperators.map(({ name }) => name),
+  ...inOperators.map(({ name }) => name),
+  ...nullCheckOperators.map(({ name }) => name),
+];
+
+const parenthesizedBooleanOperatorNames = [...logicalOperators, ...nullCheckOperators].map(
+  ({ name }) => name
+);
 
 export interface OperatorDecision {
   shouldSuggest: boolean;
@@ -69,12 +82,35 @@ type Rule = (context: EvaluatedOperatorRuleContext) => OperatorDecision | null;
 // Order matters: specific rules must come before general rules to avoid being shadowed.
 //
 // Rule ordering logic:
+// 0. Syntax-specific rules (parenthesized boolean operator expressions)
 // 1. Context-based rules (no function context, any type, boolean)
 // 2. Homogeneous function rules (first param, subsequent params)
 // 3. Type-specific rules (numeric, string/text, single string)
 // 4. Default fallback
 
 const rules: Rule[] = [
+  // Rule 0: A parenthesized boolean operator can be followed by logical and null-check operators
+  (ctx) => {
+    const { expressionRoot, parenthesizedExpressionPosition } = ctx.ctx;
+    const isOperatorExpression =
+      expressionRoot && (isBinaryExpression(expressionRoot) || isUnaryExpression(expressionRoot));
+
+    if (
+      !ctx.functionParameterContext &&
+      ctx.expressionType === 'boolean' &&
+      isOperatorExpression &&
+      parenthesizedExpressionPosition === 'after'
+    ) {
+      return {
+        shouldSuggest: true,
+        allowedOperators: parenthesizedBooleanOperatorNames,
+        reason: 'Parenthesized boolean expression',
+      };
+    }
+
+    return null;
+  },
+
   // Rule 1: No function context - allow operators (filtered by type and expression preference)
   (ctx) => {
     if (!ctx.functionParameterContext) {
@@ -96,9 +132,7 @@ const rules: Rule[] = [
 
         const stringOperators = [
           ...(isBooleanContext ? comparisonFunctions.map(({ name }) => name) : []),
-          ...patternMatchOperators.map(({ name }) => name),
-          ...inOperators.map(({ name }) => name),
-          ...nullCheckOperators.map(({ name }) => name),
+          ...stringPredicateOperatorNames,
         ];
 
         return {
@@ -144,15 +178,9 @@ const rules: Rule[] = [
       const allSignatures = functionParameterContext.functionDefinition?.signatures;
 
       if (allSignatures && hasBooleanSignature(allSignatures)) {
-        const stringOperators = [
-          ...patternMatchOperators.map(({ name }) => name),
-          ...inOperators.map(({ name }) => name),
-          ...nullCheckOperators.map(({ name }) => name),
-        ];
-
         return {
           shouldSuggest: true,
-          allowedOperators: stringOperators,
+          allowedOperators: stringPredicateOperatorNames,
           reason:
             'Homogeneous function first parameter - string operators for boolean expression creation',
         };
@@ -164,15 +192,9 @@ const rules: Rule[] = [
     // If parameter accepts boolean OR any, suggest string-specific operators
     // (any includes boolean, so we can create boolean expressions)
     if (acceptsBoolean || acceptsAny) {
-      const stringOperators = [
-        ...patternMatchOperators.map(({ name }) => name), // LIKE, NOT LIKE, RLIKE, NOT RLIKE
-        ...inOperators.map(({ name }) => name), // IN, NOT IN
-        ...nullCheckOperators.map(({ name }) => name), // IS NULL, IS NOT NULL
-      ];
-
       return {
         shouldSuggest: true,
-        allowedOperators: stringOperators,
+        allowedOperators: stringPredicateOperatorNames,
         reason: 'String operators: pattern matching (LIKE), membership (IN), null checks',
       };
     }
@@ -245,15 +267,9 @@ const rules: Rule[] = [
 
     // For text/keyword fields, limit to string-specific operators
     if (ctx.expressionType === 'text' || ctx.expressionType === 'keyword') {
-      const stringOperators = [
-        ...patternMatchOperators.map(({ name }) => name), // LIKE, NOT LIKE, RLIKE, NOT RLIKE
-        ...inOperators.map(({ name }) => name), // IN, NOT IN
-        ...nullCheckOperators.map(({ name }) => name), // IS NULL, IS NOT NULL
-      ];
-
       return {
         shouldSuggest: true,
-        allowedOperators: stringOperators,
+        allowedOperators: stringPredicateOperatorNames,
         reason: 'Homogeneous function with boolean signature - string operators only',
       };
     }

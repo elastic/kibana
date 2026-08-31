@@ -8,5 +8,5 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/cli/kibana/apm')('functional-test-runner', []);
+require('@kbn/cli/kibana/apm')('functional-test-runner', []);
 require('@kbn/test').runFtrCli();

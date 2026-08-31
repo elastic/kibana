@@ -35,6 +35,7 @@ export const SortFilter: React.FC<SortFilterProps> = ({ sortOrder, onChange }) =
       options={options}
       value={sortOrder}
       onChange={handleChange}
+      aria-label={i18n.SORT_ORDER_ARIA_LABEL}
     />
   );
 };

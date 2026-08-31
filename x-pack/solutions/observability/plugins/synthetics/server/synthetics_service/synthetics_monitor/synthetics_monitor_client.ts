@@ -6,7 +6,7 @@
  */
 import type { SavedObject } from '@kbn/core/server';
 import type { SyntheticsServerSetup } from '../../types';
-import { normalizeSecrets } from '../utils';
+import { normalizeSecrets, redactInspectedSecrets } from '../utils';
 import type { PrivateConfig } from '../private_location/synthetics_private_location';
 import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
 import type { SyntheticsService } from '../synthetics_service';
@@ -339,7 +339,10 @@ export class SyntheticsMonitorClient {
     });
 
     const [publicConfigs, privateConfig] = await Promise.all([publicPromise, privatePromise]);
-    return { publicConfigs, privateConfig };
+    return {
+      publicConfigs: redactInspectedSecrets(publicConfigs),
+      privateConfig: redactInspectedSecrets(privateConfig),
+    };
   }
 }
 

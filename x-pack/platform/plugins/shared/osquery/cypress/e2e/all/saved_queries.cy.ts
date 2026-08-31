@@ -127,7 +127,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
       // save new query from the detail page
       cy.contains('Exit full screen').should('not.exist');
-      navigateTo('/app/osquery/live_queries');
+      navigateTo('/app/osquery/history');
       cy.get('tbody tr', { timeout: 60000 })
         .first()
         .within(() => {
@@ -201,8 +201,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   // Migrated to Jest component test: public/form/results_type_field.test.tsx
   // Phase 2 migration — form field default values are UI-only assertions
 
-  // Failing: See https://github.com/elastic/kibana/issues/276571
-  describe.skip('prebuilt', () => {
+  describe('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;

@@ -31,6 +31,15 @@ interface GenericEntityFlyoutFooterProps {
   scopeId: string;
   entityFields: Record<string, string[]>;
   assetCriticalityLevel?: AssetCriticalityLevel;
+  /**
+   * Overrides forwarded to the outer `EuiFlyoutFooter` (e.g. `css` for compact spacing in the EUI
+   * system flyout). Legacy callers omit this and keep the default.
+   */
+  flyoutFooterProps?: React.ComponentProps<typeof EuiFlyoutFooter>;
+  /**
+   * Overrides for the inner `EuiPanel` (e.g. `{ paddingSize: 'none' }`). Legacy callers omit this.
+   */
+  panelProps?: React.ComponentProps<typeof EuiPanel>;
 }
 
 export const GenericEntityFlyoutFooter = ({
@@ -39,6 +48,8 @@ export const GenericEntityFlyoutFooter = ({
   scopeId,
   entityFields,
   assetCriticalityLevel,
+  flyoutFooterProps,
+  panelProps,
 }: GenericEntityFlyoutFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
@@ -85,8 +96,8 @@ export const GenericEntityFlyoutFooter = ({
   );
 
   return (
-    <EuiFlyoutFooter data-test-subj={GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ}>
-      <EuiPanel color="transparent">
+    <EuiFlyoutFooter data-test-subj={GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ} {...flyoutFooterProps}>
+      <EuiPanel color="transparent" {...panelProps}>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           {isPreviewMode && <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>}
 

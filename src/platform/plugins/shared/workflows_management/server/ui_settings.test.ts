@@ -10,6 +10,7 @@
 import { createCoreSetupMock } from '@kbn/core-lifecycle-server-mocks/src/core_setup.mock';
 import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
@@ -69,6 +70,13 @@ describe('Workflows Management UI Settings', () => {
       expect.objectContaining({
         [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: expect.objectContaining({
           name: 'Workflow Template Library',
+          value: false,
+          readonly: true,
+          readonlyMode: 'ui',
+          requiresPageReload: true,
+        }),
+        [WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID]: expect.objectContaining({
+          name: 'Workflow Executions view',
           value: false,
           readonly: true,
           readonlyMode: 'ui',

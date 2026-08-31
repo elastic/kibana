@@ -17,6 +17,16 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
+import {
+  HITL_EXTERNAL_CHANNELS_DESCRIPTION,
+  HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
+  HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
+  MAX_HITL_ACTION_LABEL_LENGTH,
+  MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH,
+  MAX_HITL_EXTERNAL_LINK_LENGTH,
+  MAX_HITL_MESSAGE_LENGTH,
+  MAX_HITL_SLACK_CHANNEL_ID_LENGTH,
+} from '../common/hitl';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -51,11 +61,24 @@ export const WorkflowRetrySchema = z.object({
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
+// Upper bound on a KQL condition. The parser recurses, so nesting depth has to stay
+// well inside the stack limit, and this bounds it. A longer expression can be hoisted
+// into a `data.set` step and compared here as a short flag.
+export const IF_CONDITION_MAX_LENGTH = 2000;
+
+const IfConditionSchema = z
+  .string()
+  .max(IF_CONDITION_MAX_LENGTH)
+  .describe(
+    'KQL condition that controls whether this step runs, e.g. "steps.prev.output.status : \'success\'"'
+  );
+
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({
   name: z.string().min(1),
   type: z.string(),
   'max-step-size': ByteSizeSchema.optional(),
+  if: IfConditionSchema.optional(),
 });
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
@@ -212,7 +235,7 @@ export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 export type StepWithOnFailure = z.infer<typeof StepWithOnFailureSchema>;
 
 export const StepWithIfConditionSchema = z.object({
-  if: z.string().optional().describe('KQL condition that controls whether this step runs'),
+  if: IfConditionSchema.optional(),
 });
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
 
@@ -224,7 +247,6 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
   with: z.record(z.string(), z.any()).optional(),
 })
-  .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
   .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
@@ -256,19 +278,97 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+export const WaitForApprovalSlackChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
+  message: z
+    .string()
+    .max(MAX_HITL_MESSAGE_LENGTH)
+    .optional()
+    .describe(
+      'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
+    ),
+});
+
+export const WaitForApprovalSlackApiChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .describe('Slack API connector saved object id or name'),
+  channels: z
+    .array(z.string().min(1).max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH))
+    .min(1)
+    .describe('Slack channel ids to post approval actions to'),
+  message: z
+    .string()
+    .max(MAX_HITL_MESSAGE_LENGTH)
+    .optional()
+    .describe(
+      'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
+    ),
+});
+
+export const WaitForApprovalChannelsSchema = z
+  .object({
+    slack: WaitForApprovalSlackChannelSchema.optional(),
+    slack_api: WaitForApprovalSlackApiChannelSchema.optional(),
+  })
+  .optional()
+  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
+
+export const HitlExternalChannelsSchema = WaitForApprovalChannelsSchema;
+
 export const WaitForInputStepInputSchema = z
   .object({
-    message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+    message: z
+      .string()
+      .max(MAX_HITL_MESSAGE_LENGTH)
+      .optional()
+      .describe('Message displayed to the user when waiting for input'),
     schema: JsonModelSchema.optional().describe(
       'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
     ),
+    channels: HitlExternalChannelsSchema,
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-});
+}).merge(TimeoutPropSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
+
+export const WaitForApprovalStepInputSchema = z
+  .object({
+    message: z
+      .string()
+      .max(MAX_HITL_MESSAGE_LENGTH)
+      .optional()
+      .describe('Message displayed to approvers'),
+    approveLabel: z
+      .string()
+      .max(MAX_HITL_ACTION_LABEL_LENGTH)
+      .optional()
+      .describe('Label for the approve action (default: Approve)'),
+    rejectLabel: z
+      .string()
+      .max(MAX_HITL_ACTION_LABEL_LENGTH)
+      .optional()
+      .describe('Label for the reject action (default: Decline)'),
+    channels: WaitForApprovalChannelsSchema,
+  })
+  .optional();
+
+export const WaitForApprovalStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('waitForApproval')
+    .describe('Pause execution until approval or rejection is received'),
+  with: WaitForApprovalStepInputSchema,
+}).merge(TimeoutPropSchema);
+export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z
   .record(z.string(), z.unknown())
@@ -421,7 +521,6 @@ export const ForEachStepSchema = BaseStepSchema.extend({
       'Loop over a list. Access current item via {{ foreach.item }}, index via {{ foreach.index }}, total via {{ foreach.total }}'
     ),
   ...ForEachStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
 });
@@ -466,7 +565,6 @@ export const WhileStepSchema = BaseStepSchema.extend({
       'Repeat steps while condition is true (do-while semantics — first iteration always runs). Access iteration index via {{ while.iteration }}'
     ),
   ...WhileStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
 });
@@ -512,7 +610,6 @@ export const SwitchStepSchema = BaseStepSchema.extend({
       'Multi-way branching. Evaluates expression and runs the steps of the first case whose match equals the expression'
     ),
   ...SwitchStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...TimeoutPropSchema.shape,
 });
 export type SwitchStep = z.infer<typeof SwitchStepSchema>;
@@ -535,11 +632,12 @@ export const getSwitchStepSchema = (stepSchema: z.ZodType, loose: boolean = fals
 };
 
 export const IfStepConfigSchema = z.object({
-  condition: z
-    .string()
-    .describe(
-      'Condition expression in KQL format that evaluates to true/false, e.g. "steps.prev.output.status : \'success\'"'
-    ),
+  condition: IfConditionSchema,
+  // This step already gates on `condition`; a step-level `if` would be a second,
+  // invisible gate. Reject it instead of stripping it, so the author sees why.
+  if: z
+    .never({ error: 'The `if` step gates on `condition`; a step-level `if` is not supported here' })
+    .optional(),
   steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when the condition is true'),
   else: z.array(BaseStepSchema).optional().describe('Steps to execute when the condition is false'),
 });
@@ -792,7 +890,6 @@ export const LoopBreakStepSchema = BaseStepSchema.extend({
   type: z
     .literal('loop.break')
     .describe('Exit the enclosing loop immediately. Valid only inside a foreach or while body'),
-  ...StepWithIfConditionSchema.shape,
 });
 export type LoopBreakStep = z.infer<typeof LoopBreakStepSchema>;
 
@@ -802,7 +899,6 @@ export const LoopContinueStepSchema = BaseStepSchema.extend({
     .describe(
       'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body'
     ),
-  ...StepWithIfConditionSchema.shape,
 });
 export type LoopContinueStep = z.infer<typeof LoopContinueStepSchema>;
 
@@ -842,7 +938,7 @@ export const WorkflowOutputStepSchema = BaseStepSchema.extend({
   type: z.literal('workflow.output'),
   status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
   with: z.record(z.string(), z.any()),
-}).extend(StepWithIfConditionSchema.shape);
+});
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
 export const WorkflowFailStepSchema = BaseStepSchema.extend({
@@ -853,7 +949,7 @@ export const WorkflowFailStepSchema = BaseStepSchema.extend({
       reason: z.string().optional(),
     })
     .optional(),
-}).extend(StepWithIfConditionSchema.shape);
+});
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Outputs --- */
@@ -882,6 +978,7 @@ const StepSchema = z.lazy(() =>
     SwitchStepSchema,
     WaitStepSchema,
     WaitForInputStepSchema,
+    WaitForApprovalStepSchema,
     DataSetStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
@@ -913,6 +1010,7 @@ export const BuiltInStepTypes = [
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   WaitForInputStepSchema.shape.type.value,
+  WaitForApprovalStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,
@@ -1073,6 +1171,10 @@ export const WorkflowDataContextSchema = z.object({
   name: z.string(),
   enabled: z.boolean(),
   spaceId: z.string(),
+  version: z
+    .number()
+    .optional()
+    .describe('Workflow document version captured when the execution was created.'),
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
@@ -1096,7 +1198,29 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
   ])
 );
 
+export const WorkflowHitlTemplateContextSchema = z.object({
+  [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: z
+    .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+    .optional()
+    .describe('External waitForInput form URL, available while the step is waiting'),
+  [HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY]: z
+    .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+    .optional()
+    .describe('External GET resume URL with token set. Append `&<field>=<value>` per with.schema.'),
+});
+
+export const WorkflowTemplatePersistedContextSchema = z.object({
+  hitl: WorkflowHitlTemplateContextSchema.optional(),
+});
+
 export const WorkflowContextSchema = z.object({
+  /**
+   * Persisted execution-context values exposed to templates as `context.*`
+   * (for example `context.hitl.externalFormLink` during external waitForInput).
+   */
+  context: WorkflowTemplatePersistedContextSchema.optional(),
   /**
    * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`) or
    * workflow call trigger (`triggers[type=workflow_call].inputs`). Populated from the trigger's

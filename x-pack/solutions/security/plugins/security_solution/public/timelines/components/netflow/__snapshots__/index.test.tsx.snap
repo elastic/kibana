@@ -832,6 +832,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
+                          aria-hidden="true"
                           color="subdued"
                           data-euiicon-type="chevronSingleRight"
                           data-test-subj="arrow-icon"
@@ -849,6 +850,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
+                          aria-hidden="true"
                           color="subdued"
                           data-euiicon-type="chevronSingleLeft"
                           data-test-subj="arrow-icon"

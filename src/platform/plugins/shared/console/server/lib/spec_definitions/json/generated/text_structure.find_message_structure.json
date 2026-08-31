@@ -30,6 +30,9 @@
       "timestamp_field": "",
       "timestamp_format": ""
     },
+    "data_autocomplete_rules": {
+      "messages": []
+    },
     "methods": [
       "GET",
       "POST"

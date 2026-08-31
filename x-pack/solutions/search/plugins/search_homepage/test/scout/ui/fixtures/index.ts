@@ -14,11 +14,14 @@ import type {
   ScoutParallelWorkerFixtures,
 } from '@kbn/scout-search';
 import { test as base, spaceTest as spaceBase, createLazyPageObject } from '@kbn/scout-search';
+// Page object owned by the console plugin, reused here as a test helper:
+import { EmbeddedConsole } from '@kbn/console-plugin/test/scout/ui/fixtures/page_objects';
 import { Homepage } from './page_objects/homepage';
 
 export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     homepage: Homepage;
+    embeddedConsole: EmbeddedConsole;
   };
   browserAuth: BrowserAuthFixture;
 }
@@ -26,6 +29,7 @@ export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
 export interface ExtendedScoutParallelTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: ScoutParallelTestFixtures['pageObjects'] & {
     homepage: Homepage;
+    embeddedConsole: EmbeddedConsole;
   };
 }
 
@@ -43,6 +47,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
     const extendedPageObjects = {
       ...pageObjects,
       homepage: createLazyPageObject(Homepage, page),
+      embeddedConsole: createLazyPageObject(EmbeddedConsole, page),
     };
     await use(extendedPageObjects);
   },
@@ -65,6 +70,7 @@ export const spaceTest = spaceBase.extend<
     const extendedPageObjects = {
       ...pageObjects,
       homepage: createLazyPageObject(Homepage, page),
+      embeddedConsole: createLazyPageObject(EmbeddedConsole, page),
     };
     await use(extendedPageObjects);
   },

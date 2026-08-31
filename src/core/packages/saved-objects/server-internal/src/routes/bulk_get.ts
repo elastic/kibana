@@ -11,6 +11,14 @@ import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_NAME_LENGTH,
+  MAX_SAVED_OBJECT_NAMESPACE_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
+  MAX_SAVED_OBJECTS_PER_QUERY,
+} from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
@@ -57,12 +65,20 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
       validate: {
         body: schema.arrayOf(
           schema.object({
-            type: schema.string(),
-            id: schema.string(),
-            fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-            namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+            type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+            id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
+            fields: schema.maybe(
+              schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }), {
+                maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
+              })
+            ),
+            namespaces: schema.maybe(
+              schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAMESPACE_LENGTH }), {
+                maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
+              })
+            ),
           }),
-          { maxSize: 10_000 }
+          { maxSize: MAX_SAVED_OBJECTS_PER_BULK_REQUEST }
         ),
       },
     },

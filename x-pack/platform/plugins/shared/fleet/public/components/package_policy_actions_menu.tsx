@@ -17,7 +17,7 @@ import {
   FLEET_CONNECTORS_PACKAGE,
   IS_AGENTLESS_QUERY_PARAM,
 } from '../../common/constants';
-import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
+import type { Agent, AgentPolicy, InMemoryPackagePolicy } from '../types';
 import {
   useAgentPolicyRefresh,
   useAuthz,
@@ -29,8 +29,10 @@ import {
 import { isAgentlessPoliciesUIEnabled, policyHasFleetServer } from '../services';
 
 import { scheduleAutoOpenModal } from '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status';
+import { useAgentlessPolicyUpgrade } from '../applications/integrations/sections/epm/screens/detail/policies/components/use_agentless_policy_upgrade';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
+import { AgentlessStatusDetailsFlyout } from './agentless_status_details_flyout';
 import { ContextMenuActions } from './context_menu_actions';
 import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
@@ -44,6 +46,16 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
   from?: 'fleet-policy-list' | 'installed-integrations' | undefined;
+  // Called after a successful agentless upgrade so the caller can refetch its list. Only relevant
+  // when the agentless upgrade action is used (agentless row + `disableAgentlessLegacyAPI`).
+  onUpgraded?: () => void;
+  /**
+   * The enrolled agentless agent for this package policy's agent policy. When provided, the
+   * "Details" action is enabled and opens a flyout showing integration health status. When absent
+   * (agent not yet enrolled), the action is shown but disabled. Only relevant for agentless
+   * policies — non-agentless callers simply omit this prop.
+   */
+  agent?: Agent;
 }> = ({
   agentPolicies,
   packagePolicy,
@@ -51,6 +63,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   upgradePackagePolicyHref,
   defaultIsOpen = false,
   from,
+  onUpgraded,
+  agent,
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
@@ -63,6 +77,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const canAddAgents = isFleetServerPolicy ? authz.fleet.addFleetServers : authz.fleet.addAgents;
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
+  const [isDetailsFlyoutOpen, setIsDetailsFlyoutOpen] = useState(false);
 
   const { cloud, application } = useStartServices();
 
@@ -70,6 +85,12 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
   const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
   const isAgentlessPolicy = packagePolicy.supports_agentless;
+
+  const {
+    isAgentlessUpgrade,
+    openModal: openAgentlessUpgradeModal,
+    confirmModal: agentlessUpgradeModal,
+  } = useAgentlessPolicyUpgrade({ packagePolicy, onUpgraded });
 
   // For agentless policies the agentPolicies prop may be empty (the parent hook doesn't always
   // fetch them) or a minimal synthesized policy without `agentless` details (the agentless
@@ -219,6 +240,25 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         defaultMessage="Edit integration"
       />
     </EuiContextMenuItem>,
+    ...(isAgentlessPolicy
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsDetailsItem"
+            icon="inspect"
+            disabled={!agent}
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              setIsDetailsFlyoutOpen(true);
+            }}
+            key="packagePolicyDetails"
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.packagePoliciesTable.detailsActionTitle"
+              defaultMessage="Details"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(packagePolicy.hasUpgrade &&
     packagePolicy.keepPoliciesUpToDate &&
     packagePolicy.pendingUpgradeReview &&
@@ -246,9 +286,18 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsUpgradeItem"
-            disabled={!canWriteIntegrationPolicies || !upgradePackagePolicyHref}
+            disabled={
+              !canWriteIntegrationPolicies || (!isAgentlessUpgrade && !upgradePackagePolicyHref)
+            }
             icon="refresh"
-            href={upgradePackagePolicyHref}
+            {...(isAgentlessUpgrade
+              ? {
+                  onClick: () => {
+                    setIsActionsMenuOpen(false);
+                    openAgentlessUpgradeModal();
+                  },
+                }
+              : { href: upgradePackagePolicyHref })}
             key="packagePolicyUpgrade"
           >
             <FormattedMessage
@@ -364,6 +413,18 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   }
   return (
     <>
+      {agentlessUpgradeModal}
+      {isDetailsFlyoutOpen && agent && (
+        <EuiPortal>
+          <AgentlessStatusDetailsFlyout
+            onClose={() => setIsDetailsFlyoutOpen(false)}
+            policyName={packagePolicy.name}
+            agent={agent}
+            agentPolicy={effectiveAgentPolicy}
+            packagePolicy={packagePolicy}
+          />
+        </EuiPortal>
+      )}
       {isEnrollmentFlyoutOpen && (
         <EuiPortal>
           <AgentEnrollmentFlyout

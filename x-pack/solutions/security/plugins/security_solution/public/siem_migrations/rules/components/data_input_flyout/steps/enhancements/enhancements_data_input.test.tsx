@@ -12,19 +12,13 @@ import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
 import { MigrationSource, type MigrationStepProps } from '../../../../../common/types';
-import * as useAppToastsModule from '../../../../../../common/hooks/use_app_toasts';
 import { QradarDataInputStep } from '../../types';
 
 jest.mock('../../../../service/hooks/use_enhance_rules');
 
-jest.mock('../../../../../../common/hooks/use_app_toasts');
-
-const useAppToastsMock = jest.spyOn(useAppToastsModule, 'useAppToasts');
-
 const mockEnhanceRules = jest.fn();
 
 describe('EnhancementsDataInput', () => {
-  const addErrorMock = jest.fn();
   const defaultProps: MigrationStepProps = {
     dataInputStep: QradarDataInputStep.Enhancements,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
@@ -36,9 +30,6 @@ describe('EnhancementsDataInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAppToastsMock.mockReturnValue({
-      addError: addErrorMock,
-    } as unknown as ReturnType<typeof useAppToastsModule.useAppToasts>);
 
     (useEnhanceRules as jest.Mock).mockReturnValue({
       enhanceRules: mockEnhanceRules,
@@ -241,8 +232,58 @@ describe('EnhancementsDataInput', () => {
     expect(getByTestId('enhancementTypeSelect')).toBeDisabled();
   });
 
-  it('should raise error toast when JSON parsing fails', async () => {
-    const { getByTestId } = render(<EnhancementsDataInput {...defaultProps} />);
+  it('should hide the error once the user uploads a valid file after an invalid one', async () => {
+    const { getByTestId, getByText, queryByText } = render(
+      <EnhancementsDataInput {...defaultProps} />
+    );
+
+    const filePicker = getByTestId('enhancementFilePicker');
+
+    await act(async () => {
+      fireEvent.change(filePicker, {
+        target: { files: [new File(['not valid json {{{'], 'invalid.json')] },
+      });
+    });
+    await waitFor(() => {
+      expect(getByText('The file does not contain valid JSON')).toBeVisible();
+    });
+
+    await act(async () => {
+      fireEvent.change(filePicker, {
+        target: { files: [new File([JSON.stringify({ mappings: [] })], 'valid.json')] },
+      });
+    });
+    await waitFor(() => {
+      expect(queryByText('The file does not contain valid JSON')).toBeNull();
+    });
+  });
+
+  it('should hide the error when the user clears the file selection', async () => {
+    const { getByTestId, getByText, queryByText } = render(
+      <EnhancementsDataInput {...defaultProps} />
+    );
+
+    const filePicker = getByTestId('enhancementFilePicker');
+
+    await act(async () => {
+      fireEvent.change(filePicker, {
+        target: { files: [new File(['not valid json {{{'], 'invalid.json')] },
+      });
+    });
+    await waitFor(() => {
+      expect(getByText('The file does not contain valid JSON')).toBeVisible();
+    });
+
+    await act(async () => {
+      fireEvent.change(filePicker, { target: { files: [] } });
+    });
+    await waitFor(() => {
+      expect(queryByText('The file does not contain valid JSON')).toBeNull();
+    });
+  });
+
+  it('should display inline error when JSON parsing fails', async () => {
+    const { getByTestId, getByText } = render(<EnhancementsDataInput {...defaultProps} />);
 
     const invalidJsonContent = 'not valid json {{{';
     const file = new File([invalidJsonContent], 'invalid.json', {
@@ -255,9 +296,11 @@ describe('EnhancementsDataInput', () => {
     });
 
     await waitFor(() => {
-      expect(addErrorMock).toHaveBeenCalledWith(expect.any(SyntaxError), {
-        title: 'Invalid JSON file',
-      });
+      expect(getByText('The file does not contain valid JSON')).toBeVisible();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('addEnhancementButton')).toBeDisabled();
     });
   });
 });

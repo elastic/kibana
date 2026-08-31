@@ -409,7 +409,7 @@ describe('Data Loader', () => {
     );
   });
 
-  it('should handle undefined isApproximate from parent API', async () => {
+  it('should default isApproximate to false when parent API does not publish it', async () => {
     await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
@@ -420,7 +420,7 @@ describe('Data Loader', () => {
         const params = internalApi.expressionParams$.getValue()!;
         expect(params.searchContext).toEqual(
           expect.objectContaining({
-            isApproximate: undefined,
+            isApproximate: false,
           })
         );
 
@@ -601,7 +601,16 @@ describe('Data Loader', () => {
       },
       {
         attributes: getLensAttributesMock({
-          state: { ...baseAttributes.state, query: { esql: 'from index | where $foo > 0' } },
+          state: {
+            ...baseAttributes.state,
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  layer1: { query: { esql: 'from index | where $foo > 0' }, columns: [] },
+                },
+              },
+            },
+          },
         }),
       }
     );
@@ -620,7 +629,16 @@ describe('Data Loader', () => {
       },
       {
         attributes: getLensAttributesMock({
-          state: { ...baseAttributes.state, query: { esql: 'from index | where $foo > 0' } },
+          state: {
+            ...baseAttributes.state,
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  layer1: { query: { esql: 'from index | where $foo > 0' }, columns: [] },
+                },
+              },
+            },
+          },
         }),
       },
       {

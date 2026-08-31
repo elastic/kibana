@@ -7,14 +7,17 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
 import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
+
+const GO_SERVICE_GROUP_NAME = 'go services';
 
 test.describe(
   'Service Groups',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects: { serviceGroupsPage } }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects: { serviceGroupsPage } }) => {
+      await apiServices.apm.serviceGroups.deleteByName(GO_SERVICE_GROUP_NAME);
       await browserAuth.loginAsPrivilegedUser();
       await serviceGroupsPage.gotoServiceGroupsPageWithDateSelected(
         testData.START_DATE,
@@ -26,8 +29,6 @@ test.describe(
       page,
       pageObjects: { serviceGroupsPage },
     }) => {
-      const GO_SERVICE_GROUP_NAME = 'go services';
-
       await test.step('shows no service groups initially', async () => {
         // If there are no service groups, the page shows this heading
         await expect(
@@ -84,7 +85,7 @@ test.describe(
         await page.getByTestId('apmDeleteGroupButton').click();
 
         // after deletion there should be no service groups
-        await waitForApmSettingsHeaderLink(page);
+        await waitForApmAppMenuReady(page);
         await expect(
           page.getByRole('heading', { name: 'No service groups', level: 2 })
         ).toBeVisible();

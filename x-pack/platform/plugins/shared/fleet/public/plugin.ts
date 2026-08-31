@@ -60,7 +60,13 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 
 import type { FleetAuthz } from '../common';
-import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
+import {
+  appRoutesService,
+  INTEGRATIONS_PLUGIN_ID,
+  PLUGIN_ID,
+  setupRouteService,
+  registerAwsOnboardingEvents,
+} from '../common';
 import {
   calculateAuthz,
   calculateEndpointExceptionsPrivilegesFromCapabilities,
@@ -75,6 +81,8 @@ import type {
 } from '../common/types';
 
 import { API_VERSIONS } from '../common/constants';
+
+import { registerIacProvisionerTelemetryEvents } from '../common/telemetry/iac_provisioner_events';
 
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import type { RequestError } from './hooks';
@@ -179,12 +187,17 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
 
+    // registerEventType is on AnalyticsServiceSetup (setup), not AnalyticsServiceStart (start).
+    registerAwsOnboardingEvents(core.analytics);
+
     setCustomIntegrations(deps.customIntegrations);
 
     // TODO: this is a contract leak and an issue.  We shouldn't be setting a module-level
     // variable from plugin setup.  Refactor to an abstraction, if necessary.
     // Set up http client
     setHttpClient(core.http);
+
+    registerIacProvisionerTelemetryEvents(core.analytics);
 
     // Register Integrations app
     core.application.register({

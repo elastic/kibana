@@ -6,8 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
-
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 export interface GroupActionRow {
   group_hash: string;
   rule_id: string | null;

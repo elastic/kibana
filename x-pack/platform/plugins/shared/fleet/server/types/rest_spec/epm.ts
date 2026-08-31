@@ -159,6 +159,15 @@ export const InstallationInfoSchema = schema.object(
             message: schema.string(),
             stack: schema.maybe(schema.string()),
           }),
+          missing_assets: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                type: schema.string(),
+              }),
+              { maxSize: 10000 }
+            )
+          ),
         }),
         { maxSize: 10 }
       )
@@ -177,6 +186,30 @@ export const InstallationInfoSchema = schema.object(
   { meta: { id: 'installation_info' } }
 );
 
+const PackageInfoKibanaAssetReferenceSchema = KibanaAssetReferenceSchema.extends(
+  {},
+  { meta: { id: 'package_info_kibana_asset_reference' } }
+);
+
+const PackageInfoEsAssetReferenceSchema = EsAssetReferenceSchema.extends(
+  {},
+  { meta: { id: 'package_info_es_asset_reference' } }
+);
+
+const PackageInfoInstallationInfoSchema = InstallationInfoSchema.extends(
+  {
+    installed_kibana: schema.arrayOf(PackageInfoKibanaAssetReferenceSchema, { maxSize: 10000 }),
+    additional_spaces_installed_kibana: schema.maybe(
+      schema.recordOf(
+        schema.string({ maxLength: 255 }),
+        schema.arrayOf(PackageInfoKibanaAssetReferenceSchema, { maxSize: 100 })
+      )
+    ),
+    installed_es: schema.arrayOf(PackageInfoEsAssetReferenceSchema, { maxSize: 10000 }),
+  },
+  { meta: { id: 'package_info_installation_info' } }
+);
+
 const PackageIconSchema = schema.object(
   {
     path: schema.maybe(schema.string()),
@@ -189,17 +222,29 @@ const PackageIconSchema = schema.object(
   { meta: { id: 'package_icon' } }
 );
 
+const PackageInfoIconSchema = PackageIconSchema.extends({}, { meta: { id: 'package_info_icon' } });
+
+const PackageInfoDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'package_info_deprecation_info' } }
+);
+
+const PackageInfoConditionsDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'package_info_conditions_deprecation_info' } }
+);
+
 export const PackageInfoSchema = schema
   .object(
     {
       status: schema.maybe(schema.string()),
-      installationInfo: schema.maybe(InstallationInfoSchema),
+      installationInfo: schema.maybe(PackageInfoInstallationInfoSchema),
       name: schema.string(),
       version: schema.string(),
       description: schema.maybe(schema.string()),
       title: schema.string(),
-      icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
-      deprecated: schema.maybe(DeprecationInfoSchema),
+      icons: schema.maybe(schema.arrayOf(PackageInfoIconSchema, { maxSize: 100 })),
+      deprecated: schema.maybe(PackageInfoDeprecationInfoSchema),
       conditions: schema.maybe(
         schema.object({
           kibana: schema.maybe(schema.object({ version: schema.maybe(schema.string()) })),
@@ -209,7 +254,7 @@ export const PackageInfoSchema = schema
               capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
             })
           ),
-          deprecated: schema.maybe(DeprecationInfoSchema),
+          deprecated: schema.maybe(PackageInfoConditionsDeprecationInfoSchema),
         })
       ),
       release: schema.maybe(
@@ -469,9 +514,37 @@ export const GetKnowledgeBaseResponseSchema = schema.object(
   { meta: { id: 'get_knowledge_base_response' } }
 );
 
+const ConflictTypeSchema = schema.oneOf([
+  schema.literal('overrides_fleet'),
+  schema.literal('blocked_by_same_priority'),
+  schema.literal('overridden_by_fleet'),
+]);
+
+const ConflictingTemplateSchema = schema.object({
+  name: schema.string({ maxLength: 1000 }),
+  priority: schema.number(),
+  conflictType: ConflictTypeSchema,
+});
+
+export const NamespaceConflictWarningSchema = schema.object({
+  dataStreamName: schema.string({ maxLength: 1000 }),
+  namespace: schema.string({ maxLength: 255 }),
+  baseTemplateName: schema.string({ maxLength: 1000 }),
+  nsTemplateName: schema.string({ maxLength: 1000 }),
+  conflictingTemplates: schema.arrayOf(ConflictingTemplateSchema, { maxSize: 100 }),
+});
+
 export const UpdatePackageResponseSchema = schema.object(
-  { item: GetPackageInfoSchema },
+  {
+    item: GetPackageInfoSchema,
+    warnings: schema.maybe(schema.arrayOf(NamespaceConflictWarningSchema, { maxSize: 100 })),
+  },
   { meta: { id: 'update_package_response' } }
+);
+
+export const NamespacePreflightCheckResponseSchema = schema.object(
+  { warnings: schema.arrayOf(NamespaceConflictWarningSchema, { maxSize: 100 }) },
+  { meta: { id: 'namespace_preflight_check_response' } }
 );
 
 export const AssetReferenceSchema = schema.oneOf([
@@ -594,6 +667,7 @@ export const GetBulkAssetsResponseSchema = schema.object(
           service: schema.maybe(schema.string()),
           title: schema.maybe(schema.string()),
           description: schema.maybe(schema.string()),
+          engine: schema.maybe(schema.oneOf([schema.literal('v1'), schema.literal('v2')])),
         }),
       }),
       { maxSize: 10000 }
@@ -705,8 +779,19 @@ export const GetFileRequestSchema = {
 };
 
 const PackageRequestParamsSchema = schema.object({
-  pkgName: schema.string({ meta: { description: 'Package name' } }),
+  pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
 });
+
+export const NamespacePreflightCheckRequestSchema = {
+  params: PackageRequestParamsSchema,
+  body: schema.object({
+    namespaces: schema.arrayOf(schema.string({ maxLength: 255 }), {
+      minSize: 1,
+      maxSize: 100,
+      meta: { description: 'Namespaces to check for pre-existing index template conflicts.' },
+    }),
+  }),
+};
 
 const PackageVersionRequestParamsSchema = schema.object({
   pkgName: schema.string({ meta: { description: 'Package name' } }),
@@ -879,6 +964,7 @@ export const BulkNamespaceCustomizationResponseSchema = schema.object(
             },
           })
         ),
+        warnings: schema.maybe(schema.arrayOf(NamespaceConflictWarningSchema, { maxSize: 100 })),
         error: schema.maybe(schema.string()),
       }),
       { maxSize: 1000 }
@@ -964,6 +1050,13 @@ export const InstallPackageFromRegistryRequestSchema = {
       {
         force: schema.boolean({ defaultValue: false }),
         ignore_constraints: schema.boolean({ defaultValue: false }),
+        allow_outdated_version: schema.boolean({
+          defaultValue: false,
+          meta: {
+            description:
+              'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
+          },
+        }),
       },
       { meta: { id: 'install_package_from_registry_request' } }
     )
@@ -1016,6 +1109,13 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
         { minSize: 1, maxSize: 1000 }
       ),
       force: schema.boolean({ defaultValue: false }),
+      allow_outdated_version: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description:
+            'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
+        },
+      }),
     },
     { meta: { id: 'bulk_install_packages_from_registry_request' } }
   ),

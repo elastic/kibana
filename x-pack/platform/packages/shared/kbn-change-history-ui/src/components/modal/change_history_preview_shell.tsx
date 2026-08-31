@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 export interface ChangeHistoryPreviewShellProps {
   backLabel: string;
   title?: string;
+  titleId?: string;
   onBack: () => void;
   headerActions?: ReactNode;
   children: ReactNode;
@@ -27,6 +28,7 @@ export interface ChangeHistoryPreviewShellProps {
 export function ChangeHistoryPreviewShell({
   backLabel,
   title,
+  titleId,
   onBack,
   headerActions,
   children,
@@ -77,7 +79,7 @@ export function ChangeHistoryPreviewShell({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   flush="left"
                   onClick={onBack}
                   data-test-subj="changeHistoryPreviewBack"
@@ -88,7 +90,7 @@ export function ChangeHistoryPreviewShell({
               {title ? (
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="m">
-                    <h1>{title}</h1>
+                    <h1 id={titleId}>{title}</h1>
                   </EuiTitle>
                 </EuiFlexItem>
               ) : null}

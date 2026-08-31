@@ -9,7 +9,9 @@ import { firstValueFrom } from 'rxjs';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import { AiRuleCreationService } from './ai_rule_creation_store';
 
-const mockRule = { name: 'Test Rule', type: 'query' } as RuleResponse;
+const mockRule = { name: 'Test Rule', type: 'query', id: 'rule-1' } as RuleResponse;
+const ATT_A = 'air:aaa';
+const ATT_B = 'air:bbb';
 
 describe('AiRuleCreationService', () => {
   let service: AiRuleCreationService;
@@ -18,74 +20,133 @@ describe('AiRuleCreationService', () => {
     service = new AiRuleCreationService();
   });
 
-  describe('aiCreatedRule$', () => {
-    it('initially emits null', async () => {
-      const value = await firstValueFrom(service.aiCreatedRule$);
-      expect(value).toBeNull();
+  describe('saveRuleRequest$', () => {
+    it('emits the rule after requestSaveRule', async () => {
+      const promise = firstValueFrom(service.saveRuleRequest$);
+      service.requestSaveRule(mockRule);
+      const value = await promise;
+      expect(value).toEqual({
+        rule: mockRule,
+        attachmentId: undefined,
+        updateOrigin: undefined,
+      });
     });
 
-    it('emits the rule after setAiCreatedRule', async () => {
-      service.setAiCreatedRule(mockRule);
-      const value = await firstValueFrom(service.aiCreatedRule$);
-      expect(value).toEqual(mockRule);
-    });
-
-    it('emits null after clearAiCreatedRule', async () => {
-      service.setAiCreatedRule(mockRule);
-      service.clearAiCreatedRule();
-      const value = await firstValueFrom(service.aiCreatedRule$);
-      expect(value).toBeNull();
+    it('carries the attachmentId and updateOrigin through requestSaveRule', async () => {
+      const promise = firstValueFrom(service.saveRuleRequest$);
+      const updateOrigin = jest.fn();
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A, updateOrigin });
+      const value = await promise;
+      expect(value).toEqual({ rule: mockRule, attachmentId: ATT_A, updateOrigin });
     });
   });
 
-  describe('formSyncActive$', () => {
-    it('initially emits false', async () => {
-      const value = await firstValueFrom(service.formSyncActive$);
-      expect(value).toBe(false);
+  describe('saving state (per card)', () => {
+    it('tracks saves per attachment id', () => {
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      expect(service.getIsSaving(ATT_A)).toBe(true);
+      expect(service.getIsSaving(ATT_B)).toBe(false);
+      expect(service.getIsSaving()).toBe(true);
     });
 
-    it('emits true after activateFormSync', async () => {
-      service.activateFormSync();
-      const value = await firstValueFrom(service.formSyncActive$);
-      expect(value).toBe(true);
+    it('allows concurrent saves on different cards and clears them independently', () => {
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      service.requestSaveRule(mockRule, { attachmentId: ATT_B });
+      expect(service.getIsSaving(ATT_A)).toBe(true);
+      expect(service.getIsSaving(ATT_B)).toBe(true);
+
+      service.clearSaving(ATT_A);
+      expect(service.getIsSaving(ATT_A)).toBe(false);
+      expect(service.getIsSaving(ATT_B)).toBe(true);
     });
 
-    it('deduplicates consecutive identical values via distinctUntilChanged', () => {
-      const emissions: boolean[] = [];
-      const subscription = service.formSyncActive$.subscribe((v) => emissions.push(v));
+    it('drops a re-request for a card whose save is already in flight', () => {
+      const seen: unknown[] = [];
+      service.saveRuleRequest$.subscribe((request) => seen.push(request));
 
-      service.activateFormSync();
-      service.activateFormSync();
-      service.activateFormSync();
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      expect(seen).toHaveLength(1);
 
-      subscription.unsubscribe();
-      expect(emissions).toEqual([false, true]);
+      service.clearSaving(ATT_A);
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      expect(seen).toHaveLength(2);
+    });
+
+    it('tracks an id-less save under the shared key', () => {
+      service.requestSaveRule(mockRule);
+      expect(service.getIsSaving()).toBe(true);
+      service.clearSaving();
+      expect(service.getIsSaving()).toBe(false);
+    });
+
+    it('reset clears all in-flight saves', () => {
+      service.requestSaveRule(mockRule, { attachmentId: ATT_A });
+      service.reset();
+      expect(service.getIsSaving()).toBe(false);
+    });
+  });
+
+  describe('boundAttachmentId', () => {
+    it('starts null', () => {
+      expect(service.getBoundAttachmentId()).toBeNull();
+    });
+
+    it('setBoundAttachment updates the bound id', () => {
+      service.setBoundAttachment(ATT_A);
+      expect(service.getBoundAttachmentId()).toBe(ATT_A);
+    });
+
+    it('releaseBind sets the bound id back to null', () => {
+      service.setBoundAttachment(ATT_A);
+      service.releaseBind();
+      expect(service.getBoundAttachmentId()).toBeNull();
+    });
+
+    it('setAiCreatedRule with attachmentId sets the bound id', () => {
+      service.setAiCreatedRule(mockRule, ATT_B);
+      expect(service.getBoundAttachmentId()).toBe(ATT_B);
+    });
+
+    it('setAiCreatedRule without attachmentId does not change the bound id', () => {
+      service.setBoundAttachment(ATT_A);
+      service.setAiCreatedRule(mockRule);
+      expect(service.getBoundAttachmentId()).toBe(ATT_A);
+    });
+
+    it('reset clears the bound id', () => {
+      service.setBoundAttachment(ATT_A);
+      service.reset();
+      expect(service.getBoundAttachmentId()).toBeNull();
+    });
+  });
+
+  describe('session management', () => {
+    it('startSession creates a new session', () => {
+      const session = service.startSession();
+      expect(session.sessionId).toBeDefined();
+      expect(session.applyCount).toBe(0);
+    });
+
+    it('incrementApplyCount increments the apply count', () => {
+      service.startSession();
+      service.incrementApplyCount();
+      service.incrementApplyCount();
+      expect(service.getSession()?.applyCount).toBe(2);
+    });
+
+    it('clearSession sets session to null', () => {
+      service.startSession();
+      service.clearSession();
+      expect(service.getSession()).toBeNull();
     });
   });
 
   describe('reset', () => {
-    it('resets aiCreatedRule$ to null', async () => {
-      service.setAiCreatedRule(mockRule);
+    it('resets session to null', () => {
+      service.startSession();
       service.reset();
-      const value = await firstValueFrom(service.aiCreatedRule$);
-      expect(value).toBeNull();
+      expect(service.getSession()).toBeNull();
     });
-
-    it('resets formSyncActive$ to false', async () => {
-      service.activateFormSync();
-      service.reset();
-      const value = await firstValueFrom(service.formSyncActive$);
-      expect(value).toBe(false);
-    });
-  });
-
-  it('each instance maintains independent state', async () => {
-    const other = new AiRuleCreationService();
-
-    service.setAiCreatedRule(mockRule);
-    service.activateFormSync();
-
-    expect(await firstValueFrom(other.aiCreatedRule$)).toBeNull();
-    expect(await firstValueFrom(other.formSyncActive$)).toBe(false);
   });
 });

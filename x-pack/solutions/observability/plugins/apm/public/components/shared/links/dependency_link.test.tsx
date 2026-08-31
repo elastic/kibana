@@ -5,17 +5,26 @@
  * 2.0.
  */
 
-import { composeStories } from '@storybook/react';
-import { render } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
-import * as stories from './dependency_link.stories';
-
-const { Example } = composeStories(stories);
+import { renderWithContext } from '../../../utils/test_helpers';
+import { DependencyLink } from './dependency_link';
 
 describe('DependencyLink', () => {
-  it('renders', async () => {
-    const { findByText } = render(<Example />);
+  it('renders', () => {
+    renderWithContext(
+      <DependencyLink
+        query={{
+          dependencyName: 'postgres',
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          comparisonEnabled: false,
+        }}
+      />
+    );
 
-    expect(await findByText('postgres')).toBeDefined();
+    expect(screen.getByText('postgres')).toBeInTheDocument();
   });
 });

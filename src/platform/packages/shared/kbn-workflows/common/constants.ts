@@ -37,6 +37,17 @@ export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStats
 export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
 
 /**
+ * Global Advanced Setting gating the global Workflow Executions view
+ * (`/app/workflows/executions`).
+ *
+ * Registered as a global uiSetting (not per-space) so the same toggle is
+ * readable from any browser plugin that consumes the workflows UI without
+ * taking a runtime dep on `workflows_management`.
+ */
+export const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
+  'workflowsManagement:globalExecutionsView:enabled';
+
+/**
  * Map of regular (saved object) connector types -> their system connector equivalents.
  * Use this map to make the `connector-id` step config property optional for a given connector step type, allowing it to be executed via its linked system connector.
  * Pre-requisite for this to work:
@@ -45,11 +56,11 @@ export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library
 export const SystemConnectorsMap = new Map<string, string>([['.http', '.http-system']]);
 
 /**
- * Workflow attachment and SML types used by the agent builder integration.
+ * Workflow attachment types used by the agent builder integration.
+ * The matching KI type id is `WORKFLOW_KI_TYPE` in `@kbn/agent-builder-elastic-ai-index-ki-types`.
  */
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
-export const WORKFLOW_SML_TYPE = 'workflow';
 
 /**
  * UI event broadcast on the agent builder events bus when a workflow YAML

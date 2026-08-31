@@ -58,7 +58,7 @@ export const ActionPolicyFormPage = () => {
     <EuiFlexGroup justifyContent="flexStart">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           onClick={navigateToList}
           data-test-subj="returnButton"
           style={{ paddingInline: 0 }}
@@ -214,11 +214,15 @@ const ActionPolicyFormPageContent = ({
   const isLoading = isCreating || isUpdating || isCreatingWorkflows;
 
   return (
-    <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
+    <EuiPageTemplate.Section
+      paddingSize="none"
+      restrictWidth={true}
+      data-test-subj="actionPolicyFormPage"
+    >
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             onClick={onCancel}
             data-test-subj="returnButton"
             style={{ paddingInline: 0 }}

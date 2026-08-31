@@ -15,14 +15,14 @@ import type { EuiButton, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 export type AiButtonVariant = 'accent' | 'base' | 'empty' | 'outlined';
 
 /** Allowed icon types for AI button components. */
-export type AiButtonIconType = 'sparkles' | 'productAgent' | 'aiAssistantLogo';
+export type AiButtonIconType = 'addToChat' | 'sparkles' | 'productAgent' | 'aiAssistantLogo';
 type AiButtonTextSize = 'xs' | 's' | 'm';
 
 /** Event handler prop names from DOMAttributes (onClick, onKeyDown, …). */
 type ButtonDomHandlerKeys = Extract<keyof React.DOMAttributes<HTMLButtonElement>, `on${string}`>;
 
-/** Keys to relax: event handlers and ref, so they accept both button and anchor elements. */
-type RelaxKeys = ButtonDomHandlerKeys | 'buttonRef';
+/** Keys to relax: event handlers, ref, and `type` (button vs anchor MIME type clash). */
+type RelaxKeys = ButtonDomHandlerKeys | 'buttonRef' | 'type';
 
 /** Relaxed replacements: handlers and ref that accept both element types. */
 type RelaxedOverrides = Pick<
@@ -30,6 +30,11 @@ type RelaxedOverrides = Pick<
   ButtonDomHandlerKeys
 > & {
   buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement>;
+  /**
+   * HTML button `type`. Kept as the button literal union so spreading `AiButtonProps`
+   * does not widen to `string` via the anchor MIME `type` from EUI's button|anchor props.
+   */
+  type?: 'submit' | 'reset' | 'button';
 };
 
 /** Makes P accept handlers/ref that work for both button and anchor. */
@@ -41,6 +46,8 @@ export type AiButtonProps =
       DistributiveOmit<React.ComponentProps<typeof EuiButton>, 'fill' | 'iconType' | 'size'>
     > & {
       iconOnly?: false;
+      withToolTip?: never;
+      toolTipContent?: never;
       fill?: never;
       size?: AiButtonTextSize;
       variant?: 'base' | 'accent';
@@ -50,15 +57,25 @@ export type AiButtonProps =
       DistributiveOmit<React.ComponentProps<typeof EuiButtonEmpty>, 'iconType'>
     > & {
       iconOnly?: false;
+      withToolTip?: never;
+      toolTipContent?: never;
       variant: 'empty' | 'outlined';
       iconType?: AiButtonIconType;
     })
   | (RelaxForButtonOrAnchor<
-      DistributiveOmit<React.ComponentProps<typeof EuiButtonIcon>, 'display' | 'iconType'>
+      DistributiveOmit<
+        React.ComponentProps<typeof EuiButtonIcon>,
+        'display' | 'iconType' | 'children'
+      >
     > & {
       iconOnly: true;
       display?: never;
+      children?: never;
       variant?: AiButtonVariant;
       iconType: AiButtonIconType;
       'aria-label': string;
+      /** Wraps the icon button in a tooltip when `true`. Only applies to icon-only buttons. */
+      withToolTip?: boolean;
+      /** Tooltip content when `withToolTip` is `true`. Falls back to `aria-label` when omitted. */
+      toolTipContent?: React.ReactNode;
     });

@@ -30,7 +30,7 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
   return (
     <KibanaPageTemplate.EmptyPrompt
       data-test-subj="externalInferenceEmptyPrompt"
-      iconType="plusInCircle"
+      iconType="plusCircle"
       title={
         <h2>
           {i18n.translate('xpack.searchInferenceEndpoints.externalInference.emptyTitle', {

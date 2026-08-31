@@ -17,6 +17,7 @@ export enum StepCategory {
   Ai = 'ai',
   Kibana = 'kibana',
   KibanaCases = 'kibana.cases',
+  KibanaEntityStore = 'kibana.entityStore',
   KibanaSecurity = 'kibana.security',
   Data = 'data',
   FlowControl = 'flowControl',

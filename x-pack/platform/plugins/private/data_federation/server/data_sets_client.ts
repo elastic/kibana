@@ -21,7 +21,7 @@ export class DataSetsClient {
    * Calls Elasticsearch `GET /_query/data_set`.
    */
   public async getAll(): Promise<DataSetWithName[]> {
-    return await this.esClient.transport.request({
+    return this.esClient.transport.request({
       method: 'GET',
       path,
     });
@@ -32,7 +32,7 @@ export class DataSetsClient {
    */
   public async get(id: string): Promise<DataSetWithName> {
     const encoded = encodeURIComponent(id);
-    return await this.esClient.transport.request({
+    return this.esClient.transport.request({
       method: 'GET',
       path: `${path}/${encoded}`,
     });
@@ -43,7 +43,7 @@ export class DataSetsClient {
    */
   public async put(id: string, body: Dataset): Promise<void> {
     const encoded = encodeURIComponent(id);
-    return await this.esClient.transport.request({
+    return this.esClient.transport.request({
       method: 'PUT',
       path: `${path}/${encoded}`,
       body,
@@ -55,7 +55,7 @@ export class DataSetsClient {
    */
   public async delete(id: string): Promise<void> {
     const encoded = encodeURIComponent(id);
-    return await this.esClient.transport.request({
+    return this.esClient.transport.request({
       method: 'DELETE',
       path: `${path}/${encoded}`,
     });

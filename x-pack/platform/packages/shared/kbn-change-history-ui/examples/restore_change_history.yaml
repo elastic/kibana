@@ -1,0 +1,35 @@
+summary: Restore an entity to a prior change
+description: Writes the selected snapshot back to the primary store and runs domain side effects.
+operationId: restoreEntityChangeHistory
+tags:
+  - change history
+parameters:
+  - name: objectId
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: eventId
+    in: path
+    required: true
+    schema:
+      type: string
+responses:
+  '204':
+    description: Restore succeeded
+  '403':
+    description: Caller lacks restore privilege
+  '404':
+    description: Entity or change not found
+  '409':
+    description: Live entity changed since history was loaded (restore conflict)
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            errorCode:
+              type: string
+              example: RESTORE_CONFLICT
+            message:
+              type: string

@@ -84,6 +84,6 @@ const queryDeletePolicyRevisions = async (
         },
       },
     },
-    { signal: context.abortController?.signal }
+    { signal: context.signal }
   );
 };

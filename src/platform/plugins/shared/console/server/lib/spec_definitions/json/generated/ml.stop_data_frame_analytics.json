@@ -13,6 +13,22 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "id": "",
+      "allow_no_match": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "timeout": ""
+    },
     "methods": [
       "POST"
     ],

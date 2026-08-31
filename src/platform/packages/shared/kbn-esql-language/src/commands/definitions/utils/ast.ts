@@ -21,11 +21,12 @@ import { EDITOR_MARKER } from '../constants';
 import { endsWithComma, endsWithWhitespace } from './regex';
 
 const ENDS_WITH_BINARY_OPERATOR_REGEX =
-  /(?:\+|\/|==|>=|>|<=|<|:|%|\*|-|!=|=|\b(?:in|like|not in|not like|not rlike|rlike|and|or|not|as)\b)\s+$/i;
+  /(?:\+|\/|==|>=|>|<=|<|%|\*|-|!=|=|\b(?:in|like|not in|not like|not rlike|rlike|and|or|not|as)\b)\s+$/i;
 const ENDS_WITH_CASTING_OPERATOR_REGEX = /::\s*$/i;
+const ENDS_WITH_MATCH_OPERATOR_REGEX = /(?:^|[^:]):\s*$/;
 
 export function isMarkerNode(node: ESQLAstItem | PromQLAstNode | undefined): boolean {
-  return Boolean(node && !Array.isArray(node) && node.name?.endsWith(EDITOR_MARKER));
+  return Boolean(node && !Array.isArray(node) && node.name?.includes(EDITOR_MARKER));
 }
 
 function findCommand(ast: ESQLAstQueryExpression, offset: number) {
@@ -263,7 +264,9 @@ export function getBracketsToClose(text: string) {
  * having an AST is helpful so we heuristically correct the syntax so it can be parsed.
  */
 export function correctQuerySyntax(query: string) {
-  if (
+  if (ENDS_WITH_MATCH_OPERATOR_REGEX.test(query)) {
+    query += `"${EDITOR_MARKER}"`;
+  } else if (
     ENDS_WITH_BINARY_OPERATOR_REGEX.test(query) ||
     ENDS_WITH_CASTING_OPERATOR_REGEX.test(query) ||
     (endsWithComma(query) && endsWithWhitespace(query))

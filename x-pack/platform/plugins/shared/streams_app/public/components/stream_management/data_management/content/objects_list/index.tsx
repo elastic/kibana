@@ -17,7 +17,6 @@ import { EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamTree } from './tree';
 import { containsMappings } from '../helpers';
-import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 
 export function ContentPackObjectsList({
   objects,
@@ -29,10 +28,6 @@ export function ContentPackObjectsList({
   const streamEntries = objects.filter(
     (entry): entry is ContentPackStream => entry.type === 'stream'
   );
-  const {
-    features: { significantEvents },
-  } = useStreamsPrivileges();
-  const isSignificantEventsEnabled = !!significantEvents?.enabled && !!significantEvents?.available;
   const [includeMappings, setIncludeMappings] = useState<boolean>(containsMappings(streamEntries));
   const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({
     ...objects
@@ -65,19 +60,13 @@ export function ContentPackObjectsList({
   return !rootEntry ? null : (
     <>
       <EuiCallOut
+        announceOnMount
         size="s"
-        iconType="iInCircle"
-        title={
-          isSignificantEventsEnabled
-            ? i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCallout', {
-                defaultMessage:
-                  'Content packs include stream structure only: routing, mappings, and child streams. Significant events and other detections are not included and are managed from the Significant events tab.',
-              })
-            : i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCalloutNoTab', {
-                defaultMessage:
-                  'Content packs include stream structure only: routing, mappings, and child streams. Significant events and other detections are not included and are managed separately.',
-              })
-        }
+        iconType="info"
+        title={i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCallout', {
+          defaultMessage:
+            'Content packs include stream structure only: routing, mappings, and child streams. Significant events and other detections are not included and are managed separately.',
+        })}
       />
 
       <EuiSpacer size="m" />

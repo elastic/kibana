@@ -28,7 +28,7 @@ export interface RelatedAlertsBySessionProps {
   /**
    * Callback to open the alert preview
    */
-  onShowAlert: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string, title?: string) => void;
   /**
    * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
    */

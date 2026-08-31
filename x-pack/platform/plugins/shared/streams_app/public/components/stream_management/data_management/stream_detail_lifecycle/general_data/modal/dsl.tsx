@@ -38,10 +38,10 @@ export const DEFAULT_RETENTION_UNIT = { name: 'Days', value: 'd' };
 
 export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButtonDisabled }: Props) {
   const timeUnits = [
-    { name: 'Days', value: 'd' },
-    { name: 'Hours', value: 'h' },
-    { name: 'Minutes', value: 'm' },
     { name: 'Seconds', value: 's' },
+    { name: 'Minutes', value: 'm' },
+    { name: 'Hours', value: 'h' },
+    { name: 'Days', value: 'd' },
   ];
 
   const existingRetention = isDslLifecycle(initialValue)
@@ -96,6 +96,10 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
         isInvalid={invalidRetention}
         append={
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailLifecycle.retentionUnitOptionsAriaLabel',
+              { defaultMessage: 'Retention time unit options' }
+            )}
             isOpen={showUnitMenu}
             panelPaddingSize="none"
             closePopover={closeUnitMenu}

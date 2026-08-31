@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
+import type { Dispatch, MiddlewareAPI, PayloadAction } from 'redux-toolkit-v1';
 import moment from 'moment';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LensAppState, LensState, LensStoreDeps, DatasourceMap } from '@kbn/lens-common';

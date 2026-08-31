@@ -10,10 +10,7 @@ import { EbtTelemetryClient } from './client';
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
   STREAMS_STATE_ERROR_EVENT,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
-  STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
-  STREAMS_SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
 } from './constants';
 
 describe('EbtTelemetryClient', () => {
@@ -84,80 +81,6 @@ describe('EbtTelemetryClient', () => {
     });
   });
 
-  describe('trackDescriptionGenerated', () => {
-    it('tracks description generated events', () => {
-      client.trackDescriptionGenerated({
-        input_tokens_used: 200,
-        output_tokens_used: 100,
-        stream_name: 'test-stream',
-        stream_type: 'classic',
-      });
-
-      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
-        {
-          input_tokens_used: 200,
-          output_tokens_used: 100,
-          stream_name: 'test-stream',
-          stream_type: 'classic',
-        }
-      );
-    });
-  });
-
-  describe('trackSignificantEventsQueriesGenerated', () => {
-    it('tracks significant events queries generated events', () => {
-      client.trackSignificantEventsQueriesGenerated({
-        count: 5,
-        connector_id: 'test-connector',
-        input_tokens_used: 300,
-        output_tokens_used: 150,
-        cached_tokens_used: 20,
-        duration_ms: 1200,
-        stream_name: 'test-stream',
-        stream_type: 'wired',
-        tool_usage: {
-          get_stream_features: {
-            calls: 1,
-            failures: 0,
-            latency_ms: 100,
-          },
-          add_queries: {
-            calls: 1,
-            failures: 0,
-            latency_ms: 100,
-          },
-        },
-      });
-
-      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
-        {
-          count: 5,
-          connector_id: 'test-connector',
-          input_tokens_used: 300,
-          output_tokens_used: 150,
-          cached_tokens_used: 20,
-          duration_ms: 1200,
-          stream_name: 'test-stream',
-          stream_type: 'wired',
-          tool_usage: {
-            get_stream_features: {
-              calls: 1,
-              failures: 0,
-              latency_ms: 100,
-            },
-            add_queries: {
-              calls: 1,
-              failures: 0,
-              latency_ms: 100,
-            },
-          },
-        }
-      );
-    });
-  });
-
   describe('trackProcessingPipelineSuggested', () => {
     it('tracks processing pipeline suggested events on success', () => {
       client.trackProcessingPipelineSuggested({
@@ -218,35 +141,6 @@ describe('EbtTelemetryClient', () => {
           success: false,
           stream_name: 'logs-empty',
           stream_type: 'wired',
-        }
-      );
-    });
-  });
-
-  describe('trackSignificantEventsDetectionScan', () => {
-    it('tracks a detection change-point scan event', () => {
-      client.trackSignificantEventsDetectionScan({
-        took_ms: 42,
-        duration_ms: 120,
-        rules_scanned: 24,
-        alerting_engine: 'v2',
-        alerts_source_index: '.rule-events',
-        lookback: 'now-30m',
-        bucket_interval: '30s',
-        space_id: 'default',
-      });
-
-      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        STREAMS_SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
-        {
-          took_ms: 42,
-          duration_ms: 120,
-          rules_scanned: 24,
-          alerting_engine: 'v2',
-          alerts_source_index: '.rule-events',
-          lookback: 'now-30m',
-          bucket_interval: '30s',
-          space_id: 'default',
         }
       );
     });

@@ -199,6 +199,9 @@ export function HeaderActions({
         <EuiFlexItem>
           <EuiPopover
             id="contextRuleEditMenu"
+            aria-label={i18n.translate('xpack.observability.ruleDetails.actionsPopoverAriaLabel', {
+              defaultMessage: 'Rule actions',
+            })}
             panelPaddingSize="none"
             isOpen={isRuleEditPopoverOpen}
             closePopover={togglePopover}

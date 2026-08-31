@@ -39,7 +39,7 @@ async function fetchMapping(
   }
 }
 
-async function captureSystemIndex({
+async function captureDataStream({
   esClient,
   log,
   config,
@@ -120,23 +120,22 @@ export async function captureEnvSnapshot({
   });
 
   const runId = String(flags['run-id'] || moment().format('YYYY-MM-DD'));
-  const { snapshotName, systemIndices, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
+  const { snapshotName, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
 
   log.info(`Snapshot: ${snapshotName} | Run: ${runId} | ES: ${config.esUrl}`);
 
-  // All SigEvents data streams go through captureSystemIndex (reindex → snapshot-*).
+  // All SigEvents data streams are reindexed to snapshot-safe plain indices.
   // SIGEVENTS_OPTIONAL_STREAMS (discoveries/detections) are skipped silently when absent —
   // the user may have chosen not to run the discovery workflow.
-  const resolvedSystemIndices = await resolvePatterns(esClient, log, [
-    ...systemIndices,
+  const resolvedDataStreams = await resolvePatterns(esClient, log, [
     ...SIGNIFICANT_EVENTS_DATA_STREAMS,
   ]);
   const resolvedIndices = await resolvePatterns(esClient, log, [logsIndex, ...alertIndices]);
 
-  const capturedSystemIndices: string[] = [];
-  for (const idx of resolvedSystemIndices) {
+  const capturedDataStreams: string[] = [];
+  for (const idx of resolvedDataStreams) {
     const optional = (SIGEVENTS_OPTIONAL_STREAMS as readonly string[]).includes(idx);
-    const snapshotIndex = await captureSystemIndex({
+    const snapshotIndex = await captureDataStream({
       esClient,
       config,
       log,
@@ -144,11 +143,11 @@ export async function captureEnvSnapshot({
       optional,
     });
     if (snapshotIndex !== undefined) {
-      capturedSystemIndices.push(snapshotIndex);
+      capturedDataStreams.push(snapshotIndex);
     }
   }
 
-  const allSnapshotIndices = [...resolvedIndices, ...capturedSystemIndices].join(',');
+  const allSnapshotIndices = [...resolvedIndices, ...capturedDataStreams].join(',');
 
   await registerGcsRepository(esClient, log, runId);
   const actualIndices = await createSnapshot({

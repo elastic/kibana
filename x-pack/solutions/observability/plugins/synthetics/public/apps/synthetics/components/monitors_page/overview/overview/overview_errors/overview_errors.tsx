@@ -24,7 +24,7 @@ export function OverviewErrors() {
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
           <OverviewErrorsCount from={from} to={to} />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>

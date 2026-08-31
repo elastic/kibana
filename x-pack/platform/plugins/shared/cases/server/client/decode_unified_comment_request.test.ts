@@ -25,7 +25,17 @@ describe('decodeUnifiedCommentRequest', () => {
     );
   });
 
-  describe('when `schema` is set (preferred path)', () => {
+  it('throws a Boom badRequest when a registered type has no schema (runtime misuse)', () => {
+    const unifiedRegistry = new UnifiedAttachmentTypeRegistry();
+    // Simulate a type registered via `as any` that bypasses the required-schema type.
+    unifiedRegistry.register({ id: COMMENT_ATTACHMENT_TYPE } as never);
+
+    expect(() => decodeUnifiedCommentRequest({ ...validCommentPayload }, unifiedRegistry)).toThrow(
+      /Attachment type 'comment' does not define a schema/
+    );
+  });
+
+  describe('when `schema` is set', () => {
     it('accepts a valid payload', () => {
       const unifiedRegistry = new UnifiedAttachmentTypeRegistry();
       unifiedRegistry.register({
@@ -52,58 +62,5 @@ describe('decodeUnifiedCommentRequest', () => {
         )
       ).toThrow(/data\.content: Comment content must be a non-empty string/);
     });
-
-    it('prefers `schema` over a (legacy) `schemaValidator` when both are set', () => {
-      const unifiedRegistry = new UnifiedAttachmentTypeRegistry();
-      const legacyValidator = jest.fn();
-      unifiedRegistry.register({
-        id: COMMENT_ATTACHMENT_TYPE,
-        schema: CommentAttachmentPayloadSchema,
-        schemaValidator: legacyValidator,
-      });
-
-      decodeUnifiedCommentRequest({ ...validCommentPayload }, unifiedRegistry);
-
-      expect(legacyValidator).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('when only legacy `schemaValidator` is set (fallback path)', () => {
-    it('passes the `data` slice for unified value attachments', () => {
-      const unifiedRegistry = new UnifiedAttachmentTypeRegistry();
-      const schemaValidator = jest.fn();
-      unifiedRegistry.register({ id: COMMENT_ATTACHMENT_TYPE, schemaValidator });
-
-      decodeUnifiedCommentRequest({ ...validCommentPayload }, unifiedRegistry);
-
-      expect(schemaValidator).toHaveBeenCalledWith(validCommentPayload.data);
-    });
-
-    it('passes the `metadata` slice (or null) for unified reference attachments', () => {
-      const unifiedRegistry = new UnifiedAttachmentTypeRegistry();
-      const schemaValidator = jest.fn();
-      unifiedRegistry.register({ id: 'security.alert', schemaValidator });
-
-      decodeUnifiedCommentRequest(
-        {
-          type: 'security.alert',
-          owner: 'securitySolution',
-          attachmentId: 'alert-1',
-        },
-        unifiedRegistry
-      );
-
-      expect(schemaValidator).toHaveBeenCalledWith(null);
-    });
-  });
-
-  it('silently no-ops when neither `schema` nor `schemaValidator` is set', () => {
-    // Pre-existing behavior; the API path (`validateUnifiedRegisteredAttachments`) throws instead.
-    const unifiedRegistry = new UnifiedAttachmentTypeRegistry();
-    unifiedRegistry.register({ id: COMMENT_ATTACHMENT_TYPE });
-
-    expect(() =>
-      decodeUnifiedCommentRequest({ ...validCommentPayload }, unifiedRegistry)
-    ).not.toThrow();
   });
 });

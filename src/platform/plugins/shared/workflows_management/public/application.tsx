@@ -11,7 +11,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { QueryClientProvider } from '@kbn/react-query';
 import { WorkflowsUiServicesProvider } from '@kbn/workflows-ui';
 import { WorkflowsContextProvider } from './common/context';
@@ -23,10 +22,8 @@ export const renderApp = (
   services: WorkflowsServices,
   { history, element }: AppMountParameters
 ) => {
-  const { theme } = services;
-
   ReactDOM.render(
-    <KibanaThemeProvider theme={theme}>
+    services.rendering.addContext(
       <KibanaContextProvider services={services}>
         <QueryClientProvider client={queryClient}>
           <WorkflowsContextProvider>
@@ -36,7 +33,7 @@ export const renderApp = (
           </WorkflowsContextProvider>
         </QueryClientProvider>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    ),
     element
   );
 

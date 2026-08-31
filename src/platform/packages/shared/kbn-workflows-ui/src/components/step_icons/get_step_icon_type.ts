@@ -29,7 +29,10 @@ export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
 
 // Switch has good readability as it is
 // eslint-disable-next-line complexity
-export const getStepIconType = (nodeType: string): IconType => {
+export const getStepIconType = (type: string): IconType => {
+  // Strip a leading dot so callers can pass the raw step/connector type
+  // (e.g. ".slack", ".email") without a separate normalization step.
+  const nodeType = type.startsWith('.') ? type.slice(1) : type;
   let iconType: IconType = 'info';
 
   switch (nodeType) {
@@ -75,6 +78,9 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'waitForInput':
       iconType = 'user';
       break;
+    case 'waitForApproval':
+      iconType = 'user';
+      break;
     case 'enter-if':
     case 'exit-if':
     case 'enter-condition-branch':
@@ -95,13 +101,14 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'while-iteration':
       iconType = 'tokenNumber';
       break;
+    case 'merge':
+      iconType = HardcodedIcons.merge;
+      break;
     case 'parallel':
     case 'enter-parallel':
     case 'exit-parallel':
-      iconType = 'branch';
-      break;
     case 'parallel-branch':
-      iconType = 'branch';
+      iconType = HardcodedIcons.parallel;
       break;
     case 'loop.break':
     case 'loop.continue':

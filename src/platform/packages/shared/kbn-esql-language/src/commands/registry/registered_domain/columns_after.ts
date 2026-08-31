@@ -6,35 +6,25 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { LeafPrinter } from '@elastic/esql';
 import type { ESQLCommand, ESQLAstRegisteredDomainCommand } from '@elastic/esql/types';
-import type { SupportedDataType } from '../../definitions/types';
+import { Commands } from '../../definitions/keywords';
+import {
+  buildPrefixedColumns,
+  getColumnName,
+  getCommandOutputColumns,
+} from '../../definitions/utils/columns';
 import type { ESQLColumnData } from '../types';
-
-export const REGISTERED_DOMAIN_COLUMNS: Array<{ suffix: string; type: SupportedDataType }> = [
-  { suffix: 'domain', type: 'keyword' },
-  { suffix: 'registered_domain', type: 'keyword' },
-  { suffix: 'top_level_domain', type: 'keyword' },
-  { suffix: 'subdomain', type: 'keyword' },
-];
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[]
 ): ESQLColumnData[] => {
   const { targetField } = command as ESQLAstRegisteredDomainCommand;
+  const output = getCommandOutputColumns(Commands.REGISTERED_DOMAIN);
 
-  if (!targetField) {
+  if (!targetField || !output) {
     return previousColumns;
   }
 
-  const prefix = LeafPrinter.column(targetField);
-
-  const newColumns: ESQLColumnData[] = REGISTERED_DOMAIN_COLUMNS.map(({ suffix, type }) => ({
-    name: `${prefix}.${suffix}`,
-    type,
-    userDefined: false,
-  }));
-
-  return [...previousColumns, ...newColumns];
+  return [...previousColumns, ...buildPrefixedColumns(getColumnName(targetField), output)];
 };

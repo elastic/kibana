@@ -107,6 +107,30 @@ export type ApmOtelAttributes = {
     'attributes.status.code': number;
     'attributes.url.path': string;
     'attributes.url.scheme': string;
+    // GenAI semantic conventions (OTel)
+    'attributes.gen_ai.operation.name': string;
+    'attributes.gen_ai.system': string;
+    'attributes.gen_ai.request.model': string;
+    'attributes.gen_ai.response.model': string;
+    'attributes.gen_ai.usage.input_tokens': number;
+    'attributes.gen_ai.usage.output_tokens': number;
+    'attributes.gen_ai.request.temperature': number;
+    'attributes.gen_ai.request.top_p': number;
+    'attributes.gen_ai.request.top_k': number;
+    'attributes.gen_ai.request.max_tokens': number;
+    'attributes.gen_ai.request.seed': number;
+    'attributes.gen_ai.response.id': string;
+    'attributes.gen_ai.response.finish_reasons': string[];
+    // EDOT extensions for prompt/response capture.
+    // Messages are stored as an array of individually-serialized JSON message
+    // strings (one per message) so each element stays under the ES flattened
+    // ignore_above:1024 limit — a single JSON array blob would be silently
+    // dropped from the index.
+    'attributes.gen_ai.provider.name': string;
+    'attributes.gen_ai.input.messages': string | string[];
+    'attributes.gen_ai.output.messages': string | string[];
+    'attributes.gen_ai.system_instructions': string;
+    'attributes.gen_ai.conversation.id': string;
   };
 
 type MetricsAttributes = {

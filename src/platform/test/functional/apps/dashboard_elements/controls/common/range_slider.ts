@@ -30,6 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Range Slider Control';
 
+  /**
+   * Purpose: Range slider smoke test
+   *
+   * Migration: Migrate to scout
+   */
   describe('Range Slider Control', () => {
     before(async () => {
       await security.testUser.setRoles([

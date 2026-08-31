@@ -9,8 +9,12 @@ import { useInfiniteQuery } from '@kbn/react-query';
 import { useCallback, useMemo } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
+import type { ChangeHistoryPendingChange } from '../types/change_history_pending_change';
 import type { ListChangeHistoryResult } from '../types/list_change_history_params';
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
+import { prependChangeHistoryPendingChange } from '../utils/merge_change_history_pending_change';
+import { getChangeHistoryPendingChangeFingerprint } from '../utils/get_change_history_pending_change_fingerprint';
+import { resolveChangeHistoryPendingChange } from '../utils/resolve_change_history_pending_change';
 import { changeHistoryListQueryKey } from './change_history_list_query_key';
 
 export interface UseChangeHistoryListArgs {
@@ -23,6 +27,7 @@ export interface UseChangeHistoryListArgs {
 
 export interface UseChangeHistoryListResult {
   items: ChangeHistoryListItem[];
+  pendingChange?: ChangeHistoryPendingChange;
   total: number;
   isLoading: boolean;
   isFetching: boolean;
@@ -40,7 +45,7 @@ export const useChangeHistoryList = ({
   enabled = true,
   pageSize: pageSizeArg,
 }: UseChangeHistoryListArgs): UseChangeHistoryListResult => {
-  const { scope, listPageSize } = useChangeHistoryConfig();
+  const { scope, listPageSize, supports } = useChangeHistoryConfig();
   const pageSize = pageSizeArg ?? listPageSize;
   const {
     data,
@@ -82,6 +87,23 @@ export const useChangeHistoryList = ({
 
     return data.pages.flatMap((page) => page.items.map((item) => updates.get(item.id) ?? item));
   }, [data?.pages]);
+
+  const pendingChange = resolveChangeHistoryPendingChange(adapter, supports.unsavedChanges);
+  const pendingChangeFingerprint = getChangeHistoryPendingChangeFingerprint(pendingChange);
+
+  const itemsWithPendingChange = useMemo(() => {
+    if (!pendingChangeFingerprint) {
+      return items;
+    }
+
+    const pending = resolveChangeHistoryPendingChange(adapter, supports.unsavedChanges);
+    if (!pending) {
+      return items;
+    }
+
+    return prependChangeHistoryPendingChange(items, pending);
+  }, [adapter, items, pendingChangeFingerprint, supports.unsavedChanges]);
+
   const total = data?.pages[0]?.total ?? 0;
   const isFetchingFirstPage = isFetching && !isFetchingNextPage;
 
@@ -97,7 +119,8 @@ export const useChangeHistoryList = ({
   }, [refetchQuery]);
 
   return {
-    items,
+    items: itemsWithPendingChange,
+    pendingChange,
     total,
     isLoading,
     isFetching,

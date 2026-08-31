@@ -24,6 +24,7 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { ServiceToken } from '@kbn/core-di';
 import { Setup, Start } from '@kbn/core-di';
 import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
 
@@ -138,13 +139,13 @@ export class PluginWrapper<
 
     if (this.definition.module) {
       this.container = (setupContext as CoreSetup).injection.getContainer();
-      this.container.loadSync(this.definition.module);
-      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
+      this.container.load(this.definition.module);
+      this.container.load(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
     return [
       this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
-      this.container?.get<TSetup>(Setup),
+      this.container?.get(Setup as ServiceToken<TSetup>),
     ].find(Boolean)!;
   }
 
@@ -164,10 +165,10 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    this.container?.loadSync(createStartModule(startContext, plugins));
+    this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start),
+      this.container?.get(Start as ServiceToken<TStart>),
     ].find(Boolean)!;
 
     if (isPromise(contract)) {
@@ -191,7 +192,7 @@ export class PluginWrapper<
     }
 
     await this.instance?.stop?.();
-    await this.container?.unbindAll();
+    await this.container?.unbindAllAsync();
     this.instance = undefined;
     this.container = undefined;
   }

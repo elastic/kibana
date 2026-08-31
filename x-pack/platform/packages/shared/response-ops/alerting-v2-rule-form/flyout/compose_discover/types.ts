@@ -6,21 +6,21 @@
  */
 
 import type React from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import type { FormValues } from '../../form/types';
 import type { BuilderState } from './rule_builder/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
-export type RecoveryType = 'default' | 'custom';
+export type RecoveryType = 'default' | 'custom' | 'none';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
 export type StepId =
   | 'alertCondition'
   | 'builderCondition'
-  | 'recoveryCondition'
+  | 'outcome'
   | 'details'
   | 'notifications';
 
@@ -39,16 +39,19 @@ export interface StepRenderProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
+  onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   ruleId?: string;
   renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
-  /** Opts the user into manual split mode from the form (e.g. split-failed CTA). */
-  onManualSplit?: () => void;
 }
 
 export interface StepDefinition {
   id: StepId;
   title: string;
+  /** RHF field paths validated via `trigger()` when no custom `validate` is set. */
+  fields?: Array<FieldPath<FormValues>>;
+  /** UI-state precondition that must pass before field validation runs. */
+  meetsPrecondition?: (state: ComposeDiscoverState) => boolean;
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
     methods: UseFormReturn<FormValues>,
@@ -69,9 +72,8 @@ export interface StepDefinition {
  * mirrored here. Pass `isAlert` explicitly to any reducer action or helper that needs it.
  */
 export interface ComposeDiscoverState {
-  mode: ComposeDiscoverMode;
   step: number;
-  /** How recovery is detected. 'default' = invert alert block; 'custom' = separate recovery block. */
+  /** 'default' = no_breach; 'custom' = query; 'none' = no recovery (persists as 'none'). */
   recoveryType: RecoveryType;
   activeTab: QueryTab;
   childOpen: boolean;

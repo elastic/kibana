@@ -28,13 +28,11 @@ import React from 'react';
 import { paths } from '../../../constants';
 import { RuleActionsMenu } from '../../../pages/rules_list_page/rule_actions_menu';
 import { RuleProvider } from '../../rule_details/rule_context';
-import {
-  RuleHeaderDescription,
-  RuleTitleWithBadges,
-} from '../../rule_details/rule_header_description';
+import { RuleHeaderDescription, RuleTitleWithBadges } from '../../rule_details/rule_summary_header';
 import { RuleConditions } from '../../rule_details/sidebar/rule_conditions';
 import { RuleMetadata } from '../../rule_details/sidebar/rule_metadata';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { useRuleAutoAttach } from '../../../agent_builder/use_rule_auto_attach';
 
 const FLYOUT_TITLE_ID = 'ruleSummaryFlyoutTitle';
 
@@ -46,6 +44,9 @@ export interface RuleSummaryFlyoutProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  onRun: (rule: RuleApiResponse) => void;
+  onUpdateApiKey?: (rule: RuleApiResponse) => void;
+  canWrite?: boolean;
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
   hasAnimation?: EuiFlyoutProps['hasAnimation'];
@@ -59,11 +60,15 @@ export const RuleSummaryFlyout = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  onRun,
+  onUpdateApiKey,
+  canWrite = true,
   session,
   ownFocus = true,
   hasAnimation = true,
 }: RuleSummaryFlyoutProps) => {
   const { basePath } = useService(CoreStart('http'));
+  useRuleAutoAttach(rule);
   const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));
 
   return (
@@ -93,7 +98,7 @@ export const RuleSummaryFlyout = ({
             responsive={false}
             alignItems="center"
           >
-            {onQuickEdit && (
+            {canWrite && onQuickEdit && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
@@ -113,15 +118,20 @@ export const RuleSummaryFlyout = ({
                 </EuiToolTip>
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <RuleActionsMenu
-                rule={rule}
-                onEdit={onEdit}
-                onClone={onClone}
-                onDelete={onDelete}
-                onToggleEnabled={onToggleEnabled}
-              />
-            </EuiFlexItem>
+            {canWrite && (
+              <EuiFlexItem grow={false}>
+                <RuleActionsMenu
+                  rule={rule}
+                  canWrite={canWrite}
+                  onEdit={onEdit}
+                  onClone={onClone}
+                  onDelete={onDelete}
+                  onToggleEnabled={onToggleEnabled}
+                  onRun={onRun}
+                  onUpdateApiKey={onUpdateApiKey}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.close', {

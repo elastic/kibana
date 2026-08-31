@@ -8,7 +8,7 @@
 import type { DataViewsContract, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TextBasedPersistedState } from '@kbn/lens-common';
 import type { HttpStart } from '@kbn/core/public';
-import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import { getESQLTimeField, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import {
   ensureIndexPattern,
   ensureESQLTimeFieldOnAdHocDataViews,
@@ -20,11 +20,13 @@ import { sampleIndexPatterns, mockDataViewsService } from './mocks';
 import { documentField } from '../datasources/form_based/document_field';
 
 jest.mock('@kbn/esql-utils', () => ({
-  getESQLTimeFieldFromQuery: jest.fn(),
+  getESQLTimeField: jest.fn(),
+  getProjectRoutingFromEsqlQuery: jest.fn().mockReturnValue(undefined),
 }));
 
-const mockGetESQLTimeFieldFromQuery = getESQLTimeFieldFromQuery as jest.MockedFunction<
-  typeof getESQLTimeFieldFromQuery
+const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getESQLTimeField>;
+const mockGetProjectRoutingFromEsqlQuery = getProjectRoutingFromEsqlQuery as jest.MockedFunction<
+  typeof getProjectRoutingFromEsqlQuery
 >;
 
 describe('loader', () => {
@@ -364,7 +366,8 @@ describe('loader', () => {
     const mockDataViews = mockDataViewsService() as unknown as DataViewsContract;
 
     beforeEach(() => {
-      mockGetESQLTimeFieldFromQuery.mockReset();
+      mockGetESQLTimeField.mockReset();
+      mockGetProjectRoutingFromEsqlQuery.mockReset().mockReturnValue(undefined);
       (mockDataViews.clearInstanceCache as jest.Mock).mockClear();
     });
 
@@ -381,7 +384,7 @@ describe('loader', () => {
       });
 
       expect(result).toBe(adHocDataViews);
-      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(mockGetESQLTimeField).not.toHaveBeenCalled();
     });
 
     it('should return adHocDataViews unchanged when layers is empty', async () => {
@@ -397,7 +400,7 @@ describe('loader', () => {
       });
 
       expect(result).toEqual(adHocDataViews);
-      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(mockGetESQLTimeField).not.toHaveBeenCalled();
     });
 
     it('should skip layers without an ES|QL query', async () => {
@@ -416,7 +419,7 @@ describe('loader', () => {
       });
 
       expect(result).toEqual({});
-      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(mockGetESQLTimeField).not.toHaveBeenCalled();
     });
 
     it('should skip enrichment when the existing spec already has a timeFieldName', async () => {
@@ -437,7 +440,7 @@ describe('loader', () => {
       });
 
       expect(result).toEqual(adHocDataViews);
-      expect(mockGetESQLTimeFieldFromQuery).not.toHaveBeenCalled();
+      expect(mockGetESQLTimeField).not.toHaveBeenCalled();
       expect(mockDataViews.clearInstanceCache).not.toHaveBeenCalled();
     });
 
@@ -451,7 +454,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -460,9 +463,10 @@ describe('loader', () => {
         http: mockHttp,
       });
 
-      expect(mockGetESQLTimeFieldFromQuery).toHaveBeenCalledWith({
+      expect(mockGetESQLTimeField).toHaveBeenCalledWith({
         query: 'FROM logs-*',
         http: mockHttp,
+        projectRouting: undefined,
       });
       expect(result.dv1).toEqual({ id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' });
       expect(mockDataViews.clearInstanceCache).toHaveBeenCalledWith('dv1');
@@ -476,7 +480,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -501,7 +505,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -510,10 +514,11 @@ describe('loader', () => {
         http: mockHttp,
       });
 
-      expect(mockGetESQLTimeFieldFromQuery).toHaveBeenCalledTimes(1);
-      expect(mockGetESQLTimeFieldFromQuery).toHaveBeenCalledWith({
+      expect(mockGetESQLTimeField).toHaveBeenCalledTimes(1);
+      expect(mockGetESQLTimeField).toHaveBeenCalledWith({
         query: 'FROM metrics-*',
         http: mockHttp,
+        projectRouting: undefined,
       });
       expect(result.dv1).toEqual(adHocDataViews.dv1);
       expect(result.dv2.timeFieldName).toBe('@timestamp');
@@ -531,7 +536,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue('@timestamp');
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -554,7 +559,7 @@ describe('loader', () => {
         },
       } as unknown as TextBasedPersistedState;
 
-      mockGetESQLTimeFieldFromQuery.mockResolvedValue(undefined);
+      mockGetESQLTimeField.mockResolvedValue(undefined);
 
       const result = await ensureESQLTimeFieldOnAdHocDataViews({
         adHocDataViews,
@@ -565,6 +570,62 @@ describe('loader', () => {
 
       expect(result.dv1).toEqual({ id: 'dv1', title: 'logs-*' });
       expect(mockDataViews.clearInstanceCache).not.toHaveBeenCalled();
+    });
+
+    it('should forward picker projectRouting to the time field route', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
+
+      await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+        projectRouting: '_alias:*',
+      });
+
+      expect(mockGetESQLTimeField).toHaveBeenCalledWith({
+        query: 'FROM logs-*',
+        http: mockHttp,
+        projectRouting: '_alias:*',
+      });
+    });
+
+    it('should prefer SET project_routing in the query over the picker routing', async () => {
+      const query = 'SET project_routing = "_alias:linked"; FROM logs-*';
+      const adHocDataViews: Record<string, DataViewSpec> = {
+        dv1: { id: 'dv1', title: 'logs-*' },
+      };
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'dv1', query: { esql: query } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      mockGetProjectRoutingFromEsqlQuery.mockReturnValue('_alias:linked');
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
+
+      await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: mockDataViews,
+        http: mockHttp,
+        projectRouting: '_alias:_origin',
+      });
+
+      expect(mockGetESQLTimeField).toHaveBeenCalledWith({
+        query,
+        http: mockHttp,
+        projectRouting: '_alias:linked',
+      });
     });
   });
 });

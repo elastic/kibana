@@ -14,8 +14,6 @@ import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { buildFieldsTermAggregation } from '../../hosts/details/helpers';
 import { USER_FIELDS } from './helpers';
 
-const EUID_RUNTIME_FIELD = 'entity_id';
-
 export const buildObservedUserDetailsQuery = ({
   defaultIndex,
   userName,
@@ -46,9 +44,6 @@ export const buildObservedUserDetailsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    ...(entityStoreV2
-      ? { runtime_mappings: { [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping('user') } }
-      : {}),
     aggregations: {
       ...buildFieldsTermAggregation(USER_FIELDS),
     },

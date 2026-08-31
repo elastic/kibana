@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import { useFormContext } from 'react-hook-form';
 import { YamlRuleForm, type YamlRuleFormProps } from './yaml_rule_form';
 import { createFormWrapper, createMockServices } from '../test_utils';
@@ -118,7 +118,7 @@ describe('YamlRuleForm component', () => {
     // After Commit 1, YamlRuleForm no longer derives YAML from form context;
     // its parent (RuleFormContent) does. The "derive from form" behavior is
     // covered in rule_form.test.tsx.
-    const initialYaml = dump({
+    const initialYaml = stringify({
       kind: 'alert',
       metadata: { name: 'Initial Rule', enabled: true },
       query: { format: 'standalone', breach: 'FROM logs-*' },
@@ -159,7 +159,7 @@ describe('YamlRuleForm component', () => {
     const editor = screen.getByRole('textbox', { name: 'YAML Editor' });
 
     // Replace editor content with valid YAML
-    const validYaml = dump({
+    const validYaml = stringify({
       kind: 'alert',
       metadata: { name: 'Test Rule', enabled: true },
       time_field: '@timestamp',
@@ -241,7 +241,7 @@ describe('YamlRuleForm component', () => {
     };
 
     it('applies parsed YAML values to form state on valid blur', async () => {
-      const validYaml = dump({
+      const validYaml = stringify({
         kind: 'alert',
         metadata: { name: 'Blurred Name', enabled: true },
         time_field: '@timestamp',

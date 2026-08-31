@@ -53,8 +53,8 @@ jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 jest.mock('../../shared/hooks/use_navigate_to_session_view');
 jest.mock('../../shared/hooks/use_navigate_to_graph_visualization');
 
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,

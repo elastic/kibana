@@ -41,6 +41,21 @@ export const elasticModelIds = {
   RainbowSprinkles: 'rainbow-sprinkles',
 } as const;
 
+export interface CspRegion {
+  csp: string;
+  region: string;
+  geo?: string;
+  region_display_name?: string;
+}
+
+/** A region entry that carries only a geographic zone with no CSP/region detail. */
+export interface GeoOnlyRegion {
+  geo: string;
+}
+
+/** Union of all region entry shapes returned by the EIS metadata.regions field. */
+export type EisRegion = CspRegion | GeoOnlyRegion;
+
 export type EisInferenceEndpointMetadata = {
   heuristics?: {
     properties?: string[];
@@ -52,4 +67,6 @@ export type EisInferenceEndpointMetadata = {
     name?: string;
     model_creator?: string;
   } & Record<string, unknown>;
+  regions?: EisRegion[];
+  denied_by_region_policy?: boolean;
 } & Record<string, unknown>;

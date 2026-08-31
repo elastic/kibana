@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -36,7 +36,9 @@ import {
 import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
 import { useKibana } from '../../../common/lib/kibana';
+import { KibanaServices } from '../../../common/lib/kibana/services';
 import { TemplateSelector } from '../../create/templates';
+import { TemplateSelectorV2 } from './template_selector_v2';
 import type { CasesConfigurationUITemplate } from '../../../containers/types';
 import { getOwnerFromRuleConsumerProducer } from '../../../../common/utils/owner';
 import { getConfigurationByOwner } from '../../../containers/configure/utils';
@@ -96,6 +98,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     }
   }, [uiSettings]);
 
+  const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+
   const { timeWindow, reopenClosedCases, groupingBy, templateId } = useMemo(
     () =>
       actionParams.subActionParams ?? {
@@ -103,6 +107,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         reopenClosedCases: false,
         groupingBy: [],
         templateId: null,
+        templateVersion: null,
       },
     [actionParams.subActionParams]
   );
@@ -136,6 +141,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           reopenClosedCases: false,
           groupingBy: [],
           templateId: null,
+          templateVersion: null,
         },
         index
       );
@@ -174,6 +180,19 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       editSubActionProperty('groupingBy', optionsValue?.length ? [optionsValue[0].value] : []);
     },
     [editSubActionProperty]
+  );
+
+  /**
+   * EuiComboBox marks itself as invalid when the typed text does not resolve to a selected option,
+   * so the same condition drives the error message shown to the user.
+   */
+  const [groupingByInvalidSearch, setGroupingByInvalidSearch] = useState(false);
+
+  const onGroupingBySearchChange = useCallback(
+    (searchValue: string, hasMatchingOptions = false) => {
+      setGroupingByInvalidSearch(searchValue.length > 0 && !hasMatchingOptions);
+    },
+    []
   );
 
   const onChangeMaxCasesToOpend: React.ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -217,6 +236,27 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editSubActionProperty]
   );
 
+  const onV2TemplateChange = useCallback(
+    ({
+      templateId: newTemplateId,
+      templateVersion: newTemplateVersion,
+    }: {
+      templateId: string | null;
+      templateVersion: string | null;
+    }) => {
+      editAction(
+        'subActionParams',
+        {
+          ...actionParams.subActionParams,
+          templateId: newTemplateId,
+          templateVersion: newTemplateVersion,
+        },
+        index
+      );
+    },
+    [actionParams.subActionParams, editAction, index]
+  );
+
   const onAutoPushChange: React.EventHandler<React.ChangeEvent<HTMLInputElement>> = useCallback(
     (event) => {
       editSubActionProperty('autoPushCase', event.target.checked);
@@ -230,14 +270,25 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         data-test-subj="case-action-attack-discovery-tooltip"
         content={i18n.ATTACK_DISCOVERY_TEMPLATE_TOOLTIP}
       >
-        <TemplateSelector
-          key={currentConfiguration.id}
-          isLoading={isLoadingCaseConfiguration}
-          templates={[defaultTemplate, ...currentConfiguration.templates]}
-          onTemplateChange={onTemplateChange}
-          initialTemplate={selectedTemplate}
-          isDisabled={true}
-        />
+        {isTemplatesV2Enabled ? (
+          <TemplateSelectorV2
+            owner={owner}
+            templateId={templateId ?? null}
+            legacyTemplates={currentConfiguration.templates}
+            isLoading={isLoadingCaseConfiguration}
+            isDisabled={true}
+            onChange={onV2TemplateChange}
+          />
+        ) : (
+          <TemplateSelector
+            key={currentConfiguration.id}
+            isLoading={isLoadingCaseConfiguration}
+            templates={[defaultTemplate, ...currentConfiguration.templates]}
+            onTemplateChange={onTemplateChange}
+            initialTemplate={selectedTemplate}
+            isDisabled={true}
+          />
+        )}
       </EuiToolTip>
     );
   }
@@ -246,7 +297,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <EuiFormRow fullWidth label={i18n.GROUP_BY_ALERT} labelAppend={OptionalFieldLabel}>
+          <EuiFormRow
+            fullWidth
+            label={i18n.GROUP_BY_ALERT}
+            labelAppend={OptionalFieldLabel}
+            isInvalid={groupingByInvalidSearch}
+            error={groupingByInvalidSearch ? [i18n.GROUP_BY_ALERT_INVALID_FIELD_ERROR] : []}
+          >
             <EuiComboBox
               fullWidth
               isClearable={true}
@@ -254,8 +311,10 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
               data-test-subj="group-by-alert-field-combobox"
               isLoading={loadingAlertDataViews}
               isDisabled={loadingAlertDataViews}
+              isInvalid={groupingByInvalidSearch}
               options={options}
               onChange={onChangeComboBox}
+              onSearchChange={onGroupingBySearchChange}
               selectedOptions={selectedOptions}
             />
           </EuiFormRow>
@@ -314,15 +373,25 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={true}>
-          <TemplateSelector
-            key={currentConfiguration.id}
-            isLoading={isLoadingCaseConfiguration}
-            templates={[defaultTemplate, ...currentConfiguration.templates]}
-            onTemplateChange={onTemplateChange}
-            initialTemplate={selectedTemplate}
-          />
+          {isTemplatesV2Enabled ? (
+            <TemplateSelectorV2
+              owner={owner}
+              templateId={templateId ?? null}
+              legacyTemplates={currentConfiguration.templates}
+              isLoading={isLoadingCaseConfiguration}
+              onChange={onV2TemplateChange}
+            />
+          ) : (
+            <TemplateSelector
+              key={currentConfiguration.id}
+              isLoading={isLoadingCaseConfiguration}
+              templates={[defaultTemplate, ...currentConfiguration.templates]}
+              onTemplateChange={onTemplateChange}
+              initialTemplate={selectedTemplate}
+            />
+          )}
         </EuiFlexItem>
-        {selectedTemplateHasConnector ? (
+        {!isTemplatesV2Enabled && selectedTemplateHasConnector ? (
           <EuiFlexItem grow={true}>
             <EuiCheckbox
               id={`auto-push-case-${index}`}

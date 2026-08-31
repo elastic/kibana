@@ -59,9 +59,23 @@ steps:
 
   - key: verify-es-snapshot
     label: 'Verify ES Snapshot'
-    trigger: kibana-elasticsearch-snapshot-verify
-    async: true
-    soft_fail: true
     if: build.env("DRY_RUN") != "true"
-    build:
-      branch: $BRANCH
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    command: |
+      ES_SNAPSHOT_MANIFEST="$(buildkite-agent meta-data get es_snapshot_manifest)"
+
+      buildkite-agent pipeline upload << PIPELINE
+      steps:
+        - label: 'Verify ES Snapshot'
+          trigger: kibana-elasticsearch-snapshot-verify
+          async: true
+          soft_fail: true
+          build:
+            branch: '$BRANCH'
+            env:
+              ES_SNAPSHOT_MANIFEST: '$${ES_SNAPSHOT_MANIFEST}'
+      PIPELINE

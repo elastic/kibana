@@ -219,6 +219,7 @@ export function ThroughputChart({
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
                   element={APM_CHART_EBT_ELEMENTS.THROUGHPUT}
+                  anomaly={anomaly}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

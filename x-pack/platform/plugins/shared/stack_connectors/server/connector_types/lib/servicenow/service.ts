@@ -23,6 +23,7 @@ import type {
   GetApplicationInfoResponse,
   ServiceFactory,
   ExternalServiceParamsClose,
+  RequestContext,
 } from './types';
 
 import * as i18n from './translations';
@@ -31,9 +32,13 @@ import {
   getPushedDate,
   prepareIncident,
   throwIfAdditionalFieldsNotSupported,
+  createServiceNowApiError,
 } from './utils';
 
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
+
+const TABLE_GET: RequestContext = { endpoint: 'table', method: 'get' };
+const HEALTH_GET: RequestContext = { endpoint: 'health', method: 'get' };
 
 export const createExternalService: ServiceFactory = ({
   credentials,
@@ -76,6 +81,10 @@ export const createExternalService: ServiceFactory = ({
   const getVersionUrl = () => `${urlWithoutTrailingSlash}/api/${appScope}/elastic_api/health`;
 
   const useTableApi = !useImportAPI || usesTableApiConfigValue;
+  const updateIncidentContext: RequestContext = {
+    endpoint: useTableApi ? 'table' : 'import_set',
+    method: useTableApi ? 'patch' : 'post',
+  };
 
   const getCreateIncidentUrl = () => (useTableApi ? tableApiIncidentUrl : importSetTableUrl);
   const getUpdateIncidentUrl = (incidentId: string) =>
@@ -112,16 +121,21 @@ export const createExternalService: ServiceFactory = ({
     data: ImportSetApiResponse['result'][0]
   ): data is ImportSetApiResponseError['result'][0] => data.status === 'error';
 
-  const throwIfImportSetApiResponseIsAnError = (res: ImportSetApiResponse) => {
-    if (res.result.length === 0) {
-      throw new Error('Unexpected result');
+  const throwIfImportSetApiResponseIsAnError = (res: AxiosResponse<ImportSetApiResponse>) => {
+    if (res.data.result.length === 0) {
+      throw createServiceNowApiError('Unexpected result', {
+        status: res.status,
+        body: res.data,
+      });
     }
 
-    const data = res.result[0];
+    const data = res.data.result[0];
 
-    // Create ResponseError message?
     if (isImportSetApiResponseAnError(data)) {
-      throw new Error(data.error_message);
+      throw createServiceNowApiError(data.error_message, {
+        status: res.status,
+        body: res.data,
+      });
     }
   };
 
@@ -144,7 +158,7 @@ export const createExternalService: ServiceFactory = ({
 
       return { ...res.data.result };
     } catch (error) {
-      throw addServiceMessageToError(error, 'Unable to get application version');
+      throw addServiceMessageToError(error, 'Unable to get application version', HEALTH_GET);
     }
   };
 
@@ -176,7 +190,7 @@ export const createExternalService: ServiceFactory = ({
 
       return { ...res.data.result };
     } catch (error) {
-      throw addServiceMessageToError(error, `Unable to get incident with id ${id}`);
+      throw addServiceMessageToError(error, `Unable to get incident with id ${id}`, TABLE_GET);
     }
   };
 
@@ -194,7 +208,7 @@ export const createExternalService: ServiceFactory = ({
       checkInstance(res);
       return res.data.result.length > 0 ? { ...res.data.result } : undefined;
     } catch (error) {
-      throw addServiceMessageToError(error, 'Unable to find incidents by query');
+      throw addServiceMessageToError(error, 'Unable to find incidents by query', TABLE_GET);
     }
   };
 
@@ -218,7 +232,7 @@ export const createExternalService: ServiceFactory = ({
       checkInstance(res);
 
       if (!useTableApi) {
-        throwIfImportSetApiResponseIsAnError(res.data);
+        throwIfImportSetApiResponseIsAnError(res);
       }
 
       const incidentId = useTableApi ? res.data.result.sys_id : res.data.result[0].sys_id;
@@ -231,7 +245,10 @@ export const createExternalService: ServiceFactory = ({
         url: getIncidentViewURL(insertedIncident.sys_id),
       };
     } catch (error) {
-      throw addServiceMessageToError(error, 'Unable to create incident');
+      throw addServiceMessageToError(error, 'Unable to create incident', {
+        endpoint: useTableApi ? 'table' : 'import_set',
+        method: 'post',
+      });
     }
   };
 
@@ -244,7 +261,7 @@ export const createExternalService: ServiceFactory = ({
         axios: axiosInstance,
         url: getUpdateIncidentUrl(incidentId),
         // Import Set API supports only POST.
-        method: useTableApi ? 'patch' : 'post',
+        method: updateIncidentContext.method,
         logger,
         data: {
           ...prepareIncident(useTableApi, incident),
@@ -258,7 +275,7 @@ export const createExternalService: ServiceFactory = ({
       checkInstance(res);
 
       if (!useTableApi) {
-        throwIfImportSetApiResponseIsAnError(res.data);
+        throwIfImportSetApiResponseIsAnError(res);
       }
 
       const id = useTableApi ? res.data.result.sys_id : res.data.result[0].sys_id;
@@ -271,7 +288,11 @@ export const createExternalService: ServiceFactory = ({
         url: getIncidentViewURL(updatedIncident.sys_id),
       };
     } catch (error) {
-      throw addServiceMessageToError(error, `Unable to update incident with id ${incidentId}`);
+      throw addServiceMessageToError(
+        error,
+        `Unable to update incident with id ${incidentId}`,
+        updateIncidentContext
+      );
     }
   };
 
@@ -299,7 +320,8 @@ export const createExternalService: ServiceFactory = ({
     } catch (error) {
       throw addServiceMessageToError(
         error,
-        `Unable to get incident by correlation ID ${correlationId}`
+        `Unable to get incident by correlation ID ${correlationId}`,
+        TABLE_GET
       );
     }
   };
@@ -359,7 +381,7 @@ export const createExternalService: ServiceFactory = ({
         return null;
       }
 
-      throw addServiceMessageToError(error, 'Unable to close incident');
+      throw addServiceMessageToError(error, 'Unable to close incident', updateIncidentContext);
     }
   };
 
@@ -377,7 +399,7 @@ export const createExternalService: ServiceFactory = ({
 
       return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
-      throw addServiceMessageToError(error, 'Unable to get fields');
+      throw addServiceMessageToError(error, 'Unable to get fields', TABLE_GET);
     }
   };
 
@@ -393,7 +415,7 @@ export const createExternalService: ServiceFactory = ({
       checkInstance(res);
       return res.data.result;
     } catch (error) {
-      throw addServiceMessageToError(error, 'Unable to get choices');
+      throw addServiceMessageToError(error, 'Unable to get choices', TABLE_GET);
     }
   };
 

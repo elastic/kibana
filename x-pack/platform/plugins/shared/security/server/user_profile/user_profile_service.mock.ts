@@ -12,6 +12,7 @@ export const userProfileServiceMock = {
   createStart: (): jest.Mocked<UserProfileServiceStartInternal> => ({
     activate: jest.fn().mockReturnValue(userProfileMock.createWithSecurity()),
     getCurrent: jest.fn(),
+    getCurrentProfileId: jest.fn(),
     update: jest.fn(),
     suggest: jest.fn(),
     bulkGet: jest.fn(),

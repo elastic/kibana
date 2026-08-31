@@ -9,14 +9,27 @@
 
 import type { BehaviorSubject } from 'rxjs';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
 
+/**
+ * Prefix a variable name carries in an ES|QL query. Determined by the variable's
+ * {@link ESQLVariableType} — derive it with `getVariableNamePrefix` from `@kbn/esql-utils`
+ * rather than hardcoding a prefix.
+ */
 export enum VariableNamePrefix {
+  /** Column and function names, e.g. `STATS COUNT(??field)`. */
   IDENTIFIER = '??',
+  /** Literal values, e.g. `WHERE machine.os == ?os`. */
   VALUE = '?',
 }
 
+/**
+ * Kind of value an ES|QL variable holds. This also dictates the variable's prefix in a query:
+ * `FIELDS` and `FUNCTIONS` are identifiers and take `??`; everything else takes `?`.
+ * Using the wrong prefix makes Elasticsearch reject the query.
+ */
 export enum ESQLVariableType {
   TIME_LITERAL = 'time_literal',
   FIELDS = 'fields',
@@ -29,7 +42,6 @@ export enum ESQLVariableType {
  * - STATIC_VALUES: Static values that are not dependent on any query
  * - VALUES_FROM_QUERY: Values that are dependent on an ES|QL query
  */
-
 export enum EsqlControlType {
   STATIC_VALUES = 'STATIC_VALUES',
   VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
@@ -57,11 +69,11 @@ export const isQueryESQLControl = (control?: object): control is QueryESQLContro
   );
 };
 
-export interface ESQLControlVariable {
+export interface ESQLControlVariable extends SerializableRecord {
   key: string;
   value: string | number | (string | number)[];
   type: ESQLVariableType;
-  meta?: {
+  meta?: SerializableRecord & {
     // `controlledBy` is the ID of the control that publishes the variable
     controlledBy?: string;
     // `group` allows grouping of variables

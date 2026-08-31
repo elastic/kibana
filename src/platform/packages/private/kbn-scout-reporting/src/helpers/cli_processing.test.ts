@@ -69,7 +69,7 @@ describe('cli_processing', () => {
     it(`should throw error if command has less than 3 arguments`, () => {
       const argv = ['/usr/local/bin/node', 'node_modules/.bin/playwright'];
       expect(() => stripRunCommand(argv)).toThrow(
-        /Invalid command arguments: must include at least 'node scripts\/playwright test'/
+        /Invalid command arguments: expected 'node scripts\/playwright test'/
       );
     });
 
@@ -82,7 +82,7 @@ describe('cli_processing', () => {
         '--grep=@local-serverless-search',
       ];
       expect(() => stripRunCommand(argv)).toThrow(
-        /Invalid command structure: Expected "node <playwright_path> test" or "npx playwright test"/
+        /Invalid command arguments: expected 'node scripts\/playwright test'/
       );
     });
   });

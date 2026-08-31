@@ -41,3 +41,10 @@ export const CREATE_CUSTOM_JOB = i18n.translate(
     defaultMessage: 'Create custom job',
   }
 );
+
+export const JOBS_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.components.mlPopup.jobsTable.caption',
+  {
+    defaultMessage: 'ML jobs',
+  }
+);

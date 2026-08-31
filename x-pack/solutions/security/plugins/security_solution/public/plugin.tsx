@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
@@ -83,13 +84,17 @@ import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
   registerAttachmentUiDefinitions,
+  registerAiRuleCreationHandler,
   registerEntityAnalyticsDashboardAttachment,
+  registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
+  registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -101,6 +106,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private appUpdater$ = new Subject<AppUpdater>();
   private storage = new Storage(localStorage);
+  private saveRuleSub?: Subscription;
+  private saveRuleHandlerStopped = false;
 
   // Lazily instantiated dependencies
   private _subPlugins?: SubPlugins;
@@ -145,7 +152,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     if (workflowsExtensions) {
-      registerWorkflowSteps(workflowsExtensions, this.experimentalFeatures);
+      registerWorkflowSteps(workflowsExtensions);
+      registerSecurityWorkflowTriggers(workflowsExtensions);
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -296,11 +304,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
-    cases.attachmentFramework.registerUnified(getIndicatorAttachment());
-    cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
-    cases.attachmentFramework.registerUnified(getEventType());
-    cases.attachmentFramework.registerUnified(getSecurityAlertType());
-    cases.attachmentFramework.registerUnified(getTimelineAttachment());
+    cases.attachmentFramework.registerAttachment(getIndicatorAttachment());
+    cases.attachmentFramework.registerAttachment(getEndpointUnifiedAttachment());
+    cases.attachmentFramework.registerAttachment(getEventType());
+    cases.attachmentFramework.registerAttachment(getSecurityAlertType());
+    cases.attachmentFramework.registerAttachment(getTimelineAttachment());
 
     // Always register the entity attachment renderer so that attachments created
     // while the feature flag was enabled continue to display correctly after the
@@ -309,7 +317,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Lazily imported to keep the entity attachment module out of the page-load bundle.
     import('./cases/attachments/entity')
       .then(({ getEntityAttachment }) => {
-        cases.attachmentFramework.registerUnified(getEntityAttachment());
+        cases.attachmentFramework.registerAttachment(getEntityAttachment());
       })
       .catch((e) => {
         this.logger.error('Failed to register entity attachment type', e);
@@ -325,6 +333,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
+    if (this.experimentalFeatures.aiRuleCreationEnabled) {
+      registerAiRuleCreationHandler({
+        aiRuleCreation: this.services.aiRuleCreation,
+        notifications: core.notifications,
+        agentBuilder: plugins.agentBuilder,
+        register: (subscription) => {
+          if (this.saveRuleHandlerStopped) {
+            subscription.unsubscribe();
+            return;
+          }
+          this.saveRuleSub = subscription;
+        },
+      });
+    }
+
     if (plugins.agentBuilder?.attachments) {
       const coreSetup = this._coreSetup;
       if (!coreSetup) {
@@ -332,19 +355,44 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
-      registerRuleAttachment({
-        attachments: plugins.agentBuilder.attachments,
-        application: core.application,
-        aiRuleCreation: this.services.aiRuleCreation,
-        uiSettings: core.uiSettings,
-      });
+      if (this.experimentalFeatures.aiRuleCreationEnabled) {
+        registerRuleAttachment({
+          attachments: plugins.agentBuilder.attachments,
+          application: core.application,
+          aiRuleCreation: this.services.aiRuleCreation,
+          uiSettings: core.uiSettings,
+        });
+      }
       registerEntityAnalyticsDashboardAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
+        experimentalFeatures: this.experimentalFeatures,
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
       });
+      registerEntityGraphAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        http: core.http,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        searchSession: plugins.data.search.session,
+        experimentalFeatures: this.experimentalFeatures,
+        uiSettings: core.uiSettings,
+      });
+      if (this.experimentalFeatures.riskScoreHistoryEnabled) {
+        registerEntityRiskScoreHistoryAttachment({
+          attachments: plugins.agentBuilder.attachments,
+          application: core.application,
+          agentBuilder: plugins.agentBuilder,
+          chrome: core.chrome,
+          experimentalFeatures: this.experimentalFeatures,
+          searchSession: plugins.data.search.session,
+          uiSettings: core.uiSettings,
+        });
+      }
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
@@ -354,6 +402,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({
@@ -373,6 +422,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public stop() {
+    this.saveRuleHandlerStopped = true;
+    this.saveRuleSub?.unsubscribe();
     this.services.stop();
   }
 
@@ -646,7 +697,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
       id: 'security-solution-attack-flyout-overview-tab',
-      render: ({ hit }) => {
+      render: ({ hit, onAttackUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -656,6 +707,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               hit={hit}
               servicesPromise={servicesPromise}
               storePromise={storePromise}
+              onAttackUpdated={onAttackUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
           </React.Suspense>
         );

@@ -16,7 +16,7 @@ import type {
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
-  CasesFindResponse,
+  CasesSearchResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   SingleCaseMetricsResponse,
@@ -111,7 +111,7 @@ import {
   constructCustomFieldsFilter,
   decodeFindAllAttachedAlertsResponse,
 } from './utils';
-import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import { decodeCasesSearchResponse, decodeCasesSimilarResponse } from '../api/decoders';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 
 export const resolveCase = async ({
@@ -341,7 +341,7 @@ export const getCases = async ({
     ...queryParams,
   };
 
-  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(
+  const response = await KibanaServices.get().http.fetch<CasesSearchResponse>(
     `${CASES_INTERNAL_URL}/_search`,
     {
       method: 'POST',
@@ -350,7 +350,7 @@ export const getCases = async ({
     }
   );
 
-  return convertAllCasesToCamel(decodeCasesFindResponse(response));
+  return convertAllCasesToCamel(decodeCasesSearchResponse(response));
 };
 
 export const postCase = async ({
