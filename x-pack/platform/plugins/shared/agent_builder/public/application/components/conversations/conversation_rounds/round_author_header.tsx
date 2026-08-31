@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConversationOriginType, type ConversationRoundOrigin } from '@kbn/agent-builder-common';
@@ -37,6 +38,13 @@ const formatRoundTime = (startedAt: string): string => {
 };
 
 const RoundAuthorName: React.FC<{ name?: string }> = ({ name }) => <strong>{name}</strong>;
+
+const roundAuthorDetailItemStyles = ({ euiTheme }: UseEuiTheme) => css`
+  display: inline-flex;
+  align-items: center;
+  gap: ${euiTheme.size.xs};
+  color: ${euiTheme.colors.textSubdued};
+`;
 
 const RoundAuthorSeparator: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -72,17 +80,10 @@ const RoundAgentBadge: React.FC = () => {
 };
 
 const RoundOrigin: React.FC<{ origin: ConversationRoundOrigin }> = ({ origin }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
 
   return (
-    <span
-      css={css`
-        display: inline-flex;
-        align-items: center;
-        gap: ${euiTheme.size.xs};
-        color: ${euiTheme.colors.textSubdued};
-      `}
-    >
+    <span css={roundAuthorDetailItemStyles(euiThemeContext)}>
       {origin.type === ConversationOriginType.Slack && (
         <>
           <EuiIcon type="logoSlack" size="s" aria-hidden={true} />
@@ -94,20 +95,9 @@ const RoundOrigin: React.FC<{ origin: ConversationRoundOrigin }> = ({ origin }) 
 };
 
 const RoundTime: React.FC<{ time: string }> = ({ time }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
 
-  return (
-    <span
-      css={css`
-        display: inline-flex;
-        align-items: center;
-        gap: ${euiTheme.size.xs};
-        color: ${euiTheme.colors.textSubdued};
-      `}
-    >
-      {time}
-    </span>
-  );
+  return <span css={roundAuthorDetailItemStyles(euiThemeContext)}>{time}</span>;
 };
 
 interface RoundAuthorHeaderProps {
