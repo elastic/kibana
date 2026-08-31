@@ -113,11 +113,16 @@ steps:
     with:
       input: 'Hi there! Are you alive?'
 
+  - name: set_channel_variable_step
+    type: data.set
+    with:
+      channel: '#one-workflow'
+
   - name: step2
     type: ${FakeConnectors.slack1.actionTypeId}
     connector-id: ${FakeConnectors.slack1.name}
     with:
-      message: 'Inference result: {{steps.step1.output[0].result}}'
+      message: 'Inference result: {{steps.step1.output[0].result}}; Channel: {{variables.channel}}'
 
   - name: step3
     type: ${FakeConnectors.slack1.actionTypeId}
@@ -131,6 +136,9 @@ steps:
             step1: {
               output: [{ result: 'I am alive!' }],
             },
+          },
+          variables: {
+            channel: '#one-workflow',
           },
         },
       });
@@ -159,61 +167,7 @@ steps:
         expect.objectContaining({
           id: FakeConnectors.slack1.id,
           params: {
-            message: `Inference result: I am alive!`,
-          },
-        })
-      );
-    });
-  });
-
-  describe('atomic step reading variables', () => {
-    beforeAll(async () => {
-      await workflowRunFixture.runSingleStep({
-        workflowYaml: `
-steps:
-  - name: setChannelStep
-    type: data.set
-    with:
-      channel: '#one-workflow'
-
-  - name: printChannelStep
-    type: ${FakeConnectors.slack1.actionTypeId}
-    connector-id: ${FakeConnectors.slack1.name}
-    with:
-      message: 'Channel: {{variables.channel}}'
-          `,
-        stepId: 'printChannelStep',
-        contextOverride: {
-          variables: {
-            channel: '#one-workflow',
-          },
-        },
-      });
-    });
-
-    it('should run atomic step successfully', () => {
-      const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
-          'fake_workflow_execution_id'
-        );
-      expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(workflowExecutionDoc?.error).toBe(undefined);
-    });
-
-    it('should execute only the requested step', () => {
-      const stepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-      );
-      expect(stepExecutions.length).toBe(1);
-      expect(stepExecutions[0].stepId).toBe('printChannelStep');
-    });
-
-    it('should call the connector with variables from the overriden context', () => {
-      expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: FakeConnectors.slack1.id,
-          params: {
-            message: `Channel: #one-workflow`,
+            message: `Inference result: I am alive!; Channel: #one-workflow`,
           },
         })
       );
