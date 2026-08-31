@@ -352,7 +352,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               agent && <RoundAuthorAvatar agent={agent} />
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="agentBuilderRoundAgentContent">
+          <EuiFlexItem grow={true} data-test-subj="agentBuilderRoundAgentContent">
             <EuiFlexGroup direction="column" gutterSize="s">
               {agent && (
                 <EuiFlexItem grow={false}>
