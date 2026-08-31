@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PND_ATTACK_DISCOVERY_FP_TP_WORKFLOW_ID } from './attack_discovery_fp_tp';
 import {
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
@@ -18,6 +19,10 @@ import { PND_WATCH_DETECTION_WORKFLOW_ID } from './watch_detection';
 import { PND_WATCH_FLOOR_WORKFLOW_ID } from './watch_floor';
 import { PND_WATCH_OFFICER_WORKFLOW_ID } from './watch_officer';
 
+export {
+  PND_ATTACK_DISCOVERY_FP_TP_WORKFLOW,
+  PND_ATTACK_DISCOVERY_FP_TP_WORKFLOW_ID,
+} from './attack_discovery_fp_tp';
 export {
   PND_RULE_CREATION_WORKFLOW,
   PND_RULE_CREATION_WORKFLOW_ID,
@@ -45,3 +50,5 @@ export const PND_RULE_WORKFLOW_IDS = [
   PND_RULE_TUNING_WORKFLOW_ID,
   PND_RULE_CREATION_WORKFLOW_ID,
 ] as const;
+
+export const PND_ANALYSIS_WORKFLOW_IDS = [PND_ATTACK_DISCOVERY_FP_TP_WORKFLOW_ID] as const;

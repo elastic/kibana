@@ -25,3 +25,9 @@ export {
   getMockProposalById,
   getMockProposalsByInvestigationId,
 } from './proposals';
+
+export {
+  MOCK_FP_TP_FAILURE,
+  MOCK_FP_TP_INCONCLUSIVE_RESULT,
+  MOCK_FP_TP_TRUE_POSITIVE_RESULT,
+} from './fp_tp_analysis';

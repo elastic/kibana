@@ -6,6 +6,9 @@
  */
 
 import {
+  MOCK_FP_TP_FAILURE,
+  MOCK_FP_TP_INCONCLUSIVE_RESULT,
+  MOCK_FP_TP_TRUE_POSITIVE_RESULT,
   MOCK_INVESTIGATIONS,
   MOCK_PROPOSALS,
   SKILLS_SEED,
@@ -14,6 +17,8 @@ import {
 } from '../samples';
 import type { Investigation, Proposal, Watch } from '.';
 import {
+  FpTpFailure,
+  FpTpResult,
   GetInvestigationResponse,
   GetWatchResponse,
   ListInvestigationProposalsResponse,
@@ -106,5 +111,29 @@ describe('PND schema smoke tests', () => {
     const investigation = MOCK_INVESTIGATIONS[0];
     const result = GetInvestigationResponse.parse({ investigation });
     expect(result.investigation.id).toBe(investigation.id);
+  });
+
+  it('parses a true-positive FP/TP result through FpTpResult', () => {
+    const result = FpTpResult.parse(MOCK_FP_TP_TRUE_POSITIVE_RESULT);
+    expect(result.classification).toBe('true_positive');
+  });
+
+  it('parses an inconclusive FP/TP result through FpTpResult', () => {
+    const result = FpTpResult.parse(MOCK_FP_TP_INCONCLUSIVE_RESULT);
+    expect(result.classification).toBe('inconclusive');
+  });
+
+  it('parses an operational failure through FpTpFailure', () => {
+    const result = FpTpFailure.parse(MOCK_FP_TP_FAILURE);
+    expect(result.status).toBe('failed');
+  });
+
+  it('rejects a failed payload that also carries a classification', () => {
+    expect(() =>
+      FpTpFailure.parse({
+        ...MOCK_FP_TP_FAILURE,
+        classification: 'false_positive',
+      })
+    ).toThrow();
   });
 });

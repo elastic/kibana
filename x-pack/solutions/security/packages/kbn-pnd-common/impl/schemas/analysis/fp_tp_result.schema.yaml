@@ -1,0 +1,148 @@
+openapi: 3.0.0
+info:
+  title: PND Attack Discovery FP/TP analysis result schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    FpTpClassification:
+      type: string
+      enum: [true_positive, false_positive, inconclusive]
+      description: Completed analysis classification. Distinct from operational failure.
+
+    FpTpEvidenceResult:
+      type: string
+      enum: [supports, contradicts, neutral]
+      description: How a corroborating evidence item relates to the classification.
+
+    FpTpCheckStatus:
+      type: string
+      enum: [completed, skipped, failed]
+      description: Outcome of a configured corroboration check.
+
+    FpTpCorroboratingEvidence:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - source
+        - result
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        source:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Evidence source (e.g. attack_discovery, related_alerts)
+        result:
+          $ref: '#/components/schemas/FpTpEvidenceResult'
+        details:
+          type: string
+          maxLength: 4000
+
+    FpTpCheck:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        name:
+          type: string
+          maxLength: 256
+        status:
+          $ref: '#/components/schemas/FpTpCheckStatus'
+        details:
+          type: string
+          maxLength: 4000
+          description: Why the check completed, was skipped, or failed.
+
+    FpTpAnalysisMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - workflow_id
+        - workflow_execution_id
+        - configuration_version
+        - completed_at
+      properties:
+        workflow_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        workflow_execution_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        configuration_version:
+          type: string
+          minLength: 1
+          maxLength: 64
+        completed_at:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: ISO 8601 timestamp when analysis finished
+
+    FpTpResult:
+      type: object
+      additionalProperties: false
+      required:
+        - schema_version
+        - attack_discovery_id
+        - investigation_id
+        - classification
+        - summary
+        - reasoning
+        - corroborating_evidence
+        - caveats
+        - checks
+        - analysis_metadata
+      properties:
+        schema_version:
+          type: string
+          enum: ['1']
+        attack_discovery_id:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        investigation_id:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        classification:
+          $ref: '#/components/schemas/FpTpClassification'
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 8000
+        reasoning:
+          type: string
+          minLength: 1
+          maxLength: 16000
+        corroborating_evidence:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/FpTpCorroboratingEvidence'
+        caveats:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            maxLength: 2000
+        checks:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/FpTpCheck'
+        analysis_metadata:
+          $ref: '#/components/schemas/FpTpAnalysisMetadata'

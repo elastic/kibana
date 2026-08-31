@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  PND_ANALYSIS_WORKFLOW_IDS,
   PND_MANAGED_WATCH_WORKFLOW_IDS,
   PND_WATCH_FLOOR_WORKFLOW_ID,
   PND_RULE_WORKFLOW_IDS,
@@ -34,12 +35,15 @@ const createDependencies = () => {
 };
 
 describe('initializeManagedWorkflows', () => {
-  it('installs only global rule workflows before reconciliation', async () => {
+  it('installs only global rule and analysis workflows before reconciliation', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.install.mock.calls.map(([id]) => id)).toEqual(PND_RULE_WORKFLOW_IDS);
+    expect(client.install.mock.calls.map(([id]) => id)).toEqual([
+      ...PND_RULE_WORKFLOW_IDS,
+      ...PND_ANALYSIS_WORKFLOW_IDS,
+    ]);
     expect(client.install).not.toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ workflowIdSuffix: expect.any(String) })
@@ -135,6 +139,22 @@ describe('initializeManagedWorkflows', () => {
     );
   });
 
+  it('does not reconcile when a required analysis workflow install fails', async () => {
+    const { client, workflowsExtensions, logger } = createDependencies();
+    client.install.mockImplementation(async (id: string) => {
+      if (id === PND_ANALYSIS_WORKFLOW_IDS[0]) {
+        throw new Error('analysis workflow install failed');
+      }
+    });
+
+    await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+    expect(client.ready).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('analysis workflow install failed')
+    );
+  });
+
   it('does not reconcile when persisted settings cannot be migrated', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
     client.listInstalledWorkflowStates = jest.fn(async () => [
@@ -177,7 +197,10 @@ describe('initializeManagedWorkflows', () => {
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.install.mock.calls.map(([id]) => id)).toEqual(PND_RULE_WORKFLOW_IDS);
+    expect(client.install.mock.calls.map(([id]) => id)).toEqual([
+      ...PND_RULE_WORKFLOW_IDS,
+      ...PND_ANALYSIS_WORKFLOW_IDS,
+    ]);
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 

@@ -98,6 +98,15 @@ export {
   WatchWorkerAttachment,
   WorkerRunState,
   WorkflowTriggerType,
+  FpTpAnalysisMetadata,
+  FpTpCheck,
+  FpTpCheckStatus,
+  FpTpClassification,
+  FpTpCorroboratingEvidence,
+  FpTpEvidenceResult,
+  FpTpFailure,
+  FpTpFailureError,
+  FpTpResult,
   type TimelineEvent,
 } from './impl/schemas';
 
@@ -115,6 +124,9 @@ export type {
 
 export {
   MOCK_CLEAN_RUN_NOTE,
+  MOCK_FP_TP_FAILURE,
+  MOCK_FP_TP_INCONCLUSIVE_RESULT,
+  MOCK_FP_TP_TRUE_POSITIVE_RESULT,
   MOCK_INVESTIGATIONS,
   MOCK_PROPOSALS,
   SKILLS_SEED,
