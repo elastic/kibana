@@ -93,6 +93,36 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   ? TimelineEqlResponse
   : TimelineEventsAllStrategyResponse;
 
+/**
+ * Raw response fields that signal incomplete results. EQL reports dropped shards in
+ * `shard_failures` and leaves `is_partial` false once the async search finishes, so
+ * `isPartial` alone misses timed-out or failed shards.
+ */
+interface PartialResultsRawResponse {
+  timed_out?: boolean;
+  _shards?: { failed?: number };
+  shard_failures?: unknown[];
+}
+
+const isPartialResult = (
+  isPartial: boolean | undefined,
+  rawResponse: PartialResultsRawResponse | undefined
+): boolean => {
+  if (isPartial === true) {
+    return true;
+  }
+  if (rawResponse == null) {
+    return false;
+  }
+  if (rawResponse.timed_out === true) {
+    return true;
+  }
+  if (Array.isArray(rawResponse.shard_failures) && rawResponse.shard_failures.length > 0) {
+    return true;
+  }
+  return typeof rawResponse._shards?.failed === 'number' && rawResponse._shards.failed > 0;
+};
+
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
   endDate?: string;
@@ -294,7 +324,10 @@ export const useTimelineEventsHandler = ({
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
                     refreshedAt: Date.now(),
-                    isPartial: response.isPartial === true,
+                    isPartial: isPartialResult(
+                      response.isPartial,
+                      response.rawResponse as PartialResultsRawResponse | undefined
+                    ),
                   };
                   if (id === TimelineId.active) {
                     activeTimeline.setPageName(pageName);

@@ -367,6 +367,63 @@ describe('useTimelineEventsHandler', () => {
 
       expect(result.current[1].isPartial).toEqual(true);
     });
+
+    it('returns isPartial true when the completed EQL response reports shard failures', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: { securitySolutionTimeline: { crud: true } },
+          },
+          data: {
+            search: {
+              search: () => ({
+                subscribe: jest.fn().mockImplementation(({ next }) => {
+                  const requestTimeout = setTimeout(() => {
+                    next({
+                      isRunning: false,
+                      isPartial: false,
+                      inspect: { dsl: [], response: [] },
+                      edges: [],
+                      pageInfo: { activePage: 0, querySize: 25 },
+                      rawResponse: {
+                        is_partial: false,
+                        is_running: false,
+                        timed_out: false,
+                        shard_failures: [
+                          { shard: 0, index: 'logs-test', reason: { type: 'script_exception' } },
+                        ],
+                      },
+                      totalCount: 1,
+                    });
+                  }, 50);
+                  return {
+                    unsubscribe: () => {
+                      clearTimeout(requestTimeout);
+                    },
+                  };
+                }),
+              }),
+              showError: jest.fn(),
+            },
+          },
+        },
+      });
+
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
+      });
+
+      expect(result.current[1].isPartial).toEqual(true);
+    });
   });
 
   describe('error/invalid states', () => {
