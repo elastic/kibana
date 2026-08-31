@@ -67,7 +67,7 @@ export const generateWorkflow = async ({
       const lastAgentStep = findLastAgentStep(out.actions);
       const response = lastAgentStep?.text ?? '';
 
-      return { workflow: out.validation.parsedWorkflow, response };
+      return { workflow: out.validation.parsedWorkflow, yaml: out.yaml, response };
     }
   );
 };

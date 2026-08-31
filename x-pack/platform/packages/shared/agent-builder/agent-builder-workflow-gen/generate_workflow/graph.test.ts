@@ -66,6 +66,7 @@ steps:
     });
 
     expect(result.workflow.name).toBe('hello world');
+    expect(result.yaml).toBe(VALID_YAML);
   });
 
   it('retries once when validation fails and succeeds on second attempt', async () => {
