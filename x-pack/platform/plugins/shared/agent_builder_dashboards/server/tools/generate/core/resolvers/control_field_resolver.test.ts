@@ -5,66 +5,37 @@
  * 2.0.
  */
 
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { ToolResultStore } from '@kbn/agent-builder-server';
+import { getIndexFields } from '@kbn/agent-builder-genai-utils';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createControlFieldResolver } from './control_field_resolver';
 
-const sampleLogsFieldsText = '- host [text]\n- host.keyword [keyword]';
+jest.mock('@kbn/agent-builder-genai-utils');
 
-const createResultStore = ({
-  resources,
-}: {
-  resources?: Record<string, unknown>;
-} = {}): Pick<ToolResultStore, 'listEntries' | 'getEntry'> => {
-  const dir = '/platform_core_get_index_mapping_call-1';
-  return {
-    listEntries: jest.fn(async (dirPath: string) => {
-      if (resources === undefined || dirPath !== '/') {
-        return [];
-      }
-      return [{ type: 'dir' as const, path: dir }];
-    }),
-    getEntry: jest.fn(async (path: string) => {
-      if (path === `${dir}/meta.json`) {
-        return {
-          path,
-          type: 'file' as const,
-          content: {
-            raw: {
-              tool_id: platformCoreTools.getIndexMapping,
-              results: [{ file: 'result.json' }],
-            },
-          },
-          metadata: {} as never,
-        };
-      }
-      if (path === `${dir}/result.json`) {
-        return {
-          path,
-          type: 'file' as const,
-          content: { raw: { resources } },
-          metadata: {} as never,
-        };
-      }
-      return undefined;
-    }),
-  };
+const getIndexFieldsMock = getIndexFields as jest.MockedFunction<typeof getIndexFields>;
+
+const sampleLogsFields = {
+  type: 'index' as const,
+  fields: [
+    { path: 'host', type: 'text', meta: {} },
+    { path: 'host.keyword', type: 'keyword', meta: {} },
+  ],
 };
 
 describe('createControlFieldResolver', () => {
-  it('rewrites a text field using a prior get_index_mapping result', async () => {
-    const resolve = createControlFieldResolver({
-      resultStore: createResultStore({
-        resources: {
-          kibana_sample_data_logs: {
-            type: 'index',
-            fields: sampleLogsFieldsText,
-          },
-        },
-      }),
-      logger: loggerMock.create(),
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const logger = loggerMock.create();
+
+  beforeEach(() => {
+    getIndexFieldsMock.mockReset();
+  });
+
+  it('rewrites a text field to its keyword sibling', async () => {
+    getIndexFieldsMock.mockResolvedValue({
+      kibana_sample_data_logs: sampleLogsFields,
     });
+
+    const resolve = createControlFieldResolver({ esClient, logger });
 
     await expect(resolve({ fieldName: 'host', index: 'kibana_sample_data_logs' })).resolves.toEqual(
       {
@@ -73,18 +44,12 @@ describe('createControlFieldResolver', () => {
     );
   });
 
-  it('rejects an unknown field after looking up the mapping', async () => {
-    const resolve = createControlFieldResolver({
-      resultStore: createResultStore({
-        resources: {
-          kibana_sample_data_logs: {
-            type: 'index',
-            fields: sampleLogsFieldsText,
-          },
-        },
-      }),
-      logger: loggerMock.create(),
+  it('rejects an unknown field', async () => {
+    getIndexFieldsMock.mockResolvedValue({
+      kibana_sample_data_logs: sampleLogsFields,
     });
+
+    const resolve = createControlFieldResolver({ esClient, logger });
 
     await expect(
       resolve({ fieldName: 'method', index: 'kibana_sample_data_logs' })
@@ -93,34 +58,30 @@ describe('createControlFieldResolver', () => {
     });
   });
 
-  it('reuses one mapping load for multiple fields on the same index', async () => {
-    const resultStore = createResultStore({
-      resources: {
-        kibana_sample_data_logs: {
-          type: 'index',
-          fields: sampleLogsFieldsText,
-        },
-      },
+  it('fetches once for multiple fields on the same index', async () => {
+    getIndexFieldsMock.mockResolvedValue({
+      kibana_sample_data_logs: sampleLogsFields,
     });
-    const resolve = createControlFieldResolver({
-      resultStore,
-      logger: loggerMock.create(),
-    });
+
+    const resolve = createControlFieldResolver({ esClient, logger });
 
     await resolve({ fieldName: 'host', index: 'kibana_sample_data_logs' });
     await resolve({ fieldName: 'method', index: 'kibana_sample_data_logs' });
 
-    expect(resultStore.listEntries).toHaveBeenCalledTimes(1);
+    expect(getIndexFieldsMock).toHaveBeenCalledTimes(1);
+    expect(getIndexFieldsMock).toHaveBeenCalledWith({
+      indices: ['kibana_sample_data_logs'],
+      esClient,
+    });
   });
 
-  it('passes the field through when no get_index_mapping result covers the index', async () => {
-    const resolve = createControlFieldResolver({
-      resultStore: createResultStore(),
-      logger: loggerMock.create(),
-    });
+  it('returns an error when the mapping fetch fails', async () => {
+    getIndexFieldsMock.mockRejectedValue(new Error('index_not_found_exception'));
+
+    const resolve = createControlFieldResolver({ esClient, logger });
 
     await expect(resolve({ fieldName: 'host', index: 'missing-*' })).resolves.toEqual({
-      fieldName: 'host',
+      error: 'Could not load mapping for index "missing-*": index_not_found_exception',
     });
   });
 });

@@ -36,7 +36,7 @@ interface ExecuteDashboardOperationsParams {
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
  * reads any store. Control field names are checked via `resolveControlField`
- * (prior get_index_mapping tool results) when the host provides it.
+ * when the host provides it.
  */
 export const executeDashboardOperations = async ({
   dashboardData,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ToolResultStore } from '@kbn/agent-builder-server';
+import { getIndexFields } from '@kbn/agent-builder-genai-utils';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { getErrorMessage } from '../utils';
 import {
@@ -13,40 +14,42 @@ import {
   type ControlFieldTypes,
 } from '../operations/resolve_aggregatable_control_field';
 import type { ResolveControlField } from '../operations/types';
-import { loadIndexMappingFieldsFromResultStore } from './index_mapping_tool_fields';
 
 export const createControlFieldResolver = ({
-  resultStore,
+  esClient,
   logger,
 }: {
-  resultStore?: Pick<ToolResultStore, 'listEntries' | 'getEntry'>;
+  esClient: ElasticsearchClient;
   logger: Logger;
 }): ResolveControlField => {
-  let fieldsByIndexPromise: Promise<Map<string, ControlFieldTypes>> | undefined;
+  const fieldsByIndex = new Map<string, Promise<ControlFieldTypes>>();
 
-  const loadFieldsByIndex = (): Promise<Map<string, ControlFieldTypes>> => {
-    if (!fieldsByIndexPromise) {
-      fieldsByIndexPromise = resultStore
-        ? loadIndexMappingFieldsFromResultStore(resultStore).catch((error) => {
-            logger.warn(
-              `Could not load get_index_mapping results for control fields: ${getErrorMessage(
-                error
-              )}`
-            );
-            return new Map();
-          })
-        : Promise.resolve(new Map());
+  const loadFields = (index: string): Promise<ControlFieldTypes> => {
+    const cached = fieldsByIndex.get(index);
+    if (cached) {
+      return cached;
     }
-    return fieldsByIndexPromise;
+
+    const pending = getIndexFields({ indices: [index], esClient }).then((result) => {
+      const fields: ControlFieldTypes = {};
+      for (const field of result[index]?.fields ?? []) {
+        fields[field.path] = field.type;
+      }
+      return fields;
+    });
+
+    fieldsByIndex.set(index, pending);
+    return pending;
   };
 
   return async ({ fieldName, index }) => {
-    const fieldsByIndex = await loadFieldsByIndex();
-    const fields = fieldsByIndex.get(index);
-    if (!fields) {
-      return { fieldName };
+    try {
+      const fields = await loadFields(index);
+      return resolveAggregatableControlField({ fieldName, fields });
+    } catch (error) {
+      const message = getErrorMessage(error);
+      logger.warn(`Could not load index fields for controls on "${index}": ${message}`);
+      return { error: `Could not load mapping for index "${index}": ${message}` };
     }
-
-    return resolveAggregatableControlField({ fieldName, fields });
   };
 };

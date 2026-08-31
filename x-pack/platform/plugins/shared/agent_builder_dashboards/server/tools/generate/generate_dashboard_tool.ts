@@ -123,7 +123,7 @@ Use operations[] to:
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
-      { logger, attachments, events, esClient, modelProvider, resultStore }
+      { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
@@ -152,7 +152,7 @@ Use operations[] to:
             esClient,
           }),
           resolveControlField: createControlFieldResolver({
-            resultStore,
+            esClient: esClient.asCurrentUser,
             logger,
           }),
         });
