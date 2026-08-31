@@ -75,10 +75,9 @@ apiTest.describe(
     apiTest(
       'availability-gated tools are present in spaces where they are available',
       async ({ asAdmin }) => {
-        const response = await asAdmin.get(
-          spaceUrl(`${API_AGENT_BUILDER}/tools`, SECURITY_SPACE),
-          { responseType: 'json' }
-        );
+        const response = await asAdmin.get(spaceUrl(`${API_AGENT_BUILDER}/tools`, SECURITY_SPACE), {
+          responseType: 'json',
+        });
         expect(response).toHaveStatusCode(200);
         const toolIds = (response.body as ListToolsResponse).results.map((t) => t.id);
         for (const gatedId of GATED_TOOL_IDS) {
