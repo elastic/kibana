@@ -13,7 +13,6 @@ import {
   createLogstashLensEditorSuiteSetup,
   deleteAnnotationGroupFromLibrary,
   openPanelInlineEditorAndWaitVisible,
-  saveLensAsNewCopyToNewDashboard,
   spaceTest,
 } from '../fixtures';
 
@@ -25,13 +24,15 @@ const ANNOTATION_DIMENSION = 'lnsXY_xAnnotationsPanel > lns-dimensionTrigger';
  * opens the panel's inline editor — the shared starting point of every test here.
  */
 async function openXyPanelInlineEditor(
-  pageObjects: Pick<LensPageObjects, 'dashboard' | 'lens' | 'visualize' | 'saveModal'>,
+  pageObjects: Pick<LensPageObjects, 'dashboard' | 'lens' | 'visualize'>,
   panelTitle: string
 ) {
-  const { dashboard, lens, visualize, saveModal } = pageObjects;
+  const { dashboard, lens, visualize } = pageObjects;
   await visualize.goto();
   await visualize.openSavedVisualization('lnsXYvis', { waitFor: 'lens' });
-  await saveLensAsNewCopyToNewDashboard({ lens, saveModal }, panelTitle);
+  // Re-saving a saved visualization enables the add-to-dashboard radios only after
+  // "Save as new visualization" is checked; `saveToLibrary: false` keeps it by-value.
+  await lens.save(panelTitle, { addToDashboard: 'new', saveAsNew: true, saveToLibrary: false });
   await dashboard.waitForRenderComplete();
   await openPanelInlineEditorAndWaitVisible({ dashboard, lens });
 }

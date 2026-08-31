@@ -226,30 +226,6 @@ export async function buildMetricVisualization({ visualize, lens }: VisualizeAnd
 }
 
 /**
- * Saves the currently open *saved* Lens visualization as a new copy and adds it to a new
- * dashboard. Re-saving an existing saved visualization disables the add-to-dashboard radios
- * until "Save as new visualization" is checked (FTR passed `saveAsNew: true` for the same
- * reason), which the shared `lens_app.save()` does not support.
- */
-export async function saveLensAsNewCopyToNewDashboard(
-  { lens, saveModal }: Pick<LensPageObjects, 'lens' | 'saveModal'>,
-  title: string
-) {
-  await lens.saveButton.click();
-  await saveModal.modal.waitFor({ state: 'visible' });
-
-  await lens.setEuiSwitch('saveAsNewCheckbox', true);
-  await saveModal.fillTitle(title);
-  // Radio is enabled only after save-as-new is on; `selectNewDashboard` auto-waits for enabled.
-  await saveModal.selectNewDashboard();
-  // A copy of a library visualization defaults to "Add to library" checked, which would
-  // create a by-reference panel; uncheck for a by-value panel (FTR `saveToLibrary: false`).
-  await saveModal.setAddToLibrary(false);
-
-  await saveModal.confirm();
-}
-
-/**
  * Creates an XY histogram (average of `bytes` over `@timestamp`, broken down by `ip`)
  * starting from the current dashboard (edit mode) and returns to it.
  * Replaces FTR `lens.createAndAddLensFromDashboard`.

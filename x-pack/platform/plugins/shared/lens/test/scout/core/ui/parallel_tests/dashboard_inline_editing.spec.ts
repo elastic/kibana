@@ -13,7 +13,6 @@ import {
   createLogstashLensEditorSuiteSetup,
   createXyLensPanelFromDashboard,
   openPanelInlineEditorAndWaitVisible,
-  saveLensAsNewCopyToNewDashboard,
   spaceTest,
 } from '../fixtures';
 
@@ -114,14 +113,20 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
   });
 
   spaceTest('applies inline edits to a by-reference panel', async ({ pageObjects }) => {
-    const { dashboard, lens, visualize, saveModal } = pageObjects;
+    const { dashboard, lens, visualize } = pageObjects;
 
     await spaceTest.step(
       'add the saved visualization to a new dashboard and link it to the library',
       async () => {
         await visualize.goto();
         await visualize.openSavedVisualization('lnsXYvis', { waitFor: 'lens' });
-        await saveLensAsNewCopyToNewDashboard({ lens, saveModal }, 'xyVisChart Copy');
+        // Re-saving a saved visualization enables the add-to-dashboard radios only after
+        // "Save as new visualization" is checked; `saveToLibrary: false` keeps it by-value.
+        await lens.save('xyVisChart Copy', {
+          addToDashboard: 'new',
+          saveAsNew: true,
+          saveToLibrary: false,
+        });
         await dashboard.waitForRenderComplete();
         await dashboard.saveToLibrary('My by reference visualization');
       }
