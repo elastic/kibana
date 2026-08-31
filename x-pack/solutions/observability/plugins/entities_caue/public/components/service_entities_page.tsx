@@ -33,8 +33,9 @@ import { useServiceEntities } from '../hooks/use_service_entities';
 import { useEntityStoreStatus } from '../hooks/use_entity_store_status';
 import { useServiceDependencies } from '../hooks/use_service_dependencies';
 import { ServiceMap } from './service_map/service_map';
+import { KubernetesEntitiesTab } from './kubernetes_entities_tab';
 
-type TabId = 'entities' | 'map';
+type TabId = 'entities' | 'map' | 'kubernetes';
 
 const toStringArray = (value: string | string[] | null): string[] => {
   if (!value) return [];
@@ -276,6 +277,14 @@ export const ServiceEntitiesPage = ({ data, http, share }: Props) => {
       onClick: () => setSelectedTab('map'),
       'data-test-subj': 'serviceEntitiesTab-map',
     },
+    {
+      label: i18n.translate('xpack.entitiesCaue.tabs.kubernetes', {
+        defaultMessage: 'Kubernetes',
+      }),
+      isSelected: selectedTab === 'kubernetes',
+      onClick: () => setSelectedTab('kubernetes'),
+      'data-test-subj': 'serviceEntitiesTab-kubernetes',
+    },
   ];
 
   const content = (() => {
@@ -298,6 +307,10 @@ export const ServiceEntitiesPage = ({ data, http, share }: Props) => {
           })}
         />
       );
+    }
+
+    if (selectedTab === 'kubernetes') {
+      return <KubernetesEntitiesTab data={data} isInstalled={isInstalled} />;
     }
 
     if (isError) {

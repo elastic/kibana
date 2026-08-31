@@ -15,3 +15,19 @@ const ENTITIES_LATEST_INDEX = 'entities-latest-default';
 export const SERVICE_ENTITIES_QUERY = `FROM ${ENTITIES_LATEST_INDEX}
 | WHERE entity.type == "Service"
 | KEEP entity.id, entity.name, service.environment, service.version, service.type, entity.lifecycle.first_seen, entity.lifecycle.last_seen, entity.source, service.health.calculated_level, service.health.calculated_score_norm`;
+
+export const K8S_ENTITY_TYPES = [
+  'k8s.pod',
+  'k8s.container',
+  'k8s.deployment',
+  'k8s.replicaset',
+  'k8s.namespace',
+  'k8s.node',
+  'k8s.daemonset',
+] as const;
+
+export type K8sEntityType = (typeof K8S_ENTITY_TYPES)[number];
+
+export const K8S_ENTITIES_QUERY = `FROM ${ENTITIES_LATEST_INDEX}
+| WHERE entity.EngineMetadata.Type IN ("k8s.pod", "k8s.container", "k8s.deployment", "k8s.replicaset", "k8s.namespace", "k8s.node", "k8s.daemonset")
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, k8s.namespace.name, k8s.pod.uid, k8s.replicaset.name, k8s.deployment.name, k8s.daemonset.name, k8s.node.name, service.name, entity.lifecycle.first_seen, entity.lifecycle.last_seen`;

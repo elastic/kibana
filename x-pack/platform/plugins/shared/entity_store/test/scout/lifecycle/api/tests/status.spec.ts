@@ -21,7 +21,19 @@ import {
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
 } from '../../../../../server/domain/saved_objects';
 
-const ALL_ENTITY_TYPES = ['generic', 'host', 'service', 'user'];
+const ALL_ENTITY_TYPES = [
+  'generic',
+  'host',
+  'k8s.container',
+  'k8s.daemonset',
+  'k8s.deployment',
+  'k8s.namespace',
+  'k8s.node',
+  'k8s.pod',
+  'k8s.replicaset',
+  'service',
+  'user',
+];
 
 apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;

@@ -636,7 +636,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
       })
     );
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('.entities.v2.latest.default-00001')
+      expect.stringContaining('.entities.v2.latest.default-00002')
     );
   });
 

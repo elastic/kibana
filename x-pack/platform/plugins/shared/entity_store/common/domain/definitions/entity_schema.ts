@@ -9,7 +9,19 @@ import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod/v4';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+export const EntityType = z.enum([
+  'user',
+  'host',
+  'service',
+  'generic',
+  'k8s.pod',
+  'k8s.container',
+  'k8s.deployment',
+  'k8s.replicaset',
+  'k8s.namespace',
+  'k8s.node',
+  'k8s.daemonset',
+]);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
