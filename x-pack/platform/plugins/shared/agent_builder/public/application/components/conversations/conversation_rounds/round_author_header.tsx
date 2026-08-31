@@ -187,7 +187,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
 
   return (
     <EuiFlexGroup
-      gutterSize="xs"
+      gutterSize="s"
       alignItems="center"
       responsive={false}
       css={css`
