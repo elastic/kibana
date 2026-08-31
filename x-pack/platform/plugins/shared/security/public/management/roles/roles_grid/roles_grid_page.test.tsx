@@ -8,6 +8,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -16,7 +17,12 @@ import { RolesGridPage } from './roles_grid_page';
 import { rolesAPIClientMock } from '../index.mock';
 import type { RolesAPIClient } from '../roles_api_client';
 
-const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) =>
+  render(
+    <MockAppHeaderProvider>
+      <I18nProvider>{ui}</I18nProvider>
+    </MockAppHeaderProvider>
+  );
 
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
@@ -83,6 +89,8 @@ describe('<RolesGridPage />', () => {
       expect(screen.queryByTestId('permissionDeniedMessage')).not.toBeInTheDocument();
       expect(screen.getByText('Reserved')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('createRoleButton')).toBeInTheDocument();
+    expect(screen.getByTestId('showReservedRolesSwitch')).toBeInTheDocument();
   });
 
   it('renders disabled roles as such', async () => {
