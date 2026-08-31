@@ -13,6 +13,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
+import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import {
   syntheticsMonitorSOTypes,
   syntheticsMonitorSavedObjectType,
@@ -211,7 +212,8 @@ export class SyntheticsPrivateLocation {
     testRunId?: string,
     runOnce?: boolean,
     conditionHosts?: EnrolledAgents,
-    existingCondition?: string | null
+    existingCondition?: string | null,
+    assignAgentConditions: boolean = true
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -222,20 +224,26 @@ export class SyntheticsPrivateLocation {
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
       if (isConditionShardedLocation(privateLocation)) {
-        const agentIds = conditionHosts?.agentIds ?? [];
-        const existingAgentId = agentIdFromCondition(existingCondition);
+        if (assignAgentConditions) {
+          const agentIds = conditionHosts?.agentIds ?? [];
+          const existingAgentId = agentIdFromCondition(existingCondition);
 
-        if (existingAgentId && agentIds.includes(existingAgentId)) {
-          // Keep a valid existing pin during edits. Health and balancing moves
-          // belong to the rebalance task, not the monitor CRUD path.
-          newPolicy.condition = existingCondition;
-        } else if (agentIds.length > 0) {
-          const assigned = assignAgentById(config.id, agentIds);
-          if (assigned) {
-            newPolicy.condition = assigned.condition;
+          if (existingAgentId && agentIds.includes(existingAgentId)) {
+            // Keep a valid existing pin during edits. Health and balancing moves
+            // belong to the rebalance task, not the monitor CRUD path.
+            newPolicy.condition = existingCondition;
+          } else if (agentIds.length > 0) {
+            const assigned = assignAgentById(config.id, agentIds);
+            if (assigned) {
+              newPolicy.condition = assigned.condition;
+            }
           }
+          // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
+        } else if (existingCondition) {
+          // Settings pause: do not add or reassign pins. Keep whatever is already
+          // on the policy so a save does not unschedule existing shards.
+          newPolicy.condition = existingCondition;
         }
-        // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
       } else {
         // Preserve the classic payload exactly as it was unless this edit is
         // explicitly turning off a previously stamped scalable-location pin.
@@ -324,6 +332,22 @@ export class SyntheticsPrivateLocation {
     return { agentIds: [...agentIds] };
   }
 
+  /**
+   * Live settings kill-switch shared with the rebalance task. When this is off,
+   * monitor create/edit/inspect must not stamp a new agent `condition`.
+   * Defaults to on so a settings-read failure does not change CRUD behavior.
+   */
+  private async isShardRebalanceEnabled(): Promise<boolean> {
+    try {
+      const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+      const settings = await getSyntheticsDynamicSettings(soClient);
+      return settings.rebalancePrivateLocationShardsEnabled !== false;
+    } catch (e) {
+      this.server.logger.error(e);
+      return true;
+    }
+  }
+
   /** Resolves each touched scalable location at most once per monitor batch. */
   private async getScalableAgentsByLocation(
     locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
@@ -375,9 +399,10 @@ export class SyntheticsPrivateLocation {
       configs,
       privateLocations
     );
-    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(
-      referencedPrivateLocations
-    );
+    const assignAgentConditions = await this.isShardRebalanceEnabled();
+    const scalableAgentsByLocation = assignAgentConditions
+      ? await this.getScalableAgentsByLocation(referencedPrivateLocations)
+      : new Map<string, EnrolledAgents>();
 
     for (const { config, globalParams } of configs) {
       try {
@@ -401,7 +426,9 @@ export class SyntheticsPrivateLocation {
             maintenanceWindows,
             testRunId,
             runOnce,
-            scalableAgentsByLocation.get(location.id)
+            scalableAgentsByLocation.get(location.id),
+            undefined,
+            assignAgentConditions
           );
 
           if (!newPolicy) {
@@ -471,9 +498,11 @@ export class SyntheticsPrivateLocation {
       const privateLocation = locations.find((loc) => !loc.isServiceManaged);
 
       const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
-      const conditionHosts = isConditionShardedLocation(location)
-        ? await this.getEnrolledAgents(location.agentPolicyId)
-        : undefined;
+      const assignAgentConditions = await this.isShardRebalanceEnabled();
+      const conditionHosts =
+        assignAgentConditions && isConditionShardedLocation(location)
+          ? await this.getEnrolledAgents(location.agentPolicyId)
+          : undefined;
 
       const newPolicy = await this.generateNewPolicy(
         config,
@@ -484,7 +513,9 @@ export class SyntheticsPrivateLocation {
         maintenanceWindows,
         undefined,
         undefined,
-        conditionHosts
+        conditionHosts,
+        undefined,
+        assignAgentConditions
       );
 
       const pkgPolicy = {
@@ -530,9 +561,10 @@ export class SyntheticsPrivateLocation {
       configs,
       allPrivateLocations
     );
-    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(
-      referencedPrivateLocations
-    );
+    const assignAgentConditions = await this.isShardRebalanceEnabled();
+    const scalableAgentsByLocation = assignAgentConditions
+      ? await this.getScalableAgentsByLocation(referencedPrivateLocations)
+      : new Map<string, EnrolledAgents>();
     const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
@@ -571,7 +603,8 @@ export class SyntheticsPrivateLocation {
               undefined,
               undefined,
               scalableAgentsByLocation.get(privateLocation.id),
-              existingCondition
+              existingCondition,
+              assignAgentConditions
             );
 
             if (!newPolicy) {
