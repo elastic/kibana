@@ -26,6 +26,9 @@ export default createTestConfig({
     )}`,
     `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
   ],
+  // Risk score tests do not exercise prebuilt-rule management endpoints,
+  // so there is no need to install the mock prebuilt rules package.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
