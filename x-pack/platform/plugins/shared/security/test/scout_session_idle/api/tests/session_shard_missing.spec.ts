@@ -21,16 +21,11 @@ import {
   resetCleanupTask,
   runCleanupTask,
   simulatePointInTimeFailure,
-  toggleSessionCleanupTask,
 } from '../../../session_management/helpers';
 
 const BASIC_PROVIDER = { type: 'basic', name: 'basic1' } as const;
 
 test.describe('Session index shard missing', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
-  test.beforeAll(async ({ apiClient, config }) => {
-    await toggleSessionCleanupTask(apiClient, config, false);
-  });
-
   test.beforeEach(async ({ apiClient, config, esClient }) => {
     await ensureSessionIndexReady(esClient);
     await enableSessionAuthcDebugLogs(esClient);
@@ -43,8 +38,7 @@ test.describe('Session index shard missing', { tag: [...LOCAL_STATEFUL_TAGS] }, 
     await simulatePointInTimeFailure(apiClient, config, false);
   });
 
-  test.afterAll(async ({ apiClient, config, esClient }) => {
-    await toggleSessionCleanupTask(apiClient, config, true);
+  test.afterAll(async ({ esClient }) => {
     await disableSessionAuthcDebugLogs(esClient);
   });
 
