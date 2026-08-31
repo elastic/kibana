@@ -15,8 +15,17 @@ import {
   ATTACK_CARD_TEST_ID,
   ATTACK_TITLE_TEST_ID,
   ATTACK_ALERT_COUNT_TEST_ID,
+  ATTACK_TAB_BULK_ACTIONS_TEST_ID,
+  ATTACK_TAB_BULK_REMOVE_TEST_ID,
+  ATTACK_TAB_COLUMN_ACTIONS_TEST_ID,
+  ATTACK_TAB_COLUMN_ALERTS_TEST_ID,
+  ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID,
+  ATTACK_TAB_COLUMN_SUMMARY_TEST_ID,
+  ATTACK_TAB_COLUMN_TITLE_TEST_ID,
+  ATTACK_TAB_GRID_TEST_ID,
+  ATTACK_TAB_ROW_SELECT_TEST_ID,
   ATTACK_TAB_ROW_TITLE_TEST_ID,
-  ATTACK_TAB_TABLE_TEST_ID,
+  ATTACK_TAB_SELECT_ALL_TEST_ID,
   REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
   REMOVE_ATTACK_BUTTON_TEST_ID,
   REMOVE_ATTACK_MODAL_TEST_ID,
@@ -50,16 +59,61 @@ const AI_ASSISTANT_CTA_TEST_IDS = ['newAgentBuilderAttachment', 'viewInAiAssista
 const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = 'investigateInTimelineButton';
 
 /**
+ * The Attacks section's grid column ids, from `ATTACK_TAB_COLUMN_ID` in
+ * `public/cases/attachments/attack/utils.ts`. Inlined for the same reason as the ids above, and
+ * exported so specs can name a column without repeating a string literal.
+ */
+export const ATTACK_GRID_COLUMN_ID = {
+  actions: 'actions',
+  detectedOn: 'detectedOn',
+  title: 'title',
+  alerts: 'alerts',
+  summary: 'summary',
+  riskScore: 'riskScore',
+  status: 'status',
+  attachedBy: 'attachedBy',
+  attachedAt: 'attachedAt',
+} as const;
+
+/**
+ * The grid's selection control column, which is rendered ahead of the picked columns and is not
+ * part of the user's column selection. Filtered out of {@link AttackCasesPage.getGridColumnIds}
+ * so a spec can assert the column set the column picker actually drives.
+ */
+const SELECTION_COLUMN_ID = 'selection';
+
+/**
+ * `@elastic/eui` data grid internals. The grid's toolbar, header cells and column picker are
+ * EUI's own, so their ids belong to EUI; they are named here rather than inlined at the call
+ * sites so an EUI rename surfaces in one place.
+ */
+const EUI_HEADER_CELL_TEST_ID_PREFIX = 'dataGridHeaderCell-';
+const EUI_COLUMN_SELECTOR_BUTTON_TEST_ID = 'dataGridColumnSelectorButton';
+const EUI_COLUMN_VISIBILITY_TOGGLE_TEST_ID_PREFIX = 'dataGridColumnSelectorToggleColumnVisibility-';
+const EUI_SORT_SELECTOR_BUTTON_TEST_ID = 'dataGridColumnSortingButton';
+const EUI_FULL_SCREEN_BUTTON_TEST_ID = 'dataGridFullScreenButton';
+
+/**
+ * The Cases plugin's "select a case" modal, opened by the Attacks page's "Add to existing case"
+ * action. The select button is suffixed with the case's saved object id.
+ */
+const SELECT_CASE_MODAL_TEST_ID = 'all-cases-modal';
+const SELECT_CASE_BUTTON_TEST_ID_PREFIX = 'cases-table-row-select-';
+/** The toast the Cases plugin raises once an attachment lands on an existing case. */
+const ATTACH_SUCCESS_TOAST_TEST_ID = 'cases-toast-success-attach';
+
+/**
  * Page object for the attack case-attachment flow:
  * - the Attacks page table "Take action" popover (Add to new/existing case)
- * - the Cases new-case creation flyout
+ * - the Cases new-case creation flyout and its "select a case" modal
  * - the case view: the attack preview card in the Activity log, and the Attacks
  *   section inside the consolidated Attachments tab
  *
  * The unified attachment framework renders no per-type tab: attacks render as an
  * accordion (`case-view-attachment-accordion-security.attack`) inside the single
  * Attachments tab, and that accordion only exists when the case has at least one
- * `security.attack` attachment.
+ * `security.attack` attachment. Inside it, the section renders an `EuiDataGrid` styled to match
+ * the Alerts section directly above it.
  */
 export class AttackCasesPage {
   // Attacks page – table group "Take action" popover
@@ -72,6 +126,11 @@ export class AttackCasesPage {
   public readonly createCaseDescriptionInput: Locator;
   public readonly createCaseSubmitButton: Locator;
   public readonly caseToastLink: Locator;
+
+  // "Add to existing case" – the Cases plugin's case selector modal
+  public readonly selectCaseModal: Locator;
+  public readonly selectCaseButtons: Locator;
+  public readonly attachSuccessToast: Locator;
 
   // Case view – Activity log attack card. The card is rendered from the persisted metadata
   // snapshot with the same components as the Attacks page, minus that page's calls to action.
@@ -93,10 +152,28 @@ export class AttackCasesPage {
   public readonly attachmentsContainer: Locator;
   public readonly attackAccordion: Locator;
   public readonly attackAccordionBadge: Locator;
-  public readonly attackTable: Locator;
-  public readonly attackTableRowTitles: Locator;
   public readonly alertAccordion: Locator;
   public readonly alertAccordionBadge: Locator;
+
+  // Case view – the Attacks section's data grid
+  public readonly attackGrid: Locator;
+  public readonly attackGridColumnHeaders: Locator;
+  public readonly attackGridColumnSelectorButton: Locator;
+  public readonly attackGridSortSelectorButton: Locator;
+  public readonly attackGridFullScreenButton: Locator;
+  public readonly attackGridRowTitles: Locator;
+  public readonly attackGridDetectedOnCells: Locator;
+  public readonly attackGridTitleCells: Locator;
+  public readonly attackGridAlertsCells: Locator;
+  public readonly attackGridSummaryCells: Locator;
+  public readonly attackGridRowActions: Locator;
+  public readonly attackGridShowButtons: Locator;
+
+  // Case view – the Attacks section's selection and bulk action bar
+  public readonly attackGridSelectAllCheckbox: Locator;
+  public readonly attackGridRowSelectCheckboxes: Locator;
+  public readonly attackGridBulkActions: Locator;
+  public readonly attackGridBulkRemoveButton: Locator;
 
   // Case view – attack removal prompt
   public readonly removeAttackButtons: Locator;
@@ -119,6 +196,13 @@ export class AttackCasesPage {
     this.createCaseSubmitButton = page.testSubj.locator('create-case-submit');
     this.caseToastLink = page.testSubj.locator('toaster-content-case-view-link');
 
+    this.selectCaseModal = page.testSubj.locator(SELECT_CASE_MODAL_TEST_ID);
+    // Suffixed with the case's saved object id, generated server-side — match the prefix.
+    this.selectCaseButtons = this.selectCaseModal.locator(
+      `[data-test-subj^="${SELECT_CASE_BUTTON_TEST_ID_PREFIX}"]`
+    );
+    this.attachSuccessToast = page.testSubj.locator(ATTACH_SUCCESS_TOAST_TEST_ID);
+
     this.activityAttackCard = page.testSubj.locator(ATTACK_CARD_TEST_ID);
     this.activityAttackTitle = page.testSubj.locator(ATTACK_TITLE_TEST_ID);
     this.activityAttackAlertCount = page.testSubj.locator(ATTACK_ALERT_COUNT_TEST_ID);
@@ -135,7 +219,8 @@ export class AttackCasesPage {
       INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID
     );
     // The button's test subject is suffixed with the attachment saved object id, which is
-    // generated server-side, so match on the stable prefix.
+    // generated server-side, so match on the stable prefix. The Activity log's copy of the action
+    // is the only one on that tab; the grid's copies are scoped to the grid below.
     this.showAttackButton = page.locator(`[data-test-subj^="${SHOW_ATTACK_BUTTON_TEST_ID}-"]`);
 
     this.attachmentsTab = page.testSubj.locator('case-view-tab-title-attachments');
@@ -146,8 +231,6 @@ export class AttackCasesPage {
     this.attackAccordionBadge = page.testSubj.locator(
       `case-view-attachment-badge-${SECURITY_ATTACK_ATTACHMENT_TYPE}`
     );
-    this.attackTable = page.testSubj.locator(ATTACK_TAB_TABLE_TEST_ID);
-    this.attackTableRowTitles = page.testSubj.locator(ATTACK_TAB_ROW_TITLE_TEST_ID);
     this.alertAccordion = page.testSubj.locator(
       `case-view-attachment-accordion-${SECURITY_ALERT_ATTACHMENT_TYPE}`
     );
@@ -155,8 +238,42 @@ export class AttackCasesPage {
       `case-view-attachment-badge-${SECURITY_ALERT_ATTACHMENT_TYPE}`
     );
 
+    this.attackGrid = page.testSubj.locator(ATTACK_TAB_GRID_TEST_ID);
+    this.attackGridColumnHeaders = this.attackGrid.locator(
+      `[data-test-subj^="${EUI_HEADER_CELL_TEST_ID_PREFIX}"]`
+    );
+    this.attackGridColumnSelectorButton = this.attackGrid.getByTestId(
+      EUI_COLUMN_SELECTOR_BUTTON_TEST_ID
+    );
+    this.attackGridSortSelectorButton = this.attackGrid.getByTestId(
+      EUI_SORT_SELECTOR_BUTTON_TEST_ID
+    );
+    this.attackGridFullScreenButton = this.attackGrid.getByTestId(EUI_FULL_SCREEN_BUTTON_TEST_ID);
+    this.attackGridRowTitles = this.attackGrid.getByTestId(ATTACK_TAB_ROW_TITLE_TEST_ID);
+    this.attackGridDetectedOnCells = this.attackGrid.getByTestId(
+      ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID
+    );
+    this.attackGridTitleCells = this.attackGrid.getByTestId(ATTACK_TAB_COLUMN_TITLE_TEST_ID);
+    this.attackGridAlertsCells = this.attackGrid.getByTestId(ATTACK_TAB_COLUMN_ALERTS_TEST_ID);
+    this.attackGridSummaryCells = this.attackGrid.getByTestId(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID);
+    this.attackGridRowActions = this.attackGrid.getByTestId(ATTACK_TAB_COLUMN_ACTIONS_TEST_ID);
+    this.attackGridShowButtons = this.attackGrid.locator(
+      `[data-test-subj^="${SHOW_ATTACK_BUTTON_TEST_ID}-"]`
+    );
+
+    this.attackGridSelectAllCheckbox = this.attackGrid.getByTestId(ATTACK_TAB_SELECT_ALL_TEST_ID);
     // Suffixed with the attachment saved object id, generated server-side — match the prefix.
-    this.removeAttackButtons = page.locator(`[data-test-subj^="${REMOVE_ATTACK_BUTTON_TEST_ID}-"]`);
+    this.attackGridRowSelectCheckboxes = this.attackGrid.locator(
+      `[data-test-subj^="${ATTACK_TAB_ROW_SELECT_TEST_ID}-"]`
+    );
+    // The bar is appended to the grid's own toolbar, so it lives inside the grid.
+    this.attackGridBulkActions = this.attackGrid.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID);
+    this.attackGridBulkRemoveButton = this.attackGrid.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID);
+
+    // Suffixed with the attachment saved object id, generated server-side — match the prefix.
+    this.removeAttackButtons = this.attackGrid.locator(
+      `[data-test-subj^="${REMOVE_ATTACK_BUTTON_TEST_ID}-"]`
+    );
     this.removeAttackModal = page.testSubj.locator(REMOVE_ATTACK_MODAL_TEST_ID);
     this.removeAttackAlertsCheckbox = page.testSubj.locator(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID);
     this.removeAttackConfirmButton = page.testSubj.locator('confirmModalConfirmButton');
@@ -181,37 +298,81 @@ export class AttackCasesPage {
    * racing the render, which `all()` on its own does not.
    */
   private async resolveFirst(locator: Locator, notFoundMessage: string): Promise<Locator> {
-    await expect(locator).not.toHaveCount(0, { timeout: 30_000 });
+    return this.resolveAt(locator, 0, notFoundMessage);
+  }
 
-    const [first] = await locator.all();
+  /**
+   * Resolves the element at `index`, once the locator has matched at least that many. Polling on
+   * the count rather than asserting it keeps the resolution from racing a list that renders its
+   * rows one at a time, which `all()` on its own does not.
+   */
+  private async resolveAt(
+    locator: Locator,
+    index: number,
+    notFoundMessage: string
+  ): Promise<Locator> {
+    await expect
+      .poll(async () => locator.count(), { timeout: 30_000, message: notFoundMessage })
+      .toBeGreaterThan(index);
 
-    if (!first) {
+    const match = (await locator.all())[index];
+
+    if (!match) {
       throw new Error(notFoundMessage);
     }
 
-    return first;
+    return match;
   }
 
   /** Resolves one or more test subjects within the activity log's attack card. */
   private cardSection(...testSubjects: readonly string[]): Locator {
-    const selector = testSubjects.map((subject) => `[data-test-subj="${subject}"]`).join(', ');
-
-    return this.activityAttackCard.locator(selector);
+    return this.activityAttackCard.locator(
+      testSubjects.map((subject) => `[data-test-subj="${subject}"]`).join(', ')
+    );
   }
 
   /** Opens the "Take action" popover on the first attack group in the Attacks table. */
   async openFirstAttackTakeActionMenu() {
-    const firstTakeActionButton = await this.resolveFirst(
+    await this.openAttackTakeActionMenu(0);
+  }
+
+  /**
+   * Opens the "Take action" popover on the attack group at `groupIndex`. The Attacks page lists
+   * one group per attack, so the index selects which attack the case actions will attach.
+   */
+  async openAttackTakeActionMenu(groupIndex: number) {
+    const takeActionButton = await this.resolveAt(
       this.takeActionButtons,
-      'No take action button found in the attacks table'
+      groupIndex,
+      `No take action button at index ${groupIndex} in the attacks table`
     );
 
-    await firstTakeActionButton.click();
+    await takeActionButton.waitFor({ state: 'visible', timeout: 30_000 });
+    await takeActionButton.click();
     await this.addToNewCaseItem.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async clickAddToNewCase() {
     await this.addToNewCaseItem.click();
+  }
+
+  /**
+   * Attaches through "Add to existing case", picking the only case in the space. Returns once the
+   * Cases plugin confirms the attachment, so a caller navigating to the case is not racing the
+   * write.
+   */
+  async addToOnlyExistingCase() {
+    await this.addToExistingCaseItem.click();
+    await this.selectCaseModal.waitFor({ state: 'visible', timeout: 30_000 });
+
+    const selectCaseButton = await this.resolveFirst(
+      this.selectCaseButtons,
+      'No selectable case found in the case selector modal'
+    );
+
+    await selectCaseButton.click();
+    await this.selectCaseModal.waitFor({ state: 'hidden', timeout: 30_000 });
+    await this.attachSuccessToast.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async createCase(name: string, description: string) {
@@ -231,6 +392,20 @@ export class AttackCasesPage {
   async navigateToCase(caseId: string) {
     await this.page.gotoApp(`security/cases/${caseId}`);
     await this.waitForCaseView();
+  }
+
+  /** The id of the case currently open, read back from the case-view URL. */
+  async getOpenCaseId(): Promise<string> {
+    await this.waitForCaseView();
+
+    const url = this.page.url();
+    const caseId = /\/cases\/([^/?#]+)/.exec(url)?.[1];
+
+    if (caseId == null) {
+      throw new Error(`Not on a case view, so no case id to read: ${url}`);
+    }
+
+    return caseId;
   }
 
   /**
@@ -256,6 +431,53 @@ export class AttackCasesPage {
     await this.showAttackButton.click();
   }
 
+  /** Opens the attack flyout from the first grid row's actions column. */
+  async openAttackFlyoutFromGrid() {
+    const firstShowButton = await this.resolveFirst(
+      this.attackGridShowButtons,
+      'No show attack button found in the attacks grid'
+    );
+
+    await firstShowButton.click();
+  }
+
+  /**
+   * The grid's column ids in render order, without the selection control column — that is, the
+   * set the column picker drives, with the leading actions column first.
+   */
+  async getGridColumnIds(): Promise<string[]> {
+    await expect(this.attackGridColumnHeaders).not.toHaveCount(0, { timeout: 30_000 });
+
+    const testSubjects = await this.attackGridColumnHeaders.evaluateAll((headers) =>
+      headers.map((header) => header.getAttribute('data-test-subj') ?? '')
+    );
+
+    return testSubjects
+      .map((testSubject) => testSubject.slice(EUI_HEADER_CELL_TEST_ID_PREFIX.length))
+      .filter((columnId) => columnId !== SELECTION_COLUMN_ID);
+  }
+
+  /**
+   * Adds a column to the grid through the data grid's own column picker. The switch is a
+   * `role="switch"` button rather than a checkbox, so its state is asserted rather than checked.
+   */
+  async addGridColumn(columnId: string) {
+    await this.attackGridColumnSelectorButton.click();
+
+    const toggle = this.page.testSubj.locator(
+      `${EUI_COLUMN_VISIBILITY_TOGGLE_TEST_ID_PREFIX}${columnId}`
+    );
+    await toggle.waitFor({ state: 'visible', timeout: 30_000 });
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-checked', 'true', { timeout: 30_000 });
+
+    // Dismissed with the toolbar button that opened it, so the picker stops covering the grid it
+    // just changed. Read from the switch going away rather than from the popover: EUI puts
+    // `dataGridColumnSelectorPopover` on the anchor, which is in the DOM whether it is open or not.
+    await this.attackGridColumnSelectorButton.click();
+    await toggle.waitFor({ state: 'hidden', timeout: 30_000 });
+  }
+
   /** Opens the removal prompt for the first row of the Attacks section. */
   async openRemoveAttackPrompt() {
     const firstRemoveButton = await this.resolveFirst(
@@ -264,6 +486,19 @@ export class AttackCasesPage {
     );
 
     await firstRemoveButton.click();
+    await this.removeAttackModal.waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  /** Ticks the header checkbox, which selects every row the search has left in the grid. */
+  async selectAllAttacks() {
+    await this.attackGridSelectAllCheckbox.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.attackGridSelectAllCheckbox.check();
+  }
+
+  /** Opens the removal prompt from the bulk action bar, for the whole selection. */
+  async openBulkRemoveAttacksPrompt() {
+    await this.attackGridBulkRemoveButton.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.attackGridBulkRemoveButton.click();
     await this.removeAttackModal.waitFor({ state: 'visible', timeout: 30_000 });
   }
 

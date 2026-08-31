@@ -16,9 +16,14 @@
  *  - The Activity log card reads like the Attacks page: the detected-on line, the clamped entity
  *    summary, the summary markdown, the Details section and the attack chain, all rendered as
  *    formatted markdown, and none of the Attacks page's calls to action.
- *  - The "Show attack details" affordance on the card opens the attack flyout.
+ *  - The Attacks section renders as a data grid that reads as a sibling of the Alerts section
+ *    above it: the default column set, the toolbar's column and sort selectors, the column
+ *    picker and its persistence, and the two row actions.
+ *  - The "Show attack details" affordance opens the attack flyout, both from the Activity log
+ *    card and from the grid's row actions.
  *  - Removing the attack from the Attacks section, with the prompt's "also remove related
- *    alerts" checkbox ticked, takes the attack and the alerts it brought in off the case.
+ *    alerts" checkbox ticked, takes the attack and the alerts it brought in off the case, both
+ *    one row at a time and for a whole selection through the bulk action bar.
  *
  * The `security.attack` type is registered only when `attackAttachmentsEnabled` is on; the
  * attacks-alignment Scout config boots with it (see
@@ -32,6 +37,7 @@
 
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../../../fixtures';
+import { ATTACK_GRID_COLUMN_ID } from '../../../fixtures/page_objects/attack_cases_page';
 
 const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
   'securitySolution:enableAlertsAndAttacksAlignment';
@@ -42,9 +48,17 @@ const CASE_DESCRIPTION = 'Created by the Scout attack case-attachment test';
 // The narrative of the seeded attacks, from `apiServices.attackDiscovery.seedAttackData`. Both
 // seeded attacks share these prefixes, so the assertions hold whichever group the table lists
 // first, and the manual one only appends " (manual)".
+const SEEDED_TITLE = 'Scout seeded attack discovery';
 const SEEDED_SUMMARY = 'Seeded with synthetic alert IDs';
 const SEEDED_DETAILS = 'Seeded by Scout attacks space setup';
 const SEEDED_ENTITY_SUMMARY = 'Seeded entity summary';
+// Every seeded attack carries two constituent alerts.
+const SEEDED_ALERT_COUNT = '2';
+
+// The shared placeholder a column renders when it has no value, from
+// `public/common/components/empty_value` (`getEmptyValue`). Inlined rather than imported to keep
+// the Kibana public bundle out of the Playwright process.
+const EMPTY_VALUE = '—';
 
 spaceTest.describe(
   'Attack case attachments',
@@ -55,7 +69,13 @@ spaceTest.describe(
       await apiServices.attackDiscovery.seedAttackData();
     });
 
-    spaceTest.beforeEach(async ({ apiServices, browserAuth, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ apiServices, browserAuth, page, scoutSpace }) => {
+      // The case view spends its width on the navigation and the case-settings panel, leaving the
+      // attachment sections a narrow column. At Playwright's default 1280 the attacks grid is
+      // narrower than its columns, and a data grid keeps only the columns it can show in the DOM —
+      // so the rightmost ones would be unassertable for reasons of window size rather than of
+      // behaviour.
+      await page.setViewportSize({ width: 1920, height: 1080 });
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
       await scoutSpace.uiSettings.set({
         [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
@@ -77,10 +97,11 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'attaches an attack to a new case and renders the preview card and Attacks section',
+      'attaches an attack to a new case and renders the preview card and Attacks grid',
       async ({ pageObjects }) => {
         const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
         const caseName = 'Scout attack attachment case – render';
+        let caseId = '';
 
         await spaceTest.step('attach the first attack to a new case', async () => {
           await detectionsAttackDiscoveryPage.navigateToAttacksPage();
@@ -91,6 +112,8 @@ spaceTest.describe(
           await attackCases.clickAddToNewCase();
           await attackCases.createCase(caseName, CASE_DESCRIPTION);
           await attackCases.clickCaseToastLink();
+
+          caseId = await attackCases.getOpenCaseId();
         });
 
         await spaceTest.step(
@@ -130,20 +153,82 @@ spaceTest.describe(
         });
 
         await spaceTest.step(
-          'the Attachments tab renders an Attacks section distinct from Alerts',
+          'the Attachments tab renders an Attacks grid distinct from Alerts',
           async () => {
             await attackCases.openAttachmentsTab();
             await expect(attackCases.attackAccordion).toBeVisible();
             await expect(attackCases.attackAccordionBadge).toHaveText('1');
-            await expect(attackCases.attackTable).toBeVisible();
-            await expect(attackCases.attackTableRowTitles).toHaveCount(1);
+            await expect(attackCases.attackGrid).toBeVisible();
+            await expect(attackCases.attackGridRowTitles).toHaveCount(1);
+          }
+        );
+
+        await spaceTest.step(
+          'the grid toolbar offers the same controls as the Alerts section',
+          async () => {
+            await expect(attackCases.attackGridColumnSelectorButton).toBeVisible();
+            await expect(attackCases.attackGridSortSelectorButton).toBeVisible();
+            // Hidden for parity with the alerts grid. Grouping and CSV export are not data grid
+            // controls at all, so there is nothing of theirs to assert absent.
+            await expect(attackCases.attackGridFullScreenButton).toHaveCount(0);
+          }
+        );
+
+        await spaceTest.step('the grid shows the default columns, in order', async () => {
+          expect(await attackCases.getGridColumnIds()).toStrictEqual([
+            ATTACK_GRID_COLUMN_ID.actions,
+            ATTACK_GRID_COLUMN_ID.detectedOn,
+            ATTACK_GRID_COLUMN_ID.title,
+            ATTACK_GRID_COLUMN_ID.alerts,
+            ATTACK_GRID_COLUMN_ID.summary,
+          ]);
+        });
+
+        // The case holds a single attack, so each cell locator resolves to exactly one cell.
+        await spaceTest.step('every default column shows the attack’s own value', async () => {
+          // The attack's detection time, which the seed always sets — not the time it was
+          // attached, and never the empty placeholder.
+          await expect(attackCases.attackGridDetectedOnCells).not.toBeEmpty();
+          await expect(attackCases.attackGridDetectedOnCells).not.toHaveText(EMPTY_VALUE);
+
+          await expect(attackCases.attackGridTitleCells).toContainText(SEEDED_TITLE);
+          await expect(attackCases.attackGridAlertsCells).toHaveText(SEEDED_ALERT_COUNT);
+
+          await expect(attackCases.attackGridSummaryCells).toContainText(SEEDED_SUMMARY);
+          // The cell renders de-anonymised plain text, so neither markdown syntax nor the
+          // `{{ field value }}` token syntax may reach it.
+          await expect(attackCases.attackGridSummaryCells).not.toContainText('{{');
+
+          // Both row actions live in the single leading actions cell.
+          await expect(attackCases.attackGridRowActions).toHaveCount(1);
+          await expect(attackCases.attackGridShowButtons).toHaveCount(1);
+          await expect(attackCases.removeAttackButtons).toHaveCount(1);
+        });
+
+        await spaceTest.step(
+          'the column picker adds an optional column and remembers it',
+          async () => {
+            // "Attached by" is one of the four columns kept out of the default set. The grid's
+            // header row lists every picked column, virtualization notwithstanding, so it is what
+            // the picker's effect is read from.
+            await attackCases.addGridColumn(ATTACK_GRID_COLUMN_ID.attachedBy);
+            expect(await attackCases.getGridColumnIds()).toContain(
+              ATTACK_GRID_COLUMN_ID.attachedBy
+            );
+
+            // The selection is persisted per user, so it survives leaving and re-opening the case.
+            await attackCases.navigateToCase(caseId);
+            await attackCases.openAttachmentsTab();
+            expect(await attackCases.getGridColumnIds()).toContain(
+              ATTACK_GRID_COLUMN_ID.attachedBy
+            );
           }
         );
       }
     );
 
     spaceTest(
-      'removes the attack and the alerts it brought in from the Attacks section',
+      'removes the attack and the alerts it brought in from the grid row action',
       async ({ pageObjects }) => {
         const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
         const caseName = 'Scout attack attachment case – removal';
@@ -165,8 +250,9 @@ spaceTest.describe(
             await attackCases.openAttachmentsTab();
             await expect(attackCases.attackAccordion).toBeVisible();
             await expect(attackCases.attackAccordionBadge).toHaveText('1');
+            await expect(attackCases.attackGridRowTitles).toHaveCount(1);
             // The seeded attack carries two constituent alerts, attached alongside it.
-            await expect(attackCases.alertAccordionBadge).toHaveText('2');
+            await expect(attackCases.alertAccordionBadge).toHaveText(SEEDED_ALERT_COUNT);
           }
         );
 
@@ -189,10 +275,11 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'opens the attack flyout from the attachment "Show attack details" action',
+      'removes several attacks at once from the bulk action bar',
       async ({ pageObjects }) => {
         const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
-        const caseName = 'Scout attack attachment case – navigation';
+        const caseName = 'Scout attack attachment case – bulk removal';
+        let caseId = '';
 
         await spaceTest.step('attach the first attack to a new case', async () => {
           await detectionsAttackDiscoveryPage.navigateToAttacksPage();
@@ -203,10 +290,84 @@ spaceTest.describe(
           await attackCases.clickAddToNewCase();
           await attackCases.createCase(caseName, CASE_DESCRIPTION);
           await attackCases.clickCaseToastLink();
+
+          caseId = await attackCases.getOpenCaseId();
         });
 
-        await spaceTest.step('clicking Show attack details opens the attack flyout', async () => {
+        await spaceTest.step('attach the second attack to the same case', async () => {
+          // The space is seeded with two attacks, one group per attack, and the case created
+          // above is the only one in it — so "Add to existing case" has a single candidate.
+          await detectionsAttackDiscoveryPage.navigateToAttacksPage();
+          await detectionsAttackDiscoveryPage.collapseKpisSection();
+          await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
+
+          await attackCases.openAttackTakeActionMenu(1);
+          await attackCases.addToOnlyExistingCase();
+        });
+
+        await spaceTest.step('the grid lists both attacks', async () => {
+          await attackCases.navigateToCase(caseId);
+          await attackCases.openAttachmentsTab();
+          await expect(attackCases.attackAccordionBadge).toHaveText('2');
+          await expect(attackCases.attackGridRowTitles).toHaveCount(2);
+        });
+
+        await spaceTest.step('selecting every row reveals the bulk action bar', async () => {
+          await expect(attackCases.attackGridBulkActions).toHaveCount(0);
+
+          await attackCases.selectAllAttacks();
+
+          await expect(attackCases.attackGridRowSelectCheckboxes).toHaveCount(2);
+          await expect(attackCases.attackGridBulkActions).toBeVisible();
+          await expect(attackCases.attackGridBulkRemoveButton).toBeVisible();
+        });
+
+        await spaceTest.step(
+          'removing the selection takes both attacks and their alerts off the case',
+          async () => {
+            await attackCases.openBulkRemoveAttacksPrompt();
+            await attackCases.confirmRemoveAttack({ withRelatedAlerts: true });
+
+            await expect(attackCases.attackAccordion).toBeHidden();
+            await expect(attackCases.alertAccordion).toBeHidden();
+          }
+        );
+      }
+    );
+
+    spaceTest(
+      'opens the attack flyout from the "Show attack details" action',
+      async ({ pageObjects }) => {
+        const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
+        const caseName = 'Scout attack attachment case – navigation';
+        let caseId = '';
+
+        await spaceTest.step('attach the first attack to a new case', async () => {
+          await detectionsAttackDiscoveryPage.navigateToAttacksPage();
+          await detectionsAttackDiscoveryPage.collapseKpisSection();
+          await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
+
+          await attackCases.openFirstAttackTakeActionMenu();
+          await attackCases.clickAddToNewCase();
+          await attackCases.createCase(caseName, CASE_DESCRIPTION);
+          await attackCases.clickCaseToastLink();
+
+          caseId = await attackCases.getOpenCaseId();
+        });
+
+        await spaceTest.step('the Activity log card opens the attack flyout', async () => {
           await attackCases.openAttackFlyoutFromActivity();
+          await expect(attackCases.attackDetailsFlyoutBody).toBeVisible();
+        });
+
+        await spaceTest.step('the grid row action opens the attack flyout', async () => {
+          // Navigated back to the case so the flyout the step above opened is closed, and this
+          // assertion is about the grid's own action rather than leftover state.
+          await attackCases.navigateToCase(caseId);
+          await attackCases.openAttachmentsTab();
+          await expect(attackCases.attackDetailsFlyoutBody).toBeHidden();
+
+          await attackCases.openAttackFlyoutFromGrid();
           await expect(attackCases.attackDetailsFlyoutBody).toBeVisible();
         });
       }

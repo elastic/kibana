@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
@@ -65,7 +65,7 @@ import { RemoveAttackButton } from './remove_attack_button';
 import type { SelectedAttack } from './attack_tab_bulk_actions';
 import { AttackTabBulkActions } from './attack_tab_bulk_actions';
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
-import type { AttackCaseAttachmentRow, AttackTabColumnId } from '../utils';
+import type { AttackCaseAttachmentRow, AttackTabColumnId, CaseAttachment } from '../utils';
 import {
   ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY,
   ATTACK_TAB_COLUMN_ID,
@@ -88,6 +88,36 @@ interface AttackRow {
   /** True once the live query has settled without returning this attack. */
   isUnresolved: boolean;
 }
+
+/**
+ * What the grid's cells render from. Passed through context rather than closed over by the render
+ * functions, because `EuiDataGrid` renders those as component types: a render function rebuilt
+ * when the rows or the selection change is a new component to React, so every cell would unmount
+ * — taking an open removal prompt with it.
+ */
+interface AttackGridCellContextValue {
+  areAllRowsSelected: boolean;
+  comments: readonly CaseAttachment[];
+  isRemoving: boolean;
+  onRemoveConfirmed: (savedObjectId: string, confirmation: RemoveAttackConfirmation) => void;
+  rows: AttackRow[];
+  selectedRowCount: number;
+  selectedRowIds: ReadonlySet<string>;
+  toggleAllRowsSelected: () => void;
+  toggleRowSelected: (savedObjectId: string) => void;
+}
+
+const AttackGridCellContext = createContext<AttackGridCellContextValue | null>(null);
+
+const useAttackGridCellContext = (): AttackGridCellContextValue => {
+  const cellContext = useContext(AttackGridCellContext);
+
+  if (cellContext == null) {
+    throw new Error('The attacks grid cells must be rendered inside AttackGridCellContext');
+  }
+
+  return cellContext;
+};
 
 /** Matches the alerts grid directly above this section in the tab. */
 const GRID_STYLE: EuiDataGridStyle = {
@@ -416,6 +446,122 @@ const compareRows = (
   return 0;
 };
 
+const SelectAllAttacksHeaderCell = () => {
+  const { areAllRowsSelected, selectedRowCount, toggleAllRowsSelected } =
+    useAttackGridCellContext();
+
+  const selectAllId = useGeneratedHtmlId({ prefix: 'attackTabSelectAll' });
+
+  return (
+    <EuiCheckbox
+      aria-label={SELECT_ALL_LABEL}
+      checked={areAllRowsSelected}
+      data-test-subj={ATTACK_TAB_SELECT_ALL_TEST_ID}
+      id={selectAllId}
+      indeterminate={selectedRowCount > 0 && !areAllRowsSelected}
+      onChange={toggleAllRowsSelected}
+    />
+  );
+};
+
+SelectAllAttacksHeaderCell.displayName = 'SelectAllAttacksHeaderCell';
+
+const SelectAttackCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  const { rows, selectedRowIds, toggleRowSelected } = useAttackGridCellContext();
+
+  const row = rows[rowIndex];
+
+  if (row == null) {
+    return null;
+  }
+
+  return (
+    <EuiCheckbox
+      aria-label={getSelectAttackLabel(getTitle(row.attack, row.metadata))}
+      checked={selectedRowIds.has(row.savedObjectId)}
+      data-test-subj={`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${row.savedObjectId}`}
+      id={`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${row.savedObjectId}`}
+      onChange={() => toggleRowSelected(row.savedObjectId)}
+    />
+  );
+};
+
+SelectAttackCell.displayName = 'SelectAttackCell';
+
+const AttackActionsHeaderCell = () => <>{COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.actions]}</>;
+
+AttackActionsHeaderCell.displayName = 'AttackActionsHeaderCell';
+
+const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  const { comments, isRemoving, onRemoveConfirmed, rows } = useAttackGridCellContext();
+
+  const row = rows[rowIndex];
+
+  if (row == null) {
+    return null;
+  }
+
+  const attackTitle = getTitle(row.attack, row.metadata);
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      data-test-subj={ATTACK_TAB_COLUMN_ACTIONS_TEST_ID}
+      gutterSize="xs"
+      responsive={false}
+    >
+      <EuiFlexItem grow={false}>
+        <ShowAttackButton
+          id={row.savedObjectId}
+          attackId={row.attachmentId}
+          indexName={row.attack?.index ?? row.metadata.index}
+          attackTitle={attackTitle}
+          isDisabled={row.isUnresolved}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {/* Removal stays available for an unresolved attack — the attachment can always be taken
+            off the case; only the "also remove its alerts" offer needs the document. */}
+        <RemoveAttackButton
+          id={row.savedObjectId}
+          attackId={row.attachmentId}
+          attackTitle={attackTitle}
+          comments={comments}
+          isDisabled={isRemoving}
+          onConfirm={(confirmation) => onRemoveConfirmed(row.savedObjectId, confirmation)}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+AttackActionsCell.displayName = 'AttackActionsCell';
+
+const AttackGridCell = ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
+  const { rows } = useAttackGridCellContext();
+
+  const row = rows[rowIndex];
+
+  return row != null ? <AttackCell row={row} columnId={columnId} isDetails={isDetails} /> : null;
+};
+
+AttackGridCell.displayName = 'AttackGridCell';
+
+const LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [
+  {
+    id: SELECTION_COLUMN_ID,
+    width: SELECTION_COLUMN_WIDTH,
+    headerCellRender: SelectAllAttacksHeaderCell,
+    rowCellRender: SelectAttackCell,
+  },
+  {
+    id: ATTACK_TAB_COLUMN_ID.actions,
+    width: ACTIONS_COLUMN_WIDTH,
+    headerCellRender: AttackActionsHeaderCell,
+    rowCellRender: AttackActionsCell,
+  },
+];
+
 /**
  * Renders the "Attacks" accordion body in the case Attachments tab.
  *
@@ -611,17 +757,6 @@ const AttackTabTable = ({
     [onChangeItemsPerPage, pageIndex, pageSize]
   );
 
-  const renderCellValue = useCallback(
-    ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
-      const row = rows[rowIndex];
-      if (row == null) {
-        return null;
-      }
-      return <AttackCell row={row} columnId={columnId} isDetails={isDetails} />;
-    },
-    [rows]
-  );
-
   const toggleRowSelected = useCallback((savedObjectId: string) => {
     setSelectedRowIds((current) => {
       const next = new Set(current);
@@ -651,90 +786,24 @@ const AttackTabTable = ({
     );
   }, [areAllRowsSelected, rows]);
 
-  const selectAllId = useGeneratedHtmlId({ prefix: 'attackTabSelectAll' });
-
-  const leadingControlColumns = useMemo<EuiDataGridControlColumn[]>(
-    () => [
-      {
-        id: SELECTION_COLUMN_ID,
-        width: SELECTION_COLUMN_WIDTH,
-        headerCellRender: () => (
-          <EuiCheckbox
-            aria-label={SELECT_ALL_LABEL}
-            checked={areAllRowsSelected}
-            data-test-subj={ATTACK_TAB_SELECT_ALL_TEST_ID}
-            id={selectAllId}
-            indeterminate={selectedRowCount > 0 && !areAllRowsSelected}
-            onChange={toggleAllRowsSelected}
-          />
-        ),
-        rowCellRender: ({ rowIndex }) => {
-          const row = rows[rowIndex];
-          if (row == null) {
-            return null;
-          }
-
-          return (
-            <EuiCheckbox
-              aria-label={getSelectAttackLabel(getTitle(row.attack, row.metadata))}
-              checked={selectedRowIds.has(row.savedObjectId)}
-              data-test-subj={`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${row.savedObjectId}`}
-              id={`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${row.savedObjectId}`}
-              onChange={() => toggleRowSelected(row.savedObjectId)}
-            />
-          );
-        },
-      },
-      {
-        id: ATTACK_TAB_COLUMN_ID.actions,
-        width: ACTIONS_COLUMN_WIDTH,
-        headerCellRender: () => <>{COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.actions]}</>,
-        rowCellRender: ({ rowIndex }) => {
-          const row = rows[rowIndex];
-          if (row == null) {
-            return null;
-          }
-
-          return (
-            <EuiFlexGroup
-              alignItems="center"
-              data-test-subj={ATTACK_TAB_COLUMN_ACTIONS_TEST_ID}
-              gutterSize="xs"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <ShowAttackButton
-                  id={row.savedObjectId}
-                  attackId={row.attachmentId}
-                  indexName={row.attack?.index ?? row.metadata.index}
-                  attackTitle={getTitle(row.attack, row.metadata)}
-                  isDisabled={row.isUnresolved}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {/* Removal stays available for an unresolved attack — the attachment can always be
-                    taken off the case; only the "also remove its alerts" offer needs the document. */}
-                <RemoveAttackButton
-                  id={row.savedObjectId}
-                  attackId={row.attachmentId}
-                  attackTitle={getTitle(row.attack, row.metadata)}
-                  comments={comments}
-                  isDisabled={isRemoving}
-                  onConfirm={(confirmation) => onRemoveConfirmed(row.savedObjectId, confirmation)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
-      },
-    ],
+  const cellContext = useMemo<AttackGridCellContextValue>(
+    () => ({
+      areAllRowsSelected,
+      comments,
+      isRemoving,
+      onRemoveConfirmed,
+      rows,
+      selectedRowCount,
+      selectedRowIds,
+      toggleAllRowsSelected,
+      toggleRowSelected,
+    }),
     [
       areAllRowsSelected,
       comments,
       isRemoving,
       onRemoveConfirmed,
       rows,
-      selectAllId,
       selectedRowCount,
       selectedRowIds,
       toggleAllRowsSelected,
@@ -793,19 +862,21 @@ const AttackTabTable = ({
       `}
     >
       {isLoading ? <EuiProgress color="accent" position="absolute" size="xs" /> : null}
-      <EuiDataGrid
-        aria-label={TABLE_CAPTION}
-        columns={GRID_COLUMNS}
-        columnVisibility={columnVisibility}
-        data-test-subj={ATTACK_TAB_GRID_TEST_ID}
-        gridStyle={GRID_STYLE}
-        leadingControlColumns={leadingControlColumns}
-        pagination={pagination}
-        renderCellValue={renderCellValue}
-        rowCount={rows.length}
-        sorting={sorting}
-        toolbarVisibility={toolbarVisibility}
-      />
+      <AttackGridCellContext.Provider value={cellContext}>
+        <EuiDataGrid
+          aria-label={TABLE_CAPTION}
+          columns={GRID_COLUMNS}
+          columnVisibility={columnVisibility}
+          data-test-subj={ATTACK_TAB_GRID_TEST_ID}
+          gridStyle={GRID_STYLE}
+          leadingControlColumns={LEADING_CONTROL_COLUMNS}
+          pagination={pagination}
+          renderCellValue={AttackGridCell}
+          rowCount={rows.length}
+          sorting={sorting}
+          toolbarVisibility={toolbarVisibility}
+        />
+      </AttackGridCellContext.Provider>
     </EuiFlexItem>
   );
 };

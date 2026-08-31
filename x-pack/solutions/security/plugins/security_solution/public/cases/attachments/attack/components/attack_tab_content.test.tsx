@@ -780,6 +780,29 @@ describe('AttackTabContent', () => {
       expect(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID)).toBeEnabled();
     });
 
+    it('keeps the removal prompt open when the case hands the section fresh attachments', async () => {
+      const { rerender } = render(
+        <TestProviders>
+          <AttackTabContent caseData={buildCaseData([buildAttachment()])} />
+        </TestProviders>
+      );
+
+      await openRemovalPrompt();
+
+      expect(screen.getByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
+
+      // The case view refetches on its own, so the same attachment arrives again as a new object.
+      // The grid renders its cells from component types: were they rebuilt per render, React would
+      // remount the cell and take the open prompt down with it.
+      rerender(
+        <TestProviders>
+          <AttackTabContent caseData={buildCaseData([buildAttachment()])} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
+    });
+
     it('removes only the attack attachment when the checkbox is left unchecked', async () => {
       renderTab();
 
