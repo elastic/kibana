@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
   EuiCode,
   EuiDescriptionList,
@@ -34,8 +35,10 @@ import type { FieldDefinition } from '../../../../common/types/domain/field_defi
 import {
   FieldType,
   InlineFieldSchema,
+  isDisplayOnlyField,
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
+import { StrictInlineFieldSchema } from '../../../../common/types/domain/template/strict_fields';
 import {
   type FieldDefaultValue,
   updateFieldDefinitionDefault,
@@ -89,7 +92,16 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
     }
   }, [definition]);
 
-  const isDefinitionValid = parsedDefinition?.success === true;
+  // On create the server enforces the authoring charset (strict); on update the server uses the
+  // lenient schema because the name is immutable anyway. Mirror that split in the UI so the Save
+  // button only enables when the definition matches what the server will accept.
+  const isDefinitionValid = useMemo(() => {
+    if (!parsedDefinition?.success) return false;
+    if (!isEditing) {
+      return StrictInlineFieldSchema.safeParse(parsedDefinition.data).success;
+    }
+    return true;
+  }, [parsedDefinition, isEditing]);
 
   // A definition's name and (YAML) type are its permanent identity: they form the
   // storage key for case values and the Cases analytics field. Editing them is
@@ -114,6 +126,20 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
     (parsedDefinition.data.name !== originalIdentity.name ||
       (originalIdentity.type !== undefined &&
         parsedDefinition.data.type !== originalIdentity.type));
+
+  // Automated case creation (the cases connector) can only fill fields that have a default,
+  // so a required field without one is a promise no automated writer can keep — the case is
+  // created with the field empty. Non-blocking: humans creating cases in the UI still get
+  // prompted for it, so this configuration is legal, just worth a deliberate choice.
+  const requiredWithoutDefault =
+    parsedDefinition?.success === true &&
+    !isDisplayOnlyField(parsedDefinition.data) &&
+    parsedDefinition.data.validation?.required === true &&
+    (() => {
+      const defaultValue = (parsedDefinition.data.metadata as { default?: unknown } | undefined)
+        ?.default;
+      return defaultValue === undefined || defaultValue === null || defaultValue === '';
+    })();
 
   const handleSave = useCallback(() => {
     if (!parsedDefinition?.success || identityChanged) return;
@@ -276,6 +302,45 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
               data-test-subj="fieldDefinitionYamlInput"
             />
           </EuiFormRow>
+          {!isEditing && parsedDefinition?.success === true && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="primary"
+                iconType="info"
+                title={i18n.FIELD_IDENTITY_CREATE_NOTICE_TITLE}
+                data-test-subj="fieldDefinitionIdentityNotice"
+              >
+                <p>
+                  {i18n.FIELD_IDENTITY_CREATE_NOTICE(
+                    parsedDefinition.data.name,
+                    parsedDefinition.data.type
+                  )}
+                </p>
+              </EuiCallOut>
+            </>
+          )}
+          {requiredWithoutDefault && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="warning"
+                iconType="warning"
+                title={i18n.REQUIRED_NO_DEFAULT_WARNING_TITLE}
+                data-test-subj="fieldDefinitionRequiredNoDefaultWarning"
+              >
+                <p>
+                  {isGlobal
+                    ? i18n.REQUIRED_NO_DEFAULT_WARNING_GLOBAL
+                    : i18n.REQUIRED_NO_DEFAULT_WARNING}
+                </p>
+              </EuiCallOut>
+            </>
+          )}
           <EuiSpacer size="l" />
           <EuiPanel hasBorder paddingSize="m" color="subdued">
             <EuiTitle size="xs">

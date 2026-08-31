@@ -94,16 +94,34 @@ interface StreamFlyoutPageProps extends StreamFlyoutProps {
 function StandardStreamFlyoutPage({
   loading,
   children,
-}: React.PropsWithChildren<{ loading: boolean }>) {
+  fillHeight = false,
+}: React.PropsWithChildren<{ loading: boolean; fillHeight?: boolean }>) {
   return (
-    <EuiFlyoutBody data-test-subj="streamsCanvasFlyoutBody">
+    <EuiFlyoutBody
+      data-test-subj="streamsCanvasFlyoutBody"
+      css={
+        fillHeight
+          ? css`
+              .euiFlyoutBody__overflowContent {
+                box-sizing: border-box;
+                height: 100%;
+              }
+
+              .euiFlyoutBody__overflowContent > div {
+                height: 100%;
+              }
+            `
+          : undefined
+      }
+    >
       <div
         css={css`
           padding: 25px;
+          ${fillHeight ? 'box-sizing: border-box; height: 100%;' : ''}
         `}
       >
         {loading ? (
-          <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: '100%' }}>
             <EuiLoadingSpinner data-test-subj="streamsCanvasFlyout-loading" size="xxl" />
           </EuiFlexGroup>
         ) : (
@@ -127,7 +145,7 @@ const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => Rea
   ),
   processing: (props) => <StreamProcessing {...props} />,
   attachments: (props) => (
-    <StandardStreamFlyoutPage loading={props.loading}>
+    <StandardStreamFlyoutPage loading={props.loading} fillHeight>
       <StreamAttachments {...props} />
     </StandardStreamFlyoutPage>
   ),
@@ -282,12 +300,14 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   return (
     <EuiFlyout
       size="l"
+      maxWidth={1600}
       aria-labelledby={headerId}
       onClose={onClose}
       data-test-subj="streamsCanvasFlyout"
       paddingSize="none"
       flyoutMenuProps={{
         customActions,
+        titleId: headerId,
       }}
     >
       <EuiFlyoutHeader hasBorder>
@@ -304,6 +324,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
                 min-height: 32px;
               `}
               gutterSize="s"
+              wrap
             >
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s" data-test-subj="streamsCanvasFlyoutTitle">
@@ -311,7 +332,9 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFlexGroup gutterSize="xs">{badges}</EuiFlexGroup>
+                <EuiFlexGroup responsive wrap gutterSize="xs">
+                  {badges}
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

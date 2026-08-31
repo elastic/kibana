@@ -21,12 +21,14 @@ export const getRegionPolicy = async (
 
 export const putRegionPolicy = async (
   client: ElasticsearchClient,
-  body: RegionPolicyBody
+  body: RegionPolicyBody,
+  force?: boolean
 ): Promise<RegionPolicyResponse> => {
   return client.transport.request<RegionPolicyResponse>({
     method: 'PUT',
     path: REGION_POLICY_PATH,
     body: { region_policy: body },
+    ...(force ? { querystring: { force: true } } : {}),
   });
 };
 

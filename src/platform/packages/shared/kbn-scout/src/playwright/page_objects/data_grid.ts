@@ -87,9 +87,7 @@ export class DataGrid {
   }
 
   async changeRowsPerPageTo(rowsPerPage: number, scope: DataGridPaginationScope = 'discover') {
-    await this.getPaginationContainer(scope)
-      .locator('[data-test-subj="tablePaginationPopoverButton"]')
-      .click();
+    await this.getRowsPerPageButton(scope).click();
     const option = this.page.testSubj.locator(`tablePagination-${rowsPerPage}-rows`);
     await option.waitFor({ state: 'visible' });
     await option.click();
@@ -198,6 +196,23 @@ export class DataGrid {
     );
   }
 
+  /** The "Rows per page: N" toolbar button. Absent in `singlePage` pagination mode. */
+  getRowsPerPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
+    return this.getPaginationContainer(scope).locator(
+      '[data-test-subj="tablePaginationPopoverButton"]'
+    );
+  }
+
+  getPreviousPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
+    return this.getPaginationContainer(scope).locator(
+      '[data-test-subj="pagination-button-previous"]'
+    );
+  }
+
+  getNextPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
+    return this.getPaginationContainer(scope).locator('[data-test-subj="pagination-button-next"]');
+  }
+
   async getCurrentRowHeight(scope: 'row' | 'header' = 'row'): Promise<DataGridRowHeight> {
     const buttonGroup = this.page.testSubj.locator(
       `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
@@ -211,9 +226,7 @@ export class DataGrid {
   }
 
   async getCurrentRowsPerPage(scope: DataGridPaginationScope = 'discover'): Promise<number> {
-    const buttonText = await this.getPaginationContainer(scope)
-      .locator('[data-test-subj="tablePaginationPopoverButton"]')
-      .innerText();
+    const buttonText = await this.getRowsPerPageButton(scope).innerText();
     const rowsPerPage = buttonText.match(/Rows per page:\s*(\d+)/)?.[1];
 
     if (!rowsPerPage) {
@@ -514,7 +527,7 @@ export class DataGrid {
     await expandButton.waitFor({ state: 'visible' });
     await expandButton.scrollIntoViewIfNeeded();
     await expandButton.hover();
-    await expandButton.click({ delay: 50 });
+    await expandButton.click();
   }
 
   async openGridDisplaySettings() {

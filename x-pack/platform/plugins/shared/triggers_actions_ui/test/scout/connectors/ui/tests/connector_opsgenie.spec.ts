@@ -27,7 +27,8 @@ import {
 // Per-spec index so opsgenie and jsm never share/delete the same ES index.
 const THRESHOLD_INDEX = `${THRESHOLD_TEST_INDEX}-opsgenie`;
 
-const openOpsgenieTestTab = async (page: ScoutPage, connectorId: string) => {
+const openOpsgenieTestTab = async (page: ScoutPage, connectorId: string, connectorName: string) => {
+  await searchConnectors(page, connectorName);
   await page.testSubj.click(`edit${connectorId}`);
   await page.testSubj.click('testConnectorTab');
   await page.testSubj.locator('opsgenie-subActionSelect').waitFor({ state: 'visible' });
@@ -36,6 +37,7 @@ const openOpsgenieTestTab = async (page: ScoutPage, connectorId: string) => {
 test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
   const createdConnectorIds: string[] = [];
   let testPageConnectorId: string;
+  let testPageConnectorName: string;
   let alertsConnectorName: string;
 
   test.beforeAll(async ({ apiServices, esClient }) => {
@@ -53,8 +55,9 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     await esClient.indices.refresh({ index: THRESHOLD_INDEX });
 
     // Connector for test-page tests
+    testPageConnectorName = `opsgenie-test-page-${Date.now()}`;
     const testConnector = await apiServices.alerting.connectors.create({
-      name: `opsgenie-test-page-${Date.now()}`,
+      name: testPageConnectorName,
       connectorTypeId: '.opsgenie',
       config: { apiUrl: 'https://test.opsgenie.com' },
       secrets: { apiKey: '1234' },
@@ -225,7 +228,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     await navigateToConnectors(page, kbnUrl);
     const reopenTestTab = async () => {
       await closeFlyoutIfOpen(page);
-      await openOpsgenieTestTab(page, testPageConnectorId);
+      await openOpsgenieTestTab(page, testPageConnectorId, testPageConnectorName);
     };
 
     await test.step('should show the sub action selector when in test mode', async () => {
@@ -258,7 +261,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     await navigateToConnectors(page, kbnUrl);
     const reopenTestTab = async () => {
       await closeFlyoutIfOpen(page);
-      await openOpsgenieTestTab(page, testPageConnectorId);
+      await openOpsgenieTestTab(page, testPageConnectorId, testPageConnectorName);
     };
 
     await test.step('should show the additional options when clicking more options', async () => {
@@ -337,7 +340,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     await navigateToConnectors(page, kbnUrl);
     const reopenTestTab = async () => {
       await closeFlyoutIfOpen(page);
-      await openOpsgenieTestTab(page, testPageConnectorId);
+      await openOpsgenieTestTab(page, testPageConnectorId, testPageConnectorName);
       await page.testSubj.locator('opsgenie-subActionSelect').selectOption('closeAlert');
     };
 

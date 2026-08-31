@@ -9,7 +9,7 @@
 
 import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CPSProject } from '../../../../types';
 import { ProjectPickerListItem, type ProjectPickerListItemProps } from './list_item';
@@ -44,35 +44,45 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
 
   const includedVisibleProjectIds = useMemo(() => getIncludedVisibleProjectIds(state), [state]);
 
-  const visibleProjects = useMemo(
-    () =>
-      state.visibleProjectIds
-        .map((id) => state.availableProjects.get(id))
-        .filter((project): project is CPSProject => project != null),
-    [state.visibleProjectIds, state.availableProjects]
+  const selectedProjectIdsSet = useMemo(
+    () => new Set(state.selectedProjectIds),
+    [state.selectedProjectIds]
   );
+
+  const projectsToRender = useMemo(() => {
+    // when controls are hidden, we want to show only the selected projects
+    return (state.controlsState === 'hidden' ? state.selectedProjectIds : state.visibleProjectIds)
+      .map((id) => state.availableProjects.get(id))
+      .filter((project): project is CPSProject => project != null);
+  }, [
+    state.controlsState,
+    state.selectedProjectIds,
+    state.visibleProjectIds,
+    state.availableProjects,
+  ]);
 
   const closePopover = useCallback(() => {
     buttonRef.current = null;
     setActivePopover(null);
   }, []);
 
-  const getWrappingPopoverTrigger = useCallback(
-    (kind: 'contextMenu' | 'tags') => {
-      return (project: CPSProject, evt: React.MouseEvent<unknown>) => {
-        evt.preventDefault();
+  const getWrappingPopoverTrigger = useCallback((kind: 'contextMenu' | 'tags') => {
+    return (project: CPSProject, evt: React.MouseEvent<unknown>) => {
+      evt.preventDefault();
 
-        if (activePopover?.kind === kind && activePopover.project._id === project._id) {
-          closePopover();
-          return;
+      const nextButton = evt.currentTarget as HTMLElement;
+
+      setActivePopover((prev) => {
+        if (prev?.kind === kind && prev.project._id === project._id) {
+          buttonRef.current = null;
+          return null;
         }
 
-        buttonRef.current = evt.currentTarget as HTMLElement;
-        setActivePopover({ kind, project, isVisible: true });
-      };
-    },
-    [activePopover, closePopover]
-  );
+        buttonRef.current = nextButton;
+        return { kind, project, isVisible: true };
+      });
+    };
+  }, []);
 
   const onContextMenu = useMemo<ProjectPickerListItemProps['onContextMenu']>(
     () => getWrappingPopoverTrigger('contextMenu'),
@@ -136,7 +146,7 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
   const activeProject = activePopover?.project ?? null;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {activePopover?.kind === 'contextMenu' && activeProject && buttonRef.current ? (
         <ProjectPickerListItemContextMenu
           key={`contextMenu-${activeProject._id}`}
@@ -155,22 +165,39 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
           projectTags={getProjectTags(activeProject)}
         />
       ) : null}
-      {visibleProjects.map((project) => (
-        <EuiFlexItem key={project._id} css={styles.listItemContainer}>
-          <ProjectPickerListItem
-            isSelected={state.selectedProjects.includes(project._id)}
-            isToggleDisabled={
-              state.selectedProjects.includes(project._id) && includedVisibleProjectIds.length === 1
-            }
-            toggleDisabledMessage={toggleDisabledMessage}
-            project={project}
-            onContextMenu={onContextMenu}
-            onToggle={onToggle}
-            onLabelClick={onLabelClick}
-            isReadOnly={state.isReadOnly}
+      {state.isFilterProposalPending && (
+        <EuiFlexItem grow={false}>
+          <EuiProgress
+            size="xs"
+            color="primary"
+            data-test-subj="projectPickerListLoadingIndicator"
           />
         </EuiFlexItem>
-      ))}
+      )}
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
+          {projectsToRender.map((project) => {
+            const isSelected = selectedProjectIdsSet.has(project._id);
+
+            return (
+              <EuiFlexItem key={project._id} grow={false} css={styles.listItemContainer}>
+                <ProjectPickerListItem
+                  isSelected={isSelected}
+                  isToggleDisabled={isSelected && includedVisibleProjectIds.length === 1}
+                  isInteractionsDisabled={state.isFilterProposalPending}
+                  controlsState={state.controlsState}
+                  isOriginProject={state.originProjectId === project._id}
+                  toggleDisabledMessage={toggleDisabledMessage}
+                  project={project}
+                  onContextMenu={onContextMenu}
+                  onToggle={onToggle}
+                  onLabelClick={onLabelClick}
+                />
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

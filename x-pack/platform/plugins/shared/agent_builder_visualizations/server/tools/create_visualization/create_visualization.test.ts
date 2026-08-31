@@ -8,16 +8,22 @@
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
-import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizations-server';
+import {
+  buildLensConfig,
+  buildVegaConfig,
+  selectDefaultTimeRange,
+} from '@kbn/agent-builder-visualizations-server';
 import { createVisualizationTool } from './create_visualization';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
+  selectDefaultTimeRange: jest.fn(),
 }));
 
 const mockBuildLens = buildLensConfig as jest.Mock;
 const mockBuildVega = buildVegaConfig as jest.Mock;
+const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
 
 const createLogger = (): Logger =>
   ({
@@ -94,6 +100,58 @@ describe('createVisualizationTool schema', () => {
       }).success
     ).toBe(false);
   });
+
+  it('accepts an optional time_range and rejects a partial one', () => {
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+      }).success
+    ).toBe(true);
+
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+        time_range: { from: 'now-7d', to: 'now' },
+      }).success
+    ).toBe(true);
+
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+        time_range: { from: 'now-7d' },
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects a time_range whose endpoints are not valid Kibana date math', () => {
+    const base = { query: 'errors over time', chartType: SupportedChartType.XY };
+
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: 'not-a-date' } }).success).toBe(
+      false
+    );
+    expect(
+      schema.safeParse({ ...base, time_range: { from: 'yesterday', to: 'today' } }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        ...base,
+        time_range: { from: '2026-01-02T00:00:00.000Z', to: '2026-01-01T00:00:00.000Z' },
+      }).success
+    ).toBe(false);
+
+    expect(schema.safeParse({ ...base, time_range: { from: 'now-7d', to: 'now' } }).success).toBe(
+      true
+    );
+    expect(
+      schema.safeParse({
+        ...base,
+        time_range: { from: '2024-05-20T00:00:00.000Z', to: '2024-05-24T23:59:59.999Z' },
+      }).success
+    ).toBe(true);
+  });
 });
 
 describe('createVisualizationTool handler', () => {
@@ -103,11 +161,15 @@ describe('createVisualizationTool handler', () => {
       selectedChartType: SupportedChartType.XY,
       validatedConfig: { title: 'Errors over time' },
       esqlQuery: 'FROM logs | STATS count() BY @timestamp',
-      timeRange: { from: 'now-15m', to: 'now' },
     });
     mockBuildVega.mockResolvedValue({
       spec: '{"$schema":"vega-lite"}',
       esqlQuery: 'FROM logs | STATS count() BY host',
+    });
+    mockSelectDefaultTimeRange.mockResolvedValue({
+      from: 'now-15m',
+      to: 'now',
+      mode: 'relative',
     });
   });
 
@@ -149,7 +211,24 @@ describe('createVisualizationTool handler', () => {
     expect(data.visualization).toEqual({ spec: '{"$schema":"vega-lite"}' });
     expect(data.esql).toBe('FROM logs | STATS count() BY host');
     expect(data.chart_type).toBeUndefined();
+    expect(data.time_range).toEqual({ from: 'now-15m', to: 'now' });
     expect(data.query).toBeUndefined();
+  });
+
+  it('omits time_range when selectDefaultTimeRange returns undefined', async () => {
+    mockSelectDefaultTimeRange.mockResolvedValue(undefined);
+
+    const { result, attachments } = await runHandler({
+      query: 'errors over time',
+      chartType: SupportedChartType.XY,
+    });
+
+    expect(result.results[0].data.time_range).toBeUndefined();
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ time_range: expect.anything() }),
+      })
+    );
   });
 
   it('keeps the existing renderer when updating by attachment id', async () => {
@@ -182,6 +261,7 @@ describe('createVisualizationTool handler', () => {
     expect(mockBuildVega).toHaveBeenCalledWith(
       expect.objectContaining({ existingSpec: '{"old":true}' })
     );
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
     expect(attachments.update).toHaveBeenCalledWith(
       'existing',
       expect.objectContaining({ data: expect.objectContaining({ renderer: 'vega' }) })
@@ -193,6 +273,97 @@ describe('createVisualizationTool handler', () => {
     expect(data.renderer).toBe('vega');
     expect(data.attachment_id).toBe('existing');
     expect(data.version).toBe(2);
+    expect(data.time_range).toBeUndefined();
+  });
+
+  it('reuses the existing time_range on edit instead of probing', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+            time_range: { from: 'now-7d', to: 'now' },
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'make it a line chart', attachment_id: 'existing' },
+      { attachments }
+    );
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }),
+      })
+    );
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+  });
+
+  it('uses an explicit time_range on create and skips the data-aware probe', async () => {
+    const { result, attachments } = await runHandler({
+      query: 'errors over the last 7 days',
+      chartType: SupportedChartType.XY,
+      time_range: { from: 'now-7d', to: 'now' },
+    });
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }),
+      })
+    );
+  });
+
+  it('uses an explicit time_range on edit instead of the stored range', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+            time_range: { from: 'now-24h', to: 'now' },
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      {
+        query: 'show the last 30 days',
+        attachment_id: 'existing',
+        time_range: { from: 'now-30d', to: 'now' },
+      },
+      { attachments }
+    );
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-30d', to: 'now' });
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-30d', to: 'now' } }),
+      })
+    );
   });
 
   it('returns an error when the attachment to update does not exist', async () => {

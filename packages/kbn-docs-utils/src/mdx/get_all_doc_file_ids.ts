@@ -9,7 +9,7 @@
 
 import Fsp from 'fs/promises';
 
-import globby from 'globby';
+import { globby } from 'globby';
 import { asyncMapWithLimit } from '@kbn/std';
 import { parse } from 'yaml';
 

@@ -69,6 +69,85 @@ describe('validateTemplateDefinitionYaml', () => {
     expect(result.success).toBe(false);
   });
 
+  describe('authoring-charset check', () => {
+    it('rejects a field name that produces an invalid storage key', () => {
+      const result = validateTemplateDefinitionYaml(
+        COMPLETE_DEFINITION.replace('name: effort', 'name: bad-name')
+      );
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.message).toContain('bad-name');
+      }
+    });
+
+    describe('grandfathering (existingDefinition)', () => {
+      const LEGACY_DEFINITION = COMPLETE_DEFINITION.replace('name: effort', 'name: legacy-field');
+
+      const WITH_BRAND_NEW_FIELD = `name: Case default title
+description: ""
+severity: low
+category: ""
+tags: []
+assignees: []
+settings:
+  syncAlerts: false
+  extractObservables: false
+connector:
+  type: .none
+  id: none
+  fields: null
+fields:
+  - name: legacy-field
+    control: INPUT_NUMBER
+    label: Effort
+    type: integer
+  - name: brand-new field
+    control: INPUT_TEXT
+    label: Brand New
+    type: keyword
+`;
+
+      it('accepts an untouched field whose name predates the authoring-charset rule', () => {
+        // Same definition, unchanged — editing a template with a pre-existing invalid name must
+        // not permanently disable Save for edits that never touch the offending field.
+        const result = validateTemplateDefinitionYaml(LEGACY_DEFINITION, LEGACY_DEFINITION);
+        expect(result.success).toBe(true);
+      });
+
+      it('still rejects a brand-new invalid field name even with an existingDefinition', () => {
+        const result = validateTemplateDefinitionYaml(WITH_BRAND_NEW_FIELD, LEGACY_DEFINITION);
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.message).toContain('brand-new field');
+        }
+      });
+
+      it('rejects the same invalid name when creating (no existingDefinition to grandfather against)', () => {
+        const result = validateTemplateDefinitionYaml(LEGACY_DEFINITION);
+        expect(result.success).toBe(false);
+      });
+
+      it('rejects an underscore twin of a stored hyphenated field name', () => {
+        const withUnderscoreTwin = WITH_BRAND_NEW_FIELD.replace(
+          'name: brand-new field',
+          'name: legacy_field'
+        );
+        const result = validateTemplateDefinitionYaml(withUnderscoreTwin, LEGACY_DEFINITION);
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.message).toContain('legacy_field');
+          expect(result.message).toContain('legacy-field');
+        }
+      });
+
+      it('falls back to fully strict when existingDefinition fails to parse', () => {
+        const result = validateTemplateDefinitionYaml(LEGACY_DEFINITION, 'not: valid: yaml: [');
+        expect(result.success).toBe(false);
+      });
+    });
+  });
+
   describe('completeness (editor-only)', () => {
     it('rejects a definition missing the fields block', () => {
       const withoutFields = COMPLETE_DEFINITION.replace(

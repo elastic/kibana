@@ -262,6 +262,151 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.total).toBe(1);
   });
 
+  it('matches dependency features by source or target when feature IDs are requested', async () => {
+    const res = await searchKnowledgeIndicators({
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency'],
+        feature_ids: ['orders-api'],
+      },
+      getStreamNames: async () => ['logs.test'],
+      getFeatures: async () => [
+        makeFeature({
+          id: 'orders-api-storage',
+          type: 'dependency',
+          properties: {
+            source: 'orders-api',
+            target: 'storage',
+            protocol: 'tcp',
+          },
+        }),
+        makeFeature({
+          id: 'unrelated-dependency',
+          type: 'dependency',
+          properties: {
+            source: 'users-api',
+            target: 'identity',
+            protocol: 'http',
+          },
+        }),
+      ],
+      getQueries: async () => [],
+    });
+
+    expect(res.knowledge_indicators).toEqual([
+      expect.objectContaining({
+        kind: 'feature',
+        feature: expect.objectContaining({ id: 'orders-api-storage' }),
+      }),
+    ]);
+  });
+
+  it('matches entity features by name when connected via a dependency endpoint', async () => {
+    const res = await searchKnowledgeIndicators({
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency', 'entity'],
+        feature_ids: ['orders-api'],
+      },
+      getStreamNames: async () => ['logs.test'],
+      getFeatures: async () => [
+        makeFeature({
+          id: 'orders-api-storage',
+          type: 'dependency',
+          properties: {
+            source: 'orders-api',
+            target: 'storage',
+            protocol: 'tcp',
+          },
+        }),
+        makeFeature({
+          id: 'storage-entity',
+          type: 'entity',
+          properties: {
+            name: 'storage',
+            technology: 'redis',
+          },
+        }),
+        makeFeature({
+          id: 'unrelated-entity',
+          type: 'entity',
+          properties: {
+            name: 'identity-service',
+            technology: 'nodejs',
+          },
+        }),
+      ],
+      getQueries: async () => [],
+    });
+
+    const ids = res.knowledge_indicators.map((ki) =>
+      ki.kind === 'feature' ? ki.feature.id : null
+    );
+    expect(ids).toContain('orders-api-storage');
+    expect(ids).toContain('storage-entity');
+    expect(ids).not.toContain('unrelated-entity');
+  });
+
+  it('expands entity features when feature_ids seeds a dependency by feature ID', async () => {
+    const res = await searchKnowledgeIndicators({
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency', 'entity'],
+        feature_ids: ['frontend-balancereader-http'],
+      },
+      getStreamNames: async () => ['logs.test'],
+      getFeatures: async () => [
+        makeFeature({
+          id: 'frontend-balancereader-http',
+          type: 'dependency',
+          properties: { source: 'frontend', target: 'balancereader', protocol: 'http' },
+        }),
+        makeFeature({
+          id: 'balancereader-entity',
+          type: 'entity',
+          properties: { name: 'balancereader', technology: 'java' },
+        }),
+        makeFeature({
+          id: 'unrelated-entity',
+          type: 'entity',
+          properties: { name: 'redis-cache', technology: 'redis' },
+        }),
+      ],
+      getQueries: async () => [],
+    });
+
+    const ids = res.knowledge_indicators.map((ki) =>
+      ki.kind === 'feature' ? ki.feature.id : null
+    );
+    expect(ids).toContain('frontend-balancereader-http');
+    expect(ids).toContain('balancereader-entity');
+    expect(ids).not.toContain('unrelated-entity');
+  });
+
+  it('includes infrastructure features only when their ID is in feature_ids', async () => {
+    const res = await searchKnowledgeIndicators({
+      params: {
+        kind: ['feature'],
+        feature_types: ['infrastructure', 'entity'],
+        feature_ids: ['k8s-node-1'],
+      },
+      getStreamNames: async () => ['logs.test'],
+      getFeatures: async () => [
+        makeFeature({ id: 'k8s-node-1', type: 'infrastructure', properties: {} }),
+        makeFeature({ id: 'k8s-node-2', type: 'infrastructure', properties: {} }),
+        makeFeature({ id: 'some-entity', type: 'entity', properties: { name: 'svc' } }),
+      ],
+      getQueries: async () => [],
+    });
+
+    const ids = res.knowledge_indicators.map((ki) =>
+      ki.kind === 'feature' ? ki.feature.id : null
+    );
+    expect(ids).toContain('k8s-node-1');
+    expect(ids).not.toContain('k8s-node-2');
+    expect(ids).not.toContain('some-entity');
+  });
+
   it('calls onFeatureFetchError when a stream feature fetch fails', async () => {
     const onFeatureFetchError = jest.fn();
 

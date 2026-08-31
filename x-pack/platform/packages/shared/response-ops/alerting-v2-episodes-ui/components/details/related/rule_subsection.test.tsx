@@ -96,7 +96,11 @@ describe('RelatedEpisodesRuleSubsection', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('alertingV2RelatedEpisodesRuleLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2RelatedEpisodesRuleLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('shows the empty state when there are no episodes', () => {

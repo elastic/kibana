@@ -29,6 +29,7 @@ import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
+import type { CasesClientSource } from './types';
 import type { CasesFindRequestWithCustomFields, CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
@@ -65,15 +66,18 @@ import {
 } from '../cases_analytics_v2';
 import { CasesEventBus } from '../events/event_bus';
 
-const createCasesEventBusMock = (): CasesEventBus => {
+export const createCasesEventBusMock = (): CasesEventBus => {
   return {
     ...new CasesEventBus(),
     emitCaseCreated: jest.fn(),
     emitCaseUpdated: jest.fn(),
     emitAttachmentsAdded: jest.fn(),
+    emitAlertStatusChanged: jest.fn(),
     onCaseCreated: jest.fn(),
     onCaseUpdated: jest.fn(),
     onAttachmentsAdded: jest.fn(),
+    onAlertStatusChanged: jest.fn(),
+    hasAlertStatusChangedListeners: jest.fn().mockReturnValue(false),
   };
 };
 
@@ -294,6 +298,7 @@ export const createCasesClientMockArgs = () => {
     },
     casesEventBus: createCasesEventBusMock(),
     request: httpServerMock.createKibanaRequest(),
+    clientSource: 'rest_api' as CasesClientSource,
   };
 };
 

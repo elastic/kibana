@@ -17,7 +17,7 @@ import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
 let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
 
-jest.mock('@kbn/ui-chrome-layout-utils', () => ({
+jest.mock('@kbn/ui-chrome-layout', () => ({
   useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
 }));
 
@@ -76,6 +76,27 @@ describe('AppMenu', () => {
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
+    });
+
+    it('does not render a React node passed as an item label', () => {
+      render(
+        <AppMenuComponent
+          config={{
+            items: [
+              {
+                id: 'hack',
+                label: <span data-test-subj="hacked-menu-label">hack</span>,
+                run: jest.fn(),
+                iconType: 'gear',
+              } as unknown as AppMenuItemType,
+              { id: 'ok', label: 'Settings', run: jest.fn(), iconType: 'gear' },
+            ],
+          }}
+        />
+      );
+
+      expect(screen.queryByTestId('hacked-menu-label')).not.toBeInTheDocument();
+      expect(screen.getByText('Settings')).toBeInTheDocument();
     });
   });
 

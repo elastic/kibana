@@ -19,7 +19,13 @@ import {
   READ_ROLE,
 } from '../../../common/roles';
 
-const ALL_APPS: readonly AlertingApp[] = ['rules', 'alerts', 'actionPolicies', 'executionHistory'];
+const ALL_APPS: readonly AlertingApp[] = [
+  'rules',
+  'ruleLibrary',
+  'alerts',
+  'actionPolicies',
+  'executionHistory',
+];
 
 const complement = (all: readonly AlertingApp[], subset: readonly AlertingApp[]): AlertingApp[] =>
   all.filter((app) => !subset.includes(app));
@@ -66,8 +72,8 @@ test.describe('Management pages - required privileges', { tag: tags.deploymentAg
   );
 
   test(
-    'user with rules read-only role can only view the Rules page',
-    accessTestBody(ALERTING_V2_RULES_READ_ROLE, ['rules'])
+    'user with rules read-only role can view the Rules and Rule library pages',
+    accessTestBody(ALERTING_V2_RULES_READ_ROLE, ['rules', 'ruleLibrary'])
   );
 
   test(

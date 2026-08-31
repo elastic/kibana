@@ -29,13 +29,6 @@ jest.mock('../../../common/hooks/use_breadcrumbs', () => ({
   useBreadcrumbs: jest.fn(),
 }));
 
-const mockUseIsExperimentalFeatureEnabled = jest.fn();
-jest.mock('../../../common/experimental_features_context', () => ({
-  ...jest.requireActual('../../../common/experimental_features_context'),
-  useIsExperimentalFeatureEnabled: (feature: string) =>
-    mockUseIsExperimentalFeatureEnabled(feature),
-}));
-
 let capturedOnDirtyStateChange: ((isDirty: boolean) => void) | undefined;
 let capturedIsReadOnly: boolean | undefined;
 let capturedIsPrebuilt: boolean | undefined;
@@ -76,9 +69,6 @@ jest.mock('../../../packs/use_copy_pack', () => ({
 }));
 
 jest.mock('../../../components/layouts', () => ({
-  WithHeaderLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="with-header-layout">{children}</div>
-  ),
   fullWidthFormContentCss: {},
 }));
 
@@ -127,7 +117,6 @@ const setPermissions = (osquery: Record<string, boolean>) => {
 };
 
 const setupDefaultMocks = () => {
-  mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   mockUsePack.mockReturnValue({ isLoading: false, data: mockPackData, error: null });
   mockUseDeletePack.mockReturnValue({ mutateAsync: mockDeleteMutateAsync, isLoading: false });
   mockUseCopyPack.mockReturnValue({ mutateAsync: mockCopyMutateAsync, isLoading: false });
@@ -216,14 +205,6 @@ describe('EditPackPage', () => {
 
       expect(mockCopyMutateAsync).toHaveBeenCalledTimes(1);
       expect(screen.queryByText('You have unsaved changes')).not.toBeInTheDocument();
-    });
-
-    it('does not render the Duplicate pack button when queryHistoryRework feature flag is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
-      renderPage();
-
-      expect(screen.queryByText('Duplicate pack')).not.toBeInTheDocument();
     });
   });
 

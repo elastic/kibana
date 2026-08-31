@@ -11,6 +11,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { loggerMock } from '@kbn/logging-mocks';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Type } from 'apache-arrow/Arrow.node';
 import type {
   PipelineStateStream,
   RuleExecutionInput,
@@ -24,6 +25,7 @@ import type { AlertEvent } from '../resources/datastreams/alert_events';
 import type { RuleExecutionPipelineInput } from './rule_executor/execution_pipeline';
 import { createExecutionContext } from './execution_context';
 import type { RuleSavedObjectAttributes } from '../saved_objects';
+import { createLoggerService } from './services/logger_service/logger_service.mock';
 
 /**
  * Creates a mock Elasticsearch client.
@@ -125,6 +127,11 @@ export function createRuleExecutionPipelineInput(
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionUuid: 'execution-uuid',
     abortSignal: new AbortController().signal,
+    logger: createLoggerService().loggerService.forSubsystem('ruleExecutor').withLabels({
+      rule_id: 'rule-1',
+      space_id: 'default',
+      task_id: 'task-1',
+    }),
     ...overrides,
   };
 }
@@ -132,6 +139,11 @@ export function createRuleExecutionPipelineInput(
 export function createRulePipelineState(state?: Partial<RulePipelineState>): RulePipelineState {
   return {
     input: createRuleExecutionInput(),
+    logger: createLoggerService().loggerService.forSubsystem('ruleExecutor').withLabels({
+      rule_id: 'rule-1',
+      space_id: 'default',
+      task_id: 'task-1',
+    }),
     ...state,
   };
 }
@@ -189,6 +201,7 @@ export function createEsqlResponse(
 export interface MockArrowBatch {
   numRows: number;
   rows: Array<Record<string, unknown>>;
+  timestampColumns?: string[];
 }
 
 export interface MockArrowReader {
@@ -196,6 +209,7 @@ export interface MockArrowReader {
   cancel: jest.Mock<Promise<void>, []>;
   [Symbol.asyncIterator]: () => AsyncIterator<{
     numRows: number;
+    schema: { fields: Array<{ name: string; typeId: number }> };
     toArray: () => Array<{ toJSON: () => Record<string, unknown> }>;
   }>;
 }
@@ -213,8 +227,15 @@ export function createMockArrowReader(batches: MockArrowBatch[]): MockArrowReade
     }),
     async *[Symbol.asyncIterator]() {
       for (const batch of batches) {
+        const fieldNames = Array.from(new Set(batch.rows.flatMap((row) => Object.keys(row))));
         yield {
           numRows: batch.numRows,
+          schema: {
+            fields: fieldNames.map((name) => ({
+              name,
+              typeId: batch.timestampColumns?.includes(name) ? Type.Timestamp : Type.Utf8,
+            })),
+          },
           toArray: () =>
             batch.rows.map((row) => ({
               toJSON: () => row,

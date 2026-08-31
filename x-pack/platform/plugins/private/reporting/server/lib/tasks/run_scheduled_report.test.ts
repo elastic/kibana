@@ -8,6 +8,8 @@
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { isExternalUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { CancellationToken } from '@kbn/reporting-common';
 import { JOB_STATUS, KibanaShuttingDownError, QueueTimeoutError } from '@kbn/reporting-common';
@@ -426,6 +428,86 @@ describe('Run Scheduled Report Task', () => {
     expect(runTaskFn.mock.calls[0][0].request.headers).toEqual({
       authorization: 'ApiKey skdjtq4u543yt3rhewrh',
     });
+  });
+
+  it('re-marks the rebuilt request when the task manager fake request carries an external UIAM credential', async () => {
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    // The real thing Task Manager hands to the runner: a fake KibanaRequest whose
+    // external-credential verdict is bound to the request object, not its headers.
+    const markedRequestFromTask = kibanaRequestFactory(fakeRawRequest);
+    markExternalUiamCredential(markedRequestFromTask);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test1',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: markedRequestFromTask,
+    } as unknown as RunContext);
+
+    await taskRunner.run();
+
+    const rebuiltRequest = runTaskFn.mock.calls[0][0].request;
+    expect(rebuiltRequest).not.toBe(markedRequestFromTask);
+    expect(rebuiltRequest.headers).toEqual({
+      authorization: 'ApiKey skdjtq4u543yt3rhewrh',
+    });
+    expect(isExternalUiamCredential(rebuiltRequest)).toBe(true);
+  });
+
+  it('does not mark the rebuilt request when the task manager fake request is not marked', async () => {
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    const unmarkedRequestFromTask = kibanaRequestFactory(fakeRawRequest);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test1',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: unmarkedRequestFromTask,
+    } as unknown as RunContext);
+
+    await taskRunner.run();
+
+    expect(isExternalUiamCredential(runTaskFn.mock.calls[0][0].request)).toBe(false);
   });
 
   it('sends telemetry event when job is claimed', async () => {
