@@ -165,14 +165,14 @@ export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShel
               {help}
             </div>
           )}
-          {actions && (
-            <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
-              {actions}
-            </div>
-          )}
           {userMenu && (
             <div css={styles.userMenuSlot} data-test-subj="chromeNextGlobalHeaderUserMenu">
               {userMenu}
+            </div>
+          )}
+          {actions && (
+            <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
+              {actions}
             </div>
           )}
         </div>
