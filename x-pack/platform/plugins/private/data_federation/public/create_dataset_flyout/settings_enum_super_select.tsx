@@ -7,11 +7,13 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonIcon, EuiFormRow, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import type { Control, FieldPath, RegisterOptions } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
+import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import { useDatasetSettingDefaultHint } from './dataset_settings_default_hints';
 import { buildSuperSelectOption } from './dataset_settings_super_select_utils';
 
 export interface SettingsEnumSuperSelectProps<T extends string> {
@@ -36,10 +38,14 @@ export function SettingsEnumSuperSelect<T extends string>({
   rules,
 }: SettingsEnumSuperSelectProps<T>): ReturnType<FunctionComponent> {
   const { field, fieldState } = useController({ name, control, rules });
+  const defaultHint = useDatasetSettingDefaultHint(name);
 
   const superSelectOptions = useMemo(
-    () => options.map((option) => buildSuperSelectOption(option)),
-    [options]
+    () =>
+      options.map((option) =>
+        buildSuperSelectOption({ ...option, isDefault: option.value === defaultHint?.value })
+      ),
+    [defaultHint?.value, options]
   );
 
   const hasValue = Boolean(field.value);
@@ -58,12 +64,29 @@ export function SettingsEnumSuperSelect<T extends string>({
         fullWidth
         compressed
         aria-label={label}
-        placeholder={placeholder}
+        placeholder={defaultHint?.placeholder ?? placeholder}
         valueOfSelected={hasValue ? (field.value as T) : undefined}
         onChange={(value) => field.onChange(value)}
         name={field.name}
         buttonRef={field.ref}
         isInvalid={Boolean(fieldState.error)}
+        append={
+          defaultHint && hasValue ? (
+            <EuiToolTip
+              content={createDatasetFlyoutStrings.settingsClearToDefault(label)}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                size="xs"
+                aria-label={createDatasetFlyoutStrings.settingsClearToDefault(label)}
+                data-test-subj={`${dataTestSubj}ClearToDefault`}
+                onClick={() => field.onChange('')}
+              />
+            </EuiToolTip>
+          ) : undefined
+        }
       />
     </EuiFormRow>
   );

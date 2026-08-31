@@ -17,22 +17,12 @@ import {
 } from '../create_dataset_flyout/settings_custom_json_utils';
 import { createDatasetFlyoutStrings } from '../create_dataset_flyout/create_dataset_flyout_i18n';
 import { getDefaultSettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
+import { getSettingDefaultLabel } from '../create_dataset_flyout/dataset_settings_default_hints';
+import { FORMAT_SUPER_SELECT_OPTIONS } from '../create_dataset_flyout/dataset_settings_options';
 import {
-  DELIMITER_PRESETS,
-  DATETIME_FORMAT_PRESETS,
-  ENCODING_PRESETS,
-  ERROR_MODE_SUPER_SELECT_OPTIONS,
-  FORMAT_SUPER_SELECT_OPTIONS,
-  HEADER_ROW_SUPER_SELECT_OPTIONS,
-  MODE_SUPER_SELECT_OPTIONS,
-  MULTI_VALUE_SYNTAX_SUPER_SELECT_OPTIONS,
-  NULL_VALUE_PRESETS,
-  OPTIMIZED_READER_SUPER_SELECT_OPTIONS,
-  PARTITION_DETECTION_SUPER_SELECT_OPTIONS,
-  PARTITION_PATH_PRESETS,
-  SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS,
-} from '../create_dataset_flyout/dataset_settings_options';
-import type { DatasetSettingsFieldId } from '../create_dataset_flyout/dataset_settings_visibility';
+  formatSettingsFieldDisplayValue,
+  getDatasetSettingsFieldLabel,
+} from '../create_dataset_flyout/dataset_settings_value_labels';
 import {
   DATASET_SETTINGS_FIELD_IDS,
   isFieldVisibleForErrorMode,
@@ -43,7 +33,9 @@ import { datasetWizardStrings } from './dataset_wizard_i18n';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
+  hasDatasetWizardRegionField,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
@@ -107,106 +99,6 @@ export const buildDatasetRequestText = (values: DatasetWizardFormValues): string
   return `${endpoint}\n${body}`;
 };
 
-export const getDatasetSettingsFieldLabel = (fieldId: DatasetSettingsFieldId): string => {
-  switch (fieldId) {
-    case 'partition_detection':
-      return createDatasetFlyoutStrings.settingsPartitionDetectionLabel();
-    case 'partition_path':
-      return createDatasetFlyoutStrings.settingsPartitionPathLabel();
-    case 'schema_sample_size':
-      return createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel();
-    case 'schema_resolution':
-      return createDatasetFlyoutStrings.settingsSchemaResolutionLabel();
-    case 'delimiter':
-      return createDatasetFlyoutStrings.settingsDelimiterLabel();
-    case 'mode':
-      return createDatasetFlyoutStrings.settingsModeLabel();
-    case 'quote':
-      return createDatasetFlyoutStrings.settingsQuoteLabel();
-    case 'escape':
-      return createDatasetFlyoutStrings.settingsEscapeLabel();
-    case 'comment':
-      return createDatasetFlyoutStrings.settingsCommentLabel();
-    case 'encoding':
-      return createDatasetFlyoutStrings.settingsEncodingLabel();
-    case 'header_row':
-      return createDatasetFlyoutStrings.settingsHeaderRowLabel();
-    case 'column_prefix':
-      return createDatasetFlyoutStrings.settingsColumnPrefixLabel();
-    case 'null_value':
-      return createDatasetFlyoutStrings.settingsNullValueLabel();
-    case 'datetime_format':
-      return createDatasetFlyoutStrings.settingsDatetimeFormatLabel();
-    case 'multi_value_syntax':
-      return createDatasetFlyoutStrings.settingsMultiValueSyntaxLabel();
-    case 'error_mode':
-      return createDatasetFlyoutStrings.settingsErrorModeLabel();
-    case 'max_errors':
-      return createDatasetFlyoutStrings.settingsMaxErrorsLabel();
-    case 'max_error_ratio':
-      return createDatasetFlyoutStrings.settingsMaxErrorRatioLabel();
-    case 'max_field_size':
-      return createDatasetFlyoutStrings.settingsMaxFieldSizeLabel();
-    case 'segment_size':
-      return createDatasetFlyoutStrings.settingsSegmentSizeLabel();
-    case 'optimized_reader':
-      return createDatasetFlyoutStrings.settingsOptimizedReaderLabel();
-    case 'late_materialization':
-      return createDatasetFlyoutStrings.settingsLateMaterializationLabel();
-  }
-};
-
-const lookupOptionLabel = <T extends string>(
-  value: string,
-  options: Array<{ value: T; label: string }>
-): string | undefined => options.find((option) => option.value === value)?.label;
-
-const lookupPresetLabel = (
-  value: string,
-  presets: Array<{ value: string; label: string }>
-): string => presets.find((preset) => preset.value === value)?.label ?? value;
-
-export const formatSettingsFieldDisplayValue = (
-  fieldId: DatasetSettingsFieldId,
-  value: string
-): string => {
-  switch (fieldId) {
-    case 'partition_detection':
-      return lookupOptionLabel(value, PARTITION_DETECTION_SUPER_SELECT_OPTIONS()) ?? value;
-    case 'schema_resolution':
-      return lookupOptionLabel(value, SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS()) ?? value;
-    case 'header_row':
-    case 'optimized_reader':
-    case 'late_materialization':
-      return (
-        lookupOptionLabel(
-          value,
-          fieldId === 'header_row'
-            ? HEADER_ROW_SUPER_SELECT_OPTIONS()
-            : OPTIMIZED_READER_SUPER_SELECT_OPTIONS()
-        ) ?? value
-      );
-    case 'mode':
-      return lookupOptionLabel(value, MODE_SUPER_SELECT_OPTIONS()) ?? value;
-    case 'error_mode':
-      return lookupOptionLabel(value, ERROR_MODE_SUPER_SELECT_OPTIONS()) ?? value;
-    case 'multi_value_syntax':
-      return lookupOptionLabel(value, MULTI_VALUE_SYNTAX_SUPER_SELECT_OPTIONS()) ?? value;
-    case 'delimiter':
-      return lookupPresetLabel(value, DELIMITER_PRESETS());
-    case 'encoding':
-      return lookupPresetLabel(value, ENCODING_PRESETS());
-    case 'null_value':
-      return lookupPresetLabel(value, NULL_VALUE_PRESETS());
-    case 'datetime_format':
-      return lookupPresetLabel(value, DATETIME_FORMAT_PRESETS());
-    case 'partition_path':
-      return lookupPresetLabel(value, PARTITION_PATH_PRESETS());
-    default:
-      return value;
-  }
-};
-
 const getFormatLabel = (
   format: Exclude<DatasetWizardFormValues['settings']['format'], ''>
 ): string => {
@@ -245,7 +137,8 @@ const countManualMappingFields = (mappings: Record<string, object>): number => {
 
 export const getReviewLogisticsRows = (
   values: DatasetWizardFormValues,
-  dataSources: DataSource[]
+  dataSources: DataSource[],
+  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
 ): ReviewSummaryRow[] => {
   const selectedDataSource = dataSources.find(
     (dataSource) => dataSource.name === values.data_source
@@ -275,7 +168,7 @@ export const getReviewLogisticsRows = (
     },
   ];
 
-  if (values.region.trim()) {
+  if (hasDatasetWizardRegionField(flowVariant) && values.region.trim()) {
     rows.push({
       label: datasetWizardStrings.regionLabel(),
       displayValue: getAwsRegionLabel(values.region),
@@ -288,7 +181,8 @@ export const getReviewLogisticsRows = (
 export const getReviewSettingsRows = (
   settings: DatasetWizardFormValues['settings'],
   resource: string,
-  customJson?: string
+  customJson?: string,
+  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
 ): ReviewSummaryRow[] => {
   const format = settings.format;
   if (!format) {
@@ -299,6 +193,7 @@ export const getReviewSettingsRows = (
     ? applyCustomJsonToFormSettings(settings, customJson)
     : settings;
   const defaults = getDefaultSettingsForFormat(format);
+  const showUnsetAsDefaults = isDatasetWizardFlow396(flowVariant);
   const inferredFormat = inferFormatFromResource(resource);
   const formatBadge =
     inferredFormat && inferredFormat === format ? undefined : ('modified' as const);
@@ -321,6 +216,20 @@ export const getReviewSettingsRows = (
 
     const value = effectiveSettings[fieldId];
     if (!value || (typeof value === 'string' && value.trim() === '')) {
+      // Flows that leave defaults as placeholders still owe the reader the
+      // value Elasticsearch will apply.
+      const defaultLabel = showUnsetAsDefaults
+        ? getSettingDefaultLabel(fieldId, format)
+        : undefined;
+
+      if (defaultLabel) {
+        rows.push({
+          label: getDatasetSettingsFieldLabel(fieldId),
+          displayValue: defaultLabel,
+          badge: 'default',
+        });
+      }
+
       continue;
     }
 

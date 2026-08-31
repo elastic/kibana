@@ -14,6 +14,8 @@ import { useController } from 'react-hook-form';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
+import { useDatasetSettingDefaultHint } from './dataset_settings_default_hints';
+import { DefaultOptionBadge } from './dataset_settings_super_select_utils';
 
 export interface SettingsPresetComboBoxProps {
   control: Control<CreateDatasetFormValues>;
@@ -26,6 +28,7 @@ export interface SettingsPresetComboBoxProps {
   rules?: RegisterOptions<CreateDatasetFormValues, FieldPath<CreateDatasetFormValues>>;
 }
 
+/** Rebuilt rather than reused so the default badge stays in the dropdown list. */
 const buildSelectedOptions = (
   value: string,
   comboBoxOptions: Array<EuiComboBoxOptionOption<string>>
@@ -35,11 +38,8 @@ const buildSelectedOptions = (
   }
 
   const matchingOption = comboBoxOptions.find((option) => option.value === value);
-  if (matchingOption) {
-    return [matchingOption];
-  }
 
-  return [{ label: value, value }];
+  return [{ label: matchingOption?.label ?? value, value }];
 };
 
 export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxProps> = ({
@@ -53,14 +53,16 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
   rules,
 }) => {
   const { field, fieldState } = useController({ name, control, rules });
+  const defaultHint = useDatasetSettingDefaultHint(name);
 
   const comboBoxOptions = useMemo(
     () =>
       presets.map((preset) => ({
         label: preset.label,
         value: preset.value,
+        ...(preset.value === defaultHint?.value ? { append: <DefaultOptionBadge /> } : {}),
       })),
-    [presets]
+    [defaultHint?.value, presets]
   );
 
   const selectedOptions = useMemo(
@@ -104,7 +106,7 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
         isClearable
         isInvalid={Boolean(fieldState.error)}
         aria-label={label}
-        placeholder={placeholder}
+        placeholder={defaultHint?.placeholder ?? placeholder}
         singleSelection={{ asPlainText: true }}
         customOptionText={createDatasetFlyoutStrings.settingsPresetCustomOptionText()}
         inputRef={field.ref}

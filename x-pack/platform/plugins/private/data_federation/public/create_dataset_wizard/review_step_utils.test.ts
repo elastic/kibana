@@ -12,6 +12,7 @@ import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/c
 import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
@@ -46,7 +47,7 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.parquet',
       settings: {
         format: 'parquet',
-        partition_detection: 'hive',
+        partition_detection: 'auto',
         schema_resolution: 'union_by_name',
         error_mode: 'fail_fast',
         optimized_reader: true,
@@ -85,7 +86,7 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.parquet',
       settings: {
         format: 'csv',
-        partition_detection: 'none',
+        partition_detection: 'auto',
         schema_resolution: 'union_by_name',
         delimiter: ',',
         mode: 'quoted',
@@ -118,14 +119,14 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.tsv',
       settings: {
         format: 'tsv',
-        partition_detection: 'none',
+        partition_detection: 'auto',
         schema_resolution: 'union_by_name',
         delimiter: '\t',
         mode: 'plain',
         header_row: true,
         encoding: 'UTF-8',
-        quote: '"',
-        escape: '\\',
+        quote: 'none',
+        escape: 'none',
         comment: '//',
         column_prefix: 'col',
         datetime_format: 'ISO-8601',
@@ -151,10 +152,10 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.ndjson',
       settings: {
         format: 'ndjson',
-        partition_detection: 'none',
+        partition_detection: 'auto',
         schema_resolution: 'union_by_name',
         schema_sample_size: 20000,
-        datetime_format: 'ISO-8601',
+        datetime_format: 'strict_date_optional_time',
         error_mode: 'fail_fast',
         segment_size: '4mb',
       },
@@ -175,7 +176,7 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.orc',
       settings: {
         format: 'orc',
-        partition_detection: 'hive',
+        partition_detection: 'auto',
         schema_resolution: 'union_by_name',
         error_mode: 'fail_fast',
       },
@@ -260,16 +261,55 @@ describe('review_step_utils', () => {
     const rows = getReviewSettingsRows(
       settings,
       's3://obs-logs-prod/**/*.parquet',
-      '{ "partition_detection": "auto" }'
+      '{ "partition_detection": "hive" }'
     );
     const partitionDetectionRow = rows.find((row) => row.label === 'Partition detection');
 
     expect(partitionDetectionRow).toEqual(
       expect.objectContaining({
-        displayValue: 'Auto',
+        displayValue: 'Hive',
         badge: 'modified',
       })
     );
+  });
+
+  it('shows the values Elasticsearch will apply for settings left unset in flow 3 9.6', () => {
+    const settings = {
+      ...emptyCreateDatasetSettingsFormValues(),
+      format: 'csv' as const,
+      delimiter: ';',
+    };
+
+    const rows = getReviewSettingsRows(
+      settings,
+      's3://obs-logs-prod/**/*.csv',
+      undefined,
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6
+    );
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ displayValue: 'Semicolon (;)', badge: 'modified' }),
+        expect.objectContaining({
+          label: 'Partition detection',
+          displayValue: 'Auto',
+          badge: 'default',
+        }),
+        expect.objectContaining({ label: 'Encoding', displayValue: 'UTF-8', badge: 'default' }),
+      ])
+    );
+  });
+
+  it('omits unset settings from summary rows in flows that pre-fill their defaults', () => {
+    const settings = {
+      ...emptyCreateDatasetSettingsFormValues(),
+      format: 'csv' as const,
+      delimiter: ';',
+    };
+
+    const rows = getReviewSettingsRows(settings, 's3://obs-logs-prod/**/*.csv');
+
+    expect(rows.find((row) => row.label === 'Encoding')).toBeUndefined();
   });
 
   it('returns automatic schema mapping rows when inferred field types were modified', () => {

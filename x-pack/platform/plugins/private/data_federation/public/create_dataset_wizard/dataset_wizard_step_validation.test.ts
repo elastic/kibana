@@ -160,7 +160,7 @@ describe('dataset_wizard_step_validation', () => {
     );
   });
 
-  it('drops the region field in flow 4, where it is detected from the bucket', () => {
+  it('drops the region field in the flows that do not ask for one', () => {
     const values = emptyDatasetWizardFormValues();
 
     expect(getAdditionalSettingsStepFields(values, DATASET_WIZARD_FLOW_VARIANT_3)).toContain(
@@ -169,6 +169,9 @@ describe('dataset_wizard_step_validation', () => {
     expect(getAdditionalSettingsStepFields(values, DATASET_WIZARD_FLOW_VARIANT_4)).not.toContain(
       'region'
     );
+    expect(
+      getAdditionalSettingsStepFields(values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    ).not.toContain('region');
   });
 
   it('treats step 4 as review in flow 3 9.6', () => {
@@ -176,6 +179,6 @@ describe('dataset_wizard_step_validation', () => {
 
     expect(
       getWizardStepFields(PREVIEW_RESULTS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
-    ).toEqual(expect.arrayContaining(['data_source', 'name', 'resource', 'region']));
+    ).toEqual(expect.arrayContaining(['data_source', 'name', 'resource']));
   });
 });

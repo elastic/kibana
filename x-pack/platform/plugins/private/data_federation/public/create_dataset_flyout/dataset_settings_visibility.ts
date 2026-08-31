@@ -111,7 +111,8 @@ export const isFieldVisibleForErrorMode = (
     return true;
   }
 
-  return errorMode !== 'fail_fast';
+  // An unset error mode reads as its default, fail_fast, which ignores the limits.
+  return errorMode !== '' && errorMode !== 'fail_fast';
 };
 
 export const getVisibleAccordionsForFormat = (

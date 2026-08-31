@@ -24,6 +24,7 @@ import { DatasetSettingsCommonPanel } from '../../create_dataset_flyout/dataset_
 import { datasetSettingsFieldsWidthCss } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DatasetSettingsFlow3SettingsPanel } from '../../create_dataset_flyout/dataset_settings_flow3_settings_panel';
 import { applySettingsForFormat } from '../../create_dataset_flyout/dataset_settings_defaults';
+import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
 import { buildDefaultSettingsCustomJson } from '../../create_dataset_flyout/settings_custom_json_schema';
 import { EMPTY_SETTINGS_CUSTOM_JSON } from '../../create_dataset_flyout/settings_custom_json_utils';
 import { FORMAT_SUPER_SELECT_OPTIONS } from '../../create_dataset_flyout/dataset_settings_options';
@@ -37,9 +38,9 @@ import { AutoDetectedSuffix } from '../auto_detected_suffix';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
+  hasDatasetWizardRegionField,
   isDatasetWizardFlow3,
   isDatasetWizardFlow396,
-  isDatasetWizardFlow4,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
@@ -86,6 +87,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
 
   const format = formatField.value as DatasetFormatFormValue;
   const hasFormatSelected = isKnownFormat(format);
+  const showDefaultsAsPlaceholders = isDatasetWizardFlow396(flowVariant);
   const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
   const previousErrorModeRef = useRef<DatasetErrorModeFormValue | undefined>(undefined);
 
@@ -104,15 +106,19 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
 
   const applyFormatDefaultsToForm = useCallback(
     (nextFormat: Exclude<DatasetFormatFormValue, ''>) => {
-      const withDefaults = applySettingsForFormat(getValues('settings'), nextFormat);
+      const withDefaults = applySettingsForFormat(getValues('settings'), nextFormat, {
+        applyDefaults: !showDefaultsAsPlaceholders,
+      });
       setValue('settings', withDefaults, { shouldDirty: true, shouldValidate: true });
 
-      if (isDatasetWizardFlow3(flowVariant)) {
+      // Seeding the JSON with defaults would write them straight back into the
+      // fields the placeholders are meant to leave empty.
+      if (isDatasetWizardFlow3(flowVariant) && !showDefaultsAsPlaceholders) {
         setDefaultCustomJson(nextFormat, withDefaults.error_mode);
         previousErrorModeRef.current = withDefaults.error_mode;
       }
     },
-    [flowVariant, getValues, setDefaultCustomJson, setValue]
+    [flowVariant, getValues, setDefaultCustomJson, setValue, showDefaultsAsPlaceholders]
   );
 
   const handleFormatSelection = useCallback(
@@ -129,7 +135,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   );
 
   useEffect(() => {
-    if (!isDatasetWizardFlow3(flowVariant) || !hasFormatSelected) {
+    if (!isDatasetWizardFlow3(flowVariant) || showDefaultsAsPlaceholders || !hasFormatSelected) {
       previousErrorModeRef.current = errorMode;
       return;
     }
@@ -145,7 +151,14 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
 
     previousErrorModeRef.current = errorMode;
     setDefaultCustomJson(format, errorMode);
-  }, [errorMode, flowVariant, format, hasFormatSelected, setDefaultCustomJson]);
+  }, [
+    errorMode,
+    flowVariant,
+    format,
+    hasFormatSelected,
+    setDefaultCustomJson,
+    showDefaultsAsPlaceholders,
+  ]);
 
   useEffect(() => {
     const inferredFormat = inferFormatFromResource(resource);
@@ -284,7 +297,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
 
       <EuiForm component="div">
         <div css={isDatasetWizardFlow3(flowVariant) ? datasetSettingsFieldsWidthCss : undefined}>
-          {isDatasetWizardFlow3(flowVariant) && !isDatasetWizardFlow4(flowVariant) ? (
+          {isDatasetWizardFlow3(flowVariant) && hasDatasetWizardRegionField(flowVariant) ? (
             <WizardRegionField
               control={control}
               autoDetectedRegion={autoDetectedRegion}
@@ -310,32 +323,37 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
         </div>
 
         {hasFormatSelected ? (
-          isDatasetWizardFlow3(flowVariant) ? (
-            <DatasetSettingsFlow3SettingsPanel
-              control={control}
-              getValues={getValues}
-              setValue={setValue}
-              format={format}
-              commonSettingsTitle={datasetWizardStrings.commonSettingsTitle()}
-              advancedSettingsTitle={datasetWizardStrings.advancedSettingsTitleFlow3()}
-              testSubjPrefix="datasetWizard"
-            />
-          ) : (
-            <>
-              <DatasetSettingsCommonPanel
+          <DatasetSettingDefaultHintsProvider
+            format={format}
+            isEnabled={showDefaultsAsPlaceholders}
+          >
+            {isDatasetWizardFlow3(flowVariant) ? (
+              <DatasetSettingsFlow3SettingsPanel
                 control={control}
+                getValues={getValues}
+                setValue={setValue}
                 format={format}
-                panelTitle={datasetWizardStrings.commonSettingsTitle()}
+                commonSettingsTitle={datasetWizardStrings.commonSettingsTitle()}
+                advancedSettingsTitle={datasetWizardStrings.advancedSettingsTitleFlow3()}
                 testSubjPrefix="datasetWizard"
               />
-              <DatasetSettingsAccordions
-                control={control}
-                format={format}
-                accordionTitles={accordionTitles}
-                testSubjPrefix="datasetWizard"
-              />
-            </>
-          )
+            ) : (
+              <>
+                <DatasetSettingsCommonPanel
+                  control={control}
+                  format={format}
+                  panelTitle={datasetWizardStrings.commonSettingsTitle()}
+                  testSubjPrefix="datasetWizard"
+                />
+                <DatasetSettingsAccordions
+                  control={control}
+                  format={format}
+                  accordionTitles={accordionTitles}
+                  testSubjPrefix="datasetWizard"
+                />
+              </>
+            )}
+          </DatasetSettingDefaultHintsProvider>
         ) : null}
       </EuiForm>
     </div>

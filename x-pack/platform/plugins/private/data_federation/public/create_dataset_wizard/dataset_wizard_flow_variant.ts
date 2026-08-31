@@ -46,6 +46,14 @@ export const hasDatasetWizardPreviewResultsStep = (
   flowVariant: DatasetWizardFlowVariant
 ): boolean => isDatasetWizardFlow3(flowVariant) && !isDatasetWizardFlow396(flowVariant);
 
+/**
+ * Flow 3 9.6 relies on the region Elasticsearch resolves from the resource, and
+ * flow 4 detects it from the bucket on its data source step, so neither asks
+ * the user for one.
+ */
+export const hasDatasetWizardRegionField = (flowVariant: DatasetWizardFlowVariant): boolean =>
+  !isDatasetWizardFlow396(flowVariant) && !isDatasetWizardFlow4(flowVariant);
+
 export const parseWizardFlowVariantFromSearch = (
   search: string
 ): DatasetWizardFlowVariant | undefined => {

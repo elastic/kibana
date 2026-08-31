@@ -20,7 +20,9 @@ describe('DataSourceSuperSelect', () => {
     { name: 'azure-blob', type: 'azure', description: '', settings: {} },
   ];
 
-  const renderSelect = (props: Partial<React.ComponentProps<typeof DataSourceSuperSelect>> = {}) => {
+  const renderSelect = (
+    props: Partial<React.ComponentProps<typeof DataSourceSuperSelect>> = {}
+  ) => {
     const onChange = jest.fn();
     const onConnectNewDataSource = jest.fn();
 
@@ -79,6 +81,33 @@ describe('DataSourceSuperSelect', () => {
 
     expect(within(control).getByText('amazon-s3-test')).toBeInTheDocument();
     expect(within(control).getByText(statusLabel)).toBeInTheDocument();
+  });
+
+  it('hides connection status everywhere when it is turned off', async () => {
+    const { getByTestId, getAllByRole, queryByText } = renderSelect({
+      value: 'amazon-s3-test',
+      showConnectionStatus: false,
+    });
+
+    const statusLabels = [
+      mainTranslations.columns.dataSources.connectionStatusConnected,
+      mainTranslations.columns.dataSources.connectionStatusBroken,
+    ];
+
+    statusLabels.forEach((statusLabel) => {
+      expect(within(getByTestId('datasetWizardDataSource')).queryByText(statusLabel)).toBeNull();
+    });
+
+    fireEvent.click(getByTestId('datasetWizardDataSource'));
+
+    await waitFor(() => {
+      expect(getAllByRole('option')).toHaveLength(2);
+    });
+
+    statusLabels.forEach((statusLabel) => {
+      expect(queryByText(statusLabel)).toBeNull();
+    });
+    expect(within(getAllByRole('option')[0]).getByText('amazon-s3-test')).toBeInTheDocument();
   });
 
   it('filters data sources by search query', async () => {

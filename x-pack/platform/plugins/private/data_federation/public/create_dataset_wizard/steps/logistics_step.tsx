@@ -18,6 +18,7 @@ import { DataSourceSuperSelect } from '../data_source_super_select';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   isDatasetWizardFlow3,
+  isDatasetWizardFlow396,
   isDatasetWizardFlow4,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
@@ -153,6 +154,7 @@ const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
               name={dataSourceField.name}
               buttonRef={dataSourceField.ref}
               isInvalid={Boolean(dataSourceFieldState.error)}
+              showConnectionStatus={!isDatasetWizardFlow396(flowVariant)}
             />
           </EuiFormRow>
 

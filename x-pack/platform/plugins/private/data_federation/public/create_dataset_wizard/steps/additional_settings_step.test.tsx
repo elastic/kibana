@@ -211,7 +211,7 @@ describe('AdditionalSettingsStep', () => {
           datetime_format: 'ISO-8601',
           multi_value_syntax: 'none',
           max_field_size: '10485760',
-          partition_detection: 'none',
+          partition_detection: 'auto',
           schema_resolution: 'union_by_name',
           error_mode: 'fail_fast',
           max_error_ratio: '0.0',
@@ -257,15 +257,15 @@ describe('AdditionalSettingsStep', () => {
           header_row: 'true',
           null_value: NULL_VALUE_EMPTY_STRING_PRESET,
           encoding: 'UTF-8',
-          quote: '"',
-          escape: '\\',
+          quote: 'none',
+          escape: 'none',
           comment: '//',
           column_prefix: 'col',
           schema_sample_size: '20000',
           datetime_format: 'ISO-8601',
           multi_value_syntax: 'none',
           max_field_size: '10485760',
-          partition_detection: 'none',
+          partition_detection: 'auto',
           schema_resolution: 'union_by_name',
           error_mode: 'fail_fast',
           max_error_ratio: '0.0',
@@ -363,7 +363,7 @@ describe('AdditionalSettingsStep', () => {
         const settings = JSON.parse(getByTestId('settingsSnapshot').textContent ?? '{}');
         expect(settings).toMatchObject({
           format: 'orc',
-          partition_detection: 'hive',
+          partition_detection: 'auto',
           schema_resolution: 'union_by_name',
           error_mode: 'fail_fast',
           max_error_ratio: '0.0',
@@ -407,8 +407,8 @@ describe('AdditionalSettingsStep', () => {
         expect(settings).toMatchObject({
           format: 'ndjson',
           schema_sample_size: '20000',
-          datetime_format: 'ISO-8601',
-          partition_detection: 'none',
+          datetime_format: 'strict_date_optional_time',
+          partition_detection: 'auto',
           schema_resolution: 'union_by_name',
           error_mode: 'fail_fast',
           max_error_ratio: '0.0',
@@ -430,6 +430,110 @@ describe('AdditionalSettingsStep', () => {
 
     expect(queryByTestId('datasetWizardSettingsDelimiter')).toBeNull();
     expect(queryByTestId('datasetWizardAccordionColumnsAndValues')).toBeNull();
+  });
+
+  describe('flow 3 9.6', () => {
+    it('hides the region field', async () => {
+      const { queryByTestId, getByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.csv"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
+      });
+
+      expect(queryByTestId('datasetWizardRegion')).toBeNull();
+    });
+
+    it('leaves settings unset so the request can omit them', async () => {
+      const Harness = () => {
+        const syncedResourceRef = useRef<string | null>(null);
+        const { control, getValues, setValue, watch } = useForm<DatasetWizardFormValues>({
+          defaultValues: emptyDatasetWizardFormValues(),
+        });
+        const settings = watch('settings');
+
+        return (
+          <EuiProvider>
+            <AdditionalSettingsStep
+              control={control}
+              getValues={getValues}
+              setValue={setValue}
+              resource="s3://bucket/data.csv"
+              syncedResourceRef={syncedResourceRef}
+              isEditMode={false}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+            />
+            <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
+          </EuiProvider>
+        );
+      };
+
+      const { getByTestId } = render(<Harness />);
+
+      await waitFor(() => {
+        const settings = JSON.parse(getByTestId('settingsSnapshot').textContent ?? '{}');
+        expect(settings).toMatchObject({
+          format: 'csv',
+          delimiter: '',
+          partition_detection: '',
+          encoding: '',
+          error_mode: '',
+        });
+      });
+    });
+
+    it('offers the default as a placeholder instead', async () => {
+      const { getByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.csv"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsDelimiter')).toBeInTheDocument();
+      });
+
+      expect(
+        within(getByTestId('datasetWizardSettingsDelimiter')).getByRole('combobox')
+      ).toHaveAttribute('placeholder', 'Default: Comma (,)');
+    });
+
+    it('keeps pre-filling defaults in flow 3', async () => {
+      const Harness = () => {
+        const syncedResourceRef = useRef<string | null>(null);
+        const { control, getValues, setValue, watch } = useForm<DatasetWizardFormValues>({
+          defaultValues: emptyDatasetWizardFormValues(),
+        });
+        const settings = watch('settings');
+
+        return (
+          <EuiProvider>
+            <AdditionalSettingsStep
+              control={control}
+              getValues={getValues}
+              setValue={setValue}
+              resource="s3://bucket/data.csv"
+              syncedResourceRef={syncedResourceRef}
+              isEditMode={false}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
+            />
+            <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
+          </EuiProvider>
+        );
+      };
+
+      const { getByTestId } = render(<Harness />);
+
+      await waitFor(() => {
+        const settings = JSON.parse(getByTestId('settingsSnapshot').textContent ?? '{}');
+        expect(settings).toMatchObject({ format: 'csv', delimiter: ',' });
+      });
+    });
   });
 
   describe('flow 3 settings layout', () => {

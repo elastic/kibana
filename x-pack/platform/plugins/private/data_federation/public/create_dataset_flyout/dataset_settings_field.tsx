@@ -27,6 +27,7 @@ import {
   PARTITION_PATH_PRESETS,
   SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS,
 } from './dataset_settings_options';
+import { useDatasetSettingDefaultHint } from './dataset_settings_default_hints';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 import { SettingsEnumSuperSelect } from './settings_enum_super_select';
 import { SettingsPresetComboBox } from './settings_preset_combo_box';
@@ -299,6 +300,7 @@ const SchemaSampleSizeField: FunctionComponent<{
     control,
     rules: { validate: validateSchemaSampleSize },
   });
+  const defaultHint = useDatasetSettingDefaultHint('settings.schema_sample_size');
 
   return (
     <EuiFormRow
@@ -314,6 +316,7 @@ const SchemaSampleSizeField: FunctionComponent<{
         compressed
         min={1}
         step={1}
+        placeholder={defaultHint?.placeholder}
         isInvalid={Boolean(fieldState.error)}
         value={field.value}
         onChange={(event) => field.onChange(event.target.value)}
@@ -332,6 +335,7 @@ const TextSettingsField: FunctionComponent<{
   testSubj: string;
 }> = ({ control, name, label, helpText, testSubj }) => {
   const { field } = useController({ name, control });
+  const defaultHint = useDatasetSettingDefaultHint(name);
 
   return (
     <EuiFormRow label={label} helpText={helpText} fullWidth>
@@ -339,6 +343,7 @@ const TextSettingsField: FunctionComponent<{
         data-test-subj={testSubj}
         fullWidth
         compressed
+        placeholder={defaultHint?.placeholder}
         value={field.value}
         onChange={(event) => field.onChange(event.target.value)}
         name={field.name}
@@ -360,6 +365,7 @@ const NumberSettingsField: FunctionComponent<{
   rules?: { validate: (value: string) => true | string };
 }> = ({ control, name, label, helpText, testSubj, min, max, step, rules }) => {
   const { field, fieldState } = useController({ name, control, rules });
+  const defaultHint = useDatasetSettingDefaultHint(name);
 
   return (
     <EuiFormRow
@@ -376,6 +382,7 @@ const NumberSettingsField: FunctionComponent<{
         min={min}
         max={max}
         step={step}
+        placeholder={defaultHint?.placeholder}
         isInvalid={Boolean(fieldState.error)}
         value={field.value}
         onChange={(event) => field.onChange(event.target.value)}

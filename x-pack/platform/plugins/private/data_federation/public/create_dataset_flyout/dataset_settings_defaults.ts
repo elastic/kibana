@@ -14,7 +14,7 @@ import { DATASET_SETTINGS_FIELD_IDS, isFieldVisibleForFormat } from './dataset_s
 import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
 const UNIVERSAL_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
-  partition_detection: 'none',
+  partition_detection: 'auto',
   schema_resolution: 'union_by_name',
 };
 
@@ -26,30 +26,47 @@ const CSV_TSV_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
   max_error_ratio: '0.0',
   header_row: 'true',
   comment: '//',
-  quote: '"',
-  escape: '\\',
   multi_value_syntax: 'none',
   error_mode: 'fail_fast',
   max_field_size: '10485760',
   datetime_format: 'ISO-8601',
 };
 
+/**
+ * Mirrors the defaults documented for the dataset settings API, so a field left
+ * untouched can be omitted from the request without changing how the file reads.
+ * schema_sample_size, optimized_reader, and late_materialization are undocumented
+ * and remain our own choices.
+ */
 const FORMAT_DEFAULTS: Partial<
   Record<Exclude<DatasetFormatFormValue, ''>, Partial<CreateDatasetSettingsFormValues>>
 > = {
-  csv: { ...UNIVERSAL_DEFAULTS, ...CSV_TSV_DEFAULTS, delimiter: ',', mode: 'quoted' },
-  tsv: { ...UNIVERSAL_DEFAULTS, ...CSV_TSV_DEFAULTS, delimiter: '\t', mode: 'plain' },
+  csv: {
+    ...UNIVERSAL_DEFAULTS,
+    ...CSV_TSV_DEFAULTS,
+    delimiter: ',',
+    mode: 'quoted',
+    quote: '"',
+    escape: '\\',
+  },
+  tsv: {
+    ...UNIVERSAL_DEFAULTS,
+    ...CSV_TSV_DEFAULTS,
+    delimiter: '\t',
+    mode: 'plain',
+    quote: 'none',
+    escape: 'none',
+  },
   ndjson: {
     ...UNIVERSAL_DEFAULTS,
     error_mode: 'fail_fast',
     max_error_ratio: '0.0',
     schema_sample_size: '20000',
     segment_size: '4mb',
-    datetime_format: 'ISO-8601',
+    datetime_format: 'strict_date_optional_time',
   },
   parquet: {
     ...UNIVERSAL_DEFAULTS,
-    partition_detection: 'hive',
     error_mode: 'fail_fast',
     max_error_ratio: '0.0',
     optimized_reader: 'true',
@@ -57,7 +74,6 @@ const FORMAT_DEFAULTS: Partial<
   },
   orc: {
     ...UNIVERSAL_DEFAULTS,
-    partition_detection: 'hive',
     error_mode: 'fail_fast',
     max_error_ratio: '0.0',
   },
@@ -83,6 +99,14 @@ const isCsvTsvSwitch = (
   isCsvTsvFormat(previousFormat) &&
   isCsvTsvFormat(nextFormat);
 
+export interface ApplySettingsForFormatOptions {
+  /**
+   * Flows that surface defaults as placeholders leave the fields empty so the
+   * request can omit them.
+   */
+  applyDefaults?: boolean;
+}
+
 /**
  * Reconciles settings with a selected format:
  * - clears fields that do not apply to the format
@@ -92,19 +116,21 @@ const isCsvTsvSwitch = (
  */
 export const applySettingsForFormat = (
   current: CreateDatasetSettingsFormValues,
-  nextFormat: Exclude<DatasetFormatFormValue, ''>
+  nextFormat: Exclude<DatasetFormatFormValue, ''>,
+  { applyDefaults = true }: ApplySettingsForFormatOptions = {}
 ): CreateDatasetSettingsFormValues => {
-  const defaults = getDefaultSettingsForFormat(nextFormat);
+  const defaults = applyDefaults ? getDefaultSettingsForFormat(nextFormat) : {};
   const next = { ...emptyCreateDatasetSettingsFormValues(), format: nextFormat };
   const previousFormat = isKnownFormat(current.format) ? current.format : undefined;
-  const resetCsvTsvDefaults = isCsvTsvSwitch(previousFormat, nextFormat);
+  const resetCsvTsvDefaults = applyDefaults && isCsvTsvSwitch(previousFormat, nextFormat);
 
   for (const fieldId of DATASET_SETTINGS_FIELD_IDS) {
     if (!isFieldVisibleForFormat(fieldId, nextFormat)) {
       continue;
     }
 
-    const previousDefaults = previousFormat ? getDefaultSettingsForFormat(previousFormat) : {};
+    const previousDefaults =
+      applyDefaults && previousFormat ? getDefaultSettingsForFormat(previousFormat) : {};
     const currentValue = current[fieldId];
     const userCustomized =
       !resetCsvTsvDefaults &&

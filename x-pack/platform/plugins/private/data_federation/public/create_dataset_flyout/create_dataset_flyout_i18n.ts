@@ -9,6 +9,23 @@ import { i18n } from '@kbn/i18n';
 
 /** Localized strings for the create / edit dataset flyout. */
 export const createDatasetFlyoutStrings = {
+  settingsDefaultPlaceholder: (value: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDefaultPlaceholder', {
+      defaultMessage: 'Default: {value}',
+      values: { value },
+    }),
+
+  settingsDefaultOptionBadge: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDefaultOptionBadge', {
+      defaultMessage: 'Default',
+    }),
+
+  settingsClearToDefault: (label: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsClearToDefault', {
+      defaultMessage: 'Clear {label} to use the default',
+      values: { label },
+    }),
+
   createTitle: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.createTitle', {
       defaultMessage: 'Add dataset',
@@ -169,6 +186,11 @@ export const createDatasetFlyoutStrings = {
   settingsMaxErrorsHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxErrorsHelp', {
       defaultMessage: 'Maximum number of row errors before failing.',
+    }),
+
+  settingsMaxErrorsDefaultUnbounded: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxErrorsDefaultUnbounded', {
+      defaultMessage: 'Unbounded',
     }),
 
   settingsMaxErrorRatioLabel: () =>

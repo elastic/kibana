@@ -168,7 +168,8 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
       display: flex;
       flex-direction: column;
       max-height: calc(
-        ${euiTheme.size.m} + ${euiTheme.size.m} + ${euiTheme.size.l} + ${reviewTabScrollableMaxHeight}
+        ${euiTheme.size.m} + ${euiTheme.size.m} + ${euiTheme.size.l} +
+          ${reviewTabScrollableMaxHeight}
       );
       box-sizing: border-box;
     `,
@@ -189,12 +190,18 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
   );
 
   const logisticsRows = useMemo(
-    () => getReviewLogisticsRows(values, dataSources),
-    [dataSources, values]
+    () => getReviewLogisticsRows(values, dataSources, flowVariant),
+    [dataSources, flowVariant, values]
   );
   const settingsRows = useMemo(
-    () => getReviewSettingsRows(values.settings, values.resource, values.settings_custom_json),
-    [values.resource, values.settings, values.settings_custom_json]
+    () =>
+      getReviewSettingsRows(
+        values.settings,
+        values.resource,
+        values.settings_custom_json,
+        flowVariant
+      ),
+    [flowVariant, values.resource, values.settings, values.settings_custom_json]
   );
   const schemaMappingRows = useMemo(
     () => getReviewSchemaMappingRows(values, flowVariant),

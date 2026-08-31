@@ -20,7 +20,11 @@ describe('dataset_settings_visibility', () => {
     it('shows max error fields for other error modes', () => {
       expect(isFieldVisibleForErrorMode('max_errors', 'skip_row')).toBe(true);
       expect(isFieldVisibleForErrorMode('max_error_ratio', 'null_field')).toBe(true);
-      expect(isFieldVisibleForErrorMode('max_errors', '')).toBe(true);
+    });
+
+    it('treats an unset error mode as the fail_fast default', () => {
+      expect(isFieldVisibleForErrorMode('max_errors', '')).toBe(false);
+      expect(isFieldVisibleForErrorMode('max_error_ratio', '')).toBe(false);
     });
   });
 

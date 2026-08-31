@@ -34,7 +34,10 @@ const selectableListProps = {
   bordered: false,
 };
 
-const DataSourceOptionDisplay: FunctionComponent<{ dataSource: DataSource }> = ({ dataSource }) => {
+const DataSourceOptionDisplay: FunctionComponent<{
+  dataSource: DataSource;
+  showConnectionStatus: boolean;
+}> = ({ dataSource, showConnectionStatus }) => {
   const iconType = DATA_SOURCE_TYPES_TO_ICONS[dataSource.type];
 
   return (
@@ -53,9 +56,11 @@ const DataSourceOptionDisplay: FunctionComponent<{ dataSource: DataSource }> = (
           <EuiFlexItem grow={false}>{dataSource.name}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DataSourceConnectionStatusHealth dataSourceName={dataSource.name} />
-      </EuiFlexItem>
+      {showConnectionStatus ? (
+        <EuiFlexItem grow={false}>
+          <DataSourceConnectionStatusHealth dataSourceName={dataSource.name} />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };
@@ -75,6 +80,7 @@ export interface DataSourceSuperSelectProps {
   buttonRef?: Ref<HTMLButtonElement>;
   isInvalid?: boolean;
   fullWidth?: boolean;
+  showConnectionStatus?: boolean;
 }
 
 export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps> = ({
@@ -91,6 +97,7 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
   buttonRef,
   isInvalid = false,
   fullWidth = false,
+  showConnectionStatus = true,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -98,9 +105,11 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
     (): Array<EuiSuperSelectOption<string>> =>
       dataSources.map((ds) => ({
         value: ds.name,
-        inputDisplay: <DataSourceOptionDisplay dataSource={ds} />,
+        inputDisplay: (
+          <DataSourceOptionDisplay dataSource={ds} showConnectionStatus={showConnectionStatus} />
+        ),
       })),
-    [dataSources]
+    [dataSources, showConnectionStatus]
   );
 
   const selectableOptions = useMemo(
@@ -111,9 +120,11 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
         searchableLabel: ds.name,
         checked: value === ds.name ? 'on' : undefined,
         prepend: <EuiIcon type={DATA_SOURCE_TYPES_TO_ICONS[ds.type]} size="m" aria-hidden />,
-        append: <DataSourceConnectionStatusHealth dataSourceName={ds.name} />,
+        ...(showConnectionStatus
+          ? { append: <DataSourceConnectionStatusHealth dataSourceName={ds.name} /> }
+          : {}),
       })),
-    [dataSources, value]
+    [dataSources, showConnectionStatus, value]
   );
 
   const closePopover = useCallback(() => {

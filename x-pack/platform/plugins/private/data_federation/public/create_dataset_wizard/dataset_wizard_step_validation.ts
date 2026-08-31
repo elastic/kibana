@@ -24,6 +24,7 @@ import {
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   hasDatasetWizardPreviewResultsStep,
+  hasDatasetWizardRegionField,
   isDatasetWizardFlow3,
   isDatasetWizardFlow4,
   type DatasetWizardFlowVariant,
@@ -52,7 +53,9 @@ const FILE_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = ['resource']
 const getLogisticsStepFields = (
   flowVariant: DatasetWizardFlowVariant
 ): Array<FieldPath<DatasetWizardFormValues>> =>
-  isDatasetWizardFlow3(flowVariant) ? LOGISTICS_STEP_FIELDS_WITHOUT_REGION : LOGISTICS_STEP_FIELDS;
+  isDatasetWizardFlow3(flowVariant) || !hasDatasetWizardRegionField(flowVariant)
+    ? LOGISTICS_STEP_FIELDS_WITHOUT_REGION
+    : LOGISTICS_STEP_FIELDS;
 
 const GLUE_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = [
   'glue_database',
@@ -71,10 +74,8 @@ export const getAdditionalSettingsStepFields = (
   flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
 ): Array<FieldPath<DatasetWizardFormValues>> => {
   const { format, error_mode: errorMode } = values.settings;
-  // Flow 4 detects the region from the bucket on its data source step, so it has
-  // no region field to validate here.
   const regionFields: Array<FieldPath<DatasetWizardFormValues>> =
-    isDatasetWizardFlow3(flowVariant) && !isDatasetWizardFlow4(flowVariant) ? ['region'] : [];
+    isDatasetWizardFlow3(flowVariant) && hasDatasetWizardRegionField(flowVariant) ? ['region'] : [];
 
   if (!isKnownFormat(format)) {
     return regionFields;

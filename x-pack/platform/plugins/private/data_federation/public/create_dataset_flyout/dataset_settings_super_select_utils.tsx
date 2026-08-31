@@ -6,28 +6,53 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
+
+import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+
+export const DefaultOptionBadge = () => (
+  <EuiBadge color="hollow" data-test-subj="datasetSettingsDefaultOptionBadge">
+    {createDatasetFlyoutStrings.settingsDefaultOptionBadge()}
+  </EuiBadge>
+);
 
 export const buildSuperSelectOption = <T extends string>({
   value,
   label,
   description,
+  isDefault = false,
 }: {
   value: T;
   label: string;
   description?: string;
-}): EuiSuperSelectOption<T> => ({
-  value,
-  inputDisplay: label,
-  dropdownDisplay: description ? (
-    <>
-      <strong>{label}</strong>
-      <EuiText size="s" color="subdued">
-        <p>{description}</p>
-      </EuiText>
-    </>
-  ) : (
-    label
-  ),
-});
+  isDefault?: boolean;
+}): EuiSuperSelectOption<T> => {
+  if (!description && !isDefault) {
+    return { value, inputDisplay: label, dropdownDisplay: label };
+  }
+
+  return {
+    value,
+    inputDisplay: label,
+    dropdownDisplay: (
+      <>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <strong>{label}</strong>
+          </EuiFlexItem>
+          {isDefault ? (
+            <EuiFlexItem grow={false}>
+              <DefaultOptionBadge />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+        {description ? (
+          <EuiText size="s" color="subdued">
+            <p>{description}</p>
+          </EuiText>
+        ) : null}
+      </>
+    ),
+  };
+};
