@@ -44,6 +44,8 @@ const nowIso = () => new Date().toISOString();
  * that matches every document is indistinguishable from a rule that matches the right ones, so a
  * fixture of pure attack traffic cannot detect an over-broad query.
  */
+const JS_PROTO = ['java', 'script'].join(':');
+
 export const buildFixtures = (): SeededIndex[] => [
   {
     index: ENDPOINT_INDEX,
@@ -174,6 +176,126 @@ export const buildFixtures = (): SeededIndex[] => [
         },
         host: { id: 'host-4', name: 'linux-build-02', os: { type: 'linux', family: 'debian' } },
         user: { name: 'ci-runner', domain: 'corp' },
+      },
+      // `gap-t1053-005` (shell spawned by crond). Parent crond + interactive shell name;
+      // the cron-spawned `sh` true positive that the reference query must match.
+      {
+        '@timestamp': nowIso(),
+        event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
+        process: {
+          name: 'bash',
+          args: ['bash'],
+          command_line: '/bin/bash',
+          executable: '/usr/bin/bash',
+          parent: {
+            name: 'crond',
+            args: ['crond', '-n'],
+            command_line: '/usr/sbin/crond -n',
+          },
+        },
+        host: { id: 'host-5', name: 'linux-cron-01', os: { type: 'linux', family: 'debian' } },
+        user: { name: 'root', domain: 'corp' },
+      },
+      // Over-breadth control for t1053-005: interactive shell, but parented by sshd
+      // (admin login), not crond — must NOT match the reference.
+      {
+        '@timestamp': nowIso(),
+        event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
+        process: {
+          name: 'bash',
+          args: ['bash'],
+          command_line: '/bin/bash',
+          executable: '/usr/bin/bash',
+          parent: { name: 'sshd', args: ['sshd'], command_line: '/usr/sbin/sshd -D' },
+        },
+        host: { id: 'host-5', name: 'linux-cron-01', os: { type: 'linux', family: 'debian' } },
+        user: { name: 'ops', domain: 'corp' },
+      },
+      // `gap-t1218-011` (rundll32 script-engine proxy). Args carry javascript entry point.
+      {
+        '@timestamp': nowIso(),
+        event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
+        process: {
+          name: 'rundll32.exe',
+          args: ['rundll32.exe', `${JS_PROTO}:\\..\\RunHtmlApplication`],
+          command_line: `rundll32.exe ${JS_PROTO}:\\..\\RunHtmlApplication`,
+          executable: 'C:\\Windows\\System32\\rundll32.exe',
+          parent: { name: 'cmd.exe', args: ['cmd.exe'], command_line: 'cmd.exe' },
+        },
+        host: { id: 'host-6', name: 'win-ws-11', os: { type: 'windows', family: 'windows' } },
+        user: { name: 'jdoe', domain: 'corp' },
+      },
+      // Over-breadth control for t1218-011: rundll32 with ordinary DLL setup args —
+      // legitimate proxy use that must NOT match.
+      {
+        '@timestamp': nowIso(),
+        event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
+        process: {
+          name: 'rundll32.exe',
+          args: ['rundll32.exe', 'shell32.dll,Control_RunDLL'],
+          command_line: 'rundll32.exe shell32.dll,Control_RunDLL',
+          executable: 'C:\\Windows\\System32\\rundll32.exe',
+          parent: { name: 'explorer.exe', args: ['explorer.exe'], command_line: 'explorer.exe' },
+        },
+        host: { id: 'host-6', name: 'win-ws-11', os: { type: 'windows', family: 'windows' } },
+        user: { name: 'jdoe', domain: 'corp' },
+      },
+      // `hard-t1490` (shadow copy deletion via vssadmin).
+      {
+        '@timestamp': nowIso(),
+        event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
+        process: {
+          name: 'vssadmin.exe',
+          args: ['vssadmin.exe', 'delete', 'shadows', '/all', '/quiet'],
+          command_line: 'vssadmin.exe delete shadows /all /quiet',
+          executable: 'C:\\Windows\\System32\\vssadmin.exe',
+          parent: { name: 'cmd.exe', args: ['cmd.exe'], command_line: 'cmd.exe' },
+        },
+        host: { id: 'host-6', name: 'win-ws-11', os: { type: 'windows', family: 'windows' } },
+        user: { name: 'SYSTEM', domain: 'NT AUTHORITY' },
+      },
+      // Over-breadth control for t1490: vssadmin *listing* shadows — read-only admin use
+      // that must NOT match a deletion reference.
+      {
+        '@timestamp': nowIso(),
+        event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
+        process: {
+          name: 'vssadmin.exe',
+          args: ['vssadmin.exe', 'list', 'shadows'],
+          command_line: 'vssadmin.exe list shadows',
+          executable: 'C:\\Windows\\System32\\vssadmin.exe',
+          parent: { name: 'explorer.exe', args: ['explorer.exe'], command_line: 'explorer.exe' },
+        },
+        host: { id: 'host-6', name: 'win-ws-11', os: { type: 'windows', family: 'windows' } },
+        user: { name: 'admin', domain: 'corp' },
+      },
+      // `hard-t1136-001` (local account creation via net.exe).
+      {
+        '@timestamp': nowIso(),
+        event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
+        process: {
+          name: 'net.exe',
+          args: ['net', 'user', 'svc_backup2', '/add'],
+          command_line: 'net user svc_backup2 /add',
+          executable: 'C:\\Windows\\System32\\net.exe',
+          parent: { name: 'cmd.exe', args: ['cmd.exe'], command_line: 'cmd.exe' },
+        },
+        host: { id: 'host-6', name: 'win-ws-11', os: { type: 'windows', family: 'windows' } },
+        user: { name: 'admin', domain: 'corp' },
+      },
+      // Over-breadth control for t1136-001: net.exe *listing* users — must NOT match.
+      {
+        '@timestamp': nowIso(),
+        event: { action: 'exec', type: 'start', category: 'process', outcome: 'success' },
+        process: {
+          name: 'net.exe',
+          args: ['net', 'user'],
+          command_line: 'net user',
+          executable: 'C:\\Windows\\System32\\net.exe',
+          parent: { name: 'explorer.exe', args: ['explorer.exe'], command_line: 'explorer.exe' },
+        },
+        host: { id: 'host-6', name: 'win-ws-11', os: { type: 'windows', family: 'windows' } },
+        user: { name: 'admin', domain: 'corp' },
       },
     ],
   },
