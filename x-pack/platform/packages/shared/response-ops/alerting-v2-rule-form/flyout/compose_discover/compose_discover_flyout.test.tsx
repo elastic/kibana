@@ -22,9 +22,10 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import type { FormValues, RuleQuery } from '../../form/types';
 import { createTestQueryClient } from '../../test_utils';
-import { ComposeDiscoverFlyout } from './compose_discover_flyout';
+import { ComposeDiscoverFlyout, deriveRecoveryTypeFromFormValues } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
+import type { QueryTab } from './types';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
@@ -126,6 +127,8 @@ jest.mock('./compose_discover_form', () => {
 interface SandboxFlyoutMockProps {
   query: RuleQuery;
   onQueryChange?: (query: RuleQuery) => void;
+  tabs?: QueryTab[];
+  activeTab?: QueryTab;
   timeField?: string;
   onTimeFieldChange?: (timeField: string) => void;
   timeFieldOptions?: Array<{ value: string; text: string }>;
@@ -136,6 +139,9 @@ interface SandboxFlyoutMockProps {
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
+let yamlRuleFormProps:
+  | { setYamlText: (yaml: string) => void; onBlurSync: (values: FormValues) => void }
+  | undefined;
 let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecoveryStrategy: (() => FormValues['recoveryStrategy']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
@@ -230,17 +236,23 @@ let mockParseYamlToFormValues: (yaml: string) => {
 });
 
 jest.mock('../../form/yaml_rule_form', () => ({
-  YamlRuleForm: ({ setYamlText }: { setYamlText: (yaml: string) => void }) => (
-    <div data-test-subj="yamlRuleFormMock">
-      <button
-        data-test-subj="mockMakeYamlDirty"
-        onClick={() => setYamlText('name: changed\n')}
-        type="button"
-      >
-        Make YAML dirty
-      </button>
-    </div>
-  ),
+  YamlRuleForm: (props: {
+    setYamlText: (yaml: string) => void;
+    onBlurSync: (values: FormValues) => void;
+  }) => {
+    yamlRuleFormProps = props;
+    return (
+      <div data-test-subj="yamlRuleFormMock">
+        <button
+          data-test-subj="mockMakeYamlDirty"
+          onClick={() => props.setYamlText('name: changed\n')}
+          type="button"
+        >
+          Make YAML dirty
+        </button>
+      </div>
+    );
+  },
 }));
 
 const createMockServices = (): RuleFormServices => ({
@@ -329,6 +341,7 @@ const clickSplitBaseAndAlert = () => {
 describe('ComposeDiscoverFlyout', () => {
   beforeEach(() => {
     sandboxFlyoutProps = undefined;
+    yamlRuleFormProps = undefined;
     readCommittedQuery = undefined;
     readRecoveryStrategy = undefined;
     readTimeField = undefined;
@@ -1806,6 +1819,155 @@ describe('ComposeDiscoverFlyout', () => {
       renderFlyout({ mode: 'edit', rule: rule as any });
 
       expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+    });
+  });
+
+  describe('recovery sync from YAML edits', () => {
+    const alertYamlFormValues: FormValues = {
+      ...defaultYamlFormValues,
+      kind: 'alert',
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      },
+      recoveryStrategy: 'no_breach',
+      noDataStrategy: 'none',
+    };
+
+    const withRecovery = (values: FormValues, segment: string): FormValues => ({
+      ...values,
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment },
+      },
+      recoveryStrategy: undefined,
+    });
+
+    it('updates recoveryType when recovery_strategy is edited in YAML and the user returns to form view', () => {
+      mockParseYamlToFormValues = (yaml) => ({
+        values:
+          yaml === 'name: changed\n'
+            ? { ...alertYamlFormValues, recoveryStrategy: 'none' }
+            : alertYamlFormValues,
+        error: null,
+      });
+      renderFlyout();
+
+      clickEditMode('yaml');
+      expect(getLatestFormProps().state.recoveryType).toBe('default');
+
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      clickEditMode('form');
+
+      expect(getLatestFormProps().state.recoveryType).toBe('none');
+    });
+
+    it('adds the recovery tab and focuses it when YAML gains a custom recovery block', () => {
+      mockParseYamlToFormValues = () => ({ values: alertYamlFormValues, error: null });
+      renderFlyout();
+
+      clickEditMode('yaml');
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
+
+      act(() => {
+        yamlRuleFormProps?.onBlurSync(withRecovery(alertYamlFormValues, '| WHERE count < 50'));
+      });
+
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert', 'recovery']);
+      expect(sandboxFlyoutProps?.activeTab).toBe('recovery');
+    });
+
+    it('removes the recovery tab and moves off it when YAML drops the custom recovery block', () => {
+      mockParseYamlToFormValues = () => ({
+        values: withRecovery(alertYamlFormValues, '| WHERE count < 50'),
+        error: null,
+      });
+      renderFlyout();
+
+      clickEditMode('yaml');
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert', 'recovery']);
+      expect(sandboxFlyoutProps?.activeTab).toBe('recovery');
+
+      act(() => {
+        yamlRuleFormProps?.onBlurSync({ ...alertYamlFormValues, recoveryStrategy: 'none' });
+      });
+
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
+      expect(sandboxFlyoutProps?.activeTab).toBe('alert');
+    });
+  });
+
+  describe('deriveRecoveryTypeFromFormValues', () => {
+    const baseValues: FormValues = {
+      ...defaultYamlFormValues,
+      kind: 'alert',
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      },
+    };
+
+    it('returns custom for a composed query with a recovery segment', () => {
+      const values: FormValues = {
+        ...baseValues,
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: '| WHERE count > 100' },
+          recovery: { segment: '| WHERE count < 50' },
+        },
+      };
+      expect(deriveRecoveryTypeFromFormValues(values)).toBe('custom');
+    });
+
+    it('returns custom for a standalone query with a recovery query', () => {
+      const values: FormValues = {
+        ...baseValues,
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+          recovery: { query: 'FROM logs-* | WHERE count < 50' },
+        },
+      };
+      expect(deriveRecoveryTypeFromFormValues(values)).toBe('custom');
+    });
+
+    it('returns custom for a query recovery strategy without a recovery block', () => {
+      expect(deriveRecoveryTypeFromFormValues({ ...baseValues, recoveryStrategy: 'query' })).toBe(
+        'custom'
+      );
+    });
+
+    it('returns default for no_breach', () => {
+      expect(
+        deriveRecoveryTypeFromFormValues({ ...baseValues, recoveryStrategy: 'no_breach' })
+      ).toBe('default');
+    });
+
+    it('returns none for an explicit none strategy', () => {
+      expect(deriveRecoveryTypeFromFormValues({ ...baseValues, recoveryStrategy: 'none' })).toBe(
+        'none'
+      );
+    });
+
+    it('returns none when recovery_strategy is absent', () => {
+      expect(deriveRecoveryTypeFromFormValues({ ...baseValues, recoveryStrategy: undefined })).toBe(
+        'none'
+      );
+    });
+
+    it('returns default for signal kind regardless of strategy', () => {
+      expect(
+        deriveRecoveryTypeFromFormValues({
+          ...baseValues,
+          kind: 'signal',
+          recoveryStrategy: 'none',
+        })
+      ).toBe('default');
     });
   });
 });

@@ -183,6 +183,23 @@ const getInitialRecoveryType = (
 };
 
 /*
+ * FormValues counterpart of getInitialRecoveryType, used to keep the
+ * recovery-type dropdown in sync with parsed YAML. A present recovery query
+ * (or an explicit 'query' strategy) means custom; otherwise the strategy maps
+ * directly, with a missing value meaning no recovery.
+ */
+export const deriveRecoveryTypeFromFormValues = (values: FormValues): RecoveryType => {
+  if (values.kind !== 'alert') return 'default';
+  const hasCustomRecovery =
+    values.query.format === 'composed'
+      ? Boolean(values.query.recovery?.segment?.trim())
+      : Boolean(values.query.recovery?.query?.trim());
+  if (hasCustomRecovery || values.recoveryStrategy === 'query') return 'custom';
+  if (values.recoveryStrategy === 'no_breach') return 'default';
+  return 'none';
+};
+
+/*
  * These hooks live in the plugin, not the package — imported via the plugin's hook layer
  * when this flyout is rendered in the rules list page.
  * For now they are passed as props to keep the package boundary clean.
@@ -610,9 +627,13 @@ export function ComposeDiscoverFlyout({
       methods.reset(composed);
       setSandboxQuery(composed.query);
       setSandboxTimeField(composed.timeField);
+      dispatch({
+        type: 'SYNC_RECOVERY_TYPE',
+        recoveryType: deriveRecoveryTypeFromFormValues(composed),
+      });
       return composed;
     },
-    [methods]
+    [methods, dispatch]
   );
 
   /*

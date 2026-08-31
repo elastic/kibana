@@ -187,6 +187,40 @@ describe('reducer', () => {
     });
   });
 
+  describe('SYNC_RECOVERY_TYPE', () => {
+    it('returns the same state object when recoveryType is unchanged', () => {
+      const state = createState({ recoveryType: 'default' });
+      const next = reducer(state, { type: 'SYNC_RECOVERY_TYPE', recoveryType: 'default' });
+
+      expect(next).toBe(state);
+    });
+
+    it('focuses the recovery tab when becoming custom, without opening the child', () => {
+      const state = createState({ recoveryType: 'default', childOpen: false, activeTab: 'alert' });
+      const next = reducer(state, { type: 'SYNC_RECOVERY_TYPE', recoveryType: 'custom' });
+
+      expect(next.recoveryType).toBe('custom');
+      expect(next.activeTab).toBe('recovery');
+      expect(next.childOpen).toBe(false);
+    });
+
+    it('moves off the recovery tab when leaving custom', () => {
+      const state = createState({ recoveryType: 'custom', activeTab: 'recovery' });
+      const next = reducer(state, { type: 'SYNC_RECOVERY_TYPE', recoveryType: 'none' });
+
+      expect(next.recoveryType).toBe('none');
+      expect(next.activeTab).toBe('alert');
+    });
+
+    it('keeps a non-recovery active tab when leaving custom', () => {
+      const state = createState({ recoveryType: 'custom', activeTab: 'base' });
+      const next = reducer(state, { type: 'SYNC_RECOVERY_TYPE', recoveryType: 'default' });
+
+      expect(next.recoveryType).toBe('default');
+      expect(next.activeTab).toBe('base');
+    });
+  });
+
   describe('SET_YAML_MODE', () => {
     it('opens child when enabling yaml mode', () => {
       const state = createState({ childOpen: false, yamlMode: false });

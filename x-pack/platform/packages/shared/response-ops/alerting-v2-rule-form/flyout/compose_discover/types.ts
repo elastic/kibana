@@ -89,6 +89,7 @@ export interface ComposeDiscoverState {
 
 export type ComposeDiscoverAction =
   | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
+  | { type: 'SYNC_RECOVERY_TYPE'; recoveryType: RecoveryType }
   | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }

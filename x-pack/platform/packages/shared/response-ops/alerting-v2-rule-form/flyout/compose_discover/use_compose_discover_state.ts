@@ -103,6 +103,23 @@ export function reducer(
           ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };
+    /*
+     * Passive recoveryType sync from parsed YAML — no RHF or sandbox side
+     * effects (the parsed values already carry the correct query shape) and
+     * childOpen is untouched. Becoming custom focuses the recovery tab;
+     * leaving custom moves off the removed recovery tab.
+     */
+    case 'SYNC_RECOVERY_TYPE': {
+      if (action.recoveryType === state.recoveryType) return state;
+      if (action.recoveryType === 'custom') {
+        return { ...state, recoveryType: action.recoveryType, activeTab: 'recovery' };
+      }
+      return {
+        ...state,
+        recoveryType: action.recoveryType,
+        ...(state.activeTab === 'recovery' ? { activeTab: 'alert' as const } : {}),
+      };
+    }
     case 'KIND_CHANGE':
       /*
        * Reset manual split when switching kind — the unified query is rebuilt.
