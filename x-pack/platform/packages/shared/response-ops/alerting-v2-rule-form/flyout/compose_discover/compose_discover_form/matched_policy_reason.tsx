@@ -49,8 +49,8 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
   const trimmedExpression = matcher?.expression?.trim() || null;
   const matcherTags = matcher?.tags?.length ? matcher.tags : null;
 
-  // The `global` category is the API's name for a catch-all policy (applies to every rule).
-  const isCatchAll = category === 'global';
+  // The `catch-all` category means the policy applies to every rule.
+  const isCatchAll = category === 'catch-all';
 
   if (isCatchAll) {
     return (

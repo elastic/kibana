@@ -29,9 +29,9 @@ export const matchActionPoliciesForRuleBodySchema = z
 export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesForRuleBodySchema>;
 
 export const matchedActionPolicyCategorySchema = z
-  .enum(['global', 'tags'])
+  .enum(['catch-all', 'tags'])
   .describe(
-    'Why this action policy matches the rule: "global" (catch-all: no matcher, or a matcher with neither tags nor an expression), or "tags" (the rule\'s tags intersect the matcher\'s tag clause).'
+    'Why this action policy matches the rule: "catch-all" (no matcher, or a matcher with neither tags nor an expression), or "tags" (the rule\'s tags intersect the matcher\'s tag clause).'
   );
 
 export type MatchedActionPolicyCategory = z.infer<typeof matchedActionPolicyCategorySchema>;

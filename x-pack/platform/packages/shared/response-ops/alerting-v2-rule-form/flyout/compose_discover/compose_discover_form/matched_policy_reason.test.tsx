@@ -44,8 +44,8 @@ describe('getMatchedTags', () => {
 });
 
 describe('MatchedPolicyReason', () => {
-  it('renders a catch-all badge for the global category', () => {
-    renderComponent({ category: 'global', matcher: null, ruleTags: [] });
+  it('renders a catch-all badge for the catch-all category', () => {
+    renderComponent({ category: 'catch-all', matcher: null, ruleTags: [] });
 
     expect(screen.getByTestId('matchedPolicyReasonCatchAll')).toBeInTheDocument();
     expect(screen.getByText('Catch-all')).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe('MatchedPolicyReason', () => {
   });
 
   it('shows the catch-all tooltip on hover', async () => {
-    renderComponent({ category: 'global', matcher: null, ruleTags: [] });
+    renderComponent({ category: 'catch-all', matcher: null, ruleTags: [] });
 
     await userEvent.hover(screen.getByTestId('matchedPolicyReasonCatchAll'));
 

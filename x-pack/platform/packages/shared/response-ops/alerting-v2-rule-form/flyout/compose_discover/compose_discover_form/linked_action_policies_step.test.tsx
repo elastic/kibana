@@ -45,7 +45,7 @@ describe('LinkedActionPoliciesStep', () => {
       items: [
         {
           actionPolicy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
-          category: 'global',
+          category: 'catch-all',
         },
       ],
       total: 1,
@@ -91,7 +91,7 @@ describe('LinkedActionPoliciesStep', () => {
       items: [
         {
           actionPolicy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
-          category: 'global',
+          category: 'catch-all',
         },
       ],
       total: 1,
@@ -164,7 +164,7 @@ describe('LinkedActionPoliciesStep', () => {
       items: [
         {
           actionPolicy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
-          category: 'global',
+          category: 'catch-all',
         },
       ],
       total: 1,

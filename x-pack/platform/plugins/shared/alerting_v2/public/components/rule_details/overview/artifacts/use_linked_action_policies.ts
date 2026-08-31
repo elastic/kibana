@@ -28,7 +28,7 @@ export const useLinkedActionPolicies = (tags: string[]): UseLinkedActionPolicies
 
   return {
     totalCount: items.length,
-    catchAllCount: items.filter((item) => item.category === 'global').length,
+    catchAllCount: items.filter((item) => item.category === 'catch-all').length,
     matchingCriteriaCount: items.filter((item) => item.category === 'tags').length,
     isCountTruncated: total > LINKED_ACTION_POLICIES_FETCH_LIMIT,
     isLoading,
