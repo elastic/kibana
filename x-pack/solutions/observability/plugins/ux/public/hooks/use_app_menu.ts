@@ -52,7 +52,9 @@ export function useAppMenu(enableInspector: boolean) {
     const items = [
       {
         id: 'addData',
-        label: 'Add data',
+        label: {i18n.translate('xpack.ux.addDataButtonLabel', {
+                defaultMessage: 'Add data',
+              })}
         href: application.getUrlForApp('/apm/tutorial'),
         iconType: 'plus',
       },
