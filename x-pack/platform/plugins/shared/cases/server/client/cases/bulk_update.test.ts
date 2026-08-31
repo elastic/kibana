@@ -3349,6 +3349,54 @@ describe('update', () => {
         count: 'count_as_integer',
       });
     });
+
+    it('passes the mirrored extended_fields to emitCaseUpdated.extraInfo when updatedFields is [customFields]', async () => {
+      /*
+       * FAILURE SCENARIO: if patchCases echoes back the original SO (without mirrored
+       * extended_fields in attributes) then updatedCase.extended_fields stays pre-mirror,
+       * and the event bridge would compute an empty diff — never firing the trigger.
+       */
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      // Override patchCases to echo the post-mirror SO (as the real Elasticsearch response would).
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockCases[0],
+            attributes: {
+              ...mockCases[0].attributes,
+              extended_fields: { priority_as_keyword: 'high' },
+            },
+          },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'high' }],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.request,
+        expect.objectContaining({ updatedFields: expect.arrayContaining(['customFields']) }),
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            extended_fields: expect.objectContaining({ priority_as_keyword: 'high' }),
+          }),
+        })
+      );
+    });
   });
 
   describe('close validation against the final paired extended_fields', () => {
