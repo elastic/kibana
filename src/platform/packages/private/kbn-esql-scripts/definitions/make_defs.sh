@@ -14,7 +14,7 @@ PKG_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 # Ensure local node_modules are installed (yarn kbn bootstrap skips this standalone package)
 if [ ! -f "$PKG_DIR/node_modules/.bin/ts-node" ]; then
   echo "Installing kbn-esql-scripts dependencies..."
-  (cd "$PKG_DIR" && npm ci)
+  (cd "$PKG_DIR" && npm install --no-save --ignore-scripts)
 fi
 
 TS_NODE="$PKG_DIR/node_modules/.bin/ts-node"
