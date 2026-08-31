@@ -7,9 +7,16 @@
 
 import { every, isUndefined } from 'lodash';
 import type { LogChangeHistoryOptions } from '@kbn/change-history';
+import { trackUserActionAndLogChanges } from '@kbn/change-history';
 import type { RuleChangeTrackingMetadata } from '@kbn/alerting-types';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { Logger, SavedObjectBulkResult } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
+import type {
+  TrackUserActionParams,
+  UserActivityActionId,
+  UserActivityEventType,
+} from '@kbn/core-user-activity-server';
 import type {
   RuleChange,
   RuleChangeHistorySnapshot,
@@ -31,6 +38,69 @@ interface EncryptedRuleFields {
   apiKey?: string | null;
   uiamApiKey?: string | null;
 }
+
+interface UserActivityMapping {
+  /** Registered user-activity action id (closed union enforced by core). */
+  actionId: UserActivityActionId;
+  /** ECS event.type for the action. */
+  eventType: UserActivityEventType;
+  /** Past-tense verb phrase used to build the guideline-compliant message. */
+  verbPhrase: string;
+}
+
+/**
+ * Explicit mapping from the change-tracking action to the user-activity registry id.
+ *
+ * `changesContext.action` is a plain string because consumers may pass custom actions
+ * through the `changeTracking` option (e.g. Security's `rule_install` / `rule_upgrade`).
+ * Custom actions have no registered user-activity id, so they are skipped: only the
+ * baseline `RuleChangeTrackingAction` values produce a user-activity entry.
+ */
+const USER_ACTIVITY_MAPPING: Record<RuleChangeTrackingAction, UserActivityMapping> = {
+  [RuleChangeTrackingAction.ruleCreate]: {
+    actionId: 'alerting_rule_create',
+    eventType: 'creation',
+    verbPhrase: 'created',
+  },
+  [RuleChangeTrackingAction.ruleUpdate]: {
+    actionId: 'alerting_rule_update',
+    eventType: 'change',
+    verbPhrase: 'updated',
+  },
+  [RuleChangeTrackingAction.ruleUpdateApiKey]: {
+    actionId: 'alerting_rule_api_key_update',
+    eventType: 'change',
+    verbPhrase: 'updated the API key of',
+  },
+  [RuleChangeTrackingAction.ruleEnable]: {
+    actionId: 'alerting_rule_enable',
+    eventType: 'change',
+    verbPhrase: 'enabled',
+  },
+  [RuleChangeTrackingAction.ruleDisable]: {
+    actionId: 'alerting_rule_disable',
+    eventType: 'change',
+    verbPhrase: 'disabled',
+  },
+  [RuleChangeTrackingAction.ruleSnooze]: {
+    actionId: 'alerting_rule_snooze',
+    eventType: 'change',
+    verbPhrase: 'snoozed',
+  },
+  [RuleChangeTrackingAction.ruleUnsnooze]: {
+    actionId: 'alerting_rule_unsnooze',
+    eventType: 'change',
+    verbPhrase: 'unsnoozed',
+  },
+  [RuleChangeTrackingAction.ruleDelete]: {
+    actionId: 'alerting_rule_delete',
+    eventType: 'deletion',
+    verbPhrase: 'deleted',
+  },
+};
+
+const getUserActivityMapping = (action: string): UserActivityMapping | undefined =>
+  (USER_ACTIVITY_MAPPING as Record<string, UserActivityMapping>)[action];
 
 interface LogRuleChanges {
   /**
@@ -74,6 +144,7 @@ export async function logRuleChanges({
   encryptedFieldsMap,
   rulesClientContext: {
     changeTrackingService,
+    trackUserAction,
     ruleTypeRegistry,
     logger,
     spaceId,
@@ -91,6 +162,7 @@ export async function logRuleChanges({
     ? overlayEncryptedFields(ruleSOs, encryptedFieldsMap)
     : ruleSOs;
   const changes: RuleChange[] = [];
+  const affectedRules: Array<{ id: string; name: string; tags: string[] }> = [];
   // Fallback timestamp is used when both timestamp and ruleSO.updated_at are missing.
   // In practice it'll be almost never used.
   const fallbackChangeTimestamp = new Date().toISOString();
@@ -173,6 +245,7 @@ export async function logRuleChanges({
         // rule changes history by @timestamp DESC, object.sequence DESC
         sequence: ruleSnapshot.revision,
       });
+      affectedRules.push({ id: ruleSO.id, name: ruleDomain.name, tags: ruleDomain.tags ?? [] });
     } catch (e) {
       logger.debug(
         `Unable to transform rule saved object "${JSON.stringify(
@@ -186,20 +259,53 @@ export async function logRuleChanges({
     return;
   }
 
-  try {
-    const data: LogChangeHistoryOptions['data'] = every(metadata, isUndefined)
-      ? undefined
-      : { metadata: metadata as Record<string, unknown> | undefined };
+  const data: LogChangeHistoryOptions['data'] = every(metadata, isUndefined)
+    ? undefined
+    : { metadata: metadata as Record<string, unknown> | undefined };
 
-    await changeTrackingService.logBulk(changes, {
-      action,
-      spaceId,
-      data,
-      refresh,
-    });
-  } catch (e) {
-    logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);
+  // Single instrumentation call: writes change history and emits one user-activity
+  // entry per affected rule. Failures on either destination are isolated inside the
+  // helper and never break the rule mutation path.
+  await trackUserActionAndLogChanges({
+    logChanges: () =>
+      changeTrackingService.logBulk(changes, {
+        action,
+        spaceId,
+        data,
+        refresh,
+      }),
+    trackUserAction,
+    activityEvents: buildUserActivityEvents(action, affectedRules, logger),
+    logger,
+  });
+}
+
+/**
+ * Maps the change-tracking action to user-activity events, one per affected rule.
+ * Custom change-tracking actions (e.g. Security's rule_install / rule_upgrade) have
+ * no registered user-activity action id, so no activity is emitted for them.
+ */
+function buildUserActivityEvents(
+  action: string,
+  affectedRules: Array<{ id: string; name: string; tags: string[] }>,
+  logger: Logger
+): TrackUserActionParams[] {
+  const userActivityMapping = getUserActivityMapping(action);
+
+  if (!userActivityMapping) {
+    logger.debug(
+      `No user-activity action registered for change-tracking action "${action}"; skipping user activity log`
+    );
+    return [];
   }
+
+  const { actionId, eventType, verbPhrase } = userActivityMapping;
+
+  return affectedRules.map((rule) => ({
+    message: `User ${verbPhrase} rule "${rule.name}" (id: ${rule.id}).`,
+    event: { action: actionId, type: eventType, outcome: 'success' },
+    object: { id: rule.id, name: rule.name, type: 'rule', tags: rule.tags },
+  }));
 }
 
 function getRuleType(

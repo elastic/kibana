@@ -25,6 +25,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { UserActivityServiceSetup } from '@kbn/core-user-activity-server';
 import type { DistributiveOmit } from '@elastic/eui';
 import type {
   RuleTypeRegistry,
@@ -95,6 +96,12 @@ export interface RulesClientContext {
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;
   readonly changeTrackingService?: IScopedChangeTrackingService;
+  /**
+   * Core user-activity service used to dual-instrument rule mutations next to
+   * change history (see `logRuleChanges`). Optional so consumers and tests that
+   * don't wire the service are unaffected; when absent no activity is emitted.
+   */
+  readonly trackUserAction?: UserActivityServiceSetup['trackUserAction'];
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly cloneAPIKey: (name: string) => Promise<CreateAPIKeyResult>;

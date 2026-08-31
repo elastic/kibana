@@ -52,6 +52,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/serverless",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/core-user-activity-server",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-api-server-mocks",

@@ -7,6 +7,10 @@
 
 export type * from './src/types';
 export * from './src/client';
+export {
+  trackUserActionAndLogChanges,
+  type TrackUserActionAndLogChangesParams,
+} from './src/track_user_action_and_log_changes';
 export { CHANGE_HISTORY_AGGREGATE_FIELDS } from './src/types';
 export { DEFAULT_FIELD_AGGREGATION_SIZE } from './src/constants';
 /**

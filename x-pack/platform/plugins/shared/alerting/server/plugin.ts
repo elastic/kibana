@@ -53,6 +53,7 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
+import type { UserActivityServiceSetup } from '@kbn/core-user-activity-server';
 import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -259,6 +260,7 @@ export class AlertingPlugin {
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
   private changeTrackingService?: ChangeTrackingService;
+  private trackUserAction?: UserActivityServiceSetup['trackUserAction'];
   private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -290,6 +292,10 @@ export class AlertingPlugin {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
+    // Captured at setup and threaded through RulesClientFactory into the rules
+    // client context so rule mutations can be dual-instrumented into the user
+    // activity log next to change history (see `logRuleChanges`).
+    this.trackUserAction = core.userActivity.trackUserAction;
 
     const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
@@ -704,6 +710,7 @@ export class AlertingPlugin {
       actions: plugins.actions,
       eventLog: plugins.eventLog,
       changeTrackingService: this.changeTrackingService,
+      trackUserAction: this.trackUserAction,
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
