@@ -15,8 +15,9 @@ import { spaceTest as baseSpaceTest, test as baseTest } from '@kbn/scout';
 import type { LensPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
-export * as testData from './constants';
+export * as testData from '../../fixtures/constants';
 export * from './helpers';
+export * from './open_discover_popup';
 export * from './page_objects';
 export * from './saved_object_helpers';
 

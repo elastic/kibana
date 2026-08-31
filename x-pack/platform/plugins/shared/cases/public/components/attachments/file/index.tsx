@@ -79,7 +79,17 @@ const getFileAttachmentActions = ({
     : []),
 ];
 
-const getFileAttachmentViewObject = (props: FileViewProps) => {
+const getFileAttachmentIcon = (props: FileViewProps) => {
+  if (!isValidFileMetadata(props.metadata)) {
+    return 'document';
+  }
+
+  const fileId = Array.isArray(props.attachmentId) ? props.attachmentId[0] : props.attachmentId;
+  const file = getFileFromReferenceMetadata({ fileId, metadata: props.metadata });
+  return isImage(file) ? 'image' : 'document';
+};
+
+const getFileCreationActivity = (props: FileViewProps) => {
   const caseId = props.caseData.id;
   const canDelete = props.permissions.delete;
   // The framework view-prop type still allows `string | string[]`; the schema
@@ -89,7 +99,6 @@ const getFileAttachmentViewObject = (props: FileViewProps) => {
   if (!isValidFileMetadata(props.metadata)) {
     return {
       event: i18n.ADDED_UNKNOWN_FILE,
-      timelineAvatar: 'document',
       getActions: () =>
         canDelete
           ? [
@@ -115,7 +124,6 @@ const getFileAttachmentViewObject = (props: FileViewProps) => {
         <FileAttachmentEvent file={file} />
       </Suspense>
     ),
-    timelineAvatar: isImage(file) ? 'image' : 'document',
     getActions: () => getFileAttachmentActions({ caseId, fileId, canDelete }),
     hideDefaultActions: true,
     children: isImage(file) ? FileThumbnail : undefined,
@@ -125,11 +133,11 @@ const getFileAttachmentViewObject = (props: FileViewProps) => {
 export const getFileAttachmentType = () =>
   defineAttachment({
     id: FILE_ATTACHMENT_TYPE,
-    icon: 'document',
-    displayName: i18n.FILE_DISPLAY_NAME,
-    getAttachmentViewObject: getFileAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_FILE }),
-    getAttachmentTabViewObject: () => ({ children: CaseViewFiles }),
+    getIcon: getFileAttachmentIcon,
+    getLabel: () => i18n.FILE_DISPLAY_NAME,
+    getCreationActivity: getFileCreationActivity,
+    getRemovalActivity: () => ({ event: i18n.REMOVED_FILE }),
+    getAttachmentList: () => ({ children: CaseViewFiles }),
     schema: FileAttachmentPayloadSchema,
     // File attachments reference uploaded files by id; workflow authors can't
     // produce that id from YAML, so file is excluded from workflow steps.

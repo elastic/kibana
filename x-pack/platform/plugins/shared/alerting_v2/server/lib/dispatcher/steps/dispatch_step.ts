@@ -32,6 +32,7 @@ import type {
   DispatcherStepOutput,
   DispatchFailure,
 } from '../types';
+import { PolicyCatalog } from '../state';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
@@ -79,7 +80,7 @@ export class DispatchStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { dispatch = [], policies } = state;
+    const { dispatch = [], policies = PolicyCatalog.empty() } = state;
     const { signal } = state.input;
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();
@@ -95,7 +96,7 @@ export class DispatchStep implements DispatcherStep {
 
     const groupsByApiKey = new Map<string, ActionGroup[]>();
     for (const group of dispatch) {
-      const apiKey = policies?.get(group.policyId)?.apiKey;
+      const apiKey = policies.apiKeyOf(group.policyId);
       if (!apiKey) {
         this.recordMissingApiKey(group, dispatchFailures, logger);
         continue;
@@ -144,7 +145,7 @@ export class DispatchStep implements DispatcherStep {
   ): void {
     const message = `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`;
     logger.warn({
-      message: () => message,
+      message: 'Action policy has no API key, skipping dispatch',
       code: ALERTING_LOG_CODES.DISPATCH_POLICY_MISSING_API_KEY,
       labels: { group_id: group.id, policy_id: group.policyId },
     });
@@ -208,6 +209,7 @@ export class DispatchStep implements DispatcherStep {
             destination.id,
             DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
             ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+            'Workflow not found, skipping dispatch',
             `Workflow ${destination.id} not found, skipping dispatch for group ${group.id}`,
             dispatchFailures,
             logger
@@ -220,6 +222,7 @@ export class DispatchStep implements DispatcherStep {
             destination.id,
             DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
             ALERTING_LOG_CODES.DISPATCH_WORKFLOW_DISABLED,
+            'Workflow is disabled, skipping dispatch',
             `Workflow ${destination.id} is disabled, enable it to dispatch for group ${group.id}`,
             dispatchFailures,
             logger
@@ -242,12 +245,13 @@ export class DispatchStep implements DispatcherStep {
     workflowId: string,
     reason: DispatchFailureReason,
     code: AlertingV2LogCode,
+    logMessage: string,
     message: string,
     dispatchFailures: DispatchFailure[],
     logger: LoggerServiceContract
   ): void {
     logger.warn({
-      message: () => message,
+      message: logMessage,
       code,
       labels: { group_id: group.id, workflow_id: workflowId },
     });
@@ -368,6 +372,7 @@ export class DispatchStep implements DispatcherStep {
       pending.workflowId,
       DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
       ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+      'Workflow scheduling returned no execution id',
       `Workflow ${pending.workflowId} scheduling returned no execution id for group ${pending.group.id}`,
       dispatchFailures,
       logger

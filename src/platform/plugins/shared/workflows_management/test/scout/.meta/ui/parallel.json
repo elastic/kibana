@@ -1,8 +1,7 @@
 {
-  "sha1": "5aad092acde4cc8dd02ec238a2afbb0818fee545",
+  "sha1": "58525921fb1482766d982906241cf1efe692f35c",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -414,7 +413,7 @@
     {
       "id": "bd47170adc03761-1eaf3f4c5859ccb",
       "title": "Sanity tests for workflows Create, save, run and view a dummy workflow",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -425,14 +424,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 50
       }
     },
     {
       "id": "bd47170adc03761-e6122565b6ea818",
       "title": "Sanity tests for workflows should show validation errors for invalid workflow YAML and clear them when fixed",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -443,14 +442,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 73
       }
     },
     {
       "id": "bd47170adc03761-c4c083e0976f05e",
       "title": "Sanity tests for workflows should render \"console\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -461,14 +460,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-18a9b2ea0bd01f9",
       "title": "Sanity tests for workflows should render \"if\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -479,14 +478,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-deaf864c8e913aa",
       "title": "Sanity tests for workflows should render \"foreach\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -497,14 +496,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-e01ca91455c1a7b",
       "title": "Sanity tests for workflows should render \"http\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -515,14 +514,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-6b35c868f86ce6c",
       "title": "Sanity tests for workflows should render \"loop.continue\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -533,14 +532,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-c8e4185679b827e",
       "title": "Sanity tests for workflows should render \"workflow.fail\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -551,14 +550,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-459fd6ac3eccef8",
       "title": "Sanity tests for workflows should show step type autocompletion suggestions",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -569,14 +568,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 105,
+        "line": 106,
         "column": 11
       }
     },
     {
       "id": "bd47170adc03761-097049eb176efd2",
       "title": "Sanity tests for workflows should show root-level property suggestions on empty lines",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -587,14 +586,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 143,
+        "line": 144,
         "column": 51
       }
     },
     {
       "id": "bd47170adc03761-f9053316b789cab",
       "title": "Sanity tests for workflows should not show validation errors for YAML comment lines with liquid variables",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -605,7 +604,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 157,
+        "line": 158,
         "column": 31
       }
     },

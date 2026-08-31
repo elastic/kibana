@@ -1007,8 +1007,9 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     tool.getHandler.mockReturnValue(toolHandler);
   });
 
-  it('returns error result instead of confirmation prompt when executionMode is standalone', async () => {
+  it('returns error result instead of confirmation prompt when interactivity is disabled', async () => {
     runnerDeps.executionMode = AgentExecutionMode.standalone;
+    runnerDeps.interactivity = { enabled: false };
     const runnerManager = new RunnerManager(runnerDeps);
 
     tool.confirmation = { askUser: 'always' };
@@ -1035,8 +1036,9 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     expect(toolHandler).not.toHaveBeenCalled();
   });
 
-  it('returns error result instead of on-demand prompt when executionMode is standalone', async () => {
+  it('returns error result instead of on-demand prompt when interactivity is disabled', async () => {
     runnerDeps.executionMode = AgentExecutionMode.standalone;
+    runnerDeps.interactivity = { enabled: false };
     const runnerManager = new RunnerManager(runnerDeps);
 
     toolHandler.mockReturnValue({

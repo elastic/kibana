@@ -8,7 +8,7 @@
 import '../../_index.scss';
 import React, { Component } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiShadow, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
@@ -91,59 +91,70 @@ const zoomIconBackgroundImage = (path: string, color: string) =>
  * reads the color mode via `useEuiTheme`, allowing them to follow reload-less light/dark switches.
  */
 function MapControlsThemeStyles() {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const iconColor = euiTheme.colors.textParagraph;
   return (
     <Global
-      styles={css({
-        '.mapContainer': {
-          '.maplibregl-ctrl-group:not(:empty)': {
+      styles={[
+        // Match the MapLibre zoom control shadow to the medium shadow EUI panels
+        // use (via `euiShadow`) so it stays consistent with the toolbar controls
+        // and gets the correct light/dark output, including the dark-mode border.
+        css`
+          .mapContainer .maplibregl-ctrl-group:not(:empty) {
+            ${euiShadow(euiThemeContext, 'm')}
+          }
+        `,
+        css({
+          '.mapContainer': {
+            '.maplibregl-ctrl-group:not(:empty)': {
+              backgroundColor: euiTheme.colors.backgroundBasePlain,
+            },
+            '.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon': {
+              backgroundImage: zoomIconBackgroundImage(ZOOM_IN_ICON_PATH, iconColor),
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+            },
+            '.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon': {
+              backgroundImage: zoomIconBackgroundImage(ZOOM_OUT_ICON_PATH, iconColor),
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+            },
+          },
+          // The layer table-of-contents entries live in the right-side overlay
+          // (a sibling of `.mapContainer`), so their divider and state background
+          // colors are themed here to react to reload-less light/dark switches.
+          '.mapWidgetOverlay .mapTocEntry': {
+            borderBottomColor: euiTheme.border.color,
+          },
+          '.mapWidgetOverlay .mapTocEntry-isSelected': {
+            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          },
+          '.mapWidgetOverlay .mapTocEntry-isDraggingOver': {
             backgroundColor: euiTheme.colors.backgroundBasePlain,
           },
-          '.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon': {
-            backgroundImage: zoomIconBackgroundImage(ZOOM_IN_ICON_PATH, iconColor),
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
+          '.mapWidgetOverlay .mapTocEntry-isCombineLayer': {
+            backgroundColor: euiTheme.colors.backgroundBaseSuccess,
           },
-          '.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon': {
-            backgroundImage: zoomIconBackgroundImage(ZOOM_OUT_ICON_PATH, iconColor),
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
+          '.mapWidgetOverlay .mapTocEntry-isInEditingMode': {
+            backgroundColor: `${euiTheme.colors.backgroundBasePrimary} !important`,
           },
-        },
-        // The layer table-of-contents entries live in the right-side overlay
-        // (a sibling of `.mapContainer`), so their divider and state background
-        // colors are themed here to react to reload-less light/dark switches.
-        '.mapWidgetOverlay .mapTocEntry': {
-          borderBottomColor: euiTheme.border.color,
-        },
-        '.mapWidgetOverlay .mapTocEntry-isSelected': {
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        },
-        '.mapWidgetOverlay .mapTocEntry-isDraggingOver': {
-          backgroundColor: euiTheme.colors.emptyShade,
-        },
-        '.mapWidgetOverlay .mapTocEntry-isCombineLayer': {
-          backgroundColor: euiTheme.colors.backgroundBaseSuccess,
-        },
-        '.mapWidgetOverlay .mapTocEntry-isInEditingMode': {
-          backgroundColor: `${euiTheme.colors.backgroundBasePrimary} !important`,
-        },
-        '.mapWidgetOverlay .mapLayerControl': {
-          borderTopColor: euiTheme.border.color,
-        },
-        '.mapWidgetOverlay .mapLayerControl__addLayerButton.euiButton-isDisabled': {
-          backgroundColor: `${euiTheme.colors.lightShade} !important`,
-        },
-        '.mapWidgetOverlay .mapLayerToc-droppable-isCombining': {
-          backgroundColor: `${euiTheme.colors.emptyShade} !important`,
-        },
-        '.mapWidgetOverlay .mapTocEntry__detailsToggleButton': {
-          backgroundColor: euiTheme.colors.emptyShade,
-          borderColor: euiTheme.border.color,
-          color: euiTheme.colors.textParagraph,
-        },
-      })}
+          '.mapWidgetOverlay .mapLayerControl': {
+            borderTopColor: euiTheme.border.color,
+          },
+          '.mapWidgetOverlay .mapLayerControl__addLayerButton.euiButton-isDisabled': {
+            backgroundColor: `${euiTheme.colors.lightShade} !important`,
+          },
+          '.mapWidgetOverlay .mapLayerToc-droppable-isCombining': {
+            backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important`,
+          },
+          '.mapWidgetOverlay .mapTocEntry__detailsToggleButton': {
+            backgroundColor: euiTheme.colors.backgroundBasePlain,
+            borderColor: euiTheme.border.color,
+            color: euiTheme.colors.textParagraph,
+          },
+        }),
+      ]}
     />
   );
 }

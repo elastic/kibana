@@ -32,19 +32,24 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive,
     padding: 6px ${euiTheme.size.s};
     border-radius: ${euiTheme.border.radius.small};
     text-decoration: none;
-    color: ${euiTheme.colors.textParagraph};
+    color: ${euiTheme.components.buttons.textColorText};
 
     &:hover {
-      background-color: ${euiTheme.colors.backgroundLightPrimary};
-      color: ${euiTheme.colors.textPrimary};
+      background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
+      color: ${euiTheme.components.buttons.textColorText};
       text-decoration: none;
     }
   `;
 
   const activeLinkStyles = css`
     ${baseLinkStyles}
-    background-color: ${euiTheme.colors.backgroundLightPrimary};
-    color: ${euiTheme.colors.textPrimary};
+    background-color: ${euiTheme.components.buttons.backgroundPrimary};
+    color: ${euiTheme.components.buttons.textColorPrimary};
+
+    &:hover {
+      background-color: ${euiTheme.components.buttons.backgroundPrimaryHover};
+      color: ${euiTheme.components.buttons.textColorPrimary};
+    }
   `;
 
   return (

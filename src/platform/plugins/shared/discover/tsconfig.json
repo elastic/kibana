@@ -55,6 +55,7 @@
     "@kbn/shared-ux-router",
     "@kbn/dom-drag-drop",
     "@kbn/ebt-tools",
+    "@kbn/ebt-click",
     "@kbn/unified-field-list",
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
@@ -127,6 +128,7 @@
     "@kbn/controls-schemas",
     "@kbn/as-code-data-views-schema",
     "@kbn/as-code-data-views-transforms",
+    "@kbn/as-code-export-flyout-component",
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-shared-schemas",
@@ -159,7 +161,7 @@
     "@kbn/use-observable",
     "@kbn/core-security-server",
     "@kbn/core-http-server",
-    "@kbn/ui-callout",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

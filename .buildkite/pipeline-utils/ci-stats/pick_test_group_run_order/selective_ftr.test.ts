@@ -122,6 +122,15 @@ describe('shouldSkipFtrTests', () => {
     ).toBe(true);
   });
 
+  it('returns true for dependency ownership and Renovate changes', () => {
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/dependency-ownership']), [
+        'packages/kbn-dependency-ownership/src/rule.ts',
+        'renovate.json',
+      ])
+    ).toBe(true);
+  });
+
   it('returns false when any affected module is not excluded', () => {
     expect(
       shouldSkipFtrTests(new Set(['@kbn/scout', '@kbn/dashboard-plugin']), [

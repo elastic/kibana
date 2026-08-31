@@ -54,6 +54,7 @@ export const createSyntaxValidationEvaluator = (
 ): KIQueryGenerationEvaluator => ({
   name: 'syntax_validation',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const queries = getQueriesFromOutput(output);
     if (queries.length === 0) {

@@ -25,11 +25,11 @@ export const createSubAgentExecutor = ({
       const executionService = getExecutionService();
       return executionService.executeAgent({
         mode: AgentExecutionMode.standalone,
+        interactive: { enabled: false },
         request,
         params: {
           agentId: params.agentId,
           connectorId: params.connectorId,
-          capabilities: params.capabilities,
           parentExecutionId: params.parentExecutionId,
           nextInput: { message: params.prompt },
           projectRouting,
@@ -37,6 +37,47 @@ export const createSubAgentExecutor = ({
         abortSignal: params.abortSignal,
       });
     },
+
+    createSubAgent: async (params) => {
+      const executionService = getExecutionService();
+      return executionService.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        interactive: { enabled: false },
+        request,
+        params: {
+          agentId: params.agentId,
+          connectorId: params.connectorId,
+          parentExecutionId: params.parentExecutionId,
+          conversationId: params.conversationId,
+          autoCreateConversationWithId: true,
+          nextInput: { message: params.prompt },
+          subagentCreation: {
+            parentConversationId: params.parentConversationId,
+            subagentName: params.subagentName,
+            subagentPurpose: params.subagentPurpose,
+          },
+        },
+        abortSignal: params.abortSignal,
+      });
+    },
+
+    sendToSubAgent: async (params) => {
+      const executionService = getExecutionService();
+      return executionService.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        interactive: { enabled: false },
+        request,
+        params: {
+          connectorId: params.connectorId,
+          parentExecutionId: params.parentExecutionId,
+          conversationId: params.conversationId,
+          autoCreateConversationWithId: false,
+          nextInput: { message: params.prompt },
+        },
+        abortSignal: params.abortSignal,
+      });
+    },
+
     getExecution: async (executionId) => {
       const executionService = getExecutionService();
       return executionService.getExecution(executionId);

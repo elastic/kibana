@@ -5,24 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
-import { useKibana } from '../common/lib/kibana';
-import { LegacyActionResultsSummary } from './legacy_action_results_summary';
-import type { ActionResultsSummaryProps } from './legacy_action_results_summary';
+import type { ActionResultsSummaryProps } from './types';
 import { UnifiedActionResultsSummary } from './unified_action_results_summary';
 
 export type { ActionResultsSummaryProps };
 
-const ActionResultsSummarySwitch: React.FC<ActionResultsSummaryProps> = (props) => {
-  const isUnifiedEnabled = useIsExperimentalFeatureEnabled('unifiedDataTable');
-  const { uiActions } = useKibana().services;
-
-  if (isUnifiedEnabled && uiActions) {
-    return <UnifiedActionResultsSummary {...props} />;
-  }
-
-  return <LegacyActionResultsSummary {...props} />;
-};
-
-export const ActionResultsSummary = React.memo(ActionResultsSummarySwitch);
+// Alias kept for the historical import path; uiActions is a required plugin.
+export const ActionResultsSummary = UnifiedActionResultsSummary;
