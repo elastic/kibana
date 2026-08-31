@@ -12,11 +12,11 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getLastNotifiedTimestampsQueries } from '../queries';
+import { PolicyCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicy,
-  ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -36,7 +36,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { groups = [], policies = new Map<ActionPolicyId, ActionPolicy>(), input } = state;
+    const { groups = [], policies = PolicyCatalog.empty(), input } = state;
 
     if (groups.length === 0) {
       return { type: 'continue', data: { dispatch: [], throttled: [] } };
@@ -82,7 +82,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
 
 export function applyThrottling(
   groups: readonly ActionGroup[],
-  policies: ReadonlyMap<string, ActionPolicy>,
+  policies: PolicyCatalog,
   lastNotifiedMap: ReadonlyMap<ActionGroupId, LastNotifiedInfo>,
   now: Date,
   logger?: LoggerServiceContract
@@ -141,7 +141,7 @@ function shouldDispatch(
 ): boolean {
   if (!lastRecord) return true;
 
-  const groupingMode = policy.groupingMode ?? 'per_episode';
+  const { groupingMode } = policy;
   const strategy =
     policy.throttle?.strategy ??
     (groupingMode === 'per_episode' ? 'on_status_change' : 'time_interval');

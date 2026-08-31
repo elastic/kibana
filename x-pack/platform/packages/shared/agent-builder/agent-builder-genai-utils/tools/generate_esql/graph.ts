@@ -99,7 +99,10 @@ export const createNlToEsqlGraph = ({
     return { resource: resolvedResource };
   };
 
-  const modelCallConfig: Partial<InferenceChatModelCallOptions> = { sessionId, cacheControl };
+  const requestDocCallConfig: Partial<InferenceChatModelCallOptions> = {
+    sessionId: sessionId ? `${sessionId}:request-doc` : undefined,
+    cacheControl,
+  };
 
   // request doc step - retrieve the list of relevant commands and functions that may be useful to generate the query
   const requestDocumentation = async (state: StateType) => {
@@ -119,7 +122,7 @@ export const createNlToEsqlGraph = ({
           .describe('Tool to use to request ES|QL documentation'),
         { name: 'request_documentation' }
       )
-      .withConfig(modelCallConfig);
+      .withConfig(requestDocCallConfig);
 
     const { commands = [], functions = [] } = await requestDocModel.invoke(
       createRequestDocumentationPrompt({
@@ -144,8 +147,12 @@ export const createNlToEsqlGraph = ({
   };
 
   // generate esql step - generate the esql query based on the doc and the user's input
+  const generateCallConfig: Partial<InferenceChatModelCallOptions> = {
+    sessionId: sessionId ? `${sessionId}:generate` : undefined,
+    cacheControl,
+  };
   const generateEsql = async (state: StateType) => {
-    const generateModel = model.chatModel.withConfig(modelCallConfig);
+    const generateModel = model.chatModel.withConfig(generateCallConfig);
 
     const response = await generateModel.invoke(
       createGenerateEsqlPrompt({

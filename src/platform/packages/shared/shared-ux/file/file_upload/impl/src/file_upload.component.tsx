@@ -20,10 +20,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 
@@ -53,7 +50,7 @@ const styles = {
   `,
 };
 
-export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
+export const FileUpload = React.forwardRef<EuiFilePickerRef, Props>(
   (
     {
       compressed,
@@ -95,7 +92,7 @@ export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
           fullWidth={fullWidth}
           aria-label={i18nTexts.defaultPickerLabel}
           id={id}
-          ref={ref as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+          ref={ref}
           onChange={(fs) => {
             uploadState.setFiles(Array.from(fs ?? []));
             if (immediate && uploadState.hasFiles()) uploadState.upload(meta);

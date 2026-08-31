@@ -22,6 +22,7 @@ export function createLatencyEvaluator({
     log,
     config: {
       name: 'Latency',
+      direction: 'minimize',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}"
 | STATS total_duration_ns = MAX(duration)
@@ -61,6 +62,7 @@ export function createSpanLatencyEvaluator({
     log,
     config: {
       name: 'Latency',
+      direction: 'minimize',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}" AND ${spanFilter}
 | STATS total_duration_ns = SUM(duration)

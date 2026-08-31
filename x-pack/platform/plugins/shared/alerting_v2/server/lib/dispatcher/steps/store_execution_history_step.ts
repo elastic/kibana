@@ -12,6 +12,7 @@ import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../.
 import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../../services/event_log_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { EpisodeTriage, RuleCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -20,7 +21,6 @@ import type {
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  Rule,
   RuleId,
 } from '../types';
 import {
@@ -108,17 +108,17 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     const {
       dispatch = [],
       throttled = [],
-      dispatchable = [],
+      triage = EpisodeTriage.empty(),
       dispatchedExecutions,
       dispatchFailures = [],
-      rules,
+      rules = RuleCatalog.empty(),
       input,
     } = state;
 
     if (
       dispatch.length === 0 &&
       throttled.length === 0 &&
-      dispatchable.length === 0 &&
+      !triage.hasDispatchable() &&
       dispatchFailures.length === 0
     ) {
       return { type: 'continue' };
@@ -157,7 +157,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     // their episodes are not double-reported as `unmatched`. Those episodes did
     // match a policy; `dispatch_failed` already carries their episode_ids.
     const unmatched = aggregateUnmatchedBySubject(
-      getUnmatchedEpisodes(dispatchable, dispatch, throttled)
+      getUnmatchedEpisodes(triage.dispatchable, dispatch, throttled)
     );
     for (const group of unmatched) {
       this.emitUnmatchedSummary({ timestamp, executionUuid, group });
@@ -181,7 +181,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     executionUuid: string;
     summary: PolicySummary;
     action: ActionPolicyEventAction;
-    rules: Map<RuleId, Rule> | undefined;
+    rules: RuleCatalog;
   }): void {
     const ruleIds = Array.from(summary.ruleIds);
     const { refs, spillOver } = buildPolicyAndRuleRefs(
@@ -247,7 +247,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     timestamp: string;
     executionUuid: string;
     failure: DispatchFailure;
-    rules: Map<RuleId, Rule> | undefined;
+    rules: RuleCatalog;
   }): void {
     const ruleIdSet = new Set<string>();
     const episodeIdSet = new Set<string>();
@@ -351,13 +351,13 @@ function buildPolicyAndRuleRefs(
   policyId: ActionPolicyId,
   spaceId: string,
   ruleIds: string[],
-  rules: Map<RuleId, Rule> | undefined
+  rules: RuleCatalog
 ): { refs: SavedObjectRef[]; spillOver: string[] } {
   const capped = ruleIds.slice(0, RULE_REF_CAP);
   const spillOver = ruleIds.slice(RULE_REF_CAP);
   const refs: SavedObjectRef[] = [
     policyRef({ id: policyId, spaceId }),
-    ...capped.map((id) => ruleRef({ id, spaceId: rules?.get(id)?.spaceId ?? spaceId })),
+    ...capped.map((id) => ruleRef({ id, spaceId: rules.spaceIdOf(id) ?? spaceId })),
   ];
   return { refs, spillOver };
 }
