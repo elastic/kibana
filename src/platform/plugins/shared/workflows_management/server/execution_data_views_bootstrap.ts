@@ -118,9 +118,11 @@ export class ExecutionDataViewsBootstrap {
         }
       } catch (err) {
         if (isAlreadyExistsError(err)) {
-          this.logger.debug(
-            `ExecutionDataViewsBootstrap: data view ${id} already created by another Kibana node`
-          );
+          const existing = await this.getDataViewIfExists(dvService, id);
+          if (existing === null) {
+            throw err;
+          }
+          this.logger.debug(`ExecutionDataViewsBootstrap: data view ${id} already exists`);
         } else {
           throw err;
         }

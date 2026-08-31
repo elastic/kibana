@@ -90,6 +90,53 @@ describe('ExecutionDataViewsBootstrap', () => {
     expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenCalledTimes(1);
   });
 
+  it('accepts a duplicate error only when the expected ID exists', async () => {
+    const duplicateError = Object.assign(new Error('duplicate data view'), {
+      name: 'DuplicateDataViewError',
+    });
+    const dataViewsService = {
+      get: jest
+        .fn()
+        .mockRejectedValueOnce(new Error('Saved object not found'))
+        .mockResolvedValue({ id: 'workflows-executions-managed-marketing' }),
+      create: jest.fn().mockImplementation(async (spec) => spec),
+      createSavedObject: jest.fn().mockRejectedValue(duplicateError),
+    };
+    const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
+    const logger = loggerMock.create();
+    const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, logger);
+
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    await flushPromises();
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    await flushPromises();
+
+    expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenCalledTimes(1);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not cache a duplicate name with a different ID', async () => {
+    const duplicateError = Object.assign(new Error('duplicate data view'), {
+      name: 'DuplicateDataViewError',
+    });
+    const dataViewsService = {
+      get: jest.fn().mockRejectedValue(new Error('Saved object not found')),
+      create: jest.fn().mockImplementation(async (spec) => spec),
+      createSavedObject: jest.fn().mockRejectedValue(duplicateError),
+    };
+    const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
+    const logger = loggerMock.create();
+    const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, logger);
+
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    await flushPromises();
+    bootstrap.ensureForSpaceFireAndForget('marketing', savedObjectsClient, esClient, request);
+    await flushPromises();
+
+    expect(dataViewsPlugin.dataViewsServiceFactory).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('duplicate data view'));
+  });
+
   it('does not cache a failed bootstrap', async () => {
     const dataViewsService = {
       get: jest
