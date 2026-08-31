@@ -1,18 +1,9 @@
 {
-  "sha1": "452cb7af9b7490e41d2df233a60fcebc3c1e2666",
-  "testChannels": ["ci-on-commit", "ci-batch-3h"],
+  "sha1": "7d84f56ef130a0fa474c1c07ce7f34d9bc353e09",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
-    {
-      "id": "47e4b768e7655a9-7132d4e40af07dc",
-      "title": "Teardown environment for streams tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "eaf86af9bf7a908-744ce32675c025c",
       "title": "Setup environment for streams tests",
@@ -386,7 +377,10 @@
       "id": "89eca2580b53f18-1908a67631697ac",
       "title": "Draft stream simulation - processing preview should display sample documents from the parent stream for a draft",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/draft_stream_simulation.spec.ts",
         "line": 86,
@@ -397,7 +391,10 @@
       "id": "89eca2580b53f18-8961cf973c704ab",
       "title": "Draft stream simulation - processing preview should simulate a Set processor and show processed results in preview",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/draft_stream_simulation.spec.ts",
         "line": 90,
@@ -408,7 +405,10 @@
       "id": "89eca2580b53f18-334e103d179bed7",
       "title": "Draft stream simulation - processing preview should simulate a Rename processor on a draft stream",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/draft_stream_simulation.spec.ts",
         "line": 111,
@@ -419,7 +419,10 @@
       "id": "89eca2580b53f18-71493f3cff0bcd9",
       "title": "Draft stream simulation - processing preview should update simulation preview reactively when configuring a new processor",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/draft_stream_simulation.spec.ts",
         "line": 129,
@@ -430,7 +433,10 @@
       "id": "89eca2580b53f18-2e643d3f9a21477",
       "title": "Draft stream simulation - processing preview should simulate multiple sequential processors on a draft stream",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/draft_stream_simulation.spec.ts",
         "line": 148,
@@ -1017,7 +1023,10 @@
       "id": "334942ee7933919-e9679353e0dd347",
       "title": "Stream data processing - Pipeline suggestions should show suggest pipeline button when no steps exist and hide when connector unavailable",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/pipeline_suggestions.spec.ts",
         "line": 57,
@@ -1028,7 +1037,10 @@
       "id": "334942ee7933919-c1c440ff4267a08",
       "title": "Stream data processing - Pipeline suggestions should generate suggestion and allow accept/reject",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/pipeline_suggestions.spec.ts",
         "line": 76,
@@ -1039,7 +1051,10 @@
       "id": "334942ee7933919-b0c8efe63622aaa",
       "title": "Stream data processing - Pipeline suggestions should regenerate suggestions",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/pipeline_suggestions.spec.ts",
         "line": 95,
@@ -1168,6 +1183,17 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/processing_without_ai.spec.ts",
         "line": 28,
         "column": 39
+      }
+    },
+    {
+      "id": "47e4b768e7655a9-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

@@ -104,6 +104,7 @@ toc:
           - file: connectors-kibana/google-calendar-action-type.md
           - file: connectors-kibana/google-cloud-monitoring-action-type.md
           - file: connectors-kibana/google-cloud-storage-action-type.md
+          - file: connectors-kibana/google-docs-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/grafana-action-type.md
           - file: connectors-kibana/graphql-action-type.md
@@ -138,6 +139,7 @@ toc:
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/trello-action-type.md
           - file: connectors-kibana/unifi-action-type.md
+          - file: connectors-kibana/urlscan-io-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
           - file: connectors-kibana/workday-action-type.md

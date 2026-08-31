@@ -16,6 +16,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { Model } from '../common_attributes.gen';
+
 export const EvaluateRequestBody = lazySchema(() =>
   z.object({
     subject: z.object({
@@ -69,6 +71,14 @@ export const EvaluateResponse = lazySchema(() =>
           name: z.string().max(256),
           version: z.string().max(64),
           kind: z.enum(['llm', 'code']),
+          /**
+           * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
+           */
+          direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
+          /**
+           * Model resolved from the evaluator's `connector_id`. Absent for code evaluators, which invoke no model.
+           */
+          model: Model.optional(),
         }),
         scores: z
           .array(

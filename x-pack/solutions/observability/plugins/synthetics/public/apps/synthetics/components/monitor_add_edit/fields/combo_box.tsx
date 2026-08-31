@@ -111,7 +111,6 @@ export const FormattedComboBox = ({
           tooltipProps={{ disableScreenReaderOutput: true }}
         >
           {(copy) => (
-            /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
             <EuiButtonIcon
               iconType="copy"
               display="base"

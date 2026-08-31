@@ -14,8 +14,8 @@ const STATUS_DECISION_RUBRIC = [
   'You cannot run queries. Use the signal counts in the summary and the agent output evidence.',
   '',
   'Status gates:',
-  '- `open`: a current failure, material degradation, or sensitive-data exposure is confirmed, or a verification gap leaves one of those conditions plausible. A concrete non-benign error in a found off-topic row directly confirms a separate observed-error event even though its source rule signal is `confirmed: false`; judge that event from the row’s error signature and impact.',
-  '- `dismissed`: the proposed incident is a false alarm, benign/positive change, unrelated finding, or non-confirming finding (`confirmedSignalCount == 0`), with no plausible failure, degradation, or exposure left unverified. A concrete non-benign error found in an off-topic row is independent current evidence: reject the original rule, but represent the observed error with an `open` event rather than dismissing it.',
+  '- `open`: a current failure, material degradation, or sensitive-data exposure has a `confirms` verdict, or an `inconclusive` verdict leaves one plausible, or a `not_checked` verdict leaves one plausible only when evidence shows no backed query was available. A concrete non-benign error in a found `off_topic` row directly confirms a separate observed-error event; judge that event from the row’s error signature and impact.',
+  '- `dismissed`: the proposed incident is a false alarm, benign/positive change, unrelated finding, or non-confirming finding (`confirmsVerdictCount == 0`), with no plausible failure, degradation, or exposure left unresolved. A concrete non-benign error found in an off-topic row is independent current evidence: reject the original rule, but represent the observed error with an `open` event rather than dismissing it.',
   '- `closed` is a recovery state, not the disposition for a healthy or positive predicate. For an active or ambiguous failure shape it requires recovery-lens grounding with verified healthy/opposite rows or a successfully executed exact query with no matching failure rows.',
   '- An open event with the same rule may be reconciled to `closed` even when its prior signal is unconfirmed, if a current exact query shows verified healthy/opposite rows or no matching failure rows. This exception applies to directionally ambiguous detections, preserves the existing episode, and does not create a new dismissed event.',
   '- `closed` for a settled episode requires every signal to be settled/downward or to satisfy the same-rule recovery reconciliation exception. Carried settled signals are trusted; each fresh settled signal requires recovery-lens grounding with verified healthy/opposite rows or a successfully executed exact query with no matching failure rows. A query error, telemetry gap, unrelated result, or active failure row blocks closure.',
@@ -32,6 +32,7 @@ export const createStatusCorrectnessEvaluator = (
 ): Evaluator<DiscoveryEvaluationExample, DiscoveryAgentOutput> => ({
   name: 'status_correctness',
   kind: 'LLM',
+  direction: 'maximize',
   evaluate: async (params) => {
     const { output, expected } = params;
     const expectedGroundTruth = expected?.expected_ground_truth;
@@ -48,9 +49,12 @@ export const createStatusCorrectnessEvaluator = (
     const eventsSummary = events.map((e) => ({
       event_id: e.event_id,
       status: e.status,
-      confirmedSignalCount: (e.signals ?? []).filter((s) => s.confirmed === true).length,
-      rejectedSignalCount: (e.signals ?? []).filter((s) => s.confirmed === false).length,
-      unverifiedSignalCount: (e.signals ?? []).filter((s) => s.confirmed === undefined).length,
+      confirmsVerdictCount: (e.signals ?? []).filter((s) => s.verdict === 'confirms').length,
+      refutesVerdictCount: (e.signals ?? []).filter((s) => s.verdict === 'refutes').length,
+      offTopicVerdictCount: (e.signals ?? []).filter((s) => s.verdict === 'off_topic').length,
+      unresolvedVerdictCount: (e.signals ?? []).filter(
+        (s) => s.verdict === 'inconclusive' || s.verdict === 'not_checked'
+      ).length,
     }));
 
     const criteria: EvaluationCriterion[] = [

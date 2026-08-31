@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { PhaseWithAllocation } from '../../../../../../../../../common/types';
 
@@ -39,12 +39,10 @@ interface Props {
 
 export const NoTiersAvailableNotice: FunctionComponent<Props> = ({ phase }) => {
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       data-test-subj="noTiersAvailableNotice"
       title={i18nTexts[phase].title}
-      color="warning"
-    >
-      {i18nTexts[phase].body}
-    </EuiCallOut>
+      text={i18nTexts[phase].body}
+    />
   );
 };

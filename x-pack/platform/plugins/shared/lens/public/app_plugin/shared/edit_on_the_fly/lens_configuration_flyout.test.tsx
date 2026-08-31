@@ -117,6 +117,31 @@ const lensAttributes = {
   },
   references: [],
 } as unknown as TypedLensSerializedState['attributes'];
+// Structurally text-based variant: the ES|QL query lives on the text-based
+// datasource layer, the top-level slot stays empty (see `isTextBasedAttributes`)
+const mockTextBasedState = {
+  layers: {
+    layer1: { query: { esql: 'from index1 | limit 10' }, columns: [] },
+  },
+};
+// Different layer query so the flyout detects pending changes (mirrors
+// `mockFormBasedStateChanged` for the form-based fixture)
+const mockTextBasedStateChanged = {
+  layers: {
+    layer1: { query: { esql: 'from index1' }, columns: [] },
+  },
+};
+const esqlLensAttributes = {
+  ...lensAttributes,
+  state: {
+    ...lensAttributes.state,
+    query: undefined,
+    datasourceStates: {
+      textBased: mockTextBasedStateChanged,
+    },
+  },
+} as unknown as TypedLensSerializedState['attributes'];
+
 const mockStartDependencies =
   createMockStartDependencies() as unknown as LensPluginStartDependencies;
 
@@ -185,6 +210,10 @@ describe('LensEditConfigurationFlyout', () => {
             formBased: {
               isLoading: false,
               state: mockFormBasedState,
+            },
+            textBased: {
+              isLoading: false,
+              state: mockTextBasedState,
             },
           },
           activeDatasourceId: 'formBased',
@@ -311,6 +340,7 @@ describe('LensEditConfigurationFlyout', () => {
       {
         closeFlyout: jest.fn(),
         onApply: onApplyCbSpy,
+        attributes: esqlLensAttributes,
       },
       { esql: 'from index1 | limit 10' }
     );
@@ -319,10 +349,9 @@ describe('LensEditConfigurationFlyout', () => {
       title: 'test',
       visualizationType: 'testVis',
       state: {
-        datasourceStates: { formBased: mockFormBasedState },
+        datasourceStates: { formBased: mockFormBasedState, textBased: mockTextBasedState },
         visualization: {},
         filters: [],
-        query: { esql: 'from index1 | limit 10' },
       },
       filters: [],
       query: { esql: 'from index1 | limit 10' },
@@ -372,7 +401,7 @@ describe('LensEditConfigurationFlyout', () => {
 
   it('should display the suggestions if query is ES|QL', async () => {
     await renderConfigFlyout(
-      {},
+      { attributes: esqlLensAttributes },
       {
         esql: 'from index1 | limit 10',
       }
@@ -382,7 +411,10 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
-    await renderConfigFlyout({ hideTextBasedEditor: false }, { esql: 'from index1 | limit 10' });
+    await renderConfigFlyout(
+      { hideTextBasedEditor: false, attributes: esqlLensAttributes },
+      { esql: 'from index1 | limit 10' }
+    );
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
   });
 

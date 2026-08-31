@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { LeadEntity } from '../../types';
+import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../../../utils/elasticsearch_terms_limits';
 import { parseAlertBuckets } from '../types';
 import { errorMessage } from '../utils';
 import { ALERT_ENTITY_TYPES, ALERT_LOOKBACK, MODULE_ID, type AlertSummary } from './config';
@@ -83,52 +84,45 @@ export const fetchAlertSummariesForEntities = async (
   }
   if (euidsByType.size === 0) return result;
 
-  const runtimeMappings = Object.fromEntries(
-    Array.from(euidsByType.keys(), (type) => [
-      runtimeFieldName(type),
-      euid.painless.getEuidRuntimeMapping(type),
-    ])
-  );
-
-  const entityTerms = Array.from(euidsByType, ([type, euids]) => ({
-    terms: { [runtimeFieldName(type)]: euids },
-  }));
-
-  const aggs = Object.fromEntries(
-    Array.from(euidsByType, ([type, euids]) => [
-      `by_${type}`,
-      {
-        terms: {
-          field: runtimeFieldName(type),
-          size: Math.min(euids.length, ENTITY_BUCKET_LIMIT),
-        },
-        aggs: alertSubAggs(),
-      },
-    ])
-  );
-
   try {
-    const response = await esClient.search({
-      index: alertsIndexPattern,
-      size: 0,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      runtime_mappings: runtimeMappings,
-      query: {
-        bool: {
-          filter: [
-            { bool: { should: entityTerms, minimum_should_match: 1 } },
-            { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
-            { range: { '@timestamp': { gte: ALERT_LOOKBACK, lte: 'now' } } },
-          ],
-          must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
-        },
-      },
-      aggs,
-    });
+    for (const [type, euids] of euidsByType) {
+      const fieldName = runtimeFieldName(type);
+      const runtimeMappings = {
+        [fieldName]: euid.painless.getEuidRuntimeMapping(type),
+      };
 
-    for (const type of euidsByType.keys()) {
-      parseEntityBuckets(response.aggregations?.[`by_${type}`], result);
+      for (let offset = 0; offset < euids.length; offset += DEFAULT_MAX_TERMS_QUERY_COUNT) {
+        const chunk = euids.slice(offset, offset + DEFAULT_MAX_TERMS_QUERY_COUNT);
+
+        const response = await esClient.search({
+          index: alertsIndexPattern,
+          size: 0,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          runtime_mappings: runtimeMappings,
+          query: {
+            bool: {
+              filter: [
+                { terms: { [fieldName]: chunk } },
+                { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
+                { range: { '@timestamp': { gte: ALERT_LOOKBACK, lte: 'now' } } },
+              ],
+              must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
+            },
+          },
+          aggs: {
+            [`by_${type}`]: {
+              terms: {
+                field: fieldName,
+                size: Math.min(chunk.length, ENTITY_BUCKET_LIMIT),
+              },
+              aggs: alertSubAggs(),
+            },
+          },
+        });
+
+        parseEntityBuckets(response.aggregations?.[`by_${type}`], result);
+      }
     }
   } catch (error) {
     logger.warn(`[${MODULE_ID}] Failed to fetch alert summaries: ${errorMessage(error)}`);

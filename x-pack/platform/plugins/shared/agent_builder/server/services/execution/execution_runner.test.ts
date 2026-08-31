@@ -393,6 +393,46 @@ describe('handleAgentExecution', () => {
       expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserId, 'created-user-id');
       expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'created_user');
     });
+
+    it('persists readOnly on the conversation it creates', async () => {
+      const conversationClient = createConversationClientMock();
+      conversationClient.create.mockResolvedValue(
+        createEmptyConversation({ id: 'new-conversation', read_only: true })
+      );
+
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        } as RoundCompleteEvent)
+      );
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            nextInput: { message: 'Hello' },
+            readOnly: true,
+          },
+        } as never,
+        deps: createDeps({ conversationClient }),
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+
+      await lastValueFrom(events$.pipe(toArray()));
+
+      expect(conversationClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ read_only: true })
+      );
+    });
   });
 });
 

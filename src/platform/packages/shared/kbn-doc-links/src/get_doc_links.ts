@@ -52,7 +52,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgradingStackOnCloud: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
     },
     apm: {
-      kibanaSettings: `${ELASTIC_DOCS}solutions/observability/apm/applications-ui-settings`,
+      kibanaSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#observability-advanced-settings`,
       supportedServiceMaps: `${ELASTIC_DOCS}solutions/observability/apm/service-map`,
       supportedServiceMapsLegend: `${ELASTIC_DOCS}solutions/observability/apm/service-map#service-maps-legend`,
       customLinks: `${ELASTIC_DOCS}solutions/observability/apm/create-custom-links`,
@@ -466,6 +466,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/alert-suppression#configure-alert-suppression`,
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attacks-page`,
+      runAttackDiscoveryInWorkflow: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/run-attack-discovery-in-a-workflow`,
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
       remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,
     },
@@ -988,6 +989,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       elasticAgentLogFileRetention: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-log-file-rotation-retention`,
       elasticAgentDownloads: `${ELASTIC_WEBSITE_URL}downloads/past-releases/elastic-agent-`,
       integrationsReference: `${ELASTIC_DOCS}reference/integrations`,
+      datastreamsTemplateConflicts: `${ELASTIC_DOCS}reference/fleet/data-streams-template-conflicts`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
@@ -1091,6 +1093,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     telemetry: {
       settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/telemetry-settings`,
+      securityData: `${ELASTIC_DOCS}reference/kibana/configuration-reference/telemetry-settings#security-telemetry`,
     },
     playground: {
       chatPlayground: `${ELASTIC_DOCS}solutions/search/rag/playground`,
@@ -1098,6 +1101,18 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       retrieval: `${ELASTIC_DOCS}solutions/search/rag/playground-query`,
       context: `${ELASTIC_DOCS}solutions/search/rag/playground-context`,
       hiddenFields: `${ELASTIC_DOCS}solutions/search/rag/playground-query#playground-hidden-fields`,
+    },
+    dataFederation: {
+      overview: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation`,
+      quickstart: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-quickstart`,
+      dataSources: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources`,
+      datasets: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets`,
+      datasetSettings: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets#dataset-settings`,
+      authentication: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources#authentication`,
+      staticCredentials: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-static-credentials`,
+      federatedIdentity: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-federated-identity`,
+      querying: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-querying`,
+      security: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-security`,
     },
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,

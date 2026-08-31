@@ -74,7 +74,9 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
       const { visualize, lens, filterBar } = pageObjects;
 
       await spaceTest.step('build multi-layer chart with logstash and flights layers', async () => {
-        await openEmptyLensEditor(pageObjects);
+        await openEmptyLensEditor(pageObjects, {
+          timeRange: testData.MULTIPLE_DATA_VIEWS_TIME_RANGE,
+        });
 
         // defaultIndex already points at the long-window DV; wait for it to resolve instead of
         // opening the switcher (search + `*` titles races under parallel CI load).

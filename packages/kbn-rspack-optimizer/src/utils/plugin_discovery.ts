@@ -19,6 +19,10 @@ export interface DiscoverPluginsOptions {
   repoRoot: string;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Explicit plugin paths passed via --plugin-path */
+  paths?: string[];
+  /** Directories scanned for plugins */
+  parentDirs?: string[];
 }
 
 const isDefaultPlugin = getPluginPackagesFilter();
@@ -50,9 +54,14 @@ function toPluginEntry(repoRoot: string, pkg: PluginPackage): PluginEntry | null
  * Discover all Kibana plugins with UI bundles using the repo package map.
  */
 export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<PluginEntry[]> {
-  const { repoRoot, examples = false, testPlugins = false } = options;
-
-  const pluginFilter = getPluginPackagesFilter({ examples, testPlugins, browser: true });
+  const { repoRoot, examples = false, testPlugins = false, paths, parentDirs } = options;
+  const pluginFilter = getPluginPackagesFilter({
+    examples,
+    testPlugins,
+    browser: true,
+    paths,
+    parentDirs,
+  });
 
   const plugins: PluginEntry[] = [];
   for (const pkg of getPackages(repoRoot)) {

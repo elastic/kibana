@@ -5,92 +5,89 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
-import useAsyncRetry from 'react-use/lib/useAsyncRetry';
-import type { AvailablePackagesHookType, UseLocalSearchType } from '@kbn/fleet-plugin/public';
+import React, { useMemo } from 'react';
+import type { IntegrationCardItem, UseLocalSearchType } from '@kbn/fleet-plugin/public';
 import { AddDataSearchResults } from '../add_data_grid';
-import { renderResultCard } from './render_result_card';
+import type { FleetCardsValue } from './fleet_cards_provider';
+import { useFleetCards } from './fleet_cards_provider';
+import { createRenderResultCard } from './render_result_card';
 import { useAddDataResultItems } from './use_add_data_result_items';
-
-interface FleetHooks {
-  useAvailablePackages: AvailablePackagesHookType;
-  useLocalSearch: UseLocalSearchType;
-}
-
-const fetchFleetHooks = (): Promise<FleetHooks> =>
-  import('@kbn/fleet-plugin/public').then((module) =>
-    Promise.all([module.AvailablePackagesHook(), module.LocalSearchHook()]).then(
-      ([availablePackages, localSearch]) => ({
-        useAvailablePackages: availablePackages.useAvailablePackages,
-        useLocalSearch: localSearch.useLocalSearch,
-      })
-    )
-  );
 
 interface Props {
   searchTerm: string;
+  /** Names the chooser the page should open, by Fleet's group id. */
+  onOpenCollection: (groupId: string) => void;
 }
+
+type RenderCard = ReturnType<typeof createRenderResultCard>;
 
 const LoadedResults = ({
   searchTerm,
-  fleetHooks,
+  allCards,
+  isLoading,
+  error,
+  useLocalSearch,
   onRetry,
-}: Props & { fleetHooks: FleetHooks; onRetry: () => void }) => {
-  const { items, isLoading, error } = useAddDataResultItems({ searchTerm, ...fleetHooks });
+  renderCard,
+}: {
+  searchTerm: string;
+  allCards: IntegrationCardItem[];
+  isLoading: boolean;
+  error?: Error;
+  useLocalSearch: UseLocalSearchType;
+  onRetry: () => void;
+  renderCard: RenderCard;
+}) => {
+  const { items } = useAddDataResultItems({ searchTerm, allCards, isLoading, useLocalSearch });
 
   return (
     <AddDataSearchResults
       searchTerm={searchTerm}
       items={items}
       isLoading={isLoading}
-      // The error state wins over partial quickstart-only results.
       isError={Boolean(error)}
       onRetry={onRetry}
-      renderCard={renderResultCard}
+      renderCard={renderCard}
     />
   );
 };
 
-export const ObservabilitySearchResults = ({ searchTerm }: Props) => {
-  const hookRef = useRef<FleetHooks | null>(null);
+/**
+ * The search results half of the Add Data page, reading the package data the
+ * page-level FleetCardsProvider already shares with the curated grid.
+ */
+export const ObservabilitySearchResults = ({ searchTerm, onOpenCollection }: Props) => {
+  const fleetCards: FleetCardsValue = useFleetCards();
+  const renderCard = useMemo(
+    () => createRenderResultCard({ onOpenCollection }),
+    [onOpenCollection]
+  );
 
-  const {
-    error: errorLoading,
-    retry: retryAsyncLoad,
-    loading: asyncLoading,
-  } = useAsyncRetry(async () => {
-    hookRef.current = await fetchFleetHooks();
-  });
+  const { useLocalSearch, allCards, isLoading, error, retry } = fleetCards;
 
-  const retry = () => {
-    if (!asyncLoading) retryAsyncLoad();
-  };
-
-  // `useAsyncRetry` keeps the previous error while retrying, so loading has to
-  // be checked first or Retry leaves an enabled button that does nothing.
-  if (errorLoading && !asyncLoading) {
+  // `useLocalSearch` doubles as the module-loaded signal: no hook to call yet.
+  if (useLocalSearch === null) {
     return (
       <AddDataSearchResults
         searchTerm={searchTerm}
         items={[]}
-        isLoading={false}
-        isError
+        isLoading={isLoading}
+        isError={Boolean(error)}
         onRetry={retry}
-        renderCard={renderResultCard}
+        renderCard={renderCard}
       />
     );
   }
 
-  if (asyncLoading || hookRef.current === null) {
-    return (
-      <AddDataSearchResults
-        searchTerm={searchTerm}
-        items={[]}
-        isLoading
-        renderCard={renderResultCard}
-      />
-    );
-  }
-
-  return <LoadedResults searchTerm={searchTerm} fleetHooks={hookRef.current} onRetry={retry} />;
+  return (
+    <LoadedResults
+      searchTerm={searchTerm}
+      allCards={allCards}
+      isLoading={isLoading}
+      error={error}
+      useLocalSearch={useLocalSearch}
+      onRetry={retry}
+      renderCard={renderCard}
+    />
+  );
 };

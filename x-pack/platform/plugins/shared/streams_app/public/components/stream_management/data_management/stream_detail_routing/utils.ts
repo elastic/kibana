@@ -57,7 +57,10 @@ export const buildRoutingSaveRequestPayload = (
   return {
     ingest: {
       ...definition.stream.ingest,
-      processing: omit(definition.stream.ingest.processing, 'updated_at'),
+      processing: omit(
+        definition.stream.ingest.processing,
+        'updated_at'
+      ) as Streams.WiredStream.UpsertRequest['stream']['ingest']['processing'],
       wired: {
         ...definition.stream.ingest.wired,
         routing,
