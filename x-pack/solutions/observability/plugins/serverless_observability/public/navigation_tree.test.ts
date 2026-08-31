@@ -196,10 +196,7 @@ describe('Navigation Tree', () => {
           {
             title: 'Rule Management',
             breadcrumbStatus: 'hidden',
-            children: [
-              { link: 'management:rules' },
-              { link: 'management:rule_library' },
-            ],
+            children: [{ link: 'management:rules' }, { link: 'management:rule_library' }],
           },
           {
             title: 'Notifications and Suppressions',

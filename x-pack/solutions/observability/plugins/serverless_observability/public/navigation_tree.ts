@@ -14,9 +14,7 @@ import type {
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import {
-  getAlertingV2ManagementNavPanel,
-} from '@kbn/alerting-v2-utils';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
