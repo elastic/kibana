@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fileds';
+import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fields';
 
 describe('unflattenMetadataInfoFields', () => {
   it('should map fields with single values correctly', () => {
@@ -97,6 +97,68 @@ describe('unflattenMetadataInfoFields', () => {
         os: {
           name: 'Linux',
         },
+      },
+    });
+  });
+
+  it('should skip multi-fields that share a prefix with a parent field', () => {
+    const fields = {
+      'container.name': ['demo-app-1-name'],
+      'container.name.text': ['demo-app-1-text'],
+      'container.name.keyword': ['demo-app-1-keyword'],
+      'container.runtime': ['docker'],
+    };
+
+    const result: Record<string, any> = {};
+    unflattenMetadataInfoFields(result, { fields });
+
+    expect(result).toEqual({
+      container: {
+        name: 'demo-app-1-name',
+        runtime: 'docker',
+      },
+    });
+    expect(typeof result.container.name).toBe('string');
+  });
+
+  it('should skip multi-fields even when they appear before the parent field', () => {
+    const fields = {
+      'container.name.text': ['demo-app-1-text'],
+      'container.name.keyword': ['demo-app-1-keyword'],
+      'container.name': ['demo-app-1-name'],
+      'container.runtime': ['docker'],
+    };
+
+    const result: Record<string, any> = {};
+    unflattenMetadataInfoFields(result, { fields });
+
+    expect(result).toEqual({
+      container: {
+        name: 'demo-app-1-name',
+        runtime: 'docker',
+      },
+    });
+    expect(typeof result.container.name).toBe('string');
+  });
+
+  it('should skip multi-fields when the parent was dropped by ignore_above', () => {
+    const fields = {
+      'container.name.text': ['getting-started-demo-app-1'],
+      'container.runtime': ['docker'],
+    };
+    const ignoredFieldValues = {
+      'container.name': ['getting-started-demo-app-1'],
+    };
+
+    const result: Record<string, any> = {};
+    unflattenMetadataInfoFields(result, {
+      fields,
+      ignored_field_values: ignoredFieldValues,
+    });
+
+    expect(result).toEqual({
+      container: {
+        runtime: 'docker',
       },
     });
   });

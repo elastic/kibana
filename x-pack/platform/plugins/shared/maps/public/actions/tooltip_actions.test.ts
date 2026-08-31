@@ -13,6 +13,9 @@ jest.mock('../kibana_services', () => ({
       },
     };
   },
+  getMapsCapabilities() {
+    return { save: true };
+  },
 }));
 
 import type { TooltipState } from '../../common/descriptor_types';
