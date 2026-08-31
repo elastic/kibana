@@ -6,7 +6,10 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import {
+  getChartTypeSelectionPromptContent,
+  seriesStatisticsAgentGuidance,
+} from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
@@ -70,6 +73,11 @@ Reach for custom content only when nothing above fits:
 ## Chart Type Guidance
 
 For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
+
+Before \`add_panels\`, pick 1–2 primary time-series XY (the overview trend that matches the title or intent).
+On a new dashboard, phrase at least one and at most two of those primary time-series XY queries as "<measure> over time, show avg/min/max in the legend" (e.g. "log volume over time, show avg/min/max in the legend"). Skip categorical bar charts and queries whose measure is already AVG/MIN/MAX of a field.
+
+${seriesStatisticsAgentGuidance}
 
 ${chartTypeSelectionGuidance}
 
