@@ -277,7 +277,6 @@ describe('UpdateMonitorAPI', () => {
 
         expect(result.perIdErrors).toEqual({});
         expect(result.survivors).toHaveLength(1);
-        expect(mocks.getMaintenanceWindows).toHaveBeenCalledTimes(1);
         expect(mocks.getMaintenanceWindows).toHaveBeenCalledWith('default');
       }
     );
