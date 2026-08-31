@@ -30,12 +30,7 @@ const makeSteps = (titles: string[], currentIndex: number): MinimalStep[] =>
     status: i < currentIndex ? 'complete' : i === currentIndex ? 'current' : 'incomplete',
   }));
 
-const RULE_STEPS = [
-  'Condition',
-  'Recovery Condition',
-  'Details & Artifacts',
-  'Notifications',
-];
+const RULE_STEPS = ['Condition', 'Recovery Condition', 'Details & Artifacts', 'Notifications'];
 const RULE_STEPS_SHORT = ['Condition', 'Details & Artifacts', 'Notifications'];
 
 // ---------------------------------------------------------------------------
