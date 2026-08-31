@@ -16,6 +16,7 @@ import { VALID_KI_FEATURE_TYPES, getFeaturesFromOutput } from '../types';
 export const typeValidationEvaluator = {
   name: 'type_validation',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const features = getFeaturesFromOutput(output);
     if (features.length === 0) {

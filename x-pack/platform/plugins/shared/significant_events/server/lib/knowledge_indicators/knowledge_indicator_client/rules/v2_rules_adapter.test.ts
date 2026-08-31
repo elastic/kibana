@@ -6,8 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { RulesAdapterV2 } from './v2_rules_adapter';
+import { Parser } from '@elastic/esql';
+import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
+import { RulesAdapterV2, type RulesAdapterV2Params } from './v2_rules_adapter';
 import {
   STREAMS_RULE_STREAM_TAG_PREFIX,
   type SignificantEventsRuleDefinition,
@@ -29,8 +31,11 @@ function makeRulesClientMock() {
   };
 }
 
-function makeAdapter(mock: ReturnType<typeof makeRulesClientMock>) {
-  return new RulesAdapterV2(mock as unknown as RulesClientApi);
+function makeAdapter(
+  mock: ReturnType<typeof makeRulesClientMock>,
+  { isServerless }: Pick<RulesAdapterV2Params, 'isServerless'> = { isServerless: false }
+) {
+  return new RulesAdapterV2({ rulesClient: mock, isServerless });
 }
 
 function lastCreateCall(mock: ReturnType<typeof makeRulesClientMock>) {
@@ -160,6 +165,50 @@ describe('RulesAdapterV2', () => {
       };
       expect(data.time_field).toBe('event.ingested');
       expect(data.query.breach.query).toContain('BUCKET(event.ingested, 1 minute)');
+    });
+  });
+
+  describe('serverless project routing', () => {
+    const SET_DIRECTIVE = `SET project_routing="${PROJECT_ROUTING_ALL}";`;
+
+    it('omits the project routing directive on stateful', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { isServerless: false });
+      await adapter.createRule('rule-1', createDefinition);
+
+      expect(lastCreateCall(mock).data.query.breach.query).not.toContain('SET project_routing');
+    });
+
+    it('scopes the create breach query across all projects on serverless', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { isServerless: true });
+      await adapter.createRule('rule-1', createDefinition);
+
+      const query = lastCreateCall(mock).data.query.breach.query;
+      expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
+      expectMetricSeriesBreach(query);
+    });
+
+    it('scopes the update breach query across all projects on serverless', async () => {
+      const mock = makeRulesClientMock();
+      mock.updateRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { isServerless: true });
+      await adapter.updateRule('rule-1', updateDefinition);
+
+      const query = lastUpdateCall(mock).data.query.breach.query;
+      expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
+      expectMetricSeriesBreach(query);
+    });
+
+    it('emits a query Alerting v2 rule validation accepts', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock, { isServerless: true });
+      await adapter.createRule('rule-1', createDefinition);
+
+      expect(Parser.parseErrors(lastCreateCall(mock).data.query.breach.query)).toEqual([]);
     });
   });
 
