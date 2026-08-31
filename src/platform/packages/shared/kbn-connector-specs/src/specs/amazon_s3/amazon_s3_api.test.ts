@@ -58,7 +58,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: undefined,
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3Buckets with a single bucket', async () => {
@@ -75,7 +75,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: undefined,
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3Buckets with multiple buckets', async () => {
@@ -96,7 +96,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: 'continuation-token',
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3BucketObjects with no objects in bucket', async () => {
@@ -109,7 +109,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: undefined,
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3BucketObjects with a single object in bucket', async () => {
@@ -129,7 +129,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: undefined,
       isTruncated: false,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should listAmazonS3BucketObjects with a multiple objects in bucket', async () => {
@@ -155,7 +155,7 @@ describe('amazon_s3_api exports', () => {
       nextContinuationToken: 'continuation-token',
       isTruncated: true,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should getAmazonS3BucketObjectMetadata', async () => {
@@ -184,7 +184,7 @@ describe('amazon_s3_api exports', () => {
       server: 'AmazonS3',
       storageClass: 'STANDARD',
     });
-    expect(mockClient.head).toBeCalledTimes(1);
+    expect(mockClient.head).toHaveBeenCalledTimes(1);
   });
 
   it('should generate a Amazon S3 bucket object presigned url', async () => {
@@ -235,7 +235,7 @@ describe('amazon_s3_api exports', () => {
       encoding: 'base64',
       hasContent: true,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should downloadAmazonS3BucketObject file with spaces in key for URI encoding', async () => {
@@ -260,7 +260,7 @@ describe('amazon_s3_api exports', () => {
       encoding: 'base64',
       hasContent: true,
     });
-    expect(mockClient.get).toBeCalledTimes(1);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
   });
 
   it('should preserve response size metadata when download fails', async () => {
