@@ -116,6 +116,32 @@ const MAX_CACHE_SIZE_MB = 10;
 
 const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
 
+// Browser-specific messages thrown by `window.fetch` when a request fails at the
+// network/transport layer (e.g. the user navigates away or closes the tab while a
+// request is in flight, so the browser aborts the connection). Chrome throws
+// `Failed to fetch`; Firefox throws `NetworkError when attempting to fetch resource`.
+// These surface as `HttpFetchError`s (name `TypeError`) from core's HTTP client and
+// are indistinguishable from a genuine backend failure other than by their message.
+const TRANSPORT_LEVEL_FETCH_ERROR_MESSAGES = [
+  'Failed to fetch',
+  'NetworkError when attempting to fetch resource',
+];
+
+/**
+ * Returns `true` when the error is a transport-level failure thrown by `window.fetch`
+ * (see {@link TRANSPORT_LEVEL_FETCH_ERROR_MESSAGES}). These are typically caused by the
+ * request being aborted when the user navigates away, rather than by a real search
+ * failure, so callers treat them the same way as an explicit abort.
+ */
+const isTransportLevelFetchError = (e: { name?: string; message?: string }): boolean => {
+  const { name, message } = e ?? {};
+  return (
+    name === 'TypeError' &&
+    typeof message === 'string' &&
+    TRANSPORT_LEVEL_FETCH_ERROR_MESSAGES.some((known) => message.includes(known))
+  );
+};
+
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
   private searchTimeout: number;
@@ -245,6 +271,15 @@ export class SearchInterceptor {
     if (e instanceof AbortError) {
       // In the case an application initiated abort, throw the existing AbortError
       return e;
+    }
+
+    if (isTransportLevelFetchError(e)) {
+      // A transport-level `window.fetch` failure (e.g. "Failed to fetch" / "NetworkError
+      // when attempting to fetch resource") almost always means the in-flight request was
+      // aborted because the user navigated away or lost connectivity, not that the search
+      // itself failed. Treat it as an abort so it is handled the same way as an explicit
+      // cancellation instead of surfacing as a reportable error.
+      return new AbortError(e.message);
     }
 
     if (isEsError(e)) {
