@@ -34,6 +34,7 @@ const mockConfigurationData = {
   owner: mockedTestProvidersOwner[0],
   observableTypes: [],
   extractObservables: true,
+  workflowTags: [],
 };
 
 export const useCaseConfigureResponse = {

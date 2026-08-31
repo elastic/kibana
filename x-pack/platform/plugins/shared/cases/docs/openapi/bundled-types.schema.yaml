@@ -373,6 +373,15 @@ paths:
                       $ref: '#/components/schemas/owner'
                     templates:
                       $ref: '#/components/schemas/templates'
+                    workflowTags:
+                      type: array
+                      description: |
+                        Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                      maxItems: 100
+                      items:
+                        type: string
+                        minLength: 1
+                        maxLength: 256
                     updated_at:
                       type: string
                       format: date-time
@@ -563,6 +572,15 @@ paths:
                     $ref: '#/components/schemas/owner'
                   templates:
                     $ref: '#/components/schemas/templates'
+                  workflowTags:
+                    type: array
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    maxItems: 100
+                    items:
+                      type: string
+                      minLength: 1
+                      maxLength: 256
                   updated_at:
                     type: string
                     format: date-time
@@ -755,6 +773,15 @@ paths:
                     $ref: '#/components/schemas/owner'
                   templates:
                     $ref: '#/components/schemas/templates'
+                  workflowTags:
+                    type: array
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    maxItems: 100
+                    items:
+                      type: string
+                      minLength: 1
+                      maxLength: 256
                   updated_at:
                     type: string
                     format: date-time
@@ -3829,6 +3856,15 @@ components:
           $ref: '#/components/schemas/owner'
         templates:
           $ref: '#/components/schemas/templates'
+        workflowTags:
+          type: array
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 256
     update_case_configuration_request:
       title: Update case configuration request
       description: |
@@ -3906,6 +3942,15 @@ components:
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
         templates:
           $ref: '#/components/schemas/templates'
+        workflowTags:
+          type: array
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 256
         version:
           description: |
             The version of the connector. To retrieve the version value, use the get configuration API.

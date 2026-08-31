@@ -36,6 +36,7 @@ export const usePersistConfiguration = () => {
       connector,
       observableTypes,
       extractObservables,
+      workflowTags,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -46,6 +47,7 @@ export const usePersistConfiguration = () => {
           owner: owner[0],
           observableTypes,
           extractObservables,
+          workflowTags,
         });
       }
 
@@ -57,6 +59,7 @@ export const usePersistConfiguration = () => {
         templates: templates ?? [],
         observableTypes,
         extractObservables,
+        workflowTags,
       });
     },
     {

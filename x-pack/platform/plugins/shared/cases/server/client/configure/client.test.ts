@@ -390,6 +390,7 @@ describe('client', () => {
               username: 'elastic',
             },
             observableTypes: [],
+            workflowTags: [],
           },
         });
 
@@ -452,6 +453,7 @@ describe('client', () => {
             ],
             observableTypes: [],
             extractObservables: true,
+            workflowTags: [],
           },
           version: 'test-version',
         });
@@ -464,6 +466,7 @@ describe('client', () => {
           references: [],
           attributes: {
             observableTypes: [],
+            workflowTags: [],
             templates: [],
             created_at: '2019-11-25T21:54:48.952Z',
             created_by: {
@@ -1061,6 +1064,7 @@ describe('client', () => {
               owner: 'cases',
               observableTypes: [],
               extractObservables: true,
+              workflowTags: [],
             },
             id: 'test-id',
             version: 'test-version',
@@ -1130,6 +1134,7 @@ describe('client', () => {
                   },
                 ],
                 observableTypes: [],
+                workflowTags: [],
               },
               id: 'test-id',
               version: 'test-version',
@@ -1282,6 +1287,7 @@ describe('client', () => {
               username: 'elastic',
             },
             observableTypes: [],
+            workflowTags: [],
           },
         };
 
@@ -1630,6 +1636,7 @@ describe('client', () => {
                   updated_by: null,
                   observableTypes: [],
                   extractObservables: true,
+                  workflowTags: [],
                 },
                 score: 0,
               },
@@ -1657,6 +1664,7 @@ describe('client', () => {
               updated_by: null,
               observableTypes: [],
               extractObservables: true,
+              workflowTags: [],
             },
           });
 
@@ -1897,6 +1905,7 @@ describe('client', () => {
           templates: [],
           observableTypes: [],
           extractObservables: true,
+          workflowTags: [],
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
           updated_at: null,
