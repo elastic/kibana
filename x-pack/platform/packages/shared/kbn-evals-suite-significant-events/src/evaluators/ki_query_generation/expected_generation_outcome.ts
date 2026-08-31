@@ -20,6 +20,7 @@ export const expectedGenerationOutcomeEvaluator: Evaluator<
 > = {
   name: 'expected_generation_outcome',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const expectQueries = expected?.expect_queries;
     if (expectQueries == null) {
