@@ -60,12 +60,13 @@ export default function (providerContext: FtrProviderContext) {
       }
     };
 
-    const enableOutputSecrets = async () => {
+    const seedFleetServerRequirements = async () => {
       await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           output_secret_storage_requirements_met: true,
+          otlp_output_requirements_met: true,
           use_space_awareness_migration_status: 'success',
         },
         overwrite: true,
@@ -76,7 +77,7 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await cleanFleetIndices(es);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').send({}).expect(200);
-      await enableOutputSecrets();
+      await seedFleetServerRequirements();
       await deleteAllSecrets();
     });
 

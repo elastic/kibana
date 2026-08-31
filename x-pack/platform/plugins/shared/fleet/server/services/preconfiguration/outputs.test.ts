@@ -12,6 +12,7 @@ import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
+import { checkOtlpOutputAllowed } from '../outputs/helpers';
 
 import {
   SERVERLESS_DEFAULT_OUTPUT_ID,
@@ -32,13 +33,18 @@ jest.mock('../output');
 jest.mock('../epm/packages/bundled_packages');
 jest.mock('../epm/archive');
 jest.mock('../settings');
+jest.mock('../outputs/helpers');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
+  typeof checkOtlpOutputAllowed
+>;
 
 jest.mock('../app_context', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({
       useSpaceAwareness: false,
+      enableOtlpOutput: true,
     }),
     getInternalUserSOClient: jest.fn(),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
@@ -86,6 +92,7 @@ describe('Outputs preconfiguration', () => {
     mockedOutputService.update.mockReset();
     mockedOutputService.delete.mockReset();
     mockedOutputService.getDefaultDataOutputId.mockReset();
+    mockedCheckOtlpOutputAllowed.mockResolvedValue({ result: true });
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
     const keyHash = (await hashSecret('secretKey')) as string;
     const passwordHash = (await hashSecret('secretPassword')) as string;
@@ -788,6 +795,67 @@ describe('Outputs preconfiguration', () => {
       expect(mockedOutputService.create).toHaveBeenCalled();
       expect(mockedOutputService.update).not.toHaveBeenCalled();
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    it('should create a preconfigured OTLP output when the Fleet Server version requirement is met', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'non-existing-otlp-output-1',
+          name: 'OTLP Output 1',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        },
+      ]);
+
+      expect(mockedOutputService.create).toBeCalled();
+      expect(mockedOutputService.update).not.toBeCalled();
+    });
+
+    it('should skip the OTLP output but create the non-OTLP output when the version requirement is not met', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedCheckOtlpOutputAllowed.mockResolvedValueOnce({
+        result: false,
+        error: 'OTLP output requires all Fleet Servers to be on version 9.6.0 or later.',
+      });
+
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'non-existing-otlp-output-1',
+          name: 'OTLP Output 1',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        },
+        {
+          id: 'non-existing-es-output-2',
+          name: 'ES Output 2',
+          type: 'elasticsearch',
+          is_default: false,
+          is_default_monitoring: false,
+          hosts: ['http://es.co:80'],
+        },
+      ]);
+
+      // ES output created; OTLP skipped — proves per-item skip, not batch abort
+      expect(mockedOutputService.create).toHaveBeenCalledTimes(1);
+      expect(mockedOutputService.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ name: 'ES Output 2' }),
+        expect.objectContaining({ id: 'non-existing-es-output-2' })
+      );
     });
 
     it('should create a preconfigured remote ES output that does not exist', async () => {

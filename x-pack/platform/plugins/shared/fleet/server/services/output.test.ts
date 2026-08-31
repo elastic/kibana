@@ -1452,6 +1452,32 @@ describe('Output Service', () => {
         ).rejects.toThrow('OTLP output type is not enabled');
       });
 
+      it('should throw if the Fleet Server version requirement is not met', async () => {
+        const soClient = getMockedSoClient();
+        mockedCheckOtlpOutputAllowed.mockResolvedValueOnce({
+          result: false,
+          error: 'OTLP output requires all Fleet Servers to be on version 9.6.0 or later.',
+        });
+
+        await expect(
+          outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Test OTLP',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: 'https://otel.example.com:4317',
+                protocol: 'grpc',
+              },
+            },
+            { id: 'output-test' }
+          )
+        ).rejects.toThrow('9.6.0 or later');
+      });
+
       it('should create an otlp output and persist otlp_exporter config', async () => {
         const soClient = getMockedSoClient();
         mockedAgentPolicyService.list.mockResolvedValue({
@@ -3373,6 +3399,24 @@ describe('Output Service', () => {
             name: 'Updated OTLP',
           })
         ).rejects.toThrow('OTLP output type is not enabled');
+      });
+
+      it('Should throw if the Fleet Server version requirement is not met when switching type to OTLP', async () => {
+        const soClient = getMockedSoClient({});
+        mockedCheckOtlpOutputAllowed.mockResolvedValueOnce({
+          result: false,
+          error: 'OTLP output requires all Fleet Servers to be on version 9.6.0 or later.',
+        });
+
+        await expect(
+          outputService.update(soClient, esClientMock, 'existing-es-output', {
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+            },
+          })
+        ).rejects.toThrow('9.6.0 or later');
       });
 
       it('Should throw when updating an OTLP output used by a policy with non-OTel inputs', async () => {
