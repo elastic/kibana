@@ -49,6 +49,38 @@ const MANAGE_RULES_LABEL = i18n.translate('xpack.infra.alerting.manageRules', {
   defaultMessage: 'Manage rules',
 });
 
+const INFRASTRUCTURE_RULES_LABEL = i18n.translate(
+  'xpack.infra.alerting.infrastructureDropdownMenu',
+  {
+    defaultMessage: 'Infrastructure',
+  }
+);
+
+const CREATE_INVENTORY_RULE_LABEL = i18n.translate(
+  'xpack.infra.alerting.createInventoryRuleButton',
+  {
+    defaultMessage: 'Create inventory rule',
+  }
+);
+
+const METRICS_RULES_LABEL = i18n.translate('xpack.infra.alerting.metricsDropdownMenu', {
+  defaultMessage: 'Metrics',
+});
+
+const CREATE_THRESHOLD_RULE_LABEL = i18n.translate(
+  'xpack.infra.alerting.createThresholdRuleButton',
+  {
+    defaultMessage: 'Create threshold rule',
+  }
+);
+
+const CREATE_CUSTOM_THRESHOLD_RULE_LABEL = i18n.translate(
+  'xpack.infra.alerting.customThresholdDropdownMenu',
+  {
+    defaultMessage: 'Create custom threshold rule',
+  }
+);
+
 export interface MetricsAppHeaderMenuResult {
   menu: AppHeaderMenu;
   flyouts: React.ReactElement;
@@ -117,16 +149,12 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
       if (canCreateAlerts && config.featureFlags.inventoryThresholdAlertRuleEnabled) {
         alertItems.push({
           id: 'infrastructureRules',
-          label: i18n.translate('xpack.infra.alerting.infrastructureDropdownMenu', {
-            defaultMessage: 'Infrastructure',
-          }),
+          label: INFRASTRUCTURE_RULES_LABEL,
           testId: 'inventory-alerts-menu-option',
           items: [
             {
               id: 'createInventoryRule',
-              label: i18n.translate('xpack.infra.alerting.createInventoryRuleButton', {
-                defaultMessage: 'Create inventory rule',
-              }),
+              label: CREATE_INVENTORY_RULE_LABEL,
               testId: 'inventory-alerts-create-rule',
               run: () => {
                 setVisibleFlyoutType('inventory');
@@ -139,16 +167,12 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
       if (canCreateAlerts && config.featureFlags.metricThresholdAlertRuleEnabled) {
         alertItems.push({
           id: 'metricsRules',
-          label: i18n.translate('xpack.infra.alerting.metricsDropdownMenu', {
-            defaultMessage: 'Metrics',
-          }),
+          label: METRICS_RULES_LABEL,
           testId: 'metrics-threshold-alerts-menu-option',
           items: [
             {
               id: 'createThresholdRule',
-              label: i18n.translate('xpack.infra.alerting.createThresholdRuleButton', {
-                defaultMessage: 'Create threshold rule',
-              }),
+              label: CREATE_THRESHOLD_RULE_LABEL,
               testId: 'metrics-threshold-alerts-create-rule',
               run: () => {
                 setVisibleFlyoutType('metricThreshold');
@@ -161,9 +185,7 @@ export function useMetricsAppHeaderMenu(): MetricsAppHeaderMenuResult {
       if (canCreateAlerts && config.featureFlags.customThresholdAlertsEnabled) {
         alertItems.push({
           id: 'createCustomThresholdRule',
-          label: i18n.translate('xpack.infra.alerting.customThresholdDropdownMenu', {
-            defaultMessage: 'Create custom threshold rule',
-          }),
+          label: CREATE_CUSTOM_THRESHOLD_RULE_LABEL,
           testId: 'custom-threshold-alerts-menu-option',
           run: () => {
             setVisibleFlyoutType('customThreshold');
