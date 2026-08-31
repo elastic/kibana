@@ -57,7 +57,6 @@ import type {
   DataSourceTypeESQL,
   DataSourceTypeNoESQL,
 } from '../schema/data_source';
-import type { DataLayerTypeESQL } from '../schema/charts/xy';
 import type { XScaleSchemaType } from '../schema/charts/shared';
 import { fromFilterLensStateToAPI, toLensStateFilterLanguage } from './columns/filter';
 
@@ -763,23 +762,10 @@ export const filtersAndQueryToApiFormat = (
   };
 };
 
-function extraQueryFromAPIState(state: LensApiConfig): { esql: string } | Query | undefined {
-  if ('data_source' in state && state.data_source.type === 'esql') {
-    return { esql: state.data_source.query };
-  }
-  if ('layers' in state && Array.isArray(state.layers)) {
-    // pick only the first one for now
-    const esqlLayer = state.layers.find(
-      (layer): layer is DataLayerTypeESQL =>
-        layer.type !== 'reference_lines' &&
-        layer.type !== 'annotations' &&
-        'data_source' in layer &&
-        layer.data_source?.type === 'esql'
-    );
-    if (esqlLayer && 'query' in esqlLayer.data_source) {
-      return { esql: esqlLayer.data_source.query };
-    }
-  }
+function extraQueryFromAPIState(state: LensApiConfig): Query | undefined {
+  // ES|QL queries live exclusively on the text-based datasource layers
+  // (written by the layer transforms); the top-level slot only carries the
+  // chart-scoped KQL/Lucene filter from the API `query` field.
   if ('query' in state && state.query) {
     return queryToLensState(state.query satisfies LensApiFilterType);
   }

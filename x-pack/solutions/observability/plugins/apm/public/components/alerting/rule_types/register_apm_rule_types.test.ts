@@ -37,8 +37,8 @@ const expectedTransactionLink = `/app/apm/services/${SERVICE_NAME_VALUE}?transac
 const expectedErrorCountLinkAllEnvs = `/app/apm/services/${SERVICE_NAME_VALUE}/errors?environment=${ENVIRONMENT_ALL_VALUE}`;
 const expectedTransactionLinkAllEnvs = `/app/apm/services/${SERVICE_NAME_VALUE}?transactionType=${TRANSACTION_TYPE_VALUE}&environment=${ENVIRONMENT_ALL_VALUE}`;
 const expectedTransactionLinkMissingTxType = `/app/apm/services/${SERVICE_NAME_VALUE}?transactionType=&environment=${SERVICE_ENVIRONMENT_VALUE}`;
-const expectedErrorCountLinkMissingService = `/app/apm/services/undefined/errors?environment=${SERVICE_ENVIRONMENT_VALUE}`;
-const expectedTransactionLinkMissingService = `/app/apm/services/undefined?transactionType=${TRANSACTION_TYPE_VALUE}&environment=${SERVICE_ENVIRONMENT_VALUE}`;
+const expectedErrorCountLinkMissingService = `/app/apm/services?environment=${SERVICE_ENVIRONMENT_VALUE}`;
+const expectedTransactionLinkMissingService = `/app/apm/services?transactionType=${TRANSACTION_TYPE_VALUE}&environment=${SERVICE_ENVIRONMENT_VALUE}`;
 
 const transactionRuleTypes = [
   ApmRuleType.TransactionDuration,
@@ -197,7 +197,7 @@ describe('registerApmRuleTypes formatters', () => {
       );
 
       it.each(missingFieldValues)(
-        'does not truncate remaining fields when service.name is %s',
+        'links to the service inventory when service.name is %s',
         (_label, serviceName) => {
           const fields = {
             [ALERT_REASON]: ALERT_REASON_VALUE,

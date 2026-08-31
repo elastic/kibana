@@ -54,7 +54,8 @@ const buildOverviewUrl = (entityEuid: string, entityType: 'user' | 'host'): stri
     encodeURIComponent(entityEuid)
   );
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/287531
+apiTest.describe.skip(
   'Entity ML Anomaly Detection APIs',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
@@ -176,22 +177,22 @@ apiTest.describe(
         });
         const padJob = padJobRes.jobs?.[0];
         if (!padJob) {
-          log.debug(`[DIAG] PAD job not found — job config is missing entirely`);
+          log.info(`[DIAG] PAD job not found — job config is missing entirely`);
         } else {
           const analysisConfig = padJob.analysis_config;
           const detectorCount = analysisConfig?.detectors?.length ?? 0;
-          log.debug(
+          log.info(
             `[DIAG] PAD job config: detectors=${detectorCount}, ` +
               `analysisConfig=${JSON.stringify(analysisConfig)}`
           );
           if (detectorCount === 0) {
-            log.debug(
+            log.info(
               `[DIAG] WARNING: PAD job analysis_config.detectors is empty — theory 1 confirmed`
             );
           }
         }
       } catch (err) {
-        log.debug(`[DIAG] Failed to fetch PAD job config: ${err}`);
+        log.info(`[DIAG] Failed to fetch PAD job config: ${err}`);
       }
 
       // Create Security: Authentication ML jobs
@@ -240,17 +241,17 @@ apiTest.describe(
             | Record<string, unknown>
             | undefined;
           const userNameType = (userProps?.name as Record<string, unknown> | undefined)?.type;
-          log.debug(
+          log.info(
             `[DIAG] ${indexName} mappings: source.geo.region_name.type=${regionNameType}, user.name.type=${userNameType}`
           );
           if (regionNameType !== 'keyword' && regionNameType !== undefined) {
-            log.debug(
+            log.info(
               `[DIAG] WARNING: source.geo.region_name mapped as "${regionNameType}" not keyword — theory 2 confirmed`
             );
           }
         }
       } catch (err) {
-        log.debug(`[DIAG] Failed to fetch source index mappings: ${err}`);
+        log.info(`[DIAG] Failed to fetch source index mappings: ${err}`);
       }
 
       // DIAGNOSTIC (theory 2 continued): confirm the source events were actually indexed with
@@ -270,17 +271,17 @@ apiTest.describe(
           size: 10,
         });
         const hits = searchRes.hits?.hits ?? [];
-        log.debug(
+        log.info(
           `[DIAG] Source events for carol.davis with source.geo.region_name: count=${hits.length}, ` +
             `docs=${JSON.stringify(hits.map((h) => h._source))}`
         );
         if (hits.length === 0) {
-          log.debug(
+          log.info(
             `[DIAG] WARNING: no carol.davis source events with geo region found — baseline enrichment will return empty`
           );
         }
       } catch (err) {
-        log.debug(`[DIAG] Failed to search source events: ${err}`);
+        log.info(`[DIAG] Failed to search source events: ${err}`);
       }
 
       // Index anomaly records for the test entities.

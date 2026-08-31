@@ -278,6 +278,7 @@ export function validateJsonSchemaDefaults(
       message: `Invalid default value for ${propertyName}: ${errorMessage}`,
       severity: 'error',
       owner: 'json-schema-default-validation',
+      ruleId: 'invalidDefaultValue',
       hoverMessage: `Default value does not match the property's constraints (type: ${
         schema.type
       }, format: ${schema.format || 'none'}, pattern: ${schema.pattern || 'none'})`,

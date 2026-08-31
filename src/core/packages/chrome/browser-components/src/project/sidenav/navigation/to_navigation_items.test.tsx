@@ -39,12 +39,10 @@ beforeEach(() => {
 
 describe('toNavigationItems', () => {
   const {
-    logoItem,
     navItems: { footerItems, primaryItems },
   } = createNavigationItems();
 
-  it('should not extract a logoItem; home stays in primary items', () => {
-    expect(logoItem).toBeUndefined();
+  it('keeps the home node as a regular primary item', () => {
     const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
     expect(homeItem).toBeDefined();
     expect(homeItem?.label).toBe('Security');
@@ -123,8 +121,6 @@ describe('isActive', () => {
     const homeNode = navigationTree.body[0];
     const footerNode = navigationTree.footer![0]!;
 
-    // Home stays in primary items (no separate logo), so it is marked at the same
-    // level as other root items. Earliest active path wins at that level.
     const { activeItemId } = createNavigationItems(navigationTree, [[homeNode], [footerNode]]);
     expect(activeItemId).toBe(homeNode.id);
   });

@@ -622,8 +622,6 @@ export interface PublicAlertsDataGridProps
     featureId: string;
     owner: CasesOwner[];
     appId?: string;
-    syncAlerts?: boolean;
-    extractObservables?: boolean;
   };
   /**
    * If true, hides the bulk actions controls
