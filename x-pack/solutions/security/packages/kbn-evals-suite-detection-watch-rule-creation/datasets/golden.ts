@@ -133,4 +133,57 @@ export const goldenDataset: RuleCreationExample[] = [
 | WHERE numeric_ratio > 0.5`,
     },
   },
+  // Case 4 — T1053.005 (Scheduled Task/Job: Cron), Linux
+  // Gap: interactive shells spawned by crond indicate attacker-planted cron jobs.
+  // Sourced from: elastic/detection-rules — linux_execution_schedule_task_cron style coverage.
+  {
+    id: 'gap-t1053-005-cron-spawned-shell',
+    input: {
+      technique: 'T1053.005',
+      gap_description:
+        'No rule detecting shells spawned directly by the cron daemon. Legitimate cron jobs ' +
+        'rarely need an interactive shell; attackers plant cron entries for persistence.',
+      evidence:
+        'Hunt found bash processes with parent crond on 2 Linux servers at 03:00, absent from ' +
+        'any legitimate crontab.',
+      confidence: 0.8,
+    },
+    output: {
+      mitreIds: ['T1053.005'],
+      optionalMitreIds: ['T1053'],
+      language: 'esql',
+      esqlQuery: `FROM logs-endpoint.events.process-*
+| WHERE host.os.type == "linux"
+  AND event.type == "start"
+  AND process.parent.name == "crond"
+  AND process.name IN ("bash", "sh", "dash", "zsh")`,
+    },
+  },
+
+  // Case 5 — T1218.011 (System Binary Proxy Execution: Rundll32), Windows
+  // Gap: rundll32 executing script-engine entry points is a classic LOLBin proxy.
+  // Sourced from: elastic/detection-rules — windows_lateral_movement_rundll32 style coverage.
+  {
+    id: 'gap-t1218-011-rundll32-script-engine',
+    input: {
+      technique: 'T1218.011',
+      gap_description:
+        'No rule for rundll32 invoking script-engine entry points (javascript, RunHtmlApplication). ' +
+        'Rundll32 proxying script execution evades application allow-listing.',
+      evidence:
+        'EDR telemetry shows rundll32.exe with javascript/RunHtmlApplication arguments on a ' +
+        'workstation where no deployment tool uses rundll32.',
+      confidence: 0.85,
+    },
+    output: {
+      mitreIds: ['T1218.011'],
+      optionalMitreIds: ['T1218', 'T1059.007'],
+      language: 'esql',
+      esqlQuery: `FROM logs-endpoint.events.process-*
+| WHERE host.os.type == "windows"
+  AND event.type == "start"
+  AND process.name == "rundll32.exe"
+  AND process.args : ("javascript", "RunHtmlApplication")`,
+    },
+  },
 ];

@@ -14,6 +14,8 @@ import {
   validateInterval,
   validateRiskScore,
   validateSeverity,
+  tieredTechniqueCredit,
+  ordinalMitreF1,
 } from './helpers';
 
 describe('extractMitreTechniques', () => {
@@ -194,5 +196,44 @@ describe('hasRequiredFields', () => {
       risk_score: 1,
     });
     expect(missing).toContain('tags');
+  });
+});
+
+describe('ordinal MITRE credit (tieredTechniqueCredit / ordinalMitreF1)', () => {
+  it('exact sub-technique match earns full credit', () => {
+    expect(tieredTechniqueCredit('T1078.001', new Set(['T1078.001']))).toEqual({
+      credit: 1,
+      kind: 'exact',
+    });
+  });
+
+  it('parent technique earns HALF credit — the mutation-sensitive tier', () => {
+    expect(tieredTechniqueCredit('T1078.001', new Set(['T1078'])).credit).toBe(0.5);
+    expect(tieredTechniqueCredit('T1078.001', new Set(['T1078'])).kind).toBe('parent');
+  });
+
+  it('wrong technique earns zero, not partial', () => {
+    expect(tieredTechniqueCredit('T1078.001', new Set(['T1059']))).toEqual({
+      credit: 0,
+      kind: 'miss',
+    });
+  });
+
+  it('empty generated set is a miss', () => {
+    expect(tieredTechniqueCredit('T1078.001', new Set())).toEqual({ credit: 0, kind: 'miss' });
+  });
+
+  it('ordinalMitreF1 separates close from wrong where exact-F1 cannot', () => {
+    // expected {T1548.002}; arm A returns parent {T1548}; arm B returns garbage {T1059}
+    const closeArm = ordinalMitreF1(new Set(['T1548']), new Set(['T1548.002']));
+    const wrongArm = ordinalMitreF1(new Set(['T1059']), new Set(['T1548.002']));
+    expect(closeArm.f1).toBeGreaterThan(wrongArm.f1);
+    expect(closeArm.f1).toBeGreaterThan(0);
+    expect(wrongArm.f1).toBe(0);
+  });
+
+  it('exact IDs keep the historical 1.0 ceiling (continuity with build-461 numbers)', () => {
+    const r = ordinalMitreF1(new Set(['T1078.001']), new Set(['T1078.001']));
+    expect(r.f1).toBe(1);
   });
 });

@@ -78,7 +78,15 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
   evaluate(
     'generates a valid ES|QL detection rule for the stated gap',
-    async ({ executorClient, evaluators, ruleCreationClient, esClient, traceEsClient, log }) => {
+    async ({
+      executorClient,
+      evaluators,
+      ruleCreationClient,
+      esClient,
+      traceEsClient,
+      log,
+      connector,
+    }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
         evaluators,
@@ -86,6 +94,10 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
         esClient,
         traceEsClient,
         log,
+        // Judge provenance: stamped into every Gap Addressed score document so a
+        // self-judging model (judge connector == subject connector) is visible
+        // in the data, not inferred later.
+        judgeProvenance: { judgeConnectorId: connector.id, judgeConnectorName: connector.name },
       });
 
       await evaluateDataset({
@@ -101,7 +113,15 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
   evaluate(
     'handles complex and multi-technique detection gaps',
-    async ({ executorClient, evaluators, ruleCreationClient, esClient, traceEsClient, log }) => {
+    async ({
+      executorClient,
+      evaluators,
+      ruleCreationClient,
+      esClient,
+      traceEsClient,
+      log,
+      connector,
+    }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
         evaluators,
@@ -109,6 +129,10 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
         esClient,
         traceEsClient,
         log,
+        // Judge provenance: stamped into every Gap Addressed score document so a
+        // self-judging model (judge connector == subject connector) is visible
+        // in the data, not inferred later.
+        judgeProvenance: { judgeConnectorId: connector.id, judgeConnectorName: connector.name },
       });
 
       await evaluateDataset({
@@ -125,7 +149,15 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
   evaluate(
     'quality gate trips on a deliberately vague gap (canary)',
-    async ({ executorClient, evaluators, ruleCreationClient, esClient, traceEsClient, log }) => {
+    async ({
+      executorClient,
+      evaluators,
+      ruleCreationClient,
+      esClient,
+      traceEsClient,
+      log,
+      connector,
+    }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
         evaluators,
@@ -133,6 +165,10 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
         esClient,
         traceEsClient,
         log,
+        // Judge provenance: stamped into every Gap Addressed score document so a
+        // self-judging model (judge connector == subject connector) is visible
+        // in the data, not inferred later.
+        judgeProvenance: { judgeConnectorId: connector.id, judgeConnectorName: connector.name },
       });
 
       await evaluateDataset({

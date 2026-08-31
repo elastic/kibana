@@ -59,6 +59,75 @@ export const validateFromClause = (query: string): { valid: boolean; error?: str
 };
 
 /** Precision, recall, and F1 for set comparisons. */
+
+/**
+ * Parent technique id of a sub-technique id ("T1548.002" -> "T1548"), or null
+ * for a plain technique id.
+ */
+export const parentTechniqueId = (id: string): string | null =>
+  /^T\d{4}\.\d{3}$/.test(id) ? id.slice(0, 5) : null;
+
+/**
+ * Ordinal credit for one expected technique id against the generated set.
+ * Exact sub-technique match: 1. Parent technique present without the
+ * sub-technique: 0.5 — "right family, imprecise member" is meaningfully
+ * better than wrong, but not equivalent to exact. Anything else: 0.
+ *
+ * Without this split, a model that returns T1548 for expected T1548.002 and a
+ * model that returns T1059 both score 0 — the metric cannot see "close".
+ */
+export const tieredTechniqueCredit = (
+  expectedId: string,
+  generated: Set<string>
+): { credit: number; kind: 'exact' | 'parent' | 'miss' } => {
+  if (generated.has(expectedId)) return { credit: 1, kind: 'exact' };
+  const parent = parentTechniqueId(expectedId);
+  if (parent != null && generated.has(parent)) return { credit: 0.5, kind: 'parent' };
+  return { credit: 0, kind: 'miss' };
+};
+
+/**
+ * F1 with ordinal credit: recall sums per-expected credit; precision counts
+ * every scored generated id at its credit (a parent-only match contributes
+ * 0.5, not a false positive). Generated ids outside the expected family stay
+ * 0-credit false positives.
+ */
+export const ordinalMitreF1 = (
+  generated: Set<string>,
+  expected: Set<string>
+): {
+  f1: number;
+  precision: number;
+  recall: number;
+  partials: Array<{ expected: string; kind: 'exact' | 'parent' | 'miss' }>;
+} => {
+  if (expected.size === 0) {
+    return { f1: 1, precision: 1, recall: 1, partials: [] };
+  }
+  if (generated.size === 0) {
+    return { f1: 0, precision: 0, recall: 0, partials: [] };
+  }
+  const partials: Array<{ expected: string; kind: 'exact' | 'parent' | 'miss' }> = [];
+  let recallSum = 0;
+  for (const id of expected) {
+    const { credit, kind } = tieredTechniqueCredit(id, generated);
+    recallSum += credit;
+    if (kind !== 'exact') partials.push({ expected: id, kind });
+  }
+  const expectedParents = new Set(
+    [...expected].map((id) => parentTechniqueId(id)).filter((p): p is string => p != null)
+  );
+  let precisionSum = 0;
+  for (const id of generated) {
+    if (expected.has(id)) precisionSum += 1;
+    else if (expectedParents.has(id)) precisionSum += 0.5;
+  }
+  const precision = precisionSum / generated.size;
+  const recall = recallSum / expected.size;
+  const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
+  return { f1, precision, recall, partials };
+};
+
 export const calculateSetMetrics = <T>(
   predicted: Set<T>,
   expected: Set<T>

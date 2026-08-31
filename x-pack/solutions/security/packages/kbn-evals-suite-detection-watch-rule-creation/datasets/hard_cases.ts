@@ -118,4 +118,60 @@ export const hardCases: RuleCreationExample[] = [
 | STATS run_count = COUNT(*) BY host.name, user.name, process.command_line`,
     },
   },
+  // Hard 4 — T1490 (Inhibit System Recovery) / T1070.004 (Indicator Removal: File Deletion)
+  // Gap: shadow-copy deletion immediately before encryption is ransomware prep.
+  // Sourced from: elastic/detection-rules — volume shadow copy deletion coverage.
+  {
+    id: 'hard-t1490-shadow-copy-deletion',
+    input: {
+      technique: 'T1490',
+      gap_description:
+        'No rule for deletion of Volume Shadow Copies via vssadmin or wmic. Ransomware ' +
+        'operators destroy shadow copies to make encrypted files unrecoverable; existing ' +
+        'ransomware rules trigger only after encryption starts.',
+      evidence:
+        'IR timeline shows "vssadmin delete shadows /all" 90 seconds before mass file ' +
+        'encryption on a file server. No existing rule fired before the encryption event.',
+      confidence: 0.9,
+    },
+    output: {
+      mitreIds: ['T1490'],
+      optionalMitreIds: ['T1070.004', 'T1486'],
+      language: 'esql',
+      esqlQuery: `FROM logs-endpoint.events.process-*
+| WHERE host.os.type == "windows"
+  AND event.type == "start"
+  AND (
+    process.command_line LIKE "*vssadmin*delete shadows*"
+    OR process.command_line LIKE "*wmic*shadowcopy delete*"
+  )`,
+    },
+  },
+
+  // Hard 5 — T1136.001 (Create Account: Local Account), Windows
+  // Gap: net user /add is trivially available and rarely alerted outside domain controllers.
+  // Sourced from: elastic/detection-rules — windows local user creation coverage.
+  {
+    id: 'hard-t1136-001-local-account-creation',
+    input: {
+      technique: 'T1136.001',
+      gap_description:
+        'No ES|QL rule for local account creation on member servers via net user /add. ' +
+        'Attackers establish persistence with a new local admin after initial access.',
+      evidence:
+        'Hunt found "net user svc_backup /add" followed by local-group membership changes on ' +
+        'a member server; the account name matches no deployment manifest.',
+      confidence: 0.85,
+    },
+    output: {
+      mitreIds: ['T1136.001'],
+      optionalMitreIds: ['T1136', 'T1098'],
+      language: 'esql',
+      esqlQuery: `FROM logs-endpoint.events.process-*
+| WHERE host.os.type == "windows"
+  AND event.type == "start"
+  AND process.name IN ("net.exe", "net1.exe")
+  AND process.command_line LIKE "*user*add*"`,
+    },
+  },
 ];

@@ -21,8 +21,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationExample } from '../../datasets/golden';
 import type { RuleCreationClient, RuleCreationResult } from '../rule_creation_client';
 import { createToolRoutingEvaluator } from './tool_routing';
+import { logRunSummary, withScoreCollection, type ScoreSink } from './run_summary';
 import {
-  calculateSetMetrics,
   extractMitreTechniques,
   hasRequiredFields,
   resolveDateMathSeconds,
@@ -31,6 +31,7 @@ import {
   validateInterval,
   validateRiskScore,
   validateSeverity,
+  ordinalMitreF1,
 } from '../helpers';
 
 export type RuleEvaluator = Evaluator<RuleCreationExample, RuleCreationResult>;
@@ -123,7 +124,10 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
         [...generatedTechniques].filter((t) => !optionalTechniques.has(t))
       );
 
-      const metrics = calculateSetMetrics(scoredTechniques, expectedTechniques);
+      // Ordinal F1: exact sub-technique = 1, parent-without-sub = 0.5. An
+      // exact-ID set score treats "right family, imprecise member" the same as
+      // garbage, which is exactly where the hard-cases 0.6x was hiding structure.
+      const metrics = ordinalMitreF1(scoredTechniques, expectedTechniques);
       const invalidFormat = [...generatedTechniques].filter((t) => !/^T\d{4}(\.\d{3})?$/.test(t));
       return {
         score: metrics.f1,
@@ -131,6 +135,7 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
           precision: metrics.precision,
           recall: metrics.recall,
           f1: metrics.f1,
+          partials: metrics.partials,
           generated: Array.from(generatedTechniques),
           expected: Array.from(expectedTechniques),
           optionalCredited: [...generatedTechniques].filter((t) => optionalTechniques.has(t)),
@@ -245,7 +250,10 @@ const GAP_ADDRESSED_CRITERIA = (
     `(e.g. FROM * with no meaningful filters), or unrelated to the described technique.`,
 ];
 
-export const createGapAddressedEvaluator = (evaluators: DefaultEvaluators): RuleEvaluator => ({
+export const createGapAddressedEvaluator = (
+  evaluators: DefaultEvaluators,
+  judgeProvenance?: { judgeConnectorId: string; judgeConnectorName?: string }
+): RuleEvaluator => ({
   direction: RULE_EVALUATOR_DIRECTION,
   name: 'Gap Addressed',
   kind: 'LLM',
@@ -255,7 +263,22 @@ export const createGapAddressedEvaluator = (evaluators: DefaultEvaluators): Rule
     const criteriaEval = evaluators.criteria(
       GAP_ADDRESSED_CRITERIA(input.technique, input.gap_description, name, query)
     );
-    return criteriaEval.evaluate({ input, output: output.rule, expected, metadata: undefined });
+    const result = await criteriaEval.evaluate({
+      input,
+      output: output.rule,
+      expected,
+      metadata: undefined,
+    });
+    // Judge provenance on every LLM-evaluated score: a self-judging model
+    // (judge == subject) must be visible in the score document, not discovered
+    // later by cross-referencing connector configs.
+    return {
+      ...result,
+      metadata: {
+        ...(result.metadata as Record<string, unknown> | undefined),
+        ...(judgeProvenance ? { judge: judgeProvenance } : {}),
+      },
+    };
   },
 });
 
@@ -271,6 +294,7 @@ export const createEvaluateDataset =
     esClient,
     traceEsClient,
     log,
+    judgeProvenance,
   }: {
     ruleCreationClient: RuleCreationClient;
     evaluators: DefaultEvaluators;
@@ -278,6 +302,7 @@ export const createEvaluateDataset =
     esClient: EsClient;
     traceEsClient: TraceEsClient;
     log: ToolingLog;
+    judgeProvenance?: { judgeConnectorId: string; judgeConnectorName?: string };
   }) =>
   async ({
     dataset,
@@ -298,21 +323,24 @@ export const createEvaluateDataset =
       createLookbackGapEvaluator(),
       createQueryExecutabilityEvaluator(esClient),
       createToolRoutingEvaluator({ traceEsClient, log }),
-      createGapAddressedEvaluator(evaluators),
+      createGapAddressedEvaluator(evaluators, judgeProvenance),
     ];
 
     log.info(
       `Running rule creation evaluation: "${dataset.name}" (${dataset.examples.length} examples)`
     );
 
+    // Observe every score so the run can state its own resolution limits.
+    const sink: ScoreSink = new Map();
     await executorClient.runExperiment(
       {
         name: dataset.name,
         datasets: [dataset],
         task: async ({ input }) => ruleCreationClient.run({ input }),
       },
-      allEvaluators
+      withScoreCollection(allEvaluators, sink)
     );
 
     log.info(`Evaluation complete: "${dataset.name}"`);
+    logRunSummary({ sink, datasetName: dataset.name, log });
   };
