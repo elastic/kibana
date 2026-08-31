@@ -3,15 +3,19 @@
 // thresholds. Calibrated against kibana May-Jul 2026 data (n=5,477 PRs, backports
 // excluded). Soft-limit only: never blocks, just adds context.
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
-const SOFT_LINES = Number(process.env.PR_SIZE_SOFT_LINES ?? '500');
-const SOFT_FILES = Number(process.env.PR_SIZE_SOFT_FILES ?? '15');
-const DEBOUNCE_SECS = Number(process.env.PR_SIZE_DEBOUNCE_SECS ?? '30');
+const parseEnvInt = (name, fallback) => {
+  const n = parseInt(process.env[name] ?? '', 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+};
+const SOFT_LINES = parseEnvInt('PR_SIZE_SOFT_LINES', 500);
+const SOFT_FILES = parseEnvInt('PR_SIZE_SOFT_FILES', 15);
+const DEBOUNCE_SECS = parseEnvInt('PR_SIZE_DEBOUNCE_SECS', 30);
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 
@@ -23,7 +27,9 @@ if (existsSync(debounceFile)) {
   const last = Number(readFileSync(debounceFile, 'utf8').trim()) || 0;
   if (nowSecs - last < DEBOUNCE_SECS) process.exit(0);
 }
-writeFileSync(debounceFile, String(nowSecs));
+const debounceTmp = `${debounceFile}.tmp.${process.pid}`;
+writeFileSync(debounceTmp, String(nowSecs));
+renameSync(debounceTmp, debounceFile);
 
 // Git helper — always uses --no-optional-locks, never fetches.
 const git = (...args) => {
@@ -59,7 +65,9 @@ try {
 if (!mergeBase) {
   mergeBase = git('merge-base', 'HEAD', `origin/${defaultBranch}`);
   if (!mergeBase) process.exit(0);
-  writeFileSync(cacheFile, JSON.stringify({ head: headSha, origin: originSha, base: mergeBase }));
+  const cacheTmp = `${cacheFile}.tmp.${process.pid}`;
+  writeFileSync(cacheTmp, JSON.stringify({ head: headSha, origin: originSha, base: mergeBase }));
+  renameSync(cacheTmp, cacheFile);
 }
 
 // Count additions and changed files (additions only — deletions don't penalise refactors).
@@ -100,5 +108,5 @@ process.stdout.write(
         `Consider splitting into smaller, focused PRs. ` +
         `Soft advisory only — calibrated against kibana May–Jul 2026 data.`,
     },
-  })
+  }) + '\n'
 );
