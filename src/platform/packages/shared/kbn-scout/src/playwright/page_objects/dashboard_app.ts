@@ -970,9 +970,11 @@ export class DashboardApp {
       const actionInPanel = panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
       await actionInPanel.click();
     } else {
-      // Open context menu and click action
+      // Open context menu and click action. The menu renders in a portal outside the panel, so it
+      // cannot be panel-scoped; filtering to the visible match skips the hidden quick-action
+      // buttons that every other panel on the dashboard renders under the same test subject.
       await this.openPanelContextMenu(title);
-      await this.page.testSubj.click(actionTestSubj);
+      await this.page.testSubj.locator(actionTestSubj).filter({ visible: true }).click();
       // Wait for context menu to close after clicking the action
       await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
     }
@@ -1003,6 +1005,29 @@ export class DashboardApp {
     await expect(this.page.testSubj.locator('unlinkPanelSuccess')).toBeVisible();
     // Verify the panel is now unlinked
     await this.expectNotLinkedToLibrary(title);
+  }
+
+  /** Opens the inspector flyout for the given panel (or the first panel if omitted). */
+  async openInspector(title?: string) {
+    await this.clickPanelAction('embeddablePanelAction-openInspector', title);
+    await this.page.testSubj.locator('inspectorPanel').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * From the dashboard listing page, discards the unsaved draft for the given dashboard title.
+   * Navigates to the listing first, then clicks the discard button if it exists (guard against
+   * tests that failed before a draft was created).
+   */
+  async discardUnsavedDashboard(title = 'New Dashboard') {
+    await this.page.gotoApp('dashboards');
+    const discardButton = this.page.testSubj.locator(
+      `discard-unsaved-${title.replace(/\s/g, '-')}`
+    );
+    if (await discardButton.isVisible()) {
+      await discardButton.click();
+      await this.page.testSubj.click('confirmModalConfirmButton');
+      await discardButton.waitFor({ state: 'hidden' });
+    }
   }
 
   /**

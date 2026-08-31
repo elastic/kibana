@@ -10,7 +10,13 @@ import type {
   AlertEventSeverity,
 } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
-import type { EpisodeScan, PolicyCatalog, RuleCatalog } from './state';
+import type {
+  EpisodeScan,
+  EpisodeTriage,
+  PolicyCatalog,
+  RuleCatalog,
+  SuppressionIndex,
+} from './state';
 import type { DispatchFailureReason } from './steps/constants';
 
 export type RuleId = string;
@@ -176,9 +182,10 @@ export interface DispatcherPipelineState {
   readonly scan?: EpisodeScan;
   /** Count of episodes that received an `.alert-actions` record this tick. */
   readonly recordedEpisodes?: number;
-  readonly suppressions?: AlertEpisodeSuppression[];
-  readonly dispatchable?: AlertEpisode[];
-  readonly suppressed?: Array<AlertEpisode & { reason: string }>;
+  /** Suppression facts from `.alert-actions`, indexed for per-episode lookup. */
+  readonly suppressions?: SuppressionIndex;
+  /** Dispatchable vs suppressed verdict on the scanned episodes. */
+  readonly triage?: EpisodeTriage;
   readonly rules?: RuleCatalog;
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
