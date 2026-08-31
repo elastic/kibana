@@ -16,3 +16,26 @@ export type {
   RunAgentStepOutputSchema,
   RunAgentStepConfigSchema,
 } from './run_agent_step';
+
+export {
+  ConversationEventSchema,
+  ConversationSchema,
+  ConversationSummarySchema,
+} from './conversation_schemas';
+export { ConversationGetStepTypeId, conversationGetStepCommonDefinition } from './conversation_get';
+export {
+  ConversationListStepTypeId,
+  conversationListStepCommonDefinition,
+} from './conversation_list';
+export {
+  ConversationCreateStepTypeId,
+  conversationCreateStepCommonDefinition,
+} from './conversation_create';
+export {
+  ConversationUpdateStepTypeId,
+  conversationUpdateStepCommonDefinition,
+} from './conversation_update';
+export {
+  ConversationDeleteStepTypeId,
+  conversationDeleteStepCommonDefinition,
+} from './conversation_delete';
