@@ -9,11 +9,13 @@
 
 import type { PageObjects, ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
 import { SearchExamplesPage } from './page_objects';
 
 export interface SearchExamplesTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     searchExamples: SearchExamplesPage;
+    inspector: Inspector;
   };
 }
 
@@ -31,6 +33,7 @@ export const test = baseTest.extend<SearchExamplesTestFixtures, ScoutWorkerFixtu
     await use({
       ...pageObjects,
       searchExamples: createLazyPageObject(SearchExamplesPage, page, pageObjects.datePicker),
+      inspector: createLazyPageObject(Inspector, page),
     });
   },
 });

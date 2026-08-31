@@ -32,15 +32,21 @@ test.describe('Search example shard-failure warnings', { tag: '@local-stateful-c
   });
 
   test('shows shard-failure warnings as toasts and can open inspector', async ({ pageObjects }) => {
-    const { searchExamples } = pageObjects;
-    await searchExamples.searchSourceWithOther.click();
+    const { inspector, searchExamples } = pageObjects;
 
-    await expect(searchExamples.viewWarningBtn).toBeVisible();
-    await searchExamples.viewWarningBtn.click();
-    await expect(searchExamples.inspectorPanel).toBeVisible();
+    await test.step('run shard-failure search', async () => {
+      await searchExamples.searchSourceWithOther.click();
+      await expect(searchExamples.viewWarningBtn).toBeVisible();
+    });
 
-    await searchExamples.inspectorCloseButton.click();
-    await expect(searchExamples.inspectorPanel).toHaveCount(0);
+    await test.step('open inspector from warning toast', async () => {
+      await searchExamples.viewWarningBtn.click();
+      await expect(inspector.panel).toBeVisible();
+    });
+
+    await test.step('close inspector', async () => {
+      await inspector.close();
+    });
   });
 
   test('shows incomplete warnings on the results tab', async ({ pageObjects }) => {

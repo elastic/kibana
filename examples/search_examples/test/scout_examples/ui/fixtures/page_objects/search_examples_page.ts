@@ -41,8 +41,6 @@ export class SearchExamplesPage {
   readonly warningsTab: Locator;
   readonly warningsCodeBlock: Locator;
   readonly viewWarningBtn: Locator;
-  readonly inspectorPanel: Locator;
-  readonly inspectorCloseButton: Locator;
 
   constructor(
     private readonly page: ScoutPage,
@@ -66,8 +64,6 @@ export class SearchExamplesPage {
     this.warningsTab = this.page.testSubj.locator('warningsTab');
     this.warningsCodeBlock = this.page.testSubj.locator('warningsCodeBlock');
     this.viewWarningBtn = this.page.testSubj.locator('viewWarningBtn');
-    this.inspectorPanel = this.page.testSubj.locator('inspectorPanel');
-    this.inspectorCloseButton = this.page.testSubj.locator('euiFlyoutCloseButton');
   }
 
   searchResults(count: number): Locator {
