@@ -125,7 +125,7 @@ export function ContextAppContent({
   const areSuccessorsLoading =
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
 
-  const showInterceptedWarning = Boolean(interceptedWarnings.length);
+  const showInterceptedWarning = Boolean(interceptedWarnings.length) && !isWarningCalloutDismissed;
   const showPredecessorsWarning =
     !isAnchorLoading && !arePredecessorsLoading && predecessors.length < predecessorCount;
   const showSuccessorsWarning =
