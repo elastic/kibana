@@ -116,6 +116,7 @@ export const createCorrectnessEvaluators = <
   const factuality: Evaluator = {
     name: 'Factuality',
     kind: 'LLM',
+    direction: 'maximize',
     evaluate: async ({ input, output, expected, metadata }) => {
       const analysis = await getAnalysis(
         input as TInput,
@@ -145,6 +146,7 @@ export const createCorrectnessEvaluators = <
   const relevance: Evaluator = {
     name: 'Relevance',
     kind: 'LLM',
+    direction: 'maximize',
     evaluate: async ({ input, output, expected, metadata }) => {
       const analysis = await getAnalysis(
         input as TInput,
