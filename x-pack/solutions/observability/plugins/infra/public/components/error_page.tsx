@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { PageTemplate } from './page_template';
+import { filledPageSectionContentCss } from './empty_states/layout';
 
 interface Props {
   detailedMessage?: React.ReactNode;
@@ -25,14 +26,6 @@ interface Props {
   retry?: () => void;
   shortMessage: React.ReactNode;
 }
-
-const filledPageSectionContentCss = css`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  height: 100%;
-`;
 
 const centeredErrorCss = css`
   width: 100%;

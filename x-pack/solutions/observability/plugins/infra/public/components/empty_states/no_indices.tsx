@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { EuiPageSection } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PageTemplate } from '../page_template';
+import { filledPageSectionContentCss } from './layout';
 
 interface NoIndicesProps extends Omit<EuiEmptyPromptProps, 'body' | 'title'> {
   body: string;
@@ -19,14 +19,6 @@ interface NoIndicesProps extends Omit<EuiEmptyPromptProps, 'body' | 'title'> {
   header?: React.ReactNode;
   title: string;
 }
-
-const filledPageSectionContentCss = css`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  height: 100%;
-`;
 
 // Represents a fully constructed page, including page template.
 export const NoIndices: React.FC<NoIndicesProps> = ({ body, header, title, ...rest }) => {
