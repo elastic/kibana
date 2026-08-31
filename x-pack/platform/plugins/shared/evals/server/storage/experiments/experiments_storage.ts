@@ -37,7 +37,7 @@ export const experimentsStorageSettings = {
   },
 } satisfies IndexStorageSettings;
 
-export type ExperimentRecordStatus = 'pending' | 'running' | 'completed' | 'failed';
+export type ExperimentRecordStatus = 'running' | 'completed' | 'failed';
 
 export const isTerminalStatus = (status: ExperimentRecordStatus): boolean =>
   status === 'completed' || status === 'failed';

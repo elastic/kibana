@@ -39,7 +39,6 @@ export interface CreateExperimentRecordInput {
   name: string;
   description?: string;
   protocol: ExperimentProtocolSnapshot;
-  status?: Extract<ExperimentRecordStatus, 'pending' | 'running'>;
   provenance?: ExperimentProvenance;
   startedAt?: string;
   spaceIds?: string[];
@@ -50,7 +49,6 @@ export interface UpdateExperimentRecordInput {
   status?: ExperimentRecordStatus;
   completeness?: ExperimentCompleteness;
   error?: string;
-  startedAt?: string;
   completedAt?: string;
 }
 
@@ -104,20 +102,18 @@ export class ExperimentRecordClient {
     name,
     description,
     protocol,
-    status = 'running',
     provenance,
     startedAt,
     spaceIds,
   }: CreateExperimentRecordInput): Promise<ExperimentRecordDocument> {
     const timestamp = new Date().toISOString();
-    const resolvedStartedAt = startedAt ?? (status === 'running' ? timestamp : undefined);
     const document: ExperimentRecordStorageProperties = {
       experiment_id: experimentId,
       name,
       ...(description !== undefined ? { description } : {}),
       protocol,
-      status,
-      ...(resolvedStartedAt ? { started_at: resolvedStartedAt } : {}),
+      status: 'running',
+      started_at: startedAt ?? timestamp,
       ...(provenance ? { provenance } : {}),
       space_ids: Array.from(new Set([this.spaceId, ...(spaceIds ?? [])])),
       created_at: timestamp,
@@ -151,9 +147,8 @@ export class ExperimentRecordClient {
   }
 
   /**
-   * Applies a status transition in place. Timestamps follow the status: leaving
-   * `pending` stamps `started_at`, reaching `completed` or `failed` stamps
-   * `completed_at`, unless the caller supplies its own.
+   * Applies a status transition in place. Reaching `completed` or `failed`
+   * stamps `completed_at`, unless the caller supplies its own.
    */
   async update(
     experimentId: string,
@@ -223,10 +218,6 @@ const applyUpdate = (
   const status = patch.status ?? current.status;
   const timestamp = new Date().toISOString();
 
-  const startedAt =
-    patch.startedAt ??
-    current.started_at ??
-    (current.status === 'pending' && status !== 'pending' ? timestamp : undefined);
   const completedAt = isTerminalStatus(status)
     ? patch.completedAt ?? current.completed_at ?? timestamp
     : current.completed_at;
@@ -234,7 +225,6 @@ const applyUpdate = (
   return {
     ...current,
     status,
-    ...(startedAt ? { started_at: startedAt } : {}),
     ...(completedAt ? { completed_at: completedAt } : {}),
     ...(patch.completeness !== undefined ? { completeness: patch.completeness } : {}),
     ...(patch.error !== undefined ? { error: patch.error } : {}),

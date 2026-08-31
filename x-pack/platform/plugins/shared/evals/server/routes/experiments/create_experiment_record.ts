@@ -83,21 +83,13 @@ export const registerCreateExperimentRecordRoute = ({
             spaceId: activeSpaceId,
           });
 
-          const {
-            name,
-            description,
-            protocol,
-            status,
-            provenance,
-            started_at: startedAt,
-          } = request.body;
+          const { name, description, protocol, provenance, started_at: startedAt } = request.body;
 
           const record = await recordClient.create({
             experimentId,
             name,
             description,
             protocol,
-            status,
             provenance,
             startedAt,
             spaceIds: explicitSpaceIds,

@@ -122,7 +122,6 @@ describe('POST /internal/evals/experiments/{experimentId}/_record', () => {
       name: payload.name,
       description: payload.description,
       protocol: payload.protocol,
-      status: undefined,
       provenance: payload.provenance,
       startedAt: undefined,
       spaceIds: undefined,
@@ -249,22 +248,14 @@ describe('POST /internal/evals/experiments/{experimentId}/_record', () => {
     expect(response.payload).toEqual({ message: 'Failed to create experiment record' });
   });
 
-  it('defaults status to running and rejects terminal statuses at validation', () => {
-    const defaulted = CreateEvaluationExperimentRecordRequestBody.safeParse(getBasePayload());
-    expect(defaulted.success).toBe(true);
-    expect(defaulted.data?.status).toBe('running');
-
-    const pending = CreateEvaluationExperimentRecordRequestBody.safeParse({
-      ...getBasePayload(),
-      status: 'pending',
-    });
-    expect(pending.success).toBe(true);
-
-    const terminal = CreateEvaluationExperimentRecordRequestBody.safeParse({
+  it('takes no status; records are always created running', () => {
+    // A status sent by an out-of-repo caller is stripped rather than rejected.
+    const parsed = CreateEvaluationExperimentRecordRequestBody.safeParse({
       ...getBasePayload(),
       status: 'completed',
     });
-    expect(terminal.success).toBe(false);
+    expect(parsed.success).toBe(true);
+    expect(parsed.data).not.toHaveProperty('status');
   });
 
   it('fails validation without a name or a protocol dataset', () => {

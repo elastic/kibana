@@ -204,7 +204,7 @@ describe('ExperimentRecordClient', () => {
       );
     });
 
-    it('stamps started_at for a running record but not a pending one', async () => {
+    it('stamps started_at with the creation time', async () => {
       const { client } = createClient();
 
       const running = await client.create({
@@ -212,18 +212,10 @@ describe('ExperimentRecordClient', () => {
         name: 'Running',
         protocol: PROTOCOL,
       });
-      const pending = await client.create({
-        experimentId: 'exp-pending',
-        name: 'Pending',
-        protocol: PROTOCOL,
-        status: 'pending',
-      });
 
-      expect(running.started_at).toBeDefined();
+      expect(running.status).toBe('running');
       expect(running.started_at).toBe(running.created_at);
-      expect(pending.status).toBe('pending');
-      expect(pending.started_at).toBeUndefined();
-      expect(pending.completed_at).toBeUndefined();
+      expect(running.completed_at).toBeUndefined();
     });
 
     it('keeps the description and provenance the producer supplied', async () => {
@@ -380,38 +372,6 @@ describe('ExperimentRecordClient', () => {
 
       expect(updated.status).toBe('failed');
       expect(updated.error).toBe('Task provider timed out');
-      expect(updated.completed_at).toBeDefined();
-    });
-
-    it('stamps started_at when a pending record starts running', async () => {
-      const { client } = createClient();
-      await client.create({
-        experimentId: 'exp-1',
-        name: 'Queued run',
-        protocol: PROTOCOL,
-        status: 'pending',
-      });
-
-      const updated = await client.update('exp-1', { status: 'running' });
-
-      expect(updated.status).toBe('running');
-      expect(updated.started_at).toBeDefined();
-      expect(updated.completed_at).toBeUndefined();
-    });
-
-    it('does not stamp started_at when a pending record fails before running', async () => {
-      const { client } = createClient();
-      await client.create({
-        experimentId: 'exp-1',
-        name: 'Queued run',
-        protocol: PROTOCOL,
-        status: 'pending',
-      });
-
-      const updated = await client.update('exp-1', { status: 'failed', error: 'provision error' });
-
-      expect(updated.status).toBe('failed');
-      expect(updated.started_at).toBeUndefined();
       expect(updated.completed_at).toBeDefined();
     });
 

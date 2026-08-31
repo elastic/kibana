@@ -40,11 +40,7 @@ export const CreateEvaluationExperimentRecordRequestBody = lazySchema(() =>
     description: z.string().max(2048).optional(),
     protocol: ExperimentRecordProtocol,
     /**
-     * Initial lifecycle status. `pending` is for queued runs (e.g. workflow executions) that have not started executing yet; runs that begin immediately are created as `running`.
-     */
-    status: z.enum(['pending', 'running']).optional().default('running'),
-    /**
-     * When execution began. Defaults to the creation time for records created as `running`.
+     * When execution began. Defaults to the creation time; every record is created as `running`.
      */
     started_at: z.string().max(64).optional(),
     provenance: ExperimentRecordProvenance.optional(),

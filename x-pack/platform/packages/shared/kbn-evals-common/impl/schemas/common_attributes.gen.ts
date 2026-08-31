@@ -407,7 +407,7 @@ export const EvaluationExperimentRecord = lazySchema(() =>
     name: z.string().max(256),
     description: z.string().max(2048).optional(),
     protocol: ExperimentRecordProtocol,
-    status: z.enum(['pending', 'running', 'completed', 'failed']),
+    status: z.enum(['running', 'completed', 'failed']),
     started_at: z.string().max(64).optional(),
     completed_at: z.string().max(64).optional(),
     provenance: ExperimentRecordProvenance.optional(),
