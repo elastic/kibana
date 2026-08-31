@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { RedirectTo } from '../../components/redirect_to';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
@@ -25,8 +25,9 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
 
   const isDifferentialView = routePath === '/flamegraphs/differential';
 
-  const tabs: Required<EuiPageHeaderContentProps>['tabs'] = [
+  const tabs: AppHeaderTab[] = [
     {
+      id: 'flamegraph',
       label: i18n.translate('xpack.profiling.flameGraphsView.flameGraphTabLabel', {
         defaultMessage: 'Flamegraph',
       }),
@@ -34,6 +35,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       href: profilingRouter.link('/flamegraphs/flamegraph', { query }),
     },
     {
+      id: 'differential-flamegraph',
       label: i18n.translate('xpack.profiling.flameGraphsView.differentialFlameGraphTabLabel', {
         defaultMessage: 'Differential flamegraph',
       }),

@@ -12,6 +12,7 @@
     "@kbn/observability-plugin",
     "@kbn/scout-synthtrace",
     "@kbn/profiling-utils",
+    "@kbn/app-header",
   ],
   "exclude": [
     "target/**/*"

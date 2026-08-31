@@ -38251,7 +38251,6 @@
     "xpack.profiling.functionsView.samplesColumnLabel.hint": "估计值",
     "xpack.profiling.functionsView.totalSampleCountLabel": "总样例数估值：",
     "xpack.profiling.header.betaBadgeTooltip": "此模块不是 GA 版。请通过报告错误来帮助我们。",
-    "xpack.profiling.header.storageExplorerLink.tooltip": "此模块不是 GA 版。请通过报告错误来帮助我们。",
     "xpack.profiling.headerActionMenu.addData": "添加数据",
     "xpack.profiling.headerActionMenu.settings": "设置",
     "xpack.profiling.headerActionMenu.storageExplorer": "Storage Explorer",

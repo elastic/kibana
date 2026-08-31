@@ -38242,7 +38242,6 @@
     "xpack.profiling.functionsView.samplesColumnLabel.hint": "予測額",
     "xpack.profiling.functionsView.totalSampleCountLabel": "合計サンプル推定：",
     "xpack.profiling.header.betaBadgeTooltip": "このモジュールはGAではありません。不具合が発生したら報告してください。",
-    "xpack.profiling.header.storageExplorerLink.tooltip": "このモジュールはGAではありません。不具合が発生したら報告してください。",
     "xpack.profiling.headerActionMenu.addData": "データを追加",
     "xpack.profiling.headerActionMenu.settings": "設定",
     "xpack.profiling.headerActionMenu.storageExplorer": "ストレージエクスプローラー",

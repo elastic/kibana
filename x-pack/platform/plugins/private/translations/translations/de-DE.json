@@ -38127,7 +38127,6 @@
     "xpack.profiling.functionsView.samplesColumnLabel.hint": "Geschätzte Werte",
     "xpack.profiling.functionsView.totalSampleCountLabel": "Gesamtschätzung der Stichprobe:",
     "xpack.profiling.header.betaBadgeTooltip": "Dieses Modul ist nicht GA. Bitte helfen Sie uns, indem Sie etwaige Fehler melden.",
-    "xpack.profiling.header.storageExplorerLink.tooltip": "Dieses Modul ist nicht GA. Bitte helfen Sie uns, indem Sie etwaige Bugs melden.",
     "xpack.profiling.headerActionMenu.addData": "Daten hinzufügen",
     "xpack.profiling.headerActionMenu.settings": "Einstellungen",
     "xpack.profiling.headerActionMenu.storageExplorer": "Speicher-Explorer",

@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingStorageExplorerPage {
@@ -40,7 +41,7 @@ export class ProfilingStorageExplorerPage {
    */
   private async waitForStorageExplorerPage() {
     await this.page
-      .getByTestId('profilingPageTemplate')
+      .getByTestId(APP_HEADER_TEST_SUBJECTS.title)
       .getByText('Storage explorer')
       .waitFor({ timeout: EXTENDED_TIMEOUT });
   }

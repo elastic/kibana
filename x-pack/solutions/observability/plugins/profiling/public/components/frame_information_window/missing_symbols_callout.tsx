@@ -13,7 +13,7 @@ import type { FrameType } from '@kbn/profiling-utils';
 import { getLanguageType } from '@kbn/profiling-utils';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { AddDataTabs } from '../../views/add_data_view';
+import { AddDataTabs } from '../../views/add_data_view/types';
 
 interface Props {
   frameType: FrameType;

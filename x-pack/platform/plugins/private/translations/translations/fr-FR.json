@@ -38036,7 +38036,6 @@
     "xpack.profiling.functionsView.samplesColumnLabel.hint": "Valeurs estimées",
     "xpack.profiling.functionsView.totalSampleCountLabel": "Total estimation d'échantillons :",
     "xpack.profiling.header.betaBadgeTooltip": "Ce module n'est pas disponible. Nous vous remercions de bien vouloir nous aider en nous signalant tout bug.",
-    "xpack.profiling.header.storageExplorerLink.tooltip": "Ce module n'est pas disponible. Nous vous remercions de bien vouloir nous aider en nous signalant tout bug.",
     "xpack.profiling.headerActionMenu.addData": "Ajouter des données",
     "xpack.profiling.headerActionMenu.settings": "Paramètres",
     "xpack.profiling.headerActionMenu.storageExplorer": "Explorateur de stockage",
