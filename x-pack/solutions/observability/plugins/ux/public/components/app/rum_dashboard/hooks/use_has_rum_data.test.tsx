@@ -123,6 +123,35 @@ describe('useHasRumData', () => {
     expect(result.current.loading).toBe(false);
   });
 
+  it('does not return to the loading screen once an answer exists', () => {
+    // Either query can be re-issued when its dependencies settle. Before this was handled, the
+    // page went onboarding -> loading -> onboarding, which reads as a flicker.
+    responses[TIERED] = { data: hits(0), loading: false };
+    responses[UNBOUNDED] = { data: hits(0), loading: false };
+
+    const { result, rerender } = renderHook(() => useHasRumData());
+    expect(result.current).toMatchObject({ hasData: false, loading: false });
+
+    // the tier restricted query re-fires
+    responses[TIERED] = { data: hits(0), loading: true };
+    rerender();
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.hasData).toBe(false);
+  });
+
+  it('never shows the loading screen when an earlier visit already answered', () => {
+    // The check costs two sequential requests on the no-data path. Spinning for both of them is
+    // what made the loading screen visible; a returning user keeps the previous answer instead.
+    window.localStorage.setItem('uxAppHasDataBoolean', 'false');
+    responses[TIERED] = { data: undefined, loading: true };
+
+    const { result } = renderHook(() => useHasRumData());
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.hasData).toBe(false);
+  });
+
   it('reports no data when neither query finds any', () => {
     responses[TIERED] = { data: hits(0), loading: false };
     responses[UNBOUNDED] = { data: hits(0), loading: false };
