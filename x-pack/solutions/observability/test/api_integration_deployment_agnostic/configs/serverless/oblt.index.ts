@@ -14,6 +14,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     // Note: if your tests runtime is over 5 minutes, create a new index and config file
 
     loadTestFile(require.resolve('../../apis/alerting'));
-    loadTestFile(require.resolve('../../apis/dataset_quality'));
   });
 }

@@ -690,6 +690,7 @@ export class SyntheticsPrivateLocation {
     const policies = await this.packagePolicyService.getByIds({
       spaceId,
       packagePolicyIds: Array.from(policyIdsToFetch),
+      fields: ['name', 'condition'],
     });
 
     return { policies, allSpaces };
@@ -713,6 +714,7 @@ export class SyntheticsPrivateLocation {
     const existingPolicies = await this.packagePolicyService.getByIds({
       spaceId,
       packagePolicyIds: Array.from(policyIdsToFetch),
+      fields: ['name'],
     });
 
     const policyIdsToDelete = new Set<string>();

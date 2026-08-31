@@ -232,6 +232,8 @@ const TAB_COMPARATORS: TabComparators = {
   chartInterval: fieldComparator('chartInterval', 'auto'),
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
+  documentsDisplayMode: fieldComparator('documentsDisplayMode', 'table'),
+  jsonModeSettings: fieldComparator('jsonModeSettings', {}),
   esqlApproximation: fieldComparator('esqlApproximation', false),
   visContext: visContextComparator,
   controlGroupJson: (a, b) => {

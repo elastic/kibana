@@ -6,10 +6,12 @@
   "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/agent-builder-server",
+    "@kbn/agent-builder-skill-loader",
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-common",
     "@kbn/zod",
