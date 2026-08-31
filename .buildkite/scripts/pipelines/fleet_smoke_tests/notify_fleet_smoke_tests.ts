@@ -19,7 +19,7 @@ import { BuildkiteClient } from '#pipeline-utils';
 
 const SMOKE_TESTS_PIPELINE_SLUG = 'fleet-smoke-tests';
 const BUILD_SEARCH_WINDOW_DAYS = 7;
-const DEFAULT_CONSECUTIVE_FAILURES_THRESHOLD = 2;
+const DEFAULT_CONSECUTIVE_FAILURES_THRESHOLD = 3;
 const DRY_RUN = !!process.env.DRY_RUN?.match(/(1|true)/i);
 
 function getThreshold(): number {
