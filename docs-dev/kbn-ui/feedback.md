@@ -8,10 +8,11 @@ The UI for One Feedback — a universal way for users to rate their experience a
 
 ## Components
 
-It exposes two components:
+It exposes the following components:
 
 * `FeedbackTriggerButton` — a header button that opens the feedback form in a modal.
 * `FeedbackContainer` — the feedback form itself, for hosts that manage their own container.
+* `FeedbackSuccessToastTitle` and `FeedbackSuccessToastBody` — content for the submission success toast. The host is responsible for mounting these into its toast system.
 
 ### Trigger button [kbn-ui-feedback-trigger-button]
 
@@ -29,9 +30,17 @@ The button lives in the global header and opens the form on click. It is disable
 :id: kibana:kbn_ui:feedback--form
 :::
 
+### Success toast [kbn-ui-feedback-success-toast]
+
+After a successful submission, hosts should show `FeedbackSuccessToastTitle` and `FeedbackSuccessToastBody`. Pass `surveyUrl` for the research-panel link and `onDismiss` so the "Maybe later" action can close the toast.
+
+:::{storybook}
+:id: kibana:kbn_ui:feedback--success-toast
+:::
+
 ## Usage [kbn-ui-feedback-usage]
 
-Both components are driven entirely by callbacks, so the host owns data fetching, telemetry, and toasts.
+The trigger button and form are driven entirely by callbacks, so the host owns data fetching, telemetry, and toasts.
 
 ```tsx
 import { FeedbackTriggerButton } from '@kbn/ui-feedback';

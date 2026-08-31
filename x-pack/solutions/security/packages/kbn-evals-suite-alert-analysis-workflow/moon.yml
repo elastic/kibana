@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-threat-hunting'
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow
 dependsOn:
+  - '@kbn/security-evals-workflow-traces'
   - '@kbn/evals'
   - '@kbn/scout'
   - '@kbn/tooling-log'

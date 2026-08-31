@@ -1,122 +1,9 @@
 {
-  "sha1": "5dd9d4c56ed9b4627bcbf00c6e17e486899c6634",
+  "sha1": "3933bab12c9785a43c2f132034de34452d704698",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "697afb3ed12aa45-9872ed8d1853c32",
-      "title": "Entity Store CCS logs extraction (test against local instance) Should run CCS extraction for host and write to updates then latest index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 143,
-        "column": 18
-      }
-    },
-    {
-      "id": "697afb3ed12aa45-1b29e03e5160c81",
-      "title": "Entity Store CCS logs extraction (test against local instance) Should run CCS extraction for user and write to updates then latest index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 282,
-        "column": 18
-      }
-    },
-    {
-      "id": "697afb3ed12aa45-87cc27d441c9286",
-      "title": "Entity Store CCS logs extraction (test against local instance) Should run CCS extraction for service and write to updates then latest index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 515,
-        "column": 19
-      }
-    },
-    {
-      "id": "697afb3ed12aa45-f28023257e21fbb",
-      "title": "Entity Store CCS logs extraction (test against local instance) Should run CCS extraction for generic and write to updates then latest index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 598,
-        "column": 30
-      }
-    },
-    {
-      "id": "697afb3ed12aa45-477b0c83f68c6fe",
-      "title": "Entity Store CCS logs extraction (test against local instance) Should route cloud asset users to the correct namespace based on cloud.provider via CCS extraction",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 665,
-        "column": 18
-      }
-    },
-    {
-      "id": "697afb3ed12aa45-e3f29795ceaa5ac",
-      "title": "Entity Store CCS logs extraction (test against local instance) Should paginate correctly across outer log-slice loop and inner entity-page loop",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 916,
-        "column": 74
-      }
-    },
-    {
-      "id": "697afb3ed12aa45-bda631ea8a8353f",
-      "title": "Entity Store CCS logs extraction (test against local instance) Should succeed when a data stream used as remote index pattern has a closed backing index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/ccs_logs_extraction.spec.ts",
-        "line": 1118,
-        "column": 24
-      }
-    },
     {
       "id": "6d37da1b366c84e-3c3ccd873a00934",
       "title": "Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage) Should extract host with entity pagination (docsLimit 5, wide log slices)",
@@ -129,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/entity_extraction_paginated.spec.ts",
-        "line": 62,
+        "line": 67,
         "column": 7
       }
     },
@@ -145,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/entity_extraction_paginated.spec.ts",
-        "line": 92,
+        "line": 97,
         "column": 16
       }
     },
@@ -241,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_volume_cap.spec.ts",
-        "line": 70,
+        "line": 73,
         "column": 12
       }
     },
@@ -257,7 +144,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_volume_cap.spec.ts",
-        "line": 166,
+        "line": 169,
         "column": 15
       }
     },
@@ -273,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_volume_cap.spec.ts",
-        "line": 224,
+        "line": 227,
         "column": 17
       }
     },
@@ -289,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 86,
+        "line": 89,
         "column": 22
       }
     },
@@ -305,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 114,
+        "line": 117,
         "column": 12
       }
     },
@@ -321,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 150,
-        "column": 22
+        "line": 152,
+        "column": 12
       }
     },
     {
@@ -337,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 177,
-        "column": 18
+        "line": 178,
+        "column": 11
       }
     },
     {
@@ -353,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 205,
-        "column": 74
+        "line": 209,
+        "column": 72
       }
     },
     {
@@ -369,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 446,
-        "column": 25
+        "line": 450,
+        "column": 23
       }
     },
     {
@@ -385,7 +272,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 568,
+        "line": 571,
         "column": 17
       }
     },
@@ -401,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 638,
-        "column": 42
+        "line": 642,
+        "column": 25
       }
     },
     {
@@ -417,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 667,
-        "column": 13
+        "line": 669,
+        "column": 9
       }
     },
     {
@@ -433,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 698,
-        "column": 21
+        "line": 702,
+        "column": 15
       }
     },
     {
@@ -449,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 781,
-        "column": 7
+        "line": 834,
+        "column": 24
       }
     },
     {
@@ -465,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 849,
-        "column": 49
+        "line": 853,
+        "column": 32
       }
     },
     {
@@ -481,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 961,
-        "column": 25
+        "line": 964,
+        "column": 22
       }
     },
     {
@@ -497,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1027,
-        "column": 23
+        "line": 1030,
+        "column": 13
       }
     },
     {
@@ -513,8 +400,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1052,
-        "column": 15
+        "line": 1055,
+        "column": 7
       }
     },
     {
@@ -529,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1119,
-        "column": 13
+        "line": 1122,
+        "column": 7
       }
     },
     {
@@ -545,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1205,
-        "column": 14
+        "line": 1202,
+        "column": 13
       }
     },
     {
@@ -561,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1360,
-        "column": 26
+        "line": 1363,
+        "column": 7
       }
     }
   ]

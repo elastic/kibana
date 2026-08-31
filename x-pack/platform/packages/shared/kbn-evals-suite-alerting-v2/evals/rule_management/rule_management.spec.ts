@@ -22,6 +22,7 @@ import {
   INDEX_DISCOVERY_TOOL_IDS,
   INDEX_MAPPING_TOOL_ID,
   RULE_MANAGEMENT_SKILL_ID,
+  RUNBOOK_ARTIFACT_TYPE,
 } from '../../src/constants';
 import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
 
@@ -339,6 +340,101 @@ evaluate.describe(
               format: 'standalone',
               strategy: 'none',
             }),
+          ],
+        },
+      });
+    });
+  }
+);
+
+evaluate.describe(
+  'Alerting V2 rule-management skill - runbooks',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('runbook composition', async ({ evaluateDataset, hostMetricsIndex }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'alerting-v2: runbook composition',
+          description:
+            'Exercises runbook attachment via the rule-management skill. Covers single-turn ' +
+            'rule creation with an inline runbook request, and multi-turn addition of a ' +
+            'runbook to an already-composed rule.',
+          examples: [
+            {
+              input: {
+                turns: [
+                  `Create an alert rule on ${hostMetricsIndex} that fires when average ` +
+                    'system.cpu.total.norm.pct stays above 0.9 for 5 minutes, grouped by host.name. ' +
+                    'Include a runbook with investigation steps for high CPU usage.',
+                ],
+              },
+              output: {
+                criteria: [
+                  'The assistant composes the rule in this turn rather than asking for details the user already provided.',
+                  'The manage_rule call includes a set_runbook operation with markdown content describing investigation steps for high CPU usage.',
+                  'The runbook content is meaningful and actionable — not a placeholder or stub — and is relevant to the high-CPU scenario the user described.',
+                  'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
+                ],
+                expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
+                expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
+                expectAttachmentData: (attachments) => {
+                  const attachment = getLatestAttachmentData<RuleAttachmentData>(
+                    attachments,
+                    RULE_ATTACHMENT_TYPE
+                  );
+                  expect(attachment).toBeDefined();
+                  expect(attachment!.kind).toEqual('alert');
+                  const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
+                  expect(esql).toContain(hostMetricsIndex);
+                  expect(esql).toContain('system.cpu.total.norm.pct');
+
+                  const runbook = attachment!.artifacts?.find(
+                    (a) => a.type === RUNBOOK_ARTIFACT_TYPE
+                  );
+                  expect(runbook).toBeDefined();
+                  expect(typeof runbook!.data.content).toBe('string');
+                  expect((runbook!.data.content as string).trim().length).toBeGreaterThan(0);
+                },
+              },
+            },
+            {
+              input: {
+                turns: [
+                  `Create an alert rule on ${hostMetricsIndex} that fires when average ` +
+                    'system.cpu.total.norm.pct stays above 0.9 for 5 minutes, grouped by host.name.',
+                  'Add a runbook to this rule with steps to investigate and mitigate high CPU on a host.',
+                ],
+              },
+              output: {
+                criteria: [
+                  'The first-turn response composes the rule without a runbook.',
+                  'After the user requests a runbook on the second turn, the assistant calls manage_rule with a set_runbook operation containing markdown investigation steps.',
+                  'The runbook content is relevant to the high-CPU scenario and includes actionable triage or mitigation steps.',
+                  'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
+                ],
+                expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
+                expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
+                expectAttachmentData: (attachments) => {
+                  const attachment = getLatestAttachmentData<RuleAttachmentData>(
+                    attachments,
+                    RULE_ATTACHMENT_TYPE
+                  );
+                  expect(attachment).toBeDefined();
+                  expect(attachment!.kind).toEqual('alert');
+
+                  const runbook = attachment!.artifacts?.find(
+                    (a) => a.type === RUNBOOK_ARTIFACT_TYPE
+                  );
+                  expect(runbook).toBeDefined();
+                  expect(typeof runbook!.data.content).toBe('string');
+                  expect((runbook!.data.content as string).trim().length).toBeGreaterThan(0);
+                },
+              },
+            },
           ],
         },
       });
