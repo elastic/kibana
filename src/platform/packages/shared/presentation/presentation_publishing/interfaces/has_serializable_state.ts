@@ -40,6 +40,7 @@ export const apiHasSerializableState = (api: unknown | null): api is HasSerializ
   return Boolean(
     (api as HasSerializableState)?.serializeState &&
       (api as HasSerializableState)?.applySerializedState &&
-      (api as HasSerializableState)?.anyStateChange$
+      (api as HasSerializableState)?.anyStateChange$ &&
+      (api as HasSerializableState)?.latestState$
   );
 };
