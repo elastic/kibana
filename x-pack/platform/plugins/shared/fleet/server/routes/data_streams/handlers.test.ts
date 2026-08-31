@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -20,7 +22,7 @@ import { dataStreamService } from '../../services/data_streams';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { appContextService } from '../../services';
 
-import { getDeprecatedILMCheckHandler, getListHandler } from './handlers';
+import { getDeprecatedILMCheckHandler, getListHandler, getHasDataHandler } from './handlers';
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
 
 describe('getListHandler', () => {
@@ -432,6 +434,186 @@ describe('getDeprecatedILMCheckHandler', () => {
             componentTemplates: ['logs-test@package'],
           },
         ],
+      },
+    });
+  });
+});
+
+describe('getHasDataHandler', () => {
+  let context: FleetRequestHandlerContext;
+  let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+  const makeRequest = (query: { dataStreams: string; start: string }) =>
+    httpServerMock.createKibanaRequest({ query }) as jest.Mocked<KibanaRequest>;
+
+  beforeEach(() => {
+    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    response = httpServerMock.createResponseFactory();
+
+    context = {
+      core: {
+        elasticsearch: {
+          client: {
+            asCurrentUser: mockEsClient,
+          },
+        },
+      },
+    } as unknown as FleetRequestHandlerContext;
+  });
+
+  it('rejects an invalid index pattern', async () => {
+    const request = makeRequest({ dataStreams: 'bad-pattern', start: '2025-01-01T00:00:00Z' });
+
+    await getHasDataHandler(context, request, response);
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'Invalid index pattern: "bad-pattern"' },
+    });
+    expect(mockEsClient.msearch).not.toHaveBeenCalled();
+  });
+
+  it('rejects a pattern with arbitrary index name (security boundary)', async () => {
+    const request = makeRequest({ dataStreams: '.security-7', start: '2025-01-01T00:00:00Z' });
+
+    await getHasDataHandler(context, request, response);
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'Invalid index pattern: ".security-7"' },
+    });
+    expect(mockEsClient.msearch).not.toHaveBeenCalled();
+  });
+
+  it('rejects when only one pattern in the list is invalid', async () => {
+    const request = makeRequest({
+      dataStreams: 'logs-aws.vpcflow-*,.security-7',
+      start: '2025-01-01T00:00:00Z',
+    });
+
+    await getHasDataHandler(context, request, response);
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'Invalid index pattern: ".security-7"' },
+    });
+    expect(mockEsClient.msearch).not.toHaveBeenCalled();
+  });
+
+  it('returns results with true for patterns with hits and false for empty', async () => {
+    mockEsClient.msearch.mockResolvedValue({
+      responses: [{ hits: { total: { value: 5 } } }, { hits: { total: { value: 0 } } }],
+    } as any);
+
+    const request = makeRequest({
+      dataStreams: 'logs-aws.vpcflow-*,metrics-aws.ec2-*',
+      start: '2025-01-01T00:00:00Z',
+    });
+
+    await getHasDataHandler(context, request, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        results: {
+          'logs-aws.vpcflow-*': true,
+          'metrics-aws.ec2-*': false,
+        },
+      },
+    });
+  });
+
+  it('returns false for a pattern whose msearch response is an error', async () => {
+    mockEsClient.msearch.mockResolvedValue({
+      responses: [{ error: { type: 'index_not_found_exception' } }],
+    } as any);
+
+    const request = makeRequest({
+      dataStreams: 'logs-aws.vpcflow-*',
+      start: '2025-01-01T00:00:00Z',
+    });
+
+    await getHasDataHandler(context, request, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { results: { 'logs-aws.vpcflow-*': false } },
+    });
+  });
+
+  it('returns false for all patterns when a no-shard error is thrown', async () => {
+    const noShardError = new errors.ResponseError({
+      statusCode: 503,
+      body: {
+        error: {
+          type: 'search_phase_execution_exception',
+          root_cause: [{ type: 'no_shard_available_action_exception' }],
+        },
+      },
+      headers: {},
+      meta: {} as any,
+      warnings: null,
+    } as any);
+    mockEsClient.msearch.mockRejectedValue(noShardError);
+
+    const request = makeRequest({
+      dataStreams: 'logs-aws.vpcflow-*',
+      start: '2025-01-01T00:00:00Z',
+    });
+
+    await getHasDataHandler(context, request, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { results: { 'logs-aws.vpcflow-*': false } },
+    });
+  });
+
+  it('rethrows errors that are not no-shard errors', async () => {
+    mockEsClient.msearch.mockRejectedValue(new Error('boom'));
+
+    const request = makeRequest({
+      dataStreams: 'logs-aws.vpcflow-*',
+      start: '2025-01-01T00:00:00Z',
+    });
+
+    await expect(getHasDataHandler(context, request, response)).rejects.toThrow('boom');
+  });
+
+  it('builds the correct msearch body — one header+body pair per pattern', async () => {
+    mockEsClient.msearch.mockResolvedValue({
+      responses: [{ hits: { total: { value: 0 } } }],
+    } as any);
+
+    const request = makeRequest({
+      dataStreams: 'logs-aws.vpcflow-*',
+      start: '2025-01-01T00:00:00Z',
+    });
+
+    await getHasDataHandler(context, request, response);
+
+    const { searches } = jest.mocked(mockEsClient.msearch).mock.calls[0][0] as any;
+    expect(searches).toHaveLength(2); // 1 pattern × 2 items (header + body)
+    expect(searches[0]).toMatchObject({ index: 'logs-aws.vpcflow-*', ignore_unavailable: true });
+    expect(searches[1]).toMatchObject({ size: 0, terminate_after: 1 });
+    expect(searches[1].query.bool.filter).toEqual([
+      { range: { '@timestamp': { gte: '2025-01-01T00:00:00Z' } } },
+    ]);
+  });
+
+  it('trims whitespace around comma-separated patterns', async () => {
+    mockEsClient.msearch.mockResolvedValue({
+      responses: [{ hits: { total: { value: 1 } } }, { hits: { total: { value: 1 } } }],
+    } as any);
+
+    const request = makeRequest({
+      dataStreams: 'logs-aws.vpcflow-* , metrics-aws.ec2-*',
+      start: '2025-01-01T00:00:00Z',
+    });
+
+    await getHasDataHandler(context, request, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        results: {
+          'logs-aws.vpcflow-*': true,
+          'metrics-aws.ec2-*': true,
+        },
       },
     });
   });

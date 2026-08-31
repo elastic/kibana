@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-export const DETECTION_HAS_DATA_PATH = '/internal/ingest_hub/aws/detection/has_data';
-
-/** Validates that a pattern is a safe `logs-<dataset>-*` or `metrics-<dataset>-*` wildcard index pattern. */
-export const INDEX_PATTERN_REGEX = /^(logs|metrics)-[a-z0-9_.]+-\*$/;
-
-export interface HasDataRequest {
-  /** Comma-joined list of index patterns. */
-  dataStreams: string;
-  /** ISO8601 start timestamp for the `@timestamp` range filter. */
-  start: string;
-}
-
 export interface HasDataResponse {
   results: Record<string, boolean>;
 }

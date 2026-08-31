@@ -16,7 +16,7 @@ import { DATA_STREAM_API_ROUTES } from '../../constants';
 import { DeprecatedILMPolicyCheckResponseSchema } from '../../../common/types/rest_spec/data_stream';
 import { genericErrorResponse } from '../schema/errors';
 
-import { getListHandler, getDeprecatedILMCheckHandler } from './handlers';
+import { getListHandler, getDeprecatedILMCheckHandler, getHasDataHandler } from './handlers';
 
 export const ListDataStreamsResponseSchema = schema.object({
   data_streams: schema.arrayOf(
@@ -90,6 +90,54 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getListHandler
+    );
+
+  // Check if data streams have data
+  router.versioned
+    .get({
+      path: DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
+      },
+      summary: 'Check if data streams have data',
+      description:
+        'Check whether one or more data stream index patterns contain documents within a given time window.',
+      options: {
+        tags: ['oas-tag:Data streams'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {
+            query: schema.object({
+              dataStreams: schema.string(),
+              start: schema.string(),
+            }),
+          },
+          response: {
+            200: {
+              description: 'OK',
+              body: () =>
+                schema.object({
+                  results: schema.recordOf(schema.string(), schema.boolean()),
+                }),
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getHasDataHandler
     );
 
   // Check for deprecated ILM policies

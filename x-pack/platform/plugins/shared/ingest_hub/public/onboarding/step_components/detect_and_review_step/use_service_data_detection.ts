@@ -9,10 +9,10 @@ import { useRef, useMemo, useCallback } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DATA_STREAM_API_ROUTES, DATA_STREAM_INDEX_PATTERN_REGEX } from '@kbn/fleet-plugin/common';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { getServiceIndexPatterns } from '../../common/service_index_patterns';
-import { DETECTION_HAS_DATA_PATH, INDEX_PATTERN_REGEX } from '../../../../common/detection_api';
 import type { HasDataResponse } from '../../../../common/detection_api';
 
 const POLL_INTERVAL_MS = 10_000;
@@ -49,7 +49,7 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
       const entry = awsServicesMap?.get(id);
       if (entry) {
         for (const p of getServiceIndexPatterns(entry)) {
-          if (INDEX_PATTERN_REGEX.test(p) && !patterns.includes(p)) patterns.push(p);
+          if (DATA_STREAM_INDEX_PATTERN_REGEX.test(p) && !patterns.includes(p)) patterns.push(p);
         }
       }
     }
@@ -77,7 +77,7 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
   const { data: queryData } = useQuery<HasDataResponse>({
     queryKey: ['ingest_hub', 'has_data', allPatterns.join(','), startRef.current],
     queryFn: () =>
-      services.http.get<HasDataResponse>(DETECTION_HAS_DATA_PATH, {
+      services.http.get<HasDataResponse>(DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN, {
         query: { dataStreams: allPatterns.join(','), start: startRef.current },
       }),
     refetchInterval: shouldPoll ? POLL_INTERVAL_MS : false,
