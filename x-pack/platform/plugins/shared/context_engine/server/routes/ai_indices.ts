@@ -28,7 +28,6 @@ import {
   MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
   aiIndexByIdPath,
   aiIndexFeedbackAnalysisPath,
-  aiIndexKiSummaryPath,
   aiIndexKiByIdPath,
   aiIndexKiListPath,
   aiIndexPath,

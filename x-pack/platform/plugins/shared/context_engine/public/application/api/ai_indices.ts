@@ -12,7 +12,6 @@ import {
   AI_INDEX_INTERNAL_API_VERSION,
   aiIndexByIdPath,
   aiIndexFeedbackAnalysisPath,
-  aiIndexKiSummaryPath,
   aiIndexPath,
 } from '../../../common/constants';
 import type {

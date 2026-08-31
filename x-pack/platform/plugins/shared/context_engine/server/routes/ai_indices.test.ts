@@ -16,7 +16,6 @@ import {
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   aiIndexByIdPath,
   aiIndexFeedbackAnalysisPath,
-  aiIndexKiSummaryPath,
   aiIndexKiByIdPath,
   aiIndexKiListPath,
   aiIndexPath,
