@@ -96,8 +96,6 @@ export const setUnifiedAlertsAssigneesRoute = (
           allValidAssigneesToAdd.length > MAX_ASSIGNEES_PER_OPERATION ||
           allValidAssigneesToRemove.length > MAX_ASSIGNEES_PER_OPERATION;
 
-        // Only read when the prefetch succeeded: on failure `alertIds` / `attackIds` stay empty,
-        // which suppresses both emits rather than reporting request intent as observed fact.
         let alertAssigneesActuallyAdded = validAssigneesToAdd;
         let alertAssigneesActuallyRemoved = validAssigneesToRemove;
         let attackAssigneesActuallyAdded = validAssigneesToAdd;
