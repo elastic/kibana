@@ -9,7 +9,8 @@ fi
 
 ELASTICSEARCH_PATH="$1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Run both scripts with the provided path
-ts-node --transpileOnly "$SCRIPT_DIR/generate_esql_command_docs.ts" "$ELASTICSEARCH_PATH" && \
-ts-node --transpileOnly "$SCRIPT_DIR/generate_esql_docs.ts" "$ELASTICSEARCH_PATH"
+ts-node --project "$PKG_DIR/tsconfig.scripts.json" --transpileOnly "$SCRIPT_DIR/generate_esql_command_docs.ts" "$ELASTICSEARCH_PATH" && \
+ts-node --project "$PKG_DIR/tsconfig.scripts.json" --transpileOnly "$SCRIPT_DIR/generate_esql_docs.ts" "$ELASTICSEARCH_PATH"
