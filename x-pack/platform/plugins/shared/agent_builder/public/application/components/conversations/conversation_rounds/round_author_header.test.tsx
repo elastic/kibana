@@ -65,11 +65,11 @@ describe('RoundAuthorHeader', () => {
     expect(screen.getByText('via Slack')).toBeInTheDocument();
   });
 
-  it('uses the user profile display name and avatar when provided', () => {
+  it('uses the user profile display name without rendering the avatar', () => {
     render(<RoundAuthorHeader startedAt={startedAt} author={authorProfile} />);
 
     expect(screen.getByText('Alice Example')).toBeInTheDocument();
-    expect(screen.getByText('AE')).toBeInTheDocument();
+    expect(screen.queryByText('AE')).not.toBeInTheDocument();
   });
 
   it('resolves a Kibana author profile when only the round author is available', () => {
@@ -86,7 +86,7 @@ describe('RoundAuthorHeader', () => {
       enabled: true,
     });
     expect(screen.getByText('Alice Example')).toBeInTheDocument();
-    expect(screen.getByText('AE')).toBeInTheDocument();
+    expect(screen.queryByText('AE')).not.toBeInTheDocument();
   });
 
   it('does not render user attribution when no user name is available', () => {

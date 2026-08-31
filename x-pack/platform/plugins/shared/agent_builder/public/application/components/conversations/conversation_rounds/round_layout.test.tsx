@@ -18,6 +18,7 @@ import { RoundLayout } from './round_layout';
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
+import { RoundAuthorAvatar } from './round_author_avatar';
 import { RoundAuthorHeader } from './round_author_header';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useAgentId } from '../../../hooks/use_conversation';
@@ -36,6 +37,12 @@ jest.mock('./round_response/round_response', () => ({
 
 jest.mock('./round_events/round_events', () => ({
   RoundEvents: jest.fn(() => <div data-test-subj="agentBuilderThinkingPanel">Reasoning</div>),
+}));
+
+jest.mock('./round_author_avatar', () => ({
+  RoundAuthorAvatar: jest.fn(({ agent }) => (
+    <div data-test-subj="agentBuilderAssistantAvatar">{agent.name} avatar</div>
+  )),
 }));
 
 jest.mock('./round_author_header', () => ({
@@ -76,6 +83,7 @@ const useAgentBuilderAgentByIdMock = jest.mocked(useAgentBuilderAgentById);
 const roundInputMock = RoundInput as jest.MockedFunction<typeof RoundInput>;
 const roundEventsMock = RoundEvents as jest.MockedFunction<typeof RoundEvents>;
 const roundResponseMock = RoundResponse as jest.MockedFunction<typeof RoundResponse>;
+const roundAuthorAvatarMock = jest.mocked(RoundAuthorAvatar);
 const roundAuthorHeaderMock = jest.mocked(RoundAuthorHeader);
 const agent: AgentDefinition = {
   id: 'agent-1',
@@ -280,6 +288,75 @@ describe('RoundLayout', () => {
       Node.DOCUMENT_POSITION_FOLLOWING
     );
     expect(attribution.compareDocumentPosition(response)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('renders the agent avatar beside the agent output content', () => {
+    const round = {
+      ...createRound(1),
+      steps: [createReasoningStep({ reasoning: 'Checking indices' })],
+    };
+
+    render(
+      <RoundLayout
+        allRounds={[round]}
+        conversationId="conversation-1"
+        isCurrentRound={false}
+        rawRound={round}
+        roundIndex={0}
+        scrollContainerHeight={100}
+      />
+    );
+
+    const layout = screen.getByTestId('agentBuilderRoundAgentLayout');
+    const avatar = screen.getByTestId('agentBuilderRoundAgentAvatar');
+    const content = screen.getByTestId('agentBuilderRoundAgentContent');
+
+    expect(roundAuthorAvatarMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agent,
+      }),
+      expect.anything()
+    );
+    expect(content).toContainElement(screen.getByTestId('agentBuilderAssistantAttribution'));
+    expect(content).toContainElement(screen.getByTestId('agentBuilderThinkingPanel'));
+    expect(content).toContainElement(screen.getByTestId('agentBuilderRoundResponse'));
+    expect(layout.firstElementChild).toBe(avatar);
+    expect(avatar.nextElementSibling).toBe(content);
+  });
+
+  it('reserves the agent avatar column while the agent is loading', () => {
+    useAgentBuilderAgentByIdMock.mockReturnValue({
+      agent: null,
+      isLoading: true,
+      error: null,
+    } as ReturnType<typeof useAgentBuilderAgentById>);
+
+    const round = {
+      ...createRound(1),
+      steps: [createReasoningStep({ reasoning: 'Checking indices' })],
+    };
+
+    render(
+      <RoundLayout
+        allRounds={[round]}
+        conversationId="conversation-1"
+        isCurrentRound={false}
+        rawRound={round}
+        roundIndex={0}
+        scrollContainerHeight={100}
+      />
+    );
+
+    const layout = screen.getByTestId('agentBuilderRoundAgentLayout');
+    const avatar = screen.getByTestId('agentBuilderRoundAgentAvatar');
+    const content = screen.getByTestId('agentBuilderRoundAgentContent');
+
+    expect(roundAuthorAvatarMock).not.toHaveBeenCalled();
+    expect(avatar).toBeEmptyDOMElement();
+    expect(content).toContainElement(screen.getByTestId('agentBuilderThinkingPanel'));
+    expect(content).toContainElement(screen.getByTestId('agentBuilderRoundResponse'));
+    expect(layout.firstElementChild).toBe(avatar);
+    expect(avatar.nextElementSibling).toBe(content);
   });
 
   it('passes pending round context to the input renderer', () => {

@@ -28,6 +28,7 @@ import { useCurrentUser } from '../../../hooks/use_current_user';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { CommandBadgeText } from './command_badge_text';
+import { RoundAuthorAvatar } from './round_author_avatar';
 import { RoundAuthorHeader } from './round_author_header';
 import { getInputAuthor, isCurrentUserAuthor, type RoundAuthor } from './round_author';
 
@@ -73,31 +74,30 @@ export const RoundInput = ({
     ${euiTextBreakWord()}
     white-space: pre-wrap;
     border-radius: 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
-    padding: ${euiTheme.size.m} ${euiTheme.size.base} ${euiTheme.size.m} ${euiTheme.size.xl};
+    padding: ${euiTheme.size.m} ${euiTheme.size.base};
   `;
 
   const inputContentStyles = css`
     inline-size: 100%;
   `;
 
-  const stackItemSpacingStyles = css`
-    margin-block-start: ${euiTheme.size.xxs};
-  `;
-
-  const actionContentStyles = css`
-    inline-size: 100%;
-    margin-block-start: ${euiTheme.size.xxs};
-  `;
-
   return (
     <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
+      gutterSize="s"
       alignItems="flexStart"
+      responsive={false}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      data-test-subj="agentBuilderRoundInputLayout"
     >
-      <EuiFlexItem grow={false} css={inputContentStyles}>
+      <EuiFlexItem grow={false} data-test-subj="agentBuilderRoundInputAvatar">
+        <RoundAuthorAvatar author={inputAuthor} origin={origin} />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={inputContentStyles}
+        data-test-subj="agentBuilderRoundInputContent"
+      >
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <RoundAuthorHeader author={inputAuthor} origin={origin} startedAt={startedAt} />
@@ -118,26 +118,26 @@ export const RoundInput = ({
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
+          {hasAttachmentReferences && (
+            <EuiFlexItem grow={false}>
+              <RoundAttachmentReferences
+                attachmentRefs={attachmentRefs}
+                conversationAttachments={conversationAttachments}
+                fallbackAttachments={fallbackAttachments}
+                actorFilter={[ATTACHMENT_REF_ACTOR.user]}
+                justifyContent="flexStart"
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <RoundResponseActions
+              content={input}
+              isVisible={isHovering}
+              copyTarget="prompt"
+              actionStackGutterSize="none"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      {hasAttachmentReferences && (
-        <EuiFlexItem grow={false} css={stackItemSpacingStyles}>
-          <RoundAttachmentReferences
-            attachmentRefs={attachmentRefs}
-            conversationAttachments={conversationAttachments}
-            fallbackAttachments={fallbackAttachments}
-            actorFilter={[ATTACHMENT_REF_ACTOR.user]}
-            justifyContent="flexStart"
-          />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false} css={actionContentStyles}>
-        <RoundResponseActions
-          content={input}
-          isVisible={isHovering}
-          copyTarget="prompt"
-          actionStackGutterSize="none"
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +21,7 @@ import { AgentPromptType, type PromptResponse } from '@kbn/agent-builder-common/
 import { RoundInput } from './round_input';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
+import { RoundAuthorAvatar } from './round_author_avatar';
 import { RoundAuthorHeader } from './round_author_header';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
@@ -103,6 +104,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   allRounds,
   roundIndex,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
   const [promptResponses, setPromptResponses] = useState<Record<string, PromptResponse>>({});
@@ -198,33 +200,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
   `;
 
-  return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      aria-label={labels.container}
-      css={roundContainerStyles}
-    >
-      {/* Input Message */}
-      <EuiFlexItem grow={false}>
-        <RoundInput
-          input={input.message}
-          author={author}
-          isPendingCurrentRound={isPendingCurrentRound({ isCurrentRound, roundId: rawRound.id })}
-          origin={origin}
-          startedAt={startedAt}
-          attachmentRefs={input.attachment_refs}
-          conversationAttachments={conversationAttachments}
-          fallbackAttachments={input.attachments}
-        />
-      </EuiFlexItem>
+  const avatarColumnStyles = css`
+    min-inline-size: ${euiTheme.size.l};
+  `;
 
-      {agent && (
-        <EuiFlexItem grow={false}>
-          <RoundAuthorHeader startedAt={startedAt} agent={agent} />
-        </EuiFlexItem>
-      )}
-
+  const agentOutputContent = (
+    <>
       {/* Steps container — always rendered above the error block so steps
           stay anchored where the user last saw them. */}
       {steps.length > 0 && (
@@ -308,19 +289,17 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       {/* Response */}
       {!isAwaitingPrompt && (
         <EuiFlexItem grow={false}>
-          <EuiFlexItem>
-            <RoundResponse
-              hasError={isErrorCurrentRound}
-              response={response}
-              steps={steps}
-              isLoading={isLoadingCurrentRound}
-              isLastRound={isCurrentRound}
-              conversationAttachments={conversationAttachments}
-              attachmentRefs={attachmentRefs}
-              conversationId={conversationId}
-              rawRound={rawRound}
-            />
-          </EuiFlexItem>
+          <RoundResponse
+            hasError={isErrorCurrentRound}
+            response={response}
+            steps={steps}
+            isLoading={isLoadingCurrentRound}
+            isLastRound={isCurrentRound}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={attachmentRefs}
+            conversationId={conversationId}
+            rawRound={rawRound}
+          />
           <RoundAttachmentReferences
             attachmentRefs={input.attachment_refs}
             conversationAttachments={conversationAttachments}
@@ -328,6 +307,56 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           />
         </EuiFlexItem>
       )}
+    </>
+  );
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      aria-label={labels.container}
+      css={roundContainerStyles}
+    >
+      {/* Input Message */}
+      <EuiFlexItem grow={false}>
+        <RoundInput
+          input={input.message}
+          author={author}
+          isPendingCurrentRound={isPendingCurrentRound({ isCurrentRound, roundId: rawRound.id })}
+          origin={origin}
+          startedAt={startedAt}
+          attachmentRefs={input.attachment_refs}
+          conversationAttachments={conversationAttachments}
+          fallbackAttachments={input.attachments}
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="flexStart"
+          responsive={false}
+          data-test-subj="agentBuilderRoundAgentLayout"
+        >
+          <EuiFlexItem
+            grow={false}
+            css={avatarColumnStyles}
+            data-test-subj="agentBuilderRoundAgentAvatar"
+          >
+            {agent && <RoundAuthorAvatar agent={agent} />}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} data-test-subj="agentBuilderRoundAgentContent">
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {agent && (
+                <EuiFlexItem grow={false}>
+                  <RoundAuthorHeader startedAt={startedAt} agent={agent} />
+                </EuiFlexItem>
+              )}
+              {agentOutputContent}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
       {/* Add spacing after the final round so that text is not cut off by the scroll mask */}
       {isCurrentRound && <EuiSpacer size="l" />}
