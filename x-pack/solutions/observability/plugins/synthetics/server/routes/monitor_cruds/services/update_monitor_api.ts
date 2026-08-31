@@ -122,11 +122,9 @@ export class UpdateMonitorAPI {
     decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
     patchById: Map<string, Partial<EncryptedSyntheticsMonitor>>
   ): Promise<MaintenanceWindow[] | undefined> {
+    // Do not skip non-`ui` monitors: an enabled-only patch lets them through
+    // to normalizeMonitor, which resolves MW refs the same as single-edit.
     const hasMaintenanceWindowRefs = decryptedMonitors.some((monitor) => {
-      if (monitor.attributes[ConfigKey.MONITOR_SOURCE_TYPE] !== 'ui') {
-        return false;
-      }
-
       const patch = patchById.get(monitor.id);
       const refs =
         patch?.[ConfigKey.MAINTENANCE_WINDOWS] ?? monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS];
