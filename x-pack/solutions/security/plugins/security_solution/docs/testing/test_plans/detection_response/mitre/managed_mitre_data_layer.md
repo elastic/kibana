@@ -309,6 +309,7 @@ And the response body should describe a validation error for the <parameter> par
 | `framework`         | value is not "enterprise"                                     |
 | `types`             | contains a value not in tactic / technique / subtechnique     |
 | `types`             | array contains more than 3 elements                           |
+| `framework_version` | string longer than 32 characters                              |
 | `status`            | value is not "active" or "all"                                |
 
 ### Server-side data client
