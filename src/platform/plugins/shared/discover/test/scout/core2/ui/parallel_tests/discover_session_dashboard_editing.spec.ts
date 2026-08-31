@@ -115,4 +115,30 @@ spaceTest.describe('Discover session dashboard editing', { tag: '@local-stateful
       await expect(page.testSubj.locator('discoverSaveButton')).toHaveText('Save');
     }
   );
+
+  spaceTest(
+    'opens a normal Discover session when saving a by-value edit as new',
+    async ({ page, pageObjects, scoutSpace }) => {
+      const { dashboard, discover, unifiedTabs } = pageObjects;
+      const savedAsTitle = `Saved by-value Discover session ${scoutSpace.id}`;
+
+      await dashboard.openNewDashboard();
+      await dashboard.addSavedSearch(testData.SAVED_SEARCH_TITLE);
+      await dashboard.waitForRenderComplete();
+
+      await dashboard.unlinkFromLibrary(testData.SAVED_SEARCH_TITLE);
+      await dashboard.clickPanelAction(
+        'embeddablePanelAction-editPanel',
+        testData.SAVED_SEARCH_TITLE
+      );
+      await discover.waitUntilTabIsLoaded();
+      await expect(page.testSubj.locator('unifiedTabs_tabsBar')).toBeHidden();
+
+      await discover.saveEditorSessionAsNew(savedAsTitle);
+
+      expect(await discover.getCurrentQueryName()).toBe(savedAsTitle);
+      await expect(unifiedTabs.getTabs()).toHaveCount(1);
+      await expect(page.testSubj.locator('discoverSaveButton')).toHaveText('Save');
+    }
+  );
 });
