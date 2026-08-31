@@ -90,7 +90,9 @@ spaceTest.describe('Discover session panel interactions', { tag: tags.deployment
 
       await dataGrid.changeRowsPerPageTo(CUSTOM_ROWS_PER_PAGE);
       await expect.poll(() => dataGrid.getCurrentRowsPerPage()).toBe(CUSTOM_ROWS_PER_PAGE);
+      await expect(dashboard.unsavedChangesIndicator).toBeVisible();
       await dashboard.saveChangesToExistingDashboard();
+      await expect(dashboard.unsavedChangesIndicator).toBeHidden();
 
       await page.reload();
       await dashboard.waitForRenderComplete();
