@@ -75,7 +75,7 @@ describe('Notifications Plugin', () => {
       const { plugin, coreSetup, pluginSetup } = createNotificationsPlugin(validConnectorConfig);
       plugin.setup(coreSetup, pluginSetup);
       expect(emailServiceProviderMock.mock.instances[0].setup).toHaveBeenCalledTimes(1);
-      expect(emailServiceProviderMock.mock.instances[0].setup).toBeCalledWith(pluginSetup);
+      expect(emailServiceProviderMock.mock.instances[0].setup).toHaveBeenCalledWith(pluginSetup);
     });
   });
 
@@ -84,7 +84,7 @@ describe('Notifications Plugin', () => {
       const { plugin, coreStart, pluginStart } = createNotificationsPlugin(validConnectorConfig);
       plugin.start(coreStart, pluginStart);
       expect(emailServiceProviderMock.mock.instances[0].start).toHaveBeenCalledTimes(1);
-      expect(emailServiceProviderMock.mock.instances[0].start).toBeCalledWith(pluginStart);
+      expect(emailServiceProviderMock.mock.instances[0].start).toHaveBeenCalledWith(pluginStart);
     });
 
     it('should return EmailServiceProvider.start() contract as part of its contract', () => {
@@ -100,7 +100,7 @@ describe('Notifications Plugin', () => {
       providerMock.start.mockReturnValue(emailStart);
       const start = plugin.start(coreStart, pluginStart);
       expect(emailServiceProviderMock.mock.instances[0].start).toHaveBeenCalledTimes(1);
-      expect(emailServiceProviderMock.mock.instances[0].start).toBeCalledWith(pluginStart);
+      expect(emailServiceProviderMock.mock.instances[0].start).toHaveBeenCalledWith(pluginStart);
       expect(start).toEqual(expect.objectContaining(emailStart));
     });
   });

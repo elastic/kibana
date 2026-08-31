@@ -2057,15 +2057,72 @@ paths:
           name: agent_id
           required: false
           schema:
+            maxLength: 64
             type: string
+        - description: Page number, 1-based.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: Number of results per page. Maximum 1000.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 1000
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Sort direction for results, ordered by updated_at.
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: Filter to pinned (true) or unpinned (false) conversations. Omit to return all.
+          in: query
+          name: pinned
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
             application/json:
               examples:
-                listConversationsResponseExample:
-                  description: Example response containing the list of conversations with all agents
+                listConversationsPinnedExample:
+                  description: Example response filtered to pinned conversations only
                   value:
+                    pagination:
+                      page: 1
+                      per_page: 1000
+                      total: 3
+                    results:
+                      - agent_id: elastic-ai-agent
+                        created_at: '2025-08-01T10:00:00.000Z'
+                        id: a1b2c3d4-1234-5678-abcd-000000000001
+                        permissions:
+                          delete: true
+                          rename: true
+                        pinned: true
+                        title: Important reference conversation
+                        updated_at: '2025-09-20T08:30:00.000Z'
+                        user:
+                          username: elastic
+                listConversationsResponseExample:
+                  description: Example response returning the first page of conversations for all agents
+                  value:
+                    pagination:
+                      page: 1
+                      per_page: 1000
+                      total: 128
                     results:
                       - agent_id: elastic-ai-agent
                         created_at: '2025-09-19T17:45:39.554Z'
@@ -2085,11 +2142,19 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/agent_builder/conversations" \
-              -H "Authorization: ApiKey ${API_KEY}"
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations?page=1&sort_order=desc" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "elastic-api-version: 2023-10-31"
+        - label: Filter to pinned conversations
+          lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations?pinned=true" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "elastic-api-version: 2023-10-31"
         - lang: Console
           source: |
-            GET kbn://api/agent_builder/conversations
+            GET kbn://api/agent_builder/conversations?page=1&sort_order=desc
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -2174,7 +2239,7 @@ paths:
                     - access_mode
                 agent_id:
                   description: The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.
-                  maxLength: 256
+                  maxLength: 64
                   type: string
                 conversation_id:
                   description: Optional client-supplied UUID for the conversation. Server-generated if omitted.
@@ -107298,15 +107363,6 @@ components:
                                   - normal
                                 type: string
                             description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
-                          documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -107323,17 +107379,6 @@ components:
                                   - auto
                                 type: string
                             description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
-                          json_mode_settings:
-                            additionalProperties: false
-                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
-                            type: object
-                            properties:
-                              hide_nulls:
-                                description: When true, fields with null values are hidden while in JSON mode.
-                                type: boolean
-                              wrap_lines:
-                                description: When false, long values are truncated to a single line instead of wrapping while in JSON mode.
-                                type: boolean
                           query:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
                           row_height:
@@ -107427,15 +107472,6 @@ components:
                                   - normal
                                 type: string
                             description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
-                          documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -107445,17 +107481,6 @@ components:
                                   - auto
                                 type: string
                             description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
-                          json_mode_settings:
-                            additionalProperties: false
-                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
-                            type: object
-                            properties:
-                              hide_nulls:
-                                description: When true, fields with null values are hidden while in JSON mode.
-                                type: boolean
-                              wrap_lines:
-                                description: When false, long values are truncated to a single line instead of wrapping while in JSON mode.
-                                type: boolean
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -107596,15 +107621,6 @@ components:
                             - normal
                           type: string
                       description: 'Data grid row spacing: `compact`, `expanded`, or `normal`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
-                    documents_display_mode:
-                      anyOf:
-                        - enum:
-                            - table
-                          type: string
-                        - enum:
-                            - json
-                          type: string
-                      description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                     header_row_height:
                       anyOf:
                         - maximum: 5
@@ -107614,17 +107630,6 @@ components:
                             - auto
                           type: string
                       description: 'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
-                    json_mode_settings:
-                      additionalProperties: false
-                      description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
-                      type: object
-                      properties:
-                        hide_nulls:
-                          description: When true, fields with null values are hidden while in JSON mode.
-                          type: boolean
-                        wrap_lines:
-                          description: When false, long values are truncated to a single line instead of wrapping while in JSON mode.
-                          type: boolean
                     row_height:
                       anyOf:
                         - maximum: 20
