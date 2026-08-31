@@ -24,7 +24,6 @@ spaceTest.describe(
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.cleanStandardList();
       await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(DEFAULT_DATA_VIEW);
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
