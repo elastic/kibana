@@ -47,6 +47,8 @@ Tenant ID
 
 You can test connectors while creating or editing them in {{kib}}. The test verifies connectivity by listing the authenticated user's joined teams when using delegated auth, or all teams in the tenant when using app-only auth.
 
+## Connector actions [microsoft-teams-connector-actions]
+
 The Microsoft Teams connector has the following actions:
 
 **List joined teams**
