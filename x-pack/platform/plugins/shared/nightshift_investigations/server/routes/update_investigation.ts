@@ -10,13 +10,14 @@ import {
   MAX_BLIND_SPOTS,
   MAX_HYPOTHESES,
   MAX_RECOMMENDATIONS,
-  MAX_SIGNIFICANT_EVENT_UPDATES,
+  MAX_TRIGGER_FEEDBACK,
   MAX_TEXT_LENGTH,
   investigationBlindSpotSchema,
   investigationHypothesisSchema,
   investigationImpactSchema,
   investigationRecommendationSchema,
-  significantEventUpdateSchema,
+  severitySchema,
+  triggerFeedbackSchema,
 } from '@kbn/significant-events-schema';
 import { UPDATABLE_INVESTIGATION_STATUSES } from '../../common';
 import { MAX_KEYWORD_LENGTH } from '../../common';
@@ -31,12 +32,11 @@ const updateInvestigationBodySchema = z.object({
   error: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   summary: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   conclusion: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
+  severity: orAbsent(severitySchema),
   hypotheses: orAbsent(z.array(investigationHypothesisSchema).max(MAX_HYPOTHESES)),
   recommendations: orAbsent(z.array(investigationRecommendationSchema).max(MAX_RECOMMENDATIONS)),
   blind_spots: orAbsent(z.array(investigationBlindSpotSchema).max(MAX_BLIND_SPOTS)),
-  significant_event_updates: orAbsent(
-    z.array(significantEventUpdateSchema).max(MAX_SIGNIFICANT_EVENT_UPDATES)
-  ),
+  trigger_feedback: orAbsent(z.array(triggerFeedbackSchema).max(MAX_TRIGGER_FEEDBACK)),
   conversation_id: orAbsent(z.string().max(MAX_KEYWORD_LENGTH)),
   impact: orAbsent(investigationImpactSchema),
 });

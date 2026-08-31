@@ -83,6 +83,20 @@ describe('investigation lifecycle contracts', () => {
     });
   });
 
+  it('persists completed structured output including severity and trigger_feedback', () => {
+    const persistCompleted = requireStep('persist_investigation_completed');
+    expect(persistCompleted.with?.body).toEqual(
+      expect.objectContaining({
+        status: 'completed',
+        severity: '${{ steps.investigate.output.structured_output.severity }}',
+        trigger_feedback: '${{ steps.investigate.output.structured_output.trigger_feedback }}',
+      })
+    );
+    expect(investigation.steps.some((step) => step.name === 'attach_to_significant_event')).toBe(
+      false
+    );
+  });
+
   it('space-scopes the path of every kibana.request step', () => {
     // Only generated `kibana.*` connector steps get a space prefix from the engine; a raw
     // `kibana.request` is sent verbatim, so an unprefixed path writes to the default space and

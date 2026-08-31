@@ -12,8 +12,9 @@ import {
   MAX_HYPOTHESES,
   MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
-  MAX_SIGNIFICANT_EVENT_UPDATES,
+  MAX_TRIGGER_FEEDBACK,
   MAX_TEXT_LENGTH,
+  SEVERITY_OPTIONS,
 } from '@kbn/significant-events-schema';
 import {
   INVESTIGATION_STATUSES,
@@ -71,6 +72,16 @@ const investigationAttributesSchemaV1 = schema.object({
   error: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
   summary: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
   conclusion: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
+  severity: schema.maybe(
+    schema.string({
+      maxLength: MAX_KEYWORD_LENGTH,
+      validate: (value) => {
+        if (!SEVERITY_OPTIONS.some((option) => option === value)) {
+          return `must be one of: ${SEVERITY_OPTIONS.join(', ')}`;
+        }
+      },
+    })
+  ),
   hypotheses: schema.maybe(
     schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: MAX_HYPOTHESES })
   ),
@@ -80,9 +91,9 @@ const investigationAttributesSchemaV1 = schema.object({
   blind_spots: schema.maybe(
     schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: MAX_BLIND_SPOTS })
   ),
-  significant_event_updates: schema.maybe(
+  trigger_feedback: schema.maybe(
     schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
-      maxSize: MAX_SIGNIFICANT_EVENT_UPDATES,
+      maxSize: MAX_TRIGGER_FEEDBACK,
     })
   ),
   conversation_id: schema.maybe(schema.string({ maxLength: MAX_KEYWORD_LENGTH })),
