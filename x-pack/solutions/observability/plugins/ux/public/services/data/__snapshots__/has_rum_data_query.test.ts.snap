@@ -1,6 +1,62 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`hasRumDataQuery builds a tier restricted query 1`] = `
+exports[`hasRumDataQuery existence check (default) builds a tier restricted existence query 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "transaction.type": "page-load",
+          },
+        },
+        Object {
+          "term": Object {
+            "processor.event": "transaction",
+          },
+        },
+        Object {
+          "terms": Object {
+            "_tier": Array [
+              "data_hot",
+              "data_warm",
+            ],
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+  "terminate_after": 1,
+  "track_total_hits": 1,
+}
+`;
+
+exports[`hasRumDataQuery existence check (default) builds an unrestricted existence query 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "transaction.type": "page-load",
+          },
+        },
+        Object {
+          "term": Object {
+            "processor.event": "transaction",
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
+  "terminate_after": 1,
+  "track_total_hits": 1,
+}
+`;
+
+exports[`hasRumDataQuery withServiceName builds a tier restricted query with a services aggregation 1`] = `
 Object {
   "aggs": Object {
     "services": Object {
@@ -51,7 +107,7 @@ Object {
 }
 `;
 
-exports[`hasRumDataQuery builds an unrestricted query 1`] = `
+exports[`hasRumDataQuery withServiceName builds an unrestricted query with a services aggregation 1`] = `
 Object {
   "aggs": Object {
     "services": Object {

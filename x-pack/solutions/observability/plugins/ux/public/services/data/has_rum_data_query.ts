@@ -18,15 +18,19 @@ import { rangeQuery } from './range_query';
 
 export const HAS_RUM_DATA_TIERS: DataTier[] = ['data_hot', 'data_warm'];
 
+interface HasRumAggregations {
+  services?: { mostTraffic?: { buckets?: Array<{ key?: string | number }> } };
+}
+
 export function formatHasRumResult<T>(
   esResult: ESSearchResponse<T, ReturnType<typeof hasRumDataQuery>, { restTotalHitsAsInt: false }>,
   indices?: string
 ) {
-  if (!esResult) return esResult;
+  const aggregations = (esResult.aggregations ?? {}) as HasRumAggregations;
   return {
     indices,
     hasData: esResult.hits.total.value > 0,
-    serviceName: esResult.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
+    serviceName: aggregations.services?.mostTraffic?.buckets?.[0]?.key,
   };
 }
 
@@ -34,12 +38,14 @@ export function hasRumDataQuery({
   start = moment().subtract(24, 'h').valueOf(),
   end = moment().valueOf(),
   dataTiers,
+  withServiceName = false,
 }: {
   start?: number;
   end?: number;
   dataTiers?: DataTier[];
+  withServiceName?: boolean;
 }) {
-  return {
+  const query = {
     size: 0,
     query: {
       bool: {
@@ -50,6 +56,18 @@ export function hasRumDataQuery({
         ],
       },
     },
+  };
+
+  if (!withServiceName) {
+    return {
+      ...query,
+      terminate_after: 1,
+      track_total_hits: 1,
+    };
+  }
+
+  return {
+    ...query,
     aggs: {
       services: {
         filter: rangeQuery(start, end)[0],

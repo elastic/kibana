@@ -105,6 +105,7 @@ export async function hasRumData(
             start: params?.absoluteTime?.start,
             end: params?.absoluteTime?.end,
             dataTiers,
+            withServiceName: true,
           }),
         },
       }),

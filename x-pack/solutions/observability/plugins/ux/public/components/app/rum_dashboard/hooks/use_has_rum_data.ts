@@ -22,7 +22,11 @@ export function useHasRumData() {
 
   const { dataViewTitle } = useDataView();
 
-  const { data: tiered, loading } = useEsSearch(
+  const {
+    data: tiered,
+    loading,
+    error: tieredError,
+  } = useEsSearch(
     {
       index: dataViewTitle,
       ...hasRumDataQuery({ dataTiers: HAS_RUM_DATA_TIERS }),
@@ -33,6 +37,8 @@ export function useHasRumData() {
     }
   );
 
+  const tieredHasData = tiered !== undefined && tiered.hits.total.value > 0;
+  const tieredFailed = !loading && tieredError !== undefined;
   const tieredIsEmpty = !loading && tiered !== undefined && tiered.hits.total.value === 0;
 
   // Latch the decision for as long as we are looking at the same data view. `tieredIsEmpty` drops
@@ -40,11 +46,18 @@ export function useHasRumData() {
   // `index`, so without the latch a re-issue disables the fallback mid-flight and the stale empty
   // tiered result briefly becomes the answer — which renders the onboarding screen at a user who
   // does have data.
+  //
+  // Clear when the data view changes or hot/warm later has hits, otherwise navigating away from an
+  // empty view and back re-enables the fallback before the cheap pass answers. A failed cheap pass
+  // is treated like empty so the unrestricted query still runs.
   const latchedFor = useRef<string | undefined>(undefined);
-  if (tieredIsEmpty) {
+  if (latchedFor.current !== undefined && (latchedFor.current !== dataViewTitle || tieredHasData)) {
+    latchedFor.current = undefined;
+  }
+  if (tieredIsEmpty || tieredFailed) {
     latchedFor.current = dataViewTitle;
   }
-  const needsFallback = tieredIsEmpty || latchedFor.current === dataViewTitle;
+  const needsFallback = tieredIsEmpty || tieredFailed || latchedFor.current === dataViewTitle;
 
   const { data: fallback, error: fallbackError } = useEsSearch(
     {
@@ -57,9 +70,6 @@ export function useHasRumData() {
     }
   );
 
-  // A latched fallback must not mask a later tier restricted hit, e.g. a deployment that starts
-  // ingesting again while the page is open.
-  const tieredHasData = tiered !== undefined && tiered.hits.total.value > 0;
   const response = tieredHasData || !needsFallback ? tiered : fallback;
 
   const fallbackHasResult = fallback !== undefined || fallbackError !== undefined;

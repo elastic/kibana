@@ -42,7 +42,13 @@ const hits = (value: number) => ({
 let responses: Record<string, EsSearchResult>;
 let calls: Array<{
   name: string;
-  params: { index?: string; query: { bool: { filter: unknown[] } } };
+  params: {
+    index?: string;
+    query: { bool: { filter: unknown[] } };
+    aggs?: unknown;
+    terminate_after?: number;
+    track_total_hits?: number;
+  };
 }>;
 
 const callFor = (name: string) => calls.filter((call) => call.name === name).pop();
@@ -76,7 +82,10 @@ describe('useHasRumData', () => {
 
     expect(result.current.hasData).toBe(true);
     expect(result.current.loading).toBe(false);
-    expect(callFor(TIERED)?.params.query.bool.filter).toContainEqual(TIER_CLAUSE);
+    const tieredParams = callFor(TIERED)?.params;
+    expect(tieredParams?.query.bool.filter).toContainEqual(TIER_CLAUSE);
+    expect(tieredParams).not.toHaveProperty('aggs');
+    expect(tieredParams?.terminate_after).toBe(1);
     // No second request: `useEsSearch` skips it while `index` is undefined.
     expect(callFor(UNBOUNDED)?.params.index).toBeUndefined();
     expect(window.localStorage.getItem('uxAppHasDataBoolean')).toBe('true');
@@ -91,6 +100,8 @@ describe('useHasRumData', () => {
     const fallback = callFor(UNBOUNDED);
     expect(fallback?.params.index).toBe(DATA_VIEW_TITLE);
     expect(fallback?.params.query.bool.filter).not.toContainEqual(TIER_CLAUSE);
+    expect(fallback?.params).not.toHaveProperty('aggs');
+    expect(fallback?.params.terminate_after).toBe(1);
     expect(result.current.hasData).toBe(true);
     expect(window.localStorage.getItem('uxAppHasDataBoolean')).toBe('true');
   });
@@ -210,5 +221,51 @@ describe('useHasRumData', () => {
 
     expect(calls.every(({ params }) => !params.index)).toBe(true);
     expect(result.current.loading).toBe(false);
+  });
+
+  it('falls back when the tier restricted query errors, instead of keeping a stale cache with no retry', () => {
+    window.localStorage.setItem('uxAppHasDataBoolean', 'false');
+    responses[TIERED] = { data: undefined, loading: false, error: new Error('boom') };
+    responses[UNBOUNDED] = { data: hits(1), loading: false };
+
+    const { result } = renderHook(() => useHasRumData());
+
+    expect(callFor(UNBOUNDED)?.params.index).toBe(DATA_VIEW_TITLE);
+    expect(result.current.hasData).toBe(true);
+    expect(window.localStorage.getItem('uxAppHasDataBoolean')).toBe('true');
+  });
+
+  it('clears the fallback latch when the tier restricted query later finds data', () => {
+    responses[TIERED] = { data: hits(0), loading: false };
+    responses[UNBOUNDED] = { data: hits(1), loading: false };
+
+    const { result, rerender } = renderHook(() => useHasRumData());
+    expect(callFor(UNBOUNDED)?.params.index).toBe(DATA_VIEW_TITLE);
+
+    responses[TIERED] = { data: hits(3), loading: false };
+    rerender();
+
+    expect(callFor(UNBOUNDED)?.params.index).toBeUndefined();
+    expect(result.current.hasData).toBe(true);
+  });
+
+  it('does not re-enable the fallback before the cheap pass answers after changing data view', () => {
+    responses[TIERED] = { data: hits(0), loading: false };
+    responses[UNBOUNDED] = { data: hits(1), loading: false };
+
+    const { rerender } = renderHook(() => useHasRumData());
+    expect(callFor(UNBOUNDED)?.params.index).toBe(DATA_VIEW_TITLE);
+
+    useDataViewMock.mockReturnValue({ dataViewTitle: 'traces-*' });
+    responses[TIERED] = { data: undefined, loading: true };
+    responses[UNBOUNDED] = { data: undefined, loading: false };
+    rerender();
+
+    expect(callFor(UNBOUNDED)?.params.index).toBeUndefined();
+
+    responses[TIERED] = { data: hits(4), loading: false };
+    rerender();
+
+    expect(callFor(UNBOUNDED)?.params.index).toBeUndefined();
   });
 });
