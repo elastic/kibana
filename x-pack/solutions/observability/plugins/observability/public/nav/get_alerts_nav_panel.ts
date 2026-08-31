@@ -18,9 +18,9 @@ const ALERTS_ICON = 'warning';
  * Returns the solution-nav Alerts entry for Observability.
  *
  * When `alerting:v2:enabled` is false, returns a plain Alerts link.
- * When true, returns a panel opener whose flyout contains the Alerts
- * page, Notifications and Suppressions (Action Policies, Maintenance
- * Windows), and Operations (Execution History).
+ * When true, returns a panel opener whose flyout contains Inbox
+ * (alerting v2 episodes), Alerts V1 (classic alerts), Notifications
+ * and Suppressions, and Operations.
  *
  * Spread into a navigation tree `body`:
  *
@@ -44,9 +44,15 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
           breadcrumbStatus: 'hidden' as const,
           children: [
             {
+              link: 'management:episodes' as const,
+              title: i18n.translate('xpack.observability.nav.inbox', {
+                defaultMessage: 'Inbox',
+              }),
+            },
+            {
               link: ALERTS_LINK,
-              title: i18n.translate('xpack.observability.nav.alerts', {
-                defaultMessage: 'Alerts',
+              title: i18n.translate('xpack.observability.nav.alertsV1', {
+                defaultMessage: 'Alerts V1',
               }),
             },
           ],

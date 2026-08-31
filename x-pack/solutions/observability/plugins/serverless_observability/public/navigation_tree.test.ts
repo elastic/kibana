@@ -184,8 +184,12 @@ describe('Navigation Tree', () => {
             breadcrumbStatus: 'hidden',
             children: [
               expect.objectContaining({
+                link: 'management:episodes',
+                title: 'Inbox',
+              }),
+              expect.objectContaining({
                 link: 'observability-overview:alerts',
-                title: 'Alerts',
+                title: 'Alerts V1',
               }),
             ],
           },
