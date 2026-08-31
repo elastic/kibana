@@ -269,10 +269,11 @@ For pre-fix CI lag, make the reason verifiable by naming the commit — e.g. "th
 
 When in doubt, leave the issue open.
 
-## Attribution
+## Relevant history
 
-- Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
-- Never speculate or use attribution as a fallback for weak evidence.
+- Mention a PR or commit (or a small set, last 3 months) only when it materially explains how the flake became possible or observable.
+- State each change's precise causal role — e.g. introduced the faulty behavior, exposed a pre-existing issue, or supplied a prerequisite change. Never infer causation merely because a PR added the test or last touched the file.
+- Never name or `@`-mention an author, and omit the history entirely when the causal link is ambiguous.
 
 ## Comment format
 
@@ -396,7 +397,7 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
 - Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
-- Find the PR that most likely introduced the flakiness and name it here with an inline link and its merge date in a readable format (e.g. [#262449](https://github.com/elastic/kibana/pull/262449), merged August 12, 2025). Per **Attribution**, name it only when the evidence strongly implicates it — never as a fallback for weak evidence.
+- Per **Relevant history**, when strongly supported, name the PR or small set of PRs needed to explain how the flake became possible or observable, with inline links and merge dates. State each PR's precise causal role; do not force a single "introducing PR" when the history is multi-causal, and omit PR history when the evidence is ambiguous.
 
 #### Additional context (optional)
 
