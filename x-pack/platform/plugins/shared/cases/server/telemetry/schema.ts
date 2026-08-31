@@ -300,8 +300,7 @@ export const casesSchema: CasesTelemetrySchema = {
         type: 'long',
         _meta: {
           description:
-            'Runs triggered from the cases-list bulk action (no single-case origin). ' +
-            'Derived as total minus the sum of all origin buckets.',
+            'Runs triggered from the cases-list bulk action (no single-case origin). Derived as total minus the sum of all origin buckets.',
         },
       },
     },
@@ -309,8 +308,7 @@ export const casesSchema: CasesTelemetrySchema = {
       type: 'long',
       _meta: {
         description:
-          'Number of case configurations that have at least one workflow tag set. ' +
-          'Tag values are never reported.',
+          'Number of case configurations that have at least one workflow tag set. Tag values are never reported.',
       },
     },
   },
