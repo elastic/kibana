@@ -7,9 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { InferenceConnector } from '@kbn/inference-common';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React, { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { useIsCpsMultiProject } from '../../../../hooks/use_is_cps_multi_project';
+import { useKibana } from '../../../../hooks/use_kibana';
 import {
   CONNECTOR_LOAD_ERROR,
   CROSS_PROJECT_GENERATION_DISCLOSURE,
@@ -59,7 +60,12 @@ export const GenerateSplitButton = ({
   isLoading,
   size,
 }: GenerateSplitButtonProps) => {
-  const isCpsMultiProject = useIsCpsMultiProject();
+  const {
+    dependencies: {
+      start: { cps },
+    },
+  } = useKibana();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
   const featuresConnector = useMemo(
     () => allConnectors.find((c) => c.connectorId === config.connectors.features),
     [allConnectors, config.connectors.features]

@@ -13,7 +13,7 @@
     "@kbn/core",
     "@kbn/repo-info",
     "@kbn/human-readable-id",
-    "@kbn/std"
+    "@kbn/std",
   ],
   "exclude": ["target/**/*"]
 }

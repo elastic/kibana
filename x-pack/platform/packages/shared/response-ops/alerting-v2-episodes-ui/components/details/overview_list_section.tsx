@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
@@ -16,6 +16,7 @@ import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
 import { AlertEpisodeOverviewList, type GroupingRowStatus } from './overview_list';
+import { AlertEpisodeDescriptionListSkeleton } from './section_skeletons';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
@@ -79,7 +80,7 @@ export const AlertEpisodeOverviewListSection = ({
 
   if (isLoadingEpisode || isLoadingEpisodeActions || (groupHash && isLoadingGroupActions)) {
     return (
-      <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeOverviewListSectionLoading" />
+      <AlertEpisodeDescriptionListSkeleton data-test-subj="alertingV2EpisodeOverviewListSectionLoading" />
     );
   }
 

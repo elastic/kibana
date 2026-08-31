@@ -11,9 +11,18 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import type { WorkflowListItemDto } from '@kbn/workflows';
+import {
+  RunWorkflowPanel,
+  useWorkflowsCapabilities,
+  useWorkflowsUIEnabledSetting,
+} from '@kbn/workflows-ui';
 import * as i18n from '../translations';
-import { RunWorkflowPanel } from './run_workflow_panel';
+
+// Sort manual-trigger workflows to the top. Module-scoped so the reference is stable across renders.
+const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
+  Number((b.definition?.triggers ?? []).some((t) => t.type === 'manual')) -
+  Number((a.definition?.triggers ?? []).some((t) => t.type === 'manual'));
 
 export type DocumentTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
 
@@ -44,8 +53,7 @@ export const DocumentWorkflowsPanel = ({
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      sortTriggerType="manual"
-      executeButtonTestSubj="execute-document-workflow-button"
+      sortWorkflow={sortManualWorkflow}
       onClose={onClose}
       onExecute={onExecute}
     />

@@ -7,6 +7,8 @@
 
 import { screen } from '@testing-library/react';
 import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 import { RemoteClusterAdd, RemoteClusterEdit } from '../../../public/application/sections';
 import type { Cluster } from '../../../common/lib';
@@ -39,14 +41,17 @@ describe('Edit Remote cluster', () => {
 
   test('should have the title of the page set correctly', async () => {
     renderEdit(REMOTE_CLUSTER_EDIT);
-    expect(await screen.findByTestId('remoteClusterPageTitle')).toHaveTextContent(
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
       'Edit remote cluster'
     );
   });
 
   test('should have a link to the documentation', async () => {
     renderEdit(REMOTE_CLUSTER_EDIT);
-    expect(await screen.findByTestId('remoteClusterDocsButton')).toBeInTheDocument();
+    await openAppMenuOverflow();
+    expect(
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
+    ).toBeInTheDocument();
   });
 
   test('should use the same Form component as the "<RemoteClusterAdd />" component', async () => {

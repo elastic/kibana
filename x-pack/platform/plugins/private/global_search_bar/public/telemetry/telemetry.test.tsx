@@ -134,8 +134,18 @@ describe('SearchBar', () => {
 
       simulateTypeChar('d');
 
-      expect(mockReportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
-      expect(mockReportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_request');
+      expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+        1,
+        'global_search_bar',
+        'count',
+        'search_focus'
+      );
+      expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+        2,
+        'global_search_bar',
+        'count',
+        'search_request'
+      );
       expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
     });
 
@@ -157,8 +167,18 @@ describe('SearchBar', () => {
         expect(await screen.findByTestId('nav-search-input')).toEqual(document.activeElement);
       });
 
-      expect(mockReportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'shortcut_used');
-      expect(mockReportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_focus');
+      expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+        1,
+        'global_search_bar',
+        'count',
+        'shortcut_used'
+      );
+      expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+        2,
+        'global_search_bar',
+        'count',
+        'search_focus'
+      );
       expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
     });
 
@@ -187,13 +207,13 @@ describe('SearchBar', () => {
 
       fireEvent.click(await screen.findByTestId('nav-search-option'));
 
-      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
+      expect(mockReportEvent).toHaveBeenNthCalledWith(1, 'global_search_bar_click_application', {
         selected_rank: 1,
         selected_label: 'Discover',
         application: 'discover',
         terms: '',
       });
-      expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_blur', {
+      expect(mockReportEvent).toHaveBeenNthCalledWith(2, 'global_search_bar_blur', {
         focus_time_ms: 1000,
       });
       expect(mockReportEvent).toHaveBeenCalledTimes(2);
@@ -223,13 +243,13 @@ describe('SearchBar', () => {
 
       fireEvent.click(await screen.findByTestId('nav-search-option'));
 
-      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
+      expect(mockReportEvent).toHaveBeenNthCalledWith(1, 'global_search_bar_click_application', {
         selected_rank: 1,
         selected_label: 'Discover',
         application: 'discover',
         terms: 'Ahoy!',
       });
-      expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_blur', {
+      expect(mockReportEvent).toHaveBeenNthCalledWith(2, 'global_search_bar_blur', {
         focus_time_ms: 1000,
       });
       expect(mockReportEvent).toHaveBeenCalledTimes(2);
@@ -298,8 +318,18 @@ describe('SearchBar', () => {
         fireEvent.click(await screen.findByTestId('nav-search-conceal'));
         expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
 
-        expect(mockReportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'shortcut_used');
-        expect(mockReportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_focus');
+        expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+          1,
+          'global_search_bar',
+          'count',
+          'shortcut_used'
+        );
+        expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+          2,
+          'global_search_bar',
+          'count',
+          'search_focus'
+        );
         expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
       });
 
@@ -326,10 +356,15 @@ describe('SearchBar', () => {
         fireEvent.click(await screen.findByTestId('nav-search-conceal'));
         expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
 
-        expect(mockReportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
+        expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+          1,
+          'global_search_bar',
+          'count',
+          'search_focus'
+        );
         expect(mockReportUiCounter).toHaveBeenCalledTimes(1);
 
-        expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_blur', {
+        expect(mockReportEvent).toHaveBeenNthCalledWith(1, 'global_search_bar_blur', {
           focus_time_ms: 1000,
         });
         expect(mockReportEvent).toHaveBeenCalledTimes(1);

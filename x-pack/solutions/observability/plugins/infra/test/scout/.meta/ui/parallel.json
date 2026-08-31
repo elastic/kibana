@@ -1,54 +1,9 @@
 {
-  "sha1": "4f572e84a3ba5e1fbf5f03888231295621a48e16",
+  "sha1": "50d921bdc5648542005f2042dd471f1f4aaa7fc0",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "f9db2c0f703ede6-10a320ba15dd24a",
-      "title": "Clean up infra data after UI parallel tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
-    {
-      "id": "f9db2c0f703ede6-8095e0336b0445d",
-      "title": "Clean up metrics anomalies ML jobs",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 33,
-        "column": 14
-      }
-    },
-    {
-      "id": "f9db2c0f703ede6-2295ef712bc4c42",
-      "title": "Clean up metrics_and_logs archive",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 46,
-        "column": 33
-      }
-    },
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -1955,6 +1910,50 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.spec.ts",
         "line": 13,
         "column": 14
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-10a320ba15dd24a",
+      "title": "Clean up infra data after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-8095e0336b0445d",
+      "title": "Clean up metrics anomalies ML jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 33,
+        "column": 14
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-2295ef712bc4c42",
+      "title": "Clean up metrics_and_logs archive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 46,
+        "column": 33
       }
     }
   ]

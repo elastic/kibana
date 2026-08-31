@@ -51,7 +51,9 @@ export {
 } from './src/features/identify_features';
 export {
   generateAllComputedFeatures,
+  DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS,
   type ComputedFeatureGenerationResult,
+  type GenerateAllComputedFeaturesOptions,
 } from './src/features/computed';
 export {
   CODE_ANALYSIS_PROVIDER_KEY,

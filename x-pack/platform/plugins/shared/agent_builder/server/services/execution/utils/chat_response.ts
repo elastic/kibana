@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import {
+  createInternalError,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
@@ -16,19 +17,26 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ChatResponse } from '../../../../common/http_api/chat';
 
-export const buildChatResponseFromEvents = (events: ChatEvent[]): ChatResponse => {
-  const roundCompleteEvent = events.find(isRoundCompleteEvent);
+/** Recovers the conversation created/updated event that a conversation-mode run always emits*/
+export const findConversationEvent = (
+  events: ChatEvent[]
+): ConversationCreatedEvent | ConversationUpdatedEvent => {
   const conversationEvent = events.find(
     (event): event is ConversationUpdatedEvent | ConversationCreatedEvent =>
       isConversationUpdatedEvent(event) || isConversationCreatedEvent(event)
   );
-
-  if (!roundCompleteEvent) {
-    throw new Error('No round_complete event was emitted');
-  }
   if (!conversationEvent) {
-    throw new Error('No conversation event was emitted');
+    throw createInternalError('No conversation event was emitted by the agent run');
   }
+  return conversationEvent;
+};
+
+export const buildChatResponseFromEvents = (events: ChatEvent[]): ChatResponse => {
+  const roundCompleteEvent = events.find(isRoundCompleteEvent);
+  if (!roundCompleteEvent) {
+    throw createInternalError('No round_complete event was emitted by the agent run');
+  }
+  const conversationEvent = findConversationEvent(events);
 
   const {
     data: { round },

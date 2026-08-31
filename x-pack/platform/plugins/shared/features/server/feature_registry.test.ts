@@ -894,6 +894,105 @@ describe('FeatureRegistry', () => {
       );
     });
 
+    describe('aiIndex privileges', () => {
+      it('allows a feature privilege to declare AI Index read types', () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              aiIndex: { read: ['dashboard'] },
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+            read: {
+              aiIndex: { read: ['dashboard'] },
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+        };
+
+        const featureRegistry = new FeatureRegistry();
+        expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrow();
+      });
+
+      it('allows a sub-feature privilege to declare AI Index read types', () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+            read: {
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'sub-feature',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'sub-1',
+                      name: 'Sub 1',
+                      includeIn: 'read',
+                      aiIndex: { read: ['dashboard'] },
+                      savedObject: { all: [], read: [] },
+                      ui: [],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        };
+
+        const featureRegistry = new FeatureRegistry();
+        expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrow();
+      });
+
+      it('rejects a non-array aiIndex.read', () => {
+        const feature = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              aiIndex: { read: 'dashboard' },
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+            read: {
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+        } as unknown as KibanaFeatureConfig;
+
+        const featureRegistry = new FeatureRegistry();
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `
+          "[privileges]: types that failed validation:
+          - [privileges.0]: expected value to equal [null]
+          - [privileges.1.all.aiIndex.read]: could not parse array value from json input"
+        `
+        );
+      });
+    });
+
     describe('alerting', () => {
       it(`prevents privileges from specifying rule types that don't exist at the root level`, () => {
         const feature: KibanaFeatureConfig = {
@@ -2060,7 +2159,7 @@ describe('FeatureRegistry', () => {
       };
 
       const featureRegistry = new FeatureRegistry();
-      expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrowError();
+      expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrow();
     });
 
     it('does not allow features with both regular and reserved privileges to be hidden', () => {

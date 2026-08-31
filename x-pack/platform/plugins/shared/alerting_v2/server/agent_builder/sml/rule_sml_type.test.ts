@@ -10,10 +10,10 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { RULE_ATTACHMENT_TYPE, RULE_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { RulesClient } from '../../lib/rules_client';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { createRuleSmlType } from './rule_sml_type';
 
 const baseRuleAttrs: RuleSavedObjectAttributes = {
@@ -91,8 +91,8 @@ describe('createRuleSmlType', () => {
     });
 
   describe('id and fetchFrequency', () => {
-    it('uses the shared RULE_SML_TYPE constant', () => {
-      expect(buildDefinition().id).toBe(RULE_SML_TYPE);
+    it('uses the shared RULE_KI_TYPE constant', () => {
+      expect(buildDefinition().id).toBe(RULE_KI_TYPE);
     });
 
     it('returns "1m" as fetch frequency', () => {
@@ -200,7 +200,7 @@ describe('createRuleSmlType', () => {
 
       expect(getRepoSo).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-1');
       expect(result).toEqual({
-        type: RULE_SML_TYPE,
+        type: RULE_KI_TYPE,
         title: 'High CPU',
         content: [
           'High CPU',
@@ -250,10 +250,10 @@ describe('createRuleSmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the rules-read API privilege', () => {
+    it('returns the registered ai_index read action for rules', () => {
       const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+        kibana: { privileges: { name: [`ai_index:${RULE_KI_TYPE}/read`] } },
       });
     });
   });
@@ -263,10 +263,10 @@ describe('createRuleSmlType', () => {
       const originId = overrides.origin_id ?? 'rule-1';
       return {
         id: 'sml-1',
-        type: RULE_SML_TYPE,
+        type: RULE_KI_TYPE,
         title: 'High CPU',
         origin_id: originId,
-        origin: { uri: `${RULE_SML_TYPE}://${originId}` },
+        origin: { uri: `${RULE_KI_TYPE}://${originId}` },
         content: '',
         created_at: '2026-04-10T00:00:00.000Z',
         updated_at: '2026-04-10T00:00:00.000Z',

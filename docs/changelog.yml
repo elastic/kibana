@@ -317,22 +317,22 @@ bundle:
   # Use YAML literal block scalar (|) for multiline descriptions. See docs/contribute/changelog.md for examples.
   # description: |
   #   This release includes new features and bug fixes.
-  use_local_changelogs: true
+  use_local_changelogs: false
 
   # Named bundle profiles for different release scenarios
   profiles:
     kibana-release:
       output_products: 'kibana {version} {lifecycle}'
-      output: 'kibana/{version}.yaml'
+      # output: 'kibana/{version}.yaml'
     observability-release:
       output_products: 'observability {version} {lifecycle}'
-      output: 'observability/{version}.yaml'
+      # output: 'observability/{version}.yaml'
     security-release:
       output_products: 'security {version} {lifecycle}'
-      output: 'security/{version}.yaml'
+      # output: 'security/{version}.yaml'
     serverless-release:
       output_products: 'cloud-serverless {version} {lifecycle}'
-      output: 'cloud-serverless/kibana-{version}.yaml'
+      # output: 'cloud-serverless/kibana-{version}.yaml'
       # Feature IDs to hide when bundling with this profile (accepts string or list)
       hide_features:
         - data-federation

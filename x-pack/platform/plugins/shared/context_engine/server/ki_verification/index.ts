@@ -16,3 +16,9 @@ export type {
 } from './types';
 export { KiVerifierRegistry } from './registry';
 export { KiVerificationService } from './service';
+export { createKiVerifierRegistry } from './create_registry';
+export {
+  createEsqlValidSyntaxVerifier,
+  ESQL_ATTRIBUTE_KEY,
+  ESQL_VALID_SYNTAX_VERIFIER_ID,
+} from './verifiers';
