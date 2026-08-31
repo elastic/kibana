@@ -60,7 +60,9 @@ export function useAppMenu(enableInspector: boolean) {
     if (enableInspector) {
       items.unshift({
         id: 'inspect',
-        label: 'Inspect',
+        label: {i18n.translate('xpack.ux.inspectButtonText', {
+        defaultMessage: 'Inspect',
+      })},
         iconType: 'inspect',
         run: () => inspector.open(inspectorAdapters),
         overflow: true,
