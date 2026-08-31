@@ -9,38 +9,33 @@ import type { ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
-  getRoundAuthorHeaderName,
   isUserProfileAuthor,
   type RoundAuthor,
 } from '../components/conversations/conversation_rounds/round_author_helpers';
 import { useUserProfiles } from './use_user_profiles';
 
-interface UseRoundAuthorDetailsArgs {
+interface UseRoundAuthorProfileArgs {
   agent?: AgentDefinition;
   author?: RoundAuthor;
   origin?: ConversationRoundOrigin;
 }
 
-interface UseRoundAuthorDetailsResult {
-  authorProfile?: UserProfileWithAvatar;
-  name?: string;
-}
-
-export const useRoundAuthorDetails = ({
+export const useRoundAuthorProfile = ({
   agent,
   author,
   origin,
-}: UseRoundAuthorDetailsArgs): UseRoundAuthorDetailsResult => {
+}: UseRoundAuthorProfileArgs): UserProfileWithAvatar | undefined => {
   const isAgent = Boolean(agent);
   const hasUserProfileAuthor = isUserProfileAuthor(author);
   const shouldResolveAuthorProfile =
     !isAgent && !hasUserProfileAuthor && !origin && Boolean(author?.id);
+
   const { data: authorProfiles = [] } = useUserProfiles({
     uids: !hasUserProfileAuthor && author?.id ? [author.id] : [],
     enabled: shouldResolveAuthorProfile,
   });
-  const authorProfile = hasUserProfileAuthor ? author : authorProfiles[0];
-  const name = getRoundAuthorHeaderName({ agent, author, authorProfile });
 
-  return { authorProfile, name };
+  const authorProfile = hasUserProfileAuthor ? author : authorProfiles[0];
+
+  return authorProfile;
 };

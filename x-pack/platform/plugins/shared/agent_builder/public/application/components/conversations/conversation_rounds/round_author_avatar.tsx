@@ -10,9 +10,9 @@ import { EuiAvatar } from '@elastic/eui';
 import { UserAvatar } from '@kbn/user-profile-components';
 import type { ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
-import { useRoundAuthorDetails } from '../../../hooks/use_round_author_details';
+import { useRoundAuthorProfile } from '../../../hooks/use_round_author_profile';
 import { AgentAvatar } from '../../common/agent_avatar';
-import type { RoundAuthor } from './round_author_helpers';
+import { getRoundAuthorHeaderName, type RoundAuthor } from './round_author_helpers';
 
 interface RoundAuthorAvatarProps {
   agent?: AgentDefinition;
@@ -21,7 +21,7 @@ interface RoundAuthorAvatarProps {
 }
 
 export const RoundAuthorAvatar: React.FC<RoundAuthorAvatarProps> = ({ agent, author, origin }) => {
-  const { authorProfile, name } = useRoundAuthorDetails({ agent, author, origin });
+  const authorProfile = useRoundAuthorProfile({ agent, author, origin });
 
   if (agent) {
     return <AgentAvatar agent={agent} size="s" iconSize="l" iconPaddingSize="none" />;
@@ -30,6 +30,8 @@ export const RoundAuthorAvatar: React.FC<RoundAuthorAvatarProps> = ({ agent, aut
   if (authorProfile) {
     return <UserAvatar user={authorProfile.user} avatar={authorProfile.data?.avatar} size="s" />;
   }
+
+  const name = getRoundAuthorHeaderName({ agent, author, authorProfile });
 
   if (name) {
     return <EuiAvatar size="s" name={name} />;

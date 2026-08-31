@@ -7,17 +7,19 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { EuiAvatar } from '@elastic/eui';
 import { UserAvatar, type UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
-import { useRoundAuthorDetails } from '../../../hooks/use_round_author_details';
+import { useRoundAuthorProfile } from '../../../hooks/use_round_author_profile';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorAvatar } from './round_author_avatar';
 
-jest.mock('../../../hooks/use_round_author_details', () => ({
-  useRoundAuthorDetails: jest.fn(),
+jest.mock('../../../hooks/use_round_author_profile', () => ({
+  useRoundAuthorProfile: jest.fn(),
 }));
 
 jest.mock('@kbn/user-profile-components', () => ({
+  getUserDisplayName: jest.fn((user) => user.full_name ?? user.username),
   UserAvatar: jest.fn(({ avatar }) => (
     <div data-test-subj="agentBuilderUserAvatar">{avatar?.initials}</div>
   )),
@@ -29,9 +31,14 @@ jest.mock('../../common/agent_avatar', () => ({
   )),
 }));
 
-const mockUseRoundAuthorDetails = jest.mocked(useRoundAuthorDetails);
+jest.mock('@elastic/eui', () => ({
+  EuiAvatar: jest.fn(({ name }) => <div data-test-subj="agentBuilderFallbackAvatar">{name}</div>),
+}));
+
+const mockUseRoundAuthorProfile = jest.mocked(useRoundAuthorProfile);
 const mockAgentAvatar = jest.mocked(AgentAvatar);
 const mockUserAvatar = jest.mocked(UserAvatar);
+const mockEuiAvatar = jest.mocked(EuiAvatar);
 
 describe('RoundAuthorAvatar', () => {
   const agent: AgentDefinition = {
@@ -61,11 +68,10 @@ describe('RoundAuthorAvatar', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseRoundAuthorProfile.mockReturnValue(undefined);
   });
 
   it('renders the agent avatar when an agent is available', () => {
-    mockUseRoundAuthorDetails.mockReturnValue({ name: agent.name });
-
     render(<RoundAuthorAvatar agent={agent} />);
 
     expect(mockAgentAvatar).toHaveBeenCalledWith(
@@ -81,10 +87,7 @@ describe('RoundAuthorAvatar', () => {
   });
 
   it('renders the user avatar when a user profile is available', () => {
-    mockUseRoundAuthorDetails.mockReturnValue({
-      authorProfile,
-      name: 'Alice Example',
-    });
+    mockUseRoundAuthorProfile.mockReturnValue(authorProfile);
 
     render(<RoundAuthorAvatar author={authorProfile} />);
 
@@ -98,5 +101,20 @@ describe('RoundAuthorAvatar', () => {
       expect.anything()
     );
     expect(screen.getByTestId('agentBuilderUserAvatar')).toHaveTextContent('AE');
+  });
+
+  it('renders a fallback avatar from the author display name when no profile is available', () => {
+    render(
+      <RoundAuthorAvatar author={{ id: 'user-2', full_name: 'Jane Doe', username: 'jdoe' }} />
+    );
+
+    expect(mockEuiAvatar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        size: 's',
+        name: 'Jane Doe',
+      }),
+      expect.anything()
+    );
+    expect(screen.getByTestId('agentBuilderFallbackAvatar')).toHaveTextContent('Jane Doe');
   });
 });

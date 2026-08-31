@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { ConversationOriginType, type ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import moment from 'moment';
-import { useRoundAuthorDetails } from '../../../hooks/use_round_author_details';
-import type { RoundAuthor } from './round_author_helpers';
+import { useRoundAuthorProfile } from '../../../hooks/use_round_author_profile';
+import { getRoundAuthorHeaderName, type RoundAuthor } from './round_author_helpers';
 
 const labels = {
   agentBadge: i18n.translate('xpack.agentBuilder.roundAuthor.agentBadge', {
@@ -104,7 +104,8 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   const { euiTheme } = useEuiTheme();
   const time = moment(startedAt).format('LT');
   const isAgent = Boolean(agent);
-  const { name } = useRoundAuthorDetails({ agent, author, origin });
+  const authorProfile = useRoundAuthorProfile({ agent, author, origin });
+  const name = getRoundAuthorHeaderName({ agent, author, authorProfile });
 
   return (
     <EuiText
