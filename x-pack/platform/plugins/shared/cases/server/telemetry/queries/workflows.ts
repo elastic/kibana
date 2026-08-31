@@ -17,7 +17,12 @@ import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants/workflow';
-import type { CasesTelemetry, CollectTelemetryDataParams, Buckets, ReferencesAggregation } from '../types';
+import type {
+  CasesTelemetry,
+  CollectTelemetryDataParams,
+  Buckets,
+  ReferencesAggregation,
+} from '../types';
 import {
   getCountsAggregationQuery,
   getCountsFromBuckets,
@@ -120,15 +125,14 @@ export const getWorkflowsTelemetryData = async ({
       total: totalRuns,
       ...getCountsFromBuckets(countBuckets),
     },
-    totalCasesWithRuns:
-      runsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
+    totalCasesWithRuns: runsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
     totalUniqueUsers: runAggs?.uniqueUsers?.value ?? 0,
     byOriginType: {
       ...originCounts,
-      // Bulk runs are those with no origin — subtract the attributed ones from the total.
-      bulk: Math.max(0, totalRuns - originSum),
+      // Unattributed: runs with no origin (list-level bulk runs) or an unrecognised origin type.
+      // Derived rather than stored because origin is optional on the run request.
+      unattributed: Math.max(0, totalRuns - originSum),
     },
-    configurationsWithWorkflowTags:
-      configRes.aggregations?.configurationsWithTags?.doc_count ?? 0,
+    configurationsWithWorkflowTags: configRes.aggregations?.configurationsWithTags?.doc_count ?? 0,
   };
 };

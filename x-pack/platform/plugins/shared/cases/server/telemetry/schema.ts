@@ -296,11 +296,11 @@ export const casesSchema: CasesTelemetrySchema = {
           description: 'Runs triggered from the alerts table with a multi-alert selection',
         },
       },
-      bulk: {
+      unattributed: {
         type: 'long',
         _meta: {
           description:
-            'Runs triggered from the cases-list bulk action (no single-case origin). Derived as total minus the sum of all origin buckets.',
+            'Runs carrying no single-case origin (cases-list bulk runs or an unrecognised origin). Derived as max(0, total minus the sum of all attributed origin buckets).',
         },
       },
     },

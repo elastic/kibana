@@ -21,6 +21,7 @@ import {
   CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE,
 } from '../../common/constants';
 import { CASE_WORKFLOW_RUN_ORIGIN_TYPES } from '../../common/constants/workflow';
+import { UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE } from './use_workflow_run_ebt';
 import { registerTemplateAnalytics } from './templates';
 
 export const registerAnalytics = ({
@@ -301,9 +302,11 @@ export const registerAnalytics = ({
           description:
             `The surface from which the workflow was triggered. One of: ${[
               ...CASE_WORKFLOW_RUN_ORIGIN_TYPES,
-              'bulk',
+              UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE,
             ].join(', ')}. ` +
-            '"bulk" means the run was started from the cases-list bulk action without a specific case origin.',
+            `"${UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE}" means the run carried no single-case origin — ` +
+            'cases-list bulk runs (which span multiple cases) or a run whose origin was absent. ' +
+            'The server-side usage collector records the same dimension with the "cases." prefix stripped from each value.',
           optional: false,
         },
       },
