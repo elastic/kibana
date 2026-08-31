@@ -167,6 +167,41 @@ describe('getProfileAppStateDefaults', () => {
       });
     });
 
+    it('should retain Summary column from profile defaults without a stored width', async () => {
+      const { profilesManagerMock: profilesManager, dataSourceProfileProviderMock } =
+        createContextAwarenessMocks();
+
+      dataSourceProfileProviderMock.profile.getDefaultAppState = jest.fn(() => () => ({
+        columns: [{ name: 'message', width: 100 }, { name: '_source' }],
+      }));
+
+      const scopedProfilesManagerWithSummary = profilesManager.createScopedProfilesManager({
+        scopedEbtManager: scopedEbtManagerMock,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      });
+      await scopedProfilesManagerWithSummary.resolveDataSourceProfile({});
+
+      const appState = getProfileAppStateDefaults({
+        scopedProfilesManager: scopedProfilesManagerWithSummary,
+        profileAppStateDefaults: createProfileAppStateDefaults(['columns']),
+        dataView: dataViewWithTimefieldMock,
+      }).getPostFetchState({
+        defaultColumns: [],
+        esqlQueryColumns: undefined,
+      });
+
+      expect(appState).toEqual({
+        columns: ['message', '_source'],
+        grid: {
+          columns: {
+            message: {
+              width: 100,
+            },
+          },
+        },
+      });
+    });
+
     it('should return undefined', () => {
       const appState = getProfileAppStateDefaults({
         scopedProfilesManager,

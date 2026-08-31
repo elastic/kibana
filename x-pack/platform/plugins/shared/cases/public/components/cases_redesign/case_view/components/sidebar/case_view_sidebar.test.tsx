@@ -93,7 +93,6 @@ const useGetCasesFeaturesRes = {
   metricsFeatures: [CaseMetricsFeature.ALERTS_COUNT],
   pushToServiceAuthorized: true,
   caseAssignmentAuthorized: true,
-  isAlertsEnabled: true,
   isSyncAlertsEnabled: true,
 };
 
@@ -486,9 +485,7 @@ describe('CaseViewSidebar (redesign)', () => {
       within(content).queryByTestId('legacy-custom-fields-view-settings-link')
     ).not.toBeInTheDocument();
     expect(
-      within(content).getByText(
-        /Contact your administrator to confirm the fields have been migrated/i
-      )
+      within(content).getByText(/Contact your administrator to remove the deprecated fields/i)
     ).toBeInTheDocument();
   });
 

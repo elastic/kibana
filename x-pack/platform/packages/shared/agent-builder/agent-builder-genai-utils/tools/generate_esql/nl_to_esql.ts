@@ -112,6 +112,10 @@ export interface GenerateEsqlOptions {
    * If true, external ES|QL datasets are considered when discovering and resolving the target.
    */
   includeDatasets?: boolean;
+  /**
+   * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
+   */
+  sessionId?: string;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;

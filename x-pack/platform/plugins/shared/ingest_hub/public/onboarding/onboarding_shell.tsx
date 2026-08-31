@@ -12,27 +12,28 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
   EuiStepsHorizontal,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
-import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import { useOnboardingFlow } from './onboarding_flow_context';
 import {
-  DeploySettingsStep,
+  AuthenticateAndDeployStep,
   ServicesStep,
   ServiceSettingsStep,
   DeployAndDetectStep,
 } from './step_components';
 
-const DEPLOY_SETTINGS_STEP_INDEX = ONBOARDING_STEPS.findIndex((s) => s.id === 'deploy-settings');
 const DOWNSTREAM_OF_SERVICES_STEP_IDS = ONBOARDING_STEPS.slice(1).map((s) => s.id);
 
 export interface StepComponentProps {
@@ -41,7 +42,7 @@ export interface StepComponentProps {
 }
 
 const STEP_COMPONENTS: Record<string, React.ComponentType<StepComponentProps>> = {
-  'deploy-settings': DeploySettingsStep,
+  'authenticate-and-deploy': AuthenticateAndDeployStep,
   services: ServicesStep,
   'service-settings': ServiceSettingsStep,
   'deploy-and-detect': DeployAndDetectStep,
@@ -72,7 +73,13 @@ export function OnboardingShell() {
   const { completedSteps, markStepComplete, markStepsIncomplete, firstIncompleteStepId } =
     useStepState(integrationId);
 
-  const { servicesStep } = useOnboardingFlow();
+  const {
+    servicesStep,
+    awsServiceMatrix,
+    awsServiceMatrixError,
+    refetchAwsServiceMatrix,
+    isDataFormatResolved,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   useInvalidateDownstreamSteps({
@@ -80,16 +87,6 @@ export function OnboardingShell() {
     downstreamStepIds: DOWNSTREAM_OF_SERVICES_STEP_IDS,
     markStepsIncomplete,
   });
-
-  const needsDeploySettingsStep = useMemo(
-    () =>
-      selectedServiceIds.length === 0 ||
-      selectedServiceIds.some(
-        (id) =>
-          AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless') ?? false
-      ),
-    [selectedServiceIds]
-  );
 
   const currentStepId = location.hash ? location.hash.slice(1) : '';
   const isValidStep = ONBOARDING_STEPS.some((s) => s.id === currentStepId);
@@ -106,39 +103,17 @@ export function OnboardingShell() {
     const nextStep = ONBOARDING_STEPS[currentStepIndex + 1];
     return () => {
       markStepComplete(currentStepId);
-      if (currentStepId === 'services' && !needsDeploySettingsStep) {
-        markStepComplete('deploy-settings');
-        const stepAfterConnect = ONBOARDING_STEPS[DEPLOY_SETTINGS_STEP_INDEX + 1];
-        if (stepAfterConnect) {
-          history.push({ ...location, hash: `#${stepAfterConnect.id}` });
-        }
-      } else if (nextStep) {
+      if (nextStep) {
         history.push({ ...location, hash: `#${nextStep.id}` });
       }
     };
-  }, [
-    currentStepId,
-    currentStepIndex,
-    markStepComplete,
-    needsDeploySettingsStep,
-    history,
-    location,
-  ]);
+  }, [currentStepId, currentStepIndex, markStepComplete, history, location]);
 
   const onBack = useMemo(() => {
     if (currentStepIndex <= 0) return undefined;
-    // Scan backward, skipping connect when it is not part of the current flow
-    let prevIndex = currentStepIndex - 1;
-    while (
-      prevIndex > 0 &&
-      ONBOARDING_STEPS[prevIndex].id === 'deploy-settings' &&
-      !needsDeploySettingsStep
-    ) {
-      prevIndex--;
-    }
-    const prevStep = ONBOARDING_STEPS[prevIndex];
+    const prevStep = ONBOARDING_STEPS[currentStepIndex - 1];
     return () => history.push({ ...location, hash: `#${prevStep.id}` });
-  }, [currentStepIndex, needsDeploySettingsStep, history, location]);
+  }, [currentStepIndex, history, location]);
 
   const horizontalStepsConfig = useMemo(
     () =>
@@ -197,7 +172,34 @@ export function OnboardingShell() {
         <EuiSpacer size="xs" />
         <EuiStepsHorizontal steps={horizontalStepsConfig} />
         <EuiSpacer size="xl" />
-        {CurrentStepComponent && <CurrentStepComponent onContinue={onContinue} onBack={onBack} />}
+        {awsServiceMatrixError ? (
+          <KbnDangerCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.onboardingShell.matrixError.title"
+                defaultMessage="Failed to load AWS integration catalog"
+              />
+            }
+            actionProps={{
+              primary: {
+                children: (
+                  <FormattedMessage
+                    id="xpack.ingestHub.onboardingShell.matrixError.retry"
+                    defaultMessage="Retry"
+                  />
+                ),
+                onClick: refetchAwsServiceMatrix,
+              },
+            }}
+          />
+        ) : !awsServiceMatrix || !isDataFormatResolved ? (
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '300px' }}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexGroup>
+        ) : (
+          CurrentStepComponent && <CurrentStepComponent onContinue={onContinue} onBack={onBack} />
+        )}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

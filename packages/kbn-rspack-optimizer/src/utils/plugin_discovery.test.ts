@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
 import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { discoverPlugins } from './plugin_discovery';
@@ -91,6 +92,37 @@ describe('plugin_discovery', () => {
     });
   });
 
+  describe('discoverPlugins with allowlistPluginGroups', () => {
+    let allPlugins: Awaited<ReturnType<typeof discoverPlugins>>;
+    let platformPlugins: Awaited<ReturnType<typeof discoverPlugins>>;
+
+    beforeAll(async () => {
+      allPlugins = await discoverPlugins({
+        repoRoot: REPO_ROOT,
+        examples: false,
+        testPlugins: false,
+      });
+      platformPlugins = await discoverPlugins({
+        repoRoot: REPO_ROOT,
+        examples: false,
+        testPlugins: false,
+        allowlistPluginGroups: ['platform'],
+      });
+    }, 60000);
+
+    it('discovers fewer plugins when restricted to the platform group', () => {
+      expect(platformPlugins.length).toBeLessThan(allPlugins.length);
+      expect(platformPlugins.length).toBeGreaterThan(0);
+    });
+
+    it('keeps platform plugins and drops solution plugins', () => {
+      const ids = new Set(platformPlugins.map((p) => p.id));
+      expect(ids.has('data')).toBe(true);
+      expect(ids.has('discover')).toBe(true);
+      expect(ids.has('securitySolution')).toBe(false);
+    });
+  });
+
   describe('discoverPlugins with testPlugins', () => {
     let pluginsWithTest: Awaited<ReturnType<typeof discoverPlugins>>;
     let pluginsWithoutTest: Awaited<ReturnType<typeof discoverPlugins>>;
@@ -112,4 +144,26 @@ describe('plugin_discovery', () => {
       expect(pluginsWithTest.length).toBeGreaterThanOrEqual(pluginsWithoutTest.length);
     });
   });
+});
+
+describe('discoverPlugins with explicit paths', () => {
+  it('includes an explicitly selected test plugin', async () => {
+    const pluginPath = Path.resolve(
+      REPO_ROOT,
+      'src/platform/test/analytics/plugins/analytics_ftr_helpers'
+    );
+    const plugins = await discoverPlugins({
+      repoRoot: REPO_ROOT,
+      examples: false,
+      testPlugins: false,
+      paths: [pluginPath],
+    });
+
+    expect(plugins).toContainEqual(
+      expect.objectContaining({
+        id: 'analyticsFtrHelpers',
+        contextDir: pluginPath,
+      })
+    );
+  }, 30000);
 });

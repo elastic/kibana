@@ -45,6 +45,7 @@ export interface CspRegion {
   csp: string;
   region: string;
   geo?: string;
+  region_display_name?: string;
 }
 
 /** A region entry that carries only a geographic zone with no CSP/region detail. */
@@ -67,4 +68,5 @@ export type EisInferenceEndpointMetadata = {
     model_creator?: string;
   } & Record<string, unknown>;
   regions?: EisRegion[];
+  denied_by_region_policy?: boolean;
 } & Record<string, unknown>;

@@ -22,7 +22,6 @@ export {
   PND_FEATURE_ID,
   PND_INTERNAL_URL,
   PND_INVESTIGATIONS_URL,
-  PND_INVESTIGATION_PROPOSALS_URL_TEMPLATE,
   PND_INVESTIGATION_URL_TEMPLATE,
   PND_PLUGIN_NAME,
   PND_SKILLS_URL,
@@ -31,8 +30,6 @@ export {
   PND_WATCH_URL_TEMPLATE,
   PND_WORKERS_URL,
   PND_WORKER_URL_TEMPLATE,
-  PROPOSAL_STATUSES,
-  RECOMMENDED_ACTIONS,
   SYSTEM_SECURITY_WATCH_CATALOG,
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
@@ -43,9 +40,7 @@ export {
   TEMPLATE_ID_INCIDENT,
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_PROPOSAL,
-  TEMPLATE_IDS,
   WATCH_AUTONOMY_LEVELS,
-  WATCH_CUSTOM_TAG,
   WATCH_DARK_TAG,
   WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
@@ -53,7 +48,6 @@ export {
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
-  buildInvestigationProposalsUrl,
   buildInvestigationUrl,
   buildSkillUrl,
   buildWatchUrl,
@@ -68,7 +62,6 @@ export {
   EvidenceRef,
   GetInvestigationResponse,
   GetWatchResponse,
-  Incident,
   Investigation,
   Lifecycle,
   ListInvestigationProposalsResponse,
@@ -77,21 +70,17 @@ export {
   ListWatchesResponse,
   ListWorkersResponse,
   Proposal,
-  ProposalStatus,
   RecommendedAction,
   ScheduleCadence,
   ScheduleHandoff,
   ScheduleMode,
   ScopeAccess,
-  TemplateId,
-  TimelineEvent,
   UpdateWatchRequestBody,
   UpdateWatchResponse,
   Watch,
   WatchApprovalGate,
   WatchAutonomyLevel,
   WatchCallableRef,
-  WatchGeneralSettings,
   WatchLedgerEntry,
   WatchMetrics,
   WatchRecentRun,
@@ -105,18 +94,19 @@ export {
   WatchSettings,
   WatchSkill,
   WatchSkillAttachment,
-  WatchTier,
   WatchTriggerProjection,
   WatchTriggersSettings,
   WatchWorker,
   WatchWorkerAttachment,
   WorkerRunState,
   WorkflowTriggerType,
+  type TimelineEvent,
 } from './impl/schemas';
 
 export {
   compareWatchesForDisplay,
   coverageFromSchedule,
+  createCatalogWatchPlaceholder,
   isOnDutyNow,
 } from './impl/watches/watch_helpers';
 
@@ -125,6 +115,7 @@ export { extractConversationEntities } from './impl/attachments/entity_attachmen
 export { aggregateBlastRadius } from './impl/blast_radius/blast_radius';
 export type { BlastRadiusEntry } from './impl/blast_radius/blast_radius';
 export type {
+  CatalogWatchId,
   WatchDisplaySortable,
   WatchScheduleCoverageInput,
 } from './impl/watches/watch_helpers';
@@ -135,7 +126,6 @@ export {
   MOCK_PROPOSALS,
   SKILLS_SEED,
   WATCHES_SEED,
-  WATCH_SETTINGS_SEED,
   WORKERS_SEED,
   createMockInvestigation,
   createMockProposal,
@@ -145,9 +135,4 @@ export {
   getMockProposalsByInvestigationId,
 } from './impl/samples';
 export type { SystemSecurityWatchCatalogEntry } from './constants';
-export type {
-  WatchLedgerEntrySeed,
-  WatchSettingsSeed,
-  WatchSkillSeed,
-  WatchWorkerSeed,
-} from './impl/samples';
+export type { WatchSkillSeed, WatchWorkerSeed } from './impl/samples';

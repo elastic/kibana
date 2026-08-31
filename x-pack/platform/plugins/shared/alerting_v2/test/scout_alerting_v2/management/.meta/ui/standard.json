@@ -1,8 +1,7 @@
 {
-  "sha1": "bcd6a2388306b1e779a81f40a56b3cf45b2e372b",
+  "sha1": "93c6cbc5380977d9f2d3e079ba1bff6297d8fc31",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -21,8 +20,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
-        "line": 55,
-        "column": 14
+        "line": 61,
+        "column": 69
       }
     },
     {
@@ -41,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
-        "line": 55,
-        "column": 69
+        "line": 61,
+        "column": 97
       }
     },
     {
@@ -61,13 +60,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
-        "line": 55,
-        "column": 97
+        "line": 62,
+        "column": 8
       }
     },
     {
-      "id": "9c72907cf23b98d-8801b6e0b64b580",
-      "title": "Management pages - required privileges user with rules read-only role can only view the Rules page",
+      "id": "9c72907cf23b98d-d99fe7755387fda",
+      "title": "Management pages - required privileges user with rules read-only role can view the Rules and Rule library pages",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -81,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
-        "line": 56,
-        "column": 8
+        "line": 65,
+        "column": 5
       }
     },
     {
@@ -101,7 +100,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
-        "line": 69,
+        "line": 85,
         "column": 5
       }
     },
@@ -121,8 +120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
-        "line": 84,
-        "column": 5
+        "line": 50,
+        "column": 24
       }
     },
     {
@@ -141,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
-        "line": 51,
+        "line": 53,
         "column": 24
       }
     }
