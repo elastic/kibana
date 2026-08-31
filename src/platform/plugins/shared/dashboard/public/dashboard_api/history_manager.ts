@@ -13,7 +13,6 @@ import {
   debounceTime,
   filter,
   map,
-  switchMap,
   withLatestFrom,
   type Observable,
   type Subject,
@@ -38,10 +37,7 @@ export function initializeHistoryManager({
   setState: (state: DashboardState) => Promise<void>;
   dataLoading$: Observable<boolean>;
   historyUpdated$: Subject<void>;
-}): {
-  api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
-  cleanup: () => void;
-} {
+}) {
   const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
   const dashboardCurrentState$ = new BehaviorSubject<DashboardState | undefined>(undefined);
 
@@ -53,14 +49,24 @@ export function initializeHistoryManager({
 
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
-      disableUndoRedo$,
-      state$: dashboardCurrentState$,
-      mapState: (state) => {
-        return {
-          ...state,
-          panels: state.panels.sort(sortById), // keep panel order consistent so that diffing on array works as expected
-        };
+      onStateChange$: combineLatest([anyStateChange$, dataLoading$]).pipe(
+        debounceTime(0), // flatten anyStateChange + dataLoading event updates
+        withLatestFrom(hasOverlays$),
+        // do not push to history while a child is loading or an editor is open
+        filter(([[, loading], hasOverlays]) => !loading && !hasOverlays),
+        map(() => {
+          const state = getState();
+          return {
+            ...state,
+            panels: state.panels.sort(sortById), // keep panel order consistent so that diffing on array works as expected
+          };
+        })
+      ),
+      setState: async (state: DashboardState) => {
+        await setState(state);
+        historyUpdated$.next();
       },
+      getLatestState: getState,
       maxSize: 100,
     }
   );
@@ -77,20 +83,12 @@ export function initializeHistoryManager({
       historyUpdated$.next();
     });
 
-  // when the history's state updates, respond by setting state on the Dashboard
-  const historyStateSubscription = historyApi.currentState$
-    .pipe(
-      switchMap(async (newState) => {
-        if (!newState) return;
-        await setState(newState);
-      })
-    )
-    .subscribe();
-
   return {
-    api: historyApi,
+    internalApi: {
+      ...historyApi,
+      disableUndoRedo$,
+    },
     cleanup: () => {
-      historyStateSubscription.unsubscribe();
       onAnyStateChangeSubscription.unsubscribe();
       disableUndoRedoSubscription.unsubscribe();
       cleanupHistoryTracking();

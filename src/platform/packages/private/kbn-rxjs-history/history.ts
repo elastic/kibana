@@ -10,36 +10,26 @@
 import * as jsondiffpatch from 'jsondiffpatch';
 import { cloneDeep } from 'lodash';
 
-import { BehaviorSubject, combineLatest, filter, map, pairwise, skip } from 'rxjs';
+import { BehaviorSubject, filter, Observable, pairwise } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
-  state$,
-  mapState,
+  onStateChange$,
+  getLatestState,
+  setState,
   maxSize,
-  disableUndoRedo$ = new BehaviorSubject<boolean>(true),
 }: {
-  state$: BehaviorSubject<T | undefined>;
-  mapState: (state: T) => T;
+  onStateChange$: Observable<T | undefined>;
+  getLatestState: () => T;
+  setState: (state: T) => Promise<void>;
   maxSize: number;
-  disableUndoRedo$?: BehaviorSubject<boolean>;
 }) {
   const history: jsondiffpatch.Delta[] = [];
   const pointer$ = new BehaviorSubject<number>(-1);
   let undoOrRedoAction = false;
 
-  const initialState = state$.getValue();
-  const currentState$ = new BehaviorSubject<T | undefined>(
-    initialState ? mapState(initialState) : undefined
-  );
-  const disabledActions$ = new BehaviorSubject({
-    undo: true as boolean,
-    redo: true as boolean,
-  });
-
-  const stateSubscription = state$
+  const stateSubscription = onStateChange$
     .pipe(
       filter((state): state is T => Boolean(state)),
-      map(mapState),
       pairwise()
     )
     .subscribe(([previous, current]) => {
@@ -65,35 +55,35 @@ export function startTrackingHistory<T extends object = {}>({
       pointer$.next(history.length - 1); // note: this is safer than incrementing, just in case things get out of sync
     });
 
-  const disabledActionsSubscription = combineLatest([pointer$, disableUndoRedo$]).subscribe(
-    ([pointer, disableUndoRedo]) => {
-      disabledActions$.next({
-        undo: disableUndoRedo || pointer <= -1, // at the bottom of the history stack
-        redo: disableUndoRedo || pointer + 1 >= history.length, // at the top of the history stack
-      });
+  const canUndo$ = new BehaviorSubject(false);
+  const canRedo$ = new BehaviorSubject(false);
+  const pointerSubscription = pointer$.subscribe(
+    (pointer) => {
+      const bottomOfStack = pointer <= -1;
+      const topOfStack = pointer + 1 >= history.length;
+      canUndo$.next(!bottomOfStack);
+      canRedo$.next(!topOfStack);
     }
   );
 
-  const undoPatch = () => {
-    if (disableUndoRedo$.getValue()) return false;
+  const undoPatch = async () => {
     const pointer = pointer$.getValue();
     if (pointer <= -1) return false; // cannot undo - already at the bottom of the stack
 
     const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
     undoOrRedoAction = true;
-    currentState$.next(jsondiffpatch.patch(cloneDeep(state$.getValue()), reversedPatch) as T);
+    await setState(jsondiffpatch.patch(cloneDeep(getLatestState()), reversedPatch) as T);
     pointer$.next(pointer - 1);
     return true;
   };
 
-  const redoPatch = () => {
-    if (disableUndoRedo$.getValue()) return false;
+  const redoPatch = async () => {
     const pointer = pointer$.getValue();
     if (pointer + 1 >= history.length) return false; // cannot redo - already at the top of the stack
 
     const patch = history[pointer + 1]; // must apply the **next** patch
     undoOrRedoAction = true;
-    currentState$.next(jsondiffpatch.patch(cloneDeep(state$.getValue()), patch) as T);
+    await setState(jsondiffpatch.patch(cloneDeep(getLatestState()), patch) as T);
     pointer$.next(pointer + 1);
     return true;
   };
@@ -113,11 +103,8 @@ export function startTrackingHistory<T extends object = {}>({
       if (key === 'z') {
         undoPatch();
       } else if (key === 'y') {
-        const success = redoPatch();
-        if (success) {
-          // prevent default behaviour (for example, on chrome, this opens history by default)
-          event.preventDefault();
-        }
+        redoPatch();
+        event.preventDefault();
       }
     }
   };
@@ -125,14 +112,14 @@ export function startTrackingHistory<T extends object = {}>({
 
   return {
     api: {
-      currentState$: currentState$.pipe(skip(1)),
-      disabledActions$,
+      canUndo$,
+      canRedo$,
       undo: undoPatch,
       redo: redoPatch,
     },
     cleanup: () => {
       stateSubscription.unsubscribe();
-      disabledActionsSubscription.unsubscribe();
+      pointerSubscription.unsubscribe();
       document.removeEventListener('keydown', keyDownHandler);
     },
   };

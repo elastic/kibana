@@ -348,7 +348,7 @@ export function getDashboardApi({
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {
-    ...historyManager.api,
+    ...historyManager.internalApi,
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
     ...unsavedChangesManager.internalApi,
