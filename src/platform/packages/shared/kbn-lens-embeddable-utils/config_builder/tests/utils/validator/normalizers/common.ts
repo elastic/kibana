@@ -27,6 +27,7 @@ import type {
   ValueFormatConfig,
   RangeIndexPatternColumn,
 } from '@kbn/lens-common';
+import { hasTextBasedLayers } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
@@ -364,18 +365,21 @@ function normalizeAdHocDataViews(attributes: LensAttributes) {
 }
 
 /**
- * For ES|QL panels, the layer query is the source of truth at runtime.
- * The top-level state.query may diverge in legacy SOs — sync it to the layer.
+ * For ES|QL panels, the layer query is the source of truth. Legacy SOs may
+ * still carry an aggregate copy in the top-level state.query slot (dead data,
+ * dropped at read time) and the API→SO transform emits an empty kuery default
+ * — normalize both to an absent slot for comparison.
  */
 function normalizeESQLQuery(attributes: LensAttributes) {
-  const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
-  if (textBasedLayers.length > 0) {
-    const layerQuery = textBasedLayers[0].query;
-    // For ES|QL panels the layer query is authoritative; the transform always promotes it to the
-    // top-level state query, replacing any stale legacy query (even a different language).
-    if (layerQuery?.esql && attributes.state.query) {
-      attributes.state.query = layerQuery;
-    }
+  const isTextBased = hasTextBasedLayers(attributes);
+  const query: unknown = attributes.state.query;
+  if (!query || typeof query !== 'object') {
+    return;
+  }
+  const isAggregate = 'esql' in query;
+  const isEmpty = 'query' in query && query.query === '';
+  if (isAggregate || (isTextBased && isEmpty)) {
+    delete attributes.state.query;
   }
 }
 
@@ -1420,6 +1424,8 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     return attributes;
   },
   transformed: (attributes: T) => {
+    normalizeESQLQuery(attributes);
+
     if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
       delete attributes.state.adHocDataViews;
     }

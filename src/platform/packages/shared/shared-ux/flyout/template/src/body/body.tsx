@@ -13,7 +13,7 @@ import { EuiFlyoutBody } from '@elastic/eui';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { FlyoutBodyProps } from '../types';
 import { bodyAssembly, flyoutAssembly } from '../assembly';
-import { resolveZoneTestSubj, useFlyoutTemplateConfig } from '../context';
+import { resolveZoneTestSubj, useFlyoutHeaderCollapse, useFlyoutTemplateConfig } from '../context';
 
 /** Renders passthrough children in source order, routing assembly parse through bodyAssembly. */
 const renderBodyItems = (children: ReactNode) => {
@@ -40,10 +40,14 @@ export const Body = BaseBody;
 /** Internal renderer for the body zone. */
 export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBodyProps) => {
   const { dataTestSubj: rootTestSubj } = useFlyoutTemplateConfig();
+  const { scrollContainerRef } = useFlyoutHeaderCollapse();
 
   return (
     <KibanaErrorBoundaryProvider>
-      <EuiFlyoutBody data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body')}>
+      <EuiFlyoutBody
+        data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body')}
+        scrollContainerRef={scrollContainerRef}
+      >
         <KibanaErrorBoundary>{renderBodyItems(children)}</KibanaErrorBoundary>
       </EuiFlyoutBody>
     </KibanaErrorBoundaryProvider>

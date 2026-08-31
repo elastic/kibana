@@ -30,7 +30,7 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import { installStatic } from './managed_workflows/install_static';
+import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 
@@ -42,11 +42,7 @@ export class PndPlugin
   private spaces?: PndStartDependencies['spaces'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 
-  /**
-   * Created during `start` once Workflows management is known. Routes resolve it lazily, so it is
-   * built even without Workflows — store-backed reads and writes still work, and only the
-   * workflow-backed `enabled` write degrades.
-   */
+  /** Created during `start`; routes resolve it lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
 
   constructor(context: PluginInitializerContext<PndConfig>) {
@@ -65,7 +61,7 @@ export class PndPlugin
 
     this.logger.info('Setting up PND plugin');
 
-    this.workflowsManagementApi = workflowsManagement?.management;
+    this.workflowsManagementApi = workflowsManagement.management;
 
     registerOwner({ workflowsExtensions });
 
@@ -80,7 +76,7 @@ export class PndPlugin
           app: ['kibana', PND_FEATURE_ID],
           api: [PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
-          ui: ['show'],
+          ui: ['show', 'write'],
         },
         read: {
           app: ['kibana', PND_FEATURE_ID],
@@ -111,27 +107,27 @@ export class PndPlugin
       return {};
     }
 
-    const installationReady = installStatic({
-      enabled: this.config.enabled,
+    const management = this.workflowsManagementApi
+      ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
+      : undefined;
+    const managedWorkflows = initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
     }).catch((error) => {
       this.logger.error(
-        `PND managed watch installation failed: ${
+        `PND managed workflow initialization failed: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
+      return undefined;
     });
 
-    // Built whether or not Workflows management is available: the watch store backs settings either
-    // way, and `enabled` falls back to the store when there is no workflow to write to.
+    // Mock mode changes presentation data only; durable settings and enablement still use Workflows.
     this.watchesService = new WatchesService(
-      this.workflowsManagementApi
-        ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
-        : undefined,
+      management,
+      managedWorkflows,
       this.logger,
-      this.config.ui.useMockData,
-      installationReady
+      this.config.ui.useMockData
     );
 
     return {};

@@ -32,6 +32,7 @@ import type {
   AgentBuilderSmlPluginSetup,
   AgentBuilderSmlPluginStart,
 } from '@kbn/agent-builder-sml-plugin/server';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
 
 export type {
   AgentBuilderPluginSetup,
@@ -66,6 +67,7 @@ export interface AgentBuilderSetupDependencies {
   home: HomeServerPluginSetup;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
+  files: FilesSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -79,4 +81,5 @@ export interface AgentBuilderStartDependencies {
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   agentBuilderSml: AgentBuilderSmlPluginStart;
+  files: FilesStart;
 }
