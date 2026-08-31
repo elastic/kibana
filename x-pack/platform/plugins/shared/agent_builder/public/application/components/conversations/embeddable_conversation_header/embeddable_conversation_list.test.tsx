@@ -21,6 +21,12 @@ jest.mock('../../../context/streaming/streaming_context', () => ({
   useStreamingContext: jest.fn(),
 }));
 
+jest.mock('../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: jest.fn(() => ({
+    conversationTemplatesService: { getTemplateUIDefinition: jest.fn() },
+  })),
+}));
+
 jest.mock('../../../hooks/use_conversation_list', () => ({
   useConversationList: jest.fn(),
 }));
