@@ -46,7 +46,7 @@ describe('updateRuleInputSchema', () => {
 
   it('is a plain union of real zod objects', () => {
     const ruleSchema = updateRuleInputSchema.shape.rule;
-    // Check that schema is a normal union and not a proxy – otherwise autocomplete 
+    // Check that schema is a normal union and not a proxy – otherwise autocomplete
     // and editor validation don't work.
     expect(ruleSchema).toBeInstanceOf(z.ZodUnion);
     expect((ruleSchema as z.ZodUnion).options[0]).toBeInstanceOf(z.ZodObject);

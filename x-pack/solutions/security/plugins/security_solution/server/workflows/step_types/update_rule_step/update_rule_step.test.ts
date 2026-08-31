@@ -21,10 +21,10 @@ describe('updateRuleStepDefinition', () => {
   let mockContextManager: jest.Mocked<Context['contextManager']>;
 
   const buildContext = (rule: InputRule): Context =>
-  ({
-    input: { rule },
-    contextManager: mockContextManager,
-  } as unknown as Context);
+    ({
+      input: { rule },
+      contextManager: mockContextManager,
+    } as unknown as Context);
 
   beforeEach(() => {
     mockContextManager = {

@@ -77,7 +77,7 @@ export const updateRuleStepCommonDefinition: BaseStepDefinition<
           - host.name
         value: 200
       severity: medium
-\`\`\``
+\`\`\``,
     ],
   },
 };
