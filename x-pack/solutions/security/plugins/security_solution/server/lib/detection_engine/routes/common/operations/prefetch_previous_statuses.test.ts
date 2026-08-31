@@ -18,6 +18,7 @@ import {
   fetchAlertIdToIndex,
   fetchAlertIdIndexWithSource,
   prefetchAllPreviousStatusesByIds,
+  prefetchChangedListFieldIds,
   prefetchPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
   verifyAlertIdsInIndex,
@@ -1073,5 +1074,132 @@ describe('computeActualDelta', () => {
   it('preserves the original order of the requestedToAdd array in the output', () => {
     const { actualAdded } = computeActualDelta([{ [FIELD]: [] }], ['z', 'a', 'm'], [], FIELD);
     expect(actualAdded).toEqual(['z', 'a', 'm']);
+  });
+});
+
+describe('prefetchChangedListFieldIds', () => {
+  const FIELD = 'kibana.alert.workflow_tags';
+  let context: SecuritySolutionRequestHandlerContextMock;
+  let esClient: SecuritySolutionRequestHandlerContextMock['core']['elasticsearch']['client']['asCurrentUser'];
+
+  const sourceHits = (hits: Array<{ _id: string; _index?: string; tags?: string[] }>) =>
+    searchResponse({
+      hits: {
+        total: { value: hits.length, relation: 'eq' },
+        hits: hits.map(({ _id, _index = '.alerts-security.alerts-default', tags }) => ({
+          _id,
+          _index,
+          _source: tags === undefined ? {} : { [FIELD]: tags },
+        })),
+      },
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ context } = requestContextMock.createTools());
+    esClient = context.core.elasticsearch.client.asCurrentUser;
+  });
+
+  it('returns only the ids of documents the update would actually change', async () => {
+    // Encoding WHY: the emitted id list is a claim about which alerts changed. A document
+    // that already carries every requested tag is untouched by the update script, so a
+    // workflow acting on its id would act on a change that never happened.
+    esClient.search.mockResolvedValue(
+      sourceHits([
+        { _id: 'unchanged', tags: ['existing'] },
+        { _id: 'changed', tags: ['other'] },
+      ])
+    );
+    const { changedIds } = await prefetchChangedListFieldIds(
+      esClient,
+      'my-index',
+      ['unchanged', 'changed'],
+      FIELD,
+      ['existing'],
+      [],
+      ['existing'],
+      []
+    );
+    expect(changedIds).toEqual(['changed']);
+  });
+
+  it('returns an empty id list when no requested id exists in the index', async () => {
+    // Encoding WHY: an empty result is how the callers suppress the event entirely —
+    // nothing was observed, so nothing may be claimed.
+    esClient.search.mockResolvedValue(sourceHits([]));
+    const { changedIds, actualAdded, actualRemoved } = await prefetchChangedListFieldIds(
+      esClient,
+      'my-index',
+      ['missing'],
+      FIELD,
+      ['tag'],
+      [],
+      ['tag'],
+      []
+    );
+    expect(changedIds).toEqual([]);
+    expect(actualAdded).toEqual([]);
+    expect(actualRemoved).toEqual([]);
+  });
+
+  it('flags a document as changed from the raw arrays while the delta stays within the capped arrays', async () => {
+    // Encoding WHY: the two arrays serve different masters. The predicate must see the whole
+    // request so an over-cap value that genuinely mutates the document still fires the trigger;
+    // the payload must stay inside the Zod bounds, so its delta is computed from the capped
+    // arrays and may legitimately come back empty (callers then set truncated).
+    esClient.search.mockResolvedValue(sourceHits([{ _id: 'alert-1', tags: ['capped'] }]));
+    const { changedIds, actualAdded } = await prefetchChangedListFieldIds(
+      esClient,
+      'my-index',
+      ['alert-1'],
+      FIELD,
+      ['capped', 'beyond-the-cap'],
+      [],
+      ['capped'],
+      []
+    );
+    expect(changedIds).toEqual(['alert-1']);
+    expect(actualAdded).toEqual([]);
+  });
+
+  it('deduplicates an id returned by more than one index family', async () => {
+    // Encoding WHY: an _id can exist in both the scheduled and adhoc attack families, and
+    // emitting it twice makes a workflow process the same document repeatedly.
+    esClient.search.mockResolvedValue(
+      sourceHits([
+        { _id: 'attack-1', _index: '.alerts-security.attack.discovery.alerts-default', tags: [] },
+        {
+          _id: 'attack-1',
+          _index: '.adhoc.alerts-security.attack.discovery.alerts-default',
+          tags: [],
+        },
+      ])
+    );
+    const { changedIds } = await prefetchChangedListFieldIds(
+      esClient,
+      ['.alerts-security.attack.discovery.alerts-default'],
+      ['attack-1'],
+      FIELD,
+      ['tag'],
+      [],
+      ['tag'],
+      []
+    );
+    expect(changedIds).toEqual(['attack-1']);
+  });
+
+  it('reports a removal only when at least one document carries the value', async () => {
+    esClient.search.mockResolvedValue(sourceHits([{ _id: 'alert-1', tags: ['present'] }]));
+    const { actualRemoved } = await prefetchChangedListFieldIds(
+      esClient,
+      'my-index',
+      ['alert-1'],
+      FIELD,
+      [],
+      ['present', 'absent'],
+      [],
+      ['present', 'absent']
+    );
+    expect(actualRemoved).toEqual(['present']);
   });
 });
