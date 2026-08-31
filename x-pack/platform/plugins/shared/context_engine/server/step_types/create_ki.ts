@@ -13,6 +13,7 @@ import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   assertWritableDest,
+  enforceKiVerification,
   resolveOrCreateAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
@@ -21,6 +22,7 @@ export const getCreateKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
   checkWritePrivilege,
+  kiVerificationService,
   analyticsService,
   logger,
 }: KiStepDependencies) =>
@@ -30,7 +32,7 @@ export const getCreateKiStepDefinition = ({
       const request = context.contextManager.getFakeRequest();
       await assertContextEngineEnabled(isContextEngineEnabled, request);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, ki, verification } = context.input;
       return withKiWriteTelemetry({
         action: 'create',
         aiIndexId,
@@ -50,6 +52,18 @@ export const getCreateKiStepDefinition = ({
             });
           }
           const esClient = context.contextManager.getScopedEsClient();
+
+          if (verification) {
+            await enforceKiVerification({
+              ki,
+              verification,
+              kiVerificationService,
+              esClient,
+              analyticsService,
+              logger,
+              abortSignal: context.abortSignal,
+            });
+          }
 
           const response = await esClient.index(
             {

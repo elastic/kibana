@@ -11,9 +11,15 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import type { KiPartialFields } from '../../common/step_types/ki';
+import type { KiWriteVerification } from '../../common/step_types/ki_write_verification';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-import type { KiVerificationSummary } from '../ki_verification';
+import type {
+  KiVerificationService,
+  KiVerificationSummary,
+  KnowledgeIndicator,
+} from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
 import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 
@@ -24,6 +30,7 @@ export interface KiStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
   /** Whether the request has the Context Engine write API privilege. */
   checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
+  kiVerificationService: KiVerificationService;
   analyticsService: ContextEngineAnalyticsService;
   logger: Logger;
 }
@@ -129,6 +136,62 @@ export const withKiVerificationTelemetry = async ({
     logger.debug(aborted ? 'KI verification aborted' : `KI verification errored: ${errorType}`);
     throw error;
   }
+};
+
+/** Runs the requested verifiers and fails the step when any verifier rejects the KI. */
+export const enforceKiVerification = async ({
+  ki,
+  verification,
+  kiVerificationService,
+  esClient,
+  analyticsService,
+  logger,
+  abortSignal,
+}: {
+  ki: KnowledgeIndicator;
+  verification: KiWriteVerification;
+  kiVerificationService: KiVerificationService;
+  esClient: ElasticsearchClient;
+  analyticsService: ContextEngineAnalyticsService;
+  logger: Logger;
+  abortSignal: AbortSignal;
+}): Promise<void> => {
+  const summary = await withKiVerificationTelemetry({
+    analyticsService,
+    logger,
+    run: () =>
+      kiVerificationService.verifyKi(ki, {
+        isEnabled: true,
+        esClient,
+        logger,
+        abortSignal,
+        esqlAttributes: verification.esql_attributes,
+        verifiers: verification.verifiers,
+      }),
+  });
+
+  if (!summary.passed) {
+    const failedVerifierIds = summary.results
+      .filter(({ passed }) => !passed)
+      .map(({ verifier }) => verifier);
+    throw new ExecutionError({
+      type: 'VerificationError',
+      message: `Knowledge indicator verification failed: ${failedVerifierIds.join(', ')}`,
+      details: { verification: summary },
+    });
+  }
+};
+
+/** Merges a KI patch using the same object and array semantics as an Elasticsearch update. */
+export const mergeKiForVerification = (
+  storedKi: KnowledgeIndicator,
+  patch: KiPartialFields
+): KnowledgeIndicator => {
+  const mergedKi: KnowledgeIndicator = { ...storedKi, ...patch };
+  if (patch.attributes !== undefined) {
+    mergedKi.attributes = { ...storedKi.attributes, ...patch.attributes };
+  }
+  return mergedKi;
 };
 
 /** Fails the step when the workflow user lacks the Context Engine write API privilege. */

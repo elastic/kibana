@@ -9,6 +9,7 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/logging';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from '../ai_indices/service';
+import type { KiVerificationService } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 
 /** Builds a minimal step handler context with a mocked scoped ES client. */
@@ -44,8 +45,11 @@ export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexS
     get: jest.fn().mockResolvedValue({ id: 'my-ai-index', dest, managed }),
   } as unknown as AiIndexService);
 
-/** Fresh telemetry deps (analytics service + logger mocks) for a KI step definition. */
+/** Fresh verification, telemetry, and logger mocks for a KI step definition. */
 export const mockKiStepTelemetry = () => ({
+  kiVerificationService: {
+    verifyKi: jest.fn().mockResolvedValue({ passed: true, results: [] }),
+  } as unknown as jest.Mocked<KiVerificationService>,
   analyticsService: {
     reportKiWrite: jest.fn(),
     reportKiVerification: jest.fn(),

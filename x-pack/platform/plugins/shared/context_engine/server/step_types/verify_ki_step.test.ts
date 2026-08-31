@@ -7,7 +7,12 @@
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
-import { ESQL_VALID_RUNTIME_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
+import {
+  createKiVerifierRegistry,
+  ESQL_VALID_RUNTIME_VERIFIER_ID,
+  ESQL_VALID_SYNTAX_VERIFIER_ID,
+  KiVerificationService,
+} from '../ki_verification';
 import { mockKiStepTelemetry } from './test_utils';
 
 type VerifyKiHandler = ReturnType<typeof createVerifyKiStepDefinition>['handler'];
@@ -65,7 +70,12 @@ describe('verify_ki workflow step', () => {
   });
 
   const makeDefinition = () =>
-    createVerifyKiStepDefinition(coreSetup, telemetry.logger, telemetry.analyticsService);
+    createVerifyKiStepDefinition(
+      coreSetup,
+      telemetry.logger,
+      telemetry.analyticsService,
+      new KiVerificationService(createKiVerifierRegistry())
+    );
 
   const runHandler = async (
     ki: VerifyKiHandlerContext['input']['ki'],

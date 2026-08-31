@@ -35,6 +35,7 @@ import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from '
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
+import { createKiVerifierRegistry, KiVerificationService } from './ki_verification';
 
 export class ContextEnginePlugin
   implements
@@ -51,6 +52,7 @@ export class ContextEnginePlugin
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
+  private readonly kiVerificationService = new KiVerificationService(createKiVerifierRegistry());
   private analyticsService?: ContextEngineAnalyticsService;
 
   constructor(context: PluginInitializerContext) {
@@ -71,7 +73,12 @@ export class ContextEnginePlugin
     const analyticsService = this.analyticsService;
 
     setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService)
+      createVerifyKiStepDefinition(
+        coreSetup,
+        this.logger.get('context_steps'),
+        analyticsService,
+        this.kiVerificationService
+      )
     );
 
     coreSetup.uiSettings.registerGlobal({
@@ -127,6 +134,7 @@ export class ContextEnginePlugin
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
       analyticsService,
+      kiVerificationService: this.kiVerificationService,
       logger: this.logger.get('context_steps'),
       getAiIndexService: () => {
         if (!this.aiIndexService) {
