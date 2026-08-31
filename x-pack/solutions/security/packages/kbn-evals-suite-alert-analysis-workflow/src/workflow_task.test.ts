@@ -16,11 +16,6 @@ const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecuti
     ...overrides,
   } as WorkflowStepExecutionDto);
 
-/**
- * The suite joins agent tool spans on `conversation_id`, not the workflow's
- * `traceId`. These pin the shape the reader is handed: plain string ids, in
- * first-seen order, one per `ai.agent` step.
- */
 describe('alert-analysis conversation id extraction', () => {
   it('maps every agent step to a plain conversation id for the trace reader', () => {
     const steps = [

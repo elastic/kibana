@@ -11,11 +11,6 @@ import {
 } from './agent_conversation_ids';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 
-/**
- * Covers the multi-agent case (one conversation id per `ai.agent` step) and the
- * `step_level_timeout` wrapper, which reuses the agent step's `stepId` with a
- * null output.
- */
 const step = (over: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({ stepId: 'draft_creation', ...over } as WorkflowStepExecutionDto);
 

@@ -17,29 +17,15 @@ interface EsqlResponse {
 }
 
 /**
- * Ordered tool calls for one or more agent conversations.
- *
- * Joined on `gen_ai.conversation.id`, NOT on the workflow's trace id. The agent
- * invocation opens its own root trace, so the workflow's trace id matches zero
- * agent spans — that mismatch is what made workflow Tool Routing / Trajectory
- * evaluators report N/A on every example.
- *
- * Pass every `ai.agent` step's conversation id (from step output
- * `conversation_id`). Multi-agent workflows (draft → review → rewrite) produce
- * one conversation id per step; callers must supply all of them or later steps'
- * tool spans are silently dropped.
- *
- * `LIMIT` is explicit because ES|QL otherwise applies an implicit 1000-row
- * default and truncates silently. Truncation here is not a visible failure — it
- * drops the tail of a trajectory and scores routing against a partial tool
- * sequence. The busiest conversation observed on the golden cluster used 483
- * tool spans (2026-08-12), so this ceiling clears current traffic with headroom.
+ * Explicit because ES|QL otherwise applies an implicit 1000-row default and
+ * truncates silently, which would score routing against a partial trajectory
+ * rather than fail visibly.
  */
 const TOOL_SPAN_LIMIT = 10_000;
 
 const assertSafeEsqlString = (value: string): string => {
-  // Conversation ids and tool names from the platform are UUID / dotted identifiers.
-  // Reject anything that could break out of an ES|QL string literal.
+  // Values are interpolated into ES|QL string literals, so reject anything
+  // that could break out of one.
   if (!/^[A-Za-z0-9._-]+$/.test(value)) {
     throw new Error(`Unsafe value for ES|QL string literal: ${value}`);
   }
@@ -135,7 +121,6 @@ const normalizeConversationIds = (conversationIds: string | string[] | undefined
   const ids = (Array.isArray(conversationIds) ? conversationIds : [conversationIds]).filter(
     (id): id is string => typeof id === 'string' && id.length > 0
   );
-  // Preserve first-seen order while deduping.
   const seen = new Set<string>();
   const result: string[] = [];
   for (const id of ids) {

@@ -9,15 +9,6 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { readAgentToolCallsFromTraces } from './read_agent_tool_calls_from_traces';
 
-/**
- * Contract: join on `gen_ai.conversation.id` (not workflow `trace.id`), filter
- * to TOOL spans, exclude filestore.read by default, and keep an explicit LIMIT
- * so ES|QL's implicit 1000-row cap cannot silently truncate trajectories.
- *
- * Multi-`ai.agent` workflows must pass every conversation id — a single id
- * silently drops later steps' tool spans.
- */
-
 const silentLog = {
   warning: jest.fn(),
   info: jest.fn(),
@@ -219,9 +210,8 @@ describe('readAgentToolCallsFromTraces', () => {
 
     const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
       .query;
-    // Real traces indices have no mapping for this field until some span sets
-    // it; naming it in KEEP made ES|QL reject the whole query (Unknown column),
-    // which degraded every read to unavailable.
+    // Unmapped on real traces indices until a span sets it; naming it in KEEP
+    // makes ES|QL reject the whole query.
     expect(query).not.toContain('attributes.gen_ai.tool.call.failed');
     expect(query).toContain('| KEEP @timestamp, tool_id');
   });
