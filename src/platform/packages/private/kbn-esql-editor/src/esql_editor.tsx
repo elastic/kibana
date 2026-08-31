@@ -473,6 +473,8 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedFieldsFromESQL,
     dataSourcesCache,
     memoizedSources,
+    timeseriesIndicesCache,
+    memoizedTimeseriesIndices,
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
     minimalQueryRef,
@@ -546,6 +548,8 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedFieldsFromESQL,
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
+    timeseriesIndicesCache,
+    memoizedTimeseriesIndices,
     favoritesClient,
     getJoinIndicesCallback,
     enableResourceBrowser,
@@ -837,8 +841,11 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   // Add editor key bindings
-                  addEditorKeyBindings(editor, stableOnQuerySubmit, stableOnPrettifyQuery, () =>
-                    onGenerateFromCommentRef.current()
+                  const keyBindingDisposables = addEditorKeyBindings(
+                    editor,
+                    stableOnQuerySubmit,
+                    stableOnPrettifyQuery,
+                    () => onGenerateFromCommentRef.current()
                   );
 
                   const ghostHintDisposables = setupGhostLineHint(editor);
@@ -849,6 +856,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     if (!editorCommandDisposables.current.has(currentEditor)) {
                       editorCommandDisposables.current.set(currentEditor, [
                         ...commandDisposables,
+                        ...keyBindingDisposables,
                         ...ghostHintDisposables,
                       ]);
                     }
@@ -885,12 +893,17 @@ const ESQLEditorInternal = function ESQLEditor({
                     isSuggestionPopupOpenRef
                   );
 
-                  // on CMD/CTRL + / comment out the entire line
-                  editor.addCommand(
+                  // An action, not a command: `addCommand` keybindings are page-wide and fire while
+                  // another editor on the page has focus.
+                  const commentLineDisposable = editor.addAction({
+                    id: 'esql.commentLine',
+                    label: i18n.translate('esqlEditor.query.commentLineLabel', {
+                      defaultMessage: 'Toggle line comment',
+                    }),
                     // eslint-disable-next-line no-bitwise
-                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
-                    onCommentLine
-                  );
+                    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash],
+                    run: onCommentLine,
+                  });
 
                   setMeasuredEditorWidth(editor.getLayoutInfo().width);
                   if (expandToFitQueryOnMount) {
@@ -916,6 +929,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     layoutChangeDisposable,
                     modelContentDisposable,
                     suggestionPopupDisposable,
+                    commentLineDisposable,
                   ];
                   editorCommandDisposables.current.get(currentEditor)?.push(...listenerDisposables);
 

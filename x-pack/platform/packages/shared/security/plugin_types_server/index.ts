@@ -51,6 +51,7 @@ export type {
   CheckUserProfilesPrivilegesResponse,
   CasesActions,
   CheckPrivileges,
+  AiIndexActions,
   AlertingActions,
   AlertsActions,
   AppActions,
