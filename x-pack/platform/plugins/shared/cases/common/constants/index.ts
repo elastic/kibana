@@ -313,19 +313,18 @@ export const MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH = MAX_EXTENDED_FIELD_VALUE_B
 export const MAX_EXTENDED_FIELD_FILTERS = MAX_FIELD_DEFINITIONS_PER_OWNER * 2;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
+
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
 export const MAX_USER_ACTION_AUTHOR_LENGTH = 256 as const;
+export const MAX_USER_ACTION_TYPE_LENGTH = 50 as const;
 
 /**
  * Cases features
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
+  alerts: { read: true, all: true },
   metrics: [],
-  observables: { enabled: true, autoExtract: false },
-  events: { enabled: false },
-  templates: { enabled: false },
 });
 
 /**
@@ -398,6 +397,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesTableColumns: 'cases.list.tableColumns',
   casesListFields: 'cases.list.fields',
+  casesGlobalFieldColumns: 'cases.list.globalFieldColumns',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesViewMode: 'cases.list.viewMode',
   casesTableState: 'cases.list.state',
@@ -498,6 +498,18 @@ export const CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE =
 
 export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
   'case_markdown_editor_plugin_clicked' as const;
+
+/**
+ * Template management events. Each one reports a single confirmed user action on the template
+ * management pages — not a count of templates written. A bulk delete reports one event whatever the
+ * number of removed templates, and the YAML import flow reports nothing. Use the server-side
+ * template counters for write totals; they count every caller.
+ */
+export const CASES_TEMPLATE_CREATED_EVENT_TYPE = 'cases_template_created' as const;
+
+export const CASES_TEMPLATE_UPDATED_EVENT_TYPE = 'cases_template_updated' as const;
+
+export const CASES_TEMPLATE_DELETED_EVENT_TYPE = 'cases_template_deleted' as const;
 
 /**
  * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that

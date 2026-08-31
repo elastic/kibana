@@ -63,8 +63,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    // total run time ~10m 55s (colors/color_mapping/chart_data/time_shift/share → Scout)
-    loadTestFile(require.resolve('./dashboard')); // 6m 45s
-    loadTestFile(require.resolve('./show_underlying_data_dashboard')); // 2m 10s
+    // remaining: skipped dashboard.ts (#280950). show_underlying_data* → Scout
+    loadTestFile(require.resolve('./dashboard'));
   });
 };

@@ -99,7 +99,7 @@ export const deriveRedirectConfig = (redirectUris?: string[]): RedirectUriConfig
     return { type: RedirectUriType.LOCAL, uris: [{ value: '' }] };
   }
 
-  const isRemote = uris.length === 1 && uris[0].startsWith('https://') && !isLoopbackUri(uris[0]);
+  const isRemote = uris.every((uri) => uri.startsWith('https://') && !isLoopbackUri(uri));
 
   return {
     type: isRemote ? RedirectUriType.REMOTE : RedirectUriType.LOCAL,

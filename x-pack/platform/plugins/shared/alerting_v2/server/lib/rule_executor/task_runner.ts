@@ -90,10 +90,7 @@ export class RuleExecutorTaskRunner {
     }
 
     if (result.haltReason === 'rule_deleted') {
-      const params = taskInstance.params as RuleExecutorTaskParams;
-      logger.debug({
-        message: `Rule "${params.ruleId}" in the "${params.spaceId}" space no longer exists. Its corresponding task will be removed by Task Manager.`,
-      });
+      logger.debug({ message: 'Rule no longer exists; task will be removed' });
       throwUnrecoverableError(new Error('Rule no longer exists'));
     }
 

@@ -11,6 +11,7 @@ import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsReadPrivilegesCallout } from './entity_analytics_read_privileges_callout';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
+import { LEADS_INDEX_PATTERN } from '../../../common/entity_analytics/lead_generation/constants';
 
 jest.mock('../../common/components/callouts/use_callout_storage', () => ({
   useCallOutStorage: () => ({
@@ -153,7 +154,7 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
   });
 
   it('shows callout when lead generation index is missing read privilege', () => {
-    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadsIndex = LEADS_INDEX_PATTERN;
     const leadPrivileges = makeEntityEnginePrivileges({
       [leadsIndex]: { read: false, view_index_metadata: true },
     });
@@ -165,7 +166,7 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
   });
 
   it('combines missing privileges from risk engine, entity store, and lead generation', () => {
-    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadsIndex = LEADS_INDEX_PATTERN;
     const missingRiskPrivileges: RiskEngineMissingPrivilegesResponse = {
       isLoading: false,
       hasAllRequiredPrivileges: false,
@@ -246,7 +247,7 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
   });
 
   it('combines missing privileges from all sources including anomaly', () => {
-    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadsIndex = LEADS_INDEX_PATTERN;
     const anomalyIndex = '.ml-anomalies-*';
     const missingRiskPrivileges: RiskEngineMissingPrivilegesResponse = {
       isLoading: false,

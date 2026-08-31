@@ -78,7 +78,7 @@ export const PromptModal = ({ prompt, onClose }: PromptModalProps) => {
           {(copy) => (
             <EuiButton
               fill
-              iconType="copyClipboard"
+              iconType="copy"
               onClick={copy}
               data-test-subj="vectordbPromptModalCopyButton"
               data-telemetry-id="serverlessVectordb-home-chat-copyPrompt"

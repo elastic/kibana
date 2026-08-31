@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { selectEvaluators } from '@kbn/evals';
 import type { Evaluator } from '@kbn/evals';
 import { createScenarioCriteriaLlmEvaluator } from '../scenario_criteria/evaluators';
 import { createSyntaxValidationEvaluator } from './syntax/syntax_validation';
@@ -20,6 +19,7 @@ import { createStatsQualityCalibrationEvaluator } from './stats/stats_quality_ca
 import { createToolUsageEvaluator } from './tool_usage/tool_usage_validation';
 import { exactDuplicateAvoidanceEvaluator } from './novelty/exact_duplicate_avoidance';
 import { generationSuccessEvaluator } from './generation_success';
+import { expectedGenerationOutcomeEvaluator } from './expected_generation_outcome';
 import type {
   KIQueryGenerationEvaluationExample,
   KIQueryGenerationEvaluator,
@@ -54,16 +54,15 @@ export const createKIQueryGenerationEvaluators = (
     createToolUsageEvaluator(),
     exactDuplicateAvoidanceEvaluator,
     generationSuccessEvaluator,
+    expectedGenerationOutcomeEvaluator,
   ];
-  const base = selectEvaluators(evaluators);
-
   if (!scenarioCriteria) {
-    return base;
+    return evaluators;
   }
 
   const { criteriaFn, criteria } = scenarioCriteria;
   return [
-    ...base,
+    ...evaluators,
     createScenarioCriteriaLlmEvaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput>(
       {
         criteriaFn: (c) =>

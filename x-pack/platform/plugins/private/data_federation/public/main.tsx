@@ -119,7 +119,7 @@ export const Main: FunctionComponent = () => {
             {
               id: 'quickstart',
               label: mainTranslations.quickstartLink,
-              iconType: 'launch',
+              iconType: 'rocket',
               href: dataFederationLinks.quickstart,
               target: '_blank',
               overflow: true,

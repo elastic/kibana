@@ -218,7 +218,9 @@ export class DescendantsQuery extends BaseResolverQuery {
      *
      * So the schema fields are flattened ('process.parent.entity_id')
      */
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    return response.hits.hits.map((hit) => hit.fields);
+    return response.hits.hits.map((hit) => ({
+      ...(hit.fields ?? {}),
+      ...(hit._index ? { _index: hit._index } : {}),
+    }));
   }
 }

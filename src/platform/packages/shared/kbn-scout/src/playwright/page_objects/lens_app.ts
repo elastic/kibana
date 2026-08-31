@@ -28,6 +28,7 @@ export class LensApp {
   readonly saveModal;
   readonly savedObjectTitleInput;
   readonly confirmSaveButton;
+  readonly addToLibraryCheckbox;
   /**
    * Needed by the Lens plugin's `openDimensionEditor` / `secondaryFlyoutBackButton` alias
    * as well as `closeDimensionEditor` here.
@@ -54,6 +55,7 @@ export class LensApp {
     this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+    this.addToLibraryCheckbox = this.page.locator('#add-to-library-checkbox');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
@@ -168,6 +170,8 @@ export class LensApp {
         }
       | {
           addToDashboard: 'new';
+          saveAsNew?: boolean;
+          saveToLibrary?: boolean;
         }
       | {
           addToDashboard: 'none';
@@ -185,7 +189,17 @@ export class LensApp {
         .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
         .click();
     } else if (options?.addToDashboard === 'new') {
+      if (options.saveAsNew !== undefined) {
+        await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
+      }
       await this.page.locator('#new-dashboard-option').check();
+      if (options.saveToLibrary !== undefined) {
+        if (options.saveToLibrary) {
+          await this.addToLibraryCheckbox.check();
+        } else {
+          await this.addToLibraryCheckbox.uncheck();
+        }
+      }
     } else if (options?.addToDashboard === 'none') {
       await this.page.locator('#add-to-library-option').check();
     }

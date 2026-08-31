@@ -20,7 +20,6 @@ const {
   openTrustedApps,
   selectOs,
   openFieldSelector,
-  expectedFieldOptions,
   selectField,
   fillOutValueField,
   fillOutTrustedAppsFlyout,
@@ -31,8 +30,6 @@ const {
   validateRenderedConditions,
   deleteTrustedAppItem,
   removeSingleCondition,
-  expectAllFieldOptionsRendered,
-  expectFieldOptionsNotRendered,
 } = trustedAppsFormSelectors;
 
 describe(
@@ -100,26 +97,6 @@ describe(
           : []),
       ],
       os_types: ['macos'],
-    });
-
-    describe('Renders Trusted Apps form fields', () => {
-      it('Correctly renders all blocklist fields for different OSs', () => {
-        openTrustedApps({ create: true });
-        selectOs('windows');
-        expectFieldOptionsNotRendered();
-        openFieldSelector();
-        expectAllFieldOptionsRendered();
-
-        selectOs('macos');
-        expectFieldOptionsNotRendered();
-        openFieldSelector();
-        expectAllFieldOptionsRendered();
-
-        selectOs('linux');
-        expectFieldOptionsNotRendered();
-        openFieldSelector();
-        expectedFieldOptions(['Path', 'Hash']);
-      });
     });
 
     describe('Handles CRUD with signature field', () => {

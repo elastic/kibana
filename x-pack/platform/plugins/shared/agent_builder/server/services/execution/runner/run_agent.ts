@@ -62,6 +62,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
+  const conversationClient = await manager.deps.conversationService.getScopedClient({ request });
 
   const { filesystemService, bashService } = await createFilesystemServices({
     manager,
@@ -121,11 +122,15 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     hooks: manager.deps.hooks,
     experimentalFeatures,
     executionMode: manager.deps.executionMode,
+    interactivity: manager.deps.interactivity,
+    parentExecutionId: manager.deps.parentExecutionId,
     subAgentExecutor: manager.deps.subAgentExecutor,
+    conversationClient,
     analyticsService,
     trackingService,
     filesystemService,
     bashService,
+    aiIndexResolver: manager.deps.agentsService.getAiIndexResolver(),
   };
 };
 

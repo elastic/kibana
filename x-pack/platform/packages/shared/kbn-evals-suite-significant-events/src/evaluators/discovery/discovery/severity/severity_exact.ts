@@ -72,6 +72,7 @@ const matchesExpectedEvent = (
 export const severityExactEvaluator: DiscoveryEvaluator = {
   name: 'severity_exact',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output, expected }) => {
     const expectedEvents = expected?.expected_significant_events ?? [];
     const expectedOpenEvents = expectedEvents.filter(

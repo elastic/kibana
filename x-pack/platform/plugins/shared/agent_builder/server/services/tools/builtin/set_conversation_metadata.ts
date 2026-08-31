@@ -67,6 +67,7 @@ export const createSetConversationMetadataTool = ({
   description: toolDescription,
   schema: setConversationMetadataSchema,
   tags: ['internal'],
+  excludeFromMcp: true,
   handler: async ({ metadata }) => {
     // Reject unknown keys first.
     for (const key of Object.keys(metadata)) {
