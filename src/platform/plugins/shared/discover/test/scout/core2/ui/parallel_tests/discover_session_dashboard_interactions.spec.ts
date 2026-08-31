@@ -12,15 +12,16 @@ import type { DiscoverSessionApiDataInput } from '../../../../../server/api/sche
 import { spaceTest, tags, testData } from '../fixtures';
 
 const FLIGHTS_DATA_VIEW = 'kibana_sample_data_flights';
-const FLIGHTS_TIME_RANGE_DISPLAY = {
-  from: 'Apr 10, 2018 @ 00:00:00.000',
-  to: 'Nov 15, 2018 @ 00:00:00.000',
+const FLIGHTS_TIME_RANGE = {
+  from: '2018-04-10T00:00:00.000Z',
+  to: '2018-11-15T00:00:00.000Z',
 };
 const CUSTOM_ROWS_PER_PAGE = 10;
 
 spaceTest.describe('Discover session panel interactions', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
+    await discoverScoutSpace.uiSettings.setDefaultTime(FLIGHTS_TIME_RANGE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -50,7 +51,7 @@ spaceTest.describe('Discover session panel interactions', { tag: tags.deployment
   spaceTest(
     'persists rows per page after saving and reloading a dashboard',
     async ({ apiServices, discoverScoutSpace, page, pageObjects, scoutSpace }) => {
-      const { dashboard, dataGrid, datePicker } = pageObjects;
+      const { dashboard, dataGrid } = pageObjects;
       const savedSearchName = `Paginated Discover session ${scoutSpace.id}`;
       const dashboardName = `Dashboard with paginated Discover session ${scoutSpace.id}`;
 
@@ -73,7 +74,6 @@ spaceTest.describe('Discover session panel interactions', { tag: tags.deployment
       );
 
       await dashboard.openNewDashboard();
-      await datePicker.setAbsoluteRange(FLIGHTS_TIME_RANGE_DISPLAY);
       await dashboard.addSavedSearch(savedSearchName);
       await dashboard.waitForRenderComplete();
       await dataGrid.waitForLoad();
