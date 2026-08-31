@@ -340,13 +340,7 @@ export const vegaEmbeddableFactory = (
     return {
       api,
       Component: () => {
-        const [renderInput, hideTitle, title, description, rendered] = useBatchedPublishingSubjects(
-          renderInput$,
-          api.hideTitle$,
-          api.title$,
-          api.description$,
-          rendered$
-        );
+        const [renderInput, rendered] = useBatchedPublishingSubjects(renderInput$, rendered$);
         const domNode = useRef<HTMLDivElement>(null);
 
         useEffect(
@@ -366,14 +360,7 @@ export const vegaEmbeddableFactory = (
         }, [rendered]);
 
         return (
-          <div
-            ref={domNode}
-            css={{ width: '100%', height: '100%', display: 'flex' }}
-            data-render-complete={rendered}
-            data-title={hideTitle ? '' : title ?? ''}
-            data-description={description ?? ''}
-            data-shared-item
-          >
+          <div ref={domNode} css={{ width: '100%', height: '100%', display: 'flex' }}>
             {renderInput ? (
               <Suspense fallback={<EuiLoadingChart size="l" />}>
                 <LazyVegaVisComponent
