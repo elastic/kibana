@@ -12,11 +12,8 @@ import type {
   BulkResponse,
   CreateActionPolicyDataInput,
   MatchedActionPolicy,
-  MatcherContext,
-  PolicyMatcher,
 } from '@kbn/alerting-v2-schemas';
 import {
-  ALERT_EPISODE_STATUS,
   createActionPolicyDataSchema,
   updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -24,7 +21,6 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
-import { evaluateKql } from '@kbn/eval-kql';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
@@ -41,6 +37,7 @@ import {
   getInvalidActionPolicyDataMessage,
 } from '../errors/action_policy_error_messages';
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
+import { PolicyMatcher } from '../dispatcher/state';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
@@ -75,16 +72,6 @@ import {
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
-
-const policyMatcherToKql = (matcher: PolicyMatcher | null | undefined): string | null => {
-  if (!matcher) return null;
-  const { tags, expression } = matcher;
-  const parts: string[] = [];
-  if (tags && tags.length > 0) parts.push(tags.map((t) => `rule.tags: "${t}"`).join(' OR '));
-  if (expression && expression.trim()) parts.push(`(${expression.trim()})`);
-  if (parts.length === 0) return null;
-  return parts.map((p) => `(${p})`).join(' AND ');
-};
 
 /**
  * Concurrency cap for {@link ActionPolicyClient.bulkUpdateActionPoliciesApiKey}.
@@ -396,44 +383,27 @@ export class ActionPolicyClient {
   public async matchActionPoliciesForRule(
     params: MatchActionPoliciesForRuleParams
   ): Promise<MatchActionPoliciesForRuleResponse> {
-    const { ruleId, ruleName, ruleTags } = params;
-
-    const context: MatcherContext = {
-      last_event_timestamp: '',
-      group_hash: '',
-      episode_id: '',
-      episode_status: ALERT_EPISODE_STATUS.ACTIVE,
-      rule: {
-        id: ruleId ?? '',
-        name: ruleName ?? '',
-        tags: ruleTags ?? [],
-      },
-    };
+    const { ruleTags = [] } = params;
+    const ruleTagSet = new Set(ruleTags);
 
     const items: MatchedActionPolicy[] = [];
 
     const allPolicies = await this.findActionPolicies({ perPage: 100 });
     for (const actionPolicy of allPolicies.items) {
-      const matcherKql = policyMatcherToKql(actionPolicy.matcher);
-      if (matcherKql === null) {
+      const { matcher } = actionPolicy;
+
+      // A catch-all matcher (absent, or with neither a tag clause nor an expression) applies to
+      // every rule. Reuses the dispatcher's canonical definition so both stay in sync.
+      if (PolicyMatcher.of(matcher).isCatchAll()) {
         items.push({ actionPolicy, category: 'global' });
         continue;
       }
 
-      let isMatch = false;
-      try {
-        isMatch = evaluateKql(matcherKql, context);
-      } catch {
-        this.logger.warn({
-          message: 'Policy matcher failed to evaluate; treating as no-match',
-          code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
-          labels: { policy_id: actionPolicy.id },
-        });
-        continue;
-      }
-
-      if (isMatch) {
-        items.push({ actionPolicy, category: 'global-filtered' });
+      // Expression clauses depend on episode data unavailable here, so a policy can only match
+      // through its tag clause intersecting the rule's tags.
+      const matcherTags = matcher?.tags ?? [];
+      if (matcherTags.some((tag) => ruleTagSet.has(tag))) {
+        items.push({ actionPolicy, category: 'tags' });
       }
     }
 

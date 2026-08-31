@@ -1338,7 +1338,6 @@ export function ComposeDiscoverFlyout({
                       onRecoveryTypeChange={handleRecoveryTypeChange}
                       onKindChange={handleKindChange}
                       isEditing={isEditing}
-                      ruleId={ruleId}
                       builderType={builderType}
                     />
                   </BuilderStateProvider>

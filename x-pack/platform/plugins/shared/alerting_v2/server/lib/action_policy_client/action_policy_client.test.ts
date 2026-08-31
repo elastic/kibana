@@ -26,12 +26,6 @@ import { createLoggerService } from '../services/logger_service/logger_service.m
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
-jest.mock('@kbn/eval-kql', () => ({
-  evaluateKql: jest.fn(),
-}));
-
-import { evaluateKql } from '@kbn/eval-kql';
-
 describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
@@ -3108,10 +3102,6 @@ describe('ActionPolicyClient', () => {
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
-    beforeEach(() => {
-      (evaluateKql as jest.Mock).mockReset();
-    });
-
     it('returns global APs for policies with no matcher, along with the space-scoped total', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse(
@@ -3120,7 +3110,7 @@ describe('ActionPolicyClient', () => {
         )
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('global');
@@ -3128,26 +3118,52 @@ describe('ActionPolicyClient', () => {
       expect(result.total).toBe(150);
     });
 
-    it('returns global-filtered APs for policies where evaluateKql returns true', async () => {
+    it('returns global APs for policies whose matcher has neither tags nor an expression', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: { tags: ['rule-1'] },
+        matcher: { tags: [], expression: '  ' },
+      };
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindResponse([{ id: 'ap-empty-matcher', attributes: matcherAttr }])
+      );
+
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].category).toBe('global');
+      expect(result.items[0].actionPolicy.id).toBe('ap-empty-matcher');
+    });
+
+    it('returns global APs even when the rule has no tags', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindResponse([{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }])
+      );
+
+      const result = await client.matchActionPoliciesForRule({});
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].category).toBe('global');
+    });
+
+    it('returns tags APs when the rule tags intersect the matcher tag clause', async () => {
+      const matcherAttr: ActionPolicySavedObjectAttributes = {
+        ...baseAttributes,
+        matcher: { tags: ['prod', 'infra'] },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse([{ id: 'ap-matcher', attributes: matcherAttr }])
       );
 
-      (evaluateKql as jest.Mock).mockReturnValue(true);
-
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('global-filtered');
+      expect(result.items[0].category).toBe('tags');
       expect(result.items[0].actionPolicy.id).toBe('ap-matcher');
     });
 
-    it('skips APs where evaluateKql returns false', async () => {
+    it('skips APs whose tag clause does not intersect the rule tags', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
         matcher: { tags: ['staging'] },
@@ -3157,63 +3173,41 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-no-match', attributes: matcherAttr }])
       );
 
-      (evaluateKql as jest.Mock).mockReturnValue(false);
-
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
     });
 
-    it('skips APs where evaluateKql throws and does not re-throw', async () => {
+    it('skips expression-only matchers that cannot be resolved from rule tags', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: { expression: 'invalid kql !!!' },
+        matcher: { expression: 'episode_status: "active"' },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
-        makeFindResponse([{ id: 'ap-err', attributes: matcherAttr }])
+        makeFindResponse([{ id: 'ap-expression', attributes: matcherAttr }])
       );
 
-      (evaluateKql as jest.Mock).mockImplementation(() => {
-        throw new Error('KQL parse error: invalid kql !!!');
-      });
-
-      const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Policy matcher failed to evaluate; treating as no-match',
-        expect.objectContaining({
-          labels: expect.objectContaining({
-            policy_id: 'ap-err',
-            code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
-          }),
-        })
-      );
-      const warnMessage = (mockLogger.warn as jest.Mock).mock.calls[0][0] as string;
-      expect(warnMessage).not.toContain('invalid kql !!!');
-      expect(warnMessage).not.toContain('KQL parse error');
     });
 
-    it('uses provided ruleName and ruleTags to evaluate matchers', async () => {
+    it('returns tags APs when a matcher has both tags and an expression and the tags intersect', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: { tags: ['prod'] },
+        matcher: { tags: ['prod'], expression: 'data.error_count > 0' },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
-        makeFindResponse([{ id: 'ap-matcher', attributes: matcherAttr }])
+        makeFindResponse([{ id: 'ap-combined', attributes: matcherAttr }])
       );
 
-      (evaluateKql as jest.Mock).mockReturnValue(true);
-
-      const result = await client.matchActionPoliciesForRule({
-        ruleName: 'my-rule',
-        ruleTags: ['prod'],
-      });
+      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod', 'infra'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('global-filtered');
+      expect(result.items[0].category).toBe('tags');
+      expect(result.items[0].actionPolicy.id).toBe('ap-combined');
     });
   });
 });

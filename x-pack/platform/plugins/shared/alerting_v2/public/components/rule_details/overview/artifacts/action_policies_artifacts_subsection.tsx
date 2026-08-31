@@ -71,7 +71,7 @@ export const ActionPoliciesArtifactsSubsection: React.FC = () => {
   const rule = useRule();
   const http = useService(CoreStart('http'));
   const { totalCount, catchAllCount, matchingCriteriaCount, isCountTruncated, isLoading, isError } =
-    useLinkedActionPolicies(rule.id);
+    useLinkedActionPolicies(rule.metadata.tags ?? []);
 
   const openNotificationPoliciesHref = http.basePath.prepend(paths.actionPolicyList);
 

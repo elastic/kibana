@@ -55,7 +55,7 @@ describe('MatchedPolicyReason', () => {
 
   it('renders a tags badge with the matched tag count', () => {
     renderComponent({
-      category: 'global-filtered',
+      category: 'tags',
       matcher: { tags: ['env:prod', 'team:sre'] },
       ruleTags: ['env:prod', 'other'],
     });
@@ -68,7 +68,7 @@ describe('MatchedPolicyReason', () => {
 
   it('falls back to showing all matcher tags when the rule carries none', () => {
     renderComponent({
-      category: 'global-filtered',
+      category: 'tags',
       matcher: { tags: ['env:prod', 'team:sre'] },
       ruleTags: [],
     });
@@ -79,7 +79,7 @@ describe('MatchedPolicyReason', () => {
 
   it('renders an expression badge', () => {
     renderComponent({
-      category: 'global-filtered',
+      category: 'tags',
       matcher: { expression: 'rule.name: "checkout"' },
       ruleTags: [],
     });
@@ -91,7 +91,7 @@ describe('MatchedPolicyReason', () => {
 
   it('renders both tags and expression badges when the matcher has both clauses', () => {
     renderComponent({
-      category: 'global-filtered',
+      category: 'tags',
       matcher: { tags: ['env:prod'], expression: 'rule.name: "checkout"' },
       ruleTags: ['env:prod'],
     });
@@ -111,7 +111,7 @@ describe('MatchedPolicyReason', () => {
 
   it('shows the matched tags in the tags badge tooltip', async () => {
     renderComponent({
-      category: 'global-filtered',
+      category: 'tags',
       matcher: { tags: ['env:prod', 'team:sre'] },
       ruleTags: ['env:prod'],
     });
@@ -123,7 +123,7 @@ describe('MatchedPolicyReason', () => {
 
   it('shows the expression in the expression badge tooltip', async () => {
     renderComponent({
-      category: 'global-filtered',
+      category: 'tags',
       matcher: { expression: 'rule.id: "my-rule"' },
       ruleTags: [],
     });

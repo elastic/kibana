@@ -57,15 +57,13 @@ const getEditLabel = (name: string) =>
 
 interface Props {
   http: HttpStart;
-  ruleId?: string;
 }
 
-export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
+export const LinkedActionPoliciesStep = ({ http }: Props) => {
   const metadata = useWatch<FormValues, 'metadata'>({ name: 'metadata' });
-  const name = metadata?.name;
   const tags = metadata?.tags;
 
-  const { isLoading, error, items } = useMatchedActionPolicies({ http, ruleId, name, tags });
+  const { isLoading, error, items } = useMatchedActionPolicies({ http, tags });
   const ruleTags = tags ?? [];
 
   return (
