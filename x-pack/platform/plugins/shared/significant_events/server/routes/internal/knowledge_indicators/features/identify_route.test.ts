@@ -27,9 +27,7 @@ const computedRoute =
     'POST /internal/streams/{streamName}/features/_identify/computed'
   ];
 const shouldIdentifyRoute =
-  internalIdentifyKIFeaturesRoutes[
-    'GET /internal/streams/{streamName}/features/_should_identify'
-  ];
+  internalIdentifyKIFeaturesRoutes['GET /internal/streams/{streamName}/features/_should_identify'];
 
 type InferredHandlerParams = Parameters<typeof inferredRoute.handler>[0];
 type ComputedHandlerParams = Parameters<typeof computedRoute.handler>[0];
