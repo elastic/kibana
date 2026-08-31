@@ -9,6 +9,7 @@ import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import React from 'react';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -111,6 +112,8 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         rulesListProps: {},
       });
     },
+    getRulesPage: () =>
+      React.createElement('div', { 'data-test-subj': 'rules-page' }, 'mocked component'),
     getAlertSummaryWidget: (props) => {
       const dependencies: AlertSummaryWidgetDependencies['dependencies'] = {
         charts: chartPluginMock.createStartContract(),

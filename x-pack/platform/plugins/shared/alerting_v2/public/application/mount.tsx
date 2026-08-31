@@ -48,10 +48,12 @@ export const mountAlertingV2App = async ({
   params,
   container,
   coreStart,
+  showRulesV2Tab = false,
 }: {
   params: AlertingV2MountParams;
   container: Container;
   coreStart: CoreStart;
+  showRulesV2Tab?: boolean;
 }): Promise<AppUnmount> => {
   const { element, history, setBreadcrumbs } = params;
 
@@ -64,7 +66,7 @@ export const mountAlertingV2App = async ({
           <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
             <I18nProvider>
               <Router history={history}>
-                <RulesApp />
+                <RulesApp showRulesV2Tab={showRulesV2Tab} />
               </Router>
             </I18nProvider>
           </BreadcrumbProvider>

@@ -8,9 +8,11 @@
 import type {
   AppMountParameters,
   AppUpdater,
+  ChromeStart,
   CoreSetup,
   CoreStart,
   Plugin as CorePlugin,
+  ScopedHistory,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { from, map } from 'rxjs';
@@ -64,6 +66,7 @@ import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRulesListLazy } from './common/get_rules_list';
+import { getRulesPageLazy } from './common/get_rules_page';
 import { getActionFormLazy } from './common/get_action_form';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
@@ -115,6 +118,7 @@ import type { UntrackAlertsModalProps } from './application/sections/common/comp
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+import type { TriggersAndActionsUiServices } from './application/rules_app';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -149,6 +153,15 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: RuleEventLogListProps<T>
   ) => ReactElement<RuleEventLogListProps<T>>;
   getRulesList: (props: RulesListProps) => ReactElement;
+  /**
+   * Renders the classic Stack Management Rules app (list, logs, details, create/edit)
+   * so host pages can embed it. Pass a `ScopedHistory` scoped to the host's v1
+   * tab path (e.g. `history.createSubHistory('/v1')`).
+   */
+  getRulesPage: (props: {
+    history: ScopedHistory;
+    setBreadcrumbs: ChromeStart['setBreadcrumbs'];
+  }) => ReactElement;
   getRulesListNotifyBadge: (
     props: RulesListNotifyBadgePropsWithApi
   ) => ReactElement<RulesListNotifyBadgePropsWithApi>;
@@ -223,6 +236,8 @@ export class Plugin
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
   private config: TriggersActionsUiConfigType;
   private connectorServices?: ConnectorServices;
+  private setupPlugins?: PluginsSetup;
+  private kibanaFeatures: KibanaFeature[] = [];
   readonly experimentalFeatures: ExperimentalFeatures;
   private readonly isServerless: boolean;
 
@@ -234,10 +249,60 @@ export class Plugin
     this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
   }
 
+  private createRulesPageServices(
+    core: CoreStart,
+    plugins: PluginsStart,
+    params: {
+      history: ScopedHistory;
+      setBreadcrumbs: ChromeStart['setBreadcrumbs'];
+      element: HTMLElement;
+      kibanaFeatures: KibanaFeature[];
+    }
+  ): TriggersAndActionsUiServices {
+    if (!this.setupPlugins) {
+      throw new Error('triggersActionsUi setup() must run before creating the Rules page');
+    }
+
+    return {
+      ...core,
+      actions: this.setupPlugins.actions,
+      security: { ...core.security, ...plugins.security },
+      cloud: this.setupPlugins.cloud,
+      data: plugins.data,
+      dataViews: plugins.dataViews,
+      dataViewEditor: plugins.dataViewEditor,
+      charts: plugins.charts,
+      alerting: plugins.alerting,
+      spaces: plugins.spaces,
+      unifiedSearch: plugins.unifiedSearch,
+      isCloud: Boolean(this.setupPlugins.cloud?.isCloudEnabled),
+      element: params.element,
+      theme: core.theme,
+      storage: new Storage(window.localStorage),
+      setBreadcrumbs: params.setBreadcrumbs,
+      history: params.history,
+      actionTypeRegistry: this.actionTypeRegistry,
+      ruleTypeRegistry: this.ruleTypeRegistry,
+      kibanaFeatures: params.kibanaFeatures,
+      licensing: plugins.licensing,
+      expressions: plugins.expressions,
+      isServerless: this.isServerless,
+      fieldFormats: plugins.fieldFormats,
+      lens: plugins.lens,
+      fieldsMetadata: plugins.fieldsMetadata,
+      contentManagement: plugins.contentManagement,
+      share: plugins.share,
+      uiActions: plugins.uiActions,
+      cps: plugins.cps,
+      inspector: plugins.inspector,
+    };
+  }
+
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
     const isServerless = this.isServerless;
+    this.setupPlugins = plugins;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
@@ -512,6 +577,15 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    void plugins.features
+      .getFeatures()
+      .then((features) => {
+        this.kibanaFeatures = features;
+      })
+      .catch(() => {
+        this.kibanaFeatures = [];
+      });
+
     const createAlertRuleAction = async () => {
       const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
         coreStart: core,
@@ -602,6 +676,16 @@ export class Plugin
           connectorServices: this.connectorServices!,
           rulesListProps: props,
         });
+      },
+      getRulesPage: ({ history, setBreadcrumbs }) => {
+        return getRulesPageLazy(
+          this.createRulesPageServices(core, plugins, {
+            history,
+            setBreadcrumbs,
+            element: document.createElement('div'),
+            kibanaFeatures: this.kibanaFeatures,
+          })
+        );
       },
       getRuleDefinition: (
         props: Omit<RuleDefinitionProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>

@@ -205,6 +205,14 @@ const waitForRules = async () => {
   });
 };
 
+const getManageV1RulesLink = () => {
+  const overflowButton = screen.queryByTestId('app-menu-overflow-button');
+  if (overflowButton) {
+    fireEvent.click(overflowButton);
+  }
+  return screen.getByTestId('manageV1RulesButton');
+};
+
 describe('RulesListPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -302,6 +310,41 @@ describe('RulesListPage', () => {
       ).toBeInTheDocument();
     });
     expect(screen.queryByTestId('rulesListTable')).not.toBeInTheDocument();
+  });
+
+  it('renders a manage v1 rules link to the classic rules app', async () => {
+    renderPage();
+    await waitForRules();
+
+    const manageV1RulesLink = getManageV1RulesLink();
+    expect(manageV1RulesLink).toHaveAttribute('href', '/app/rules');
+    expect(manageV1RulesLink).toHaveTextContent('Manage v1 rules');
+  });
+
+  it('hides the manage v1 rules link when hideManageV1Rules is set', async () => {
+    render(
+      <ListPageTestProviders>
+        <RulesListPage hideManageV1Rules />
+      </ListPageTestProviders>
+    );
+    await waitForRules();
+
+    const overflowButton = screen.queryByTestId('app-menu-overflow-button');
+    if (overflowButton) {
+      fireEvent.click(overflowButton);
+    }
+    expect(screen.queryByTestId('manageV1RulesButton')).not.toBeInTheDocument();
+  });
+
+  it('keeps the manage v1 rules link when the create controls are hidden', async () => {
+    resolveRules([], 0);
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('manageV1RulesButton')).toHaveAttribute('href', '/app/rules');
   });
 
   it('hides the header create controls in the empty state (no rules, no active filters)', async () => {
@@ -882,6 +925,7 @@ describe('RulesListPage', () => {
 
       expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
       expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+      expect(getManageV1RulesLink()).toHaveAttribute('href', '/app/rules');
     });
 
     it('shows a read-only empty prompt (not the create panel) when there are no rules', async () => {

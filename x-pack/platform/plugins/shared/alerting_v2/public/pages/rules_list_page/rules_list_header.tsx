@@ -17,7 +17,19 @@ const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTit
   defaultMessage: 'Rules',
 });
 
+const manageV1RulesItem = (href: string) => ({
+  id: 'manageV1Rules',
+  label: i18n.translate('xpack.alertingV2.rulesList.manageV1RulesButton', {
+    defaultMessage: 'Manage v1 rules',
+  }),
+  iconType: 'gear' as const,
+  href,
+  testId: 'manageV1RulesButton',
+});
+
 const getRulesListMenu = ({
+  manageV1RulesHref,
+  showCreateActions,
   onCreateRule,
   onCreateEsqlRule,
   onCreateWithAgent,
@@ -25,71 +37,86 @@ const getRulesListMenu = ({
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: {
+  manageV1RulesHref?: string;
+  showCreateActions: boolean;
   onCreateRule: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
   onBuildSequence: () => void;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
-}): AppHeaderMenu => ({
-  items: [
-    {
-      id: 'buildSequence',
-      label: i18n.translate('xpack.alertingV2.rulesList.buildSequenceButton', {
-        defaultMessage: 'Build a sequence',
+}): AppHeaderMenu => {
+  const manageV1Rules = manageV1RulesHref ? manageV1RulesItem(manageV1RulesHref) : undefined;
+
+  if (!showCreateActions) {
+    return manageV1Rules ? { primaryActionItem: manageV1Rules } : {};
+  }
+
+  return {
+    items: [
+      ...(manageV1Rules ? [manageV1Rules] : []),
+      {
+        id: 'buildSequence',
+        label: i18n.translate('xpack.alertingV2.rulesList.buildSequenceButton', {
+          defaultMessage: 'Build a sequence',
+        }),
+        iconType: 'branch' as const,
+        tooltipContent: i18n.translate('xpack.alertingV2.rulesList.buildSequenceTooltip', {
+          defaultMessage: 'Chain rules to detect multi-step alert patterns',
+        }),
+        testId: 'createSequenceRuleButton',
+        run: onBuildSequence,
+      },
+    ],
+    primaryActionItem: {
+      id: 'createRule',
+      label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
+        defaultMessage: 'Create rule',
       }),
-      iconType: 'branch',
-      tooltipContent: i18n.translate('xpack.alertingV2.rulesList.buildSequenceTooltip', {
-        defaultMessage: 'Chain rules to detect multi-step alert patterns',
-      }),
-      testId: 'createSequenceRuleButton',
-      run: onBuildSequence,
+      iconType: 'plusCircle',
+      run: onCreateRule,
+      testId: 'createRuleButton',
+      popoverTestId: 'createRulePopoverPanel',
+      splitButtonProps: {
+        iconType: 'chevronSingleDown',
+        secondaryButtonAriaLabel: i18n.translate(
+          'xpack.alertingV2.rulesList.createRuleMoreOptions',
+          {
+            defaultMessage: 'More create options',
+          }
+        ),
+        items: [
+          {
+            id: 'createEsqlRule',
+            label: i18n.translate('xpack.alertingV2.rulesList.createEsqlRuleButton', {
+              defaultMessage: 'Create ES|QL rule',
+            }),
+            iconType: 'productDiscover',
+            order: 0,
+            run: onCreateEsqlRule,
+            testId: 'createEsqlRuleButton',
+          },
+          {
+            id: 'createWithAgent',
+            label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
+              defaultMessage: 'Create with agent',
+            }),
+            iconType: 'sparkles' as const,
+            order: 1,
+            run: onCreateWithAgent,
+            testId: 'createWithAgentButton',
+            disableButton: createWithAgentDisabled,
+            tooltipContent: createWithAgentTooltipText,
+          },
+        ],
+      },
     },
-  ],
-  primaryActionItem: {
-    id: 'createRule',
-    label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
-      defaultMessage: 'Create rule',
-    }),
-    iconType: 'plusCircle',
-    run: onCreateRule,
-    testId: 'createRuleButton',
-    popoverTestId: 'createRulePopoverPanel',
-    splitButtonProps: {
-      iconType: 'chevronSingleDown',
-      secondaryButtonAriaLabel: i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
-        defaultMessage: 'More create options',
-      }),
-      items: [
-        {
-          id: 'createEsqlRule',
-          label: i18n.translate('xpack.alertingV2.rulesList.createEsqlRuleButton', {
-            defaultMessage: 'Create ES|QL rule',
-          }),
-          iconType: 'productDiscover',
-          order: 0,
-          run: onCreateEsqlRule,
-          testId: 'createEsqlRuleButton',
-        },
-        {
-          id: 'createWithAgent',
-          label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
-            defaultMessage: 'Create with agent',
-          }),
-          iconType: 'sparkles' as const,
-          order: 1,
-          run: onCreateWithAgent,
-          testId: 'createWithAgentButton',
-          disableButton: createWithAgentDisabled,
-          tooltipContent: createWithAgentTooltipText,
-        },
-      ],
-    },
-  },
-});
+  };
+};
 
 export interface RulesListHeaderProps {
   canWrite: boolean;
+  manageV1RulesHref?: string;
   onCreateRule: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
@@ -105,6 +132,7 @@ export interface RulesListHeaderProps {
  */
 export const RulesListHeader = ({
   canWrite,
+  manageV1RulesHref,
   onCreateRule,
   onCreateEsqlRule,
   onCreateWithAgent,
@@ -113,22 +141,23 @@ export const RulesListHeader = ({
   createWithAgentTooltipText,
 }: RulesListHeaderProps) => {
   const phase = useContentListPhase();
-  const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
+  const showCreateActions = canWrite && phase !== 'empty' && phase !== 'initialLoad';
 
   const headerMenu = useMemo(
     () =>
-      showHeaderMenu
-        ? getRulesListMenu({
-            onCreateRule,
-            onCreateEsqlRule,
-            onCreateWithAgent,
-            onBuildSequence,
-            createWithAgentDisabled,
-            createWithAgentTooltipText,
-          })
-        : undefined,
+      getRulesListMenu({
+        manageV1RulesHref,
+        showCreateActions,
+        onCreateRule,
+        onCreateEsqlRule,
+        onCreateWithAgent,
+        onBuildSequence,
+        createWithAgentDisabled,
+        createWithAgentTooltipText,
+      }),
     [
-      showHeaderMenu,
+      manageV1RulesHref,
+      showCreateActions,
       onCreateRule,
       onCreateEsqlRule,
       onCreateWithAgent,

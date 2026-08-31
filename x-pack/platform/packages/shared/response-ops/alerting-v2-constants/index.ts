@@ -12,6 +12,8 @@ export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 
 export const ALERTING_V2_SECTION_ID = 'alertingV2';
+/** Stack Management Insights and Alerting section; hosts the solution-nav `management:rules` page. */
+export const INSIGHTS_AND_ALERTING_SECTION_ID = 'insightsAndAlerting';
 export const ALERTING_V2_RULES_APP_ID = 'rules';
 export const ALERTING_V2_RULE_LIBRARY_APP_ID = 'rule_library';
 export const ALERTING_V2_RULE_LIBRARY_LOCATOR = 'ALERTING_V2_RULE_LIBRARY_LOCATOR';
