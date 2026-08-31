@@ -135,7 +135,7 @@ describe('fetchCandidateEntities', () => {
   const listEntitiesBatch = jest.fn();
   const crudClient = { listEntitiesBatch } as unknown as EntityStoreCRUDClient;
 
-  const STRATEGY_COUNT = 6;
+  const STRATEGY_COUNT = 5;
   const emptyResult = { records: [], total: 0 };
 
   type BatchParams = Array<{ sortField: string; filter?: unknown; filterQuery?: string }>;
