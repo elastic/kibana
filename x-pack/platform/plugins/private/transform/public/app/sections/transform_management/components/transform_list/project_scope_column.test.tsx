@@ -74,7 +74,7 @@ describe('ProjectScopeColumn', () => {
     expect(screen.getByText('Origin project')).toBeInTheDocument();
     expect(screen.getByText('Linked project')).toBeInTheDocument();
     expect(
-      screen.queryByRole('group', { name: 'Cross-project search project picker' })
+      screen.queryByRole('group', { name: 'Cross-project search scope selector' })
     ).not.toBeInTheDocument();
   });
 
