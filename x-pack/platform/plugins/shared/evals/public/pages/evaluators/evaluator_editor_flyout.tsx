@@ -199,6 +199,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
     for (const score of scores) {
       const scoreName = score.name.trim();
       if (!scoreName) {
+        setFormError(i18n.REQUIRED_FIELDS_ERROR);
         return undefined;
       }
 
