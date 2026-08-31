@@ -8,6 +8,7 @@
 import { parse } from 'yaml';
 import { PND_RULE_CREATION_WORKFLOW } from '@kbn/workflows/managed/definitions/pnd/rule_workflows';
 import { DRAFT_STEP_ID, REVIEW_STEP_ID, RULE_CREATION_TOOL_ID } from './constants';
+import { REQUIRED_PROMPT_CONTRACT } from './workflow_fixture';
 
 // The definition module is the single source for both the yaml and the version, so this
 // asserts exactly what the pnd plugin installs — not a copy that could drift from it.
@@ -27,6 +28,23 @@ const RULE_CREATION_YAML: string = PND_RULE_CREATION_WORKFLOW.yaml;
  *  - skip-shaped output    -> a refusal must satisfy the step schema, else it errors
  *  - step ids / tool id    -> client + Tool Routing evaluator address these by name
  */
+describe('installed-revision guard', () => {
+  // The stack can serve an older revision than the checkout (managed definitions only
+  // reinstall on Kibana start). These patterns are what assertWorkflowInstalled checks, so
+  // a v2-shaped document fails setup loudly instead of scoring a workflow not under test.
+  const CONTRACT = REQUIRED_PROMPT_CONTRACT.map(({ pattern }) => pattern);
+  const v2Shaped =
+    'steps:\n  - name: draft_creation\n    with:\n      message: |-\n        Draft a rule now.\n';
+
+  it('rejects a stack still serving the pre-gate revision', () => {
+    expect(CONTRACT.every((p) => p.test(v2Shaped))).toBe(false);
+  });
+
+  it('accepts the revision shipped in this checkout', () => {
+    expect(CONTRACT.every((p) => p.test(RULE_CREATION_YAML))).toBe(true);
+  });
+});
+
 describe('system-security-rule-creation contract', () => {
   const yaml: string = RULE_CREATION_YAML;
   interface JsonSchemaNode {
