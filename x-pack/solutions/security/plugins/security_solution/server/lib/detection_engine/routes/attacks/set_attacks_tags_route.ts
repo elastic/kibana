@@ -133,9 +133,7 @@ export const setAttacksTagsRoute = (
                   tagsAdded: attackTagsActuallyAdded,
                   tagsRemoved: attackTagsActuallyRemoved,
                   truncated:
-                    verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER ||
-                    ids.length > MAX_ALERTS_PER_TRIGGER ||
-                    operationTruncated,
+                    verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
                 });
               }
               return result;

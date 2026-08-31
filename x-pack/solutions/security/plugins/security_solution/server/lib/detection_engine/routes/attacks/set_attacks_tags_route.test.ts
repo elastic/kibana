@@ -25,7 +25,11 @@ import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksTagsRoute } from './set_attacks_tags_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { MAX_TAG_LENGTH, MAX_TAGS_PER_OPERATION } from '../../../../../common/workflows/triggers';
+import {
+  MAX_ALERTS_PER_TRIGGER,
+  MAX_TAG_LENGTH,
+  MAX_TAGS_PER_OPERATION,
+} from '../../../../../common/workflows/triggers';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -382,6 +386,30 @@ describe('set attacks tags', () => {
         expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({ attackIds: ['attack1'] })
+        );
+      });
+
+      test('does not set truncated when the request exceeds the ID cap but the payload is complete', async () => {
+        // Encoding WHY: `truncated` tells a workflow author the payload lost data. A request
+        // with more IDs than MAX_ALERTS_PER_TRIGGER where only one attack actually changes
+        // loses nothing, so claiming truncation would send the author hunting for IDs that
+        // were never dropped. The flag must follow the emitted payload, not the request size.
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+          getSearchResponse([{ _id: 'attack1' }])
+        );
+        const oversizedIds = Array.from(
+          { length: MAX_ALERTS_PER_TRIGGER + 1 },
+          (_, i) => `attack-${i}`
+        );
+        await server.inject(
+          getRequest({ ids: oversizedIds, tags: defaultTags }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ attackIds: ['attack1'], truncated: false })
         );
       });
 
