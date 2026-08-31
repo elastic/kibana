@@ -143,7 +143,7 @@ export class SignificantEventsPlugin
       rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
-      const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
+      const isServerless = plugins.cloud?.isServerlessEnabled ?? false;
 
       const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
@@ -367,7 +367,7 @@ export class SignificantEventsPlugin
   public start(core: CoreStart, plugins: SignificantEventsPluginStartDependencies): void {
     if (this.server) {
       this.server.core = core;
-      this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
+      this.server.isServerless = this.server.cloud?.isServerlessEnabled ?? false;
       this.server.security = plugins.security;
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
