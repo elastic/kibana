@@ -10,7 +10,7 @@ import {
   InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationSubjectMissingError,
-} from '../client/investigations_client';
+} from '../client/errors';
 
 export const rethrowInvestigationClientError = (error: unknown): never => {
   if (error instanceof InvestigationNotFoundError) {

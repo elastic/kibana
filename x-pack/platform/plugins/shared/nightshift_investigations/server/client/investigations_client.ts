@@ -49,13 +49,6 @@ import {
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
 } from './errors';
-export {
-  InvestigationConflictError,
-  InvestigationNotFoundError,
-  InvalidInvestigationContextError,
-  InvestigationSubjectMissingError,
-  InvestigationUnavailableError,
-};
 
 /** Used when persist omitted `error`. */
 const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
@@ -190,6 +183,10 @@ export interface NightshiftInvestigationsClientDeps {
   workflowsManagement?: WorkflowsServerPluginSetup;
   spaces?: SpacesPluginStart;
   logger: Logger;
+  /**
+   * Explicit override for contexts where the request cannot carry space info (e.g. workflow step
+   * definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
+   */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
   investigationRepository: InvestigationRepository;

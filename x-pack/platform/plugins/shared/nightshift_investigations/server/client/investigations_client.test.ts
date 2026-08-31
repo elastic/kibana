@@ -25,8 +25,8 @@ import {
   InvestigationNotFoundError,
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
-  NightshiftInvestigationsClient,
-} from './investigations_client';
+} from './errors';
+import { NightshiftInvestigationsClient } from './investigations_client';
 
 jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),

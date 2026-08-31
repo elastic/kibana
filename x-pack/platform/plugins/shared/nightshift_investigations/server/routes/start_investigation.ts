@@ -9,7 +9,7 @@ import { badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { alertInvestigationContextSchema, freeFormContextSchema } from '../../common';
-import { InvalidInvestigationContextError } from '../client/investigations_client';
+import { InvalidInvestigationContextError } from '../client/errors';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
