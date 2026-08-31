@@ -97,6 +97,23 @@ export interface SmlIndexer {
   }) => Promise<void>;
 }
 
+// Wraps an internal SO repository so that .get() and .bulkGet() calls
+// automatically include the given namespace. All other methods fall through
+// to the original client via the prototype chain.
+const withNamespace = (
+  client: SavedObjectsClientContract,
+  namespace: string
+): SavedObjectsClientContract => {
+  const wrapped = Object.create(client) as SavedObjectsClientContract;
+  wrapped.get = (type, id, opts) => client.get(type, id, { ...opts, namespace });
+  wrapped.bulkGet = (objects, opts) =>
+    client.bulkGet(
+      objects.map((o) => ({ ...o, namespace })),
+      opts
+    );
+  return wrapped;
+};
+
 export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
   return new SmlIndexerImpl({ registry, logger });
 };
@@ -162,8 +179,6 @@ class SmlIndexerImpl implements SmlIndexer {
 
     // Internal repos need an explicit namespace to access non-default spaces;
     // scoped clients handle it themselves and throw if one is passed.
-    // The proxy intercepts .get() and .bulkGet() — the only SO methods any
-    // current getSmlEntry implementation calls (list() hooks are not in scope).
     const [firstSpace] = spaces;
     if (clientHasSpacesExtension && firstSpace && firstSpace !== 'default') {
       contextLogger.warn(
@@ -174,25 +189,7 @@ class SmlIndexerImpl implements SmlIndexer {
     const internalNamespace =
       !clientHasSpacesExtension && firstSpace && firstSpace !== 'default' ? firstSpace : undefined;
     const wrappedClient = internalNamespace
-      ? (new Proxy(savedObjectsClient, {
-          get(target, prop) {
-            if (prop === 'get') {
-              return (type: string, id: string, opts?: object) =>
-                (target as any).get(type, id, { ...opts, namespace: internalNamespace });
-            }
-            if (prop === 'bulkGet') {
-              return (
-                objects: Array<{ type: string; id: string; [k: string]: unknown }>,
-                opts?: object
-              ) =>
-                (target as any).bulkGet(
-                  objects.map((o) => ({ ...o, namespace: internalNamespace })),
-                  opts
-                );
-            }
-            return (target as any)[prop];
-          },
-        }) as SavedObjectsClientContract)
+      ? withNamespace(savedObjectsClient as SavedObjectsClientContract, internalNamespace)
       : (savedObjectsClient as SavedObjectsClientContract);
 
     const context: SmlContext = {
