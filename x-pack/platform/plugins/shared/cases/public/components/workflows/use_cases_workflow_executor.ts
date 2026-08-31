@@ -11,6 +11,10 @@ import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
 import { useAppUrl, useHttp, useKibana, useToasts } from '../../common/lib/kibana';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import {
+  useWorkflowRunTriggeredEBT,
+  getWorkflowRunOriginType,
+} from '../../analytics/use_workflow_run_ebt';
 import { runCaseWorkflow } from './api';
 import { buildViewExecutionText, getWorkflowExecutionPath } from './use_run_workflow_on_cases';
 import * as i18n from './translations';
@@ -21,6 +25,7 @@ export interface CasesWorkflowExecutorDeps {
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
   rendering: ReturnType<typeof useKibana>['services']['rendering'];
   refreshCaseViewPage: () => void;
+  reportWorkflowRunTriggered: ReturnType<typeof useWorkflowRunTriggeredEBT>;
 }
 
 export interface UseCasesWorkflowExecutorParams {
@@ -34,7 +39,14 @@ export interface UseCasesWorkflowExecutorParams {
  */
 export const createCasesWorkflowExecutor =
   (
-    { http, toasts, getAppUrl, rendering, refreshCaseViewPage }: CasesWorkflowExecutorDeps,
+    {
+      http,
+      toasts,
+      getAppUrl,
+      rendering,
+      refreshCaseViewPage,
+      reportWorkflowRunTriggered,
+    }: CasesWorkflowExecutorDeps,
     { caseId, origin }: UseCasesWorkflowExecutorParams
   ): RunWorkflowExecutor =>
   async ({ workflowId, inputs }) => {
@@ -47,6 +59,9 @@ export const createCasesWorkflowExecutor =
         origin,
       },
     });
+
+    // Report after the API resolves so only confirmed starts are counted.
+    reportWorkflowRunTriggered({ originType: getWorkflowRunOriginType(origin), caseCount: 1 });
 
     const executionHref = response.workflowExecutionId
       ? getAppUrl({ path: getWorkflowExecutionPath(workflowId, response.workflowExecutionId) })
@@ -75,10 +90,11 @@ export const useCasesWorkflowExecutorDeps = (): CasesWorkflowExecutorDeps => {
   const { getAppUrl } = useAppUrl(WORKFLOWS_APP_ID);
   const { rendering } = useKibana().services;
   const refreshCaseViewPage = useRefreshCaseViewPage();
+  const reportWorkflowRunTriggered = useWorkflowRunTriggeredEBT();
 
   return useMemo(
-    () => ({ http, toasts, getAppUrl, rendering, refreshCaseViewPage }),
-    [getAppUrl, http, refreshCaseViewPage, rendering, toasts]
+    () => ({ http, toasts, getAppUrl, rendering, refreshCaseViewPage, reportWorkflowRunTriggered }),
+    [getAppUrl, http, refreshCaseViewPage, rendering, reportWorkflowRunTriggered, toasts]
   );
 };
 

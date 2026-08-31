@@ -20,6 +20,11 @@ jest.mock('@kbn/react-kibana-mount', () => ({
   toMountPoint: (node: unknown) => node,
 }));
 
+// Mock the EBT hook — analytics behaviour is tested in its own suite
+jest.mock('../../analytics/use_workflow_run_ebt', () => ({
+  useWorkflowRunTriggeredEBT: () => jest.fn(),
+}));
+
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 
 describe('useRunWorkflowOnCases', () => {

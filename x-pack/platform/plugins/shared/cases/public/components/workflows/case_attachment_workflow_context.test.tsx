@@ -22,6 +22,12 @@ jest.mock('./use_run_case_workflow', () => ({
 
 const mockUseCanRunCaseWorkflow = jest.mocked(useCanRunCaseWorkflow);
 
+jest.mock('../../analytics/use_workflow_run_ebt', () => ({
+  useWorkflowRunTriggeredEBT: () => jest.fn(),
+  getWorkflowRunOriginType: jest.requireActual('../../analytics/use_workflow_run_ebt')
+    .getWorkflowRunOriginType,
+}));
+
 describe('useCaseAttachmentWorkflowContext', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <CaseAttachmentWorkflowProvider caseId="case-1">{children}</CaseAttachmentWorkflowProvider>

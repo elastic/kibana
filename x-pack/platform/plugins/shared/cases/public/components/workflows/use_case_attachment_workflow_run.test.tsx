@@ -27,6 +27,13 @@ jest.mock('./use_run_case_workflow', () => ({
   useCanRunCaseWorkflow: jest.fn(),
 }));
 
+const mockReportWorkflowRunTriggered = jest.fn();
+jest.mock('../../analytics/use_workflow_run_ebt', () => ({
+  useWorkflowRunTriggeredEBT: () => mockReportWorkflowRunTriggered,
+  getWorkflowRunOriginType: jest.requireActual('../../analytics/use_workflow_run_ebt')
+    .getWorkflowRunOriginType,
+}));
+
 const mockUseCanRunCaseWorkflow = jest.mocked(useCanRunCaseWorkflow);
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 
@@ -170,6 +177,10 @@ describe('useCaseAttachmentWorkflowRun', () => {
     );
     expect(mockToasts.addWarning).not.toHaveBeenCalled();
     expect(mockRefreshCaseViewPage).toHaveBeenCalledTimes(1);
+    expect(mockReportWorkflowRunTriggered).toHaveBeenCalledWith({
+      originType: 'cases.attachment',
+      caseCount: 1,
+    });
   });
 
   it('shows only the activity warning toast when the activity write fails', async () => {
