@@ -16,7 +16,9 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
+  AlertInvestigationContext,
   GetInvestigationResponse,
+  InvestigationContext,
   InvestigationStatus,
   InvestigationSubject,
   InvestigationSubjectType,
@@ -29,7 +31,9 @@ import type {
   StartInvestigationResponse,
 } from '../../common';
 import {
+  alertInvestigationContextSchema,
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+  freeFormContextSchema,
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
 } from '../../common';
@@ -38,15 +42,18 @@ import type {
   InvestigationSavedObjectUpdateAttributes,
   NightshiftInvestigationAttributes,
 } from '../saved_objects';
+import { buildInvestigationMessage } from './build_investigation_message';
 import {
   InvestigationConflictError,
   InvestigationNotFoundError,
+  InvalidInvestigationContextError,
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
 } from './errors';
 export {
   InvestigationConflictError,
   InvestigationNotFoundError,
+  InvalidInvestigationContextError,
   InvestigationSubjectMissingError,
   InvestigationUnavailableError,
 };
@@ -252,13 +259,45 @@ export class NightshiftInvestigationsClient {
     );
   }
 
+  /**
+   * Validates the context against the contract for its subject type and composes the brief the
+   * agent will read. Done here and not only in the route schema, because the workflow step
+   * definition and the plugin start contract both reach `start` without passing through route
+   * validation. Each branch parses with its own schema, so the alert brief is composed from a
+   * value the schema has already vouched for rather than from a re-checked `unknown`.
+   */
+  private prepareAgentInput(
+    subject: InvestigationSubject,
+    message: string | undefined,
+    context: InvestigationContext | AlertInvestigationContext
+  ): { message: string; context: Record<string, unknown> } {
+    if (subject.type === 'alert') {
+      const parsed = alertInvestigationContextSchema.safeParse(context);
+      if (!parsed.success) {
+        throw new InvalidInvestigationContextError(subject.type, parsed.error);
+      }
+      // An alert investigation always gets the brief composed from its alert data — that is what
+      // the alert context exists for. Every other subject keeps the caller-supplied message.
+      return { message: buildInvestigationMessage(parsed.data), context: parsed.data };
+    }
+
+    const parsed = freeFormContextSchema.safeParse(context);
+    if (!parsed.success) {
+      throw new InvalidInvestigationContextError(subject.type, parsed.error);
+    }
+    return {
+      message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
+      context: parsed.data,
+    };
+  }
+
   async start({
     subject,
     trigger_type,
     message,
     stream_names,
     concurrency_key,
-    context,
+    context = {},
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
       throw new InvestigationUnavailableError('workflowsManagement is not available');
@@ -267,6 +306,8 @@ export class NightshiftInvestigationsClient {
     if (!this.agentBuilder) {
       throw new InvestigationUnavailableError('agentBuilder is not available');
     }
+
+    const prepared = this.prepareAgentInput(subject, message, context);
 
     const spaceId = this.getSpaceId();
 
@@ -290,11 +331,11 @@ export class NightshiftInvestigationsClient {
     }
 
     const inputs = {
-      message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
+      message: prepared.message,
       stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
-        ...context,
+        ...prepared.context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,

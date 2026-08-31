@@ -12,7 +12,7 @@ import type {
   InvestigationRecommendation,
   SignificantEventUpdate,
 } from '@kbn/significant-events-schema';
-import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
+import type { InvestigationTriggerType } from './workflows/triggers';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,
@@ -22,15 +22,32 @@ export {
   type InvestigationTriggerType,
 } from './workflows/triggers';
 
-export interface InvestigationSubject {
-  type: InvestigationSubjectType;
-  id: string;
-  summary?: string;
-}
+/**
+ * The alert-facing types are derived from the zod schemas in `./schemas`, so the validation a
+ * caller is held to and the type the code is written against cannot disagree.
+ */
+export type {
+  AlertInvestigationContext,
+  AlertSnapshot,
+  AlertSnapshotEvaluation,
+  AlertSnapshotGroup,
+  InvestigationContext,
+  InvestigationSubject,
+} from './schemas';
 
-export interface InvestigationContext {
-  [key: string]: unknown;
-}
+export {
+  alertInvestigationContextSchema,
+  alertSnapshotSchema,
+  freeFormContextSchema,
+  investigationSubjectSchema,
+  MAX_ALERTS_PER_INVESTIGATION,
+} from './schemas';
+
+import type {
+  AlertInvestigationContext,
+  InvestigationContext,
+  InvestigationSubject,
+} from './schemas';
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
@@ -54,7 +71,7 @@ export interface StartInvestigationRequest {
    * strategy). Use a stable, unique caller-side ID — e.g. the alert _id or event UUID.
    */
   concurrency_key?: string;
-  context?: InvestigationContext;
+  context?: InvestigationContext | AlertInvestigationContext;
 }
 
 export interface StartInvestigationResponse {
