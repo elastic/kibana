@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { ServiceMapAttachmentData } from '../../../common/agent_builder/attachments';
+import { SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE } from '../../../common/agent_builder/attachments';
 import { transformTopologyToServiceMap } from '../../../common/agent_builder/attachments/service_map_transform';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
@@ -17,6 +17,7 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APM_EBT_ACTIONS } from '../../components/app/ebt_constants';
 import { SERVICE_MAP_EBT_ELEMENTS } from '../../components/app/service_map/ebt_constants';
 import { ContextualServiceMapGraph } from '../../components/app/service_map/contextual_map/contextual_service_map_graph';
+import { EXPLORE_IN_SERVICE_MAP_LABEL } from '../../components/app/service_map/contextual_map/contextual_service_map_section';
 import { useContextualServiceMapState } from '../../components/app/service_map/contextual_map/use_contextual_service_map_state';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../context/license/use_license_context';
@@ -25,15 +26,6 @@ import { ApmEmbeddableContext } from '../../embeddable/embeddable_context';
 import { getServiceMapUrl } from '../../embeddable/service_map/get_service_map_url';
 import type { EmbeddableDeps } from '../../embeddable/types';
 import { AgentServiceMap } from './agent_service_map';
-
-const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
-  'xpack.apm.agentBuilder.attachments.serviceMap.exploreInServiceMap',
-  { defaultMessage: 'Explore in Service map' }
-);
-
-/** Matches the `observability.get_service_topology` tool's default range. */
-const DEFAULT_RANGE_FROM = 'now-1h';
-const DEFAULT_RANGE_TO = 'now';
 
 export interface AgentContextualServiceMapProps {
   data: ServiceMapAttachmentData;
@@ -67,8 +59,9 @@ function ContextualMapContent({
   const { nodes, edges } = useMemo(() => transformTopologyToServiceMap(data), [data]);
   const contextualState = useContextualServiceMapState({ serviceName });
 
-  // Hide the link when the full Service Map page would only show a license
-  // prompt (platinum feature) or is disabled in config.
+  // Hide every full-map entry point (header link AND the graph's toolbar
+  // button) when the full Service Map page would only show a license prompt
+  // (platinum feature) or is disabled in config.
   const showExploreLink = Boolean(
     license && isActivePlatinumLicense(license) && config?.serviceMapEnabled
   );
@@ -90,7 +83,7 @@ function ContextualMapContent({
       kuery=""
       start={start}
       end={end}
-      fullMapHref={fullMapHref}
+      fullMapHref={showExploreLink ? fullMapHref : undefined}
       showFocusMap
       clearKueryOnPopoverNavigation
       alwaysNavigateOnPopoverFocus
@@ -114,7 +107,7 @@ function ContextualMapContent({
         <EuiLink
           href={fullMapHref}
           target="_blank"
-          data-test-subj="agentServiceMapExploreInServiceMap"
+          data-test-subj="apmAgentServiceMapExploreInServiceMap"
           {...getEbtProps({
             action: APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP,
             element: SERVICE_MAP_EBT_ELEMENTS.AGENT_ATTACHMENT_LINK,
@@ -136,14 +129,30 @@ function ContextualMap({
   serviceName,
   isSidebar,
 }: AgentContextualServiceMapProps & { serviceName: string }) {
-  const rangeFrom = data.timeRange?.start ?? DEFAULT_RANGE_FROM;
-  const rangeTo = data.timeRange?.end ?? DEFAULT_RANGE_TO;
-  const environment = (data.environment ?? ENVIRONMENT_ALL.value) as Environment;
+  const environment: Environment = data.environment || ENVIRONMENT_ALL.value;
 
-  const { start, end } = useMemo(() => {
-    const { start: parsedStart, end: parsedEnd } = getDateRange({ rangeFrom, rangeTo });
-    return { start: parsedStart ?? rangeFrom, end: parsedEnd ?? rangeTo };
-  }, [rangeFrom, rangeTo]);
+  const { rangeFrom, rangeTo, start, end } = useMemo(() => {
+    const requested = {
+      rangeFrom: data.timeRange?.start ?? SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.start,
+      rangeTo: data.timeRange?.end ?? SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.end,
+    };
+    const parsed = getDateRange(requested);
+    if (parsed.start && parsed.end) {
+      return { ...requested, start: parsed.start, end: parsed.end };
+    }
+    // Unparseable attachment timeRange (LLM-provided): fall back to the
+    // default range rather than passing raw garbage to the data fetches.
+    const fallback = {
+      rangeFrom: SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.start,
+      rangeTo: SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.end,
+    };
+    const parsedFallback = getDateRange(fallback);
+    return {
+      ...fallback,
+      start: parsedFallback.start ?? fallback.rangeFrom,
+      end: parsedFallback.end ?? fallback.rangeTo,
+    };
+  }, [data.timeRange?.start, data.timeRange?.end]);
 
   const fullMapHref = getServiceMapUrl(deps.coreStart, {
     rangeFrom,
