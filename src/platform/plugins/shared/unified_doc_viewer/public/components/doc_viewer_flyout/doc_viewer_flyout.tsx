@@ -140,7 +140,7 @@ export function UnifiedDocViewerFlyout({
     flyoutWidthLocalStorageKey ?? FLYOUT_WIDTH_KEY,
     defaultWidth
   );
-  const shouldPersistFlyoutWidthRef = useRef(false);
+  const shouldPersistNextFlyoutWidthRef = useRef(false);
   // Keep this initial size frozen so EUI uses its container-rescale path until elastic/eui#9969 lands.
   const flyoutWidthRef = useRef(flyoutWidth ?? defaultWidth);
   const minWidth = euiTheme.base * 24;
@@ -162,14 +162,14 @@ export function UnifiedDocViewerFlyout({
   const isResizeHandle = useCallback(
     (target: EventTarget) =>
       target instanceof HTMLElement &&
-      target.getAttribute('data-test-subj') === 'euiResizableButton',
+      target.closest('[data-test-subj="euiResizableButton"]') !== null,
     []
   );
 
   const onPointerDown = useCallback(
     (ev: React.PointerEvent) => {
       if (isResizeHandle(ev.target)) {
-        shouldPersistFlyoutWidthRef.current = true;
+        shouldPersistNextFlyoutWidthRef.current = true;
       }
     },
     [isResizeHandle]
@@ -182,7 +182,7 @@ export function UnifiedDocViewerFlyout({
         (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT)
       ) {
         // Capture the interaction before EUI handles the key and calls onResize.
-        shouldPersistFlyoutWidthRef.current = true;
+        shouldPersistNextFlyoutWidthRef.current = true;
       }
     },
     [isResizeHandle]
@@ -191,8 +191,8 @@ export function UnifiedDocViewerFlyout({
   const onResize = useCallback(
     (width: number) => {
       // Gate persistence because EUI can also call onResize after a container resize (elastic/eui#9969).
-      if (shouldPersistFlyoutWidthRef.current) {
-        shouldPersistFlyoutWidthRef.current = false;
+      if (shouldPersistNextFlyoutWidthRef.current) {
+        shouldPersistNextFlyoutWidthRef.current = false;
         setFlyoutWidth(width);
       }
     },

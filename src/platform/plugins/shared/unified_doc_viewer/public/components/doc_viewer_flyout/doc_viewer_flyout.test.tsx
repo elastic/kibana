@@ -27,7 +27,9 @@ jest.mock('@elastic/eui', () => {
     ...actual,
     EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => (
       <OriginalFlyout {...props} ref={ref}>
-        <button data-test-subj="euiResizableButton">Resize handle</button>
+        <button data-test-subj="euiResizableButton">
+          <span>Resize handle</span>
+        </button>
         <button onClick={() => props.onResize?.(700)}>Trigger resize</button>
         {props.flyoutMenuProps && (
           <actual.EuiFlyoutMenu {...props.flyoutMenuProps} hideCloseButton />
@@ -88,13 +90,16 @@ const buildProps = (
 describe('UnifiedDocViewerFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    localStorage.clear();
     unifiedDocViewerServices = createUnifiedDocViewerServices();
     setUnifiedDocViewerServices(unifiedDocViewerServices);
   });
 
   describe('flyout width persistence', () => {
     const storageKey = 'docViewerFlyoutTestWidth';
+
+    afterEach(() => {
+      localStorage.removeItem(storageKey);
+    });
 
     const renderFlyout = () => {
       render(
@@ -117,13 +122,24 @@ describe('UnifiedDocViewerFlyout', () => {
       expect(localStorage.getItem(storageKey)).toBeNull();
     });
 
-    it('persists a resize after a pointer interaction with the handle', () => {
+    it('persists the next resize after a pointer interaction with a handle descendant', () => {
+      const { triggerResize } = renderFlyout();
+
+      fireEvent.pointerDown(screen.getByText('Resize handle'));
+      fireEvent.click(triggerResize);
+
+      expect(localStorage.getItem(storageKey)).toBe('700');
+    });
+
+    it('does not persist later resize callbacks from container changes', () => {
       const { resizeHandle, triggerResize } = renderFlyout();
 
       fireEvent.pointerDown(resizeHandle);
       fireEvent.click(triggerResize);
+      localStorage.removeItem(storageKey);
+      fireEvent.click(triggerResize);
 
-      expect(localStorage.getItem(storageKey)).toBe('700');
+      expect(localStorage.getItem(storageKey)).toBeNull();
     });
 
     it('persists a keyboard resize from the handle', () => {
