@@ -22,11 +22,11 @@ describe('lifecycleToRetentionMs', () => {
     expect(lifecycleToRetentionMs({ dsl: {} })).toBe(Number.POSITIVE_INFINITY);
   });
 
-  it('returns NaN for an unparseable DSL duration', () => {
-    expect(lifecycleToRetentionMs({ dsl: { data_retention: '30w' } })).toBeNaN();
+  it('returns undefined for an unparseable DSL duration', () => {
+    expect(lifecycleToRetentionMs({ dsl: { data_retention: '30w' } })).toBeUndefined();
   });
 
-  it('returns NaN for ILM because the delete age is not on the list payload', () => {
-    expect(lifecycleToRetentionMs({ ilm: { policy: 'my-policy' } })).toBeNaN();
+  it('returns undefined for ILM because the delete age is not on the list payload', () => {
+    expect(lifecycleToRetentionMs({ ilm: { policy: 'my-policy' } })).toBeUndefined();
   });
 });

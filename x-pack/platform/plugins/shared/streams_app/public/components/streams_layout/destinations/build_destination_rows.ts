@@ -46,11 +46,13 @@ const QUALITY_RANK: Record<QualityIndicators, number> = {
   good: 2,
 };
 
+type SortDirectionFactor = 1 | -1;
+
 const compareRows = (
   a: DestinationRow,
   b: DestinationRow,
   field: SortableField,
-  directionFactor: number
+  directionFactor: SortDirectionFactor
 ): number => {
   if (field === 'name') {
     return directionFactor * a.name.localeCompare(b.name);
@@ -61,18 +63,19 @@ const compareRows = (
   return compareNumbers(a[field], b[field], directionFactor);
 };
 
-const compareNumbers = (aValue: number, bValue: number, directionFactor: number): number => {
-  const aUnknown = Number.isNaN(aValue);
-  const bUnknown = Number.isNaN(bValue);
-  if (aUnknown || bUnknown) {
-    if (aUnknown && bUnknown) {
-      return 0;
-    }
-    return aUnknown ? 1 : -1;
+const compareNumbers = (
+  aValue: number | undefined,
+  bValue: number | undefined,
+  directionFactor: SortDirectionFactor
+): number => {
+  // An unknown value sorts last whichever direction the user picked.
+  if (aValue === undefined) {
+    return bValue === undefined ? 0 : 1;
   }
-  if (aValue === bValue) {
-    return 0;
+  if (bValue === undefined) {
+    return -1;
   }
+
   return directionFactor * (aValue - bValue);
 };
 
@@ -127,7 +130,7 @@ export const buildDestinationRows = ({
   sortDirection: EntityTableSortDirection;
 }): DestinationRow[] => {
   const query = searchText.trim().toLowerCase();
-  const directionFactor = sortDirection === 'desc' ? -1 : 1;
+  const directionFactor: SortDirectionFactor = sortDirection === 'desc' ? -1 : 1;
 
   return destinations
     .filter((destination) => matchesDestinationQuery(destination, query))

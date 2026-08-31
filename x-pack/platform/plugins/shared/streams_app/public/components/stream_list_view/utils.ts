@@ -186,12 +186,10 @@ const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] =
 
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
   const lifecycle = node.effective_lifecycle;
-  // Stream list ranks ILM with indefinite DSL. Destinations keep NaN via lifecycleToRetentionMs.
-  const mappedRetentionMs =
+  const retentionMs =
     lifecycle && isIlmLifecycle(lifecycle)
       ? Number.POSITIVE_INFINITY
-      : lifecycleToRetentionMs(lifecycle);
-  const retentionMs = Number.isNaN(mappedRetentionMs) ? 0 : mappedRetentionMs;
+      : lifecycleToRetentionMs(lifecycle) ?? 0;
   const nameSortKey =
     'children' in node
       ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`

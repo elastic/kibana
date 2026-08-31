@@ -11,12 +11,13 @@ import { parseDuration, parseDurationInSeconds } from './parse_duration';
 
 /**
  * Numeric retention for table sorting. Infinity is reserved for known-indefinite
- * DSL (no data_retention). ILM and unparseable durations return NaN so they are
- * not ranked as keep-forever or as already-expired.
+ * DSL (no data_retention). ILM and unparseable durations return undefined so
+ * callers have to rank them explicitly instead of treating them as keep-forever
+ * or as already-expired.
  */
 export const lifecycleToRetentionMs = (
   lifecycle: IngestStreamEffectiveLifecycle | undefined
-): number => {
+): number | undefined => {
   if (!lifecycle) {
     return 0;
   }
@@ -28,14 +29,14 @@ export const lifecycleToRetentionMs = (
     }
 
     if (!parseDuration(dataRetention)) {
-      return Number.NaN;
+      return undefined;
     }
 
     return parseDurationInSeconds(dataRetention) * 1000;
   }
 
   if (isIlmLifecycle(lifecycle)) {
-    return Number.NaN;
+    return undefined;
   }
 
   return 0;

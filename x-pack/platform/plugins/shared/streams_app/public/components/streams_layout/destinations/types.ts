@@ -32,8 +32,11 @@ export interface Destination {
   canReadFailureStore: boolean;
   /** Undefined when the destination has no meaningful retention. */
   retention: IngestStreamEffectiveLifecycle | undefined;
-  /** Numeric retention used for sorting; Infinity for indefinite retention. */
-  retentionMs: number;
+  /**
+   * Numeric retention used for sorting; Infinity for indefinite retention and
+   * undefined when it cannot be determined (ILM, unparseable duration).
+   */
+  retentionMs: number | undefined;
   /** Backing stream definition, powering stream-based actions like Discover. */
   streamDefinition: Streams.ClassicStream.Definition;
   indexMode: IndicesIndexMode;

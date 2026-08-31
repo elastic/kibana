@@ -112,7 +112,7 @@ describe('streamToDestination', () => {
       effective_lifecycle: { ilm: { policy: 'my-policy' } },
     } as unknown as ClassicStreamDetail);
 
-    expect(destination.retentionMs).toBeNaN();
+    expect(destination.retentionMs).toBeUndefined();
     expect(destination.retention).toEqual({ ilm: { policy: 'my-policy' } });
   });
 
