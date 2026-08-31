@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@kbn/react-query';
 import { useRef } from 'react';
 import type { IToasts } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
@@ -72,12 +72,26 @@ const applyWorkerPatch = (worker: Worker, patch: UpdateWorkerRequestBody): Worke
   return {
     ...worker,
     enabled,
-    state: enabled ? 'ok' : 'paused',
+    state: worker.state === 'unavailable' ? 'unavailable' : enabled ? 'ok' : 'paused',
     settings: {
       ...worker.settings,
       autonomy,
     },
   };
+};
+
+const replaceWorkerInList = (
+  queryClient: QueryClient,
+  queryKey: ReturnType<typeof queryKeys.workers.list>,
+  next: Worker
+): void => {
+  const current = queryClient.getQueryData<ListWorkersResponse>(queryKey);
+  if (!current) {
+    return;
+  }
+  queryClient.setQueryData<ListWorkersResponse>(queryKey, {
+    workers: current.workers.map((worker) => (worker.id === next.id ? next : worker)),
+  });
 };
 
 /**
@@ -112,6 +126,8 @@ export const useUpdateWorker = () => {
             body: JSON.stringify(body),
           }
         );
+        // Reconcile inside the queued operation so the next request sees the new revision.
+        replaceWorkerInList(queryClient, queryKey, response.worker);
         return response;
       };
       const operation = mutationQueue.current.then(execute, execute);
@@ -140,15 +156,7 @@ export const useUpdateWorker = () => {
       notifyWorkerUpdateError(services.notifications!.toasts, error);
     },
     onSuccess: (data) => {
-      const current = queryClient.getQueryData<ListWorkersResponse>(queryKey);
-      if (!current) {
-        return;
-      }
-      queryClient.setQueryData<ListWorkersResponse>(queryKey, {
-        workers: current.workers.map((worker) =>
-          worker.id === data.worker.id ? data.worker : worker
-        ),
-      });
+      replaceWorkerInList(queryClient, queryKey, data.worker);
     },
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey });

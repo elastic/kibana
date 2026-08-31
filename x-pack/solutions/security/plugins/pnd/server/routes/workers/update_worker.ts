@@ -16,7 +16,6 @@ import {
 } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
-import { storeUnavailableResponse } from '../store_route_guard';
 
 const UpdateWorkerRequestParams = z.object({
   workerId: z.string().min(1).max(128),
@@ -90,7 +89,14 @@ export const registerUpdateWorkerRoute = ({
                 },
               });
             case 'unavailable':
-              return storeUnavailableResponse(response);
+              return response.customError({
+                statusCode: 503,
+                body: {
+                  message: i18n.translate('xpack.pnd.workerSettingsUnavailableErrorMessage', {
+                    defaultMessage: 'Worker settings are temporarily unavailable; try again',
+                  }),
+                },
+              });
             case 'failed':
               return response.customError({
                 statusCode: 500,

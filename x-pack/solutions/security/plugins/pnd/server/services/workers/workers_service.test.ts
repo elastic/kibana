@@ -251,6 +251,56 @@ describe('WorkersService', () => {
     expect(harness.scheduledTasks.get(`${TRIAGE}-${SPACE}`)?.apiKeyId).toEqual(expect.any(String));
   });
 
+  it('installs defaults when disabling a Worker that has no document yet', async () => {
+    const harness = createPersistentHarness();
+    const result = await harness.createService().update(TRIAGE, { enabled: false }, SPACE, request);
+
+    expect(result.outcome).toBe('updated');
+    if (result.outcome !== 'updated') throw new Error('Expected disable-on-missing to succeed');
+    expect(harness.install).toHaveBeenCalledWith(
+      TRIAGE,
+      expect.objectContaining({ workflowIdSuffix: SPACE })
+    );
+    expect(result.response.worker.enabled).toBe(false);
+    expect(harness.documents.has(`${TRIAGE}-${SPACE}`)).toBe(true);
+    expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.enabled).toBe(false);
+  });
+
+  it('projects unavailable when installed settings cannot be read', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockRejectedValueOnce(
+      new Error('storage down')
+    );
+
+    const worker = await service.get(TRIAGE, SPACE);
+
+    expect(worker?.state).toBe('unavailable');
+    expect(worker?.stateReason).toBe('Worker settings could not be read from durable storage');
+    expect(worker?.settingsRevision).toBeNull();
+    expect(worker?.enabled).toBe(true);
+  });
+
+  it('projects unavailable when the installed document has no template values', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockResolvedValueOnce({
+      workflowId: `${TRIAGE}-${SPACE}`,
+      spaceId: SPACE,
+      definitionId: TRIAGE,
+      templateValues: null,
+      documentVersion: 2,
+    });
+
+    const worker = await service.get(TRIAGE, SPACE);
+
+    expect(worker?.state).toBe('unavailable');
+    expect(worker?.stateReason).toBe('Worker settings could not be read from durable storage');
+    expect(worker?.settingsRevision).toBeNull();
+  });
+
   it('installs on enable and leaves the per-space document in place on disable', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();

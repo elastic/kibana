@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  SYSTEM_SECURITY_WORKER_CATALOG,
   SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -79,8 +78,20 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
 export const workerDescription = (workerId: string): string | undefined =>
   WORKER_DESCRIPTIONS[workerId];
 
-export const WORKER_NAMES: Record<string, string> = Object.fromEntries(
-  SYSTEM_SECURITY_WORKER_CATALOG.map(({ id, name }) => [id, name])
-);
+export const WORKER_NAMES: Record<string, string> = {
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.floorAlertTriage.name',
+    { defaultMessage: 'Alert Triage' }
+  ),
+  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.floorAttackDiscovery.name',
+    { defaultMessage: 'Attack Discovery' }
+  ),
+  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.darkContinuousThreatHunt.name',
+    { defaultMessage: 'Continuous Threat Hunt' }
+  ),
+};
 
-export const workerName = (workerId: string): string => WORKER_NAMES[workerId] ?? workerId;
+export const workerName = (workerId: string, fallbackName?: string): string =>
+  WORKER_NAMES[workerId] ?? fallbackName ?? workerId;

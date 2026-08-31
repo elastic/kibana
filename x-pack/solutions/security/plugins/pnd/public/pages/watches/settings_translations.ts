@@ -78,6 +78,11 @@ export const WORKER_SECTION_SUBTITLE = i18n.translate(
   { defaultMessage: 'applies to this worker only' }
 );
 
+export const WORKER_SETTINGS_UNAVAILABLE = i18n.translate(
+  'xpack.pnd.watches.settings.worker.unavailable',
+  { defaultMessage: 'Settings could not be read; reload and try again' }
+);
+
 export const SKILLS_SECTION_TITLE = i18n.translate(
   'xpack.pnd.watches.settings.skills.sectionTitle',
   { defaultMessage: 'Skills' }
@@ -126,7 +131,7 @@ export const AUTONOMY_LEVEL_NAMES: Record<string, string> = {
 export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   manual: i18n.translate('xpack.pnd.watches.settings.autonomy.manual.description', {
     defaultMessage:
-      'Nothing runs on its own. The Watch drafts proposals and every one of them waits for your review.',
+      'Nothing runs on its own. This Worker drafts proposals and every one of them waits for your review.',
   }),
   assisted: i18n.translate('xpack.pnd.watches.settings.autonomy.assisted.description', {
     defaultMessage:
@@ -134,7 +139,7 @@ export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   }),
   supervised: i18n.translate('xpack.pnd.watches.settings.autonomy.supervised.description', {
     defaultMessage:
-      'The Watch acts within its allow-list and tells you afterwards. Consequential actions still gate.',
+      'This Worker acts within its allow-list and tells you afterwards. Consequential actions still gate.',
   }),
 };
 
@@ -545,7 +550,7 @@ const WATCH_INTROS: Record<string, string> = {
   }),
   [SYSTEM_SECURITY_WATCH_OFFICER_ID]: i18n.translate('xpack.pnd.watches.settings.intro.officer', {
     defaultMessage:
-      'Groups the Investigation Worker that takes Floor hand-off and stages cases and response. Settings below belong to that Worker, not to this Watch.',
+      'Watch grouping for investigation hand-off. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.translate('xpack.pnd.watches.settings.intro.dark', {
     defaultMessage:
@@ -553,13 +558,13 @@ const WATCH_INTROS: Record<string, string> = {
   }),
   [SYSTEM_SECURITY_WATCH_DEEP_ID]: i18n.translate('xpack.pnd.watches.settings.intro.deep', {
     defaultMessage:
-      'Groups the Specialist Analysis Worker for forensics, timelines, and hunts beyond triage. Settings below belong to that Worker, not to this Watch.',
+      'Watch grouping for specialist analysis. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DETECTION_ID]: i18n.translate(
     'xpack.pnd.watches.settings.intro.detection',
     {
       defaultMessage:
-        'Groups the Workers that turn false-positive noise and coverage gaps into reviewable rule proposals. Settings below belong to each Worker, not to this Watch.',
+        'Watch grouping for detection-engineering work. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
     }
   ),
 };

@@ -11,6 +11,7 @@ import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -81,6 +82,8 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
   mockUseWorkers.mockReturnValue({
     data: { workers },
     isLoading: false,
+    error: null,
+    refetch: jest.fn(),
   } as never);
   const mutate = jest.fn();
   mockUseUpdateWorker.mockReturnValue({ mutate } as never);
@@ -148,5 +151,42 @@ describe('WatchDetailPage', () => {
     ).toBeInTheDocument();
     expect(within(section).getByTestId('pndAutonomySlider')).toBeInTheDocument();
     expect(screen.queryByTestId('pndCandidateLimit')).not.toBeInTheDocument();
+  });
+
+  it('shows a Worker-load error instead of an empty member list', () => {
+    mockUseWatch.mockReturnValue({
+      data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseWorkers.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('workers unavailable'),
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn() } as never);
+
+    render(
+      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId('pndWatchWorkersLoadError')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`pndWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows Officer as an empty grouping without a load error', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_OFFICER_ID, [...floorWorkers, darkWorker]);
+
+    expect(screen.getByTestId('pndWatchWorkersSection')).toBeInTheDocument();
+    expect(screen.queryByTestId('pndWatchWorkersLoadError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(/pndWatchWorkerSection-/)).not.toBeInTheDocument();
   });
 });

@@ -75,7 +75,7 @@ export const WorkersTable: React.FC = () => {
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <strong>{worker.name}</strong>
+                      <strong>{i18n.workerName(worker.id, worker.name)}</strong>
                     </EuiText>
                   </EuiFlexItem>
                   {worker.lifecycle && worker.lifecycle !== 'ga' ? (
@@ -123,7 +123,8 @@ export const WorkersTable: React.FC = () => {
           <EuiSwitch
             checked={enabled}
             showLabel={false}
-            label={i18n.enableWorkerAriaLabel(worker.name)}
+            label={i18n.enableWorkerAriaLabel(i18n.workerName(worker.id, worker.name))}
+            disabled={worker.state === 'unavailable'}
             data-test-subj={`pndWorkerToggle-${worker.id}`}
             onChange={(event) =>
               updateWorker({ workerId: worker.id, patch: { enabled: event.target.checked } })

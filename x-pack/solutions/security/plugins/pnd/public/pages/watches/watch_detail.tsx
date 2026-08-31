@@ -28,19 +28,26 @@ import { SettingsSection } from './components/settings_section';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
+import { workerName } from './workers/translations';
 
 const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
   const { mutate: updateWorker } = useUpdateWorker();
+  const settingsLocked = worker.state === 'unavailable';
 
   return (
     <SettingsSection
-      title={worker.name}
-      subtitle={settingsI18n.WORKER_SECTION_SUBTITLE}
+      title={workerName(worker.id, worker.name)}
+      subtitle={
+        settingsLocked
+          ? settingsI18n.WORKER_SETTINGS_UNAVAILABLE
+          : settingsI18n.WORKER_SECTION_SUBTITLE
+      }
       data-test-subj={`pndWatchWorkerSection-${worker.id}`}
     >
       <EuiSwitch
         label={settingsI18n.ENABLED_SWITCH_LABEL}
         checked={worker.enabled}
+        disabled={settingsLocked}
         onChange={(event) =>
           updateWorker({ workerId: worker.id, patch: { enabled: event.target.checked } })
         }
@@ -49,6 +56,7 @@ const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
       <EuiSpacer size="m" />
       <AutonomySlider
         current={worker.settings.autonomy}
+        isDisabled={settingsLocked}
         onChange={(autonomyLevel) =>
           updateWorker({ workerId: worker.id, patch: { autonomyLevel } })
         }
@@ -61,7 +69,12 @@ export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
   const { data, isLoading, error, refetch } = useWatch(watchId);
-  const { data: workersData, isLoading: workersLoading } = useWorkers();
+  const {
+    data: workersData,
+    isLoading: workersLoading,
+    error: workersError,
+    refetch: refetchWorkers,
+  } = useWorkers();
 
   const watch = data?.watch;
   usePndDocTitle(watch?.name ?? i18n.PAGE_TITLE);
@@ -133,7 +146,17 @@ export const WatchDetailPage: React.FC = () => {
             subtitle={settingsI18n.WORKERS_SECTION_SUBTITLE}
             data-test-subj="pndWatchWorkersSection"
           >
-            {workersLoading && members.length === 0 ? (
+            {workersError ? (
+              <EuiEmptyPrompt
+                iconType="error"
+                title={<h2>{i18n.WORKERS_LOAD_ERROR_TITLE}</h2>}
+                body={<p>{i18n.WORKERS_LOAD_ERROR_BODY}</p>}
+                actions={
+                  <EuiButtonEmpty onClick={() => refetchWorkers()}>{i18n.RETRY}</EuiButtonEmpty>
+                }
+                data-test-subj="pndWatchWorkersLoadError"
+              />
+            ) : workersLoading && members.length === 0 ? (
               <EuiLoadingSpinner size="m" aria-label={i18n.LOADING_WATCH} />
             ) : (
               <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>

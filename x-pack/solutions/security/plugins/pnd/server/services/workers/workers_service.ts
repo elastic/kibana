@@ -147,11 +147,6 @@ export class WorkersService {
 
     if (patch.enabled != null) {
       if (!status.installed) {
-        if (!patch.enabled) {
-          const worker = await this.projectWorker(registration, spaceId);
-          return { outcome: 'updated', response: { worker } };
-        }
-
         await installRegisteredWorker(managedWorkflows, registration, {
           spaceId,
           workflowIdSuffix: spaceId,
@@ -187,16 +182,20 @@ export class WorkersService {
     let lastRun: string | null = null;
     let settingsRevision: number | null = null;
     let values = registration.settings.createDefaultValues();
+    let settingsUnavailable = false;
 
     if (status.installed) {
       enabled = Boolean(status.enabled);
       try {
         const state = await managedWorkflows.getInstalledWorkflowState(status.workflowId, spaceId);
-        settingsRevision = state?.documentVersion ?? null;
-        if (state?.templateValues) {
+        if (!state?.templateValues) {
+          settingsUnavailable = true;
+        } else {
+          settingsRevision = state.documentVersion ?? null;
           values = registration.settings.migrate(state.templateValues).values;
         }
       } catch (error) {
+        settingsUnavailable = true;
         this.logger.warn(
           `Failed to read settings for worker ${registration.id}: ${
             error instanceof Error ? error.message : String(error)
@@ -225,7 +224,10 @@ export class WorkersService {
       watchIds: [registration.catalog.watchId],
       enabled,
       lastRun,
-      state: enabled ? 'ok' : 'paused',
+      state: settingsUnavailable ? 'unavailable' : enabled ? 'ok' : 'paused',
+      ...(settingsUnavailable
+        ? { stateReason: 'Worker settings could not be read from durable storage' }
+        : {}),
       settings: registration.settings.toSettings(values),
       settingsRevision,
     };
