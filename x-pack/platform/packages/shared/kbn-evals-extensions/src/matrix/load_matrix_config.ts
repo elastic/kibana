@@ -226,6 +226,13 @@ export const matrixConfigSchema = schema.object({
     mode: schema.oneOf([schema.literal('weighted'), schema.literal('mean')], {
       defaultValue: 'weighted',
     }),
+    /**
+     * Run-to-run standard deviation of the overall score, measured by
+     * re-running one model on an unchanged commit. Set it and rows within
+     * 2x the 95% interval are grouped into a tie tier instead of being
+     * presented as ranked. Omit to keep the raw ordering.
+     */
+    runStdev: schema.maybe(schema.number({ min: 0, max: 10 })),
   }),
   /**
    * Renders the legacy single "Overall" column (weighted/mean over every base

@@ -57,6 +57,13 @@ export interface MatrixRow {
    * not directly comparable to full-coverage rows.
    */
   coverage: { covered: number; total: number };
+  /**
+   * 1-based tier. Runs of the same model on an unchanged commit move the
+   * overall score by ~0.2 (stdev over 7 haiku runs on golden), so adjacent
+   * ranks are not distinguishable. Rows within a tier are statistically
+   * tied; only a tier boundary is a real difference.
+   */
+  tier?: number;
 }
 
 /** Aggregated token magnitudes for one (model, column) pair, in native units. */
@@ -371,6 +378,38 @@ const buildTokenCost = (
  * Pure transform from aggregated eval scores + config into a renderable matrix.
  * Models are emitted in config order; models absent from the data are skipped.
  */
+/**
+ * Groups rows into tiers of statistically indistinguishable models.
+ *
+ * Re-running one model on an unchanged commit and stack moves its overall by
+ * about 0.2 (stdev across 7 haiku runs on golden), so a 0.05 gap between two
+ * adjacent rows is noise, not a ranking. Rows stay in the same tier until the
+ * drop from the tier leader exceeds the combined 95% interval; only crossing
+ * a tier boundary is a difference the data can support.
+ */
+const assignTiers = (rows: MatrixRow[], config: MatrixConfig): MatrixRow[] => {
+  const sd = config.overall.runStdev;
+  if (!sd) {
+    return rows;
+  }
+  const threshold = 2 * 1.96 * sd;
+  let tier = 1;
+  let leader: number | undefined;
+  return rows.map((row) => {
+    const value = row.overall.kind === 'score' ? row.overall.value : undefined;
+    if (value === undefined) {
+      return row;
+    }
+    if (leader === undefined) {
+      leader = value;
+    } else if (leader - value > threshold) {
+      tier += 1;
+      leader = value;
+    }
+    return { ...row, tier };
+  });
+};
+
 export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixConfig): Matrix => {
   const byModelId = new Map(aggregated.map((entry) => [entry.modelId, entry]));
   const resolveScores = (modelConfig: MatrixModelConfig) =>
@@ -455,8 +494,8 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
     })),
     displayColumns: buildDisplayColumns(config),
     overallLabel: config.overall.label,
-    proprietary: proprietary.sort(sortByPrimaryDesc),
-    openSource: openSource.sort(sortByPrimaryDesc),
+    proprietary: assignTiers(proprietary.sort(sortByPrimaryDesc), config),
+    openSource: assignTiers(openSource.sort(sortByPrimaryDesc), config),
     // Token magnitudes are meaningful only over base columns; composites are derived scores.
     ...(config.tokenCost
       ? { tokenCost: buildTokenCost(config, config.tokenCost, resolveScores) }

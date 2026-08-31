@@ -11,6 +11,9 @@
   "decimals": 2,
   "notRecommendedBelow": 0,
   "minCoverage": 12,
+  "overall": {
+    "runStdev": 0.198
+  },
   "toolCallWarnAbove": 40,
   "notRecommendedLabel": "Not recommended",
   "showOverall": true,

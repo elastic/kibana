@@ -54,6 +54,45 @@ const aggregated: AggregatedModelScores[] = [
   },
 ];
 
+describe('buildMatrix tie tiers', () => {
+  // Re-running one model on an unchanged commit moves its overall by ~0.2
+  // (stdev over 7 haiku runs on golden). Publishing 8.54 above 8.42 as a
+  // ranking therefore asserts a difference the data cannot support.
+  const tierConfig: MatrixConfig = parseMatrixConfig({
+    minCoverage: 1,
+    overall: { runStdev: 0.198 },
+    columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+    models: [
+      { id: 'model-a', label: 'A' },
+      { id: 'model-b', label: 'B' },
+      { id: 'model-c', label: 'C' },
+    ],
+  });
+
+  const one = (id: string, mean: number) => ({
+    suiteId: 'suite-a',
+    experimentId: id,
+    datasets: [{ datasetId: id, datasetName: id, evaluators: [evaluator(mean)] }],
+  });
+
+  it('ties rows inside the noise band and splits only on a real gap', () => {
+    const matrix = buildMatrix(
+      [
+        { modelId: 'model-a', provider: 'p', suites: [one('r1', 0.85)] },
+        { modelId: 'model-b', provider: 'p', suites: [one('r2', 0.84)] },
+        { modelId: 'model-c', provider: 'p', suites: [one('r3', 0.4)] },
+      ],
+      tierConfig
+    );
+
+    const tiers = Object.fromEntries(matrix.proprietary.map((r) => [r.modelId, r.tier]));
+    // 8.5 vs 8.4 is inside the interval -> same tier, not a ranking.
+    expect(tiers['model-a']).toBe(tiers['model-b']);
+    // 8.5 vs 4.0 clears it comfortably -> a real difference.
+    expect(tiers['model-c']).toBeGreaterThan(tiers['model-a']!);
+  });
+});
+
 describe('buildMatrix coverage floor', () => {
   // Reproduces the 2026-08-29 matrix: GLM-5.2 answered 2 of 24 prompts, scored
   // 10.0 on both, and outranked every frontier model. A thin run must never
