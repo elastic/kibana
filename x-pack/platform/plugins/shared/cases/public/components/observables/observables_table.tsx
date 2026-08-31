@@ -110,10 +110,7 @@ export const ObservablesTable = ({
   );
 
   const selection: EuiTableSelectionType<Observable> | undefined = useMemo(
-    () =>
-      canRunWorkflow
-        ? { selected, onSelectionChange }
-        : undefined,
+    () => (canRunWorkflow ? { selected, onSelectionChange } : undefined),
     [canRunWorkflow, onSelectionChange, selected]
   );
 

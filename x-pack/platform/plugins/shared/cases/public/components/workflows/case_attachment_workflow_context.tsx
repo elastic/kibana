@@ -20,9 +20,9 @@ interface CaseAttachmentWorkflowContextValue {
   caseId: string;
 }
 
-const CaseAttachmentWorkflowContext = createContext<
-  CaseAttachmentWorkflowContextValue | undefined
->(undefined);
+const CaseAttachmentWorkflowContext = createContext<CaseAttachmentWorkflowContextValue | undefined>(
+  undefined
+);
 
 CaseAttachmentWorkflowContext.displayName = 'CaseAttachmentWorkflowContext';
 

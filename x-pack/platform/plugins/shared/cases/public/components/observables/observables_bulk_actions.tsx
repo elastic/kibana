@@ -6,13 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiFlexItem,
-  EuiPopover,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import type { CaseUI } from '../../containers/types';
