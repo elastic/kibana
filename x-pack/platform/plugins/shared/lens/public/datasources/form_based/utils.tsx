@@ -48,6 +48,7 @@ import type {
   FieldBasedIndexPatternColumn,
   StateSetter,
 } from '@kbn/lens-common';
+import { isColumnOfType } from '@kbn/lens-common';
 import { renewIDs } from '../../utils';
 
 import type { GenericOperationDefinition } from './operations';
@@ -58,7 +59,7 @@ import {
   updateDefaultLabels,
 } from './operations';
 
-import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
+import { getInvalidFieldMessage } from './operations/definitions/helpers';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
