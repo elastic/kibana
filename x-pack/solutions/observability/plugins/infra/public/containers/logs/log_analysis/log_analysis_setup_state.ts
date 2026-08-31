@@ -59,6 +59,7 @@ export const useAnalysisSetupState = <T extends JobType>({
   useEffect(() => {
     if (!isCpsEnabled) return;
     let cancelled = false;
+    // cpsManager.whenReady() never rejects. Even if something goes wrong, it will resolve with a standard value. A catch block isn't required
     services.cps?.cpsManager?.whenReady().then(() => {
       if (!cancelled) {
         setProjectRouting(services.cps?.cpsManager?.getDefaultProjectRouting());
