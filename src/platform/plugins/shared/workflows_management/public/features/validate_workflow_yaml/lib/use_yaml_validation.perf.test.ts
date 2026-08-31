@@ -155,7 +155,7 @@ function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig) {
 
   const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
   timings.validateConnectorIds = benchmarkSync(() => {
-    validateConnectorIds(connectorIdItems, null, '');
+    validateConnectorIds(connectorIdItems, {}, '');
   }, iterations);
 
   timings.validateWorkflowOutputsInYaml = benchmarkSync(() => {
@@ -244,7 +244,7 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
 
     start = performance.now();
     const connectorIdItems = collectAllConnectorIds(yamlDocument, lc);
-    validateConnectorIds(connectorIdItems, null, '');
+    validateConnectorIds(connectorIdItems, {}, '');
     record('connectorIds (collect+validate)', performance.now() - start);
 
     start = performance.now();

@@ -64,7 +64,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         jobCreator.end,
         chartInterval.getInterval().asMilliseconds(),
         jobCreator.runtimeMappings ?? undefined,
-        jobCreator.datafeedConfig.indices_options
+        jobCreator.datafeedConfig.indices_options,
+        jobCreator.projectRouting ?? undefined
       );
       setEventRateChartData(resp);
     } catch (error) {

@@ -55,6 +55,11 @@ const commandsData: CommandSectionMetadata[] = [
   },
 ];
 
+const BACKSLASH_REGEX = /\\/g;
+const SINGLE_QUOTE_REGEX = /'/g;
+const BACKTICK_REGEX = /`/g;
+const TEMPLATE_EXPRESSION_REGEX = /\$\{/g;
+
 /**
  * This script generates the ESQL inline command documentation files by merging
  * the source and processing commands with Elasticsearch definitions.
@@ -134,11 +139,6 @@ import { i18n } from '@kbn/i18n';
 export const commands = ${generateCommandSectionDoc(data)};
 `;
 }
-
-const BACKSLASH_REGEX = /\\/g;
-const SINGLE_QUOTE_REGEX = /'/g;
-const BACKTICK_REGEX = /`/g;
-const TEMPLATE_EXPRESSION_REGEX = /\$\{/g;
 
 /**
  * Escapes a string for safe interpolation inside a single-quoted JS string literal.

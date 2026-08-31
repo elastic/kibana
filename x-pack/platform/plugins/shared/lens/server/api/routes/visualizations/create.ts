@@ -94,7 +94,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
           const responseItem = getLensResponseItem(builder, result.item);
 
           return res.created<LensCreateResponseBody>({
-            body: responseItem,
+            body: lensCreateResponseBodySchema.parse(responseItem),
           });
         } catch (error) {
           if (isBoom(error) && error.output.statusCode === 403) {
