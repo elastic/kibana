@@ -151,6 +151,9 @@ export const readCookie = (cookieHeader: string, name: string): string | undefin
  * servable candidate, matched case-insensitively (exact, else primary-subtag
  * fallback). Returns `undefined` if no entry yields a servable candidate.
  * Entries with `q=0` are ignored.
+ *
+ * Must stay synchronous and allocation-light: it runs on the render path for
+ * every request, so any I/O or async lookup here is paid per response.
  */
 export const pickFromAcceptLanguage = (
   header: string,

@@ -539,4 +539,19 @@ describe('pickFromAcceptLanguage', () => {
   it('returns undefined when the only matching candidate has no translation hash', () => {
     expect(pickFromAcceptLanguage('fr-CH', ['fr-FR'], {})).toBeUndefined();
   });
+
+  // resolveLocale calls this on the render path for every request, so growing it
+  // into an async/deferred lookup would cost a microtask per response.
+  describe('synchronous contract', () => {
+    it('is not declared async', () => {
+      expect(pickFromAcceptLanguage.constructor.name).toBe('Function');
+    });
+
+    it('returns a plain value rather than a thenable', () => {
+      const result = pickFromAcceptLanguage('fr-FR', ['en', 'fr-FR'], hashesFor(['en', 'fr-FR']));
+      expect(result).toBe('fr-FR');
+      expect(result).not.toBeInstanceOf(Promise);
+      expect((result as unknown as PromiseLike<unknown>).then).toBeUndefined();
+    });
+  });
 });
