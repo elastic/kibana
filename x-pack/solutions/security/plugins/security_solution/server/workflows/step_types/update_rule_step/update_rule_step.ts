@@ -18,9 +18,6 @@ export const updateRuleStepDefinition = createServerStepDefinition({
   ...updateRuleStepCommonDefinition,
   handler: async (context) => {
     try {
-      // The PATCH endpoint owns all validation: exactly one of `id`/`rule_id`, and the body
-      // is validated against the existing rule's type (`type` is optional and cannot change
-      // the rule type).
       const { body } = await context.contextManager.callKibanaApi<UpdateRuleOutput>({
         method: 'PATCH',
         path: DETECTION_ENGINE_RULES_URL,
