@@ -745,11 +745,6 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 **Alerting**:
 * Add `[Elastic Cloud Trial]` prefix to email subjects sent through the built-in {{ecloud}} email service on trial deployments [#276705]({{kib-pull}}276705).
 
-**{{product.observability}} solution**:
-For the {{product.observability}} 9.4.6 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
-
-**{{elastic-sec}} solution**:
-For the {{elastic-sec}} 9.4.6 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Workflows**:
 * Add step-level `if` skip conditions to all workflow step types except the `if` step, which continues to use `condition` [#279210]({{kib-pull}}279210).
