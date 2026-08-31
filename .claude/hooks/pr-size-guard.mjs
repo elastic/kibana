@@ -3,7 +3,7 @@
 // thresholds. Calibrated against kibana May-Jul 2026 data (n=5,477 PRs, backports
 // excluded). Soft-limit only: never blocks, just adds context.
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
@@ -45,23 +45,25 @@ const headSha = git('rev-parse', 'HEAD');
 const originSha = git('rev-parse', `origin/${defaultBranch}`);
 if (!headSha || !originSha) process.exit(0);
 
-// Merge-base is cached keyed on (HEAD sha, origin/<default> sha) so it is only
-// recomputed when either ref actually moves.
-const cacheDir = join(tmpdir(), 'pr-size-cache');
-mkdirSync(cacheDir, { recursive: true });
-const cacheKey = createHash('md5').update(`${headSha}:${originSha}`).digest('hex');
-const cacheFile = join(cacheDir, cacheKey);
+// Merge-base is cached per repo in a single JSON file keyed by projectDir hash,
+// preventing cross-repo collisions (e.g. forks sharing a SHA pair on one machine)
+// and bounding tmp-dir growth to one file per repo.
+const cacheFile = join(tmpdir(), `pr-size-mergebase-${debounceKey}`);
 
 let mergeBase;
-if (existsSync(cacheFile)) {
-  mergeBase = readFileSync(cacheFile, 'utf8').trim();
-} else {
+try {
+  const cached = JSON.parse(readFileSync(cacheFile, 'utf8'));
+  if (cached.head === headSha && cached.origin === originSha) mergeBase = cached.base;
+} catch { /* cache miss */ }
+
+if (!mergeBase) {
   mergeBase = git('merge-base', 'HEAD', `origin/${defaultBranch}`);
   if (!mergeBase) process.exit(0);
-  writeFileSync(cacheFile, mergeBase);
+  writeFileSync(cacheFile, JSON.stringify({ head: headSha, origin: originSha, base: mergeBase }));
 }
 
 // Count additions and changed files (additions only — deletions don't penalise refactors).
+// Binary files (shown as '-' in --numstat) count toward the file total but not additions.
 const diffOut = git('diff', '--numstat', mergeBase, 'HEAD');
 if (!diffOut) process.exit(0);
 
@@ -70,9 +72,9 @@ let files = 0;
 for (const line of diffOut.split('\n')) {
   if (!line.trim()) continue;
   const [added] = line.split('\t');
-  if (added === '-') continue; // binary file
-  additions += Number(added) || 0;
   files += 1;
+  if (added === '-') continue; // binary: count file but skip additions
+  additions += Number(added) || 0;
 }
 
 const warnLines = additions >= SOFT_LINES;
