@@ -30,7 +30,7 @@ import type { PackagePolicyClient } from '../package_policy_service';
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
-import { FleetNotFoundError } from '../../errors';
+import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 
 import type { PackageInfo } from '../../types';
 import {
@@ -283,7 +283,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     } catch (e) {
       if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.logger.warn(`Agent policy ${policyId} not found, cleaning up orphaned resources`);
-        await this.deleteOrphanedAgentlessResources(policyId, user);
+        await this.deleteOrphanedAgentlessResources(policyId, user, options);
         return;
       }
       throw e;
@@ -300,19 +300,49 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     });
   }
 
-  private async deleteOrphanedAgentlessResources(policyId: string, user?: AuthenticatedUser) {
-    const packagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
+  private async deleteOrphanedAgentlessResources(
+    policyId: string,
+    user?: AuthenticatedUser,
+    options?: { force?: boolean }
+  ) {
+    const allPackagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
       this.soClient,
       policyId
     );
 
-    if (packagePolicies.length > 0) {
-      await this.packagePolicyService.delete(
+    const agentlessPackagePolicies = allPackagePolicies.filter((pp) => pp.supports_agentless);
+    const skippedIds = allPackagePolicies.filter((pp) => !pp.supports_agentless).map((pp) => pp.id);
+
+    if (skippedIds.length > 0) {
+      this.logger.warn(
+        `Skipping deletion of non-agentless package policies for orphaned agent policy ${policyId}: ${skippedIds.join(
+          ', '
+        )}`
+      );
+    }
+
+    const managedIds = agentlessPackagePolicies
+      .filter((pp) => pp.is_managed && !options?.force)
+      .map((pp) => pp.id);
+    if (managedIds.length > 0) {
+      throw new FleetError(
+        `Cannot delete managed agentless policies without force: ${managedIds.join(
+          ', '
+        )}. Pass force: true to override.`
+      );
+    }
+
+    let deleteErrors: string[] = [];
+    if (agentlessPackagePolicies.length > 0) {
+      const deleteResult = await this.packagePolicyService.delete(
         this.soClient,
         this.esClient,
-        packagePolicies.map((pp) => pp.id),
-        { force: true, user: user ?? undefined, skipUnassignFromAgentPolicies: true }
+        agentlessPackagePolicies.map((pp) => pp.id),
+        { force: options?.force, user: user ?? undefined }
       );
+      deleteErrors = deleteResult
+        .filter((r) => !r.success)
+        .map((r) => `${r.id}: ${r.body?.message ?? 'unknown error'}`);
     }
 
     try {
@@ -320,6 +350,18 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     } catch (e) {
       this.logger.warn(
         `Failed to delete agentless deployment for orphaned policy ${policyId}: ${e.message}`
+      );
+    }
+
+    if (agentlessPackagePolicies.length === 0) {
+      throw new FleetNotFoundError(`No agentless package policies found for policy ${policyId}`);
+    }
+
+    if (deleteErrors.length > 0) {
+      throw new PackagePolicyRequestError(
+        `Failed to delete some package policies for orphaned agent policy ${policyId}: ${deleteErrors.join(
+          '; '
+        )}`
       );
     }
   }
