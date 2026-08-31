@@ -27,10 +27,12 @@ jest.mock('../../../app/transaction_details/waterfall_with_summary/maybe_view_tr
 jest.mock('../../summary/transaction_summary', () => ({
   TransactionSummary: () => <div data-test-subj="transactionDetailFlyoutTraceSampleSummary" />,
 }));
+const mockTimeline = jest.fn((_props: { onNodeClick?: () => void }) => (
+  <div data-test-subj="transactionDetailFlyoutTraceSampleTimeline" />
+));
 jest.mock('./trace_sample_timeline', () => ({
-  TransactionDetailFlyoutTraceSampleTimeline: () => (
-    <div data-test-subj="transactionDetailFlyoutTraceSampleTimeline" />
-  ),
+  TransactionDetailFlyoutTraceSampleTimeline: (props: { onNodeClick?: () => void }) =>
+    mockTimeline(props),
 }));
 
 const mockedUseTransactionDetailFlyoutContext = useTransactionDetailFlyoutContext as jest.Mock;
@@ -49,7 +51,10 @@ const FILTERS = {
 const mockedUseUnifiedWaterfallFetcher = useUnifiedWaterfallFetcher as jest.Mock;
 
 const DEFAULT_WATERFALL_RESULT = {
-  traceItems: [{ id: 'span-1', traceId: 'trace-1' }],
+  traceItems: [
+    { id: 'tx-1', traceId: 'trace-1', parentId: undefined },
+    { id: 'span-1', traceId: 'trace-1', parentId: 'tx-1' },
+  ],
   errors: [],
   agentMarks: {},
   entryTransaction: {
@@ -63,6 +68,7 @@ const DEFAULT_WATERFALL_RESULT = {
 
 describe('TransactionDetailFlyoutTraceSample', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     mockedUseTransactionDetailFlyoutContext.mockReturnValue({
       filters: FILTERS,
       openFullTraceFlyout: jest.fn(),
@@ -94,6 +100,29 @@ describe('TransactionDetailFlyoutTraceSample', () => {
     expect(screen.getByTestId('transactionDetailFlyoutTraceSampleSummary')).toBeInTheDocument();
     expect(screen.getByTestId('transactionDetailFlyoutTraceSampleTimeline')).toBeInTheDocument();
     expect(screen.getByTestId('transactionDetailFlyoutViewFullTraceLink')).toBeInTheDocument();
+    expect(mockTimeline).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onNodeClick: expect.any(Function),
+      })
+    );
+  });
+
+  it('opens the full-trace flyout when a waterfall node is clicked', () => {
+    const openFullTraceFlyout = jest.fn();
+    mockedUseTransactionDetailFlyoutContext.mockReturnValue({
+      filters: FILTERS,
+      openFullTraceFlyout,
+    });
+
+    render(<TransactionDetailFlyoutTraceSample />);
+
+    const { onNodeClick } = mockTimeline.mock.calls[0][0];
+    onNodeClick?.();
+
+    expect(openFullTraceFlyout).toHaveBeenCalledWith({
+      traceId: 'trace-1',
+      contextSpanIds: expect.any(Array),
+    });
   });
 
   it('renders empty prompt when no trace samples are available', () => {

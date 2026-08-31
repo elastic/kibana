@@ -20,7 +20,7 @@ import {
   getTraceParentChildrenMap,
 } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FETCH_STATUS, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { useUnifiedWaterfallFetcher } from '../../../app/transaction_details/use_unified_waterfall_fetcher';
@@ -87,6 +87,13 @@ export function TransactionDetailFlyoutTraceSample() {
     return getSubtreeIds(parentChildMap, entryTransaction.transaction.id);
   }, [entryTransaction, unifiedWaterfallFetchResult.traceItems]);
 
+  const openSelectedFullTrace = useCallback(() => {
+    if (!traceId) {
+      return;
+    }
+    openFullTraceFlyout({ traceId, contextSpanIds });
+  }, [traceId, contextSpanIds, openFullTraceFlyout]);
+
   if (!entryTransaction && traceSamples?.length === 0 && isSucceeded) {
     return (
       <EuiEmptyPrompt
@@ -139,12 +146,7 @@ export function TransactionDetailFlyoutTraceSample() {
                 transaction={entryTransaction}
                 traceItems={unifiedWaterfallFetchResult.traceItems}
                 variant="flyout"
-                onViewFullTrace={() => {
-                  if (!traceId) {
-                    return;
-                  }
-                  openFullTraceFlyout({ traceId, contextSpanIds });
-                }}
+                onViewFullTrace={openSelectedFullTrace}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -180,6 +182,7 @@ export function TransactionDetailFlyoutTraceSample() {
               entryTransactionId={entryTransactionId}
               traceDocsTotal={unifiedWaterfallFetchResult.traceDocsTotal}
               maxTraceItems={unifiedWaterfallFetchResult.maxTraceItems}
+              onNodeClick={openSelectedFullTrace}
             />
           )}
         </EuiFlexItem>

@@ -24,6 +24,7 @@ interface TransactionDetailFlyoutTraceSampleTimelineProps {
   entryTransactionId?: string;
   traceDocsTotal?: number;
   maxTraceItems?: number;
+  onNodeClick?: () => void;
 }
 
 export function TransactionDetailFlyoutTraceSampleTimeline({
@@ -34,6 +35,7 @@ export function TransactionDetailFlyoutTraceSampleTimeline({
   entryTransactionId,
   traceDocsTotal,
   maxTraceItems,
+  onNodeClick,
 }: TransactionDetailFlyoutTraceSampleTimelineProps) {
   const {
     deps: { core },
@@ -74,6 +76,13 @@ export function TransactionDetailFlyoutTraceSampleTimeline({
           traceDocsTotal={traceDocsTotal}
           maxTraceItems={maxTraceItems}
           getServiceBadgeHref={getServiceBadgeHref}
+          onClick={
+            onNodeClick
+              ? () => {
+                  onNodeClick();
+                }
+              : undefined
+          }
           ebt={ebt}
         />
       </div>
