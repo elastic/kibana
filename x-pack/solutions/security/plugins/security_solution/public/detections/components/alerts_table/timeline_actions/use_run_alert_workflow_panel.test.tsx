@@ -22,6 +22,12 @@ import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
 
+// Captures arguments so tests can assert which alertId was threaded through.
+const mockUseCaseAlertWorkflowRun = jest.fn();
+jest.mock('@kbn/cases-plugin/public', () => ({
+  useCaseAlertWorkflowRun: (params: unknown) => mockUseCaseAlertWorkflowRun(params),
+}));
+
 const mockMutate = jest.fn();
 const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
 const mockUseWorkflowsCapabilities = jest.fn(() => ({
@@ -157,6 +163,7 @@ const renderContextMenu = (
 describe('useRunAlertWorkflowPanel', () => {
   beforeEach(() => {
     mockRunWorkflowPanelProps.length = 0;
+    mockUseCaseAlertWorkflowRun.mockReturnValue(undefined);
     mockUseRunWorkflow.mockReturnValue({ mutate: mockMutate });
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
@@ -294,6 +301,52 @@ describe('useRunAlertWorkflowPanel', () => {
         managedAlertWorkflow,
         unmanagedManualWorkflow,
       ]);
+    });
+
+    it('passes runWorkflow as undefined when outside a case (falls back to generic Workflows API)', async () => {
+      mockUseCaseAlertWorkflowRun.mockReturnValue(undefined);
+
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+      const items = result.current.runWorkflowMenuItem;
+      const panels = result.current.runAlertWorkflowPanel;
+      renderContextMenu(items, panels);
+
+      await waitFor(() => {
+        const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+        expect(panelProps?.runWorkflow).toBeUndefined();
+      });
+    });
+
+    it('passes the Cases executor as runWorkflow when inside a case', async () => {
+      const mockExecutor = jest.fn();
+      mockUseCaseAlertWorkflowRun.mockReturnValue(mockExecutor);
+
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+      const items = result.current.runWorkflowMenuItem;
+      const panels = result.current.runAlertWorkflowPanel;
+      renderContextMenu(items, panels);
+
+      await waitFor(() => {
+        const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+        expect(panelProps?.runWorkflow).toBe(mockExecutor);
+      });
+    });
+
+    it('calls useCaseAlertWorkflowRun with the row alert id so the activity is attributed to the single alert', async () => {
+      const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+      const items = result.current.runWorkflowMenuItem;
+      const panels = result.current.runAlertWorkflowPanel;
+      renderContextMenu(items, panels);
+
+      await waitFor(() => {
+        expect(mockUseCaseAlertWorkflowRun).toHaveBeenCalledWith({ alertId: 'alert-123' });
+      });
     });
   });
 });
