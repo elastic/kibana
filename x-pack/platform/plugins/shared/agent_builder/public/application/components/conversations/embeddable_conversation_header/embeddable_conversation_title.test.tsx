@@ -14,7 +14,7 @@ import {
   useConversationTitle,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
-import { ConversationTitle } from './conversation_title';
+import { EmbeddableConversationTitle } from './embeddable_conversation_title';
 
 jest.mock('../../../hooks/use_conversation', () => ({
   useConversationTitle: jest.fn(),
@@ -46,7 +46,7 @@ const renderTitle = (permissions: Partial<ConversationPermissions>) => {
 
   render(
     <IntlProvider locale="en">
-      <ConversationTitle />
+      <EmbeddableConversationTitle />
     </IntlProvider>
   );
 };
@@ -54,7 +54,7 @@ const renderTitle = (permissions: Partial<ConversationPermissions>) => {
 const openTitleMenu = () =>
   fireEvent.click(screen.getByTestId('agentBuilderConversationTitleButton'));
 
-describe('ConversationTitle', () => {
+describe('EmbeddableConversationTitle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
