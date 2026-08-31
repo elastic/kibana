@@ -421,6 +421,19 @@ export async function openDimensionEditorAndWaitForFlyout(
   await expect(page.getByTestId('text-based-languages-field-selection-row')).toBeVisible();
 }
 
+/**
+ * Opens the Lens inline editor for a panel via its hover/context action and waits for the
+ * flyout. Complements {@link openInlineEditorAndWaitVisible} for panels without a known
+ * embeddable id (e.g. freshly created, unsaved panels).
+ */
+export async function openPanelInlineEditorAndWaitVisible(
+  { dashboard, lens }: DashboardAndLens,
+  panelTitle?: string
+) {
+  await dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
+  await expect(lens.workspace.inlineEditor).toBeVisible();
+}
+
 export async function openInlineEditorAndWaitVisible(
   { dashboard, lens }: DashboardAndLens,
   panelId: string

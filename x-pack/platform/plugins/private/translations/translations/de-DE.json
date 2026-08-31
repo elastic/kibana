@@ -22195,7 +22195,6 @@
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink": "Weitere Informationen",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText": "Standardmäßig werden alle Log- und Messdaten auf der Hot Tier gespeichert. {learnMore} bezüglich der Änderung der Datenaufbewahrungsrichtlinie für diese Integration.",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeHelpLabel": "Wählen Sie für diese Richtlinie einen Datenstromtyp aus. Diese Einstellung ändert den Namen des Datenstroms der Integration. {learnMore}.",
-    "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeInputLabel": "Datenstromtyp",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel": "Beschreibung",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyIlmPolicyText": "Wählen Sie eine ILM-Richtlinie aus, die auf alle Datenströme für diesen Namespace angewendet werden soll. {learnMore}",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditDataStreamTypeHelpLabel": "Der Datenstromtyp kann für diese Integration nicht geändert werden. Erstellen Sie eine neue Integrationsrichtlinie, um einen anderen Eingangstyp zu verwenden.",
