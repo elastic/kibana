@@ -63,6 +63,7 @@ export const RoundInput = ({
   const [isHovering, setIsHovering] = useState(false);
   const inputAuthor = getInputAuthor({ author, currentUser, isPendingCurrentRound });
   const isCurrentUser = isCurrentUserAuthor({ author: inputAuthor, currentUser });
+  const hasAttachmentReferences = Boolean(attachmentRefs?.length || fallbackAttachments?.length);
 
   const inputContainerStyles = css`
     width: 100%;
@@ -82,7 +83,7 @@ export const RoundInput = ({
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="s"
+      gutterSize="xs"
       alignItems="flexStart"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
@@ -110,15 +111,17 @@ export const RoundInput = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <RoundAttachmentReferences
-          attachmentRefs={attachmentRefs}
-          conversationAttachments={conversationAttachments}
-          fallbackAttachments={fallbackAttachments}
-          actorFilter={[ATTACHMENT_REF_ACTOR.user]}
-          justifyContent="flexStart"
-        />
-      </EuiFlexItem>
+      {hasAttachmentReferences && (
+        <EuiFlexItem grow={false}>
+          <RoundAttachmentReferences
+            attachmentRefs={attachmentRefs}
+            conversationAttachments={conversationAttachments}
+            fallbackAttachments={fallbackAttachments}
+            actorFilter={[ATTACHMENT_REF_ACTOR.user]}
+            justifyContent="flexStart"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <RoundResponseActions content={input} isVisible={isHovering} copyTarget="prompt" />
       </EuiFlexItem>
