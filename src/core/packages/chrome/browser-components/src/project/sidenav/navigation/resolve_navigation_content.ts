@@ -26,6 +26,7 @@ export interface ResolvedLinksContent {
   nodeId: string;
   title: string;
   items: SecondaryMenuItem[];
+  viewAllHref?: string;
 }
 
 export interface ResolvedPanelContent {
@@ -104,6 +105,7 @@ export const resolveLinksContent = (
           nodeId,
           title: content.title,
           items: items.map(toSecondaryMenuItem),
+          viewAllHref: content.viewAllHref,
         }))
       )
     )
@@ -161,11 +163,11 @@ export const attachPopoverSections = (
       label: section.title,
       items: section.items,
     };
-    const viewAllSection = item.href
+    const viewAllSection = section.viewAllHref
       ? [
           {
             id: `${section.id}-viewAll`,
-            items: [toViewAllItem(section.id, item.href)],
+            items: [toViewAllItem(section.id, section.viewAllHref)],
           },
         ]
       : [];

@@ -318,9 +318,11 @@ export interface ProjectNavigationLinkListContent {
   target: AppDeepLinkId;
   title: string;
   items$: Observable<readonly ProjectNavigationLinkItem[]>;
+  /** Listing / app href for chrome-owned View all. Omit to hide the row. */
+  viewAllHref?: string;
 }
 
-/** Expanded-panel slot. Agent Builder owns the lazy panel tree; chrome hosts it. */
+/** Expanded-panel host. `load` returns a mount point; Agent Builder portals its existing sidebar. */
 export interface ProjectNavigationAgentBuilderContent {
   kind: 'agentBuilder';
   id: string;

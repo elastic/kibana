@@ -19,6 +19,7 @@ import {
   distinctUntilChanged,
   from,
   map,
+  shareReplay,
   switchMap,
   type Subscription,
 } from 'rxjs';
@@ -180,8 +181,9 @@ export class AgentBuilderPlugin
       title: i18n.translate('xpack.agentBuilder.navigation.recentlyViewedTitle', {
         defaultMessage: 'Recently viewed',
       }),
+      viewAllHref: core.application.getUrlForApp(AGENTBUILDER_APP_ID),
       items$: eventsService.activeConversation$.pipe(
-        map((active) => active?.id),
+        map((active) => `${active?.id ?? ''}:${active?.conversation?.title ?? ''}`),
         distinctUntilChanged(),
         switchMap(() => from(conversationsService.list({}))),
         map((conversations) =>
@@ -198,7 +200,8 @@ export class AgentBuilderPlugin
                 }),
               }),
             }))
-        )
+        ),
+        shareReplay({ bufferSize: 1, refCount: true })
       ),
     });
     const conversationTemplatesService = new ConversationTemplatesService();

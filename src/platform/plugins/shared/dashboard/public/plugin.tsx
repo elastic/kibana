@@ -348,6 +348,9 @@ export class DashboardPlugin
       title: i18n.translate('dashboard.navigation.recentlyViewedTitle', {
         defaultMessage: 'Recently viewed',
       }),
+      viewAllHref: core.application.getUrlForApp(DASHBOARD_APP_ID, {
+        path: `#${LANDING_PAGE_PATH}`,
+      }),
       items$: getDashboardRecentlyAccessedService()
         .get$()
         .pipe(
