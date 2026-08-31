@@ -428,7 +428,6 @@ describe('MetricsExperienceStateProvider', () => {
         expect(result.current.currentPage).toBe(2);
         expect(result.current.metricsSort).toEqual(METRICS_GRID_SORT_DEFAULTS);
       });
-
     });
   });
 });
