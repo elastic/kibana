@@ -42,7 +42,12 @@ import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
 import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
-import { ATTACK_TAB_COLUMN_ID } from '../utils';
+import { STATUS_BUTTON_TEST_ID } from '../../../../flyout_v2/document/main/components/test_ids';
+import {
+  ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY,
+  ATTACK_TAB_COLUMN_ID,
+  PICKABLE_ATTACK_TAB_COLUMN_IDS,
+} from '../utils';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
@@ -172,6 +177,9 @@ const sortColumn = async (columnId: string, label: string) => {
 describe('AttackTabContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // The grid persists its visible columns, so a selection left behind by one test would
+    // decide what the next one renders.
+    mockedUseKibana.services.storage.clear();
     useAssistantAvailabilityMock.mockReturnValue({ isAssistantEnabled: true });
     mockFindResult([liveAttack]);
     mockedUseKibana.services.cases.helpers.canUseCases = jest
@@ -329,6 +337,156 @@ describe('AttackTabContent', () => {
       );
 
       expect(screen.getByTestId(EUI_PAGINATION_TEST_ID)).toHaveTextContent('Rows per page: 50');
+    });
+  });
+
+  describe('the column picker', () => {
+    const openColumnPicker = async () => {
+      await userEvent.click(screen.getByTestId(EUI_COLUMN_SELECTOR_TEST_ID));
+    };
+
+    /** Opens the picker once, then toggles each column, as a user works the popover. */
+    const pickColumns = async (...columnIds: string[]) => {
+      await openColumnPicker();
+
+      for (const columnId of columnIds) {
+        await userEvent.click(await screen.findByTestId(euiColumnToggleTestId(columnId)));
+      }
+    };
+
+    const { storage } = mockedUseKibana.services;
+
+    const persistedColumnIds = () => storage.get(ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY);
+
+    it('lists every pickable column, with only the defaults switched on', async () => {
+      renderTab();
+
+      await openColumnPicker();
+
+      expect(
+        await screen.findByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.detectedOn))
+      ).toBeChecked();
+      // Nothing the picker offers is missing from the pickable set the persisted selection is
+      // narrowed against, which would leave that column unable to be remembered.
+      expect(screen.getAllByTestId(/^dataGridColumnSelectorColumnItem-/)).toHaveLength(
+        PICKABLE_ATTACK_TAB_COLUMN_IDS.length
+      );
+      expect(screen.getByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.title))).toBeChecked();
+      expect(screen.getByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.alerts))).toBeChecked();
+      expect(screen.getByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.summary))).toBeChecked();
+      expect(
+        screen.getByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.riskScore))
+      ).not.toBeChecked();
+      expect(
+        screen.getByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.status))
+      ).not.toBeChecked();
+      expect(
+        screen.getByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.attachedBy))
+      ).not.toBeChecked();
+      expect(
+        screen.getByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.attachedAt))
+      ).not.toBeChecked();
+    });
+
+    it('keeps the actions column out of the picker, as the grid always renders it', async () => {
+      renderTab();
+
+      await openColumnPicker();
+
+      expect(await screen.findByTestId(EUI_COLUMN_SELECTOR_TEST_ID)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(euiColumnToggleTestId(ATTACK_TAB_COLUMN_ID.actions))
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_ACTIONS_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('renders the risk score once it is picked', async () => {
+      renderTab();
+
+      await pickColumns(ATTACK_TAB_COLUMN_ID.riskScore);
+
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_RISK_SCORE_TEST_ID)).toHaveTextContent('77');
+    });
+
+    it('renders the status as a rule status badge once it is picked', async () => {
+      renderTab();
+
+      await pickColumns(ATTACK_TAB_COLUMN_ID.status);
+
+      expect(screen.getByTestId(ATTACK_TAB_ROW_STATUS_TEST_ID)).toHaveTextContent('acknowledged');
+      expect(screen.getByTestId(STATUS_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('renders the attaching user once it is picked', async () => {
+      renderTab();
+
+      await pickColumns(ATTACK_TAB_COLUMN_ID.attachedBy);
+
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID)).toHaveTextContent(
+        'Ada Lovelace'
+      );
+    });
+
+    it('renders the attachment time as a preference-formatted date once it is picked', async () => {
+      renderTab();
+
+      await pickColumns(ATTACK_TAB_COLUMN_ID.attachedAt);
+
+      // `createdAt`, which is the day after the attack itself was detected.
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID)).toHaveTextContent(
+        'May 2, 2024 @ 10:00:00.000'
+      );
+    });
+
+    it('takes a default column back off the grid', async () => {
+      renderTab();
+
+      await pickColumns(ATTACK_TAB_COLUMN_ID.alerts);
+
+      expect(screen.queryByTestId(ATTACK_TAB_COLUMN_ALERTS_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('remembers the selection across a remount', async () => {
+      const { unmount } = renderTab();
+
+      await pickColumns(ATTACK_TAB_COLUMN_ID.riskScore, ATTACK_TAB_COLUMN_ID.attachedBy);
+      unmount();
+
+      renderTab();
+
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_RISK_SCORE_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('persists the selection under the attacks case attachment key alone', async () => {
+      // The entities section of this same tab, which persists its own columns.
+      const otherTableKey = 'securitySolution.entityAnalytics.cases.attachment.columns';
+      storage.set(otherTableKey, ['entityName']);
+
+      renderTab();
+      await pickColumns(ATTACK_TAB_COLUMN_ID.status);
+
+      expect(persistedColumnIds()).toContain(ATTACK_TAB_COLUMN_ID.status);
+      expect(storage.get(otherTableKey)).toEqual(['entityName']);
+    });
+
+    it.each([
+      ['is absent', undefined],
+      ['holds something other than a list of columns', { columns: ['attachedBy'] }],
+      ['holds no column this release renders', ['entityCount']],
+      ['is empty', []],
+    ])('falls back to the default columns when the persisted selection %s', (_label, persisted) => {
+      if (persisted !== undefined) {
+        storage.set(ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY, persisted);
+      }
+
+      renderTab();
+
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_DETECTED_ON_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_ALERTS_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(ATTACK_TAB_COLUMN_SUMMARY_TEST_ID)).toBeInTheDocument();
+      expect(screen.queryByTestId(ATTACK_TAB_COLUMN_ATTACHED_BY_TEST_ID)).not.toBeInTheDocument();
     });
   });
 

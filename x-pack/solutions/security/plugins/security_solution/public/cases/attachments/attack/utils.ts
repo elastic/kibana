@@ -49,11 +49,52 @@ export const DEFAULT_ATTACK_TAB_COLUMN_IDS: readonly AttackTabColumnId[] = [
 ];
 
 /**
+ * The columns the column picker offers, in the order the grid declares them.
+ *
+ * `actions` is absent for the same reason it is absent from the defaults: the grid renders it as
+ * a leading control column, outside the visible-column list the picker drives.
+ */
+export const PICKABLE_ATTACK_TAB_COLUMN_IDS: readonly AttackTabColumnId[] = [
+  ATTACK_TAB_COLUMN_ID.detectedOn,
+  ATTACK_TAB_COLUMN_ID.title,
+  ATTACK_TAB_COLUMN_ID.alerts,
+  ATTACK_TAB_COLUMN_ID.summary,
+  ATTACK_TAB_COLUMN_ID.riskScore,
+  ATTACK_TAB_COLUMN_ID.status,
+  ATTACK_TAB_COLUMN_ID.attachedBy,
+  ATTACK_TAB_COLUMN_ID.attachedAt,
+];
+
+const PICKABLE_ATTACK_TAB_COLUMN_ID_SET: ReadonlySet<string> = new Set(
+  PICKABLE_ATTACK_TAB_COLUMN_IDS
+);
+
+/**
  * localStorage key for the persisted column selection, namespaced to the case attachment so it
  * cannot collide with the same columns on the Attacks page or with the entities section.
  */
 export const ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY =
   'securitySolution.attackDiscovery.cases.attachment.columns';
+
+/**
+ * Narrows a column selection read back from localStorage to the ids this grid can still render,
+ * falling back to the defaults when it holds nothing usable.
+ *
+ * The runtime shape checks are not redundant with the declared type: the value is whatever was
+ * last written under the key, by any release, and a visible column the grid has no definition
+ * for renders as a blank column the picker offers no way to take back off.
+ */
+export const toVisibleAttackTabColumnIds = (
+  persisted: readonly string[] | null | undefined
+): AttackTabColumnId[] => {
+  const pickable = Array.isArray(persisted)
+    ? persisted.filter((columnId): columnId is AttackTabColumnId =>
+        PICKABLE_ATTACK_TAB_COLUMN_ID_SET.has(columnId)
+      )
+    : [];
+
+  return pickable.length > 0 ? pickable : [...DEFAULT_ATTACK_TAB_COLUMN_IDS];
+};
 
 /**
  * A `security.attack` attachment narrowed to the fields the attachments section renders: the

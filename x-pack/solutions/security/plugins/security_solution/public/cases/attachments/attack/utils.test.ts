@@ -10,7 +10,13 @@ import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import type { CaseAttachment } from './utils';
-import { isAttackAttachment, matchesSearchTerm, toReadableAttackIndexPattern } from './utils';
+import {
+  DEFAULT_ATTACK_TAB_COLUMN_IDS,
+  isAttackAttachment,
+  matchesSearchTerm,
+  toReadableAttackIndexPattern,
+  toVisibleAttackTabColumnIds,
+} from './utils';
 
 const attackAttachment = {
   type: SECURITY_ATTACK_ATTACHMENT_TYPE,
@@ -78,6 +84,46 @@ describe('matchesSearchTerm', () => {
   it('matches when the optional summary is absent', () => {
     const { summaryMarkdown, ...metadata } = attachment.metadata;
     expect(matchesSearchTerm({ ...attachment, metadata }, 'credential')).toBe(true);
+  });
+});
+
+describe('toVisibleAttackTabColumnIds', () => {
+  const defaults = [...DEFAULT_ATTACK_TAB_COLUMN_IDS];
+
+  it('keeps a persisted selection, in the order it was persisted', () => {
+    expect(toVisibleAttackTabColumnIds(['title', 'status', 'detectedOn'])).toEqual([
+      'title',
+      'status',
+      'detectedOn',
+    ]);
+  });
+
+  it('falls back to the defaults when nothing has been persisted', () => {
+    expect(toVisibleAttackTabColumnIds(undefined)).toEqual(defaults);
+  });
+
+  it('drops an id the grid no longer renders', () => {
+    expect(toVisibleAttackTabColumnIds(['title', 'entityCount'])).toEqual(['title']);
+  });
+
+  it('drops the actions column, which the grid renders outside the picker', () => {
+    expect(toVisibleAttackTabColumnIds(['actions', 'title'])).toEqual(['title']);
+  });
+
+  it.each([
+    ['an empty selection', []],
+    ['a selection of ids the grid no longer renders', ['entityCount']],
+  ])('falls back to the defaults for %s', (_label, persisted) => {
+    expect(toVisibleAttackTabColumnIds(persisted)).toEqual(defaults);
+  });
+
+  it.each([
+    ['an object', { columns: ['title'] }],
+    ['a string', 'title'],
+    ['a number', 7],
+    ['null', null],
+  ])('falls back to the defaults for %s written under the key', (_label, persisted) => {
+    expect(toVisibleAttackTabColumnIds(persisted as unknown as string[])).toEqual(defaults);
   });
 });
 

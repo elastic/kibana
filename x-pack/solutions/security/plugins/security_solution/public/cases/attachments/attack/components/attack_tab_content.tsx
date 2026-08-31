@@ -67,10 +67,11 @@ import { AttackTabBulkActions } from './attack_tab_bulk_actions';
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
 import type { AttackCaseAttachmentRow, AttackTabColumnId } from '../utils';
 import {
+  ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY,
   ATTACK_TAB_COLUMN_ID,
-  DEFAULT_ATTACK_TAB_COLUMN_IDS,
   isAttackAttachment,
   matchesSearchTerm,
+  toVisibleAttackTabColumnIds,
 } from '../utils';
 
 /** One attached attack: the snapshot persisted on the attachment, plus the live document when it resolves. */
@@ -480,7 +481,7 @@ const AttackTabTable = ({
   caseData: CommonAttachmentListViewProps['caseData'];
   searchTerm: CommonAttachmentListViewProps['searchTerm'];
 }) => {
-  const { http } = useKibana().services;
+  const { http, storage } = useKibana().services;
   const { isAssistantEnabled } = useAssistantAvailability();
   const { mutate: removeAttack, isLoading: isRemoving } = useRemoveAttackAttachment();
 
@@ -554,11 +555,25 @@ const AttackTabTable = ({
     [items, sortingColumns]
   );
 
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([
-    ...DEFAULT_ATTACK_TAB_COLUMN_IDS,
-  ]);
+  // Read once, on mount: the selection is only ever changed from this grid's own picker.
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
+    toVisibleAttackTabColumnIds(storage.get(ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY))
+  );
 
-  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
+  // Persisted per user rather than per case: which columns an analyst reads attacks by is a
+  // property of how they work, not of the case they happen to have open.
+  const onChangeVisibleColumns = useCallback(
+    (nextVisibleColumns: string[]) => {
+      storage.set(ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY, nextVisibleColumns);
+      setVisibleColumns(nextVisibleColumns);
+    },
+    [storage]
+  );
+
+  const columnVisibility = useMemo(
+    () => ({ visibleColumns, setVisibleColumns: onChangeVisibleColumns }),
+    [onChangeVisibleColumns, visibleColumns]
+  );
 
   // Keyed by saved object id, the same handle the row actions and the bulk removal use.
   const [selectedRowIds, setSelectedRowIds] = useState<ReadonlySet<string>>(NO_SELECTION);
