@@ -14,6 +14,7 @@ import {
   deleteAnnotationGroupFromLibrary,
   openPanelInlineEditorAndWaitVisible,
   spaceTest,
+  testData,
 } from '../fixtures';
 
 const ANNOTATION_GROUP_TITLE = 'My by reference annotation group';
@@ -29,7 +30,7 @@ async function openXyPanelInlineEditor(
 ) {
   const { dashboard, lens, visualize } = pageObjects;
   await visualize.goto();
-  await visualize.openSavedVisualization('lnsXYvis', { waitFor: 'lens' });
+  await visualize.openSavedVisualization(testData.LENS_BASIC_TITLES.XY_VIS, { waitFor: 'lens' });
   // Re-saving a saved visualization enables the add-to-dashboard radios only after
   // "Save as new visualization" is checked; `saveToLibrary: false` keeps it by-value.
   await lens.save(panelTitle, { addToDashboard: 'new', saveAsNew: true, saveToLibrary: false });

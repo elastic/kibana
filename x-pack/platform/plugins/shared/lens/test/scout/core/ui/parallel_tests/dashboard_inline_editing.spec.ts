@@ -15,6 +15,7 @@ import {
   createLogstashLensEditorSuiteSetup,
   openPanelInlineEditorAndWaitVisible,
   spaceTest,
+  testData,
 } from '../fixtures';
 
 const SECONDARY_METRIC_PANEL = 'lnsMetric_secondaryMetricDimensionPanel';
@@ -157,7 +158,9 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
       'add the saved visualization to a new dashboard and link it to the library',
       async () => {
         await visualize.goto();
-        await visualize.openSavedVisualization('lnsXYvis', { waitFor: 'lens' });
+        await visualize.openSavedVisualization(testData.LENS_BASIC_TITLES.XY_VIS, {
+          waitFor: 'lens',
+        });
         // Re-saving a saved visualization enables the add-to-dashboard radios only after
         // "Save as new visualization" is checked; `saveToLibrary: false` keeps it by-value.
         await lens.save('xyVisChart Copy', {
