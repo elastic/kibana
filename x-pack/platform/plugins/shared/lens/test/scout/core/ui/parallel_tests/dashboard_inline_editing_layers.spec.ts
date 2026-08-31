@@ -11,7 +11,6 @@ import {
   applyLensInlineEditorAndWaitClosed,
   cancelLensInlineEditorAndWaitClosed,
   createLogstashLensEditorSuiteSetup,
-  deleteAnnotationGroupFromLibrary,
   openPanelInlineEditorAndWaitVisible,
   spaceTest,
   testData,
@@ -51,7 +50,16 @@ spaceTest.describe(
 
     spaceTest.beforeAll(suiteSetup.beforeAll);
     spaceTest.beforeEach(suiteSetup.beforeEach);
-    spaceTest.afterAll(suiteSetup.afterAll);
+    spaceTest.afterAll(async ({ kbnClient, scoutSpace, apiServices }) => {
+      // The by-reference annotation test saves an `event-annotation-group`, which
+      // `cleanStandardList()` does not cover; delete it via API so it cannot leak
+      // into the shared worker space even when the test fails mid-way.
+      await kbnClient.savedObjects.clean({
+        types: ['event-annotation-group'],
+        space: scoutSpace.id,
+      });
+      await suiteSetup.afterAll({ scoutSpace, apiServices });
+    });
 
     spaceTest('adds a by-value annotation layer inline', async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
@@ -109,12 +117,6 @@ spaceTest.describe(
         await expect(page.testSubj.locator(ANNOTATION_DIMENSION)).toHaveText('Event');
 
         await cancelLensInlineEditorAndWaitClosed({ lens });
-      });
-
-      await spaceTest.step('clean up the annotation group', async () => {
-        // FTR leaked this saved object; delete it so the space's annotation library
-        // stays empty for other suites sharing the worker space.
-        await deleteAnnotationGroupFromLibrary(page, ANNOTATION_GROUP_TITLE);
       });
     });
 
