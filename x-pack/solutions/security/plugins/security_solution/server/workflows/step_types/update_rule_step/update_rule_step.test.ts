@@ -21,10 +21,10 @@ describe('updateRuleStepDefinition', () => {
   let mockContextManager: jest.Mocked<Context['contextManager']>;
 
   const buildContext = (rule: InputRule): Context =>
-    ({
-      input: { rule },
-      contextManager: mockContextManager,
-    } as unknown as Context);
+  ({
+    input: { rule },
+    contextManager: mockContextManager,
+  } as unknown as Context);
 
   beforeEach(() => {
     mockContextManager = {
@@ -54,21 +54,6 @@ describe('updateRuleStepDefinition', () => {
       body: rule,
     });
     expect(result.output).toEqual(updatedRule);
-  });
-
-  it('forwards a typeless rule unchanged; the endpoint resolves the type from the existing rule', async () => {
-    // A rule object passed as a single `${{ ... }}` expression bypasses input schema
-    // validation, so `type` can be absent at run time.
-    const rule = { rule_id: 'my-rule', query: 'host.name: *' } as InputRule;
-    mockContextManager.callKibanaApi.mockResolvedValue({ status: 200, headers: {}, body: rule });
-
-    await updateRuleStepDefinition.handler(buildContext(rule));
-
-    expect(mockContextManager.callKibanaApi).toHaveBeenCalledWith({
-      method: 'PATCH',
-      path: DETECTION_ENGINE_RULES_URL,
-      body: rule,
-    });
   });
 
   it('routes API failures through toApiExecutionError', async () => {

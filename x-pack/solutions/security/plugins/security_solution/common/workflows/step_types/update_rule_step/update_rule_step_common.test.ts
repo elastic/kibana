@@ -44,13 +44,14 @@ describe('updateRuleInputSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  // The YAML editor machinery dispatches on `instanceof`: lazySchema proxies fail those
-  // checks (blank autocomplete), and a ZodDiscriminatedUnion makes the editor pre-fill
-  // `type: ""` into the step scaffold, wrongly suggesting the field is required.
   it('is a plain union of real zod objects', () => {
     const ruleSchema = updateRuleInputSchema.shape.rule;
+    // Check that schema is a normal union and not a proxy – otherwise autocomplete 
+    // and editor validation don't work.
     expect(ruleSchema).toBeInstanceOf(z.ZodUnion);
-    expect(ruleSchema).not.toBeInstanceOf(z.ZodDiscriminatedUnion);
     expect((ruleSchema as z.ZodUnion).options[0]).toBeInstanceOf(z.ZodObject);
+    // Check that schema is not a discriminated union – otherwise the editor pre-fills `type: ""`,
+    // although "type" is optional.
+    expect(ruleSchema).not.toBeInstanceOf(z.ZodDiscriminatedUnion);
   });
 });
