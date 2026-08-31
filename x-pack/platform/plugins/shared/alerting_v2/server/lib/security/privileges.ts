@@ -29,17 +29,17 @@ const category: AppCategory = {
   euiIconType: 'watchesApp',
 };
 
-const techPreviewDescription = i18n.translate(
-  'xpack.alertingV2.privileges.techPreviewDescription',
+const experimentalDescription = i18n.translate(
+  'xpack.alertingV2.privileges.experimentalDescription',
   {
-    defaultMessage: 'Technical preview',
+    defaultMessage: 'Experimental',
   }
 );
 
 const buildPrivilegesTooltip = (documentationUrl: string): string =>
-  i18n.translate('xpack.alertingV2.privileges.techPreviewTooltip', {
+  i18n.translate('xpack.alertingV2.privileges.experimentalTooltip', {
     defaultMessage:
-      'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. {docsUrl}',
+      'This functionality is experimental and may be changed or removed completely in a future release. Elastic will work to fix any issues, but experimental features are not subject to the support SLA of official GA features. {docsUrl}',
     values: { docsUrl: documentationUrl },
   });
 
@@ -53,7 +53,7 @@ const buildKibanaFeature = (
   return {
     id: feature.id,
     name: feature.name,
-    description: techPreviewDescription,
+    description: experimentalDescription,
     privilegesTooltip: buildPrivilegesTooltip(documentationUrl),
     category,
     app,

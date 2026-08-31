@@ -59,12 +59,12 @@ describe('registerFeaturePrivileges', () => {
     });
   });
 
-  it('marks every feature as technical preview with a documentation tooltip', () => {
+  it('marks every feature as experimental with a documentation tooltip', () => {
     for (const feature of Object.values(ALERTING_V2_FEATURES)) {
       const registered = getRegisteredFeature(feature.id);
-      expect(registered.description).toBe('Technical preview');
+      expect(registered.description).toBe('Experimental');
       expect(registered.privilegesTooltip).toContain(
-        'This functionality is in technical preview and may be changed or removed in a future release.'
+        'This functionality is experimental and may be changed or removed completely in a future release.'
       );
       expect(registered.privilegesTooltip).toContain(docLinks.links.alerting.alertingV2Overview);
     }
