@@ -83,6 +83,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
       {isCpsEnabled && onOpenProjectScope ? (
         <>
           <AnalysisSetupProjectScopeForm
+            disabled={disabled}
             isCpsEnabled={isCpsEnabled}
             isCpsManagerReady={isCpsManagerReady}
             projectRouting={projectRouting}

@@ -80,25 +80,27 @@ export interface LoadedProjectScopeProjects {
   linkedProjects: CPSProject[];
 }
 
-export interface AnalysisSetupProjectScopeProps {
+export interface AnalysisSetupProjectScopeFormProps {
   isCpsEnabled: boolean;
   isCpsManagerReady: boolean;
   projectRouting: ProjectRouting;
   onOpenProjectScope: (projects: LoadedProjectScopeProjects) => void;
   validationErrors?: ProjectRoutingValidationError[];
+  disabled?: boolean;
 }
 
-interface AnalysisSetupProjectScopeButtonProps
-  extends Omit<AnalysisSetupProjectScopeProps, 'isCpsEnabled'> {
+interface AnalysisSetupProjectScopeFormInnerProps
+  extends Omit<AnalysisSetupProjectScopeFormProps, 'isCpsEnabled'> {
   cpsManager: ICPSManager;
 }
 
-const AnalysisSetupProjectScopeButton: FC<AnalysisSetupProjectScopeButtonProps> = ({
+const AnalysisSetupProjectScopeFormInner: FC<AnalysisSetupProjectScopeFormInnerProps> = ({
   cpsManager,
   isCpsManagerReady,
   onOpenProjectScope,
   projectRouting,
   validationErrors = [],
+  disabled = false,
 }) => {
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
@@ -137,7 +139,7 @@ const AnalysisSetupProjectScopeButton: FC<AnalysisSetupProjectScopeButtonProps> 
   }
 
   const isButtonLoading = isProjectScopeLoading || !isCpsManagerReady;
-  const isButtonDisabled = isButtonLoading || hasError;
+  const isButtonDisabled = disabled || isButtonLoading || hasError;
 
   return (
     <EuiFlexGroup direction="column">
@@ -189,12 +191,9 @@ const formatValidationError = (validationError: ProjectRoutingValidationError): 
   }
 };
 
-export const AnalysisSetupProjectScopeForm: FC<AnalysisSetupProjectScopeProps> = ({
+export const AnalysisSetupProjectScopeForm: FC<AnalysisSetupProjectScopeFormProps> = ({
   isCpsEnabled,
-  isCpsManagerReady,
-  onOpenProjectScope,
-  projectRouting,
-  validationErrors,
+  ...props
 }) => {
   const {
     services: { cps },
@@ -205,13 +204,5 @@ export const AnalysisSetupProjectScopeForm: FC<AnalysisSetupProjectScopeProps> =
     return null;
   }
 
-  return (
-    <AnalysisSetupProjectScopeButton
-      cpsManager={cpsManager}
-      isCpsManagerReady={isCpsManagerReady}
-      onOpenProjectScope={onOpenProjectScope}
-      projectRouting={projectRouting}
-      validationErrors={validationErrors}
-    />
-  );
+  return <AnalysisSetupProjectScopeFormInner cpsManager={cpsManager} {...props} />;
 };
