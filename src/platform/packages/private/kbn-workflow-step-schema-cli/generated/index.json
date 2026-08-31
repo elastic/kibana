@@ -1,5 +1,4 @@
 {
-  "buildHash": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "connectorTypes": [
     ".1password",
     ".abuseipdb",
@@ -85,7 +84,6 @@
     ".zendesk",
     ".zoom"
   ],
-  "kibanaVersion": "9.6.0",
   "profile": "superset",
   "stepTypes": [
     "1password.getUser",
@@ -552,7 +550,6 @@
     "new_relic.runNrqlQuery",
     "new_relic.unacknowledgeIssue",
     "new_relic.updateMutingRule",
-    "nightshift.triggerInvestigation",
     "notion.getDataSource",
     "notion.getPage",
     "notion.queryDataSource",
@@ -663,6 +660,7 @@
     "security.buildAlertEntityGraph",
     "security.createExceptionListItem",
     "security.createNote",
+    "security.createRule",
     "security.createRuleException",
     "security.deleteNote",
     "security.disableRule",
@@ -872,20 +870,26 @@
     "entityStore.entityRiskScoreChanged",
     "manual",
     "scheduled",
+    "security.alertAssigneesChanged",
+    "security.alertStatusChanged",
+    "security.alertTagsChanged",
+    "security.attackAssigneesChanged",
+    "security.attackStatusChanged",
+    "security.attackTagsChanged",
+    "security.noteCreated",
+    "security.noteUpdated",
     "significant-events.eventCreated",
     "significant-events.eventStatusChanged",
-    "significant-events.investigationCompleted",
-    "significant-events.investigationStarted",
     "workflows.failed"
   ],
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "41d19bfc2d10df171d3ae100597b5c3b36ea7e9ab82f99d6da63ac1caa879796"
+      "sha256": "32a4e2cad782affa0c183d17a99f68f8277ebd78e078f173922d8a88eeb63ce4"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "abb560dd70873775fefad1a342394ce5c2813ffa8bfd45cd8bdcd7a5c7d3c597"
+      "sha256": "46df67db860c4227970654413aca6e2b632c69382af1a14356c02504673afc51"
     }
   }
 }
