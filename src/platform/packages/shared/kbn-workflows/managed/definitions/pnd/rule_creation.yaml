@@ -62,6 +62,27 @@ steps:
         is discoverable in the detection library. Use the stated technique and
         sub-technique where one applies.
 
+        MITRE precision rules — getting these wrong silently corrupts the
+        detection library's coverage analytics:
+        - rule.threat[0].technique[0].id MUST equal the stated technique id
+          verbatim (e.g. "T1195.002", not "T1195"). If the stated id is a
+          sub-technique (has a .NNN suffix), do NOT fall back to the parent —
+          catalog the exact sub-technique with its own name.
+        - Choose by the ATT&CK TACTIC the behavior belongs to, not by surface
+          similarity: deleting volume shadow copies before encryption is
+          Impact (T1490), not Defense Evasion indicator removal (T1070.004)
+          and not the encryption itself (T1486); a npm lifecycle hook spawning
+          a child process is Supply Chain Compromise (T1195.002), not
+          Command and Scripting Interpreter (T1059); deleting cloud resolver
+          log config is Impair Defenses sub-technique (T1562.008), not the
+          generic T1562; running a shell inside a container as admin is
+          Container Administration Command (T1609), not Escape to Host
+          (T1611); creating a local account is Create Account: Local Account
+          (T1136.001), not generic account management (T1098).
+        - Before returning, re-read the drafted rule and verify the first
+          technique id equals the stated one. If it does not, fix the draft
+          rather than shipping the mismatch.
+
         Echo the tool's returned rule fields under "rule" and the attachment
         metadata alongside it. Never return id or rule_id.
       schema:
