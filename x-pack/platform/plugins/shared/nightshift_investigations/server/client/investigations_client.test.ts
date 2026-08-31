@@ -60,7 +60,8 @@ const makeExecution = (overrides: Record<string, unknown> = {}) => ({
   finishedAt: undefined as string | undefined,
   context: undefined as Record<string, unknown> | undefined,
   stepExecutions: undefined as
-    Array<{ stepId?: string; stepType?: string; startedAt?: string; output: unknown }> | undefined,
+    | Array<{ stepId?: string; stepType?: string; startedAt?: string; output: unknown }>
+    | undefined,
   error: undefined as { message: string } | undefined,
   ...overrides,
 });

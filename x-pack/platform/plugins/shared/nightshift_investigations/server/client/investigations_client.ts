@@ -402,7 +402,7 @@ export class NightshiftInvestigationsClient {
       completed_at: isTerminal ? execution.finishedAt : undefined,
       conclusion:
         status === 'completed'
-          ? (asString(structuredOutput?.conclusion) ?? asString(structuredOutput?.summary))
+          ? asString(structuredOutput?.conclusion) ?? asString(structuredOutput?.summary)
           : undefined,
       severity:
         status === 'completed' ? asSeverity(structuredOutput?.severity, this.logger) : undefined,
