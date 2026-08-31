@@ -26,10 +26,10 @@ interface CreateActionPolicyAttachmentTypeOptions {
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
 }
 
-const formatMatcher = (m: PolicyMatcher): string => {
-  if (m.expression?.trim()) return `expression: "${m.expression.trim()}"`;
+const formatMatcher = (matcher: PolicyMatcher): string => {
+  if (matcher.expression?.trim()) return `expression: "${matcher.expression.trim()}"`;
   const parts: string[] = [];
-  if (m.tags?.length) parts.push(`tags: ${m.tags.join(', ')}`);
+  if (matcher.tags?.length) parts.push(`tags: ${matcher.tags.join(', ')}`);
   return parts.join(' | ') || '{}';
 };
 

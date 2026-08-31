@@ -388,12 +388,13 @@ export class ActionPolicyClient {
 
     const items: MatchedActionPolicy[] = [];
 
-    const allPolicies = await this.findActionPolicies({ perPage: 100 });
+    const allPolicies = await this.findActionPolicies({ perPage: 100, sortField: 'name' });
     for (const actionPolicy of allPolicies.items) {
       const { matcher } = actionPolicy;
 
       // A catch-all matcher (absent, or with neither a tag clause nor an expression) applies to
-      // every rule. Reuses the dispatcher's canonical definition so both stay in sync.
+      // every rule; it is surfaced under the "global" category. Reuses the dispatcher's canonical
+      // catch-all definition so both stay in sync.
       if (PolicyMatcher.of(matcher).isCatchAll()) {
         items.push({ actionPolicy, category: 'global' });
         continue;

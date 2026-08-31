@@ -938,7 +938,7 @@ export function ComposeDiscoverFlyout({
     }
 
     let submitted = values;
-    if (!!values.notifications?.workflows?.length && !values.metadata.tags?.length) {
+    if (values.notifications?.workflows?.length && !values.metadata.tags?.length) {
       const tags = [buildRuleNotificationTag(values.metadata.name)];
       methods.setValue('metadata.tags', tags, { shouldDirty: true });
       submitted = { ...values, metadata: { ...values.metadata, tags } };
