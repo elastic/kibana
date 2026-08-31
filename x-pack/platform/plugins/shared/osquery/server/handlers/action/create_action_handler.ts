@@ -44,6 +44,8 @@ interface CreateActionHandlerOptions {
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
+  /** When true, dispatch stored SO content even if the caller supplied a query. */
+  useStoredQuery?: boolean;
 }
 
 export const createActionHandler = async (
@@ -59,7 +61,7 @@ export const createActionHandler = async (
     options.space?.id ?? DEFAULT_SPACE_ID
   );
 
-  const { metadata, alertData, error } = options;
+  const { metadata, alertData, error, useStoredQuery } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
   const {
     agent_all: agentAll,
@@ -85,11 +87,12 @@ export const createActionHandler = async (
   }
 
   let packSO;
+  const packId = params.pack_id?.trim();
 
-  if (params.pack_id) {
+  if (packId) {
     packSO = await spaceScopedInternalSavedObjectsClient.get<PackSavedObject>(
       packSavedObjectType,
-      params.pack_id
+      packId
     );
   }
 
@@ -110,11 +113,9 @@ export const createActionHandler = async (
     user_id: metadata?.currentUser,
     user_profile_uid: metadata?.userProfileUid,
     metadata: params.metadata,
-    pack_id: params.pack_id,
+    pack_id: packId,
     pack_name: packSO?.attributes?.name,
-    pack_prebuilt: params.pack_id
-      ? some(packSO?.references, ['type', 'osquery-pack-asset'])
-      : undefined,
+    pack_prebuilt: packId ? some(packSO?.references, ['type', 'osquery-pack-asset']) : undefined,
     tags: [],
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
@@ -144,6 +145,7 @@ export const createActionHandler = async (
           error,
           spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
           spaceScopedClient: spaceScopedInternalSavedObjectsClient,
+          useStoredQuery,
         }),
   };
 

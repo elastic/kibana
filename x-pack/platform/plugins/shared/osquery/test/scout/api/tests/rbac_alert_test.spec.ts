@@ -78,9 +78,6 @@ apiTest.describe(
     apiTest(
       'returns 403 when an alert id is supplied but no investigation guide justifies the query',
       async ({ apiClient }) => {
-        // An alert reference only justifies a query that appears in that alert's
-        // investigation guide. An alert that cannot be read, or whose rule carries no
-        // guide, provides no justification and must not fall through to dispatch.
         const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
           headers: { ...testData.COMMON_HEADERS, ...t1Credentials.apiKeyHeader },
           body: testData.getMinimalLiveQuery({

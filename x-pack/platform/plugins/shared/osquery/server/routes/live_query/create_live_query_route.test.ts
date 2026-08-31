@@ -215,5 +215,35 @@ describe('createLiveQueryRoute', () => {
 
     const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
     expect(soClient.get).toHaveBeenCalledWith(savedQuerySavedObjectType, SAVED_QUERY_ID);
+    expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ saved_query_id: SAVED_QUERY_ID }),
+      expect.objectContaining({ useStoredQuery: true })
+    );
+  });
+
+  it('returns 403 when caller SQL does not match the stored saved query', async () => {
+    const response = await invokeRoute({
+      saved_query_id: SAVED_QUERY_ID,
+      query: 'select 42 as leaked;',
+      agent_ids: ['agent-1'],
+    });
+
+    expect(response.forbidden).toHaveBeenCalled();
+    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+  });
+
+  it('still sets useStoredQuery when the caller posted matching SQL', async () => {
+    await invokeRoute({
+      saved_query_id: SAVED_QUERY_ID,
+      query: STORED_QUERY,
+      agent_ids: ['agent-1'],
+    });
+
+    expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ query: STORED_QUERY, saved_query_id: SAVED_QUERY_ID }),
+      expect.objectContaining({ useStoredQuery: true })
+    );
   });
 });

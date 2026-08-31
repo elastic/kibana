@@ -31,12 +31,6 @@ import type { createActionService } from './handlers/action/create_action_servic
 export interface CheckResponseActionAuthzParams {
   saved_query_id?: string;
   pack_id?: string;
-  /**
-   * Caller-supplied query payload. Callers authorized only by `runSavedQueries` may not
-   * supply their own osquery SQL - the dispatched query is derived from the referenced
-   * saved object instead. These fields are inspected so such an attempt is rejected
-   * rather than silently ignored.
-   */
   query?: string;
   queries?: Array<{ query?: string }>;
   ecs_mapping?: Record<string, unknown>;
@@ -44,14 +38,7 @@ export interface CheckResponseActionAuthzParams {
 
 export interface OsqueryPluginSetup {
   createActionService: ReturnType<typeof createActionService>;
-  /**
-   * Validates that the requesting user has the required osquery privileges
-   * for the given response action configuration.
-   * Throws a 403 CustomHttpRequestError if the user lacks authorization.
-   *
-   * Used by security_solution when creating/updating detection rules
-   * that include osquery response actions.
-   */
+  /** Throws 403 if the request is not authorized for the given osquery response action. */
   checkResponseActionAuthz: (
     request: KibanaRequest,
     actionParams: CheckResponseActionAuthzParams

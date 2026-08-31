@@ -23,7 +23,10 @@ import type { StartPlugins } from '../../types';
 import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
 import { getUserInfo } from '../../lib/get_user_info';
-import { isOsqueryResponseActionAuthorized } from '../../lib/check_response_action_authz';
+import {
+  getOsqueryCapabilities,
+  isOsqueryResponseActionAuthorized,
+} from '../../lib/check_response_action_authz';
 import { createLiveQueryResponseSchema } from './response_schemas';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -35,7 +38,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         authz: {
           enabled: false,
           reason:
-            'Authorization depends on the request body: writeLiveQueries permits arbitrary SQL, while runSavedQueries only permits running a saved_query_id or pack_id that resolves to a real saved object. See isOsqueryResponseActionAuthorized below.',
+            'Authorization depends on the request body; see isOsqueryResponseActionAuthorized.',
         },
       },
     })
@@ -60,6 +63,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
         const space = await osqueryContext.service.getActiveSpace(request);
+        const { writeLiveQueries } = await getOsqueryCapabilities(coreStartServices, request);
 
         const isInvalid = !(await isOsqueryResponseActionAuthorized(
           coreStartServices,
@@ -78,8 +82,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           .getRuleRegistryService()
           ?.getRacClientWithRequest(request);
 
-        // An unreadable or non-existent alert must not surface as a 500 on the deny path -
-        // an unauthorized caller referencing an alert they cannot read is a 403.
+        // Unreadable/missing alert on the deny path is 403, not 500.
         let alertData: (ParsedTechnicalFields & { _index: string }) | undefined;
         try {
           alertData = request.body.alert_ids?.length
@@ -96,9 +99,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
 
         if (isInvalid) {
-          // The only justification for an otherwise-unauthorized request is that the query
-          // appears in the referenced alert's investigation guide. Absence of a guide is
-          // absence of justification, not absence of a constraint - so it must deny.
+          // Investigation-guide match is the only unauthorized bypass.
           if (!request.body.alert_ids?.length) {
             return response.forbidden();
           }
@@ -159,6 +160,8 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               metadata: { currentUser: username, userProfileUid },
               alertData,
               space,
+              // Investigation-guide bypass keeps caller SQL; otherwise stored SO is dispatched.
+              useStoredQuery: !isInvalid && !writeLiveQueries,
             }
           );
           if (!fleetActionsCount) {

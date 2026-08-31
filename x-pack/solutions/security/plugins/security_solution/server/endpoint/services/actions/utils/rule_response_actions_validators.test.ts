@@ -646,6 +646,30 @@ describe('Rules Endpoint response actions validators', () => {
       });
     });
 
+    it('should pass ecs_mapping to osquery authz checker', async () => {
+      options.rulePayload = {
+        response_actions: [
+          {
+            action_type_id: '.osquery' as const,
+            params: {
+              saved_query_id: 'test-saved-query',
+              ecs_mapping: { 'host.name': { field: 'name' } },
+            },
+          },
+        ],
+      };
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: 'test-saved-query',
+        pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+        ecs_mapping: { 'host.name': { field: 'name' } },
+      });
+    });
+
     it('should throw when osquery authz checker rejects', async () => {
       const authzError: Error & { statusCode?: number } = new Error(
         'User is not authorized to create/update osquery response action'

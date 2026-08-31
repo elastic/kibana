@@ -55,8 +55,6 @@ apiTest.describe(
     apiTest(
       'returns 403 when smuggling a custom query behind a saved query id',
       async ({ apiClient }) => {
-        // The saved query id is a reference to resolve, not a capability token: supplying
-        // SQL that differs from the stored query is a privilege escalation attempt.
         const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
           headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
           body: testData.getSavedQueryLiveQuery(savedQueryId, {
@@ -72,8 +70,6 @@ apiTest.describe(
     apiTest(
       'returns 403 when smuggling a queries array behind a saved query id',
       async ({ apiClient }) => {
-        // `queries[]` takes precedence over `saved_query_id` when the action is built, so
-        // it must not be accepted on the strength of an accompanying reference.
         const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
           headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
           body: testData.getSavedQueryLiveQuery(savedQueryId, {
@@ -86,10 +82,25 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'returns 403 when a whitespace saved query id is used to smuggle a custom query',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
+          headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
+          body: testData.getSavedQueryLiveQuery(' ', { query: 'select 42 as leaked;' }),
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
     apiTest('returns 403 when the saved query id does not resolve', async ({ apiClient }) => {
       const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
         headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
-        body: testData.getSavedQueryLiveQuery(' ', { query: 'select 42 as leaked;' }),
+        body: testData.getSavedQueryLiveQuery('non-existent-saved-query-id', {
+          query: 'select 42 as leaked;',
+        }),
         responseType: 'json',
       });
 

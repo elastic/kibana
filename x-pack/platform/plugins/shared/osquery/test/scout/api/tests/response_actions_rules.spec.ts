@@ -316,30 +316,25 @@ apiTest.describe(
       },
     });
 
-    const isOsqueryAuthzDenied = (response: { statusCode: number; body: unknown }): boolean => {
-      if (response.statusCode === 403) {
-        return true;
-      }
+    const buildRulesImportMultipart = (rule: object) => {
+      const ndjson = `${JSON.stringify(rule)}\n`;
+      const boundary = '----scoutFormBoundary';
+      const body = [
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="file"; filename="rules.ndjson"',
+        'Content-Type: application/x-ndjson',
+        '',
+        ndjson,
+        `--${boundary}--`,
+        '',
+      ].join('\r\n');
 
-      const body = response.body as {
-        status_code?: number;
-        attributes?: { errors?: Array<{ status_code?: number; error?: { status_code?: number } }> };
-        errors?: Array<{ error?: { status_code?: number } }>;
+      return {
+        headers: {
+          'content-type': `multipart/form-data; boundary=${boundary}`,
+        },
+        body: Buffer.from(body),
       };
-
-      if (body.status_code === 403) {
-        return true;
-      }
-
-      if (body.attributes?.errors?.some((error) => error.status_code === 403)) {
-        return true;
-      }
-
-      if (body.errors?.some((error) => error.error?.status_code === 403)) {
-        return true;
-      }
-
-      return false;
     };
 
     apiTest(
@@ -353,7 +348,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(isOsqueryAuthzDenied(response)).toBe(true);
+        expect(response).toHaveStatusCode(403);
         if (response.statusCode === 200 && response.body?.id) {
           createdRuleIds.push(response.body.id);
         }
@@ -379,7 +374,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(isOsqueryAuthzDenied(response)).toBe(true);
+        expect(response).toHaveStatusCode(403);
         if (response.statusCode === 200 && response.body?.id) {
           createdRuleIds.push(response.body.id);
         }
@@ -429,7 +424,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(isOsqueryAuthzDenied(updateResponse)).toBe(true);
+        expect(updateResponse).toHaveStatusCode(403);
       }
     );
 
@@ -453,7 +448,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(isOsqueryAuthzDenied(patchResponse)).toBe(true);
+        expect(patchResponse).toHaveStatusCode(403);
       }
     );
 
@@ -464,17 +459,7 @@ apiTest.describe(
           rule_id: `ra-import-${Date.now()}`,
           response_actions: [smuggledOsqueryAction()],
         });
-        const ndjson = `${JSON.stringify(rule)}\n`;
-        const boundary = '----scoutFormBoundary';
-        const multipartBody = [
-          `--${boundary}`,
-          'Content-Disposition: form-data; name="file"; filename="rules.ndjson"',
-          'Content-Type: application/x-ndjson',
-          '',
-          ndjson,
-          `--${boundary}--`,
-          '',
-        ].join('\r\n');
+        const multipart = buildRulesImportMultipart(rule);
 
         const importResponse = await apiClient.post(testData.API_PATHS.DETECTION_RULES_IMPORT, {
           headers: {
@@ -482,13 +467,22 @@ apiTest.describe(
             'kbn-xsrf': testData.COMMON_HEADERS['kbn-xsrf'],
             'x-elastic-internal-origin': 'kibana',
             'elastic-api-version': testData.OSQUERY_API_VERSION,
-            'content-type': `multipart/form-data; boundary=${boundary}`,
+            ...multipart.headers,
           },
-          body: Buffer.from(multipartBody),
+          body: multipart.body,
           responseType: 'json',
         });
 
-        expect(isOsqueryAuthzDenied(importResponse)).toBe(true);
+        expect(importResponse).toHaveStatusCode(200);
+        expect(importResponse.body).toStrictEqual(
+          expect.objectContaining({
+            errors: expect.arrayContaining([
+              expect.objectContaining({
+                error: expect.objectContaining({ status_code: 403 }),
+              }),
+            ]),
+          })
+        );
       }
     );
 
@@ -515,7 +509,14 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(isOsqueryAuthzDenied(bulkResponse)).toBe(true);
+        expect(bulkResponse).toHaveStatusCode(200);
+        expect(bulkResponse.body).toStrictEqual(
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              errors: expect.arrayContaining([expect.objectContaining({ status_code: 403 })]),
+            }),
+          })
+        );
         const created = (
           bulkResponse.body as { attributes?: { results?: { created?: Array<{ id: string }> } } }
         ).attributes?.results?.created;

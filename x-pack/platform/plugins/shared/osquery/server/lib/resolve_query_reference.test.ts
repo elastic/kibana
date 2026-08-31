@@ -14,15 +14,10 @@ const SAVED_QUERY_ID = 'saved-query-1';
 const PACK_ID = 'pack-1';
 
 describe('resolveQueryReference', () => {
-  /**
-   * Seeds saved objects per space so cross-space isolation can be asserted: a lookup made
-   * while scoped to space A must not see an object that only exists in space B.
-   */
   const createMockCoreStart = (
     objectsBySpace: Record<string, Record<string, object>>
   ): CoreStart => {
     const getScopedClient = jest.fn((request: { headers: unknown }) => {
-      // getInternalSavedObjectsClientForSpaceId brands the space onto the fake request.
       const spaceId = (request as unknown as { spaceId?: string }).spaceId ?? 'default';
       const objects = objectsBySpace[spaceId] ?? {};
 

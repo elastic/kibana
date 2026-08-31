@@ -169,9 +169,6 @@ describe('createActionHandler', () => {
   });
 
   it('does not dispatch anything when the referenced pack cannot be read', async () => {
-    // Unresolvable references are rejected by the authorization layer before reaching the
-    // handler; if one still gets here it must fail without queuing a Fleet action rather
-    // than falling through to dispatch the caller's own query.
     mockedGetInternalSOClient.mockReturnValue({
       get: jest
         .fn()
@@ -192,5 +189,38 @@ describe('createActionHandler', () => {
     expect(bulkCreate).not.toHaveBeenCalled();
     expect(bulk).not.toHaveBeenCalled();
     expect(reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('forwards useStoredQuery to createDynamicQueries', async () => {
+    const { context } = buildOsqueryContext();
+
+    await createActionHandler(
+      context,
+      { saved_query_id: 'sq-1', query: 'select 42 as leaked;', agent_ids: [TEST_AGENT] },
+      { space: { id: 'production' }, useStoredQuery: true }
+    );
+
+    expect(mockedCreateDynamicQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ useStoredQuery: true })
+    );
+  });
+
+  it('looks up a padded pack_id using the trimmed id', async () => {
+    const get = jest.fn().mockResolvedValue({
+      attributes: { name: 'pack', queries: [] },
+      references: [],
+    });
+    mockedGetInternalSOClient.mockReturnValue({
+      get,
+    } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
+    const { context } = buildOsqueryContext();
+
+    await createActionHandler(
+      context,
+      { pack_id: '  pack-1  ', agent_ids: [TEST_AGENT] },
+      { space: { id: 'production' } }
+    );
+
+    expect(get).toHaveBeenCalledWith(packSavedObjectType, 'pack-1');
   });
 });

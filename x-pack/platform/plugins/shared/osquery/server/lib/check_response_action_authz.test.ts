@@ -19,10 +19,6 @@ const STORED_PACK_QUERY = 'select * from processes;';
 describe('isOsqueryResponseActionAuthorized', () => {
   let request: KibanaRequest;
 
-  /**
-   * Builds a CoreStart whose internal saved objects client resolves only the ids seeded
-   * here, so an unresolvable reference behaves like it does in production (404).
-   */
   const createMockCoreStart = (
     capabilities: Record<string, boolean>,
     savedObjects: Record<
@@ -271,6 +267,20 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(true);
     });
 
+    it('should reject SQL smuggled into a parameterised stored query', async () => {
+      const coreStart = createMockCoreStart(
+        { writeLiveQueries: false, runSavedQueries: true },
+        { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
+      );
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, {
+          saved_query_id: SAVED_QUERY_ID,
+          query: "select * from os_version where name='' UNION SELECT name FROM users --';",
+        })
+      ).resolves.toBe(false);
+    });
+
     it('should reject SQL appended around a parameterised stored query', async () => {
       const coreStart = createMockCoreStart(
         { writeLiveQueries: false, runSavedQueries: true },
@@ -281,6 +291,20 @@ describe('isOsqueryResponseActionAuthorized', () => {
         isOsqueryResponseActionAuthorized(coreStart, request, {
           saved_query_id: SAVED_QUERY_ID,
           query: "select * from os_version where name='Ubuntu'; select 42 as leaked;",
+        })
+      ).resolves.toBe(false);
+    });
+
+    it('should reject a supplied query when the stored query is only a placeholder', async () => {
+      const coreStart = createMockCoreStart(
+        { writeLiveQueries: false, runSavedQueries: true },
+        { [SAVED_QUERY_ID]: { query: '{{host.os.name}}' } }
+      );
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, {
+          saved_query_id: SAVED_QUERY_ID,
+          query: 'select 42 as leaked;',
         })
       ).resolves.toBe(false);
     });

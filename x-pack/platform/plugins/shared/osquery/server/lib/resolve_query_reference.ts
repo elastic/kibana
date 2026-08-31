@@ -12,11 +12,7 @@ import { packSavedObjectType, savedQuerySavedObjectType } from '../../common/typ
 import type { PackSavedObject, SavedQuerySavedObject } from '../common/types';
 import { getInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
 
-/**
- * Normalizes saved-object `ecs_mapping` (array `{ key, value }` or record) to the
- * record form used on live-query request bodies, so callers can be compared against
- * stored content without depending on which shape the SO happens to hold.
- */
+/** Normalizes SO `ecs_mapping` (array or record) to the record form used on live-query bodies. */
 export const toEcsMappingRecord = (
   mapping:
     | Array<{ key: string; value: Record<string, object> }>
@@ -42,13 +38,6 @@ export const toEcsMappingRecord = (
   return Object.keys(mapping).length ? mapping : undefined;
 };
 
-/**
- * The query content backing an authorized `saved_query_id` / `pack_id` reference.
- *
- * `queries` is populated for packs (which hold many queries); `query` and `ecs_mapping`
- * are populated for saved queries. Callers authorized only by `runSavedQueries` dispatch
- * this content instead of anything they supplied themselves.
- */
 export interface ResolvedQueryReference {
   query?: string;
   queries?: string[];
@@ -56,17 +45,8 @@ export interface ResolvedQueryReference {
 }
 
 /**
- * Resolves a `saved_query_id` or `pack_id` to its stored query content.
- *
- * Resolution deliberately uses the internal, space-scoped saved objects client. The
- * `run_saved_queries` sub-feature privilege grants no saved object read access
- * (`savedObject: { all: [], read: [] }` in register_features.ts), so a user holding only
- * that privilege genuinely cannot read the referenced object with their own credentials.
- * Reading it internally lets us derive trusted query content without granting the caller
- * any visibility into the object. Space scoping is preserved, so a reference that lives in
- * another space does not resolve.
- *
- * @returns the stored query content, or `undefined` when the reference does not resolve.
+ * Resolves a saved query or pack via the internal space-scoped SO client.
+ * `run_saved_queries` grants no SO read, so the caller's credentials cannot load the object.
  */
 export const resolveQueryReference = async (
   coreStart: CoreStart,
@@ -75,8 +55,6 @@ export const resolveQueryReference = async (
 ): Promise<ResolvedQueryReference | undefined> => {
   const { saved_query_id: savedQueryId, pack_id: packId } = reference;
 
-  // A blank or whitespace-only id is not a reference. Guarding here keeps the
-  // "presence implies authorization" bug from reappearing at the resolution layer.
   const trimmedSavedQueryId = savedQueryId?.trim();
   const trimmedPackId = packId?.trim();
 

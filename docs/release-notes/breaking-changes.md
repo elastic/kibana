@@ -43,13 +43,14 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 $$$kibana-287882$$$
 ::::{dropdown} Osquery live queries no longer accept caller-supplied SQL from `runSavedQueries`-only callers
-**Details**<br> `POST /api/osquery/live_queries` now derives the dispatched SQL from the referenced saved query or pack. A caller who holds only the osquery `runSavedQueries` privilege (and not `writeLiveQueries`) can no longer supply a `query` or `queries` array. A mismatched query, an unresolvable `saved_query_id` / `pack_id`, or a `queries` array on that persona returns HTTP 403 Forbidden. Callers who hold `writeLiveQueries` are unchanged.
+:applies_to: {"stack": "ga 9.6+", "serverless": "ga"}
+**Details**<br> This is a breaking change on Elastic Cloud Serverless (Security Complete) as soon as it ships there, and on Elastic Stack from 9.6.0. `POST /api/osquery/live_queries` now derives the dispatched SQL from the referenced saved query or pack. A caller who holds only the osquery `runSavedQueries` privilege (and not `writeLiveQueries`) cannot run ad-hoc SQL. A `queries` array, an unresolvable `saved_query_id` / `pack_id`, or a `query` / `ecs_mapping` that does not match the stored object returns HTTP 403 Forbidden. A matching `query` is accepted for compatibility with the Kibana UI (which still posts the selected saved query's SQL) but does not change what is dispatched: the stored object is the source of truth, and `{{parameter}}` substitution is applied server-side when alert context is present. Callers who hold `writeLiveQueries` are unchanged.
 
-The same rules apply when attaching an osquery response action to a detection rule (create, update, patch, import, and bulk duplicate).
+The same rules apply when attaching an osquery response action to a detection rule (create, update, patch, import, and bulk duplicate). Rule-run dispatch also uses stored content, so SQL persisted on the action cannot override the referenced saved query.
 
 **Impact**<br> API clients that posted `{ saved_query_id, query }` with SQL that differed from the saved object — or that used a placeholder id to run ad-hoc SQL — now receive 403. No Kibana UI flow produces that payload: the saved-query picker requires `readSavedQueries`, and the query editor is read-only without `writeLiveQueries`.
 
-**Action**<br> For `runSavedQueries`-only callers, send a resolvable `saved_query_id` or `pack_id` and omit `query` / `queries`. To run arbitrary SQL, grant `writeLiveQueries`.
+**Action**<br> For `runSavedQueries`-only callers, send a resolvable `saved_query_id` or `pack_id`. You may omit `query` / `queries`, or send SQL that matches the stored object. To run arbitrary SQL, grant `writeLiveQueries`.
 
 View [PR #287882](https://github.com/elastic/kibana/pull/287882).
 ::::
