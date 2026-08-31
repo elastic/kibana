@@ -11,6 +11,7 @@ import React from 'react';
 import { of } from 'rxjs';
 
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
@@ -66,7 +67,7 @@ test('it renders with custom logo', () => {
 test('it queries for spaces when loaded', async () => {
   const spaces = [
     {
-      id: 'space-1',
+      id: asSpaceId('space-1'),
       name: 'Space 1',
       description: 'This is the first space',
       disabledFeatures: [],
@@ -90,7 +91,7 @@ test('it queries for spaces when loaded', async () => {
 
 test('it renders the list filter controls when the spaces list exceeds the threshold', async () => {
   const spaces = Array.from({ length: VIEW_MODE_THRESHOLD + 1 }, (_, index) => ({
-    id: `space-${index}`,
+    id: asSpaceId(`space-${index}`),
     name: `Space ${index}`,
     description: `This is the ${index} space`,
     disabledFeatures: [],
@@ -112,7 +113,7 @@ test('it renders the list filter controls when the spaces list exceeds the thres
 
 test('it displays only spaces matching the search term', async () => {
   const spaces = Array.from({ length: VIEW_MODE_THRESHOLD + 1 }, (_, index) => ({
-    id: `space-${index}`,
+    id: asSpaceId(`space-${index}`),
     name: `Space ${index}`,
     description: `This is the ${index} space`,
     disabledFeatures: [],

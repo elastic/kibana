@@ -44,17 +44,17 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 
 #### Key flags
 
-| Flag                | Description                                      |
-| ------------------- | ------------------------------------------------ |
-| `--suite <id>`      | Suite to run (interactive prompt if omitted)     |
-| `--model <id>`      | Connector/model to evaluate (comma-separated OK) |
-| `--judge <id>`      | Connector for LLM-as-a-judge evaluators          |
-| `--grep <pattern>`  | Filter tests by name                             |
-| `--repetitions <n>` | Repeat each example N times                      |
+| Flag                | Description                                                            |
+| ------------------- | ---------------------------------------------------------------------- |
+| `--suite <id>`      | Suite to run (interactive prompt if omitted)                           |
+| `--model <id>`      | Connector/model to evaluate (comma-separated OK)                       |
+| `--judge <id>`      | Connector for LLM-as-a-judge evaluators                                |
+| `--grep <pattern>`  | Filter tests by name                                                   |
+| `--repetitions <n>` | Repeat each example N times                                            |
 | `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
-| `--skip-server`     | Skip EDOT/Scout startup (use existing services)  |
-| `--skip-init`       | Skip config and connector setup                  |
-| `--dry-run`         | Print configuration and exit                     |
+| `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
+| `--skip-init`       | Skip config and connector setup                                        |
+| `--dry-run`         | Print configuration and exit                                           |
 
 #### EIS connector setup
 
@@ -324,6 +324,7 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
       {
         name: 'equals',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output, expected }) => ({
           score: output?.content === expected?.content ? 1 : 0,
           metadata: { output: output?.content, expected: expected?.content },
@@ -333,6 +334,14 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
   );
 });
 ```
+
+`direction` sets the optimization goal for this evaluator's score:
+
+| Value      | When to use                          |
+| ---------- | ------------------------------------ |
+| `maximize` | Higher is better (quality, accuracy) |
+| `minimize` | Lower is better (latency)            |
+| `neutral`  | No clear better direction            |
 
 ### Tagging datasets
 
@@ -384,7 +393,7 @@ Built-in evaluator factories you can use directly or as inspiration for custom e
   - `Groundedness` -- verifies claims are supported by provided context
 - **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks agent skill reads)
 - **RAG** -- `createRagEvaluators` (Precision@K, Recall@K, F1@K)
-- **Code evaluators** -- any inline `{ name, kind: 'CODE', evaluate }` object
+- **Code evaluators** -- any inline `{ name, kind: 'CODE', direction, evaluate }` object
 
 You can use these as-is or build your own directly in the suite.
 
