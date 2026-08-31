@@ -25,6 +25,12 @@ export const SAMPLE_01_ROLLUP_INDEX = 'sample-01-rollup-search-examples';
 
 export const SAMPLE_01_DATA_VIEW_TITLE = `${SAMPLE_01_INDEX},${SAMPLE_01_ROLLUP_INDEX}`;
 
+/**
+ * Comma-free display name. IndexPatternSelect / EuiComboBox treat `,` as a
+ * delimiter, so selecting by title `sample-01,sample-01-rollup-…` flakes.
+ */
+export const SAMPLE_01_DATA_VIEW_NAME = 'search-examples-warnings';
+
 export const SAMPLE_01_TIME_RANGE = {
   from: 'Jun 17, 2022 @ 00:00:00.000',
   to: 'Jun 23, 2022 @ 00:00:00.000',

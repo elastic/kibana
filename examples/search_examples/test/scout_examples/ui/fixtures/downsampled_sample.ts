@@ -10,6 +10,7 @@
 import type { ScoutWorkerFixtures } from '@kbn/scout';
 import {
   DOWNSAMPLED_ARCHIVE,
+  SAMPLE_01_DATA_VIEW_NAME,
   SAMPLE_01_DATA_VIEW_TITLE,
   SAMPLE_01_INDEX,
   SAMPLE_01_ROLLUP_INDEX,
@@ -40,6 +41,7 @@ export const ensureDownsampledSample = async ({
 
   await apiServices.dataViews.create({
     title: SAMPLE_01_DATA_VIEW_TITLE,
+    name: SAMPLE_01_DATA_VIEW_NAME,
     timeFieldName: '@timestamp',
     override: true,
   });

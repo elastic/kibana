@@ -12,7 +12,7 @@ import {
   APP_ID,
   DATA_VIEW,
   LOGSTASH_TIME_RANGE,
-  SAMPLE_01_DATA_VIEW_TITLE,
+  SAMPLE_01_DATA_VIEW_NAME,
   SAMPLE_01_TIME_RANGE,
 } from '../constants';
 
@@ -102,7 +102,7 @@ export class SearchExamplesPage {
    * data view, rollup metric field, and the range covering sample-01.
    */
   async configureWarningsDemo(): Promise<void> {
-    await this.selectSingleComboOption('dataViewSelector', SAMPLE_01_DATA_VIEW_TITLE);
+    await this.selectSingleComboOption('dataViewSelector', SAMPLE_01_DATA_VIEW_NAME);
     await this.page.testSubj.locator('searchMetricField').waitFor({ state: 'visible' });
     await this.selectSingleComboOption(
       'searchMetricField',
@@ -159,6 +159,7 @@ export class SearchExamplesPage {
     });
     const searchInput = root.locator('[data-test-subj="comboBoxSearchInput"]');
     const listbox = this.page.getByRole('listbox');
+    await listbox.waitFor({ state: 'visible', timeout });
     const option = listbox.getByRole('option').filter({ hasText: exactLabel });
 
     await searchInput.fill(label);
