@@ -47,7 +47,7 @@ Both sides register through the `workflowsExtensions` setup contract:
 - Public trigger types: `src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts` (`PublicTriggerDefinition`)
 - Emit API: `src/platform/packages/shared/kbn-workflows/server/types.ts` (`WorkflowsClient`, `WorkflowsApiRequestHandlerContext`, `emitEvent`)
 - Event-chain guardrails: `src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts`
-- Approval fixture: `src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_trigger_definitions.ts`
+- Approval fixture: `src/platform/plugins/shared/workflows_extensions/test/scout_workflows_extensions/api/fixtures/approved_trigger_definitions.ts`
 
 ## 0. Locate the owning plugin (do this first)
 
@@ -129,7 +129,7 @@ For naming conventions, schema rules, registration templates, emit patterns, and
 | Public registration | Spread common + `React.lazy` icon | n/a | Missing icon; duplicated strings |
 | `emitEvent` | Payload matches `eventSchema`; use real request | n/a | Throws; broken chain guardrails |
 | Public loader | Async import to keep zod out of main bundle | sync inline | Trigger module inflates plugin bundle |
-| `APPROVED_TRIGGER_DEFINITIONS` | Add new ID + `schemaHash`; sorted by ID | test fails | CI blocks merge until updated |
+| `APPROVED_TRIGGER_DEFINITIONS` | Add new ID + `schemaHash`; sorted by ID. `test/scout_workflows_extensions` boots gated plugins | test fails | CI blocks merge until updated |
 
 ## Author checklist
 
@@ -164,7 +164,8 @@ When adding a new trigger:
 
 6. **Approval gate** — see [TRIGGERS.md approval process](../../dev_docs/TRIGGERS.md#trigger-definition-approval-process)
    - [ ] Scout API test run or GET `internal/workflows_extensions/trigger_definitions` for `schemaHash`
-   - [ ] Entry added to `APPROVED_TRIGGER_DEFINITIONS` (alphabetically sorted)
+   - [ ] Entry added to `APPROVED_TRIGGER_DEFINITIONS` (alphabetically sorted) in `test/scout_workflows_extensions`
+   - [ ] If registration is gated by a plugin `enabled` config that is not already on in the `workflows_extensions` Scout config set (`classic.stateful.config.ts`), add that flag there
    - [ ] PR description requests review from `@elastic/workflows-eng`
 
 ## Reviewer checklist
@@ -179,7 +180,7 @@ When reviewing a PR that adds or modifies a custom trigger:
 - [ ] Public spreads common definition; icon uses `React.lazy`, not EUI icon name strings
 - [ ] `emitEvent` payloads match `eventSchema`; emit path uses the attribution request for chain guardrails
 - [ ] Public registration uses an async loader unless the module is trivially small
-- [ ] `APPROVED_TRIGGER_DEFINITIONS` is updated (sorted; new entry near related namespace); workflows-eng review requested
+- [ ] `APPROVED_TRIGGER_DEFINITIONS` is updated (sorted; new entry near related namespace); gated plugins are enabled in the `workflows_extensions` Scout config set; workflows-eng review requested
 - [ ] Event-chain implications considered when workflows can re-emit this trigger
 
 ## Reference implementations

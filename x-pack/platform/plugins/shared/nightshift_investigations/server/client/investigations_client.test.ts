@@ -11,8 +11,10 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/man
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InvestigationStatus } from '../../common';
+import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
+  InvalidInvestigationContextError,
   InvestigationNotFoundError,
   InvestigationUnavailableError,
   NightshiftInvestigationsClient,
@@ -223,6 +225,64 @@ describe('NightshiftInvestigationsClient.get()', () => {
     });
   });
 
+  describe('subject reference', () => {
+    it('returns the summary verbatim, however long', async () => {
+      const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: 'event-42',
+                summary: long,
+              },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({
+        type: 'significant_event',
+        id: 'event-42',
+        summary: long,
+      });
+    });
+
+    it('adds the summary to an alert subject', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({
+        type: 'alert',
+        id: 'alert-99',
+        summary: 'CPU saturation',
+      });
+    });
+
+    it('omits the summary when the caller supplied none', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              message: 'Investigation requested for alert alert-99',
+              context: { source: 'alert', alert_id: 'alert-99' },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
+    });
+  });
+
   describe('terminal state handling', () => {
     it('sets completed_at when status is completed', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
@@ -241,7 +301,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
     });
   });
 
-  describe('conclusions', () => {
+  describe('conclusion', () => {
     // The workflow engine wraps ai.agent structured output in a `structured_output` envelope.
     // Real shape: stepExecution.output = { structured_output: { conclusion: '...', summary: '...' } }
     // Confirmed by investigation_workflow.yaml: steps.investigate.output.structured_output.*
@@ -257,7 +317,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBe('All clear.');
+      expect(result.conclusion).toBe('All clear.');
     });
 
     it('prefers the last step with structured_output when multiple steps have it', async () => {
@@ -271,7 +331,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBe('Last conclusion.');
+      expect(result.conclusion).toBe('Last conclusion.');
     });
 
     it('falls back to summary when structured_output has summary but no conclusion', async () => {
@@ -282,7 +342,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBe('Summary text.');
+      expect(result.conclusion).toBe('Summary text.');
     });
 
     it('does not match steps whose output has conclusion at the top level (old/wrong shape)', async () => {
@@ -293,7 +353,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBeUndefined();
+      expect(result.conclusion).toBeUndefined();
     });
 
     it('returns undefined when no step has structured_output', async () => {
@@ -304,10 +364,10 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBeUndefined();
+      expect(result.conclusion).toBeUndefined();
     });
 
-    it('does not return conclusions when status is not completed', async () => {
+    it('does not return conclusion when status is not completed', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           status: ExecutionStatus.RUNNING,
@@ -315,7 +375,112 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBeUndefined();
+      expect(result.conclusion).toBeUndefined();
+    });
+  });
+
+  describe('result', () => {
+    // The full agent output, validated against the same schema the workflow declares to the model.
+    // The hypotheses, the ES|QL behind each verdict and the recommendations are the expensive part
+    // of a run, so a caller that only gets `conclusion` cannot show why the answer is believable.
+    const fullState = {
+      summary: 'Three candidates investigated.',
+      conclusion: 'Pool exhaustion after the pool_max change.',
+      hypotheses: [
+        {
+          candidate: 'pool_max reduced from 80 to 50',
+          confidence: 0.97,
+          status: 'confirmed',
+          reason: 'v2.3.1 saturates at 49 of 50 connections.',
+          evidence: [
+            {
+              description: 'Pool metrics by version.',
+              esql_query: 'FROM logs-infra-services | STATS AVG(connections.active) BY version',
+              time_range: { from: '2026-08-27T01:00:00Z', to: '2026-08-27T03:40:00Z' },
+            },
+          ],
+        },
+        {
+          candidate: 'Downstream dependency degradation',
+          confidence: 0.05,
+          status: 'dismissed',
+          reason: 'Neighbouring services sit at their baseline.',
+        },
+      ],
+      blind_spots: [{ title: 'No APM traces', description: 'Could not identify the error class.' }],
+      recommendations: [{ title: 'Roll back to v2.1.0', description: 'Restores pool_max to 80.' }],
+    };
+
+    it('returns the whole investigation state, not just the conclusion', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [{ output: { structured_output: fullState } }],
+        })
+      );
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.result).toEqual(fullState);
+      // A dismissed hypothesis is as much of the record as a confirmed one.
+      expect(result.result?.hypotheses.map((h) => h.status)).toEqual(['confirmed', 'dismissed']);
+      // Evidence keeps the query and its window, so a reader can re-run it.
+      expect(result.result?.hypotheses[0].evidence?.[0].esql_query).toContain('FROM logs-infra');
+      expect(result.result?.hypotheses[0].evidence?.[0].time_range?.from).toBe(
+        '2026-08-27T01:00:00Z'
+      );
+    });
+
+    it('keeps the conclusion string alongside the structured result', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [{ output: { structured_output: fullState } }],
+        })
+      );
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.conclusion).toBe('Pool exhaustion after the pool_max change.');
+    });
+
+    it('drops output that does not match the schema but still returns the narrative', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            {
+              // `hypotheses` is required by the schema and a confidence above 1 is out of range:
+              // half-parsed output would be worse than none, because a consumer cannot tell.
+              output: {
+                structured_output: {
+                  summary: 'A summary.',
+                  conclusion: 'Still readable.',
+                  hypotheses: [{ candidate: 'c', confidence: 42, status: 'confirmed' }],
+                },
+              },
+            },
+          ],
+        })
+      );
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.result).toBeUndefined();
+      expect(result.conclusion).toBe('Still readable.');
+    });
+
+    it('does not return a result while the investigation is still running', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.RUNNING,
+          stepExecutions: [{ output: { structured_output: fullState } }],
+        })
+      );
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.result).toBeUndefined();
     });
   });
 
@@ -512,11 +677,30 @@ describe('NightshiftInvestigationsClient.start()', () => {
   const WORKFLOW_ID = SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
   const mockWorkflow = { id: WORKFLOW_ID, definition: { steps: [] } };
 
+  const alertContext = {
+    alerts: [
+      {
+        id: 'alert-1',
+        rule_id: 'rule-1',
+        rule_name: 'Latency is too high',
+        rule_type_id: 'apm.transaction_duration',
+        rule_category: 'Latency threshold',
+        reason: 'Latency is 2.5s for service checkout',
+        status: 'active',
+        start: '2026-08-24T12:00:00.000Z',
+        flapping: false,
+      },
+    ],
+  };
+
   it('calls runWorkflow with the correct inputs and returns investigation_id', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    const result = await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+    const result = await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1' },
+      context: alertContext,
+    });
 
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: WORKFLOW_ID }),
@@ -541,6 +725,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await makeClient().start({
       subject: { type: 'alert', id: 'alert-2' },
       trigger_type: 'automatic',
+      context: alertContext,
     });
 
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
@@ -552,6 +737,29 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
+  });
+
+  it('persists the subject summary into the workflow context', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1', summary: 'CPU saturation on checkout-api' },
+      context: alertContext,
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context.summary).toBe('CPU saturation on checkout-api');
+  });
+
+  it('omits the context summary when none was supplied', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context: alertContext });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context).not.toHaveProperty('summary');
   });
 
   it('includes concurrency_key in inputs when provided', async () => {
@@ -587,14 +795,16 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(inputs.stream_names).toEqual(['logs.checkout']);
   });
 
+  // Uses a significant event subject: an alert investigation cannot reach the generic fallback
+  // any more, because it is rejected without the alert data the brief is composed from.
   it('falls back to a generic message and empty stream_names when omitted', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-999');
 
-    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+    await makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } });
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
-    expect(inputs.message).toBe('Investigation requested for alert alert-1');
+    expect(inputs.message).toBe('Investigation requested for significant_event se-1');
     expect(inputs.stream_names).toEqual([]);
   });
 
@@ -602,7 +812,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context: alertContext });
 
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
@@ -616,9 +826,9 @@ describe('NightshiftInvestigationsClient.start()', () => {
   it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
 
-    await expect(makeClient().start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
-      InvestigationUnavailableError
-    );
+    await expect(
+      makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })
+    ).rejects.toThrow(InvestigationUnavailableError);
   });
 
   it('throws InvestigationUnavailableError when agentBuilder is not available', async () => {
@@ -632,5 +842,154 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await expect(client.start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
       InvestigationUnavailableError
     );
+  });
+
+  // The route schema also enforces this, but the workflow step definition and the plugin start
+  // contract reach start() directly, and the step types its context as a plain record.
+  describe('alert context validation', () => {
+    it.each([
+      ['no context at all', undefined],
+      ['a context with no alerts key', { source: 'alert' }],
+      ['an empty alerts array', { alerts: [] }],
+      ['an alert missing required fields', { alerts: [{ id: 'alert-1' }] }],
+      ['an alert whose evaluation is the wrong shape', { alerts: [{ evaluation: { value: {} } }] }],
+    ])('rejects an alert investigation with %s', async (_label, context) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+      await expect(
+        makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context })
+      ).rejects.toThrow(InvalidInvestigationContextError);
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    // Without this, `event_uuid` reaches the workflow's attach steps and files an alert's findings
+    // against a significant event.
+    it.each([['event_uuid'], ['stream_names'], ['source']])(
+      'rejects an alert investigation whose context also carries %s',
+      async (key) => {
+        mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+        await expect(
+          makeClient().start({
+            subject: { type: 'alert', id: 'alert-1' },
+            context: { ...alertContext, [key]: 'whatever' },
+          })
+        ).rejects.toThrow(InvalidInvestigationContextError);
+        expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+      }
+    );
+
+    it('names the offending keys and fields so the caller can see what was rejected', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'alert', id: 'alert-1' },
+          context: { ...alertContext, event_uuid: 'se-1', severity: 'high' },
+        })
+      ).rejects.toThrow(/event_uuid[\s\S]*severity/);
+    });
+
+    it('reports which snapshot field was wrong rather than a bare rejection', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'alert', id: 'alert-1' },
+          context: { alerts: [{ ...alertContext.alerts[0], flapping: 'nope' }] },
+        })
+      ).rejects.toThrow(/flapping/);
+    });
+
+    // The workflow interpolates context.event_uuid into an internal request path, so a value that
+    // is not id-shaped could point the attach steps at a different endpoint. Everything else in a
+    // significant-event context stays open, because that payload belongs to another plugin.
+    it.each([
+      ['a path separator', 'events/../../other'],
+      ['a parent-directory segment', '..'],
+      ['a query string', 'abc?expand=true'],
+      ['a fragment', 'abc#frag'],
+      ['an empty string', ''],
+    ])('rejects a significant event context whose event_uuid carries %s', async (_label, uuid) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'significant_event', id: 'se-1' },
+          context: { event_uuid: uuid },
+        })
+      ).rejects.toThrow(InvalidInvestigationContextError);
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    // A non-string cannot travel through `start`'s typed signature, so it is asserted against the
+    // schema directly. This is the shape an untyped caller sends: a JSON body, or a workflow step
+    // whose input schema is a record of unknown.
+    it('rejects an event_uuid that is not a string at all', () => {
+      expect(freeFormContextSchema.safeParse({ event_uuid: { nested: true } }).success).toBe(false);
+    });
+
+    it('accepts the uuid shape the significant events plugin actually sends', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-791');
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'significant_event', id: 'se-1' },
+          context: { event_uuid: '3f2504e0-4f89-11d3-9a0c-0305e82c3301' },
+        })
+      ).resolves.toEqual({ investigation_id: 'exec-791' });
+    });
+
+    it('leaves the free-form context of a significant event subject alone', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-790');
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'significant_event', id: 'se-1' },
+          context: { event_uuid: 'se-1', severity: 'high' },
+        })
+      ).resolves.toEqual({ investigation_id: 'exec-790' });
+    });
+
+    it('does not require alerts for a significant event subject', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-789');
+
+      await expect(
+        makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })
+      ).resolves.toEqual({ investigation_id: 'exec-789' });
+    });
+
+    it('builds the brief from the snapshot rather than the bare subject id', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-321');
+
+      await makeClient().start({
+        subject: { type: 'alert', id: 'alert-1' },
+        context: alertContext,
+      });
+
+      const inputs = mockManagement.runWorkflow.mock.calls[0][2];
+      expect(inputs.message).toContain('Latency is too high');
+      expect(inputs.message).not.toBe('Investigation requested for alert alert-1');
+    });
+
+    // The composed brief is only for alert subjects; a caller-supplied message still wins
+    // everywhere else, which is the behaviour every non-alert caller already relies on.
+    it('keeps the caller-supplied message for a significant event subject', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-654');
+
+      await makeClient().start({
+        subject: { type: 'significant_event', id: 'se-1' },
+        message: 'Checkout latency breach',
+        context: { alerts: [alertContext.alerts[0]] },
+      });
+
+      const inputs = mockManagement.runWorkflow.mock.calls[0][2];
+      expect(inputs.message).toBe('Checkout latency breach');
+    });
   });
 });
