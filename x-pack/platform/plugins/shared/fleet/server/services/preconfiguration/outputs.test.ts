@@ -1383,7 +1383,6 @@ describe('Outputs preconfiguration', () => {
           { fromPreconfiguration: true }
         );
       });
-
     });
   });
 });
