@@ -50,10 +50,12 @@ const buildOrderedToolQuery = ({
   conversationIds,
   indexPattern,
   excludeToolIds,
+  includeFailures,
 }: {
   conversationIds: string[];
   indexPattern: string;
   excludeToolIds: string[];
+  includeFailures: boolean;
 }): string => {
   const conversationClause =
     conversationIds.length === 1
@@ -74,7 +76,7 @@ FROM ${indexPattern}
 | EVAL tool_id = COALESCE(attributes.gen_ai.tool.name, name)
 | WHERE tool_id IS NOT NULL
   ${excludeClause}
-| KEEP @timestamp, tool_id, attributes.gen_ai.tool.call.failed
+| KEEP @timestamp, tool_id${includeFailures ? ', attributes.gen_ai.tool.call.failed' : ''}
 | LIMIT ${TOOL_SPAN_LIMIT}
 `.trim();
 };
@@ -197,7 +199,12 @@ export const readAgentToolCallsFromTraces = async ({
           method: 'POST',
           path: '/_query',
           body: {
-            query: buildOrderedToolQuery({ conversationIds: ids, indexPattern, excludeToolIds }),
+            query: buildOrderedToolQuery({
+              conversationIds: ids,
+              indexPattern,
+              excludeToolIds,
+              includeFailures,
+            }),
           },
         });
 

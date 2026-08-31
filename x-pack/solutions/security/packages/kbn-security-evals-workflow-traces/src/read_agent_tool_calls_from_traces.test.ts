@@ -206,4 +206,44 @@ describe('readAgentToolCallsFromTraces', () => {
       .query;
     expect(query).toContain('attributes.gen_ai.conversation.id IN ("conv-1", "conv-2")');
   });
+  it('keeps the failure column out of KEEP unless failures are requested', async () => {
+    const client = mockClient([
+      { columns: [{ name: 'tool_id' }], values: [['platform.core.search']] },
+    ]);
+
+    await readAgentToolCallsFromTraces({
+      traceEsClient: client,
+      conversationIds: 'conv-1',
+      log: silentLog,
+    });
+
+    const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
+      .query;
+    // Real traces indices have no mapping for this field until some span sets
+    // it; naming it in KEEP made ES|QL reject the whole query (Unknown column),
+    // which degraded every read to unavailable.
+    expect(query).not.toContain('attributes.gen_ai.tool.call.failed');
+    expect(query).toContain('| KEEP @timestamp, tool_id');
+  });
+
+  it('asks for the failure column only when failures are requested', async () => {
+    const client = mockClient([
+      {
+        columns: [{ name: 'tool_id' }, { name: 'attributes.gen_ai.tool.call.failed' }],
+        values: [['platform.core.esql', true]],
+      },
+    ]);
+
+    const result = await readAgentToolCallsFromTraces({
+      traceEsClient: client,
+      conversationIds: 'conv-1',
+      log: silentLog,
+      includeFailures: true,
+    });
+
+    const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
+      .query;
+    expect(query).toContain('attributes.gen_ai.tool.call.failed');
+    expect(result.failedToolCallIds).toEqual(['platform.core.esql']);
+  });
 });
