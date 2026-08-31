@@ -24,6 +24,7 @@
     "@kbn/eval-kql",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-security-server",
+    "@kbn/core-http-server-utils",
     "@kbn/cloud-plugin",
     "@kbn/utility-types",
     "@kbn/zod",
