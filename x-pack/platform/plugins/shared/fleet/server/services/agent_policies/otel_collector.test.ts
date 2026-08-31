@@ -3613,8 +3613,10 @@ describe('generateOtelcolConfig', () => {
       });
     });
 
-    it('should translate a config_yaml-only output with no stored preset', () => {
-      expect(getExporter({ ...defaultOutput, config_yaml: 'worker: 3' })).toMatchObject({
+    it('should translate a custom preset output using config_yaml values', () => {
+      expect(
+        getExporter({ ...defaultOutput, preset: 'custom', config_yaml: 'worker: 3' })
+      ).toMatchObject({
         max_conns_per_host: 3,
       });
     });
@@ -3718,11 +3720,28 @@ describe('generateOtelcolConfig', () => {
       });
     });
 
-    it('should treat an output whose config_yaml sets a reserved performance key as custom', () => {
-      // No explicit preset: getDefaultPresetForEsOutput resolves to `custom` here, so the
-      // user's bulk_max_size must survive instead of being overwritten by `balanced`.
-      expect(getExporter({ ...defaultOutput, config_yaml: 'bulk_max_size: 500' })).toMatchObject({
+    it('should use config_yaml bulk_max_size when preset is custom', () => {
+      expect(
+        getExporter({ ...defaultOutput, preset: 'custom', config_yaml: 'bulk_max_size: 500' })
+      ).toMatchObject({
         sending_queue: { batch: { max_size: 500, min_size: 500 } },
+      });
+    });
+
+    it('should clamp batch min_size to queue_size when the custom queue is smaller than the default batch', () => {
+      // queue.mem.events: 100, bulk_max_size and flush.min_events default to 1600 → without
+      // the clamp, min_size would be 1600 > queue_size 100, which the exporter rejects.
+      const exporter = getExporter({
+        ...defaultOutput,
+        preset: 'custom',
+        config_yaml: 'queue.mem.events: 100',
+      });
+
+      expect(exporter).toMatchObject({
+        sending_queue: {
+          queue_size: 100,
+          batch: { min_size: 100 }, // clamped down to queue_size
+        },
       });
     });
 

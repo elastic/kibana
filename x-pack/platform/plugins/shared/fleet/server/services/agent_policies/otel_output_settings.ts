@@ -354,6 +354,11 @@ export const buildOtelEsExporterConfig = (output: Output): Record<string, unknow
         // two-per-connection staging model regardless.
         { queueSize: settings.queueMemEvents, numConsumers: 2 * maxConns };
 
+  // On the named-preset path calcNamedPresetSizing already ensures queueSize >= batchSize.
+  // On the custom path the user controls queueMemEvents directly, so clamp min_size down
+  // instead of touching the queue size the user configured.
+  const batchMinSize = Math.min(batchSize, queueSize);
+
   return {
     // max_conns_per_host bounds the connection count: num_consumers is deliberately set
     // above it, so without this the extra consumers would open extra connections and change
@@ -368,7 +373,7 @@ export const buildOtelEsExporterConfig = (output: Output): Record<string, unknow
       batch: {
         flush_timeout: settings.queueFlushTimeout,
         max_size: settings.bulkMaxSize,
-        min_size: batchSize,
+        min_size: batchMinSize,
         sizer: 'items',
       },
     },
