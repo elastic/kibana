@@ -36,11 +36,19 @@ export const transformBackfillParamToAdHocRun = (
 
   return {
     adHocRunSO: {
-      apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
-      apiKeyToUse: rule.apiKey!,
+      // Rules created with a raw user-created Cloud API key deliberately have no ES API key
+      // (`rule.apiKey` is null); represent that with empty strings — the same no-key convention
+      // Task Manager uses — so scheduling the backfill does not throw before the snapshotted
+      // UIAM key below takes over. The ad hoc task runner treats an empty `apiKeyToUse` as
+      // absent and falls back to `uiamApiKey` when building the fake request.
+      apiKeyId: rule.apiKey ? Buffer.from(rule.apiKey, 'base64').toString().split(':')[0] : '',
+      apiKeyToUse: rule.apiKey ?? '',
       // Snapshot the rule's UIAM API key (when present) so the ad hoc task runner
       // can authenticate the same way a regular rule run does in UIAM deployments.
+      // `uiamApiKeyExternal` has to ride along: without it the backfill run would present a
+      // user-created (external) Cloud key with the UIAM shared secret, which UIAM rejects.
       ...(rule.uiamApiKey ? { uiamApiKey: rule.uiamApiKey } : {}),
+      ...(rule.uiamApiKey && rule.uiamApiKeyExternal === true ? { uiamApiKeyExternal: true } : {}),
       createdAt: new Date().toISOString(),
       duration: rule.schedule.interval,
       enabled: true,

@@ -26,6 +26,8 @@ plugins:
     - data_view_management
     - data_views
     - data_views_as_code
+    - data_visualizer
+    - dataset_quality
     - dev_tools
     - discover
     - discover_enhanced
@@ -60,6 +62,8 @@ plugins:
     - monitoring
     - navigation
     - nightshift
+    - nightshift_investigations
+    - notification_center
     - observability
     - observability_onboarding
     - osquery
@@ -70,6 +74,7 @@ plugins:
     - reindex_service
     - saved_objects_management
     - saved_objects_tagging
+    - searchExamples
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
@@ -123,6 +128,7 @@ excluded_configs:
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
-  - x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/playwright.config.ts
   - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts

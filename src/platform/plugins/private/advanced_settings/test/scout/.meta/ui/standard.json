@@ -1,5 +1,8 @@
 {
   "sha1": "7d87791f6be5b70ca3b0454934bb745a6680933e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "a3e4b1438a281ec-a15d1ea44076beb",
@@ -10,8 +13,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
-        "line": 19,
-        "column": 7
+        "line": 18,
+        "column": 14
       }
     },
     {
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
-        "line": 33,
-        "column": 7
+        "line": 23,
+        "column": 9
       }
     },
     {
@@ -36,8 +39,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 33,
+        "column": 8
       }
     },
     {
@@ -49,8 +52,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
-        "line": 63,
-        "column": 7
+        "line": 40,
+        "column": 21
       }
     },
     {
@@ -62,8 +65,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 47,
+        "column": 5
       }
     },
     {
@@ -75,8 +78,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
-        "line": 92,
-        "column": 7
+        "line": 56,
+        "column": 21
       }
     },
     {
@@ -88,8 +91,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
-        "line": 110,
-        "column": 7
+        "line": 65,
+        "column": 11
       }
     },
     {
@@ -101,8 +104,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
-        "line": 122,
-        "column": 7
+        "line": 72,
+        "column": 21
       }
     },
     {
@@ -114,8 +117,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
-        "line": 34,
-        "column": 7
+        "line": 32,
+        "column": 5
       }
     },
     {
@@ -127,8 +130,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 46,
+        "column": 24
       }
     },
     {
@@ -140,8 +143,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 57,
+        "column": 5
       }
     }
   ]

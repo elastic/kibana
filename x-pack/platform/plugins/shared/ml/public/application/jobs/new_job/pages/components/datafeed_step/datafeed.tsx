@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { getIsMlCpsEnabled } from '../../../../../services/ml_server_info';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { WizardNav } from '../wizard_nav';
 import { QueryInput } from './components/query';
@@ -30,6 +31,8 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
   const {
     services: { cps },
   } = useMlKibana();
+  const isMlCpsEnabled = getIsMlCpsEnabled();
+
   useEffect(() => {
     const active =
       isValidQuery &&
@@ -55,7 +58,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
               <ScrollSizeInput />
               <TimeField />
               <ChangeDataView isDisabled={false} />
-              {cps?.cpsManager ? <ProjectRoutingSelect /> : null}
+              {isMlCpsEnabled && cps?.cpsManager ? <ProjectRoutingSelect /> : null}
             </EuiFlexItem>
           </EuiFlexGroup>
           <ResetQueryButton />

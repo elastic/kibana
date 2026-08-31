@@ -18,7 +18,12 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
-export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const createUserRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
+) => {
   router.versioned
     .post({
       access: 'public',
@@ -37,6 +42,17 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             body: CreatePrivMonUserRequestBody,
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       withMinimumLicense(
         async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {

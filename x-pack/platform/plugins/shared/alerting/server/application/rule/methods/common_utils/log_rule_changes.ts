@@ -241,6 +241,7 @@ function transformRuleDomainToRuleChangeHistorySnapshot(
     apiKeyOwner: ruleDomain.apiKeyOwner,
     apiKeyCreatedByUser: ruleDomain.apiKeyCreatedByUser,
     uiamApiKey: ruleDomain.uiamApiKey,
+    uiamApiKeyExternal: ruleDomain.uiamApiKeyExternal,
     throttle: ruleDomain.throttle,
     muteAll: ruleDomain.muteAll,
     notifyWhen: ruleDomain.notifyWhen,

@@ -52,7 +52,12 @@ const expectedFor = (
 
 describe('createAttackDiscoveryRubricEvaluator', () => {
   const judge = jest.fn();
-  const criteria = jest.fn(() => ({ name: 'criteria', kind: 'LLM' as const, evaluate: judge }));
+  const criteria = jest.fn(() => ({
+    name: 'criteria',
+    kind: 'LLM' as const,
+    direction: 'maximize',
+    evaluate: judge,
+  }));
   const evaluators = { criteria } as unknown as DefaultEvaluators;
 
   const evaluate = (params: {

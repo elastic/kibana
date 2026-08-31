@@ -473,9 +473,12 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
   return field?.name !== '*' ? field?.name : undefined;
 };
 
-// this is for backward compatibility, if the query is of fields or functions type
-// and the query is not set with ?? in the query, we should set it
-// https://github.com/elastic/elasticsearch/pull/122459
+/**
+ * Rewrites `?varName` → `??varName` for FIELDS/FUNCTIONS variables.
+ *
+ * **Backward compat only** — unnecessary for new integrations, which have no saved queries
+ * predating the `??` syntax (https://github.com/elastic/elasticsearch/pull/122459).
+ */
 export const fixESQLQueryWithVariables = (
   queryString: string,
   esqlVariables?: ESQLControlVariable[]

@@ -9,6 +9,7 @@ import type { EuiCheckboxProps } from '@elastic/eui';
 import React from 'react';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
@@ -46,7 +47,7 @@ describe('EnabledFeatures', () => {
         <EnabledFeatures
           features={features}
           space={{
-            id: 'my-space',
+            id: asSpaceId('my-space'),
             name: 'my space',
             disabledFeatures: ['feature-1', 'feature-2'],
           }}
@@ -63,7 +64,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={{
-          id: 'my-space',
+          id: asSpaceId('my-space'),
           name: 'my space',
           disabledFeatures: ['feature-1', 'feature-2'],
         }}
@@ -96,7 +97,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={{
-          id: 'my-space',
+          id: asSpaceId('my-space'),
           name: 'my space',
           disabledFeatures: [],
         }}
@@ -132,7 +133,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={{
-          id: 'my-space',
+          id: asSpaceId('my-space'),
           name: 'my space',
           disabledFeatures: [],
         }}
@@ -161,7 +162,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={{
-          id: 'my-space',
+          id: asSpaceId('my-space'),
           name: 'my space',
           disabledFeatures: ['feature-1', 'feature-2'],
         }}
@@ -188,7 +189,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={{
-          id: 'my-space',
+          id: asSpaceId('my-space'),
           name: 'my space',
           disabledFeatures: ['feature-1'],
         }}
@@ -206,7 +207,7 @@ describe('EnabledFeatures', () => {
         <EnabledFeatures
           features={features}
           space={{
-            id: 'my-space',
+            id: asSpaceId('my-space'),
             name: 'my space',
             disabledFeatures: [],
           }}
@@ -225,7 +226,7 @@ describe('EnabledFeatures', () => {
           features={[
             ...features,
             {
-              id: 'feature-3',
+              id: asSpaceId('feature-3'),
               name: 'Feature 3',
               app: [],
               category: DEFAULT_APP_CATEGORIES.management,
@@ -233,7 +234,7 @@ describe('EnabledFeatures', () => {
             },
           ]}
           space={{
-            id: 'my-space',
+            id: asSpaceId('my-space'),
             name: 'my space',
             disabledFeatures: [],
           }}

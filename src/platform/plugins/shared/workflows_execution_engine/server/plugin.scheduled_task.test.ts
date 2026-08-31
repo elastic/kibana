@@ -15,9 +15,14 @@ import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-man
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 
-jest.mock('../common', () => ({
-  createIndexes: jest.fn().mockResolvedValue(undefined),
-}));
+jest.mock('./repositories/data_access_layer', () => {
+  const actual = jest.requireActual('./repositories/data_access_layer');
+  const { createDataClientJestMock } = jest.requireActual('./test_utils/data_client_jest_mock');
+  return {
+    ...actual,
+    createDataClientBundle: jest.fn(() => createDataClientJestMock()),
+  };
+});
 jest.mock('./lib/check_license', () => ({
   checkLicense: jest.fn().mockResolvedValue(undefined),
 }));
@@ -199,10 +204,55 @@ describe('workflow:scheduled task runner', () => {
     });
   });
 
+  it('skips the run without deleting the task when the workflow document is disabled', async () => {
+    setupPlugin();
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      enabled: false,
+      yaml: 'name: test',
+      definition: {
+        name: 'test',
+        enabled: false,
+        triggers: [{ type: 'scheduled' }],
+        steps: [],
+      },
+    });
+    const logger = initializerContext.logger.get();
+    const warnSpy = jest.spyOn(logger, 'warn');
+
+    const setCustomTaskRunEventFields = jest.fn();
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: {} as KibanaRequest,
+        setCustomTaskRunEventFields,
+      })
+    );
+
+    const result = await runner.run();
+
+    expect(result).toEqual({
+      state: taskState,
+    });
+    expect(mockGetWorkflow).toHaveBeenCalledWith(workflowId, spaceId, { includeGlobal: true });
+    expect(mockCheckAndSkipIfExistingScheduledExecution).not.toHaveBeenCalled();
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+    expect(mockRunWorkflow).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      `Workflow ${workflowId} is disabled in space ${spaceId}; skipping leftover scheduled run`
+    );
+    expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
+      workflow_id: workflowId,
+      space_id: spaceId,
+      outcome: 'skipped',
+    });
+  });
+
   it('stamps skipped when dedupe check skips the scheduled run', async () => {
     setupPlugin();
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
+      enabled: true,
       definition: { triggers: [{ type: 'scheduled' }] },
     });
     mockCheckAndSkipIfExistingScheduledExecution.mockResolvedValue({
@@ -235,6 +285,7 @@ describe('workflow:scheduled task runner', () => {
     setupPlugin();
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
+      enabled: true,
       yaml: 'name: test',
       definition: {
         name: 'test',
@@ -278,6 +329,7 @@ describe('workflow:scheduled task runner', () => {
     setupPlugin();
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
+      enabled: true,
       yaml: 'name: test',
       definition: {
         name: 'test',
@@ -319,6 +371,7 @@ describe('workflow:scheduled task runner', () => {
     setupPlugin();
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
+      enabled: true,
       yaml: 'name: test',
       definition: {
         name: 'test',
@@ -356,6 +409,7 @@ describe('workflow:scheduled task runner', () => {
     setupPlugin();
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
+      enabled: true,
       yaml: 'name: test',
       definition: {
         name: 'test',
@@ -397,6 +451,7 @@ describe('workflow:scheduled task runner', () => {
     setupPlugin();
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
+      enabled: true,
       yaml: 'name: test',
       definition: {
         name: 'test',

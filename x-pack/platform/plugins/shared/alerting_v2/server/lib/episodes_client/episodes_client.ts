@@ -6,7 +6,12 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { buildEpisodeQuery, type AlertEpisodeEsqlRow } from '@kbn/alerting-v2-common-queries';
+import {
+  buildEpisodeGroupHashQuery,
+  buildEpisodeQuery,
+  type AlertEpisodeEsqlRow,
+  type EpisodeGroupHashEsqlRow,
+} from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -25,8 +30,17 @@ export class EpisodesClient {
    * `undefined` when no such episode exists.
    */
   public async get(episodeId: string): Promise<AlertEpisode | undefined> {
+    // Resolving the group hash first lets the main query narrow to the
+    // episode's series instead of aggregating the whole space
+    const [lookupRow] = await this.queryService.executeQueryRows<EpisodeGroupHashEsqlRow>({
+      query: buildEpisodeGroupHashQuery(this.spaceId, episodeId).print('basic'),
+    });
+    if (lookupRow?.group_hash == null) {
+      return undefined;
+    }
+
     const rows = await this.queryService.executeQueryRows<AlertEpisodeEsqlRow>({
-      query: buildEpisodeQuery(this.spaceId, episodeId).print('basic'),
+      query: buildEpisodeQuery(this.spaceId, episodeId, lookupRow.group_hash).print('basic'),
     });
 
     const [row] = rows;

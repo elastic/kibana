@@ -11,5 +11,6 @@ import type { ResolvedConfiguration } from '../types';
 export const resolveConfiguration = (configuration: AgentConfiguration): ResolvedConfiguration => {
   return {
     instructions: configuration.instructions ?? '',
+    aiIndices: configuration.ai_indices ?? [],
   };
 };

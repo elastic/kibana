@@ -12,8 +12,12 @@ import { convertSecurityApi } from './convert_security_api';
 
 describe('convertSecurityApi', () => {
   it('returns the API from the source', () => {
-    const source: CoreSecurityDelegateContract = { authc: { getCurrentUser: jest.fn() } };
+    const source: CoreSecurityDelegateContract = {
+      authc: { getCurrentUser: jest.fn() },
+      serviceAccounts: { isEnabled: jest.fn() },
+    };
     const output = convertSecurityApi(source);
     expect(output.authc.getCurrentUser).toBe(source.authc.getCurrentUser);
+    expect(output.serviceAccounts).toBe(source.serviceAccounts);
   });
 });

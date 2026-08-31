@@ -6,13 +6,17 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { CONTEXT_ENGINE_PATHS } from '../paths';
+import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
 jest.mock('@kbn/esql/public', () => ({
@@ -43,15 +47,23 @@ jest.mock('../hooks/use_data_connectors', () => ({
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider services={services}>
-          <QueryClientProvider client={queryClient}>
-            <CreateAiIndexPage />
-          </QueryClientProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    </I18nProvider>
+    <ChromeServiceProvider value={{ chrome: services.chrome }}>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider
+            services={{
+              ...services,
+              history: scopedHistoryMock.create(),
+              appChrome: createAppChromeMock(),
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <CreateAiIndexPage />
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    </ChromeServiceProvider>
   );
 };
 
@@ -75,6 +87,41 @@ const VALID_ID = 'support-ticket-triage';
 describe('CreateAiIndexPage', () => {
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('renders a back button linking to the AI indexes landing page', () => {
+    const services = coreMock.createStart();
+    services.application.getUrlForApp.mockImplementation(
+      (appId, options) => `/app/${appId}${options?.path ?? ''}`
+    );
+
+    renderWithProviders(services);
+
+    expect(services.application.getUrlForApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
+    );
+    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toHaveAttribute(
+      'href',
+      '/app/context_engine/'
+    );
+  });
+
+  it('navigates to the landing page and prevents the anchor default navigation on back click', () => {
+    const services = coreMock.createStart();
+    services.application.getUrlForApp.mockImplementation(
+      (appId, options) => `/app/${appId}${options?.path ?? ''}`
+    );
+
+    renderWithProviders(services);
+
+    const backButton = screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ);
+    fireEvent.click(backButton);
+
+    expect(services.application.navigateToApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
+    );
   });
 
   it('keeps the create button disabled until a valid id is provided, without requiring a source', () => {

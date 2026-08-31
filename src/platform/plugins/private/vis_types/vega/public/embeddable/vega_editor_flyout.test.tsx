@@ -54,7 +54,7 @@ describe('VegaEditorFlyout', () => {
 
     expect(screen.getByRole('heading', { name: 'Vega' })).toBeInTheDocument();
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    const previewButton = screen.getByRole('button', { name: 'Preview' });
+    const previewButton = screen.getByTestId('vegaEditorFlyoutPreviewButton');
 
     // Preview is disabled until the spec differs from what is rendered on the panel.
     expect(previewButton).toBeDisabled();
@@ -77,22 +77,22 @@ describe('VegaEditorFlyout', () => {
     const user = userEvent.setup();
 
     // No edits yet → nothing to save.
-    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+    expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeDisabled();
 
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
     await user.clear(editor);
     await user.paste('{ mark: bar }');
-    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
+    expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeEnabled();
 
     // Editing back to the original spec disables Save again.
     await user.clear(editor);
     await user.paste('{ mark: point }');
-    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+    expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeDisabled();
   });
 
   it('enables Apply and close for a new panel so its default spec can be accepted', () => {
     renderFlyout({ isNewPanel: true });
-    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
+    expect(screen.getByTestId('vegaEditorFlyoutSaveButton')).toBeEnabled();
   });
 
   it('saves the current spec, closes, and does not revert on unmount', async () => {
@@ -103,7 +103,7 @@ describe('VegaEditorFlyout', () => {
     await user.clear(editor);
     await user.paste('{ mark: bar }');
 
-    await user.click(screen.getByRole('button', { name: 'Apply and close' }));
+    await user.click(screen.getByTestId('vegaEditorFlyoutSaveButton'));
     expect(onSave).toHaveBeenCalledWith('{ mark: bar }');
     expect(closeFlyout).toHaveBeenCalledTimes(1);
     // Save persists directly; it does not depend on a prior Preview.
@@ -121,7 +121,7 @@ describe('VegaEditorFlyout', () => {
     const editor = screen.getByRole('textbox', { name: 'Vega spec' });
     await user.clear(editor);
     await user.paste('{ mark: bar }');
-    await user.click(screen.getByRole('button', { name: 'Preview' })); // previewed but not saved
+    await user.click(screen.getByTestId('vegaEditorFlyoutPreviewButton')); // previewed but not saved
 
     unmount();
     expect(onRevert).toHaveBeenCalledTimes(1);
@@ -131,7 +131,7 @@ describe('VegaEditorFlyout', () => {
     const { closeFlyout, onSave, onRevert } = renderFlyout();
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    await user.click(screen.getByTestId('vegaEditorFlyoutCancelButton'));
     expect(closeFlyout).toHaveBeenCalledTimes(1);
     expect(onSave).not.toHaveBeenCalled();
     // Cancel only closes; the revert is driven by unmount, not the button.

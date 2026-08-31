@@ -17,6 +17,7 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { Resolver } from '../../../../resolver/view';
+import { withDocumentIndex } from '../../../shared/utils/non_local_index';
 import { ANALYZER_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
@@ -76,7 +77,7 @@ export const AnalyzerGraph = memo(
             <Resolver
               databaseDocumentID={eventId}
               resolverComponentInstanceID={RESOLVER_COMPONENT_INSTANCE_ID}
-              indices={selectedPatterns}
+              indices={withDocumentIndex(selectedPatterns, hit.raw._index)}
               shouldUpdate={shouldUpdate}
               filters={filters}
               renderCellActions={renderCellActions}

@@ -15,7 +15,10 @@ export const useFetchTags = (params?: { search?: string }) => {
 
   return useQuery<string[], Error>({
     queryKey: actionPolicyKeys.tags(params?.search),
-    queryFn: () => actionPoliciesApi.fetchTags({ search: params?.search }),
+    queryFn: async () => {
+      const { tags } = await actionPoliciesApi.fetchTags({ search: params?.search });
+      return tags;
+    },
     refetchOnWindowFocus: false,
     staleTime: 30 * 1000, // 30 seconds
   });

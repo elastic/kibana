@@ -45,6 +45,9 @@ import type { PromoteQueriesResult } from '../../../../lib/knowledge_indicators'
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_STREAMS = 10;
+// Leave five minutes under the route's idle-socket limit for an in-flight
+// validation call and the agent's forced-completion turn to finish.
+const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
 
 const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
@@ -653,7 +656,13 @@ const generateQueriesRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
     const result = await generateKIQueries(
-      { streamName, connectorId, maxExistingQueriesForContext, queryValidationTimeoutMs },
+      {
+        streamName,
+        connectorId,
+        maxExistingQueriesForContext,
+        maxDurationMs: QUERY_GENERATION_MAX_DURATION_MS,
+        queryValidationTimeoutMs,
+      },
       {
         streamsClient,
         inferenceClient,

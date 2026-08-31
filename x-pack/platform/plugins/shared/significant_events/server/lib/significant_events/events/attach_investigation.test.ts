@@ -15,10 +15,7 @@ import {
 import { attachInvestigationToEvent } from './attach_investigation';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
-import {
-  EVENT_STATUS_CHANGED_TRIGGER_ID,
-  INVESTIGATION_COMPLETED_TRIGGER_ID,
-} from '../../../../common/workflows/triggers';
+import { EVENT_STATUS_CHANGED_TRIGGER_ID } from '../../../../common/workflows/triggers';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -419,10 +416,6 @@ describe('attachInvestigationToEvent', () => {
     expect(triggerEmitter).toHaveBeenCalledWith(
       EVENT_STATUS_CHANGED_TRIGGER_ID,
       expect.objectContaining({ status: 'closed', previous_status: 'open' })
-    );
-    expect(triggerEmitter).toHaveBeenCalledWith(
-      INVESTIGATION_COMPLETED_TRIGGER_ID,
-      expect.objectContaining({ workflow_execution_id: investigation.workflow_execution_id })
     );
   });
 

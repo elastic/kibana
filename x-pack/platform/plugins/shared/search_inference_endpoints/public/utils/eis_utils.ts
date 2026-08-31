@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
-import { REGION_DISPLAY_NAMES } from '../../common/constants';
 import { EisModelStatus } from '../../common/types';
 import type { PolicyMode } from '../types';
 import {
@@ -334,13 +333,17 @@ const GEO_DISPLAY_NAMES: Record<string, string> = {
  */
 export const getGeoDisplayName = (geo: string): string => GEO_DISPLAY_NAMES[geo] ?? geo;
 
-/**
- * Returns the display label for a CSP region, e.g. "US East (N. Virginia) - AWS".
- * Falls back to the raw region code when no display name is registered.
- */
-export const getRegionDisplayName = (r: CspRegion): string => {
-  const key = regionKey(r);
-  return `${REGION_DISPLAY_NAMES[key] ?? r.region} - ${r.csp.toUpperCase()}`;
+export const getRegionPlaceName = (r: CspRegion): string => r.region_display_name || r.region;
+
+export const getRegionDisplayName = (r: CspRegion): string =>
+  `${getRegionPlaceName(r)} - ${r.csp.toUpperCase()}`;
+
+const keepPreferredRegion = (current: CspRegion | undefined, incoming: CspRegion): CspRegion => {
+  if (!current) return incoming;
+  if (!current.region_display_name && incoming.region_display_name) {
+    return incoming;
+  }
+  return current;
 };
 
 const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
@@ -355,7 +358,8 @@ const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, Cs
       if (!isCspRegion(region)) continue;
       const geo = region.geo ?? 'other';
       const geoMap = byGeo.get(geo) ?? new Map<string, CspRegion>();
-      geoMap.set(regionKey(region), region);
+      const key = regionKey(region);
+      geoMap.set(key, keepPreferredRegion(geoMap.get(key), region));
       byGeo.set(geo, geoMap);
     }
   }
@@ -430,7 +434,7 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
     for (const region of regions) {
       if (!isCspRegion(region)) continue;
       const key = regionKey(region);
-      if (!seen.has(key)) seen.set(key, region);
+      seen.set(key, keepPreferredRegion(seen.get(key), region));
     }
   }
 

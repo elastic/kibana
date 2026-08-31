@@ -6,7 +6,7 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
@@ -17,9 +17,7 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
-
-const DASHBOARD_SML_TYPE = 'dashboard';
-const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
+import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 interface CreateDashboardSmlTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
@@ -67,7 +65,7 @@ const toDashboardSearchContent = (state: DashboardState): string => {
 export const createDashboardSmlType = ({
   getDashboardClient,
 }: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
-  id: DASHBOARD_SML_TYPE,
+  id: DASHBOARD_KI_TYPE,
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -97,7 +95,7 @@ export const createDashboardSmlType = ({
       const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
-        type: DASHBOARD_SML_TYPE,
+        type: DASHBOARD_KI_TYPE,
         title: dashboard.data.title ?? originId,
         content: toDashboardSearchContent(dashboard.data),
       };
@@ -109,8 +107,7 @@ export const createDashboardSmlType = ({
     }
   },
 
-  getPermissions: () =>
-    kibanaSavedObjectPermissions({ savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE }),
+  getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_KI_TYPE }),
 
   toAttachment: async (item, context) => {
     try {

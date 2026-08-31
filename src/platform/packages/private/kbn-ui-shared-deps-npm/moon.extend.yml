@@ -74,8 +74,6 @@ tasks:
       - --collect
       - react-router-dom
       - --collect
-      - react-router-dom-v5-compat
-      - --collect
       - redux
       - --collect
       - reselect

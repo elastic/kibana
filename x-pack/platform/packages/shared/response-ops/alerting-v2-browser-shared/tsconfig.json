@@ -1,0 +1,17 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "react", "@testing-library/jest-dom", "@kbn/ambient-ui-types"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/date-range-picker",
+    "@kbn/date-range-picker-presets",
+    "@kbn/i18n",
+    "@kbn/use-observable"
+  ]
+}

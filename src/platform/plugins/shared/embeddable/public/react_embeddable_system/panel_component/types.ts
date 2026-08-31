@@ -30,6 +30,9 @@ export interface PresentationPanelProps<
 > {
   Component: React.FC<PropsType>;
   componentApi: ApiType;
+  componentInternalApi: {
+    setVisibility: (isVisible: boolean) => void;
+  };
   componentProps?: PropsType;
 
   showShadow?: boolean;
@@ -41,7 +44,6 @@ export interface PresentationPanelProps<
    */
   hideLoader?: boolean;
   hideHeader?: boolean;
-  hideInspector?: boolean;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;
@@ -63,9 +65,9 @@ export interface PresentationPanelProps<
   hidePanelChrome?: boolean;
 
   /**
-   * Optional search term to highlight in the panel title
+   * Optional search terms to highlight in the panel title
    */
-  titleHighlight?: string;
+  titleHighlight?: string | string[];
 }
 
 /**

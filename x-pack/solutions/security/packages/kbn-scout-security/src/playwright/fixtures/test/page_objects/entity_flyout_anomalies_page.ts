@@ -172,6 +172,14 @@ export class EntityFlyoutAnomaliesPage {
     return this.page.testSubj.locator(`${ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX}${actionKey}`);
   }
 
+  /**
+   * Click a row-actions menu item. noWaitAfter: add-to-timeline updates the URL
+   * while opening the modal, which otherwise hangs the click after scroll.
+   */
+  async clickRowAction(actionKey: string) {
+    await this.getRowAction(actionKey).click({ noWaitAfter: true });
+  }
+
   async selectMitreTactic(tactic: string) {
     await this.getMitreTacticDot(tactic).click();
   }

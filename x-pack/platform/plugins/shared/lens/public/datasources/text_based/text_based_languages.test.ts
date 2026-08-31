@@ -504,6 +504,106 @@ describe('Textbased Data Source', () => {
         )
       ).toBe(false);
     });
+
+    it('uses a dynamic TBUCKET alias for the trendline time column', () => {
+      const query = 'TS metrics-* | STATS avg_cpu = AVG(cpu) BY `Over time` = TBUCKET(1 hour)';
+      const state = {
+        layers: {
+          main: {
+            columns: [
+              {
+                columnId: 'metric-accessor',
+                fieldName: 'avg_cpu',
+                meta: { type: 'number' },
+              },
+            ],
+            query: { esql: query },
+            index: 'metrics',
+          },
+          trendline: {
+            columns: [
+              {
+                columnId: 'trendline-time-accessor',
+                fieldName: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+                meta: { type: 'date' },
+              },
+            ],
+            query: { esql: query },
+            index: 'metrics',
+            timeField: '@timestamp',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const newState = TextBasedDatasource.syncColumns({
+        state,
+        links: [
+          {
+            from: {
+              layerId: 'main',
+              columnId: 'metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.METRIC,
+            },
+            to: {
+              layerId: 'trendline',
+              columnId: 'trendline-metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
+            },
+          },
+        ],
+        getDimensionGroups: jest.fn(),
+        indexPatterns: {},
+      });
+
+      expect(newState.layers.trendline.query?.esql).toBe(query);
+      expect(
+        newState.layers.trendline.columns.find(
+          (column) => column.columnId === 'trendline-time-accessor'
+        )?.fieldName
+      ).toBe('Over time');
+    });
+  });
+
+  describe('#initializeDimension', () => {
+    it('initializes the trendline time dimension from a TBUCKET alias', () => {
+      const query = 'TS metrics-* | STATS avg_cpu = AVG(cpu) BY custom_time = TBUCKET(100)';
+      const state = {
+        layers: {
+          trendline: {
+            columns: [],
+            query: { esql: query },
+            index: 'metrics',
+            timeField: '@timestamp',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const { initializeDimension } = TextBasedDatasource;
+      if (!initializeDimension) {
+        throw new Error('Expected text-based datasource to initialize dimensions');
+      }
+
+      const newState = initializeDimension(
+        state,
+        'trendline',
+        {},
+        {
+          columnId: 'trendline-time-accessor',
+          groupId: LENS_METRIC_GROUP_ID.TREND_TIME,
+          visualizationGroups: [],
+          autoTimeField: true,
+        }
+      );
+
+      expect(newState.layers.trendline.query?.esql).toBe(query);
+      expect(newState.layers.trendline.columns).toEqual([
+        {
+          columnId: 'trendline-time-accessor',
+          fieldName: 'custom_time',
+          meta: { type: 'date' },
+        },
+      ]);
+    });
   });
 
   describe('#insertLayer', () => {

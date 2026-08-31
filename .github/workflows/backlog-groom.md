@@ -35,6 +35,7 @@ engine:
     ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 tools:
+  bash: true
   github:
     toolsets: [default]
     min-integrity: none

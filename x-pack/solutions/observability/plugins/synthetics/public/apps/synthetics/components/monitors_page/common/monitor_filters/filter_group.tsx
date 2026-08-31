@@ -21,6 +21,7 @@ import type {
 import { getSyntheticsFilterDisplayValues } from '../../../../utils/filters/filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
+import { getRemoteOriginFieldLabel } from '../../../../utils/remote/remote_origin_copy';
 
 const mixUrlValues = (
   values?: LabelWithCountValue[],
@@ -151,7 +152,7 @@ export const FilterGroup = ({
 
   if (showRemoteClusterFilter && hasRemoteMonitors) {
     allFilters.push({
-      label: REMOTE_CLUSTER_LABEL,
+      label: getRemoteOriginFieldLabel(),
       field: 'remoteNames',
       values: getSyntheticsFilterDisplayValues(
         mixUrlValues(remoteClusterValues, urlParams.remoteNames),
@@ -197,10 +198,3 @@ const TAGS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.tag
 const SCHEDULE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.frequencyLabel', {
   defaultMessage: `Frequency`,
 });
-
-const REMOTE_CLUSTER_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.filter.remoteClusterLabel',
-  {
-    defaultMessage: `Remote cluster`,
-  }
-);

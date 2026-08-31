@@ -8,7 +8,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
+import {
+  markExternalUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 
 import { KibanaActionStepImpl } from './kibana_action_step';
@@ -213,6 +216,45 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     const unattestedFetchOptions = mockedFetch.mock.calls[0][1] as RequestInit;
     const unattestedHeaders = new Headers(unattestedFetchOptions.headers);
     expect(unattestedHeaders.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBeNull();
+    expect(mockGetInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('does not attest a user-created (external) UIAM credential on loopback requests', async () => {
+    // The receiving Kibana would honor the attestation and attach the UIAM shared secret to its
+    // Elasticsearch calls, and UIAM rejects external keys presented with client authentication.
+    mockGetInternalCallerAttestationHeaders.mockReturnValue({
+      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'valid-attestation',
+    });
+    const externalKeyRequest = {
+      headers: { authorization: 'ApiKey essu_user_created_key' },
+      isFakeRequest: true,
+    } as unknown as KibanaRequest;
+    markExternalUiamCredential(externalKeyRequest);
+    mockContextManager.getFakeRequest.mockReturnValue(externalKeyRequest);
+
+    const stepWith = { request: { method: 'GET', path: '/api/status' } };
+    const step = {
+      id: 'test_step',
+      type: 'kibana.request',
+      stepId: 'test_step',
+      stepType: 'kibana.request',
+      configuration: { name: 'test_step', type: 'kibana.request', with: stepWith },
+    } as unknown as KibanaGraphNode;
+
+    await runStep(
+      new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      ),
+      stepWith
+    );
+
+    const headers = new Headers((mockedFetch.mock.calls[0][1] as RequestInit).headers);
+    // The credential itself still goes out; only the attestation is withheld.
+    expect(headers.get('authorization')).toBe('ApiKey essu_user_created_key');
+    expect(headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBeNull();
     expect(mockGetInternalCallerAttestationHeaders).not.toHaveBeenCalled();
   });
 

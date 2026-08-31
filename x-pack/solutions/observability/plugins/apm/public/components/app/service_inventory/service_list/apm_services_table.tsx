@@ -6,6 +6,7 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiToolTip } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -61,6 +62,7 @@ import {
 } from '../../../../../common/slo_indicator_types';
 import { SloOverviewFlyout, useSloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { SERVICE_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { listMetricColumnPreset } from '../../../../utils/column_presets';
 
@@ -144,6 +146,10 @@ export function getServiceColumns({
                         alertStatus: ALERT_STATUS_ACTIVE,
                       },
                     })}
+                    {...getEbtProps({
+                      action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+                      element: SERVICE_INVENTORY_EBT_ELEMENTS.ALERTS_BADGE,
+                    })}
                   >
                     {alertsCount}
                   </EuiBadge>
@@ -180,6 +186,10 @@ export function getServiceColumns({
                   sloCount={sloCount}
                   serviceName={serviceName}
                   onClick={() => onSloBadgeClick(serviceName, agentName)}
+                  ebt={{
+                    action: EBT_CLICK_ACTIONS.VIEW_SLOS,
+                    element: SERVICE_INVENTORY_EBT_ELEMENTS.SLO_BADGE,
+                  }}
                 />
               );
             },
@@ -221,6 +231,10 @@ export function getServiceColumns({
                 <AnomaliesBadge
                   score={anomalyScore}
                   detectorType={detectorType}
+                  ebt={{
+                    action: EBT_CLICK_ACTIONS.VIEW_ANOMALIES,
+                    element: SERVICE_INVENTORY_EBT_ELEMENTS.ANOMALIES_BADGE,
+                  }}
                   navigationProps={
                     agentName && anomalyEnvironment && locators
                       ? {

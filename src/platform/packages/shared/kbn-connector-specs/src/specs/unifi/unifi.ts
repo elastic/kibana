@@ -186,10 +186,11 @@ export const Unifi: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    // A new connector type must reach Production-NonCanary before it can declare
-    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
-    // and others in a follow-up PR.
-    supportedFeatureIds: ['agentBuilder'],
+    // Step 2 of the two-step release for a new connector type. `.unifi` shipped with
+    // ['agentBuilder'] only and has since reached Production-NonCanary, so every node
+    // now registers the type and declaring a user-facing feature can no longer leave a
+    // persisted workflow referencing a type some node lacks.
+    supportedFeatureIds: ['agentBuilder', 'workflows'],
   },
 
   auth: {

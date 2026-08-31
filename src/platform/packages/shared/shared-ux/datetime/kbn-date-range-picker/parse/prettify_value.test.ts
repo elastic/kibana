@@ -77,6 +77,20 @@ describe('prettifyValue', () => {
     });
   });
 
+  describe('chained date math — pass through', () => {
+    it('leaves "now/y+3M to now" unchanged', () => {
+      expect(prettifyValue('now/y+3M to now')).toBe('now/y+3M to now');
+    });
+
+    it('leaves "now-3M/y+3M" unchanged', () => {
+      expect(prettifyValue('now-3M/y+3M')).toBe('now-3M/y+3M');
+    });
+
+    it('leaves "-1y/y+3M to now/y+3M" unchanged', () => {
+      expect(prettifyValue('-1y/y+3M to now/y+3M')).toBe('-1y/y+3M to now/y+3M');
+    });
+  });
+
   describe('absolute dates — formats ISO strings', () => {
     it('formats absolute-to-absolute with DEFAULT_DATE_FORMAT', () => {
       expect(prettifyValue('2025-01-01T00:00:00Z to 2025-06-15T00:00:00Z')).toBe(

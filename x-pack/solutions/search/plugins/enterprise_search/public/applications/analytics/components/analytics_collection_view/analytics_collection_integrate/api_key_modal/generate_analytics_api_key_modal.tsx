@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFieldText,
   EuiFlexGroup,
@@ -32,6 +31,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 
 import { generateAnalyticsApiKeyLogic } from '../../../../api/generate_analytics_api_key/generate_analytics_api_key_logic';
 
@@ -130,7 +130,7 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
                     </>
                   ) : (
                     <EuiFlexItem>
-                      <EuiCallOut
+                      <KbnSuccessCallout
                         announceOnMount
                         title={
                           <FormattedMessage
@@ -141,8 +141,6 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
                             }}
                           />
                         }
-                        color="success"
-                        iconType="check"
                         role="alert"
                       />
                       <EuiFlexGroup alignItems="center">

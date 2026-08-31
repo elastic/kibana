@@ -210,7 +210,6 @@ export const SYNTHETICS_AVAILABILITY_DEFAULT_VALUES: SyntheticsAvailabilityIndic
 export const SETTINGS_DEFAULT_VALUES = {
   frequency: 1,
   preventInitialBackfill: false,
-  preventCrossProjectSearch: false,
   syncDelay: 1,
   syncField: null,
 };

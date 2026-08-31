@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: merge with src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts. There should be one test to check that flyout accessibliity is behaving.
+ */
+
 import expect from '@kbn/expect';
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';

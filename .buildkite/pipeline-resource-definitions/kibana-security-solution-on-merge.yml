@@ -34,6 +34,7 @@ spec:
             paths:
               - .buildkite/pipelines/security_solution_on_merge.yml
             cleanup_sparse_state: true
+      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false

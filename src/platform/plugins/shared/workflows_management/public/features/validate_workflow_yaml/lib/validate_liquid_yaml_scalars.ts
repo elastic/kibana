@@ -114,6 +114,7 @@ export function validateLiquidYamlScalars(
         results.push({
           id: `liquid-template-${startPos.line}-${startPos.column}-${endPos.line}-${endPos.column}`,
           owner: 'liquid-template-validation',
+          ruleId: 'liquidSyntaxError',
           message: errorMessage.replace(/, line:\d+, col:\d+/g, ''),
           startLineNumber: startPos.line,
           startColumn: startPos.column,
@@ -251,6 +252,7 @@ function collectForLoopCollectionResults(
       results.push({
         id: `for-collection-${nearestStep.name}-${scope.collectionPath}-${absRange.start}`,
         owner: 'variable-validation',
+        ruleId: 'invalidCollectionPath',
         message: diagnostic.message,
         severity: diagnostic.severity,
         startLineNumber: startPos.lineNumber,

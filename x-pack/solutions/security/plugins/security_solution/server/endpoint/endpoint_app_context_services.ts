@@ -85,6 +85,7 @@ import type { ResponseActionAgentType } from '../../common/endpoint/service/resp
 import { ScopedEndpointArtifactListClient } from './services/scoped_endpoint_artifact_list_client';
 import { SimpleMemCache } from './lib/simple_mem_cache';
 import { hasConnectedRemoteClusters } from './utils/ccs_utils';
+import { setYaraLogger } from './lib/libyara';
 
 /** Time-to-live (seconds) for the cached connected-remote-clusters check backing `isCcsEnabled` */
 const CCS_CACHE_TTL_SECONDS = 60;
@@ -172,6 +173,8 @@ export class EndpointAppContextService {
     this.startDependencies = dependencies;
     this.security = dependencies.security;
 
+    setYaraLogger(this.createLogger('libyara'));
+
     const isScriptsLibraryEnabled =
       this.startDependencies.experimentalFeatures.responseActionsScriptLibraryManagement;
 
@@ -206,6 +209,7 @@ export class EndpointAppContextService {
   }
 
   public stop() {
+    setYaraLogger(undefined);
     this.startDependencies = null;
     this.savedObjectsFactoryService = null;
   }

@@ -27,10 +27,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
-import type {
-  YamlValidationErrorSeverity,
-  YamlValidationResult,
-} from '../../../features/validate_workflow_yaml/model/types';
+import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 const severityOrder = ['error', 'warning'];
@@ -112,29 +109,14 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
   let buttonContent: React.ReactNode | null = null;
 
   const allValidationErrors: YamlValidationResult[] = useMemo(
-    () => [
-      ...(validationErrors?.filter(
-        (error) => error.severity === 'error' || error.severity === 'warning'
-      ) || []),
-      ...(errorValidating
-        ? [
-            {
-              id: 'error-validating',
-              endLineNumber: 0,
-              endColumn: 0,
-              hoverMessage: null,
-              severity: 'error' as YamlValidationErrorSeverity,
-              message: errorValidating.message,
-              owner: 'variable-validation' as const,
-              startLineNumber: 0,
-              startColumn: 0,
-              afterMessage: null,
-            },
-          ]
-        : []),
-    ],
-    [validationErrors, errorValidating]
+    () =>
+      validationErrors?.filter(
+        (validationError) =>
+          validationError.severity === 'error' || validationError.severity === 'warning'
+      ) ?? [],
+    [validationErrors]
   );
+  const hasAccordionContent = allValidationErrors.length > 0;
 
   // Report telemetry when validation errors change (only when errors are present and stable)
   useEffect(() => {
@@ -179,7 +161,10 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
         defaultMessage: 'Initializing validation...',
       }
     );
-  } else if (allValidationErrors?.length === 0) {
+  } else if (errorValidating) {
+    icon = <EuiIcon type="errorFill" color="danger" size="m" aria-hidden={true} />;
+    buttonContent = errorValidating.message;
+  } else if (allValidationErrors.length === 0) {
     icon = (
       <EuiIcon
         type="checkCircleFill"
@@ -211,14 +196,18 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-          <EuiFlexItem css={styles.buttonContentText} className="button-content-text">
+          <EuiFlexItem
+            css={styles.buttonContentText}
+            className="button-content-text"
+            data-test-subj={errorValidating ? 'workflowValidationRunError' : undefined}
+          >
             {buttonContent}
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      arrowDisplay={allValidationErrors?.length > 0 ? 'left' : 'none'}
+      arrowDisplay={hasAccordionContent ? 'left' : 'none'}
       initialIsOpen={false}
-      isDisabled={allValidationErrors?.length === 0}
+      isDisabled={!hasAccordionContent}
       css={styles.accordion}
       extraAction={extraAction}
     >
@@ -246,7 +235,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
                       ? 'errorFill'
                       : error.severity === 'warning'
                       ? 'warningFill'
-                      : 'iInCircle'
+                      : 'info'
                   }
                   color={
                     error.severity === 'error'

@@ -21,7 +21,13 @@ import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
 
 import type { Agent } from '../types';
 
-import { AgentStatusChangeTask, TYPE, VERSION } from './agent_status_change_task';
+import {
+  AgentStatusChangeTask,
+  AGENT_STATUS_CHANGE_SOURCE_FIELDS,
+  HAS_CHANGED_RUNTIME_FIELD,
+  TYPE,
+  VERSION,
+} from './agent_status_change_task';
 
 jest.mock('../services');
 jest.mock('../services/agents');
@@ -56,6 +62,13 @@ const getMockFetchAllAgentsByKuery = (items: Agent[]) =>
   jest.fn(async function* () {
     yield items;
   })();
+
+const getMockFetchAllAgentsByKueryPages = (pages: Agent[][]) =>
+  jest.fn(async function* () {
+    for (const page of pages) {
+      yield page;
+    }
+  })();
 const mockBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bulkUpdateAgents>;
 
 describe('AgentStatusChangeTask', () => {
@@ -66,6 +79,7 @@ describe('AgentStatusChangeTask', () => {
   let mockTask: AgentStatusChangeTask;
   let mockCore: CoreSetup;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let mockLogFactory: ReturnType<typeof loggingSystemMock.create>;
 
   beforeEach(async () => {
     mockContract = createAppContextStartContractMock();
@@ -74,10 +88,11 @@ describe('AgentStatusChangeTask', () => {
       pluginStartContract: {},
     });
     mockTaskManagerSetup = tmSetupMock();
+    mockLogFactory = loggingSystemMock.create();
     mockTask = new AgentStatusChangeTask({
       core: mockCore,
       taskManager: mockTaskManagerSetup,
-      logFactory: loggingSystemMock.create(),
+      logFactory: mockLogFactory,
       config: {
         taskInterval: '10m',
       },
@@ -233,6 +248,105 @@ describe('AgentStatusChangeTask', () => {
 
       expect(mockBulkUpdateAgents).not.toHaveBeenCalled();
       expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should pass _source and fetchFields to fetchAllAgentsByKuery', async () => {
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery([]));
+
+      await runTask();
+
+      expect(mockedFetchAllAgentsByKuery).toHaveBeenCalled();
+      const [, , optionsArg] = mockedFetchAllAgentsByKuery.mock.calls[0];
+      expect(optionsArg).toMatchObject({
+        kuery: 'hasChanged:true',
+        _source: AGENT_STATUS_CHANGE_SOURCE_FIELDS,
+        fetchFields: ['status'],
+        runtimeFields: HAS_CHANGED_RUNTIME_FIELD,
+      });
+    });
+
+    it('should not throw and should skip agents with missing local_metadata', async () => {
+      const agents = [
+        {
+          id: 'agent-no-meta',
+          policy_id: 'policy-1',
+          status: 'online',
+          namespaces: ['default'],
+          // no local_metadata
+        },
+        {
+          id: 'agent-with-meta',
+          policy_id: 'policy-1',
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host1' } },
+        },
+      ] as unknown as Agent[];
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      expect(mockBulkUpdateAgents).toHaveBeenCalled();
+      expect(esClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operations: expect.arrayContaining([
+            expect.objectContaining({ agent: { id: 'agent-no-meta' }, hostname: undefined }),
+            expect.objectContaining({ agent: { id: 'agent-with-meta' }, hostname: 'host1' }),
+          ]),
+        })
+      );
+    });
+
+    it('should skip agents with no status and warn', async () => {
+      const agents = [
+        {
+          id: 'agent-no-status',
+          policy_id: 'policy-1',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host1' } },
+          // no status
+        },
+        {
+          id: 'agent-with-status',
+          policy_id: 'policy-1',
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host2' } },
+        },
+      ] as unknown as Agent[];
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      expect(mockBulkUpdateAgents).toHaveBeenCalledWith(
+        esClient,
+        [{ agentId: 'agent-with-status', data: { last_known_status: 'online' } }],
+        {}
+      );
+      const logs = loggingSystemMock.collect(mockLogFactory);
+      expect(logs.warn.some((entry) => String(entry[0]).includes('Skipped 1 agent'))).toBe(true);
+    });
+
+    it('should stop at MAX_AGENTS_PER_RUN and log', async () => {
+      const makeAgents = (count: number, idPrefix: string): Agent[] =>
+        Array.from({ length: count }, (_, i) => ({
+          id: `${idPrefix}-${i}`,
+          policy_id: 'policy-1',
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: `host-${i}` } },
+        })) as unknown as Agent[];
+
+      // 6 pages of 10000 = 60000 total, cap is 50000 (5 pages)
+      const pages = Array.from({ length: 6 }, (_, i) => makeAgents(10000, `page${i}`));
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKueryPages(pages));
+
+      await runTask();
+
+      // 5 pages processed, 6th not reached
+      expect(mockBulkUpdateAgents).toHaveBeenCalledTimes(5);
+      const logs = loggingSystemMock.collect(mockLogFactory);
+      expect(logs.info.some((entry) => String(entry[0]).includes('per-run cap'))).toBe(true);
     });
 
     it('should do nothing when feature flag is disabled', async () => {

@@ -14,6 +14,7 @@ const LEADS_BASE = 'internal/entity_analytics/leads';
  */
 export const LEAD_GENERATION_ROUTES = {
   GET_LEADS: LEADS_BASE,
+  GET_CHANGES: `${LEADS_BASE}/changes`,
   GENERATE: `${LEADS_BASE}/generate`,
   STATUS: `${LEADS_BASE}/status`,
   DISMISS: (id: string) => `${LEADS_BASE}/${id}/_dismiss`,

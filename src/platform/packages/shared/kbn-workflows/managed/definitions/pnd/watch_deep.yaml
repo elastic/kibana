@@ -3,7 +3,7 @@ name: Deep Watch
 description: >
   Deep Watch skeleton. Specialist, on-demand depth — forensics,
   hunts, and draft-only conclusions under human review.
-enabled: true
+enabled: false
 tags:
   - watch
   - watch-deep
@@ -11,32 +11,13 @@ triggers:
   - type: manual
 consts:
   watch_policy:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy semantics are defined separately.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Deep investigation & hunts
-    autonomyLevel: 3
-    handoff: records
-    onDemand: true
-    draft: false
-    cadence: manual
-    from: 8
-    to: 18
-    mode: window
     ui:
       color: "#8b5cf6"
-      icon: console
       order: 40
-    scopeSummary: Security indices · EDR · DNS
-    scopes:
-      - name: Security indices
-        access: full
-        label: Read
-      - name: EDR telemetry
-        access: full
-        label: Read
-      - name: DNS · netflow
-        access: full
-        label: Read
-    # Capabilities projected from executable steps — see Watch Floor.
-    callables: []
 steps:
   - name: specialist_stub
     type: console

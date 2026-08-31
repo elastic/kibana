@@ -28,6 +28,7 @@
     "@kbn/dev-utils",
     "@kbn/es",
     "@kbn/rspack-optimizer",
+    "@kbn/projects-solutions-groups",
   ],
   "exclude": [
     "target/**/*",

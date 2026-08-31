@@ -31,6 +31,7 @@ export interface ComputedFeatureGeneratorOptions {
   end: number;
   esClient: ElasticsearchClient;
   logger: Logger;
+  signal: AbortSignal;
   /**
    * Optional providers for externally-backed computed features, keyed by
    * feature type. Injected by the consuming plugin; absent providers cause the

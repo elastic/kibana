@@ -11,21 +11,6 @@
  */
 export const allowedExperimentalValues = Object.freeze({
   /**
-   * This feature flag hides all 9.4 UI changes:
-   *   - Enables the copy/duplicate functionality for packs and saved queries,
-   *     and the kebab row-action menus in list tables.
-   *   - Renames "Live queries" tab to "History" and "Saved queries" to "Queries"
-   *   - Introduces /history and /new routes, redirects legacy /live_queries paths
-   *   - Introduces search input and users filter
-   *   - Introduces scheduled responses support
-   */
-  queryHistoryRework: true,
-  /**
-   * Replaces the legacy EuiDataGrid results table with UnifiedDataTable,
-   * adding KQL search, document flyout, per-row actions, and column curation.
-   */
-  unifiedDataTable: true,
-  /**
    * Enables the "Export Results" button and server-side streaming export endpoints
    * for downloading osquery results as NDJSON, JSON, or CSV files.
    */

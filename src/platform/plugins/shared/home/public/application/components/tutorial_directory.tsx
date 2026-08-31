@@ -13,7 +13,6 @@ import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup } from '@elastic/eui';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { SampleDataTab } from '@kbn/home-sample-data-tab';
-import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TutorialsCategory } from '../../../common/constants';
 import { Synopsis } from './synopsis';
@@ -21,11 +20,10 @@ import type { HomeKibanaServices } from '../kibana_services';
 import { getServices } from '../kibana_services';
 import { getTutorials } from '../load_tutorials';
 import type { TutorialType } from '../../services/tutorials/types';
+import { getTutorialDirectoryFirstCrumb } from './tutorial_directory_return_crumb';
+import { TutorialDirectoryBackLink } from './tutorial_directory_back_link';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
-const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle', {
-  defaultMessage: 'Integrations',
-});
 
 interface TutorialDirectoryUiProps {
   addBasePath: HomeKibanaServices['addBasePath'];
@@ -176,12 +174,15 @@ class TutorialDirectoryUi extends React.Component<
 
   setBreadcrumbs = () => {
     const tab = this.getSelectedTab();
-    const breadcrumbs = [
-      {
-        text: integrationsTitle,
-        href: this.props.addBasePath(`/app/integrations/browse`),
-      },
-    ];
+    const { application, history } = getServices();
+    const hash =
+      history.location.hash || (typeof window !== 'undefined' ? window.location.hash : '');
+    const firstCrumb = getTutorialDirectoryFirstCrumb({
+      hash,
+      addBasePath: this.props.addBasePath,
+      getUrlForApp: application.getUrlForApp,
+    });
+    const breadcrumbs = [firstCrumb];
 
     if (tab?.name) {
       breadcrumbs.push({
@@ -269,24 +270,32 @@ class TutorialDirectoryUi extends React.Component<
   render() {
     const headerLinks = this.renderHeaderLinks();
     const tabs = this.getTabs();
+    const { application, history } = getServices();
+    const hash =
+      history.location.hash || (typeof window !== 'undefined' ? window.location.hash : '');
 
     return (
-      <KibanaPageTemplate
-        restrictWidth={1200}
-        pageHeader={{
-          pageTitle: (
-            <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
-          ),
-          description: (
+      <KibanaPageTemplate restrictWidth={1200}>
+        <KibanaPageTemplate.Header
+          pageTitle={
+            <>
+              <TutorialDirectoryBackLink
+                hash={hash}
+                addBasePath={this.props.addBasePath}
+                getUrlForApp={application.getUrlForApp}
+              />
+              <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
+            </>
+          }
+          description={
             <FormattedMessage
               id="home.tutorial.addDataToKibanaDescription"
               defaultMessage="Try our sample data or upload your own data."
             />
-          ),
-          tabs,
-          rightSideItems: headerLinks ? [headerLinks] : [],
-        }}
-      >
+          }
+          tabs={tabs}
+          rightSideItems={headerLinks ? [headerLinks] : []}
+        />
         <KibanaPageTemplate.Section>{this.renderTabContent()}</KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );

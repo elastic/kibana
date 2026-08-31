@@ -130,14 +130,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
       security: {
         authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: [
-                FLEET_API_PRIVILEGES.SETTINGS.ALL,
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
-              ],
-            },
-          ],
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
         },
       },
       summary: 'Update output',

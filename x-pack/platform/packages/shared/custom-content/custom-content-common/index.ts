@@ -15,5 +15,15 @@ export {
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
 } from './constants';
 
-export { customContentStateSchema } from './schema';
-export type { CustomContentState } from './schema';
+export {
+  customContentStateSchema,
+  customContentUpdateSchema,
+  customContentPanelUpdateSchema,
+  readEsqlQuery,
+  toEsqlQueryState,
+  resolveEsqlQueryEdit,
+} from './schema';
+export type { CustomContentUpdate } from './schema';
+export type { ResolvedEsqlQueryEdit, CustomContentState } from './schema';
+
+export { stripMarkdownFences } from './strip_markdown_fences';

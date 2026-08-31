@@ -7,6 +7,7 @@
 
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { getBreachEsqlQuery, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -22,15 +23,6 @@ import {
 } from '../utils';
 import { RuleDetailsTable } from './rule_details_table';
 
-const MODE_LABELS: Record<string, string> = {
-  signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
-    defaultMessage: 'Signal',
-  }),
-  alert: i18n.translate('xpack.alertingV2.ruleDetails.modeAlert', {
-    defaultMessage: 'Alert',
-  }),
-};
-
 export interface RuleConditionsProps {
   /**
    * `'full'` (default) shows all condition fields, matching the details page.
@@ -43,7 +35,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
   variant = 'full',
 }) => {
   const rule = useRule();
-  const isAlertMode = rule.kind === 'alert';
+  const isAlertKind = rule.kind === 'alert';
   const isSummary = variant === 'summary';
   const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
   const recoveryCondition = getRecoverEsqlSegment(rule.query, rule.recovery_strategy);
@@ -88,13 +80,13 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       'data-test-subj': 'alertingV2RuleDetailsLookback',
     },
     {
-      title: i18n.translate('xpack.alertingV2.ruleDetails.mode', {
-        defaultMessage: 'Mode',
+      title: i18n.translate('xpack.alertingV2.ruleDetails.kind', {
+        defaultMessage: 'Outcome',
       }),
-      description: MODE_LABELS[rule.kind] ?? rule.kind,
-      'data-test-subj': 'alertingV2RuleDetailsMode',
+      description: RULE_KIND_LABELS[rule.kind] ?? rule.kind,
+      'data-test-subj': 'alertingV2RuleDetailsKind',
     },
-    ...(isAlertMode && !isSummary
+    ...(isAlertKind && !isSummary
       ? [
           {
             title: i18n.translate('xpack.alertingV2.ruleDetails.alertDelay', {

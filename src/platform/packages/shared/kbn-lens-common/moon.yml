@@ -64,6 +64,9 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/control-group-renderer'
   - '@kbn/palettes'
+  - '@kbn/esql-language'
+  - '@kbn/calculate-auto'
+  - '@kbn/core-lifecycle-browser-mocks'
 tags:
   - shared-common
   - package

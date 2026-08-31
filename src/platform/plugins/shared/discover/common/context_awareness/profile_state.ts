@@ -29,6 +29,14 @@ export enum ProfileStateType {
 }
 
 /**
+ * Profile state field types that the host persists in local tab storage across reloads.
+ */
+export const LOCALLY_PERSISTED_PROFILE_STATE_TYPES = [
+  ProfileStateType.Persistent,
+  ProfileStateType.Url,
+];
+
+/**
  * Describes the intended lifetime for each field in a profile state definition.
  */
 export type ProfileStateDescriptor<TState extends SerializableRecord> = {

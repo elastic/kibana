@@ -47,6 +47,8 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     uninstall: jest.Mock;
     ready: jest.Mock;
     getWorkflowStatus: jest.Mock;
+    getInstalledWorkflowState: jest.Mock;
+    listInstalledWorkflowStates: jest.Mock;
     execute: jest.Mock;
   };
 
@@ -86,6 +88,8 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       uninstall: jest.fn().mockResolvedValue(undefined),
       ready: jest.fn().mockResolvedValue(undefined),
       getWorkflowStatus: jest.fn().mockResolvedValue({ status: 'intact' }),
+      getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
+      listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
       execute: jest.fn().mockResolvedValue('mock-execution-id'),
     };
 

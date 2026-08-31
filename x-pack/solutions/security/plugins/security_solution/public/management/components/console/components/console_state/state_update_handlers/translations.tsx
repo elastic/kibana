@@ -92,7 +92,7 @@ export const executionTranslations = Object.freeze({
       <ConsoleCodeBlock>
         <FormattedMessage
           id="xpack.securitySolution.console.commandValidation.exclusiveOr"
-          defaultMessage="This command supports only one of the following arguments: {argNames}"
+          defaultMessage="This command requires (only) one of the following arguments: {argNames}"
           values={{
             argNames: (
               <ConsoleCodeBlock bold inline>
@@ -102,6 +102,51 @@ export const executionTranslations = Object.freeze({
           }}
         />
       </ConsoleCodeBlock>
+    );
+  },
+
+  missingConditionallyRequiredExclusiveOrArg: (
+    argName: string,
+    listOfMissingArgs: string
+  ): ReactNode => {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.console.commandValidation.missingConditionallyRequiredExclusiveOrArg"
+        defaultMessage="Argument {argName} requires (only) one of the following arguments: {listOfMissingArgs}"
+        values={{
+          argName: (
+            <ConsoleCodeBlock bold inline>
+              {argName}
+            </ConsoleCodeBlock>
+          ),
+          listOfMissingArgs: (
+            <ConsoleCodeBlock bold inline>
+              {listOfMissingArgs}
+            </ConsoleCodeBlock>
+          ),
+        }}
+      />
+    );
+  },
+
+  missingConditionallyRequiredArgs: (argName: string, listOfMissingArgs: string): ReactNode => {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.console.commandValidation.missingConditionallyRequiredArgs"
+        defaultMessage="Use of {argName} requires the following additional arguments: {listOfMissingArgs}"
+        values={{
+          argName: (
+            <ConsoleCodeBlock bold inline>
+              {argName}
+            </ConsoleCodeBlock>
+          ),
+          listOfMissingArgs: (
+            <ConsoleCodeBlock bold inline>
+              {listOfMissingArgs}
+            </ConsoleCodeBlock>
+          ),
+        }}
+      />
     );
   },
 

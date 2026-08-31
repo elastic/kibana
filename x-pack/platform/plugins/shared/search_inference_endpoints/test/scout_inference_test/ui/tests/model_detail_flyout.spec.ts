@@ -246,4 +246,36 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.addEndpointModal).toBeHidden();
     });
   });
+
+  test('shows region preferences unavailable callout when the model is denied by region policy', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('mock endpoints denied by region policy', async () => {
+      await unmockInferenceEndpoints(page);
+      await mockInferenceEndpoints(
+        page,
+        eisEndpointsMockData.map((endpoint) =>
+          endpoint.service_settings?.model_id === 'anthropic-claude-3.7-sonnet'
+            ? {
+                ...endpoint,
+                metadata: { ...endpoint.metadata, denied_by_region_policy: true },
+              }
+            : endpoint
+        )
+      );
+      await eisModels.goto();
+    });
+
+    await test.step('open flyout for a denied model', async () => {
+      await eisModels.modelCard('Anthropic Claude Sonnet 3.7').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('unavailable callout is visible', async () => {
+      await expect(eisModels.flyoutRegionUnavailableCallout).toBeVisible();
+    });
+  });
 });

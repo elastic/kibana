@@ -19,10 +19,17 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
+  DataClient,
+  GetStepExecutionsByIdsOptions,
+  GetWorkflowExecutionsByIdsOptions,
+  StepExecutionsDataClient,
   TriggerEventsContract,
+  WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
+
+export { getStepExecutionsByWorkflowExecution } from './repositories/data_access_layer/lib/get_step_executions_by_workflow_execution';
 
 export type {
   LogsRepository,

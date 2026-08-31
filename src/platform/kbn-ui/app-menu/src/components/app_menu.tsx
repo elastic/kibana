@@ -8,8 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import { EuiHeaderLinks, type EuiBreakpointSize, useCurrentEuiBreakpoint } from '@elastic/eui';
-import { useCurrentChromeApplicationBreakpoint } from '@kbn/ui-chrome-layout-utils';
 import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
@@ -17,12 +15,19 @@ import { AppMenuItem } from './app_menu_item';
 import { AppMenuOverflowButton } from './app_menu_overflow_button';
 import { AppMenuSwitchComponent } from './app_menu_switch';
 import type { AppMenuConfig, AppMenuStaticItem } from '../types';
-import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
+import {
+  AppMenuApplicationResponsiveContent,
+  AppMenuViewportResponsiveContent,
+  type AppMenuBreakpointSource,
+  type AppMenuLayout,
+} from './app_menu_responsive';
 
 const secondaryActionsCss = css`
   display: flex;
   align-items: center;
 `;
+
+export type { AppMenuBreakpointSource };
 
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
@@ -34,78 +39,8 @@ export interface AppMenuItemsProps {
   staticItems?: AppMenuStaticItem[];
 }
 
-export type AppMenuBreakpointSource = 'application' | 'viewport';
-
-type AppMenuLayout = 'collapsed' | 'minimal' | 'expanded';
-
-const APPLICATION_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
-  xs: 'collapsed',
-  s: 'minimal',
-  m: 'expanded',
-  l: 'expanded',
-  xl: 'expanded',
-};
-
-const VIEWPORT_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
-  xs: 'collapsed',
-  s: 'collapsed',
-  m: 'minimal',
-  l: 'minimal',
-  xl: 'expanded',
-};
-
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.switch;
-
-const AppMenuHeaderLinks = ({ children }: { children: React.ReactNode }) => (
-  <EuiHeaderLinks
-    data-test-subj={APP_MENU_TEST_SUBJECTS.root}
-    gutterSize="xs"
-    popoverBreakpoints="none"
-    className="kbnTopNavMenu__wrapper"
-  >
-    {children}
-  </EuiHeaderLinks>
-);
-
-interface AppMenuResponsiveContentProps {
-  content: Record<AppMenuLayout, React.ReactNode>;
-}
-
-type AppMenuResolvedResponsiveContentProps = AppMenuResponsiveContentProps & {
-  breakpoint: EuiBreakpointSize | undefined;
-  source: AppMenuBreakpointSource;
-};
-
-const AppMenuResponsiveContent = ({
-  content,
-  breakpoint,
-  source,
-}: AppMenuResolvedResponsiveContentProps) => {
-  const layouts = source === 'application' ? APPLICATION_LAYOUTS : VIEWPORT_LAYOUTS;
-  const layout = breakpoint ? layouts[breakpoint] : 'collapsed';
-
-  return <AppMenuHeaderLinks>{content[layout]}</AppMenuHeaderLinks>;
-};
-
-const AppMenuApplicationResponsiveContent = (props: AppMenuResponsiveContentProps) => {
-  const applicationBreakpoint = useCurrentChromeApplicationBreakpoint();
-  const viewportBreakpoint = useCurrentEuiBreakpoint();
-
-  return (
-    <AppMenuResponsiveContent
-      {...props}
-      breakpoint={applicationBreakpoint ?? viewportBreakpoint}
-      source={applicationBreakpoint === undefined ? 'viewport' : 'application'}
-    />
-  );
-};
-
-const AppMenuViewportResponsiveContent = (props: AppMenuResponsiveContentProps) => {
-  const breakpoint = useCurrentEuiBreakpoint();
-
-  return <AppMenuResponsiveContent {...props} breakpoint={breakpoint} source="viewport" />;
-};
 
 export const AppMenuComponent = ({
   config,

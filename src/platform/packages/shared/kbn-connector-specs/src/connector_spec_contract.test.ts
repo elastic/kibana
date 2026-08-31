@@ -12,11 +12,10 @@ import * as connectorsSpecs from './all_specs';
 import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector_spec';
 import { ConnectorIconsMap } from './connector_icons_map';
 import { getSchemaForAuthType } from './lib';
-import { buildEventId } from './event_type_id';
+import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from './event_type_id';
 import { SPECS_ALLOWED_EVENTS } from './specs_allowed_events';
 
 const CONNECTOR_ID_PATTERN = /^\.[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/;
-const MAX_CONNECTOR_ID_LENGTH = 64;
 const allSpecs = Object.entries(connectorsSpecs) as Array<[string, ConnectorSpec]>;
 const registeredAuthTypes = Object.values(authTypeSpecs) as NormalizedAuthType[];
 
@@ -37,7 +36,7 @@ describe('connector spec contracts', () => {
     const { metadata } = spec;
 
     expect(metadata.id).toMatch(CONNECTOR_ID_PATTERN);
-    expect(metadata.id.length).toBeLessThanOrEqual(MAX_CONNECTOR_ID_LENGTH);
+    expect(metadata.id.length).toBeLessThanOrEqual(MAX_CONNECTOR_TYPE_ID_LENGTH);
     expect(metadata.displayName.trim()).not.toHaveLength(0);
     expect(metadata.description.trim()).not.toHaveLength(0);
     // supportedFeatureIds may be [] for support-only connectors (not yet feature-enabled).

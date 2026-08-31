@@ -25,7 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -49,6 +49,7 @@ import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
@@ -68,7 +69,8 @@ function convertTreeToEuiTreeViewItems(
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
   euiTheme: EuiThemeComputed,
   selectedId: string | null,
-  onSelectStepExecution: (stepExecutionId: string) => void
+  onSelectStepExecution: (stepExecutionId: string) => void,
+  onStepExpanded: (stepType: string) => void
 ): EuiTreeViewProps['items'] {
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
@@ -148,12 +150,14 @@ function convertTreeToEuiTreeViewItems(
               stepExecutionMap,
               euiTheme,
               selectedId,
-              onSelectStepExecution
+              onSelectStepExecution,
+              onStepExpanded
             )
           : undefined,
       callback:
         // collapse/expand the tree view item when the button is clicked
         () => {
+          onStepExpanded(stepType);
           let toOpen = item.stepExecutionId;
           if (!toOpen && item.children.length) {
             toOpen = item.children[0].stepExecutionId;
@@ -190,6 +194,14 @@ export const WorkflowStepExecutionTree = ({
 }: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
+  const telemetry = useTelemetry();
+
+  const handleStepExpanded = useCallback(
+    (stepType: string) => {
+      telemetry.reportWorkflowExecutionsStepExpanded({ stepType });
+    },
+    [telemetry]
+  );
 
   const failedBeforeSteps =
     execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
@@ -316,7 +328,8 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap,
       euiTheme,
       selectedId,
-      onStepExecutionClick
+      onStepExecutionClick,
+      handleStepExpanded
     );
 
     const overviewItem = items.find(

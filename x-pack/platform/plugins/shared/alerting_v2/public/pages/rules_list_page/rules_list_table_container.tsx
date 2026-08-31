@@ -24,6 +24,7 @@ import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useBulkUpdateRuleApiKey } from '../../hooks/use_bulk_update_rule_api_key';
 import { useRunRule } from '../../hooks/use_run_rule';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
+import { useRuleChangeHistoryModal } from '../../components/rule/modals/change_history';
 import { UpdateApiKeyConfirmationModal } from '../../components/rule/modals/update_api_key_confirmation_modal';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
@@ -60,6 +61,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
   const { items: contentItems, totalItems, isLoading, hasActiveQuery } = useContentListItems();
   const { pageIndex, pageSize, pageSizeOptions, setPageIndex, setPageSize } =
@@ -240,6 +242,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
         onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
         onRun={(r) => runRuleMutation.mutate({ id: r.id })}
+        onViewChangeHistory={(r) => openChangeHistory({ id: r.id, name: r.metadata.name })}
         togglingRuleId={
           toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
         }
@@ -301,6 +304,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           isLoading={updateApiKeyMutation.isLoading}
         />
       ) : null}
+      {changeHistoryModal}
     </>
   );
 };

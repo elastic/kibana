@@ -109,5 +109,13 @@ describe('createCustomContentContextAttachmentType', () => {
       });
       expect(value).not.toContain('ES|QL Query:');
     });
+
+    it('includes embeddable_id in the panel header', async () => {
+      const value = await getRepresentationValue({
+        panel_template: '<div/>',
+        embeddable_id: 'panel-xyz',
+      });
+      expect(value).toContain('embeddable_id: panel-xyz');
+    });
   });
 });

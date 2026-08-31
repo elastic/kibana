@@ -873,6 +873,83 @@ class MyPlugin {
 and [`RendererTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/renderers/type_definition.ts)
 for the full contracts.
 
+## Registering conversation template UI
+
+Conversation templates give a conversation a type: a `template_id` plus typed `metadata` fields, validated server-side. The conversation template UI registry controls what renders in the conversation metadata flyout for a given template: your plugin registers reusable tabs, and per-template definitions that reference those tabs by id.
+
+The model mirrors the attachment registry: Agent Builder owns the flyout shell, and your plugin owns the tab content. The registry is browser-only — nothing UI-related is persisted.
+
+### Browser-side registration
+
+Register tabs and template UI definitions using the `conversationTemplates` API of the `agentBuilder` plugin's start contract:
+
+```ts
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    // Register a reusable tab
+    agentBuilder.conversationTemplates.registerTab('security.entities', entitiesTabDefinition);
+
+    // Assign a display name, icon, and tabs (in render order) to a template
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+      name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
+        defaultMessage: 'Phishing Investigation',
+      }),
+      icon: 'mail',
+      tabs: ['security.entities', 'security.overview'],
+    });
+  }
+}
+```
+
+Tabs and templates register separately, so the same tab can be reused across templates. Agent Builder registers its own built-in `attachments` and `timeline` tabs through this same API (from the `agentBuilderPlatform` plugin).
+
+### Complete example
+
+```tsx
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
+import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
+
+// Tab content must be self-contained: capture the services you need in a closure at
+// registration and mount your own providers inside `content`. The flyout can render
+// outside any KibanaContextProvider, so ambient context (useKibana() etc.) is not available OOTB.
+const createOverviewTab = (core: CoreStart): ConversationTemplateTabDefinition => ({
+  label: i18n.translate('xpack.securitySolution.conversationTabs.overviewLabel', {
+    defaultMessage: 'Overview',
+  }),
+  // A React component receiving the full conversation. It may use hooks.
+  content: ({ conversation }) => (
+    <SecurityProviders core={core}>
+      <OverviewView templateId={conversation.template_id} metadata={conversation.metadata} />
+    </SecurityProviders>
+  ),
+});
+
+class SecurityPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    agentBuilder.conversationTemplates.registerTab('security.overview', createOverviewTab(core));
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', {
+      name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
+        defaultMessage: 'Phishing Investigation',
+      }),
+      icon: 'mail',
+      tabs: ['security.overview'],
+    });
+  }
+}
+```
+
+### Rules
+
+- **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.
+- **Naming**: Tab ids are a global keyspace. Always prefix them with your plugin name (`security.overview`). `attachments` and `timeline` are reserved for Agent Builder's built-in tabs.
+- **Duplicates**: Registering a duplicate tab id or template id throws.
+- **Resolution**: Tab ids resolve when the flyout opens, so registration order across plugins does not matter. Ids with no registered tab are skipped. Templates with no registered UI definition fall back to the built-in tabs.
+- **Ordering**: Template tabs render in array order. The built-in tabs always render after them.
+
+Refer to [`ConversationTemplateServiceStartContract`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-browser/templates/contract.ts) for the full contract.
+
 ## Chat integration and pending attachments
 
 Plugins can integrate with the active chat surface (the embeddable sidebar and the full-page routed chat) through the `agentBuilder` start contract.
@@ -1212,17 +1289,18 @@ attach them to a conversation.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
-   the data index, filtering by the user's current space and checking Kibana
-   privileges against each result's `permissions` array.
+   the data index with an authorization filter that binds space and action
+   together — a user must hold every action one of the entry's space groups
+   requires, within that single space.
 4. **Attach**: When the AI agent calls `sml_attach` with `entry_ids`, the service loads each entry, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 
 - The crawler runs with **internal credentials** (`asInternalUser`) — it indexes
   content from all spaces.
-- Access control is enforced at **query time**: results are filtered by space
-  and by Kibana feature privileges (the `permissions` your optional
-  `getPermissions` hook returns).
+- Access control is enforced at **query time**: results are filtered by the
+  Kibana actions your optional `getPermissions` hook returns, scoped to the
+  space the entry lives in.
 
 ---
 
@@ -1235,7 +1313,7 @@ Create a file in your plugin (e.g.
 
 ```typescript
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 
 export const myAssetSmlType: SmlTypeDefinition = {
   // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
@@ -1288,12 +1366,12 @@ export const myAssetSmlType: SmlTypeDefinition = {
     }
   },
 
-  // Optional: compute the permissions that gate access to the entry.
+  // Optional: compute the actions that gate access to the entry.
   // Omit for resources that are intentionally public within the space.
-  // Prefer `kibanaSavedObjectPermissions` for saved-object-backed types
-  // instead of hand-writing the privilege string.
-  getPermissions: () =>
-    kibanaSavedObjectPermissions({ savedObjectType: 'my-saved-object-type' }),
+  // Prefer `kibanaPermissions` instead of hand-writing the action string. The
+  // `kiType` is your SML type id, and it MUST match the KI type your feature
+  // declares in `aiIndex: { read: [...] }`.
+  getPermissions: () => kibanaPermissions({ kiType: 'my-sml-type' }),
 
   // Convert an SML document back into a conversation attachment.
   // Called when the AI agent wants to "attach" a search result.
@@ -1351,16 +1429,26 @@ all spaces. The crawler indexes everything; access control happens at query time
 many panels is still a single entry — its panel titles just become part of
 `content`, as in the example above).
 
-The optional `getPermissions` hook returns the Kibana saved object privileges
-required to access the underlying asset. Common patterns:
+The optional `getPermissions` hook returns the Kibana actions required to access the
+underlying asset. Every SML type uses the same helper, whatever backs it:
 
-- `kibanaSavedObjectPermissions({ savedObjectType: 'lens' })` for Lens visualizations
-- `kibanaSavedObjectPermissions({ savedObjectType: 'dashboard' })` for dashboards
-- `kibanaSavedObjectPermissions({ savedObjectType: 'search' })` for saved searches
+- `kibanaPermissions({ kiType: 'visualization' })` for Lens visualizations
+- `kibanaPermissions({ kiType: 'dashboard' })` for dashboards
+- `kibanaPermissions({ kiType: 'workflow' })` for workflows
 
-Users without the listed privileges won't see the item in `sml_search` results.
-Omit `getPermissions` only when the resource is intentionally public within
-the space.
+Each call produces one action, `ai_index:<kiType>/read`. Two things to get right:
+
+- **`kiType` is your SML type id**, not the saved object type or index name backing it.
+- **Your feature must grant that action**, by declaring `aiIndex: { read: ['<kiType>'] }` on
+  the privilege that should confer read access (see `FeatureKibanaPrivileges`). If the two
+  disagree, the action you stamp is one no privilege ever grants, and every entry of your type
+  silently disappears from every user's results.
+
+Users without the action won't see the item in `sml_search` results. Omit
+`getPermissions` only when the resource is intentionally public within the space.
+
+You return actions only. The indexer groups them per space into the stored
+`{ space, name[], count }` shape — never construct that yourself.
 
 ##### `toAttachment()` — Resolving saved objects
 
@@ -1393,7 +1481,7 @@ The visualization SML type is registered in
 It:
 - Lists all `lens` saved objects across all spaces
 - Extracts title, description, chart type, and ES|QL query as searchable content
-- Sets `permissions: { kibana: { privileges: [{ name: 'saved_object:lens/get' }] }, elasticsearch: { indices: [] } }`
+- Gates access on the `ai_index:visualization/read` action, via `kibanaPermissions({ kiType: VISUALIZATION_SML_TYPE })`
 - Converts results back to Lens API format for the attachment renderer
 - Uses a 1-hour crawl interval
 

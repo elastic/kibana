@@ -14,7 +14,6 @@ export {
   getSampleDocuments,
   getSampleDocumentsEsql,
 } from './src/tools/describe_dataset/get_sample_documents';
-export { getDiverseSampleDocuments } from './src/tools/describe_dataset/get_diverse_sample_documents';
 export type {
   DocumentAnalysis,
   FormattedDocumentAnalysis,
@@ -41,5 +40,10 @@ export {
   getEsqlDocumentId,
   type EsqlSourceDocument,
 } from './src/utils/parse_esql_source_documents';
+export {
+  categorizeWithNoiseExclusion,
+  columnPath,
+  type CategorizeWithSampleRow,
+} from './src/utils/esql_categorize';
 
 export { executeAsEsqlAgent } from './src/tools/esql';

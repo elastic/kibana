@@ -125,6 +125,7 @@ describe('Spaces plugin', () => {
       const licensing = licensingMock.createSetup();
       const cps = {
         getCpsEnabled: jest.fn().mockReturnValue(false),
+        isTierEligible: jest.fn().mockResolvedValue(false),
       };
 
       const plugin = new SpacesPlugin(initializerContext);
@@ -140,6 +141,7 @@ describe('Spaces plugin', () => {
       const licensing = licensingMock.createSetup();
       const cps = {
         getCpsEnabled: jest.fn().mockReturnValue(true),
+        isTierEligible: jest.fn().mockResolvedValue(true),
       };
 
       const plugin = new SpacesPlugin(initializerContext);
@@ -202,6 +204,7 @@ describe('Spaces plugin', () => {
       const licensing = licensingMock.createSetup();
       const cpsSetup = {
         getCpsEnabled: jest.fn().mockReturnValue(true),
+        isTierEligible: jest.fn().mockResolvedValue(true),
       };
 
       const plugin = new SpacesPlugin(initializerContext);

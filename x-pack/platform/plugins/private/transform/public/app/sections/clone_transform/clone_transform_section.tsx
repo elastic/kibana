@@ -13,7 +13,8 @@ import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { TransformConfigUnion } from '../../../../common/types/transform';
 
@@ -138,16 +139,14 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
       <EuiPageTemplate.Section data-test-subj="transformPageCloneTransform" paddingSize={'none'}>
         {typeof errorMessage !== 'undefined' ? (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18n.translate('xpack.transform.clone.errorPromptTitle', {
                 defaultMessage: 'An error occurred getting the transform configuration.',
               })}
-              color="danger"
-              iconType="warning"
             >
               <pre>{JSON.stringify(errorMessage)}</pre>
-            </EuiCallOut>
+            </KbnDangerCallout>
             <EuiSpacer size="l" />
           </>
         ) : null}

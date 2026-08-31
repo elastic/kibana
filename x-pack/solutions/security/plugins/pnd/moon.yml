@@ -29,8 +29,10 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'
-  - '@kbn/react-kibana-context-theme'
   - '@kbn/core-http-browser'
+  - '@kbn/ui-callout'
+  - '@kbn/app-header'
+  - '@kbn/deeplinks-security'
   - '@kbn/spaces-plugin'
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
@@ -38,6 +40,7 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/logging-mocks'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod

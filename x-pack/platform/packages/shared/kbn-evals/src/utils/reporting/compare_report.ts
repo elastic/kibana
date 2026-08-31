@@ -7,7 +7,7 @@
 
 import chalk from 'chalk';
 import { table } from 'table';
-import type { PairedTTestResult } from '@kbn/evals-common';
+import type { Direction, PairedTTestResult } from '@kbn/evals-common';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 
@@ -22,17 +22,19 @@ function formatNumber(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '-';
 }
 
-function formatDifference(value: number): string {
+function formatDifference(value: number, direction: Direction): string {
   if (!Number.isFinite(value)) {
     return chalk.gray('-');
   }
-  if (value > 0) {
-    return chalk.green(`+${value.toFixed(2)}`);
+
+  const formatted = value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
+
+  if (value === 0 || direction === 'neutral') {
+    return formatted;
   }
-  if (value < 0) {
-    return chalk.red(value.toFixed(2));
-  }
-  return value.toFixed(2);
+
+  const improved = direction === 'maximize' ? value > 0 : value < 0;
+  return improved ? chalk.green(formatted) : chalk.red(formatted);
 }
 
 function buildTableConfig(columnCount: number): {
@@ -75,7 +77,15 @@ export function formatPairedTTestReport({
     (result) => result.pValue !== null && result.pValue < significanceThreshold
   ).length;
 
-  const tableHeaders = ['Evaluator', 'N', 'Mean A', 'Mean B', 'Diff', 'p-value', 'Significant'];
+  const tableHeaders = [
+    'Evaluator',
+    'N',
+    'Mean (target)',
+    'Mean (baseline)',
+    'Diff',
+    'p-value',
+    'Significant',
+  ];
   const rowsByDataset = new Map<string, string[][]>();
 
   sortedResults.forEach((result) => {
@@ -94,7 +104,7 @@ export function formatPairedTTestReport({
       result.sampleSize.toString(),
       formatNumber(result.meanA),
       formatNumber(result.meanB),
-      formatDifference(delta),
+      formatDifference(delta, result.direction),
       formatPValue(result.pValue),
       significanceLabel,
     ]);
@@ -102,8 +112,8 @@ export function formatPairedTTestReport({
   });
 
   const header = [
-    `Experiment A: ${experimentIdA}`,
-    `Experiment B: ${experimentIdB}`,
+    `Target: ${experimentIdA}`,
+    `Baseline: ${experimentIdB}`,
     `Significance threshold: p < ${significanceThreshold}`,
   ];
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;

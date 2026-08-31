@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -22,12 +21,14 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { regionKey, isPolicyMode } from '../../utils/eis_utils';
 import { useManageRegionsState } from './use_manage_regions_state';
 import { ConfirmRegionChangeModal } from './confirm_region_change_modal';
+import { ConfirmRegionSelectionModal } from './confirm_region_selection_modal';
 import { ConfirmDeleteRegionPolicyModal } from './confirm_delete_region_policy_modal';
 import { GeoTabContent } from './geo_tab_content';
 import { RegionsTabContent } from './regions_tab_content';
@@ -54,6 +55,8 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     isCallOutDismissed,
     showConfirmation,
     showDeleteConfirmation,
+    conflictArtifacts,
+    isRedesignEnabled,
     useCustomPolicy,
     setActiveTab,
     setUseCustomPolicy,
@@ -108,6 +111,8 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     : handleCancelConfirmation;
   const showTabContent = useCustomPolicy || isLoading;
   const showCallOut = useCustomPolicy && !isCallOutDismissed;
+  const showRedesignConfirmation = showConfirmation && isRedesignEnabled;
+  const showLegacyConfirmation = showConfirmation && !isRedesignEnabled;
 
   return (
     <>
@@ -127,23 +132,21 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
 
         <EuiModalBody>
           {isError && (
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount={false}
               title={i18n.translate(
                 'xpack.searchInferenceEndpoints.manageRegions.errorCallout.title',
                 { defaultMessage: 'Failed to load region data' }
               )}
-              color="danger"
-              iconType="error"
               data-test-subj="manageRegionsErrorCallout"
-            >
-              <p>
-                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.errorCallout.body', {
+              text={i18n.translate(
+                'xpack.searchInferenceEndpoints.manageRegions.errorCallout.body',
+                {
                   defaultMessage:
                     'An error occurred while fetching region or policy data. To try again, close and reopen this panel.',
-                })}
-              </p>
-            </EuiCallOut>
+                }
+              )}
+            />
           )}
           {isError && <EuiSpacer size="m" />}
 
@@ -172,24 +175,19 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
 
           {showCallOut && <EuiSpacer size="m" />}
           {showCallOut && (
-            <EuiCallOut
+            <KbnWarningCallout
               title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.title', {
                 defaultMessage: "Some models aren't available in every region.",
               })}
-              color="warning"
-              iconType="warning"
               announceOnMount={false}
               onDismiss={handleDismissCallOut}
               dismissButtonProps={{ 'data-test-subj': 'manageRegionsCalloutDismiss' }}
               data-test-subj="manageRegionsCallout"
-            >
-              <p>
-                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
-                  defaultMessage:
-                    "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
-                })}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
+                defaultMessage:
+                  "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
+              })}
+            />
           )}
 
           {showTabContent && <EuiSpacer size="m" />}
@@ -227,7 +225,18 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         </EuiModalFooter>
       </EuiModal>
 
-      {showConfirmation && (
+      {showRedesignConfirmation && (
+        <ConfirmRegionSelectionModal
+          mode={activeTab}
+          selectedRegions={filteredRegions}
+          selectedGeos={[...geoTab.checkedGeos]}
+          conflictArtifacts={conflictArtifacts}
+          onConfirm={handleConfirmSave}
+          onCancel={handleCancelConfirmation}
+          isSaving={isSaving}
+        />
+      )}
+      {showLegacyConfirmation && (
         <ConfirmRegionChangeModal
           mode={activeTab}
           selectedRegions={filteredRegions}

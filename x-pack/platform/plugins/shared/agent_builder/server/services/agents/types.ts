@@ -10,6 +10,7 @@ import type {
   BuiltInAgentDefinition,
   AgentTypeDefinition,
   AgentAvailabilityConfig,
+  AgentBaseConfiguration,
 } from '@kbn/agent-builder-server/agents';
 import type {
   AgentConfiguration,
@@ -51,6 +52,10 @@ export interface AgentsServiceStart {
     agent: AgentDefinition;
     request: KibanaRequest;
   }) => Promise<AgentConfiguration>;
+  resolveAgentBaseConfiguration: (opts: {
+    agentType: string;
+    request: KibanaRequest;
+  }) => Promise<AgentBaseConfiguration | undefined>;
   removeToolRefsFromAgents: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   getAgentsUsingTools: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   removePluginRefsFromAgents: (params: PluginRefsParams) => Promise<AgentsUsingToolsResult>;

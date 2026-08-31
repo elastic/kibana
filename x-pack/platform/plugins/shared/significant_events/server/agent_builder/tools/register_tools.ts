@@ -18,10 +18,6 @@ import { createEventTool } from './event_create/tool';
 import { createEventStatusUpdateTool } from './event_status_update/tool';
 import { createEventInvestigationAttachTool } from '../../memory_and_investigation/tools/event_investigation_attach/tool';
 import { createEventsWriteTool } from './event_write/tool';
-import {
-  createInvestigationProgressReportTool,
-  SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
-} from '../../memory_and_investigation/tools/investigation_progress_report/tool';
 export {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID,
@@ -31,7 +27,6 @@ export {
   SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
   SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
 } from './tool_ids';
-export { SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID };
 
 export function registerAgentBuilderTools({
   agentBuilder,
@@ -98,10 +93,6 @@ export function registerAgentBuilderTools({
       server,
       logger: logger.get('events_write_tool'),
       telemetry,
-    }),
-    createInvestigationProgressReportTool({
-      server,
-      logger: logger.get('investigation_progress_report_tool'),
     }),
   ];
 

@@ -27,7 +27,7 @@ import {
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 
-// The top nav reads chrome via context hooks (`useChromeStyle`/`useIsNextChrome`), so render inside
+// The top nav reads chrome via context hooks (`useChromeStyle`), so render inside
 // the chrome provider just like production. The mock defaults to classic chrome (legacy header mode).
 const renderWithChrome = (ui: React.ReactElement) =>
   renderWithI18n(coreServices.chrome.withProvider(ui));

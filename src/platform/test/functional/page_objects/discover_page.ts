@@ -395,8 +395,12 @@ export class DiscoverPageObject extends FtrService {
 
   public async getBreakdownFieldValue() {
     const breakdownButton = await this.testSubjects.find('unifiedHistogramBreakdownSelectorButton');
+    const visibleText = await breakdownButton.getVisibleText();
 
-    return breakdownButton.getVisibleText();
+    // The button label truncates long field names via an absolutely positioned
+    // overlay, which the browser's visible-text computation renders as if it
+    // were on its own line. Collapse that whitespace since it isn't visible on screen.
+    return visibleText.replace(/\s+/g, ' ').trim();
   }
 
   public async chooseBreakdownField(field: string, value?: string) {
@@ -987,21 +991,32 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async assertViewModeToggleNotExists() {
-    await this.testSubjects.missingOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+    await this.testSubjects.missingOrFail('dscViewModeToggleButton', { timeout: 2 * 1000 });
   }
 
   public async assertViewModeToggleExists() {
-    await this.testSubjects.existOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+    await this.testSubjects.existOrFail('dscViewModeToggleButton', { timeout: 2 * 1000 });
   }
 
   public async assertFieldStatsTableNotExists() {
     await this.testSubjects.missingOrFail('dscFieldStatsEmbeddedContent', { timeout: 2 * 1000 });
   }
 
+  /**
+   * Opens the view mode selector dropdown and selects the option with the given test subject
+   * (one of `dscViewModeDocumentOption`, `dscViewModePatternAnalysisOption`, `dscViewModeFieldStatsOption`).
+   */
+  public async selectViewMode(optionTestSubject: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.click('dscViewModeToggleButton');
+      await this.testSubjects.existOrFail('dscViewModeToggleSelectable');
+    });
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(optionTestSubject);
+  }
+
   public async clickViewModeFieldStatsButton() {
     await this.retry.tryForTime(2 * 1000, async () => {
-      await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('dscViewModeFieldStatsButton');
+      await this.selectViewMode('dscViewModeFieldStatsOption');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
   }

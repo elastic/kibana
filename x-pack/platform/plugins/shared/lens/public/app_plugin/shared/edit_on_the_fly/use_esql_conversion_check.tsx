@@ -24,12 +24,10 @@ import type { CoreStart } from '@kbn/core/public';
 import {
   generateEsqlQuery,
   isEsqlQuerySuccess,
-  type ColumnRoles,
-} from '../../../datasources/form_based/generate_esql_query';
-import {
   esqlConversionFailureReasonMessages,
   getFailureTooltip,
-} from '../../../datasources/form_based/to_esql_failure_reasons';
+  type ColumnRoles,
+} from '@kbn/lens-common';
 import type { ConvertibleLayer } from './esql_conversion_types';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';

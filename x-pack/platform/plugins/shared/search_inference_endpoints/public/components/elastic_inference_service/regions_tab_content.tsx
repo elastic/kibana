@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiCallOut, EuiEmptyPrompt, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RegionSelectionToolbar } from './region_selection_toolbar';
@@ -68,23 +69,18 @@ export const RegionsTabContent: React.FC<RegionsTabContentProps> = ({
   if (totalRegions === 0) {
     if (isError) return null;
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         css={tabContentStyles}
         announceOnMount
         title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noRegions.title', {
           defaultMessage: 'No regions available',
         })}
-        color="warning"
-        iconType="warning"
         data-test-subj="manageRegionsNoRegions"
-      >
-        <p>
-          {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noRegions.description', {
-            defaultMessage:
-              'No region information is available for the current Elastic Inference Service endpoints.',
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noRegions.description', {
+          defaultMessage:
+            'No region information is available for the current Elastic Inference Service endpoints.',
+        })}
+      />
     );
   }
 

@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import {
+  extendPlaywrightPage,
+  KibanaCodeEditorWrapper,
+  QueryBar,
+  ContentListWrapper,
+  type KibanaUrl,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ContentListWrapper } from '@kbn/scout';
-import type { Locator, ScoutPage } from '@kbn/scout';
 import type { LensPageObjects } from './page_objects';
 import {
   DATA_VIEW_ID,
   FORMULA_ESCAPED_RUNTIME_FIELD,
   KBN_ARCHIVE_PATHS,
   LOGSTASH_IN_RANGE_DATES,
-} from './constants';
+} from '../../fixtures/constants';
+import type { ImportedSavedObject } from './saved_object_helpers';
 
+export type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
 /**
  * Creates an ad hoc (temporary) data view from the Lens data panel switcher.
  * Equivalent to FTR `dataViews.createFromSearchBar({ name, adHoc: true })` in the Lens context.
@@ -127,6 +135,66 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
   if (shouldClickMenu) {
     await csvMenuItem.click();
   }
+
+  // FTR `closeExportFlyout` — dismiss leftover export UI so the editor stays interactive.
+  await page.keyboard.press('Escape');
+  await expect(page.testSubj.locator('exportFlyoutCloseButton')).toBeHidden();
+  await expect(page.testSubj.locator('exportPopoverPanel')).toBeHidden();
+}
+
+type LensCsvContent = Record<string, { content: string; type: string }>;
+
+/** Reads `window.ELASTIC_LENS_CSV_CONTENT` when CSV download debug is enabled. */
+export async function getLensCsvContent(page: ScoutPage): Promise<LensCsvContent | undefined> {
+  return page.evaluate(
+    () =>
+      (
+        window as Window & {
+          ELASTIC_LENS_CSV_CONTENT?: LensCsvContent;
+        }
+      ).ELASTIC_LENS_CSV_CONTENT
+  );
+}
+
+/** Waits until CSV debug content has at least `minLayers` keys, then returns it. */
+export async function waitForLensCsvContent(
+  page: ScoutPage,
+  minLayers: number
+): Promise<LensCsvContent> {
+  let content: LensCsvContent | undefined;
+  await expect
+    .poll(async () => {
+      content = await getLensCsvContent(page);
+      return content && Object.keys(content).length >= minLayers;
+    })
+    .toBe(true);
+  if (!content) {
+    throw new Error(`Expected at least ${minLayers} CSV layer(s)`);
+  }
+  return content;
+}
+
+/**
+ * Opens a Lens share URL in a new tab and waits for the app + chart to mount.
+ * Caller must close the returned page (use `try`/`finally`).
+ */
+export async function openSharedLensUrl(options: {
+  context: { newPage: () => Promise<PlaywrightPage> };
+  kbnUrl: KibanaUrl;
+  url: string;
+  chartTestSubj?: string;
+}): Promise<{ page: ScoutPage; queryBar: QueryBar }> {
+  const { context, kbnUrl, url, chartTestSubj = 'xyVisChart' } = options;
+  const sharedPage = extendPlaywrightPage({
+    page: await context.newPage(),
+    kbnUrl,
+  });
+  await sharedPage.goto(url);
+  await sharedPage.testSubj.locator('lnsApp').waitFor({ state: 'visible' });
+  await sharedPage
+    .locator(`[data-test-subj="lnsWorkspace"] [data-test-subj="${chartTestSubj}"]`)
+    .waitFor({ state: 'visible' });
+  return { page: sharedPage, queryBar: new QueryBar(sharedPage) };
 }
 
 // Uses Lens-editor-only methods (e.g. `inlineEditor`, `convertToEsqlButton`), so this is
@@ -214,8 +282,8 @@ export async function enableElasticChartDebug(context: ElasticChartDebugContext)
 /**
  * Creates a space-scoped Logstash data view + common uiSettings so Visualize/Lens
  * do not redirect to the "no data views" empty state.
- * Returns `beforeEach` that logs in and opens an empty Lens editor (same shape as
- * `createOpenInLensSuiteSetup`).
+ * Returns `beforeEach` that logs in and opens an empty Lens editor with `_g` time
+ * already in the URL (same shape as `createOpenInLensSuiteSetup`).
  */
 export function createLogstashLensEditorSuiteSetup(options?: {
   timeRange?: { from: string; to: string };
@@ -242,10 +310,13 @@ export function createLogstashLensEditorSuiteSetup(options?: {
   const skipEmptyLensOpen = options?.skipEmptyLensOpen ?? false;
   let storedDataViewId: string | undefined;
 
-  const beforeAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
-    if (loadLensArchives) {
-      await scoutSpace.savedObjects.load(KBN_ARCHIVE_PATHS.LENS_BASIC);
-    }
+  const beforeAll = async ({
+    scoutSpace,
+    apiServices,
+  }: LogstashSpaceSetupContext): Promise<ImportedSavedObject[]> => {
+    const importedSavedObjects = loadLensArchives
+      ? await scoutSpace.savedObjects.load(KBN_ARCHIVE_PATHS.LENS_BASIC)
+      : [];
 
     // Name matches title so Lens data-view switcher rows resolve as `dataView-logstash-*`.
     const { data: dataView } = await apiServices.dataViews.create({
@@ -274,6 +345,8 @@ export function createLogstashLensEditorSuiteSetup(options?: {
         to: timeRange.to,
       }),
     });
+
+    return importedSavedObjects;
   };
 
   const beforeEach = async ({
@@ -290,7 +363,7 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     if (skipEmptyLensOpen) {
       return;
     }
-    await openEmptyLensEditor(pageObjects);
+    await openEmptyLensEditor(pageObjects, { timeRange });
   };
 
   const afterAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
@@ -301,17 +374,38 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     await scoutSpace.savedObjects.cleanStandardList();
   };
 
-  return { beforeAll, beforeEach, afterAll, openEmptyLensEditor };
+  const openEmptyLensEditorForSuite = async (
+    pageObjects: Pick<LensPageObjects, 'lens'>
+  ): Promise<void> => {
+    await openEmptyLensEditor(pageObjects, { timeRange });
+  };
+
+  const getDataViewId = (): string => {
+    if (!storedDataViewId) {
+      throw new Error('Logstash data view has not been created');
+    }
+    return storedDataViewId;
+  };
+
+  return {
+    beforeAll,
+    beforeEach,
+    afterAll,
+    openEmptyLensEditor: openEmptyLensEditorForSuite,
+    getDataViewId,
+  };
 }
 
-/** Opens a fresh empty Lens editor (URL navigation resets stale Visualize/Lens state). */
+/**
+ * Opens a fresh empty Lens editor with `_g` time already in the URL hash.
+ * Defaults to {@link LOGSTASH_IN_RANGE_DATES}. Pass `timeRange` when the suite uses a
+ * different window — sync will not replace an existing `_g` from uiSettings.
+ */
 export async function openEmptyLensEditor(
-  pageObjects: Pick<LensPageObjects, 'visualize' | 'lens'>
+  pageObjects: Pick<LensPageObjects, 'lens'>,
+  options?: { timeRange?: { from: string; to: string } }
 ): Promise<void> {
-  await pageObjects.visualize.goto();
-  await pageObjects.visualize.openNewVisualizationWizard();
-  await pageObjects.visualize.clickVisType('lens');
-  await pageObjects.lens.waitForLensApp();
+  await pageObjects.lens.workspace.openEmptyEditor(options?.timeRange ?? LOGSTASH_IN_RANGE_DATES);
 }
 
 export async function openDimensionEditorAndWaitForFlyout(
@@ -379,4 +473,19 @@ export async function convertToEsqlViaModal({
   await expect(lens.workspace.convertToEsqlButton).toBeHidden();
   await expect(page.getByTestId('ESQLEditor')).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();
+}
+
+/**
+ * Builds a new legacy-metric Lens vis (average of bytes).
+ * Opens the Lens editor directly — the Visualize listing bootstrap is not under test.
+ */
+export async function createNewLens({ lens }: Pick<LensPageObjects, 'lens'>): Promise<void> {
+  await openEmptyLensEditor({ lens });
+  await lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'average',
+    field: 'bytes',
+  });
+  await lens.switchToVisualization('lnsLegacyMetric', { search: 'legacy' });
+  await lens.waitForVisualization('legacyMtrVis');
 }

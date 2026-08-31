@@ -83,7 +83,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                         </span>
                       </EuiToolTip>
                     ),
-                    description: formatAgentCPU(agent.metrics, agentPolicy),
+                    description: formatAgentCPU(agent.metrics, agentPolicy, agent),
                   },
                   {
                     title: (
@@ -105,7 +105,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                         </span>
                       </EuiToolTip>
                     ),
-                    description: formatAgentMemory(agent.metrics, agentPolicy),
+                    description: formatAgentMemory(agent.metrics, agentPolicy, agent),
                   },
                 ].map(({ title, description }) => {
                   const tooltip =

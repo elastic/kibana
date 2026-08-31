@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { MOCK_INVESTIGATIONS, MOCK_MANAGED_WATCHES, MOCK_PROPOSALS } from '../samples';
+import {
+  MOCK_INVESTIGATIONS,
+  MOCK_PROPOSALS,
+  SKILLS_SEED,
+  WATCHES_SEED,
+  WORKERS_SEED,
+} from '../samples';
 import type { Investigation, Proposal, Watch } from '.';
 import {
   GetInvestigationResponse,
@@ -13,22 +19,64 @@ import {
   ListInvestigationProposalsResponse,
   ListInvestigationsResponse,
   ListWatchesResponse,
+  WatchSkill,
+  WatchWorker,
 } from '.';
 
 describe('PND schema smoke tests', () => {
-  it('parses mock watches through ListWatchesResponse', () => {
-    const result = ListWatchesResponse.parse({ watches: MOCK_MANAGED_WATCHES });
-    expect(result.watches).toHaveLength(4);
+  it('parses seed watches through ListWatchesResponse', () => {
+    const result = ListWatchesResponse.parse({ watches: WATCHES_SEED });
+    expect(result.watches).toHaveLength(5);
     result.watches.forEach((watch: Watch) => {
       expect(watch.tags).toContain('watch');
       expect(watch.managed).toBe(true);
     });
   });
 
-  it('parses individual mock watches through GetWatchResponse', () => {
-    for (const watch of MOCK_MANAGED_WATCHES) {
-      const result = GetWatchResponse.parse({ watch });
+  it('parses individual seed watches through GetWatchResponse', () => {
+    for (const watch of WATCHES_SEED) {
+      const result = GetWatchResponse.parse({ watch, settingsRevision: null });
       expect(result.watch.id).toBe(watch.id);
+    }
+  });
+
+  it('parses seed workers through WatchWorker', () => {
+    for (const { lastRunSecondsAgo, ...rest } of WORKERS_SEED) {
+      const result = WatchWorker.parse({
+        ...rest,
+        lastRun: lastRunSecondsAgo == null ? null : new Date().toISOString(),
+      });
+      expect(result.watchIds.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('parses seed skills through WatchSkill', () => {
+    for (const { lastRunSecondsAgo, ...rest } of SKILLS_SEED) {
+      const result = WatchSkill.parse({
+        ...rest,
+        lastRun: lastRunSecondsAgo == null ? null : new Date().toISOString(),
+      });
+      expect(result.watchIds.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('keeps worker watch ids within the managed catalog', () => {
+    const watchIds = new Set(WATCHES_SEED.map(({ id }) => id));
+
+    for (const worker of WORKERS_SEED) {
+      for (const watchId of worker.watchIds) {
+        expect(watchIds).toContain(watchId);
+      }
+    }
+  });
+
+  it('keeps skill watch ids within the managed catalog', () => {
+    const watchIds = new Set(WATCHES_SEED.map(({ id }) => id));
+
+    for (const skill of SKILLS_SEED) {
+      for (const watchId of skill.watchIds) {
+        expect(watchIds).toContain(watchId);
+      }
     }
   });
 

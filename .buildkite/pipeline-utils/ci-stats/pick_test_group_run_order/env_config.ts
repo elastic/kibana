@@ -90,6 +90,10 @@ export function loadRunOrderConfig() {
 
     // set by common/env.sh for merge-queue (gh-readonly-queue/*) builds
     mergeQueueMergeBase: process.env.MERGE_QUEUE_MERGE_BASE || undefined,
+
+    allowZeroConfigMatches: ['true', 'yes', '1'].includes(
+      process.env.ALLOW_ZERO_JEST_OR_FTR_CONFIGS?.toLowerCase() || 'false'
+    ),
   } as const;
 }
 

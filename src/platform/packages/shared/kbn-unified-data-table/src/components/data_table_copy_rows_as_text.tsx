@@ -33,7 +33,7 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
   onCompleted,
 }) => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const { valueToStringConverter, dataView, selectedDocsState } =
+  const { valueToStringConverter, dataView, selectedDocsState, documentsDisplayMode } =
     useContext(UnifiedDataTableContext);
   const { isDocSelected } = selectedDocsState;
 
@@ -50,8 +50,9 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
         setIsProcessing(true);
 
         const outputColumns = columns.reduce((acc, column) => {
-          if (column === '_source') {
-            // split Document column into individual columns
+          // In summary mode the _source column is expanded into its individual fields; in JSON mode
+          // it stays a single column so the whole document is copied as JSON.
+          if (column === '_source' && documentsDisplayMode !== 'json') {
             const fieldCounts = calcFieldCounts(rows);
             acc.push(...Object.keys(fieldCounts).sort());
             return acc;
@@ -73,6 +74,7 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
           valueToStringConverter,
           toastNotifications,
           dataView,
+          documentsDisplayMode,
         });
         setIsProcessing(false);
         onCompleted();

@@ -1,8 +1,7 @@
 {
-  "sha1": "0ee513a400725afb71170c29e7f0a163a59be20d",
+  "sha1": "1fdc51b8ab09fba8b5b212047a092927fd40a598",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -488,12 +487,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_rule_creation.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 10
       }
     },

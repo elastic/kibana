@@ -24,7 +24,7 @@ import type {
   ElasticsearchClientConfig,
   AsScopedOptions,
 } from '@kbn/core-elasticsearch-server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isExternalUiamCredential } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
@@ -208,6 +208,7 @@ export class ClusterClient implements ICustomClusterClient {
   private getScopedHeaders(request: ScopeableRequest): Headers {
     let scopedHeaders: Headers;
     let requestHeaders: Headers | undefined;
+    let isExternalCredential = false;
     if (isRealRequest(request)) {
       requestHeaders = ensureRawRequest(request).headers ?? {};
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
@@ -219,6 +220,11 @@ export class ClusterClient implements ICustomClusterClient {
         ...authHeaders,
       };
     } else {
+      // Fake requests carrying a user-created (external) UIAM API key are marked by their
+      // builder: UIAM rejects external keys presented with client authentication, so the shared
+      // secret must not be attached to them. The marker is bound to the request object rather than
+      // its headers, so it cannot reach Elasticsearch or be supplied by an inbound request.
+      isExternalCredential = isKibanaRequest(request) && isExternalUiamCredential(request);
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }
 
@@ -233,7 +239,10 @@ export class ClusterClient implements ICustomClusterClient {
         this.security.uiam.getElasticsearchClientAuthentication(
           requestHeaders
             ? { credentialSource: 'inbound', credential, requestHeaders }
-            : { credentialSource: 'internal', credential }
+            : {
+                credentialSource: isExternalCredential ? 'external' : 'internal',
+                credential,
+              }
         );
     }
 
@@ -259,9 +268,13 @@ export class ClusterClient implements ICustomClusterClient {
     // Use `internal` regardless of the request shape: unlike `getScopedHeaders`, this never reads a
     // credential off the wire. For a real request it takes the auth provider's post-authentication
     // headers (Kibana already vouched for that credential), and for a fake one the credential was
-    // minted by Kibana itself, so neither needs an attestation to be trusted.
+    // minted by Kibana itself, so neither needs an attestation to be trusted. The exception is a
+    // fake request explicitly marked as carrying a user-created (external) UIAM credential, which
+    // UIAM rejects when presented with client authentication.
+    const isExternalCredential =
+      !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
     const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication({
-      credentialSource: 'internal',
+      credentialSource: isExternalCredential ? 'external' : 'internal',
       credential: authorizationHeader,
     });
 

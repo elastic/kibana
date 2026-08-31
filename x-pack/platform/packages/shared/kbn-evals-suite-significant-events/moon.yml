@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/streamlang'
   - '@kbn/significant-events-plugin'
   - '@kbn/repo-info'
+  - '@kbn/test'
 tags:
   - functional-tests
   - package

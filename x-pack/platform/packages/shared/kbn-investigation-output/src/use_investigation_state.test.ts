@@ -40,8 +40,21 @@ const validState = { summary: 'ok', hypotheses: [] };
 
 const completedExecutionWithOutput = (output: unknown) => ({
   status: 'completed',
-  stepExecutions: [{ stepId: 'investigate', output }],
+  stepExecutions: [{ stepId: 'investigate', stepType: 'ai.agent', output }],
 });
+
+/**
+ * What the engine actually persists for a step declaring a `timeout` (the `investigate` step
+ * does): a synthetic `step_level_timeout` wrapper step execution sharing the `stepId`, recorded
+ * before the real `ai.agent` one and carrying no output of its own.
+ */
+const withTimeoutWrapper = (
+  agentStep: Record<string, unknown>,
+  wrapperStep: Record<string, unknown> = {}
+) => [
+  { stepId: 'investigate', stepType: 'step_level_timeout', output: null, ...wrapperStep },
+  { stepId: 'investigate', stepType: 'ai.agent', ...agentStep },
+];
 
 const progressEvent = (state: unknown) => ({
   type: ChatEventType.toolUi,
@@ -115,6 +128,64 @@ describe('useInvestigationState', () => {
       expect(result.current.status).toBe('complete');
       expect(result.current.error).toBeUndefined();
       expect(mockGetExecution).toHaveBeenCalledWith('exec-1', { includeOutput: true });
+    });
+
+    it('reads the result from the real agent step when a timeout wrapper shares its stepId', async () => {
+      mockGetExecution.mockResolvedValue({
+        status: 'completed',
+        stepExecutions: withTimeoutWrapper({
+          output: { message: 'ok', conversation_id: 'conv-1', structured_output: validState },
+        }),
+      });
+      const http = createHttp();
+
+      const { result } = renderHook(() =>
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
+      );
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('complete');
+      });
+      expect(result.current.state).toEqual(validState);
+      expect(result.current.conversationId).toBe('conv-1');
+      expect(result.current.error).toBeUndefined();
+    });
+
+    it('reports the agent step error even though the timeout wrapper precedes it', async () => {
+      mockGetExecution.mockResolvedValue({
+        status: 'failed',
+        stepExecutions: withTimeoutWrapper({ error: { message: 'No connector configured' } }),
+      });
+      const http = createHttp();
+
+      const { result } = renderHook(() =>
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
+      );
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('failed');
+      });
+      expect(result.current.error).toBe('No connector configured');
+    });
+
+    it('reports a timeout, which only the wrapper (not the ai.agent step) records', async () => {
+      mockGetExecution.mockResolvedValue({
+        status: 'failed',
+        stepExecutions: withTimeoutWrapper(
+          { output: null },
+          { error: { message: 'Step timed out after 1800s' } }
+        ),
+      });
+      const http = createHttp();
+
+      const { result } = renderHook(() =>
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
+      );
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('failed');
+      });
+      expect(result.current.error).toBe('Step timed out after 1800s');
     });
 
     it('reports failed with the step error when the investigate step failed', async () => {

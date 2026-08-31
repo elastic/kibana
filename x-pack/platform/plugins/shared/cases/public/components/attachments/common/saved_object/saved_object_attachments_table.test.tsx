@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithTestingProviders } from '../../../../common/mock';
+import { buildCasesPermissions, renderWithTestingProviders } from '../../../../common/mock';
 import { basicCase } from '../../../../containers/mock';
+import { useDeleteComment } from '../../../../containers/use_delete_comment';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_SO_TYPE,
@@ -21,8 +22,10 @@ import { SavedObjectAttachmentsTable } from './saved_object_attachments_table';
 import { useSavedObjectInAppUrls } from './use_saved_object_in_app_url';
 
 jest.mock('./use_saved_object_in_app_url');
+jest.mock('../../../../containers/use_delete_comment');
 
 const useSavedObjectInAppUrlsMock = useSavedObjectInAppUrls as jest.Mock;
+const useDeleteCommentMock = useDeleteComment as jest.Mock;
 
 const soAttachment = (
   id: string,
@@ -46,9 +49,12 @@ const soAttachment = (
 const caseWith = (comments: AttachmentUIV2[]): CaseUI => ({ ...basicCase, comments } as CaseUI);
 
 describe('SavedObjectAttachmentsTable', () => {
+  const mutate = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
     useSavedObjectInAppUrlsMock.mockReturnValue({});
+    useDeleteCommentMock.mockReturnValue({ isLoading: false, mutate });
   });
 
   it('renders the empty state when no attachments match the type', () => {
@@ -188,5 +194,54 @@ describe('SavedObjectAttachmentsTable', () => {
     );
     const row = screen.getByTestId('cases-so-attachments-table-row-c0');
     expect(within(row).getByText('D0')).toBeInTheDocument();
+  });
+
+  it('renders a delete action when the user has delete permission', () => {
+    const data = caseWith([soAttachment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'D1')]);
+    renderWithTestingProviders(
+      <SavedObjectAttachmentsTable
+        caseData={data}
+        attachmentTypeId={DASHBOARD_ATTACHMENT_TYPE}
+        soType="dashboard"
+      />
+    );
+    expect(screen.getByTestId('cases-so-attachments-table-delete-c1')).toBeInTheDocument();
+  });
+
+  it('does not render a delete action without delete permission', () => {
+    const data = caseWith([soAttachment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'D1')]);
+    renderWithTestingProviders(
+      <SavedObjectAttachmentsTable
+        caseData={data}
+        attachmentTypeId={DASHBOARD_ATTACHMENT_TYPE}
+        soType="dashboard"
+      />,
+      { wrapperProps: { permissions: buildCasesPermissions({ delete: false }) } }
+    );
+    expect(screen.queryByTestId('cases-so-attachments-table-delete-c1')).not.toBeInTheDocument();
+  });
+
+  it('confirms deletion and calls useDeleteComment with the row id', async () => {
+    const data = caseWith([soAttachment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'D1')]);
+    renderWithTestingProviders(
+      <SavedObjectAttachmentsTable
+        caseData={data}
+        attachmentTypeId={DASHBOARD_ATTACHMENT_TYPE}
+        soType="dashboard"
+      />
+    );
+
+    await userEvent.click(screen.getByTestId('cases-so-attachments-table-delete-c1'));
+    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalledWith({
+        caseId: basicCase.id,
+        commentId: 'c1',
+        successToasterTitle: 'Deleted attachment',
+      });
+    });
   });
 });

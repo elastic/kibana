@@ -17,6 +17,7 @@ import {
   AiIndexIdConflictError,
   AiIndexAlreadyExistsError,
 } from './errors';
+import { MAX_AI_INDEX_AUTOMATIONS } from '../../common/constants';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
 
@@ -184,6 +185,24 @@ describe('AiIndexService', () => {
       expect(indexArgs.if_primary_term).toBe(2);
       expect(indexArgs.document?.date_created).toBe(aiIndexDocument.date_created);
       expect(indexArgs.document?.date_modified).not.toBe(aiIndexDocument.date_modified);
+    });
+
+    it('persists feedback_agent_id when updating an existing AI index', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: aiIndexDocument,
+      });
+
+      await expect(
+        service.put('customer_support', { ...properties, feedback_agent_id: 'my-analysis-agent' })
+      ).resolves.toBe('updated');
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document?.feedback_agent_id).toBe('my-analysis-agent');
     });
 
     it('throws AiIndexConflictError when a concurrent create wins (409)', async () => {
@@ -525,6 +544,45 @@ describe('AiIndexService', () => {
       );
     });
 
+    it('round-trips feedback_agent_id from the stored document to the item', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: { ...aiIndexDocument, feedback_agent_id: 'my-analysis-agent' },
+      });
+
+      await expect(service.get('customer_support')).resolves.toEqual(
+        expect.objectContaining({ feedback_agent_id: 'my-analysis-agent' })
+      );
+    });
+
+    it('omits feedback_agent_id when the stored document has none', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: aiIndexDocument,
+      });
+
+      await expect(service.get('customer_support')).resolves.not.toHaveProperty(
+        'feedback_agent_id'
+      );
+    });
+
+    it('persists feedback_agent_id when creating an AI index', async () => {
+      await service.create('customer_support', {
+        ...properties,
+        feedback_agent_id: 'my-analysis-agent',
+      });
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ feedback_agent_id: 'my-analysis-agent' }),
+        })
+      );
+    });
+
     it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
       storageClient.get.mockRejectedValue(createNotFoundError());
 
@@ -608,6 +666,215 @@ describe('AiIndexService', () => {
       storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'not_found' });
 
       await expect(service.delete('customer_support')).rejects.toBeInstanceOf(AiIndexNotFoundError);
+    });
+  });
+
+  describe('assertCanAcceptAutomation', () => {
+    it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'missing',
+        _index: '.contextengine-ai-indices',
+        found: false,
+      });
+
+      await expect(service.assertCanAcceptAutomation('missing')).rejects.toBeInstanceOf(
+        AiIndexNotFoundError
+      );
+    });
+
+    it('throws AiIndexManagedError when the entry is managed', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(
+        service.assertCanAcceptAutomation('customer_support', { type: 'workflow', value: 'wf-new' })
+      ).rejects.toBeInstanceOf(AiIndexManagedError);
+    });
+
+    it('rejects when the automation limit is reached', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: {
+          ...aiIndexDocument,
+          automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
+            type: 'workflow' as const,
+            value: `wf-${index}`,
+          })),
+        },
+      });
+
+      await expect(
+        service.assertCanAcceptAutomation('customer_support', { type: 'workflow', value: 'wf-new' })
+      ).rejects.toThrow(/maximum number of automations/);
+    });
+
+    it('allows already attached workflows when the automation limit is reached', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: {
+          ...aiIndexDocument,
+          automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
+            type: 'workflow' as const,
+            value: index === 0 ? 'nightly-refresh' : `wf-${index}`,
+          })),
+        },
+      });
+
+      await expect(
+        service.assertCanAcceptAutomation('customer_support', {
+          type: 'workflow',
+          value: 'nightly-refresh',
+        })
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('addAutomation', () => {
+    it('appends a workflow automation to the AI index', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: aiIndexDocument,
+      });
+      storageClient.index.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        _seq_no: 8,
+        _primary_term: 2,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        _version: 2,
+        result: 'updated',
+      } as Awaited<ReturnType<AiIndexStorageClient['index']>>);
+
+      await expect(
+        service.addAutomation('customer_support', { type: 'workflow', value: 'wf-new' })
+      ).resolves.toBe('attached');
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'customer_support',
+          if_seq_no: 7,
+          if_primary_term: 2,
+          document: expect.objectContaining({
+            automations: [
+              { type: 'workflow', value: 'nightly-refresh' },
+              { type: 'workflow', value: 'wf-new' },
+            ],
+          }),
+        })
+      );
+    });
+
+    it('returns already_attached when the workflow is already linked', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: aiIndexDocument,
+      });
+
+      await expect(
+        service.addAutomation('customer_support', {
+          type: 'workflow',
+          value: 'nightly-refresh',
+        })
+      ).resolves.toBe('already_attached');
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('retries on concurrent writes', async () => {
+      storageClient.get
+        .mockResolvedValueOnce({
+          _id: 'customer_support',
+          _index: '.contextengine-ai-indices',
+          found: true,
+          _seq_no: 7,
+          _primary_term: 2,
+          _source: aiIndexDocument,
+        })
+        .mockResolvedValueOnce({
+          _id: 'customer_support',
+          _index: '.contextengine-ai-indices',
+          found: true,
+          _seq_no: 8,
+          _primary_term: 2,
+          _source: {
+            ...aiIndexDocument,
+            automations: [
+              ...aiIndexDocument.automations,
+              { type: 'workflow', value: 'wf-concurrent' },
+            ],
+          },
+        });
+      storageClient.index.mockRejectedValueOnce(createConflictError()).mockResolvedValueOnce({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        _seq_no: 9,
+        _primary_term: 2,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        _version: 3,
+        result: 'updated',
+      } as Awaited<ReturnType<AiIndexStorageClient['index']>>);
+
+      await expect(
+        service.addAutomation('customer_support', { type: 'workflow', value: 'wf-new' })
+      ).resolves.toBe('attached');
+      expect(storageClient.index).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws AiIndexManagedError when the entry is managed', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(
+        service.addAutomation('customer_support', { type: 'workflow', value: 'wf-new' })
+      ).rejects.toBeInstanceOf(AiIndexManagedError);
+    });
+
+    it('rejects when the automation limit is reached', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: {
+          ...aiIndexDocument,
+          automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
+            type: 'workflow' as const,
+            value: `wf-${index}`,
+          })),
+        },
+      });
+
+      await expect(
+        service.addAutomation('customer_support', { type: 'workflow', value: 'wf-new' })
+      ).rejects.toThrow(/maximum number of automations/);
     });
   });
 });

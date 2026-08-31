@@ -61,6 +61,7 @@
     "@kbn/alerting-v2-utils",
     "@kbn/deeplinks-workflows",
     "@kbn/features-plugin",
-    "@kbn/navigation-plugin"
+    "@kbn/navigation-plugin",
+    "@kbn/ui-callout"
   ]
 }

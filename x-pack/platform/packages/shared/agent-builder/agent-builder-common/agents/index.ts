@@ -31,14 +31,12 @@ export {
   type AgentAccessControlPrincipalType,
 } from './access_control';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
-export {
-  type AgentCapabilities,
-  type ResolvedAgentCapabilities,
-  getKibanaDefaultAgentCapabilities,
-} from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
 export { AgentExecutionMode, SubagentExecutionMode } from './execution_mode';
 export { ExecutionStatus, type SerializedExecutionError } from './execution_status';
+export type { InteractivityConfig } from './interactivity';
+export { normalizeInteractive } from './interactivity';
+export { SubagentMode } from './subagent_mode';
 export type {
   AgentListOptions,
   AgentCreateRequest,

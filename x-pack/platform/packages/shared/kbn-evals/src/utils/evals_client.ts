@@ -7,10 +7,12 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
+import { z } from '@kbn/zod';
 import {
   API_VERSIONS,
-  DATASET_UUID_NAMESPACE,
+  DeleteEvaluationDatasetResponse,
   EVALS_DATASETS_URL,
+  EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
@@ -24,12 +26,15 @@ import {
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
+  DEFAULT_SPACE_ID,
+  ResolveEvaluationDatasetResponse,
+  UpsertEvaluationDatasetResponse,
+  getDatasetId,
   type DatasetMaturity,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
-import { v5 as uuidv5 } from 'uuid';
 import { getStatusCode } from './retry_utils';
 
 export interface EvaluatorStats {
@@ -49,7 +54,8 @@ export interface EvaluatorStats {
 export interface ExperimentStats {
   stats: EvaluatorStats[];
   taskModel: EvalsModel;
-  evaluatorModel: EvalsModel;
+  /** The judge most evaluators used, absent when only code evaluators scored the experiment. */
+  evaluatorModel?: EvalsModel;
   totalRepetitions: number;
 }
 
@@ -64,6 +70,8 @@ export interface UpsertDatasetInput {
   description: string;
   tags?: string[];
   maturity?: DatasetMaturity;
+  /** Spaces to assign the dataset to. Omitted means the space the request lands in. */
+  spaceIds?: string[];
   examples: Array<{
     input?: Record<string, unknown>;
     output?: Record<string, unknown>;
@@ -110,6 +118,13 @@ export interface BaselineExperiment {
 const EVALS_PLUGIN_DISABLED_MESSAGE =
   'Evaluations plugin is not enabled on the target Kibana. Ensure xpack.evals.enabled=true is set in the Kibana configuration.';
 
+const SPACES_URL = '/api/spaces/space';
+// Serverless turns away a public api call that doesn't say which version it
+// was written against.
+const SPACES_HEADERS = { 'elastic-api-version': '2023-10-31' };
+
+const SpacesResponse = z.array(z.object({ id: z.string() }));
+
 const getResponseData = (response: unknown): unknown => {
   if (typeof response === 'object' && response !== null && 'data' in response) {
     return (response as { data: unknown }).data;
@@ -137,7 +152,7 @@ const mapStatsResponse = (
   response: ReturnType<typeof GetEvaluationExperimentResponse.parse>
 ): ExperimentStats => {
   const { task_model: taskModel, evaluator_model: evaluatorModel } = response;
-  if (!taskModel || !evaluatorModel) {
+  if (!taskModel) {
     throw new Error('Evaluation experiment is missing model metadata');
   }
 
@@ -170,12 +185,33 @@ const buildExperimentQuery = (options?: GetExperimentFilters) => ({
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };
 
 export class EvalsClient {
-  constructor(private readonly kbnClient: KbnClient, private readonly log: SomeDevLog) {}
+  /** The spaces this run writes to, in the order they were listed. */
+  private readonly spaceIds: string[];
+  /** The space every request is sent to, when it isn't the default one. */
+  private readonly homeSpaceId?: string;
+
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: SomeDevLog,
+    { spaceIds = [] }: { spaceIds?: string[] } = {}
+  ) {
+    this.spaceIds = spaceIds;
+    // Runs in the space the datasets are written to, rather than writing to it
+    // from the default space, so ids resolve and privileges are checked where
+    // the data lands. The first space listed, so a run that widens an existing
+    // dataset's spaces still works from the one already holding it.
+    const homeSpaceId = spaceIds[0] ?? DEFAULT_SPACE_ID;
+    this.homeSpaceId = homeSpaceId === DEFAULT_SPACE_ID ? undefined : homeSpaceId;
+  }
+
+  private path(path: string): string {
+    return this.homeSpaceId ? `/s/${encodeURIComponent(this.homeSpaceId)}${path}` : path;
+  }
 
   async ingestScores(request: IngestScoresRequestBodyInput): Promise<IngestScoresResult> {
     const body = IngestScoresRequestBody.parse(request);
     const response = await this.kbnClient.request({
-      path: EVALS_SCORES_URL,
+      path: this.path(EVALS_SCORES_URL),
       method: 'POST',
       body,
       headers: VERSIONED_HEADERS,
@@ -209,7 +245,9 @@ export class EvalsClient {
   ): Promise<ExperimentStats | null> {
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_EXPERIMENT_URL.replace('{experimentId}', encodeURIComponent(experimentId)),
+        path: this.path(
+          EVALS_EXPERIMENT_URL.replace('{experimentId}', encodeURIComponent(experimentId))
+        ),
         method: 'GET',
         query: buildExperimentQuery(options),
         headers: VERSIONED_HEADERS,
@@ -232,9 +270,8 @@ export class EvalsClient {
   ): Promise<EvaluationScoreDocument[]> {
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_EXPERIMENT_SCORES_URL.replace(
-          '{experimentId}',
-          encodeURIComponent(experimentId)
+        path: this.path(
+          EVALS_EXPERIMENT_SCORES_URL.replace('{experimentId}', encodeURIComponent(experimentId))
         ),
         method: 'GET',
         query: buildExperimentQuery(options),
@@ -259,9 +296,13 @@ export class EvalsClient {
     }
   }
 
-  async upsertDataset(dataset: UpsertDatasetInput): Promise<void> {
-    await this.kbnClient.request({
-      path: EVALS_DATASET_UPSERT_URL,
+  /**
+   * Creates or updates a dataset and returns the id the server assigned it. Ids
+   * derive from the owning space, so the caller can't compute one.
+   */
+  async upsertDataset(dataset: UpsertDatasetInput): Promise<string> {
+    const response = await this.kbnClient.request({
+      path: this.path(EVALS_DATASET_UPSERT_URL),
       method: 'POST',
       body: {
         name: dataset.name,
@@ -270,18 +311,20 @@ export class EvalsClient {
         // declare tags leaves the stored ones alone.
         ...(dataset.tags ? { tags: dataset.tags } : {}),
         ...(dataset.maturity ? { maturity: dataset.maturity } : {}),
+        ...(dataset.spaceIds?.length ? { space_ids: dataset.spaceIds } : {}),
         examples: dataset.examples,
       },
       headers: VERSIONED_HEADERS,
       retries: 0,
     });
+
+    return UpsertEvaluationDatasetResponse.parse(getResponseData(response)).dataset_id;
   }
 
-  async getDatasetByName(datasetName: string): Promise<DatasetWithId | null> {
+  private async fetchDatasetById(datasetId: string): Promise<DatasetWithId | null> {
     try {
-      const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
       const response = await this.kbnClient.request({
-        path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
+        path: this.path(EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId))),
         method: 'GET',
         headers: VERSIONED_HEADERS,
         retries: 0,
@@ -310,6 +353,59 @@ export class EvalsClient {
     }
   }
 
+  /**
+   * Looks a dataset up by name within the run's space, guessing the legacy id
+   * first — all an older Kibana understands — then asking the server.
+   */
+  async getDatasetByName(datasetName: string): Promise<DatasetWithId | null> {
+    const defaultSpaceDataset = await this.fetchDatasetById(
+      getDatasetId(DEFAULT_SPACE_ID, datasetName)
+    );
+    if (defaultSpaceDataset) {
+      return defaultSpaceDataset;
+    }
+
+    try {
+      const response = await this.kbnClient.request({
+        path: this.path(EVALS_DATASET_RESOLVE_URL),
+        method: 'GET',
+        query: { name: datasetName },
+        headers: VERSIONED_HEADERS,
+        retries: 0,
+      });
+
+      const { id } = ResolveEvaluationDatasetResponse.parse(getResponseData(response));
+      return await this.fetchDatasetById(id);
+    } catch (error: unknown) {
+      // A Kibana without this route reads `_resolve` as a dataset id and also
+      // answers 404, same as a genuinely unknown name.
+      if (getStatusCode(error) === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Deletes a dataset, or detaches it from the run's space when other spaces
+   * still use it. The server decides which and reports it back as `unshared`.
+   *
+   * Takes an id rather than a name: names are only unique within a space, so a
+   * wrong one could resolve to a dataset the caller never meant to touch.
+   */
+  async deleteDataset(datasetId: string): Promise<{ unshared: boolean }> {
+    const response = await this.kbnClient.request({
+      path: this.path(EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId))),
+      method: 'DELETE',
+      headers: VERSIONED_HEADERS,
+      retries: 0,
+    });
+
+    const { unshared } = DeleteEvaluationDatasetResponse.parse(getResponseData(response));
+
+    return { unshared: unshared ?? false };
+  }
+
   async findLatestExperimentForBuild({
     suiteId,
     branch,
@@ -326,7 +422,7 @@ export class EvalsClient {
         : baseExecutionId;
 
       const response = await this.kbnClient.request({
-        path: EVALS_EXPERIMENTS_URL,
+        path: this.path(EVALS_EXPERIMENTS_URL),
         method: 'GET',
         query: {
           suite_id: suiteId,
@@ -376,7 +472,7 @@ export class EvalsClient {
   }): Promise<BaselineExperiment | undefined> {
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_EXPERIMENTS_URL,
+        path: this.path(EVALS_EXPERIMENTS_URL),
         method: 'GET',
         query: {
           suite_id: suiteId,
@@ -416,7 +512,7 @@ export class EvalsClient {
   async assertPluginEnabled(): Promise<void> {
     try {
       await this.kbnClient.request({
-        path: EVALS_DATASETS_URL,
+        path: this.path(EVALS_DATASETS_URL),
         method: 'GET',
         query: { page: 1, per_page: 1 },
         headers: VERSIONED_HEADERS,
@@ -427,6 +523,54 @@ export class EvalsClient {
         throw new Error(EVALS_PLUGIN_DISABLED_MESSAGE);
       }
       throw error;
+    }
+  }
+
+  /**
+   * Refuses a run aimed at a space that isn't there. Kibana only checks that a
+   * space exists when it serves a page, so requests prefixed with a mistyped
+   * one are answered as though it were real, and the run would write datasets
+   * and scores that no space can reach.
+   */
+  async assertSpacesExist(): Promise<void> {
+    if (this.spaceIds.length === 0) {
+      return;
+    }
+
+    const existingSpaceIds = await this.fetchSpaceIds();
+
+    // Nothing to check against. Stopping every run whose credentials can't read
+    // the space list would cost more than the mistyped id this catches.
+    if (!existingSpaceIds) {
+      this.log.warning(
+        'Could not read the spaces on the target Kibana, so --space-ids goes unverified.'
+      );
+      return;
+    }
+
+    const unknownSpaceIds = this.spaceIds.filter((spaceId) => !existingSpaceIds.has(spaceId));
+
+    if (unknownSpaceIds.length > 0) {
+      throw new Error(
+        `Unknown space id(s): ${unknownSpaceIds.join(
+          ', '
+        )}. --space-ids must name spaces that exist on the target Kibana.`
+      );
+    }
+  }
+
+  private async fetchSpaceIds(): Promise<Set<string> | undefined> {
+    try {
+      const response = await this.kbnClient.request({
+        path: SPACES_URL,
+        method: 'GET',
+        headers: SPACES_HEADERS,
+        retries: 0,
+      });
+
+      return new Set(SpacesResponse.parse(getResponseData(response)).map(({ id }) => id));
+    } catch (error) {
+      return undefined;
     }
   }
 }

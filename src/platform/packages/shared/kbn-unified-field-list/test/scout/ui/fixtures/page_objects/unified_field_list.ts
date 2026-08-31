@@ -10,7 +10,14 @@
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
+type SidebarSectionName =
+  | 'meta'
+  | 'empty'
+  | 'available'
+  | 'unmapped'
+  | 'popular'
+  | 'selected'
+  | 'recommended';
 
 export class UnifiedFieldList {
   constructor(private readonly page: ScoutPage) {}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSampleDocumentsEsql, DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { esql } from '@elastic/esql';
 import { getStreamSamplingSource } from '@kbn/streams-schema';
 import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/significant-events-schema';
@@ -17,10 +17,6 @@ const SAMPLE_SIZE = 5;
 const LOG_MESSAGE_FIELDS = ['message', 'body.text'] as const;
 const ERROR_KEYWORDS = ['error', 'exception'] as const;
 
-// Keep only the message + prompt-relevant signal fields; raw docs are otherwise
-// mostly irrelevant metadata. OTel nests under `(resource.)attributes.*`, so
-// match on the prefix-stripped leaf (keeps `resource.attributes.service.name`,
-// drops `resource.attributes.cloud.service.name`).
 const ERROR_LOG_KEEP_FIELDS = new Set<string>([
   '@timestamp',
   ...LOG_MESSAGE_FIELDS,
@@ -37,7 +33,6 @@ const ERROR_LOG_KEEP_FIELDS = new Set<string>([
 
 const OTEL_FIELD_PREFIX = /^(?:resource\.)?attributes\./;
 
-// Keep the original (dotted) key — the name the LLM must reference in ES|QL — not the leaf.
 export const pickErrorLogFields = (fields: Record<string, unknown>): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(fields)) {
@@ -49,28 +44,13 @@ export const pickErrorLogFields = (fields: Record<string, unknown>): Record<stri
   return result;
 };
 
-const columnPath = (field: string) => (field.includes('.') ? field.split('.') : field);
+// QSTR: log.level is union-typed on some streams; ::keyword cast fixes verification but kills OR pushdown. QSTR resolves per-shard, avoiding both.
+const ERROR_QUERY_STRING = [
+  'log.level:error',
+  ...LOG_MESSAGE_FIELDS.flatMap((field) => ERROR_KEYWORDS.map((keyword) => `${field}:${keyword}`)),
+].join(' OR ');
 
-// Equivalent to the pre-ES|QL DSL filter:
-//   { term: { 'log.level': 'error' } }
-//   OR match_phrase: { message: 'error' | 'exception' }
-//   OR match_phrase: { 'body.text': 'error' | 'exception' }
-//
-// Built as a Composer `whereCondition` rather than a `KQL(...)` string because
-// ES 9.3 rejects `WHERE KQL(...) | SAMPLE` at planning time. `MATCH_PHRASE` is
-// the analyzer-aware ES|QL analogue of DSL `match_phrase` and works after
-// `SAMPLE` on both 9.3 and 9.5.
-const ERROR_WHERE_CONDITION = (() => {
-  const logLevelClause = esql.exp`${esql.col(columnPath('log.level'))} == "error"`;
-  const messageClauses = LOG_MESSAGE_FIELDS.flatMap((field) =>
-    ERROR_KEYWORDS.map(
-      (keyword) => esql.exp`MATCH_PHRASE(${esql.col(columnPath(field))}, ${esql.str(keyword)})`
-    )
-  );
-  return [logLevelClause, ...messageClauses].reduce(
-    (acc, current) => esql.exp`${acc} OR ${current}`
-  );
-})();
+const ERROR_WHERE_CONDITION = esql.exp`QSTR(${esql.str(ERROR_QUERY_STRING)})`;
 
 export const errorLogsGenerator: ComputedFeatureGenerator = {
   type: ERROR_LOGS_FEATURE_TYPE,
@@ -81,12 +61,7 @@ export const errorLogsGenerator: ComputedFeatureGenerator = {
 Use the \`properties.samples\` array to see actual error log entries.
 This is useful for understanding error patterns, identifying recurring issues, and diagnosing problems in the system.`,
 
-  generate: async ({ stream, start, end, esClient }) => {
-    // `unmappedFields: 'NULLIFY'` lets `MATCH_PHRASE` skip clauses whose field
-    // is not mapped on any backing index. Without it, ECS-only streams (no
-    // `body.text`) and OTEL-only streams (no `message`) would fail with
-    // `verification_exception: Unknown column [...]`. DSL `match_phrase`
-    // silently no-matches missing fields, so this preserves baseline parity.
+  generate: async ({ stream, start, end, esClient, signal }) => {
     const { hits } = await getSampleDocumentsEsql({
       esClient,
       index: getStreamSamplingSource(stream),
@@ -94,8 +69,7 @@ This is useful for understanding error patterns, identifying recurring issues, a
       end,
       sampleSize: SAMPLE_SIZE,
       whereCondition: ERROR_WHERE_CONDITION,
-      unmappedFields: 'NULLIFY',
-      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
+      abortSignal: signal,
     });
 
     return {

@@ -51,7 +51,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
     void (async () => {
       const currentUser = await core.security.authc.getCurrentUser();
 
-      const surveyUrl = new URL('https://ela.st/kibana-product-survey');
+      const surveyUrl = new URL('https://ela.st/user-interviews-opt-in');
 
       surveyUrl.searchParams.set('uid', String(currentUser.profile_uid || null));
       surveyUrl.searchParams.set('pid', String(cloud.serverless.projectId || null));

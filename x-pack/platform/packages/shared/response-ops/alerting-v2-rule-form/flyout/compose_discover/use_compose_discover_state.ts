@@ -45,14 +45,12 @@ export const createInitialState = ({
 }: InitialStateConfig): ComposeDiscoverState => {
   const recoveryType = initialKind === 'alert' ? initialRecoveryType : 'default';
   return {
-    mode,
     step: 0,
     recoveryType,
     activeTab: defaultTabForTabs(
       getSandboxTabs(initialKind === 'alert', {
         step: 0,
         recoveryType,
-        mode,
         manualSplitEnabled: false,
       })
     ),
@@ -66,26 +64,21 @@ export const createInitialState = ({
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
- * create/edit/clone + alertCondition + manualSplitEnabled → ['base', 'alert']
- * create/edit/clone + alertCondition                      → undefined (unified editor; create runs heuristic on Apply)
- * isAlert + outcome + custom                              → ['recovery']
- * everything else                                         → undefined (single editor)
+ * alertCondition + manualSplitEnabled → ['base', 'alert']
+ * alertCondition                      → undefined (unified editor; heuristic split on Apply)
+ * isAlert + outcome + custom          → ['recovery']
+ * everything else                     → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
-  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'mode' | 'manualSplitEnabled'>
+  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'manualSplitEnabled'>
 ): QueryTab[] | undefined {
   if (!isAlert) return undefined;
 
   const stepId = getStepIds(isAlert)[state.step];
 
   if (stepId === 'alertCondition') {
-    const usesUnifiedEditorByDefault =
-      state.mode === 'create' || state.mode === 'edit' || state.mode === 'clone';
-    if (usesUnifiedEditorByDefault) {
-      return state.manualSplitEnabled ? ['base', 'alert'] : undefined;
-    }
-    return ['base', 'alert'];
+    return state.manualSplitEnabled ? ['base', 'alert'] : undefined;
   }
   if (stepId === 'outcome' && state.recoveryType === 'custom') return ['recovery'];
   return undefined;

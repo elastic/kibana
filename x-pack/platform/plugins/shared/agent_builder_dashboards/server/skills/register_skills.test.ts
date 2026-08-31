@@ -6,10 +6,8 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { createDashboardManagementSkill } from './dashboard_management_skill';
+import { dashboardManagementSkill as skill } from './dashboard_management_skill';
 import { registerSkills } from './register_skills';
-
-const skill = createDashboardManagementSkill(() => Promise.resolve(true));
 
 describe('registerSkills', () => {
   it('registers the dashboard management skill', async () => {
@@ -18,7 +16,7 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder, () => Promise.resolve(true));
+    registerSkills(agentBuilder);
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard-management' }));
@@ -36,10 +34,10 @@ describe('registerSkills', () => {
 
   it('includes the shared chart type selection guidance', () => {
     expect(skill.content).toContain('Chart Type Guidance');
-    expect(skill.content).toContain('Available chart types:');
+    expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
     expect(skill.content).toContain(
-      "Choose 'mosaic' when visualizing the joint distribution of two categorical dimensions"
+      'Choose for cross-tabulations (e.g. "request methods by status code"'
     );
     expect(skill.content).toContain(
       'provide a new `chartType` when the request changes the chart family'

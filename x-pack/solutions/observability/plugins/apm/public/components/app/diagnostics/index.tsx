@@ -8,7 +8,8 @@
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { z } from '@kbn/zod/v4';
-import { EuiButton, EuiCallOut, EuiIcon, EuiLoadingLogo, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLoadingLogo, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -89,10 +90,17 @@ export const diagnosticsRoute = {
   },
 };
 
-function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
+const tabWarningBadge = {
+  iconType: 'warning',
+  tooltip: i18n.translate('xpack.apm.diagnostics.tab.warningTooltip', {
+    defaultMessage: 'This tab reports issues',
+  }),
+};
+
+export function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
   const routePath = useApmRoutePath();
   const router = useApmRouter();
-  const { diagnosticsBundle, status } = useDiagnosticsContext();
+  const { diagnosticsBundle, status, isImported, refetch } = useDiagnosticsContext();
   const { query } = useApmParams('/diagnostics/*');
   const isCrossCluster = getIsCrossCluster(diagnosticsBundle);
   const isLoading = isPending(status);
@@ -115,8 +123,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
   const hasAllClusterPrivileges =
     diagnosticsBundle?.diagnosticsPrivileges.hasAllClusterPrivileges ?? true;
 
-  const tabs = [
+  const tabs: Array<AppHeaderTab & { isHidden?: boolean }> = [
     {
+      id: 'summary',
       'data-test-subj': 'summary-tab',
       href: router.link('/diagnostics', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.summary', {
@@ -125,10 +134,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       isSelected: routePath === '/diagnostics',
     },
     {
+      id: 'index-pattern-settings',
       'data-test-subj': 'index-pattern-tab',
-      prepend: !getIsIndexPatternTabOk(diagnosticsBundle) && (
-        <EuiIcon type="warning" color="red" aria-hidden={true} />
-      ),
+      badge: !getIsIndexPatternTabOk(diagnosticsBundle) ? tabWarningBadge : undefined,
       href: router.link('/diagnostics/index-pattern-settings', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.index_pattern_settings', {
         defaultMessage: 'Index pattern settings',
@@ -137,10 +145,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       isHidden: isCrossCluster || !hasAllClusterPrivileges,
     },
     {
+      id: 'index-templates',
       'data-test-subj': 'index-templates-tab',
-      prepend: !getIsIndexTemplateOk(diagnosticsBundle) && (
-        <EuiIcon type="warning" color="red" aria-hidden={true} />
-      ),
+      badge: !getIsIndexTemplateOk(diagnosticsBundle) ? tabWarningBadge : undefined,
       href: router.link('/diagnostics/index-templates', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.index_templates', {
         defaultMessage: 'Index templates',
@@ -149,10 +156,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       isHidden: isCrossCluster || !hasAllClusterPrivileges,
     },
     {
+      id: 'data-streams',
       'data-test-subj': 'data-streams-tab',
-      prepend: !getIsDataStreamTabOk(diagnosticsBundle) && (
-        <EuiIcon type="warning" color="red" aria-hidden={true} />
-      ),
+      badge: !getIsDataStreamTabOk(diagnosticsBundle) ? tabWarningBadge : undefined,
       href: router.link('/diagnostics/data-streams', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.datastreams', {
         defaultMessage: 'Data streams',
@@ -161,10 +167,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       isHidden: isCrossCluster || !hasAllClusterPrivileges,
     },
     {
+      id: 'indices',
       'data-test-subj': 'indices-tab',
-      prepend: !getIsIndicesTabOk(diagnosticsBundle) && (
-        <EuiIcon type="warning" color="red" aria-hidden={true} />
-      ),
+      badge: !getIsIndicesTabOk(diagnosticsBundle) ? tabWarningBadge : undefined,
       href: router.link('/diagnostics/indices', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.indices', {
         defaultMessage: 'Indices',
@@ -173,6 +178,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       isHidden: isCrossCluster || !hasAllClusterPrivileges,
     },
     {
+      id: 'documents',
       'data-test-subj': 'documents-tab',
       href: router.link('/diagnostics/documents', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.apmEvents', {
@@ -181,6 +187,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       isSelected: routePath === '/diagnostics/documents',
     },
     {
+      id: 'import-export',
       'data-test-subj': 'import-export-tab',
       href: router.link('/diagnostics/import-export', { query }),
       label: i18n.translate('xpack.apm.diagnostics.tab.import_export', {
@@ -188,20 +195,33 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       }),
       isSelected: routePath === '/diagnostics/import-export',
     },
-  ].filter((tab) => !tab.isHidden);
+  ]
+    .filter((tab) => !tab.isHidden)
+    .map(({ isHidden, ...tab }) => tab);
 
   return (
     <ApmMainTemplate
       data-test-subj="apmDiagnosticsTemplate"
-      pageTitle="Diagnostics"
-      showServiceGroupSaveButton={false}
-      pageHeader={{
-        iconType: 'magnifyExclamation',
-        rightSideItems: [<RefreshButton />],
-        description: <TemplateDescription />,
+      header={{
+        title: i18n.translate('xpack.apm.diagnostics.title', {
+          defaultMessage: 'Diagnostics',
+        }),
         tabs,
+        menu: {
+          primaryActionItem: {
+            id: 'refreshDiagnostics',
+            label: i18n.translate('xpack.apm.refreshButton.refreshButtonLabel', {
+              defaultMessage: 'Refresh',
+            }),
+            iconType: 'refresh',
+            testId: 'apmDiagnosticsTemplateRefreshButton',
+            disableButton: isImported,
+            run: refetch,
+          },
+        },
       }}
     >
+      <TemplateDescription />
       {children}
     </ApmMainTemplate>
   );
@@ -211,39 +231,28 @@ function TemplateDescription() {
   const { isImported, setImportedDiagnosticsBundle } = useDiagnosticsContext();
   if (isImported) {
     return (
-      <EuiCallOut
-        announceOnMount
-        title={i18n.translate(
-          'xpack.apm.templateDescription.euiCallOut.displayingResultsFromTheLabel',
-          { defaultMessage: 'Displaying results from the uploaded diagnostics report' }
-        )}
-        iconType="upload"
-      >
-        <EuiButton
-          data-test-subj="apmTemplateDescriptionClearBundleButton"
-          onClick={() => setImportedDiagnosticsBundle(undefined)}
+      <>
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate(
+            'xpack.apm.templateDescription.euiCallOut.displayingResultsFromTheLabel',
+            { defaultMessage: 'Displaying results from the uploaded diagnostics report' }
+          )}
+          iconType="upload"
         >
-          {i18n.translate('xpack.apm.templateDescription.clearBundleButtonLabel', {
-            defaultMessage: 'Clear bundle',
-          })}
-        </EuiButton>
-      </EuiCallOut>
+          <EuiButton
+            data-test-subj="apmTemplateDescriptionClearBundleButton"
+            onClick={() => setImportedDiagnosticsBundle(undefined)}
+          >
+            {i18n.translate('xpack.apm.templateDescription.clearBundleButtonLabel', {
+              defaultMessage: 'Clear bundle',
+            })}
+          </EuiButton>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
     );
   }
 
   return null;
-}
-
-function RefreshButton() {
-  const { isImported, refetch } = useDiagnosticsContext();
-  return (
-    <EuiButton
-      isDisabled={isImported}
-      data-test-subj="apmDiagnosticsTemplateRefreshButton"
-      fill
-      onClick={refetch}
-    >
-      {i18n.translate('xpack.apm.refreshButton.refreshButtonLabel', { defaultMessage: 'Refresh' })}
-    </EuiButton>
-  );
 }

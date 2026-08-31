@@ -14,6 +14,7 @@ import type {
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import type { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
+import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -223,6 +224,11 @@ export interface TaskRunnerContext {
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
+  /**
+   * Converts Elasticsearch API keys into UIAM ones. Used to re-grant a rule's UIAM API key when a
+   * run fails because UIAM no longer knows the stored key. Absent when UIAM is not configured.
+   */
+  uiamConvert?: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

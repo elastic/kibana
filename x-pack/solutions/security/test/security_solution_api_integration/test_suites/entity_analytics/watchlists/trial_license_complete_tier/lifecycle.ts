@@ -51,15 +51,15 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       await entityStore.createEntity('user', {
-        user: { name: 'alice' },
-        entity: { id: userEuid('alice'), type: 'user' },
+        user: { name: 'alice-delete' },
+        entity: { id: userEuid('alice-delete'), type: 'user' },
       });
       await entityStore.createEntity('user', {
-        user: { name: 'bob' },
-        entity: { id: userEuid('bob'), type: 'user' },
+        user: { name: 'bob-delete' },
+        entity: { id: userEuid('bob-delete'), type: 'user' },
       });
 
-      await utils.addUsersToSourceIndex(['alice', 'bob'], sourceIndexName);
+      await utils.addUsersToSourceIndex(['alice-delete', 'bob-delete'], sourceIndexName);
       await utils.syncWatchlist(watchlistId);
       expect(await utils.queryWatchlistIndex(watchlistId)).toHaveLength(2);
 
@@ -75,18 +75,22 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       await entityStore.createEntity('user', {
-        user: { name: 'alice' },
-        entity: { id: userEuid('alice'), type: 'user' },
+        user: { name: 'alice-store-cleanup' },
+        entity: { id: userEuid('alice-store-cleanup'), type: 'user' },
       });
 
-      await utils.addUsersToSourceIndex(['alice'], sourceIndexName);
+      await utils.addUsersToSourceIndex(['alice-store-cleanup'], sourceIndexName);
       await utils.syncWatchlist(watchlistId);
 
-      expect(await entityStore.getEntityWatchlists(userEuid('alice'))).toContain(watchlistId);
+      expect(await entityStore.getEntityWatchlists(userEuid('alice-store-cleanup'))).toContain(
+        watchlistId
+      );
 
       await deleteWatchlist(watchlistId);
 
-      expect(await entityStore.getEntityWatchlists(userEuid('alice'))).not.toContain(watchlistId);
+      expect(await entityStore.getEntityWatchlists(userEuid('alice-store-cleanup'))).not.toContain(
+        watchlistId
+      );
     });
 
     it('should keep an entity in the watchlist index when it belongs to multiple watchlists and only one is deleted', async () => {
@@ -101,11 +105,11 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       await entityStore.createEntity('user', {
-        user: { name: 'alice' },
-        entity: { id: userEuid('alice'), type: 'user' },
+        user: { name: 'alice-multi' },
+        entity: { id: userEuid('alice-multi'), type: 'user' },
       });
 
-      await utils.addUsersToSourceIndex(['alice'], sourceIndexName);
+      await utils.addUsersToSourceIndex(['alice-multi'], sourceIndexName);
       await utils.syncWatchlist(wlId1);
       await utils.syncWatchlist(wlId2);
 

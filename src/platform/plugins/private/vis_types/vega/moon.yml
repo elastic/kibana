@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/visualizations-common'
   - '@kbn/es-types'
+  - '@kbn/esql-types'
   - '@kbn/esql-utils'
   - '@kbn/scout'
   - '@kbn/presentation-util'

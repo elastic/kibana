@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/core-data-streams-server'
   - '@kbn/i18n'
   - '@kbn/react-query'
+  - '@kbn/shared-ux-link-redirect-app'
+  - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/shared-ux-router'
   - '@kbn/i18n-react'
   - '@kbn/core-logging-server-mocks'
@@ -60,6 +62,8 @@ dependsOn:
   - '@kbn/crypto'
   - '@kbn/std'
   - '@kbn/repo-info'
+  - '@kbn/ui-callout'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod

@@ -151,6 +151,7 @@
     "@kbn/management-settings-ids",
     "@kbn/alerting-v2-utils",
     "@kbn/deeplinks-workflows",
+    "@kbn/deeplinks-evals",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/kql",
     "@kbn/shared-ux-utility",

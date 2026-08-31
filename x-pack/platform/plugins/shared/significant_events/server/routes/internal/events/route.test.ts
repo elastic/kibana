@@ -34,7 +34,7 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
         licensing: {},
         getEventClient: () => ({ findByEventUuid }),
       }),
-      server: { workflowsManagement: {}, agentBuilder: {}, spaces: {} },
+      server: { nightshiftInvestigations: {} },
       logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
       maintenanceService: makeMaintenanceService('paused'),
     } as unknown as HandlerParams;
@@ -82,6 +82,49 @@ describe('GET /internal/significant_events/events', () => {
       page: 1,
       perPage: 25,
       total: 1,
+    });
+  });
+
+  it('maps event_id to eventIds and still forwards time range and other filters', async () => {
+    const findLatestByCurrentStatePaginated = jest.fn().mockResolvedValue({
+      hits: [],
+      page: 1,
+      perPage: 25,
+      total: 0,
+    });
+
+    await eventsSearchRoute.handler({
+      params: {
+        query: {
+          event_id: 'event-1',
+          from: '2026-01-01T00:00:00.000Z',
+          to: '2026-01-02T00:00:00.000Z',
+          status: 'open',
+          severity: '40-medium',
+          stream: 'logs.test',
+          search: 'noise',
+          page: 2,
+          perPage: 10,
+        },
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventClient: () => ({ findLatestByCurrentStatePaginated }),
+      }),
+      server: {},
+    } as never);
+
+    expect(findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
+      eventIds: ['event-1'],
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+      status: ['open'],
+      severity: ['40-medium'],
+      stream: ['logs.test'],
+      search: 'noise',
+      page: 2,
+      perPage: 10,
     });
   });
 });

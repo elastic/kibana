@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
 import { useEnabledFeatures } from '../../contexts/ml';
@@ -25,17 +26,14 @@ export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
 
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.title"
             defaultMessage="Awaiting machine learning node"
           />
         }
-        color="primary"
-        iconType="info"
-      >
-        <div>
+        text={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.noMLNodesAvailableDescription"
             defaultMessage="{jobCount, plural, one {# job} other {# jobs}} will start after autoscaling has increased ML capacity. This may take several minutes."
@@ -43,8 +41,8 @@ export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
               jobCount,
             }}
           />
-        </div>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer size="m" />
     </>
   );

@@ -26,7 +26,7 @@ export type CasesColumnsConfiguration = Record<
 export const useCasesColumnsConfiguration = (
   isSelectorView?: boolean
 ): CasesColumnsConfiguration => {
-  const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
+  const { caseAssignmentAuthorized } = useCasesFeatures();
   const { templatesEnabled } = useCasesConfig();
   const {
     data: { customFields },
@@ -59,7 +59,7 @@ export const useCasesColumnsConfiguration = (
     totalAlerts: {
       field: 'totalAlerts',
       name: ALERTS,
-      canDisplay: isAlertsEnabled && !isSelectorView,
+      canDisplay: !isSelectorView,
       isCheckedDefault: true,
     },
     totalEvents: {

@@ -8,7 +8,6 @@
 import {
   EuiAccordion,
   EuiButton,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFilterButton,
   EuiFilterGroup,
@@ -28,6 +27,7 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ILicense } from '@kbn/licensing-types';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   getStateWithCopyToFields,
   hasSemanticTextField,
@@ -344,23 +344,20 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const errorSavingMappings = saveMappingError && (
     <EuiFlexItem grow={false}>
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
-        color="danger"
         data-test-subj="indexDetailsSaveMappingsError"
-        iconType="error"
         title={i18n.translate('xpack.idxMgmt.indexDetails.mappings.error.title', {
           defaultMessage: 'Error saving mapping',
         })}
-      >
-        <EuiText>
+        text={
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.mappings.error.description"
             defaultMessage="Error saving mapping: {errorMessage}"
             values={{ errorMessage: saveMappingError }}
           />
-        </EuiText>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer />
     </EuiFlexItem>
   );

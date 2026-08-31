@@ -124,8 +124,9 @@ steps:
     label: 'Pick Test Group Run Order'
     key: pick_test_group_run_order
     agents:
-      machineType: n2-standard-2
-      diskSizeGb: 130
+      provider: k8s
+      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
+      imageUID: 1000
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -133,6 +134,27 @@ steps:
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
       FTR_TEST_CHANNELS: ci-on-commit
+    plugins:
+      - sparse-checkout#v1.6.0:
+          no_cone: true
+          paths:
+            - '/.buildkite/'
+            - '/.node-version'
+            - '/package.json'
+            - '/tsconfig.base.json'
+            - '/versions.json'
+            - '/kibana.jsonc'
+            - '**/kibana.jsonc'
+            - '**/tsconfig.json'
+            - '**/jest.config.js'
+            - '**/jest.integration.config.js'
+            - '**/*.test.js'
+            - '**/*.test.mjs'
+            - '**/*.test.ts'
+            - '**/*.test.tsx'
+          cleanup_sparse_state: true
+          post_checkout:
+            unshallow: true
     retry:
       automatic:
         - exit_status: '*'

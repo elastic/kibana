@@ -188,7 +188,7 @@ async function validateOutputServerless(
 
   try {
     const privateOutput = await outputService.get(SERVERLESS_PRIVATE_OUTPUT_ID);
-    if (isEqual(output.hosts, privateOutput.hosts)) {
+    if (isEqual(output.hosts, privateOutput.hosts) && outputId === SERVERLESS_PRIVATE_OUTPUT_ID) {
       return;
     }
   } catch (e) {

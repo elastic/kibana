@@ -73,7 +73,6 @@ test.describe(
         'management:inference_endpoints',
         'management:model_settings',
         'management:genAiSettings',
-        'management:evals',
         'management:observabilityAiAssistantManagement',
       ];
       for (const deepLinkId of disabledDeepLinks) {

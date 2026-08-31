@@ -228,6 +228,7 @@ export const SharepointServer: ConnectorSpec = {
 
     callRestApi: {
       isTool: true,
+      scope: 'destroy',
       description:
         "Call any SharePoint Server REST API endpoint directly. Use this for advanced queries not covered by the other actions. The path must start with '_api/' (for example, '_api/web/title' or '_api/web/lists/GetByTitle(\\'Documents\\')/items?$top=5'). Prefer the dedicated actions (getLists, getListItems, getFolderContents, etc.) when they cover your use case.",
       input: CallRestApiInputSchema,

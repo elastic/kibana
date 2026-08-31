@@ -7,8 +7,7 @@ Elastic applications (e.g. Cloud console).
 
 The source component lives in `src/platform/kbn-ui/side-navigation/`. This
 packaging layer bundles it into a single JS file with webpack, replacing
-Kibana-only dependencies (`@kbn/i18n`, `@kbn/core-chrome-layout-constants`)
-with lightweight stubs via aliases.
+Kibana-only dependencies (`@kbn/i18n`) with lightweight stubs via aliases.
 
 ## Quick start
 
@@ -26,7 +25,6 @@ import { SideNavigation } from '@kbn/ui-side-navigation';
 
 <SideNavigation
   items={navigationItems}
-  logo={logoConfig}
   isCollapsed={false}
   activeItemId="dashboard"
   onItemClick={handleClick}

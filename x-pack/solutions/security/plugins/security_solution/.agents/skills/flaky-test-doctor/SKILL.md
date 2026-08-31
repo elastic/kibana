@@ -30,7 +30,7 @@ Path relative to this skill's directory.
 
 ## Required sub-skills
 
-- **ON MIGRATION:** cypress-to-scout-migration (Security Solution additive skill, when recommending Scout migration)
+- **ON MIGRATION:** read the general `cypress-to-scout-migration` skill first, then the additive `security-cypress-to-scout-migration` skill co-located in this plugin
 - **ON SCOUT PATTERNS:** scout-ui-testing, scout-api-testing
 
 ## Boundaries
@@ -137,7 +137,7 @@ All fixes must follow team conventions:
 
 **For flakiness:** Provide root cause, before/after code, why the fix works.
 **For bugs:** Describe the bug, affected environments, next steps.
-**For migration candidates:** Read the `cypress-to-scout-migration` skill (the one co-located in this plugin's `.agents/skills/`).
+**For migration candidates:** Read the general `cypress-to-scout-migration` skill at the repository root first, then the additive `security-cypress-to-scout-migration` skill co-located in this plugin's `.agents/skills/`.
 
 ## Information gathering strategy
 

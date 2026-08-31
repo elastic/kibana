@@ -422,7 +422,14 @@ describe('Action Executor', () => {
         signal: undefined,
       });
 
-      expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
+      expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1', {
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          spaceId: 'some-namespace',
+        },
+      });
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -571,7 +578,14 @@ describe('Action Executor', () => {
           profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         });
 
-        expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
+        expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1', {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            spaceId: 'some-namespace',
+          },
+        });
         expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
         const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -661,7 +675,17 @@ describe('Action Executor', () => {
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
-      expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
+      expect(loggerMock.debug).toBeCalledWith(
+        'executing action test:preconfigured: Preconfigured',
+        {
+          labels: {
+            actionId: 'preconfigured',
+            actionLabel: 'test:preconfigured: Preconfigured',
+            actionTypeId: 'test',
+            spaceId: 'some-namespace',
+          },
+        }
+      );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -758,7 +782,15 @@ describe('Action Executor', () => {
         }
       );
       expect(loggerMock.debug).toBeCalledWith(
-        'executing action .cases:system-connector-.cases: System action: .cases'
+        'executing action .cases:system-connector-.cases: System action: .cases',
+        {
+          labels: {
+            actionId: 'system-connector-.cases',
+            actionLabel: '.cases:system-connector-.cases: System action: .cases',
+            actionTypeId: '.cases',
+            spaceId: 'some-namespace',
+          },
+        }
       );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
@@ -869,7 +901,14 @@ describe('Action Executor', () => {
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
-      expect(loggerMock.debug).toBeCalledWith('executing action test.sub-feature-action:1: 1');
+      expect(loggerMock.debug).toBeCalledWith('executing action test.sub-feature-action:1: 1', {
+        labels: {
+          actionId: '1',
+          actionLabel: 'test.sub-feature-action:1: 1',
+          actionTypeId: 'test.sub-feature-action',
+          spaceId: 'some-namespace',
+        },
+      });
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -1310,7 +1349,17 @@ describe('Action Executor', () => {
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
-      expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
+      expect(loggerMock.debug).toBeCalledWith(
+        'executing action test:preconfigured: Preconfigured',
+        {
+          labels: {
+            actionId: 'preconfigured',
+            actionLabel: 'test:preconfigured: Preconfigured',
+            actionTypeId: 'test',
+            spaceId: 'some-namespace',
+          },
+        }
+      );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -1409,7 +1458,15 @@ describe('Action Executor', () => {
       });
 
       expect(loggerMock.debug).toBeCalledWith(
-        'executing action .cases:system-connector-.cases: System action: .cases'
+        'executing action .cases:system-connector-.cases: System action: .cases',
+        {
+          labels: {
+            actionId: 'system-connector-.cases',
+            actionLabel: '.cases:system-connector-.cases: System action: .cases',
+            actionTypeId: '.cases',
+            spaceId: 'some-namespace',
+          },
+        }
       );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
@@ -1513,7 +1570,19 @@ describe('Action Executor', () => {
         await actionExecutor.execute(executeParams);
       }
       expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: message for action execution error: serviceMessage for action execution error'
+        'action execution failure: test:1: 1: message for action execution error: serviceMessage for action execution error',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
     });
 
@@ -1537,11 +1606,34 @@ describe('Action Executor', () => {
 
       expect(executorResult?.errorSource).toBe(TaskErrorSource.FRAMEWORK);
       expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true'
+        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
       expect(loggerMock.error).toBeCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed', 'framework-error'],
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          alertExecutionId: undefined,
+          alertId: undefined,
+          name: '1',
+          ruleId: undefined,
+          ruleName: undefined,
+          spaceId: 'some-namespace',
+        },
+        tags: ['action-run-failed', 'framework-error'],
       });
     });
 
@@ -1568,11 +1660,33 @@ describe('Action Executor', () => {
 
       expect(executorResult?.errorSource).toBe(TaskErrorSource.USER);
       expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true'
+        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
       expect(loggerMock.error).toBeCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed', 'user-error'],
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          alertExecutionId: undefined,
+          alertId: undefined,
+          name: '1',
+          ruleId: undefined,
+          spaceId: 'some-namespace',
+        },
+        tags: ['action-run-failed', 'user-error'],
       });
     });
 
@@ -1613,11 +1727,33 @@ describe('Action Executor', () => {
         errorSource: TaskErrorSource.USER,
       });
       expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: an error occurred while running the action: Refresh token expired. User must re-authorize.'
+        'action execution failure: test:1: 1: an error occurred while running the action: Refresh token expired. User must re-authorize.',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
       expect(loggerMock.error).toBeCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed', 'user-error'],
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          alertExecutionId: undefined,
+          alertId: undefined,
+          name: '1',
+          ruleId: undefined,
+          spaceId: 'some-namespace',
+        },
+        tags: ['action-run-failed', 'user-error'],
       });
     });
 
@@ -1642,7 +1778,19 @@ describe('Action Executor', () => {
         await actionExecutor.execute(executeParams);
       }
       expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: returned unexpected result "invalid-status"'
+        'action execution failure: test:1: 1: returned unexpected result "invalid-status"',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
     });
 
@@ -1730,11 +1878,33 @@ describe('Action Executor', () => {
 
       expect(executorResult?.errorSource).toBe(TaskErrorSource.USER);
       expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: an error occurred while running the action: Client network socket disconnected before secure TLS connection was established; retry: true'
+        'action execution failure: test:1: 1: an error occurred while running the action: Client network socket disconnected before secure TLS connection was established; retry: true',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
       expect(loggerMock.error).toBeCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed', 'user-error'],
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          alertExecutionId: undefined,
+          alertId: undefined,
+          name: '1',
+          ruleId: undefined,
+          spaceId: 'some-namespace',
+        },
+        tags: ['action-run-failed', 'user-error'],
       });
     });
   }

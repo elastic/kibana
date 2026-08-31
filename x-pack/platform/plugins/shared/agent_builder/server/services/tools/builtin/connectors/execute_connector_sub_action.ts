@@ -65,9 +65,19 @@ export const createExecuteConnectorSubActionTool = ({
     'Arguments must look like: {"connectorId":"<id>","subAction":"<name>","params":{...}}. ' +
     'Keep connectorId and subAction at the root; put every argument for the sub-action inside params, not at the root. ' +
     'Use the connector attachment for the Connector ID, allowed sub-action names, and parameter definitions. ' +
-    'Do not invent names or parameters.',
+    'Do not invent names or parameters. ' +
+    'Connectors API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors — ' +
+    'Connectors reference: https://www.elastic.co/docs/reference/kibana/connectors-kibana',
   schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
+  excludeFromMcp: true,
+  annotations: {
+    title: 'Execute Connector Sub-Action',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {

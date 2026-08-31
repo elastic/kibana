@@ -9,10 +9,10 @@
   }
 
   .maplibregl-ctrl-group:not(:empty) {
-    @include euiBottomShadowLarge;
     @include mapToolbarButtonGroupBorderRadius;
-    // background-color is applied reactively via Emotion (useEuiTheme) so it
-    // follows reload-less light/dark theme switches.
+    // background-color and box-shadow are applied reactively via Emotion
+    // (useEuiTheme) in MapContainer's Global styles so they follow reload-less
+    // light/dark theme switches and match the medium shadow EUI panels use.
     transition: transform $euiAnimSpeedNormal ease-in-out;
 
     &:hover {

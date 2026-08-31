@@ -20,6 +20,7 @@ import type { TopLevelSpec } from 'vega-lite';
 import { compile, version as vegaLiteVersion } from 'vega-lite';
 
 import type { CoreTheme } from '@kbn/core/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { EsQueryParser } from './es_query_parser';
 import { EsqlQueryParser } from './esql_query_parser';
 import { Utils, getDefaultAreaGradientFill, getVegaThemeColors } from './utils';
@@ -75,6 +76,7 @@ export class VegaParser {
   filters: Bool;
   timeCache: TimeCache;
   theme: CoreTheme;
+  esqlVariables?: ESQLControlVariable[];
 
   constructor(
     spec: VegaSpec | string,
@@ -82,7 +84,8 @@ export class VegaParser {
     timeCache: TimeCache,
     filters: Bool,
     getServiceSettings: () => Promise<IServiceSettings>,
-    theme: CoreTheme
+    theme: CoreTheme,
+    esqlVariables?: ESQLControlVariable[]
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -94,6 +97,7 @@ export class VegaParser {
     this.filters = filters;
     this.timeCache = timeCache;
     this.theme = theme;
+    this.esqlVariables = esqlVariables;
   }
 
   async parseAsync() {
@@ -607,7 +611,13 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       const onWarn = this._onWarning.bind(this);
       this._urlParsers = {
         elasticsearch: new EsQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
-        esql: new EsqlQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
+        esql: new EsqlQueryParser(
+          this.timeCache,
+          this.searchAPI,
+          this.filters,
+          onWarn,
+          this.esqlVariables
+        ),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
       };

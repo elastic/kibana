@@ -32,6 +32,8 @@ import {
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
+import { getNonLocalQualifiedIndex } from '../../../shared/utils/non_local_index';
+import { LEGACY_ANCESTOR_INDEX } from '../constants/field_names';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -61,9 +63,10 @@ export const InvestigationSection = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const documentIndexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '';
     const isRemoteDocument = useMemo(
-      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
-      [hit]
+      () => isNonLocalIndexName(documentIndexName),
+      [documentIndexName]
     );
     const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const ruleId = useMemo(
@@ -78,9 +81,14 @@ export const InvestigationSection = memo(
       () => rule?.investigation_fields?.field_names ?? [],
       [rule?.investigation_fields?.field_names]
     );
+
     const ancestorsIndexName = useMemo(
-      () => (getFieldValue(hit, 'signal.ancestors.index') as string) ?? '',
-      [hit]
+      () =>
+        getNonLocalQualifiedIndex(
+          (getFieldValue(hit, LEGACY_ANCESTOR_INDEX) as string) ?? '',
+          documentIndexName
+        ),
+      [hit, documentIndexName]
     );
 
     const expanded = useExpandSection({

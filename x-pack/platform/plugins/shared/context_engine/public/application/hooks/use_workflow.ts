@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@kbn/react-query';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
+
+export const isWorkflowNotFoundError = (error: unknown): boolean =>
+  isHttpFetchError(error) && error.response?.status === 404;
 
 export const useWorkflow = (workflowId: string) => {
   const api = useWorkflowsApi();
@@ -14,5 +18,6 @@ export const useWorkflow = (workflowId: string) => {
   return useQuery({
     queryKey: ['context_engine', 'workflow', workflowId],
     queryFn: () => api.getWorkflow(workflowId),
+    retry: (failureCount, error) => (isWorkflowNotFoundError(error) ? false : failureCount < 3),
   });
 };

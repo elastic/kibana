@@ -55,6 +55,7 @@ function extractEqPairs(
 export const filterGroundingEvaluator = {
   name: 'filter_grounding',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ input, output, expected }) => {
     if (!expected.expect_entity_filters) {
       return { score: null, explanation: 'Entity filter evaluation not requested — skipping' };

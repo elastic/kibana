@@ -206,7 +206,6 @@ describe('AWSReusableConnectorForm', () => {
         cloudProvider: 'aws',
         accountType: undefined,
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 
@@ -217,7 +216,6 @@ describe('AWSReusableConnectorForm', () => {
         cloudProvider: 'aws',
         accountType: 'single-account',
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 
@@ -230,7 +228,6 @@ describe('AWSReusableConnectorForm', () => {
         cloudProvider: 'aws',
         accountType: 'organization-account',
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 

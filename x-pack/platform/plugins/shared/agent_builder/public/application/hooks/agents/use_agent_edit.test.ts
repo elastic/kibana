@@ -26,7 +26,7 @@ jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
 
-jest.mock('react-router-dom-v5-compat', () => ({
+jest.mock('@kbn/shared-ux-router', () => ({
   useSearchParams: () => [new URLSearchParams(), jest.fn()],
 }));
 

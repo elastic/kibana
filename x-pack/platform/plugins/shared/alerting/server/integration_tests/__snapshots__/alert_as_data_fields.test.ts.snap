@@ -12227,6 +12227,9 @@ Object {
         "missed_docs_count": Object {
           "type": "long",
         },
+        "missed_docs_percentage": Object {
+          "type": "float",
+        },
       },
       "required": false,
       "type": "object",
