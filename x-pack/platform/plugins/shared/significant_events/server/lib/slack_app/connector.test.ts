@@ -14,7 +14,8 @@ import {
   unregisterElasticAppsSlackConnector,
 } from './connector';
 
-const createLogger = () => ({ debug: jest.fn() } as unknown as jest.Mocked<Logger>);
+const createLogger = () =>
+  ({ debug: jest.fn(), warn: jest.fn() } as unknown as jest.Mocked<Logger>);
 
 const createActions = () => {
   const calls: string[] = [];
@@ -65,6 +66,29 @@ describe('registerElasticAppsSlackConnector', () => {
 
     expect(actions.calls).toEqual(['unregister', 'register']);
   });
+
+  it('reports success so callers can trust the connector is in place', () => {
+    expect(
+      registerElasticAppsSlackConnector({
+        actions: createActions(),
+        logger: createLogger(),
+        tenantKey: 'tenant-A',
+      })
+    ).toBe(true);
+  });
+
+  it('reports failure without logging when the id is held by a connector it cannot replace', () => {
+    const logger = createLogger();
+    const actions = {
+      unregisterDynamicConnector: jest.fn().mockReturnValue(false),
+      registerDynamicConnector: jest.fn().mockReturnValue(false),
+    };
+
+    expect(registerElasticAppsSlackConnector({ actions, logger, tenantKey: 'tenant-A' })).toBe(
+      false
+    );
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
 });
 
 describe('unregisterElasticAppsSlackConnector', () => {
@@ -93,8 +117,12 @@ describe('getRegisteredTenantKey', () => {
     expect(
       getRegisteredTenantKey({
         inMemoryConnectors: [
-          { id: 'other', secrets: { tenantKey: 'tenant-Z' } },
-          { id: ELASTIC_APPS_SLACK_CONNECTOR_ID, secrets: { tenantKey: 'tenant-A' } },
+          { id: 'other', secrets: { tenantKey: 'tenant-Z' }, isDynamic: true },
+          {
+            id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+            secrets: { tenantKey: 'tenant-A' },
+            isDynamic: true,
+          },
         ] as never,
       })
     ).toBe('tenant-A');
@@ -107,7 +135,19 @@ describe('getRegisteredTenantKey', () => {
   it('returns undefined when the registered connector carries no tenant key', () => {
     expect(
       getRegisteredTenantKey({
-        inMemoryConnectors: [{ id: ELASTIC_APPS_SLACK_CONNECTOR_ID, secrets: {} }] as never,
+        inMemoryConnectors: [
+          { id: ELASTIC_APPS_SLACK_CONNECTOR_ID, secrets: {}, isDynamic: true },
+        ] as never,
+      })
+    ).toBeUndefined();
+  });
+
+  it('ignores a connector under the same id that this app did not register', () => {
+    expect(
+      getRegisteredTenantKey({
+        inMemoryConnectors: [
+          { id: ELASTIC_APPS_SLACK_CONNECTOR_ID, secrets: { tenantKey: 'tenant-A' } },
+        ] as never,
       })
     ).toBeUndefined();
   });

@@ -54,17 +54,20 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
   const getLicense = jest.fn().mockResolvedValue({ type: 'platinum' });
 
   // Mutated in place like the actions plugin's own array, so `getRegisteredTenantKey` sees what the
-  // service just did.
-  const inMemoryConnectors: Array<{ id: string; secrets?: unknown }> = [];
+  // service just did. The `isDynamic` handling mirrors the plugin: registration is refused for any
+  // id already present, while unregistration only removes connectors this app registered.
+  const inMemoryConnectors: Array<{ id: string; secrets?: unknown; isDynamic?: boolean }> = [];
   const registerDynamicConnector = jest.fn((connector: { id: string; secrets?: unknown }) => {
     if (inMemoryConnectors.some(({ id }) => id === connector.id)) {
       return false;
     }
-    inMemoryConnectors.push(connector);
+    inMemoryConnectors.push({ ...connector, isDynamic: true });
     return true;
   });
   const unregisterDynamicConnector = jest.fn((connectorId: string) => {
-    const index = inMemoryConnectors.findIndex(({ id }) => id === connectorId);
+    const index = inMemoryConnectors.findIndex(
+      ({ id, isDynamic }) => id === connectorId && isDynamic === true
+    );
     if (index === -1) {
       return false;
     }
@@ -96,6 +99,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
   return {
     server,
     soClient,
+    logger,
     grantAsInternalUser,
     invalidateAsInternalUser,
     getBooleanValue,
@@ -852,6 +856,7 @@ describe('SlackAppService', () => {
       inMemoryConnectors.push({
         id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
         secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
       });
       soClient.get.mockResolvedValue({
         attributes: {
@@ -947,6 +952,7 @@ describe('SlackAppService', () => {
       inMemoryConnectors.push({
         id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
         secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
       });
       soClient.get.mockResolvedValue({
         attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
@@ -963,6 +969,7 @@ describe('SlackAppService', () => {
       inMemoryConnectors.push({
         id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
         secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
       });
       soClient.get.mockResolvedValue({
         attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-B' },
@@ -980,6 +987,7 @@ describe('SlackAppService', () => {
       inMemoryConnectors.push({
         id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
         secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
       });
 
       await new SlackAppService(server).reconcileConnector(soClient as never);
@@ -995,6 +1003,7 @@ describe('SlackAppService', () => {
       inMemoryConnectors.push({
         id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
         secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
       });
       soClient.get.mockResolvedValue({
         attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
@@ -1004,6 +1013,73 @@ describe('SlackAppService', () => {
 
       expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
       expect(soClient.get).not.toHaveBeenCalled();
+    });
+
+    describe('when the connector id is taken by a connector this app does not own', () => {
+      // A preconfigured `elastic-apps-slack` in kibana.yml. It carries the tenant key the reconcile
+      // wants, so matching on the id alone would read as "already correct" even though this app can
+      // neither vouch for its auth nor unregister it.
+      const foreignConnector = {
+        id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+        secrets: { tenantKey: 'tenant-A' },
+      };
+
+      const createCollidingHarness = () => {
+        const harness = createHarness();
+        harness.inMemoryConnectors.push({ ...foreignConnector });
+        harness.soClient.get.mockResolvedValue({
+          attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
+        });
+        return harness;
+      };
+
+      it('does not read a matching tenant key as an already correct registration', async () => {
+        const { server, soClient, registerDynamicConnector } = createCollidingHarness();
+
+        await new SlackAppService(server).reconcileConnector(soClient as never);
+
+        expect(registerDynamicConnector).toHaveBeenCalled();
+      });
+
+      it('leaves the foreign connector in place', async () => {
+        const { server, soClient, inMemoryConnectors } = createCollidingHarness();
+
+        await new SlackAppService(server).reconcileConnector(soClient as never);
+
+        expect(inMemoryConnectors).toEqual([foreignConnector]);
+      });
+
+      it('warns once instead of on every reconcile pass', async () => {
+        const { server, soClient, logger } = createCollidingHarness();
+        const service = new SlackAppService(server);
+
+        await service.reconcileConnector(soClient as never);
+        await service.reconcileConnector(soClient as never);
+        await service.reconcileConnector(soClient as never);
+
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`Could not register the "${ELASTIC_APPS_SLACK_CONNECTOR_ID}"`)
+        );
+      });
+
+      it('warns again when the id is taken a second time', async () => {
+        const { server, soClient, inMemoryConnectors, logger } = createCollidingHarness();
+        const service = new SlackAppService(server);
+
+        await service.reconcileConnector(soClient as never);
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+
+        // The operator drops it from kibana.yml and restarts, so the app takes over the id.
+        inMemoryConnectors.length = 0;
+        await service.reconcileConnector(soClient as never);
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+
+        inMemoryConnectors.splice(0, inMemoryConnectors.length, { ...foreignConnector });
+        await service.reconcileConnector(soClient as never);
+
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+      });
     });
   });
 });

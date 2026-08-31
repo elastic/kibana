@@ -43,6 +43,10 @@ const buildConnector = (tenantKey: string): InMemoryConnector => ({
 /**
  * Unregisters first because `registerDynamicConnector` is a no-op when the id is taken, so a
  * reconnect to a different workspace would otherwise keep serving the previous tenant key.
+ *
+ * Returns false when the id is held by a connector this app does not own (a preconfigured
+ * `elastic-apps-slack` in `kibana.yml`): the unregister leaves it in place and the register is
+ * refused, so callers must not treat the call as having taken effect.
  */
 export const registerElasticAppsSlackConnector = ({
   actions,
@@ -52,10 +56,13 @@ export const registerElasticAppsSlackConnector = ({
   actions: Pick<DynamicConnectorActions, 'registerDynamicConnector' | 'unregisterDynamicConnector'>;
   logger: Logger;
   tenantKey: string;
-}): void => {
+}): boolean => {
   actions.unregisterDynamicConnector(ELASTIC_APPS_SLACK_CONNECTOR_ID);
-  actions.registerDynamicConnector(buildConnector(tenantKey));
+  if (!actions.registerDynamicConnector(buildConnector(tenantKey))) {
+    return false;
+  }
   logger.debug(`Registered the ${ELASTIC_APPS_SLACK_CONNECTOR_ID} connector`);
+  return true;
 };
 
 export const unregisterElasticAppsSlackConnector = ({
@@ -70,12 +77,16 @@ export const unregisterElasticAppsSlackConnector = ({
   }
 };
 
-/** Lets a reconcile tell "already correct" from "registered for the wrong workspace". */
+/**
+ * Lets a reconcile tell "already correct" from "registered for the wrong workspace". Matches on
+ * `isDynamic` as well as the id, because only dynamic connectors are ones this app registered and
+ * can unregister: a foreign connector squatting the id must never read as already correct.
+ */
 export const getRegisteredTenantKey = (
   actions: Pick<DynamicConnectorActions, 'inMemoryConnectors'>
 ): string | undefined => {
   const connector = actions.inMemoryConnectors.find(
-    ({ id }) => id === ELASTIC_APPS_SLACK_CONNECTOR_ID
+    ({ id, isDynamic }) => id === ELASTIC_APPS_SLACK_CONNECTOR_ID && isDynamic === true
   );
   const tenantKey = (connector?.secrets as { tenantKey?: unknown } | undefined)?.tenantKey;
   return typeof tenantKey === 'string' ? tenantKey : undefined;

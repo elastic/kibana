@@ -25,6 +25,7 @@ import {
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
 import {
+  ELASTIC_APPS_SLACK_CONNECTOR_ID,
   getRegisteredTenantKey,
   registerElasticAppsSlackConnector,
   unregisterElasticAppsSlackConnector,
@@ -40,6 +41,12 @@ export interface ListBindingsOptions {
 
 export class SlackAppService {
   private readonly logger: Logger;
+
+  /**
+   * An id collision clears only by editing `kibana.yml` and restarting, so the reconcile loop would
+   * otherwise repeat the warning every interval for the life of the process.
+   */
+  private idTakenWarned = false;
 
   constructor(private readonly server: StreamsServer) {
     this.logger = server.logger.get('slack-app');
@@ -68,11 +75,23 @@ export class SlackAppService {
   }
 
   private publishConnector(tenantKey: string): void {
-    registerElasticAppsSlackConnector({
+    const registered = registerElasticAppsSlackConnector({
       actions: this.server.actions,
       logger: this.logger,
       tenantKey,
     });
+
+    if (registered) {
+      this.idTakenWarned = false;
+      return;
+    }
+
+    if (!this.idTakenWarned) {
+      this.idTakenWarned = true;
+      this.logger.warn(
+        `Could not register the "${ELASTIC_APPS_SLACK_CONNECTOR_ID}" connector: a connector with that id already exists and is not managed by the Elastic Slack app. Remove it from your Kibana configuration so the Elastic Slack app can own the id.`
+      );
+    }
   }
 
   private withdrawConnector(): void {
