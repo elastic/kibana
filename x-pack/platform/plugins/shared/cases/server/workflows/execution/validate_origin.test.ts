@@ -8,7 +8,10 @@
 import type { DocumentResponse } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { getAlertInfoFromComments } from '../../common/utils';
-import { parseSelectedAlertPairs, validateOrigin as validateOriginWithAttachments } from './validate_origin';
+import {
+  parseSelectedAlertPairs,
+  validateOrigin as validateOriginWithAttachments,
+} from './validate_origin';
 
 const theCase = {
   id: 'case-1',
@@ -23,7 +26,10 @@ const theCase = {
  * identical to what alert preprocessing later fetches.
  */
 const validateOrigin = (
-  params: Omit<Parameters<typeof validateOriginWithAttachments>[0], 'attachedAlerts' | 'selectedAlerts'> & {
+  params: Omit<
+    Parameters<typeof validateOriginWithAttachments>[0],
+    'attachedAlerts' | 'selectedAlerts'
+  > & {
     inputs: Record<string, unknown>;
   }
 ): void => {
@@ -358,30 +364,34 @@ describe('parseSelectedAlertPairs', () => {
   });
 
   it('throws 400 when alertIds is not an array', () => {
-    expect(() =>
-      parseSelectedAlertPairs({ event: { alertIds: 'alert-1' } })
-    ).toThrow('inputs.event.alertIds must be an array.');
-    expect(() =>
-      parseSelectedAlertPairs({ event: { alertIds: 42 } })
-    ).toThrow('inputs.event.alertIds must be an array.');
+    expect(() => parseSelectedAlertPairs({ event: { alertIds: 'alert-1' } })).toThrow(
+      'inputs.event.alertIds must be an array.'
+    );
+    expect(() => parseSelectedAlertPairs({ event: { alertIds: 42 } })).toThrow(
+      'inputs.event.alertIds must be an array.'
+    );
   });
 
   it('throws 400 when an entry has a non-string _id', () => {
     expect(() =>
       parseSelectedAlertPairs({ event: { alertIds: [{ _id: 4242, _index: '.alerts' }] } })
-    ).toThrow('Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.');
+    ).toThrow(
+      'Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.'
+    );
   });
 
   it('throws 400 when an entry has a non-string _index', () => {
     expect(() =>
       parseSelectedAlertPairs({ event: { alertIds: [{ _id: 'alert-1', _index: 99 }] } })
-    ).toThrow('Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.');
+    ).toThrow(
+      'Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.'
+    );
   });
 
   it('throws 400 when an entry is not an object', () => {
-    expect(() =>
-      parseSelectedAlertPairs({ event: { alertIds: ['alert-1'] } })
-    ).toThrow('Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.');
+    expect(() => parseSelectedAlertPairs({ event: { alertIds: ['alert-1'] } })).toThrow(
+      'Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.'
+    );
   });
 
   it(`throws 400 when alertIds exceeds MAX_ALERTS_PER_CASE entries`, () => {
@@ -389,19 +399,103 @@ describe('parseSelectedAlertPairs', () => {
       _id: `alert-${i}`,
       _index: '.alerts',
     }));
-    expect(() =>
-      parseSelectedAlertPairs({ event: { alertIds: oversized } })
-    ).toThrow(/cannot contain more than/);
+    expect(() => parseSelectedAlertPairs({ event: { alertIds: oversized } })).toThrow(
+      /cannot contain more than/
+    );
   });
 
   it('returns the correct pairs for a valid array', () => {
     expect(
       parseSelectedAlertPairs({
-        event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-a' }, { _id: 'alert-2', _index: '.alerts-b' }] },
+        event: {
+          alertIds: [
+            { _id: 'alert-1', _index: '.alerts-a' },
+            { _id: 'alert-2', _index: '.alerts-b' },
+          ],
+        },
       })
     ).toEqual([
       { _id: 'alert-1', _index: '.alerts-a' },
       { _id: 'alert-2', _index: '.alerts-b' },
     ]);
+  });
+});
+
+// ── cases.observables origin ──────────────────────────────────────────────────
+
+describe('cases.observables origin', () => {
+  const caseWithObs = {
+    ...theCase,
+    observables: [
+      { id: 'obs-1', typeKey: 'ip', value: '1.2.3.4', description: null },
+      { id: 'obs-2', typeKey: 'url', value: 'https://example.com', description: null },
+    ],
+  } as unknown as Case;
+
+  it('passes when all observableIds belong to the case', () => {
+    expect(() =>
+      validateOrigin({
+        origin: { type: 'cases.observables', caseId: 'case-1', observableIds: ['obs-1', 'obs-2'] },
+        caseId: 'case-1',
+        inputs: {},
+        theCase: caseWithObs,
+      })
+    ).not.toThrow();
+  });
+
+  it('passes for a single observableId', () => {
+    expect(() =>
+      validateOrigin({
+        origin: { type: 'cases.observables', caseId: 'case-1', observableIds: ['obs-1'] },
+        caseId: 'case-1',
+        inputs: {},
+        theCase: caseWithObs,
+      })
+    ).not.toThrow();
+  });
+
+  it('throws when an observableId does not belong to the case', () => {
+    expect(() =>
+      validateOrigin({
+        origin: {
+          type: 'cases.observables',
+          caseId: 'case-1',
+          observableIds: ['obs-1', 'unknown-id'],
+        },
+        caseId: 'case-1',
+        inputs: {},
+        theCase: caseWithObs,
+      })
+    ).toThrow('Observable "unknown-id" does not belong to case "case-1".');
+  });
+
+  it('throws when observableIds contains duplicates', () => {
+    expect(() =>
+      validateOrigin({
+        origin: {
+          type: 'cases.observables',
+          caseId: 'case-1',
+          observableIds: ['obs-1', 'obs-1'],
+        },
+        caseId: 'case-1',
+        inputs: {},
+        theCase: caseWithObs,
+      })
+    ).toThrow('observableIds must not contain duplicates');
+  });
+
+  it('throws when origin caseId does not match the target case', () => {
+    expect(() =>
+      validateOrigin({
+        origin: {
+          type: 'cases.observables',
+          caseId: 'case-other',
+          observableIds: ['obs-1'],
+        },
+        caseId: 'case-1',
+        inputs: {},
+        theCase: caseWithObs,
+      })
+    ).toThrow('Workflow origin caseId must match case id "case-1".');
   });
 });

@@ -4429,6 +4429,7 @@ components:
               enum:
                 - cases.case
                 - cases.observable
+                - cases.observables
                 - cases.alert
                 - cases.alerts
             id:

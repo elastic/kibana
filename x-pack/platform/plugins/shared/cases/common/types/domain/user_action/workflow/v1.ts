@@ -10,6 +10,7 @@ import { UserActionTypes } from '../action/v1';
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
 } from './constants';
@@ -28,12 +29,13 @@ export const WorkflowPayloadRt = rt.strict({
  * `buildActivityOrigin` actually writes for that type. A `cases.case` origin never carries
  * `index`, `typeKey`, or `value`; a `cases.observable` origin never carries `index`.
  *
- * - `cases.case`       — triggered from the case detail page.
- * - `cases.observable` — triggered from the observables table for a specific observable;
- *                        carries optional `typeKey` + `value` for display.
- * - `cases.alert`      — triggered from the alerts table for a single alert;
- *                        carries optional `index` for the deep link.
- * - `cases.alerts`     — triggered from the alerts table with a multi-alert selection.
+ * - `cases.case`        — triggered from the case detail page.
+ * - `cases.observable`  — triggered from the observables table for a specific observable;
+ *                         carries optional `typeKey` + `value` for display.
+ * - `cases.observables` — triggered from the observables table with a multi-observable selection.
+ * - `cases.alert`       — triggered from the alerts table for a single alert;
+ *                         carries optional `index` for the deep link.
+ * - `cases.alerts`      — triggered from the alerts table with a multi-alert selection.
  */
 export const WorkflowOriginRt = rt.union([
   rt.strict({
@@ -56,6 +58,11 @@ export const WorkflowOriginRt = rt.union([
       }),
     ])
   ),
+  rt.strict({
+    type: rt.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
+    /** The primary identifier: caseId. */
+    id: rt.string,
+  }),
   rt.exact(
     rt.intersection([
       rt.type({

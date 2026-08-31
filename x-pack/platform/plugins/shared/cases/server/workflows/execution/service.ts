@@ -15,6 +15,8 @@ import {
   CASE_SAVED_OBJECT,
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   CASES_WORKFLOW_EXECUTION_SOURCE,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
 import { CasesWorkflowExecutionMetadataSchema } from '../../../common/types/api/workflow/v1';
 import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../common/types/api';
@@ -29,6 +31,39 @@ import {
 import type { CasesRequestHandlerContext } from '../../types';
 import { buildActivityOrigin } from './build_activity_origin';
 import { parseSelectedAlertPairs, validateOrigin } from './validate_origin';
+
+interface ResolvedObservable {
+  id: string;
+  typeKey: string;
+  value: string;
+  description: string | null;
+}
+
+/** Resolves observable data from the case for observable-scoped origins. */
+const resolveObservables = (
+  origin: RunCaseWorkflowRequest['origin'],
+  theCase: Awaited<ReturnType<CasesClient['cases']['get']>> | undefined
+): ResolvedObservable[] | undefined => {
+  if (!origin || !theCase) return undefined;
+
+  if (origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE) {
+    const obs = theCase.observables.find(({ id }) => id === origin.observableId);
+    if (!obs) return undefined;
+    return [{ id: obs.id, typeKey: obs.typeKey, value: obs.value, description: obs.description }];
+  }
+
+  if (origin.type === OBSERVABLES_WORKFLOW_ORIGIN_TYPE) {
+    const byId = new Map(theCase.observables.map((o) => [o.id, o]));
+    return origin.observableIds.flatMap((id) => {
+      const obs = byId.get(id);
+      return obs
+        ? [{ id: obs.id, typeKey: obs.typeKey, value: obs.value, description: obs.description }]
+        : [];
+    });
+  }
+
+  return undefined;
+};
 
 interface RunWorkflowParams {
   workflowId: string;
@@ -170,16 +205,25 @@ export class CasesWorkflowRunService {
       throw Boom.badRequest('Workflow is disabled. Enable it to run it.');
     }
 
-    // Strip any client-supplied event.caseIds so the client cannot pre-seed the value;
-    // the server re-injects the authorized set via eventOverrides after preprocessing.
+    // Strip client-supplied values for server-owned event keys so callers cannot
+    // pre-seed them. The server re-injects the authoritative values via eventOverrides
+    // after alert preprocessing runs (which replaces the whole `event` object).
+    const SERVER_OWNED_EVENT_KEYS = new Set(['caseIds', 'observables']);
     const { event: rawEvent, ...otherInputs } = body.inputs;
     const strippedEvent = isPlainObject(rawEvent)
-      ? (({ caseIds: _dropped, ...rest }: Record<string, unknown>) => rest)(
-          rawEvent as Record<string, unknown>
+      ? Object.fromEntries(
+          Object.entries(rawEvent as Record<string, unknown>).filter(
+            ([k]) => !SERVER_OWNED_EVENT_KEYS.has(k)
+          )
         )
       : rawEvent;
     const sanitizedInputs =
       strippedEvent !== undefined ? { ...otherInputs, event: strippedEvent } : otherInputs;
+
+    // Resolve observable data from the already-fetched case for observable-scoped origins.
+    // Enrichment is always derived from the case object (not from client inputs) so a
+    // case-authorized caller cannot inject arbitrary observable values into the workflow.
+    const resolvedObservables = resolveObservables(body.origin, theCase);
 
     const metadata = CasesWorkflowExecutionMetadataSchema.parse({
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
@@ -203,7 +247,10 @@ export class CasesWorkflowRunService {
       request,
       preprocessingContext: context,
       metadata,
-      eventOverrides: { caseIds },
+      eventOverrides: {
+        caseIds,
+        ...(resolvedObservables !== undefined ? { observables: resolvedObservables } : {}),
+      },
     });
 
     // One audit event per case keeps the audit trail queryable by individual case ID.

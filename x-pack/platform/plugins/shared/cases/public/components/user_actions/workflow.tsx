@@ -15,6 +15,7 @@ import type { WorkflowOrigin, WorkflowUserAction } from '../../../common/types/d
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
@@ -94,6 +95,14 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
           <FormattedMessage
             id="xpack.cases.caseView.userActions.ranWorkflowOnAlertLabel"
             defaultMessage="ran {name} on an alert"
+            values={{ name: workflowNameNode }}
+          />
+        );
+      case OBSERVABLES_WORKFLOW_ORIGIN_TYPE:
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.ranWorkflowOnObservablesLabel"
+            defaultMessage="ran {name} on observables"
             values={{ name: workflowNameNode }}
           />
         );
