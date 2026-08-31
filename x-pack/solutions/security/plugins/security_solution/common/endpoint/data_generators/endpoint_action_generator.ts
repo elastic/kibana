@@ -752,7 +752,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       {
         type: 'json',
         content: {
-          code: atError ? 'ra_kill-process_error_not-found' : 'ra_kill-process_success_done',
+          code: atError
+            ? this.randomKillProcessResponseCode('error')
+            : this.randomKillProcessResponseCode('success'),
           ...(!atError
             ? {
                 command: this.randomFileSystemPath(),
