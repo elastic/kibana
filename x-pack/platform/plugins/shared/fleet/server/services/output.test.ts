@@ -2258,6 +2258,7 @@ describe('Output Service', () => {
         ca_trusted_fingerprint: null,
         config_yaml: null,
         ssl: null,
+        type: 'logstash',
       });
     });
 
