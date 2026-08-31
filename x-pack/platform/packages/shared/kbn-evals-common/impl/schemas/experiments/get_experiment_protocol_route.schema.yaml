@@ -10,8 +10,10 @@ paths:
       operationId: GetEvaluationExperimentProtocol
       description: >-
         Get the protocol (what was evaluated and how) and execution record
-        (when, where, how completely) of an evaluation experiment, derived
-        from its score documents.
+        (when, where, how completely) of an evaluation experiment. Read from
+        the stored experiment record when the run created one, falling back
+        to derivation from score documents for historical experiments that
+        were never recorded.
       summary: Get evaluation experiment protocol and execution record
       tags:
         - Evals API
@@ -53,9 +55,10 @@ paths:
             maxLength: 1024
           description: >-
             The workflow execution that launched this experiment, when it was
-            run through Workflows. Supplying it lets the execution status
-            reflect the live workflow state; without it, an experiment with
-            scores reads as completed.
+            run through Workflows. Consulted when the stored experiment
+            record is missing or not yet terminal, so the execution status
+            can reflect the live workflow state; without either, an
+            experiment with scores reads as completed.
       responses:
         '200':
           description: Successful response
@@ -94,7 +97,10 @@ components:
   schemas:
     ExperimentProtocol:
       type: object
-      description: What was evaluated and how, derived from the score documents.
+      description: >-
+        What was evaluated and how. Taken from the protocol snapshot of the
+        stored experiment record when one exists, otherwise derived from the
+        score documents.
       properties:
         experiment_name:
           type: string
@@ -136,8 +142,9 @@ components:
           type: boolean
           description: >-
             Whether the dataset still exists in this space. When false, the
-            description and current example count are unavailable and only
-            the id and name recorded on the scores remain.
+            description and example count are only present when a stored
+            experiment record supplies the snapshot taken when the run
+            started.
         description:
           type: string
           maxLength: 2048
@@ -211,6 +218,18 @@ components:
         hostname:
           type: string
           maxLength: 256
+        started_at:
+          type: string
+          maxLength: 64
+          description: When execution began, from the stored experiment record.
+        completed_at:
+          type: string
+          maxLength: 64
+          description: When execution finished, from the stored experiment record.
+        error:
+          type: string
+          maxLength: 4096
+          description: Why the run failed, from the stored experiment record.
         status:
           type: string
           enum:
@@ -220,18 +239,28 @@ components:
             - failed
             - cancelled
           description: >-
-            Derived execution status. Taken from the live workflow execution
-            when `workflow_execution_id` names one; otherwise an experiment
-            with scores reads as completed, since score documents alone
-            cannot distinguish a finished run from an interrupted one.
+            Execution status. The stored experiment record is authoritative
+            once terminal; a missing or still-running record defers to the
+            live workflow execution when `workflow_execution_id` names one.
+            Without either, an experiment with scores reads as completed,
+            since score documents alone cannot distinguish a finished run
+            from an interrupted one.
         status_source:
           type: string
           enum:
+            - record
             - workflow
             - scores
-          description: Whether `status` came from the workflow execution or was assumed from score presence.
+          description: >-
+            Whether `status` came from the stored experiment record, the live
+            workflow execution, or was assumed from score presence.
         completeness:
           $ref: '#/components/schemas/ExperimentCompleteness'
+        task_counters:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/ExperimentRecordCompleteness'
+          description: >-
+            Task-level counters reported when the run was finalized. Only
+            present when a stored experiment record carries them.
       required:
         - status
         - status_source

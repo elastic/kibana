@@ -471,6 +471,15 @@ node scripts/evals dataplex sync --dry-run   # Preview changes
 
 ## 4. Developer details
 
+### Experiment records
+
+Besides ingesting score documents, the CLI executor writes a **first-class experiment record** for every experiment it runs:
+
+- When a run starts, it snapshots the protocol (dataset, task model, evaluator list, repetitions) and provenance (git, CI, hostname) via `POST /internal/evals/experiments/{experimentId}/_record`.
+- When the run ends, it finalizes the record via `POST .../_record/_finalize` with the terminal status (`completed`/`failed`), task-level counters (successful tasks, task failures, score-ingestion failures), and the error on failure.
+
+Both calls are best effort: against an older Kibana without the record API they are skipped silently, and the run proceeds on scores alone. The `GET /internal/evals/experiments/{experimentId}/protocol` endpoint prefers the stored record when it exists and falls back to deriving the protocol from score documents for historical experiments (see the [evals plugin README](../../../plugins/shared/evals/README.md#experiment-records)).
+
 ### Automated label sync
 
 `models:*` and `models:judge:*` labels are synced automatically:

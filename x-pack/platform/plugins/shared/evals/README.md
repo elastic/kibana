@@ -74,13 +74,14 @@ node scripts/edot_collector
 
 The plugin reads from the following indices:
 
-| Index pattern                  | Source                | Contents                   |
-| ------------------------------ | --------------------- | -------------------------- |
-| `.evaluation-scores`           | Score ingestion API   | Evaluation score documents |
-| `.evaluation-datasets`         | Datasets API          | Dataset metadata           |
-| `.evaluation-dataset-examples` | Datasets API          | Dataset examples           |
-| `.evaluation-evaluators`       | Evaluators API        | User-defined evaluators    |
-| `traces-*`                     | OTLP / EDOT collector | OpenTelemetry trace spans  |
+| Index pattern                  | Source                | Contents                               |
+| ------------------------------ | --------------------- | -------------------------------------- |
+| `.evaluation-scores`           | Score ingestion API   | Evaluation score documents             |
+| `.evaluation-experiments`      | Experiment record API | Experiment records (protocol + status) |
+| `.evaluation-datasets`         | Datasets API          | Dataset metadata                       |
+| `.evaluation-dataset-examples` | Datasets API          | Dataset examples                       |
+| `.evaluation-evaluators`       | Evaluators API        | User-defined evaluators                |
+| `traces-*`                     | OTLP / EDOT collector | OpenTelemetry trace spans              |
 
 Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
 
@@ -89,6 +90,15 @@ Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces
 The `@kbn/evals` CLI sends scores via `POST /internal/evals/scores` rather than writing directly to Elasticsearch. The plugin validates the payload and persists documents to the `.evaluation-scores` data stream.
 
 For a shared "golden cluster", set `EVAL_KBN_URL` (and optionally `EVAL_KBN_API_KEY`) to route score ingestion and dataset operations to a remote Kibana instance.
+
+## Experiment records
+
+- `POST /internal/evals/experiments/{experimentId}/_record` creates the record when the run starts, snapshotting the protocol (dataset, task model, evaluator list, repetitions) and provenance (git, CI, hostname, execution id). One record exists per experiment and space; a duplicate create returns `409`.
+- `POST /internal/evals/experiments/{experimentId}/_record/_finalize` marks the run `completed` or `failed` when it ends, with task-level counters (successful tasks, task failures, score-ingestion failures) and an error message on failure.
+
+Both producers write records: the `@kbn/evals` CLI executor and the server-side workflow runner. Writing is best effort, a producer talking to an older Kibana without the record API skips it silently.
+
+The read path is **hybrid**: `GET /internal/evals/experiments/{experimentId}/protocol` prefers the stored record when one exists (true lifecycle status, the protocol as it was at run time, even after the dataset was edited or deleted) and falls back to score-document derivation for historical experiments that were never recorded. Never-recorded data is not reconstructed retroactively.
 
 ## Workflow-based experiment execution
 
@@ -177,7 +187,8 @@ Other plugins can contribute their own production feature as an additional targe
 
 All routes are internal (`elastic-api-version: 1`). Read routes require the `read_evals` privilege; write routes require `manage_evals`.
 
-- **Experiments** — list, detail, scores, dataset-level examples, and statistical comparison of two experiments
+- **Experiments** — list, detail, protocol/execution record, paginated runs, batched trace retrieval, scores, dataset-level examples, and statistical comparison of two experiments
+- **Experiment records** — create a record at run start and finalize it at run end (see [Experiment records](#experiment-records))
 - **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.
 - **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. The listing accepts `tags` and `maturity` filters and returns facet counts for both (see [Dataset tags and maturity](#dataset-tags-and-maturity)). Supports remote forwarding to a configured golden-cluster Kibana.
 - **Evaluators** — list every evaluator available in the space, and create, read, update, or delete user-defined ones

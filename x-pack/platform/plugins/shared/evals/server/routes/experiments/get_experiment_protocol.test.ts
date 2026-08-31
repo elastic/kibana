@@ -44,14 +44,16 @@ describe('GET /internal/evals/experiments/{experimentId}/protocol', () => {
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
     };
     const getMetadata = jest.fn().mockResolvedValue(undefined);
+    const getRecord = jest.fn().mockResolvedValue(undefined);
     const context = coreMock.createCustomRequestHandlerContext({
       evals: {
         evaluationScoreService,
         datasetService: { getClient: () => ({ getMetadata }) },
+        experimentRecordService: { getClient: () => ({ get: getRecord }) },
       } as any,
     });
 
-    return { handler, context, evaluationScoreService, getMetadata, logger };
+    return { handler, context, evaluationScoreService, getMetadata, getRecord, logger };
   };
 
   const makeRequest = (query: Record<string, string> = {}, experimentId = 'experiment-abc') =>
@@ -127,6 +129,46 @@ describe('GET /internal/evals/experiments/{experimentId}/protocol', () => {
         ],
       },
     },
+  });
+
+  const storedRecord = (overrides: Record<string, unknown> = {}) => ({
+    id: 'default_experiment-abc',
+    experiment_id: 'experiment-abc',
+    name: 'Recorded experiment',
+    protocol: {
+      dataset: {
+        id: 'dataset-1',
+        name: 'My Dataset',
+        description: 'Snapshot description',
+        examples_count: 4,
+      },
+      task: { model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' } },
+      evaluators: [
+        {
+          name: 'correctness',
+          version: '3',
+          kind: 'llm',
+          model: { id: 'claude-3-snapshot', family: 'Claude', provider: 'Anthropic' },
+        },
+        { name: 'latency', kind: 'code' },
+      ],
+      total_repetitions: 3,
+    },
+    status: 'failed',
+    started_at: '2026-08-01T00:00:00.000Z',
+    completed_at: '2026-08-01T00:12:00.000Z',
+    error: 'boom',
+    completeness: { successful_tasks: 5, failed_tasks: 1, score_ingest_failures: 0 },
+    provenance: {
+      execution_id: 'exec-record',
+      suite_id: 'suite-record',
+      hostname: 'record-host',
+      git: { branch: 'record-branch', commit_sha: 'record-sha' },
+    },
+    space_ids: ['default'],
+    created_at: '2026-08-01T00:00:00.000Z',
+    updated_at: '2026-08-01T00:12:00.000Z',
+    ...overrides,
   });
 
   it('returns 404 when no documents match the experiment', async () => {
@@ -376,6 +418,233 @@ describe('GET /internal/evals/experiments/{experimentId}/protocol', () => {
 
     const { query } = evaluationScoreService.search.mock.calls[0][0];
     expect(query.bool.must[0]).toEqual({ term: { 'metadata.execution_id': 'exec-1' } });
+  });
+
+  it('prefers the stored record for protocol identity and terminal status', async () => {
+    const { handler, context, evaluationScoreService, getMetadata, getRecord } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce(searchResponse() as any);
+    getMetadata.mockResolvedValueOnce({
+      id: 'dataset-1',
+      name: 'My Dataset',
+      description: 'A dataset',
+      examples_count: 5,
+      space_ids: ['default'],
+    });
+    getRecord.mockResolvedValueOnce(storedRecord());
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.protocol).toEqual({
+      experiment_name: 'Recorded experiment',
+      task_model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' },
+      total_repetitions: 3,
+      datasets: [
+        {
+          id: 'dataset-1',
+          name: 'My Dataset',
+          evaluated_example_count: 3,
+          exists: true,
+          description: 'A dataset',
+          example_count: 5,
+        },
+      ],
+      evaluators: [
+        {
+          name: 'correctness',
+          version: '3',
+          kind: 'llm',
+          model: { id: 'claude-3-snapshot', family: 'Claude', provider: 'Anthropic' },
+          score_count: 6,
+        },
+        { name: 'latency', version: undefined, kind: 'code', score_count: 6 },
+      ],
+    });
+    expect(response.payload.execution).toEqual({
+      execution_id: 'exec-1',
+      suite_id: 'suite-1',
+      first_score_at: '2026-08-01T00:00:00.000Z',
+      last_score_at: '2026-08-01T00:10:00.000Z',
+      git_branch: 'main',
+      git_commit_sha: 'abc123',
+      ci: { build_url: 'https://ci.example/build/1' },
+      hostname: 'worker-01',
+      started_at: '2026-08-01T00:00:00.000Z',
+      completed_at: '2026-08-01T00:12:00.000Z',
+      error: 'boom',
+      status: 'failed',
+      status_source: 'record',
+      completeness: {
+        example_count: 3,
+        evaluator_count: 2,
+        total_repetitions: 2,
+        expected_scores: 12,
+        received_scores: 12,
+        complete: true,
+      },
+      task_counters: { successful_tasks: 5, failed_tasks: 1, score_ingest_failures: 0 },
+    });
+  });
+
+  it('answers from the record alone before any scores exist', async () => {
+    const { handler, context, evaluationScoreService, getMetadata, getRecord } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+    getMetadata.mockResolvedValueOnce(undefined);
+    getRecord.mockResolvedValueOnce(
+      storedRecord({
+        status: 'running',
+        completed_at: undefined,
+        error: undefined,
+        completeness: undefined,
+      })
+    );
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.protocol).toEqual({
+      experiment_name: 'Recorded experiment',
+      task_model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' },
+      total_repetitions: 3,
+      // The dataset is gone (or not yet readable), so the snapshot supplies
+      // its description and example count.
+      datasets: [
+        {
+          id: 'dataset-1',
+          name: 'My Dataset',
+          evaluated_example_count: 0,
+          exists: false,
+          description: 'Snapshot description',
+          example_count: 4,
+        },
+      ],
+      evaluators: [
+        {
+          name: 'correctness',
+          version: '3',
+          kind: 'llm',
+          model: { id: 'claude-3-snapshot', family: 'Claude', provider: 'Anthropic' },
+          score_count: 0,
+        },
+        { name: 'latency', kind: 'code', score_count: 0 },
+      ],
+    });
+    expect(response.payload.execution).toEqual({
+      execution_id: 'exec-record',
+      suite_id: 'suite-record',
+      first_score_at: undefined,
+      last_score_at: undefined,
+      git_branch: 'record-branch',
+      git_commit_sha: 'record-sha',
+      ci: undefined,
+      hostname: 'record-host',
+      started_at: '2026-08-01T00:00:00.000Z',
+      status: 'running',
+      status_source: 'record',
+      completeness: {
+        example_count: 0,
+        evaluator_count: 0,
+        total_repetitions: 1,
+        expected_scores: 0,
+        received_scores: 0,
+        complete: false,
+      },
+    });
+  });
+
+  it('never attributes a model to a code evaluator, even when the record snapshot carries one', async () => {
+    const { handler, context, evaluationScoreService, getRecord } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+    getRecord.mockResolvedValueOnce(
+      storedRecord({
+        protocol: {
+          dataset: { id: 'dataset-1', name: 'My Dataset' },
+          evaluators: [{ name: 'latency', kind: 'code', model: { id: 'stray-model' } }],
+        },
+      })
+    );
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.protocol.evaluators).toEqual([
+      { name: 'latency', kind: 'code', score_count: 0 },
+    ]);
+  });
+
+  it('lets a live workflow execution supersede a non-terminal record', async () => {
+    const getWorkflowExecution = jest.fn().mockResolvedValue({
+      id: 'wf-exec-1',
+      status: 'failed',
+      workflowDefinition: { tags: [EVALS_EXPERIMENT_WORKFLOW_TAG] },
+    });
+    const { handler, context, evaluationScoreService, getRecord } = setup({
+      workflowsManagement: { management: { getWorkflowExecution } } as any,
+    });
+    evaluationScoreService.search.mockResolvedValueOnce(searchResponse() as any);
+    getRecord.mockResolvedValueOnce(storedRecord({ status: 'running', completed_at: undefined }));
+
+    const response = await handler(
+      context,
+      makeRequest({ workflow_execution_id: 'wf-exec-1' }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload.execution.status).toBe('failed');
+    expect(response.payload.execution.status_source).toBe('workflow');
+  });
+
+  it('keeps a terminal record authoritative over the live workflow execution', async () => {
+    const getWorkflowExecution = jest.fn().mockResolvedValue({
+      id: 'wf-exec-1',
+      status: 'running',
+      workflowDefinition: { tags: [EVALS_EXPERIMENT_WORKFLOW_TAG] },
+    });
+    const { handler, context, evaluationScoreService, getRecord } = setup({
+      workflowsManagement: { management: { getWorkflowExecution } } as any,
+    });
+    evaluationScoreService.search.mockResolvedValueOnce(searchResponse() as any);
+    getRecord.mockResolvedValueOnce(storedRecord());
+
+    const response = await handler(
+      context,
+      makeRequest({ workflow_execution_id: 'wf-exec-1' }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(getWorkflowExecution).not.toHaveBeenCalled();
+    expect(response.payload.execution.status).toBe('failed');
+    expect(response.payload.execution.status_source).toBe('record');
+  });
+
+  it('skips the record when execution_id overrides the experiment identity', async () => {
+    const { handler, context, evaluationScoreService, getRecord } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce(searchResponse() as any);
+
+    const response = await handler(
+      context,
+      makeRequest({ execution_id: 'exec-1' }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(getRecord).not.toHaveBeenCalled();
+    expect(response.payload.execution.status_source).toBe('scores');
+  });
+
+  it('falls back to score derivation when the record lookup fails', async () => {
+    const { handler, context, evaluationScoreService, getRecord, logger } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce(searchResponse() as any);
+    getRecord.mockRejectedValueOnce(new Error('record index unreadable'));
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.protocol.experiment_name).toBe('My experiment');
+    expect(response.payload.execution.status_source).toBe('scores');
+    expect(logger.warn).toHaveBeenCalled();
   });
 
   it('returns 500 when ES throws', async () => {

@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { Model, BuildkiteMetadata } from '../common_attributes.gen';
+import { Model, BuildkiteMetadata, ExperimentRecordCompleteness } from '../common_attributes.gen';
 
 export const ExperimentDatasetInfo = lazySchema(() =>
   z.object({
@@ -27,7 +27,7 @@ export const ExperimentDatasetInfo = lazySchema(() =>
      */
     evaluated_example_count: z.number().int(),
     /**
-     * Whether the dataset still exists in this space. When false, the description and current example count are unavailable and only the id and name recorded on the scores remain.
+     * Whether the dataset still exists in this space. When false, the description and example count are only present when a stored experiment record supplies the snapshot taken when the run started.
      */
     exists: z.boolean(),
     description: z.string().max(2048).optional(),
@@ -60,7 +60,7 @@ export const ExperimentEvaluatorInfo = lazySchema(() =>
 export type ExperimentEvaluatorInfo = z.infer<typeof ExperimentEvaluatorInfo>;
 
 /**
- * What was evaluated and how, derived from the score documents.
+ * What was evaluated and how. Taken from the protocol snapshot of the stored experiment record when one exists, otherwise derived from the score documents.
  */
 export const ExperimentProtocol = lazySchema(() =>
   z.object({
@@ -102,14 +102,30 @@ export const ExperimentExecutionRecord = lazySchema(() =>
     ci: BuildkiteMetadata.optional(),
     hostname: z.string().max(256).optional(),
     /**
-     * Derived execution status. Taken from the live workflow execution when `workflow_execution_id` names one; otherwise an experiment with scores reads as completed, since score documents alone cannot distinguish a finished run from an interrupted one.
+     * When execution began, from the stored experiment record.
+     */
+    started_at: z.string().max(64).optional(),
+    /**
+     * When execution finished, from the stored experiment record.
+     */
+    completed_at: z.string().max(64).optional(),
+    /**
+     * Why the run failed, from the stored experiment record.
+     */
+    error: z.string().max(4096).optional(),
+    /**
+     * Execution status. The stored experiment record is authoritative once terminal; a missing or still-running record defers to the live workflow execution when `workflow_execution_id` names one. Without either, an experiment with scores reads as completed, since score documents alone cannot distinguish a finished run from an interrupted one.
      */
     status: z.enum(['pending', 'running', 'completed', 'failed', 'cancelled']),
     /**
-     * Whether `status` came from the workflow execution or was assumed from score presence.
+     * Whether `status` came from the stored experiment record, the live workflow execution, or was assumed from score presence.
      */
-    status_source: z.enum(['workflow', 'scores']),
+    status_source: z.enum(['record', 'workflow', 'scores']),
     completeness: ExperimentCompleteness,
+    /**
+     * Task-level counters reported when the run was finalized. Only present when a stored experiment record carries them.
+     */
+    task_counters: ExperimentRecordCompleteness.optional(),
   })
 );
 export type ExperimentExecutionRecord = z.infer<typeof ExperimentExecutionRecord>;
@@ -129,7 +145,7 @@ export const GetEvaluationExperimentProtocolRequestQuery = lazySchema(() =>
      */
     execution_id: z.string().max(1024).optional(),
     /**
-     * The workflow execution that launched this experiment, when it was run through Workflows. Supplying it lets the execution status reflect the live workflow state; without it, an experiment with scores reads as completed.
+     * The workflow execution that launched this experiment, when it was run through Workflows. Consulted when the stored experiment record is missing or not yet terminal, so the execution status can reflect the live workflow state; without either, an experiment with scores reads as completed.
      */
     workflow_execution_id: z.string().max(1024).optional(),
   })
