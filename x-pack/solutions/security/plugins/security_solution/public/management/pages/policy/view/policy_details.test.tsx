@@ -33,6 +33,7 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../common/hooks/__mocks__/use_license';
 import { useHostIsolationExceptionsAccess } from '../../../hooks/artifacts/use_host_isolation_exceptions_access';
+import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_license');
@@ -290,6 +291,10 @@ describe('Policy Details', () => {
         await asyncActions;
         policyView.update();
       };
+
+      afterEach(() => {
+        useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
+      });
 
       it('should not display the trusted devices tab with no privileges', async () => {
         await renderWithTrustedDevicesPrivilege(false);
