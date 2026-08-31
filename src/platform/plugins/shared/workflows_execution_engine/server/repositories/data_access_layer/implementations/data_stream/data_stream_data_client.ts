@@ -284,16 +284,6 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       _source: false,
     });
 
-    for (const hit of searchResponse.hits.hits) {
-      if (hit._id && hit._seq_no !== undefined && hit._primary_term !== undefined) {
-        this.deps.versionManager.setVersion(hit._id, {
-          index: hit._index,
-          seqNo: hit._seq_no,
-          primaryTerm: hit._primary_term,
-        });
-      }
-    }
-
     const bulkResponse = await this.bulk({
       items: searchResponse.hits.hits.map((hit) => ({
         operation: 'update',
