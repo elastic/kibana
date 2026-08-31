@@ -850,6 +850,27 @@ describe('hits-per-id reservation derived from the index pattern', () => {
       expect((params as { size?: number }).size).toBeLessThanOrEqual(MAX_ALERTS_PER_TRIGGER);
     }
   });
+
+  it('throws when any shard fails so callers suppress the event rather than emit a partial delta', async () => {
+    // Encoding WHY: a failed shard silently omits documents from the hit list; without
+    // rejection the caller would compute changedIds / actualDelta over a partial source set
+    // and emit truncated: false for a payload that is actually incomplete.
+    esClient.search.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 2, successful: 1, skipped: 0, failed: 1 },
+      hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+    } as estypes.SearchResponse);
+
+    await expect(
+      fetchAlertIdIndexWithSource(
+        esClient,
+        DETECTION_INDEX,
+        ['id-1'],
+        ['kibana.alert.workflow_tags']
+      )
+    ).rejects.toThrow('Partial shard failure during prefetch');
+  });
 });
 
 describe('collectStatusTransitions', () => {
@@ -1201,5 +1222,27 @@ describe('prefetchChangedListFieldIds', () => {
       ['present', 'absent']
     );
     expect(actualRemoved).toEqual(['present']);
+  });
+
+  it('propagates a shard failure as a thrown error so callers suppress the event', async () => {
+    // Encoding WHY: a partial hit set would let changedIds / actualDelta be computed over
+    // incomplete sources, producing truncated: false on a payload that may be wrong.
+    esClient.search.mockResolvedValue({
+      ...sourceHits([{ _id: 'alert-1', tags: [] }]),
+      _shards: { total: 2, successful: 1, skipped: 0, failed: 1 },
+    } as estypes.SearchResponse);
+
+    await expect(
+      prefetchChangedListFieldIds(
+        esClient,
+        'my-index',
+        ['alert-1'],
+        FIELD,
+        ['tag'],
+        [],
+        ['tag'],
+        []
+      )
+    ).rejects.toThrow('Partial shard failure during prefetch');
   });
 });
