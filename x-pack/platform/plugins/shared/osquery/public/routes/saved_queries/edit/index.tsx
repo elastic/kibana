@@ -24,13 +24,12 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout, fullWidthFormContentCss } from '../../../components/layouts';
+import { fullWidthFormContentCss } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useDuplicateGuard } from '../../../common/hooks/use_duplicate_guard';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 import { useCopySavedQuery } from '../../../saved_queries/use_copy_saved_query';
-import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 const euiCalloutCss = {
   margin: '10px',
@@ -40,7 +39,6 @@ const EditSavedQueryPageComponent = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
 
   const permissions = useKibana().services.application.capabilities.osquery;
-  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
@@ -129,7 +127,7 @@ const EditSavedQueryPageComponent = () => {
   const actionButtons = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s">
-        {queryHistoryRework && permissions.writeSavedQueries && (
+        {permissions.writeSavedQueries && (
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={handleDuplicateClick}
@@ -155,7 +153,6 @@ const EditSavedQueryPageComponent = () => {
       </EuiFlexGroup>
     ),
     [
-      queryHistoryRework,
       permissions.writeSavedQueries,
       handleDuplicateClick,
       copySavedQueryMutation.isLoading,
@@ -207,8 +204,6 @@ const EditSavedQueryPageComponent = () => {
     </EuiConfirmModal>
   ) : null;
 
-  const showActionButtons = permissions.writeSavedQueries && (queryHistoryRework || !viewMode);
-
   const formContent = !isLoading &&
     !isEmpty(savedQueryDetails) &&
     savedQueryDetails?.saved_object_id === savedQueryId && (
@@ -223,65 +218,12 @@ const EditSavedQueryPageComponent = () => {
 
   if (isLoading) return null;
 
-  if (queryHistoryRework) {
-    if (error) {
-      return (
-        <div css={fullWidthFormContentCss}>
-          <EuiSpacer size="l" />
-          {backLink}
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('xpack.osquery.editSavedQuery.loadError.title', {
-              defaultMessage: 'Failed to load saved query',
-            })}
-            color="danger"
-            iconType="error"
-          >
-            <FormattedMessage
-              id="xpack.osquery.editSavedQuery.loadError.body"
-              defaultMessage="The saved query could not be loaded. Please try again later."
-            />
-          </EuiCallOut>
-        </div>
-      );
-    }
-
+  if (error) {
     return (
       <div css={fullWidthFormContentCss}>
         <EuiSpacer size="l" />
         {backLink}
         <EuiSpacer size="m" />
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <h1>{titleContent}</h1>
-            </EuiText>
-          </EuiFlexItem>
-          {showActionButtons && <EuiFlexItem grow={false}>{actionButtons}</EuiFlexItem>}
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        {formContent}
-        {deleteModal}
-        {duplicateModal}
-      </div>
-    );
-  }
-
-  const LeftColumn = (
-    <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-      <EuiFlexItem>{backLink}</EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText>
-          <h1>{titleContent}</h1>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  if (error) {
-    return (
-      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
         <EuiCallOut
           announceOnMount
           title={i18n.translate('xpack.osquery.editSavedQuery.loadError.title', {
@@ -295,20 +237,28 @@ const EditSavedQueryPageComponent = () => {
             defaultMessage="The saved query could not be loaded. Please try again later."
           />
         </EuiCallOut>
-      </WithHeaderLayout>
+      </div>
     );
   }
 
   return (
-    <WithHeaderLayout
-      leftColumn={LeftColumn}
-      rightColumn={showActionButtons ? actionButtons : undefined}
-      rightColumnGrow={false}
-    >
+    <div css={fullWidthFormContentCss}>
+      <EuiSpacer size="l" />
+      {backLink}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <h1>{titleContent}</h1>
+          </EuiText>
+        </EuiFlexItem>
+        {permissions.writeSavedQueries && <EuiFlexItem grow={false}>{actionButtons}</EuiFlexItem>}
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
       {formContent}
       {deleteModal}
       {duplicateModal}
-    </WithHeaderLayout>
+    </div>
   );
 };
 

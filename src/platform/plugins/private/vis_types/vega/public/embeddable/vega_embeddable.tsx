@@ -20,7 +20,7 @@ import type {
   SerializedDrilldowns,
 } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
-import type { Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -39,6 +39,7 @@ import {
   type PublishesDataViews,
   type PublishesWritableDescription,
   type PublishesWritableTitle,
+  type PublishesESQLQuery,
   type PublishesEsqlUsage,
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
@@ -56,7 +57,7 @@ import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from 
 import type { VegaParser } from '../data_model/vega_parser';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
-import { specUsesEsql } from '../lib/spec_uses_esql';
+import { getPublishedEsqlQuery, specUsesEsql } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
 
@@ -103,6 +104,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesDataLoading &
   PublishesWritableDescription &
   PublishesWritableTitle &
+  PublishesESQLQuery &
   PublishesEsqlUsage &
   PublishesProjectRoutingOverrides &
   PublishesDataViews &
@@ -130,16 +132,18 @@ export const vegaEmbeddableFactory = (
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
     const spec$ = new BehaviorSubject(initialState.spec);
     const usesEsql$ = new BehaviorSubject(false);
+    const query$ = new BehaviorSubject<AggregateQuery | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
 
-    // A spec change is parsed once for all three derived subjects. `switchMap` is used instead
+    // A spec change is parsed once for all derived subjects. `switchMap` is used instead
     // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
     const specSubscription = spec$
       .pipe(
         map(parseSpec),
         tap((spec) => {
           usesEsql$.next(spec ? specUsesEsql(spec) : false);
+          query$.next(getPublishedEsqlQuery(spec));
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
         }),
         switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
@@ -194,6 +198,7 @@ export const vegaEmbeddableFactory = (
       dataLoading$,
       rendered$,
       usesEsql$,
+      query$,
       projectRoutingOverrides$,
       dataViews$,
       supportedTriggers: () => [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU],
@@ -303,6 +308,7 @@ export const vegaEmbeddableFactory = (
               executionContext: getExecutionContext(),
               projectRouting: data.projectRouting,
               isApproximate: data.isApproximate,
+              esqlVariables: data.esqlVariables,
             });
 
             if (signal.aborted) {
@@ -334,13 +340,7 @@ export const vegaEmbeddableFactory = (
     return {
       api,
       Component: () => {
-        const [renderInput, hideTitle, title, description, rendered] = useBatchedPublishingSubjects(
-          renderInput$,
-          api.hideTitle$,
-          api.title$,
-          api.description$,
-          rendered$
-        );
+        const [renderInput, rendered] = useBatchedPublishingSubjects(renderInput$, rendered$);
         const domNode = useRef<HTMLDivElement>(null);
 
         useEffect(
@@ -360,14 +360,7 @@ export const vegaEmbeddableFactory = (
         }, [rendered]);
 
         return (
-          <div
-            ref={domNode}
-            css={{ width: '100%', height: '100%', display: 'flex' }}
-            data-render-complete={rendered}
-            data-title={hideTitle ? '' : title ?? ''}
-            data-description={description ?? ''}
-            data-shared-item
-          >
+          <div ref={domNode} css={{ width: '100%', height: '100%', display: 'flex' }}>
             {renderInput ? (
               <Suspense fallback={<EuiLoadingChart size="l" />}>
                 <LazyVegaVisComponent

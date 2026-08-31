@@ -134,6 +134,7 @@ describe('project watch', () => {
       type: string;
       if?: string;
       condition?: string;
+      with?: Record<string, unknown>;
       steps?: NestedStep[];
       else?: NestedStep[];
     }
@@ -295,6 +296,88 @@ describe('project watch', () => {
           expect(expr).toContain(`steps.${gate.name}.output.response.approved`);
         }
       }
+    });
+
+    describe('rule tuning alert marking', () => {
+      const tuning = parse(
+        getManagedWorkflowDefinition(PND_RULE_TUNING_WORKFLOW_ID)!.yaml!
+      ) as WorkflowYaml;
+      const tuningSteps = flattenSteps(tuning.steps as unknown as NestedStep[]);
+      const harvest = tuningSteps.find(({ name }) => name === 'harvest_fp_alerts_by_rule')!;
+      const harvestQuery = String(harvest.with?.query);
+      const reviewedTag = (tuning.consts as Record<string, string>).reviewed_tag;
+      const tagSteps = tuningSteps.filter(({ type }) => type === 'security.setAlertTags');
+
+      it('filters the reviewed tag out of the harvest', () => {
+        expect(reviewedTag).toEqual(expect.any(String));
+        expect(harvestQuery).toContain('NOT MV_CONTAINS(`kibana.alert.workflow_tags`');
+        expect(harvestQuery).toContain('{{ consts.reviewed_tag }}');
+      });
+
+      // The tag API writes to the alerts index of the space it runs in, so anything the
+      // harvest reads outside that space could never be marked.
+      it('harvests only the space it can tag in', () => {
+        expect(harvestQuery).toContain('FROM .alerts-security.alerts-{{ workflow.spaceId }}');
+      });
+
+      // A partial aggregation returns a short alert_ids list, so alerts that drove an
+      // approved change would stay untagged and come back on the next sweep.
+      it('refuses partial harvest results', () => {
+        expect(harvest.with?.allow_partial_results).toBe(false);
+      });
+
+      it('tags the harvested alerts once a decision is recorded', () => {
+        expect(tagSteps.map(({ name }) => name)).toEqual([
+          'mark_alerts_dismissed',
+          'mark_alerts_applied',
+        ]);
+
+        const [dismissed, applied] = tagSteps;
+        expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
+        expect(dismissed.with?.tags_to_add).toBe('${{ consts.dismissed_tags }}');
+        expect(applied.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(applied.with?.tags_to_add).toBe('${{ consts.applied_tags }}');
+      });
+
+      // The tag API requires an array; only a value that is exactly one `${{ }}`
+      // expression survives templating as an array instead of a string.
+      it('passes tags_to_add as a single expression, never a template', () => {
+        for (const step of tagSteps) {
+          expect(String(step.with?.tags_to_add)).toMatch(/^\$\{\{ [\w.]+ \}\}$/);
+        }
+      });
+
+      it('declares dismissed and applied tag sets', () => {
+        expect(tuning.consts).toEqual(
+          expect.objectContaining({
+            dismissed_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-dismissed'],
+            applied_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-applied'],
+          })
+        );
+        expect(tuning.consts).not.toHaveProperty('reviewed_only_tags');
+      });
+
+      it('does not use classify_proposal or can_apply', () => {
+        expect(tuningSteps.some(({ name }) => name === 'classify_proposal')).toBe(false);
+        expect(JSON.stringify(tuningSteps)).not.toContain('can_apply');
+      });
+
+      // The harvest projects its columns positionally, so reordering KEEP would make the
+      // tag step read some other column as the alert ids.
+      it('reads the alert ids from the column position KEEP assigns them', () => {
+        const keepClause = harvestQuery
+          .split('\n')
+          .find((line) => line.trimStart().startsWith('| KEEP'))!;
+        const columns = keepClause
+          .replace('| KEEP', '')
+          .split(',')
+          .map((column) => column.trim().replace(/`/g, ''));
+
+        expect(columns).toContain('alert_ids');
+        for (const step of tagSteps) {
+          expect(step.with?.alert_ids).toContain(`foreach.item.${columns.indexOf('alert_ids')}`);
+        }
+      });
     });
 
     it('keeps the skills and the preview worker inside the workers themselves', () => {

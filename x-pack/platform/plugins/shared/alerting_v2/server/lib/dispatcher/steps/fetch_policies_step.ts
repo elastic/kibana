@@ -11,6 +11,8 @@ import { ActionPolicySavedObjectServiceInternalToken } from '../../services/acti
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { DEFAULT_GROUPING_MODE } from '../constants';
+import { PolicyCatalog } from '../state';
 import type {
   ActionPolicy,
   ActionPolicyId,
@@ -58,13 +60,13 @@ export class FetchPoliciesStep implements DispatcherStep {
         matcher: doc.attributes.matcher ?? undefined,
         groupBy: doc.attributes.groupBy ?? [],
         tags: doc.attributes.tags ?? [],
-        groupingMode: doc.attributes.groupingMode ?? undefined,
+        groupingMode: doc.attributes.groupingMode ?? DEFAULT_GROUPING_MODE,
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
         apiKey: doc.attributes.apiKey,
       });
     }
 
-    return { type: 'continue', data: { policies } };
+    return { type: 'continue', data: { policies: PolicyCatalog.of(policies) } };
   }
 }
