@@ -32,6 +32,7 @@ describe('ki_feature_similarity_search tool', () => {
     const getScopedClients = jest.fn(async () => {
       return {
         licensing: {},
+        streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ findFeatures }),
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;

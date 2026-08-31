@@ -67,6 +67,7 @@ export const createFeatureSimilaritySearchTool = ({
           server,
           licensing: scopedClients.licensing,
         });
+        await scopedClients.streamsClient.getStream(streamName);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const result = await searchFeatureSimilarity({ kiClient, streamName, args });
 
