@@ -620,7 +620,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
    */
   randomKillProcessResponseCode(type?: 'error' | 'success'): string {
     const codeList = KILL_PROCESS_RESPONSE_CODES.filter((code) => {
-      if (!/_descendant_/.test(code)) {
+      if (/_descendant_/.test(code)) {
         return false;
       }
 
@@ -632,7 +632,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         return /_error_/.test(code);
       }
 
-      return !/_success_/.test(code);
+      return /_success_/.test(code);
     });
 
     return this.randomChoice(codeList);
