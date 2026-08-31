@@ -25,47 +25,58 @@ export interface TitleAreaProps {
    * share the same gap and offset as a real title.
    */
   placeholder?: ReactNode;
+  /**
+   * Discover-specific extra start inset on this wrapper. Does not replace
+   * `Title`'s global no-back `titleOffset`; the two paddings live on different boxes.
+   */
+  padTitleStart?: boolean;
 }
 
-export const TitleArea = React.memo<TitleAreaProps>(({ title, back, size, placeholder }) => {
-  const { euiTheme } = useEuiTheme();
-  const backTargets = toBackTargets(back);
-  const hasBack = backTargets.length > 0;
-  const showTitle = !!title && (isEditableTitle(title) || title.length > 0);
-  const showPlaceholder = !showTitle && placeholder != null;
+export const TitleArea = React.memo<TitleAreaProps>(
+  ({ title, back, size, placeholder, padTitleStart }) => {
+    const { euiTheme } = useEuiTheme();
+    const backTargets = toBackTargets(back);
+    const hasBack = backTargets.length > 0;
+    const showTitle = !!title && (isEditableTitle(title) || title.length > 0);
+    const showPlaceholder = !showTitle && placeholder != null;
 
-  const styles = useMemo(() => {
-    const wrapper = css`
-      display: flex;
-      align-items: center;
-      gap: ${euiTheme.size.s};
-      flex: 0 1 auto;
-      min-width: 0;
-      max-width: 100%;
-    `;
+    const styles = useMemo(() => {
+      const wrapper = css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 100%;
+        ${padTitleStart &&
+        css`
+          padding-inline-start: ${euiTheme.size.xs};
+        `}
+      `;
 
-    // Same inset `Title` applies when there is no back button, so a lone placeholder
-    // lines up with where the title text sits.
-    const placeholderOffset = css`
-      padding-left: ${euiTheme.size.xs};
-    `;
+      // Same inset `Title` applies when there is no back button, so a lone placeholder
+      // lines up with where the title text sits.
+      const placeholderOffset = css`
+        padding-left: ${euiTheme.size.xs};
+      `;
 
-    return { wrapper, placeholderOffset };
-  }, [euiTheme]);
+      return { wrapper, placeholderOffset };
+    }, [euiTheme, padTitleStart]);
 
-  if (!showTitle && !hasBack && !showPlaceholder) {
-    return null;
+    if (!showTitle && !hasBack && !showPlaceholder) {
+      return null;
+    }
+
+    return (
+      <div css={styles.wrapper}>
+        {hasBack && <BackButton targets={backTargets} />}
+        {showTitle && title && <Title title={title} titleOffset={!hasBack} size={size} />}
+        {showPlaceholder && (
+          <div css={!hasBack ? styles.placeholderOffset : undefined}>{placeholder}</div>
+        )}
+      </div>
+    );
   }
-
-  return (
-    <div css={styles.wrapper}>
-      {hasBack && <BackButton targets={backTargets} />}
-      {showTitle && title && <Title title={title} titleOffset={!hasBack} size={size} />}
-      {showPlaceholder && (
-        <div css={!hasBack ? styles.placeholderOffset : undefined}>{placeholder}</div>
-      )}
-    </div>
-  );
-});
+);
 
 TitleArea.displayName = 'TitleArea';

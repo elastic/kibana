@@ -26,7 +26,7 @@ import { LegacyHeaderActionMenu } from './legacy_action_menu';
 
 export type AppHeaderViewProps = DistributiveOmit<
   AppHeaderPresentationProps,
-  'staticItems' | 'fallbackMenu' | 'titleAppend' | 'borderless'
+  'staticItems' | 'fallbackMenu' | 'titleAppend' | 'borderless' | 'padTitleStart'
 > & {
   docLink?: string;
   showAddIntegrations?: boolean;
@@ -67,7 +67,7 @@ const getPublicAppHeaderViewProps = ({
 
 const usePresentationProps = (
   props: AppHeaderViewProps,
-  extras?: Pick<AppHeaderPresentationProps, 'titleAppend' | 'borderless'>
+  extras?: Pick<AppHeaderPresentationProps, 'titleAppend' | 'borderless' | 'padTitleStart'>
 ): AppHeaderPresentationProps => {
   const publicProps = getPublicAppHeaderViewProps(props);
   const back = useBackNavTargets(publicProps.back);
@@ -118,6 +118,7 @@ export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, 
   const presentationProps = usePresentationProps(props, {
     titleAppend: tabsBar,
     borderless: tabsBar != null,
+    padTitleStart: true,
   });
   return <AppHeaderPresentation {...presentationProps} title={props.title} />;
 });
