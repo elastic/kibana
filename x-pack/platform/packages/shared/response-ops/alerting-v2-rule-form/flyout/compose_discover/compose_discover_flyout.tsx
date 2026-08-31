@@ -117,9 +117,9 @@ const CREATE_ESQL_TITLE = i18n.translate(
   { defaultMessage: 'Create ES|QL rule' }
 );
 
-const CREATE_THRESHOLD_TITLE = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.createThresholdTitleLabel',
-  { defaultMessage: 'Create Threshold rule' }
+const CREATE_RULE_FALLBACK_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.createTitleLabel',
+  { defaultMessage: 'Create rule' }
 );
 
 const EDIT_RULE_FALLBACK_TITLE = i18n.translate(
@@ -194,8 +194,8 @@ const getFlyoutTitle = ({
       values: { ruleName: trimmedName },
     });
   }
-  if (builderType === 'threshold') {
-    return CREATE_THRESHOLD_TITLE;
+  if (builderType) {
+    return RULE_BUILDER_REGISTRY[builderType]?.createFlyoutTitle ?? CREATE_RULE_FALLBACK_TITLE;
   }
   return CREATE_ESQL_TITLE;
 };

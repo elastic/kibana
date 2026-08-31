@@ -440,6 +440,11 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByText('Create Threshold rule')).toBeInTheDocument();
     });
 
+    it('shows "Create rule" when builderType is unknown', () => {
+      renderFlyout({ mode: 'create', builderType: 'unknown-builder' });
+      expect(screen.getByText('Create rule')).toBeInTheDocument();
+    });
+
     it('shows "Edit {name}" in edit mode when the rule has a name', () => {
       renderFlyout({
         mode: 'edit',
