@@ -438,7 +438,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'aggregate_metric_double',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -450,7 +450,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'boolean',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -462,7 +462,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'cartesian_point',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -474,7 +474,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'cartesian_shape',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -486,7 +486,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -498,7 +498,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date_nanos',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -510,7 +510,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date_range',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -522,7 +522,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'dense_vector',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -534,7 +534,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -546,7 +546,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double_range',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -558,7 +558,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'exponential_histogram',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -570,7 +570,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'exponential_histogram',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -588,7 +588,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'flattened',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -600,7 +600,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'geo_point',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -612,7 +612,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'geo_shape',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -624,7 +624,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'geohash',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -636,7 +636,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'geohex',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -648,7 +648,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'geotile',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -660,7 +660,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -672,7 +672,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'ip',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -684,7 +684,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'keyword',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -696,7 +696,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -708,7 +708,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'tdigest',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -720,7 +720,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'tdigest',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -738,7 +738,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'text',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -750,7 +750,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'unsigned_long',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
@@ -762,7 +762,7 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'version',
-          optional: false,
+          optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
         },
