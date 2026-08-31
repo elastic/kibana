@@ -311,6 +311,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'waf_otel',
     name: 'AWS WAF',
+    // 'security_identity_compliance' is correct; original scaffolding used
+    // 'management_governance' by mistake — WAF is a security product.
     category: 'security_identity_compliance',
     dataFormat: 'otel',
     policyTemplate: 'waf',

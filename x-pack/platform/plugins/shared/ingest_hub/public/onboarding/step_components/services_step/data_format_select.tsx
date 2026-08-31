@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DataFormat } from '../../aws_service_matrix';
 
+// inputDisplay and dropdownDisplay intentionally share the same i18n key — they render
+// the same label string in different contexts (collapsed select vs open dropdown).
 const DATA_FORMAT_OPTIONS = [
   {
     value: 'otel' as DataFormat,
@@ -95,5 +97,11 @@ export function DataFormatSelect({ dataFormat, onChange, disabled }: DataFormatS
     />
   );
 
-  return disabled ? <EuiToolTip content={disabledTooltip}>{select}</EuiToolTip> : select;
+  // span needed: disabled EuiSuperSelect has pointer-events:none; the span intercepts hover
+  // events so the tooltip fires even when the select is non-interactive.
+  return disabled ? (
+    <EuiToolTip content={disabledTooltip}>
+      <span style={{ display: 'inline-block' }}>{select}</span>
+    </EuiToolTip>
+  ) : select;
 }

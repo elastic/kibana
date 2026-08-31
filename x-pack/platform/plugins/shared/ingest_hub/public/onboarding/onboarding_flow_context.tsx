@@ -224,6 +224,10 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         // during the load window would change the sorted signature and wrongly mark downstream
         // steps incomplete on every reload.
         if (!entry) return true;
+        // OTel service IDs persisted from a prior Observability-space session are silently
+        // dropped here when dataFormat resolves to 'ecs' in a non-Observability space.
+        // The !isDataFormatResolved spinner gate (onboarding_shell.tsx) prevents any action
+        // before resolution, so there is no visible inconsistency for the user.
         return entry.showInUI !== false && (entry.dataFormat ?? 'ecs') === dataFormat;
       }),
     [persistedServices, awsServicesMap, dataFormat]

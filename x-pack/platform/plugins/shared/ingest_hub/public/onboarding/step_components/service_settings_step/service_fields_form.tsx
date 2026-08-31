@@ -60,6 +60,8 @@ function getInputDisplayLabel(input: string, inputTitles?: Record<string, string
         defaultMessage: 'Collect logs via CloudWatch',
       });
     case 'otelcol':
+      // buildAwsServiceMatrix always populates inputTitles.otelcol from pt.title, so the
+      // inputTitles?.[input] lookup above returns before this branch is ever reached.
       return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.otelcol', {
         defaultMessage: 'Collect metrics via CloudWatch',
       });
@@ -172,8 +174,14 @@ function InputVarFields({
 }) {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
 
+  const allConfigFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  // data_stream.dataset is only present on OTel input-package services. useGetDataStreams cannot
+  // be called conditionally (Rules of Hooks), so the fetch always fires — only the derived
+  // value is guarded to avoid building a sorted list for every ECS-format flyout.
+  const needsDatastreams = allConfigFields.includes('data_stream.dataset');
   const { data: dataStreamsData } = useGetDataStreams();
   const datastreams = useMemo(() => {
+    if (!needsDatastreams) return undefined;
     const all = dataStreamsData?.data_streams ?? [];
     // Mirror Fleet's sortDatastreamsByDataset: package's own streams first, then alphabetical.
     return [...all].sort((a, b) => {
@@ -182,9 +190,7 @@ function InputVarFields({
       if (aOwn !== bOwn) return aOwn - bOwn;
       return a.dataset.localeCompare(b.dataset);
     });
-  }, [dataStreamsData, service.packageName]);
-
-  const allConfigFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  }, [dataStreamsData, service.packageName, needsDatastreams]);
   const regionFieldName = getRegionFieldName(service, activeInput);
   const regionMeta = allConfigFields.includes(regionFieldName)
     ? resolveFieldMeta(service, activeInput, regionFieldName)

@@ -127,6 +127,8 @@ export function getFlyoutFields(
     if (!meta) return false;
     // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
     if (meta.isBool) return false;
+    // show_user:false vars intentionally surface here (under Advanced options via isAdvancedVar)
+    // to match the Integrations UI which shows all vars regardless of show_user.
     return true;
   });
 }
