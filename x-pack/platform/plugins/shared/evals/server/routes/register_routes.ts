@@ -15,7 +15,7 @@ import type { EvaluatorRegistry } from '../evaluators/types';
 import type { TaskProviderRegistry } from '../task_providers/types';
 import { registerGetExperimentsRoute } from './experiments/get_experiments';
 import { registerGetExperimentRoute } from './experiments/get_experiment';
-import { registerGetExperimentProtocolRoute } from './experiments/get_experiment_protocol';
+import { registerGetExperimentRecordRoute } from './experiments/get_experiment_record';
 import { registerGetExperimentRunsRoute } from './experiments/get_experiment_runs';
 import { registerGetExperimentTracesRoute } from './experiments/get_experiment_traces';
 import { registerGetExperimentScoresRoute } from './experiments/get_experiment_scores';
@@ -72,7 +72,7 @@ export interface RouteDependencies extends SpaceDependencies {
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetExperimentsRoute(dependencies);
   registerGetExperimentRoute(dependencies);
-  registerGetExperimentProtocolRoute(dependencies);
+  registerGetExperimentRecordRoute(dependencies);
   registerGetExperimentRunsRoute(dependencies);
   registerGetExperimentTracesRoute(dependencies);
   registerGetExperimentScoresRoute(dependencies);

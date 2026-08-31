@@ -9,7 +9,7 @@ export * from './common_attributes.gen';
 
 export * from './experiments/get_experiments_route.gen';
 export * from './experiments/get_experiment_route.gen';
-export * from './experiments/get_experiment_protocol_route.gen';
+export * from './experiments/get_experiment_record_route.gen';
 export * from './experiments/get_experiment_runs_route.gen';
 export * from './experiments/get_experiment_traces_route.gen';
 export * from './experiments/get_experiment_scores_route.gen';

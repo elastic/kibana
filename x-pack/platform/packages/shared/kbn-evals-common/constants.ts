@@ -11,8 +11,6 @@ export const EVALS_EXPERIMENTS_URL = `${EVALS_INTERNAL_URL}/experiments` as cons
 export const EVALS_EXPERIMENT_URL = `${EVALS_INTERNAL_URL}/experiments/{experimentId}` as const;
 export const EVALS_EXPERIMENT_SCORES_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/scores` as const;
-export const EVALS_EXPERIMENT_PROTOCOL_URL =
-  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/protocol` as const;
 export const EVALS_EXPERIMENT_RUNS_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/runs` as const;
 export const EVALS_EXPERIMENT_TRACES_URL =

@@ -98,7 +98,7 @@ For a shared "golden cluster", set `EVAL_KBN_URL` (and optionally `EVAL_KBN_API_
 
 Both producers write records: the `@kbn/evals` CLI executor and the server-side workflow runner. Writing is best effort, a producer talking to an older Kibana without the record API skips it silently.
 
-The read path is **hybrid**: `GET /internal/evals/experiments/{experimentId}/protocol` prefers the stored record when one exists (true lifecycle status, the protocol as it was at run time, even after the dataset was edited or deleted) and falls back to score-document derivation for historical experiments that were never recorded. Never-recorded data is not reconstructed retroactively.
+`GET /internal/evals/experiments/{experimentId}/_record` reads the stored record back: the true lifecycle status and the protocol as it was at run time, even after the dataset was edited or deleted. Experiments that never created a record return `404`.
 
 ## Workflow-based experiment execution
 
