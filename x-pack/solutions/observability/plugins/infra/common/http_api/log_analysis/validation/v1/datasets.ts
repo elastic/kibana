@@ -8,6 +8,7 @@
 import * as rt from 'io-ts';
 import { LimitedSizeArray } from '@kbn/securitysolution-io-ts-types';
 import { MAX_VALIDATION_INDICES } from './constants';
+import { projectRoutingRT } from './shared';
 
 export const LOG_ANALYSIS_VALIDATE_DATASETS_PATH =
   '/api/infra/log_analysis/validation/log_entry_datasets';
@@ -25,7 +26,7 @@ export const validateLogEntryDatasetsRequestPayloadRT = rt.type({
       runtimeMappings: rt.UnknownRecord,
     }),
     rt.partial({
-      projectRouting: rt.string,
+      projectRouting: projectRoutingRT,
     }),
   ]),
 });
