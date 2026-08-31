@@ -131,7 +131,7 @@ describe('installKibanaAssetsWithStreaming', () => {
     });
 
     expect(refs).toEqual([]);
-    expect(soClientWithSpace.bulkCreate).not.toBeCalled();
+    expect(soClientWithSpace.bulkCreate).not.toHaveBeenCalled();
   });
 
   it('should include non-reserved index patterns in returned assetRefs', async () => {
@@ -206,7 +206,7 @@ describe('installKibanaAssetsWithStreaming', () => {
 
       await install({ attributes: { installed_kibana_version: '9.0.0' } });
 
-      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+      expect(soClientWithSpace.bulkCreate).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ overwrite: true })
       );
@@ -217,7 +217,7 @@ describe('installKibanaAssetsWithStreaming', () => {
 
       await install({ attributes: { installed_kibana_version: '9.0.0' } });
 
-      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+      expect(soClientWithSpace.bulkCreate).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ overwrite: false })
       );
@@ -228,7 +228,7 @@ describe('installKibanaAssetsWithStreaming', () => {
 
       await install({ attributes: { installed_kibana_version: '9.0.0' } });
 
-      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+      expect(soClientWithSpace.bulkCreate).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ overwrite: false })
       );
@@ -239,7 +239,7 @@ describe('installKibanaAssetsWithStreaming', () => {
 
       await install({ attributes: {} });
 
-      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+      expect(soClientWithSpace.bulkCreate).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ overwrite: true })
       );
@@ -250,7 +250,7 @@ describe('installKibanaAssetsWithStreaming', () => {
 
       await install(undefined);
 
-      expect(soClientWithSpace.bulkCreate).toBeCalledWith(
+      expect(soClientWithSpace.bulkCreate).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ overwrite: true })
       );
