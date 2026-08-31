@@ -359,6 +359,44 @@ describe('RoundLayout', () => {
     expect(avatar.nextElementSibling).toBe(content);
   });
 
+  it('replaces the current round agent avatar with the streaming loader while loading', () => {
+    useConversationStreamMock.mockReturnValue({
+      sendMessage: jest.fn(),
+      isResponseLoading: true,
+      isStreaming: true,
+      pendingMessage: undefined,
+      error: null,
+      errorSteps: [],
+      retry: jest.fn(),
+      canCancel: false,
+      cancel: jest.fn(),
+      removeError: jest.fn(),
+      resumeRound: jest.fn(),
+      isResuming: false,
+      regenerate: jest.fn(),
+      isRegenerating: false,
+    } as ReturnType<typeof useConversationStream>);
+
+    const round = createRound(1);
+
+    render(
+      <RoundLayout
+        allRounds={[round]}
+        conversationId="conversation-1"
+        isCurrentRound={true}
+        rawRound={round}
+        roundIndex={0}
+        scrollContainerHeight={100}
+      />
+    );
+
+    const avatar = screen.getByTestId('agentBuilderRoundAgentAvatar');
+    const loader = screen.getByLabelText('Streaming response');
+
+    expect(avatar).toContainElement(loader);
+    expect(roundAuthorAvatarMock).not.toHaveBeenCalled();
+  });
+
   it('passes pending round context to the input renderer', () => {
     const round = {
       ...createRound(1),

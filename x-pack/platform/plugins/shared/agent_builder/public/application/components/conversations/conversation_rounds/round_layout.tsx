@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -45,6 +45,9 @@ interface RoundLayoutProps {
 const labels = {
   container: i18n.translate('xpack.agentBuilder.round.container', {
     defaultMessage: 'Conversation round',
+  }),
+  streamingResponse: i18n.translate('xpack.agentBuilder.round.streamingResponse', {
+    defaultMessage: 'Streaming response',
   }),
 };
 
@@ -343,7 +346,11 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
             css={avatarColumnStyles}
             data-test-subj="agentBuilderRoundAgentAvatar"
           >
-            {agent && <RoundAuthorAvatar agent={agent} />}
+            {isLoadingCurrentRound ? (
+              <EuiLoadingElastic size="l" aria-label={labels.streamingResponse} />
+            ) : (
+              agent && <RoundAuthorAvatar agent={agent} />
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj="agentBuilderRoundAgentContent">
             <EuiFlexGroup direction="column" gutterSize="s">
