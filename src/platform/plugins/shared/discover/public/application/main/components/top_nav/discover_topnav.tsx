@@ -79,7 +79,7 @@ export const DiscoverTopNav = ({
   const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
 
   const query = useAppStateSelector((state) => state.query);
-  const isApproximate = useAppStateSelector((state) => state.isApproximate ?? false);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
@@ -199,7 +199,7 @@ export const DiscoverTopNav = ({
 
   const onUseApproximationChange = useCallback(
     (nextValue: boolean) => {
-      dispatch(updateAppState({ appState: { isApproximate: nextValue } }));
+      dispatch(updateAppState({ appState: { esqlApproximation: nextValue } }));
     },
     [dispatch, updateAppState]
   );
@@ -327,7 +327,7 @@ export const DiscoverTopNav = ({
     [esqlModeErrors]
   );
 
-  const { topNavBadges, topNavMenu } = useDiscoverTopNav({
+  const { topNavBadges, topNavMenu, shareAction } = useDiscoverTopNav({
     onOpenSaveModal,
     onOpenSaveAsModal,
     persistedDiscoverSession,
@@ -338,7 +338,11 @@ export const DiscoverTopNav = ({
 
   return (
     <span>
-      <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
+      <DiscoverTopNavMenu
+        topNavBadges={topNavBadges}
+        topNavMenu={topNavMenu}
+        shareAction={shareAction}
+      />
       <SearchBar
         useBackgroundSearchButton={
           customizationContext.displayMode !== 'embedded' &&
@@ -418,7 +422,7 @@ export const DiscoverTopNav = ({
         esqlApproximation={
           isEsqlMode
             ? {
-                isApproximate,
+                isApproximate: esqlApproximation,
                 onChange: onUseApproximationChange,
                 additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
                   defaultMessage: 'Only applies to queries that use one STATS command.',

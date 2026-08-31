@@ -12,6 +12,8 @@ import { test } from '../../fixtures';
 
 const INDEX_TEMPLATE_NAME = 'index-template-test-name';
 const DEFAULT_SNAPSHOT_REPOSITORY_NAME = 'index-template-test-default-repo';
+// ECH has no node-local `path.repo`, so reuse the managed repository it ships with (never create it).
+const CLOUD_DEFAULT_SNAPSHOT_REPOSITORY_NAME = 'found-snapshots';
 
 const enableDataStream = async (page: ScoutPage) => {
   const dataStreamSwitch = page.testSubj
@@ -30,8 +32,14 @@ const enableDataStream = async (page: ScoutPage) => {
 // neither the frozen phase nor the "2 data phases" lifecycle summary exists there.
 test.describe('Index templates tab - template creation', { tag: tags.stateful.classic }, () => {
   // A default snapshot repository must exist for the data-lifecycle frozen phase card to render.
-  test.beforeAll(async ({ esClient }) => {
-    // `/tmp/repo` is one of the locations Scout's stateful ES allows via `path.repo`.
+  test.beforeAll(async ({ esClient, config }) => {
+    if (config.isCloud) {
+      await esClient.cluster.putSettings({
+        persistent: { 'repositories.default_repository': CLOUD_DEFAULT_SNAPSHOT_REPOSITORY_NAME },
+      });
+      return;
+    }
+    // `/tmp/repo` is one of the locations Scout's local stateful ES allows via `path.repo`.
     await esClient.snapshot.createRepository({
       name: DEFAULT_SNAPSHOT_REPOSITORY_NAME,
       repository: { type: 'fs', settings: { location: '/tmp/repo' } },
@@ -53,14 +61,17 @@ test.describe('Index templates tab - template creation', { tag: tags.stateful.cl
     await esClient.indices.deleteIndexTemplate({ name: INDEX_TEMPLATE_NAME }, { ignore: [404] });
   });
 
-  test.afterAll(async ({ esClient }) => {
+  test.afterAll(async ({ esClient, config }) => {
     await esClient.cluster.putSettings({
       persistent: { 'repositories.default_repository': null },
     });
-    await esClient.snapshot.deleteRepository(
-      { name: DEFAULT_SNAPSHOT_REPOSITORY_NAME },
-      { ignore: [404] }
-    );
+    // Only remove the `fs` repository the local branch created; never the managed Cloud one.
+    if (!config.isCloud) {
+      await esClient.snapshot.deleteRepository(
+        { name: DEFAULT_SNAPSHOT_REPOSITORY_NAME },
+        { ignore: [404] }
+      );
+    }
   });
 
   test('can create an index template with data retention', async ({ page, pageObjects }) => {

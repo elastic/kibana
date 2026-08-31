@@ -15,7 +15,10 @@ import {
 import {
   INVESTIGATE_STEP_ID,
   investigationStateSchema,
+  MAX_BLIND_SPOTS,
   MAX_HYPOTHESIS_EVIDENCE,
+  MAX_IMPACT_ENTITIES,
+  MAX_RECOMMENDATIONS,
 } from './investigation_state';
 
 interface ParsedInvestigationWorkflow {
@@ -146,7 +149,19 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       },
     ],
     conclusion: 'Connection pool exhaustion caused by the 14:02 deploy.',
-    gaps_found: ['No profiling data available'],
+    recommendations: [
+      {
+        title: 'Revert the pool-size config change',
+        description: 'Raise it back above the previous value.',
+        code: 'connection_pool:\n  max_size: 100',
+      },
+    ],
+    blind_spots: [
+      {
+        title: 'No profiling data available',
+        description: 'Would have confirmed whether a leak compounded the exhaustion.',
+      },
+    ],
     significant_event_updates: [severityUpdate],
   };
 
@@ -230,6 +245,106 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(observationOnly).success).toBe(true);
   });
 
+  it('accepts evidence carrying a query and a code reference in one entry under both schemas', () => {
+    const withCode = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'A 1ms gRPC timeout in the product validation loop',
+          confidence: 0.95,
+          status: 'confirmed',
+          evidence: [
+            {
+              description: 'Errors spike at 08:40 and the handler re-raises on deadline exceeded.',
+              esql_query: 'FROM logs.otel | STATS count = COUNT(*)',
+              time_range: { from: '2026-08-05T08:00:00Z', to: '2026-08-05T09:10:00Z' },
+              code: {
+                source: 'github_connector',
+                repo: 'elastic/otel-demo-scenario',
+                path: 'src/recommendationservice/recommendation_server.py',
+                host: 'github.com',
+                ref: 'f07c1da942b0c555fab6cf4eab612df1997b1329',
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(withCode)).toBe(true);
+    expect(investigationStateSchema.safeParse(withCode).success).toBe(true);
+  });
+
+  it('accepts a code reference with neither host nor ref, which simply will not be linked', () => {
+    const unlinkable = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'The retry guard is missing.',
+              code: {
+                source: 'code_search',
+                repo: 'open-telemetry/opentelemetry-demo',
+                path: 'src/recommendationservice/recommendation_server.py',
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(unlinkable)).toBe(true);
+    expect(investigationStateSchema.safeParse(unlinkable).success).toBe(true);
+  });
+
+  it('rejects a code reference missing its repo under both schemas', () => {
+    const missingRepo = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'Read the handler.',
+              code: { source: 'github_connector', path: 'src/handler.ts' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(missingRepo)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingRepo).success).toBe(false);
+  });
+
+  it('rejects a code reference with an unknown source under both schemas', () => {
+    const badSource = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'Read the handler.',
+              code: { source: 'gitlab', repo: 'acme/foo', path: 'src/handler.ts' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(badSource)).toBe(false);
+    expect(investigationStateSchema.safeParse(badSource).success).toBe(false);
+  });
+
   it('rejects hypothesis evidence exceeding MAX_HYPOTHESIS_EVIDENCE under both schemas', () => {
     const tooMuchEvidence = {
       summary: 'ok',
@@ -287,6 +402,61 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(oversized)).toBe(false);
     expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
+  });
+
+  it('accepts a minimal recommendation (title only) under both schemas', () => {
+    const minimalRecommendation = {
+      ...validPayload,
+      recommendations: [{ title: 'Roll back the deployment' }],
+    };
+
+    expect(validate(minimalRecommendation)).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalRecommendation).success).toBe(true);
+  });
+
+  it('rejects a recommendations array exceeding MAX_RECOMMENDATIONS under both schemas', () => {
+    const tooManyRecommendations = {
+      ...validPayload,
+      recommendations: Array.from({ length: MAX_RECOMMENDATIONS + 1 }, (_, index) => ({
+        title: `Step ${index}`,
+      })),
+    };
+
+    expect(validate(tooManyRecommendations)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyRecommendations).success).toBe(false);
+  });
+
+  it('rejects a recommendation missing its title under both schemas', () => {
+    const missingTitle = {
+      ...validPayload,
+      recommendations: [{ description: 'Do the thing' }],
+    };
+
+    expect(validate(missingTitle)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingTitle).success).toBe(false);
+  });
+
+  it('rejects a blind spot missing its description under both schemas', () => {
+    const missingDescription = {
+      ...validPayload,
+      blind_spots: [{ title: 'No traces for the cart service' }],
+    };
+
+    expect(validate(missingDescription)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingDescription).success).toBe(false);
+  });
+
+  it('rejects a blind_spots array exceeding MAX_BLIND_SPOTS under both schemas', () => {
+    const tooManyBlindSpots = {
+      ...validPayload,
+      blind_spots: Array.from({ length: MAX_BLIND_SPOTS + 1 }, (_, index) => ({
+        title: `Gap ${index}`,
+        description: `Missing data ${index}`,
+      })),
+    };
+
+    expect(validate(tooManyBlindSpots)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyBlindSpots).success).toBe(false);
   });
 
   it('rejects an event_update with an unknown field under both schemas', () => {
@@ -363,5 +533,81 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(tooMany)).toBe(false);
     expect(investigationStateSchema.safeParse(tooMany).success).toBe(false);
+  });
+
+  it('accepts a payload with an impact entity carrying a name and evidence under both schemas', () => {
+    const withImpact = {
+      ...validPayload,
+      impact: {
+        entities: [
+          {
+            name: 'checkout-service',
+            type: 'service',
+            evidence: {
+              description: 'checkout-service error rate during incident window',
+              esql_query:
+                'FROM traces-* | WHERE service.name == "checkout-service" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == "failure"',
+              time_range: { from: '2026-07-28T14:00:00Z', to: '2026-07-28T15:00:00Z' },
+            },
+          },
+        ],
+      },
+    };
+
+    expect(validate(withImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(withImpact).success).toBe(true);
+  });
+
+  it('accepts an impact entity with only a name (no optional fields) under both schemas', () => {
+    const minimalImpact = {
+      ...validPayload,
+      impact: { entities: [{ name: 'payment-service' }] },
+    };
+
+    expect(validate(minimalImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalImpact).success).toBe(true);
+  });
+
+  it('accepts an impact entity with feature_id and stream_name under both schemas', () => {
+    const withKi = {
+      ...validPayload,
+      impact: {
+        entities: [
+          {
+            name: 'cart-service',
+            type: 'service',
+            feature_id: 'ki-abc123',
+            stream_name: 'logs-app',
+          },
+        ],
+      },
+    };
+
+    expect(validate(withKi)).toBe(true);
+    expect(investigationStateSchema.safeParse(withKi).success).toBe(true);
+  });
+
+  it('rejects an impact entity missing its required name under both schemas', () => {
+    const missingName = {
+      ...validPayload,
+      impact: { entities: [{ type: 'service' }] },
+    };
+
+    expect(validate(missingName)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingName).success).toBe(false);
+  });
+
+  it('rejects an impact entities array exceeding MAX_IMPACT_ENTITIES under both schemas', () => {
+    const tooManyEntities = {
+      ...validPayload,
+      impact: {
+        entities: Array.from({ length: MAX_IMPACT_ENTITIES + 1 }, (_, i) => ({
+          name: `service-${i}`,
+        })),
+      },
+    };
+
+    expect(validate(tooManyEntities)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyEntities).success).toBe(false);
   });
 });

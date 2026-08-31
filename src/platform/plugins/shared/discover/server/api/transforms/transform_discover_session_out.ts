@@ -11,24 +11,28 @@ import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { fromStoredTab } from '../../../common/embeddable/transform_utils';
-import type { DiscoverSessionApiData } from '../schema';
+import type { DiscoverSessionApiData, DiscoverSessionWarning } from '../schema';
 import { transformControlPanelsOut } from './transform_control_panels';
 import { transformVisContextOut } from './transform_vis_context';
 
 export const transformDiscoverSessionOut = (
   attributes: DiscoverSessionAttributes,
   references: SavedObjectReference[] = []
-): DiscoverSessionApiData => {
+): { sessionState: DiscoverSessionApiData; warnings: DiscoverSessionWarning[] } => {
   const { tags } = toAsCodeTags(references);
-
-  return {
+  const warnings: DiscoverSessionWarning[] = [];
+  const sessionState: DiscoverSessionApiData = {
     title: attributes.title,
     description: attributes.description,
     tags,
     tabs: attributes.tabs.map((tab) => {
       const apiTab = fromStoredTab(tab.attributes, references);
       const visContext = transformVisContextOut(tab.attributes.visContext);
-      const controlPanels = transformControlPanelsOut(tab.attributes.controlGroupJson);
+      const { panels: controlPanels, warnings: controlPanelWarnings } = transformControlPanelsOut(
+        tab.attributes.controlGroupJson,
+        tab.id
+      );
+      warnings.push(...controlPanelWarnings);
 
       return {
         id: tab.id,
@@ -55,7 +59,13 @@ export const transformDiscoverSessionOut = (
         }),
         ...(visContext !== undefined && { vis_context: visContext }),
         ...(controlPanels !== undefined && { control_panels: controlPanels }),
+        ...(tab.attributes.isTextBasedQuery &&
+          tab.attributes.esqlApproximation !== undefined && {
+            esql_approximation: tab.attributes.esqlApproximation,
+          }),
       };
     }),
   };
+
+  return { sessionState, warnings };
 };

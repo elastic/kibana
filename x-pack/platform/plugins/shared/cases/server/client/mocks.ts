@@ -29,6 +29,7 @@ import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
+import type { CasesClientSource } from './types';
 import type { CasesFindRequestWithCustomFields, CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
@@ -42,11 +43,7 @@ import type { UserActionsSubClient } from './user_actions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
-import {
-  createExternalReferenceAttachmentTypeRegistryMock,
-  createPersistableStateAttachmentTypeRegistryMock,
-  createUnifiedAttachmentTypeRegistryMock,
-} from '../attachment_framework/mocks';
+import { createUnifiedAttachmentTypeRegistryMock } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
   connectorMappingsServiceMock,
@@ -69,15 +66,18 @@ import {
 } from '../cases_analytics_v2';
 import { CasesEventBus } from '../events/event_bus';
 
-const createCasesEventBusMock = (): CasesEventBus => {
+export const createCasesEventBusMock = (): CasesEventBus => {
   return {
     ...new CasesEventBus(),
     emitCaseCreated: jest.fn(),
     emitCaseUpdated: jest.fn(),
     emitAttachmentsAdded: jest.fn(),
+    emitAlertStatusChanged: jest.fn(),
     onCaseCreated: jest.fn(),
     onCaseUpdated: jest.fn(),
     onAttachmentsAdded: jest.fn(),
+    onAlertStatusChanged: jest.fn(),
+    hasAlertStatusChangedListeners: jest.fn().mockReturnValue(false),
   };
 };
 
@@ -280,8 +280,6 @@ export const createCasesClientMockArgs = () => {
       profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
     },
     spaceId: 'default',
-    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
-    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
@@ -293,14 +291,14 @@ export const createCasesClientMockArgs = () => {
     ),
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
-    // Assignee-identity population is opt-in per test; keep it off by default so
-    // the broad create/update suites keep asserting uid-only assignees.
+    // Assignee-identity population is on by default
     config: {
       ...ConfigSchema.validate({}),
-      assigneeIdentity: { enabled: false },
+      assigneeIdentity: { enabled: true },
     },
     casesEventBus: createCasesEventBusMock(),
     request: httpServerMock.createKibanaRequest(),
+    clientSource: 'rest_api' as CasesClientSource,
   };
 };
 
@@ -324,8 +322,6 @@ export const createCasesClientFactoryMockArgs = () => {
         {}
       )
     ),
-    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
-    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     casesEventBus: createCasesEventBusMock(),

@@ -1,6 +1,6 @@
 # @kbn/evals-suite-ml
 
-Evaluation suites for ML Agent Builder skills (owned by `@elastic/ml-ui`).
+Evaluation suites for ML Agent Builder skills (owned by `@elastic/search-ml-ux`).
 
 ## Anomaly detection skill
 

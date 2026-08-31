@@ -27,9 +27,10 @@ import { useGetFieldDefinitions } from '../../field_library/hooks/use_get_field_
 export const useGlobalInlineFields = ({ enabled = true }: { enabled?: boolean } = {}): {
   globalInlineFields: InlineField[];
   isLoading: boolean;
+  isLoaded: boolean;
 } => {
   const { owner } = useCasesContext();
-  const { data, isFetching } = useGetFieldDefinitions({
+  const { data, isFetching, isSuccess } = useGetFieldDefinitions({
     owner: enabled ? owner : undefined,
     isGlobal: true,
     // Fetch once per session; a new array reference on refetch would churn the column memos.
@@ -44,5 +45,9 @@ export const useGlobalInlineFields = ({ enabled = true }: { enabled?: boolean } 
     [data]
   );
 
-  return { globalInlineFields, isLoading: enabled && isFetching };
+  return {
+    globalInlineFields,
+    isLoading: enabled && isFetching,
+    isLoaded: !enabled || (isSuccess && !isFetching),
+  };
 };

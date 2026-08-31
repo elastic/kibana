@@ -58,7 +58,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
       await spaceTest.step(
         'creates a dynamic reference line when dragging a field onto it',
         async () => {
-          await lens.dragFieldToDimensionTrigger(
+          await lens.dragDrop.dragFieldToDimensionTrigger(
             'bytes',
             `${REFERENCE_LINE_LEFT} > lns-empty-dimension`
           );
@@ -106,7 +106,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
             afterCount: renderCountBeforeClose ?? undefined,
           });
 
-          await lens.dragDimensionToDimension({
+          await lens.dragDrop.dragDimensionToDimension({
             from: `${REFERENCE_LINE_LEFT} > lns-dimensionTrigger`,
             to: `${REFERENCE_LINE_RIGHT} > lns-empty-dimension`,
           });
@@ -136,7 +136,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
       await spaceTest.step(
         'duplicates the original style when duplicating a reference line',
         async () => {
-          await lens.dragDimensionToDimension({
+          await lens.dragDrop.dragDimensionToDimension({
             from: `${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`,
             to: `${REFERENCE_LINE_RIGHT} > lns-empty-dimension`,
           });

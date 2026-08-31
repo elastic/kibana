@@ -24,11 +24,11 @@ import {
   createWorkflowsClientProvider,
 } from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
-import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
+import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
 import type {
@@ -112,13 +112,7 @@ export class WorkflowsPlugin
       audit,
     });
 
-    // Register the `workflowsManagement` route-handler context. Its only purpose is to
-    // fire-and-forget the per-space data-view bootstrap when a workflows route is first
-    // called in a space. The context is accessed in `withServerlessAvailabilityCheck`
-    // to trigger the lazy getter — route handlers never read from it.
-    //
-    // `getStartServices()` bridges the setup/start boundary: `dataViews` is only available
-    // at start time but context providers are registered at setup time.
+    // The availability wrapper accesses this lazy context for every workflows request.
     core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(
       'workflowsManagement',
       async (_context, request) => {
@@ -130,7 +124,6 @@ export class WorkflowsPlugin
           );
         }
 
-        // `getSpaceId` is synchronous and available from setup-time spaces reference.
         const spaceId = spaces?.getSpaceId(request) ?? 'default';
 
         this.executionDataViewsBootstrap.ensureForSpaceFireAndForget(
@@ -139,8 +132,6 @@ export class WorkflowsPlugin
           coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
           request
         );
-
-        // The context value is void — callers await the getter but only to trigger the side effect.
       }
     );
 

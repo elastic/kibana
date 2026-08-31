@@ -21,6 +21,7 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
+import type { AppHeaderShareAction } from '@kbn/app-header';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
@@ -30,16 +31,19 @@ import { getDashboardBackupService } from '../../services/dashboard_api_services
 import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
 import { coreServices, shareService, dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
+import { getDashboardAccessControlState } from '../../utils/get_dashboard_access_control_state';
 import { topNavStrings } from '../_dashboard_app_strings';
-import { ShowShareModal } from './share/show_share_modal';
 import { useShareOptions } from './share/use_share_options';
 
 export const useDashboardMenuItems = ({
   maybeRedirect,
   showResetChange,
+  shareAction,
 }: {
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
+  /** Used to build the menu Share item from the same action passed to App Header. */
+  shareAction?: AppHeaderShareAction;
 }) => {
   const isMounted = useMountedState();
   const accessControlClient = getAccessControlClient();
@@ -59,15 +63,16 @@ export const useDashboardMenuItems = ({
     );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
-  const isInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
-  const canManageAccessControl = useMemo(() => {
-    const userAccessControl = accessControlClient.checkUserAccessControl({
-      accessControl,
-      createdBy: dashboardApi.createdBy,
-      userId: dashboardApi.user?.uid,
-    });
-    return dashboardApi?.user?.hasGlobalAccessControlPrivilege || userAccessControl;
-  }, [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]);
+  const { isInEditAccessMode, canManageAccessControl } = useMemo(
+    () =>
+      getDashboardAccessControlState({
+        accessControlClient,
+        accessControl,
+        createdBy: dashboardApi.createdBy,
+        user: dashboardApi.user,
+      }),
+    [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]
+  );
 
   const isEditButtonDisabled = useMemo(() => {
     if (disableTopNav) return true;
@@ -145,14 +150,6 @@ export const useDashboardMenuItems = ({
     );
   }, [dashboardApi]);
 
-  const saveFromShareModal = useCallback(async () => {
-    if (lastSavedId) {
-      quickSaveDashboard();
-    } else {
-      dashboardInteractiveSave();
-    }
-  }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
-
   const openAddPanelFlyout = useCallback(
     (params?: AppMenuRunActionParams) => {
       openLazyFlyout({
@@ -184,33 +181,6 @@ export const useDashboardMenuItems = ({
 
   const hasExportMenuItems = exportItems.length > 0;
 
-  /**
-   * Show the Dashboard app's share menu
-   */
-  const showShare = useCallback(() => {
-    ShowShareModal({
-      shareOptions,
-      canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
-      accessControl,
-      createdBy: dashboardApi.createdBy,
-      isManaged: dashboardApi.isManaged,
-      accessControlClient,
-      saveDashboard: saveFromShareModal,
-      changeAccessMode: dashboardApi.changeAccessMode,
-    });
-  }, [
-    hasUnsavedChanges,
-    isInEditAccessMode,
-    canManageAccessControl,
-    accessControl,
-    saveFromShareModal,
-    dashboardApi.changeAccessMode,
-    dashboardApi.createdBy,
-    accessControlClient,
-    dashboardApi.isManaged,
-    shareOptions,
-  ]);
-
   const getEditTooltip = useCallback(() => {
     if (dashboardApi.isManaged) {
       return topNavStrings.edit.managedDashboardTooltip;
@@ -220,13 +190,6 @@ export const useDashboardMenuItems = ({
     }
     return topNavStrings.edit.writeRestrictedTooltip;
   }, [isInEditAccessMode, canManageAccessControl, dashboardApi.isManaged]);
-
-  const getShareTooltip = useCallback(() => {
-    if (!dashboardApi.isAccessControlEnabled) return undefined;
-    return isInEditAccessMode
-      ? topNavStrings.share.editModeTooltipContent
-      : topNavStrings.share.writeRestrictedModeTooltipContent;
-  }, [isInEditAccessMode, dashboardApi.isAccessControlEnabled]);
 
   const resetChangesMenuItem = useMemo(() => {
     return {
@@ -287,13 +250,20 @@ export const useDashboardMenuItems = ({
       share: {
         order: viewMode === 'edit' ? 3 : 1,
         label: topNavStrings.share.label,
-        tooltipContent: getShareTooltip(),
-        tooltipTitle: topNavStrings.share.tooltipTitle,
+        tooltipContent: shareAction?.tooltip?.content,
+        tooltipTitle: shareAction?.tooltip?.title,
         id: 'share',
         iconType: 'share',
         testId: 'shareTopNavButton',
-        disableButton: disableTopNav,
-        run: () => showShare(),
+        disableButton: shareAction?.isDisabled ?? disableTopNav,
+        run: (params) => {
+          if (!shareAction) {
+            return;
+          }
+          void shareAction.onClick({
+            returnFocus: params?.returnFocus ?? (() => params?.triggerElement?.focus()),
+          });
+        },
       } as AppMenuItemType,
 
       export: exportMenuItem,
@@ -333,7 +303,7 @@ export const useDashboardMenuItems = ({
 
       switchToViewMode: {
         order: 1,
-        iconType: 'logOut', // use 'logOut' when added to EUI
+        iconType: 'logOut',
         label: topNavStrings.switchToViewMode.label,
         id: 'cancel',
         disableButton: disableTopNav || !lastSavedId || isResetting,
@@ -415,14 +385,13 @@ export const useDashboardMenuItems = ({
     isSaveInProgress,
     lastSavedId,
     dashboardInteractiveSave,
-    showShare,
+    shareAction,
     dashboardApi,
     quickSaveDashboard,
     resetChanges,
     isResetting,
     isEditButtonDisabled,
     getEditTooltip,
-    getShareTooltip,
     appId,
     isQuickSaveButtonDisabled,
     hasUnsavedChanges,
@@ -444,12 +413,14 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.duplicate);
     }
 
-    if (shareService) {
+    if (shareAction) {
       items.push(menuItems.share);
       if (hasExportMenuItems) {
         // only render the export button if we have integrations
         items.push(menuItems.export);
       }
+    } else if (shareService && hasExportMenuItems) {
+      items.push(menuItems.export);
     }
 
     if (showResetChange) {
@@ -480,6 +451,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.isManaged,
     showResetChange,
     hasExportMenuItems,
+    shareAction,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
@@ -491,12 +463,14 @@ export const useDashboardMenuItems = ({
       menuItems.settings,
     ];
 
-    if (shareService) {
+    if (shareAction) {
       items.push(menuItems.share);
       if (hasExportMenuItems) {
         // only render the export button if we have integrations
         items.push(menuItems.export);
       }
+    } else if (shareService && hasExportMenuItems) {
+      items.push(menuItems.export);
     }
 
     if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
@@ -518,6 +492,7 @@ export const useDashboardMenuItems = ({
     menuItems.save,
     menuItems.add,
     hasExportMenuItems,
+    shareAction,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

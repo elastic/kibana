@@ -149,8 +149,8 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
 
       await spaceTest.step('switch to table and drop unsupported static values', async () => {
         await lens.switchToVisualization('lnsDatatable');
-        await expect.poll(async () => lens.datatable.getCountOfDatatableColumns()).toBe(1);
-        expect(await lens.datatable.getDatatableHeaderText(0)).toBe('Count of records');
+        await expect.poll(async () => lens.datatable.getCountOfColumns()).toBe(1);
+        expect(await lens.datatable.getHeaderText(0)).toBe('Count of records');
       });
     }
   );

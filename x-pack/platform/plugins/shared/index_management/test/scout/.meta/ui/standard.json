@@ -1,8 +1,7 @@
 {
-  "sha1": "3c6b52024e103ea929ec30f68277387ffe121029",
+  "sha1": "034ef3cdef2d0c8e6a83aae435e9b38e99cdfe39",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -141,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 8
       }
     },
@@ -161,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 5
       }
     },
@@ -181,7 +180,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 29
       }
     },
@@ -201,7 +200,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 56
       }
     },
@@ -221,8 +220,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 134,
-        "column": 11
+        "line": 132,
+        "column": 5
       }
     },
     {
@@ -241,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 159,
-        "column": 13
+        "line": 158,
+        "column": 5
       }
     },
     {
@@ -618,17 +617,93 @@
       }
     },
     {
+      "id": "12fbe1db6a5131f-344fe5bf4df5313",
+      "title": "Index actions context menu can create an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions_context_menu.spec.ts",
+        "line": 30,
+        "column": 19
+      }
+    },
+    {
+      "id": "12fbe1db6a5131f-6b52749e8ff263d",
+      "title": "Index actions context menu navigates to overview, settings, and mappings tabs from the manage index menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions_context_menu.spec.ts",
+        "line": 37,
+        "column": 23
+      }
+    },
+    {
+      "id": "12fbe1db6a5131f-581b08f6ccf56f0",
+      "title": "Index actions context menu can delete an index from the manage index menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_actions_context_menu.spec.ts",
+        "line": 68,
+        "column": 7
+      }
+    },
+    {
       "id": "8b2302c844751d9-97a3b7268ab4789",
       "title": "Index details page Navigates to the index details page from the home page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
-        "line": 12,
-        "column": 39
+        "line": 23,
+        "column": 63
+      }
+    },
+    {
+      "id": "8b2302c844751d9-4774623dac3b908",
+      "title": "Index details page Shows enabled mappings and settings actions for a fresh index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
+        "line": 30,
+        "column": 86
       }
     },
     {
@@ -641,7 +716,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
-        "line": 31,
+        "line": 27,
         "column": 5
       }
     },
@@ -655,7 +730,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
-        "line": 43,
+        "line": 39,
         "column": 95
       }
     },
@@ -669,7 +744,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
-        "line": 59,
+        "line": 55,
         "column": 8
       }
     },
@@ -683,7 +758,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
-        "line": 69,
+        "line": 65,
         "column": 11
       }
     },
@@ -731,8 +806,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_creation.spec.ts",
-        "line": 58,
-        "column": 19
+        "line": 66,
+        "column": 21
       }
     },
     {
@@ -745,8 +820,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_creation.spec.ts",
-        "line": 91,
-        "column": 24
+        "line": 78,
+        "column": 5
       }
     },
     {
@@ -819,7 +894,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_modification.spec.ts",
-        "line": 40,
+        "line": 46,
         "column": 22
       }
     },

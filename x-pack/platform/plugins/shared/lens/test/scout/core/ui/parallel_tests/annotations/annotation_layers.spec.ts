@@ -66,7 +66,7 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
       await spaceTest.step(
         'duplicates the style when duplicating an annotation and groups them in the chart',
         async () => {
-          await lens.dragDimensionToDimension({
+          await lens.dragDrop.dragDimensionToDimension({
             from: `${ANNOTATIONS_PANEL} > lns-dimensionTrigger`,
             to: `${ANNOTATIONS_PANEL} > lns-empty-dimension`,
           });

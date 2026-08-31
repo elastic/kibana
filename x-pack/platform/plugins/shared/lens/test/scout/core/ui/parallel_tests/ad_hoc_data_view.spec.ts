@@ -142,10 +142,10 @@ spaceTest.describe('Lens ad hoc data view', { tag: '@local-stateful-classic' }, 
 
       await spaceTest.step('switch to another data view and back', async () => {
         await page.testSubj.locator('lnsIndexPatternFieldSearch').fill('');
-        await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.LOGSTASH);
+        await lens.dragDrop.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.LOGSTASH);
         await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield')).toHaveCount(0);
 
-        await lens.switchDataPanelIndexPattern(testData.AD_HOC_DATA_VIEW_NAME);
+        await lens.dragDrop.switchDataPanelIndexPattern(testData.AD_HOC_DATA_VIEW_NAME);
         // Scope to Available fields — the same test subject also appears under Selected.
         await expect(
           page.testSubj
@@ -450,7 +450,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: '@local-stateful-classic' }, 
 
       const assertDiscoverNavigation = async () => {
         const discoverPagePromise = context.waitForEvent('page');
-        await dashboard.clickPanelAction('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+        await dashboard.clickPanelAction(testData.DATA_TEST_SUBJECTS.OPEN_IN_DISCOVER_ACTION);
         const discoverPage = await discoverPagePromise;
 
         try {

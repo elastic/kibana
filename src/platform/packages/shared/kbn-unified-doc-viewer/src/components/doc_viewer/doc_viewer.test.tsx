@@ -399,7 +399,7 @@ describe('<DocViewer />', () => {
     });
   });
 
-  test('adds EBT click attributes to the tab when the doc view defines them', () => {
+  test('adds EBT click attributes to every tab, preferring the ones the doc view defines', () => {
     const registry = new DocViewsRegistry();
     registry.add({
       id: 'test1',
@@ -408,16 +408,24 @@ describe('<DocViewer />', () => {
       ebt: { action: 'viewGenAi', element: 'docViewerTabs' },
       render: jest.fn(() => <></>),
     });
-    registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: jest.fn(() => <></>) });
+    registry.add({
+      id: 'doc_view_test_two',
+      order: 20,
+      title: 'Tab 2',
+      render: jest.fn(() => <></>),
+    });
 
     render(
       <WrappedDocViewer docViews={registry.getAll()} hit={records[0]} dataView={dataViewMock} />
     );
 
-    const tabWithEbt = screen.getByTestId('docViewerTab-test1');
-    expect(tabWithEbt).toHaveAttribute('data-ebt-action', 'viewGenAi');
-    expect(tabWithEbt).toHaveAttribute('data-ebt-element', 'docViewerTabs');
-    expect(screen.getByTestId('docViewerTab-test2')).not.toHaveAttribute('data-ebt-action');
+    const tabWithEbtOverride = screen.getByTestId('docViewerTab-test1');
+    expect(tabWithEbtOverride).toHaveAttribute('data-ebt-action', 'viewGenAi');
+    expect(tabWithEbtOverride).toHaveAttribute('data-ebt-element', 'docViewerTabs');
+
+    const tabWithGeneratedEbt = screen.getByTestId('docViewerTab-doc_view_test_two');
+    expect(tabWithGeneratedEbt).toHaveAttribute('data-ebt-action', 'viewTestTwo');
+    expect(tabWithGeneratedEbt).toHaveAttribute('data-ebt-element', 'docViewerTabs');
   });
 
   test('forwards originDocType to the unified_doc_viewer_viewed event', () => {

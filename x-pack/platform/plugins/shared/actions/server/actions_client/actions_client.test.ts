@@ -549,6 +549,11 @@ describe('create()', () => {
           },
         },
       },
+      inboundEvents: {
+        enabled: false,
+        maxBodyBytes: new ByteSizeValue(1024 * 1024),
+        maxEmitted: 25,
+      },
     });
 
     const localActionTypeRegistryParams = {

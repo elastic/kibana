@@ -15,6 +15,7 @@ import {
   MessageRole,
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
+  InferenceEndpointProvider,
 } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
@@ -344,6 +345,106 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
+    it('defaults reasoning effort to none when native tools are present and the model requires it', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'openai-gpt-5.4',
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: expect.any(Array),
+            reasoning: { effort: 'none' },
+          }),
+        })
+      );
+    });
+
+    it('omits the reasoning default when the model does not tolerate disabled reasoning', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'google-gemini-2.5-pro',
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            reasoning: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('omits the reasoning default when the model is unknown', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            reasoning: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('propagates an explicit reasoning parameter', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          reasoning: { effort: 'low' },
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            reasoning: { effort: 'low' },
+          }),
+        })
+      );
+    });
+
     it('omits temperature when model metadata is missing', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
@@ -575,6 +676,168 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
+    it('sanitizes tool schemas when the provider is googlevertexai', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      const tools = {
+        myTool: {
+          description: 'my tool',
+          schema: {
+            type: 'object' as const,
+            properties: {
+              // shape emitted by zod v4 for `z.record(z.string(), z.string())`
+              someRecord: {
+                type: 'object',
+                propertyNames: { type: 'string' },
+                additionalProperties: { type: 'string' },
+              },
+            } as Record<string, any>,
+          },
+        },
+      };
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          provider: 'googlevertexai',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: [
+              {
+                type: 'function',
+                function: {
+                  name: 'myTool',
+                  description: 'my tool',
+                  parameters: {
+                    type: 'object',
+                    properties: {
+                      someRecord: {
+                        type: 'object',
+                        additionalProperties: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          }),
+        })
+      );
+    });
+
+    it('leaves tool schemas untouched for other providers', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      const schema = {
+        type: 'object' as const,
+        properties: {
+          someRecord: {
+            type: 'object',
+            propertyNames: { type: 'string' },
+            additionalProperties: { type: 'string' },
+          },
+        } as Record<string, any>,
+      };
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          provider: 'amazonbedrock',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            myTool: { description: 'my tool', schema },
+          },
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: [
+              {
+                type: 'function',
+                function: {
+                  name: 'myTool',
+                  description: 'my tool',
+                  parameters: schema,
+                },
+              },
+            ],
+          }),
+        })
+      );
+    });
+
+    it('injects a dummy tool when history has tool use and tools are omitted', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(
+          of({
+            choices: [{ finish_reason: null, index: 0, delta: { content: '' } }],
+            created: Date.now(),
+            id: 'test-chunk',
+            model: 'gpt-4o',
+            object: 'chat.completion.chunk',
+          }),
+          logger
+        )
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [
+            { role: MessageRole.User, content: 'question' },
+            {
+              role: MessageRole.Assistant,
+              content: '',
+              toolCalls: [
+                {
+                  toolCallId: '1',
+                  function: { name: 'myTool', arguments: {} },
+                },
+              ],
+            },
+            {
+              role: MessageRole.Tool,
+              name: 'myTool',
+              toolCallId: '1',
+              response: { ok: true },
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: [
+              {
+                type: 'function',
+                function: {
+                  name: 'doNotCallThisTool',
+                  description: 'Do not call this tool, it is strictly forbidden',
+                  parameters: {
+                    type: 'object',
+                    properties: {},
+                  },
+                },
+              },
+            ],
+          }),
+        })
+      );
+    });
+
     it('uses simulated function calling when functionCalling is "simulated"', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
@@ -664,6 +927,134 @@ describe('inferenceEndpointAdapter', () => {
             .pipe(toArray())
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Inference endpoint not found"`);
+    });
+
+    describe('EIS cache control and session id', () => {
+      beforeEach(() => {
+        executorMock.invoke.mockResolvedValue(
+          observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+        );
+      });
+
+      it('includes cache_control and session_id for EIS endpoints', () => {
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            provider: InferenceEndpointProvider.Elastic,
+            cacheControl: { type: 'ephemeral', ttl: '1h' },
+            sessionId: 'session-abc',
+          })
+          .subscribe(noop);
+
+        expect(executorMock.invoke).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              cache_control: { type: 'ephemeral', ttl: '1h' },
+              session_id: 'session-abc',
+            }),
+          })
+        );
+      });
+
+      it('omits ttl from cache_control when not provided', () => {
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            provider: InferenceEndpointProvider.Elastic,
+            cacheControl: { type: 'ephemeral' },
+            sessionId: 'session-abc',
+          })
+          .subscribe(noop);
+
+        // exact object literal — any extra key (e.g. ttl: undefined) would fail this
+        expect(executorMock.invoke).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              cache_control: { type: 'ephemeral' },
+              session_id: 'session-abc',
+            }),
+          })
+        );
+      });
+
+      it('includes only session_id when cacheControl is not provided', () => {
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            provider: InferenceEndpointProvider.Elastic,
+            sessionId: 'session-xyz',
+          })
+          .subscribe(noop);
+
+        expect(executorMock.invoke).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({ session_id: 'session-xyz' }),
+          })
+        );
+        expect(executorMock.invoke).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.not.objectContaining({ cache_control: expect.anything() }),
+          })
+        );
+      });
+
+      it('omits both fields for non-EIS providers even when values are supplied', () => {
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            provider: InferenceEndpointProvider.AmazonBedrock,
+            cacheControl: { type: 'ephemeral' },
+            sessionId: 'session-abc',
+          })
+          .subscribe(noop);
+
+        expect(executorMock.invoke).toHaveBeenCalled();
+        const request = executorMock.invoke.mock.calls[0][0];
+        expect(request.body).not.toHaveProperty('cache_control');
+        expect(request.body).not.toHaveProperty('session_id');
+      });
+
+      it('omits both fields when endpointProvider is undefined', () => {
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            cacheControl: { type: 'ephemeral' },
+            sessionId: 'session-abc',
+          })
+          .subscribe(noop);
+
+        expect(executorMock.invoke).toHaveBeenCalled();
+        const request = executorMock.invoke.mock.calls[0][0];
+        expect(request.body).not.toHaveProperty('cache_control');
+        expect(request.body).not.toHaveProperty('session_id');
+      });
+
+      it('includes both fields in simulated function calling mode for EIS endpoints', () => {
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            provider: InferenceEndpointProvider.Elastic,
+            functionCalling: 'simulated',
+            cacheControl: { type: 'ephemeral' },
+            sessionId: 'session-abc',
+          })
+          .subscribe(noop);
+
+        expect(executorMock.invoke).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              cache_control: { type: 'ephemeral' },
+              session_id: 'session-abc',
+            }),
+          })
+        );
+      });
     });
   });
 });

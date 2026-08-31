@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// the dist env setup does not include babel/register, just the polyfill
+// sources are pre-transpiled during the build, no runtime transpiler needed
 require('./setup_env');
-require('./polyfill');

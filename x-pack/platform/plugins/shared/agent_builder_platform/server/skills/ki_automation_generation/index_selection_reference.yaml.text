@@ -2,13 +2,17 @@ version: "1"
 name: Index-selection KIs (with ES|QL access patterns)
 description: >
   Profile each source index (mapping + 20 samples) into a per-index Knowledge Indicator
-  that carries parameterized ES|QL access patterns, written into an AI Index.
+  that carries parameterized ES|QL access patterns, verified and written into an AI Index
+  via the context-engine steps.
 enabled: true
 tags:
   - index-selection
   - knowledge-indicators
 consts:
-  target_index: .ai-index-idx-ki-example
+  # Context Engine AI index id; createKi registers the AI index if missing,
+  # backed by ai-index-idx-{{ consts.ai_index_id }}. If an AI index with this id
+  # is already registered, createKi writes to its existing destination instead.
+  ai_index_id: ki-example
   indices:
     - raw-cases-all
     - raw-articles-all
@@ -16,39 +20,6 @@ consts:
 triggers:
   - type: manual
 steps:
-  - name: ensure_target_index
-    type: elasticsearch.indices.create
-    with:
-      index: "{{ consts.target_index }}"
-      mappings:
-        dynamic: strict
-        properties:
-          id: { type: keyword }
-          type: { type: keyword }
-          title:
-            type: text
-            fields:
-              semantic: { type: semantic_text }
-          content:
-            type: text
-            fields:
-              semantic: { type: semantic_text }
-          description:
-            type: text
-            fields:
-              semantic: { type: semantic_text }
-          tags:
-            type: keyword
-          attributes:
-            type: flattened
-          discovery_labels:
-            type: nested
-            properties:
-              value: { type: search_as_you_type }
-              kind: { type: keyword }
-          ingestion_method: { type: keyword }
-    on-failure:
-      continue: true
   - name: loop_indices
     type: foreach
     foreach: "{{ consts.indices | json }}"
@@ -137,6 +108,7 @@ steps:
                 description: >
                   One entry per authoritative question-class. Each is a parameterized
                   ES|QL query the agent fills in at ask-time.
+                minItems: 1
                 items:
                   type: object
                   properties:
@@ -158,6 +130,10 @@ steps:
                           type: { type: string }
                           example: { type: string }
                     returns: { type: string }
+                  required:
+                    - question_type
+                    - esql_template
+                    - esql_example
             required:
               - display_name
               - purpose
@@ -166,19 +142,20 @@ steps:
               - when_to_use
               - access_patterns
         timeout: 120s
-      - name: sink_index_ki
-        type: elasticsearch.index
+      # Build the KI once so verify_ki and sink_index_ki see the same document.
+      # context-engine.createKi sets @timestamp.
+      - name: build_ki
+        type: data.set
         with:
-          index: "{{ consts.target_index }}"
-          id: "{{ foreach.item }}"
-          refresh: wait_for
-          document:
-            type: ki
+          ki:
+            type: index_metadata
             title: "{{ steps.profile_index.output.content.display_name | default: foreach.item }}"
-            ingestion_method: manual
             tags:
               - index-selection
             attributes:
+              # Put every ES|QL query the KI carries in attributes.esql so verifiers check it.
+              # Here: each access pattern's runnable esql_example.
+              esql: "${{ steps.profile_index.output.content.access_patterns | map: 'esql_example' }}"
               key_fields: "{{ steps.profile_index.output.content.key_fields | join: ', ' }}"
               when_to_use: "{{ steps.profile_index.output.content.when_to_use }}"
               joins: "{{ steps.profile_index.output.content.joins | join: ', ' }}"
@@ -197,5 +174,26 @@ steps:
               {% endfor %}
             description: |
               Index profile: {{ steps.profile_index.output.content.display_name }}. Does NOT contain: {{ steps.profile_index.output.content.does_not_contain | join: "; " }}. Key fields: {{ steps.profile_index.output.content.key_fields | join: "; " }}. Joins: {{ steps.profile_index.output.content.joins | join: "; " }}.
+      - name: verify_ki
+        type: context-engine.verifyKi
+        with:
+          ki: "${{ variables.ki }}"
+      # Write only when verification passes; surface failing verifiers + reasons otherwise.
+      - name: gate_on_verification
+        type: if
+        condition: "${{ steps.verify_ki.output.passed }}"
+        steps:
+          # Stable ki_id: re-runs replace this index's KI instead of appending a duplicate.
+          - name: sink_index_ki
+            type: context-engine.createKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ foreach.item }}"
+              ki: "${{ variables.ki }}"
+        else:
+          - name: report_verification_failure
+            type: console
+            with:
+              message: "KI for {{ foreach.item }} failed verification: {{ steps.verify_ki.output.results | json }}"
     iteration-on-failure:
       continue: true

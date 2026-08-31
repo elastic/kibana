@@ -14,7 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import {
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  type MetricsGridSettings,
+} from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { stableStringify } from '@kbn/std';
@@ -117,7 +121,8 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-  const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
+  const { flyoutState, onFlyoutStateChange, profileId, gridSettings, onMetricExplored } =
+    useMetricsExperienceState();
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
@@ -255,6 +260,9 @@ export const MetricsGrid = ({
                   userSource={userSource}
                   description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
+                  profileId={profileId}
+                  gridSettings={gridSettings}
+                  onMetricExplored={onMetricExplored}
                 />
               </EuiFlexItem>
             );
@@ -294,6 +302,9 @@ interface ChartItemProps
   whereStatements?: string[];
   userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
+  gridSettings: MetricsGridSettings;
+  onMetricExplored?: (metricUniqueKey: string) => void;
 }
 
 const ChartItem = React.memo(
@@ -320,8 +331,10 @@ const ChartItem = React.memo(
     onFocusCell,
     onViewDetails,
     userMessages,
+    profileId,
+    gridSettings,
+    onMetricExplored,
   }: ChartItemProps) => {
-    const { profileId, gridSettings, onMetricExplored } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),

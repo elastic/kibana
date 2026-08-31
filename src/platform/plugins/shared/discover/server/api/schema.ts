@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod';
 import {
+  asCodeEsqlApproximationSchema,
   asCodeIdSchema,
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
@@ -68,7 +69,7 @@ const discoverSessionControlWidthSchema = z
     description: 'Minimum width of the control panel.',
   });
 
-const discoverSessionControlPanelSchema = z
+export const discoverSessionControlPanelSchema = z
   .object({
     id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
     type: z.literal(ESQL_CONTROL),
@@ -169,6 +170,7 @@ const discoverSessionEsqlTabSchema = z
     ...discoverSessionTabIdentitySchema.shape,
     ...esqlTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
+    ...asCodeEsqlApproximationSchema.shape,
   })
   .strict();
 
@@ -221,6 +223,49 @@ export const discoverSessionApiResponseSchema = z
   })
   .strict();
 
+/* Shared context for warnings produced while transforming a Discover session tab. */
+const discoverSessionWarningBaseSchema = z.object({
+  message: z.string().meta({ description: 'Why stored content was omitted from the response.' }),
+  tab_id: z.string().meta({ description: 'The ID of the affected tab.' }),
+});
+
+/* Reports one invalid panel while allowing the other panels in the tab to be returned. */
+const discoverSessionDroppedPanelWarningSchema = discoverSessionWarningBaseSchema
+  .extend({
+    type: z.literal('dropped_panel'),
+    panel_id: z.string().meta({ description: 'The ID of the omitted control panel.' }),
+  })
+  .strict();
+
+/* Reports a tab property that could not be returned as a whole. */
+const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSchema
+  .extend({
+    type: z.literal('dropped_property'),
+    key: z.string().meta({ description: 'The name of the property omitted from the response.' }),
+  })
+  .strict();
+
+/* Allows GET responses to preserve valid session data while reporting what was dropped. */
+export const discoverSessionWarningsSchema = z
+  .array(
+    z.union([discoverSessionDroppedPanelWarningSchema, discoverSessionDroppedPropertyWarningSchema])
+  )
+  .meta({
+    description:
+      'Warnings generated when stored Discover session content cannot be fully represented in the API response.',
+  });
+
+export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema.extend({
+  warnings: discoverSessionWarningsSchema.optional(),
+});
+
+export const discoverSessionSanitizeResponseSchema = z
+  .object({
+    data: discoverSessionApiDataSchema,
+    warnings: discoverSessionWarningsSchema.optional(),
+  })
+  .strict();
+
 export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
   query: z
     .string()
@@ -264,9 +309,17 @@ export const discoverSessionSearchResponseSchema = z
 
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
+export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;
+export type DiscoverSessionSanitizeResponse = z.output<
+  typeof discoverSessionSanitizeResponseSchema
+>;
+export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSchema>[number];
 export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
 export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;
 export type DiscoverSessionApiClassicTab = z.output<typeof discoverSessionClassicTabSchema>;
 export type DiscoverSessionApiEsqlTab = z.output<typeof discoverSessionEsqlTabSchema>;
 export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
 export type DiscoverSessionControlPanels = z.output<typeof discoverSessionControlPanelsSchema>;
+
+// Input types (shape accepted by the API, before defaults applied)
+export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataSchema>;

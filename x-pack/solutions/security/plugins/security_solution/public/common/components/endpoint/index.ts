@@ -6,6 +6,7 @@
  */
 
 export * from './host_isolation';
+export { HOST_ON_LINKED_PROJECT_TOOLTIP } from './host_isolation';
 export * from './responder';
 export * from './link_to_app';
 export * from './route_capture';

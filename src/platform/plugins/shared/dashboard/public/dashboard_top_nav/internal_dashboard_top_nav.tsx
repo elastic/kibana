@@ -38,10 +38,10 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -54,12 +54,14 @@ import {
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
+import { useDashboardShareAction } from '../dashboard_app/top_nav/use_dashboard_share_action';
 import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,
   dataService,
+  screenshotModeService,
   serverlessService,
   unifiedSearchService,
 } from '../services/kibana_services';
@@ -87,6 +89,7 @@ interface DashboardChromeNextHeaderProps {
   badges: AppHeaderBadge[];
   dashboardId?: string;
   viewMode: string;
+  share?: AppHeaderShareAction;
 }
 
 /**
@@ -100,6 +103,7 @@ const DashboardChromeNextHeader = ({
   badges,
   dashboardId,
   viewMode,
+  share,
 }: DashboardChromeNextHeaderProps) => {
   const favorite = useFavorite({ id: dashboardId });
 
@@ -115,6 +119,7 @@ const DashboardChromeNextHeader = ({
         menu={menu}
         badges={badges}
         favorite={favorite}
+        share={share}
         spacing="compact"
       />
     );
@@ -126,6 +131,7 @@ const DashboardChromeNextHeader = ({
       menu={menu}
       badges={badges}
       favorite={favorite}
+      share={share}
       spacing="compact"
     />
   );
@@ -148,9 +154,9 @@ export function InternalDashboardTopNav({
   //  - `inline`: next chrome, standalone -> we render `AppHeader`.
   //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
   //    the content so chrome renders it in the app-header slot.
-  //  - `legacy`: classic chrome or next chrome disabled -> push through the imperative chrome APIs.
+  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
   const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const isAppHeaderActive = useIsNextChrome() && chromeStyle === 'project';
+  const isAppHeaderActive = chromeStyle === 'project';
   const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
 
   const { onAppLeave } = useDashboardMountContext();
@@ -387,9 +393,12 @@ export function InternalDashboardTopNav({
     [redirectTo]
   );
 
+  const shareAction = useDashboardShareAction({ maybeRedirect });
+
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     maybeRedirect,
     showResetChange,
+    shareAction,
   });
 
   UseUnmount(() => {
@@ -492,6 +501,7 @@ export function InternalDashboardTopNav({
             badges={appHeaderBadges}
             dashboardId={lastSavedId}
             viewMode={viewMode}
+            share={shareAction}
           />
         </DashboardFavoritesProvider>
       )}
@@ -537,7 +547,15 @@ export function InternalDashboardTopNav({
         />
       )}
 
-      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
+      <span
+        // ControlsRenderer must always be rendered
+        // so that control filters are applied to dashboard
+        //
+        // do not display ControlsRenderer in reports
+        style={screenshotModeService.isScreenshotMode() ? { display: 'none' } : undefined}
+      >
+        <DashboardControlsRenderer />
+      </span>
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

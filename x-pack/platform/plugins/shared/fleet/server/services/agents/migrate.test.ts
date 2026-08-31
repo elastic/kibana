@@ -63,6 +63,7 @@ const mockedUuidv4 = uuidv4 as jest.MockedFunction<typeof uuidv4>;
 const mockedAgent: Agent = {
   id: 'agent-123',
   policy_id: 'policy-456',
+  policy_base_id: 'policy-456',
   last_checkin: new Date().toISOString(),
   components: [],
   local_metadata: {

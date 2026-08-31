@@ -96,13 +96,17 @@ export interface DocumentFlyoutProps {
    * Callback invoked after alert mutations to refresh related flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Optional test subject applied to the existing flyout header.
+   */
+  dataTestSubj?: string;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
+  ({ hit, onAlertUpdated, renderCellActions, dataTestSubj }: DocumentFlyoutProps) => {
     const { openNotes, openDocumentFlyoutFromIndex } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -134,7 +138,11 @@ export const DocumentFlyout = memo(
     // Maps each ancestor document id to the index it lives in, so a Source event value in the Table
     // tab can open that specific ancestor document. Threshold rules are excluded (see helper).
     const ancestorsIndexById = useMemo(
-      () => getAncestorsIndexById(getTimelineEventsDetailsFromRecord(hit)),
+      () =>
+        getAncestorsIndexById(
+          getTimelineEventsDetailsFromRecord(hit),
+          hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''
+        ),
       [hit]
     );
 
@@ -206,7 +214,7 @@ export const DocumentFlyout = memo(
     return (
       <>
         <RemoteDocumentCallout hit={hit} />
-        <EuiFlyoutHeader css={headerStyles}>
+        <EuiFlyoutHeader css={headerStyles} data-test-subj={dataTestSubj}>
           <Header
             hit={hit}
             renderCellActions={renderCellActions}

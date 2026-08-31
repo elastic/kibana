@@ -59,12 +59,7 @@ const withServerlessAvailabilityCheck =
         },
       });
     }
-    // Trigger the `workflowsManagement` context provider, which fires the per-space
-    // execution data-view bootstrap as a side effect. The provider's return value is
-    // void — this line exists only to activate the lazy getter so the bootstrap runs
-    // on every workflows request without requiring individual route handlers to opt in.
-    // Placement here, after both the license check and the availability guard, means
-    // the bootstrap only runs for requests that are actually going to be served.
+    // Access the lazy context to start the per-space data-view bootstrap.
     await context.workflowsManagement;
     return handler(context, request, response);
   };

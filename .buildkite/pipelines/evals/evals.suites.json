@@ -97,6 +97,29 @@
       "ciLabels": [
         "evals:significant-events"
       ],
+      "stepTimeoutInMinutes": 150,
+      "shards": [
+        {
+          "id": "discovery-and-queries",
+          "specFiles": [
+            "evals/discovery/discovery.spec.ts",
+            "evals/ki_query_generation/ki_query_generation.spec.ts"
+          ]
+        },
+        {
+          "id": "feature-extraction",
+          "specFiles": [
+            "evals/ki_feature_extraction/ki_feature_extraction.spec.ts"
+          ]
+        },
+        {
+          "id": "feature-dedup-and-exclusion",
+          "specFiles": [
+            "evals/ki_feature_deduplication/ki_feature_deduplication.spec.ts",
+            "evals/ki_feature_exclusion/ki_feature_exclusion.spec.ts"
+          ]
+        }
+      ],
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-4.6-sonnet",
         "eis/anthropic-claude-4.6-opus",
@@ -117,7 +140,7 @@
     {
       "id": "llm-tasks",
       "name": "LLM Tasks",
-      "slackChannel": "#appex-ai-infra-alerts",
+      "slackChannel": "#search-ml-ux-team",
       "configPath": "x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/playwright.config.ts",
       "tags": [
         "ai-infra"
@@ -249,6 +272,21 @@
       "serverConfigSet": "evals_tracing"
     },
     {
+      "id": "attack-discovery-agent-builder",
+      "name": "Attack Discovery Agent Builder",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:attack-discovery-agent-builder"
+      ],
+      "serverConfigSet": "evals_attack_discovery_agent_builder"
+    },
+    {
       "id": "lead-generation",
       "name": "Lead Generation",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-lead-generation/playwright.config.ts",
@@ -339,6 +377,25 @@
       ],
       "ciLabels": [
         "evals:agent-builder-dashboards"
+      ],
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-4.6-sonnet",
+        "eis/anthropic-claude-4.6-opus",
+        "eis/openai-gpt-5.2",
+        "eis/openai-gpt-5.4"
+      ]
+    },
+    {
+      "id": "agent-builder-visualizations",
+      "name": "Agent Builder Visualizations",
+      "slackChannel": "#kibana-presentation-reminders",
+      "configPath": "x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations/playwright.config.ts",
+      "tags": [
+        "platform",
+        "agent-builder-visualizations"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-visualizations"
       ],
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-4.6-sonnet",

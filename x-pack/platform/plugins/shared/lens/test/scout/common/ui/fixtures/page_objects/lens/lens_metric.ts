@@ -24,7 +24,9 @@ export class LensMetric {
    * to assert it appears should poll `count()` before snapshotting via `getMetricVisualizationData`.
    */
   readonly metricProgressBar;
+  readonly legacyMetricLabel;
   readonly legacyMetricValue;
+  readonly trendline;
 
   constructor(private readonly page: ScoutPage) {
     this.metricTilesLocator = this.page.locator(
@@ -37,7 +39,9 @@ export class LensMetric {
     this.metricProgressBar = this.page.locator(
       '[data-test-subj="mtrVis"] .echSingleMetricProgress'
     );
+    this.legacyMetricLabel = this.page.testSubj.locator('metric_label');
     this.legacyMetricValue = this.page.testSubj.locator('metric_value');
+    this.trendline = this.page.locator('[data-test-subj="mtrVis"] .echSingleMetricSparkline');
   }
 
   /** Returns locators for each Elastic Charts metric tile currently rendered. */

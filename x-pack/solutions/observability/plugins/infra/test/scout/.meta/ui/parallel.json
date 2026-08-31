@@ -1,54 +1,9 @@
 {
-  "sha1": "bcd096074d1f9c8a0fb24e8bad14c00dd112ad81",
+  "sha1": "50d921bdc5648542005f2042dd471f1f4aaa7fc0",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "f9db2c0f703ede6-10a320ba15dd24a",
-      "title": "Clean up infra data after UI parallel tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
-    {
-      "id": "f9db2c0f703ede6-8095e0336b0445d",
-      "title": "Clean up metrics anomalies ML jobs",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 26,
-        "column": 14
-      }
-    },
-    {
-      "id": "f9db2c0f703ede6-2295ef712bc4c42",
-      "title": "Clean up metrics_and_logs archive",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 37,
-        "column": 35
-      }
-    },
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -75,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 84,
-        "column": 31
+        "line": 143,
+        "column": 2
       }
     },
     {
@@ -89,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 138,
-        "column": 11
+        "line": 153,
+        "column": 45
       }
     },
     {
@@ -1419,8 +1374,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 36,
-        "column": 41
+        "line": 37,
+        "column": 5
       }
     },
     {
@@ -1434,7 +1389,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
         "line": 41,
-        "column": 5
+        "column": 23
       }
     },
     {
@@ -1447,7 +1402,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 49,
+        "line": 48,
         "column": 11
       }
     },
@@ -1461,7 +1416,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 59,
+        "line": 58,
         "column": 11
       }
     },
@@ -1475,7 +1430,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 70,
+        "line": 69,
         "column": 11
       }
     },
@@ -1490,7 +1445,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
         "line": 82,
-        "column": 9
+        "column": 53
       }
     },
     {
@@ -1503,8 +1458,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 99,
-        "column": 8
+        "line": 98,
+        "column": 5
       }
     },
     {
@@ -1955,6 +1910,50 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.spec.ts",
         "line": 13,
         "column": 14
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-10a320ba15dd24a",
+      "title": "Clean up infra data after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-8095e0336b0445d",
+      "title": "Clean up metrics anomalies ML jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 33,
+        "column": 14
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-2295ef712bc4c42",
+      "title": "Clean up metrics_and_logs archive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 46,
+        "column": 33
       }
     }
   ]

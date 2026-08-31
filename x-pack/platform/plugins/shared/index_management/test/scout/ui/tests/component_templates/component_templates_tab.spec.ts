@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags, EuiFieldTextWrapper } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 
@@ -51,9 +51,7 @@ test.describe('Component templates tab', { tag: tags.deploymentAgnostic }, () =>
   test('creates a component template', async ({ page, pageObjects }) => {
     await page.testSubj.locator('createComponentTemplateButton').click();
     // `nameField` carries the test subject on its EuiFormRow wrapper.
-    await new EuiFieldTextWrapper(page, { dataTestSubj: 'nameField' }).fill(
-      TEST_COMPONENT_TEMPLATE
-    );
+    await page.testSubj.locator('nameField').locator('input').fill(TEST_COMPONENT_TEMPLATE);
 
     // Walk the remaining optional steps (index settings, mappings, aliases, review) and submit.
     for (let step = 0; step < 5; step++) {

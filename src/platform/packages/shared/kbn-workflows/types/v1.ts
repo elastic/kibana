@@ -22,6 +22,7 @@ import type {
   WorkflowYaml,
 } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
+import type { WorkflowValidationRuleId } from '../validation/rules';
 
 export type { WorkflowYaml } from '../spec/schema';
 
@@ -247,16 +248,7 @@ export interface EsWorkflowStepExecution {
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
 
-  /**
-   * Whether this step belongs to a managed workflow execution. Mirrors the `managed` field
-   * on the parent workflow execution doc and is stamped by `createStep` in
-   * `workflow_execution_state.ts`.
-   *
-   * Required by `KibanaWorkflowsImplicitPrivilegesProvider` (Elasticsearch repo): the DLS
-   * grant 1 uses `must_not: term managed:true` on the step-executions index. Without this
-   * field a base-read user could see step rows (including `hitl.respondedBy`) for managed
-   * executions they are not authorised to access.
-   */
+  /** Whether this step belongs to a managed workflow execution. */
   managed?: boolean;
 
   /**
@@ -898,6 +890,12 @@ export interface WorkflowDiagnostic {
   message: string;
   source: string;
   path?: (string | number)[];
+  /**
+   * Stable identity of the check that produced this diagnostic. Prefer this over
+   * matching on `message`, which is translated and reworded freely.
+   * See WORKFLOW_VALIDATION_RULES.
+   */
+  ruleId: WorkflowValidationRuleId;
 }
 export interface ValidateWorkflowResponseDto {
   valid: boolean;

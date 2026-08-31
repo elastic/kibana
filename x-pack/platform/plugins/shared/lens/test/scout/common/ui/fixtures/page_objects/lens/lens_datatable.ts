@@ -20,25 +20,33 @@ export class LensDatatable {
 
   /**
    * Locator for a Lens datatable cell. Prefer `expect(locator).toContainText(...)`
-   * over polling + `getDatatableCellText` when asserting visible values.
+   * over polling + `getCellText` when asserting visible values.
    */
-  getDatatableCellLocator(rowIndex = 0, colIndex = 0, addRowNumberColumn = true) {
+  getCellLocator(rowIndex = 0, colIndex = 0, addRowNumberColumn = true) {
     const col = colIndex + (addRowNumberColumn ? 1 : 0);
     return this.dataTable.locator(
       `[data-test-subj="dataGridRowCell"][data-gridcell-column-index="${col}"][data-gridcell-visible-row-index="${rowIndex}"]`
     );
   }
 
-  private datatableCell(rowIndex: number, colIndex: number, addRowNumberColumn: boolean) {
-    return this.getDatatableCellLocator(rowIndex, colIndex, addRowNumberColumn);
+  getHeaderLocator(name: string) {
+    return this.dataTable.getByRole('columnheader', { name });
   }
 
-  async getDatatableCellText(
-    rowIndex = 0,
-    colIndex = 0,
-    addRowNumberColumn = true
-  ): Promise<string> {
-    const cell = this.datatableCell(rowIndex, colIndex, addRowNumberColumn);
+  async filterOutCell(rowIndex = 0, colIndex = 0): Promise<void> {
+    const cell = this.getCellLocator(rowIndex, colIndex);
+    await cell.hover();
+
+    const filterOutButton = cell.getByTestId('lensDatatableFilterOut');
+    await filterOutButton.click();
+  }
+
+  private cell(rowIndex: number, colIndex: number, addRowNumberColumn: boolean) {
+    return this.getCellLocator(rowIndex, colIndex, addRowNumberColumn);
+  }
+
+  async getCellText(rowIndex = 0, colIndex = 0, addRowNumberColumn = true): Promise<string> {
+    const cell = this.cell(rowIndex, colIndex, addRowNumberColumn);
     await cell.waitFor({ state: 'visible' });
     // EUI data grid can append expand/filter glyphs (↵, ↦) / extra whitespace in innerText.
     return ((await cell.innerText()) ?? '')
@@ -47,25 +55,25 @@ export class LensDatatable {
       .trim();
   }
 
-  async getDatatableCellStyle(
+  async getCellStyle(
     rowIndex = 0,
     colIndex = 0,
     addRowNumberColumn = true
   ): Promise<Record<string, string>> {
-    const cell = this.datatableCell(rowIndex, colIndex, addRowNumberColumn);
+    const cell = this.cell(rowIndex, colIndex, addRowNumberColumn);
     await cell.waitFor({ state: 'visible' });
     return parseInlineStyle((await cell.getAttribute('style')) ?? '');
   }
 
-  async getCountOfDatatableColumns(): Promise<number> {
+  async getCountOfColumns(): Promise<number> {
     // FTR parity: EuiDataGrid has no per-column test subj for content cells; `.euiDataGridHeaderCell__content`
-    // excludes the leading control column (same selector as FTR `getCountOfDatatableColumns`).
+    // excludes the leading control column (same selector as FTR `getCountOfColumns`).
     return this.dataTable.locator('.euiDataGridHeaderCell__content').count();
   }
 
-  async getDatatableHeaderText(index = 0): Promise<string> {
+  async getHeaderText(index = 0): Promise<string> {
     // Prefer content nodes — columnheader innerText can include action glyphs like ↵.
-    // Index matches getCountOfDatatableColumns (control column excluded).
+    // Index matches getCountOfColumns (control column excluded).
     // FTR parity: EUI class selector until Lens exposes header content test subjects.
     const headers = this.dataTable.locator('.euiDataGridHeaderCell__content');
     await this.page.waitForFunction(

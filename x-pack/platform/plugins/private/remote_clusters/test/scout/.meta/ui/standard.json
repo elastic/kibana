@@ -1,8 +1,7 @@
 {
-  "sha1": "4863f17c8cc64d51ca34f92753848be0bbcde7d1",
+  "sha1": "8af7ab42cc7983dc69c9b7446e601e2e7315ddca",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -14,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/ui/tests/remote_clusters_crud.spec.ts",
-        "line": 20,
-        "column": 69
+        "line": 21,
+        "column": 5
       }
     },
     {
@@ -27,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/ui/tests/remote_clusters_edit_delete.spec.ts",
-        "line": 64,
-        "column": 39
+        "line": 60,
+        "column": 5
       }
     },
     {
@@ -40,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/ui/tests/remote_clusters_edit_delete.spec.ts",
-        "line": 67,
-        "column": 11
+        "line": 66,
+        "column": 8
       }
     }
   ]

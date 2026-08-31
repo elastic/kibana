@@ -104,10 +104,7 @@ const setupHappyPath = (ids: string[] = ['id-1', 'id-2']) => {
       notes: [],
     });
   });
-  mockBuildSuperTimelineModel.mockReturnValue({
-    model: makeMergedModel(),
-    skippedQueryTimelines: [],
-  });
+  mockBuildSuperTimelineModel.mockReturnValue(makeMergedModel());
 };
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -262,38 +259,6 @@ describe('useOpenSuperTimeline', () => {
     });
   });
 
-  describe('EQL/ESQL skipped-query toast', () => {
-    it('shows a warning toast naming EQL/ESQL timelines when skippedQueryTimelines is non-empty', async () => {
-      setupHappyPath();
-      mockBuildSuperTimelineModel.mockReturnValue({
-        model: makeMergedModel(),
-        skippedQueryTimelines: [
-          { id: 'eql-id', title: 'EQL Investigation', reason: 'eql' as const },
-        ],
-      });
-
-      const { result } = renderHook(() => useOpenSuperTimeline());
-      await act(async () => {
-        await result.current.openSuperTimeline(['id-1', 'id-2']);
-      });
-
-      expect(mockAddWarning).toHaveBeenCalledTimes(1);
-      const warningText = mockAddWarning.mock.calls[0][0].text as string;
-      expect(warningText).toContain('EQL Investigation');
-    });
-
-    it('shows no toast when all timelines contribute KQL queries', async () => {
-      setupHappyPath();
-
-      const { result } = renderHook(() => useOpenSuperTimeline());
-      await act(async () => {
-        await result.current.openSuperTimeline(['id-1', 'id-2']);
-      });
-
-      expect(mockAddWarning).not.toHaveBeenCalled();
-    });
-  });
-
   describe('error handling', () => {
     it('shows warning toasts (not an error) when all resolveTimeline calls reject', async () => {
       // WHY: with Promise.allSettled a single failure should not abort the whole batch.
@@ -319,10 +284,9 @@ describe('useOpenSuperTimeline', () => {
         timeline: { ...timelineDefaults, id: '', savedObjectId: 'id-2' } as TimelineModel,
         notes: [],
       });
-      mockBuildSuperTimelineModel.mockReturnValue({
-        model: makeMergedModel({ superTimelineSourceIds: ['id-2', 'id-3'] }),
-        skippedQueryTimelines: [],
-      });
+      mockBuildSuperTimelineModel.mockReturnValue(
+        makeMergedModel({ superTimelineSourceIds: ['id-2', 'id-3'] })
+      );
 
       const { result } = renderHook(() => useOpenSuperTimeline());
       await act(async () => {

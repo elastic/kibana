@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import React, { createContext, type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  type FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSteps,
   EuiToolTip,
@@ -20,6 +30,7 @@ import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
@@ -38,6 +49,7 @@ import { isLatestTransform } from '../../../../../../common/types/transform';
 import { getCreateTransformRequestBody } from '../../../../common';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
+import { useTransformHasLinkedProjects } from '../../../../hooks/use_transform_has_linked_projects';
 
 import type { StepDefineExposedState } from '../step_define';
 import { applyTransformConfigToDefineState, getDefaultStepDefineState } from '../step_define';
@@ -52,12 +64,16 @@ import { WizardNav } from '../wizard_nav';
 
 import { TRANSFORM_STORAGE_KEYS } from './storage';
 import { StepDefine } from './step_define';
+import { ProjectScopeSelector } from './project_scope_selector';
 
 const styles = {
   steps: css`
     .euiStep__content {
       padding-right: 0;
     }
+  `,
+  projectScopeSelector: css`
+    min-inline-size: 180px;
   `,
 };
 
@@ -102,7 +118,14 @@ export const Wizard: FC<WizardProps> = React.memo(
   }) => {
     const { showNodeInfo } = useEnabledFeatures();
     const appDependencies = useAppDependencies();
-    const { uiSettings, data, dataViewEditor, fieldFormats, charts } = appDependencies;
+    const { uiSettings, data, dataViewEditor, fieldFormats, charts, cps } = appDependencies;
+    const cpsManager = cps?.cpsManager;
+    const linkedProjectsState = useTransformHasLinkedProjects(cpsManager);
+    const canUseProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
+    const shouldUseProjectScope = Boolean(
+      canUseProjectScope && linkedProjectsState.hasLinkedProjects !== false
+    );
+    const isProjectScopeDiscoveryPending = canUseProjectScope && linkedProjectsState.isLoading;
     const dataView = searchItems?.dataView;
     const defaultTransformFunction = getInitialTransformFunction(
       cloneConfig,
@@ -120,7 +143,62 @@ export const Wizard: FC<WizardProps> = React.memo(
     const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
     const [savedDataViews, setSavedDataViews] = useState<DataViewListItem[]>([]);
     const [pendingDataViewId, setPendingDataViewId] = useState<string>();
+    const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>();
+    const projectRoutingRef = useRef(projectRouting);
+    const shouldUseProjectScopeRef = useRef(shouldUseProjectScope);
+    const cpsManagerRef = useRef(cpsManager);
+    const hasUserSelectedProjectRouting = useRef(false);
     const changeDataViewModalTitleId = useGeneratedHtmlId();
+
+    useEffect(() => {
+      projectRoutingRef.current = projectRouting;
+    }, [projectRouting]);
+
+    useEffect(() => {
+      shouldUseProjectScopeRef.current = shouldUseProjectScope;
+      cpsManagerRef.current = cpsManager;
+    }, [cpsManager, shouldUseProjectScope]);
+
+    useEffect(() => {
+      if (!shouldUseProjectScope || !cpsManager || isProjectScopeDiscoveryPending) {
+        return;
+      }
+
+      let canceled = false;
+
+      cpsManager.whenReady().then(() => {
+        if (
+          canceled ||
+          hasUserSelectedProjectRouting.current ||
+          !shouldUseProjectScopeRef.current
+        ) {
+          return;
+        }
+
+        const defaultProjectRouting = cpsManager.getDefaultProjectRouting();
+        setProjectRouting(defaultProjectRouting);
+        setStepDefineState((prevState) =>
+          prevState ? { ...prevState, projectRouting: defaultProjectRouting } : prevState
+        );
+      });
+
+      return () => {
+        canceled = true;
+      };
+    }, [cpsManager, isProjectScopeDiscoveryPending, shouldUseProjectScope]);
+
+    useEffect(() => {
+      if (shouldUseProjectScope) {
+        return;
+      }
+
+      setProjectRouting(undefined);
+      setStepDefineState((prevState) =>
+        prevState && prevState.projectRouting !== undefined
+          ? { ...prevState, projectRouting: undefined }
+          : prevState
+      );
+    }, [shouldUseProjectScope]);
 
     const resetWizardState = useCallback(
       (nextSearchItems: SearchItems, transformFunction: TransformFunction) => {
@@ -132,6 +210,10 @@ export const Wizard: FC<WizardProps> = React.memo(
           cloneConfig,
           nextSearchItems.dataView
         );
+        if (shouldUseProjectScopeRef.current && nextStepDefineState.projectRouting === undefined) {
+          nextStepDefineState.projectRouting =
+            projectRoutingRef.current ?? cpsManagerRef.current?.getDefaultProjectRouting();
+        }
 
         setStepDefineState(nextStepDefineState);
         setStepDetailsState(
@@ -188,8 +270,27 @@ export const Wizard: FC<WizardProps> = React.memo(
     }, [defaultTransformFunction, pendingDataViewId, setSavedObjectId]);
 
     const cancelDataViewChange = useCallback(() => setPendingDataViewId(undefined), []);
+    const handleProjectRoutingChange = useCallback((nextProjectRouting: ProjectRouting) => {
+      hasUserSelectedProjectRouting.current = true;
+      setProjectRouting(nextProjectRouting);
+      setStepDefineState((prevState) =>
+        prevState ? { ...prevState, projectRouting: nextProjectRouting } : prevState
+      );
+      setStepCreateState(getDefaultStepCreateState());
+      setCurrentStep(WIZARD_STEPS.DEFINE);
+    }, []);
     const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
     const isDataViewPickerDisabled = setSavedObjectId === undefined;
+    const projectScopeSelector =
+      shouldUseProjectScope && cpsManager ? (
+        <EuiFlexItem grow={false} css={styles.projectScopeSelector}>
+          <ProjectScopeSelector
+            cpsManager={cpsManager}
+            onProjectRoutingChange={handleProjectRoutingChange}
+            projectRouting={projectRouting}
+          />
+        </EuiFlexItem>
+      ) : null;
     const dataViewPickerComponent = (
       <DataViewPicker
         compressed={false}
@@ -219,7 +320,7 @@ export const Wizard: FC<WizardProps> = React.memo(
       />
     );
 
-    const dataViewPicker = (
+    const dataViewPickerRow = (
       <EuiFormRow
         label={i18n.translate('xpack.transform.stepDefineForm.dataViewLabel', {
           defaultMessage: 'Data view',
@@ -245,6 +346,12 @@ export const Wizard: FC<WizardProps> = React.memo(
           dataViewPickerComponent
         )}
       </EuiFormRow>
+    );
+    const dataViewPicker = (
+      <EuiFlexGroup alignItems="flexStart" gutterSize="m">
+        {projectScopeSelector}
+        <EuiFlexItem grow>{dataViewPickerRow}</EuiFlexItem>
+      </EuiFlexGroup>
     );
 
     const transformConfig =

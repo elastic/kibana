@@ -321,10 +321,6 @@ export class WorkflowExecutionState {
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
       isTestRun: Boolean(this.workflowExecution.isTestRun),
-      // Explicit boolean (not undefined) so the DLS `must_not: term managed:true` filter on
-      // the step-executions index correctly handles both managed and non-managed rows.
-      // Without this stamp a base-read user could see step rows for managed executions they
-      // are not authorised to access via KibanaWorkflowsImplicitPrivilegesProvider.
       managed: Boolean(this.workflowExecution.managed),
     } as StepExecutionMetadata;
     this.stepExecutions.set(id, newStep);

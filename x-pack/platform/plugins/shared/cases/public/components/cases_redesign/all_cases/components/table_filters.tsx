@@ -29,6 +29,7 @@ import { ColumnsPopover } from './columns_popover';
 import { SortFilter } from './sort_filter';
 import { useCasesConfig } from '../../../../common/lib/kibana';
 import { useCasesToast } from '../../../../common/use_cases_toast';
+import { useGlobalInlineFields } from '../../../all_cases/hooks/use_global_inline_fields';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -91,6 +92,11 @@ const CasesTableFiltersComponent = ({
 
   const { euiTheme } = useEuiTheme();
   const { templatesEnabled } = useCasesConfig();
+  const {
+    globalInlineFields,
+    isLoading: isLoadingGlobalFields,
+    isLoaded: areGlobalFieldsLoaded,
+  } = useGlobalInlineFields({ enabled: templatesEnabled });
   const { showInfoToast } = useCasesToast();
   const hasShownHiddenFieldsSearchToast = useRef(false);
 
@@ -114,7 +120,11 @@ const CasesTableFiltersComponent = ({
   );
 
   const isLoadingFilters =
-    isLoading || isLoadingTags || isLoadingCategories || isLoadingCasesConfiguration;
+    isLoading ||
+    isLoadingTags ||
+    isLoadingCategories ||
+    isLoadingCasesConfiguration ||
+    isLoadingGlobalFields;
 
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
@@ -142,6 +152,9 @@ const CasesTableFiltersComponent = ({
     isSelectorView,
     filterOptions,
     customFields,
+    globalInlineFields,
+    areGlobalFieldsLoaded,
+    templatesEnabled,
     isLoading: isLoadingFilters,
   });
 

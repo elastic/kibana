@@ -233,21 +233,98 @@ export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
  * non-ASCII input) so this maps directly onto Lucene's limit.
  */
 export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
+
+/**
+ * Single source of truth for the allowed character sets in templates-v2 extended-field keys.
+ *
+ * The key stored for a field is `${name}_as_${type}` (see `getFieldSnakeKey` in
+ * `common/utils/template_fields.ts`). Because this key is interpolated verbatim into Painless
+ * string literals (search-time scripts and data-view runtime fields), the set of safe characters
+ * must exclude anything that could break Painless source or push the compiled script over
+ * Elasticsearch's 65,535-byte bytecode limit.
+ *
+ * Two guards, deliberately not independent:
+ *
+ *   AUTHORABLE_SNAKE_KEY  — what a user may newly create (strict).
+ *   SAFE_SNAKE_KEY        — what we are willing to read back / publish (lenient superset).
+ *
+ * The lenient guard exists because keys already in the index may contain characters that
+ * predate the strict rule (e.g. hyphens written by the v1→v2 migration task). We must be
+ * able to read and surface those fields without breaking anything, even though we now refuse
+ * to create new ones with the same shape.
+ *
+ * **NEVER add a character to AUTHORABLE_SNAKE_KEY without also ensuring it is in
+ * SAFE_SNAKE_KEY** — the containment is validated by the unit tests in
+ * `common/constants/snake_key_guards.test.ts`. The deliberate delta between the two
+ * (READ_TOLERATED_KEY_CHARS) is the only place to add characters that apply to reads only.
+ */
+
+/** The base character class — written down once. Both regexes are derived from this string. */
+const AUTHORABLE_KEY_CHARS = 'A-Za-z0-9_';
+
+/**
+ * Characters permitted in keys already in the index but NOT in newly-authored names.
+ * Hyphens are here because the v1→v2 migration wrote UUID field names (hex + hyphens) and
+ * some hand-authored hyphenated names already exist; on the authoring path a hyphen is
+ * refused because it camel-folds identically to `_` and reads as KQL negation.
+ * Anything added here widens reads only — by construction it cannot widen authoring.
+ */
+const READ_TOLERATED_KEY_CHARS = '-';
+
+/**
+ * Authoring guard — what a user may newly create.
+ * Must stay a strict subset of SAFE_SNAKE_KEY; enforced by unit tests.
+ */
+export const AUTHORABLE_SNAKE_KEY = new RegExp(`^[${AUTHORABLE_KEY_CHARS}]+$`);
+
+/**
+ * Read / storage guard — what we will accept when reading back keys from the index and
+ * interpolating them into Painless literals. A superset of AUTHORABLE_SNAKE_KEY by
+ * construction (shares AUTHORABLE_KEY_CHARS, adds READ_TOLERATED_KEY_CHARS).
+ */
+export const SAFE_SNAKE_KEY = new RegExp(`^[${AUTHORABLE_KEY_CHARS}${READ_TOLERATED_KEY_CHARS}]+$`);
+
+/**
+ * The longest `type` literal that any inline field can carry (the second half of the
+ * `${name}_as_${type}` key). Used when validating `$ref` aliases that have no locally-known
+ * type — checking against this value guarantees the derived key fits MAX_SNAKE_KEY_LENGTH
+ * regardless of which type the referenced field uses.
+ *
+ * A unit test ("LONGEST_STORAGE_TYPE is the longest type literal in the field schemas")
+ * in `strict_fields.test.ts` compares this against `ALL_TEMPLATE_TYPE_SUFFIXES` from the
+ * server analytics module. If a longer type literal is added to the field schemas that test
+ * will fail, prompting an update here.
+ */
+export const LONGEST_STORAGE_TYPE = 'unsigned_long' as const;
+
+/**
+ * Maximum length of a full `${name}_as_${type}` extended-field storage key.
+ * Shared by the friendly-name generator (which reserves room for the longest
+ * type suffix) and the analytics runtime-field guard so a generated name can
+ * never produce a key the analytics layer rejects.
+ */
+export const MAX_SNAKE_KEY_LENGTH = 256 as const;
+/**
+ * Bounds for `extendedFieldFilters` on find/search and All Cases URL state.
+ * Field Library values can legitimately occupy the full template/value payload, and each of the
+ * 200 fields can contribute both values of a TOGGLE filter.
+ */
+export const MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH = MAX_EXTENDED_FIELD_VALUE_BYTES;
+export const MAX_EXTENDED_FIELD_FILTERS = MAX_FIELD_DEFINITIONS_PER_OWNER * 2;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
+
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
 export const MAX_USER_ACTION_AUTHOR_LENGTH = 256 as const;
+export const MAX_USER_ACTION_TYPE_LENGTH = 50 as const;
 
 /**
  * Cases features
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
+  alerts: { read: true, all: true },
   metrics: [],
-  observables: { enabled: true, autoExtract: false },
-  events: { enabled: false },
-  templates: { enabled: false },
 });
 
 /**
@@ -320,6 +397,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesTableColumns: 'cases.list.tableColumns',
   casesListFields: 'cases.list.fields',
+  casesGlobalFieldColumns: 'cases.list.globalFieldColumns',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesViewMode: 'cases.list.viewMode',
   casesTableState: 'cases.list.state',
@@ -420,6 +498,18 @@ export const CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE =
 
 export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
   'case_markdown_editor_plugin_clicked' as const;
+
+/**
+ * Template management events. Each one reports a single confirmed user action on the template
+ * management pages — not a count of templates written. A bulk delete reports one event whatever the
+ * number of removed templates, and the YAML import flow reports nothing. Use the server-side
+ * template counters for write totals; they count every caller.
+ */
+export const CASES_TEMPLATE_CREATED_EVENT_TYPE = 'cases_template_created' as const;
+
+export const CASES_TEMPLATE_UPDATED_EVENT_TYPE = 'cases_template_updated' as const;
+
+export const CASES_TEMPLATE_DELETED_EVENT_TYPE = 'cases_template_deleted' as const;
 
 /**
  * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that

@@ -1,5 +1,8 @@
 {
-  "sha1": "0528006baf2b5845f7652b1f56d5951234ea1077",
+  "sha1": "107600cbcc2b78425d61a4d318fa63e8487dbaf5",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "70a0a35dd08286e-9bea428d7c47a33",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/cross_cluster_replication_home.spec.ts",
-        "line": 15,
-        "column": 7
+        "line": 14,
+        "column": 24
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/cross_cluster_replication_home.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 52,
+        "column": 13
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/cross_cluster_replication_home.spec.ts",
-        "line": 74,
-        "column": 7
+        "line": 64,
+        "column": 11
       }
     },
     {
@@ -48,13 +51,12 @@
       "title": "Cross-Cluster Replication - with data follower index and auto-follow pattern data views are accessible",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/cross_cluster_replication_with_data.spec.ts",
-        "line": 117,
-        "column": 7
+        "line": 122,
+        "column": 23
       }
     },
     {
@@ -67,8 +69,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 18,
-        "column": 9
+        "line": 14,
+        "column": 24
       }
     },
     {
@@ -81,8 +83,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 33,
-        "column": 9
+        "line": 24,
+        "column": 15
       }
     }
   ]

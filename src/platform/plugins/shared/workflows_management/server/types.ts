@@ -74,13 +74,6 @@ export interface WorkflowsServerPluginStartDeps {
   dataViews: DataViewsServerPluginStart;
 }
 
-/**
- * Context accessor for the per-request data view bootstrap side effect.
- *
- * Routes never need to read from this context — it is accessed only to
- * trigger the lazy getter, which fires the `ExecutionDataViewsBootstrap`
- * ensure. The type is `void` to make that intent explicit.
- */
 export type WorkflowsManagementRequestHandlerContext = Promise<void>;
 
 export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{

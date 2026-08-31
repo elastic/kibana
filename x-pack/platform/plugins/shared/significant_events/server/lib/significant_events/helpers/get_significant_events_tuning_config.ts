@@ -10,8 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-  SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
-  validateSignificantEventsTuningConfig,
+  resolveSignificantEventsTuningConfig,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 
@@ -24,7 +23,7 @@ export async function getSignificantEventsTuningConfig(
   globalUiSettingsClient: IUiSettingsClient,
   logger: Logger
 ): Promise<SignificantEventsTuningConfig> {
-  let stored: Partial<SignificantEventsTuningConfig>;
+  let stored: unknown;
   try {
     const raw = await globalUiSettingsClient.get<string>(
       OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG
@@ -39,34 +38,5 @@ export async function getSignificantEventsTuningConfig(
     return { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG };
   }
 
-  // Silently drop unknown keys from stored config (e.g. renamed fields from a
-  // previous version) so they don't trigger a full reset via validateSignificantEventsTuningConfig.
-  const knownKeys = new Set(Object.keys(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS));
-  const safeStored = Object.fromEntries(
-    Object.entries(stored ?? {}).filter(([key]) => knownKeys.has(key))
-  ) as Partial<SignificantEventsTuningConfig>;
-
-  const merged = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...safeStored };
-
-  // semantic_min_score changed from a raw model-specific scale (0-100) to a
-  // minmax-normalized scale (0-1). Override any persisted out-of-range value.
-  if (merged.semantic_min_score < 0 || merged.semantic_min_score > 1) {
-    logger.warn(
-      `semantic_min_score=${merged.semantic_min_score} is outside the valid [0, 1] range ` +
-        `(likely a pre-upgrade value on the old 0-100 scale). Resetting to default ` +
-        `${DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.semantic_min_score}.`
-    );
-    merged.semantic_min_score = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.semantic_min_score;
-  }
-
-  const errors = validateSignificantEventsTuningConfig(merged as Record<string, unknown>);
-  if (errors.length > 0) {
-    logger.warn(
-      `Significant Events tuning config is invalid (${errors.join(', ')}). ` +
-        `Falling back to default config. Fix the config in the Settings page.`
-    );
-    return { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG };
-  }
-
-  return merged;
+  return resolveSignificantEventsTuningConfig(stored, logger);
 }

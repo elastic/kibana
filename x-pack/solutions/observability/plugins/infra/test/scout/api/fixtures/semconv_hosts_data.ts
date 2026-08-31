@@ -16,8 +16,8 @@ export interface SemconvHost {
   hostName: string;
 }
 
-export const SEMCONV_HOSTS_DATA_FROM = '2024-01-01T00:00:00.000Z';
-export const SEMCONV_HOSTS_DATA_TO = '2024-01-01T00:10:00.000Z';
+export const SEMCONV_HOSTS_DATA_FROM = '2019-07-10T20:00:00.000Z';
+export const SEMCONV_HOSTS_DATA_TO = '2019-07-10T20:10:00.000Z';
 
 export const SEMCONV_HOSTS: SemconvHost[] = [
   { hostName: 'semconv-host-1' },

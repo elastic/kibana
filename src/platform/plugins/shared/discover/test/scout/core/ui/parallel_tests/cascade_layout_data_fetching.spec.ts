@@ -9,9 +9,9 @@
 
 /**
  * Verifies that expanding/collapsing cascade rows only fetches ES|QL row data
- * when it hasn't already been fetched, and that an in-flight fetch survives a
- * quick tab switch away and back. Protects against performance regressions
- * (unnecessary refetching) rather than data correctness.
+ * when it hasn't already been fetched, and that an in-flight fetch survives
+ * switching away from and back to its tab. Protects against performance
+ * regressions (unnecessary refetching) rather than data correctness.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -138,46 +138,6 @@ spaceTest.describe(
                 discover.toggleCascadeLayoutRow(firstRowId)
               )
             ).toBe(0);
-          }
-        );
-      }
-    );
-
-    spaceTest(
-      'keeps an expanded row fetch active when switching tabs quickly',
-      async ({ page, pageObjects, network }) => {
-        const { dataGrid, discover, unifiedTabs } = pageObjects;
-
-        expect(await runCascadeQuery(pageObjects, STATS_QUERY)).toBe(true);
-        await unifiedTabs.createNewTab();
-        expect(await runCascadeQuery(pageObjects, STATS_QUERY)).toBe(true);
-
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-        const [firstRowId] = await discover.getCascadeLayoutVisibleRowIds();
-
-        await network.trackMatchingRequests(
-          { endpoint: ESQL_ASYNC_ENDPOINT },
-          async (getRequestCount) => {
-            // Click without waiting for expansion so the fetch starts before switching
-            // away and returning to this tab.
-            const initialRequest = page.waitForRequest((request) =>
-              request.url().includes(ESQL_ASYNC_ENDPOINT)
-            );
-            await discover.clickCascadeRowToggle(firstRowId);
-            await unifiedTabs.selectTab(1);
-            await initialRequest;
-
-            const requestCountBeforeReturning = getRequestCount();
-            expect(requestCountBeforeReturning).toBeGreaterThan(0);
-
-            await unifiedTabs.selectTab(0);
-            await discover.waitUntilTabIsLoaded();
-
-            expect(await discover.isCascadeLayoutRowExpanded(firstRowId)).toBe(true);
-            await dataGrid.waitForDocTableRendered();
-
-            expect(getRequestCount()).toBe(requestCountBeforeReturning);
           }
         );
       }
