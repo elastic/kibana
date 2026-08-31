@@ -4751,8 +4751,8 @@ importers:
         specifier: 2.16.0
         version: 2.16.0(eslint@8.57.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       '@elastic/eui-test-helpers':
-        specifier: 1.4.0
-        version: 1.4.0(@playwright/test@1.62.1)
+        specifier: 1.5.0
+        version: 1.5.0(@playwright/test@1.62.1)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -10624,8 +10624,8 @@ packages:
   '@elastic/eui-illustrations@1.0.1':
     resolution: {integrity: sha512-kEKd1o9mtAPFeJRz/H9Loa7tF9X4HFlKtyA2dC5YVyqoESPHz7d3h4P8RxYioe/RUhZpkvHY8pIAkIeSbJJ42Q==}
 
-  '@elastic/eui-test-helpers@1.4.0':
-    resolution: {integrity: sha512-ZiJcq/dMIs4VD1tdLK3Op21j6+dZ6Q2k54n08FjGz5hqVcd3MoEBUBp54xe+p2AQ9IPeFM21KWeYPDuUX0PwyA==}
+  '@elastic/eui-test-helpers@1.5.0':
+    resolution: {integrity: sha512-oW20Eaw3w1OzXbiRA2Dj0XPmYN9dkshFZHkM8atrcaHu8NcvspKijzDfw84rTaWGG6AnZEHMfyau08TKhrdZVw==}
     peerDependencies:
       '@playwright/test': ^1.50.0
     peerDependenciesMeta:
@@ -27768,7 +27768,7 @@ snapshots:
 
   '@elastic/eui-illustrations@1.0.1': {}
 
-  '@elastic/eui-test-helpers@1.4.0(@playwright/test@1.62.1)':
+  '@elastic/eui-test-helpers@1.5.0(@playwright/test@1.62.1)':
     optionalDependencies:
       '@playwright/test': 1.62.1
 
