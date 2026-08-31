@@ -8,9 +8,12 @@
 import { MAX_KI_ATTRIBUTES, MAX_KI_ATTRIBUTE_VALUE_LENGTH } from './ki';
 import { VerifyKiInputSchema } from './verify_ki_step';
 
+const BASE = { verifiers: ['esql-valid-runtime'] };
+
 describe('VerifyKiInputSchema', () => {
   it('accepts a KI with esql attributes', () => {
     const result = VerifyKiInputSchema.safeParse({
+      ...BASE,
       ki: { type: 'detection', attributes: { esql: 'FROM logs-* | LIMIT 1' } },
     });
 
@@ -19,6 +22,7 @@ describe('VerifyKiInputSchema', () => {
 
   it('accepts a KI without esql attributes', () => {
     const result = VerifyKiInputSchema.safeParse({
+      ...BASE,
       ki: { type: 'detection', title: 'no esql', attributes: { severity: 'high' } },
     });
 
@@ -26,9 +30,21 @@ describe('VerifyKiInputSchema', () => {
   });
 
   it('accepts a KI without any attributes', () => {
-    const result = VerifyKiInputSchema.safeParse({ ki: { type: 'detection' } });
+    const result = VerifyKiInputSchema.safeParse({ ...BASE, ki: { type: 'detection' } });
 
     expect(result.success).toBe(true);
+  });
+
+  it('rejects a missing verifiers list', () => {
+    const result = VerifyKiInputSchema.safeParse({ ki: { type: 'detection' } });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty verifiers list', () => {
+    const result = VerifyKiInputSchema.safeParse({ ki: { type: 'detection' }, verifiers: [] });
+
+    expect(result.success).toBe(false);
   });
 
   it('rejects attributes with too many entries', () => {
@@ -36,13 +52,14 @@ describe('VerifyKiInputSchema', () => {
       Array.from({ length: MAX_KI_ATTRIBUTES + 1 }, (_, i) => [`key${i}`, 'v'])
     );
 
-    const result = VerifyKiInputSchema.safeParse({ ki: { attributes } });
+    const result = VerifyKiInputSchema.safeParse({ ...BASE, ki: { attributes } });
 
     expect(result.success).toBe(false);
   });
 
   it('rejects attribute values above the length cap', () => {
     const result = VerifyKiInputSchema.safeParse({
+      ...BASE,
       ki: { attributes: { esql: 'x'.repeat(MAX_KI_ATTRIBUTE_VALUE_LENGTH + 1) } },
     });
 
