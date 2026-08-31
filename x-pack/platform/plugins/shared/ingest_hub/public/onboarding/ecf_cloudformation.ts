@@ -107,9 +107,10 @@ export const getEcfServiceConfigs = (
     const entryVars = serviceVars[instanceId];
 
     // ECF services are single-DS. Read ARNs from the first DS's varsByInput.
-    // Fall back to entry.id when dataStreams is empty (AWS_SERVICES_MAP populates dataStreams
-    // only after the manifest is fetched; at module-load time the array is []).
-    const dsId = entry.dataStreams?.[0] ?? entry.id;
+    // Prefer ecfDataStream (set on OTel twins where the DS path differs from the entry id),
+    // then the first runtime dataStream (populated once the manifest is fetched), then the
+    // entry.id as a last resort. AWS_SERVICES_MAP always has dataStreams:[] at module load.
+    const dsId = entry.ecfDataStream ?? entry.dataStreams?.[0] ?? entry.id;
     const dsVars = entryVars?.varsByDataStream?.[dsId];
     const enabledInputs = dsVars?.enabledInputs ?? [];
 
