@@ -7,6 +7,7 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 import { registerFeaturePrivileges } from './privileges';
@@ -21,9 +22,11 @@ import {
 } from '@kbn/alerting-v2-constants';
 
 describe('registerFeaturePrivileges', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
+
   const getRegisteredFeature = (id: string): KibanaFeatureConfig => {
     const features = featuresPluginMock.createSetup();
-    registerFeaturePrivileges(features);
+    registerFeaturePrivileges(features, docLinks);
 
     const registered = features.registerKibanaFeature.mock.calls
       .map(([feature]) => feature)
@@ -38,11 +41,33 @@ describe('registerFeaturePrivileges', () => {
 
   it('registers a Kibana feature for every alerting_v2 feature', () => {
     const features = featuresPluginMock.createSetup();
-    registerFeaturePrivileges(features);
+    registerFeaturePrivileges(features, docLinks);
 
     expect(features.registerKibanaFeature).toHaveBeenCalledTimes(
       Object.keys(ALERTING_V2_FEATURES).length
     );
+  });
+
+  it('groups features under the Alerting V2 privilege section', () => {
+    const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
+
+    expect(rulesFeature.category).toEqual({
+      id: 'alerting',
+      label: 'Alerting V2',
+      order: 1000,
+      euiIconType: 'watchesApp',
+    });
+  });
+
+  it('marks every feature as technical preview with a documentation tooltip', () => {
+    for (const feature of Object.values(ALERTING_V2_FEATURES)) {
+      const registered = getRegisteredFeature(feature.id);
+      expect(registered.description).toBe('Technical preview');
+      expect(registered.privilegesTooltip).toContain(
+        'This functionality is in technical preview and may be changed or removed in a future release.'
+      );
+      expect(registered.privilegesTooltip).toContain(docLinks.links.alerting.alertingV2Overview);
+    }
   });
 
   it('forwards the `alerts` privilege to the `all` and `read` privileges of the alerts feature', () => {

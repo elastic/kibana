@@ -41,7 +41,10 @@ import { alertingAdvancedSettings } from '../settings/advanced_settings';
  */
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
-    registerFeaturePrivileges(container.get(PluginSetup('features')));
+    registerFeaturePrivileges(
+      container.get(PluginSetup('features')),
+      container.get(CoreSetup('docLinks'))
+    );
 
     registerSavedObjects({
       savedObjects: container.get(CoreSetup('savedObjects')),

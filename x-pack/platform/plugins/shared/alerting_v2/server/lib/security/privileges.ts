@@ -7,7 +7,8 @@
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import type { AppCategory } from '@kbn/core/types';
+import type { AppCategory, DocLinksServiceSetup } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 import { APP_ID } from '../constants';
 import {
@@ -21,18 +22,39 @@ export { ALERTING_V2_API_PRIVILEGES };
 
 const category: AppCategory = {
   id: 'alerting',
-  label: 'Alerting',
+  label: i18n.translate('xpack.alertingV2.privileges.sectionLabel', {
+    defaultMessage: 'Alerting V2',
+  }),
   order: 1000,
   euiIconType: 'watchesApp',
 };
 
-const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => {
+const techPreviewDescription = i18n.translate(
+  'xpack.alertingV2.privileges.techPreviewDescription',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+const buildPrivilegesTooltip = (documentationUrl: string): string =>
+  i18n.translate('xpack.alertingV2.privileges.techPreviewTooltip', {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. {docsUrl}',
+    values: { docsUrl: documentationUrl },
+  });
+
+const buildKibanaFeature = (
+  feature: AlertingV2FeatureDefinition,
+  documentationUrl: string
+): KibanaFeatureConfig => {
   const managementApps = [...getFeatureManagementApps(feature)];
   const app = [APP_ID];
 
   return {
     id: feature.id,
     name: feature.name,
+    description: techPreviewDescription,
+    privilegesTooltip: buildPrivilegesTooltip(documentationUrl),
     category,
     app,
     management: {
@@ -78,8 +100,12 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
   };
 };
 
-export const registerFeaturePrivileges = (features: FeaturesPluginSetup) => {
+export const registerFeaturePrivileges = (
+  features: FeaturesPluginSetup,
+  docLinks: DocLinksServiceSetup
+) => {
+  const documentationUrl = docLinks.links.alerting.alertingV2Overview;
   Object.values(ALERTING_V2_FEATURES).forEach((feature) => {
-    features.registerKibanaFeature(buildKibanaFeature(feature));
+    features.registerKibanaFeature(buildKibanaFeature(feature, documentationUrl));
   });
 };

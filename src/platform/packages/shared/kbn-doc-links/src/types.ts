@@ -486,6 +486,7 @@ export interface DocLinks {
   }>;
   readonly alerting: Readonly<{
     authorization: string;
+    alertingV2Overview: string;
     guide: string;
     actionTypes: string;
     apmRulesErrorCount: string;
