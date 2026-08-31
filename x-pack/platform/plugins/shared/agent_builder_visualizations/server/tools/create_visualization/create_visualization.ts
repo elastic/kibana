@@ -52,7 +52,7 @@ const createVisualizationSchema = z
       .string()
       .max(2048)
       .describe(
-        'A natural language query describing the desired visualization. "Average <field> over time" is a measure. "Log volume over time, show avg/min/max in the legend" is legend statistics — keep that phrasing, do not ask ES|QL to compute those stats.'
+        'A natural language query describing a visualization.
       ),
     index: z
       .string()
