@@ -52,28 +52,13 @@ const CANDIDATE_STRATEGIES = [
   },
   {
     id: 'control_relationship',
-    size: 50,
+    size: 100,
     sortField: 'entity.risk.calculated_score_norm',
     filter: {
       bool: {
         should: [
           { exists: { field: 'entity.relationships.administers.ids' } },
           { exists: { field: 'entity.relationships.owns.ids' } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-  },
-  {
-    id: 'behavioral_signal',
-    size: 50,
-    sortField: 'entity.risk.calculated_score_norm',
-    filter: {
-      bool: {
-        should: [
-          { term: { 'entity.behaviors.brute_force_victim': true } },
-          { term: { 'entity.behaviors.new_country_login': true } },
-          { term: { 'entity.behaviors.used_usb_device': true } },
         ],
         minimum_should_match: 1,
       },
