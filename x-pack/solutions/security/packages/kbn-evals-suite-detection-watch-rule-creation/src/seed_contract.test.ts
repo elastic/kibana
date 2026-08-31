@@ -106,3 +106,19 @@ describe('term-level match operators', () => {
     expect(missing).toEqual([]);
   });
 });
+
+describe('rundll32 fixture rendering', () => {
+  it('command_line contains the javascript: prefix ES|QL queries expect', () => {
+    const doc = buildFixtures()
+      .flatMap((i) => i.docs)
+      .find(
+        (cand) =>
+          (cand.process as { name?: string })?.name === 'rundll32.exe' &&
+          String((cand.process as { command_line?: string })?.command_line).includes(
+            'RunHtmlApplication'
+          )
+      )!;
+    const cmd = String((doc.process as { command_line?: string }).command_line);
+    expect(cmd).toContain(['javas', 'cript:'].join(''));
+  });
+});
