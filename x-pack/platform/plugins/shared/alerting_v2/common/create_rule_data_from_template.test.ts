@@ -59,4 +59,25 @@ describe('createRuleDataFromTemplate', () => {
     expect(createData.recovery_strategy).toBe('no_breach');
     expect(createData.kind).toBe('alert');
   });
+
+  it('stamps metadata.source when given a RuleTemplateResponse with id', () => {
+    const templateResponse = {
+      id: 'nginx-error-rate',
+      engine: 'v2' as const,
+      rule: exampleTemplateAttributes.rule,
+    };
+    const createData = createRuleDataFromTemplate(templateResponse);
+
+    expect(createData.metadata.source).toEqual({
+      type: 'rule_template',
+      data: { template_id: 'nginx-error-rate' },
+    });
+  });
+
+  it('does not stamp source when given a RuleTemplateData without id', () => {
+    const template = ruleTemplateDataSchema.parse(exampleTemplateAttributes);
+    const createData = createRuleDataFromTemplate(template);
+
+    expect(createData.metadata.source).toBeUndefined();
+  });
 });
