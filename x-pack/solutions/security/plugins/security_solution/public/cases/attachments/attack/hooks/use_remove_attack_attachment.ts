@@ -14,41 +14,52 @@ import { bulkDeleteCaseAttachments } from '../api';
 
 export const REMOVE_ATTACK_ATTACHMENT_MUTATION_KEY = ['POST', 'attack-attachment-bulk-delete'];
 
-// Deliberately uncounted: the prompt counts alert *documents* while the removal takes alert
-// *attachments*, and one attachment can carry several documents. Restating a number here would
-// risk contradicting the one the user was shown.
-const SUCCESS_WITH_ALERTS = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.cases.remove.successWithAlerts',
-  { defaultMessage: 'Removed the attack and its related alerts from the case' }
-);
+// The alerts are deliberately uncounted: the prompt counts alert *documents* while the removal
+// takes alert *attachments*, and one attachment can carry several documents. Restating a number
+// here would risk contradicting the one the user was shown.
+const getSuccessWithAlerts = (attackCount: number) =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.remove.successWithAlerts', {
+    defaultMessage:
+      'Removed {attackCount, plural, one {the attack and its related alerts} other {# attacks and their related alerts}} from the case',
+    values: { attackCount },
+  });
 
-const SUCCESS = i18n.translate('xpack.securitySolution.attackDiscovery.cases.remove.success', {
-  defaultMessage: 'Removed the attack from the case',
-});
+const getSuccess = (attackCount: number) =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.remove.success', {
+    defaultMessage:
+      'Removed {attackCount, plural, one {the attack} other {# attacks}} from the case',
+    values: { attackCount },
+  });
 
-const ERROR_TITLE = i18n.translate('xpack.securitySolution.attackDiscovery.cases.remove.error', {
-  defaultMessage: 'Failed to remove the attack from the case',
-});
+const getErrorTitle = (attackCount: number) =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.remove.error', {
+    defaultMessage:
+      'Failed to remove {attackCount, plural, one {the attack} other {the attacks}} from the case',
+    values: { attackCount },
+  });
 
 export interface RemoveAttackAttachmentParams {
   /** The case the attachments belong to. */
   caseId: string;
-  /** The attack attachment's saved object id. */
-  attackAttachmentId: string;
   /**
-   * Saved object ids of the alert attachments to remove alongside the attack. Empty when the
-   * user left the prompt's checkbox unchecked, which removes the attack on its own.
+   * Saved object ids of the attack attachments to remove: one for a row action, several for a
+   * bulk selection.
+   */
+  attackAttachmentIds: readonly string[];
+  /**
+   * Saved object ids of the alert attachments to remove alongside the attacks. Empty when the
+   * user left the prompt's checkbox unchecked, which removes the attacks on their own.
    */
   alertAttachmentIds: readonly string[];
 }
 
 /**
- * Removes a `security.attack` attachment from a case, optionally taking the alert attachments
- * the removal prompt resolved as safe to remove with it.
+ * Removes `security.attack` attachments from a case, optionally taking the alert attachments
+ * the removal prompt resolved as safe to remove with them.
  *
- * Everything goes in one bulk-delete call so a partial failure cannot leave the attack removed
- * with its alerts stranded — the endpoint deletes all of the ids or none of them. The attack's
- * own id is sent first, which matters only when the set is large enough to be batched.
+ * Everything goes in one bulk-delete call so a partial failure cannot leave an attack removed
+ * with its alerts stranded — the endpoint deletes all of the ids or none of them. The attack
+ * ids are sent first, which matters only when the set is large enough to be batched.
  *
  * On success the case view page cache is invalidated through the same hook the Cases single
  * delete uses, so the activity log, the Attacks section and the Attachments tab badge all
@@ -60,20 +71,24 @@ export const useRemoveAttackAttachment = () => {
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation<void, Error, RemoveAttackAttachmentParams>(
-    ({ caseId, attackAttachmentId, alertAttachmentIds }) =>
+    ({ caseId, attackAttachmentIds, alertAttachmentIds }) =>
       bulkDeleteCaseAttachments({
         http,
         caseId,
-        attachmentIds: [attackAttachmentId, ...alertAttachmentIds],
+        attachmentIds: [...attackAttachmentIds, ...alertAttachmentIds],
       }),
     {
       mutationKey: REMOVE_ATTACK_ATTACHMENT_MUTATION_KEY,
-      onSuccess: (_result, { alertAttachmentIds }) => {
+      onSuccess: (_result, { attackAttachmentIds, alertAttachmentIds }) => {
         refreshCaseViewPage();
-        addSuccess(alertAttachmentIds.length > 0 ? SUCCESS_WITH_ALERTS : SUCCESS);
+        addSuccess(
+          alertAttachmentIds.length > 0
+            ? getSuccessWithAlerts(attackAttachmentIds.length)
+            : getSuccess(attackAttachmentIds.length)
+        );
       },
-      onError: (error) => {
-        addError(error, { title: ERROR_TITLE });
+      onError: (error, { attackAttachmentIds }) => {
+        addError(error, { title: getErrorTitle(attackAttachmentIds.length) });
       },
     }
   );

@@ -48,7 +48,7 @@ describe('useRemoveAttackAttachment', () => {
 
     result.current.mutate({
       caseId: 'case-1',
-      attackAttachmentId: 'so-attack-1',
+      attackAttachmentIds: ['so-attack-1'],
       alertAttachmentIds: [],
     });
 
@@ -66,7 +66,7 @@ describe('useRemoveAttackAttachment', () => {
 
     result.current.mutate({
       caseId: 'case-1',
-      attackAttachmentId: 'so-attack-1',
+      attackAttachmentIds: ['so-attack-1'],
       alertAttachmentIds: ['so-alert-1', 'so-alert-2'],
     });
 
@@ -84,12 +84,49 @@ describe('useRemoveAttackAttachment', () => {
     );
   });
 
+  it('removes every attack of a bulk selection in one call, attacks first', async () => {
+    const { result } = renderHook(() => useRemoveAttackAttachment(), { wrapper });
+
+    result.current.mutate({
+      caseId: 'case-1',
+      attackAttachmentIds: ['so-attack-1', 'so-attack-2', 'so-attack-3'],
+      alertAttachmentIds: ['so-alert-1'],
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(bulkDeleteCaseAttachmentsMock).toHaveBeenCalledTimes(1);
+    expect(bulkDeleteCaseAttachmentsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        caseId: 'case-1',
+        attachmentIds: ['so-attack-1', 'so-attack-2', 'so-attack-3', 'so-alert-1'],
+      })
+    );
+    expect(appToasts.addSuccess).toHaveBeenCalledWith(
+      'Removed 3 attacks and their related alerts from the case'
+    );
+  });
+
+  it('counts the attacks it removed when no alerts were opted in', async () => {
+    const { result } = renderHook(() => useRemoveAttackAttachment(), { wrapper });
+
+    result.current.mutate({
+      caseId: 'case-1',
+      attackAttachmentIds: ['so-attack-1', 'so-attack-2'],
+      alertAttachmentIds: [],
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(appToasts.addSuccess).toHaveBeenCalledWith('Removed 2 attacks from the case');
+  });
+
   it('refreshes the case view page so the removals show without a manual refresh', async () => {
     const { result } = renderHook(() => useRemoveAttackAttachment(), { wrapper });
 
     result.current.mutate({
       caseId: 'case-1',
-      attackAttachmentId: 'so-attack-1',
+      attackAttachmentIds: ['so-attack-1'],
       alertAttachmentIds: ['so-alert-1'],
     });
 
@@ -106,7 +143,7 @@ describe('useRemoveAttackAttachment', () => {
 
     result.current.mutate({
       caseId: 'case-1',
-      attackAttachmentId: 'so-attack-1',
+      attackAttachmentIds: ['so-attack-1'],
       alertAttachmentIds: ['so-alert-1'],
     });
 

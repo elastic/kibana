@@ -31,29 +31,29 @@ const LOADING: UseRemovableAlertAttachmentsResult = {
 };
 
 /**
- * Resolves which of the case's alert attachments may be removed alongside the attack attachment
- * identified by `attackId`.
+ * Resolves which of the case's alert attachments may be removed alongside the attack attachments
+ * identified by `attackIds` — one for a row action, several for a bulk selection.
  *
  * The attack alert sets are read live rather than from attachment metadata — see
  * {@link resolveRemovableAlertAttachments} for why — so every attack attached to the case is
- * fetched in one request: the one being removed, and the others whose claims exclude alerts from
+ * fetched in one request: the ones being removed, and the others whose claims exclude alerts from
  * the result. Mount this only once the user has asked to remove something; it costs a request.
  *
  * @param comments the case's attachments.
- * @param attackId the attack document id of the attachment being removed.
+ * @param attackIds the attack document ids of the attachments being removed.
  */
 export const useRemovableAlertAttachments = ({
   comments,
-  attackId,
+  attackIds,
 }: {
   comments: readonly CaseAttachment[];
-  attackId: string;
+  attackIds: readonly string[];
 }): UseRemovableAlertAttachmentsResult => {
   const { http } = useKibana().services;
   const { isAssistantEnabled } = useAssistantAvailability();
 
   // The same attack can only be attached once, but dedupe anyway: the ids form the query key.
-  const attackIds = useMemo(
+  const caseAttackIds = useMemo(
     () => [
       ...new Set(
         comments.flatMap((comment) => (isAttackAttachment(comment) ? [comment.attachmentId] : []))
@@ -64,11 +64,11 @@ export const useRemovableAlertAttachments = ({
 
   const { data, isLoading, status } = useFindAttackDiscoveries({
     http,
-    ids: attackIds,
+    ids: caseAttackIds,
     // Attacks attached by a teammate belong to the case regardless of who generated them.
     includeAllAuthors: true,
     // `_find` defaults to 10 per page, which would leave later attacks looking unresolvable.
-    perPage: Math.max(attackIds.length, 1),
+    perPage: Math.max(caseAttackIds.length, 1),
     // The hook has no separate `enabled` flag; this doubles as one.
     isAssistantEnabled,
   });
@@ -97,15 +97,23 @@ export const useRemovableAlertAttachments = ({
       return LOADING;
     }
 
+    const removedAttackIds = new Set(attackIds);
+    const removedAlertIds = attackIds.map((id) => alertIdsByAttackId.get(id));
+
     return {
       isLoading: false,
       ...resolveRemovableAlertAttachments({
-        attackAlertIds: alertIdsByAttackId.get(attackId),
+        // The selection's alert sets are unioned and deduped: an alert two selected attacks
+        // share leaves with them, and counts once. Left undefined when any of the selection is
+        // unresolved, because a union missing one of its parts understates what is claimed.
+        attackAlertIds: removedAlertIds.some((ids) => ids == null)
+          ? undefined
+          : [...new Set(removedAlertIds.flatMap((ids) => ids ?? []))],
         alertAttachments,
-        otherAttackAlertIds: attackIds
-          .filter((id) => id !== attackId)
+        otherAttackAlertIds: caseAttackIds
+          .filter((id) => !removedAttackIds.has(id))
           .map((id) => alertIdsByAttackId.get(id)),
       }),
     };
-  }, [alertAttachments, alertIdsByAttackId, attackId, attackIds, hasSettled]);
+  }, [alertAttachments, alertIdsByAttackId, attackIds, caseAttackIds, hasSettled]);
 };

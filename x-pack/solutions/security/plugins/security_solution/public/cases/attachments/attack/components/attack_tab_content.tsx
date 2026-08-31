@@ -60,8 +60,10 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { RuleStatus } from '../../../../timelines/components/timeline/body/renderers/rule_status';
 import { ShowAttackButton } from './show_attack_button';
-import type { RemoveAttackConfirmation } from './remove_attack_button';
+import type { RemoveAttackConfirmation } from './connected_remove_attack_modal';
 import { RemoveAttackButton } from './remove_attack_button';
+import type { SelectedAttack } from './attack_tab_bulk_actions';
+import { AttackTabBulkActions } from './attack_tab_bulk_actions';
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
 import type { AttackCaseAttachmentRow, AttackTabColumnId } from '../utils';
 import {
@@ -93,7 +95,10 @@ const GRID_STYLE: EuiDataGridStyle = {
   header: 'underline',
 };
 
-/** Matches the alerts grid. `EuiDataGrid` has no grouping or CSV export of its own to hide. */
+/**
+ * Matches the alerts grid. `EuiDataGrid` has no grouping or CSV export of its own to hide.
+ * The bulk action bar is appended to this at render time, once there is a selection to act on.
+ */
 const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
   showColumnSelector: true,
   showSortSelector: true,
@@ -483,7 +488,7 @@ const AttackTabTable = ({
 
   const onRemoveConfirmed = useCallback(
     (attackAttachmentId: string, { alertAttachmentIds }: RemoveAttackConfirmation) =>
-      removeAttack({ caseId, attackAttachmentId, alertAttachmentIds }),
+      removeAttack({ caseId, attackAttachmentIds: [attackAttachmentId], alertAttachmentIds }),
     [caseId, removeAttack]
   );
 
@@ -612,12 +617,14 @@ const AttackTabTable = ({
     });
   }, []);
 
-  // Counted against the rows rather than the selection, so an attachment removed from the case
-  // while selected cannot leave the header checkbox stuck.
-  const selectedRowCount = useMemo(
-    () => rows.filter(({ savedObjectId }) => selectedRowIds.has(savedObjectId)).length,
+  // Taken from the rows rather than the selection, so an attachment removed from the case while
+  // selected cannot leave the header checkbox stuck or the bulk bar naming a row that is gone.
+  const selectedRows = useMemo(
+    () => rows.filter(({ savedObjectId }) => selectedRowIds.has(savedObjectId)),
     [rows, selectedRowIds]
   );
+
+  const selectedRowCount = selectedRows.length;
 
   const areAllRowsSelected = rows.length > 0 && selectedRowCount === rows.length;
 
@@ -720,6 +727,49 @@ const AttackTabTable = ({
     ]
   );
 
+  const selectedAttacks = useMemo<SelectedAttack[]>(
+    () =>
+      selectedRows.map(({ attachmentId, attack, metadata }) => ({
+        attackId: attachmentId,
+        title: getTitle(attack, metadata),
+      })),
+    [selectedRows]
+  );
+
+  const onBulkRemoveConfirmed = useCallback(
+    ({ alertAttachmentIds }: RemoveAttackConfirmation) =>
+      removeAttack(
+        {
+          caseId,
+          attackAttachmentIds: selectedRows.map(({ savedObjectId }) => savedObjectId),
+          alertAttachmentIds,
+        },
+        // Only once the removal lands: a selection cleared ahead of a failure would leave the
+        // user with nothing to retry from.
+        { onSuccess: clearSelection }
+      ),
+    [caseId, clearSelection, removeAttack, selectedRows]
+  );
+
+  const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(
+    () => ({
+      ...TOOLBAR_VISIBILITY,
+      additionalControls: {
+        left: {
+          append: (
+            <AttackTabBulkActions
+              comments={comments}
+              isRemoving={isRemoving}
+              onConfirm={onBulkRemoveConfirmed}
+              selectedAttacks={selectedAttacks}
+            />
+          ),
+        },
+      },
+    }),
+    [comments, isRemoving, onBulkRemoveConfirmed, selectedAttacks]
+  );
+
   return (
     <EuiFlexItem
       data-test-subj={ATTACK_TAB_TABLE_TEST_ID}
@@ -739,7 +789,7 @@ const AttackTabTable = ({
         renderCellValue={renderCellValue}
         rowCount={rows.length}
         sorting={sorting}
-        toolbarVisibility={TOOLBAR_VISIBILITY}
+        toolbarVisibility={toolbarVisibility}
       />
     </EuiFlexItem>
   );

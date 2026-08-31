@@ -62,7 +62,7 @@ describe('useRemovableAlertAttachments', () => {
           attackAttachment('attack-2'),
           alertAttachment('so-alert-1', ['alert-1']),
         ],
-        attackId: 'attack-1',
+        attackIds: ['attack-1'],
       })
     );
 
@@ -85,7 +85,7 @@ describe('useRemovableAlertAttachments', () => {
     const { result } = renderHook(() =>
       useRemovableAlertAttachments({
         comments: [attackAttachment('attack-1'), alertAttachment('so-alert-1', ['alert-1'])],
-        attackId: 'attack-1',
+        attackIds: ['attack-1'],
       })
     );
 
@@ -110,7 +110,7 @@ describe('useRemovableAlertAttachments', () => {
           alertAttachment('so-alert-2', ['alert-2']),
           alertAttachment('so-alert-3', ['alert-3']),
         ],
-        attackId: 'attack-1',
+        attackIds: ['attack-1'],
       })
     );
 
@@ -138,7 +138,7 @@ describe('useRemovableAlertAttachments', () => {
           alertAttachment('so-alert-1', ['alert-1']),
           alertAttachment('so-alert-2', ['alert-2']),
         ],
-        attackId: 'attack-1',
+        attackIds: ['attack-1'],
       })
     );
 
@@ -164,7 +164,7 @@ describe('useRemovableAlertAttachments', () => {
     const { result } = renderHook(() =>
       useRemovableAlertAttachments({
         comments: [attackAttachment('attack-1'), alertAttachment('so-alert-1', ['alert-1'])],
-        attackId: 'attack-1',
+        attackIds: ['attack-1'],
       })
     );
 
@@ -182,7 +182,7 @@ describe('useRemovableAlertAttachments', () => {
     const { result } = renderHook(() =>
       useRemovableAlertAttachments({
         comments: [attackAttachment('attack-1'), alertAttachment('so-alert-1', ['alert-1'])],
-        attackId: 'attack-1',
+        attackIds: ['attack-1'],
       })
     );
 
@@ -206,11 +206,93 @@ describe('useRemovableAlertAttachments', () => {
           attackAttachment('attack-2'),
           alertAttachment('so-alert-1', ['alert-1']),
         ],
-        attackId: 'attack-1',
+        attackIds: ['attack-1'],
       })
     );
 
     expect(result.current.isResolvable).toBe(false);
     expect(result.current.attachmentIds).toEqual([]);
+  });
+
+  describe('a selection of several attacks', () => {
+    it('unions their alert ids, so an alert shared only within the selection is removable', () => {
+      useFindAttackDiscoveriesMock.mockReturnValue(
+        findResult([
+          { id: 'attack-1', alertIds: ['alert-1', 'alert-2'] },
+          { id: 'attack-2', alertIds: ['alert-2', 'alert-3'] },
+        ])
+      );
+
+      const { result } = renderHook(() =>
+        useRemovableAlertAttachments({
+          comments: [
+            attackAttachment('attack-1'),
+            attackAttachment('attack-2'),
+            alertAttachment('so-alert-1', ['alert-1']),
+            // Removable only because the union covers both of its alerts.
+            alertAttachment('so-alert-cross', ['alert-2', 'alert-3']),
+          ],
+          attackIds: ['attack-1', 'attack-2'],
+        })
+      );
+
+      expect(result.current).toEqual({
+        isLoading: false,
+        attachmentIds: ['so-alert-1', 'so-alert-cross'],
+        // alert-2 belongs to both selected attacks and is counted once.
+        alertIds: ['alert-1', 'alert-2', 'alert-3'],
+        isResolvable: true,
+      });
+    });
+
+    it('still excludes alerts claimed by an attack outside the selection', () => {
+      useFindAttackDiscoveriesMock.mockReturnValue(
+        findResult([
+          { id: 'attack-1', alertIds: ['alert-1'] },
+          { id: 'attack-2', alertIds: ['alert-2'] },
+          { id: 'attack-3', alertIds: ['alert-2'] },
+        ])
+      );
+
+      const { result } = renderHook(() =>
+        useRemovableAlertAttachments({
+          comments: [
+            attackAttachment('attack-1'),
+            attackAttachment('attack-2'),
+            attackAttachment('attack-3'),
+            alertAttachment('so-alert-1', ['alert-1']),
+            alertAttachment('so-alert-2', ['alert-2']),
+          ],
+          attackIds: ['attack-1', 'attack-2'],
+        })
+      );
+
+      expect(result.current).toEqual({
+        isLoading: false,
+        attachmentIds: ['so-alert-1'],
+        alertIds: ['alert-1'],
+        isResolvable: true,
+      });
+    });
+
+    it('is not resolvable when any attack in the selection did not come back', () => {
+      useFindAttackDiscoveriesMock.mockReturnValue(
+        findResult([{ id: 'attack-1', alertIds: ['alert-1'] }])
+      );
+
+      const { result } = renderHook(() =>
+        useRemovableAlertAttachments({
+          comments: [
+            attackAttachment('attack-1'),
+            attackAttachment('attack-2'),
+            alertAttachment('so-alert-1', ['alert-1']),
+          ],
+          attackIds: ['attack-1', 'attack-2'],
+        })
+      );
+
+      expect(result.current.isResolvable).toBe(false);
+      expect(result.current.attachmentIds).toEqual([]);
+    });
   });
 });

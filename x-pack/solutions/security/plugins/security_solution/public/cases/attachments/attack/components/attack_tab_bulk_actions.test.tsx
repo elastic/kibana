@@ -13,8 +13,9 @@ import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import {
+  ATTACK_TAB_BULK_ACTIONS_TEST_ID,
+  ATTACK_TAB_BULK_REMOVE_TEST_ID,
   REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
-  REMOVE_ATTACK_BUTTON_TEST_ID,
   REMOVE_ATTACK_MODAL_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 import { APP_ID } from '../../../../../common/constants';
@@ -22,8 +23,9 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { allCasesPermissions, noCasesPermissions } from '../../../../cases_test_utils';
 import type { CaseAttachment } from '../utils';
-import { RemoveAttackButton } from './remove_attack_button';
 import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
+import type { SelectedAttack } from './attack_tab_bulk_actions';
+import { AttackTabBulkActions } from './attack_tab_bulk_actions';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../hooks/use_removable_alert_attachments');
@@ -46,9 +48,12 @@ const comments = [
   },
 ] as unknown as CaseAttachment[];
 
-const REMOVE_BUTTON_TEST_ID = `${REMOVE_ATTACK_BUTTON_TEST_ID}-so-attack-1`;
+const twoAttacks: SelectedAttack[] = [
+  { attackId: 'attack-1', title: 'Credential dumping on host-1' },
+  { attackId: 'attack-2', title: 'Lateral movement to host-2' },
+];
 
-describe('RemoveAttackButton', () => {
+describe('AttackTabBulkActions', () => {
   const onConfirm = jest.fn();
 
   beforeEach(() => {
@@ -59,61 +64,104 @@ describe('RemoveAttackButton', () => {
     useRemovableAlertAttachmentsMock.mockReturnValue({
       isLoading: false,
       isResolvable: true,
-      attachmentIds: ['so-alert-1'],
-      alertIds: ['alert-1'],
+      attachmentIds: ['so-alert-1', 'so-alert-2'],
+      alertIds: ['alert-1', 'alert-2'],
     });
   });
 
-  const renderButton = () =>
+  const renderBar = (selectedAttacks: SelectedAttack[], isRemoving = false) =>
     render(
       <TestProviders>
-        <RemoveAttackButton
-          id="so-attack-1"
-          attackId="attack-1"
-          attackTitle="Credential dumping on host-1"
+        <AttackTabBulkActions
           comments={comments}
+          isRemoving={isRemoving}
           onConfirm={onConfirm}
+          selectedAttacks={selectedAttacks}
         />
       </TestProviders>
     );
+
+  it('renders nothing while no row is selected', () => {
+    renderBar([]);
+
+    expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
+  });
 
   it('renders nothing when the user cannot delete attachments', () => {
     mockedUseKibana.services.cases.helpers.canUseCases = jest
       .fn()
       .mockReturnValue(noCasesPermissions());
 
-    renderButton();
+    renderBar(twoAttacks);
 
-    expect(screen.queryByTestId(REMOVE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('scopes the permission check to the securitySolution owner', () => {
-    renderButton();
+    renderBar(twoAttacks);
 
     expect(mockedUseKibana.services.cases.helpers.canUseCases).toHaveBeenCalledWith([APP_ID]);
   });
 
-  it('has an accessible label and does not resolve anything until it is clicked', () => {
-    renderButton();
+  it('counts the selection and offers removal as its only action', () => {
+    renderBar(twoAttacks);
 
-    expect(screen.getByLabelText('Remove attack from case')).toBeInTheDocument();
-    expect(screen.queryByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).not.toBeInTheDocument();
+    const bar = screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID);
+
+    expect(bar).toHaveTextContent('2 attacks selected');
+    expect(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID)).toHaveTextContent(
+      'Remove from case'
+    );
+    expect(bar.querySelectorAll('button')).toHaveLength(1);
+  });
+
+  it('disables the action while a removal is in flight', () => {
+    renderBar(twoAttacks, true);
+
+    expect(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID)).toBeDisabled();
+  });
+
+  it('resolves nothing until the action is used', () => {
+    renderBar(twoAttacks);
+
     expect(useRemovableAlertAttachmentsMock).not.toHaveBeenCalled();
   });
 
-  it('opens the confirmation prompt instead of removing immediately', async () => {
-    renderButton();
+  it('resolves the removable alerts across the whole selection', async () => {
+    renderBar(twoAttacks);
 
-    await userEvent.click(screen.getByTestId(REMOVE_BUTTON_TEST_ID));
+    await userEvent.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
 
-    expect(screen.getByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
-    expect(onConfirm).not.toHaveBeenCalled();
+    expect(useRemovableAlertAttachmentsMock).toHaveBeenCalledWith({
+      attackIds: ['attack-1', 'attack-2'],
+      comments,
+    });
+  });
+
+  it('names the selection by count in the prompt', async () => {
+    renderBar(twoAttacks);
+
+    await userEvent.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
+
+    expect(screen.getByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toHaveTextContent(
+      '2 attacks will be removed from this case.'
+    );
+  });
+
+  it('names the attack itself when a single row is selected', async () => {
+    renderBar([twoAttacks[0]]);
+
+    await userEvent.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
+
+    expect(screen.getByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toHaveTextContent(
+      'Credential dumping on host-1 will be removed from this case.'
+    );
   });
 
   it('removes nothing when the prompt is cancelled', async () => {
-    renderButton();
+    renderBar(twoAttacks);
 
-    await userEvent.click(screen.getByTestId(REMOVE_BUTTON_TEST_ID));
+    await userEvent.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
     await userEvent.click(screen.getByText('Cancel'));
 
     expect(onConfirm).not.toHaveBeenCalled();
@@ -121,46 +169,23 @@ describe('RemoveAttackButton', () => {
   });
 
   it('confirms with no alert attachments when the checkbox is left unchecked', async () => {
-    renderButton();
+    renderBar(twoAttacks);
 
-    await userEvent.click(screen.getByTestId(REMOVE_BUTTON_TEST_ID));
+    await userEvent.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
     await userEvent.click(screen.getByText('Remove'));
 
     expect(onConfirm).toHaveBeenCalledWith({ alertAttachmentIds: [] });
   });
 
-  it('confirms with the resolved alert attachments when the checkbox is checked', async () => {
-    renderButton();
+  it('confirms with the alert attachments resolved for the selection', async () => {
+    renderBar(twoAttacks);
 
-    await userEvent.click(screen.getByTestId(REMOVE_BUTTON_TEST_ID));
+    await userEvent.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
     await userEvent.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
     await userEvent.click(screen.getByText('Remove'));
 
-    expect(onConfirm).toHaveBeenCalledWith({ alertAttachmentIds: ['so-alert-1'] });
-  });
-
-  it('shows the resolved alert count on the checkbox', async () => {
-    useRemovableAlertAttachmentsMock.mockReturnValue({
-      isLoading: false,
-      isResolvable: true,
-      attachmentIds: ['so-alert-1'],
-      alertIds: ['alert-1', 'alert-2'],
-    });
-
-    renderButton();
-    await userEvent.click(screen.getByTestId(REMOVE_BUTTON_TEST_ID));
-
-    expect(screen.getByLabelText('Also remove 2 related alerts')).toBeInTheDocument();
-  });
-
-  it('resolves the removable alerts for the attack being removed', async () => {
-    renderButton();
-
-    await userEvent.click(screen.getByTestId(REMOVE_BUTTON_TEST_ID));
-
-    expect(useRemovableAlertAttachmentsMock).toHaveBeenCalledWith({
-      attackIds: ['attack-1'],
-      comments,
+    expect(onConfirm).toHaveBeenCalledWith({
+      alertAttachmentIds: ['so-alert-1', 'so-alert-2'],
     });
   });
 });

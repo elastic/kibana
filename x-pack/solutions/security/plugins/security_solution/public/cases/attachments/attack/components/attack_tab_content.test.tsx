@@ -12,6 +12,8 @@ import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { AttackTabContent } from './attack_tab_content';
 import {
+  ATTACK_TAB_BULK_ACTIONS_TEST_ID,
+  ATTACK_TAB_BULK_REMOVE_TEST_ID,
   ATTACK_TAB_COLUMN_ACTIONS_TEST_ID,
   ATTACK_TAB_COLUMN_ALERTS_TEST_ID,
   ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID,
@@ -628,7 +630,7 @@ describe('AttackTabContent', () => {
 
       expect(removeAttack).toHaveBeenCalledWith({
         caseId: 'case-1',
-        attackAttachmentId: 'so-1',
+        attackAttachmentIds: ['so-1'],
         alertAttachmentIds: [],
       });
     });
@@ -643,7 +645,7 @@ describe('AttackTabContent', () => {
       expect(removeAttack).toHaveBeenCalledTimes(1);
       expect(removeAttack).toHaveBeenCalledWith({
         caseId: 'case-1',
-        attackAttachmentId: 'so-1',
+        attackAttachmentIds: ['so-1'],
         alertAttachmentIds: ['so-alert-1', 'so-alert-2'],
       });
     });
@@ -803,6 +805,138 @@ describe('AttackTabContent', () => {
       );
 
       expect(rowCheckbox('so-1')).not.toBeChecked();
+    });
+  });
+
+  describe('the bulk action bar', () => {
+    const rowCheckbox = (savedObjectId: string) =>
+      screen.getByTestId(`${ATTACK_TAB_ROW_SELECT_TEST_ID}-${savedObjectId}`);
+
+    /** Sorted by detection time, `so-1` is the live attack and `so-2` the unresolved one. */
+    const renderTwoAttachments = () =>
+      renderAttachments([
+        buildAttachment(),
+        buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
+      ]);
+
+    const selectBothRows = async () => {
+      await userEvent.click(rowCheckbox('so-1'));
+      await userEvent.click(rowCheckbox('so-2'));
+    };
+
+    const openBulkRemovalPrompt = async () => {
+      await userEvent.click(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID));
+    };
+
+    const confirmRemoval = async () => {
+      await userEvent.click(screen.getByText('Remove'));
+    };
+
+    it('stays hidden until a row is selected', () => {
+      renderTwoAttachments();
+
+      expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('appears with the selection, and counts it', async () => {
+      renderTwoAttachments();
+
+      await userEvent.click(rowCheckbox('so-1'));
+      expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
+        '1 attack selected'
+      );
+
+      await userEvent.click(rowCheckbox('so-2'));
+      expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
+        '2 attacks selected'
+      );
+    });
+
+    it('goes away again when the selection is cleared', async () => {
+      renderTwoAttachments();
+
+      await userEvent.click(rowCheckbox('so-1'));
+      await userEvent.click(rowCheckbox('so-1'));
+
+      expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('resolves the related alerts across the whole selection', async () => {
+      renderTwoAttachments();
+
+      await selectBothRows();
+      await openBulkRemovalPrompt();
+
+      expect(useRemovableAlertAttachmentsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ attackIds: ['attack-id-1', 'attack-id-2'] })
+      );
+    });
+
+    it('removes every selected attack in one call rather than one per row', async () => {
+      renderTwoAttachments();
+
+      await selectBothRows();
+      await openBulkRemovalPrompt();
+      await confirmRemoval();
+
+      expect(removeAttack).toHaveBeenCalledTimes(1);
+      expect(removeAttack).toHaveBeenCalledWith(
+        {
+          caseId: 'case-1',
+          attackAttachmentIds: ['so-1', 'so-2'],
+          alertAttachmentIds: [],
+        },
+        expect.anything()
+      );
+    });
+
+    it('takes the selection’s related alert attachments when the prompt opts in', async () => {
+      renderTwoAttachments();
+
+      await selectBothRows();
+      await openBulkRemovalPrompt();
+      await userEvent.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
+      await confirmRemoval();
+
+      expect(removeAttack).toHaveBeenCalledWith(
+        expect.objectContaining({ alertAttachmentIds: ['so-alert-1', 'so-alert-2'] }),
+        expect.anything()
+      );
+    });
+
+    it('clears the selection once the removal lands', async () => {
+      removeAttack.mockImplementationOnce((_params, options) => options?.onSuccess?.());
+
+      renderTwoAttachments();
+
+      await selectBothRows();
+      await openBulkRemovalPrompt();
+      await confirmRemoval();
+
+      expect(rowCheckbox('so-1')).not.toBeChecked();
+      expect(rowCheckbox('so-2')).not.toBeChecked();
+      expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('keeps the selection when the removal does not land', async () => {
+      renderTwoAttachments();
+
+      await selectBothRows();
+      await openBulkRemovalPrompt();
+      await confirmRemoval();
+
+      expect(rowCheckbox('so-1')).toBeChecked();
+      expect(rowCheckbox('so-2')).toBeChecked();
+    });
+
+    it('disables the bulk action while a removal is in flight', async () => {
+      useRemoveAttackAttachmentMock.mockReturnValue({ mutate: removeAttack, isLoading: true });
+
+      renderTwoAttachments();
+
+      await userEvent.click(rowCheckbox('so-1'));
+
+      expect(screen.getByTestId(ATTACK_TAB_BULK_REMOVE_TEST_ID)).toBeDisabled();
     });
   });
 });

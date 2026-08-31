@@ -5,29 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { REMOVE_ATTACK_BUTTON_TEST_ID } from '../../../../../common/cases/attachments/attack/test_ids';
 import { APP_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
 import type { CaseAttachment } from '../utils';
-import { RemoveAttackModal } from './remove_attack_modal';
+import type { RemoveAttackConfirmation } from './connected_remove_attack_modal';
+import { ConnectedRemoveAttackModal } from './connected_remove_attack_modal';
 
 const REMOVE_ATTACK_TOOLTIP = i18n.translate(
   'xpack.securitySolution.attackDiscovery.cases.remove.buttonLabel',
   { defaultMessage: 'Remove attack from case' }
 );
-
-/** What the confirmed removal should delete, beyond the attack attachment itself. */
-export interface RemoveAttackConfirmation {
-  /**
-   * Saved object ids of the alert attachments to remove alongside the attack. Empty unless the
-   * user opted in, so the caller can always pass these straight to a bulk delete.
-   */
-  alertAttachmentIds: string[];
-}
 
 export interface RemoveAttackButtonProps {
   /** Id used to build the button's `data-test-subj` and DOM id — the attachment saved object id. */
@@ -64,6 +55,8 @@ export const RemoveAttackButton = ({
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
 
+  const attackIds = useMemo(() => [attackId], [attackId]);
+
   const canDelete = cases.helpers.canUseCases([APP_ID]).delete;
 
   if (!canDelete) {
@@ -87,7 +80,7 @@ export const RemoveAttackButton = ({
           not per rendered row. */}
       {isModalOpen ? (
         <ConnectedRemoveAttackModal
-          attackId={attackId}
+          attackIds={attackIds}
           attackTitle={attackTitle}
           comments={comments}
           onCancel={closeModal}
@@ -99,45 +92,3 @@ export const RemoveAttackButton = ({
 };
 
 RemoveAttackButton.displayName = 'RemoveAttackButton';
-
-/** Resolves the attack's removable alerts and feeds the confirmation prompt. */
-const ConnectedRemoveAttackModal = ({
-  attackId,
-  attackTitle,
-  comments,
-  onCancel,
-  onConfirm,
-}: {
-  attackId: string;
-  attackTitle: string;
-  comments: readonly CaseAttachment[];
-  onCancel: () => void;
-  onConfirm: (confirmation: RemoveAttackConfirmation) => void;
-}) => {
-  const { attachmentIds, alertIds, isResolvable, isLoading } = useRemovableAlertAttachments({
-    comments,
-    attackId,
-  });
-
-  const onModalConfirm = useCallback(
-    ({ removeRelatedAlerts }: { removeRelatedAlerts: boolean }) => {
-      onCancel();
-      onConfirm({ alertAttachmentIds: removeRelatedAlerts ? attachmentIds : [] });
-    },
-    [attachmentIds, onCancel, onConfirm]
-  );
-
-  return (
-    <RemoveAttackModal
-      // The count names alert documents, not attachments: an alert attachment can carry several.
-      alertCount={alertIds.length}
-      attackTitle={attackTitle}
-      isLoading={isLoading}
-      isResolvable={isResolvable}
-      onCancel={onCancel}
-      onConfirm={onModalConfirm}
-    />
-  );
-};
-
-ConnectedRemoveAttackModal.displayName = 'ConnectedRemoveAttackModal';
