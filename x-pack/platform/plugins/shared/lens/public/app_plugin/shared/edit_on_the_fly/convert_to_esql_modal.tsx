@@ -28,12 +28,14 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { esql } from '@elastic/esql';
 
+import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import { getFailureTooltip } from '@kbn/lens-common';
+
 import { layerTypes } from '../../..';
-import { getFailureTooltip } from '../../../datasources/form_based/to_esql_failure_reasons';
+
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
