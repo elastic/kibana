@@ -376,6 +376,11 @@ export const fetchAlertIdIndexWithSource = async (
     size: cappedIds.length * cap,
     ignore_unavailable: true,
   });
+  if ((searchResponse._shards.failed ?? 0) > 0) {
+    throw new Error(
+      `Partial shard failure during prefetch (${searchResponse._shards.failed} of ${searchResponse._shards.total} shards failed); suppressing event to avoid reporting an incomplete delta`
+    );
+  }
   const pairs: IdIndexPairWithSource[] = [];
   for (const hit of searchResponse.hits.hits) {
     if (hit._id != null && hit._index != null) {
