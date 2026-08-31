@@ -32,18 +32,23 @@ const renderComponent = (
   const http = httpServiceMock.createStartContract();
   return render(
     <IntlProvider locale="en">
-      <LinkedActionPoliciesStep http={http} ruleId="rule-1" {...props} />
+      <LinkedActionPoliciesStep http={http} {...props} />
     </IntlProvider>
   );
 };
 
 describe('LinkedActionPoliciesStep', () => {
-  it('always renders the title and subtext', () => {
+  it('renders the title and the matching subtext when policies are present', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
-      items: [],
-      total: 0,
+      items: [
+        {
+          actionPolicy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'global',
+        },
+      ],
+      total: 1,
     });
 
     renderComponent();
@@ -76,7 +81,7 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(screen.getByTestId('linkedActionPoliciesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('0 matching action policies')).toBeInTheDocument();
+    expect(screen.getByText('No matching action policies found.')).toBeInTheDocument();
   });
 
   it('renders a catch-all badge for a global policy', () => {
@@ -100,7 +105,7 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.queryByTestId('matchedPolicyReasonExpression')).not.toBeInTheDocument();
   });
 
-  it('renders a tags badge for a global-filtered policy matched by tags', () => {
+  it('renders a tags badge for a policy matched by tags', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod', 'other'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
@@ -112,7 +117,7 @@ describe('LinkedActionPoliciesStep', () => {
             name: 'Tag Policy',
             matcher: { tags: ['env:prod', 'team:sre'] },
           } as any,
-          category: 'global-filtered',
+          category: 'tags',
         },
       ],
       total: 1,
@@ -125,30 +130,6 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
   });
 
-  it('renders an expression badge for a global-filtered policy matched by expression', () => {
-    mockUseMatchedActionPolicies.mockReturnValue({
-      isLoading: false,
-      error: null,
-      items: [
-        {
-          actionPolicy: {
-            id: 'ap-3',
-            name: 'Expression Policy',
-            matcher: { expression: 'rule.name: "checkout"' },
-          } as any,
-          category: 'global-filtered',
-        },
-      ],
-      total: 1,
-    });
-
-    renderComponent();
-
-    expect(screen.getByTestId('matchedPolicyReasonExpression')).toBeInTheDocument();
-    expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('matchedPolicyReasonTags')).not.toBeInTheDocument();
-  });
-
   it('renders both tags and expression badges when the matcher has both clauses', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
@@ -159,9 +140,9 @@ describe('LinkedActionPoliciesStep', () => {
           actionPolicy: {
             id: 'ap-4',
             name: 'Combined Policy',
-            matcher: { tags: ['env:prod'], expression: 'rule.name: "checkout*"' },
+            matcher: { tags: ['env:prod'], expression: 'data.error_count > 0' },
           } as any,
-          category: 'global-filtered',
+          category: 'tags',
         },
       ],
       total: 1,
@@ -191,7 +172,7 @@ describe('LinkedActionPoliciesStep', () => {
 
     render(
       <IntlProvider locale="en">
-        <LinkedActionPoliciesStep http={http} ruleId="rule-1" />
+        <LinkedActionPoliciesStep http={http} />
       </IntlProvider>
     );
 
@@ -214,7 +195,7 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByTestId('linkedActionPoliciesError')).toBeInTheDocument();
   });
 
-  it('passes name and tags from form values when ruleId is not provided', () => {
+  it('passes the current form tags to the matcher hook so unsaved changes are reflected', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
@@ -223,26 +204,10 @@ describe('LinkedActionPoliciesStep', () => {
       total: 0,
     });
 
-    renderComponent({ ruleId: undefined });
+    renderComponent();
 
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
-      expect.objectContaining({ ruleId: undefined, name: 'My Rule', tags: ['env:prod'] })
-    );
-  });
-
-  it('passes current form name and tags alongside ruleId so unsaved changes are reflected', () => {
-    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
-    mockUseMatchedActionPolicies.mockReturnValue({
-      isLoading: false,
-      error: null,
-      items: [],
-      total: 0,
-    });
-
-    renderComponent({ ruleId: 'rule-abc' });
-
-    expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
-      expect.objectContaining({ ruleId: 'rule-abc', name: 'My Rule', tags: ['env:prod'] })
+      expect.objectContaining({ tags: ['env:prod'] })
     );
   });
 });

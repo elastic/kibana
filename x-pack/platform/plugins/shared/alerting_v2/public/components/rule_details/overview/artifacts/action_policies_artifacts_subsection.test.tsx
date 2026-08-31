@@ -45,7 +45,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1 },
+  metadata: { name: 'Test Rule', version: 1, tags: ['prod'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
@@ -78,9 +78,9 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     });
   });
 
-  it('loads linked policies for the current rule', () => {
+  it('loads linked policies using the current rule tags', () => {
     renderSubsection();
-    expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith('rule-1');
+    expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith(['prod']);
   });
 
   it('renders loading state on the stat', () => {

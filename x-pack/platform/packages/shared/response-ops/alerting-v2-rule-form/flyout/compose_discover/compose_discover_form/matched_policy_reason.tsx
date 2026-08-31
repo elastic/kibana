@@ -34,8 +34,8 @@ const expressionTooltipTitle = i18n.translate(
 export const getMatchedTags = (matcherTags: string[], ruleTags: string[]): string[] => {
   const ruleTagSet = new Set(ruleTags);
   const matched = matcherTags.filter((tag) => ruleTagSet.has(tag));
-  // A `global-filtered` policy with a tag clause must have matched at least one tag, but the form's
-  // tags can be a keystroke ahead of the fetched result — show the clause rather than an empty list.
+  // A `tags` policy must have matched at least one tag, but the form's tags can be a keystroke
+  // ahead of the fetched result — show the clause rather than an empty list.
   return matched.length > 0 ? matched : matcherTags;
 };
 

@@ -16,14 +16,12 @@ import { ACTION_POLICY_RESPONSE } from './action_policy_oas_shared_examples';
 
 export const MATCH_ACTION_POLICIES_FOR_RULE_REQUEST: MatchActionPoliciesForRuleBody = {
   rule: {
-    id: 'rule-1',
-    name: 'Host CPU high',
     tags: ['production'],
   },
 };
 
 export const MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE: MatchActionPoliciesForRuleResponse = {
-  items: [{ actionPolicy: ACTION_POLICY_RESPONSE, category: 'global-filtered' }],
+  items: [{ actionPolicy: ACTION_POLICY_RESPONSE, category: 'tags' }],
   total: 1,
 };
 
