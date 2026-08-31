@@ -71,6 +71,10 @@ export const IngestScoresRequestBody = lazySchema(() =>
             metadata: z.object({}).catchall(z.unknown()).optional(),
             trace_id: z.string().max(256).nullable().optional(),
             /**
+             * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
+             */
+            direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
+            /**
              * Model this evaluator judged with. When omitted, the top-level `evaluator_model` is used unless `kind` is `code`.
              */
             model: Model.optional(),
