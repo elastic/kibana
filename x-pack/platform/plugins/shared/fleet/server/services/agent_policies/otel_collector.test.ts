@@ -19,6 +19,46 @@ describe('generateOtelcolConfig', () => {
     name: 'default',
     id: 'fleet-default-output',
     hosts: ['http://localhost:9200'],
+    preset: 'balanced',
+  };
+
+  // Expected OTel exporter fields for the `balanced` preset on a single-host output.
+  // `buildOtelEsExporterConfig` always runs — every persisted ES output has a preset set
+  // by `outputService.create` or `backfillAllOutputPresets`.
+  const BALANCED_EXPORTER_SETTINGS = {
+    max_conns_per_host: 1,
+    sending_queue: {
+      enabled: true,
+      block_on_overflow: true,
+      wait_for_result: true,
+      num_consumers: 2,
+      queue_size: 6400,
+      batch: {
+        flush_timeout: '10s',
+        max_size: 1600,
+        min_size: 1600,
+        sizer: 'items',
+      },
+    },
+    logs_dynamic_id: { enabled: true },
+    logs_dynamic_pipeline: { enabled: true },
+    include_source_on_error: true,
+    suppress_conflict_errors: true,
+    bulk_response_filter_path: 'errors,items.*.error,items.*.status,items.*.failure_store',
+    retry: {
+      enabled: true,
+      max_retries: 3,
+      initial_interval: '1s',
+      max_interval: '60s',
+      retry_on_status: [
+        300, 301, 302, 303, 304, 305, 307, 308, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409,
+        410, 411, 412, 414, 415, 416, 417, 418, 421, 422, 423, 424, 425, 426, 428, 429, 431, 451,
+        500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511,
+      ],
+      retry_on_document_status: [429, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511],
+    },
+    compression: 'gzip',
+    compression_params: { level: 1 },
   };
 
   const logInput: FullAgentPolicyInput = {
@@ -287,6 +327,7 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -342,6 +383,7 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/fleet-default-output': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -395,6 +437,7 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -510,6 +553,7 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -578,6 +622,7 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -1227,6 +1272,7 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -2552,6 +2598,7 @@ describe('generateOtelcolConfig', () => {
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: ['http://localhost:9200'],
         auth: { authenticator: 'beatsauth/default' },
+        ...BALANCED_EXPORTER_SETTINGS,
       });
       expect(result.service?.extensions).toContain('beatsauth/default');
     });
@@ -2747,6 +2794,7 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
+        ...BALANCED_EXPORTER_SETTINGS,
       });
     });
 
@@ -2755,6 +2803,7 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
+        ...BALANCED_EXPORTER_SETTINGS,
       });
     });
 
@@ -2769,6 +2818,7 @@ describe('generateOtelcolConfig', () => {
       const result = generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml });
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
+        ...BALANCED_EXPORTER_SETTINGS,
       });
     });
 
@@ -2782,6 +2832,7 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
+        ...BALANCED_EXPORTER_SETTINGS,
       });
     });
 
@@ -2795,6 +2846,7 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
+        ...BALANCED_EXPORTER_SETTINGS,
       });
     });
   });
@@ -2962,7 +3014,7 @@ describe('generateOtelcolConfig', () => {
       expect(result.service?.extensions).toContain('beatsauth/remote-output');
     });
 
-    it('should omit beatsauth and include only endpoints when otel_disable_beatsauth is true on remote output', () => {
+    it('should omit beatsauth and include only endpoints and translated settings when otel_disable_beatsauth is true on remote output', () => {
       const remoteOutputDisabled: Output = {
         ...remoteOutput,
         otel_disable_beatsauth: true,
@@ -2976,6 +3028,7 @@ describe('generateOtelcolConfig', () => {
       expect(result.extensions?.['beatsauth/remote-output']).toBeUndefined();
       expect(result.exporters?.['elasticsearch/remote-output']).toEqual({
         endpoints: ['https://remote-es.example.com:9200'],
+        ...BALANCED_EXPORTER_SETTINGS,
       });
     });
 
@@ -3014,7 +3067,7 @@ describe('generateOtelcolConfig', () => {
       expect(result.service?.extensions ?? []).not.toContain('beatsauth/default');
     });
 
-    it('should still include endpoints in exporter when otel_disable_beatsauth is true', () => {
+    it('should still include endpoints and translated settings in exporter when otel_disable_beatsauth is true', () => {
       const outputWithDisabledBeatsauth: Output = {
         ...defaultOutput,
         otel_disable_beatsauth: true,
@@ -3024,6 +3077,7 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
+        ...BALANCED_EXPORTER_SETTINGS,
       });
     });
 
@@ -3037,8 +3091,9 @@ describe('generateOtelcolConfig', () => {
       const result = generateOtelcolConfig({ inputs, dataOutput: outputWithDisabledBeatsauth });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
-        flush_interval: '5s',
         endpoints: defaultOutput.hosts,
+        ...BALANCED_EXPORTER_SETTINGS,
+        flush_interval: '5s',
       });
       expect(result.extensions?.['beatsauth/default']).toBeUndefined();
     });
@@ -3115,6 +3170,7 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -3183,6 +3239,7 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/override-output-id': {
           endpoints: ['http://override-es:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -3279,9 +3336,11 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/override-output-id': {
           endpoints: ['http://override-es:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
         'elasticsearch/fleet-default-output': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -3384,9 +3443,11 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/override-output-id': {
           endpoints: ['http://override-es:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -3503,9 +3564,11 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/override-output-id': {
           endpoints: ['http://override-es:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
+          ...BALANCED_EXPORTER_SETTINGS,
         },
       },
       service: {
@@ -3542,16 +3605,8 @@ describe('generateOtelcolConfig', () => {
         unknown
       >;
 
-    it('should not translate anything when the output stores no preset or config_yaml', () => {
-      // The output Fleet creates at bootstrap carries only name/type/hosts, so there is no
-      // user intent to translate and the exporter keeps its own upstream defaults.
-      expect(getExporter(defaultOutput)).toEqual({
-        endpoints: defaultOutput.hosts,
-      });
-    });
-
-    it('should translate an explicitly stored preset even with no config_yaml', () => {
-      expect(getExporter({ ...defaultOutput, preset: 'balanced' })).toMatchObject({
+    it('should translate the balanced preset', () => {
+      expect(getExporter(defaultOutput)).toMatchObject({
         max_conns_per_host: 1,
         sending_queue: { num_consumers: 2, queue_size: 6400 },
         compression: 'gzip',
