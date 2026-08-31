@@ -297,3 +297,4 @@ export {
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
 } from './services/cloud_connectors/test_subjects';
+export { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from './services/policy_template';

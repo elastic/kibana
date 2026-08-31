@@ -9,8 +9,9 @@ import React, { createContext, useContext, useCallback, useMemo, useRef, useStat
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
-import type { AwsServiceMatrixEntry, DeploymentMethod } from './aws_service_matrix';
+import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
+import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
 
 export interface AuthenticateAndDeployStepState {
@@ -38,10 +39,13 @@ interface PersistedAuthenticateAndDeployStep {
 
 export interface ServicesStepState {
   selectedServiceIds: string[];
+  dataFormat: DataFormat;
 }
 
 interface PersistedServicesStep {
   selectedServiceIds: string[];
+  /** Undefined when not yet explicitly chosen; resolved against the solution default at read time. */
+  dataFormat?: DataFormat;
 }
 
 interface PersistedDetectAndReviewStep {
@@ -61,15 +65,17 @@ interface OnboardingFlowState {
   setDeploymentMethod: (method: DeploymentMethod) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
+  setDataFormat: (format: DataFormat) => void;
   detectAndReviewStep: DetectAndReviewStepState;
   updateDetectAndReviewStep: (update: Partial<DetectAndReviewStepState>) => void;
   removeDeployInstance: (instanceId: string) => void;
   getLatestFailedInstances: () => string[];
-  registerDeployHandler: (fn: (instanceIds?: string[]) => void) => void;
   awsServiceMatrix: AwsServiceMatrixEntry[] | undefined;
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
   awsServiceMatrixError: boolean;
   refetchAwsServiceMatrix: () => void;
+  /** False while the default data format is being resolved (async spaces lookup). */
+  isDataFormatResolved: boolean;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -124,6 +130,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [persistedServices, setPersistedServices]
   );
 
+  const setDataFormat = useCallback(
+    (format: DataFormat) => {
+      // Clear selection atomically with the format change in one write — two separate
+      // setPersistedServices calls would race because each closes over the same persistedServices.
+      setPersistedServices({ ...persistedServices, dataFormat: format, selectedServiceIds: [] });
+    },
+    [persistedServices, setPersistedServices]
+  );
+
   // Note: session key deliberately kept as 'deployAndDetectStep' — no migration needed
   // (sessionStorage, one tab, dies on close, behind off-by-default feature flag).
   const [persistedDetectAndReviewStep, setPersistedDetectAndReviewStep] =
@@ -139,8 +154,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   // isDeploying is intentionally not persisted — it resets to false on page reload
   const [isDeploying, setIsDeploying] = useState(false);
-
-  const deployHandlerRef = useRef<((instanceIds?: string[]) => void) | null>(null);
 
   // Ref always holds the latest persisted value so updateDetectAndReviewStep
   // reads current state even when called after an await (stale closure prevention).
@@ -194,10 +207,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     []
   );
 
-  const registerDeployHandler = useCallback((fn: (instanceIds?: string[]) => void) => {
-    deployHandlerRef.current = fn;
-  }, []);
-
   const {
     matrix: awsServiceMatrix,
     isError: awsServiceMatrixError,
@@ -208,18 +217,26 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [awsServiceMatrix]
   );
 
+  const { defaultFormat, isResolved: isDataFormatResolved } = useDefaultDataFormat();
+  const dataFormat: DataFormat = persistedServices?.dataFormat ?? defaultFormat;
+
   const selectedServiceIds = useMemo(
     () =>
-      (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter(
-        // When awsServicesMap is still loading, keep all persisted ids; filter once ready.
-        (id) => awsServicesMap?.get(id)?.showInUI !== false
-      ),
-    [persistedServices, awsServicesMap]
+      (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter((id) => {
+        const entry = awsServicesMap?.get(id);
+        // Keep all ids while awsServicesMap is loading — useInvalidateDownstreamSteps runs before
+        // the !awsServiceMatrix spinner gate (onboarding_shell.tsx:80 vs :191), so dropping ids
+        // during the load window would change the sorted signature and wrongly mark downstream
+        // steps incomplete on every reload.
+        if (!entry) return true;
+        return entry.showInUI !== false && (entry.dataFormat ?? 'ecs') === dataFormat;
+      }),
+    [persistedServices, awsServicesMap, dataFormat]
   );
 
   const servicesStep: ServicesStepState = useMemo(
-    () => ({ selectedServiceIds }),
-    [selectedServiceIds]
+    () => ({ selectedServiceIds, dataFormat }),
+    [selectedServiceIds, dataFormat]
   );
 
   const deploymentMethod: DeploymentMethod =
@@ -255,15 +272,16 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         setDeploymentMethod,
         servicesStep,
         setSelectedServiceIds,
+        setDataFormat,
         detectAndReviewStep,
         updateDetectAndReviewStep,
         removeDeployInstance,
         getLatestFailedInstances,
-        registerDeployHandler,
         awsServiceMatrix,
         awsServicesMap,
         awsServiceMatrixError,
         refetchAwsServiceMatrix,
+        isDataFormatResolved,
       }}
     >
       {children}
