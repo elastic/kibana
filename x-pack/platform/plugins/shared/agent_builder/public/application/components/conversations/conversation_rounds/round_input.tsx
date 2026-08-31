@@ -72,7 +72,7 @@ export const RoundInput = ({
     ${euiTextBreakWord()}
     white-space: pre-wrap;
     border-radius: 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
-    padding: ${euiTheme.size.m} ${euiTheme.size.base};
+    padding: ${euiTheme.size.m} ${euiTheme.size.base} ${euiTheme.size.m} ${euiTheme.size.xl};
   `;
 
   const inputContentStyles = css`
