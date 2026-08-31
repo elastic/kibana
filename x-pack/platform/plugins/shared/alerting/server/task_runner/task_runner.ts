@@ -6,13 +6,13 @@
  */
 
 import apm from 'elastic-apm-node';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { DEFAULT_SPACE_ID, type SpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
 import type {
   RuleRunnerErrorStackTraceLog,
@@ -360,13 +360,9 @@ export class TaskRunner<
     });
 
     const {
-      params: { alertId: ruleId, spaceId: maybeSpaceId },
+      params: { alertId: ruleId, spaceId },
       state: { previousStartedAt },
     } = this.taskInstance;
-    // spaceId is optional in the persisted task params (legacy), but is always
-    // populated for tasks scheduled by the rules client. Default to the built-in
-    // space at this trusted boundary so the branded SpaceId flows downstream.
-    const spaceId: SpaceId = brandSpaceId(maybeSpaceId ?? DEFAULT_SPACE_ID);
 
     const { queryDelaySettings, flappingSettings: spaceFlappingSettings } =
       await this.context.rulesSettingsService.getSettings(fakeRequest, spaceId);
@@ -513,6 +509,10 @@ export class TaskRunner<
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
+      // Mirror the rule run's own credential treatment onto the connector tasks: the request is
+      // marked by getFakeKibanaRequest from the rule's persisted `uiamApiKeyExternal`, so asking
+      // it here cannot drift from what the cluster client will decide for this very run.
+      uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,

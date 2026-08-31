@@ -770,7 +770,7 @@ describe('useAvailablePackages', () => {
       expect(mockApplyGrouping).not.toHaveBeenCalled();
     });
 
-    it('calls applyGrouping and emits collection cards when flag is on', () => {
+    it('calls applyGrouping and emits collection cards when flag is on and enableCollectionGrouping is true', () => {
       mockExperimentalFeaturesServiceGet.mockReturnValue({
         enableIntegrationCollectionTiles: true,
       });
@@ -780,7 +780,10 @@ describe('useAvailablePackages', () => {
       });
 
       const { result } = renderHook(() =>
-        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          enableCollectionGrouping: true,
+        })
       );
 
       expect(mockApplyGrouping).toHaveBeenCalled();
@@ -807,6 +810,25 @@ describe('useAvailablePackages', () => {
 
       expect(result.current.allCards).toHaveLength(1);
       expect(result.current.allCards.every((c) => !c.isCollectionCard)).toBe(true);
+    });
+
+    it('skips applyGrouping and emits individual cards when enableCollectionGrouping is false, even if flag is on', () => {
+      mockExperimentalFeaturesServiceGet.mockReturnValue({
+        enableIntegrationCollectionTiles: true,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          enableCollectionGrouping: false,
+        })
+      );
+
+      // applyGrouping should NOT be called — individual cards are used directly
+      expect(mockApplyGrouping).not.toHaveBeenCalled();
+      // The single package should appear as a normal card, not a collection
+      expect(result.current.allCards).toHaveLength(1);
+      expect(result.current.allCards[0].isCollectionCard).toBeFalsy();
     });
   });
 

@@ -150,7 +150,8 @@
     "@kbn/es-archiver",
     "@kbn/test",
     "@kbn/tooling-log",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
