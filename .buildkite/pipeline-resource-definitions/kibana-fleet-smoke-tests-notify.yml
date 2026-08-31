@@ -21,7 +21,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#fleet-notifications'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
-        CONSECUTIVE_FAILURES_THRESHOLD: '2'
+        CONSECUTIVE_FAILURES_THRESHOLD: '3'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main
