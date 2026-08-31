@@ -35,7 +35,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
   async initSetup(coreSetup: CoreSetup): Promise<void> {
     coreSetup.dataStreams.registerDataStream({
       name: WORKFLOWS_EXECUTIONS_DATA_STREAM,
-      version: 2,
+      version: 1,
       hidden: true,
       template: {
         mappings: DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -44,7 +44,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
     });
     coreSetup.dataStreams.registerDataStream({
       name: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
-      version: 2,
+      version: 1,
       hidden: true,
       template: {
         mappings: DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
