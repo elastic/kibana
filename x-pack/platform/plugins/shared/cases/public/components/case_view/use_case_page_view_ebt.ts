@@ -10,17 +10,14 @@ import { CASE_PAGE_VIEW_EVENT_TYPE } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { isRegisteredOwner } from '../../files';
-import { useWorkflowRunAvailability } from '../workflows/use_run_case_workflow';
 
 export const useCasePageViewEbt = () => {
   const { analytics } = useKibana().services;
   const { owner } = useCasesContext();
-  const workflowRunAvailability = useWorkflowRunAvailability();
 
   useEffect(() => {
     analytics.reportEvent(CASE_PAGE_VIEW_EVENT_TYPE, {
       owner: owner[0] && isRegisteredOwner(owner[0]) ? owner[0] : 'unknown',
-      workflow_run_availability: workflowRunAvailability,
     });
-  }, [analytics, owner, workflowRunAvailability]);
+  }, [analytics, owner]);
 };
