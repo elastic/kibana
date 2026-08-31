@@ -59,6 +59,7 @@ export const evaluatorResultSchema = z.object({
     version: z.string().optional(),
     kind: z.enum(['llm', 'code']).optional(),
     model: modelSchema.optional(),
+    direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
   }),
   scores: z.array(
     z.object({
