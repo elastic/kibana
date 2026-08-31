@@ -19,6 +19,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Role, SecurityLicense } from '@kbn/security-plugin-types-common';
@@ -59,7 +60,7 @@ const createRole = (roleName: string, kibana: Role['kibana'] = []): Role => {
 };
 
 const space: Space = {
-  id: crypto.randomUUID(),
+  id: asSpaceId(crypto.randomUUID()),
   name: 'Odyssey',
   description: 'Journey vs. Destination',
   disabledFeatures: [],
