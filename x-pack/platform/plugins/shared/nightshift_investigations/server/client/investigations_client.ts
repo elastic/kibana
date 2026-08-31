@@ -480,7 +480,7 @@ export class NightshiftInvestigationsClient {
       if (status === existing.status) {
         return;
       }
-      throw new InvestigationConflictError(investigationId, existing.status);
+      throw InvestigationConflictError.settled(investigationId, existing.status);
     }
 
     if (status === 'failed' && error) {
@@ -494,9 +494,16 @@ export class NightshiftInvestigationsClient {
       ...output,
     };
 
-    await this.investigationRepository.update(investigationId, patch, {
-      version: existing.version,
-    });
+    try {
+      await this.investigationRepository.update(investigationId, patch, {
+        version: existing.version,
+      });
+    } catch (err) {
+      if (err instanceof InvestigationStaleWriteError) {
+        throw InvestigationConflictError.concurrentlyModified(investigationId);
+      }
+      throw err;
+    }
   }
 
   async get(investigationId: string): Promise<GetInvestigationResponse> {
@@ -555,6 +562,8 @@ export class NightshiftInvestigationsClient {
       return undefined;
     }
 
+    // Raw engine error text may contain internal details (credentials, hosts, stack
+    // internals): log it, never persist it. Only workflow-authored errors reach the API.
     const correction: InvestigationPatch = {
       status: workflowStatus,
       completed_at: execution.finishedAt ?? new Date().toISOString(),

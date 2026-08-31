@@ -8,8 +8,20 @@
 import type { InvestigationStatus } from '../../../common';
 
 export class InvestigationConflictError extends Error {
-  constructor(investigationId: string, status: InvestigationStatus) {
-    super(`Investigation "${investigationId}" is already ${status} and can no longer be updated`);
+  constructor(message: string) {
+    super(message);
     this.name = 'InvestigationConflictError';
+  }
+
+  static settled(investigationId: string, status: InvestigationStatus): InvestigationConflictError {
+    return new InvestigationConflictError(
+      `Investigation "${investigationId}" is already ${status} and can no longer be updated`
+    );
+  }
+
+  static concurrentlyModified(investigationId: string): InvestigationConflictError {
+    return new InvestigationConflictError(
+      `Investigation "${investigationId}" was modified concurrently; retry the update`
+    );
   }
 }

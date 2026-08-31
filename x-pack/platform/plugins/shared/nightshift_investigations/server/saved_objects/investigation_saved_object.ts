@@ -111,7 +111,6 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       completed_at: { type: 'date' },
       summary: { type: 'text' },
       conclusion: { type: 'text' },
-      hypotheses: { type: 'flattened', ignore_above: 1024 },
       impact: { type: 'flattened', ignore_above: 1024 },
     },
   },

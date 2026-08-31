@@ -902,11 +902,11 @@ describe('NightshiftInvestigationsClient.update()', () => {
     );
   });
 
-  it('writes with the version it read and rethrows a concurrent-write conflict', async () => {
+  it('writes with the version it read and maps a concurrent-write conflict to InvestigationConflictError', async () => {
     repository.update.mockRejectedValue(new InvestigationStaleWriteError('inv-1'));
 
     await expect(makeClient().update('inv-1', { status: 'completed' })).rejects.toThrow(
-      InvestigationStaleWriteError
+      InvestigationConflictError
     );
     expect(repository.update).toHaveBeenCalledTimes(1);
     expect(repository.update).toHaveBeenCalledWith(
