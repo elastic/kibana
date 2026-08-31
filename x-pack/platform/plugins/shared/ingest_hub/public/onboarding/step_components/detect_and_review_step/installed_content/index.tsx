@@ -44,6 +44,7 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
   const q = search.toLowerCase();
   const filteredDashboards = dashboards.filter((a) => a.title.toLowerCase().includes(q));
   const filteredRules = detectionRules.filter((a) => a.title.toLowerCase().includes(q));
+  const filteredEsAssets = esAssets.filter((a) => a.id.toLowerCase().includes(q));
 
   const serviceCount = i18n.translate(
     'xpack.ingestHub.detectAndReviewStep.installedContent.serviceCount',
@@ -147,7 +148,7 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
               </>
             )}
 
-            {esAssets.length > 0 && <RequiredAssets esAssets={esAssets} />}
+            {esAssets.length > 0 && <RequiredAssets esAssets={filteredEsAssets} />}
           </EuiPanel>
         </div>
       )}
