@@ -115,6 +115,26 @@ describe('AgentContextualServiceMap', () => {
       rangeTo: 'now',
       environment: 'ENVIRONMENT_ALL',
     });
+    // Datemath is resolved to concrete ISO timestamps for the graph fetches.
+    expect(Date.parse(lastGraphProps!.start)).not.toBeNaN();
+    expect(Date.parse(lastGraphProps!.end)).not.toBeNaN();
+  });
+
+  it('falls back to the default range when timeRange is unparseable', () => {
+    render(
+      <AgentContextualServiceMap
+        data={{
+          connections,
+          serviceName: 'backend',
+          timeRange: { start: 'not-a-date', end: 'also-not-a-date' },
+        }}
+        deps={deps}
+      />
+    );
+
+    expect(lastEmbeddableContextProps).toMatchObject({ rangeFrom: 'now-1h', rangeTo: 'now' });
+    expect(Date.parse(lastGraphProps!.start)).not.toBeNaN();
+    expect(Date.parse(lastGraphProps!.end)).not.toBeNaN();
   });
 
   it('hides in-graph context controls in the sidebar', () => {
@@ -134,7 +154,7 @@ describe('AgentContextualServiceMap', () => {
       <AgentContextualServiceMap data={{ connections, serviceName: 'backend' }} deps={deps} />
     );
 
-    const link = screen.getByTestId('agentServiceMapExploreInServiceMap');
+    const link = screen.getByTestId('apmAgentServiceMapExploreInServiceMap');
     expect(link).toHaveAttribute('href', 'http://localhost/app/apm/service-map');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('data-ebt-action', 'exploreServiceMap');
@@ -148,9 +168,11 @@ describe('AgentContextualServiceMap', () => {
       <AgentContextualServiceMap data={{ connections, serviceName: 'backend' }} deps={deps} />
     );
 
-    expect(screen.queryByTestId('agentServiceMapExploreInServiceMap')).not.toBeInTheDocument();
-    // The map itself still renders — only the full-map link is gated.
+    expect(screen.queryByTestId('apmAgentServiceMapExploreInServiceMap')).not.toBeInTheDocument();
+    // The map itself still renders — only the full-map entry points are gated,
+    // including the graph's own "View in Service map" toolbar button.
     expect(screen.getByTestId('contextualServiceMapGraph')).toBeInTheDocument();
+    expect(lastGraphProps?.fullMapHref).toBeUndefined();
   });
 
   it('hides the Explore link when service map is disabled in config', () => {
@@ -160,8 +182,9 @@ describe('AgentContextualServiceMap', () => {
       <AgentContextualServiceMap data={{ connections, serviceName: 'backend' }} deps={deps} />
     );
 
-    expect(screen.queryByTestId('agentServiceMapExploreInServiceMap')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('apmAgentServiceMapExploreInServiceMap')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextualServiceMapGraph')).toBeInTheDocument();
+    expect(lastGraphProps?.fullMapHref).toBeUndefined();
   });
 
   it('falls back to the static map when serviceName is missing', () => {

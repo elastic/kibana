@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { ServiceMapAttachmentData } from '../../../../common/agent_builder/attachments';
 import { transformTopologyToServiceMap } from '../../../../common/agent_builder/attachments/service_map_transform';
-import type { Environment } from '../../../../common/environment_rt';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ContextualServiceMapGraph } from '../../../components/app/service_map/contextual_map/contextual_service_map_graph';
 import { useContextualServiceMapState } from '../../../components/app/service_map/contextual_map/use_contextual_service_map_state';
 
@@ -46,7 +46,7 @@ function ContextualAttachmentStory({ data, serviceName }: StoryProps) {
       onCollapse={state.onCollapse}
       onBaseMaxHopsChange={state.onBaseMaxHopsChange}
       onMaxVisibleNodesChange={state.onMaxVisibleNodesChange}
-      environment={'ENVIRONMENT_ALL' as Environment}
+      environment={ENVIRONMENT_ALL.value}
       kuery=""
       start="2024-01-01T00:00:00.000Z"
       end="2024-01-01T00:15:00.000Z"

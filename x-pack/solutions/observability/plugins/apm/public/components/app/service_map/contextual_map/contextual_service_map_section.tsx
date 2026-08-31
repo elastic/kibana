@@ -28,7 +28,8 @@ const SERVICE_MAP_PANEL_TITLE = i18n.translate('xpack.apm.contextualServiceMap.p
   defaultMessage: 'Service map',
 });
 
-const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
+/** Shared with the Agent Builder service-map attachment renderer. */
+export const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
   'xpack.apm.contextualServiceMap.panel.exploreInServiceMap',
   { defaultMessage: 'Explore in Service map' }
 );

@@ -520,14 +520,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       observabilityRuleTypeRegistry,
       telemetry,
     });
-    registerEmbeddables({
-      coreSetup: core,
-      pluginsSetup: plugins,
-      config,
-      kibanaEnvironment,
-      observabilityRuleTypeRegistry,
-      telemetry,
-    });
     this.embeddableDepsPartial = {
       coreSetup: core,
       pluginsSetup: plugins,
@@ -536,6 +528,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       observabilityRuleTypeRegistry,
       telemetry,
     };
+    registerEmbeddables(this.embeddableDepsPartial);
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
 
@@ -576,15 +569,17 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     } else {
       setApmInternalServices(ApmInternalServices);
     }
-    if (plugins.agentBuilder && this.embeddableDepsPartial) {
-      registerServiceMapAttachment(plugins.agentBuilder.attachments, {
-        ...this.embeddableDepsPartial,
-        coreStart: core,
-        pluginsStart: plugins,
-      });
-      registerApmMetricsAttachment(plugins.agentBuilder!.attachments);
-      registerApmTimeseriesAttachment(plugins.agentBuilder!.attachments);
-      registerApmRelatedAlertsAttachment(plugins.agentBuilder!.attachments);
+    if (plugins.agentBuilder) {
+      if (this.embeddableDepsPartial) {
+        registerServiceMapAttachment(plugins.agentBuilder.attachments, {
+          ...this.embeddableDepsPartial,
+          coreStart: core,
+          pluginsStart: plugins,
+        });
+      }
+      registerApmMetricsAttachment(plugins.agentBuilder.attachments);
+      registerApmTimeseriesAttachment(plugins.agentBuilder.attachments);
+      registerApmRelatedAlertsAttachment(plugins.agentBuilder.attachments);
     }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
