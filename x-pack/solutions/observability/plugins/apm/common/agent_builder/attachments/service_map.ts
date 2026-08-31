@@ -73,7 +73,7 @@ export const serviceMapAttachmentDataSchema = z.object({
    * Time range used for the topology tool call. Drives the popover/flyout
    * data fetches and the "Explore in Service map" link of the contextual
    * renderer. Optional for back-compat with stored conversations; the
-   * renderer falls back to the tool's default range (now-1h → now).
+   * renderer falls back to {@link SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE}.
    */
   timeRange: z
     .object({
@@ -81,9 +81,24 @@ export const serviceMapAttachmentDataSchema = z.object({
       end: z.string().max(MAX_LABEL_LENGTH),
     })
     .optional(),
-  /** Environment used for the topology tool call, if it was scoped to one. */
+  /**
+   * Environment the investigation is scoped to, if any. Scopes only the
+   * contextual renderer's drill-down views (popovers/flyout) and its
+   * "Explore in Service map" link — `get_service_topology` itself has no
+   * environment parameter.
+   */
   environment: z.string().max(MAX_LABEL_LENGTH).optional(),
 });
+
+/**
+ * Renderer fallback when `timeRange` is absent or unparseable. Mirrors the
+ * `get_service_topology` tool's default range (kept in sync by convention;
+ * the tool lives in the observability_agent_builder plugin).
+ */
+export const SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE = {
+  start: 'now-1h',
+  end: 'now',
+} as const;
 
 export type ServiceNodeMetadata = z.infer<typeof serviceNodeMetadataSchema>;
 

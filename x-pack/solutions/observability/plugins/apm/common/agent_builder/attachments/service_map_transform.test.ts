@@ -77,7 +77,7 @@ describe('transformTopologyToServiceMap', () => {
     expect(dbEdge?.markerStart).toBeUndefined();
   });
 
-  it('populates edge sourceData/targetData for the dependency stats popover', () => {
+  it('populates edge sourceData/targetData/resources/labels for the stats popover', () => {
     const { edges } = transformTopologyToServiceMap({
       connections: [
         {
@@ -101,6 +101,19 @@ describe('transformTopologyToServiceMap', () => {
       'span.type': '',
       'span.subtype': '',
     });
+    // `resources` gates the popover's dependency stats fetch.
+    expect(edges[0].data?.resources).toEqual(['elasticsearch']);
+    // Labels keep the popover title free of the internal `>` id prefix.
+    expect(edges[0].data?.sourceLabel).toBe('opbeans-java');
+    expect(edges[0].data?.targetLabel).toBe('elasticsearch');
+  });
+
+  it('sets empty resources for service-to-service edges', () => {
+    const { edges } = transformTopologyToServiceMap({
+      connections: [{ source: serviceNode('a'), target: serviceNode('b') }],
+    });
+
+    expect(edges[0].data?.resources).toEqual([]);
   });
 
   it('merges nodeMetadata badges into service node data', () => {
@@ -130,16 +143,36 @@ describe('transformTopologyToServiceMap', () => {
   it('collapses A→B and B→A into a single bidirectional edge and dedupes repeats', () => {
     const { edges } = transformTopologyToServiceMap({
       connections: [
-        { source: serviceNode('a'), target: serviceNode('b') },
-        { source: serviceNode('b'), target: serviceNode('a') },
-        { source: serviceNode('a'), target: serviceNode('b') },
+        {
+          source: serviceNode('a'),
+          target: serviceNode('b'),
+          metrics: { latencyMs: 10 },
+        },
+        {
+          source: serviceNode('b'),
+          target: serviceNode('a'),
+          metrics: { latencyMs: 99 },
+        },
+        {
+          source: serviceNode('a'),
+          target: serviceNode('b'),
+          metrics: { latencyMs: 42 },
+        },
       ],
     });
 
     expect(edges).toHaveLength(1);
     expect(edges[0]).toMatchObject({
       id: 'a~b',
-      data: { isBidirectional: true },
+      source: 'a',
+      target: 'b',
+      data: {
+        isBidirectional: true,
+        // First-seen direction wins: metrics and source/target stay A→B.
+        metrics: { latencyMs: 10 },
+        sourceData: expect.objectContaining({ id: 'a' }),
+        targetData: expect.objectContaining({ id: 'b' }),
+      },
     });
     expect(edges[0].markerStart).toBeDefined();
     expect(edges[0].markerEnd).toBeDefined();

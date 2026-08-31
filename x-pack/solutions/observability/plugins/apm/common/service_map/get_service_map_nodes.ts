@@ -213,7 +213,7 @@ export function mapNodes({
   return mappedNodes;
 }
 
-function getConnectionNodeLabel(node: ConnectionNode): string {
+export function getConnectionNodeLabel(node: ConnectionNode): string {
   const fallback = toDisplayName(node.id);
   if (isExitSpan(node)) {
     return node[SPAN_DESTINATION_SERVICE_RESOURCE] ?? node.label ?? fallback;
