@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_KEYWORD_LENGTH } from '../saved_objects';
+import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
@@ -34,7 +34,7 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     try {
-      await client.ensureSavedObject(params.path.id);
+      await client.ensure(params.path.id);
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

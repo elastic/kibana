@@ -78,6 +78,9 @@ export interface StartInvestigationResponse {
   investigation_id: string;
 }
 
+/** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
+export const MAX_KEYWORD_LENGTH = 500;
+
 export const INVESTIGATION_STATUSES = [
   'pending',
   'running',

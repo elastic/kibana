@@ -19,7 +19,7 @@ import {
   significantEventUpdateSchema,
 } from '@kbn/significant-events-schema';
 import { UPDATABLE_INVESTIGATION_STATUSES } from '../../common';
-import { MAX_KEYWORD_LENGTH } from '../saved_objects';
+import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 

@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export {
-  nightshiftInvestigationSavedObjectType,
-  NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-} from './investigation_saved_object';
+export { InvestigationAlreadyExistsError } from './investigation_already_exists_error';
+export { InvestigationStaleWriteError } from './investigation_stale_write_error';

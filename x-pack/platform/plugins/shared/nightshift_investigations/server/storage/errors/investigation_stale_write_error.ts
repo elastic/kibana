@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export {
-  nightshiftInvestigationSavedObjectType,
-  NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-} from './investigation_saved_object';
+export class InvestigationStaleWriteError extends Error {
+  constructor(investigationId: string) {
+    super(`Investigation "${investigationId}" was modified by a concurrent write`);
+    this.name = 'InvestigationStaleWriteError';
+  }
+}

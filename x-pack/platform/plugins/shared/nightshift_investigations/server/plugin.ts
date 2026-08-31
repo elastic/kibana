@@ -37,8 +37,8 @@ import type {
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-  InvestigationSavedObjectClient,
 } from './saved_objects';
+import { SavedObjectInvestigationRepository } from './storage';
 
 export class NightshiftInvestigationsPlugin
   implements
@@ -160,14 +160,14 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
-      investigationSoClient: this.createInvestigationSoClient(request, resolvedSpaceId),
+      investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
     });
   };
 
-  private createInvestigationSoClient = (
+  private createInvestigationRepository = (
     request: KibanaRequest,
     spaceId: string
-  ): InvestigationSavedObjectClient => {
+  ): SavedObjectInvestigationRepository => {
     if (!this.savedObjects) {
       throw new Error('savedObjects is not available — plugin start() has not been called');
     }
@@ -177,7 +177,7 @@ export class NightshiftInvestigationsPlugin
         includedHiddenTypes: [NIGHTSHIFT_INVESTIGATION_SO_TYPE],
       })
       .asScopedToNamespace(spaceId);
-    return new InvestigationSavedObjectClient({ savedObjectsClient });
+    return new SavedObjectInvestigationRepository({ savedObjectsClient });
   };
 
   /**

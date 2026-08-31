@@ -13,10 +13,9 @@ import {
   INVESTIGATIONS_WRITE_ROLE,
   seedInvestigation,
   deleteInvestigation,
+  getInvestigation,
   updateInvestigation,
 } from '../fixtures';
-
-const SO_TYPE = 'nightshift-investigation';
 
 apiTest.describe(
   'PATCH /internal/nightshift/investigations/{id}',
@@ -64,7 +63,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(404);
     });
 
-    apiTest('updates status and structured output', async ({ apiClient, kbnClient }) => {
+    apiTest('updates status and structured output', async ({ apiClient }) => {
       const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
         status: 'completed',
         summary: 'Root cause identified.',
@@ -78,33 +77,35 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.acknowledged).toBe(true);
 
-      const so = await kbnClient.savedObjects.get({ type: SO_TYPE, id: TEST_ID });
-      expect(so.attributes.status).toBe('completed');
-      expect(so.attributes.summary).toBe('Root cause identified.');
-      expect(so.attributes.conclusion).toBe('Memory leak in service X.');
-      expect(so.attributes.hypotheses).toStrictEqual([
+      const investigationRequest = await getInvestigation(apiClient, cookieHeader, TEST_ID);
+      expect(investigationRequest).toHaveStatusCode(200);
+      expect(investigationRequest.body.status).toBe('completed');
+      expect(investigationRequest.body.summary).toBe('Root cause identified.');
+      expect(investigationRequest.body.conclusion).toBe('Memory leak in service X.');
+      expect(investigationRequest.body.hypotheses).toStrictEqual([
         { candidate: 'memory leak', confidence: 0.95, status: 'confirmed' },
       ]);
-      expect(so.attributes.recommendations).toStrictEqual([{ title: 'Restart pod' }]);
-      expect(so.attributes.blind_spots).toStrictEqual([
+      expect(investigationRequest.body.recommendations).toStrictEqual([{ title: 'Restart pod' }]);
+      expect(investigationRequest.body.blind_spots).toStrictEqual([
         { title: 'Network logs', description: 'Not available' },
       ]);
-      expect(so.attributes.conversation_id).toBe('conv-persist-1');
-      expect(so.attributes.impact).toStrictEqual({ entities: [{ name: 'service-x' }] });
-      expect(so.attributes.completed_at).toBeDefined();
+      expect(investigationRequest.body.conversation_id).toBe('conv-persist-1');
+      expect(investigationRequest.body.impact).toStrictEqual({ entities: [{ name: 'service-x' }] });
+      expect(investigationRequest.body.completed_at).toBeDefined();
     });
 
-    apiTest('updates error field for failed investigations', async ({ apiClient, kbnClient }) => {
+    apiTest('updates error field for failed investigations', async ({ apiClient }) => {
       const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
         status: 'failed',
         error: 'Agent timed out.',
       });
       expect(response).toHaveStatusCode(200);
 
-      const so = await kbnClient.savedObjects.get({ type: SO_TYPE, id: TEST_ID });
-      expect(so.attributes.status).toBe('failed');
-      expect(so.attributes.error).toBe('Agent timed out.');
-      expect(so.attributes.completed_at).toBeDefined();
+      const investigationRequest = await getInvestigation(apiClient, cookieHeader, TEST_ID);
+      expect(investigationRequest).toHaveStatusCode(200);
+      expect(investigationRequest.body.status).toBe('failed');
+      expect(investigationRequest.body.error).toBe('Agent timed out.');
+      expect(investigationRequest.body.completed_at).toBeDefined();
     });
 
     apiTest(
@@ -117,8 +118,9 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(409);
 
-        const so = await kbnClient.savedObjects.get({ type: SO_TYPE, id: TEST_ID });
-        expect(so.attributes.status).toBe('completed');
+        const investigationRequest = await getInvestigation(apiClient, cookieHeader, TEST_ID);
+        expect(investigationRequest).toHaveStatusCode(200);
+        expect(investigationRequest.body.status).toBe('completed');
       }
     );
 
@@ -137,9 +139,10 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(200);
 
-        const so = await kbnClient.savedObjects.get({ type: SO_TYPE, id: TEST_ID });
-        expect(so.attributes.status).toBe('completed');
-        expect(so.attributes.summary).toBe('Original summary.');
+        const investigationRequest = await getInvestigation(apiClient, cookieHeader, TEST_ID);
+        expect(investigationRequest).toHaveStatusCode(200);
+        expect(investigationRequest.body.status).toBe('completed');
+        expect(investigationRequest.body.summary).toBe('Original summary.');
       }
     );
 

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export {
-  nightshiftInvestigationSavedObjectType,
-  NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-} from './investigation_saved_object';
+export class InvestigationAlreadyExistsError extends Error {
+  constructor(investigationId: string) {
+    super(`Investigation "${investigationId}" already exists`);
+    this.name = 'InvestigationAlreadyExistsError';
+  }
+}

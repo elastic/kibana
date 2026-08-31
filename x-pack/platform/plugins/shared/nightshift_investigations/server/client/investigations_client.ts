@@ -6,8 +6,6 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -38,10 +36,12 @@ import {
   INVESTIGATION_TRIGGER_TYPES,
 } from '../../common';
 import type {
-  InvestigationSavedObjectClient,
-  InvestigationSavedObjectUpdateAttributes,
-  NightshiftInvestigationAttributes,
-} from '../saved_objects';
+  InvestigationAttributes,
+  InvestigationPatch,
+  InvestigationRecord,
+  InvestigationRepository,
+} from '../storage';
+import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
 import {
   InvestigationConflictError,
@@ -61,7 +61,7 @@ export {
 /** Used when persist omitted `error`, or when reconciling a failed workflow execution. */
 const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
 
-const LIST_SO_FIELDS = [
+const LIST_RECORD_FIELDS = [
   'completed_at',
   'concurrency_key',
   'created_at',
@@ -73,7 +73,12 @@ const LIST_SO_FIELDS = [
   'subject_type',
   'summary',
   'trigger_type',
-] as const satisfies ReadonlyArray<keyof NightshiftInvestigationAttributes>;
+] as const satisfies ReadonlyArray<keyof InvestigationAttributes>;
+
+const SUPERSEDED_STATUSES = [
+  'pending',
+  'running',
+] as const satisfies ReadonlyArray<InvestigationStatus>;
 
 function toSubject({
   subjectType,
@@ -90,47 +95,35 @@ function toSubject({
   return { type: subjectType, id: subjectId };
 }
 
-function toListInvestigationItem({
-  id,
-  attrs,
-}: {
-  id: string;
-  attrs: NightshiftInvestigationAttributes;
-}): ListInvestigationItem {
+function toListInvestigationItem(record: InvestigationRecord): ListInvestigationItem {
   return {
-    investigation_id: id,
+    investigation_id: record.id,
     subject: toSubject({
-      subjectType: attrs.subject_type,
-      subjectId: attrs.subject_id,
-      subjectSummary: attrs.subject_summary,
+      subjectType: record.subject_type,
+      subjectId: record.subject_id,
+      subjectSummary: record.subject_summary,
     }),
-    trigger_type: attrs.trigger_type,
-    status: attrs.status,
-    started_at: attrs.created_at,
-    completed_at: attrs.completed_at,
-    concurrency_key: attrs.concurrency_key,
-    executed_by: attrs.executed_by,
-    error: attrs.error,
-    summary: attrs.summary,
+    trigger_type: record.trigger_type,
+    status: record.status,
+    started_at: record.created_at,
+    completed_at: record.completed_at,
+    concurrency_key: record.concurrency_key,
+    executed_by: record.executed_by,
+    error: record.error,
+    summary: record.summary,
   };
 }
 
-function toInvestigationResponse({
-  id,
-  attrs,
-}: {
-  id: string;
-  attrs: NightshiftInvestigationAttributes;
-}): GetInvestigationResponse {
+function toInvestigationResponse(record: InvestigationRecord): GetInvestigationResponse {
   return {
-    ...toListInvestigationItem({ id, attrs }),
-    conclusion: attrs.conclusion,
-    hypotheses: attrs.hypotheses,
-    recommendations: attrs.recommendations,
-    blind_spots: attrs.blind_spots,
-    significant_event_updates: attrs.significant_event_updates,
-    conversation_id: attrs.conversation_id,
-    impact: attrs.impact,
+    ...toListInvestigationItem(record),
+    conclusion: record.conclusion,
+    hypotheses: record.hypotheses,
+    recommendations: record.recommendations,
+    blind_spots: record.blind_spots,
+    significant_event_updates: record.significant_event_updates,
+    conversation_id: record.conversation_id,
+    impact: record.impact,
   };
 }
 
@@ -229,7 +222,7 @@ export interface NightshiftInvestigationsClientDeps {
   logger: Logger;
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
-  investigationSoClient: PublicMethodsOf<InvestigationSavedObjectClient>;
+  investigationRepository: InvestigationRepository;
 }
 
 export class NightshiftInvestigationsClient {
@@ -239,7 +232,7 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
-  private readonly investigationSoClient: PublicMethodsOf<InvestigationSavedObjectClient>;
+  private readonly investigationRepository: InvestigationRepository;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -248,7 +241,7 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
-    this.investigationSoClient = deps.investigationSoClient;
+    this.investigationRepository = deps.investigationRepository;
   }
 
   private getSpaceId(): string {
@@ -355,7 +348,7 @@ export class NightshiftInvestigationsClient {
       `Started investigation for ${subject.type}/${subject.id}, execution_id=${executionId}`
     );
 
-    await this.ensureSavedObject(executionId).catch((error) => {
+    await this.ensure(executionId).catch((error) => {
       this.logger.warn(
         `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
       );
@@ -365,13 +358,13 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
-   * Creates the saved object for a workflow execution if it does not exist yet.
+   * Creates the investigation record for a workflow execution if it does not exist yet.
    * Called from start() so the id is readable immediately, and by the workflow's
    * persist_investigation_started step so runs that skipped start() are still tracked. Idempotent so
    * replays and concurrent calls are safe.
    */
-  async ensureSavedObject(investigationId: string): Promise<void> {
-    const existing = await this.investigationSoClient.get(investigationId);
+  async ensure(investigationId: string): Promise<void> {
+    const existing = await this.investigationRepository.get(investigationId);
     if (existing) {
       return;
     }
@@ -412,7 +405,7 @@ export class NightshiftInvestigationsClient {
     }
 
     try {
-      await this.investigationSoClient.create({
+      await this.investigationRepository.create({
         id: investigationId,
         attributes: {
           investigation_id: investigationId,
@@ -427,8 +420,7 @@ export class NightshiftInvestigationsClient {
         },
       });
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isConflictError(error)) {
-        // A concurrent ensure created it first.
+      if (error instanceof InvestigationAlreadyExistsError) {
         return;
       }
       throw error;
@@ -440,14 +432,21 @@ export class NightshiftInvestigationsClient {
   }: {
     concurrency_key: string;
   }): Promise<void> {
-    const superseded = await this.investigationSoClient.findByConcurrencyKey(concurrency_key);
+    const { results } = await this.investigationRepository.find({
+      concurrencyKey: concurrency_key,
+      statuses: [...SUPERSEDED_STATUSES],
+      sortField: 'created_at',
+      sortOrder: 'desc',
+      perPage: 1,
+    });
+    const superseded = results[0];
 
-    if (!superseded || isTerminalStatus(superseded.attributes.status)) {
+    if (!superseded) {
       return;
     }
 
     try {
-      await this.investigationSoClient.update(
+      await this.investigationRepository.update(
         superseded.id,
         {
           status: 'cancelled',
@@ -456,7 +455,7 @@ export class NightshiftInvestigationsClient {
         { version: superseded.version }
       );
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isConflictError(error)) {
+      if (error instanceof InvestigationStaleWriteError) {
         this.logger.warn(
           `Skipped cancelling superseded investigation "${superseded.id}": it was concurrently modified`
         );
@@ -467,57 +466,58 @@ export class NightshiftInvestigationsClient {
   }
 
   async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
-    const existing = await this.investigationSoClient.get(investigationId);
+    const existing = await this.investigationRepository.get(investigationId);
     if (!existing) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
     const { status, error, ...output } = state;
 
-    if (isTerminalStatus(existing.attributes.status)) {
+    if (isTerminalStatus(existing.status)) {
       // Replaying the same terminal status is an idempotent success — the workflow persist
       // steps retry when a response is lost. Anything else (a late progress report, a
       // superseded run's final persist) must not overwrite a settled record.
-      if (status === existing.attributes.status) {
+      if (status === existing.status) {
         return;
       }
-      throw new InvestigationConflictError(investigationId, existing.attributes.status);
+      throw new InvestigationConflictError(investigationId, existing.status);
     }
 
     if (status === 'failed' && error) {
       this.logger.warn(`Investigation "${investigationId}" failed: ${error}`);
     }
 
-    const attrs: InvestigationSavedObjectUpdateAttributes = {
+    const patch: InvestigationPatch = {
       status,
       ...(isTerminalStatus(status) && { completed_at: new Date().toISOString() }),
       ...(status === 'failed' && { error: error ?? FALLBACK_INVESTIGATION_ERROR }),
       ...output,
     };
 
-    await this.investigationSoClient.update(investigationId, attrs, {
+    await this.investigationRepository.update(investigationId, patch, {
       version: existing.version,
     });
   }
 
   async get(investigationId: string): Promise<GetInvestigationResponse> {
-    const so = await this.investigationSoClient.get(investigationId);
+    const record = await this.investigationRepository.get(investigationId);
 
-    if (!so) {
+    if (!record) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const response = toInvestigationResponse({ id: investigationId, attrs: so.attributes });
+    const response = toInvestigationResponse(record);
 
-    if (so.attributes.status === 'running') {
-      const reconciled = await this.reconcileStaleRunningStatus(investigationId, so.version).catch(
-        (err) => {
-          this.logger.warn(
-            `Failed to reconcile status for investigation "${investigationId}": ${err.message}`
-          );
-          return undefined;
-        }
-      );
+    if (record.status === 'running') {
+      const reconciled = await this.reconcileStaleRunningStatus(
+        investigationId,
+        record.version
+      ).catch((err) => {
+        this.logger.warn(
+          `Failed to reconcile status for investigation "${investigationId}": ${err.message}`
+        );
+        return undefined;
+      });
       if (reconciled) {
         response.status = reconciled.status;
         response.completed_at = reconciled.completed_at;
@@ -555,7 +555,7 @@ export class NightshiftInvestigationsClient {
       return undefined;
     }
 
-    const correction: InvestigationSavedObjectUpdateAttributes = {
+    const correction: InvestigationPatch = {
       status: workflowStatus,
       completed_at: execution.finishedAt ?? new Date().toISOString(),
       ...(workflowStatus === 'failed' && { error: FALLBACK_INVESTIGATION_ERROR }),
@@ -565,11 +565,11 @@ export class NightshiftInvestigationsClient {
       this.logger.warn(`Investigation "${investigationId}" failed: ${execution.error.message}`);
     }
 
-    await this.investigationSoClient
+    await this.investigationRepository
       .update(investigationId, correction, { version })
       .catch((err) => {
         this.logger.warn(
-          `Failed to reconcile stale SO status for investigation "${investigationId}": ${err.message}`
+          `Failed to reconcile stale status for investigation "${investigationId}": ${err.message}`
         );
       });
 
@@ -591,7 +591,7 @@ export class NightshiftInvestigationsClient {
     page = 1,
     size = 20,
   }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
-    const result = await this.investigationSoClient.find({
+    const result = await this.investigationRepository.find({
       statuses,
       createdAfter: started_after,
       createdBefore: started_before,
@@ -601,26 +601,24 @@ export class NightshiftInvestigationsClient {
       sortOrder: sort_order,
       page,
       perPage: size,
-      fields: [...LIST_SO_FIELDS],
+      fields: [...LIST_RECORD_FIELDS],
     });
 
-    const results = result.results.map((so) =>
-      toListInvestigationItem({ id: so.id, attrs: so.attributes })
-    );
+    const results = result.results.map((record) => toListInvestigationItem(record));
 
     // Cross-check `running` items against the workflow engine (same reconciliation as get(),
     // page-bounded) so list and get never disagree about a stale status. Failures fall back to
-    // the raw SO status — the list must not fail just because the engine is unreachable.
+    // the stored status — the list must not fail just because the engine is unreachable.
     await Promise.all(
-      result.results.map(async (so, index) => {
-        if (so.attributes.status !== 'running') {
+      result.results.map(async (record, index) => {
+        if (record.status !== 'running') {
           return;
         }
         const item = results[index];
-        const reconciled = await this.reconcileStaleRunningStatus(so.id, so.version).catch(
+        const reconciled = await this.reconcileStaleRunningStatus(record.id, record.version).catch(
           (err) => {
             this.logger.warn(
-              `Failed to reconcile status for investigation "${so.id}" in list: ${err.message}`
+              `Failed to reconcile status for investigation "${record.id}" in list: ${err.message}`
             );
             return undefined;
           }

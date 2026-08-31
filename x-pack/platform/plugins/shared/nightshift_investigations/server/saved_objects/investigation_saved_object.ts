@@ -7,13 +7,6 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type {
-  InvestigationBlindSpot,
-  InvestigationHypothesis,
-  InvestigationImpact,
-  InvestigationRecommendation,
-  SignificantEventUpdate,
-} from '@kbn/significant-events-schema';
 import {
   MAX_BLIND_SPOTS,
   MAX_HYPOTHESES,
@@ -22,20 +15,16 @@ import {
   MAX_SIGNIFICANT_EVENT_UPDATES,
   MAX_TEXT_LENGTH,
 } from '@kbn/significant-events-schema';
-import type {
-  InvestigationStatus,
-  InvestigationSubjectType,
-  InvestigationTriggerType,
-} from '../../common';
 import {
   INVESTIGATION_STATUSES,
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
+  MAX_KEYWORD_LENGTH,
 } from '../../common';
+import type { InvestigationAttributes } from '../storage/types';
 
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
-export const MAX_KEYWORD_LENGTH = 500;
 const MAX_ISO_DATE_LENGTH = 64;
 
 const isoDateStringSchema = schema.string({
@@ -106,59 +95,36 @@ const investigationAttributesSchemaV1 = schema.object({
   ),
 });
 
-export interface NightshiftInvestigationAttributes {
-  investigation_id: string;
-  status: InvestigationStatus;
-  subject_type: InvestigationSubjectType;
-  subject_id: string;
-  subject_summary?: string;
-  trigger_type: InvestigationTriggerType;
-  concurrency_key?: string;
-  created_at: string;
-  completed_at?: string;
-  executed_by?: string;
-  error?: string;
-  summary?: string;
-  conclusion?: string;
-  hypotheses?: InvestigationHypothesis[];
-  recommendations?: InvestigationRecommendation[];
-  blind_spots?: InvestigationBlindSpot[];
-  significant_event_updates?: SignificantEventUpdate[];
-  conversation_id?: string;
-  impact?: InvestigationImpact;
-}
-
-export const nightshiftInvestigationSavedObjectType: SavedObjectsType<NightshiftInvestigationAttributes> =
-  {
-    name: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-    hidden: true,
-    namespaceType: 'single',
-    mappings: {
-      dynamic: false,
-      properties: {
-        status: { type: 'keyword', ignore_above: 1024 },
-        subject_type: { type: 'keyword', ignore_above: 1024 },
-        subject_id: { type: 'keyword', ignore_above: 1024 },
-        subject_summary: { type: 'text' },
-        concurrency_key: { type: 'keyword', ignore_above: 1024 },
-        created_at: { type: 'date' },
-        completed_at: { type: 'date' },
-        summary: { type: 'text' },
-        conclusion: { type: 'text' },
-        hypotheses: { type: 'flattened', ignore_above: 1024 },
-        impact: { type: 'flattened', ignore_above: 1024 },
+export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
+  name: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+  hidden: true,
+  namespaceType: 'single',
+  mappings: {
+    dynamic: false,
+    properties: {
+      status: { type: 'keyword', ignore_above: 1024 },
+      subject_type: { type: 'keyword', ignore_above: 1024 },
+      subject_id: { type: 'keyword', ignore_above: 1024 },
+      subject_summary: { type: 'text' },
+      concurrency_key: { type: 'keyword', ignore_above: 1024 },
+      created_at: { type: 'date' },
+      completed_at: { type: 'date' },
+      summary: { type: 'text' },
+      conclusion: { type: 'text' },
+      hypotheses: { type: 'flattened', ignore_above: 1024 },
+      impact: { type: 'flattened', ignore_above: 1024 },
+    },
+  },
+  management: {
+    importableAndExportable: false,
+  },
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        create: investigationAttributesSchemaV1,
+        forwardCompatibility: investigationAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
       },
     },
-    management: {
-      importableAndExportable: false,
-    },
-    modelVersions: {
-      1: {
-        changes: [],
-        schemas: {
-          create: investigationAttributesSchemaV1,
-          forwardCompatibility: investigationAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
-        },
-      },
-    },
-  };
+  },
+};

@@ -14,6 +14,7 @@ import {
   ensureInvestigation,
   seedInvestigation,
   deleteInvestigation,
+  getInvestigation,
 } from '../fixtures';
 
 apiTest.describe(
@@ -32,7 +33,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'acknowledges without side effects when the saved object already exists',
+      'acknowledges without side effects when the investigation already exists',
       async ({ apiClient, kbnClient }) => {
         await seedInvestigation(kbnClient, { id: TEST_ID, status: 'completed' });
 
@@ -40,11 +41,9 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         expect(response.body.acknowledged).toBe(true);
 
-        const so = await kbnClient.savedObjects.get({
-          type: 'nightshift-investigation',
-          id: TEST_ID,
-        });
-        expect(so.attributes.status).toBe('completed');
+        const investigationRequest = await getInvestigation(apiClient, cookieHeader, TEST_ID);
+        expect(investigationRequest).toHaveStatusCode(200);
+        expect(investigationRequest.body.status).toBe('completed');
       }
     );
 

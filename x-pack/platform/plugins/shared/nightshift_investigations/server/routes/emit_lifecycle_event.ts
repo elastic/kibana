@@ -13,7 +13,7 @@ import {
   INVESTIGATION_FAILED_TRIGGER_ID,
   INVESTIGATION_STARTED_TRIGGER_ID,
 } from '../../common/workflows/triggers';
-import { MAX_KEYWORD_LENGTH } from '../saved_objects';
+import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
