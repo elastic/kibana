@@ -69,6 +69,12 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
+  const { data: cloudwatchOtelData, refetch: cloudwatchOtelRefetch } = useGetPackageInfoByKeyQuery(
+    'aws_cloudwatch_input_otel',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
 
   const matrix = useMemo(() => {
     if (!awsData?.item) {
@@ -81,9 +87,20 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
       ...(fargateData?.item && { awsfargate: fargateData.item }),
       ...(mqData?.item && { aws_mq: mqData.item }),
       ...(logsData?.item && { aws_logs: logsData.item }),
+      ...(cloudwatchOtelData?.item && {
+        aws_cloudwatch_input_otel: cloudwatchOtelData.item,
+      }),
     };
     return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC);
-  }, [awsData, bedrockData, bedrockAgentcoreData, fargateData, mqData, logsData]);
+  }, [
+    awsData,
+    bedrockData,
+    bedrockAgentcoreData,
+    fargateData,
+    mqData,
+    logsData,
+    cloudwatchOtelData,
+  ]);
 
   const refetch = useCallback(() => {
     awsRefetch();
@@ -92,7 +109,16 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     fargateRefetch();
     mqRefetch();
     logsRefetch();
-  }, [awsRefetch, bedrockRefetch, bedrockAgentcoreRefetch, fargateRefetch, mqRefetch, logsRefetch]);
+    cloudwatchOtelRefetch();
+  }, [
+    awsRefetch,
+    bedrockRefetch,
+    bedrockAgentcoreRefetch,
+    fargateRefetch,
+    mqRefetch,
+    logsRefetch,
+    cloudwatchOtelRefetch,
+  ]);
 
   return { matrix, isError: awsIsError, refetch };
 }

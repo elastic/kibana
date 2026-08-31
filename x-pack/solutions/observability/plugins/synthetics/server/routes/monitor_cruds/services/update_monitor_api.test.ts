@@ -258,6 +258,29 @@ describe('UpdateMonitorAPI', () => {
       expect(mocks.getMaintenanceWindows).toHaveBeenCalledWith('default');
     });
 
+    it.each(['project', 'agent'])(
+      'fetches maintenance windows for an enabled-only patch on origin %s',
+      async (origin) => {
+        const { routeContext, mocks } = createMockRouteContext();
+        mocks.findDecryptedMonitors.mockResolvedValue([
+          mockDecryptedMonitor({
+            attributes: {
+              [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
+              [ConfigKey.MAINTENANCE_WINDOWS]: ['mw-1'],
+            },
+          }),
+        ]);
+        mocks.getMaintenanceWindows.mockResolvedValue([{ id: 'mw-1', title: 'Weekend deploy' }]);
+
+        const api = new UpdateMonitorAPI(routeContext);
+        const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
+
+        expect(result.perIdErrors).toEqual({});
+        expect(result.survivors).toHaveLength(1);
+        expect(mocks.getMaintenanceWindows).toHaveBeenCalledWith('default');
+      }
+    );
+
     it('uses the normalized API config before validation and persistence', async () => {
       const { normalizeAPIConfig, validateMonitor } = jest.requireMock('../monitor_validation');
       normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => {

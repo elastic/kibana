@@ -22,6 +22,7 @@ interface RequestArgs {
   datafeedOverrides?: SetupMlModuleDatafeedOverrides[];
   query?: object;
   useDedicatedIndex?: boolean;
+  projectRouting?: string;
 }
 
 export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
@@ -36,6 +37,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
     datafeedOverrides = [],
     query,
     useDedicatedIndex = false,
+    projectRouting,
   } = requestArgs;
 
   const response = await fetch(`/internal/ml/modules/setup/${moduleId}`, {
@@ -52,6 +54,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
         datafeedOverrides,
         query,
         useDedicatedIndex,
+        projectRouting,
       })
     ),
   });
@@ -87,6 +90,7 @@ const setupMlModuleRequestParamsRT = rt.intersection([
   rt.exact(
     rt.partial({
       query: rt.object,
+      projectRouting: rt.string,
     })
   ),
 ]);

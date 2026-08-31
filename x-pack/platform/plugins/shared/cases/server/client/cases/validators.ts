@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { differenceWith, intersectionWith, isEmpty } from 'lodash';
+import { differenceWith, intersectionWith, isEmpty, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { CaseStatuses } from '../../../common/types/domain';
 import type {
   CasePatchRequest,
@@ -214,6 +215,58 @@ export const resolveGlobalFields = async (
 };
 
 /**
+ * True when a field definition mirrors a v1 custom field (`legacyKey`) that the owner no longer
+ * has configured.
+ */
+const isStaleMirror = (
+  fieldDefinition: FieldDefinition,
+  configuredLegacyKeys: Set<string>
+): boolean =>
+  fieldDefinition.legacyKey !== undefined && !configuredLegacyKeys.has(fieldDefinition.legacyKey);
+
+/**
+ * Same as `resolveGlobalFields`, but drops `required` from every stale mirror — a definition
+ * whose `legacyKey` points at a v1 custom field the owner no longer has configured.
+ *
+ * A linked definition copies the v1 field's `required` flag into its own YAML, and definitions
+ * deliberately outlive the configuration that created them: deleting a configuration leaves them
+ * behind (see `ensureGlobalFieldDefinitions` and the configure client). For a linked definition
+ * the v1 configuration stays the authority. While the custom field is configured,
+ * `validateRequiredCustomFields` enforces the flag and pairing copies the value into
+ * `extended_fields`; once the configuration is gone neither runs, and pairing is skipped
+ * altogether, so the copied flag becomes a requirement no caller can satisfy.
+ *
+ * Only `required` is dropped. The definition stays a valid global field: its key is still
+ * accepted and its value is still validated.
+ */
+export const resolveGlobalFieldsWithoutStaleMirrorRequired = async (
+  owner: string,
+  fieldDefinitionsService: FieldDefinitionsService,
+  customFieldsConfiguration?: CustomFieldsConfiguration
+): Promise<InlineField[]> => {
+  const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner, {
+    isGlobal: true,
+  });
+  const configuredLegacyKeys = new Set((customFieldsConfiguration ?? []).map(({ key }) => key));
+
+  // Parsed one definition at a time: parseFieldDefinitionsToInlineFields skips malformed
+  // definitions, so its result cannot be index-aligned with its input.
+  return fieldDefinitions.flatMap((fieldDefinition) => {
+    const [field] = parseFieldDefinitionsToInlineFields([fieldDefinition]);
+    if (field === undefined) {
+      return [];
+    }
+    if (
+      field.validation?.required !== true ||
+      !isStaleMirror(fieldDefinition, configuredLegacyKeys)
+    ) {
+      return [field];
+    }
+    return [{ ...field, validation: omit(field.validation, 'required') }];
+  });
+};
+
+/**
  * @deprecated Use `resolveGlobalFields` instead (returns the full InlineField array so
  * values can be validated against each field's definition).
  */
@@ -223,6 +276,39 @@ export const resolveGlobalFieldKeys = async (
 ): Promise<Set<string>> => {
   const inlineFields = await resolveGlobalFields(owner, fieldDefinitionsService);
   return new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
+};
+
+/**
+ * Enforces `required` on global (isGlobal) field definitions at case-creation time, with the
+ * same semantics v1 required custom fields get from `validateRequiredCustomFields`: a required
+ * field with no value and no default fails the create with a 400.
+ *
+ * Call after pairing (and after global-default injection): `extendedFields` must be the map
+ * that will be persisted. Pairing already copies a linked customFields value — including a v1
+ * configuration `defaultValue` filled by `fillMissingCustomFields` — into that map, so a
+ * legacy customFields-only create that passes v1 validation also passes here. An explicit null
+ * on the linked v1 field clears the v2 key, so it does not satisfy required.
+ *
+ * `globalFields` must come from `resolveGlobalFieldsWithoutStaleMirrorRequired`: a definition
+ * that mirrors a v1 custom field the owner no longer has configured carries a stale `required`
+ * flag that nothing on the create path can satisfy.
+ *
+ * Only required-ness is enforced here (`requiredOnly`): value validation of the request's own
+ * map is handled by `validateCaseExtendedFields`.
+ */
+export const validateRequiredGlobalFields = ({
+  globalFields,
+  extendedFields,
+}: {
+  globalFields: InlineField[];
+  extendedFields: Record<string, string>;
+}): void => {
+  const errors = validateExtendedFields(extendedFields, globalFields, {
+    requiredOnly: true,
+  });
+  if (errors.length) {
+    throw Boom.badRequest(`Invalid extended_fields: ${errors.join('; ')}`);
+  }
 };
 
 /**
@@ -263,16 +349,8 @@ export const validateCaseExtendedFields = async ({
   const globalKeySet = new Set(globalFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
   if (!templateId) {
-    // No template — only global field keys are permitted.
-    const invalidKeys = Object.keys(extendedFields).filter((k) => !globalKeySet.has(k));
-    if (invalidKeys.length) {
-      throw Boom.badRequest(
-        `extended_fields keys [${invalidKeys.join(
-          ', '
-        )}] are not global (isGlobal) field definitions`
-      );
-    }
-    // Also validate the VALUES against each global field's own definition.
+    // No template — only global field keys are permitted. validateExtendedFields reports any
+    // other key as unknown, pointing at the exact key to use where one can be derived.
     const globalErrors = validateExtendedFields(extendedFields, globalFields, { partial });
     if (globalErrors.length) {
       throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
@@ -320,6 +398,7 @@ export const validateCaseExtendedFields = async ({
   );
   const templateErrors = validateExtendedFields(templateOnlyFields, templateNonGlobalFields, {
     partial,
+    hintFields: globalFields,
   });
   if (templateErrors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${templateErrors.join('; ')}`);
@@ -429,13 +508,9 @@ export const resolveTemplateFieldsForClose = async ({
  * bulk operations can deduplicate SO fetches across cases sharing the same template.
  *
  * NOTE: We intentionally do not delegate to the common validateExtendedFields({ onClose: true })
- * here, even though that option was added in the same PR, because:
- *   1. The common function is designed for client-side real-time preview (no SO access; caller
- *      provides a flat extendedFields map). Here we operate on the caller-provided final state.
- *   2. This implementation passes fieldControlMap to evaluateCondition for correct
- *      CHECKBOX_GROUP / USER_PICKER show_when evaluation — the common function omits it
- *      (pre-existing gap). If the common function gains fieldControlMap support, this can
- *      be revisited.
+ * here, even though that option was added in the same PR, because the common function is designed
+ * for client-side real-time preview (no SO access; caller provides a flat extendedFields map),
+ * whereas this function operates on the caller-provided final state.
  */
 export const validateExtendedFieldsOnClose = ({
   caseId,
