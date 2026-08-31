@@ -6327,6 +6327,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/deeplinks-evals@link:src/platform/packages/shared/deeplinks/evals":
+  version "0.0.0"
+  uid ""
+
 "@kbn/deeplinks-fleet@link:src/platform/packages/shared/deeplinks/fleet":
   version "0.0.0"
   uid ""
@@ -8744,6 +8748,14 @@
   uid ""
 
 "@kbn/security-labs-artifact-builder@link:x-pack/packages/ai-infra/security-labs-artifact-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-mitre-attack-common@link:x-pack/solutions/security/packages/security-mitre-attack-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-mitre-attack-server@link:x-pack/solutions/security/packages/security-mitre-attack-server":
   version "0.0.0"
   uid ""
 

@@ -7,6 +7,9 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { z } from '@kbn/zod/v4';
+import type { InvestigationState } from '@kbn/significant-events-schema';
+import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -15,7 +18,9 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { INVESTIGATE_STEP_ID, severitySchema, type Severity } from '@kbn/significant-events-schema';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
+  AlertInvestigationContext,
   GetInvestigationResponse,
+  InvestigationContext,
   InvestigationStatus,
   InvestigationSubject,
   InvestigationTriggerType,
@@ -25,10 +30,20 @@ import type {
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
-import { DEFAULT_INVESTIGATION_TRIGGER_TYPE, INVESTIGATION_TRIGGER_TYPES } from '../../common';
-import { InvestigationNotFoundError } from './errors';
+import {
+  alertInvestigationContextSchema,
+  DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+  freeFormContextSchema,
+  INVESTIGATION_TRIGGER_TYPES,
+} from '../../common';
+import { buildInvestigationMessage } from './build_investigation_message';
+import { InvalidInvestigationContextError, InvestigationNotFoundError } from './errors';
 import { InvestigationUnavailableError } from './investigation_unavailable_error';
-export { InvestigationNotFoundError, InvestigationUnavailableError };
+export {
+  InvalidInvestigationContextError,
+  InvestigationNotFoundError,
+  InvestigationUnavailableError,
+};
 
 const SORT_FIELD_MAP: Record<
   NonNullable<ListInvestigationsRequest['sort_field']>,
@@ -244,6 +259,38 @@ export class NightshiftInvestigationsClient {
     );
   }
 
+  /**
+   * Validates the context against the contract for its subject type and composes the brief the
+   * agent will read. Done here and not only in the route schema, because the workflow step
+   * definition and the plugin start contract both reach `start` without passing through route
+   * validation. Each branch parses with its own schema, so the alert brief is composed from a
+   * value the schema has already vouched for rather than from a re-checked `unknown`.
+   */
+  private prepareAgentInput(
+    subject: InvestigationSubject,
+    message: string | undefined,
+    context: InvestigationContext | AlertInvestigationContext
+  ): { message: string; context: Record<string, unknown> } {
+    if (subject.type === 'alert') {
+      const parsed = alertInvestigationContextSchema.safeParse(context);
+      if (!parsed.success) {
+        throw new InvalidInvestigationContextError(subject.type, parsed.error);
+      }
+      // An alert investigation always gets the brief composed from its alert data — that is what
+      // the alert context exists for. Every other subject keeps the caller-supplied message.
+      return { message: buildInvestigationMessage(parsed.data), context: parsed.data };
+    }
+
+    const parsed = freeFormContextSchema.safeParse(context);
+    if (!parsed.success) {
+      throw new InvalidInvestigationContextError(subject.type, parsed.error);
+    }
+    return {
+      message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
+      context: parsed.data,
+    };
+  }
+
   async start({
     subject,
     trigger_type,
@@ -259,6 +306,8 @@ export class NightshiftInvestigationsClient {
     if (!this.agentBuilder) {
       throw new InvestigationUnavailableError('agentBuilder is not available');
     }
+
+    const prepared = this.prepareAgentInput(subject, message, context);
 
     const spaceId = this.getSpaceId();
 
@@ -282,11 +331,11 @@ export class NightshiftInvestigationsClient {
     }
 
     const inputs = {
-      message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
+      message: prepared.message,
       stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
-        ...context,
+        ...prepared.context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
@@ -351,12 +400,13 @@ export class NightshiftInvestigationsClient {
       status,
       started_at: execution.startedAt,
       completed_at: isTerminal ? execution.finishedAt : undefined,
-      conclusions:
+      conclusion:
         status === 'completed'
-          ? asString(structuredOutput?.conclusion) ?? asString(structuredOutput?.summary)
+          ? (asString(structuredOutput?.conclusion) ?? asString(structuredOutput?.summary))
           : undefined,
       severity:
         status === 'completed' ? asSeverity(structuredOutput?.severity, this.logger) : undefined,
+      result: status === 'completed' ? this.toResult(investigationId, structuredOutput) : undefined,
       error: (() => {
         if (status !== 'failed') return undefined;
         if (execution.error?.message) {
@@ -365,6 +415,36 @@ export class NightshiftInvestigationsClient {
         return 'Investigation failed';
       })(),
     };
+  }
+
+  /**
+   * The agent's full output, validated against the schema it was generated from.
+   *
+   * `investigationStateSchema` is not a description of this payload written after the fact: the
+   * workflow's `investigate` step declares its output schema from it, and the progress-report tool
+   * streams the same shape while the run is live. Validating here means a caller reading a
+   * finished investigation and one following a live stream can use a single renderer.
+   *
+   * Output that fails the schema is dropped rather than returned half-parsed, and logged so the
+   * mismatch is visible. `conclusion` is populated separately from the raw payload, so the caller
+   * still gets the narrative and loses only the structure around it.
+   */
+  private toResult(
+    investigationId: string,
+    rawOutput: Record<string, unknown> | undefined
+  ): InvestigationState | undefined {
+    if (!rawOutput) return undefined;
+
+    const parsed = investigationStateSchema.safeParse(rawOutput);
+    if (!parsed.success) {
+      this.logger.warn(
+        `Investigation "${investigationId}" produced output that does not match ` +
+          `investigationStateSchema: ${z.prettifyError(parsed.error)}`
+      );
+      return undefined;
+    }
+
+    return parsed.data;
   }
 
   async list({

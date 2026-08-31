@@ -19,6 +19,7 @@ const QUERY_GENERATION_EVALUATORS_ENV = 'KI_QUERY_GENERATION_EVALUATORS';
 const evaluator = (name: string): Evaluator => ({
   name,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async () => ({ score: 1, label: 'PASS' }),
 });
 
