@@ -14,7 +14,7 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { set } from '@kbn/safer-lodash-set';
+import { setWith } from '@kbn/safer-lodash-set';
 import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
 
 // Max number of values the document will show. The rest will be truncated.
@@ -239,7 +239,7 @@ const tryParsePerfectJson = (value: unknown, budget: ValueBudget): unknown => {
 const unflattenKeys = (source: Record<string, unknown>): Record<string, unknown> => {
   const target: Record<string, unknown> = {};
   for (const key of Object.keys(source)) {
-    set(target, key, source[key]);
+    setWith(target, key, source[key], Object);
   }
   return target;
 };

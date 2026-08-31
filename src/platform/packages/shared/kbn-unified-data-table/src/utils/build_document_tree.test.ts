@@ -131,6 +131,24 @@ describe('flattenedToNestedDocument', () => {
     });
   });
 
+  it('keeps numeric object keys as objects', () => {
+    const tree = buildTree({
+      _id: '1',
+      _index: 'test',
+      _source: undefined,
+      fields: {
+        'latency.50': [10],
+        'latency.95': [100],
+        'http.response.status_code.200': [5],
+      },
+    });
+
+    expect(tree).toEqual({
+      latency: { '50': 10, '95': 100 },
+      http: { response: { status_code: { '200': 5 } } },
+    });
+  });
+
   it('preserves number and boolean types (so the tree still colours them by type)', () => {
     const tree = buildTree({
       _id: '1',

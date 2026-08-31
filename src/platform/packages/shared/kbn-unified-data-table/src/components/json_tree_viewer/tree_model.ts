@@ -90,7 +90,7 @@ export type GetLeafActions = (leaf: {
  */
 export const buildNodes = (json: JsonValue): JsonNode[] => {
   if (Array.isArray(json)) {
-    return json.map((value, index) =>
+    return Array.from(json, (value, index) =>
       buildNode({ key: String(index), path: [String(index)], value, isArrayItem: true })
     );
   }
@@ -120,7 +120,7 @@ const buildNode = ({
       isArrayItem,
       kind: 'collection',
       collectionType: 'array',
-      children: value.map((child, index) =>
+      children: Array.from(value, (child, index) =>
         buildNode({
           key: String(index),
           path: [...path, String(index)],
