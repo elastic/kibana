@@ -175,7 +175,7 @@ export class PolicyArtifactsPage {
       .click();
     await this.page.testSubj
       .locator('trustedApps-form-conditionsBuilder-group1-entry0-value')
-      .fill(TRUSTED_APP_HASH);
+      .fill(TRUSTED_APP_HASH.toUpperCase());
   }
 
   private async fillEventFiltersForm() {
@@ -195,7 +195,7 @@ export class PolicyArtifactsPage {
       .fill('This is the blocklist description');
     await this.page.testSubj.locator('blocklist-form-field-select').click();
     await this.page.testSubj.locator('blocklist-form-file.hash.*').click();
-    await this.fillComboBox('blocklist-form-values-input', TRUSTED_APP_HASH, true);
+    await this.fillComboBox('blocklist-form-values-input', TRUSTED_APP_HASH.toUpperCase(), true);
     await this.page.testSubj.locator('blocklist-form-name-input').click();
   }
 

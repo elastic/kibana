@@ -9,7 +9,11 @@ import { ExceptionListTypeEnum, type EntriesArray } from '@kbn/securitysolution-
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PolicyArtifactKind } from './page_objects';
 
-/** Displayed lowercase; keep in sync with Cypress `artifacts_page.ts` criteria strings. */
+/**
+ * Displayed lowercase. Forms enter it uppercase on purpose so create flows
+ * cover hash normalization. Keep in sync with Cypress `artifacts_page.ts`
+ * criteria strings.
+ */
 export const TRUSTED_APP_HASH = 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476';
 
 /**
