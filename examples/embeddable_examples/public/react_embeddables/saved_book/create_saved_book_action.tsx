@@ -21,7 +21,7 @@ import { ADD_SAVED_BOOK_ACTION_ID } from './constants';
 export const createSavedBookAction = (core: CoreStart) => {
   return {
     id: ADD_SAVED_BOOK_ACTION_ID,
-    getIconType: () => 'folderClosed',
+    getIconType: () => 'folder',
     grouping: [embeddableExamplesGrouping],
     isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
       return apiCanAddNewPanel(embeddable);

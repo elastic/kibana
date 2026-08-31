@@ -502,7 +502,7 @@ const toTreeItems = (nodes: MemoryCategoryNode[], onSelect: (id: string) => void
     return {
       id: node.category,
       label: node.name,
-      icon: <EuiIcon type="folderClosed" size="s" aria-hidden={true} />,
+      icon: <EuiIcon type="folder" size="s" aria-hidden={true} />,
       iconWhenExpanded: <EuiIcon type="folderOpen" size="s" aria-hidden={true} />,
       ...(allChildren.length > 0 ? { children: allChildren } : {}),
     };
