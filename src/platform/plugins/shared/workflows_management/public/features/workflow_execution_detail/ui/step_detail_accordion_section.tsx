@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -25,8 +25,8 @@ interface StepDetailAccordionSectionProps {
 
 /**
  * Alert/Entity-style accordion chrome for step-detail sections: right→down
- * chevron, no bordered card, and a full-bleed divider after the section so
- * expanded content stays visually contained.
+ * chevron, no bordered card, and an inset divider after the section (does not
+ * extend into the panel's horizontal padding).
  */
 export const StepDetailAccordionSection = React.memo<StepDetailAccordionSectionProps>(
   ({
@@ -72,28 +72,28 @@ export const StepDetailAccordionSection = React.memo<StepDetailAccordionSectionP
             onClick={() => setIsOpen((v) => !v)}
             data-test-subj={dataTestSubj ? `${dataTestSubj}Toggle` : undefined}
           />
-          <div
+          <EuiTitle
+            size="s"
             css={{
               flex: 1,
               minWidth: 0,
-              fontSize: euiTheme.size.m,
-              fontWeight: euiTheme.font.weight.bold,
-              color: euiTheme.colors.title,
+              marginBottom: 0,
             }}
           >
-            {title}
-          </div>
+            <h3
+              css={{
+                minWidth: 0,
+                margin: 0,
+                color: euiTheme.colors.title,
+              }}
+            >
+              {title}
+            </h3>
+          </EuiTitle>
           {extraAction}
         </div>
         {isOpen && <div css={{ paddingBottom: euiTheme.size.m }}>{children}</div>}
-        <EuiHorizontalRule
-          margin="none"
-          css={{
-            marginLeft: `-${euiTheme.size.base}`,
-            marginRight: `-${euiTheme.size.base}`,
-            width: `calc(100% + (${euiTheme.size.base} * 2))`,
-          }}
-        />
+        <EuiHorizontalRule margin="none" />
       </div>
     );
   }

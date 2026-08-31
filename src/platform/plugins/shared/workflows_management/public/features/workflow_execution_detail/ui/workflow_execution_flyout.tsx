@@ -843,14 +843,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                               })}
                             </EuiText>
                           </div>
-                          <EuiHorizontalRule
-                            margin="none"
-                            css={{
-                              marginLeft: `-${euiTheme.size.base}`,
-                              marginRight: `-${euiTheme.size.base}`,
-                              width: `calc(100% + (${euiTheme.size.base} * 2))`,
-                            }}
-                          />
+                          <EuiHorizontalRule margin="none" />
                         </div>
                       )}
                     {activeStepExecution?.usage && activeStepExecution.usage.totalTokens > 0 && (
