@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConversationOriginType, type ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
+import moment from 'moment';
 import { useRoundAuthorDetails } from '../../../hooks/use_round_author_details';
 import type { RoundAuthor } from './round_author_helpers';
 
@@ -22,19 +23,6 @@ const labels = {
   viaSlack: i18n.translate('xpack.agentBuilder.roundAuthor.viaSlack', {
     defaultMessage: 'via Slack',
   }),
-};
-
-const formatRoundTime = (startedAt: string): string => {
-  const date = new Date(startedAt);
-
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(date);
 };
 
 const RoundAuthorName: React.FC<{ name?: string }> = ({ name }) => <strong>{name}</strong>;
@@ -114,7 +102,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   agent,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const time = formatRoundTime(startedAt);
+  const time = moment(startedAt).format('LT');
   const isAgent = Boolean(agent);
   const { name } = useRoundAuthorDetails({ agent, author, origin });
 
