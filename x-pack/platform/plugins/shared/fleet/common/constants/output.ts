@@ -30,8 +30,6 @@ export const DEFAULT_OUTPUT: NewOutput = {
 
 export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
 
-export const SERVERLESS_PRIVATE_OUTPUT_ID = 'es-private-output';
-
 // Output IDs used for agentless policies:
 //  - For ECH, this is an output created by Fleet, see `ensureDefaultOutputs()` in
 //    `x-pack/plugins/fleet/server/services/output.ts`
