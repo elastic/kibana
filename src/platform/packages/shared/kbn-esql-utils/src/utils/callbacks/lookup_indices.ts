@@ -8,43 +8,27 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { IndicesAutocompleteResult } from '@kbn/esql-types';
-import { cacheParametrizedAsyncFunction } from './utils/cache';
+import { type IndicesAutocompleteResult, JOIN_INDICES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { getRemoteClustersFromESQLQuery } from '../query_parsing_helpers';
-
-const getLookupIndices = cacheParametrizedAsyncFunction(
-  async (http: HttpStart, remoteClusters?: string) => {
-    const query = remoteClusters ? { remoteClusters } : {};
-
-    const result = await http.get<IndicesAutocompleteResult>(
-      '/internal/esql/autocomplete/join/indices',
-      { query }
-    );
-
-    return result;
-  },
-  (http: HttpStart, remoteClusters?: string) => remoteClusters || '',
-  1000 * 60 * 5, // Keep the value in cache for 5 minutes
-  1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
-);
 
 /**
  * Fetches join indices based on the provided ESQL query.
- * @param query The ESQL query string to extract remote clusters from.
- * @param http The HTTP service to use for the request.
- * @param cacheOptions Optional cache options to control cache behavior.
- * @returns A promise that resolves to an IndicesAutocompleteResult object.
+ * Caching is handled at the call site (React-level useMemo) so that
+ * projectRouting changes automatically invalidate the cache.
  */
 export const getJoinIndices = async (
   query: string,
   http: HttpStart,
-  cacheOptions?: { forceRefresh?: boolean }
-) => {
+  projectRouting?: string,
+  signal?: AbortSignal
+): Promise<IndicesAutocompleteResult> => {
   const remoteClusters = getRemoteClustersFromESQLQuery(query);
-  const result = await getLookupIndices.call(
-    { forceRefresh: cacheOptions?.forceRefresh },
-    http,
-    remoteClusters?.join(',')
-  );
-  return result;
+  const httpQuery = {
+    ...(remoteClusters?.length ? { remoteClusters: remoteClusters.join(',') } : {}),
+    ...(projectRouting ? { projectRouting } : {}),
+  };
+  return http.get<IndicesAutocompleteResult>(JOIN_INDICES_AUTOCOMPLETE_ROUTE, {
+    query: httpQuery,
+    signal,
+  });
 };

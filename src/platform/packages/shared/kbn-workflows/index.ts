@@ -101,3 +101,14 @@ export {
 
 // Export specific types that are commonly used
 export type { BuiltInStepType } from './spec/schema';
+
+export {
+  isWorkflowValidationRuleId,
+  WORKFLOW_VALIDATION_RULE_IDS,
+  WORKFLOW_VALIDATION_RULES,
+} from './validation/rules';
+export type {
+  WorkflowValidationRuleId,
+  WorkflowValidationRuleOwner,
+  WorkflowValidationRules,
+} from './validation/rules';

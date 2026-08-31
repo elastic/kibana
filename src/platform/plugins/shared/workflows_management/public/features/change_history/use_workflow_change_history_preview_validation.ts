@@ -42,7 +42,10 @@ import { getWorkflowZodSchema } from '../../../common/schema';
 import { useAvailableConnectors } from '../../entities/connectors/model/use_available_connectors';
 import { triggerSchemas } from '../../trigger_schemas';
 import { navigateToErrorPosition } from '../../widgets/workflow_yaml_editor/lib/utils';
-import { useWorkflowYamlValidationContextRef } from '../validate_workflow_yaml/lib/use_workflow_yaml_validation_context';
+import {
+  getWorkflowYamlValidationContextError,
+  useWorkflowYamlValidationContextRef,
+} from '../validate_workflow_yaml/lib/use_workflow_yaml_validation_context';
 import {
   validationResultsFingerprint,
   type YamlValidationResult,
@@ -68,6 +71,7 @@ export interface UseWorkflowChangeHistoryPreviewValidationParams {
 export interface UseWorkflowChangeHistoryPreviewValidationResult {
   validationResults: YamlValidationResult[];
   isValidationLoading: boolean;
+  validationError: Error | null;
   handleValidationErrorClick: (error: YamlValidationResult) => void;
 }
 
@@ -86,6 +90,7 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
     YamlValidationResult[]
   >([]);
   const [isValidationLoading, setIsValidationLoading] = useState(false);
+  const [validationError, setValidationError] = useState<Error | null>(null);
   const isValidationLoadingRef = useRef(false);
   const [hasInitialValidationPass, setHasInitialValidationPass] = useState(false);
   const hasInitialValidationPassRef = useRef(false);
@@ -111,6 +116,8 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
   });
   const connectorsData = useAvailableConnectors();
   const validationContextRef = useWorkflowYamlValidationContextRef();
+  const connectorTypesStatus = validationContextRef.current.connectorTypes.status;
+  const previousConnectorTypesStatusRef = useRef(connectorTypesStatus);
   const workflowZodSchema = useMemo(
     () =>
       getWorkflowZodSchema(
@@ -151,6 +158,7 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
   const beginValidationRun = useCallback(() => {
     isValidationLoadingRef.current = true;
     setIsValidationLoading(true);
+    setValidationError(null);
     setPublishedValidationResults([]);
   }, []);
 
@@ -347,6 +355,10 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
       return;
     }
 
+    if (validationContextRef.current.connectorTypes.status === 'loading') {
+      return;
+    }
+
     const yamlToValidate = validationYamlRef.current;
     let didWaitForYamlSchema = false;
 
@@ -391,12 +403,18 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
 
       applyMergedHighlightsIfNeeded(editor);
       markInitialValidationPassComplete(didWaitForYamlSchema);
+      const validationContextError = getWorkflowYamlValidationContextError(
+        validationContextRef.current
+      );
+      if (validationContextError) {
+        setValidationError(validationContextError);
+      }
       completeValidationRun();
-    } catch (validationError) {
+    } catch (caughtError) {
       if (
         abortController.signal.aborted ||
         sequence !== validationSequenceRef.current ||
-        (validationError instanceof DOMException && validationError.name === 'AbortError')
+        (caughtError instanceof DOMException && caughtError.name === 'AbortError')
       ) {
         return;
       }
@@ -407,6 +425,9 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
       yamlSchemaResultsRef.current = nextYamlSchemaResults;
       applyMergedHighlightsIfNeeded(editor);
       markInitialValidationPassComplete(didWaitForYamlSchema);
+      setValidationError(
+        caughtError instanceof Error ? caughtError : new Error(String(caughtError))
+      );
       completeValidationRun();
     }
   };
@@ -466,6 +487,7 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
       validationAbortControllerRef.current?.abort();
       isValidationLoadingRef.current = false;
       setIsValidationLoading(false);
+      setValidationError(null);
       setPublishedValidationResults([]);
       syncValidationDisplay(false);
       clearEditorValidation();
@@ -508,6 +530,21 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
   ]);
 
   useEffect(() => {
+    const previousConnectorTypesStatus = previousConnectorTypesStatusRef.current;
+    previousConnectorTypesStatusRef.current = connectorTypesStatus;
+
+    if (
+      previousConnectorTypesStatus === connectorTypesStatus ||
+      !highlightValidationErrors ||
+      !isEditorMounted
+    ) {
+      return;
+    }
+
+    void runValidationRef.current();
+  }, [connectorTypesStatus, highlightValidationErrors, isEditorMounted]);
+
+  useEffect(() => {
     if (
       !highlightValidationErrors ||
       !isEditorMounted ||
@@ -539,6 +576,7 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
     validationResults: publishedValidationResults,
     isValidationLoading:
       highlightValidationErrors && (isValidationLoading || !hasInitialValidationPass),
+    validationError,
     handleValidationErrorClick,
   };
 };
