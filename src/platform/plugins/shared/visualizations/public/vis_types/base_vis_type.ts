@@ -49,6 +49,7 @@ export class BaseVisType<TVisParams extends VisParams = VisParams> {
   public readonly getUsedIndexPattern;
   public readonly getProjectRoutingOverrides;
   public readonly usesEsql;
+  public readonly getEsqlQuery;
   public readonly inspectorAdapters;
   public readonly fetchDatatable: boolean;
   public readonly toExpressionAst;
@@ -87,6 +88,7 @@ export class BaseVisType<TVisParams extends VisParams = VisParams> {
     this.getUsedIndexPattern = opts.getUsedIndexPattern;
     this.getProjectRoutingOverrides = opts.getProjectRoutingOverrides;
     this.usesEsql = opts.usesEsql;
+    this.getEsqlQuery = opts.getEsqlQuery;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.fetchDatatable = opts.fetchDatatable ?? false;
     this.toExpressionAst = opts.toExpressionAst;

@@ -40,7 +40,8 @@ export class EsqlService {
    */
   public async getIndicesByIndexMode(
     mode: 'lookup' | 'time_series',
-    remoteClusters?: string
+    remoteClusters?: string,
+    projectRouting?: string
   ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
@@ -55,12 +56,15 @@ export class EsqlService {
       sourcesToQuery.push(...clustersArray);
     }
 
+    const cpsParams = projectRouting ? { project_routing: projectRouting } : {};
+
     // It doesn't return hidden indices
     const sources = (await client.indices.resolveIndex({
       name: sourcesToQuery,
       expand_wildcards: mode === 'lookup' ? ['open', 'closed'] : 'open',
       mode,
-    })) as ResolveIndexResponse;
+      ...cpsParams,
+    } as Parameters<typeof client.indices.resolveIndex>[0])) as ResolveIndexResponse;
 
     const mappedMode = this.getIndexSourceType(mode);
 
