@@ -63,8 +63,15 @@ export class ContextEnginePlugin
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
 
+    this.analyticsService = new ContextEngineAnalyticsService(
+      coreSetup.analytics,
+      this.logger.get('telemetry')
+    );
+    this.analyticsService.registerContextEngineEventTypes();
+    const analyticsService = this.analyticsService;
+
     setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('ki_verification'))
+      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService)
     );
 
     coreSetup.uiSettings.registerGlobal({
@@ -101,13 +108,6 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
       logger: this.logger.get('signal_generator'),
     });
-
-    this.analyticsService = new ContextEngineAnalyticsService(
-      coreSetup.analytics,
-      this.logger.get('telemetry')
-    );
-    this.analyticsService.registerContextEngineEventTypes();
-    const analyticsService = this.analyticsService;
 
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({

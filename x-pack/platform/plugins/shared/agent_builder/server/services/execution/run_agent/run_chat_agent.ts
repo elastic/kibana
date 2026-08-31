@@ -60,6 +60,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
+import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
@@ -344,6 +345,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }
   }
 
+  const imageResolver = createImageResolver({
+    attachmentStateManager: context.attachmentStateManager,
+    attachments,
+    request,
+    spaceId: context.spaceId,
+    logger,
+  });
+
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     spaceId: context.spaceId,
@@ -357,6 +366,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
+    imageResolver,
     conversationTemplates: context.conversationTemplates,
   });
 

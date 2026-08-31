@@ -132,6 +132,7 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
+    direction: 'maximize' as const,
     evaluate: async ({ input, output, expected, metadata }: any) => {
       const criteria = expected.criteria ?? [];
       const result = await evaluators
