@@ -752,7 +752,7 @@ For the {{product.observability}} 9.4.6 release information, refer to [{{product
 For the {{elastic-sec}} 9.4.6 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Workflows**:
-* Add step-level skip conditions (`if`) to all workflow step types [#279210]({{kib-pull}}279210).
+* Add step-level `if` skip conditions to all workflow step types except the `if` step, which continues to use `condition` [#279210]({{kib-pull}}279210).
 
 
 ### Fixes [kibana-9.4.6-fixes]
