@@ -869,7 +869,27 @@ describe('hits-per-id reservation derived from the index pattern', () => {
         ['id-1'],
         ['kibana.alert.workflow_tags']
       )
-    ).rejects.toThrow('Partial shard failure during prefetch');
+    ).rejects.toThrow('Incomplete prefetch response');
+  });
+
+  it('throws when the search times out so callers suppress the event rather than emit a partial delta', async () => {
+    // Encoding WHY: timed_out:true returns only the hits collected before the deadline;
+    // computing the delta over a truncated hit set can emit truncated:false on an incomplete payload.
+    esClient.search.mockResolvedValue({
+      took: 5000,
+      timed_out: true,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+    } as estypes.SearchResponse);
+
+    await expect(
+      fetchAlertIdIndexWithSource(
+        esClient,
+        DETECTION_INDEX,
+        ['id-1'],
+        ['kibana.alert.workflow_tags']
+      )
+    ).rejects.toThrow('Incomplete prefetch response');
   });
 });
 
@@ -1243,6 +1263,6 @@ describe('prefetchChangedListFieldIds', () => {
         ['tag'],
         []
       )
-    ).rejects.toThrow('Partial shard failure during prefetch');
+    ).rejects.toThrow('Incomplete prefetch response');
   });
 });
