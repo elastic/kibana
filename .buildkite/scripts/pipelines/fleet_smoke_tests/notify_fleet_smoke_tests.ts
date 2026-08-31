@@ -81,9 +81,7 @@ async function main() {
   const buildkite = new BuildkiteClient();
   const threshold = getThreshold();
 
-  const since = new Date(
-    Date.now() - BUILD_SEARCH_WINDOW_DAYS * 24 * 60 * 60 * 1000
-  ).toISOString();
+  const since = new Date(Date.now() - BUILD_SEARCH_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
   const builds = await buildkite.getBuildsAfterDate(SMOKE_TESTS_PIPELINE_SLUG, since, 50);
 
   const finishedBuilds = builds.filter((build) => ['passed', 'failed'].includes(build.state));
