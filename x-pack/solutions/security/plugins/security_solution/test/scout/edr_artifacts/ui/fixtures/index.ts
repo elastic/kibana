@@ -60,8 +60,7 @@ export const spaceTest = baseSpaceTest.extend<ArtifactTabTestFixtures, ArtifactT
     await use(extendPageObjects(pageObjects, page));
   },
   endpointPolicy: [
-    async ({ kbnClient, scoutSpace, apiServices, log }, use) => {
-      await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
+    async ({ kbnClient, scoutSpace, log }, use) => {
       const indexed = await createScoutEndpointPolicy(
         kbnClient,
         log,

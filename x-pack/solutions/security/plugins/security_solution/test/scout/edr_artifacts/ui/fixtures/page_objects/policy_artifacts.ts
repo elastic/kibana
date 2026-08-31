@@ -31,6 +31,7 @@ export class PolicyArtifactsPage {
   readonly artifactCard: Locator;
   readonly artifactCardTitle: Locator;
   readonly cardActionsButton: Locator;
+  readonly viewFullDetailsAction: Locator;
   readonly removeFromPolicyAction: Locator;
   readonly confirmModalConfirmButton: Locator;
   readonly perPolicyRadio: Locator;
@@ -55,6 +56,7 @@ export class PolicyArtifactsPage {
     this.cardActionsButton = this.page.testSubj.locator(
       'artifacts-collapsed-list-card-header-actions-button'
     );
+    this.viewFullDetailsAction = this.page.testSubj.locator('view-full-details-action');
     this.removeFromPolicyAction = this.page.testSubj.locator('remove-from-policy-action');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
     // Test subjects are generated in different formats; they all end with -perPolicy.

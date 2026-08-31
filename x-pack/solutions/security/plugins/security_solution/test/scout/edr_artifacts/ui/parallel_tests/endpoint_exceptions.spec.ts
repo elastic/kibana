@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { describeArtifactTabPolicyDetails } from '../fixtures/artifact_tabs_suite';
+import {
+  ARTIFACT_TAB_POLICY_DETAILS_LOCAL_TAGS,
+  describeArtifactTabPolicyDetails,
+} from '../fixtures/artifact_tabs_suite';
 import { getArtifactTabCase } from '../fixtures/artifact_tabs_test_data';
 
-describeArtifactTabPolicyDetails(getArtifactTabCase('endpointExceptions'));
+describeArtifactTabPolicyDetails(getArtifactTabCase('endpointExceptions'), {
+  tag: ARTIFACT_TAB_POLICY_DETAILS_LOCAL_TAGS,
+});

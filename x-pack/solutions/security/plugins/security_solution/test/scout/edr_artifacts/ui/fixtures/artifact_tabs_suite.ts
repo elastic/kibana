@@ -10,10 +10,15 @@ import { spaceTest, tags } from '.';
 import type { ArtifactTabCase } from './artifact_tabs_test_data';
 import { getArtifactNoneRole, getArtifactReadRole } from './roles';
 
-const STATEFUL_AND_SERVERLESS_COMPLETE = [
+export const ARTIFACT_TAB_POLICY_DETAILS_TAGS = [
   ...tags.stateful.classic,
   ...tags.serverless.security.complete,
 ];
+
+/** Local only — the endpoint-exceptions opt-in writes an agnostic SO with no revert. */
+export const ARTIFACT_TAB_POLICY_DETAILS_LOCAL_TAGS = ARTIFACT_TAB_POLICY_DETAILS_TAGS.filter(
+  (tag) => tag.startsWith('@local-')
+);
 
 const STATEFUL_ONLY_REASON =
   'There is no serverless role that can read a policy without the matching artifact privilege';
@@ -23,12 +28,19 @@ const STATEFUL_ONLY_REASON =
  * file owns a single agnostic list id (spaces do not isolate those lists).
  * ALL and READ/NONE stay in the same file so they cannot race on that list.
  */
-export const describeArtifactTabPolicyDetails = (artifact: ArtifactTabCase): void => {
+export const describeArtifactTabPolicyDetails = (
+  artifact: ArtifactTabCase,
+  options?: { tag?: string[] }
+): void => {
   spaceTest.describe(
     `Artifact tabs in Policy Details page — ${artifact.title}`,
-    { tag: STATEFUL_AND_SERVERLESS_COMPLETE },
+    { tag: options?.tag ?? ARTIFACT_TAB_POLICY_DETAILS_TAGS },
     () => {
       spaceTest.beforeAll(async ({ apiServices }) => {
+        // Persistent agnostic SO; only this file needs it. Keep it off MKI via local tags.
+        if (artifact.kind === 'endpointExceptions') {
+          await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
+        }
         await apiServices.endpointArtifacts.deleteList(artifact.listId);
       });
 
@@ -120,6 +132,7 @@ export const describeArtifactTabPolicyDetails = (artifact: ArtifactTabCase): voi
               await expect(pageObjects.policyArtifactsPage.assignButton).toHaveCount(0);
 
               await pageObjects.policyArtifactsPage.openCardActions();
+              await expect(pageObjects.policyArtifactsPage.viewFullDetailsAction).toBeVisible();
               await expect(pageObjects.policyArtifactsPage.removeFromPolicyAction).toHaveCount(0);
             }
           );
@@ -183,7 +196,7 @@ export const describeArtifactTabPolicyDetails = (artifact: ArtifactTabCase): voi
           await spaceTest.step('manage artifacts and return to the policy tab', async () => {
             await pageObjects.policyArtifactsPage.openManageFromUnassigned();
             await expect(page).toHaveURL(
-              new RegExp(`/app/security/administration/${artifact.urlPath}`)
+              new RegExp(`/app/security/administration/${artifact.urlPath}(?:\\?|#|$)`)
             );
             await pageObjects.policyDetailsPage.clickBackToOrigin();
           });
