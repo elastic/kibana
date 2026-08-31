@@ -109,6 +109,7 @@ import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 import { registerEmbeddables } from './embeddable/register_embeddables';
+import type { EmbeddableDeps } from './embeddable/types';
 import {
   registerServiceMapAttachment,
   registerApmMetricsAttachment,
@@ -244,6 +245,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
+  /** Setup-time half of EmbeddableDeps, completed with core/plugins in start(). */
+  private embeddableDepsPartial?: Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>;
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
@@ -525,6 +528,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       observabilityRuleTypeRegistry,
       telemetry,
     });
+    this.embeddableDepsPartial = {
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+      telemetry,
+    };
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
 
@@ -565,8 +576,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     } else {
       setApmInternalServices(ApmInternalServices);
     }
-    if (plugins.agentBuilder) {
-      registerServiceMapAttachment(plugins.agentBuilder!.attachments);
+    if (plugins.agentBuilder && this.embeddableDepsPartial) {
+      registerServiceMapAttachment(plugins.agentBuilder.attachments, {
+        ...this.embeddableDepsPartial,
+        coreStart: core,
+        pluginsStart: plugins,
+      });
       registerApmMetricsAttachment(plugins.agentBuilder!.attachments);
       registerApmTimeseriesAttachment(plugins.agentBuilder!.attachments);
       registerApmRelatedAlertsAttachment(plugins.agentBuilder!.attachments);
