@@ -103,5 +103,7 @@ export function DataFormatSelect({ dataFormat, onChange, disabled }: DataFormatS
     <EuiToolTip content={disabledTooltip}>
       <span style={{ display: 'inline-block' }}>{select}</span>
     </EuiToolTip>
-  ) : select;
+  ) : (
+    select
+  );
 }
