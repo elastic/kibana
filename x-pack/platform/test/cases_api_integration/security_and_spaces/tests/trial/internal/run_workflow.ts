@@ -531,13 +531,30 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('origin and alert-membership validation', () => {
       it('returns 400 when origin is present but caseIds has more than one entry', async () => {
+        // Both cases must exist and be authorized: the cases authorization check runs before
+        // the origin/multi-case guard, so unknown ids would return 403 (oracle hardening).
+        const [caseA, caseB] = await Promise.all([
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          ),
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          ),
+        ]);
+
         await runCaseWorkflow({
           supertest: supertestWithoutAuth,
           workflowId: enabledWorkflowId,
           params: {
-            caseIds: ['case-a', 'case-b'],
+            caseIds: [caseA.id, caseB.id],
             inputs: {},
-            origin: { type: 'cases.case', caseId: 'case-a' },
+            origin: { type: 'cases.case', caseId: caseA.id },
           },
           expectedHttpCode: 400,
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
