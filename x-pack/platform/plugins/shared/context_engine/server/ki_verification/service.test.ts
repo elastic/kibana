@@ -103,7 +103,22 @@ describe('KiVerificationService', () => {
       { verifier: 'thrower', passed: false, reason: 'boom' },
       { verifier: 'after', passed: true },
     ]);
-    expect(context.logger.warn).toHaveBeenCalledWith("KI verifier 'thrower' threw: boom");
+    expect(context.logger.warn).toHaveBeenCalledWith("KI verifier 'thrower' threw: Error");
+  });
+
+  it('rethrows abort errors', async () => {
+    const abortError = new Error('Request aborted');
+    abortError.name = 'AbortError';
+    const aborter: KiVerifier = {
+      id: 'aborter',
+      applies: () => true,
+      verify: jest.fn(async () => {
+        throw abortError;
+      }),
+    };
+    registry.register(aborter);
+
+    await expect(service.verifyKi({}, context)).rejects.toThrow(abortError);
   });
 
   it('records a verifier whose applies() throws as a failure and continues the run', async () => {
@@ -127,9 +142,7 @@ describe('KiVerificationService', () => {
       { verifier: 'applies-thrower', passed: false, reason: 'applies boom' },
       { verifier: 'after', passed: true },
     ]);
-    expect(context.logger.warn).toHaveBeenCalledWith(
-      "KI verifier 'applies-thrower' threw: applies boom"
-    );
+    expect(context.logger.warn).toHaveBeenCalledWith("KI verifier 'applies-thrower' threw: Error");
   });
 
   it('stamps the result with the verifier id from the registry', async () => {
