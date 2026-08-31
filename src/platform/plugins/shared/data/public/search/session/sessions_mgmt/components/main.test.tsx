@@ -38,8 +38,8 @@ const setup = async () => {
     management: {
       expiresSoonWarning: moment.duration(1, 'days'),
       maxSessions: 2000,
-      refreshInterval: moment.duration(1, 'day'),
-      refreshTimeout: moment.duration(2, 'days'),
+      refreshInterval: moment.duration(1, 'seconds'),
+      refreshTimeout: moment.duration(10, 'minutes'),
     },
   } as any;
 
