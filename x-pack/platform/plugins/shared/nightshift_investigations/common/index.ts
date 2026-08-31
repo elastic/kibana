@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
+import type { InvestigationState, Severity } from '@kbn/significant-events-schema';
+import type { InvestigationTriggerType } from './workflows/triggers';
+
+/**
+ * Re-exported so consumers of these responses do not need their own dependency on
+ * `@kbn/significant-events-schema`. Investigations rate themselves on the same severity tier scale
+ * significant events use, so a tier added there widens these responses too.
+ */
+export type { Severity } from '@kbn/significant-events-schema';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,
@@ -15,15 +23,32 @@ export {
   type InvestigationTriggerType,
 } from './workflows/triggers';
 
-export interface InvestigationSubject {
-  type: InvestigationSubjectType;
-  id: string;
-  summary?: string;
-}
+/**
+ * The alert-facing types are derived from the zod schemas in `./schemas`, so the validation a
+ * caller is held to and the type the code is written against cannot disagree.
+ */
+export type {
+  AlertInvestigationContext,
+  AlertSnapshot,
+  AlertSnapshotEvaluation,
+  AlertSnapshotGroup,
+  InvestigationContext,
+  InvestigationSubject,
+} from './schemas';
 
-export interface InvestigationContext {
-  [key: string]: unknown;
-}
+export {
+  alertInvestigationContextSchema,
+  alertSnapshotSchema,
+  freeFormContextSchema,
+  investigationSubjectSchema,
+  MAX_ALERTS_PER_INVESTIGATION,
+} from './schemas';
+
+import type {
+  AlertInvestigationContext,
+  InvestigationContext,
+  InvestigationSubject,
+} from './schemas';
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
@@ -47,7 +72,7 @@ export interface StartInvestigationRequest {
    * strategy). Use a stable, unique caller-side ID — e.g. the alert _id or event UUID.
    */
   concurrency_key?: string;
-  context?: InvestigationContext;
+  context?: InvestigationContext | AlertInvestigationContext;
 }
 
 export interface StartInvestigationResponse {
@@ -71,8 +96,39 @@ export interface GetInvestigationResponse {
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
-  conclusions?: string;
+  /**
+   * The conclusion narrative on its own, for a caller that wants the answer and nothing else.
+   * Falls back to the summary while no hypothesis is confirmed yet. Also the only output a caller
+   * gets when `result` had to be dropped for failing validation.
+   */
+  conclusion?: string;
+  /**
+   * The investigation's own severity verdict for the situation it investigated. Absent for runs
+   * that are still going, failed, predate the field, or completed without the agent rating one —
+   * an absent severity means unrated, never low.
+   *
+   * Also present inside `result`. It is lifted out for the same reason `conclusion` is: it is read
+   * straight off the raw payload, so it survives `result` being dropped for failing validation,
+   * and it is the one field the list endpoint carries per row.
+   */
+  severity?: Severity;
+  /**
+   * Everything the investigation produced: the hypotheses it considered with the evidence and
+   * ES|QL behind each verdict, the gaps it could not see past, and what it recommends doing.
+   *
+   * This is the same `InvestigationState` the progress-report tool streams while the run is live,
+   * so one renderer serves a finished investigation and a running one. Only the list endpoint
+   * stays narrow — it omits step runs entirely, because this payload runs to several kilobytes
+   * and no list view needs it per row.
+   */
+  result?: InvestigationState;
   error?: string;
+}
+
+export interface InvestigationStatusEvent {
+  type: 'investigation_status';
+  investigation_id: string;
+  status: InvestigationStatus;
 }
 
 export interface ListInvestigationsRequest {
@@ -92,6 +148,8 @@ export interface ListInvestigationItem {
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
+  /** See {@link GetInvestigationResponse.severity}. */
+  severity?: Severity;
   concurrency_key?: string;
   executed_by?: string;
 }
