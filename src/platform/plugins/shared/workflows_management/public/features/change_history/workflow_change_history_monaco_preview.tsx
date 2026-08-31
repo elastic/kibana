@@ -189,7 +189,7 @@ export const WorkflowChangeHistoryMonacoPreview = ({
     []
   );
 
-  const { validationResults, isValidationLoading, handleValidationErrorClick } =
+  const { validationResults, isValidationLoading, validationError, handleValidationErrorClick } =
     useWorkflowChangeHistoryPreviewValidation({
       getActiveEditor,
       validationDecorationsRef,
@@ -394,6 +394,7 @@ export const WorkflowChangeHistoryMonacoPreview = ({
           validationResults={validationResults}
           isEditorMounted={isEditorMounted}
           isValidationLoading={isValidationLoading}
+          validationError={validationError}
           highlightValidationErrors={highlightValidationErrors}
           onValidationErrorClick={handleValidationErrorClick}
         />
