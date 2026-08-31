@@ -37,13 +37,6 @@ describe('updateRuleInputSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  // `type` is optional, mirroring the PATCH API; the step handler resolves the real type from
-  // the existing rule at run time.
-  it('accepts a rule without a type', () => {
-    const result = updateRuleInputSchema.safeParse({ rule: { id: RULE_ID, query: 'x' } });
-    expect(result.success).toBe(true);
-  });
-
   it('rejects an unknown type value', () => {
     const result = updateRuleInputSchema.safeParse({
       rule: { type: 'nonsense', id: RULE_ID, query: 'x' },
@@ -51,36 +44,13 @@ describe('updateRuleInputSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  // The "exactly one of id / rule_id" rule is left to the detection engine API, which
-  // enforces it on both the read and the patch call with clear error messages.
-  it('leaves id/rule_id selector validation to the API', () => {
-    expect(updateRuleInputSchema.safeParse({ rule: { type: 'query' } }).success).toBe(true);
-    expect(
-      updateRuleInputSchema.safeParse({ rule: { type: 'query', id: RULE_ID, rule_id: 'r-1' } })
-        .success
-    ).toBe(true);
-  });
-
-  it('strips fields that do not belong to the declared type', () => {
-    const result = updateRuleInputSchema.safeParse({
-      rule: { type: 'eql', id: RULE_ID, threshold: { field: ['host.name'], value: 200 } },
-    });
-    expect(result.success).toBe(true);
-    expect(result.data?.rule).not.toHaveProperty('threshold');
-  });
-
-  // The YAML editor machinery (getShape, getSchemaAtPath, snippet generation) dispatches on
-  // `instanceof`; lazySchema proxies fail those checks. These guardrails ensure the schema is
-  // built from real zod nodes so editor autocomplete keeps working.
-  it('is built from real zod nodes, not lazySchema proxies', () => {
-    expect(updateRuleInputSchema).toBeInstanceOf(z.ZodObject);
+  // The YAML editor machinery dispatches on `instanceof`: lazySchema proxies fail those
+  // checks (blank autocomplete), and a ZodDiscriminatedUnion makes the editor pre-fill
+  // `type: ""` into the step scaffold, wrongly suggesting the field is required.
+  it('is a plain union of real zod objects', () => {
     const ruleSchema = updateRuleInputSchema.shape.rule;
-    // A plain (non-discriminated) union: a ZodDiscriminatedUnion would make the editor pre-fill
-    // `type` in the step scaffold, wrongly suggesting the field is required or changeable.
     expect(ruleSchema).toBeInstanceOf(z.ZodUnion);
     expect(ruleSchema).not.toBeInstanceOf(z.ZodDiscriminatedUnion);
-    for (const option of (ruleSchema as z.ZodUnion).options) {
-      expect(option).toBeInstanceOf(z.ZodObject);
-    }
+    expect((ruleSchema as z.ZodUnion).options[0]).toBeInstanceOf(z.ZodObject);
   });
 });

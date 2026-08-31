@@ -227,7 +227,7 @@ steps:
             Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
             {% endif %}
 
-      # Combines rule's ID and proposed query
+      # This step combines rule's ID and proposed query into a patch to be applied to the rule.
       - name: build_patch
         type: data.set
         if: >-
