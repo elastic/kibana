@@ -7,24 +7,36 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { createTraceBasedEvaluator } from '@kbn/evals';
-import { RULE_CREATION_TOOL_ID } from '../constants';
+import type { Evaluator } from '@kbn/evals';
+import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
+import type { RuleCreationResult } from '../rule_creation_client';
+
+const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
+
+interface EsqlResponse {
+  columns: Array<{ name: string; type: string }>;
+  values: Array<Array<number | string | null>>;
+}
 
 /**
  * Tool Routing (trace-based, direction: maximize).
  *
- * The workflow's `draft_creation` step is instructed to call the
+ * The workflow's draft_creation step is instructed to call the
  * `security.create_detection_rule` tool; a model that answers from parametric
- * knowledge instead of calling the tool produces plausible-looking rule fields with
- * no backend write behind it. Scores 1 when at least one TOOL span with the expected
- * tool id is present on the execution's trace.
+ * knowledge instead produces plausible rule fields with no tool invocation
+ * behind them. This evaluator scores 1 when at least one TOOL span invoking
+ * that tool is found for the run.
  *
- * Measurement honesty: Agent Builder attributes an agent step's tool spans via
- * `conversation_id` (see #284725's shared reader), so a workflow execution's own
- * trace can legitimately contain zero TOOL spans even when the agent called tools.
- * `STATS COUNT(*)` always returns one row — zero matches would otherwise score a
- * confident 0 (a false zero, not a model failure). Zero total TOOL spans is
- * therefore `isNotReported`: N/A, never 0, until the conversation-id join lands.
+ * Span lookup is two-stage (#284725 not required):
+ *  1. workflow trace id — direct join when agent spans share the workflow root span;
+ *  2. the draft step's persisted `conversation_id` via `gen_ai.conversation.id`
+ *     — Agent Builder conversations can fork their own root trace, which leaves
+ *     stage 1 with zero TOOL spans (measured: every run of builds 455/457).
+ *
+ * Zero TOOL spans across BOTH stages is NOT a score: it means neither join
+ * reached the agent's spans, so the run is scored N/A rather than a false 0
+ * (STATS COUNT(*) always returns a row — an unmeasured trace otherwise reads
+ * as a confident zero).
  */
 export function createToolRoutingEvaluator({
   traceEsClient,
@@ -32,45 +44,102 @@ export function createToolRoutingEvaluator({
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
-}) {
-  return createTraceBasedEvaluator({
-    traceEsClient,
-    log,
-    config: {
-      name: 'Tool Routing',
-      direction: 'maximize',
-      buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}" AND attributes.elastic.inference.span.kind == "TOOL"
-| STATS tool_calls = COUNT(*), required_tool_calls = COUNT(
-    CASE(
-      attributes.gen_ai.tool.name == "${RULE_CREATION_TOOL_ID}",
-      1,
-      NULL
-    )
-  )`,
-      extractResult: (response) => {
-        const columns = response.columns ?? [];
-        const row = (response.values ?? [])[0];
-        if (!row) return null;
-        const toolCallsIndex = columns.findIndex((c) => c.name === 'tool_calls');
-        const requiredIndex = columns.findIndex((c) => c.name === 'required_tool_calls');
-        if (toolCallsIndex === -1 || requiredIndex === -1) return null;
-        const toolCalls = row[toolCallsIndex] as number | null | undefined;
-        const requiredCalls = row[requiredIndex] as number | null | undefined;
-        if (toolCalls == null) return null;
-        return (requiredCalls ?? 0) > 0 ? 1 : 0;
-      },
-      // Zero TOOL spans on the trace = not measurable on this trace shape (agent
-      // tool spans join via conversation_id, not the workflow trace id). Scored
-      // N/A instead of 0 so an unmeasured run can never read as a model failure.
-      isNotReported: (response) => {
-        const toolCallsIndex = (response.columns ?? []).findIndex((c) => c.name === 'tool_calls');
-        if (toolCallsIndex === -1) return true;
-        const row = (response.values ?? [])[0];
-        const toolCalls = row?.[toolCallsIndex] as number | null | undefined;
-        return toolCalls == null || toolCalls === 0;
-      },
-      isResultValid: (result) => result !== null,
+}): Evaluator {
+  const extractConversationId = (output: RuleCreationResult | undefined): string | undefined => {
+    const draft = (output?.stepExecutions ?? []).find(
+      (s) => s.stepId === DRAFT_STEP_ID && s.output != null
+    );
+    const id = (draft?.output as { conversation_id?: unknown } | null)?.conversation_id;
+    return typeof id === 'string' ? id : undefined;
+  };
+
+  const countToolSpans = async (where: string): Promise<number | undefined> => {
+    const response = (await traceEsClient.esql.query({
+      query: `FROM traces-*\n| WHERE ${where} AND ${TOOL_KIND}\n| STATS tool_calls = COUNT(*),\n  required_tool_calls = COUNT(CASE(attributes.gen_ai.tool.name == "${RULE_CREATION_TOOL_ID}", 1, NULL))`,
+    })) as unknown as EsqlResponse;
+    const row = response.values?.[0];
+    if (!row) return undefined;
+    const totalIdx = response.columns.findIndex((c) => c.name === 'tool_calls');
+    const reqIdx = response.columns.findIndex((c) => c.name === 'required_tool_calls');
+    if (totalIdx === -1 || reqIdx === -1) return undefined;
+    const total = row[totalIdx] as number | null | undefined;
+    const required = row[reqIdx] as number | null | undefined;
+    if (total == null) return undefined;
+    if (total === 0) return undefined; // not reported on this join key
+    return (required ?? 0) > 0 ? 1 : 0;
+  };
+
+  return {
+    direction: 'maximize',
+    name: 'Tool Routing',
+    kind: 'CODE',
+    evaluate: async ({ output }) => {
+      const result = output as RuleCreationResult | undefined;
+      const traceId = result?.traceId;
+      const conversationId = extractConversationId(result);
+      if (!traceId && !conversationId) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: 'No traceId and no draft conversation_id to join tool spans on',
+          metadata: undefined,
+        };
+      }
+
+      // Stage 1: workflow trace id
+      if (traceId) {
+        try {
+          const score = await countToolSpans(`trace.id == "${traceId}"`);
+          if (score !== undefined) {
+            return {
+              score,
+              label: undefined,
+              explanation: 'joined on workflow trace id',
+              metadata: undefined,
+            };
+          }
+        } catch (error) {
+          log.debug(
+            `Tool Routing trace-id join failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
+
+      // Stage 2: Agent Builder conversation id
+      if (conversationId) {
+        try {
+          const score = await countToolSpans(
+            `attributes.gen_ai.conversation.id == "${conversationId}"`
+          );
+          if (score !== undefined) {
+            return {
+              score,
+              label: undefined,
+              explanation:
+                'joined on gen_ai.conversation.id (agent conversation forked its own trace)',
+              metadata: undefined,
+            };
+          }
+        } catch (error) {
+          log.debug(
+            `Tool Routing conversation-id join failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
+
+      return {
+        score: null,
+        label: 'unavailable',
+        explanation:
+          'No TOOL spans reachable via the workflow trace id or the draft conversation_id — ' +
+          'the agent conversation trace is not linkable with the available join keys (see #284725 ' +
+          'for the shared reader that resolves this platform-side).',
+        metadata: undefined,
+      };
     },
-  });
+  };
 }
