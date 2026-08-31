@@ -37,6 +37,19 @@ jest.mock('../../embeddable/service_map/get_service_map_url', () => ({
   getServiceMapUrl: jest.fn(() => 'http://localhost/app/apm/service-map'),
 }));
 
+const mockUseLicenseContext = jest.fn();
+jest.mock('../../context/license/use_license_context', () => ({
+  useLicenseContext: () => mockUseLicenseContext(),
+}));
+
+const mockUseApmPluginContext = jest.fn();
+jest.mock('../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => mockUseApmPluginContext(),
+}));
+
+const platinumLicense = { isActive: true, hasAtLeast: () => true };
+const basicLicense = { isActive: true, hasAtLeast: () => false };
+
 const deps = {} as EmbeddableDeps;
 
 const connections: ServiceMapAttachmentData['connections'] = [
@@ -55,6 +68,8 @@ describe('AgentContextualServiceMap', () => {
   beforeEach(() => {
     lastGraphProps = undefined;
     lastEmbeddableContextProps = undefined;
+    mockUseLicenseContext.mockReturnValue(platinumLicense);
+    mockUseApmPluginContext.mockReturnValue({ config: { serviceMapEnabled: true } });
   });
 
   it('renders the contextual map focused on data.serviceName', () => {
@@ -112,6 +127,41 @@ describe('AgentContextualServiceMap', () => {
     );
 
     expect(lastGraphProps?.showContextControls).toBe(false);
+  });
+
+  it('renders the Explore in Service map link with EBT click attributes', () => {
+    render(
+      <AgentContextualServiceMap data={{ connections, serviceName: 'backend' }} deps={deps} />
+    );
+
+    const link = screen.getByTestId('agentServiceMapExploreInServiceMap');
+    expect(link).toHaveAttribute('href', 'http://localhost/app/apm/service-map');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('data-ebt-action', 'exploreServiceMap');
+    expect(link).toHaveAttribute('data-ebt-element', 'serviceMapAgentAttachmentLink');
+  });
+
+  it('hides the Explore link without an active platinum license', () => {
+    mockUseLicenseContext.mockReturnValue(basicLicense);
+
+    render(
+      <AgentContextualServiceMap data={{ connections, serviceName: 'backend' }} deps={deps} />
+    );
+
+    expect(screen.queryByTestId('agentServiceMapExploreInServiceMap')).not.toBeInTheDocument();
+    // The map itself still renders — only the full-map link is gated.
+    expect(screen.getByTestId('contextualServiceMapGraph')).toBeInTheDocument();
+  });
+
+  it('hides the Explore link when service map is disabled in config', () => {
+    mockUseApmPluginContext.mockReturnValue({ config: { serviceMapEnabled: false } });
+
+    render(
+      <AgentContextualServiceMap data={{ connections, serviceName: 'backend' }} deps={deps} />
+    );
+
+    expect(screen.queryByTestId('agentServiceMapExploreInServiceMap')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextualServiceMapGraph')).toBeInTheDocument();
   });
 
   it('falls back to the static map when serviceName is missing', () => {
