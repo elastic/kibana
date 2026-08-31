@@ -8,11 +8,12 @@ A builder has two independent surfaces:
 | Surface | Contract | Registered via | Purpose |
 |---------|----------|----------------|---------|
 | **Server** | `BuilderTypeDefinition` | `alertingV2.registerBuilderType()` in your plugin's `setup()` | Validates `metadata.builder_fields` and generates the rule's ES\|QL query |
-| **Client** | `RuleBuilderDefinition` | see the rule form package | Renders the builder's form in the rule creation flyout |
+| **Client** | `RuleBuilderDefinition` | the rule form package's builder registry | Renders the builder's form in the rule creation flyout |
 
-This guide covers the server surface, which is the one that owns the data. Registering it is
-enough to author rules of your builder type over the API; a builder that also wants a form in the
-UI adds the client surface on top.
+Most of this guide covers the server surface, which is the one that owns the data: registering it
+is enough to author rules of your builder type over the API. [Reopening a rule in the
+builder](#reopening-a-rule-in-the-builder-client) covers the part of the client surface that has
+to agree with it.
 
 ## What the server owns
 
@@ -255,6 +256,54 @@ describe it are refused:
 
 Requests that touch neither the query nor the builder are never blocked, so a rule whose builder
 plugin has since been disabled can still be renamed, retagged, rescheduled, enabled and disabled.
+
+## Reopening a rule in the builder (client)
+
+The builder's form state and its persisted `builder_fields` are related but not identical: a form
+row usually carries view-only concerns — a React list key, a collapsed flag — that the server's
+strict schema rejects. A client-side `RuleBuilderDefinition` therefore declares how to convert
+between the two:
+
+```typescript
+const myBuilder: RuleBuilderDefinition<MyFormValues> = {
+  type: 'my_anomaly_detector',
+  // …form rendering…
+
+  /** Strips the parts of the form the server does not store. */
+  toFields: (values) => ({
+    indexPattern: values.indexPattern,
+    metric: values.metric,
+    conditions: values.conditions.map(({ id, ...condition }) => condition),
+  }),
+
+  /** Re-keys the rows so the form can render them. Null means "cannot reopen". */
+  fromFields: (fields) => {
+    const parsed = myBuilderFieldsSchema.safeParse(fields);
+    if (!parsed.success) {
+      return null;
+    }
+    return {
+      ...parsed.data,
+      conditions: parsed.data.conditions.map((condition) => ({ ...condition, id: generateId() })),
+    };
+  },
+};
+```
+
+Both are optional: a builder whose form state is already the persisted shape needs neither.
+
+Two rules of thumb keep this honest:
+
+- Validate in `fromFields` against the same schema the server uses, and return `null` when it
+  fails. A rule written by a newer Kibana, or by a builder whose fields have since changed shape,
+  then opens in ES|QL mode instead of a half-populated form that would silently drop
+  configuration on save.
+- Keep `toFields` free of the form's transient state. Anything it emits is validated by the
+  server's schema on every save, so a stray `id` or `isExpanded` surfaces to the user as a 400.
+
+`parseState` reconstructs form state by parsing a saved ES|QL query. It exists only for rules
+saved before `builder_fields`, and remains best-effort: a query the user has since hand-edited
+cannot be parsed back. Rules that carry builder fields never take that path.
 
 ## Testing
 

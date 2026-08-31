@@ -6,7 +6,11 @@ into the rule's ES|QL query.
 
 Definitions live in a package rather than in the alerting v2 plugin because they are isomorphic:
 the server validates `builder_fields` and generates the persisted query with them, while the
-browser can use the same code for a live query preview, so the two cannot drift apart.
+browser reuses the same schema and field types in the builder form, so the two cannot drift apart.
+
+`BUILTIN_BUILDER_TYPES` holds the builders the alerting v2 plugin registers itself — currently
+`threshold`. Builders owned by other teams live in their own plugins and are registered through
+`alertingV2.registerBuilderType()`.
 
 See `x-pack/platform/plugins/shared/alerting_v2/docs/rule_builder_registration.md` for the
 registration guide.

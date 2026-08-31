@@ -18,6 +18,7 @@ import {
 } from '../../form/utils/state_transition_helpers';
 import { resolveRecoveryStrategy } from '../../form/utils/rule_request_mappers';
 import type { FormValues } from '../../form/types';
+import type { BuilderSubmission } from './rule_builder/types';
 
 const DELAY_IMMEDIATE = 'immediate';
 const DELAY_BREACHES = 'breaches';
@@ -58,7 +59,7 @@ const mapStateTransition = (formValues: FormValues) => {
 
 export const composeFormToCreateRequest = (
   formValues: FormValues,
-  builderType?: string
+  builder?: BuilderSubmission
 ): CreateRuleData => {
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
@@ -72,11 +73,14 @@ export const composeFormToCreateRequest = (
       description: formValues.metadata.description,
       owner: formValues.metadata.owner,
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
-      ...(builderType ? { builder_type: builderType } : {}),
+      ...(builder ? { builder_type: builder.type, builder_fields: builder.fields } : {}),
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
-    query: ruleQueryToApiQuery(formValues.query),
+    // The query in the form is a local preview when a builder is active; the
+    // stored one is generated server-side so it can never disagree with the
+    // parameters that produced it.
+    ...(builder ? {} : { query: ruleQueryToApiQuery(formValues.query) }),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
     ...(noDataStrategy ? { no_data_strategy: noDataStrategy } : {}),
     grouping: formValues.grouping?.fields?.length
@@ -89,9 +93,9 @@ export const composeFormToCreateRequest = (
 
 export const composeFormToUpdateRequest = (
   formValues: FormValues,
-  builderType?: string
+  builder?: BuilderSubmission
 ): UpdateRuleData => {
-  const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
+  const { kind, ...request } = composeFormToCreateRequest(formValues, builder);
   const {
     grouping,
     state_transition,
@@ -99,14 +103,20 @@ export const composeFormToUpdateRequest = (
     metadata,
     recovery_strategy,
     no_data_strategy,
+    query,
     ...rest
   } = request;
   return {
     ...rest,
     metadata: {
       ...metadata,
-      builder_type: metadata.builder_type ?? null,
+      // Saving without a builder means the user is authoring ES|QL directly, so
+      // opt the rule out of builder mode explicitly. The server refuses a bare
+      // query write on a builder rule rather than guessing intent.
+      builder_type: builder ? builder.type : null,
+      builder_fields: builder ? builder.fields : null,
     },
+    ...(query === undefined ? {} : { query }),
     recovery_strategy: resolveRecoveryStrategy(formValues) ?? null,
     no_data_strategy: no_data_strategy ?? null,
     grouping: grouping ?? null,

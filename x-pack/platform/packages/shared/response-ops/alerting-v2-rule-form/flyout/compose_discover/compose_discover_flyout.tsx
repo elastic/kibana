@@ -57,7 +57,9 @@ import {
   RULE_BUILDER_REGISTRY,
   BuilderStateProvider,
   parseDiscoverQueryForBuilder,
+  toBuilderSubmission,
   type BuilderState,
+  type BuilderSubmission,
 } from './rule_builder';
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
@@ -929,16 +931,21 @@ export function ComposeDiscoverFlyout({
     if (hasValidationErrors) {
       return;
     }
+    let builder: BuilderSubmission | undefined;
     if (builderType) {
       const definition = RULE_BUILDER_REGISTRY[builderType];
       if (definition?.validate && !definition.validate(uiState, builderState)) {
         return;
       }
+      // Falls back to `undefined` when there is no registered builder or no
+      // state to send, saving the previewed query as a plain ES|QL rule rather
+      // than failing against the server's builder validation.
+      builder = toBuilderSubmission(builderType, builderState);
     }
     if (isCreate) {
-      onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
+      onCreateRule(composeFormToCreateRequest(values, builder), values.notifications);
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType), values.notifications);
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builder), values.notifications);
     }
   });
 

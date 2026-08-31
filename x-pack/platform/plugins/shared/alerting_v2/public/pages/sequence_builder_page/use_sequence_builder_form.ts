@@ -97,7 +97,10 @@ export const useSequenceBuilderState = () => {
           recoveryStrategy: undefined,
         };
 
-        const payload = composeFormToCreateRequest(merged, 'sequence');
+        // Saved as a plain ES|QL rule: the sequence page compiles the query
+        // itself and has no registered builder, and a `builder_type` now means
+        // the server generates the query from `metadata.builder_fields`.
+        const payload = composeFormToCreateRequest(merged);
         await rulesApi.createRule(payload);
 
         queryClient.invalidateQueries(ruleKeys.lists());

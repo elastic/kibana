@@ -15,6 +15,10 @@ import {
   getAvailableMetricLabels,
   reconcileAlertConditionMetrics,
 } from './threshold/form_types';
+import {
+  thresholdBuilderFieldsToFormValues,
+  thresholdFormValuesToBuilderFields,
+} from './threshold/builder_fields';
 import { getInvalidExpressionReferences } from './threshold/validate_metric_references';
 import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 import { BuilderRecoveryForm } from './threshold/recovery_condition_step';
@@ -91,6 +95,8 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
     // on queryCommitted alone before builder state is initialized).
     builderState ? isThresholdFormValid(getValidatedThresholdValues(builderState)) : false,
   parseState: parseThresholdEsql,
+  toFields: (state) => thresholdFormValuesToBuilderFields(getValidatedThresholdValues(state)),
+  fromFields: thresholdBuilderFieldsToFormValues,
 });
 
 export const RULE_BUILDER_REGISTRY: Record<string, RuleBuilderDefinition> = {

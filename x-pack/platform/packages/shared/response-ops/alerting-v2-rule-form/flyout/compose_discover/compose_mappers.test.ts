@@ -53,6 +53,19 @@ const baseFormValues: FormValues = {
   stateTransitionRecoveryDelayMode: 'immediate',
 };
 
+const BUILDER_SUBMISSION = {
+  type: 'threshold',
+  fields: {
+    indexPattern: 'logs-*',
+    timeField: '@timestamp',
+    stats: [{ label: 'count', aggregation: 'count' }],
+    evaluations: [],
+    alertConditions: [{ metric: 'count', comparator: '>', threshold: [100] }],
+    conditionOperator: 'AND',
+    groupByFields: [],
+  },
+};
+
 // ── composeFormToCreateRequest ───────────────────────────────────────────────
 
 describe('composeFormToCreateRequest', () => {
@@ -271,6 +284,28 @@ describe('composeFormToCreateRequest', () => {
       { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
     ]);
   });
+
+  it('sends builder parameters instead of a query when a builder is active', () => {
+    const result = composeFormToCreateRequest(baseFormValues, BUILDER_SUBMISSION);
+
+    expect(result.metadata.builder_type).toBe('threshold');
+    expect(result.metadata.builder_fields).toEqual(BUILDER_SUBMISSION.fields);
+    // The server generates the stored query from the parameters above; the
+    // query in the form is only the preview shown while authoring.
+    expect(result).not.toHaveProperty('query');
+  });
+
+  it('sends the query and no builder parameters without a builder', () => {
+    const result = composeFormToCreateRequest(baseFormValues);
+
+    expect(result.query).toEqual({
+      format: 'composed',
+      base: BASE,
+      breach: { segment: ALERT_SEGMENT },
+    });
+    expect(result.metadata.builder_type).toBeUndefined();
+    expect(result.metadata.builder_fields).toBeUndefined();
+  });
 });
 
 // ── composeFormToUpdateRequest ───────────────────────────────────────────────
@@ -339,6 +374,26 @@ describe('composeFormToUpdateRequest', () => {
     };
     const result = composeFormToUpdateRequest(values);
     expect(result.recovery_strategy).toBe('query');
+  });
+
+  it('sends builder parameters instead of a query when a builder is active', () => {
+    const result = composeFormToUpdateRequest(baseFormValues, BUILDER_SUBMISSION);
+
+    expect(result.metadata?.builder_type).toBe('threshold');
+    expect(result.metadata?.builder_fields).toEqual(BUILDER_SUBMISSION.fields);
+    expect(result).not.toHaveProperty('query');
+  });
+
+  it('opts the rule out of its builder when saved without one', () => {
+    const result = composeFormToUpdateRequest(baseFormValues);
+
+    expect(result.metadata?.builder_type).toBeNull();
+    expect(result.metadata?.builder_fields).toBeNull();
+    expect(result.query).toEqual({
+      format: 'composed',
+      base: BASE,
+      breach: { segment: ALERT_SEGMENT },
+    });
   });
 
   it('nullifies recovery_strategy when user removes recovery from a loaded rule', () => {

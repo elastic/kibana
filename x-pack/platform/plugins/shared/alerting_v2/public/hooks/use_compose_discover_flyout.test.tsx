@@ -17,6 +17,7 @@ const mockSetupMutate = jest.fn();
 let capturedFlyoutProps: Record<string, unknown> = {};
 
 const mockParseState = jest.fn();
+const mockFromBuilderFields = jest.fn();
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
@@ -26,6 +27,7 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   RULE_BUILDER_REGISTRY: {
     threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
   },
+  fromBuilderFields: (...args: unknown[]) => mockFromBuilderFields(...args),
 }));
 
 jest.mock('@kbn/alerting-v2-schemas', () => ({
@@ -368,5 +370,29 @@ describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
 
     expect(capturedFlyoutProps.builderType).toBe('threshold');
     expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
+  });
+
+  it('reopens a rule from its stored builder fields without parsing its query', async () => {
+    const builderState = { indexPattern: 'logs-*' };
+    mockFromBuilderFields.mockReturnValue(builderState);
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout({
+        ...builderRule,
+        metadata: { ...builderRule.metadata, builder_fields: { indexPattern: 'logs-*' } },
+      } as unknown as RuleApiResponse);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.builderType).toBe('threshold');
+    expect(capturedFlyoutProps.initialBuilderState).toEqual({
+      ...builderState,
+      timeField: '@timestamp',
+    });
+    expect(mockParseState).not.toHaveBeenCalled();
   });
 });
