@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout-security';
 
 export class PolicyDetailsPage {
   readonly pageContainer: Locator;

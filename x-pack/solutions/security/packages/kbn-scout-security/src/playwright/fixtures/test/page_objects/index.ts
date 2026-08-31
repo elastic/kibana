@@ -30,8 +30,6 @@ import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
 import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
 import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
 import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
-import { PolicyDetailsPage } from './policy_details';
-import { PolicyArtifactsPage } from './policy_artifacts';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 export { AddExceptionButtonType } from './add_exception_flyout';
@@ -71,10 +69,6 @@ export interface SecurityPageObjects extends PageObjects {
   analyzerTool: AnalyzerTool;
   /** Entity flyout anomalies section and tab — requires entityAnalyticsAnomalyDetails feature flag. */
   entityFlyoutAnomaliesPage: EntityFlyoutAnomaliesPage;
-  /** Elastic Defend policy details page (Manage → Policies). */
-  policyDetailsPage: PolicyDetailsPage;
-  /** Artifact tabs, empty states, assign flyout, and create form on policy details. */
-  policyArtifactsPage: PolicyArtifactsPage;
 }
 
 export function extendPageObjects(
@@ -111,7 +105,5 @@ export function extendPageObjects(
     prevalenceTool: createLazyPageObject(PrevalenceTool, page),
     analyzerTool: createLazyPageObject(AnalyzerTool, page),
     entityFlyoutAnomaliesPage: createLazyPageObject(EntityFlyoutAnomaliesPage, page),
-    policyDetailsPage: createLazyPageObject(PolicyDetailsPage, page),
-    policyArtifactsPage: createLazyPageObject(PolicyArtifactsPage, page),
   };
 }

@@ -7,7 +7,7 @@
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import type { PolicyArtifactKind } from '@kbn/scout-security';
+import type { PolicyArtifactKind } from './page_objects';
 
 export interface ArtifactTabCase {
   kind: PolicyArtifactKind;

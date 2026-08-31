@@ -6,12 +6,25 @@
  */
 
 import { spaceTest as baseSpaceTest, tags } from '@kbn/scout-security';
+import type {
+  ScoutPage,
+  SecurityPageObjects,
+  SecurityParallelTestFixtures,
+} from '@kbn/scout-security';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import {
   createScoutEndpointPolicy,
   deleteScoutEndpointPolicy,
   getCreatedPackagePolicy,
 } from './endpoint_policy';
+import { extendPageObjects } from './page_objects';
+import type { ArtifactTabPageObjects } from './page_objects';
+
+export type { PolicyArtifactKind } from './page_objects';
+
+export interface ArtifactTabTestFixtures extends SecurityParallelTestFixtures {
+  pageObjects: ArtifactTabPageObjects;
+}
 
 export interface ArtifactTabWorkerFixtures {
   endpointPolicy: PolicyData;
@@ -39,7 +52,13 @@ const ENDPOINT_POLICY_FIXTURE_TIMEOUT_MS = 300_000;
  * `afterAll`: that list includes ingest agent/package policies, and a worker
  * reuses this fixture across files.
  */
-export const spaceTest = baseSpaceTest.extend<{}, ArtifactTabWorkerFixtures>({
+export const spaceTest = baseSpaceTest.extend<ArtifactTabTestFixtures, ArtifactTabWorkerFixtures>({
+  pageObjects: async (
+    { pageObjects, page }: { pageObjects: SecurityPageObjects; page: ScoutPage },
+    use: (pageObjects: ArtifactTabPageObjects) => Promise<void>
+  ) => {
+    await use(extendPageObjects(pageObjects, page));
+  },
   endpointPolicy: [
     async ({ kbnClient, scoutSpace, apiServices, log }, use) => {
       await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
