@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useMemo, useCallback } from 'react';
+import { useRef, useMemo, useCallback, useEffect } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -143,17 +143,15 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
       result[id] = contextStatus;
     }
 
-    promoteToReceiving(result);
     return result;
-  }, [
-    selectedServiceIds,
-    awsServicesMap,
-    serviceStatuses,
-    deployErrors,
-    queryData,
-    isTimedOut,
-    promoteToReceiving,
-  ]);
+  }, [selectedServiceIds, awsServicesMap, serviceStatuses, deployErrors, queryData, isTimedOut]);
+
+  // Persist promotions after render — writing to the provider's state during this hook's render
+  // would be a render-phase side effect on an ancestor component. The `!== 'receiving'` guard in
+  // promoteToReceiving keeps this from looping.
+  useEffect(() => {
+    promoteToReceiving(statusByInstanceId);
+  }, [statusByInstanceId, promoteToReceiving]);
 
   const receivingCount = useMemo(
     () => Object.values(statusByInstanceId).filter((s) => s === 'receiving').length,

@@ -46,11 +46,14 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
   const filteredRules = detectionRules.filter((a) => a.title.toLowerCase().includes(q));
   const filteredEsAssets = esAssets.filter((a) => a.id.toLowerCase().includes(q));
 
-  const serviceCount = i18n.translate(
-    'xpack.ingestHub.detectAndReviewStep.installedContent.serviceCount',
+  // Assets come from the AWS package installation, which is shared across every selected service —
+  // nothing in `installed_kibana` records which policy_template an asset came from, so this count
+  // can't be per-service today. Tracked by https://github.com/elastic/ingest-dev/issues/9343.
+  const assetCount = i18n.translate(
+    'xpack.ingestHub.detectAndReviewStep.installedContent.assetCount',
     {
-      defaultMessage: '{count, plural, one {# service} other {# services}}',
-      values: { count: 1 },
+      defaultMessage: '{count, plural, one {# asset} other {# assets}}',
+      values: { count: dashboards.length + detectionRules.length + esAssets.length },
     }
   );
 
@@ -95,7 +98,7 @@ export function InstalledContent({ installedKibana, installedEs }: InstalledCont
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {serviceCount}
+              {assetCount}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
