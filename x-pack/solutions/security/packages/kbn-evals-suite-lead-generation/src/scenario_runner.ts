@@ -40,8 +40,8 @@ export const runScenario = async ({
         },
       ],
       task: async (): Promise<ScenarioTaskOutput> => {
-        await scenario.seed(ctx);
         try {
+          await scenario.seed(ctx);
           const steps = await scenario.run(ctx);
           const last = steps.at(-1);
           return {
