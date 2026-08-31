@@ -1,5 +1,5 @@
 {
-  "sha1": "a7214e54e39b821f62ca410b0fd6b4a480402ed9",
+  "sha1": "c76858f372aed263e977625a010487b2b2e0f8d2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -985,8 +985,8 @@
       }
     },
     {
-      "id": "1806196c0383e9f-932249d28094a08",
-      "title": "UpdateMonitorBulkAPI rejects project-origin monitors with an origin error",
+      "id": "1806196c0383e9f-caacd058f726587",
+      "title": "UpdateMonitorBulkAPI allows an enabled-only patch on a project-origin monitor",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -994,8 +994,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
-        "line": 253,
-        "column": 29
+        "line": 283,
+        "column": 32
+      }
+    },
+    {
+      "id": "1806196c0383e9f-4af1eb22e3f7bde",
+      "title": "UpdateMonitorBulkAPI rejects non-enabled patches on project-origin monitors with an origin error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 308,
+        "column": 16
       }
     },
     {
@@ -1008,8 +1022,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
-        "line": 295,
-        "column": 17
+        "line": 328,
+        "column": 6
       }
     },
     {
@@ -1022,7 +1036,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
-        "line": 290,
+        "line": 345,
         "column": 27
       }
     },
@@ -1036,8 +1050,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
-        "line": 340,
-        "column": 15
+        "line": 370,
+        "column": 43
       }
     },
     {
@@ -1050,8 +1064,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
-        "line": 355,
-        "column": 88
+        "line": 387,
+        "column": 21
       }
     },
     {
@@ -1064,8 +1078,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
-        "line": 370,
-        "column": 8
+        "line": 402,
+        "column": 60
       }
     },
     {
@@ -1078,8 +1092,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
-        "line": 400,
-        "column": 15
+        "line": 430,
+        "column": 36
       }
     },
     {
@@ -1092,8 +1106,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
-        "line": 416,
-        "column": 69
+        "line": 446,
+        "column": 77
       }
     }
   ]

@@ -90,7 +90,7 @@ export const createRuleSmlType = ({
   },
 
   /**
-   * Rules are gated by the dedicated `ai_index:rule/read` action.
+   * Rules are gated by the dedicated `ai_index:alerting_v2_rule/read` action.
    * The Alerting v2 feature grants it by declaring `aiIndex: { read: [RULE_KI_TYPE] }`
    * (see `common/feature_privileges.ts`), so the `kiType` here must stay in step
    * with that declaration.

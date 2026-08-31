@@ -59,7 +59,7 @@ describe('Default cell actions ', () => {
     }),
     servicesMock.toastNotifications,
     dataTableContextMock.valueToStringConverter,
-    'summary'
+    'table'
   );
   const extensionField = getField('extension');
   const messageField = getField('message');
@@ -70,7 +70,7 @@ describe('Default cell actions ', () => {
       messageField,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter,
-      'summary'
+      'table'
     );
 
     expect(cellActions.length).toEqual(1);
@@ -89,7 +89,7 @@ describe('Default cell actions ', () => {
       extensionField,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter,
-      'summary',
+      'table',
       jest.fn()
     );
 
@@ -101,7 +101,7 @@ describe('Default cell actions ', () => {
       sourceField,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter,
-      'summary'
+      'table'
     );
 
     expect(
@@ -211,7 +211,7 @@ describe('Default cell actions ', () => {
           }),
           servicesMock.toastNotifications,
           dataTableContextMock.valueToStringConverter,
-          'summary'
+          'table'
         )}
       </UnifiedDataTableContext.Provider>
     );

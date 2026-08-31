@@ -167,6 +167,58 @@ describe('IntegrationManagement telemetry', () => {
     });
   });
 
+  it('navigates to the return app when return params are present on cancel', () => {
+    renderComponent('/create?returnAppId=observabilityOnboarding&returnPath=%3F');
+
+    fireEvent.click(screen.getByTestId('cancelButton'));
+
+    expect(mockReportCancelButtonClicked).toHaveBeenCalledTimes(1);
+    expect(mockNavigateToApp).toHaveBeenCalledWith('observabilityOnboarding', {
+      path: '?',
+    });
+  });
+
+  it('renders Back to selection on create when return params are present', () => {
+    renderComponent('/create?returnAppId=observabilityOnboarding&returnPath=%3F');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back to selection' }));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('observabilityOnboarding', {
+      path: '?',
+    });
+    expect(mockReportCancelButtonClicked).not.toHaveBeenCalled();
+  });
+
+  it('does not render a back link on create without return params', () => {
+    renderComponent('/create');
+
+    expect(screen.queryByRole('button', { name: 'Back to selection' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Previous page' })).not.toBeInTheDocument();
+  });
+
+  it('does not render a back link on create for an unknown returnAppId', () => {
+    renderComponent('/create?returnAppId=otherApp&returnPath=%2Ffoo');
+
+    expect(screen.queryByRole('button', { name: 'Back to selection' })).not.toBeInTheDocument();
+  });
+
+  it('does not render a back link on edit even when return params are present', () => {
+    mockUseGetIntegrationById.mockReturnValue({
+      integration: {
+        integrationId: 'int-1',
+        title: 'Existing',
+        description: 'd',
+        status: 'completed',
+        dataStreams: [],
+      },
+      isLoading: false,
+      isError: false,
+    });
+    renderComponent('/edit/int-1?returnAppId=observabilityOnboarding&returnPath=%3F');
+
+    expect(screen.queryByRole('button', { name: 'Back to selection' })).not.toBeInTheDocument();
+  });
+
   it('calls reportDoneButtonClicked when done is clicked', () => {
     mockUseGetIntegrationById.mockReturnValue({
       integration: {
