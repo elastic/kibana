@@ -6,7 +6,7 @@
  */
 
 import type { ServiceSlosResponse, StatusCounts } from '@kbn/apm-api-shared';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, SLO_GROUPINGS_PREFIX } from '@kbn/slo-schema';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
 import type { SloAlertsClient } from '../../../lib/helpers/get_slo_alerts_client';
@@ -52,7 +52,15 @@ export async function getServiceSlos({
   }
 
   const filters: Array<Record<string, unknown>> = [
-    { term: { [SERVICE_NAME]: serviceName } },
+    {
+      bool: {
+        should: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          { term: { [`${SLO_GROUPINGS_PREFIX}${SERVICE_NAME}`]: serviceName } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
     {
       terms: {
         'slo.indicator.type': APM_SLO_INDICATOR_TYPES,

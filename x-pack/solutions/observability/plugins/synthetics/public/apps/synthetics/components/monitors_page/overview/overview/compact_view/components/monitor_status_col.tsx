@@ -128,6 +128,7 @@ export const MonitorStatusCol = ({
                   )}
                 >
                   <EuiText
+                    tabIndex={0}
                     size="xs"
                     color="danger"
                     className="eui-textNoWrap"

@@ -42,7 +42,7 @@ import type {
 } from '../types/domain';
 import type {
   CasePatchRequest,
-  CasesFindResponse,
+  CasesSearchResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
@@ -58,15 +58,10 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
   alerts: {
-    sync?: boolean;
-    enabled?: boolean;
-    isExperimental?: boolean;
     read?: boolean;
     all?: boolean;
   };
   metrics: SingleCaseMetricsFeature[];
-  observables?: { enabled: boolean; autoExtract?: boolean };
-  events?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -94,6 +89,9 @@ export interface CasesUiConfigType {
     enabled: boolean;
   };
   templates: {
+    enabled: boolean;
+  };
+  runWorkflows: {
     enabled: boolean;
   };
   casesRedesign: {
@@ -144,7 +142,10 @@ export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
 export type ObservableUI = CaseUI['observables'][0];
 
 export type CasesUI = CaseUI[];
-export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
+// Derived from the internal `_search` response superset (not the public `_find` response) so the
+// list UI type carries the optional `mttr` the metrics bar reads. The public `_find` path simply
+// leaves `mttr` undefined.
+export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesSearchResponse>, 'cases'> & {
   cases: CasesUI;
 };
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;

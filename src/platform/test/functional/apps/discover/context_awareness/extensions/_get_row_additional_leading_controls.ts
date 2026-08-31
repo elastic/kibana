@@ -33,6 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
+          // Discover rewrites the compact `_a` hash, so navigateToApp's startsWith URL check never matches.
+          skipUrlValidation: true,
         });
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
@@ -46,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
+          skipUrlValidation: true,
         });
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');

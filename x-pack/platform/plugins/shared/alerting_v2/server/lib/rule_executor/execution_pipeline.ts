@@ -15,10 +15,8 @@ import type {
 } from './types';
 import { RuleExecutionMiddlewaresToken, RuleExecutionStepsToken } from './tokens';
 import { type RuleExecutionMiddleware, type RuleExecutionMiddlewareContext } from './middleware';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../services/logger_service/logger_service';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { createExecutionContext } from '../execution_context';
 import type {
   MetricCollector,
@@ -26,6 +24,7 @@ import type {
   RuleExecutionMetricsSnapshot,
 } from './metrics/types';
 import { MetricCollectorFactoryToken } from './metrics/tokens';
+import { RULE_EXECUTION_COUNTERS } from './metrics/counters';
 import {
   RuleExecutorEventPublisher,
   type RuleExecutorEventPublisherContract,
@@ -39,7 +38,10 @@ export interface RuleExecutionPipelineInput {
   readonly ruleId: string;
   readonly spaceId: string;
   readonly scheduledAt: string;
+  readonly executionUuid: string;
   readonly abortSignal: AbortSignal;
+  /** Bound per-execution logger from the task runner. */
+  readonly logger: LoggerServiceContract;
 }
 
 export interface RuleExecutionPipelineResult {
@@ -56,7 +58,6 @@ export interface RuleExecutionPipelineContract {
 @injectable()
 export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @multiInject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[],
     @multiInject(RuleExecutionMiddlewaresToken)
     private readonly middlewares: RuleExecutionMiddleware[],
@@ -68,7 +69,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
 
   public async execute(rawInput: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult> {
     const executionContext = createExecutionContext(rawInput.abortSignal);
-    const collector = this.metricCollectorFactory.create();
+    const collector = this.metricCollectorFactory.create({ executionId: rawInput.executionUuid });
+    const logger = rawInput.logger;
 
     const input: RuleExecutionInput = {
       ruleId: rawInput.ruleId,
@@ -77,7 +79,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       executionContext,
     };
 
-    let pipelineState: RulePipelineState = { input };
+    let pipelineState: RulePipelineState = { input, logger };
 
     let stream: PipelineStateStream = (async function* () {
       yield { type: 'continue', state: pipelineState };
@@ -87,37 +89,37 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       stream = this.runMiddlewareChain({ step, collector }, stream);
     }
 
-    let snapshot: RuleExecutionMetricsSnapshot | undefined;
     try {
       for await (const result of stream) {
         pipelineState = result.state;
 
         if (result.type === 'halt') {
-          this.logger.debug({
-            message: `RuleExecutor: Pipeline halted at step: ${result.reason}`,
+          pipelineState.logger.debug({
+            message: 'Pipeline halted',
+            labels: { resource: result.reason },
           });
 
-          snapshot = collector.finalize();
           return {
             completed: false,
             haltReason: result.reason,
             finalState: pipelineState,
-            metrics: snapshot,
+            metrics: collector.finalize(),
           };
         }
       }
 
-      snapshot = collector.finalize();
+      const snapshot = collector.finalize();
+      this.publishExecutionSucceeded(rawInput, collector, pipelineState, snapshot);
       return {
         completed: true,
         finalState: pipelineState,
         metrics: snapshot,
       };
+    } catch (error) {
+      this.publishExecutionFailed(rawInput, pipelineState.logger, error);
+      throw error;
     } finally {
-      if (!snapshot) {
-        snapshot = collector.finalize();
-      }
-      this.publishExecutionCompleted(rawInput, collector, snapshot);
+      collector.finalize();
     }
   }
 
@@ -143,27 +145,58 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     return chain(input);
   }
 
-  private publishExecutionCompleted(
+  private publishExecutionSucceeded(
     rawInput: RuleExecutionPipelineInput,
     collector: MetricCollector,
+    finalState: RulePipelineState,
     snapshot: RuleExecutionMetricsSnapshot
   ): void {
+    const { rule, logger } = finalState;
+
+    if (!rule) {
+      logger.warn({
+        message: 'Skipping rule execution succeeded event publish',
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_SKIPPED,
+      });
+      return;
+    }
+
     try {
-      this.eventPublisher.publishExecutionCompleted({
+      this.eventPublisher.publishExecutionSucceeded({
         executionId: collector.executionId,
-        ruleId: rawInput.ruleId,
-        spaceId: rawInput.spaceId,
         scheduledAt: rawInput.scheduledAt,
-        startedAt: snapshot.startedAt,
-        endedAt: snapshot.endedAt,
-        durationMs: snapshot.durationMs,
-        counters: snapshot.counters,
+        ruleEventsGenerated: snapshot.counters[RULE_EXECUTION_COUNTERS.ruleEventsGenerated] ?? 0,
+        rule: {
+          ruleId: rawInput.ruleId,
+          spaceId: rawInput.spaceId,
+          kind: rule.kind,
+          tags: rule.metadata.tags ?? [],
+        },
       });
     } catch (error) {
-      this.logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.completed event: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+      logger.warn({
+        message: 'Failed to publish rule execution succeeded event',
+        error,
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
+      });
+    }
+  }
+
+  private publishExecutionFailed(
+    rawInput: RuleExecutionPipelineInput,
+    logger: LoggerServiceContract,
+    error: unknown
+  ): void {
+    try {
+      this.eventPublisher.publishExecutionFailed({
+        rule: { id: rawInput.ruleId, spaceId: rawInput.spaceId },
+        error: error instanceof Error ? error.message : String(error),
+      });
+    } catch (publishError) {
+      logger.warn({
+        message: 'Failed to publish rule execution failed event',
+        error: publishError,
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
       });
     }
   }

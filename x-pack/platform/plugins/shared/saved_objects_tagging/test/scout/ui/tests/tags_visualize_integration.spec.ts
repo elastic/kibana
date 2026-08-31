@@ -9,16 +9,15 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { ES_ARCHIVES, KBN_ARCHIVES, test } from '../fixtures';
-import { SavedObjectsListingPage } from '../fixtures/page_objects/saved_objects_listing_page';
 
 test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ esArchiver }) => {
+  test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH_FUNCTIONAL);
-  });
-
-  test.beforeEach(async ({ kbnClient, browserAuth }) => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.VISUALIZE);
+  });
+
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
@@ -26,8 +25,8 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test('allows to manually type tag filter query', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('allows to manually type tag filter query', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
     await pageObjects.visualize.goto();
 
     await listingPage.waitForLoaded();
@@ -40,8 +39,8 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('allows to filter by selecting a tag in the filter menu', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('allows to filter by selecting a tag in the filter menu', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
     await pageObjects.visualize.goto();
 
     await listingPage.waitForLoaded();
@@ -54,8 +53,8 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('allows to filter by multiple tags', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('allows to filter by multiple tags', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
     await pageObjects.visualize.goto();
 
     await listingPage.waitForLoaded();
@@ -68,14 +67,14 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('allows to select tags for a new visualization', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('allows to select tags for a new visualization', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
     await pageObjects.visualize.createTSVBVisualization();
     await pageObjects.visualize.openSaveModal();
-    await pageObjects.visualize.fillVisTitle('my-new-visualization');
-    await pageObjects.visualize.selectNoDashboard();
+    await pageObjects.saveModal.fillTitle('my-new-visualization');
+    await pageObjects.saveModal.selectNoDashboard();
     await pageObjects.tagManagement.selectSavedObjectTags('myextratag');
-    await pageObjects.visualize.confirmSave();
+    await pageObjects.saveModal.confirm();
 
     await pageObjects.visualize.goto();
     await listingPage.waitForLoaded();
@@ -85,11 +84,11 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
   });
 
   test('allows to create a tag from the tag selector', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+    const listingPage = pageObjects.savedObjectsListing;
     await pageObjects.visualize.createTSVBVisualization();
     await pageObjects.visualize.openSaveModal();
-    await pageObjects.visualize.fillVisTitle('visualization-with-new-tag');
-    await pageObjects.visualize.selectNoDashboard();
+    await pageObjects.saveModal.fillTitle('visualization-with-new-tag');
+    await pageObjects.saveModal.selectNoDashboard();
 
     await pageObjects.tagManagement.openCreateTagFromSelector();
     await pageObjects.tagManagement.tagModal.fillForm({
@@ -99,7 +98,7 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
     });
     await page.testSubj.click('createModalConfirmButton');
     await pageObjects.tagManagement.tagModal.form.waitFor({ state: 'hidden' });
-    await pageObjects.visualize.confirmSave();
+    await pageObjects.saveModal.confirm();
 
     await pageObjects.visualize.goto();
     await listingPage.waitForLoaded();
@@ -108,21 +107,21 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
     expect(itemNames).toContain('visualization-with-new-tag');
   });
 
-  test('allows to select tags for an existing visualization', async ({ page, pageObjects }) => {
-    const listingPage = new SavedObjectsListingPage(page);
+  test('allows to select tags for an existing visualization', async ({ pageObjects }) => {
+    const listingPage = pageObjects.savedObjectsListing;
 
     await pageObjects.visualize.createTSVBVisualization();
     await pageObjects.visualize.openSaveModal();
-    await pageObjects.visualize.fillVisTitle('MarkdownViz');
-    await pageObjects.visualize.selectNoDashboard();
-    await pageObjects.visualize.confirmSave();
+    await pageObjects.saveModal.fillTitle('MarkdownViz');
+    await pageObjects.saveModal.selectNoDashboard();
+    await pageObjects.saveModal.confirm();
 
     await pageObjects.visualize.goto();
     await listingPage.waitForLoaded();
     await listingPage.clickItemLink('visualize', 'MarkdownViz');
     await pageObjects.visualize.openSaveModal();
     await pageObjects.tagManagement.selectSavedObjectTags('myextratag');
-    await pageObjects.visualize.confirmSave();
+    await pageObjects.saveModal.confirm();
 
     await pageObjects.visualize.goto();
     await listingPage.waitForLoaded();

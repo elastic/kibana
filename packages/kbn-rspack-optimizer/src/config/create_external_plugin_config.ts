@@ -9,11 +9,12 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack, type Configuration } from '@rspack/core';
+import type { Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { parseKbnImportReq } from '@kbn/repo-packages';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import { rspack } from '../rspack_runtime';
 import { discoverPlugins } from '../utils/plugin_discovery';
 import { findTargetEntry } from '../utils/entry_generation';
 import { loadDllManifest } from './dll_manifest';
@@ -22,8 +23,10 @@ import {
   getSharedResolveConfig,
   getSharedResolveFallback,
   getSharedModuleRules,
+  getSharedModuleParserConfig,
   getSharedIgnoreWarnings,
-  computeConfigHash,
+  getSharedCacheConfig,
+  SHARED_PERFORMANCE_CONFIG,
   getMinimizer,
 } from './shared_config';
 import type { ThemeTag } from '../types';
@@ -40,7 +43,7 @@ const CACHE_CONFIG_FILES = [
   'packages/kbn-rspack-optimizer/src/config/externals.ts',
   'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
   'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
-  'packages/kbn-swc-config/src/browser.ts',
+  'packages/kbn-swc-config/src/browser.js',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
   UiSharedDepsNpm.dllManifestPath,
@@ -185,6 +188,7 @@ export async function createExternalPluginConfig(
       // Use shared module rules (same loaders as main build)
       // SWC for performance + require_interop_loader for ESM/CJS interop
       rules: getSharedModuleRules(repoRoot, dist, themeTags, `plugin-${pluginId}`),
+      parser: getSharedModuleParserConfig(),
     },
 
     optimization: {
@@ -201,30 +205,17 @@ export async function createExternalPluginConfig(
       minimizer: getMinimizer(dist),
     },
 
-    experiments: {
-      // Persistent cache for faster rebuilds
-      cache: cache
-        ? {
-            type: 'persistent',
-            buildDependencies: [
-              Path.resolve(pluginDir, 'package.json'),
-              ...CACHE_CONFIG_FILES.map((f) => Path.resolve(repoRoot, f)),
-            ],
-            version: `external-plugin-v3-${dist ? 'prod' : 'dev'}-${computeConfigHash(
-              repoRoot,
-              CACHE_CONFIG_FILES
-            )}`,
-            storage: {
-              type: 'filesystem',
-              directory: Path.resolve(
-                pluginDir,
-                'node_modules/.cache/.rspack-cache',
-                dist ? 'dist' : 'dev'
-              ),
-            },
-          }
-        : false,
-    },
+    // Persistent cache for faster rebuilds between restarts.
+    // (Rspack v2: moved from experiments.cache to the top-level cache option.)
+    cache: getSharedCacheConfig({
+      enabled: cache,
+      dist,
+      repoRoot,
+      cacheRoot: pluginDir,
+      versionPrefix: 'external-plugin-v4', // bumped for the Rspack 2.x cache format
+      configFiles: CACHE_CONFIG_FILES,
+      extraBuildDependencies: [Path.resolve(pluginDir, 'package.json')],
+    }),
 
     plugins: [
       // Same plugins as main build
@@ -255,6 +246,8 @@ export async function createExternalPluginConfig(
       preset: 'errors-warnings',
       timings: true,
     },
+
+    performance: SHARED_PERFORMANCE_CONFIG,
 
     // Use shared ignore warnings
     ignoreWarnings: getSharedIgnoreWarnings(),

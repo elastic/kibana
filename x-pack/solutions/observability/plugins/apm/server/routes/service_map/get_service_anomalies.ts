@@ -71,9 +71,10 @@ export async function getServiceAnomalies({
                 AnomalyDetectorType.txLatency,
                 AnomalyDetectorType.txThroughput,
                 AnomalyDetectorType.txFailureRate,
+                AnomalyDetectorType.txLowCount,
               ],
             }),
-            ...rangeQuery(Math.min(end - 30 * 60 * 1000, start), end, 'timestamp'),
+            ...rangeQuery(start, end, 'timestamp'),
             {
               terms: {
                 // Only retrieving anomalies for default transaction types

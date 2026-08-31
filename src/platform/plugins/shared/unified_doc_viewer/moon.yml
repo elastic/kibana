@@ -58,12 +58,13 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/css-utils'
   - '@kbn/storybook'
-  - '@kbn/esql-composer'
+  - '@kbn/esql-utils'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/restorable-state'
   - '@kbn/lens-common'
   - '@kbn/ebt-click'
   - '@kbn/apm-shared'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

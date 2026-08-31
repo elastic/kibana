@@ -16,17 +16,17 @@ import {
   EuiCopy,
   EuiCodeBlock,
   EuiLink,
-  EuiCallOut,
   EuiFieldText,
   EuiFormAppend,
 } from '@elastic/eui';
+import { KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import type { K8sMode } from '../types';
-import { useStartServices } from '../../../hooks';
+import { useAuthz, useStartServices } from '../../../hooks';
 
 export const ConfigureStandaloneAgentStep = ({
   isK8s,
@@ -49,6 +49,7 @@ export const ConfigureStandaloneAgentStep = ({
   onCopy?: () => void;
 }): EuiContainedStepProps => {
   const core = useStartServices();
+  const canReadSettings = useAuthz().fleet.readSettings;
   const { docLinks } = core;
 
   const policyMsg =
@@ -121,20 +122,19 @@ export const ConfigureStandaloneAgentStep = ({
             <>{policyMsg}</>
             <EuiSpacer size="m" />
             {apiKey && (
-              <EuiCallOut
+              <KbnSuccessCallout
                 announceOnMount={false}
                 title={i18n.translate('xpack.fleet.agentEnrollment.apiKeyBanner.created', {
                   defaultMessage: 'API key created.',
                 })}
-                color="success"
-                iconType="check"
                 data-test-subj="obltOnboardingLogsApiKeyCreated"
-              >
-                <p>
-                  {i18n.translate('xpack.fleet.agentEnrollment.apiKeyBanner.created.description', {
+                text={i18n.translate(
+                  'xpack.fleet.agentEnrollment.apiKeyBanner.created.description',
+                  {
                     defaultMessage: `Remember to store this information in a safe place. It won't be displayed anymore after you continue.`,
-                  })}
-                </p>
+                  }
+                )}
+              >
                 <EuiFieldText
                   data-test-subj="apmAgentKeyCallOutFieldText"
                   readOnly
@@ -160,7 +160,7 @@ export const ConfigureStandaloneAgentStep = ({
                     </EuiCopy>
                   }
                 />
-              </EuiCallOut>
+              </KbnSuccessCallout>
             )}
             <EuiSpacer size="s" />
             <EuiFlexGroup gutterSize="m">
@@ -204,6 +204,25 @@ export const ConfigureStandaloneAgentStep = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
+            {!canReadSettings && (
+              <>
+                <KbnWarningCallout
+                  announceOnMount
+                  title={i18n.translate(
+                    'xpack.fleet.agentEnrollment.secretsRedactedCallout.title',
+                    { defaultMessage: 'Some proxy credentials may not be shown' }
+                  )}
+                  text={i18n.translate(
+                    'xpack.fleet.agentEnrollment.secretsRedactedCallout.description',
+                    {
+                      defaultMessage:
+                        'Proxy headers and TLS private keys are only visible to users with the Fleet Settings: Read Kibana privilege.',
+                    }
+                  )}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <EuiCodeBlock
               language="yaml"
               style={{ maxHeight: 300 }}

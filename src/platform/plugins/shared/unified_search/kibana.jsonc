@@ -28,7 +28,8 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "esql"
+      "esql",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaUtils",

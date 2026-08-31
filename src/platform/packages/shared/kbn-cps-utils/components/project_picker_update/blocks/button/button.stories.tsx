@@ -9,14 +9,17 @@
 
 import React from 'react';
 import type { StoryObj, Meta } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import { faker } from '@faker-js/faker';
 import { ProjectPickerButton, type ProjectPickerButtonProps } from './button';
+import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from '../../state';
 
 /**
  * @description story for the project picker button component
  */
 export default {
   component: ProjectPickerButton,
-  title: 'ProjectPickerButton',
+  title: 'Project Picker/Blocks/Button',
   argTypes: {
     size: {
       control: 'select',
@@ -25,35 +28,115 @@ export default {
   },
 } satisfies Meta<typeof ProjectPickerButton>;
 
-export const ProjectPickerButtonStory: StoryObj<ProjectPickerButtonProps> = {
+export const ProjectPickerButtonStory: StoryObj<
+  Pick<
+    ProjectPickerStateProviderProps,
+    | 'availableProjects'
+    | 'defaultProjectRoutingGetter'
+    | 'currentProjectRoutingGetter'
+    | 'onProjectRoutingChange'
+    | 'originProjectId'
+  > &
+    ProjectPickerButtonProps
+> = {
   name: 'ProjectPickerButton',
   argTypes: {
     size: {
       control: 'select',
       options: ['s', 'm', 'l'],
     },
-    filteredProjectsCount: {
-      control: 'number',
-    },
-    totalProjectsCount: {
-      control: 'number',
-    },
   },
   args: {
     size: 's',
-    filteredProjectsCount: 1000,
-    totalProjectsCount: 10000,
+    availableProjects: Array.from({ length: 10 }, () => ({
+      _id: faker.string.uuid(),
+      _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
+      _alias: faker.company.name(),
+      _organisation: faker.company.name(),
+      _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
+      _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+    })),
+    defaultProjectRoutingGetter: () => '_alias:origin',
+    currentProjectRoutingGetter: () => '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
+    get originProjectId(): string {
+      return this.availableProjects![0]._id;
+    },
   },
-  render: (args) => <ProjectPickerButton {...args} />,
+  render: ({
+    availableProjects,
+    defaultProjectRoutingGetter,
+    currentProjectRoutingGetter,
+    onProjectRoutingChange,
+    originProjectId,
+    ...props
+  }) => (
+    <ProjectPickerStateProvider
+      availableProjects={availableProjects}
+      originProjectId={originProjectId}
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
+      onProjectRoutingChange={onProjectRoutingChange}
+      fetchProjectsByRouting={async () => ({
+        origin: availableProjects?.[0] ?? null,
+        linkedProjects: availableProjects?.slice(1) ?? [],
+      })}
+    >
+      <ProjectPickerButton {...props} />
+    </ProjectPickerStateProvider>
+  ),
 };
 
-export const ProjectPickerButtonDisabledStory: StoryObj<ProjectPickerButtonProps> = {
+export const ProjectPickerButtonDisabledStory: StoryObj<
+  Pick<
+    ProjectPickerStateProviderProps,
+    | 'availableProjects'
+    | 'defaultProjectRoutingGetter'
+    | 'currentProjectRoutingGetter'
+    | 'onProjectRoutingChange'
+    | 'originProjectId'
+  > &
+    ProjectPickerButtonProps
+> = {
   name: 'ProjectPickerButtonDisabled',
   args: {
     size: 's',
-    filteredProjectsCount: 1000,
-    totalProjectsCount: 10000,
     isDisabled: true,
+    availableProjects: Array.from({ length: 10 }, () => ({
+      _id: faker.string.uuid(),
+      _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
+      _alias: faker.company.name(),
+      _organisation: faker.company.name(),
+      _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
+      _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+    })),
+    defaultProjectRoutingGetter: () => '_alias:origin',
+    currentProjectRoutingGetter: () => '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
+    get originProjectId(): string {
+      return this.availableProjects![0]._id;
+    },
   },
-  render: (args) => <ProjectPickerButton {...args} />,
+  render: ({
+    defaultProjectRoutingGetter,
+    currentProjectRoutingGetter,
+    onProjectRoutingChange,
+    availableProjects,
+    originProjectId,
+    ...props
+  }) => (
+    <ProjectPickerStateProvider
+      availableProjects={availableProjects}
+      originProjectId={originProjectId}
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
+      onProjectRoutingChange={onProjectRoutingChange}
+      fetchProjectsByRouting={async () => ({
+        origin: availableProjects?.[0] ?? null,
+        linkedProjects: availableProjects?.slice(1) ?? [],
+      })}
+    >
+      <ProjectPickerButton {...props} />
+    </ProjectPickerStateProvider>
+  ),
 };

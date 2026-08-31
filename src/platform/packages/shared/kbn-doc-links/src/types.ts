@@ -174,7 +174,6 @@ export interface DocLinks {
     readonly ingestPipelines: string;
     readonly knnSearch: string;
     readonly knnSearchCombine: string;
-    readonly knnSearchTuneForSpeedAccuracy: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
     readonly licenseManagement: string;
@@ -191,12 +190,15 @@ export interface DocLinks {
     readonly semanticSearchGetStarted: string;
     readonly searchTemplates: string;
     readonly semanticTextField: string;
+    readonly semanticTextFieldSetupConfiguration: string;
+    readonly semanticTextSearchRetrieval: string;
+    readonly hybridSemanticText: string;
     readonly esAsVectorDatabase: string;
     readonly vectorSearch: string;
-    readonly vectorSearchEmbeddingModels: string;
+    readonly vectorSearchDenseVector: string;
+    readonly jinaEmbeddingModels: string;
     readonly vectorSearchBringOwnVectors: string;
-    readonly vectorSearchStorageOptimization: string;
-    readonly vectorSearchVectorsAndEmbeddings: string;
+    readonly vectorDatabaseGetStarted: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -323,7 +325,9 @@ export interface DocLinks {
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
     readonly attacksPage: string;
+    readonly runAttackDiscoveryInWorkflow: string;
     readonly mitreCoverage: string;
+    readonly remapMitreAttack: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -340,6 +344,7 @@ export interface DocLinks {
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
+    readonly cspmGcpAgentless: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;
     readonly avcResults: string;
@@ -529,6 +534,7 @@ export interface DocLinks {
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
     definingRoles: string;
+    elasticCloudApiKeys: string;
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
@@ -617,6 +623,9 @@ export interface DocLinks {
     elasticAgentStandaloneLoggingConfig: string;
     agentPolicyLogLevel: string;
     elasticAgentLogFileRetention: string;
+    elasticAgentDownloads: string;
+    integrationsReference: string;
+    datastreamsTemplateConflicts: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -719,6 +728,7 @@ export interface DocLinks {
   };
   readonly telemetry: {
     readonly settings: string;
+    readonly securityData: string;
   };
   readonly playground: {
     readonly chatPlayground: string;
@@ -741,6 +751,18 @@ export interface DocLinks {
   readonly datasetQuality: {
     readonly failureStore: string;
   };
+  readonly dataFederation: {
+    readonly overview: string;
+    readonly quickstart: string;
+    readonly dataSources: string;
+    readonly datasets: string;
+    readonly datasetSettings: string;
+    readonly authentication: string;
+    readonly staticCredentials: string;
+    readonly federatedIdentity: string;
+    readonly querying: string;
+    readonly security: string;
+  };
   readonly agentBuilder: {
     readonly agentBuilder: string;
     readonly getStarted: string;
@@ -758,6 +780,7 @@ export interface DocLinks {
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
+    readonly aiAssistant: string;
   };
   readonly applicationConnections: {
     readonly oauthClients: string;
@@ -770,6 +793,7 @@ export interface DocLinks {
   readonly cases: {
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
+    readonly manageCaseTemplates: string;
   };
 }
 

@@ -7,13 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isLiteral } from '@elastic/esql';
-import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
+import {
+  isBinaryExpression,
+  isFunctionExpression,
+  isList,
+  isLiteral,
+  isUnaryExpression,
+} from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction, ESQLList, ESQLSingleAstItem } from '@elastic/esql/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
-import type { ExpressionContext, FunctionParameterContext } from './types';
+import type {
+  ExpressionContext,
+  FunctionParameterContext,
+  ParenthesizedExpressionPosition,
+} from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getFunctionDefinition } from '../../functions';
-import { resolveArgumentTypes } from '../../expressions';
+import { getBinaryExpressionOperand, resolveArgumentTypes } from '../../expressions';
 import type { SupportedDataType } from '../../../types';
 import {
   getMatchingSignatures,
@@ -21,14 +31,63 @@ import {
   getParamAtPosition,
   getParamDefsAtPosition,
 } from '../../signatures';
-import { removeFinalUnknownIdentiferArg } from '../../shared';
 import type { PreferredExpressionType } from './types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 export type IncompleteOperatorReason = 'tooFewArgs' | 'wrongTypes';
 
+export const isTupleExpression = (
+  expression: ESQLSingleAstItem | undefined
+): expression is ESQLList =>
+  Boolean(expression && isList(expression) && expression.subtype === 'tuple');
+
+/** Checks whether the source text wraps an AST expression in closed parentheses. */
+export const isExpressionParenthesized = (
+  innerText: string,
+  expressionRoot?: ESQLSingleAstItem
+): boolean => {
+  if (!expressionRoot) {
+    return false;
+  }
+
+  const beforeExpression = innerText.slice(0, expressionRoot.location.min).trimEnd();
+  const afterExpression = innerText.slice(expressionRoot.location.max + 1).trimStart();
+
+  return beforeExpression.endsWith('(') && afterExpression.startsWith(')');
+};
+
+/** Returns the cursor position relative to parentheses wrapping the expression. */
+export const getParenthesizedExpressionPosition = (
+  query: string,
+  innerText: string,
+  expressionRoot?: ESQLSingleAstItem
+): ParenthesizedExpressionPosition | undefined => {
+  if (!isExpressionParenthesized(query, expressionRoot)) {
+    return;
+  }
+
+  return isExpressionParenthesized(innerText, expressionRoot) ? 'after' : 'inside';
+};
+
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
+
+/** Returns the deepest function expression along the rightmost binary or prefix-unary path. */
+export function getRightmostOperator(expression: ESQLFunction): ESQLFunction {
+  let operator = expression;
+
+  while (isBinaryExpression(operator) || isUnaryExpression(operator)) {
+    const rightOperand = isBinaryExpression(operator) ? operator.args[1] : operator.args[0];
+
+    if (!isFunctionExpression(rightOperand)) {
+      break;
+    }
+
+    operator = rightOperand;
+  }
+
+  return operator;
+}
 
 /** Checks if operator is a NULL check (IS NULL, IS NOT NULL) */
 export function isNullCheckOperator(name: string) {
@@ -41,7 +100,7 @@ export function isNullCheckOperator(name: string) {
 export function isInOperator(name: string) {
   const lowerName = name.toLowerCase();
 
-  return lowerName === 'in' || lowerName === 'not in';
+  return inOperators.some((operator) => operator.name.toLowerCase() === lowerName);
 }
 
 /** Checks if operator requires special handling */
@@ -129,6 +188,16 @@ export function buildExpressionFunctionParameterContext(
   };
 }
 
+/** Removes a partially typed unknown identifier from an operator's arguments. */
+export function removeFinalUnknownIdentiferArg(
+  args: ESQLAstItem[],
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): ESQLAstItem[] {
+  return getExpressionType(args[args.length - 1]) === 'unknown'
+    ? args.slice(0, args.length - 1)
+    : args;
+}
+
 /**
  * Explains why an operator invocation is not yet complete for autocomplete purposes.
  */
@@ -142,26 +211,25 @@ export function getIncompleteOperatorReason(
     return 'tooFewArgs';
   }
 
-  const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
+  // We need this flag because subquery pipeline types are unknown even when the operator type is known.
+  const hasResolvedType = getExpressionType(operator) !== 'unknown';
+  const argsForArityCheck = hasResolvedType
+    ? operator.args
+    : removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
   const { min, max } = getMaxMinNumberOfParams(fnDefinition.signatures);
-  const hasValidArity = cleanedArgs.length >= min && cleanedArgs.length <= max;
+  const hasValidArity = argsForArityCheck.length >= min && argsForArityCheck.length <= max;
 
   if (!hasValidArity) {
     return 'tooFewArgs';
   }
 
-  if (
-    operator.incomplete &&
-    (fnDefinition.name === 'is null' || fnDefinition.name === 'is not null')
-  ) {
+  if (operator.incomplete && isNullCheckOperator(fnDefinition.name)) {
     return 'tooFewArgs';
   }
 
-  if (
-    (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
-    Array.isArray(operator.args[1]) &&
-    !operator.args[1].length
-  ) {
+  const rightOperand = getBinaryExpressionOperand(operator, 'right');
+
+  if (isInOperator(fnDefinition.name) && Array.isArray(rightOperand) && !rightOperand.length) {
     return 'tooFewArgs';
   }
 

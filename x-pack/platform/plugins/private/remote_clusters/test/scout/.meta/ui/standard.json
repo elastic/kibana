@@ -1,0 +1,47 @@
+{
+  "sha1": "8af7ab42cc7983dc69c9b7446e601e2e7315ddca",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "aa44281e1098706-c674fddd8119149",
+      "title": "Remote Clusters - add cluster walks the add-cluster wizard and shows the new cluster, accessible at each step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/ui/tests/remote_clusters_crud.spec.ts",
+        "line": 21,
+        "column": 5
+      }
+    },
+    {
+      "id": "6bbd87f83b49f5f-7130f3cc8657bea",
+      "title": "Remote Clusters - edit and delete sniff-mode cluster: list, details, delete modal, edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/ui/tests/remote_clusters_edit_delete.spec.ts",
+        "line": 60,
+        "column": 5
+      }
+    },
+    {
+      "id": "6bbd87f83b49f5f-1eee2466bcaa04f",
+      "title": "Remote Clusters - edit and delete proxy-mode cluster: list, details, delete modal, edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/ui/tests/remote_clusters_edit_delete.spec.ts",
+        "line": 66,
+        "column": 8
+      }
+    }
+  ]
+}

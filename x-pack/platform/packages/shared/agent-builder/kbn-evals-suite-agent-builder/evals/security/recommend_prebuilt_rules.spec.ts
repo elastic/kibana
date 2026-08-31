@@ -62,11 +62,11 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
 });
 
 // Tactic under test. The ID is stable across MITRE and rule-package versions, so
-// we assert on it rather than rule names/counts. Defense Evasion (TA0005) is one
-// of the largest tactics in the bundled catalog, so a tactic query reliably
-// returns many installable rules.
+// we assert on it rather than rule names/counts. Stealth (TA0005, renamed from
+// Defense Evasion in ATT&CK v19) is one of the largest tactics in the bundled
+// catalog, so a tactic query reliably returns many installable rules.
 const TACTIC_ID = 'TA0005';
-const TACTIC_NAME = 'Defense Evasion';
+const TACTIC_NAME = 'Stealth';
 
 const FIND_PREBUILT_RULES_TOOL_ID = 'security.find_prebuilt_rules';
 const GET_CATALOG_OVERVIEW_TOOL_ID = 'security.get_installable_catalog_overview';
@@ -165,7 +165,7 @@ const tagsFromFilter = (step: ToolCallStep): string[] => {
     : [];
 };
 
-// The 14 canonical MITRE ATT&CK Enterprise tactics the skill routes to (its prompt table).
+// The 15 canonical MITRE ATT&CK Enterprise tactics the skill routes to (its prompt table).
 // Unlike tags, tactics are NOT discovered from a tool — they are a fixed set — so the grounding
 // source of truth is this constant, and the schema accepts any string, so this guard is real.
 const CANONICAL_TACTICS: ReadonlyArray<{ id: string; name: string }> = [
@@ -173,7 +173,7 @@ const CANONICAL_TACTICS: ReadonlyArray<{ id: string; name: string }> = [
   { id: 'TA0002', name: 'Execution' },
   { id: 'TA0003', name: 'Persistence' },
   { id: 'TA0004', name: 'Privilege Escalation' },
-  { id: 'TA0005', name: 'Defense Evasion' },
+  { id: 'TA0005', name: 'Stealth' },
   { id: 'TA0006', name: 'Credential Access' },
   { id: 'TA0007', name: 'Discovery' },
   { id: 'TA0008', name: 'Lateral Movement' },
@@ -183,6 +183,7 @@ const CANONICAL_TACTICS: ReadonlyArray<{ id: string; name: string }> = [
   { id: 'TA0040', name: 'Impact' },
   { id: 'TA0042', name: 'Resource Development' },
   { id: 'TA0043', name: 'Reconnaissance' },
+  { id: 'TA0112', name: 'Defense Impairment' },
 ];
 
 const CANONICAL_TACTIC_IDS = new Set(CANONICAL_TACTICS.map((tactic) => tactic.id));

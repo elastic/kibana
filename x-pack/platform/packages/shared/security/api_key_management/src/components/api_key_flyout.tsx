@@ -334,14 +334,22 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 
   return (
     <FormikProvider value={formik}>
-      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} size={flyoutSize} ownFocus>
+      <EuiFlyout
+        data-test-subj="apiKeyFlyout"
+        onClose={onCancel}
+        aria-labelledby={titleId}
+        size={flyoutSize}
+        ownFocus
+      >
         <Form
           onSubmit={formik.handleSubmit}
           style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id={titleId}>{title}</h2>
+              <h2 id={titleId} data-test-subj="apiKeyFlyoutTitle">
+                {title}
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>

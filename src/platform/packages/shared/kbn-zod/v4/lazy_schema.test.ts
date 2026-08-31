@@ -125,6 +125,89 @@ describe('lazySchema', () => {
     });
   });
 
+  describe('z.toJSONSchema compatibility', () => {
+    it('produces a JSON schema from a top-level lazy schema', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string(), count: z.number() }));
+
+      expect(() => z.toJSONSchema(Schema)).not.toThrow();
+      expect(z.toJSONSchema(Schema)).toMatchObject({
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          count: { type: 'number' },
+        },
+      });
+    });
+
+    it('produces a JSON schema when a lazy schema is nested inside another lazy schema', () => {
+      const Inner = lazySchema(() => z.object({ value: z.number() }));
+      const Outer = lazySchema(() => z.object({ inner: Inner, tag: z.string() }));
+
+      expect(() => z.toJSONSchema(Outer)).not.toThrow();
+      expect(z.toJSONSchema(Outer)).toMatchObject({
+        type: 'object',
+        properties: {
+          inner: { type: 'object', properties: { value: { type: 'number' } } },
+          tag: { type: 'string' },
+        },
+      });
+    });
+
+    it('preserves top-level .describe() metadata in the JSON schema output', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string() }).describe('my description'));
+      expect(z.toJSONSchema(Schema)).toMatchObject({ description: 'my description' });
+    });
+
+    it('preserves top-level .meta() title and description in the JSON schema output', () => {
+      const Schema = lazySchema(() =>
+        z.object({ id: z.string() }).meta({ title: 'My Schema', description: 'a description' })
+      );
+      expect(z.toJSONSchema(Schema)).toMatchObject({
+        title: 'My Schema',
+        description: 'a description',
+      });
+    });
+
+    it('does not pollute the global registry with the proxy after toJSONSchema', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string() }).describe('test'));
+      z.toJSONSchema(Schema);
+      expect(z.globalRegistry.has(Schema)).toBe(false);
+    });
+
+    it('does not crash or produce id collisions when the factory uses .meta({ id })', () => {
+      const Schema = lazySchema(() =>
+        z.object({ id: z.string() }).meta({ id: 'my-schema', title: 'My Schema' })
+      );
+      expect(() => z.toJSONSchema(Schema)).not.toThrow();
+      expect(z.globalRegistry.has(Schema)).toBe(false);
+    });
+
+    it('does not crash when the factory returns an optional-wrapped schema', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string() }).optional());
+      expect(() => z.toJSONSchema(Schema)).not.toThrow();
+    });
+
+    it('does not crash when the factory returns a default-wrapped schema', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string() }).default({ id: 'x' }));
+      expect(() => z.toJSONSchema(Schema)).not.toThrow();
+    });
+
+    // Verifies that the Object.create wrapper preserves non-enumerable _zod
+    // internals (e.g. propValues) so that parse still works after toJSONSchema.
+    it('still parses correctly after z.toJSONSchema is called', () => {
+      const Inner = lazySchema(() => z.object({ value: z.number() }));
+      const Outer = lazySchema(() => z.object({ inner: Inner, tag: z.string() }));
+
+      z.toJSONSchema(Outer);
+
+      expect(Outer.parse({ inner: { value: 1 }, tag: 't' })).toEqual({
+        inner: { value: 1 },
+        tag: 't',
+      });
+      expect(Outer.safeParse({ inner: { value: 'bad' }, tag: 't' }).success).toBe(false);
+    });
+  });
+
   describe('setLazySchemaDisabled', () => {
     // Always restore the default after each test — the toggle is a module-level
     // singleton and would otherwise leak across test files.

@@ -17,6 +17,17 @@ import {
 import type { PhaseName } from '@kbn/streams-schema';
 import type { LifecyclePhase } from './lifecycle_types';
 import type { TimelineSegment } from './data_lifecycle_segments';
+import { useGridColumnsTransitionCss, getSegmentFadeInCss } from './lifecycle_bar_animations';
+
+// Stable identity so React reconciles by segment rather than position: inserting/removing a
+// downsample step must not shift keys of the surrounding segments (which would misfire the
+// fade-in). Steps carry `stepIndex`; delete/frozen are role-unique; phase boundaries use their age.
+const getSegmentKey = (segment: TimelineSegment, index: number): string => {
+  if (segment.stepIndex !== undefined) return `step-${segment.stepIndex}`;
+  if (segment.isDelete) return 'delete';
+  if (segment.isFrozen) return 'frozen';
+  return segment.leftValue !== undefined ? `age-${segment.leftValue}` : `index-${index}`;
+};
 
 export const DataLifecycleTimeline = ({
   phases,
@@ -25,6 +36,7 @@ export const DataLifecycleTimeline = ({
   gridTemplateColumns,
   invalidPhases,
   invalidStepIndices,
+  animateGridChanges = true,
 }: {
   phases: LifecyclePhase[];
   isRetentionInfinite: boolean;
@@ -32,8 +44,15 @@ export const DataLifecycleTimeline = ({
   gridTemplateColumns: string;
   invalidPhases?: PhaseName[];
   invalidStepIndices?: number[];
+  animateGridChanges?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const gridColumnsTransitionCss = useGridColumnsTransitionCss(
+    euiTheme,
+    gridTemplateColumns,
+    animateGridChanges
+  );
+  const segmentFadeInCss = getSegmentFadeInCss(euiTheme);
   const segments = useMemo<TimelineSegment[]>(
     () =>
       timelineSegments ??
@@ -63,11 +82,14 @@ export const DataLifecycleTimeline = ({
           columns={1}
           gutterSize="none"
           responsive={false}
-          css={{
-            gridTemplateColumns,
-            paddingInline: euiTheme.size.xxs,
-            boxSizing: 'border-box',
-          }}
+          css={[
+            {
+              gridTemplateColumns,
+              paddingInline: euiTheme.size.xxs,
+              boxSizing: 'border-box',
+            },
+            gridColumnsTransitionCss,
+          ]}
         >
           {segments.map((segment, index) => {
             const isFirstPhase = index === 0;
@@ -90,7 +112,20 @@ export const DataLifecycleTimeline = ({
               segment.stepIndex !== undefined && invalidStepIndicesSet.has(segment.stepIndex);
 
             return (
-              <EuiFlexItem key={index} grow={segment.grow} css={{ flexBasis: 0, minWidth: 0 }}>
+              <EuiFlexItem
+                key={getSegmentKey(segment, index)}
+                grow={segment.grow}
+                css={[
+                  {
+                    flexBasis: 0,
+                    minWidth: 0,
+                    ...(segment.columnStart !== undefined && {
+                      gridColumn: `${segment.columnStart} / span 1`,
+                    }),
+                  },
+                  segmentFadeInCss,
+                ]}
+              >
                 <DataLifecyclePhaseTimeline
                   phase={segment}
                   leftValue={segment.leftValue}

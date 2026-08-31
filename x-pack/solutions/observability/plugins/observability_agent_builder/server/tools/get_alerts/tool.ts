@@ -83,6 +83,13 @@ export function createGetAlertsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {
     id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Alerts',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieves Observability alerts within a specified time range.
 
 When to use:

@@ -10,7 +10,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
-import { HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
+import { HEADER_SHARE_BUTTON_TEST_ID, HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
+import { useGetAttackFlyoutLink } from '../../../flyout/attack_details/hooks/use_get_attack_flyout_link';
 
 jest.mock('./components/header_title', () => ({
   HeaderTitle: ({ hit }: { hit: DataTableRecord }) => (
@@ -55,6 +56,20 @@ jest.mock('../../shared/components/notes', () => ({
   ),
 }));
 
+jest.mock('../../shared/components/share_url_icon_button', () => ({
+  ShareUrlIconButton: ({
+    url,
+    dataTestSubj,
+  }: {
+    url: string | null | undefined;
+    dataTestSubj: string;
+  }) => (url ? <button type="button" data-test-subj={dataTestSubj} /> : null),
+}));
+
+jest.mock('../../../flyout/attack_details/hooks/use_get_attack_flyout_link', () => ({
+  useGetAttackFlyoutLink: jest.fn(),
+}));
+
 const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecord =>
   ({
     id: 'test-attack-id',
@@ -67,10 +82,16 @@ const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecor
     ...overrides,
   } as DataTableRecord);
 
+const mockUseGetAttackFlyoutLink = useGetAttackFlyoutLink as jest.Mock;
+
 describe('<Header />', () => {
   const mockHit = createMockHit();
   const onAttackUpdated = jest.fn();
   const onShowNotes = jest.fn();
+
+  beforeEach(() => {
+    mockUseGetAttackFlyoutLink.mockReturnValue(null);
+  });
 
   const renderHeader = (props?: Partial<Parameters<typeof Header>[0]>) =>
     render(
@@ -95,10 +116,28 @@ describe('<Header />', () => {
     expect(getByTestId(HEADER_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('does not render a share action button (matches document flyout v2)', () => {
+  it('renders the share button when a link is available', () => {
+    mockUseGetAttackFlyoutLink.mockReturnValue('https://example.com/attacks/redirect/test-id');
+    const { getByTestId } = renderHeader();
+
+    expect(getByTestId(HEADER_SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('does not render the share button when link is null (e.g. missing timestamp)', () => {
+    mockUseGetAttackFlyoutLink.mockReturnValue(null);
     const { queryByTestId } = renderHeader();
 
-    expect(queryByTestId('attack-flyout-v2-header-share-button')).not.toBeInTheDocument();
+    expect(queryByTestId(HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('requests the attack (not alert) redirect link, using attackId/indexName/timestamp from the hit', () => {
+    renderHeader();
+
+    expect(mockUseGetAttackFlyoutLink).toHaveBeenCalledWith({
+      attackId: 'test-attack-id',
+      indexName: '',
+      timestamp: '2023-01-01T00:00:00.000Z',
+    });
   });
 
   it('passes hit to all sub-components', () => {

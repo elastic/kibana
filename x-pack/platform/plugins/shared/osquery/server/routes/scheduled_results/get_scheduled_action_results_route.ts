@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { PLUGIN_ID } from '../../../common';
+import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import type {
@@ -22,14 +22,18 @@ import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { PackSavedObject } from '../../common/types';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 
 interface ScheduledActionResultsAggregations {
   aggs: {
     responses_by_schedule: {
       rows_count: { value: number };
-      responses: {
-        buckets: Array<{ key: string; doc_count: number }>;
-      };
+      // Agent counts — `cardinality(agent_id)`, not document counts.
+      responded_agents?: { value: number };
+      success_agents?: { agents: { value: number } };
+      error_agents?: { agents: { value: number } };
     };
   };
 }
@@ -95,7 +99,31 @@ export const getScheduledActionResultsRoute = (
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const search = await context.search;
+          let integrationNamespaces: Record<string, string[]> = {};
+
+          if (osqueryContext?.service?.getIntegrationNamespaces) {
+            const logger = osqueryContext.logFactory.get('scheduled_action_results');
+            const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+              osqueryContext,
+              request
+            );
+            integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
+              [OSQUERY_INTEGRATION_NAME],
+              spaceScopedClient,
+              logger
+            );
+          }
+
+          const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+          const namespacesOrUndefined =
+            osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
+          const search = await getScopedSearch(
+            context,
+            request,
+            osqueryContext.cpsEnabled,
+            osqueryContext.getStartServices
+          );
           const res = await lastValueFrom(
             search.search<
               ScheduledActionResultsRequestOptions,
@@ -111,8 +139,10 @@ export const getScheduledActionResultsRoute = (
                   direction: (request.query.sortOrder as Direction) ?? Direction.desc,
                   field: request.query.sort ?? '@timestamp',
                 },
+                integrationNamespaces: namespacesOrUndefined,
+                ...(osqueryContext.cpsEnabled ? { matchMissingSpaceId: false } : {}),
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -121,10 +151,14 @@ export const getScheduledActionResultsRoute = (
             | undefined;
           const responsesBySchedule = aggs?.aggs?.responses_by_schedule;
           const rowsCount = responsesBySchedule?.rows_count?.value ?? 0;
-          const responsesBuckets = responsesBySchedule?.responses?.buckets;
 
-          const successful = responsesBuckets?.find((b) => b.key === 'success')?.doc_count ?? 0;
-          const failed = responsesBuckets?.find((b) => b.key === 'error')?.doc_count ?? 0;
+          // Agent counts. No `doc_count` fallback on purpose: it would report
+          // documents as agents, the bug this route exists to fix.
+          const successful = responsesBySchedule?.success_agents?.agents?.value ?? 0;
+          const failed = responsesBySchedule?.error_agents?.agents?.value ?? 0;
+
+          // Not `successful + failed`: an agent with both outcomes is in both buckets.
+          const totalResponded = responsesBySchedule?.responded_agents?.value ?? 0;
 
           const total =
             typeof res.rawResponse.hits.total === 'number'
@@ -180,7 +214,7 @@ export const getScheduledActionResultsRoute = (
               totalPages: Math.ceil(total / pageSize),
               aggregations: {
                 totalRowCount: rowsCount,
-                totalResponded: successful + failed,
+                totalResponded,
                 successful,
                 failed,
                 pending: 0,

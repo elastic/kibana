@@ -16,12 +16,10 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/t
 export const toInlineMemoryTool = ({
   tags,
   availability,
+  annotations,
   id,
   ...rest
 }: BuiltinToolDefinition): BuiltinSkillBoundedTool => ({
   ...rest,
   id: id.replaceAll('.', '_'),
 });
-
-export const toInlineMemoryTools = (tools: BuiltinToolDefinition[]): BuiltinSkillBoundedTool[] =>
-  tools.map(toInlineMemoryTool);

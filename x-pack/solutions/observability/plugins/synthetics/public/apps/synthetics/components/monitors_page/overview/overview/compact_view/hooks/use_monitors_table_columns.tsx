@@ -22,7 +22,6 @@ import type { OverviewStatusMetaData } from '../../../../../../../../../common/r
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
 import { SyntheticsRemoteBadge } from '../../../../../common/components/synthetics_remote_badge';
 import { SyntheticsHeartbeatBadge } from '../../../../../common/components/synthetics_heartbeat_badge';
-import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
 import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
 import { getLatestDownSummary } from '../get_latest_down_summary';
@@ -100,7 +99,7 @@ export const useMonitorsTableColumns = ({
       dispatch(
         setFlyoutConfigCallback({
           configId,
-          id: configId,
+          id: monitor.monitorQueryId,
           location: locationLabel,
           locationId,
           spaces: monitor.spaces,
@@ -147,7 +146,6 @@ export const useMonitorsTableColumns = ({
                 <EuiFlexItem grow={false}>
                   <MonitorTypeBadge
                     monitorType={monitor.type}
-                    ariaLabel={getFilterForTypeMessage(monitor.type)}
                     onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
                   />
                 </EuiFlexItem>
@@ -184,6 +182,7 @@ export const useMonitorsTableColumns = ({
               >
                 <EuiToolTip position="top" content={monitor.urls}>
                   <EuiText
+                    tabIndex={0}
                     size="xs"
                     color="subdued"
                     className="eui-textTruncate"
@@ -258,6 +257,7 @@ export const useMonitorsTableColumns = ({
                     }
                   >
                     <EuiText
+                      tabIndex={0}
                       size="xs"
                       color="danger"
                       data-test-subj="syntheticsLatestErrorCell"

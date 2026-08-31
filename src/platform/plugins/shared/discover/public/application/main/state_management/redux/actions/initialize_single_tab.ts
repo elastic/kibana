@@ -28,8 +28,7 @@ import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
-import type { ProfileStateMap } from '../../../../../context_awareness';
-import { ProfileStateType } from '../../../../../context_awareness';
+import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
@@ -44,6 +43,7 @@ export interface InitializeSingleTabsParams {
   dataViewSpec: DataViewSpec | undefined;
   esqlControls: ControlPanelsState<OptionsListESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
+  profileState?: ProfileStateMap;
 }
 
 export const initializeSingleTab = createInternalStateAsyncThunk(
@@ -57,6 +57,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         dataViewSpec,
         esqlControls,
         defaultUrlState,
+        profileState,
       },
     }: TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>,
     {
@@ -121,6 +122,10 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     const urlProfileState = services.profileStateRegistry.pickStateByType({
       profileStateMap: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY) ?? undefined,
       stateTypes: [ProfileStateType.Url],
+    });
+    const defaultPersistentProfileState = services.profileStateRegistry.pickStateByType({
+      profileStateMap: profileState,
+      stateTypes: [ProfileStateType.Persistent],
     });
 
     const discoverTabLoadTracker = scopedEbtManager$
@@ -305,6 +310,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // Initialize app and profile state together
     const mergedProfileState = services.profileStateRegistry.mergeState(
       tabState.profileState,
+      defaultPersistentProfileState,
       urlProfileState
     );
     const initialProfileState = services.profileStateRegistry.pickStateByType({

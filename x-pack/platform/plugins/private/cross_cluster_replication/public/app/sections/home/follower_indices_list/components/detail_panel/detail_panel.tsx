@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -29,6 +28,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
 import type { ApiStatus, FollowerIndexWithPausedStatus } from '../../../../../../../common/types';
@@ -170,7 +170,8 @@ const FollowerIndexDetails = ({ followerIndex, isPollingStatus }: FollowerIndexD
             <EuiSpacer size="s" />
 
             {isPaused ? (
-              <EuiCallOut
+              <KbnInfoCallout
+                announceOnMount
                 size="s"
                 title={
                   <FormattedMessage
@@ -409,6 +410,7 @@ export interface DetailPanelProps {
   followerIndex?: FollowerIndexWithPausedStatus | null;
   closeDetailPanel: () => void;
   getFollowerIndex: (id: string) => void;
+  onActionComplete?: () => void;
 }
 
 export const DetailPanel = ({
@@ -417,6 +419,7 @@ export const DetailPanel = ({
   followerIndex,
   apiStatus,
   getFollowerIndex,
+  onActionComplete,
 }: DetailPanelProps) => {
   const [isInitialLoad, setInitialLoad] = useState(true);
   const { isPolling, startPolling, stopPolling } = usePolling();
@@ -580,6 +583,7 @@ export const DetailPanel = ({
                     followerIndices={[followerIndex]}
                     testSubj="manageButton"
                     isPollingStatus={isPolling}
+                    onActionComplete={onActionComplete}
                   />
                 </EuiFlexItem>
               )}

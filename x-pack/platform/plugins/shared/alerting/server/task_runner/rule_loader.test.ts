@@ -8,6 +8,7 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { isCoreKibanaRequest } from '@kbn/core-http-server-utils';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -245,10 +246,14 @@ describe('rule_loader', () => {
 
   describe('getFakeKibanaRequest()', () => {
     let recordUiamApiKeyFallbackSpy: jest.SpyInstance;
+    let recordRuleRunSpy: jest.SpyInstance;
 
     beforeEach(() => {
       recordUiamApiKeyFallbackSpy = jest
         .spyOn(alertingUiamTelemetry, 'recordUiamApiKeyFallback')
+        .mockImplementation(() => {});
+      recordRuleRunSpy = jest
+        .spyOn(alertingUiamTelemetry, 'recordRuleRun')
         .mockImplementation(() => {});
     });
 
@@ -265,6 +270,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
       expect(effectiveApiKey).toEqual(apiKey);
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'config');
     });
 
     test('has API key, in non-default space', async () => {
@@ -294,6 +300,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
       expect(effectiveApiKey).toBeNull();
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('none', 'not_set');
     });
 
     test('returns UIAM API key when config is set to uiam', async () => {
@@ -307,6 +314,87 @@ describe('rule_loader', () => {
         authorization: `ApiKey essu_uiam_api_key`,
       });
       expect(effectiveApiKey).toEqual('essu_uiam_api_key');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('uiam_api_key', 'provisioned');
+    });
+
+    test('returns a raw user-created UIAM API key as-is when config is set to uiam', async () => {
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
+        { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
+        'default',
+        null,
+        { uiamApiKey: 'essu_user_created_key' }
+      );
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+      });
+      expect(effectiveApiKey).toEqual('essu_user_created_key');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('uiam_api_key', 'provisioned');
+    });
+
+    test('records a "user_created_key" UIAM run when the rule persisted a user-supplied UIAM API key', async () => {
+      getFakeKibanaRequest(
+        { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
+        'default',
+        null,
+        { uiamApiKey: 'essu_user_created_key', apiKeyCreatedByUser: true }
+      );
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('uiam_api_key', 'user_created_key');
+    });
+
+    test('falls back to the UIAM API key when config is set to es and the rule has no ES API key', async () => {
+      const esContext = { ...context, logger: mockLogger } as unknown as TaskRunnerContext;
+
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(esContext, 'default', null, {
+        uiamApiKey: 'essu_user_created_key',
+      });
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+      });
+      expect(effectiveApiKey).toEqual('essu_user_created_key');
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'ES API key is not provided to create a fake request, falling back to UIAM API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('uiam_api_key', 'provisioned');
+    });
+
+    test('marks the fake request as carrying an external credential when the rule persisted uiamApiKeyExternal', async () => {
+      const { fakeRequest } = getFakeKibanaRequest(
+        { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
+        'default',
+        null,
+        { uiamApiKey: 'essu_user_created_key', uiamApiKeyExternal: true }
+      );
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+      });
+      expect(isExternalUiamCredential(fakeRequest)).toBe(true);
+    });
+
+    test('marks the fake request as carrying an external credential when config is set to es and the rule has no ES API key', async () => {
+      const esContext = { ...context, logger: mockLogger } as unknown as TaskRunnerContext;
+
+      const { fakeRequest } = getFakeKibanaRequest(esContext, 'default', null, {
+        uiamApiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+      });
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+      });
+      expect(isExternalUiamCredential(fakeRequest)).toBe(true);
+    });
+
+    test('does not mark the fake request when uiamApiKeyExternal is not persisted, even for user-created keys', async () => {
+      const { fakeRequest } = getFakeKibanaRequest(
+        { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
+        'default',
+        null,
+        { uiamApiKey: 'essu_user_created_key', apiKeyCreatedByUser: true }
+      );
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+      });
+      expect(isExternalUiamCredential(fakeRequest)).toBe(false);
     });
 
     test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is false', () => {
@@ -325,6 +413,7 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'fallback_unexpected');
     });
 
     test('logs a debug message and records a "likely_non_cloud_user" fallback metric for likely non-Cloud user API key owners', () => {
@@ -346,6 +435,7 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('likely_non_cloud_user');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'fallback_likely_non_cloud_user');
     });
 
     test('logs a debug message and records a "user_created_key" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is true with an ES API key', () => {
@@ -364,6 +454,7 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('user_created_key');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'user_created_key');
     });
 
     test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is true without an ES API key', () => {
@@ -384,6 +475,9 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
+      // No credential is used for the run, so the usage counter must not report
+      // an ES-key run.
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('none', 'not_set');
       // No credential is available, so the request must stay unauthenticated
       // rather than carry a literal `ApiKey null` header.
       expect(fakeRequest.headers).toEqual({});
@@ -406,9 +500,10 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'fallback_unexpected');
     });
 
-    test('includes the rule id in the UIAM log tags when provided', () => {
+    test('includes the rule id in the UIAM log labels when provided', () => {
       const uiamContext = {
         ...context,
         shouldGrantUiam: true,
@@ -423,7 +518,7 @@ describe('rule_loader', () => {
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
-        { tags: expect.arrayContaining([ruleId]) }
+        expect.objectContaining({ labels: expect.objectContaining({ ruleId }) })
       );
     });
   });

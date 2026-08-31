@@ -144,36 +144,38 @@ export function AdvancedSettings() {
           </EuiFlexItem>
         </EuiFlexGrid>
 
-        <EuiFormRow isInvalid={getFieldState('settings.preventInitialBackfill').invalid}>
-          <Controller
-            name="settings.preventInitialBackfill"
-            control={control}
-            render={({ field: { ref, onChange, ...field } }) => (
-              <EuiCheckbox
-                id={preventBackfillCheckbox}
-                label={
-                  <span>
-                    {i18n.translate('xpack.slo.sloEdit.settings.preventInitialBackfill.label', {
-                      defaultMessage: 'Prevent initial backfill of data',
-                    })}{' '}
-                    <EuiIconTip
-                      content={i18n.translate(
-                        'xpack.slo.sloEdit.settings.preventInitialBackfill.tooltip',
-                        {
-                          defaultMessage:
-                            'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.',
-                        }
-                      )}
-                      position="top"
-                    />
-                  </span>
-                }
-                checked={Boolean(field.value)}
-                onChange={(event: any) => onChange(event.target.checked)}
-              />
-            )}
-          />
-        </EuiFormRow>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFormRow isInvalid={getFieldState('settings.preventInitialBackfill').invalid}>
+            <Controller
+              name="settings.preventInitialBackfill"
+              control={control}
+              render={({ field: { ref, onChange, ...field } }) => (
+                <EuiCheckbox
+                  id={preventBackfillCheckbox}
+                  label={
+                    <span>
+                      {i18n.translate('xpack.slo.sloEdit.settings.preventInitialBackfill.label', {
+                        defaultMessage: 'Prevent initial backfill of data',
+                      })}{' '}
+                      <EuiIconTip
+                        content={i18n.translate(
+                          'xpack.slo.sloEdit.settings.preventInitialBackfill.tooltip',
+                          {
+                            defaultMessage:
+                              'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.',
+                          }
+                        )}
+                        position="top"
+                      />
+                    </span>
+                  }
+                  checked={Boolean(field.value)}
+                  onChange={(event: any) => onChange(event.target.checked)}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiAccordion>
   );

@@ -52,6 +52,7 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { FiltersSection } from './filters/filters_section';
 import { KPIsSection } from './kpis/kpis_section';
 import { AttacksTour, AttacksTourProvider, WelcomeTourCallout } from './tour';
+import { WorkflowsPromotionCallout } from './workflows_promotion_callout';
 import { GenerationsControlCenterFlyout } from './generations_control_center';
 import { GENERATIONS_BUTTON } from './generations_control_center/translations';
 
@@ -65,7 +66,8 @@ export const ATTACKS_PAGE_TYPE_FILTER_TEST_ID = 'attacks-page-type-filter';
 export const ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'attacks-page-assignee-filter';
 export const ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID = 'attacks-page-connector-filter';
 export const ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID = 'attacks-page-standard-filters';
-const FILTERS_SECTION_WIDTH = 480;
+const GROUP_FILTERS_MAX_WIDTH = 640;
+const FILTERS_SECTION_MIN_WIDTH = 480;
 
 const ATTACKS_PAGE = 'attacks';
 const FILTER_CATEGORY = 'filters';
@@ -267,7 +269,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj={ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID}
-                    iconType="list"
+                    iconType="listBullet"
                     onClick={openControlCenter}
                     size="s"
                   >
@@ -286,10 +288,11 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
             </HeaderPage>
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />
+            <WorkflowsPromotionCallout />
             <WelcomeTourCallout />
             <AttacksTour />
             <EuiFlexGroup direction="row" responsive={false} wrap={true}>
-              <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
+              <EuiFlexItem grow={1} style={{ maxWidth: GROUP_FILTERS_MAX_WIDTH }}>
                 <EuiFlexGroup direction="row" responsive={false}>
                   <EuiFlexItem grow={1} data-test-subj={ATTACKS_PAGE_TYPE_FILTER_TEST_ID}>
                     <TypeFilter
@@ -319,7 +322,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
               <VerticalDivider grow={false} aria-hidden={true} />
               <EuiFlexItem
                 grow={1}
-                style={{ minWidth: FILTERS_SECTION_WIDTH }}
+                style={{ minWidth: FILTERS_SECTION_MIN_WIDTH }}
                 data-test-subj={ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID}
               >
                 <FiltersSection

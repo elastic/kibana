@@ -8,7 +8,6 @@
 import type { KbnClient } from '@kbn/test';
 import type { Case, CasePostRequest } from '@kbn/cases-plugin/common';
 import { CaseSeverity, CASES_URL, ConnectorTypes } from '@kbn/cases-plugin/common';
-import type { AxiosError } from 'axios';
 import { EndpointError } from '../errors';
 
 export interface IndexedCase {
@@ -80,17 +79,11 @@ export const deleteIndexedCase = async (
       },
     });
   } catch (_error) {
-    const error = _error as AxiosError;
+    const error = _error as Error & { status?: number };
 
     // ignore 404 (not found) -data has already been deleted
-    if ((error as AxiosError).response?.status !== 404) {
-      const message = `${error.message}
-  Request:
-    ${error.request.method} ${error.request.path}
-  Response Body:
-    ${JSON.stringify(error.response?.data ?? {}, null, 2)}`;
-
-      throw new EndpointError(message, error);
+    if (error.status !== 404) {
+      throw new EndpointError(error.message, error);
     }
   }
 

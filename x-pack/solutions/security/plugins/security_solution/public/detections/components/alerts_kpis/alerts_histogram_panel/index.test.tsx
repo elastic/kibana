@@ -441,6 +441,24 @@ describe('AlertsHistogramPanel', () => {
         );
         wrapper.unmount();
       });
+
+      it('when isExpanded is true, uses the expanded panel height', () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} isExpanded={true} panelHeight={375} />
+          </TestProviders>
+        );
+        expect(getByTestId('alerts-histogram-panel')).toHaveStyleRule('height', '375px');
+      });
+
+      it('when isExpanded is false, uses the collapsed panel height', () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} isExpanded={false} panelHeight={375} />
+          </TestProviders>
+        );
+        expect(getByTestId('alerts-histogram-panel')).toHaveStyleRule('height', '64px');
+      });
     });
 
     describe('When setIsExpanded is not available, use toggleQuery', () => {

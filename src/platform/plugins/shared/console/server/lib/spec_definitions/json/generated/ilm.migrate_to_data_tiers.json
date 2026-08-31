@@ -12,6 +12,10 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "legacy_template_to_delete": "",
+      "node_attribute": ""
+    },
     "methods": [
       "POST"
     ],

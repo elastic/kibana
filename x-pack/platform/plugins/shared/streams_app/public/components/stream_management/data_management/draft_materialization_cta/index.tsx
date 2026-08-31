@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -38,6 +39,8 @@ export function DraftMaterializationCTA({
     },
     core: { notifications },
   } = useKibana();
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const materialize = async () => {
     setIsMaterializing(true);
@@ -122,9 +125,11 @@ export function DraftMaterializationCTA({
 
       {isModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.streams.draftMaterialization.modal.title', {
             defaultMessage: 'Convert draft stream to ingest-time?',
           })}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={() => setIsModalVisible(false)}
           onConfirm={materialize}
           cancelButtonText={i18n.translate('xpack.streams.draftMaterialization.modal.cancel', {

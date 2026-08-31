@@ -43,13 +43,13 @@ interface BulkUpgradeTaskState {
 }
 
 export async function _runBulkUpgradeTask({
-  abortController,
+  signal,
   taskParams,
   logger,
   request,
 }: {
   taskParams: BulkUpgradeTaskParams;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   request: KibanaRequest;
 }) {
@@ -67,7 +67,7 @@ export async function _runBulkUpgradeTask({
 
   for (const pkg of packages) {
     // Throw between package install if task is aborted
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
     try {

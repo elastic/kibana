@@ -9,14 +9,20 @@ import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 
 import { TagManagementPage } from './tag_management_page';
+import { SavedObjectsListingPage } from './saved_objects_listing_page';
+import { SavedObjectsManagementPage } from './saved_objects_management_page';
 
 export interface TaggingPageObjects extends PageObjects {
   tagManagement: TagManagementPage;
+  savedObjectsListing: SavedObjectsListingPage;
+  savedObjectsManagement: SavedObjectsManagementPage;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): TaggingPageObjects {
   return {
     ...pageObjects,
     tagManagement: createLazyPageObject(TagManagementPage, page),
+    savedObjectsListing: createLazyPageObject(SavedObjectsListingPage, page),
+    savedObjectsManagement: createLazyPageObject(SavedObjectsManagementPage, page),
   };
 }

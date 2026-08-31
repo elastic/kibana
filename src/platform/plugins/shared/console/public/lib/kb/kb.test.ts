@@ -166,4 +166,148 @@ describe('Knowledge base', () => {
       expect(kb.getKibanaApiDocLinks()).toEqual({ foo: 'bar' });
     });
   });
+
+  describe('WHEN body rules use a generated shared global', () => {
+    it('SHOULD resolve the shared rules through the existing scope-link consumer', () => {
+      const api = kb._test.loadApisFromJson({
+        es: {
+          globals: {
+            __generated_rule: {
+              first_property: '',
+              second_property: '',
+            },
+          },
+          endpoints: {
+            endpoint: {
+              data_autocomplete_rules: {
+                __scope_link: 'GLOBAL.__generated_rule',
+              },
+            },
+          },
+        },
+      });
+      kb._test.setActiveApi(api);
+      const context = {
+        otherTokenValues: [],
+        endpointComponentResolver: kb.getEndpointBodyCompleteComponents,
+        globalComponentResolver: kb.getGlobalAutocompleteComponents,
+      } as AutoCompleteContext & {
+        endpointComponentResolver: typeof kb.getEndpointBodyCompleteComponents;
+        globalComponentResolver: typeof kb.getGlobalAutocompleteComponents;
+      };
+
+      populateContext(['{'], context, null, true, kb.getEndpointBodyCompleteComponents('endpoint'));
+
+      expect(context.autoCompleteSet).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'first_property' }),
+          expect.objectContaining({ name: 'second_property' }),
+        ])
+      );
+    });
+  });
+
+  describe('WHEN a mapping field name collides with a global rule', () => {
+    it('SHOULD prefer mapping wildcard suggestions through endpoint scope links', () => {
+      const api = kb._test.loadApisFromJson({
+        es: {
+          globals: {
+            query: {
+              bool: {},
+              match: {},
+            },
+          },
+          endpoints: {
+            put_mapping: {
+              data_autocomplete_rules: {
+                properties: {
+                  '*': {
+                    analyzer: 'standard',
+                    type: {
+                      __one_of: ['keyword', 'text'],
+                    },
+                  },
+                },
+              },
+            },
+            'indices.put_mapping': {
+              data_autocomplete_rules: {
+                __scope_link: 'put_mapping',
+              },
+            },
+          },
+        },
+      });
+      kb._test.setActiveApi(api);
+      const context = {
+        otherTokenValues: [],
+        endpointComponentResolver: kb.getEndpointBodyCompleteComponents,
+        globalComponentResolver: kb.getGlobalAutocompleteComponents,
+      } as AutoCompleteContext & {
+        endpointComponentResolver: typeof kb.getEndpointBodyCompleteComponents;
+        globalComponentResolver: typeof kb.getGlobalAutocompleteComponents;
+      };
+
+      populateContext(
+        ['{', 'properties', '{', 'query', '{'],
+        context,
+        null,
+        true,
+        kb.getEndpointBodyCompleteComponents('indices.put_mapping')
+      );
+
+      const suggestionNames = context.autoCompleteSet?.map(({ name }) => name);
+      expect(suggestionNames).toEqual(expect.arrayContaining(['analyzer', 'type']));
+      expect(suggestionNames).not.toContain('bool');
+      expect(suggestionNames).not.toContain('match');
+    });
+  });
+
+  describe('WHEN body rules contain primitive suggestions', () => {
+    it('SHOULD preserve boolean, number, and string term types', () => {
+      const api = kb._test.loadApisFromJson({
+        es: {
+          endpoints: {
+            endpoint: {
+              data_autocomplete_rules: {
+                value: {
+                  __one_of: [true, false, 0, 42, 'false', '42'],
+                },
+              },
+            },
+          },
+        },
+      });
+      kb._test.setActiveApi(api);
+      const context = {
+        otherTokenValues: [],
+        endpointComponentResolver: kb.getEndpointBodyCompleteComponents,
+        globalComponentResolver: kb.getGlobalAutocompleteComponents,
+      } as AutoCompleteContext & {
+        endpointComponentResolver: typeof kb.getEndpointBodyCompleteComponents;
+        globalComponentResolver: typeof kb.getGlobalAutocompleteComponents;
+      };
+
+      populateContext(
+        ['{', 'value'],
+        context,
+        null,
+        true,
+        kb.getEndpointBodyCompleteComponents('endpoint')
+      );
+
+      expect(
+        context.autoCompleteSet
+          ?.map(({ name }) => `${typeof name}:${String(name)}`)
+          .sort((left, right) => left.localeCompare(right))
+      ).toEqual([
+        'boolean:false',
+        'boolean:true',
+        'number:0',
+        'number:42',
+        'string:42',
+        'string:false',
+      ]);
+    });
+  });
 });

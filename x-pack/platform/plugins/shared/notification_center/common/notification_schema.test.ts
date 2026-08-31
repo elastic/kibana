@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { notificationWriteSchema, notificationReadSchema } from './notification_schema';
+import {
+  notificationWriteSchema,
+  notificationReadSchema,
+  notificationQueryParamsSchema,
+} from './notification_schema';
 import type { Notification, NotificationInput, NotificationDocument } from './types';
 
 /** A producer submission — no `@timestamp` (NC stamps it on ingest). */
 const validInput = {
-  notification_id: 'inference:my-endpoint:deprecated',
+  notification_id: 'inference:modelStatus:my-endpoint:deprecated',
   event_timestamp: '2026-06-17T00:00:00.000Z',
+  namespace: 'inference',
   type: 'modelStatus',
   title: 'Inference endpoint deprecated',
   description: 'Your inference endpoint is deprecated and will stop working in a future version.',
-  source_app_id: 'inference',
   severity: 'warning',
   cta: {
-    link: '/app/management/ml/inference',
+    link: '/app/management/data/inference_endpoints',
     linkText: 'View inference endpoints',
   },
 } satisfies NotificationInput;
@@ -44,27 +48,40 @@ describe('notificationWriteSchema', () => {
     ).toThrow();
   });
 
-  it.each(['notification_id', 'type', 'title', 'description', 'source_app_id'] as const)(
+  it.each(['notification_id', 'namespace', 'type', 'title', 'description'] as const)(
     'rejects an empty %s',
     (field) => {
       expect(() => notificationWriteSchema.parse({ ...validInput, [field]: '' })).toThrow();
     }
   );
 
-  it.each([
-    'notification_id',
-    'event_timestamp',
-    'type',
-    'title',
-    'description',
-    'source_app_id',
-  ] as const)('requires %s', (field) => {
-    const { [field]: _omitted, ...rest } = validInput;
-    expect(() => notificationWriteSchema.parse(rest)).toThrow();
+  it.each(['notification_id', 'namespace', 'type', 'title', 'description'] as const)(
+    'requires %s',
+    (field) => {
+      const { [field]: _omitted, ...rest } = validInput;
+      expect(() => notificationWriteSchema.parse(rest)).toThrow();
+    }
+  );
+
+  it('accepts an omitted event_timestamp (state notifications carry none)', () => {
+    const { event_timestamp: _omitted, ...rest } = validInput;
+    expect(() => notificationWriteSchema.parse(rest)).not.toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() => notificationWriteSchema.parse({ ...validInput, unexpected: 'nope' })).toThrow();
+  });
+
+  describe('namespace / type registry', () => {
+    it('rejects a namespace not in the registry', () => {
+      expect(() => notificationWriteSchema.parse({ ...validInput, namespace: 'nope' })).toThrow();
+    });
+
+    it('rejects a type not registered under its namespace', () => {
+      expect(() =>
+        notificationWriteSchema.parse({ ...validInput, type: 'notARegisteredType' })
+      ).toThrow();
+    });
   });
 
   describe('severity', () => {
@@ -127,7 +144,7 @@ describe('notificationWriteSchema', () => {
     });
 
     it('accepts an internal path link', () => {
-      const cta = { link: '/app/ml/inference', linkText: 'View' };
+      const cta = { link: '/app/management/data/inference_endpoints', linkText: 'View' };
       expect(notificationWriteSchema.parse({ ...validInput, cta }).cta).toEqual(cta);
     });
 
@@ -136,7 +153,7 @@ describe('notificationWriteSchema', () => {
       'https://evil.com',
       '//evil.com',
       '/\\evil.com',
-      'app/ml/inference',
+      'app/management/data/inference_endpoints',
     ])('rejects a non-internal link (%s)', (link) => {
       expect(() =>
         notificationWriteSchema.parse({
@@ -156,6 +173,11 @@ describe('notificationReadSchema', () => {
   it('preserves unknown top-level fields written by a newer node (loose)', () => {
     const fromNewerNode = { ...validDocument, future_field: 'kept' };
     expect(notificationReadSchema.parse(fromNewerNode)).toEqual(fromNewerNode);
+  });
+
+  it('still reads a namespace/type no longer in the registry', () => {
+    const removed = { ...validDocument, namespace: 'retiredApp', type: 'retiredType' };
+    expect(notificationReadSchema.parse(removed)).toEqual(removed);
   });
 
   it('requires @timestamp', () => {
@@ -199,5 +221,27 @@ describe('NotificationDocument typing', () => {
     // @ts-expect-error — write payload lacks @timestamp, so it is not a NotificationDocument
     const unstamped: NotificationDocument = notificationWriteSchema.parse(validInput);
     expect(unstamped).toBeDefined();
+  });
+});
+
+describe('notificationQueryParamsSchema', () => {
+  it('accepts the document-level filters', () => {
+    expect(
+      notificationQueryParamsSchema.parse({
+        namespace: 'inference',
+        type: 'modelStatus',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-20T00:00:00.000Z',
+      })
+    ).toEqual({
+      namespace: 'inference',
+      type: 'modelStatus',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-20T00:00:00.000Z',
+    });
+  });
+
+  it('rejects unknown params (strict)', () => {
+    expect(() => notificationQueryParamsSchema.parse({ nope: 'value' })).toThrow();
   });
 });

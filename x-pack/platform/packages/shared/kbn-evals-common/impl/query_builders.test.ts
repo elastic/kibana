@@ -9,22 +9,78 @@ import {
   buildExperimentFilterQuery,
   buildExampleScoresQuery,
   buildDatasetExampleScoresQuery,
+  buildSpaceFilter,
   buildStatsAggregation,
   parseStatsAggregationResponse,
+  buildEvaluatorModelsAggregation,
+  parseEvaluatorModelsAggregation,
   SCORES_SORT_ORDER,
   buildExperimentsListingFilterQuery,
   buildExperimentsListingAggregation,
   parseExperimentsListingResponse,
   buildModelDisplayId,
+  escapeWildcard,
 } from './query_builders';
 
 describe('query_builders', () => {
+  describe('escapeWildcard', () => {
+    it('escapes wildcard metacharacters so they match literally', () => {
+      // input chars: a * b ? c \ d  ->  a \* b \? c \\ d
+      expect(escapeWildcard('a*b?c\\d')).toBe('a\\*b\\?c\\\\d');
+    });
+
+    it('leaves input without metacharacters unchanged', () => {
+      expect(escapeWildcard('feature/in-tool')).toBe('feature/in-tool');
+    });
+  });
+
+  describe('buildSpaceFilter', () => {
+    it('matches the space, plus docs predating space-awareness in the default space', () => {
+      expect(buildSpaceFilter('default')).toEqual({
+        bool: {
+          should: [
+            { terms: { space_ids: ['default'] } },
+            { bool: { must_not: { exists: { field: 'space_ids' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('matches only the space itself elsewhere, with no legacy fallback', () => {
+      expect(buildSpaceFilter('marketing')).toEqual({
+        bool: {
+          should: [{ terms: { space_ids: ['marketing'] } }],
+          minimum_should_match: 1,
+        },
+      });
+    });
+  });
+
   describe('buildExampleScoresQuery', () => {
     it('filters by example.id', () => {
       const query = buildExampleScoresQuery('example-123');
       expect(query).toEqual({
         bool: { must: [{ term: { 'example.id': 'example-123' } }] },
       });
+    });
+
+    it('adds a dataset filter when datasetId is provided', () => {
+      const query = buildExampleScoresQuery('example-123', { datasetId: 'dataset-abc' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual({ term: { 'example.dataset.id': 'dataset-abc' } });
+    });
+
+    it('omits the dataset filter when datasetId is absent', () => {
+      const query = buildExampleScoresQuery('example-123', {});
+      expect(query.bool.must).toHaveLength(1);
+      expect(query.bool.must[0]).toEqual({ term: { 'example.id': 'example-123' } });
+    });
+
+    it('adds a space filter when spaceId is provided', () => {
+      const query = buildExampleScoresQuery('example-123', { spaceId: 'marketing' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual(buildSpaceFilter('marketing'));
     });
   });
 
@@ -53,6 +109,14 @@ describe('query_builders', () => {
           ],
         },
       });
+    });
+
+    it('adds a space filter when spaceId is provided', () => {
+      const query = buildDatasetExampleScoresQuery('dataset-123', 'experiment-123', {
+        spaceId: 'default',
+      });
+      expect(query.bool.must).toHaveLength(3);
+      expect(query.bool.must[2]).toEqual(buildSpaceFilter('default'));
     });
   });
 
@@ -95,6 +159,12 @@ describe('query_builders', () => {
         bool: { must: [{ term: { 'metadata.execution_id': 'run-abc' } }] },
       });
     });
+
+    it('adds a space filter when spaceId is provided', () => {
+      const query = buildExperimentFilterQuery('experiment-123', { spaceId: 'marketing' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual(buildSpaceFilter('marketing'));
+    });
   });
 
   describe('buildStatsAggregation', () => {
@@ -111,6 +181,57 @@ describe('query_builders', () => {
       expect(agg.by_dataset.aggs.by_evaluator.aggs.score_median).toEqual({
         percentiles: { field: 'evaluator.score', percents: [50] },
       });
+    });
+
+    it('aggregates the judge model within each evaluator bucket, family and provider nested under the id', () => {
+      const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
+
+      expect(aggs.evaluator_model_id).toEqual({
+        terms: { field: 'evaluator.model.id', size: 1 },
+        aggs: {
+          family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        },
+      });
+    });
+  });
+
+  describe('buildEvaluatorModelsAggregation', () => {
+    it('collects up to twenty judges, family and provider nested under the id', () => {
+      expect(buildEvaluatorModelsAggregation()).toEqual({
+        terms: { field: 'evaluator.model.id', size: 20 },
+        aggs: {
+          family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        },
+      });
+    });
+  });
+
+  describe('parseEvaluatorModelsAggregation', () => {
+    it('keeps the order the aggregation returned, so the first judge is the most used', () => {
+      expect(
+        parseEvaluatorModelsAggregation({
+          evaluator_models: {
+            buckets: [
+              {
+                key: 'gpt-4o',
+                family: { buckets: [{ key: 'GPT' }] },
+                provider: { buckets: [{ key: 'OpenAI' }] },
+              },
+              { key: 'claude-3', family: { buckets: [] }, provider: { buckets: [] } },
+            ],
+          },
+        })
+      ).toEqual([
+        { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
+        { id: 'claude-3', family: undefined, provider: undefined },
+      ]);
+    });
+
+    it('reports no judges for an experiment scored only by code evaluators', () => {
+      expect(parseEvaluatorModelsAggregation({ evaluator_models: { buckets: [] } })).toEqual([]);
+      expect(parseEvaluatorModelsAggregation(undefined)).toEqual([]);
     });
   });
 
@@ -179,6 +300,54 @@ describe('query_builders', () => {
       });
     });
 
+    it('filters by search matching experiment name or branch', () => {
+      const query = buildExperimentsListingFilterQuery({ search: 'in-tool' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    wildcard: { experiment_name: { value: '*in-tool*', case_insensitive: true } },
+                  },
+                  {
+                    wildcard: {
+                      'metadata.git.branch': { value: '*in-tool*', case_insensitive: true },
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('escapes wildcard metacharacters in the branch filter', () => {
+      const query = buildExperimentsListingFilterQuery({ branch: 'feature/foo?bar' }) as {
+        bool: { filter: Array<{ wildcard: { 'metadata.git.branch': { value: string } } }> };
+      };
+      expect(query.bool.filter[0].wildcard['metadata.git.branch'].value).toBe(
+        '*feature/foo\\?bar*'
+      );
+    });
+
+    it('escapes wildcard metacharacters in the search filter for both fields', () => {
+      const query = buildExperimentsListingFilterQuery({ search: 'a*b' }) as {
+        bool: {
+          filter: Array<{
+            bool: { should: Array<{ wildcard: Record<string, { value: string }> }> };
+          }>;
+        };
+      };
+      const should = query.bool.filter[0].bool.should;
+      expect(should[0].wildcard.experiment_name.value).toBe('*a\\*b*');
+      expect(should[1].wildcard['metadata.git.branch'].value).toBe('*a\\*b*');
+    });
+
     it('filters by datasetId', () => {
       const query = buildExperimentsListingFilterQuery({ datasetId: 'dataset-1' });
       expect(query).toEqual({
@@ -205,6 +374,16 @@ describe('query_builders', () => {
         bool: {
           must_not: [preflightExclusion],
           filter: [{ term: { 'metadata.ci.build_id': 'bk-abc123' } }],
+        },
+      });
+    });
+
+    it('filters by spaceId', () => {
+      const query = buildExperimentsListingFilterQuery({ spaceId: 'marketing' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [buildSpaceFilter('marketing')],
         },
       });
     });
@@ -258,9 +437,7 @@ describe('query_builders', () => {
           'task_model_id',
           'task_model_family',
           'task_model_provider',
-          'evaluator_model_id',
-          'evaluator_model_family',
-          'evaluator_model_provider',
+          'evaluator_models',
           'git_branch',
           'git_commit_sha',
           'total_repetitions',
@@ -268,6 +445,18 @@ describe('query_builders', () => {
           'pull_request',
         ])
       );
+    });
+
+    it('collects several judge models with their own family and provider', () => {
+      const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
+
+      expect(agg.experiments.aggs.evaluator_models).toEqual({
+        terms: { field: 'evaluator.model.id', size: 20 },
+        aggs: {
+          family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        },
+      });
     });
   });
 
@@ -284,9 +473,15 @@ describe('query_builders', () => {
       task_model_id: { buckets: [{ key: 'gpt-4' }] },
       task_model_family: { buckets: [{ key: 'gpt-4' }] },
       task_model_provider: { buckets: [{ key: 'openai' }] },
-      evaluator_model_id: { buckets: [{ key: 'claude-3' }] },
-      evaluator_model_family: { buckets: [{ key: 'claude-3' }] },
-      evaluator_model_provider: { buckets: [{ key: 'anthropic' }] },
+      evaluator_models: {
+        buckets: [
+          {
+            key: 'claude-3',
+            family: { buckets: [{ key: 'claude-3' }] },
+            provider: { buckets: [{ key: 'anthropic' }] },
+          },
+        ],
+      },
       git_branch: { buckets: [{ key: 'main' }] },
       git_commit_sha: { buckets: [{ key: 'abc123' }] },
       total_repetitions: { value: 3 },
@@ -328,11 +523,76 @@ describe('query_builders', () => {
         dataset_names: ['Dataset One'],
         task_model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' },
         evaluator_model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' },
+        evaluator_models: [{ id: 'claude-3', family: 'claude-3', provider: 'anthropic' }],
         git_branch: 'main',
         git_commit_sha: 'abc123',
         total_repetitions: 3,
         ci: { build_url: 'https://buildkite.com/build/1', pull_request: '12345' },
       });
+    });
+
+    it('returns every distinct judge model when an experiment evaluators differ', () => {
+      const aggs = {
+        total_experiments: { value: 1 },
+        experiments: {
+          buckets: [
+            makeBucket({
+              evaluator_models: {
+                buckets: [
+                  {
+                    key: 'claude-3',
+                    family: { buckets: [{ key: 'Claude' }] },
+                    provider: { buckets: [{ key: 'Anthropic' }] },
+                  },
+                  {
+                    key: 'gpt-4o',
+                    family: { buckets: [{ key: 'GPT' }] },
+                    provider: { buckets: [{ key: 'OpenAI' }] },
+                  },
+                ],
+              },
+            }),
+          ],
+        },
+      };
+
+      const result = parseExperimentsListingResponse(aggs, { page: 1, perPage: 25 });
+
+      expect(result.experiments[0].evaluator_models).toEqual([
+        { id: 'claude-3', family: 'Claude', provider: 'Anthropic' },
+        { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
+      ]);
+      // The singular reports the most used judge, which is the bucket ES ordered first.
+      expect(result.experiments[0].evaluator_model).toEqual({
+        id: 'claude-3',
+        family: 'Claude',
+        provider: 'Anthropic',
+      });
+    });
+
+    it('omits the evaluator model for an experiment judged only by code evaluators', () => {
+      const result = parseExperimentsListingResponse(
+        {
+          total_experiments: { value: 1 },
+          experiments: { buckets: [makeBucket({ evaluator_models: { buckets: [] } })] },
+        },
+        { page: 1, perPage: 25 }
+      );
+
+      expect(result.experiments[0].evaluator_models).toEqual([]);
+      expect(result.experiments[0].evaluator_model).toBeUndefined();
+      expect(result.experiments[0].task_model).toBeDefined();
+    });
+
+    it('omits the evaluator model when the evaluator_models agg is absent', () => {
+      const { evaluator_models: _omitted, ...bucketWithoutModels } = makeBucket();
+      const result = parseExperimentsListingResponse(
+        { total_experiments: { value: 1 }, experiments: { buckets: [bucketWithoutModels] } },
+        { page: 1, perPage: 25 }
+      );
+
+      expect(result.experiments[0].evaluator_models).toEqual([]);
+      expect(result.experiments[0].evaluator_model).toBeUndefined();
     });
 
     it('slices to the correct page window', () => {
@@ -450,6 +710,86 @@ describe('query_builders', () => {
         example_count: 5,
         stats: { mean: 0.8, median: 0.85, std_dev: 0.1, min: 0.5, max: 1.0, count: 10 },
       });
+    });
+
+    it('attributes each evaluator to its own judge model, and none to code evaluators', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 5 },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'correctness',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'gpt-4o',
+                          family: { buckets: [{ key: 'GPT' }] },
+                          provider: { buckets: [{ key: 'OpenAI' }] },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    key: 'groundedness',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'claude-sonnet-4',
+                          family: { buckets: [{ key: 'Claude' }] },
+                          provider: { buckets: [{ key: 'Anthropic' }] },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    key: 'latency',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: { buckets: [] },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(
+        result.map(({ evaluator_name: name, evaluator_model: model }) => [name, model])
+      ).toEqual([
+        ['correctness', { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' }],
+        ['groundedness', { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' }],
+        ['latency', undefined],
+      ]);
+    });
+
+    it('omits the judge model when the evaluator bucket carries no model sub-aggregation', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 5 },
+              by_evaluator: {
+                buckets: [{ key: 'correctness', score_stats: {}, score_median: { values: {} } }],
+              },
+            },
+          ],
+        },
+      };
+
+      expect(parseStatsAggregationResponse(aggs)[0].evaluator_model).toBeUndefined();
     });
 
     it('falls back to dataset key when dataset_name bucket is empty', () => {

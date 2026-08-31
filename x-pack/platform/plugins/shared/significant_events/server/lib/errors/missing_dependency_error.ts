@@ -17,7 +17,3 @@ export class MissingDependencyError extends StatusError {
     this.name = 'MissingDependencyError';
   }
 }
-
-export function isMissingDependencyError(error: unknown): error is MissingDependencyError {
-  return error instanceof MissingDependencyError;
-}

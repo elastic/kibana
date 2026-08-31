@@ -10,13 +10,6 @@ The serverless plugin's start contract provides the following navigation-related
 
 ```typescript
 interface ServerlessPluginStart {
-  // Register a navigation tree for a serverless plugin
-  initNavigation: (
-    id: string,
-    navigationTree$: Observable<NavigationTreeDefinition>,
-    options?: { dataTestSubj?: string }
-  ) => void;
-
   // Set breadcrumbs for the current page
   setBreadcrumbs: (breadcrumbs, params) => void;
 
@@ -28,6 +21,11 @@ interface ServerlessPluginStart {
 }
 ```
 
+Navigation tree registration is not part of this contract. Serverless plugins register via
+`navigation.initNavigation()` (from `@kbn/navigation-plugin/public`), which is the single entry
+point into core's `ProjectNavigationService` — see the
+[Shared Navigation Plugin](/src/platform/plugins/shared/navigation/README.md).
+
 ## Components
 
 - **Navigation Cards**: Utilities for generating cards for a landing page in Stack Management
@@ -36,16 +34,19 @@ interface ServerlessPluginStart {
 
 This module connects the serverless plugin with Kibana's core navigation system by:
 
-1. Using the `initNavigation` method to register navigation trees for serverless plugins.
-2. Connecting the navigation tree to the `ProjectNavigationService` to manage active nodes and navigation state.
-3. Rendering the side navigation component using the navigation tree.
-4. Exposing navigation card generators for a Stack Management landing page
+1. Exposing navigation card generators for a Stack Management landing page.
+2. Setting breadcrumbs for the current page.
+
+Navigation tree registration (and the connection to `ProjectNavigationService`) is owned by the
+`navigation` plugin — see [Usage](#usage) below.
 
 ## Usage
 
 ### Registering Navigation Trees
 
-Serverless plugins register their navigation trees using the `initNavigation` method:
+Serverless plugins register their navigation trees using the navigation plugin's
+`initNavigation` method, which guarantees the user's stored customization is seeded before the
+navigation tree is registered:
 
 ```typescript
 // In your plugin's start method
@@ -60,11 +61,7 @@ public start(core: CoreStart, plugins: PluginsStart) {
   });
 
   // Register your navigation tree
-  plugins.serverless.initNavigation(
-    'your-plugin-id',
-    navigationTree$,
-    { dataTestSubj: 'yourPluginNavigation' }
-  );
+  plugins.navigation.initNavigation('your-plugin-id', navigationTree$);
 }
 ```
 

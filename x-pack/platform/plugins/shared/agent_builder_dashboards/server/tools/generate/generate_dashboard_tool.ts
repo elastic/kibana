@@ -17,6 +17,7 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
@@ -48,8 +49,15 @@ const generateDashboardSchema = z.object({
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call.
+ *
+ * `authoringNotesByPanelId` holds the one-sentence note describing every chart
+ * authored in this run, keyed by panel id. Panels that were not authored now
+ * (or whose engine returned no note) simply have no `authoring_note`.
  */
-const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
+const summarizeDashboard = (
+  dashboardData: DashboardAttachmentData,
+  authoringNotesByPanelId: Map<string, string>
+) => ({
   title: dashboardData.title,
   description: dashboardData.description,
   panels: dashboardData.panels.map((widget) => {
@@ -63,6 +71,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
           type: panel.type,
           id: panel.id,
           grid: panel.grid,
+          authoring_note: authoringNotesByPanelId.get(panel.id),
         })),
       };
     }
@@ -70,6 +79,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
       type: widget.type,
       id: widget.id,
       grid: widget.grid,
+      authoring_note: authoringNotesByPanelId.get(widget.id),
     };
   }),
   controls: (dashboardData.pinned_panels ?? []).map((control) => {
@@ -85,7 +95,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
  * Kibana attachment persistence so the LLM works against a lightweight reference:
  * - the prior payload is read server-side from `dashboardAttachmentId`,
  * - the generated payload is persisted as a `dashboard` attachment,
- * - the result returns only the attachment id, version, and a compact summary.
+ * - the result returns only the attachment id, version, and a compact dashboard summary.
  *
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
@@ -107,7 +117,8 @@ Use operations[] to:
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
+7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
+8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -124,7 +135,7 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
-        const { dashboardData, failures } = await executeDashboardOperations({
+        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
@@ -132,6 +143,11 @@ Use operations[] to:
             logger,
             modelProvider,
             events,
+            esClient,
+          }),
+          resolveCustomContentTemplate: createCustomContentTemplateResolver({
+            logger,
+            modelProvider,
             esClient,
           }),
         });
@@ -170,7 +186,15 @@ Use operations[] to:
               data: {
                 attachment_id: attachment.id,
                 version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(finalDashboardData),
+                dashboard: summarizeDashboard(
+                  finalDashboardData,
+                  new Map(
+                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
+                      panelId,
+                      authoringNote,
+                    ])
+                  )
+                ),
                 failures: failures.length > 0 ? failures : undefined,
               },
             },

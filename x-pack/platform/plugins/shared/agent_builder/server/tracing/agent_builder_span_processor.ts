@@ -8,7 +8,9 @@
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
+  ElasticGenAIAttributes,
   GenAISemanticConventions,
+  UserAttributes,
   parseJsonAttr,
   type GenAIInputMessage,
   type GenAIOutputMessage,
@@ -20,8 +22,9 @@ import {
   AGENT_BUILDER_BUILTIN_AGENTS,
   AGENT_BUILDER_BUILTIN_TOOLS,
 } from '@kbn/agent-builder-server/allow_lists';
+import { toHashedId } from '@kbn/agent-builder-server/telemetry';
 import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
-import { normalizeAgentIdForTelemetry, toHashedId } from '../telemetry/utils';
+import { normalizeAgentIdForTelemetry } from '../telemetry/utils';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 const BUILTIN_AGENT_IDS: Set<string> = new Set([
@@ -39,6 +42,7 @@ export interface TracingPrivacySettings {
   includeSystemPrompt: boolean;
   includeRealNames: boolean;
   includeRealIds: boolean;
+  includeUserData: boolean;
 }
 
 interface AgentBuilderSpanProcessorOpts {
@@ -79,11 +83,27 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
 }
 
 /**
+ * Replaces real `user.id` with SemConv `user.hash` and strips `user.name`
+ * when user-identity attributes are disabled.
+ */
+function anonymizeUserData(attributes: Record<string, unknown>): Record<string, unknown> {
+  const { [UserAttributes.UserName]: _userName, ...result } = attributes;
+
+  const userId = result[UserAttributes.UserId];
+  if (userId != null) {
+    result[UserAttributes.UserHash] = toHashedId(String(userId));
+    delete result[UserAttributes.UserId];
+  }
+
+  return result;
+}
+
+/**
  * Replaces user-created tool, agent, and workflow names with 'custom' to avoid
  * leaking user-chosen identifiers. Built-in tools and agents keep their real names.
- * `gen_ai.tool.definitions` and `gen_ai.tool.description` are stripped entirely
- * because they embed arbitrary tool names and descriptions as free-form text/JSON
- * that cannot be selectively anonymized.
+ * `gen_ai.tool.definitions`, `gen_ai.tool.description`, and conversation titles
+ * are stripped entirely because they embed free-form user-chosen text that cannot
+ * be selectively anonymized.
  * Returns the anonymized attributes and the (possibly rewritten) span name.
  */
 function anonymizeNames(
@@ -93,6 +113,7 @@ function anonymizeNames(
   const {
     [GenAISemanticConventions.GenAIToolDefinitions]: _defs,
     [GenAISemanticConventions.GenAIToolDescription]: _desc,
+    [ElasticGenAIAttributes.ConversationTitle]: _title,
     ...result
   } = attributes;
   let finalSpanName = spanName;
@@ -296,6 +317,10 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     let processedAttributes: Record<string, unknown> = settings.includeRealIds
       ? cleanAttributes
       : hashSensitiveAttributes(cleanAttributes);
+
+    processedAttributes = settings.includeUserData
+      ? processedAttributes
+      : anonymizeUserData(processedAttributes);
 
     processedAttributes = settings.includeToolDetails
       ? processedAttributes

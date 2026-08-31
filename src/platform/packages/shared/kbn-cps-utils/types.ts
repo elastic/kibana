@@ -9,6 +9,7 @@
 
 import type { ProjectRouting } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
+import type { HeaderContextMenuItemProps } from './components/project_picker_update';
 
 /**
  * Access levels for project routing picker
@@ -48,11 +49,16 @@ export interface ProjectsData {
   origin: CPSProject | null;
   linkedProjects: CPSProject[];
 }
+export interface CPSConfigurationLinks {
+  currentSpace: HeaderContextMenuItemProps;
+  manageCrossProjectSearch?: HeaderContextMenuItemProps;
+}
 
 export interface ICPSManager {
   whenReady(): Promise<void>;
   fetchProjects(projectRouting?: ProjectRouting): Promise<ProjectsData | null>;
   getTotalProjectCount(): number;
+  hasLinkedProjects(): boolean;
   getProjectRouting$(): Observable<ProjectRouting | undefined>;
   setProjectRouting(projectRouting: ProjectRouting | undefined): void;
   /**
@@ -64,4 +70,5 @@ export interface ICPSManager {
   updateDefaultProjectRouting(projectRouting?: ProjectRouting): void;
   getProjectPickerAccess$(): Observable<ProjectRoutingAccess>;
   registerAppAccess(appId: string, resolver: CPSAppAccessResolver): void;
+  getConfigurationLinks(): CPSConfigurationLinks;
 }

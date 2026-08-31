@@ -19,6 +19,7 @@ import {
 import {
   Streams as StreamsSchema,
   effectiveToIngestLifecycle,
+  isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRoot,
@@ -105,8 +106,17 @@ const StreamDetailGeneralDataInner = ({
     setRetentionPeriod: setPreviewRetentionPeriod,
     setTimelineModel: setPreviewTimelineModel,
     clearPreview: clearLifecyclePreview,
+    releaseHoldAfterRefresh,
     isDslDownsampleFlyoutOpen,
   } = useLifecyclePreview();
+
+  // DSL phases are derived synchronously, so release the held preview as soon as the refreshed
+  // definition lands. ILM phases load asynchronously, so `IlmLifecycleSummary` releases the hold
+  // itself once its stats are ready - releasing here would flash a loading skeleton.
+  useEffect(() => {
+    if (isIlmLifecycle(definition.effective_lifecycle)) return;
+    releaseHoldAfterRefresh();
+  }, [definition, releaseHoldAfterRefresh]);
   const { notifyAfterSave } = useLifecycleAfterSave();
   const { euiTheme } = useEuiTheme();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
@@ -536,29 +546,40 @@ const StreamDetailGeneralDataInner = ({
     if (!isImportFlyoutOpen) {
       return null;
     }
-    if (!importPreviewLifecycle) {
+
+    // With no stream selected yet, prime the preview with the target stream's own lifecycle so the
+    // first selection animates from the current state instead of snapping the bars into place.
+    const effectiveLifecycle =
+      importPreviewLifecycle ??
+      (isDslLifecycle(definition.effective_lifecycle) ||
+      isIlmLifecycle(definition.effective_lifecycle)
+        ? definition.effective_lifecycle
+        : null);
+
+    if (!effectiveLifecycle) {
       return { action: 'clear', hasUnsavedChanges: false };
     }
 
     const nextLifecycle = getImportedLifecycle({
-      effectiveLifecycle: importPreviewLifecycle,
+      effectiveLifecycle,
       targetIsTimeSeries: definition.index_mode === 'time_series',
     });
-    const importHasUnsavedChanges = nextLifecycle
-      ? !isEqual(definition.stream.ingest.lifecycle, nextLifecycle)
-      : false;
+    const importHasUnsavedChanges =
+      importPreviewLifecycle && nextLifecycle
+        ? !isEqual(definition.stream.ingest.lifecycle, nextLifecycle)
+        : false;
 
     if (
-      isIlmLifecycle(importPreviewLifecycle) &&
+      isIlmLifecycle(effectiveLifecycle) &&
       !importPreviewIlmPolicies.some(
-        (policy) => policy.name === importPreviewLifecycle.ilm.policy && policy.serializedPolicy
+        (policy) => policy.name === effectiveLifecycle.ilm.policy && policy.serializedPolicy
       )
     ) {
       return { action: 'clear', hasUnsavedChanges: importHasUnsavedChanges };
     }
 
     const preview = previewFromLifecycle({
-      lifecycle: importPreviewLifecycle,
+      lifecycle: effectiveLifecycle,
       ilmPolicies: importPreviewIlmPolicies,
       isServerless,
       ilmPhases,
@@ -575,6 +596,7 @@ const StreamDetailGeneralDataInner = ({
       hasUnsavedChanges: importHasUnsavedChanges,
     };
   }, [
+    definition.effective_lifecycle,
     definition.index_mode,
     definition.stream.ingest.lifecycle,
     euiTheme.colors.severity.success,
@@ -720,6 +742,7 @@ export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
   data,
+  refreshSignal,
   isImportFlyoutOpen,
   importPreviewLifecycle,
   importPreviewIlmPolicies,
@@ -727,13 +750,14 @@ export const StreamDetailGeneralData = ({
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
   data: ReturnType<typeof useDataStreamStats>;
+  refreshSignal?: number;
   isImportFlyoutOpen?: boolean;
   importPreviewLifecycle?: IngestStreamEffectiveLifecycle | null;
   importPreviewIlmPolicies?: IlmPolicyForFlyout[];
 }) => {
   return (
     <LifecycleAfterSaveProvider>
-      <LifecyclePreviewProvider>
+      <LifecyclePreviewProvider refreshSignal={refreshSignal}>
         <StreamDetailGeneralDataInner
           definition={definition}
           refreshDefinition={refreshDefinition}

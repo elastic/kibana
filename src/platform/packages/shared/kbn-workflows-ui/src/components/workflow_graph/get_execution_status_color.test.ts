@@ -32,18 +32,18 @@ const mockTheme = {
 describe('getExecutionStatusVisual', () => {
   it('returns success icon for COMPLETED', () => {
     const { iconType, isSpinner } = getExecutionStatusVisual(mockTheme, ExecutionStatus.COMPLETED);
-    expect(iconType).toBe('checkInCircleFilled');
+    expect(iconType).toBe('checkCircleFill');
     expect(isSpinner).toBeUndefined();
   });
 
   it('returns danger icon for FAILED', () => {
     const { iconType } = getExecutionStatusVisual(mockTheme, ExecutionStatus.FAILED);
-    expect(iconType).toBe('crossInACircleFilled');
+    expect(iconType).toBe('error');
   });
 
   it('returns danger icon for TIMED_OUT', () => {
     const { iconType } = getExecutionStatusVisual(mockTheme, ExecutionStatus.TIMED_OUT);
-    expect(iconType).toBe('crossInACircleFilled');
+    expect(iconType).toBe('error');
   });
 
   it('returns spinner play icon for RUNNING', () => {
@@ -54,7 +54,7 @@ describe('getExecutionStatusVisual', () => {
 
   it('returns skipped icon for SKIPPED', () => {
     const { iconType } = getExecutionStatusVisual(mockTheme, ExecutionStatus.SKIPPED);
-    expect(iconType).toBe('minusInCircle');
+    expect(iconType).toBe('minusCircle');
   });
 
   it('returns clock icon for WAITING', () => {
@@ -69,7 +69,7 @@ describe('getExecutionStatusVisual', () => {
 
   it('returns subdued icon for CANCELLED', () => {
     const { iconType } = getExecutionStatusVisual(mockTheme, ExecutionStatus.CANCELLED);
-    expect(iconType).toBe('crossInACircleFilled');
+    expect(iconType).toBe('error');
   });
 
   it('returns clock icon for PENDING', () => {

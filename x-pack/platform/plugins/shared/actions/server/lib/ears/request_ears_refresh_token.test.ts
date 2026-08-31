@@ -37,6 +37,7 @@ describe('requestEarsRefreshToken', () => {
       authorizeEndpoint: 'v1/my-provider/oauth/authorize',
       tokenEndpoint: 'v1/my-provider/oauth/token',
       refreshEndpoint: 'v1/my-provider/oauth/refresh',
+      revokeEndpoint: 'v1/my-provider/oauth/revoke',
     });
     mockResolveEarsUrl.mockReturnValue(REFRESH_URL);
     mockRequest.mockResolvedValue({

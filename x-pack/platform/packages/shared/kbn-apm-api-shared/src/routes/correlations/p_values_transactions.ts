@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { FailedTransactionsCorrelation } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -18,20 +18,22 @@ export interface PValuesResponse {
 
 export const pValuesTransactionsRoute = defineRoute<PValuesResponse>()({
   endpoint: 'POST /internal/apm/correlations/p_values/transactions',
-  params: z.object({
-    body: z
-      .object({
-        serviceName: z.string().optional(),
-        transactionName: z.string().optional(),
-        transactionType: z.string().optional(),
-        durationMin: z.coerce.number().optional(),
-        durationMax: z.coerce.number().optional(),
-      })
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(rangeSchema)
-      .extend({
-        fieldCandidates: z.array(z.string()),
-      }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z
+        .object({
+          serviceName: z.string().optional(),
+          transactionName: z.string().optional(),
+          transactionType: z.string().optional(),
+          durationMin: z.coerce.number().optional(),
+          durationMax: z.coerce.number().optional(),
+        })
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema)
+        .extend({
+          fieldCandidates: z.array(z.string()),
+        }),
+    })
+  ),
 });

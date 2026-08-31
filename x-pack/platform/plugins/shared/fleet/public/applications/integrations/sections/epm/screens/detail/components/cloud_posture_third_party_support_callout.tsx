@@ -7,7 +7,8 @@
 
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import type { PackageInfo } from '../../../../../../../../common';
@@ -28,9 +29,8 @@ export const CloudPostureThirdPartySupportCallout = ({
 
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         onDismiss={() => setUserHasDismissedWizCallout(true)}
-        iconType="popper"
         title={i18n.translate('xpack.fleet.epm.wizIntegration.newFeaturesCallout', {
           defaultMessage:
             'New! Starting from version 2.0, ingest vulnerability and misconfiguration findings from Wiz into Elastic. Leverage out-of-the-box contextual investigation and threat-hunting workflows.',

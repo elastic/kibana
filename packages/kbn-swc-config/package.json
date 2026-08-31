@@ -3,10 +3,11 @@
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "version": "1.0.0",
-  "main": "./src/index.ts",
+  "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.ts",
-    "./browser": "./src/browser.ts",
-    "./node": "./src/node.ts"
+    ".": "./src/index.js",
+    "./browser": "./src/browser.js",
+    "./node": "./src/node.js",
+    "./node_register": "./node_register.js"
   }
 }

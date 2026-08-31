@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout-security';
+import { apiTest, ELASTIC_INTERNAL_ORIGIN_HEADER, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
@@ -22,8 +22,8 @@ import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../../common
 
 const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'Kibana',
   'Content-Type': 'application/json;charset=UTF-8',
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
 };
 
 // AI-summary read/write routes are internal (security_solution) — version comes from the
@@ -81,13 +81,14 @@ const buildSummaryBody = (overrides: { generated_at?: number } = {}) => ({
 /**
  * Permissions matrix for the Entity AI Summary read/write routes.
  *
- * Proves the access-control model documented in Issue 2:
+ * Proves the access-control model:
  *  - generation is gated on FEATURE-level perms (securitySolution + entity-analytics)
  *    and an Enterprise license — not on the user's own metadata index write privilege.
  *  - persistence goes via `asInternalUser`, so a user WITHOUT metadata write can still
- *    generate + persist.
- *  - the read is gated on the user's OWN metadata read privilege: no read → on-demand
- *    fallback (`canRead: false`); with read → the persisted summary is returned.
+ *    persist — but only if they have metadata READ (probe before write).
+ *  - no metadata read → POST returns `{ created: false }` (in-session / on-demand only);
+ *    GET returns `{ summary: null, canRead: false }`.
+ *  - with metadata read → the persisted summary is returned / written as today.
  */
 apiTest.describe(
   'Entity AI Summary permissions',
@@ -249,6 +250,41 @@ apiTest.describe(
         // route degrades gracefully rather than surfacing a 403 to the client.
         expect(read).toHaveStatusCode(200);
         expect(read.body).toMatchObject({ summary: null, canRead: false });
+      }
+    );
+
+    apiTest(
+      'a user WITHOUT metadata read cannot persist (POST returns created: false)',
+      async ({ apiClient, samlAuth, esClient }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser({
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              { names: [ENTITIES_ALIAS_INDEX], privileges: ['read'] },
+              { names: [LATEST_ENTITY_INDEX], privileges: ['read'] },
+            ],
+          },
+          kibana: [{ base: [], feature: { siemV5: ['all'] }, spaces: ['*'] }],
+        });
+        const headers = { ...cookieHeader, ...INTERNAL_HEADERS };
+
+        const generatedAt = Date.now();
+        const write = await apiClient.post(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
+          headers,
+          responseType: 'json',
+          body: buildSummaryBody({ generated_at: generatedAt }),
+        });
+        expect(write).toHaveStatusCode(200);
+        expect(write.body).toMatchObject({ created: false });
+
+        // Confirm nothing was written for this timestamp (admin seed remains readable).
+        await esClient.indices.refresh({ index: METADATA_DATA_STREAM });
+        const adminRead = await apiClient.get(readUrl(TEST_ENTITY_ID, TEST_ENTITY_TYPE), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(adminRead).toHaveStatusCode(200);
+        expect(adminRead.body.summary?.generated_at).not.toBe(generatedAt);
       }
     );
 

@@ -1,0 +1,147 @@
+{
+  "sha1": "e0e5fc69c60542b84cfcb157aaf594ff41c48581",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "895776ff34fa094-c129e7cf5767d21",
+      "title": "Ingest Synthetics test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "c8dad933cd9e3b5-be21be8c0f093a7",
+      "title": "AlertingDefaults configures alerting defaults: add Slack connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/alerting_default.spec.ts",
+        "line": 26,
+        "column": 25
+      }
+    },
+    {
+      "id": "c8dad933cd9e3b5-a4c1e1e301cd7d5",
+      "title": "AlertingDefaults configures alerting defaults: add Email connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/alerting_default.spec.ts",
+        "line": 38,
+        "column": 25
+      }
+    },
+    {
+      "id": "6c46fc8be32a3a3-f33b7e9ee853aea",
+      "title": "Bulk edit — maintenance windows applies a maintenance window to selected monitors in bulk",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/bulk_edit_maintenance_windows.spec.ts",
+        "line": 86,
+        "column": 11
+      }
+    },
+    {
+      "id": "728feac9a49403e-cfa2476ff58cabc",
+      "title": "CustomStatusAlert creates a custom status alert rule",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_status_alert.spec.ts",
+        "line": 23,
+        "column": 28
+      }
+    },
+    {
+      "id": "8e3b6ee237d0715-74afbfcf9ca5efd",
+      "title": "Creates a custom TLS alert rule can filter monitors by KQL",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_tls_alert.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "8e3b6ee237d0715-41c3eabe24bb637",
+      "title": "Creates a custom TLS alert rule can filter monitors by type",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_tls_alert.spec.ts",
+        "line": 65,
+        "column": 10
+      }
+    },
+    {
+      "id": "8e3b6ee237d0715-761cf21fcc31efc",
+      "title": "Creates a custom TLS alert rule can create rule and fire alert",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_tls_alert.spec.ts",
+        "line": 74,
+        "column": 74
+      }
+    },
+    {
+      "id": "947eec4700d1a16-036cb48539f2f34",
+      "title": "DefaultStatusAlert creates default alert, triggers on down status, and recovers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/default_status_alert.spec.ts",
+        "line": 24,
+        "column": 8
+      }
+    }
+  ]
+}

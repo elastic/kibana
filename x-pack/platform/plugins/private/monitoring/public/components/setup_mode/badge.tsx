@@ -71,7 +71,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
     } else {
       return (
         <Fragment>
-          <EuiIcon type="flag" />
+          <EuiIcon type="flag" aria-hidden={true} />
           &nbsp;
           <EuiTextColor color="warning">
             {i18n.translate('xpack.monitoring.setupMode.monitorAllNodes', {

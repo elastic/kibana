@@ -9,7 +9,10 @@
 
 import { prettyCompactStringify } from '@kbn/std';
 import type { CoreTheme } from '@kbn/core/public';
+import { transparentize } from '@elastic/eui';
 import { getEuiThemeVars } from '@kbn/ui-theme';
+import type { Color, Gradient } from 'vega';
+import { easing } from 'ts-easing';
 import { normalizeObject } from '../vega_view/utils';
 
 function normalizeAndStringify(value: unknown) {
@@ -85,10 +88,32 @@ export const VegaThemeColors = {
   },
 };
 
-export function getVegaThemeColors(
+export function getVegaThemeColors<T extends 'grid' | 'title' | 'label' | 'default' | 'visColors'>(
   theme: CoreTheme,
-  colorToken: 'grid' | 'title' | 'label' | 'default' | 'visColors'
+  colorToken: T
 ) {
   const colorMode = theme.darkMode ? 'dark' : 'light';
-  return VegaThemeColors[theme.name as keyof typeof VegaThemeColors]?.[colorMode][colorToken];
+  return VegaThemeColors[theme.name as keyof typeof VegaThemeColors]?.[colorMode][colorToken] as
+    | (T extends 'visColors' ? Color[] : Color)
+    | undefined;
+}
+
+/** Default area fill gradient aligned with Lens styling. */
+export function getDefaultAreaGradientFill(defaultColor: string | string[]): Gradient {
+  const color = Array.isArray(defaultColor) ? defaultColor[0] : defaultColor;
+  const startOpacity = 0.15;
+  const stopCount = 12;
+
+  return {
+    gradient: 'linear',
+    x1: 0,
+    y1: 1,
+    x2: 0,
+    y2: 0,
+    stops: Array.from({ length: stopCount }, (_, i) => {
+      const offset = i / (stopCount - 1);
+      const opacity = startOpacity + (1 - startOpacity) * easing.inOutSine(offset);
+      return { offset, color: transparentize(color, opacity) };
+    }),
+  };
 }

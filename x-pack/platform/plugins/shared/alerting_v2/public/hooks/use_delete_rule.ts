@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesContentList } from './invalidate_rules_content_list';
 
 export const useDeleteRule = () => {
   const rulesApi = useService(RulesApi);
@@ -25,8 +26,9 @@ export const useDeleteRule = () => {
           values: { ruleName: name },
         })
       );
+      void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.tags());
+      queryClient.invalidateQueries(ruleKeys.allTags());
       queryClient.invalidateQueries(ruleKeys.details());
     },
     onError: () => {

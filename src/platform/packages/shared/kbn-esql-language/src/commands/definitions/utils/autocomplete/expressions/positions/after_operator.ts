@@ -20,7 +20,6 @@ import {
   hasVariadicSignature,
 } from '../../../signatures';
 import { getFunctionDefinition } from '../../../functions';
-import { removeFinalUnknownIdentiferArg } from '../../../shared';
 import { logicalOperators } from '../../../../all_operators';
 import { dispatchOperators } from '../operators/dispatcher';
 import type { ExpressionContext } from '../types';
@@ -28,7 +27,9 @@ import { SuggestionBuilder } from '../suggestion_builder';
 import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
 import {
   getIncompleteOperatorReason,
+  getRightmostOperator,
   normalizePreferredExpressionTypes,
+  removeFinalUnknownIdentiferArg,
   type IncompleteOperatorReason,
 } from '../utils';
 
@@ -37,33 +38,35 @@ import {
  * Handles special cases (IN, IS NULL) or delegates to generic operator logic
  */
 export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
-  const { expressionRoot, context } = ctx;
+  const { expressionRoot, context, parenthesizedExpressionPosition } = ctx;
 
   if (!expressionRoot) {
     return [];
   }
 
-  const rightmostOperator = getRightmostOperatorInFunctionTree(expressionRoot as ESQLFunction);
-  // If we don't pass rightmostOperator, for "field IN (x) AND field NOT IN (y"
-  // dispatchOperators sees AND (no handler) instead of NOT IN, failing to suggest comma.
-  const ctxWithRightmostOperator = { ...ctx, expressionRoot: rightmostOperator };
-
-  const specialSuggestions = await dispatchOperators(ctxWithRightmostOperator);
-
-  if (specialSuggestions) {
-    return specialSuggestions;
-  }
+  const rightmostOperator = getRightmostOperator(expressionRoot as ESQLFunction);
   const getExprType = (expression: ESQLAstItem) =>
     getExpressionType(expression, context?.columns, context?.unmappedFieldsStrategy);
-
   const reason = getIncompleteOperatorReason(rightmostOperator, getExprType);
-  const complete = reason === undefined;
+  const shouldDispatchSpecialOperator =
+    reason !== undefined || parenthesizedExpressionPosition !== 'after';
 
-  if (complete) {
-    return handleCompleteOperator(ctx, rightmostOperator, getExprType);
+  if (shouldDispatchSpecialOperator) {
+    // If we don't pass rightmostOperator, for "field IN (x) AND field NOT IN (y"
+    // dispatchOperators sees AND (no handler) instead of NOT IN, failing to suggest comma.
+    const ctxWithRightmostOperator = { ...ctx, expressionRoot: rightmostOperator };
+    const specialSuggestions = await dispatchOperators(ctxWithRightmostOperator);
+
+    if (specialSuggestions) {
+      return specialSuggestions;
+    }
   }
 
-  return handleIncompleteOperator(ctx, rightmostOperator, getExprType, reason);
+  if (reason !== undefined) {
+    return handleIncompleteOperator(ctx, rightmostOperator, getExprType, reason);
+  }
+
+  return handleCompleteOperator(ctx, rightmostOperator, getExprType);
 }
 
 /** Returns supported right-side types for binary operators matching the left-side type */
@@ -218,26 +221,4 @@ async function handleIncompleteOperator(
   }
 
   return builder.build();
-}
-
-/**
- * Finds the deepest binary operator in the right branch of an expression tree.
- *
- * Uses structural right-first traversal instead of position-based detection
- * to avoid ANTLR error recovery issues where incomplete expressions get
- * positions that corrupt location.min values.
- */
-function getRightmostOperatorInFunctionTree(fn: ESQLFunction): ESQLFunction {
-  const rightArg = fn.args[1];
-
-  if (
-    fn.subtype === 'binary-expression' &&
-    rightArg &&
-    !Array.isArray(rightArg) &&
-    rightArg.type === 'function'
-  ) {
-    return getRightmostOperatorInFunctionTree(rightArg as ESQLFunction);
-  }
-
-  return fn;
 }

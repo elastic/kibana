@@ -48,13 +48,25 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
   // Normalize a by-value legacy-vis (`visualization`) Vega panel to the future
   // native `vega` API shape (`config.spec`). Temporary bridge that pairs with the
   // expansion in `from_attachment`; remove once the native vega API ships.
+  // Panel-level settings (title, description, hide_*, drilldowns, …) live beside
+  // `savedVis` and must be preserved — same pattern as Lens below.
   if (panel.type === VISUALIZE_EMBEDDABLE_TYPE) {
     const vega = extractVegaSpecFromSavedVis(panel.config);
     if (vega) {
+      const { savedVis: _savedVis, ...restConfig } = (panel.config ?? {}) as {
+        savedVis?: unknown;
+      } & Record<string, unknown>;
       return {
         type: VEGA_VIS_TYPE,
         id: panel.id ?? '',
-        config: { spec: vega.spec, title: vega.title, description: vega.description },
+        config: {
+          ...restConfig,
+          spec: vega.spec,
+          // Prefer panel-level title/description (manual edits); fall back to savedVis.
+          title: typeof restConfig.title === 'string' ? restConfig.title : vega.title,
+          description:
+            typeof restConfig.description === 'string' ? restConfig.description : vega.description,
+        },
         grid: panel.grid,
       };
     }
@@ -63,12 +75,31 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
   if (isLensAttributesPanel(panel)) {
     const { attributes, ...restConfig } = panel.config;
     try {
-      const apiFormatAttributes = new LensConfigBuilder().toAPIFormat(attributes);
+      // Match Lens `transform_out`: panel-level title/description take precedence;
+      // attributes title/description are only a legacy fallback when the panel has none.
+      // Spreading `toAPIFormat` after `restConfig` would overwrite manual panel edits.
+      const {
+        title: attributesTitle,
+        description: attributesDescription,
+        ...apiConfig
+      } = new LensConfigBuilder().toAPIFormat(attributes);
+
+      const titleFallback =
+        !('title' in restConfig) && attributesTitle ? { title: attributesTitle } : {};
+      const descriptionFallback =
+        !('description' in restConfig) && attributesDescription
+          ? { description: attributesDescription }
+          : {};
 
       return {
         type: LENS_EMBEDDABLE_TYPE,
         id: panel.id ?? '',
-        config: { ...restConfig, ...apiFormatAttributes },
+        config: {
+          ...titleFallback,
+          ...descriptionFallback,
+          ...restConfig,
+          ...apiConfig,
+        },
         grid: panel.grid,
       };
     } catch {
