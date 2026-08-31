@@ -31,6 +31,7 @@ export * from './rule_change_history_schema';
 export * from './matched_action_policies_response_schema';
 export * from './matcher_data_fields_schema';
 export * from './action_policy_tags_schema';
+export * from './severity';
 export * from './create_alert_event_data_schema';
 export * from './rule_template_schema';
 export type { MatcherContext, MatcherContextFieldDescriptor } from './matcher_context';
