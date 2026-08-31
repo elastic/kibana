@@ -11,6 +11,8 @@ import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
+  CONVERSATION_METADATA_ARRAY_OBJECT_MAX_SIZE,
+  CONVERSATION_METADATA_OBJECT_KEY_NAME_MAX_LENGTH,
 } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -123,9 +125,20 @@ export function registerInternalConversationRoutes({
               // OBJECT fields: accept any plain object. Precise structural validation
               // (declared `properties`) happens in client.patchMetadata via the compiled
               // zod schema. The limits guard below enforces depth / total size caps.
-              schema.recordOf(schema.string(), schema.any()),
+              schema.recordOf(
+                schema.string({ maxLength: CONVERSATION_METADATA_OBJECT_KEY_NAME_MAX_LENGTH }),
+                schema.any()
+              ),
               // OBJECT_ARRAY fields: accept an array of plain objects.
-              schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+              schema.arrayOf(
+                schema.recordOf(
+                  schema.string({ maxLength: CONVERSATION_METADATA_OBJECT_KEY_NAME_MAX_LENGTH }),
+                  schema.any()
+                ),
+                {
+                  maxSize: CONVERSATION_METADATA_ARRAY_OBJECT_MAX_SIZE,
+                }
+              ),
             ]),
             {
               validate: (record) => {

@@ -563,6 +563,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
 
+export const CONVERSATION_METADATA_OBJECT_KEY_NAME_MAX_LENGTH = 1000;
+export const CONVERSATION_METADATA_ARRAY_OBJECT_MAX_SIZE = 1000;
+
 /**
  * Main structure representing a conversation with an agent.
  */
