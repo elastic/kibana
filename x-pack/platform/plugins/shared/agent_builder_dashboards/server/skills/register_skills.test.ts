@@ -36,6 +36,27 @@ describe('registerSkills', () => {
     expect(skill.content).not.toContain('is a miss');
   });
 
+  it('asks which prettify categories to fix before applying review corrections', () => {
+    expect(skill.content).toContain('## Prettifying a Dashboard');
+    expect(skill.content).toContain('data.review.problems');
+    expect(skill.content).toContain('ask_user_question');
+    expect(skill.content).toContain('**Layout**');
+    expect(skill.content).toContain('**Chart styling**');
+    expect(skill.content).toContain('**Structure**');
+    expect(skill.content).toContain('topic `esql`');
+    expect(skill.content).toContain("pass the panel's existing `esql`");
+    expect(skill.description).toContain('at most twice');
+    expect(skill.content).toContain('once at the start of this conversation round');
+    expect(skill.content).toContain('at most twice');
+    expect(skill.content).toContain('A third call is forbidden');
+    expect(skill.content).toContain('once more');
+    expect(skill.content).toContain('Do not keep generating or rendering until the review is empty');
+    expect(skill.content).toContain('hypotheses');
+    expect(skill.content).not.toContain('first generate of a new dashboard only');
+    expect(skill.content).not.toContain('Later updates omit');
+    expect(skill.content).not.toContain('Do not call generation again just to fix them');
+  });
+
   it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {
     expect(skill.content).toContain('Chart Type Guidance');
     expect(skill.content).toContain('Available chart types');

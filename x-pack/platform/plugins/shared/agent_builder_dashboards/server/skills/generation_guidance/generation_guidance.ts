@@ -13,6 +13,7 @@ import {
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { getDashboardAuthoringPromptContent } from './dashboard_guidance';
+import { dashboardPrettify } from './prettify_guidance';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
 
@@ -110,5 +111,7 @@ Omit the \`esql\` field on visualization panels unless you received a validated 
  * (e.g. the Kibana one) that explains how the generated dashboard is surfaced.
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
-  guidance,
+  guidance: `${guidance}
+
+${dashboardPrettify.guidance}`,
 };
