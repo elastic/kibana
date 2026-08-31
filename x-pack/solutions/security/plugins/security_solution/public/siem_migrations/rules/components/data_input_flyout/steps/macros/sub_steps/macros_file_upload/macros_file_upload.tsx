@@ -8,10 +8,7 @@
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { isPlainObject } from 'lodash';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import { UploadFileButton } from '../../../../../../../common/components';
 import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import {
@@ -33,7 +30,7 @@ export interface MacrosFileUploadProps {
 export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
   ({ createResources, apiError, isLoading }) => {
     const [macrosToUpload, setMacrosToUpload] = useState<SiemMigrationResourceData[]>([]);
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
 
     const createMacros = useCallback(() => {
       filePickerRef.current?.removeFiles();
@@ -80,7 +77,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
             <EuiFilePicker
               isInvalid={error != null}
               id="macrosFilePicker"
-              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+              ref={filePickerRef}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
