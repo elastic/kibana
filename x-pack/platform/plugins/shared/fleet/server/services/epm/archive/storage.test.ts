@@ -8,10 +8,12 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { getAsset, getEsPackage } from './storage';
 import { appContextService } from '../../app_context';
+
 import { createAppContextStartContractMock } from '../../../mocks';
+
 import { filterAssetPathForParseAndVerifyArchive } from './parse';
+import { archiveEntryToESDocument, getAsset, getEsPackage } from './storage';
 
 describe('getAsset', () => {
   beforeEach(() => {
@@ -26,6 +28,28 @@ describe('getAsset', () => {
       path: 'path',
     });
     expect(result).toBeUndefined();
+  });
+});
+
+describe('archiveEntryToESDocument', () => {
+  it('should preserve a text asset', async () => {
+    const asset = await archiveEntryToESDocument({
+      path: 'package-1.0.0/README.txt',
+      buffer: Buffer.from('text asset'),
+      name: 'package',
+      version: '1.0.0',
+      installSource: 'registry',
+    });
+
+    expect(asset).toEqual({
+      package_name: 'package',
+      package_version: '1.0.0',
+      install_source: 'registry',
+      asset_path: 'package-1.0.0/README.txt',
+      media_type: 'text/plain; charset=utf-8',
+      data_utf8: 'text asset',
+      data_base64: '',
+    });
   });
 });
 
