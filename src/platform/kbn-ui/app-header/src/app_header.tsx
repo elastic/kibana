@@ -147,7 +147,9 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea title={title} back={back} size={titleSize} padTitleStart={padTitleStart} />}
+        title={
+          <TitleArea title={title} back={back} size={titleSize} padTitleStart={padTitleStart} />
+        }
         badges={<AppBadges badges={badges} />}
         titleActions={<TitleActions shareAction={share} favorite={favorite} />}
         titleAppend={titleAppend}
