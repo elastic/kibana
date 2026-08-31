@@ -169,16 +169,6 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
 }
 \`\`\`
 
-## Time series with legend statistics
-
-\`\`\`json
-{
-  "query": "Log volume over time, show avg/min/max in the legend",
-  "index": "logs-*",
-  "chartType": "xy"
-}
-\`\`\`
-
 ## Create with an explicit user-named time window
 
 \`\`\`json
