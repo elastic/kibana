@@ -54,10 +54,11 @@ describe('chart type guidance', () => {
       - Do not set a chart title. The primary metric name is the painted title; a dashboard chrome title on a metric is redundant.
       - A single primary number is fine. Enrich it from the same ES|QL only when it adds meaning: a \`background_chart\` (\`type: \\"trend\\"\`) when the query can show change over time; a secondary metric with dynamic coloring when there is a status, threshold, or comparison (previous period, error rate next to request count, p95 next to avg); \`type: \\"bar\\"\` only when progress-to-max is meaningful. Do not invent a second index or a complementary field.
       - When a secondary metric is a trend (period-over-period change, compare-to-primary delta, or paired with a trend/sparkline background chart), hide its title: set \`styling.secondary.label.visible: false\` and omit \`label\` on the secondary metric. Keep the value and dynamic coloring. Show a secondary label only when the secondary is a different named measure (e.g. error rate next to request count).
-      - A painted dashboard chrome title on a metric is a miss — the primary metric name is already the title.
-      - Invented static colors or BACKGROUND fills on the primary metric are a miss.
-      Considerations:
-      - When a trend or status could be shown (time series available, or a clear threshold/comparison) and the panel is a lone number on white, consider adding a sparkline or secondary. A single number with nothing to compare or trend is fine.
+      Critical:
+      - A painted dashboard chrome title on a metric is a critical issue — the primary metric name is already the title.
+      - Invented static colors or BACKGROUND fills on the primary metric are a critical issue.
+      Suggestions:
+      - When a trend or status could be shown (time series available, or a clear threshold/comparison) and the panel is a lone number on white, suggest adding a sparkline or secondary. A single number with nothing to compare or trend is fine.
       ### gauge
       - Always omit the optional 'min' and 'max' fields from the final configuration.
       - Do not infer, synthesize, or backfill gauge bounds from the ES|QL results or the user request.
@@ -68,14 +69,17 @@ describe('chart type guidance', () => {
       - For area series, set \`styling.areas.fill: \\"gradient\\"\` rather than solid.
       - Default legend rules: Place outside at the bottom. Omit legend.layout.type. Set legend.visibility: \\"auto\\" unless legend statistics are set - then set it to \\"visible\\".
       - If the request asks for series statistics *in the legend* (avg, min, max, median, last_value, last_non_null_value, first_value, count, total, standard_deviation, … — any legend.statistics option) without naming a field to aggregate, set legend.statistics to those options and legend.visibility: \\"visible\\". If the request is \\"average <field> over time\\", bind the AVG column from the query — do not treat that as legend statistics. Never invent statistic columns the query does not emit.
-      - A solid area fill on the painted chart is a miss.
-      - A visible legend on a one-series categorical chart is a miss.
+      Critical:
+      - A solid area fill on the painted chart is a critical issue.
+      - A visible legend on a one-series categorical chart is a critical issue.
       ### data_table
-      - Invented custom cell or text colors are a miss.
-      Considerations:
-      - Consider setting width from the number of columns (\`w: 24\` or \`w: 48\`). More columns → closer to 48. Prefer not shrinking a table below 24.
+      Critical:
+      - Invented custom cell or text colors are a critical issue.
+      Suggestions:
+      - Suggest setting width from the number of columns (\`w: 24\` or \`w: 48\`). More columns → closer to 48. Prefer not shrinking a table below 24.
       ### pie
-      - Invented per-slice or custom colors are a miss.",
+      Critical:
+      - Invented per-slice or custom colors are a critical issue.",
         "selection": "Available chart types — choose the one that best fits the user's intent and the nature of the data being visualized:
       - metric: Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.
       - gauge: Displays a single metric within a range with optional min/max/goal bounds. Choose when showing progress toward a goal or performance against thresholds (e.g. \\"CPU usage as a gauge\\", \\"sales target progress\\").

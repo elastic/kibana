@@ -40,11 +40,11 @@ interface ChartTypeRegistryEntry<T extends z.ZodType> {
       /**
        * Required painted violations. Fix these.
        */
-      misses?: string[];
+      critical?: string[];
       /**
        * Weaker prompts: apply when they add meaning, not as required fixes.
        */
-      considerations?: string[];
+      suggestions?: string[];
     };
     /**
      * Guidance used after this chart type has been selected, while generating
@@ -115,12 +115,12 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       selection:
         'Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.',
       review: {
-        misses: [
-          'A painted dashboard chrome title on a metric is a miss — the primary metric name is already the title.',
-          'Invented static colors or BACKGROUND fills on the primary metric are a miss.',
+        critical: [
+          'A painted dashboard chrome title on a metric is a critical issue — the primary metric name is already the title.',
+          'Invented static colors or BACKGROUND fills on the primary metric are a critical issue.',
         ],
-        considerations: [
-          'When a trend or status could be shown (time series available, or a clear threshold/comparison) and the panel is a lone number on white, consider adding a sparkline or secondary. A single number with nothing to compare or trend is fine.',
+        suggestions: [
+          'When a trend or status could be shown (time series available, or a clear threshold/comparison) and the panel is a lone number on white, suggest adding a sparkline or secondary. A single number with nothing to compare or trend is fine.',
         ],
       },
       config: {
@@ -174,9 +174,9 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       selection:
         'Line, bar, or area charts with X and Y axes. Choose for time series, trends, comparisons across series, or distributions/histograms (e.g. "request count over time", "average CPU over time", "sales by region as a bar chart"). Avg/min/max *in the legend* is still xy, not a combination chart.',
       review: {
-        misses: [
-          'A solid area fill on the painted chart is a miss.',
-          'A visible legend on a one-series categorical chart is a miss.',
+        critical: [
+          'A solid area fill on the painted chart is a critical issue.',
+          'A visible legend on a one-series categorical chart is a critical issue.',
         ],
       },
       config: {
@@ -232,9 +232,9 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       selection:
         'Structured table with sortable columns. Choose when precise values, sortable columns, or multi-dimensional breakdowns matter more than visual patterns (e.g. "list top 20 hosts by CPU usage").',
       review: {
-        misses: ['Invented custom cell or text colors are a miss.'],
-        considerations: [
-          'Consider setting width from the number of columns (`w: 24` or `w: 48`). More columns → closer to 48. Prefer not shrinking a table below 24.',
+        critical: ['Invented custom cell or text colors are a critical issue.'],
+        suggestions: [
+          'Suggest setting width from the number of columns (`w: 24` or `w: 48`). More columns → closer to 48. Prefer not shrinking a table below 24.',
         ],
       },
       config: {
@@ -258,7 +258,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       selection:
         'Pie or donut showing part-to-whole proportions as slices. Choose for percentage breakdowns with a limited number of categories, ideally fewer than 7 (e.g. "traffic distribution by browser as a donut").',
       review: {
-        misses: ['Invented per-slice or custom colors are a miss.'],
+        critical: ['Invented per-slice or custom colors are a critical issue.'],
       },
       config: {
         coloringRules: [
