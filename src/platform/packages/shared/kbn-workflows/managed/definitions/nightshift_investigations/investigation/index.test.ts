@@ -29,7 +29,7 @@ const requireStep = (name: string): WorkflowStep => {
 
 describe('investigation lifecycle contracts', () => {
   it('emits lifecycle events and fails unsuccessful executions', () => {
-    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(9);
+    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(10);
     expect(investigation.steps[0].name).toBe('ensure_investigation_agent');
 
     const expectedStatuses: Record<string, string> = {
