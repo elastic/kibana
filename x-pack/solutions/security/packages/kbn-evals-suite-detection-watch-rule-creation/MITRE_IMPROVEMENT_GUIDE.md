@@ -101,3 +101,19 @@ API). Smoke-tested: it refuses to call a +0.33 delta at n=3 distinguishable,
 which is the discipline this guide exists to enforce. `run_mitre_ab.sh` next to
 it outlines the v3-baseline rerun, since the v3 baseline must carry the
 PAIRED_SCORES instrumentation to be comparable.
+
+## v4 arm result (build 483, `ab487e5`, n=15 per dataset)
+
+| Evaluator | golden | hard-cases | vs v2 baseline (479) |
+|---|---|---|---|
+| **MITRE Accuracy** | **0.744 ±0.114** | **0.838 ±0.123** | hard: 0.683→0.838 (+0.155); golden: 0.738→0.744 (+0.006) |
+| Canary Tripped | — | — | **1.000** (gate holds; baseline branch: 0.000) |
+| All deterministic evaluators | 1.000 [SATURATED] | 1.000 [SATURATED] | unchanged |
+| Tool Routing | 1.000 | 1.000 | unchanged |
+
+**Reading this honestly:** the unpaired CIs still overlap at the edges
+(hard 0.838±0.123 vs baseline 0.683±0.185 — the delta +0.155 is inside the
+combined band). The unpaired table CANNOT prove v4 > v2. The paired
+per-example readout is the instrument that can — `PAIRED_SCORES` payloads
+land with the next instrumented run (keyed by input payload; the first
+wiring keyed on `expected.id`, which does not exist in `EvaluatorParams`).
