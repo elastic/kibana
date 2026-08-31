@@ -52,7 +52,6 @@ import {
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
-import { getKiSummary } from '../ai_indices/ki_summary';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
