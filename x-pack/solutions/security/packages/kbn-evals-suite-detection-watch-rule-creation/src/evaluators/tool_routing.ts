@@ -131,13 +131,32 @@ export function createToolRoutingEvaluator({
         }
       }
 
+      // Neither key matched. Distinguish "this cluster holds no agent tool spans at all"
+      // (export/config problem) from "spans exist but carry different join keys" (attribute
+      // drift) — otherwise every future N/A costs another round of manual trace archaeology.
+      let diagnosis = 'probe did not run';
+      try {
+        const probe = (await traceEsClient.esql.query({
+          query: `FROM traces-*
+| WHERE attributes.elastic.inference.span.kind == "TOOL"
+| STATS tool_spans = COUNT(*)`,
+        })) as unknown as EsqlResponse;
+        const total = Number(probe.values?.[0]?.[0] ?? 0);
+        diagnosis =
+          total > 0
+            ? `the cluster holds ${total} TOOL span(s) but none match this run's join keys — ` +
+              'attribute drift, compare gen_ai.conversation.id / trace.id on a recent span'
+            : 'the cluster holds NO TOOL spans at all — agent spans are not exported to the ' +
+              'tracing ES this suite queries (check TRACING_ES_URL and EDOT export)';
+      } catch (error) {
+        diagnosis = `probe failed: ${error instanceof Error ? error.message : String(error)}`;
+      }
+
+      log.warning(`Tool Routing unavailable — ${diagnosis}`);
       return {
         score: null,
         label: 'unavailable',
-        explanation:
-          'No TOOL spans reachable via the workflow trace id or the draft conversation_id — ' +
-          'the agent conversation trace is not linkable with the available join keys (see #284725 ' +
-          'for the shared reader that resolves this platform-side).',
+        explanation: `No TOOL spans reachable via the workflow trace id or the draft conversation_id. ${diagnosis}`,
         metadata: undefined,
       };
     },
