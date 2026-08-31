@@ -10,7 +10,6 @@ import { EuiBadge, EuiCode, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } f
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EPISODE_STATUS_FILTER_OPTIONS } from '../form/constants';
 
 const OR_LABEL = i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher.or', {
   defaultMessage: 'or',
@@ -24,20 +23,10 @@ const CLAUSE_LABELS = {
   tags: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher.tags', {
     defaultMessage: 'Rule tagged with',
   }),
-  rules: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher.rules', {
-    defaultMessage: 'Rule is',
-  }),
-  statuses: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher.statuses', {
-    defaultMessage: 'Alert status is',
-  }),
   expression: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher.expression', {
     defaultMessage: 'Matches query',
   }),
 };
-
-const STATUS_TITLE_BY_VALUE = new Map(
-  EPISODE_STATUS_FILTER_OPTIONS.map((option) => [option.value, option.title])
-);
 
 const renderOrList = (values: string[]): ReactNode =>
   values.map((value, index) => (
@@ -57,22 +46,10 @@ interface Clause {
 
 const buildClauses = (matcher: PolicyMatcher): Clause[] => {
   const clauses: Clause[] = [];
-  const { tags, rules, statuses, expression } = matcher;
+  const { tags, expression } = matcher;
 
   if (tags?.length) {
     clauses.push({ key: 'tags', label: CLAUSE_LABELS.tags, node: renderOrList(tags) });
-  }
-
-  if (rules?.length) {
-    clauses.push({ key: 'rules', label: CLAUSE_LABELS.rules, node: renderOrList(rules) });
-  }
-
-  if (statuses?.length) {
-    clauses.push({
-      key: 'statuses',
-      label: CLAUSE_LABELS.statuses,
-      node: renderOrList(statuses.map((status) => STATUS_TITLE_BY_VALUE.get(status) ?? status)),
-    });
   }
 
   const trimmedExpression = expression?.trim();

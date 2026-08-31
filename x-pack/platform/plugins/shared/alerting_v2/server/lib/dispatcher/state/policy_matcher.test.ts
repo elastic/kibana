@@ -22,11 +22,11 @@ describe('PolicyMatcher.toKql()', () => {
     });
 
     it('returns null when all fields are null', () => {
-      expect(PolicyMatcher.of({ tags: null, rules: null, statuses: null, expression: null }).toKql()).toBeNull();
+      expect(PolicyMatcher.of({ tags: null, expression: null }).toKql()).toBeNull();
     });
 
-    it('returns null when all arrays are empty', () => {
-      expect(PolicyMatcher.of({ tags: [], rules: [], statuses: [] }).toKql()).toBeNull();
+    it('returns null when tags array is empty', () => {
+      expect(PolicyMatcher.of({ tags: [] }).toKql()).toBeNull();
     });
 
     it('returns null when expression is empty string', () => {
@@ -42,32 +42,12 @@ describe('PolicyMatcher.toKql()', () => {
     it('single tag produces bare clause', () => {
       expect(PolicyMatcher.of({ tags: ['sev1'] }).toKql()).toBe('rule.tags : "sev1"');
     });
-
-    it('single rule id produces bare clause', () => {
-      expect(PolicyMatcher.of({ rules: ['uuid-1'] }).toKql()).toBe('rule.id : "uuid-1"');
-    });
-
-    it('single status produces bare clause', () => {
-      expect(PolicyMatcher.of({ statuses: ['active'] }).toKql()).toBe('episode_status : "active"');
-    });
   });
 
   describe('multi-value clauses (wrapped in parentheses)', () => {
     it('two tags', () => {
       expect(PolicyMatcher.of({ tags: ['sev1', 'prod'] }).toKql()).toBe(
         '(rule.tags : "sev1" OR rule.tags : "prod")'
-      );
-    });
-
-    it('two rules', () => {
-      expect(PolicyMatcher.of({ rules: ['uuid-1', 'uuid-2'] }).toKql()).toBe(
-        '(rule.id : "uuid-1" OR rule.id : "uuid-2")'
-      );
-    });
-
-    it('two statuses', () => {
-      expect(PolicyMatcher.of({ statuses: ['active', 'recovering'] }).toKql()).toBe(
-        '(episode_status : "active" OR episode_status : "recovering")'
       );
     });
   });
@@ -86,26 +66,17 @@ describe('PolicyMatcher.toKql()', () => {
     });
   });
 
-  describe('combined fields (AND-joined in order: tags → rules → statuses → expression)', () => {
-    it('all four fields combined', () => {
-      expect(
-        PolicyMatcher.of({
-          tags: ['sev1'],
-          rules: ['uuid-1'],
-          statuses: ['active'],
-          expression: 'data.env:"prod"',
-        }).toKql()
-      ).toBe('rule.tags : "sev1" AND rule.id : "uuid-1" AND episode_status : "active" AND (data.env:"prod")');
-    });
-
-    it('tags and expression only', () => {
+  describe('combined fields (AND-joined in order: tags → expression)', () => {
+    it('tags and expression combined', () => {
       expect(
         PolicyMatcher.of({ tags: ['prod'], expression: 'data.region:"us-east-1"' }).toKql()
       ).toBe('rule.tags : "prod" AND (data.region:"us-east-1")');
     });
 
-    it('null field within a non-null object is skipped', () => {
-      expect(PolicyMatcher.of({ tags: null, rules: ['uuid-1'] }).toKql()).toBe('rule.id : "uuid-1"');
+    it('null tags within a non-null object is skipped', () => {
+      expect(PolicyMatcher.of({ tags: null, expression: 'data.env:"prod"' }).toKql()).toBe(
+        '(data.env:"prod")'
+      );
     });
   });
 

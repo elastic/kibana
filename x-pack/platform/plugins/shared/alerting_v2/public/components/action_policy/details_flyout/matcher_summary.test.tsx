@@ -26,7 +26,7 @@ describe('MatcherSummary', () => {
   });
 
   it('renders the catch-all message when every matcher field is empty', () => {
-    renderWithI18n({ tags: [], rules: [], statuses: [], expression: '  ' });
+    renderWithI18n({ tags: [], expression: '  ' });
 
     expect(screen.getByText('Matches all alerts.')).toBeInTheDocument();
   });
@@ -41,22 +41,6 @@ describe('MatcherSummary', () => {
     expect(screen.queryByText('Matches all alerts.')).toBeNull();
   });
 
-  it('renders rule ids verbatim', () => {
-    renderWithI18n({ rules: ['id1', 'id2'] });
-
-    expect(screen.getByText('Rule is')).toBeInTheDocument();
-    expect(screen.getByText('id1')).toBeInTheDocument();
-    expect(screen.getByText('id2')).toBeInTheDocument();
-  });
-
-  it('maps statuses to their friendly titles', () => {
-    renderWithI18n({ statuses: ['active', 'pending'] });
-
-    expect(screen.getByText('Alert status is')).toBeInTheDocument();
-    expect(screen.getByText('Active')).toBeInTheDocument();
-    expect(screen.getByText('Pending')).toBeInTheDocument();
-  });
-
   it('renders the KQL expression verbatim', () => {
     const expression = 'data.env:"production" and data.sev:"critical"';
     renderWithI18n({ expression });
@@ -68,13 +52,11 @@ describe('MatcherSummary', () => {
   it('joins multiple clauses with "and"', () => {
     renderWithI18n({
       tags: ['prod', 'alerts'],
-      rules: ['id1', 'id2'],
       expression: 'data.env:"production"',
     });
 
     expect(screen.getByText('Matches alerts where')).toBeInTheDocument();
     expect(screen.getByText('Rule tagged with')).toBeInTheDocument();
-    expect(screen.getByText('Rule is')).toBeInTheDocument();
     expect(screen.getByText('Matches query')).toBeInTheDocument();
     expect(screen.getAllByText('and').length).toBeGreaterThanOrEqual(1);
   });

@@ -30,8 +30,6 @@ const formatMatcher = (m: PolicyMatcher): string => {
   if (m.expression?.trim()) return `expression: "${m.expression.trim()}"`;
   const parts: string[] = [];
   if (m.tags?.length) parts.push(`tags: ${m.tags.join(', ')}`);
-  if (m.rules?.length) parts.push(`rules: ${m.rules.join(', ')}`);
-  if (m.statuses?.length) parts.push(`statuses: ${m.statuses.join(', ')}`);
   return parts.join(' | ') || '{}';
 };
 

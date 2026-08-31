@@ -156,7 +156,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
         buildCreateRuleData({ metadata: { name: 'rule-for-scoped-policy' } })
       );
 
-      const matcher = { rules: [rule.id] };
+      const matcher = { expression: `rule.id: "${rule.id}"` };
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({

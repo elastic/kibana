@@ -24,23 +24,16 @@ export class PolicyMatcher {
 
   public isCatchAll(): boolean {
     if (!this.data) return true;
-    const { tags, rules, statuses, expression } = this.data;
-    return (
-      (!tags || tags.length === 0) &&
-      (!rules || rules.length === 0) &&
-      (!statuses || statuses.length === 0) &&
-      (!expression || !expression.trim())
-    );
+    const { tags, expression } = this.data;
+    return (!tags || tags.length === 0) && (!expression || !expression.trim());
   }
 
   public toKql(): string | null {
     if (this.isCatchAll()) return null;
-    const { tags, rules, statuses, expression } = this.data!;
+    const { tags, expression } = this.data!;
     const parts: string[] = [];
 
     if (tags && tags.length > 0) parts.push(buildClause('rule.tags', tags));
-    if (rules && rules.length > 0) parts.push(buildClause('rule.id', rules));
-    if (statuses && statuses.length > 0) parts.push(buildClause('episode_status', statuses));
     if (expression && expression.trim()) parts.push(`(${expression.trim()})`);
 
     if (parts.length === 0) return null;

@@ -80,12 +80,9 @@ const DEFAULT_PER_PAGE = 20;
 
 const policyMatcherToKql = (matcher: PolicyMatcher | null | undefined): string | null => {
   if (!matcher) return null;
-  const { tags, rules, statuses, expression } = matcher;
+  const { tags, expression } = matcher;
   const parts: string[] = [];
   if (tags && tags.length > 0) parts.push(tags.map((t) => `rule.tags: "${t}"`).join(' OR '));
-  if (rules && rules.length > 0) parts.push(rules.map((r) => `rule.id: "${r}"`).join(' OR '));
-  if (statuses && statuses.length > 0)
-    parts.push(statuses.map((s) => `episode_status: "${s}"`).join(' OR '));
   if (expression && expression.trim()) parts.push(`(${expression.trim()})`);
   if (parts.length === 0) return null;
   return parts.map((p) => `(${p})`).join(' AND ');

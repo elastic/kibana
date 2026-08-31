@@ -151,13 +151,13 @@ describe('executeActionPolicyOperations', () => {
         operation: 'set_destinations',
         destinations: [{ type: 'workflow', id: '00000000-0000-0000-0000-000000000001' }],
       },
-      { operation: 'set_matcher', matcher: { rules: ['rule-123'] } },
+      { operation: 'set_matcher', matcher: { tags: ['critical'] } },
       { operation: 'validate' },
     ];
 
     const result = executeActionPolicyOperations({}, ops, { isNew: true });
 
-    expect(result.matcher).toEqual({ rules: ['rule-123'] });
+    expect(result.matcher).toEqual({ tags: ['critical'] });
   });
 
   describe('agent-builder provenance tag', () => {

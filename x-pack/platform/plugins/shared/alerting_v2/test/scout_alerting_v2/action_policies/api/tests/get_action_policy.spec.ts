@@ -105,7 +105,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'rule-for-get-scoped' } })
       );
-      const matcher = { rules: [rule.id] };
+      const matcher = { expression: `rule.id: "${rule.id}"` };
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
           name: 'rule-scoped-policy',

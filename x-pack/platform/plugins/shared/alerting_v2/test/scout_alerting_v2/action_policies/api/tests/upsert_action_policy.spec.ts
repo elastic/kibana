@@ -72,7 +72,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         buildCreateRuleData({ metadata: { name: 'rule-for-upsert-scoped' } })
       );
 
-      const matcher = { rules: [rule.id] };
+      const matcher = { expression: `rule.id: "${rule.id}"` };
       const response = await apiClient.put(getActionPolicyUrl('upsert-rule-scoped-policy'), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({

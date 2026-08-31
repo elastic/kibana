@@ -24,8 +24,6 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
     if (!m) return i18n.translate('xpack.alertingV2.actionPolicyAttachment.matchesAll', { defaultMessage: 'matches all' });
     const parts: string[] = [];
     if (m.tags?.length) parts.push(`tags: ${m.tags.join(', ')}`);
-    if (m.rules?.length) parts.push(`rules: ${m.rules.length}`);
-    if (m.statuses?.length) parts.push(`statuses: ${m.statuses.join(', ')}`);
     if (m.expression?.trim()) parts.push(`expr: ${m.expression.trim()}`);
     return parts.length > 0 ? parts.join(' | ') : i18n.translate('xpack.alertingV2.actionPolicyAttachment.matchesAll', { defaultMessage: 'matches all' });
   })();

@@ -7,14 +7,13 @@
 
 import type { ActionPolicyResponse, PolicyMatcher } from '@kbn/alerting-v2-schemas';
 
+const ruleIdKql = (ruleId: string): string => `rule.id: "${ruleId}"`;
+
 const hasOnlyRuleId = (matcher: PolicyMatcher, ruleId: string): boolean => {
-  const { tags, rules, statuses, expression } = matcher;
-  const hasOtherCriteria =
-    (tags != null && tags.length > 0) ||
-    (statuses != null && statuses.length > 0) ||
-    (expression != null && expression.trim() !== '');
-  const hasExactlyOneRule = rules != null && rules.length === 1 && rules[0] === ruleId;
-  return hasExactlyOneRule && !hasOtherCriteria;
+  const { tags, expression } = matcher;
+  const noTags = !tags || tags.length === 0;
+  const expressionIsExactRuleId = expression?.trim() === ruleIdKql(ruleId);
+  return noTags && expressionIsExactRuleId;
 };
 
 /**
@@ -27,7 +26,7 @@ export const isExplicitlyLinkedToRule = (
   if (!matcher || !ruleId) {
     return false;
   }
-  return (matcher.rules ?? []).includes(ruleId);
+  return matcher.expression?.includes(ruleIdKql(ruleId)) ?? false;
 };
 
 /**

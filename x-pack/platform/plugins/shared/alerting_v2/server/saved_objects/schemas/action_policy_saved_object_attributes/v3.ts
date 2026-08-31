@@ -17,8 +17,6 @@ export const actionPolicySavedObjectAttributesSchemaV3 = schema.object({
     schema.nullable(
       schema.object({
         tags: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
-        rules: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
-        statuses: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
         expression: schema.maybe(schema.nullable(schema.string())),
       })
     )

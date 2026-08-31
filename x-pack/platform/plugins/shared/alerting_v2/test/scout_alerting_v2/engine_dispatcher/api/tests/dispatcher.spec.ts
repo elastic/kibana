@@ -213,7 +213,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       name: 'Rule-scoped policy bound to rule-001',
       description: 'Must filter to its linked rule only',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      matcher: { rules: ['rule-001'] },
+      matcher: { expression: 'rule.id: "rule-001"' },
     });
 
     await apiServices.alertingV2.actionPolicies.disable(SINGLE_RULE_POLICY_ID);

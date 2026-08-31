@@ -3174,7 +3174,7 @@ describe('ActionPolicyClient', () => {
 
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: { rules: ['rule-1'] },
+        matcher: { tags: ['rule-1'] },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(

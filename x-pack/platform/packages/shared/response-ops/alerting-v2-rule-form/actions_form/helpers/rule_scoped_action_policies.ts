@@ -10,4 +10,6 @@ import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 /**
  * The matcher the simple-action flow writes when linking a policy to a single rule
  */
-export const buildRuleScopedMatcher = (ruleId: string): PolicyMatcher => ({ rules: [ruleId] });
+export const buildRuleScopedMatcher = (ruleId: string): PolicyMatcher => ({
+  expression: `rule.id: "${ruleId}"`,
+});

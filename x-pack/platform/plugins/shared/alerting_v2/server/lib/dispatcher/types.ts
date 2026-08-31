@@ -89,8 +89,6 @@ export interface Rule {
 
 export interface PolicyMatcherAttributes {
   tags?: string[] | null;
-  rules?: string[] | null;
-  statuses?: AlertEpisodeStatus[] | null;
   expression?: string | null;
 }
 
