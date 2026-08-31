@@ -183,7 +183,7 @@ describe('ActionPolicyFormFlyout', () => {
       name: 'Policy from test',
       description: 'Description from test',
       tags: [],
-      matcher: '',
+      matcher: null,
       groupingMode: 'per_episode',
       groupBy: [],
       throttleStrategy: 'on_status_change',
