@@ -225,43 +225,6 @@ export async function buildMetricVisualization({ visualize, lens }: VisualizeAnd
   });
 }
 
-/**
- * Creates an XY histogram (average of `bytes` over `@timestamp`, broken down by `ip`)
- * starting from the current dashboard (edit mode) and returns to it.
- * Replaces FTR `lens.createAndAddLensFromDashboard`.
- */
-export async function createXyLensPanelFromDashboard(
-  { dashboard, lens }: DashboardAndLens,
-  page: ScoutPage,
-  options?: { useAdHocDataView?: boolean }
-) {
-  await dashboard.addNewLensPanel();
-  await lens.waitForLensApp();
-
-  if (options?.useAdHocDataView) {
-    await createAdHocDataViewFromLens(page, '*stash*');
-  }
-
-  await lens.configureDimension({
-    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-    operation: 'average',
-    field: 'bytes',
-  });
-  await lens.configureDimension({
-    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-    operation: 'date_histogram',
-    field: '@timestamp',
-  });
-  await lens.configureDimension({
-    dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
-    operation: 'terms',
-    field: 'ip',
-  });
-
-  await lens.saveAndReturn();
-  await dashboard.waitForRenderComplete();
-}
-
 interface LogstashSpaceSetupContext {
   scoutSpace: {
     id: string;

@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { LensPageObjects } from '../fixtures';
 import {
   applyLensInlineEditorAndWaitClosed,
   cancelLensInlineEditorAndWaitClosed,
+  createAdHocDataViewFromLens,
   createLogstashLensEditorSuiteSetup,
-  createXyLensPanelFromDashboard,
   openPanelInlineEditorAndWaitVisible,
   spaceTest,
 } from '../fixtures';
 
 const SECONDARY_METRIC_PANEL = 'lnsMetric_secondaryMetricDimensionPanel';
+const XY_SPLIT_PANEL = 'lnsXY_splitDimensionPanel';
 
 /**
  * Builds a fresh Lens Metric visualization with only a primary "Average of bytes" dimension.
@@ -39,7 +41,43 @@ async function buildBytesMetricVisualization({
   await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
   await lens.waitForVisualization('mtrVis');
 }
-const XY_SPLIT_PANEL = 'lnsXY_splitDimensionPanel';
+
+/**
+ * Creates an XY histogram (average of `bytes` over `@timestamp`, broken down by `ip`)
+ * starting from the current dashboard (edit mode) and returns to it.
+ * Replaces FTR `lens.createAndAddLensFromDashboard`.
+ */
+async function createXyLensPanelFromDashboard(
+  { dashboard, lens }: Pick<LensPageObjects, 'dashboard' | 'lens'>,
+  page: ScoutPage,
+  options?: { useAdHocDataView?: boolean }
+) {
+  await dashboard.addNewLensPanel();
+  await lens.waitForLensApp();
+
+  if (options?.useAdHocDataView) {
+    await createAdHocDataViewFromLens(page, '*stash*');
+  }
+
+  await lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'average',
+    field: 'bytes',
+  });
+  await lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: '@timestamp',
+  });
+  await lens.configureDimension({
+    dimension: `${XY_SPLIT_PANEL} > lns-empty-dimension`,
+    operation: 'terms',
+    field: 'ip',
+  });
+
+  await lens.saveAndReturn();
+  await dashboard.waitForRenderComplete();
+}
 
 // Baseline metric tile state produced by `buildBytesMetricVisualization` over the
 // logstash fixture data; inline editing only ever changes `extraText` on top of this.
