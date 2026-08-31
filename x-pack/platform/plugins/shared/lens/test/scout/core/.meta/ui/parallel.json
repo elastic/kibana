@@ -1,8 +1,7 @@
 {
-  "sha1": "e04b253704ebe8867c865f6f75cae983639255f3",
+  "sha1": "15e9c5f409a1b61c9eade0c3c14d53c9173c920a",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -118,6 +117,175 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/ad_hoc_data_view.spec.ts",
         "line": 347,
         "column": 26
+      }
+    },
+    {
+      "id": "5a841cd6f28dcc7-da6b00b8c6b96fb",
+      "title": "Lens heatmap add to dashboard adds a heatmap with number-based palette ranges to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/heatmap.spec.ts",
+        "line": 15,
+        "column": 13
+      }
+    },
+    {
+      "id": "012cbc5ba575506-b64600cbb04eebe",
+      "title": "Lens add to dashboard capabilities without dashboard access hides the dashboard flow prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/rbac.spec.ts",
+        "line": 127,
+        "column": 25
+      }
+    },
+    {
+      "id": "012cbc5ba575506-2ac66bd16b9bca0",
+      "title": "Lens add to dashboard capabilities without dashboard access hides add-to-dashboard save options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/rbac.spec.ts",
+        "line": 138,
+        "column": 3
+      }
+    },
+    {
+      "id": "012cbc5ba575506-b31633919f2b1a9",
+      "title": "Lens add to dashboard capabilities with read-only dashboard access hides the dashboard flow prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/rbac.spec.ts",
+        "line": 127,
+        "column": 25
+      }
+    },
+    {
+      "id": "012cbc5ba575506-1cf689144927af2",
+      "title": "Lens add to dashboard capabilities with read-only dashboard access hides add-to-dashboard save options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/rbac.spec.ts",
+        "line": 138,
+        "column": 3
+      }
+    },
+    {
+      "id": "9eea4d29244ea83-12f50a2f95d2b42",
+      "title": "Lens add to dashboard save by reference should allow new lens by reference to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_reference.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "9eea4d29244ea83-fb57df281d9d3d5",
+      "title": "Lens add to dashboard save by reference should allow existing lens by reference to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_reference.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "9eea4d29244ea83-7e8ce5109926531",
+      "title": "Lens add to dashboard save by reference should allow new lens by reference to an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_reference.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "9eea4d29244ea83-39ff9017c018f20",
+      "title": "Lens add to dashboard save by reference should allow existing lens by reference to an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_reference.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "3748864bf7b4bf3-1dcb7e4de5bae57",
+      "title": "Lens add to dashboard save by value should allow new lens by value to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_value.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "3748864bf7b4bf3-bf566bf2c9e6e1f",
+      "title": "Lens add to dashboard save by value should allow existing lens by value to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_value.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "3748864bf7b4bf3-7a6ef00d5e53000",
+      "title": "Lens add to dashboard save by value should allow new lens by value to an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_value.spec.ts",
+        "line": 69,
+        "column": 28
+      }
+    },
+    {
+      "id": "3748864bf7b4bf3-5dcf5262495fad6",
+      "title": "Lens add to dashboard save by value should allow existing lens by value to an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/add_to_dashboard/save_by_value.spec.ts",
+        "line": 69,
+        "column": 28
       }
     },
     {
@@ -810,6 +978,19 @@
       }
     },
     {
+      "id": "8bc1e11a382d9d0-918e80b53ac532a",
+      "title": "Lens aliased TBUCKET metric trendline enables and persists the trendline through the dimension editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_ts_toggle.spec.ts",
+        "line": 67,
+        "column": 33
+      }
+    },
+    {
       "id": "79b736095ef203d-c2bc83c3f83f983",
       "title": "Lens metric trendline on dashboard (ES|QL) renders trendline with ES|QL data source",
       "expectedStatus": "passed",
@@ -820,6 +1001,19 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
         "line": 23,
         "column": 7
+      }
+    },
+    {
+      "id": "79b736095ef203d-7fdeecc1c091f44",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline for a TS query with TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 55,
+        "column": 15
       }
     },
     {
@@ -910,6 +1104,19 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/reference_lines.spec.ts",
         "line": 17,
+        "column": 13
+      }
+    },
+    {
+      "id": "8d65d9b5ef715f9-8fb400fe599f775",
+      "title": "Lens runtime fields creates, filters, edits, and removes a runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/runtime_fields.spec.ts",
+        "line": 23,
         "column": 13
       }
     },
