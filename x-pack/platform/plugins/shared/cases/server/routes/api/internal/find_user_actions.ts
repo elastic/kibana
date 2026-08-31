@@ -70,6 +70,8 @@ export const findUserActionsRoute = createCasesRoute({
         });
       }
 
+      // Internal-only field; kept unified on purpose (see the "should return
+      // latest attachments" FTR test).
       const res: userActionApiV1.UserActionInternalFindResponse = {
         ...userActionsResponse,
         latestAttachments: attachmentRes.attachments,

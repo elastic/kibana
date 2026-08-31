@@ -24,7 +24,8 @@ export interface AddArgs {
    */
   caseId: string;
   /**
-   * Unified payload. Public POST /comments converts first via toUnifiedAttachmentRequest.
+   * Unified payload. Public POST /comments converts first via
+   * toUnifiedAttachmentRequest.
    */
   comment: UnifiedAttachmentPayload;
 }
@@ -142,7 +143,8 @@ export interface UpdateArgs {
    */
   caseID: string;
   /**
-   * Unified payload. Public PATCH /comments converts first via toUnifiedAttachmentPatchRequest.
+   * Unified payload. Public PATCH /comments converts first via
+   * toUnifiedAttachmentPatchRequest.
    */
   updateRequest: UnifiedAttachmentPayload & { id: string; version: string };
 }

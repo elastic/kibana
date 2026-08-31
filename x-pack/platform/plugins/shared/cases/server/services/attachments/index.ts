@@ -1089,6 +1089,8 @@ export class AttachmentService {
       });
 
       const validatedAttachments: Array<SavedObjectsFindResult<AttachmentAttributesV2>> = [];
+      const attachmentsEnabled =
+        getAttachmentSavedObjectType(this.context.config) === CASE_ATTACHMENT_SAVED_OBJECT;
 
       for (const so of res.saved_objects) {
         const injectedSo = injectAttachmentSOAttributesFromRefs(
@@ -1096,6 +1098,7 @@ export class AttachmentService {
         ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>;
         const transformed = toUnifiedAttributes({
           attributes: injectedSo.attributes,
+          attachmentsEnabled,
         });
         if (transformed.isUnified) {
           const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(

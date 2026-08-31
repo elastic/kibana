@@ -103,7 +103,7 @@ const createByValuePersistableState = (type: string) =>
 describe('toUnifiedAttributes', () => {
   it('maps legacy user comments to unified schema', () => {
     const attrs = createUserAttachment().attributes;
-    const out = toUnifiedAttributes({ attributes: attrs });
+    const out = toUnifiedAttributes({ attributes: attrs, attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes.type).toBe('comment');
@@ -125,7 +125,7 @@ describe('toUnifiedAttributes', () => {
       updated_by: null,
     } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes'];
 
-    const out = toUnifiedAttributes({ attributes: attrs });
+    const out = toUnifiedAttributes({ attributes: attrs, attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes).toMatchObject({
@@ -150,7 +150,7 @@ describe('toUnifiedAttributes', () => {
       updated_at: null,
       updated_by: null,
     } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes'];
-    const out = toUnifiedAttributes({ attributes: attrs });
+    const out = toUnifiedAttributes({ attributes: attrs, attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes.type).toBe('dashboard');
@@ -170,7 +170,7 @@ describe('toUnifiedAttributes', () => {
       updated_at: null,
       updated_by: null,
     } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes'];
-    const out = toUnifiedAttributes({ attributes: attrs });
+    const out = toUnifiedAttributes({ attributes: attrs, attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes.type).toBe('discoverSession');
@@ -178,7 +178,7 @@ describe('toUnifiedAttributes', () => {
   });
 
   it('maps by-value lens to unified schema', () => {
-    const out = toUnifiedAttributes({ attributes: createByValueLens() });
+    const out = toUnifiedAttributes({ attributes: createByValueLens(), attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes.type).toBe(LENS_ATTACHMENT_TYPE);
@@ -186,7 +186,7 @@ describe('toUnifiedAttributes', () => {
   });
 
   it('maps a unified file to unified schema', () => {
-    const out = toUnifiedAttributes({ attributes: createUnifiedFile() });
+    const out = toUnifiedAttributes({ attributes: createUnifiedFile(), attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes.type).toBe(FILE_ATTACHMENT_TYPE);
@@ -199,6 +199,7 @@ describe('toUnifiedAttributes', () => {
   ])('keeps a Lens-by-reference attachment unified (%s)', (_desc, withSnapshot) => {
     const out = toUnifiedAttributes({
       attributes: createByReferenceLens(withSnapshot as boolean),
+      attachmentsEnabled: true,
     });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
@@ -208,6 +209,46 @@ describe('toUnifiedAttributes', () => {
         metadata: { soType: LENS_SO_TYPE },
       });
     }
+  });
+
+  // `actionsAttachmentTransformer` is asymmetric (see its module docstring): once
+  // folded to `security.endpoint` it never re-emits `actions`. Folding on read
+  // must therefore mirror the write-time FF gate, or byte-clean/FF-off
+  // deployments would silently lose the round trip.
+  describe('legacy `actions` (asymmetric fold, FF-gated)', () => {
+    const createLegacyActions = () =>
+      ({
+        type: 'actions',
+        owner: 'securitySolutionFixture',
+        comment: 'a comment',
+        actions: {
+          type: 'isolate',
+          targets: [{ hostname: 'host-1', endpointId: 'endpoint-1' }],
+        },
+        ...basicAttributes,
+      } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes']);
+
+    it('stays legacy `actions` byte-clean when attachmentsEnabled is false', () => {
+      const out = toUnifiedAttributes({
+        attributes: createLegacyActions(),
+        attachmentsEnabled: false,
+      });
+      expect(out.isUnified).toBe(false);
+      if (!out.isUnified) {
+        expect(out.attributes).toMatchObject({ type: 'actions' });
+      }
+    });
+
+    it('folds to `security.endpoint` when attachmentsEnabled is true', () => {
+      const out = toUnifiedAttributes({
+        attributes: createLegacyActions(),
+        attachmentsEnabled: true,
+      });
+      expect(out.isUnified).toBe(true);
+      if (out.isUnified) {
+        expect(out.attributes.type).toBe(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+      }
+    });
   });
 });
 

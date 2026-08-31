@@ -14,6 +14,7 @@ import {
   type AttachmentPatchAttributesV2,
   UnifiedAttachmentAttributesRt,
 } from '../../../../common/types/domain/attachment/v2';
+import { LEGACY_ACTIONS_TYPE } from '../../../../common/constants/attachments';
 import { isMigratedAttachmentType } from '../../../../common/utils/attachments';
 import {
   getAttachmentTypeFromAttributes,
@@ -25,17 +26,27 @@ export type ModeTransformedAttributes =
   | { isUnified: true; attributes: UnifiedAttachmentAttributes }
   | { isUnified: false; attributes: AttachmentPersistedAttributes };
 
+/**
+ * Decides unified vs legacy shape on read. `attachmentsEnabled` gates the one
+ * asymmetric fold (`actions` → `security.endpoint`) to keep FF-off byte-clean.
+ */
 export function toUnifiedAttributes({
   attributes,
+  attachmentsEnabled,
 }: {
   attributes:
     | UnifiedAttachmentAttributes
     | AttachmentPersistedAttributes
     | AttachmentPatchAttributesV2;
+  attachmentsEnabled: boolean;
 }): ModeTransformedAttributes {
   const attachmentType = getAttachmentTypeFromAttributes(attributes);
   const owner = attributes?.owner ?? '';
   const transformer = getAttachmentTypeTransformers(attachmentType, owner);
+
+  if (attachmentType === LEGACY_ACTIONS_TYPE && !attachmentsEnabled) {
+    return { isUnified: false, attributes: transformer.toLegacySchema(attributes) };
+  }
 
   if (isMigratedAttachmentType(attachmentType, owner)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
