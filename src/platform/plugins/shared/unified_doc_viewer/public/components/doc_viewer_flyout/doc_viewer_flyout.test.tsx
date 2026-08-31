@@ -27,7 +27,10 @@ jest.mock('@elastic/eui', () => {
     ...actual,
     EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => (
       <OriginalFlyout {...props} ref={ref}>
-        <button data-test-subj="euiResizableButton">
+        <button
+          data-test-subj="euiResizableButton"
+          onPointerUp={() => props.onResize?.(700)}
+        >
           <span>Resize handle</span>
         </button>
         <button onClick={() => props.onResize?.(700)}>Trigger resize</button>
@@ -136,6 +139,27 @@ describe('UnifiedDocViewerFlyout', () => {
 
       fireEvent.pointerDown(resizeHandle);
       fireEvent.click(triggerResize);
+      localStorage.removeItem(storageKey);
+      fireEvent.click(triggerResize);
+
+      expect(localStorage.getItem(storageKey)).toBeNull();
+    });
+
+    it('does not persist a resize after a cancelled pointer interaction', () => {
+      const { resizeHandle, triggerResize } = renderFlyout();
+
+      fireEvent.pointerDown(resizeHandle);
+      fireEvent.pointerCancel(resizeHandle);
+      fireEvent.click(triggerResize);
+
+      expect(localStorage.getItem(storageKey)).toBeNull();
+    });
+
+    it('does not leave persistence armed after clicking the handle without dragging', () => {
+      const { resizeHandle, triggerResize } = renderFlyout();
+
+      fireEvent.pointerDown(resizeHandle);
+      fireEvent.pointerUp(resizeHandle);
       localStorage.removeItem(storageKey);
       fireEvent.click(triggerResize);
 

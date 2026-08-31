@@ -175,6 +175,10 @@ export function UnifiedDocViewerFlyout({
     [isResizeHandle]
   );
 
+  const onPointerCancel = useCallback(() => {
+    shouldPersistNextFlyoutWidthRef.current = false;
+  }, []);
+
   const onResizeHandleKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
       if (
@@ -319,6 +323,7 @@ export function UnifiedDocViewerFlyout({
             onKeyDown={onKeyDown}
             onKeyDownCapture={onResizeHandleKeyDown}
             onPointerDown={onPointerDown}
+            onPointerCancel={onPointerCancel}
             ownFocus={true}
             minWidth={minWidth}
             maxWidth={maxWidth}
