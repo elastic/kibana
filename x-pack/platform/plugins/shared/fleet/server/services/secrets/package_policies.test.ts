@@ -1177,6 +1177,29 @@ describe('Package policy secrets', () => {
         noChange: [paths1[0]],
       });
     });
+
+    it('secret cleared (value set to null) marks old secret for deletion', () => {
+      const oldPaths = [
+        {
+          path: ['somepath1'],
+          value: { value: { isSecretRef: true, id: 'secret-1' } },
+        },
+        {
+          path: ['somepath2'],
+          value: { value: { isSecretRef: true, ids: ['secret-2a', 'secret-2b'] } },
+        },
+      ];
+      const newPaths = [
+        { path: ['somepath1'], value: { value: null } },
+        { path: ['somepath2'], value: { value: null } },
+      ];
+
+      expect(diffSecretPaths(oldPaths, newPaths)).toEqual({
+        toCreate: [],
+        toDelete: oldPaths,
+        noChange: [],
+      });
+    });
   });
 
   describe('extractAndWriteSecrets', () => {

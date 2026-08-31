@@ -82,18 +82,15 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'returns 403 when the saved query id is blank',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
-          headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
-          body: testData.getSavedQueryLiveQuery(' ', { query: 'select 42 as custom;' }),
-          responseType: 'json',
-        });
+    apiTest('returns 403 when the saved query id is blank', async ({ apiClient }) => {
+      const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
+        headers: { ...testData.COMMON_HEADERS, ...t2Credentials.apiKeyHeader },
+        body: testData.getSavedQueryLiveQuery(' ', { query: 'select 42 as custom;' }),
+        responseType: 'json',
+      });
 
-        expect(response).toHaveStatusCode(403);
-      }
-    );
+      expect(response).toHaveStatusCode(403);
+    });
 
     apiTest('returns 403 when the saved query id does not resolve', async ({ apiClient }) => {
       const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
