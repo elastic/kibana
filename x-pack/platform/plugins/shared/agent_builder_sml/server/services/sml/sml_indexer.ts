@@ -162,7 +162,15 @@ class SmlIndexerImpl implements SmlIndexer {
 
     // Internal repos need an explicit namespace to access non-default spaces;
     // scoped clients handle it themselves and throw if one is passed.
+    // The proxy intercepts .get() and .bulkGet() — the only SO methods any
+    // current getSmlEntry implementation calls (list() hooks are not in scope).
     const [firstSpace] = spaces;
+    if (clientHasSpacesExtension && firstSpace && firstSpace !== 'default') {
+      contextLogger.warn(
+        `SML indexer: 'clientHasSpacesExtension' is true but space '${firstSpace}' is non-default — ` +
+          `namespace injection will be skipped. Pass an internal repository or set the flag to false.`
+      );
+    }
     const internalNamespace =
       !clientHasSpacesExtension && firstSpace && firstSpace !== 'default' ? firstSpace : undefined;
     const wrappedClient = internalNamespace
@@ -170,7 +178,17 @@ class SmlIndexerImpl implements SmlIndexer {
           get(target, prop) {
             if (prop === 'get') {
               return (type: string, id: string, opts?: object) =>
-                (target as any).get(type, id, { namespace: internalNamespace, ...opts });
+                (target as any).get(type, id, { ...opts, namespace: internalNamespace });
+            }
+            if (prop === 'bulkGet') {
+              return (
+                objects: Array<{ type: string; id: string; [k: string]: unknown }>,
+                opts?: object
+              ) =>
+                (target as any).bulkGet(
+                  objects.map((o) => ({ ...o, namespace: internalNamespace })),
+                  opts
+                );
             }
             return (target as any)[prop];
           },

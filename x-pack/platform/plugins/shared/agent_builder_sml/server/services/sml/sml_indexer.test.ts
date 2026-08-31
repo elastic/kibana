@@ -325,8 +325,7 @@ describe('createSmlIndexer', () => {
         })
       );
 
-      // The proxy should have forwarded the call to the underlying client
-      // with namespace injected, so the real .get is invoked with namespace.
+      expect(capturedClient.get).toBeDefined();
       await capturedClient.get!('lens', 'att-9');
       expect(realGet).toHaveBeenCalledWith('lens', 'att-9', { namespace: 'my-space' });
     });
@@ -357,6 +356,69 @@ describe('createSmlIndexer', () => {
       );
 
       expect(capturedClient.current).toBe(mockRepo);
+    });
+
+    it('non-default space without spaces extension: proxy injects namespace on bulkGet', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const capturedClient: { bulkGet?: Function } = {};
+      const getSmlEntry = jest.fn().mockImplementation((_id: string, ctx: any) => {
+        capturedClient.bulkGet = ctx.savedObjectsClient.bulkGet;
+        return Promise.resolve({ type: 'lens', title: 'T', content: 'c' });
+      });
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
+      const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
+      const realBulkGet = jest.fn().mockResolvedValue({ saved_objects: [] });
+      const mockRepo = { get: jest.fn(), bulkGet: realBulkGet } as unknown as ISavedObjectsRepository;
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-11',
+          attachmentType: 'lens',
+          action: 'create',
+          spaces: ['my-space'],
+          savedObjectsClient: mockRepo,
+          clientHasSpacesExtension: false,
+        })
+      );
+
+      expect(capturedClient.bulkGet).toBeDefined();
+      // Injected namespace wins even when the caller passes a conflicting one.
+      await capturedClient.bulkGet!([{ type: 'lens', id: 'att-11', namespace: 'wrong-space' }]);
+      expect(realBulkGet).toHaveBeenCalledWith(
+        [{ type: 'lens', id: 'att-11', namespace: 'my-space' }],
+        undefined
+      );
+    });
+
+    it('clientHasSpacesExtension: true with non-default space logs a warning', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const getSmlEntry = jest
+        .fn()
+        .mockResolvedValue({ type: 'lens', title: 'T', content: 'c' });
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
+      const contextLogger = createMockLogger();
+      const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-12',
+          attachmentType: 'lens',
+          action: 'create',
+          spaces: ['my-space'],
+          logger: contextLogger,
+          clientHasSpacesExtension: true,
+        })
+      );
+
+      expect(contextLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("'clientHasSpacesExtension' is true but space 'my-space' is non-default")
+      );
     });
 
     it('unknown type in origin mode: throws SmlUnregisteredTypeError without touching ES', async () => {
