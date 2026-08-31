@@ -32,14 +32,12 @@ import {
 import { useFetchEventById } from '../hooks/use_fetch_event_by_id';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
 import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
-import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
-import { getImpactedServiceStreamNames } from '../common/impacted_services';
 import {
-  buildBlastRadiusChips,
-  filterEventsByBlastRadiusChip,
-} from '../landing/blast_radius_chips';
-import { BlastRadiusEntities } from '../landing/blast_radius_entities';
+  buildImpactedServiceChips,
+  filterEventsByImpactedServiceChip,
+} from '../landing/impacted_services_chips';
+import { ImpactedServices } from '../landing/impacted_services';
 import { SignificantEventList } from '../landing/significant_event_list';
 import { SignificantEventStatuses } from '../landing/significant_event_statuses';
 import { EventFlyout } from '../event/event_flyout';
@@ -137,7 +135,7 @@ export function NightshiftApp(): React.ReactElement {
     history.replace({ search: params.toString() });
   }, [eventByIdQuery.isFetched, history, isLoading, selectedEvent, selectedEventIdFromUrl]);
 
-  const selectedBlastRadiusKey = useMemo(
+  const selectedImpactedServiceKey = useMemo(
     () => new URLSearchParams(search).get(IMPACTED_SERVICES_QUERY_PARAM) ?? undefined,
     [search]
   );
@@ -195,28 +193,18 @@ export function NightshiftApp(): React.ReactElement {
 
   // Chips cover every event on the page, resolved included, so filtering by a service that only
   // appears in resolved events is still reachable.
-  const {
-    features,
-    failedStreamNames: blastRadiusFailedStreamNames,
-    isInitialLoading: isLoadingBlastRadius,
-    isError: isBlastRadiusError,
-    refetch: refetchBlastRadius,
-  } = useFetchStreamFeatures(
-    useMemo(() => getImpactedServiceStreamNames(shownEvents), [shownEvents])
-  );
-  const blastRadius = useMemo(
-    () => buildBlastRadiusChips(shownEvents, { features }),
-    [shownEvents, features]
-  );
+  const impactedServiceChips = useMemo(() => buildImpactedServiceChips(shownEvents), [shownEvents]);
 
-  const activeBlastRadiusChip = blastRadius.some(({ key }) => key === selectedBlastRadiusKey)
-    ? selectedBlastRadiusKey
+  const activeImpactedServiceChip = impactedServiceChips.some(
+    ({ key }) => key === selectedImpactedServiceKey
+  )
+    ? selectedImpactedServiceKey
     : undefined;
 
-  const handleBlastRadiusSelect = useCallback(
+  const handleImpactedServiceSelect = useCallback(
     (chipKey: string) => {
       const params = new URLSearchParams(history.location.search);
-      const nextKey = activeBlastRadiusChip === chipKey ? undefined : chipKey;
+      const nextKey = activeImpactedServiceChip === chipKey ? undefined : chipKey;
       if (nextKey) {
         params.set(IMPACTED_SERVICES_QUERY_PARAM, nextKey);
       } else {
@@ -224,16 +212,16 @@ export function NightshiftApp(): React.ReactElement {
       }
       history.replace({ search: params.toString() });
     },
-    [activeBlastRadiusChip, history]
+    [activeImpactedServiceChip, history]
   );
 
   const visibleNeedsActionEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(needsActionEvents, activeBlastRadiusChip, { features }),
-    [needsActionEvents, activeBlastRadiusChip, features]
+    () => filterEventsByImpactedServiceChip(needsActionEvents, activeImpactedServiceChip),
+    [needsActionEvents, activeImpactedServiceChip]
   );
   const visibleResolvedEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(resolvedEvents, activeBlastRadiusChip, { features }),
-    [resolvedEvents, activeBlastRadiusChip, features]
+    () => filterEventsByImpactedServiceChip(resolvedEvents, activeImpactedServiceChip),
+    [resolvedEvents, activeImpactedServiceChip]
   );
 
   const scrollToSection = (sectionRef: React.RefObject<HTMLElement>) => {
@@ -300,8 +288,8 @@ export function NightshiftApp(): React.ReactElement {
       value2: needsActionEvents.length,
       key3: 'resolved_event_count',
       value3: resolvedEvents.length,
-      key4: 'blast_radius_filter_active',
-      value4: activeBlastRadiusChip ? 1 : 0,
+      key4: 'impacted_services_filter_active',
+      value4: activeImpactedServiceChip ? 1 : 0,
     },
     meta: {
       description:
@@ -441,14 +429,10 @@ export function NightshiftApp(): React.ReactElement {
             resolvedCount={resolvedEvents.length}
           />
 
-          <BlastRadiusEntities
-            entities={blastRadius}
-            failedStreamNames={blastRadiusFailedStreamNames}
-            isError={isBlastRadiusError}
-            isLoading={isLoadingBlastRadius}
-            onRetry={refetchBlastRadius}
-            onSelect={handleBlastRadiusSelect}
-            selectedEntityKey={activeBlastRadiusChip}
+          <ImpactedServices
+            services={impactedServiceChips}
+            onSelect={handleImpactedServiceSelect}
+            selectedServiceKey={activeImpactedServiceChip}
           />
 
           <EuiFlexItem
@@ -462,10 +446,10 @@ export function NightshiftApp(): React.ReactElement {
                   <SignificantEventList
                     {...sharedListProps}
                     events={visibleNeedsActionEvents}
-                    filterActive={Boolean(activeBlastRadiusChip)}
+                    filterActive={Boolean(activeImpactedServiceChip)}
                     onClearFilter={
-                      activeBlastRadiusChip
-                        ? () => handleBlastRadiusSelect(activeBlastRadiusChip)
+                      activeImpactedServiceChip
+                        ? () => handleImpactedServiceSelect(activeImpactedServiceChip)
                         : undefined
                     }
                     sectionRef={needsActionSectionRef}
@@ -480,10 +464,10 @@ export function NightshiftApp(): React.ReactElement {
                 <SignificantEventList
                   {...sharedListProps}
                   events={visibleResolvedEvents}
-                  filterActive={Boolean(activeBlastRadiusChip && resolvedEvents.length > 0)}
+                  filterActive={Boolean(activeImpactedServiceChip && resolvedEvents.length > 0)}
                   onClearFilter={
-                    activeBlastRadiusChip && resolvedEvents.length > 0
-                      ? () => handleBlastRadiusSelect(activeBlastRadiusChip)
+                    activeImpactedServiceChip && resolvedEvents.length > 0
+                      ? () => handleImpactedServiceSelect(activeImpactedServiceChip)
                       : undefined
                   }
                   sectionRef={resolvedSectionRef}

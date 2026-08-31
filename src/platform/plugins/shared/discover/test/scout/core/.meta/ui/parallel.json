@@ -1,8 +1,7 @@
 {
-  "sha1": "1fbb0e7a534eff7aa450b7ff6b1fd623bdcb2b96",
+  "sha1": "ecc8c9f7a82201dd1aa3167829e2c77f47ef3bfa",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -92,6 +91,32 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_state_restoration.spec.ts",
         "line": 55,
         "column": 13
+      }
+    },
+    {
+      "id": "3fe9adfc7cac7c0-81b70185dedb8c7",
+      "title": "Discover shared links - doc viewer syncs and restores a shared classic document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
+        "line": 66,
+        "column": 32
+      }
+    },
+    {
+      "id": "3fe9adfc7cac7c0-490661ba3973029",
+      "title": "Discover shared links - doc viewer syncs and restores a shared ES|QL document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links_doc_viewer.spec.ts",
+        "line": 66,
+        "column": 32
       }
     },
     {

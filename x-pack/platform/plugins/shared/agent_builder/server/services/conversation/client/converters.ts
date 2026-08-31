@@ -21,16 +21,20 @@ import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   CONVERSATION_SCHEMA_VERSION,
-  MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   ConversationRoundStatus,
   ConversationRoundStepType,
   ToolOrigin,
   ToolResultType,
+  isEventsNativeVersion,
   normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import type { ConversationPermissions } from '../../../../common/http_api/conversations';
+import type {
+  ConversationPermissions,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '../../../../common/http_api/conversations';
 import {
   hasConversationDeleteAccess,
   hasConversationRenameAccess,
@@ -42,8 +46,12 @@ import type {
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
+  NormalizedConversation,
 } from './types';
 import type { ConversationProperties } from './storage';
+import { isReadBy, migrateReadBy } from './read_by';
+import type { ConversationTemplateResolver } from '../templates/serialize';
+import { withDeserializedMetadata } from '../templates/serialize';
 import {
   createAttachmentRefs,
   migrateRoundAttachments,
@@ -51,6 +59,7 @@ import {
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
 import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
+import { eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
   Required<
@@ -69,9 +78,6 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
     hit._primary_term !== undefined
   );
 };
-
-export const isEventsNativeVersion = (v: number | undefined): v is number =>
-  typeof v === 'number' && v >= MIN_EVENTS_NATIVE_SCHEMA_VERSION;
 
 /**
  * Rebuilds the stored timeline on write: round events keep their order, and additive events
@@ -94,7 +100,10 @@ const reconcileEvents = (merged: Conversation) => {
   return events;
 };
 
-const convertBaseFromEs = (document: Document) => {
+export const fromEsWithoutRounds = (
+  document: Document,
+  user: CurrentUser
+): ConversationWithoutRounds => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -110,7 +119,7 @@ const convertBaseFromEs = (document: Document) => {
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
     status: document._source.status,
-    read: document._source.read,
+    read: isReadBy({ source: document._source, user }),
     pinned: document._source.pinned,
     read_only: document._source.read_only ?? false,
     access_control: normalizeConversationAccessControl(document._source.access_control),
@@ -235,8 +244,11 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
   return undefined;
 };
 
-export const fromEs = (document: Document): Conversation => {
-  const base = convertBaseFromEs(document);
+export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
+  const base = fromEsWithoutRounds(document, user);
+  const readBy = {
+    read_by: migrateReadBy(document._source),
+  };
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
@@ -262,8 +274,9 @@ export const fromEs = (document: Document): Conversation => {
   const storedEvents = document._source!.events;
   const isEventsNative = isEventsNativeVersion(storedSchemaVersion);
 
-  const conversation: Conversation = {
+  const conversation: NormalizedConversation = {
     ...base,
+    ...readBy,
     rounds: roundsWithRefs,
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
@@ -278,11 +291,7 @@ export const fromEs = (document: Document): Conversation => {
   return { ...conversation, events };
 };
 
-export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
-  return convertBaseFromEs(document);
-};
-
-export const withPermissions = <T extends ConversationWithoutRounds>({
+const withPermissions = <T extends ConversationWithoutRounds>({
   conversation,
   user,
 }: {
@@ -302,8 +311,92 @@ export const withPermissions = <T extends ConversationWithoutRounds>({
   };
 };
 
-export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
+/**
+ * Read-path round-trip verification. When on, a conversation's rounds are replaced by
+ * `eventsToRounds(roundsToEvents(...))` so every test suite that reads a conversation asserts the
+ * rounds<->events conversion is an identity — a fidelity regression fails CI. Applied at the
+ * response boundary only (never `fromEs`, which also feeds the OCC write path), so writes always
+ * persist the real rounds.
+ *
+ * On automatically in CI (every suite that reads a conversation exercises it), and opt-in locally
+ * via `CI=true`. Always OFF in production: a deployed Kibana never sets
+ * `CI`, so real reads return the stored rounds untouched.
+ */
+const shouldVerifyRoundTrip = process.env.CI === 'true';
+
+const verifyRoundTrip = (conversation: Conversation): Conversation =>
+  shouldVerifyRoundTrip
+    ? {
+        ...conversation,
+        rounds: eventsToRounds(roundsToEvents(conversation)),
+      }
+    : conversation;
+
+const stripInternalFields = (conversation: NormalizedConversation): Conversation => {
+  const { read_by: _readBy, ...conversationWithoutInternalFields } = conversation;
+
+  return conversationWithoutInternalFields;
+};
+
+export const toConversationResponse = ({
+  conversation,
+  resolveTemplate,
+}: {
+  conversation: NormalizedConversation;
+  resolveTemplate: ConversationTemplateResolver;
+}): Conversation => withDeserializedMetadata(stripInternalFields(conversation), resolveTemplate);
+
+export const toConversationResponseFromDocument = ({
+  document,
+  user,
+  resolveTemplate,
+}: {
+  document: Document;
+  user: CurrentUser;
+  resolveTemplate: ConversationTemplateResolver;
+}): Conversation =>
+  withDeserializedMetadata(
+    verifyRoundTrip(stripInternalFields(fromEs(document, user))),
+    resolveTemplate
+  );
+
+export const toResponseConversation = ({
+  document,
+  user,
+  resolveTemplate,
+}: {
+  document: Document;
+  user: CurrentUser;
+  resolveTemplate: ConversationTemplateResolver;
+}): ConversationWithPermissions => {
+  const conversation = toConversationResponseFromDocument({ document, user, resolveTemplate });
+
+  return withPermissions({ conversation, user });
+};
+
+export const toResponseConversationWithoutRounds = ({
+  document,
+  user,
+  resolveTemplate,
+}: {
+  document: Document;
+  user: CurrentUser;
+  resolveTemplate: ConversationTemplateResolver;
+}): ConversationWithoutRoundsWithPermissions => {
+  const conversation = withDeserializedMetadata(
+    fromEsWithoutRounds(document, user),
+    resolveTemplate
+  );
+
+  return withPermissions({ conversation, user });
+};
+
+export const toEs = (
+  conversation: NormalizedConversation,
+  space: string
+): ConversationProperties => {
   const isEventsNative = isEventsNativeVersion(conversation.schema_version);
+
   return {
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
@@ -318,7 +411,9 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     attachments: conversation.attachments ?? [],
     state: conversation.state,
     status: conversation.status,
-    read: conversation.read,
+    // Explicitly omit read to ensure migration
+    read: undefined,
+    read_by: conversation.read_by ?? [],
     pinned: conversation.pinned,
     read_only: conversation.read_only,
     access_control: normalizeConversationAccessControl(conversation.access_control),
@@ -354,7 +449,7 @@ export const updateConversation = ({
   space,
   updateDate,
 }: {
-  conversation: Conversation;
+  conversation: NormalizedConversation;
   update: ConversationUpdatableFields;
   space: string;
   updateDate: Date;
@@ -431,7 +526,7 @@ export const createRequestToEs = ({
     attachments: conversation.attachments ?? [],
     state: conversation.state,
     status: conversation.status,
-    read: false,
+    read_by: [],
     pinned: false,
     read_only: conversation.read_only ?? false,
     access_control: normalizeConversationAccessControl(conversation.access_control),

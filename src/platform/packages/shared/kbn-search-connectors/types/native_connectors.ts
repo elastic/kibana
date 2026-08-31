@@ -2240,15 +2240,51 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      secret_value: {
+      auth_method: {
         default_value: null,
         depends_on: [],
+        display: DROPDOWN,
+        label: translate('searchConnectors.nativeConnectors.microsoftTeams.authMethodLabel', {
+          defaultMessage: 'Authentication Method',
+        }),
+        options: [
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.microsoftTeams.authMethod.clientSecretLabel',
+              {
+                defaultMessage: 'Client Secret',
+              }
+            ),
+            value: 'secret',
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.microsoftTeams.authMethod.certificateLabel',
+              {
+                defaultMessage: 'Certificate',
+              }
+            ),
+            value: 'certificate',
+          },
+        ],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'secret',
+      },
+      secret_value: {
+        default_value: null,
+        depends_on: [{ field: 'auth_method', value: 'secret' }],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.microsoftTeams.secretValueLabel', {
           defaultMessage: 'Secret value',
         }),
         options: [],
-        order: 3,
+        order: 4,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -2257,26 +2293,13 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      username: {
+      certificate: {
         default_value: null,
-        depends_on: [],
-        display: TEXTBOX,
-        label: USERNAME_LABEL,
-        options: [],
-        order: 4,
-        required: true,
-        sensitive: false,
-        tooltip: null,
-        type: STRING,
-        ui_restrictions: [],
-        validations: [],
-        value: '',
-      },
-      password: {
-        default_value: null,
-        depends_on: [],
-        display: TEXTBOX,
-        label: PASSWORD_LABEL,
+        depends_on: [{ field: 'auth_method', value: 'certificate' }],
+        display: TEXTAREA,
+        label: translate('searchConnectors.nativeConnectors.microsoftTeams.certificateLabel', {
+          defaultMessage: 'Content of certificate file',
+        }),
         options: [],
         order: 5,
         required: true,
@@ -2287,8 +2310,89 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      private_key: {
+        default_value: null,
+        depends_on: [{ field: 'auth_method', value: 'certificate' }],
+        display: TEXTAREA,
+        label: translate('searchConnectors.nativeConnectors.microsoftTeams.privateKeyLabel', {
+          defaultMessage: 'Content of private key file',
+        }),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      fetch_attachment_content: {
+        default_value: true,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.microsoftTeams.fetchAttachmentContentLabel',
+          {
+            defaultMessage: 'Fetch attachment content',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.microsoftTeams.fetchAttachmentContentTooltip',
+          {
+            defaultMessage:
+              "Index channel Files-folder items and message file attachments (as File documents), and extract their content. Requires the 'Files.Read.All' application permission.",
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      use_text_extraction_service: {
+        default_value: false,
+        depends_on: [],
+        display: TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+      use_document_level_security: {
+        default_value: false,
+        depends_on: [],
+        display: TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          translate('searchConnectors.nativeConnectors.microsoftTeams.tooltipName', {
+            defaultMessage: 'Microsoft Teams',
+          })
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
-    features: {},
+    features: {
+      [DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+    },
     name: translate('searchConnectors.nativeConnectors.microsoftTeams.name', {
       defaultMessage: 'Microsoft Teams',
     }),

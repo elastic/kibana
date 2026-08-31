@@ -52,6 +52,7 @@ import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import type { ConfigType } from './config';
+import type { CasesEventBus } from './events/event_bus';
 
 export interface CasesServerSetupDependencies {
   alerting: AlertingServerSetup;
@@ -124,6 +125,7 @@ export interface CasesServerStart {
    */
   getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
   getUnifiedAttachmentTypeRegistry(): UnifiedAttachmentTypeRegistry;
+  getCasesEventBus(): CasesEventBus;
   config: ConfigType;
 }
 

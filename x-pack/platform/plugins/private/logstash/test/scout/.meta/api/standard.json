@@ -1,5 +1,8 @@
 {
   "sha1": "a3ed0971e382f4cf63c2a1e58b2d6c36fd71dc81",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "76379db0c46059d-e670d220d72679e",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/cluster.spec.ts",
-        "line": 24,
-        "column": 10
+        "line": 20,
+        "column": 11
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipeline.spec.ts",
-        "line": 41,
-        "column": 10
+        "line": 30,
+        "column": 7
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipeline.spec.ts",
-        "line": 54,
-        "column": 10
+        "line": 42,
+        "column": 22
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipeline.spec.ts",
-        "line": 63,
-        "column": 10
+        "line": 54,
+        "column": 11
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipelines_delete.spec.ts",
-        "line": 31,
-        "column": 10
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipelines_list.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 32,
+        "column": 26
       }
     }
   ]

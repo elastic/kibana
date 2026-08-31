@@ -96,7 +96,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
               </EuiFlexItem>
               {isOriginProject && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>
+                  <EuiBadge data-test-subj="projectPickerListItemOriginBadge">
                     {i18n.translate('cpsUtils.projectPicker.listItem.originProject', {
                       defaultMessage: 'This Project',
                     })}
