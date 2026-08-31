@@ -16,9 +16,9 @@ import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { AttachmentClient } from '@kbn/streams-plugin/server';
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
+import type { SignificantEventsServer } from '../types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
@@ -58,7 +58,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
 }
 
 export type SignificantEventsRouteHandlerResources = {
-  server: StreamsServer;
+  server: SignificantEventsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
   continuousKiOnboardingWorkflowService?: ContinuousKiOnboardingWorkflowService;

@@ -1,21 +1,9 @@
 {
   "sha1": "8ac242f8256ee40b7137bd8231ecf5d9cfc7e578",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "180c2ab7059d4dc-7132d4e40af07dc",
-      "title": "Teardown environment for streams tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/global.teardown.ts",
-        "line": 10,
-        "column": 19
-      }
-    },
     {
       "id": "00326eb69e240b4-744ce32675c025c",
       "title": "Setup environment for streams tests",
@@ -23,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -39,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 125,
-        "column": 9
+        "line": 110,
+        "column": 41
       }
     },
     {
@@ -55,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 140,
-        "column": 9
+        "line": 116,
+        "column": 7
       }
     },
     {
@@ -71,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 159,
-        "column": 9
+        "line": 132,
+        "column": 7
       }
     },
     {
@@ -87,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 173,
-        "column": 9
+        "line": 143,
+        "column": 7
       }
     },
     {
@@ -103,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 191,
-        "column": 9
+        "line": 155,
+        "column": 25
       }
     },
     {
@@ -119,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 224,
-        "column": 9
+        "line": 182,
+        "column": 25
       }
     },
     {
@@ -135,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 247,
-        "column": 9
+        "line": 201,
+        "column": 7
       }
     },
     {
@@ -151,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 259,
-        "column": 9
+        "line": 209,
+        "column": 25
       }
     },
     {
@@ -167,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 283,
-        "column": 9
+        "line": 230,
+        "column": 7
       }
     },
     {
@@ -183,8 +171,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 297,
-        "column": 9
+        "line": 240,
+        "column": 24
       }
     },
     {
@@ -199,8 +187,19 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 310,
-        "column": 9
+        "line": 251,
+        "column": 13
+      }
+    },
+    {
+      "id": "180c2ab7059d4dc-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

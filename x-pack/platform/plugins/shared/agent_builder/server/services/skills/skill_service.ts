@@ -15,7 +15,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
+import { isAllowedSkillRegistration } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -81,7 +81,7 @@ class SkillServiceImpl implements SkillService {
   setup(): SkillServiceSetup {
     return {
       registerSkill: (skill) => {
-        if (!isAllowedBuiltinSkill(skill.id)) {
+        if (!isAllowedSkillRegistration(skill)) {
           throw new Error(
             `Built-in skill with id "${skill.id}" is not in the list of allowed built-in skills.
              Please add it to the list of allowed built-in skills in the "@kbn/agent-builder-server/allow_lists.ts" file.`
