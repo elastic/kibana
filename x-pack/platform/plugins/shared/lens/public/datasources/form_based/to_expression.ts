@@ -33,13 +33,17 @@ import type {
   IndexPatternMap,
   RangeIndexPatternColumn,
 } from '@kbn/lens-common';
-import { isEsqlQuerySuccess, generateEsqlQuery } from './generate_esql_query';
-import { convertToAbsoluteDateRange } from '../../utils';
+import {
+  isEsqlQuerySuccess,
+  generateEsqlQuery,
+  convertToAbsoluteDateRange,
+  isColumnFormatted,
+  isColumnOfType,
+  resolveTimeShift,
+} from '@kbn/lens-common';
 import { getLensFeatureFlags } from '../../get_feature_flags';
 import { operationDefinitionMap } from './operations';
-import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import { dedupeAggs } from './dedupe_aggs';
-import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
