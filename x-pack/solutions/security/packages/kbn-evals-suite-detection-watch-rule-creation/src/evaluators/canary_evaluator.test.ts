@@ -43,10 +43,20 @@ const goodRule = {
 };
 
 describe('createCanaryEvaluator', () => {
-  it('trips when no rule was produced', async () => {
-    const result = await createCanaryEvaluator(makeEvaluators(1)).evaluate(makeArgs(undefined));
+  it('trips hardest when the v3 quality gate explicitly declined the gap', async () => {
+    const args = makeArgs(undefined);
+    args.output = { ...args.output, skipped: true, skipReason: 'evidence is empty' };
+    const result = await createCanaryEvaluator(makeEvaluators(1)).evaluate(args);
     expect(result.score).toBe(1);
-    expect(result.metadata).toMatchObject({ trippedBy: 'no rule produced' });
+    expect(result.metadata).toMatchObject({ trippedBy: 'quality gate (explicit skip)' });
+  });
+
+  it('scores N/A — not 1 — when there is neither a rule nor an explicit skip', async () => {
+    // A crashed draft also produces no rule. Rewarding that with 1 is how a fully
+    // broken run reported a passing canary (measured on build 454).
+    const result = await createCanaryEvaluator(makeEvaluators(1)).evaluate(makeArgs(undefined));
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
   });
 
   it('trips on a catch-all query without consulting the LLM judge', async () => {

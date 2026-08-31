@@ -39,21 +39,42 @@ const shouldStopPolling = (status: ExecutionStatus) =>
 // then sees a rule with no fields (the false-zero failure this fixed).
 const stepOutputSchema = z
   .object({
-    structured_output: z.object({ rule: draftRuleSchema }).partial(),
+    structured_output: z
+      .object({
+        rule: draftRuleSchema,
+        // v3 quality gate: the agent refuses unwinnable gaps instead of drafting.
+        // A refusal is a CORRECT outcome, not a missing rule — evaluators must be
+        // able to tell the two apart (a crashed draft also yields no rule).
+        skipped: z.boolean(),
+        reason: z.string(),
+      })
+      .partial(),
   })
   .partial();
 
 // Each step produces two entries in stepExecutions: an "enter" record (output: null)
 // and a "result" record (output: data). Find the result record for draft_creation.
-const extractRuleFromSteps = (steps: WorkflowStepExecutionDto[]): DraftRule | undefined => {
+const extractDraftFromSteps = (
+  steps: WorkflowStepExecutionDto[]
+): { rule: DraftRule | undefined; skipped: boolean; skipReason: string | undefined } => {
   const draftSteps = steps.filter((s) => s.stepId === DRAFT_STEP_ID);
   const resultRecord = draftSteps.find((s) => s.output != null);
   const parsed = stepOutputSchema.safeParse(resultRecord?.output);
-  return parsed.success ? parsed.data.structured_output?.rule : undefined;
+  if (!parsed.success) return { rule: undefined, skipped: false, skipReason: undefined };
+  const out = parsed.data.structured_output;
+  return {
+    rule: out?.rule,
+    skipped: out?.skipped === true,
+    skipReason: out?.reason,
+  };
 };
 
 export interface RuleCreationResult {
   rule: DraftRule | undefined;
+  /** True when the v3 quality gate refused to draft (distinct from a failed draft). */
+  skipped: boolean;
+  /** Which gate the agent reported tripping, when it skipped. */
+  skipReason: string | undefined;
   pendingApproval: boolean;
   traceId: string | undefined;
   workflowExecutionId: string;
@@ -140,16 +161,24 @@ export class RuleCreationClient {
       );
     }
 
-    const rule = extractRuleFromSteps(execution.stepExecutions ?? []);
+    const { rule, skipped, skipReason } = extractDraftFromSteps(execution.stepExecutions ?? []);
 
-    if (!rule) {
+    if (skipped) {
+      this.log.info(
+        `Workflow ${workflowExecutionId}: draft_creation declined the gap (${
+          skipReason ?? 'no reason given'
+        }) — the v3 quality gate held`
+      );
+    } else if (!rule) {
       this.log.warning(
-        `Workflow ${workflowExecutionId} reached ${execution.status} but draft_creation produced no rule — evaluators will score 0`
+        `Workflow ${workflowExecutionId} reached ${execution.status} but draft_creation produced no rule and did not decline — evaluators will score 0`
       );
     }
 
     const result: RuleCreationResult = {
       rule,
+      skipped,
+      skipReason,
       pendingApproval: execution.status === ExecutionStatus.WAITING_FOR_INPUT,
       traceId: execution.traceId,
       workflowExecutionId,

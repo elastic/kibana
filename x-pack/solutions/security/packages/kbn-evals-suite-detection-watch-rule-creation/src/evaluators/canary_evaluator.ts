@@ -24,8 +24,26 @@ export const createCanaryEvaluator = (evaluators: DefaultEvaluators): RuleEvalua
   name: 'Canary Tripped',
   kind: 'LLM',
   evaluate: async (args) => {
+    // v3 quality gate: an explicit refusal is the strongest possible trip — the
+    // workflow recognised the gap as unwinnable and declined to draft.
+    if (args.output?.skipped) {
+      return {
+        score: 1,
+        metadata: { trippedBy: 'quality gate (explicit skip)', reason: args.output.skipReason },
+      };
+    }
     if (!args.output?.rule) {
-      return { score: 1, metadata: { trippedBy: 'no rule produced' } };
+      // No rule AND no refusal is a broken run, not a working gate. Scoring 1 here
+      // would let a crashed draft masquerade as a passing canary — the exact
+      // false-positive that made this evaluator read 1 while everything was broken.
+      return {
+        score: null,
+        label: 'N/A',
+        metadata: {
+          error:
+            'draft_creation produced neither a rule nor an explicit skip — cannot tell a working gate from a failed run',
+        },
+      };
     }
     const syntax = await createQuerySyntaxValidityEvaluator().evaluate(args);
     if (syntax.score === 0) {
