@@ -54,7 +54,7 @@ export const generateWorkflow = async ({
         }
       );
 
-      if (!out.validation?.valid || !out.validation.parsedWorkflow) {
+      if (!out.validation?.valid || !out.validation.parsedWorkflow || !out.yaml) {
         const reason = out.validation?.errors.length
           ? out.validation.errors.join('; ')
           : 'no validated workflow produced';

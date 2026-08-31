@@ -140,7 +140,7 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
       try {
         const {
           workflow,
-          yaml: generatedYaml,
+          yaml: afterYaml,
           response: generationComment,
         } = await generateWorkflow({
           nlQuery: query,
@@ -155,7 +155,6 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
         });
 
         const beforeYaml = sourceData?.yaml ?? '';
-        const afterYaml = generatedYaml;
         const proposalId = v4();
 
         const {
