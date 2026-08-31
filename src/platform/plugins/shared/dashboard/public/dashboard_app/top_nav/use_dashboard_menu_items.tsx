@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -55,14 +55,25 @@ export const useDashboardMenuItems = ({
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
 
-  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
-    useBatchedPublishingSubjects(
-      dashboardApi.hasOverlays$,
-      dashboardApi.hasUnsavedChanges$,
-      dashboardApi.savedObjectId$,
-      dashboardApi.viewMode$,
-      dashboardApi.accessControl$
-    );
+  const [
+    hasOverlays,
+    hasUnsavedChanges,
+    lastSavedId,
+    viewMode,
+    accessControl,
+    canRedo,
+    canUndo,
+    disableUndoRedo,
+  ] = useBatchedPublishingSubjects(
+    dashboardApi.hasOverlays$,
+    dashboardApi.hasUnsavedChanges$,
+    dashboardApi.savedObjectId$,
+    dashboardApi.viewMode$,
+    dashboardApi.accessControl$,
+    dashboardInternalApi.canRedo$,
+    dashboardInternalApi.canUndo$,
+    dashboardInternalApi.disableUndoRedo$
+  );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
   const { isInEditAccessMode, canManageAccessControl } = useMemo(
@@ -219,36 +230,22 @@ export const useDashboardMenuItems = ({
     isResetting,
   ]);
 
-  const [undoDisabled, setUndoDisabled] = useState<boolean>(false);
-  const [redoDisabled, setRedoDisabled] = useState<boolean>(false);
-  useEffect(() => {
-    const disabledActionsSubscription = dashboardInternalApi.disabledActions$.subscribe(
-      ({ undo, redo }) => {
-        setUndoDisabled(undo);
-        setRedoDisabled(redo);
-      }
-    );
-    return () => {
-      disabledActionsSubscription.unsubscribe();
-    };
-  }, [dashboardInternalApi.disabledActions$]);
-
   const historyConfig = useMemo(() => {
     return {
       undo: {
-        disabled: disableTopNav || undoDisabled,
+        disabled: disableTopNav || disableUndoRedo || !canUndo,
         onClick: () => {
           dashboardInternalApi.undo();
         },
       },
       redo: {
-        disabled: disableTopNav || redoDisabled,
-        onClick: () => {
+        disabled: disableTopNav || disableUndoRedo || !canRedo,
+        onClick: async () => {
           dashboardInternalApi.redo();
         },
       },
     };
-  }, [disableTopNav, undoDisabled, redoDisabled, dashboardInternalApi]);
+  }, [disableTopNav, canRedo, canUndo, disableUndoRedo, dashboardInternalApi]);
 
   /**
    * Register all of the top nav configs that can be used by dashboard.

@@ -13,10 +13,9 @@ import {
   debounceTime,
   filter,
   map,
-  switchMap,
+  first,
   withLatestFrom,
   type Observable,
-  type Subject,
 } from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
@@ -30,20 +29,16 @@ export function initializeHistoryManager({
   setState,
   getState,
   dataLoading$,
-  historyUpdated$,
+  onHistoryReady,
 }: {
   anyStateChange$: Observable<void>;
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
   getState: () => DashboardState;
   setState: (state: DashboardState) => Promise<void>;
   dataLoading$: Observable<boolean>;
-  historyUpdated$: Subject<void>;
-}): {
-  api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
-  cleanup: () => void;
-} {
+  onHistoryReady: () => void;
+}) {
   const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
-  const dashboardCurrentState$ = new BehaviorSubject<DashboardState | undefined>(undefined);
 
   const disableUndoRedoSubscription = combineLatest([hasOverlays$, dataLoading$])
     .pipe(map(([hasOverlays, dataLoading]) => Boolean(hasOverlays || dataLoading)))
@@ -51,47 +46,36 @@ export function initializeHistoryManager({
       disableUndoRedo$.next(disableUndoRedo);
     });
 
+  const onStateChange$ = combineLatest([anyStateChange$, dataLoading$]).pipe(
+    debounceTime(0), // flatten anyStateChange + dataLoading event updates
+    withLatestFrom(hasOverlays$),
+    // do not push to history while a child is loading or an editor is open
+    filter(([[, loading], hasOverlays]) => !loading && !hasOverlays),
+    map(() => {
+      const state = getState();
+      return {
+        ...state,
+        panels: state.panels.sort(sortById), // keep panel order consistent so that diffing on array works as expected
+      };
+    })
+  );
+
+  onStateChange$.pipe(first()).subscribe(() => onHistoryReady());
+
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
-      disableUndoRedo$,
-      state$: dashboardCurrentState$,
-      mapState: (state) => {
-        return {
-          ...state,
-          panels: state.panels.sort(sortById), // keep panel order consistent so that diffing on array works as expected
-        };
-      },
+      onStateChange$,
+      setState,
       maxSize: 100,
     }
   );
 
-  const onAnyStateChangeSubscription = combineLatest([anyStateChange$, dataLoading$])
-    .pipe(
-      debounceTime(0), // flatten anyStateChange + dataLoading event updates
-      withLatestFrom(hasOverlays$),
-      // do not push to history while a child is loading or an editor is open
-      filter(([[, loading], hasOverlays]) => !loading && !hasOverlays)
-    )
-    .subscribe(([[, loading]]) => {
-      dashboardCurrentState$.next(getState());
-      historyUpdated$.next();
-    });
-
-  // when the history's state updates, respond by setting state on the Dashboard
-  const historyStateSubscription = historyApi.currentState$
-    .pipe(
-      switchMap(async (newState) => {
-        if (!newState) return;
-        await setState(newState);
-      })
-    )
-    .subscribe();
-
   return {
-    api: historyApi,
+    internalApi: {
+      ...historyApi,
+      disableUndoRedo$,
+    },
     cleanup: () => {
-      historyStateSubscription.unsubscribe();
-      onAnyStateChangeSubscription.unsubscribe();
       disableUndoRedoSubscription.unsubscribe();
       cleanupHistoryTracking();
     },
