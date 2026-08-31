@@ -133,7 +133,11 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
       // Ordinal F1: exact sub-technique = 1, parent-without-sub = 0.5. An
       // exact-ID set score treats "right family, imprecise member" the same as
       // garbage, which is exactly where the hard-cases 0.6x was hiding structure.
-      const metrics = ordinalMitreF1(scoredTechniques, expectedTechniques);
+      // scoredTechniques controls the precision denominator (optionals stripped so
+      // they aren't penalised as FPs); generatedTechniques is passed for recall so
+      // an optional parent technique (e.g. T1078 for expected T1078.001) can still
+      // earn the 0.5 ordinal credit via tieredTechniqueCredit.
+      const metrics = ordinalMitreF1(scoredTechniques, expectedTechniques, generatedTechniques);
       const invalidFormat = [...generatedTechniques].filter((t) => !/^T\d{4}(\.\d{3})?$/.test(t));
       return {
         score: metrics.f1,
