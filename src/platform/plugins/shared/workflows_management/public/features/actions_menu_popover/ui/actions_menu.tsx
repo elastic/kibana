@@ -416,37 +416,41 @@ export function ActionsMenu({
 const componentStyles = {
   selectable: ({ euiTheme }: UseEuiTheme) =>
     css({
+      width: '100%',
+      minWidth: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       '& .euiSelectableListItem': {
         paddingBlock: euiTheme.size.m,
-        paddingInline: '16px',
+        paddingInline: euiTheme.size.m,
       },
       '& .euiSelectableListItem.compactOption': {
         paddingBlock: euiTheme.size.s,
       },
-      // EUI 116 routes EuiSelectableListItem through EuiListItemLayout, which
-      // adds gap on __content and vertical padding on __text and drops the
-      // between-row border. renderActionOption owns its own spacing, so zero
-      // the new gap/padding out and re-add the row border to match the design.
+      '& .euiListItemLayout': {
+        paddingBlock: euiTheme.size.s,
+        paddingInline: euiTheme.size.s,
+      },
+      // EUI routes EuiSelectableListItem through EuiListItemLayout, which
+      // adds gap on __content and vertical padding on __text.
+      // renderActionOption owns its own spacing, so zero those out.
       '& .euiSelectableListItem__content': {
         gap: 0,
       },
       '& .euiSelectableListItem__text': {
         paddingBlock: 0,
       },
-      '& .euiSelectableListItem:not(:last-of-type)': {
-        borderBottom: euiTheme.border.thin,
-      },
       '& .euiSelectableList': {
         maxHeight: '420px',
         overflowY: 'auto',
+        paddingBlock: euiTheme.size.xs,
+        paddingInline: euiTheme.size.s,
       },
       '& .euiSelectableList__groupLabel': {
         borderBottom: euiTheme.border.thin,
-        paddingInline: '16px',
+        paddingInline: euiTheme.size.m,
       },
       '& .euiSelectableList__groupLabel ~ .euiSelectableList__groupLabel': {
-        marginTop: '24px',
+        marginTop: euiTheme.size.l,
       },
     }),
   title: css({
@@ -457,7 +461,7 @@ const componentStyles = {
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
       paddingBlock: euiTheme.size.m,
-      paddingInline: '16px',
+      paddingInline: euiTheme.size.m,
     }),
   actionOption: css({
     gap: '12px',
