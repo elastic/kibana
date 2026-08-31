@@ -27,11 +27,13 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
-  it('inlines the dashboard design guidance directly in the skill body', () => {
-    expect(skill.content).toContain('Dashboard Composition Guidelines');
-    expect(skill.content).toContain('Grid Packing Rules');
+  it('inlines dashboard authoring rules in the skill body', () => {
+    expect(skill.content).toContain('Lead with high-level metrics');
+    expect(skill.content).toContain('do not make a single-value metric or gauge full-width');
+    expect(skill.content).toContain('3–5 `options_list_control` dropdowns');
     expect(skill.content).toContain('show avg/min/max in the legend');
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
+    expect(skill.content).not.toContain('is a miss');
   });
 
   it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {
