@@ -57,7 +57,7 @@ steps:
     type: kibana.request
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -244,6 +244,17 @@ steps:
             description: >
               The mechanism/root-cause narrative, as plain prose — no markdown headings or bullet
               lists. Actionable steps belong in recommendations, not here.
+          severity:
+            type: string
+            enum: ['80-critical', '60-high', '40-medium', '20-low']
+            description: >
+              How severe the investigated situation is, rated on the tier ladder in the agent
+              instructions from what this investigation confirmed — whether the affected operation
+              fails, degrades, or still completes, and how broad that impact is. Set it for every
+              investigation, whatever triggered it, and rate it from your own findings rather than
+              copying a severity the trigger already carried. Distinct from a
+              trigger_feedback severity entry, which exists only for significant-event
+              runs and rates that one event rather than the whole situation.
           recommendations:
             type: array
             description: >
@@ -714,7 +725,7 @@ steps:
     if: '${{ steps.investigate.error == null }}'
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -727,7 +738,7 @@ steps:
     if: '${{ steps.investigate.error != null }}'
     with:
       method: POST
-      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
