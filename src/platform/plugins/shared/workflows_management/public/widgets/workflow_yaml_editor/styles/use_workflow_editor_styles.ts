@@ -21,7 +21,8 @@ const editorStyleMap = {
       minInlineSize: '600px',
       maxInlineSize: '600px',
       maxBlockSize: '520px',
-      borderRadius: euiTheme.border.radius.medium,
+      borderRadius: euiTheme.border.radius.control,
+      overflow: 'hidden',
     }),
 
   container: ({ euiTheme }: UseEuiTheme) =>

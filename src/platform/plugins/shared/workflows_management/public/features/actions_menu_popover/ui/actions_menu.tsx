@@ -16,6 +16,7 @@ import {
   euiFontSize,
   EuiHighlight,
   EuiIcon,
+  EuiPanel,
   EuiSelectable,
   EuiText,
   EuiTitle,
@@ -336,6 +337,15 @@ export function ActionsMenu({
   };
 
   return (
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      paddingSize="none"
+      css={css({
+        borderRadius: euiTheme.border.radius.control,
+        overflow: 'hidden',
+      })}
+    >
     <EuiSelectable
       aria-label={i18n.translate('workflows.actionsMenu.ariaLabel', {
         defaultMessage: 'Actions menu',
@@ -399,6 +409,7 @@ export function ActionsMenu({
         </>
       )}
     </EuiSelectable>
+    </EuiPanel>
   );
 }
 
