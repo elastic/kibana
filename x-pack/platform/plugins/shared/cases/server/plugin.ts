@@ -301,7 +301,8 @@ export class CasePlugin
           analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
           attachmentsEnabled: this.caseConfig.attachments?.enabled === true,
           templatesEnabled: this.caseConfig.templates?.enabled === true,
-        }
+        },
+        this.logger
       );
     }
 

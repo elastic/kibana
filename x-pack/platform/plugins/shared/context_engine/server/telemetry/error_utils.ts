@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { isRequestAbortedError } from '@kbn/es-errors';
 import { ExecutionError } from '@kbn/workflows/server';
+
+/** Whether the error is a cancellation. */
+export const isAbortError = (error: unknown): boolean =>
+  isRequestAbortedError(error) || (error instanceof Error && error.name === 'AbortError');
 
 /** The error type to report in an EBT payload. */
 export const errorTypeForTelemetry = (error: unknown): string => {

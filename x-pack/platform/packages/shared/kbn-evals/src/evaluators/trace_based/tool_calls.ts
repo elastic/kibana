@@ -22,6 +22,7 @@ export function createToolCallsEvaluator({
     log,
     config: {
       name: 'Tool Calls',
+      direction: 'neutral',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}" AND attributes.elastic.inference.span.kind == "TOOL"
 | STATS 

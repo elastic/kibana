@@ -29,6 +29,7 @@ import semverLt from 'semver/functions/lt';
 
 import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 import { KibanaSavedObjectType } from '../../../../../../../common/types/models';
+import { appendReturnParams } from '../../components/return_params';
 
 import {
   isPackagePrerelease,
@@ -137,7 +138,8 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 export function Detail() {
   const theme = useEuiTheme();
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
-  const { getFromIntegrations, getFromCollection } = useIntegrationsStateContext();
+  const { getFromIntegrations, getFromCollection, getCatalogReturn } =
+    useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
@@ -387,14 +389,19 @@ export function Detail() {
 
   const fromIntegrations = getFromIntegrations();
   const fromCollection = getFromCollection();
+  const catalogReturn = getCatalogReturn();
 
-  const fromIntegrationsPath = fromCollection
+  const baseIntegrationsPath = fromCollection
     ? getPath('integration_collection', { groupId: fromCollection.groupId })
     : fromIntegrations === 'updates_available'
     ? getPath('integrations_installed_updates_available')
     : fromIntegrations === 'installed'
     ? getPath('integrations_installed')
     : getPath('integrations_all');
+
+  const fromIntegrationsPath = fromCollection
+    ? baseIntegrationsPath
+    : appendReturnParams(baseIntegrationsPath, catalogReturn);
 
   const numOfDeferredInstallations = useMemo(
     () => getDeferredInstallationsCnt(packageInfo),

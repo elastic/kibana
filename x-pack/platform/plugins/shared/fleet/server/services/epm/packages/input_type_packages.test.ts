@@ -61,6 +61,7 @@ describe('installAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
     jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
     jest.mocked(installIndexTemplatesAndPipelines).mockClear();
+    jest.mocked(appContextService.getConfig).mockReturnValue({} as any);
     const mockedLogger = jest.mocked(appContextService.getLogger());
     mockedLogger.debug.mockClear();
     mockedLogger.error.mockClear();
@@ -80,7 +81,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       logger: mockedLogger,
       packagePolicy: {} as any,
     });
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).not.toBeCalled();
+    expect(jest.mocked(optimisticallyAddEsAssetReferences)).not.toHaveBeenCalled();
   });
 
   const TEST_PKG_INFO_INPUT = {
@@ -121,7 +122,7 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       })
-    ).rejects.toThrowError(PackageNotFoundError);
+    ).rejects.toThrow(PackageNotFoundError);
   });
 
   it('should skip index template creation when existing data stream is owned by different package with force true', async () => {
@@ -486,6 +487,58 @@ describe('installAssetsForInputPackagePolicy', () => {
     expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
   });
 
+  it('should skip the corroboration guard when skipUploadPackageValidation is set', async () => {
+    jest
+      .mocked(appContextService.getConfig)
+      .mockReturnValue({ internal: { skipUploadPackageValidation: true } } as any);
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'uploaded_probe',
+        version: '1.0.0',
+        install_source: 'upload',
+        installed_es: [],
+      },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      {
+        name: 'logs-my_dataset-default',
+        _meta: { package: { name: 'uploaded_probe' } },
+      },
+    ] as any);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: true,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+  });
+
   it('should install es index patterns for input package if package is installed', async () => {
     jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
     jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
@@ -525,7 +578,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toBeCalledWith(
+    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       expect.anything(),
@@ -1436,7 +1489,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'custom_dataset',
       {
         es_index_patterns: { custom_dataset: 'logs-my-integration.custom_dataset-*' },
@@ -1467,7 +1520,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toHaveBeenCalled();
   });
 
   it('should clean up assets for input packages with status = installed', async () => {
@@ -1513,7 +1566,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'test',
       {
         es_index_patterns: { test: 'logs-udp.test-*' },
@@ -1571,7 +1624,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'test',
       {
         installed_es: [
@@ -1606,7 +1659,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toHaveBeenCalled();
   });
 
   it('should log error if cleanupAssets failed', async () => {
@@ -1630,7 +1683,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(mockedLogger.error).toBeCalled();
+    expect(mockedLogger.error).toHaveBeenCalled();
   });
 
   describe('isInputPackageDatasetUsedByMultiplePolicies', () => {
@@ -2000,7 +2053,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       });
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toBeCalled();
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });
 
     it('should install templates for integration package with custom dataset', async () => {
