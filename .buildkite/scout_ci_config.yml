@@ -35,7 +35,6 @@ plugins:
     - embeddable_alerts_table
     - entity_store
     - error_boundary_example
-    - evals
     - event_annotation_listing
     - exploratory_view
     - fleet
