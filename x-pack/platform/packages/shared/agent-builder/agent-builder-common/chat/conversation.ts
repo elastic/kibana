@@ -699,6 +699,11 @@ export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds
   permissions: ConversationPermissions;
 };
 
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
+}
+
 export type ConversationAction = 'regenerate';
 
 // Compaction summary types

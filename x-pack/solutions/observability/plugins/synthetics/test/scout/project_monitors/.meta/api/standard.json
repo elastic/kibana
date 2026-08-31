@@ -1,5 +1,5 @@
 {
-  "sha1": "51ec8a6a42e668e9abc97510095cc32a6cffb7fb",
+  "sha1": "184b3dd6394eee516639dc35deda6c33fe4858c6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 425,
+        "line": 426,
         "column": 25
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 457,
+        "line": 458,
         "column": 10
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 502,
+        "line": 503,
         "column": 29
       }
     },
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 527,
+        "line": 528,
         "column": 28
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 558,
+        "line": 559,
         "column": 11
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 600,
+        "line": 601,
         "column": 11
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 643,
+        "line": 644,
         "column": 31
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 686,
+        "line": 687,
         "column": 32
       }
     },
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 697,
+        "line": 698,
         "column": 6
       }
     },
@@ -210,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 705,
+        "line": 706,
         "column": 18
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 749,
+        "line": 750,
         "column": 10
       }
     },
@@ -238,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 771,
+        "line": 772,
         "column": 11
       }
     },
@@ -252,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 794,
+        "line": 795,
         "column": 11
       }
     },
@@ -266,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 817,
+        "line": 818,
         "column": 11
       }
     },
@@ -280,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 849,
+        "line": 850,
         "column": 10
       }
     },
@@ -294,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 883,
+        "line": 884,
         "column": 21
       }
     },
@@ -308,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 927,
+        "line": 928,
         "column": 74
       }
     },
@@ -322,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 954,
+        "line": 955,
         "column": 6
       }
     },
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 969,
+        "line": 970,
         "column": 32
       }
     },
@@ -350,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 985,
+        "line": 986,
         "column": 16
       }
     },
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1010,
+        "line": 1011,
         "column": 17
       }
     },
@@ -378,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1053,
+        "line": 1054,
         "column": 21
       }
     },
@@ -392,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1100,
+        "line": 1101,
         "column": 7
       }
     },
@@ -406,7 +406,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1139,
+        "line": 1140,
         "column": 48
       }
     },
@@ -420,7 +420,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1195,
+        "line": 1196,
         "column": 32
       }
     },
@@ -434,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1246,
+        "line": 1247,
         "column": 32
       }
     },
@@ -448,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1259,
+        "line": 1260,
         "column": 17
       }
     },
@@ -462,7 +462,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1328,
+        "line": 1329,
         "column": 75
       }
     },
@@ -476,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1349,
+        "line": 1350,
         "column": 21
       }
     },
@@ -490,7 +490,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1426,
+        "line": 1427,
         "column": 24
       }
     },
@@ -504,7 +504,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1484,
+        "line": 1485,
         "column": 20
       }
     },
@@ -518,7 +518,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1545,
+        "line": 1546,
         "column": 36
       }
     },
@@ -532,7 +532,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1555,
+        "line": 1556,
         "column": 27
       }
     },
@@ -546,7 +546,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1609,
+        "line": 1610,
         "column": 27
       }
     },
@@ -574,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 201,
+        "line": 202,
         "column": 23
       }
     },
@@ -588,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 335,
+        "line": 336,
         "column": 11
       }
     },
@@ -602,7 +602,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 445,
+        "line": 446,
         "column": 13
       }
     },
@@ -616,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 541,
+        "line": 542,
         "column": 16
       }
     },
@@ -630,7 +630,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 563,
+        "line": 564,
         "column": 33
       }
     },
@@ -644,7 +644,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 619,
+        "line": 620,
         "column": 29
       }
     },
@@ -658,7 +658,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 708,
+        "line": 709,
         "column": 9
       }
     },
@@ -672,7 +672,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 740,
+        "line": 741,
         "column": 28
       }
     },
@@ -686,7 +686,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 762,
+        "line": 763,
         "column": 16
       }
     },
@@ -700,7 +700,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
-        "line": 730,
+        "line": 731,
         "column": 27
       }
     },
