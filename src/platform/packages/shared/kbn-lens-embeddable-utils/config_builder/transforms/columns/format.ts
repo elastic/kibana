@@ -28,7 +28,7 @@ export function fromFormatAPIToLensState(
     return;
   }
   if (format.type === 'number' || format.type === 'percent') {
-    if (!Object.keys(format).some((key) => key !== 'type')) {
+    if (Object.keys(format).length === 1) {
       return { id: format.type };
     }
 
@@ -42,7 +42,7 @@ export function fromFormatAPIToLensState(
     };
   }
   if (format.type === 'bits' || format.type === 'bytes') {
-    if (!Object.keys(format).some((key) => key !== 'type')) {
+    if (Object.keys(format).length === 1) {
       return { id: format.type };
     }
 
