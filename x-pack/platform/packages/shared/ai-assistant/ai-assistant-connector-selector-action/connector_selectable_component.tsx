@@ -119,6 +119,7 @@ export const ConnectorSelectableComponent = <T extends { value: string } = { val
   return (
     <EuiPanel
       hasShadow={false}
+      hasBorder={false}
       borderRadius="none"
       paddingSize="none"
       grow={false}
