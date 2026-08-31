@@ -124,8 +124,6 @@ safe-outputs:
   mentions:
     allowed:
       - ${{ github.actor }}
-    # Lets the agent `cc` the author of the PR that introduced the flaky test
-    allowed-collaborators: true
   add-comment:
     max: 1
     target: *issue_number
@@ -215,51 +213,6 @@ safe-outputs:
               }
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
-    # Requests the author of the PR that introduced the flaky test as a reviewer on the fix PR
-    request-fix-review:
-      description: 'Request a review on the fix PR from the author of the PR that introduced the flaky test. Only pass a real, non-bot GitHub login.'
-      runs-on: ubuntu-latest
-      needs: safe_outputs
-      if: needs.safe_outputs.outputs.created_pr_number != ''
-      permissions:
-        pull-requests: write
-      inputs:
-        author:
-          description: "GitHub login (no leading @) of the introducing PR's author to request as a reviewer on the fix PR."
-          required: true
-          type: string
-      env:
-        GH_AW_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
-      steps:
-        - name: Request review from the introducing PR author
-          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-          with:
-            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-            script: |
-              const fs = require('fs');
-              const prNumber = Number(process.env.GH_AW_PR_NUMBER);
-              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
-              if (!Number.isInteger(prNumber) || !outputPath || !fs.existsSync(outputPath)) {
-                core.info('Missing PR number or agent output; nothing to do.');
-                return;
-              }
-              // The agent's `author` tool parameter is delivered here (custom safe-jobs read inputs
-              // from GH_AW_AGENT_OUTPUT, not from the job's inputs context).
-              const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-              const author = items.find((entry) => entry.type === 'request_fix_review')?.author?.trim().replace(/^@/, '');
-              if (!author) {
-                core.info('No reviewer supplied; nothing to do.');
-                return;
-              }
-              const { owner, repo } = context.repo;
-              try {
-                await github.rest.pulls.requestReviewers({ owner, repo, pull_number: prNumber, reviewers: [author] });
-                core.info(`Requested review from @${author} on #${prNumber}.`);
-              } catch (err) {
-                // Non-fatal: GitHub 422s if the user can't review (not a collaborator, is the PR author, etc.).
-                core.warning(`Could not request review from @${author} on #${prNumber}: ${err.status || ''} ${err.message}`);
-              }
-
 strict: false
 timeout-minutes: 90
 ---
@@ -310,7 +263,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 ## Steps
 
 1. **Rule out a duplicate.** Before any investigation, run [Duplicate detection](#duplicate-detection). If a fix for this root cause is already in flight (or already merged), **do not open a PR** — skip straight to step 8 (outcome comment) and step 9 (remove label).
-2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8.
+2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any relevant PR/commit history and its precise causal role, and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8.
 3. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
@@ -319,7 +272,6 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 8. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 9. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 10. **Only if you opened a PR in step 7**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
-11. **Only if you opened a PR in step 7 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
 
 ## Fix guardrails
 
@@ -367,7 +319,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 - **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
   ```
-  Fixes #<issue-number> - likely introduced by #<introducing-pr> (cc @<introducing-pr-author>)
+  Fixes #<issue-number>
 
   ### Summary
   <a few bullet points: what was failing, and what this patch changes - keep it very concise, every bullet point must be earned>
@@ -381,8 +333,13 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   Omit the table for every other kind of flake.>
 
+  <when relevant causal history is strongly supported, include this section after the Summary and its runtime table, if present; otherwise omit it entirely>
+  ### Relevant history
+  - #<relevant-pr>: <one sentence naming the relevant file or symbol changes and their precise causal role>
+  <repeat the bullet only for each additional relevant PR>
+
   ### Context
-  <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
+  <a few bullets of additional context around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence. Cover, where known:
   - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix — and, if you re-investigated because that comment was stale (see "Validate the investigation is current"), say so and summarize what your fresh analysis concluded
   - a one-line recount of where the failures happened — e.g. the CI pipeline/lane and how often/recently — from the issue's CI data and the investigator's comment>
 
@@ -410,9 +367,10 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   </details>
   ```
 
-The first line attributes the flake:
-- **Introducing PR** (`#<introducing-pr>`): the PR you believe introduced the flake — find the PR that first added the failing test with `git log` / `git blame` on the test file, or prefer a specific PR/commit the investigator implicated as the cause. The `likely` hedge is intentional: this is an informed suspicion, not a proven cause, so keep it. If you can't identify a well-supported candidate, omit the whole `- likely introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
-- **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot (includes `kibanamachine`). Request this same person as a reviewer via the `request_fix_review` tool (see Steps).
+The first line links only the failed-test issue. When supported, the **Relevant history** section follows the Summary (and its runtime table, when present) and precedes Context; it links the one PR, or small set of PRs, needed to understand how the flake became possible or observable:
+- Write exactly one bullet and one sentence per PR. Name the relevant file(s), component, helper, assertion, or API that changed and state the PR's precise causal role — e.g. introduced the faulty behavior, exposed a pre-existing issue, or supplied a prerequisite change.
+- Use `git log` / `git blame` only as evidence to investigate, never as proof that the author or last person to touch the file caused the flake. Omit the entire section when the causal link is ambiguous or no PR materially helps explain it.
+- Never name, `@`-mention, or request review from the linked PR authors. Describe each PR's precise causal role in the Relevant history section without assigning personal responsibility.
 - Add more `Fixes #<issue-number>` references if this fix resolves multiple issues.
 
 Add the following at the very end of the PR description (and outside of the details block):
