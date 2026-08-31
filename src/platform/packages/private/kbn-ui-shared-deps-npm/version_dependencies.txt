@@ -24,7 +24,7 @@
 @elastic/esql@4.21.1
 @elastic/eui-theme-borealis@8.0.0
 @elastic/eui-theme-common@10.0.0
-@elastic/eui@119.0.0
+@elastic/eui@119.1.0
 @elastic/numeral@2.5.1
 @elastic/pretty-printer@4.21.1
 @elastic/prismjs-esql@4.14.0
@@ -460,7 +460,7 @@ supports-color@8.1.1
 supports-preserve-symlinks-flag@1.0.0
 symbol-observable@4.0.0
 tabbable@5.3.3
-tapable@2.3.0
+tapable@2.3.3
 terser-webpack-plugin@5.3.17
 terser@5.40.0
 text-diff@1.0.1

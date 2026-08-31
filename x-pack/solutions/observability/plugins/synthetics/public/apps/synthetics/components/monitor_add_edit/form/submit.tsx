@@ -6,11 +6,12 @@
  */
 
 import React, { useState } from 'react';
-import { Redirect, useParams, useHistory } from 'react-router-dom';
+import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
 import { EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEnablement } from '../../../hooks';
 import { RunTestButton } from './run_test_btn';
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
@@ -20,6 +21,7 @@ import { DeleteMonitor } from '../../monitors_page/management/monitor_list_table
 import type { SyntheticsMonitor } from '../types';
 import { ConfigKey, SourceType } from '../types';
 import { format } from './formatter';
+import { getAddMonitorCancelHref } from './cancel_href';
 
 import { MONITORS_ROUTE } from '../../../../../../common/constants';
 
@@ -32,6 +34,9 @@ export const ActionBar = ({
 }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const history = useHistory();
+  const { search } = useLocation();
+  const { application } = useKibana().services;
+  const monitorsHref = history.createHref({ pathname: MONITORS_ROUTE });
   const {
     handleSubmit,
     formState: { defaultValues, isValid },
@@ -78,7 +83,12 @@ export const ActionBar = ({
         <EuiFlexItem grow={false}>
           <EuiLink
             data-test-subj="syntheticsActionBarLink"
-            href={history.createHref({ pathname: MONITORS_ROUTE })}
+            href={getAddMonitorCancelHref({
+              search,
+              monitorsHref,
+              getUrlForApp: (appId, options) =>
+                application?.getUrlForApp(appId, options) ?? monitorsHref,
+            })}
           >
             {CANCEL_LABEL}
           </EuiLink>

@@ -15,7 +15,6 @@ import {
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
-  useBatchedPublishingSubjects,
   apiPublishesSettings,
   initializeStateApi,
 } from '@kbn/presentation-publishing';
@@ -199,13 +198,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     return {
       api,
       Component: () => {
-        const [defaultTitle, title, defaultDescription, description] = useBatchedPublishingSubjects(
-          defaultTitle$,
-          titleManager.api.title$,
-          defaultDescription$,
-          titleManager.api.description$
-        );
-
         useEffect(() => {
           return () => {
             crossPanelActions.cleanup();
@@ -249,14 +241,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
                   ? parentApi.getTooltipRenderer()
                   : undefined
               }
-              title={title ?? defaultTitle}
-              description={description ?? defaultDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              isSharable={
-                isMapRendererApi(parentApi) && typeof parentApi.isSharable === 'boolean'
-                  ? parentApi.isSharable
-                  : true
-              }
             />
           </Provider>
         );
