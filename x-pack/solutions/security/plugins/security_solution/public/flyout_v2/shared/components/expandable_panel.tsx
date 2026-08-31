@@ -251,7 +251,12 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
       </EuiSplitPanel.Inner>
       {showContent && (
         <EuiSplitPanel.Inner paddingSize="none">
-          <EuiPanel paddingSize={contentPaddingSize} data-test-subj={`${dataTestSubj}Content`}>
+          <EuiPanel
+            hasBorder={false}
+            borderRadius="none"
+            paddingSize={contentPaddingSize}
+            data-test-subj={`${dataTestSubj}Content`}
+          >
             {content}
           </EuiPanel>
         </EuiSplitPanel.Inner>
