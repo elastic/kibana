@@ -259,6 +259,13 @@ export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema
   warnings: discoverSessionWarningsSchema.optional(),
 });
 
+export const discoverSessionSanitizeResponseSchema = z
+  .object({
+    data: discoverSessionApiDataSchema,
+    warnings: discoverSessionWarningsSchema.optional(),
+  })
+  .strict();
+
 export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
   query: z
     .string()
@@ -303,6 +310,9 @@ export const discoverSessionSearchResponseSchema = z
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
 export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;
+export type DiscoverSessionSanitizeResponse = z.output<
+  typeof discoverSessionSanitizeResponseSchema
+>;
 export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSchema>[number];
 export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
 export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;
@@ -310,3 +320,6 @@ export type DiscoverSessionApiClassicTab = z.output<typeof discoverSessionClassi
 export type DiscoverSessionApiEsqlTab = z.output<typeof discoverSessionEsqlTabSchema>;
 export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
 export type DiscoverSessionControlPanels = z.output<typeof discoverSessionControlPanelsSchema>;
+
+// Input types (shape accepted by the API, before defaults applied)
+export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataSchema>;

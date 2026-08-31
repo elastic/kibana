@@ -19,6 +19,7 @@ import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, updatePrivateLocationMonitors } from './helpers';
+import { assertCanEnableAgentSharding } from './agent_sharding_license';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 import { syntheticsMonitorSOTypes } from '../../../../common/types/saved_objects';
@@ -118,7 +119,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, savedObjectsClient } = routeContext;
+    const { response, request, savedObjectsClient, context } = routeContext;
     const { locationId } = request.params;
     const {
       label: newLocationLabel,
@@ -140,6 +141,15 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         }),
       ]);
 
+      const licenseError = assertCanEnableAgentSharding(
+        (await context.licensing).license,
+        newIsAgentSharding,
+        existingLocation.attributes.isAgentSharding
+      );
+      if (licenseError) {
+        return response.forbidden({ body: { message: licenseError } });
+      }
+
       let newLocation: Awaited<ReturnType<typeof repo.editPrivateLocation>> | undefined;
 
       if (
@@ -150,10 +160,15 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
           isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
           monitorsInLocation.length
         ) {
-          await checkPrivileges({
+          const privilegeResponse = await checkPrivileges({
             routeContext,
-            monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
+            monitorsSpaces: [
+              ...new Set(monitorsInLocation.flatMap(({ namespaces }) => namespaces ?? [])),
+            ],
           });
+          if (privilegeResponse) {
+            return privilegeResponse;
+          }
         }
 
         newLocation = await repo.editPrivateLocation(locationId, {

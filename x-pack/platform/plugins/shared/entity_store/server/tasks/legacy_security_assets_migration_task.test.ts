@@ -93,7 +93,12 @@ describe('legacy_security_assets_migration_task', () => {
       mockHasLegacySecurityAssets.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
 
       const signal = new AbortController().signal;
-      const result = await runLegacySecurityAssetsMigration({ coreStart, logger, signal });
+      const result = await runLegacySecurityAssetsMigration({
+        coreStart,
+        logger,
+        signal,
+        isMigrationEnabled: async () => true,
+      });
 
       expect(result).toEqual({ migrated: ['default'], skipped: ['other'] });
       expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
@@ -102,6 +107,7 @@ describe('legacy_security_assets_migration_task', () => {
         migrationEsClient: mockEsClient,
         logger: expect.anything(),
         namespace: 'default',
+        allowLegacyMigration: true,
       });
     });
 
@@ -117,8 +123,27 @@ describe('legacy_security_assets_migration_task', () => {
           coreStart,
           logger,
           signal: controller.signal,
+          isMigrationEnabled: async () => true,
         })
       ).rejects.toThrow(/aborted/i);
+      expect(mockInstallSharedElasticsearchAssets).not.toHaveBeenCalled();
+    });
+
+    it('does not migrate when the feature flag is off', async () => {
+      mockFind.mockResolvedValue({
+        saved_objects: [{ namespaces: ['default'] }],
+      });
+      mockHasLegacySecurityAssets.mockResolvedValue(true);
+
+      const result = await runLegacySecurityAssetsMigration({
+        coreStart,
+        logger,
+        signal: new AbortController().signal,
+        isMigrationEnabled: async () => false,
+      });
+
+      expect(result).toEqual({ migrated: [], skipped: [] });
+      expect(mockHasLegacySecurityAssets).not.toHaveBeenCalled();
       expect(mockInstallSharedElasticsearchAssets).not.toHaveBeenCalled();
     });
   });
@@ -131,6 +156,7 @@ describe('legacy_security_assets_migration_task', () => {
         coreStart,
         taskManager: taskManager as unknown as TaskManagerStartContract,
         logger,
+        isMigrationEnabled: async () => true,
       });
 
       expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
@@ -146,6 +172,7 @@ describe('legacy_security_assets_migration_task', () => {
         coreStart,
         taskManager: taskManager as unknown as TaskManagerStartContract,
         logger,
+        isMigrationEnabled: async () => true,
       });
 
       expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
@@ -168,9 +195,27 @@ describe('legacy_security_assets_migration_task', () => {
         coreStart,
         taskManager: taskManager as unknown as TaskManagerStartContract,
         logger,
+        isMigrationEnabled: async () => true,
       });
 
       expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('does not schedule when the feature flag is off even if legacy assets remain', async () => {
+      mockFind.mockResolvedValue({
+        saved_objects: [{ namespaces: ['default'] }],
+      });
+      mockHasLegacySecurityAssets.mockResolvedValue(true);
+
+      await scheduleLegacySecurityAssetsMigrationIfNeeded({
+        coreStart,
+        taskManager: taskManager as unknown as TaskManagerStartContract,
+        logger,
+        isMigrationEnabled: async () => false,
+      });
+
+      expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+      expect(mockHasLegacySecurityAssets).not.toHaveBeenCalled();
     });
   });
 });

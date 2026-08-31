@@ -1,21 +1,9 @@
 {
-  "sha1": "ec5ca74d4c806503e3c313598970584f68623f14",
+  "sha1": "65d6817cda02f133e58e06687509e267cec33575",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "8bea2bd5c95a6e4-d82a0020fae5469",
-      "title": "Teardown Discover sidebar tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "a38a9adb5e6f0a9-62c28ccadd9bbd7",
       "title": "Setup Discover sidebar tests data",
@@ -147,8 +135,8 @@
       }
     },
     {
-      "id": "f8b28b67a00765a-668ab1e7987f62f",
-      "title": "Discover sidebar field groups shows available and meta field groups",
+      "id": "f8b28b67a00765a-45a867937fbfb72",
+      "title": "Discover sidebar field groups shows available, meta field groups",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -162,8 +150,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
-        "line": 22,
-        "column": 5
+        "line": 52,
+        "column": 32
       }
     },
     {
@@ -182,8 +170,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
-        "line": 33,
-        "column": 81
+        "line": 62,
+        "column": 21
+      }
+    },
+    {
+      "id": "f8b28b67a00765a-ceb81a9a1e4ba7b",
+      "title": "Discover sidebar field groups ranks a high-popularity runtime field above other popular fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
+        "line": 117,
+        "column": 30
       }
     },
     {
@@ -202,8 +210,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
-        "line": 153,
-        "column": 17
+        "line": 190,
+        "column": 16
       }
     },
     {
@@ -321,8 +329,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 58,
-        "column": 44
+        "line": 65,
+        "column": 13
       }
     },
     {
@@ -341,8 +349,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 86,
-        "column": 30
+        "line": 91,
+        "column": 9
       }
     },
     {
@@ -361,8 +369,19 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 110,
-        "column": 28
+        "line": 117,
+        "column": 25
+      }
+    },
+    {
+      "id": "8bea2bd5c95a6e4-d82a0020fae5469",
+      "title": "Teardown Discover sidebar tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

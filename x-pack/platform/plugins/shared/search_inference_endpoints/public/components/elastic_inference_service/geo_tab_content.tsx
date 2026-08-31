@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiCallOut, EuiEmptyPrompt, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RegionSelectionToolbar } from './region_selection_toolbar';
@@ -59,23 +60,18 @@ export const GeoTabContent: React.FC<GeoTabContentProps> = ({
   if (totalGeos === 0) {
     if (isError) return null;
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         css={tabContentStyles}
         announceOnMount
         title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noGeos.title', {
           defaultMessage: 'No geographies available',
         })}
-        color="warning"
-        iconType="warning"
         data-test-subj="manageRegionsNoGeos"
-      >
-        <p>
-          {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noGeos.description', {
-            defaultMessage:
-              'No geographic zone information is available for the current Elastic Inference Service endpoints.',
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noGeos.description', {
+          defaultMessage:
+            'No geographic zone information is available for the current Elastic Inference Service endpoints.',
+        })}
+      />
     );
   }
 
