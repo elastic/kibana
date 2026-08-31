@@ -107,7 +107,13 @@ export function RumHome() {
       <div> FOOOOOOOOO</div>
       <AppHeader title={DASHBOARD_LABEL} menu={appMenu} spacing="largeBleed" />
       
-      <DashboardToolbar />
+      <EuiPageSection paddingSize="m" restrictWidth={false}>
+        <DashboardToolbar />
+        {isLoading && <EmptyStateLoading />}
+        <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+          <RumOverview />
+        </div>
+      </EuiPageSection>
       {isLoading && <EmptyStateLoading />}
       <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
         <RumOverview />
