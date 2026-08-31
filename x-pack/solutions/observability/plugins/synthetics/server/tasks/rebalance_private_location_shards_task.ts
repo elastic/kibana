@@ -26,6 +26,7 @@ import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_m
 import type { SyntheticsServerSetup } from '../types';
 import {
   isRebalancePrivateLocationShardsEnabled,
+  REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
   REBALANCE_SHARDS_TASK_ID,
   REBALANCE_SHARDS_TASK_TYPE,
@@ -33,6 +34,12 @@ import {
 
 export { REBALANCE_SHARDS_TASK_ID };
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
+export const MAX_PIN_CLEAR_ATTEMPTS = 3;
+
+const PIN_DRAIN_RESET = {
+  [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+  [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
+} as const;
 
 interface RebalanceTaskState extends Record<string, unknown> {
   /**
@@ -47,6 +54,11 @@ interface RebalanceTaskState extends Record<string, unknown> {
    * Reset when the switch turns back on.
    */
   pinsCleared?: boolean;
+  /**
+   * Consecutive failed drain attempts while the switch is off. Stops retrying
+   * after MAX_PIN_CLEAR_ATTEMPTS; reset when the switch turns back on.
+   */
+  pinClearAttempts?: number;
 }
 
 /**
@@ -110,9 +122,7 @@ export class RebalancePrivateLocationShardsTask {
 
       if (scalableLocations.length === 0) {
         return {
-          state: await this.returnedState(taskInstance, {
-            [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
-          }),
+          state: await this.returnedState(taskInstance, PIN_DRAIN_RESET),
           schedule,
         };
       }
@@ -198,7 +208,7 @@ export class RebalancePrivateLocationShardsTask {
       return {
         state: await this.returnedState(taskInstance, {
           healthySince: nextHealthySince,
-          [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+          ...PIN_DRAIN_RESET,
         }),
         schedule,
       };
@@ -248,29 +258,57 @@ export class RebalancePrivateLocationShardsTask {
 
   /**
    * While off: drain leftover pins once, then skip Fleet listing until the
-   * switch turns back on. A mid-run PUT true drops the latch so a later off
-   * will scan again.
+   * switch turns back on. Failed writes retry up to MAX_PIN_CLEAR_ATTEMPTS,
+   * then stop until the next on→off. A mid-run PUT true drops the latch.
    */
   private async runDisabledDrain(
     taskInstance: ConcreteTaskInstance
   ): Promise<Record<string, unknown>> {
+    const attemptsSoFar =
+      Number(taskInstance.state[REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]) || 0;
+
     if (taskInstance.state[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY] === true) {
       this.debugLog('disabled; pins already cleared');
       return this.returnedState(taskInstance);
     }
+    if (attemptsSoFar >= MAX_PIN_CLEAR_ATTEMPTS) {
+      this.debugLog('disabled; pin drain retries exhausted');
+      return this.returnedState(taskInstance);
+    }
 
-    const { cleared, failed = 0 } =
-      await this.syntheticsMonitorClient.privateLocationAPI.clearShardConditions();
-    this.debugLog(`disabled; cleared ${cleared} agent pin(s)`);
+    let cleared = 0;
+    let failed = 0;
+    try {
+      const result = await this.syntheticsMonitorClient.privateLocationAPI.clearShardConditions();
+      cleared = result.cleared;
+      failed = result.failed ?? 0;
+      this.debugLog(`disabled; cleared ${cleared} agent pin(s)`);
+    } catch (error) {
+      failed = 1;
+      const message = error instanceof Error ? error.message : String(error);
+      this.serverSetup.logger.warn(
+        `[RebalancePrivateLocationShardsTask] disabled; pin drain failed: ${message}`
+      );
+    }
 
     const live = await this.returnedState(taskInstance);
     if (isRebalancePrivateLocationShardsEnabled({ state: live })) {
-      return { ...live, [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false };
+      return { ...live, ...PIN_DRAIN_RESET };
     }
     if (failed > 0) {
-      return live;
+      const attempts = attemptsSoFar + 1;
+      if (attempts >= MAX_PIN_CLEAR_ATTEMPTS) {
+        this.serverSetup.logger.warn(
+          `[RebalancePrivateLocationShardsTask] disabled; pin drain failed after ${MAX_PIN_CLEAR_ATTEMPTS} attempts, giving up until the setting is turned back on`
+        );
+      }
+      return { ...live, [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: attempts };
     }
-    return { ...live, [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true };
+    return {
+      ...live,
+      [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+      [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
+    };
   }
 
   // Re-read: TM persists run() state and would clobber a mid-run bulkUpdateState PUT.

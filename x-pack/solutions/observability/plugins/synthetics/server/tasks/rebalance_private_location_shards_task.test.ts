@@ -14,10 +14,12 @@ import {
   RebalancePrivateLocationShardsTask,
   REBALANCE_SHARDS_TASK_ID,
   DEFAULT_REBALANCE_SCHEDULE,
+  MAX_PIN_CLEAR_ATTEMPTS,
   runRebalanceShardsTaskSoon,
 } from './rebalance_private_location_shards_task';
 import {
   REBALANCE_SHARDS_ENABLED_STATE_KEY,
+  REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
 } from './rebalance_shards_enabled';
 import type { SyntheticsServerSetup } from '../types';
@@ -148,6 +150,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         keep: 1,
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
       });
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('disabled; cleared 3 agent pin(s)')
@@ -176,7 +179,50 @@ describe('RebalancePrivateLocationShardsTask', () => {
       const result = await run({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
 
       expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
-      expect(result.state).toEqual({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
+      expect(result.state).toEqual({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 1,
+      });
+    });
+
+    it('stops retrying the Fleet drain after MAX_PIN_CLEAR_ATTEMPTS failures', async () => {
+      mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 1 });
+
+      const lastRetry = await run({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: MAX_PIN_CLEAR_ATTEMPTS - 1,
+      });
+
+      expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
+      expect(lastRetry.state).toEqual({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: MAX_PIN_CLEAR_ATTEMPTS,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('giving up'));
+
+      mockClearShardConditions.mockClear();
+      const exhausted = await run({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: MAX_PIN_CLEAR_ATTEMPTS,
+      });
+
+      expect(mockClearShardConditions).not.toHaveBeenCalled();
+      expect(exhausted.state).toEqual({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: MAX_PIN_CLEAR_ATTEMPTS,
+      });
+    });
+
+    it('counts a thrown drain as a failed attempt', async () => {
+      mockClearShardConditions.mockRejectedValue(new Error('fleet boom'));
+
+      const result = await run({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
+
+      expect(result.state).toEqual({
+        [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 1,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('fleet boom'));
     });
 
     it('does not latch pinsCleared when a mid-run PUT turns the switch back on', async () => {
@@ -191,6 +237,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(result.state).toEqual({
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
       });
     });
 
@@ -206,6 +253,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
         extra: 1,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
       });
     });
 
@@ -219,7 +267,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
       expect(getAgentInfo).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
-      expect(result.state).toEqual({ foo: 1, [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false });
+      expect(result.state).toEqual({
+        foo: 1,
+        [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+        [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
+      });
     });
 
     it('rebalances a healthy location, passing healthy/recovery agents and capacities', async () => {
@@ -250,6 +302,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         [healthySinceKey('ap-1', 'agent-2')]: NOW,
       });
       expect(result.state[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]).toBe(false);
+      expect(result.state[REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]).toBe(0);
     });
 
     it('skips the data-plane liveness query when every agent is fresh', async () => {
@@ -347,6 +400,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         [healthySinceKey('ap-b', 'agent-b')]: NOW,
       });
       expect(result.state[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]).toBe(false);
+      expect(result.state[REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]).toBe(0);
     });
 
     it('does not throw when getPrivateLocations fails; returns the prior state', async () => {

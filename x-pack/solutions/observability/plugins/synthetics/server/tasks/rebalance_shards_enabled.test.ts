@@ -8,6 +8,7 @@
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   REBALANCE_SHARDS_ENABLED_STATE_KEY,
+  REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
   REBALANCE_SHARDS_TASK_ID,
   getRebalancePrivateLocationShardsEnabled,
@@ -80,6 +81,7 @@ describe('rebalance shards enabled setting', () => {
         {
           keep: 1,
           [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+          [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 3,
         },
         REBALANCE_SHARDS_TASK_ID
       )
@@ -87,6 +89,7 @@ describe('rebalance shards enabled setting', () => {
       keep: 1,
       [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true,
       [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+      [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
     });
   });
 });

@@ -11,6 +11,7 @@ export const REBALANCE_SHARDS_TASK_TYPE = 'Synthetics:Rebalance-Private-Location
 export const REBALANCE_SHARDS_TASK_ID = `${REBALANCE_SHARDS_TASK_TYPE}-single-instance`;
 export const REBALANCE_SHARDS_ENABLED_STATE_KEY = 'rebalancePrivateLocationShardsEnabled';
 export const REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY = 'pinsCleared';
+export const REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY = 'pinClearAttempts';
 
 /**
  * Cluster-wide kill-switch, stored on the singleton rebalance task's state —
@@ -46,6 +47,7 @@ export const setRebalancePrivateLocationShardsEnabled = async (
     // for pins stamped while the switch was on.
     if (enabled) {
       next[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY] = false;
+      next[REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY] = 0;
     }
     return next;
   });
