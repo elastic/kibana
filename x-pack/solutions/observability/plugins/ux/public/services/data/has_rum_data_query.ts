@@ -18,34 +18,24 @@ import { rangeQuery } from './range_query';
 
 export const HAS_RUM_DATA_TIERS: DataTier[] = ['data_hot', 'data_warm'];
 
-interface HasRumAggregations {
-  services?: { mostTraffic?: { buckets?: Array<{ key?: string | number }> } };
-}
-
 export function formatHasRumResult<T>(
-  esResult: ESSearchResponse<T, ReturnType<typeof hasRumDataQuery>, { restTotalHitsAsInt: false }>,
+  esResult: ESSearchResponse<
+    T,
+    ReturnType<typeof hasRumDataWithServiceNameQuery>,
+    { restTotalHitsAsInt: false }
+  >,
   indices?: string
 ) {
-  const aggregations = (esResult.aggregations ?? {}) as HasRumAggregations;
+  if (!esResult) return esResult;
   return {
     indices,
     hasData: esResult.hits.total.value > 0,
-    serviceName: aggregations.services?.mostTraffic?.buckets?.[0]?.key,
+    serviceName: esResult.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
   };
 }
 
-export function hasRumDataQuery({
-  start = moment().subtract(24, 'h').valueOf(),
-  end = moment().valueOf(),
-  dataTiers,
-  withServiceName = false,
-}: {
-  start?: number;
-  end?: number;
-  dataTiers?: DataTier[];
-  withServiceName?: boolean;
-}) {
-  const query = {
+function hasRumDataBaseQuery({ dataTiers }: { dataTiers?: DataTier[] } = {}) {
+  return {
     size: 0,
     query: {
       bool: {
@@ -57,17 +47,27 @@ export function hasRumDataQuery({
       },
     },
   };
+}
 
-  if (!withServiceName) {
-    return {
-      ...query,
-      terminate_after: 1,
-      track_total_hits: 1,
-    };
-  }
-
+export function hasRumDataQuery({ dataTiers }: { dataTiers?: DataTier[] } = {}) {
   return {
-    ...query,
+    ...hasRumDataBaseQuery({ dataTiers }),
+    terminate_after: 1,
+    track_total_hits: 1,
+  };
+}
+
+export function hasRumDataWithServiceNameQuery({
+  start = moment().subtract(24, 'h').valueOf(),
+  end = moment().valueOf(),
+  dataTiers,
+}: {
+  start?: number;
+  end?: number;
+  dataTiers?: DataTier[];
+} = {}) {
+  return {
+    ...hasRumDataBaseQuery({ dataTiers }),
     aggs: {
       services: {
         filter: rangeQuery(start, end)[0],

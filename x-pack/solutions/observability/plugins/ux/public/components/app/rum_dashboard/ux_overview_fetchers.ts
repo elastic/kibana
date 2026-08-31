@@ -26,7 +26,7 @@ import {
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import {
   formatHasRumResult,
-  hasRumDataQuery,
+  hasRumDataWithServiceNameQuery,
   HAS_RUM_DATA_TIERS,
 } from '../../../services/data/has_rum_data_query';
 
@@ -98,14 +98,13 @@ export async function hasRumData(
 
   const runHasRumDataQuery = async (dataTiers?: DataTier[]): Promise<UXHasDataResponse> =>
     formatHasRumResult(
-      await esQuery<ReturnType<typeof hasRumDataQuery>>(params.dataStartPlugin, {
+      await esQuery<ReturnType<typeof hasRumDataWithServiceNameQuery>>(params.dataStartPlugin, {
         params: {
           index: dataViewResponse.apmDataViewIndexPattern,
-          ...hasRumDataQuery({
+          ...hasRumDataWithServiceNameQuery({
             start: params?.absoluteTime?.start,
             end: params?.absoluteTime?.end,
             dataTiers,
-            withServiceName: true,
           }),
         },
       }),

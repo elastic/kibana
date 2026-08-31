@@ -8,11 +8,7 @@
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useEffect, useRef } from 'react';
-import {
-  formatHasRumResult,
-  hasRumDataQuery,
-  HAS_RUM_DATA_TIERS,
-} from '../../../../services/data/has_rum_data_query';
+import { hasRumDataQuery, HAS_RUM_DATA_TIERS } from '../../../../services/data/has_rum_data_query';
 import { useDataView } from '../local_uifilters/use_data_view';
 
 export function useHasRumData() {
@@ -86,15 +82,14 @@ export function useHasRumData() {
 
   useEffect(() => {
     if (response) {
-      const { hasData } = formatHasRumResult(response, dataViewTitle);
-      setCachedHasData(hasData);
+      setCachedHasData(response.hits.total.value > 0);
     }
   }, [dataViewTitle, response, setCachedHasData]);
 
   if (!response) return { loading: isLoading, hasData: cachedHasData ?? false };
 
   return {
-    hasData: formatHasRumResult(response, dataViewTitle).hasData,
+    hasData: response.hits.total.value > 0,
     loading: isLoading,
     dataViewTitle,
   };

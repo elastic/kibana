@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`hasRumDataQuery existence check (default) builds a tier restricted existence query 1`] = `
+exports[`hasRumDataQuery builds a tier restricted existence query 1`] = `
 Object {
   "query": Object {
     "bool": Object {
@@ -32,7 +32,7 @@ Object {
 }
 `;
 
-exports[`hasRumDataQuery existence check (default) builds an unrestricted existence query 1`] = `
+exports[`hasRumDataQuery builds an unrestricted existence query 1`] = `
 Object {
   "query": Object {
     "bool": Object {
@@ -56,7 +56,7 @@ Object {
 }
 `;
 
-exports[`hasRumDataQuery withServiceName builds a tier restricted query with a services aggregation 1`] = `
+exports[`hasRumDataWithServiceNameQuery builds a tier restricted query with a services aggregation 1`] = `
 Object {
   "aggs": Object {
     "services": Object {
@@ -107,7 +107,7 @@ Object {
 }
 `;
 
-exports[`hasRumDataQuery withServiceName builds an unrestricted query with a services aggregation 1`] = `
+exports[`hasRumDataWithServiceNameQuery builds an unrestricted query with a services aggregation 1`] = `
 Object {
   "aggs": Object {
     "services": Object {
