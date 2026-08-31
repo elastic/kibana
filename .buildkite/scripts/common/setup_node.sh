@@ -70,6 +70,8 @@ fi
 
 export PATH="$NODE_BIN_DIR:$PATH"
 
+echo " -- node: version=$(node --version)"
+
 # Pin pnpm through Corepack (bundled with Node). We intentionally omit
 # package.json "packageManager" so yarn classic remains usable as a BYO script
 # runner; the version comes from engines.pnpm instead.

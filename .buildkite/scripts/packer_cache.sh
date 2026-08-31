@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+# This will no longer be ran, we're warming up the cache thru @bake_pnpm_cache.sh
+
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/env.sh
 source .buildkite/scripts/common/setup_node.sh

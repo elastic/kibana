@@ -44,7 +44,7 @@ if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   rm -rf node_modules
 
   echo "--- pnpm install and bootstrap, attempt 2"
-  pnpm kbn bootstrap --force-install || pnpm kbn bootstrap
+  pnpm kbn bootstrap --force-install
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
@@ -54,10 +54,8 @@ fi
 # Yarn cache is only needed during install. Drop it afterwards to reclaim disk.
 # Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
 if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
-  echo "--- Clearing yarn cache"
-  echo 'Removing ~/.kibana' && rm -rf ~/.kibana
-  echo 'Removing /opt/buildkite-agent/.cache/yarn' && rm -rf /opt/buildkite-agent/.cache/yarn
-  echo 'Removing /opt/buildkite-agent/.yarn-local-mirror' && rm -rf /opt/buildkite-agent/.yarn-local-mirror
+  echo "--- Clearing cache leftovers"
+  echo 'Removing ~/.kibana' && rm -rf ~/.kibana # We no longer use this cache, what we need should be copied
   echo 'Removing ./.yarn-local-mirror' && rm -rf ./.yarn-local-mirror
   echo "Available disk space after clearing yarn cache:"
   df -h . || echo "Failed to get disk space"

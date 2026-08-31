@@ -30,6 +30,8 @@ echo "--- baking pnpm cache into $PNPM_CACHE_DIR (pnpm $(pnpm --version))"
 # Install the dependencies and skip the webpack bundles.
 CI=true pnpm kbn bootstrap --no-prebuilt
 
+tar -cf - node_modules | zstd -T0 -o node_modules.tar.zst
+
 echo "--- ES snapshots and endpoint agents"
 
 # Download ES snapshots, but consider the main branch as the reference branch 
@@ -64,7 +66,7 @@ else
 fi
 
 echo "--- pnpm cache ready"
-du -sh "$PNPM_CACHE_DIR/pnpm-store" "$PNPM_CACHE_DIR/node_modules" "$ES_CACHE_DIR" 2>/dev/null || true
+du -sh "$PNPM_CACHE_DIR/.pnpm-store" "$PNPM_CACHE_DIR/node_modules" "$ES_CACHE_DIR" 2>/dev/null || true
 echo "Bake these into the agent image so they land at:"
 echo "  $PNPM_CACHE_DIR/.pnpm-store"
 echo "  $PNPM_CACHE_DIR/node_modules"
