@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { AlertRuleTriggerSchema } from './alert_trigger_schema';
 import { ManualTriggerSchema } from './manual_trigger_schema';
 import { ScheduledTriggerSchema } from './scheduled_trigger_schema';
+import { CONNECTOR_ID_MAX_LENGTH } from '../../../common/constants';
 
 export { AlertRuleTriggerSchema } from './alert_trigger_schema';
 export { ManualTriggerSchema } from './manual_trigger_schema';
@@ -35,33 +36,82 @@ export const WORKFLOW_EVENTS_VALUES_SET = new Set<string>(WORKFLOW_EVENTS_VALUES
 export const WorkflowEventsSchema = z.enum(WORKFLOW_EVENTS_VALUES);
 
 /** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
-const CustomTriggerOnSchema = z
-  .object({
-    condition: z.string().optional(),
-    /**
-     * How this trigger responds when the event was emitted from a workflow-attributed chain:
-     * `ignore` — do not schedule;
-     * `avoid-loop` — schedule with cycle guard (default when omitted);
-     * `allow-all` — schedule without cycle guard (max chain depth still applies).
-     */
-    workflowEvents: WorkflowEventsSchema.optional(),
-  })
-  .optional();
+const CustomTriggerOnObjectSchema = z.object({
+  condition: z.string().optional(),
+  /**
+   * How this trigger responds when the event was emitted from a workflow-attributed chain:
+   * `ignore` — do not schedule;
+   * `avoid-loop` — schedule with cycle guard (default when omitted);
+   * `allow-all` — schedule without cycle guard (max chain depth still applies).
+   */
+  workflowEvents: WorkflowEventsSchema.optional(),
+});
+const CustomTriggerOnSchema = CustomTriggerOnObjectSchema.optional();
+export type CustomTriggerOn = z.infer<typeof CustomTriggerOnObjectSchema>;
+
+/**
+ * Runtime YAML shape for a registered (non-built-in) trigger.
+ * `connector-id` is required in the Zod schema when `requiresConnectorId` is set.
+ */
+export interface CustomTrigger {
+  type: string;
+  'connector-id'?: string;
+  on?: CustomTriggerOn;
+}
+
+export interface CustomTriggerSchemaConfig {
+  id: string;
+  requiresConnectorId?: boolean;
+}
+
+export type CustomTriggerSchemaInput = string | CustomTriggerSchemaConfig;
+
+const CONNECTOR_ID_REQUIRED_ERROR = 'connector-id is required and must not be empty';
+
+const toCustomTriggerSchemaConfig = (
+  trigger: CustomTriggerSchemaInput
+): CustomTriggerSchemaConfig => (typeof trigger === 'string' ? { id: trigger } : trigger);
+
+/**
+ * Maps registered trigger definitions to the YAML schema input shape.
+ */
+export const toCustomTriggerSchemaConfigs = (
+  triggers: Array<{ id: string; requiresConnectorId?: boolean }>
+): CustomTriggerSchemaConfig[] =>
+  triggers.map(({ id, requiresConnectorId }) => ({ id, requiresConnectorId }));
+
+const customTriggerSchema = ({ id, requiresConnectorId }: CustomTriggerSchemaConfig) => {
+  if (requiresConnectorId) {
+    return z.object({
+      type: z.literal(id),
+      'connector-id': z
+        .string()
+        .trim()
+        .min(1, CONNECTOR_ID_REQUIRED_ERROR)
+        .max(CONNECTOR_ID_MAX_LENGTH),
+      on: CustomTriggerOnSchema,
+    });
+  }
+
+  return z.object({
+    type: z.literal(id),
+    on: CustomTriggerOnSchema,
+  });
+};
 
 /**
  * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
  * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
  * Custom triggers allow an `on.condition` clause for KQL filtering.
+ * Pass `{ id, requiresConnectorId: true }` to require a non-empty `connector-id`;
+ * a plain string id stays `{ type, on? }` (e.g. `getTriggerSchema(['cases.updated'])`).
  */
-export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
-  if (customTriggerIds.length === 0) {
+export function getTriggerSchema(customTriggers: CustomTriggerSchemaInput[] = []): z.ZodType {
+  if (customTriggers.length === 0) {
     return TriggerSchema;
   }
-  const customSchemas = customTriggerIds.map((id) =>
-    z.object({
-      type: z.literal(id),
-      on: CustomTriggerOnSchema,
-    })
+  const customSchemas = customTriggers.map((trigger) =>
+    customTriggerSchema(toCustomTriggerSchemaConfig(trigger))
   );
   return z.discriminatedUnion('type', [
     AlertRuleTriggerSchema,

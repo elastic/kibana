@@ -17,12 +17,12 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
+import { CONNECTOR_ID_MAX_LENGTH } from '../common/constants';
 import {
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
   MAX_HITL_ACTION_LABEL_LENGTH,
-  MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH,
   MAX_HITL_EXTERNAL_LINK_LENGTH,
   MAX_HITL_MESSAGE_LENGTH,
   MAX_HITL_SLACK_CHANNEL_ID_LENGTH,
@@ -282,7 +282,7 @@ export const WaitForApprovalSlackChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
-    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .max(CONNECTOR_ID_MAX_LENGTH)
     .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
   message: z
     .string()
@@ -297,7 +297,7 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
-    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .max(CONNECTOR_ID_MAX_LENGTH)
     .describe('Slack API connector saved object id or name'),
   channels: z
     .array(z.string().min(1).max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH))
@@ -1150,7 +1150,7 @@ export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
   stepId: z.string().max(512).describe('Id of the step that produced this usage.'),
   connectorId: z
     .string()
-    .max(512)
+    .max(CONNECTOR_ID_MAX_LENGTH)
     .optional()
     .describe('Id of the LLM connector the step resolved to, when reported by the model.'),
 });

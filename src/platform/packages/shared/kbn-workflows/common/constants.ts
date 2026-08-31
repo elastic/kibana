@@ -48,6 +48,13 @@ export const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
   'workflowsManagement:globalExecutionsView:enabled';
 
 /**
+ * Max length for YAML `connector-id` (triggers, steps, HITL channels) and reported
+ * connector ids. Covers Actions saved-object ids, user-friendly aliases, and HITL
+ * connector names.
+ */
+export const CONNECTOR_ID_MAX_LENGTH = 512;
+
+/**
  * Map of regular (saved object) connector types -> their system connector equivalents.
  * Use this map to make the `connector-id` step config property optional for a given connector step type, allowing it to be executed via its linked system connector.
  * Pre-requisite for this to work:
