@@ -104,6 +104,11 @@ export class RepairSLO {
       });
     }
 
+    // A problematic-but-correct-state transform (degraded health only) has no structural remedy, so ensure every SLO still yields a result.
+    if (group.actions.length === 0) {
+      group.actions.push({ type: 'noop' });
+    }
+
     return group;
   }
 
