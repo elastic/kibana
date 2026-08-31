@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KiFields, KiPartialFields } from '../step_types/ki';
+
 /**
  * The single global Context Engine improvements index.
  *
@@ -29,8 +31,10 @@ export type ImprovementStatus = 'suggested' | 'applied' | 'rejected' | 'failed';
 /**
  * What the improvement does when applied. Verbs rather than kinds, because retiring a KI or
  * disabling a workflow is a first-class outcome of the analysis and `*_change` cannot express it.
- * Removals are soft — a KI is flagged deleted, a workflow disabled — so an applied removal is
- * always recoverable.
+ *
+ * A `remove_*` action records only the intent to remove. How a removal is carried out — a soft
+ * flag, a hard delete, a sibling index — is owned by the KI lifecycle and settled by the apply
+ * step; nothing in this store depends on the answer.
  */
 export type ImprovementAction =
   | 'add_ki'
@@ -75,16 +79,20 @@ export interface ImprovementTarget {
   subject?: string;
 }
 
-/** The body the action writes. Kept in `_source`, not indexed — see the storage schema. */
+/**
+ * The body the action writes. Kept in `_source`, not indexed — see the storage schema.
+ *
+ * The KI fields are the step contracts rather than a local shape, so a proposal cannot describe a
+ * document the apply step would reject. Hand-rolling them had already drifted: `type` and `title`
+ * are required by `createKi` but were optional here, so an improvement could typecheck and then
+ * fail on apply. Note that both step schemas strip unknown top-level keys, so custom fields belong
+ * under `attributes`.
+ */
 export interface ImprovementPayload {
-  ki?: {
-    type?: string;
-    title?: string;
-    description?: string;
-    content?: string;
-    tags?: string[];
-    attributes?: Record<string, unknown>;
-  };
+  /** For `add_ki` — the document exactly as `context-engine.createKi` takes it. */
+  ki?: KiFields;
+  /** For `edit_ki` — the fields to change, exactly as `context-engine.updateKi` takes it. */
+  ki_patch?: KiPartialFields;
   workflow_yaml?: string;
   source?: { type: 'esql' | 'connector'; value: string };
 }
