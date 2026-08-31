@@ -8,10 +8,7 @@
  */
 
 import type { InboxAction, InboxActionStatus } from '@kbn/inbox-common';
-import {
-  buildWorkflowSourceId as buildSourceIdFromParts,
-  parseWorkflowSourceId,
-} from '@kbn/inbox-common';
+import { buildWorkflowSourceId as buildSourceId, parseWorkflowSourceId } from '@kbn/inbox-common';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -84,11 +81,7 @@ export const deriveHistoryStatus = (
  * document.
  */
 export const buildWorkflowSourceId = (step: EsWorkflowStepExecution): string =>
-  buildSourceIdFromParts({
-    workflowId: step.workflowId,
-    workflowRunId: step.workflowRunId,
-    stepExecutionId: step.id,
-  });
+  buildSourceId(step.workflowId, step.workflowRunId, step.id);
 
 export { parseWorkflowSourceId };
 

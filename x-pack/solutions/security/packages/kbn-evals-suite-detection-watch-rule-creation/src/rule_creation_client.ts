@@ -211,11 +211,11 @@ export class RuleCreationClient {
       );
     }
 
-    const sourceId = buildWorkflowSourceId({
-      workflowId: RULE_CREATION_WORKFLOW_ID,
-      workflowRunId: workflowExecutionId,
-      stepExecutionId: reviewStep.id,
-    });
+    const sourceId = buildWorkflowSourceId(
+      RULE_CREATION_WORKFLOW_ID,
+      workflowExecutionId,
+      reviewStep.id
+    );
     await this.respondToApprovalGate({ sourceId, approved });
 
     return this.pollExecution({

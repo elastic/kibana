@@ -71,3 +71,23 @@ export type InboxActionStatus = (typeof INBOX_ACTION_STATUSES)[number];
 
 export const MAX_INBOX_ACTIONS_PER_PAGE = 100;
 export const DEFAULT_INBOX_ACTIONS_PER_PAGE = 25;
+
+/** Builds the composite source id used to identify a workflow step in the inbox. */
+export const buildWorkflowSourceId = (
+  workflowId: string,
+  executionId: string,
+  stepExecutionId: string
+): string => `${workflowId}:${executionId}:${stepExecutionId}`;
+
+/**
+ * Splits a composite workflow source id back into its parts. Returns null when
+ * the id is malformed — the respond route treats that as a 404.
+ */
+export const parseWorkflowSourceId = (
+  sourceId: string
+): { workflowId: string; executionId: string; stepExecutionId: string } | null => {
+  const parts = sourceId.split(':');
+  if (parts.length < 3) return null;
+  const [workflowId, executionId, ...rest] = parts;
+  return { workflowId, executionId, stepExecutionId: rest.join(':') };
+};
