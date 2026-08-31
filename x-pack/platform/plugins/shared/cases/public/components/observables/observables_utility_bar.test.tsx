@@ -20,6 +20,8 @@ describe('ObservablesUtilityBar', () => {
     isLoading: false,
     isEnabled: true,
     onExtractObservablesChanged: jest.fn(),
+    selectedObservables: [],
+    canRunWorkflow: false,
   };
 
   beforeEach(() => {

@@ -45,7 +45,7 @@ describe('ObservableActionsPopoverButton', () => {
 
   it('renders observable actions popover button correctly', async () => {
     renderWithTestingProviders(
-      <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
+      <ObservableActionsPopoverButton caseData={caseData} observable={observable} canRunWorkflow={false} />
     );
 
     expect(
@@ -55,7 +55,7 @@ describe('ObservableActionsPopoverButton', () => {
 
   it('clicking the button opens the popover', async () => {
     renderWithTestingProviders(
-      <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
+      <ObservableActionsPopoverButton caseData={caseData} observable={observable} canRunWorkflow={false} />
     );
 
     await userEvent.click(
@@ -72,7 +72,7 @@ describe('ObservableActionsPopoverButton', () => {
   describe('edit buttton', () => {
     it('clicking edit button opens the edit modal', async () => {
       renderWithTestingProviders(
-        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
+        <ObservableActionsPopoverButton caseData={caseData} observable={observable} canRunWorkflow={false} />
       );
 
       await userEvent.click(
@@ -90,7 +90,7 @@ describe('ObservableActionsPopoverButton', () => {
   describe('delete button', () => {
     it('clicking delete button opens the confirmation modal', async () => {
       renderWithTestingProviders(
-        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
+        <ObservableActionsPopoverButton caseData={caseData} observable={observable} canRunWorkflow={false} />
       );
 
       await userEvent.click(
@@ -106,7 +106,7 @@ describe('ObservableActionsPopoverButton', () => {
 
     it('clicking delete button in the confirmation modal calls deleteObservable with proper params', async () => {
       renderWithTestingProviders(
-        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
+        <ObservableActionsPopoverButton caseData={caseData} observable={observable} canRunWorkflow={false} />
       );
 
       await userEvent.click(
@@ -128,7 +128,7 @@ describe('ObservableActionsPopoverButton', () => {
 
     it('delete button is not rendered if user has no update permission', async () => {
       renderWithTestingProviders(
-        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />,
+        <ObservableActionsPopoverButton caseData={caseData} observable={observable} canRunWorkflow={false} />,
         { wrapperProps: { permissions: buildCasesPermissions({ update: false }) } }
       );
 
