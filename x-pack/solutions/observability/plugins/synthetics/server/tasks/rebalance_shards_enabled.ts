@@ -9,15 +9,17 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 export const REBALANCE_SHARDS_TASK_TYPE = 'Synthetics:Rebalance-Private-Location-Shards';
 export const REBALANCE_SHARDS_TASK_ID = `${REBALANCE_SHARDS_TASK_TYPE}-single-instance`;
+export const REBALANCE_SHARDS_ENABLED_STATE_KEY = 'rebalancePrivateLocationShardsEnabled';
 
 /**
- * Cluster-wide kill-switch, stored as Task Manager `enabled` on the singleton
- * rebalance task — same space-agnostic pattern as the maintenance-windows
- * sync interval (which lives on that task's `schedule`). The task document
- * stays scheduled; `bulkDisable` only pauses claiming.
+ * Cluster-wide kill-switch, stored on the singleton rebalance task's state —
+ * same space-agnostic pattern as the maintenance-windows sync interval
+ * (which lives on that task's `schedule`). The task stays scheduled and
+ * claimable so a disabled run can still drain leftover agent pins.
  */
-export const isRebalancePrivateLocationShardsEnabled = (task?: { enabled?: boolean }): boolean =>
-  task?.enabled !== false;
+export const isRebalancePrivateLocationShardsEnabled = (task?: {
+  state?: Record<string, unknown>;
+}): boolean => task?.state?.[REBALANCE_SHARDS_ENABLED_STATE_KEY] !== false;
 
 export const getRebalancePrivateLocationShardsEnabled = async (
   taskManager: TaskManagerStartContract
@@ -34,10 +36,9 @@ export const setRebalancePrivateLocationShardsEnabled = async (
   taskManager: TaskManagerStartContract,
   enabled: boolean
 ): Promise<boolean> => {
-  if (enabled) {
-    await taskManager.bulkEnable([REBALANCE_SHARDS_TASK_ID], true);
-  } else {
-    await taskManager.bulkDisable([REBALANCE_SHARDS_TASK_ID]);
-  }
+  await taskManager.bulkUpdateState([REBALANCE_SHARDS_TASK_ID], (state) => ({
+    ...state,
+    [REBALANCE_SHARDS_ENABLED_STATE_KEY]: enabled,
+  }));
   return getRebalancePrivateLocationShardsEnabled(taskManager);
 };

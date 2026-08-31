@@ -25,6 +25,7 @@ import {
   PRIVATE_LOCATIONS_SYNC_TASK_ID,
   runSynPrivateLocationMonitorsTaskSoon,
 } from '../../tasks/sync_private_locations_monitors_task';
+import { runRebalanceShardsTaskSoon } from '../../tasks/rebalance_private_location_shards_task';
 import {
   getRebalancePrivateLocationShardsEnabled,
   setRebalancePrivateLocationShardsEnabled,
@@ -104,6 +105,9 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
         server.pluginsStart.taskManager,
         rebalancePrivateLocationShardsEnabled
       );
+      // Drain leftover pins (when off) or resume assignment (when on) on the
+      // next task cycle — don't block this request on Fleet rewrites.
+      void runRebalanceShardsTaskSoon({ server });
     } else {
       persistedRebalance = await getRebalancePrivateLocationShardsEnabled(
         server.pluginsStart.taskManager

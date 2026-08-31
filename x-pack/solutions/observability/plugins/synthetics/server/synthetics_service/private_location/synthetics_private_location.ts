@@ -40,7 +40,12 @@ import { stringifyString } from '../formatters/private_formatters/formatting_uti
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
 import { rebalanceByCost } from './assign_shards';
-import { toConditionUpdates, toMonitorPlacements } from './rebalance_writes';
+import {
+  toConditionUpdates,
+  toClearedConditionUpdates,
+  toMonitorPlacements,
+} from './rebalance_writes';
+import { getPrivateLocations } from '../get_private_locations';
 import {
   agentIdFromCondition,
   assignAgentById,
@@ -223,35 +228,24 @@ export class SyntheticsPrivateLocation {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
-      if (isConditionShardedLocation(privateLocation)) {
-        if (assignAgentConditions) {
-          const agentIds = conditionHosts?.agentIds ?? [];
-          const existingAgentId = agentIdFromCondition(existingCondition);
+      if (isConditionShardedLocation(privateLocation) && assignAgentConditions) {
+        const agentIds = conditionHosts?.agentIds ?? [];
+        const existingAgentId = agentIdFromCondition(existingCondition);
 
-          if (existingAgentId && agentIds.includes(existingAgentId)) {
-            // Keep a valid existing pin during edits. Health and balancing moves
-            // belong to the rebalance task, not the monitor CRUD path.
-            newPolicy.condition = existingCondition;
-          } else if (agentIds.length > 0) {
-            const assigned = assignAgentById(config.id, agentIds);
-            if (assigned) {
-              newPolicy.condition = assigned.condition;
-            }
-          }
-          // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
-        } else if (existingCondition) {
-          // Settings pause: do not add or reassign pins. Keep whatever is already
-          // on the policy so a save does not unschedule existing shards.
+        if (existingAgentId && agentIds.includes(existingAgentId)) {
+          // Keep a valid existing pin during edits. Health and balancing moves
+          // belong to the rebalance task, not the monitor CRUD path.
           newPolicy.condition = existingCondition;
+        } else if (agentIds.length > 0) {
+          const assigned = assignAgentById(config.id, agentIds);
+          if (assigned) {
+            newPolicy.condition = assigned.condition;
+          }
         }
-      } else {
-        // Preserve the classic payload exactly as it was unless this edit is
-        // explicitly turning off a previously stamped scalable-location pin.
-        // In particular, package-policy creation must omit `condition`; an
-        // explicit `null` changes the Fleet policy and breaks classic callers.
-        if (existingCondition !== undefined) {
-          newPolicy.condition = null;
-        }
+        // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
+      } else if (existingCondition) {
+        // Classic location, or shard rebalancing paused: drop any leftover pin.
+        newPolicy.condition = null;
       }
       if (testRunId) {
         newPolicy.name =
@@ -854,6 +848,38 @@ export class SyntheticsPrivateLocation {
     }
 
     return { total: pkgPolicies.length, moved };
+  }
+
+  /**
+   * Drops every `${agent.id}` pin on private-location package policies so
+   * monitors run unfiltered (classic). Used when shard rebalancing is turned
+   * off. Dedupes by agent policy so a shared policy is listed once.
+   */
+  async clearShardConditions(): Promise<{ cleared: number }> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
+    const agentPolicyIds = [...new Set(locations.map((location) => location.agentPolicyId))];
+
+    let cleared = 0;
+    for (const agentPolicyId of agentPolicyIds) {
+      const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({ agentPolicyId });
+      const updatesBySpace = toClearedConditionUpdates(pkgPolicies);
+
+      for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+        const failed = await this.packagePolicyService.bulkUpdateInSpace({
+          policiesToUpdate,
+          spaceId,
+        });
+        cleared += policiesToUpdate.length - failed.length;
+        if (failed.length > 0) {
+          this.server.logger.warn(
+            `[clearShardConditions] Failed to clear ${failed.length} monitor pin(s) on agent policy ${agentPolicyId}`
+          );
+        }
+      }
+    }
+
+    return { cleared };
   }
 }
 

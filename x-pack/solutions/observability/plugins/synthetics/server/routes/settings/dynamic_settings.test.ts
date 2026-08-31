@@ -7,6 +7,7 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import * as syntheticsSettingsModule from '../../saved_objects/synthetics_settings';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../constants/settings';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
@@ -16,10 +17,14 @@ import {
   DynamicSettingsSchema,
 } from './dynamic_settings';
 import type { RouteContext } from '../types';
-import { REBALANCE_SHARDS_TASK_ID } from '../../tasks/rebalance_shards_enabled';
+import {
+  REBALANCE_SHARDS_ENABLED_STATE_KEY,
+  REBALANCE_SHARDS_TASK_ID,
+} from '../../tasks/rebalance_shards_enabled';
 
 const buildServer = () =>
   ({
+    logger: loggerMock.create(),
     pluginsStart: { taskManager: taskManagerMock.createStart() },
   } as unknown as RouteContext['server']);
 
@@ -29,6 +34,9 @@ const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext 
     server: buildServer(),
     request: { body: {} },
     response: {},
+    syntheticsMonitorClient: {
+      privateLocationAPI: { clearShardConditions: jest.fn().mockResolvedValue({ cleared: 0 }) },
+    },
     ...overrides,
   } as unknown as RouteContext);
 
@@ -54,7 +62,9 @@ describe('dynamic settings routes', () => {
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
       const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({ enabled: false });
+      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false },
+      });
 
       const route = createGetDynamicSettingsRoute();
       const result = await route.handler(buildRouteContext({ server }));
@@ -72,21 +82,68 @@ describe('dynamic settings routes', () => {
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
       const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({ enabled: false });
+      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false },
+      });
 
+      const clearShardConditions = jest.fn();
       const route = createPostDynamicSettingsRoute();
       const result = await route.handler(
         buildRouteContext({
           server,
+          syntheticsMonitorClient: {
+            privateLocationAPI: { clearShardConditions },
+          } as never,
           request: { body: { rebalancePrivateLocationShardsEnabled: false } } as never,
         })
       );
 
-      expect(server.pluginsStart.taskManager.bulkDisable).toHaveBeenCalledWith([
-        REBALANCE_SHARDS_TASK_ID,
-      ]);
+      expect(server.pluginsStart.taskManager.bulkUpdateState).toHaveBeenCalledWith(
+        [REBALANCE_SHARDS_TASK_ID],
+        expect.any(Function)
+      );
+      expect(server.pluginsStart.taskManager.bulkDisable).not.toHaveBeenCalled();
+      expect(clearShardConditions).not.toHaveBeenCalled();
+      expect(server.pluginsStart.taskManager.runSoon).toHaveBeenCalledWith(
+        REBALANCE_SHARDS_TASK_ID
+      );
       expect(setSpy.mock.calls[0][1].rebalancePrivateLocationShardsEnabled).toBeUndefined();
       expect(result).toMatchObject({ rebalancePrivateLocationShardsEnabled: false });
+    });
+
+    it('does not clear pins when turning shard rebalance on', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      jest
+        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+      const server = buildServer();
+      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
+      });
+      const clearShardConditions = jest.fn();
+
+      const route = createPostDynamicSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server,
+          syntheticsMonitorClient: {
+            privateLocationAPI: { clearShardConditions },
+          } as never,
+          request: { body: { rebalancePrivateLocationShardsEnabled: true } } as never,
+        })
+      );
+
+      expect(server.pluginsStart.taskManager.bulkUpdateState).toHaveBeenCalledWith(
+        [REBALANCE_SHARDS_TASK_ID],
+        expect.any(Function)
+      );
+      expect(server.pluginsStart.taskManager.bulkEnable).not.toHaveBeenCalled();
+      expect(clearShardConditions).not.toHaveBeenCalled();
+      expect(server.pluginsStart.taskManager.runSoon).toHaveBeenCalledWith(
+        REBALANCE_SHARDS_TASK_ID
+      );
     });
   });
 

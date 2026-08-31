@@ -90,8 +90,10 @@ export class RebalancePrivateLocationShardsTask {
     try {
       signal.throwIfAborted();
       if (!isRebalancePrivateLocationShardsEnabled(taskInstance)) {
-        this.debugLog('Rebalance private location shards disabled; skipping.');
-        return { state: taskInstance.state, schedule };
+        const { cleared } =
+          await this.syntheticsMonitorClient.privateLocationAPI.clearShardConditions();
+        this.debugLog(`disabled; cleared ${cleared} agent pin(s)`);
+        return { state: await this.returnedState(taskInstance), schedule };
       }
 
       const soClient = coreStart.savedObjects.createInternalRepository();
@@ -101,7 +103,7 @@ export class RebalancePrivateLocationShardsTask {
       );
 
       if (scalableLocations.length === 0) {
-        return { state: taskInstance.state, schedule };
+        return { state: await this.returnedState(taskInstance), schedule };
       }
 
       const now = Date.now();
@@ -183,7 +185,7 @@ export class RebalancePrivateLocationShardsTask {
       }
 
       return {
-        state: { ...taskInstance.state, healthySince: nextHealthySince },
+        state: await this.returnedState(taskInstance, { healthySince: nextHealthySince }),
         schedule,
       };
     } catch (error) {
@@ -196,7 +198,7 @@ export class RebalancePrivateLocationShardsTask {
       );
     }
 
-    return { state: taskInstance.state, schedule };
+    return { state: await this.returnedState(taskInstance), schedule };
   }
 
   async start() {
@@ -224,7 +226,27 @@ export class RebalancePrivateLocationShardsTask {
       taskType: REBALANCE_SHARDS_TASK_TYPE,
       params: {},
     });
+    // Earlier iterations stored the kill-switch on `task.enabled`. This task
+    // must stay claimable so a disabled cycle can drain leftover agent pins.
+    await taskManager.bulkEnable([REBALANCE_SHARDS_TASK_ID], false);
     this.debugLog('Rebalance private location shards task scheduled');
+  }
+
+  // Re-read: TM persists run() state and would clobber a mid-run bulkUpdateState PUT.
+  private async returnedState(
+    taskInstance: ConcreteTaskInstance,
+    patch: Record<string, unknown> = {}
+  ): Promise<Record<string, unknown>> {
+    let liveState: Record<string, unknown> = taskInstance.state;
+    try {
+      const live = await this.serverSetup.pluginsStart.taskManager.get(REBALANCE_SHARDS_TASK_ID);
+      if (live?.state) {
+        liveState = live.state;
+      }
+    } catch {
+      // claimed instance is the best we have
+    }
+    return { ...liveState, ...patch };
   }
 
   private debugLog(message: string) {

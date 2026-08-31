@@ -16,6 +16,7 @@ import {
   DEFAULT_REBALANCE_SCHEDULE,
   runRebalanceShardsTaskSoon,
 } from './rebalance_private_location_shards_task';
+import { REBALANCE_SHARDS_ENABLED_STATE_KEY } from './rebalance_shards_enabled';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
@@ -35,9 +36,13 @@ const mockTaskManagerStart = taskManagerMock.createStart();
 const mockSoRepo = savedObjectsRepositoryMock.create();
 const mockLogger = loggerMock.create();
 const mockRebalanceShards = jest.fn().mockResolvedValue({ total: 0, moved: 0 });
+const mockClearShardConditions = jest.fn().mockResolvedValue({ cleared: 0 });
 
 const mockSyntheticsMonitorClient = {
-  privateLocationAPI: { rebalanceShards: mockRebalanceShards },
+  privateLocationAPI: {
+    rebalanceShards: mockRebalanceShards,
+    clearShardConditions: mockClearShardConditions,
+  },
 } as unknown as SyntheticsMonitorClient;
 
 const coreStart = coreMock.createStart() as CoreStart;
@@ -87,7 +92,9 @@ describe('RebalancePrivateLocationShardsTask', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(NOW);
+    mockTaskManagerStart.get.mockReset();
     mockRebalanceShards.mockResolvedValue({ total: 0, moved: 0 });
+    mockClearShardConditions.mockResolvedValue({ cleared: 0 });
   });
 
   afterEach(() => jest.useRealTimers());
@@ -105,6 +112,10 @@ describe('RebalancePrivateLocationShardsTask', () => {
         })
       );
       expect(mockTaskManagerStart.removeIfExists).not.toHaveBeenCalled();
+      expect(mockTaskManagerStart.bulkEnable).toHaveBeenCalledWith(
+        [REBALANCE_SHARDS_TASK_ID],
+        false
+      );
     });
 
     it('preserves a user-configured interval already on the task', async () => {
@@ -119,17 +130,32 @@ describe('RebalancePrivateLocationShardsTask', () => {
   });
 
   describe('runTask', () => {
-    it('skips work and returns early when the rebalance task is disabled', async () => {
+    it('clears leftover agent pins and skips rebalance when the kill-switch is off', async () => {
       const getPrivateLocationsSpy = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
       const getAgentInfo = jest.spyOn(getAgentInfoModule, 'getAgentInfo');
+      mockClearShardConditions.mockResolvedValue({ cleared: 3 });
 
-      const result = await run({ keep: 1 }, openSignal(), { enabled: false });
+      const result = await run({ keep: 1, [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
 
+      expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
       expect(getPrivateLocationsSpy).not.toHaveBeenCalled();
       expect(getAgentInfo).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
-      expect(result.state).toEqual({ keep: 1 });
-      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('disabled; skipping'));
+      expect(result.state).toEqual({ keep: 1, [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('disabled; cleared 3 agent pin(s)')
+      );
+    });
+
+    it('does not clobber a mid-run kill-switch PUT when returning state', async () => {
+      mockTaskManagerStart.get.mockResolvedValue({
+        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false, extra: 1 },
+      } as never);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
+
+      const result = await run({ keep: 1 });
+
+      expect(result.state).toEqual({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false, extra: 1 });
     });
 
     it('early-exits and does not read agents when there are no scalable locations', async () => {
