@@ -61,7 +61,8 @@ export interface ImprovementsServiceApi {
 
   /**
    * Every improvement for an AI index with its current status, for the run briefing — the runner
-   * has to see what was already rejected so it does not re-propose it.
+   * has to see what was already rejected, and why (`resolution.reason`), so it does not re-propose
+   * a fix a reviewer has already turned down.
    */
   historyFor(aiIndexId: string, options?: { size?: number }): Promise<Improvement[]>;
 

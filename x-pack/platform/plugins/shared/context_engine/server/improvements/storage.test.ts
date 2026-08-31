@@ -12,6 +12,8 @@ interface MappingProp {
   type: string;
   enabled?: boolean;
   ignore_above?: number;
+  index?: boolean;
+  doc_values?: boolean;
   properties?: Record<string, MappingProp>;
 }
 
@@ -46,12 +48,20 @@ describe('improvements storage', () => {
     expect(props.rationale.type).toBe('text');
   });
 
-  it('indexes `target.*` as keywords, so "every suggestion touching workflow X" is queryable', () => {
+  it('indexes the `target.*` ids as keywords, so "every suggestion touching workflow X" is queryable', () => {
     expect(props.target.type).toBe('object');
-    expect(props.target.properties?.ki_id.type).toBe('keyword');
-    expect(props.target.properties?.workflow_id.type).toBe('keyword');
-    expect(props.target.properties?.source_value.type).toBe('keyword');
-    expect(props.target.properties?.subject.type).toBe('keyword');
+    for (const field of ['ki_id', 'workflow_id', 'subject'] as const) {
+      expect(props.target.properties?.[field].type).toBe('keyword');
+      expect(props.target.properties?.[field].index).not.toBe(false);
+    }
+  });
+
+  it('keeps `target.source_value` out of the index, since it is unbounded and unqueried', () => {
+    // An ES|QL source value can run past the adapter's default `ignore_above: 1024`, which would
+    // silently stop indexing it; dedup keys off `improvement_id`, which hashes the value already.
+    const sourceValue = props.target.properties?.source_value;
+    expect(sourceValue?.index).toBe(false);
+    expect(sourceValue?.doc_values).toBe(false);
   });
 
   it('keeps `payload` and `resolution` in _source without indexing them', () => {

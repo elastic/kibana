@@ -14,6 +14,16 @@
  */
 export const IMPROVEMENTS_INDEX = 'context-engine-improvements';
 
+/**
+ * Where an improvement stands with its reviewer.
+ *
+ * - `suggested` — proposed by an analysis run, waiting for review. The only status a write reaches.
+ * - `applied` — approved, and the change was written to the AI index.
+ * - `rejected` — dismissed by a reviewer; nothing was written. `resolution.reason` says why.
+ * - `failed` — approved, but the apply step errored, so nothing was written. Deliberately a status
+ *   rather than an error return: the improvement stays visible in the review UI and remains
+ *   actionable for a retry once the cause is fixed, and `resolution.error` carries the reason.
+ */
 export type ImprovementStatus = 'suggested' | 'applied' | 'rejected' | 'failed';
 
 /**
@@ -83,7 +93,13 @@ export interface ImprovementPayload {
 export interface ImprovementResolution {
   /** Username who approved / rejected. */
   by?: string;
-  /** Failure reason when status is `failed`. */
+  /**
+   * Why a reviewer dismissed the improvement, in their words. Distinct from `error`: this is a
+   * judgement, not a fault. The run briefing reads it back, so the analysis knows a fix was
+   * considered and turned down rather than re-proposing it on the next pass.
+   */
+  reason?: string;
+  /** Why the apply step errored, when status is `failed`. Nothing was written. */
   error?: string;
   /** The KI / workflow the apply step created or touched, so the UI can link to it. */
   applied_target_id?: string;

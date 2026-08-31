@@ -116,6 +116,8 @@ record of what the loop did to a user's index survives every transition:
   `applied` and a `rejected` head for the same improvement.
 - `failed` is a status, not an error return: an approval whose apply step errors
   stays visible and retryable, with the reason on `resolution.error`.
+- A rejection keeps the reviewer's rationale on `resolution.reason`, so the next
+  run knows a fix was considered and turned down rather than re-proposing it.
 
 **Prerequisite:** `context-engine-improvements*` must be granted to the built-in
 `kibana_system` role in Elasticsearch, the same way `context-engine-signals-*`

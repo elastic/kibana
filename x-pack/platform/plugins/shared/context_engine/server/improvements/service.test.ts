@@ -301,6 +301,22 @@ describe('ImprovementsService', () => {
       expect(revision.applied_at).toBeUndefined();
     });
 
+    it("keeps the reviewer's rejection reason, so the next run knows why it was turned down", async () => {
+      search.mockResolvedValue(searchResponse([hitOf(makeHead())]));
+
+      const revision = await service.transition('imp-1', 'rejected', {
+        by: 'elastic',
+        reason: 'the workflow is intentionally scoped to the last 7 days',
+      });
+
+      expect(revision.resolution).toEqual({
+        by: 'elastic',
+        reason: 'the workflow is intentionally scoped to the last 7 days',
+      });
+      // A rejection is a judgement, not a fault; `error` stays for a failed apply.
+      expect(revision.resolution?.error).toBeUndefined();
+    });
+
     it('records a failed apply without claiming it was applied', async () => {
       search.mockResolvedValue(searchResponse([hitOf(makeHead())]));
 

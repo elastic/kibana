@@ -17,7 +17,8 @@ import { IMPROVEMENTS_INDEX } from '../../common/http_api/improvements';
  * `payload` and `resolution` are `object({ enabled: false })`: kept in `_source` but not indexed.
  * Proposed KI content and workflow YAML routinely run to several kilobytes, so `flattened` with
  * its `ignore_above` would silently drop them, and nothing queries inside the change anyway. The
- * queries that matter — "every suggestion touching workflow X" — are served by `target.*`.
+ * queries that matter — "every suggestion touching workflow X" — are served by `target.*`, with
+ * the exception of `target.source_value`, which is unbounded for the same reason.
  */
 export const improvementsSchema = {
   properties: {
@@ -38,7 +39,13 @@ export const improvementsSchema = {
       properties: {
         ki_id: types.keyword({}),
         workflow_id: types.keyword({}),
-        source_value: types.keyword({}),
+        // A source value is an ES|QL query or a connector reference, so it is unbounded where the
+        // other discriminators are ids. Indexed as a keyword it would hit the adapter's default
+        // `ignore_above: 1024` and silently stop being searchable past that length — the same
+        // silent truncation that rules `flattened` out for `payload`. Nothing queries it either:
+        // "which suggestions touch this source" is answered by `improvement_id`, which already
+        // hashes the value. So it is kept in `_source` for display and left out of the index.
+        source_value: types.keyword({ index: false, doc_values: false }),
         subject: types.keyword({}),
       },
     }),
