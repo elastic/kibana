@@ -24,4 +24,5 @@ export { LayoutDebugOverlay } from './src/debug/layout_debug_overlay';
 export {
   GridLayoutGlobalStyles,
   type GridLayoutGlobalStylesProps,
+  framedAppearanceBackgrounds,
 } from './src/layouts/grid_global_app_style';

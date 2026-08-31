@@ -16,8 +16,6 @@ import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal
 import { BehaviorSubject } from 'rxjs';
 import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
 
-import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
-
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
   registerItem: (item: DeveloperToolbarItemProps) => UnregisterItemFn;
@@ -41,6 +39,12 @@ const LazyMeasureButton = lazy(() =>
 const LazyDesignToolsButton = lazy(() =>
   import('@kbn/design-tools').then(({ DesignToolsButton }) => ({
     default: DesignToolsButton,
+  }))
+);
+
+const LazyBackgroundInspector = lazy(() =>
+  import('./background_inspector/background_inspector').then(({ BackgroundInspector }) => ({
+    default: BackgroundInspector,
   }))
 );
 
@@ -92,15 +96,14 @@ export class DeveloperToolbarPlugin
       ),
     });
 
-    if (core.featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, true)) {
-      import('@kbn/core-chrome-feature-flags/chrome_next_toggle').then(({ ChromeNextToggle }) => {
-        this.registerItem({
-          id: 'Chrome Next',
-          children: <ChromeNextToggle featureFlags={core.featureFlags} />,
-          priority: 1,
-        });
-      });
-    }
+    this.registerItem({
+      id: 'Backgrounds',
+      children: (
+        <Suspense fallback={null}>
+          <LazyBackgroundInspector />
+        </Suspense>
+      ),
+    });
 
     return {
       registerItem: this.registerItem.bind(this),
