@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SecurityServiceStart } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { WorkflowExecutionIdentityAttributes } from './saved_object';
 
@@ -82,6 +82,18 @@ const toStoredAttributes = ({
   };
 };
 
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : 'unknown error';
+
+/** Logs a mint or invalidate failure. Never throws — logging must not take down the path. */
+export const logMintError = (logger: Logger, message: string, error?: unknown): void => {
+  try {
+    logger.error(error === undefined ? message : `${message}: ${errorMessage(error)}`);
+  } catch {
+    // Best-effort: a logger failure must not fail or crash the mint.
+  }
+};
+
 const throwIfCloudKeyOnStateful = (security: SecurityServiceStart, name: string): void => {
   if (!hasUiamService(security)) {
     throw new MintExecutionApiKeysError(
@@ -95,6 +107,7 @@ const throwIfCloudKeyOnStateful = (security: SecurityServiceStart, name: string)
 const tryGrantUiam = async (
   request: KibanaRequest,
   security: SecurityServiceStart,
+  logger: Logger,
   name: string
 ): Promise<KeyPair | undefined> => {
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
@@ -105,10 +118,19 @@ const tryGrantUiam = async (
   try {
     const result = await security.authc.apiKeys.uiam?.grant(request, { name: `uiam-${name}` });
     if (!result) {
+      logMintError(
+        logger,
+        `Failed to create UIAM API key for workflow execution identity "${name}"`
+      );
       return undefined;
     }
     return { id: result.id, api_key: result.api_key };
-  } catch {
+  } catch (error) {
+    logMintError(
+      logger,
+      `Failed to create UIAM API key for workflow execution identity "${name}"`,
+      error
+    );
     return undefined;
   }
 };
@@ -116,6 +138,8 @@ const tryGrantUiam = async (
 const invalidateGrantedUiam = async (
   request: KibanaRequest,
   security: SecurityServiceStart,
+  logger: Logger,
+  name: string,
   uiam?: KeyPair
 ): Promise<void> => {
   if (!uiam?.id) {
@@ -123,17 +147,22 @@ const invalidateGrantedUiam = async (
   }
   try {
     await security.authc.apiKeys.uiam?.invalidate(request, { id: uiam.id });
-  } catch {
-    // Best-effort: the caller still throws the original grant error.
+  } catch (error) {
+    logMintError(
+      logger,
+      `Failed to invalidate granted UIAM API key for workflow execution identity "${name}"`,
+      error
+    );
   }
 };
 
 const grantKeys = async (
   request: KibanaRequest,
   security: SecurityServiceStart,
+  logger: Logger,
   name: string
 ): Promise<{ es?: KeyPair; uiam?: KeyPair }> => {
-  const uiam = await tryGrantUiam(request, security, name);
+  const uiam = await tryGrantUiam(request, security, logger, name);
   try {
     const es = await security.authc.apiKeys.grantAsInternalUser(request, {
       name,
@@ -147,7 +176,11 @@ const grantKeys = async (
     }
     return { es: { id: es.id, api_key: es.api_key }, uiam };
   } catch (error) {
-    await invalidateGrantedUiam(request, security, uiam);
+    try {
+      await invalidateGrantedUiam(request, security, logger, name, uiam);
+    } catch {
+      // Cleanup must not replace the original grant error.
+    }
     throw error;
   }
 };
@@ -235,11 +268,13 @@ const reuseKeysFromRequest = (
 export const mintExecutionApiKeys = async ({
   request,
   security,
+  logger,
   workflowId,
   previousApiKeyCreatedByUser,
 }: {
   request: KibanaRequest;
   security: SecurityServiceStart;
+  logger: Logger;
   workflowId: string;
   previousApiKeyCreatedByUser?: boolean | null;
 }): Promise<MintedExecutionApiKeys> => {
@@ -257,10 +292,10 @@ export const mintExecutionApiKeys = async ({
   const minted = frameworkManaged
     ? isApiKeyAuth
       ? await cloneKeys(request, security, name)
-      : await grantKeys(request, security, name)
+      : await grantKeys(request, security, logger, name)
     : isApiKeyAuth
     ? reuseKeysFromRequest(request, security, name)
-    : await grantKeys(request, security, name);
+    : await grantKeys(request, security, logger, name);
 
   return toStoredAttributes({
     ...minted,

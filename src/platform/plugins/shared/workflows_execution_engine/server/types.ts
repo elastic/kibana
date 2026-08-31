@@ -96,7 +96,16 @@ export interface WorkflowsExecutionEnginePluginStart {
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;
   triggerEvents: TriggerEventsContract;
+  /**
+   * Mints and stores owner keys for a workflow. Goes through `createInternalRepository`
+   * with no SO authz — callers must already have authorized the workflow write.
+   */
   syncWorkflowExecutionIdentity: (params: SyncWorkflowExecutionIdentityParams) => Promise<void>;
+  /**
+   * Invalidates framework keys and deletes the identity SO. Goes through
+   * `createInternalRepository` with no SO authz — callers must already have
+   * authorized the workflow delete.
+   */
   invalidateWorkflowExecutionIdentity: (params: WorkflowExecutionIdentityIdParams) => Promise<void>;
 }
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { mintExecutionApiKeys, MintExecutionApiKeysError } from './mint_execution_api_keys';
 
 const WORKFLOW_ID = 'wf-1';
@@ -46,11 +46,13 @@ const createSecurity = () => {
 const mint = (
   security: ReturnType<typeof createSecurity>,
   request: ReturnType<typeof sessionRequest>,
-  previousApiKeyCreatedByUser?: boolean | null
+  previousApiKeyCreatedByUser?: boolean | null,
+  logger = loggingSystemMock.createLogger()
 ) =>
   mintExecutionApiKeys({
     request,
     security,
+    logger,
     workflowId: WORKFLOW_ID,
     previousApiKeyCreatedByUser,
   });
@@ -121,6 +123,50 @@ describe('mintExecutionApiKeys', () => {
     expect(security.authc.apiKeys.uiam?.invalidate).toHaveBeenCalledWith(expect.anything(), {
       id: 'uiam-1',
     });
+  });
+
+  it('logs and continues with an ES-only identity when the UIAM grant fails', async () => {
+    const security = createSecurity();
+    const logger = loggingSystemMock.createLogger();
+    security.authc.getCurrentUser.mockReturnValue(sessionUser as never);
+    security.authc.apiKeys.uiam!.grant.mockRejectedValue(new Error('UIAM service unavailable'));
+    security.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+      id: 'es-1',
+      name: KEY_NAME,
+      api_key: 'es-secret',
+    });
+
+    await expect(mint(security, rawCloudRequest(), undefined, logger)).resolves.toEqual({
+      apiKey: encode('es-1', 'es-secret'),
+      apiKeyOwner: 'alice',
+      apiKeyCreatedByUser: false,
+    });
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create UIAM API key')
+    );
+  });
+
+  it('logs and continues with an ES-only identity when the UIAM grant returns null', async () => {
+    const security = createSecurity();
+    const logger = loggingSystemMock.createLogger();
+    security.authc.getCurrentUser.mockReturnValue(sessionUser as never);
+    security.authc.apiKeys.uiam!.grant.mockResolvedValue(null);
+    security.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+      id: 'es-1',
+      name: KEY_NAME,
+      api_key: 'es-secret',
+    });
+
+    await expect(mint(security, rawCloudRequest(), undefined, logger)).resolves.toEqual({
+      apiKey: encode('es-1', 'es-secret'),
+      apiKeyOwner: 'alice',
+      apiKeyCreatedByUser: false,
+    });
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `Failed to create UIAM API key for workflow execution identity "${KEY_NAME}"`
+    );
   });
 
   it('invalidates the granted UIAM key when ES grant returns null', async () => {

@@ -157,6 +157,7 @@ export class WorkflowsExecutionEnginePlugin
   >;
   private meteringService?: WorkflowsMeteringService;
   private canEncrypt = false;
+  private executionIdentityService!: WorkflowExecutionIdentityService;
 
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
@@ -1716,7 +1717,7 @@ export class WorkflowsExecutionEnginePlugin
       },
     };
 
-    const executionIdentityService = new WorkflowExecutionIdentityService({
+    this.executionIdentityService = new WorkflowExecutionIdentityService({
       canEncrypt: this.canEncrypt,
       savedObjects: coreStart.savedObjects.createInternalRepository([
         WORKFLOW_EXECUTION_IDENTITY_SO_TYPE,
@@ -1738,9 +1739,9 @@ export class WorkflowsExecutionEnginePlugin
       resumeWorkflowExecution,
       triggerEvents,
       syncWorkflowExecutionIdentity: (params: SyncWorkflowExecutionIdentityParams) =>
-        executionIdentityService.sync(params),
+        this.executionIdentityService.sync(params),
       invalidateWorkflowExecutionIdentity: (params: WorkflowExecutionIdentityIdParams) =>
-        executionIdentityService.invalidate(params),
+        this.executionIdentityService.invalidate(params),
       __internalStorage: {
         workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),
         stepExecutionsDataClient: this.dataClientBundle.createStepDataClient(),

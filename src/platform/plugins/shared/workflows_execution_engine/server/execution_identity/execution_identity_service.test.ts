@@ -241,6 +241,37 @@ describe('WorkflowExecutionIdentityService', () => {
       expect(savedObjects.create).not.toHaveBeenCalled();
     });
 
+    it('invalidates minted framework keys when the identity write fails', async () => {
+      const { service, savedObjects, security } = createService();
+      security.authc.getCurrentUser.mockReturnValue(sessionUser as never);
+      security.authc.apiKeys.uiam!.grant.mockResolvedValue({
+        id: 'uiam-new',
+        name: `uiam-${KEY_NAME}`,
+        api_key: 'essu_new',
+      });
+      security.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-new',
+        name: KEY_NAME,
+        api_key: 'es-new-secret',
+      });
+      savedObjects.create.mockRejectedValue(new Error('so write failed'));
+
+      await expect(
+        service.sync({
+          workflowId: WORKFLOW_ID,
+          spaceId: SPACE_ID,
+          request: rawCloudRequest(),
+        })
+      ).rejects.toThrow('so write failed');
+
+      expect(security.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['es-new'],
+      });
+      expect(security.authc.apiKeys.uiam?.invalidate).toHaveBeenCalledWith(expect.anything(), {
+        id: 'uiam-new',
+      });
+    });
+
     it('throws and does not write when encryption is unavailable', async () => {
       const { service, savedObjects } = createService({ canEncrypt: false });
 

@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/eval-kql'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-security-server'
+  - '@kbn/core-http-server-utils'
   - '@kbn/cloud-plugin'
   - '@kbn/utility-types'
   - '@kbn/zod'
@@ -44,6 +45,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/core-spaces-common'
   - '@kbn/i18n'
+  - '@kbn/encrypted-saved-objects-plugin'
 tags:
   - plugin
   - prod

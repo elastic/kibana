@@ -22,7 +22,11 @@ import {
   WorkflowExecutionIdentityEncryptionUnavailableError,
   WorkflowExecutionIdentityMissingError,
 } from './errors';
-import { type MintedExecutionApiKeys, mintExecutionApiKeys } from './mint_execution_api_keys';
+import {
+  logMintError,
+  type MintedExecutionApiKeys,
+  mintExecutionApiKeys,
+} from './mint_execution_api_keys';
 import {
   WORKFLOW_EXECUTION_IDENTITY_SO_TYPE,
   type WorkflowExecutionIdentityAttributes,
@@ -77,10 +81,10 @@ const invalidateFrameworkKeys = async ({
         });
         await security.authc.apiKeys.uiam?.invalidate(fakeRequest, { id: uiamApiKeyId });
       } catch (error) {
-        logger.error(
-          `Failed to invalidate UIAM execution identity key for workflow ${workflowId}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
+        logMintError(
+          logger,
+          `Failed to invalidate UIAM execution identity key for workflow ${workflowId}`,
+          error
         );
       }
     }
@@ -94,17 +98,18 @@ const invalidateFrameworkKeys = async ({
   try {
     const result = await security.authc.apiKeys.invalidateAsInternalUser({ ids: [esApiKeyId] });
     if (result && result.error_count > 0) {
-      logger.error(
+      logMintError(
+        logger,
         `Failed to invalidate ES execution identity key for workflow ${workflowId}: ${result.error_details
           ?.map((error) => error.reason)
           .join(', ')}`
       );
     }
   } catch (error) {
-    logger.error(
-      `Failed to invalidate ES execution identity key for workflow ${workflowId}: ${
-        error instanceof Error ? error.message : String(error)
-      }`
+    logMintError(
+      logger,
+      `Failed to invalidate ES execution identity key for workflow ${workflowId}`,
+      error
     );
   }
 };
@@ -112,6 +117,7 @@ const invalidateFrameworkKeys = async ({
 export class WorkflowExecutionIdentityService {
   constructor(private readonly deps: WorkflowExecutionIdentityServiceDeps) {}
 
+  /** Mints a new key set from `request`, overwrites the SO, then invalidates previous framework keys. */
   async sync({ workflowId, spaceId, request }: SyncWorkflowExecutionIdentityParams): Promise<void> {
     this.assertCanEncrypt();
 
@@ -119,6 +125,7 @@ export class WorkflowExecutionIdentityService {
     const minted = await mintExecutionApiKeys({
       request,
       security: this.deps.security,
+      logger: this.deps.logger,
       workflowId,
       previousApiKeyCreatedByUser: previous?.apiKeyCreatedByUser,
     });
@@ -126,12 +133,16 @@ export class WorkflowExecutionIdentityService {
     try {
       await this.write(workflowId, spaceId, minted);
     } catch (error) {
-      await invalidateFrameworkKeys({
-        security: this.deps.security,
-        logger: this.deps.logger,
-        workflowId,
-        ...minted,
-      });
+      try {
+        await invalidateFrameworkKeys({
+          security: this.deps.security,
+          logger: this.deps.logger,
+          workflowId,
+          ...minted,
+        });
+      } catch {
+        // Cleanup must not replace the original write error.
+      }
       throw error;
     }
 
@@ -147,6 +158,7 @@ export class WorkflowExecutionIdentityService {
     }
   }
 
+  /** Invalidates framework keys for the stored identity and deletes the SO. Missing SO is a no-op. */
   async invalidate({ workflowId, spaceId }: WorkflowExecutionIdentityIdParams): Promise<void> {
     this.assertCanEncrypt();
 
@@ -175,6 +187,7 @@ export class WorkflowExecutionIdentityService {
     }
   }
 
+  /** Decrypts stored keys into a fakeRequest. Throws if the identity or keys are missing. */
   async getScheduleRequest({
     workflowId,
     spaceId,
