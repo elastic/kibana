@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/code-editor';
+import { monaco } from '@kbn/code-editor';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../hooks/use_workflows_monaco_theme';
 
 /** Shared Monaco layout defaults for workflow YAML surfaces (editor + read-only previews). */
@@ -44,7 +44,7 @@ export const WORKFLOW_READ_ONLY_MONACO_OPTIONS: monaco.editor.IStandaloneEditorC
     domReadOnly: true,
     contextmenu: false,
     glyphMargin: false, // read-only surfaces have no glyph decorations
-    lightbulb: { enabled: false },
+    lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
     quickSuggestions: false,
     suggestOnTriggerCharacters: false,
     hover: { enabled: false },
@@ -107,7 +107,7 @@ export const WORKFLOW_CHANGE_HISTORY_DIFF_MONACO_BASE_OPTIONS: monaco.editor.ISt
       top: 24,
       bottom: 16,
     },
-    lightbulb: { enabled: false },
+    lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
     quickSuggestions: false,
     suggestOnTriggerCharacters: false,
     hover: { enabled: false },
