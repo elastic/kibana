@@ -44618,7 +44618,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Check whether one or more data stream index patterns contain documents within a given time window.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.
+        Check whether one or more data stream index patterns contain documents within a given time window.<br/><br/>[Required authorization] Route required privileges: fleet-read.
       operationId: get-fleet-data-streams-data
       parameters:
         - in: query
