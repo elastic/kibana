@@ -7,8 +7,8 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { AlertTaskInstance } from './alert_task_instance';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import type { RuleTaskInstance } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '../types';
 
@@ -61,13 +61,42 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    const ruleTaskInstance: RuleTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
 
     // When the persisted params omit `spaceId`, it is defaulted to the built-in
     // space and branded at this deserialization boundary.
-    expect(alertTaskInsatnce).toEqual({
+    expect(ruleTaskInstance).toEqual({
       ...taskInstance,
       params: { alertId: '1', spaceId: 'default' },
+    });
+  });
+
+  test(`preserves extra persisted params fields beyond the schema`, () => {
+    const taskInstance: ConcreteTaskInstance = {
+      id: uuidv4(),
+      attempts: 0,
+      status: TaskStatus.Running,
+      version: '123',
+      runAt: new Date(),
+      scheduledAt: new Date(),
+      startedAt: new Date(),
+      retryAt: new Date(Date.now() + 5 * 60 * 1000),
+      state: {},
+      taskType: 'alerting:test',
+      params: {
+        alertId: '1',
+        spaceId: 'my-space',
+        consumer: 'alerts',
+      },
+      ownerId: null,
+    };
+
+    const ruleTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+
+    expect(ruleTaskInstance.params).toEqual({
+      alertId: '1',
+      spaceId: 'my-space',
+      consumer: 'alerts',
     });
   });
 
@@ -90,9 +119,9 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    const ruleTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
 
-    expect(alertTaskInstance.params.spaceId).toEqual('my-space');
+    expect(ruleTaskInstance.params.spaceId).toEqual('my-space');
   });
 
   test(`validates that a TaskInstance has valid Params`, () => {
@@ -113,12 +142,12 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertTaskInstance = taskInstanceToAlertTaskInstance(
+    const ruleTaskInstance: RuleTaskInstance = taskInstanceToAlertTaskInstance(
       taskInstance,
       alert
     );
 
-    expect(alertTaskInsatnce).toEqual({
+    expect(ruleTaskInstance).toEqual({
       ...taskInstance,
       params: { alertId: '1', spaceId: 'default' },
     });
