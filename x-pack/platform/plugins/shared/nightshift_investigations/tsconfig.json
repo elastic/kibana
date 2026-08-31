@@ -28,6 +28,5 @@
     "@kbn/core-saved-objects-server",
     "@kbn/es-query",
     "@kbn/kbn-client",
-    "@kbn/utility-types"
   ]
 }
