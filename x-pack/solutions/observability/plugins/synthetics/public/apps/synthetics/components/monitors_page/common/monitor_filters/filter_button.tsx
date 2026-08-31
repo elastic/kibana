@@ -40,16 +40,20 @@ export const FilterButton = ({
 
   const showLogicalConditionSwitch = isLogicalAndField(field);
 
+  const displayValues = query
+    ? values.filter(
+        ({ label: valueLabel }) =>
+          valueLabel.toLowerCase().includes(query.toLowerCase()) ||
+          selectedValueLabels.includes(valueLabel)
+      )
+    : values;
+
   return (
     <FieldValueSelection
       selectedValue={selectedValueLabels}
       singleSelection={false}
       label={label}
-      values={
-        query
-          ? values.filter(({ label: str }) => str.toLowerCase().includes(query.toLowerCase()))
-          : values
-      }
+      values={displayValues}
       setQuery={setQuery}
       onChange={(selectedValues, _, isLogicalAND) =>
         handleFilterChange(field, selectedValues, isLogicalAND)
