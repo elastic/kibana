@@ -149,9 +149,7 @@ export const setAttacksAssigneesRoute = (
                   assigneesAdded: attackAssigneesActuallyAdded,
                   assigneesRemoved: attackAssigneesActuallyRemoved,
                   truncated:
-                    verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER ||
-                    ids.length > MAX_ALERTS_PER_TRIGGER ||
-                    operationTruncated,
+                    verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
                 });
               }
               return result;

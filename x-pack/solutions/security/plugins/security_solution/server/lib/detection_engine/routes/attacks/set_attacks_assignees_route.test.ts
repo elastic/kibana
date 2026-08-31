@@ -26,6 +26,7 @@ import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksAssigneesRoute } from './set_attacks_assignees_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
+  MAX_ALERTS_PER_TRIGGER,
   MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
@@ -390,6 +391,30 @@ describe('set attacks assignees', () => {
         expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({ attackIds: ['attack1'] })
+        );
+      });
+
+      test('does not set truncated when the request exceeds the ID cap but the payload is complete', async () => {
+        // Encoding WHY: `truncated` tells a workflow author the payload lost data. A request
+        // with more IDs than MAX_ALERTS_PER_TRIGGER where only one attack actually changes
+        // loses nothing, so claiming truncation would send the author hunting for IDs that
+        // were never dropped. The flag must follow the emitted payload, not the request size.
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+          getSearchResponse([{ _id: 'attack1' }])
+        );
+        const oversizedIds = Array.from(
+          { length: MAX_ALERTS_PER_TRIGGER + 1 },
+          (_, i) => `attack-${i}`
+        );
+        await server.inject(
+          getRequest({ ids: oversizedIds, assignees: { add: ['user1'], remove: [] } }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ attackIds: ['attack1'], truncated: false })
         );
       });
 

@@ -89,7 +89,8 @@ export const setUnifiedAlertsTagsRoute = (
           allValidTagsToAdd.length > MAX_TAGS_PER_OPERATION ||
           allValidTagsToRemove.length > MAX_TAGS_PER_OPERATION;
 
-        // Falls back to the requested arrays if the prefetch fails.
+        // Only read when the prefetch succeeded: on failure `alertIds` / `attackIds` stay empty,
+        // which suppresses both emits rather than reporting request intent as observed fact.
         let alertTagsActuallyAdded = validTagsToAdd;
         let alertTagsActuallyRemoved = validTagsToRemove;
         let attackTagsActuallyAdded = validTagsToAdd;
