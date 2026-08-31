@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
@@ -36,8 +35,6 @@ export const ForeachIterationsSection: React.FC<ForeachIterationsSectionProps> =
   onSelectStep,
   executionStatus,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const foreachRoot = useMemo(() => {
     const tree = buildStepExecutionsTree(allStepExecutions);
     const find = (
@@ -81,11 +78,7 @@ export const ForeachIterationsSection: React.FC<ForeachIterationsSectionProps> =
   return (
     <StepDetailAccordionSection
       data-test-subj="workflowExecutionIterationsSection"
-      title={
-        <EuiText size="s" css={{ fontWeight: 600, color: euiTheme.colors.title }}>
-          <span>{headerLabel}</span>
-        </EuiText>
-      }
+      title={headerLabel}
     >
       <div role="group" aria-label={headerLabel}>
         <StepExecutionOpenTree
