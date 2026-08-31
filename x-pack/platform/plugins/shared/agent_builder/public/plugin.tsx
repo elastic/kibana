@@ -81,6 +81,7 @@ import {
 } from './sidebar';
 import { storageKeys } from './application/storage_keys';
 import { appPaths } from './application/utils/app_paths';
+import { sidenavPanelHost$ } from './application/panel/sidenav_panel_host';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
 export class AgentBuilderPlugin
@@ -174,7 +175,7 @@ export class AgentBuilderPlugin
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
-    startDependencies.navigation.registerNavigationContent({
+    startDependencies.navigation.registerNavigationSection({
       kind: 'linkList',
       id: 'agentBuilderRecentlyViewed',
       target: 'agent_builder',
@@ -297,14 +298,11 @@ export class AgentBuilderPlugin
 
     setSidebarServices(core, internalServices);
 
-    startDependencies.navigation.registerNavigationContent({
+    startDependencies.navigation.registerNavigationPanel({
       kind: 'agentBuilder',
       id: 'agentBuilderPanel',
       target: 'agent_builder',
-      load: async () => {
-        const { AgentBuilderPanel } = await import('./application/panel/agent_builder_panel');
-        return { default: AgentBuilderPanel };
-      },
+      hostRef: (element) => sidenavPanelHost$.next(element),
     });
 
     const LazyConfiguredEmbeddableConversation = React.lazy(async () => {

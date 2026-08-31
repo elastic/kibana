@@ -341,7 +341,7 @@ export class DashboardPlugin
 
     registerActions(plugins);
 
-    plugins.navigation.registerNavigationContent({
+    plugins.navigation.registerNavigationSection({
       kind: 'linkList',
       id: 'dashboardRecentlyViewed',
       target: 'dashboards',

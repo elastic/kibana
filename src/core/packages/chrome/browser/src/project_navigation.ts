@@ -8,7 +8,6 @@
  */
 
 import type { Location } from 'history';
-import type { ComponentType } from 'react';
 import type { EuiSideNavItemType, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
@@ -312,7 +311,7 @@ export interface ProjectNavigationLinkItem {
 }
 
 /** Popover-only list attached to an existing deep link. */
-export interface ProjectNavigationLinkListContent {
+export interface ProjectNavigationLinkListSection {
   kind: 'linkList';
   id: string;
   target: AppDeepLinkId;
@@ -322,17 +321,17 @@ export interface ProjectNavigationLinkListContent {
   viewAllHref?: string;
 }
 
-/** Expanded-panel host. `load` returns a mount point; Agent Builder portals its existing sidebar. */
-export interface ProjectNavigationAgentBuilderContent {
+export type ProjectNavigationSection = ProjectNavigationLinkListSection;
+
+/** Expanded-panel host. Chrome owns the node and calls `hostRef`; Agent Builder portals its existing sidebar. */
+export interface ProjectNavigationAgentBuilderPanel {
   kind: 'agentBuilder';
   id: string;
   target: 'agent_builder';
-  load: () => Promise<{ default: ComponentType }>;
+  hostRef: (element: HTMLElement | null) => void;
 }
 
-export type ProjectNavigationContent =
-  | ProjectNavigationLinkListContent
-  | ProjectNavigationAgentBuilderContent;
+export type ProjectNavigationPanel = ProjectNavigationAgentBuilderPanel;
 
 /**
  * @public

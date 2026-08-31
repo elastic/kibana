@@ -17,7 +17,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { isMac } from '@kbn/shared-ux-utility';
 
 import { useKibana } from '../../hooks/use_kibana';
-import { sidenavPanelHost$ } from '../../panel/agent_builder_panel';
+import { sidenavPanelHost$ } from '../../panel/sidenav_panel_host';
 
 import {
   CONDENSED_SIDEBAR_WIDTH,

@@ -11,10 +11,9 @@ import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
-  ProjectNavigationAgentBuilderContent,
-  ProjectNavigationContent,
+  ProjectNavigationAgentBuilderPanel,
   ProjectNavigationLinkItem,
-  ProjectNavigationLinkListContent,
+  ProjectNavigationLinkListSection,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { MenuItem, SecondaryMenuItem } from '@kbn/ui-side-navigation/types';
@@ -31,7 +30,7 @@ export interface ResolvedLinksContent {
 
 export interface ResolvedPanelContent {
   nodeId: string;
-  load: ProjectNavigationAgentBuilderContent['load'];
+  hostRef: ProjectNavigationAgentBuilderPanel['hostRef'];
 }
 
 const toSecondaryMenuItem = (item: ProjectNavigationLinkItem): SecondaryMenuItem => ({
@@ -70,59 +69,49 @@ const findMatchingNodeIds = (tree: NavigationTreeDefinitionUI, target: AppDeepLi
   return [...ids];
 };
 
-const isLinkListContent = (
-  content: ProjectNavigationContent
-): content is ProjectNavigationLinkListContent => content.kind === 'linkList';
-
-const isAgentBuilderContent = (
-  content: ProjectNavigationContent
-): content is ProjectNavigationAgentBuilderContent => content.kind === 'agentBuilder';
-
 export const resolveLinksContent = (
   tree: NavigationTreeDefinitionUI,
-  contents: readonly ProjectNavigationContent[]
+  sections: readonly ProjectNavigationLinkListSection[]
 ): Observable<readonly ResolvedLinksContent[]> => {
   if (!tree?.body) {
     return of([]);
   }
-  const placements = contents
-    .filter(isLinkListContent)
-    .flatMap((content) =>
-      findMatchingNodeIds(tree, content.target).map((nodeId) => ({ content, nodeId }))
-    );
+  const placements = sections.flatMap((section) =>
+    findMatchingNodeIds(tree, section.target).map((nodeId) => ({ section, nodeId }))
+  );
 
   if (placements.length === 0) {
     return of([]);
   }
 
   return combineLatest(
-    placements.map(({ content, nodeId }) =>
-      content.items$.pipe(
+    placements.map(({ section, nodeId }) =>
+      section.items$.pipe(
         startWith([] as readonly ProjectNavigationLinkItem[]),
         catchError(() => of([] as readonly ProjectNavigationLinkItem[])),
         map((items) => ({
-          id: content.id,
+          id: section.id,
           nodeId,
-          title: content.title,
+          title: section.title,
           items: items.map(toSecondaryMenuItem),
-          viewAllHref: content.viewAllHref,
+          viewAllHref: section.viewAllHref,
         }))
       )
     )
-  ).pipe(map((resolved) => resolved.filter((section) => section.items.length > 0)));
+  ).pipe(map((resolved) => resolved.filter((resolvedSection) => resolvedSection.items.length > 0)));
 };
 
 export const resolvePanelContent = (
   tree: NavigationTreeDefinitionUI,
-  contents: readonly ProjectNavigationContent[]
+  panels: readonly ProjectNavigationAgentBuilderPanel[]
 ): readonly ResolvedPanelContent[] => {
   if (!tree?.body) {
     return [];
   }
-  return contents.filter(isAgentBuilderContent).flatMap((content) =>
-    findMatchingNodeIds(tree, content.target).map((nodeId) => ({
+  return panels.flatMap((panel) =>
+    findMatchingNodeIds(tree, panel.target).map((nodeId) => ({
       nodeId,
-      load: content.load,
+      hostRef: panel.hostRef,
     }))
   );
 };

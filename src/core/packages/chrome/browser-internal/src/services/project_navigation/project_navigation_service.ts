@@ -18,7 +18,8 @@ import type {
   NavigationTreeDefinition,
   CloudLinks,
   SolutionId,
-  ProjectNavigationContent,
+  ProjectNavigationPanel,
+  ProjectNavigationSection,
 } from '@kbn/core-chrome-browser';
 import {
   BehaviorSubject,
@@ -60,9 +61,10 @@ export class ProjectNavigationService {
     undefined
   );
   private readonly customizeNavigationHandler$ = new BehaviorSubject<(() => void) | null>(null);
-  private readonly registeredContent$ = new BehaviorSubject<readonly ProjectNavigationContent[]>(
+  private readonly registeredSections$ = new BehaviorSubject<readonly ProjectNavigationSection[]>(
     []
   );
+  private readonly registeredPanels$ = new BehaviorSubject<readonly ProjectNavigationPanel[]>([]);
 
   constructor(private isServerless: boolean) {}
 
@@ -243,51 +245,68 @@ export class ProjectNavigationService {
       registerCustomizeNavigationHandler: (handler: () => void) => {
         this.customizeNavigationHandler$.next(handler);
       },
-      registerNavigationContent: (content: ProjectNavigationContent) => {
-        const current = this.registeredContent$.getValue();
-        if (current.some((registered) => registered.id === content.id)) {
-          logger.error(`Duplicate navigation content id "${content.id}".`);
+      registerNavigationSection: (section: ProjectNavigationSection) => {
+        if (this.hasRegisteredId(section.id)) {
+          logger.error(`Duplicate navigation id "${section.id}".`);
           return;
         }
-        switch (content.kind) {
+        switch (section.kind) {
           case 'linkList':
             if (
-              current.some(
-                (registered) =>
-                  registered.kind === 'linkList' && registered.target === content.target
-              )
+              this.registeredSections$
+                .getValue()
+                .some((registered) => registered.target === section.target)
             ) {
-              logger.error(`A second linkList on target "${content.target}" is not implemented.`);
-              return;
-            }
-            break;
-          case 'agentBuilder':
-            if (
-              current.some(
-                (registered) =>
-                  registered.kind === 'agentBuilder' && registered.target === content.target
-              )
-            ) {
-              logger.error(
-                `A second agentBuilder on target "${content.target}" is not implemented.`
-              );
+              logger.error(`A second linkList on target "${section.target}" is not implemented.`);
               return;
             }
             break;
           default: {
-            const exhaustive: never = content;
-            throw new Error(`Unknown navigation content kind: ${JSON.stringify(exhaustive)}`);
+            const exhaustive: never = section;
+            throw new Error(`Unknown navigation section kind: ${JSON.stringify(exhaustive)}`);
           }
         }
-        this.registeredContent$.next([...current, content]);
+        this.registeredSections$.next([...this.registeredSections$.getValue(), section]);
       },
-      getRegisteredNavigationContent$: () => this.registeredContent$.asObservable(),
+      registerNavigationPanel: (panel: ProjectNavigationPanel) => {
+        if (this.hasRegisteredId(panel.id)) {
+          logger.error(`Duplicate navigation id "${panel.id}".`);
+          return;
+        }
+        switch (panel.kind) {
+          case 'agentBuilder':
+            if (
+              this.registeredPanels$
+                .getValue()
+                .some((registered) => registered.target === panel.target)
+            ) {
+              logger.error(`A second panel on target "${panel.target}" is not implemented.`);
+              return;
+            }
+            break;
+          default: {
+            const exhaustive: never = panel;
+            throw new Error(`Unknown navigation panel kind: ${JSON.stringify(exhaustive)}`);
+          }
+        }
+        this.registeredPanels$.next([...this.registeredPanels$.getValue(), panel]);
+      },
+      getRegisteredNavigationSections$: () => this.registeredSections$.asObservable(),
+      getRegisteredNavigationPanels$: () => this.registeredPanels$.asObservable(),
     };
   }
 
   public stop() {
     this.stop$.next();
     this.stop$.complete();
-    this.registeredContent$.next([]);
+    this.registeredSections$.next([]);
+    this.registeredPanels$.next([]);
+  }
+
+  private hasRegisteredId(id: string): boolean {
+    return (
+      this.registeredSections$.getValue().some((registered) => registered.id === id) ||
+      this.registeredPanels$.getValue().some((registered) => registered.id === id)
+    );
   }
 }

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useMemo, type ComponentType, type ReactNode } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
+import { css } from '@emotion/react';
 import { combineLatest, distinctUntilChanged, map, switchMap } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
@@ -70,7 +71,8 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
   const items$ = useMemo(() => {
     const panelStateManager = new PanelStateManager(basePath.get());
     const navigation$ = chrome.project.getNavigation$();
-    const registeredContent$ = chrome.project.getRegisteredNavigationContent$();
+    const registeredSections$ = chrome.project.getRegisteredNavigationSections$();
+    const registeredPanels$ = chrome.project.getRegisteredNavigationPanels$();
     const currentUrl$ = chrome.project.getCurrentUrl$();
 
     const tree$ = navigation$.pipe(
@@ -78,18 +80,18 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
       distinctUntilChanged()
     );
 
-    const resolvedContent$ = combineLatest([
+    const resolvedSections$ = combineLatest([
       tree$,
-      registeredContent$.pipe(distinctUntilChanged()),
-    ]).pipe(
-      switchMap(([tree, contents]) =>
-        resolveLinksContent(tree, contents).pipe(
-          map((links) => ({
-            links,
-            panels: resolvePanelContent(tree, contents),
-          }))
-        )
-      )
+      registeredSections$.pipe(distinctUntilChanged()),
+    ]).pipe(switchMap(([tree, sections]) => resolveLinksContent(tree, sections)));
+
+    const resolvedPanels$ = combineLatest([
+      tree$,
+      registeredPanels$.pipe(distinctUntilChanged()),
+    ]).pipe(map(([tree, panels]) => resolvePanelContent(tree, panels)));
+
+    const resolvedContent$ = combineLatest([resolvedSections$, resolvedPanels$]).pipe(
+      map(([links, panels]) => ({ links, panels }))
     );
 
     const panelElements = new Map<string, ReactNode>();
@@ -136,14 +138,17 @@ const useCustomizeNavigation = (): (() => void) | undefined => {
   return handler ?? undefined;
 };
 
-const NavigationPanelLoader = ({ load }: { load: () => Promise<{ default: ComponentType }> }) => {
-  const LazyPanel = useMemo(() => React.lazy(load), [load]);
-  return (
-    <Suspense fallback={null}>
-      <LazyPanel />
-    </Suspense>
-  );
-};
+const panelHostStyles = css`
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+`;
+
+const NavigationPanelHost = ({ hostRef }: { hostRef: (element: HTMLElement | null) => void }) => (
+  <div ref={hostRef} css={panelHostStyles} />
+);
 
 const attachPanelContent = (
   navigationItems: NavigationItems,
@@ -163,7 +168,7 @@ const attachPanelContent = (
     }
     let element = cache.get(panel.nodeId);
     if (!element) {
-      element = <NavigationPanelLoader load={panel.load} />;
+      element = <NavigationPanelHost hostRef={panel.hostRef} />;
       cache.set(panel.nodeId, element);
     }
     return { ...item, panelContent: element };

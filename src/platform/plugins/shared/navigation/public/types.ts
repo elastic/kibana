@@ -15,7 +15,8 @@ import type {
   NavigationTreeDefinition,
   SolutionId,
   SolutionNavigationDefinition,
-  ProjectNavigationContent,
+  ProjectNavigationPanel,
+  ProjectNavigationSection,
 } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -70,11 +71,16 @@ export interface NavigationPublicStart {
     navigationTree$: Observable<NavigationTreeDefinition<LinkId>>
   ) => void;
   /**
-   * Attach typed content to an existing project-nav deep link.
-   * Plugins provide data; chrome renders it. Duplicate `id` is rejected.
+   * Attach a typed section to an existing project-nav deep link.
+   * Plugins provide data; chrome renders it. Duplicate `id` is rejected across sections and panels.
    * A second `linkList` on the same target is unimplemented, not an API uniqueness rule.
    */
-  registerNavigationContent: (content: ProjectNavigationContent) => void;
+  registerNavigationSection: (section: ProjectNavigationSection) => void;
+  /**
+   * Attach a typed expanded-panel owner to an existing project-nav deep link.
+   * Duplicate `id` is rejected across sections and panels. A second panel on the same target is rejected.
+   */
+  registerNavigationPanel: (panel: ProjectNavigationPanel) => void;
 }
 
 export interface NavigationPublicSetupDependencies {
