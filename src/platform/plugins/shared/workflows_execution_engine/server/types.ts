@@ -10,7 +10,10 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
@@ -24,6 +27,10 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type {
+  SyncWorkflowExecutionIdentityParams,
+  WorkflowExecutionIdentityIdParams,
+} from './execution_identity/execution_identity_service';
+import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from './repositories/data_access_layer';
@@ -33,6 +40,11 @@ import type {
 } from './trigger_events/event_logs/trigger_event_log_query';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
+
+export type {
+  SyncWorkflowExecutionIdentityParams,
+  WorkflowExecutionIdentityIdParams,
+} from './execution_identity/execution_identity_service';
 
 export type {
   DataClient,
@@ -84,6 +96,8 @@ export interface WorkflowsExecutionEnginePluginStart {
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;
   triggerEvents: TriggerEventsContract;
+  syncWorkflowExecutionIdentity: (params: SyncWorkflowExecutionIdentityParams) => Promise<void>;
+  invalidateWorkflowExecutionIdentity: (params: WorkflowExecutionIdentityIdParams) => Promise<void>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
@@ -100,6 +114,7 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   cloud: CloudStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   licensing: LicensingPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   spaces?: SpacesPluginStart;
 }
 

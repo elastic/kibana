@@ -159,6 +159,7 @@ describe('workflow:scheduled task runner', () => {
       cloud: {} as never,
       workflowsExtensions: {} as never,
       licensing: licensingMock.createStart(),
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
     });
   };
 

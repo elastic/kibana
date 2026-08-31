@@ -66,16 +66,27 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
       encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     });
 
-    const startContract = plugin.start(coreMock.createStart(), {
+    const coreStart = coreMock.createStart();
+    const encryptedSavedObjectsStart = encryptedSavedObjectsMock.createStart();
+    const startContract = plugin.start(coreStart, {
       taskManager: taskManagerMock.createStart(),
       actions: {} as any,
       cloud: {} as any,
       workflowsExtensions: {} as any,
       licensing: licensingMock.createStart(),
+      encryptedSavedObjects: encryptedSavedObjectsStart,
     });
 
     expect(mockDataClientBundleInitStart).toHaveBeenCalledTimes(1);
     expect(startContract.__internalStorage.workflowExecutionsDataClient).toBeDefined();
     expect(startContract.__internalStorage.stepExecutionsDataClient).toBeDefined();
+    expect(startContract.syncWorkflowExecutionIdentity).toEqual(expect.any(Function));
+    expect(startContract.invalidateWorkflowExecutionIdentity).toEqual(expect.any(Function));
+    expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith([
+      'workflow_execution_identity',
+    ]);
+    expect(encryptedSavedObjectsStart.getClient).toHaveBeenCalledWith({
+      includedHiddenTypes: ['workflow_execution_identity'],
+    });
   });
 });

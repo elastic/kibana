@@ -42,7 +42,15 @@ import {
   runWorkflow,
 } from './execution_functions';
 import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
-import { registerWorkflowExecutionIdentitySavedObject } from './execution_identity/saved_object';
+import {
+  type SyncWorkflowExecutionIdentityParams,
+  type WorkflowExecutionIdentityIdParams,
+  WorkflowExecutionIdentityService,
+} from './execution_identity/execution_identity_service';
+import {
+  registerWorkflowExecutionIdentitySavedObject,
+  WORKFLOW_EXECUTION_IDENTITY_SO_TYPE,
+} from './execution_identity/saved_object';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
@@ -1708,6 +1716,17 @@ export class WorkflowsExecutionEnginePlugin
       },
     };
 
+    const executionIdentityService = new WorkflowExecutionIdentityService({
+      canEncrypt: this.canEncrypt,
+      savedObjects: coreStart.savedObjects.createInternalRepository([
+        WORKFLOW_EXECUTION_IDENTITY_SO_TYPE,
+      ]),
+      encryptedSavedObjects: plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [WORKFLOW_EXECUTION_IDENTITY_SO_TYPE],
+      }),
+      security: coreStart.security,
+      logger: this.logger.get('executionIdentity'),
+    });
     return {
       workflowEventLoggerService,
       executeWorkflow,
@@ -1718,6 +1737,10 @@ export class WorkflowsExecutionEnginePlugin
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       triggerEvents,
+      syncWorkflowExecutionIdentity: (params: SyncWorkflowExecutionIdentityParams) =>
+        executionIdentityService.sync(params),
+      invalidateWorkflowExecutionIdentity: (params: WorkflowExecutionIdentityIdParams) =>
+        executionIdentityService.invalidate(params),
       __internalStorage: {
         workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),
         stepExecutionsDataClient: this.dataClientBundle.createStepDataClient(),

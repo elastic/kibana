@@ -129,6 +129,7 @@ describe('bulkScheduleWorkflow', () => {
       cloud: {} as any,
       workflowsExtensions: {} as any,
       licensing: licensingMock.createStart(),
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
     });
   });
 

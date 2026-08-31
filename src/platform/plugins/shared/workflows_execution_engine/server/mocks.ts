@@ -39,6 +39,8 @@ export const workflowsExecutionEngineMock = {
     resumeWorkflowExecution: jest.fn(),
     scheduleWorkflow: jest.fn(),
     bulkScheduleWorkflow: jest.fn(),
+    syncWorkflowExecutionIdentity: jest.fn(),
+    invalidateWorkflowExecutionIdentity: jest.fn(),
     triggerEvents: {
       emitEvent: jest.fn().mockResolvedValue(undefined),
       isEnabled: true,
