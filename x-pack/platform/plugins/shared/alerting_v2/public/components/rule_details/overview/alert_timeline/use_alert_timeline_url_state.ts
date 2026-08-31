@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   createKbnUrlStateStorage,
@@ -13,6 +13,7 @@ import {
   type IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import {
+  isSameActivityTimeRange,
   readActivityTimeRangeFromStorage,
   readActivityTimeRangeFromUrl,
   resolveActivityTimeRange,
@@ -24,13 +25,6 @@ import { DEFAULT_ACTIVITY_TIME_RANGE } from '../time_range';
 
 export type { AlertTimelineTimeRange };
 
-/**
- * Two-way sync for the Alert activity time range. Hydrates from URL, then
- * localStorage, then the default. User changes write both stores so the
- * range survives rule-to-rule navigation and is shareable via URL.
- *
- * Precedence on load (and on re-sync from browser Back/Forward): URL > localStorage > default.
- */
 export const useAlertTimelineUrlState = (
   storage?: Storage
 ): [AlertTimelineTimeRange, (next: AlertTimelineTimeRange) => void] => {
@@ -52,16 +46,24 @@ export const useAlertTimelineUrlState = (
     )
   );
 
+  const isFirstUrlSync = useRef(true);
   useEffect(() => {
-    // useState above only reads the URL on mount; user-driven changes go through setTimeRange.
-    // When location.search changes without that (e.g. browser Back/Forward), we must re-apply the
-    // state here or the picker will diverge from the address bar. Mirrors useEpisodesTableConfig.
-    const next = resolveActivityTimeRange(
-      readActivityTimeRangeFromStorage(resolvedStorage),
-      readActivityTimeRangeFromUrl(urlStateStorage),
-      DEFAULT_ACTIVITY_TIME_RANGE
-    );
-    setTimeRangeInternal((prev) => (prev.from === next.from && prev.to === next.to ? prev : next));
+    if (isFirstUrlSync.current) {
+      isFirstUrlSync.current = false;
+      if (!readActivityTimeRangeFromUrl(urlStateStorage)) {
+        const stored = readActivityTimeRangeFromStorage(resolvedStorage);
+        if (stored) {
+          void writeActivityTimeRangeToUrl(urlStateStorage, stored, { replace: true }).catch(() => {
+            // URL persistence is best-effort; state is already seeded from storage.
+          });
+        }
+      }
+      return;
+    }
+    /* Navigation is not an explicit choice, so it updates the view but never localStorage;
+     * only the date picker writes there. Mirrors useEpisodesTableConfig. */
+    const next = readActivityTimeRangeFromUrl(urlStateStorage) ?? DEFAULT_ACTIVITY_TIME_RANGE;
+    setTimeRangeInternal((prev) => (isSameActivityTimeRange(prev, next) ? prev : next));
   }, [location.search, resolvedStorage, urlStateStorage]);
 
   const persistRange = useCallback(

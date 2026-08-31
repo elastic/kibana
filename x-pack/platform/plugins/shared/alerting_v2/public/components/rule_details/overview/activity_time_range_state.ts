@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import datemath from '@kbn/datemath';
 import { z } from '@kbn/zod';
 import type { IKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
@@ -21,6 +20,8 @@ export const ACTIVITY_TIME_RANGE_STORAGE_KEY =
 
 const APP_STATE_STORAGE_KEY = '_a';
 
+type AppStateRecord = Record<string, unknown>;
+
 const MAX_TIME_RANGE_STRING_LENGTH = 128;
 
 const activityTimeRangeSchema = z.object({
@@ -29,10 +30,6 @@ const activityTimeRangeSchema = z.object({
 });
 
 export type AlertTimelineTimeRange = z.infer<typeof activityTimeRangeSchema>;
-
-type AppStateRecord = Record<string, unknown> & {
-  [ACTIVITY_TIME_RANGE_APP_STATE_KEY]?: unknown;
-};
 
 const isFiniteMs = (value: number | undefined): value is number =>
   value !== undefined && Number.isFinite(value);
@@ -65,46 +62,45 @@ export const resolveActivityTimeRange = (
   fallback: AlertTimelineTimeRange = DEFAULT_ACTIVITY_TIME_RANGE
 ): AlertTimelineTimeRange => fromUrl ?? fromStorage ?? fallback;
 
-const isDefaultActivityTimeRange = (range: AlertTimelineTimeRange): boolean =>
-  deepEqual(range, DEFAULT_ACTIVITY_TIME_RANGE);
+/** Value equality for two time ranges. */
+export const isSameActivityTimeRange = (
+  a: AlertTimelineTimeRange,
+  b: AlertTimelineTimeRange
+): boolean => a.from === b.from && a.to === b.to;
 
 export const readActivityTimeRangeFromStorage = (
   storage: Storage
 ): AlertTimelineTimeRange | undefined =>
   decodeActivityTimeRange(storage.get(ACTIVITY_TIME_RANGE_STORAGE_KEY));
 
+/**
+ * Persists the range as-is, even when it equals the current default: an
+ * explicitly selected range is an explicit choice and must not silently start
+ * tracking future default changes.
+ */
 export const writeActivityTimeRangeToStorage = (
   storage: Storage,
   range: AlertTimelineTimeRange
 ): void => {
-  if (isDefaultActivityTimeRange(range)) {
-    storage.remove(ACTIVITY_TIME_RANGE_STORAGE_KEY);
-    return;
-  }
   storage.set(ACTIVITY_TIME_RANGE_STORAGE_KEY, range);
 };
 
 export const readActivityTimeRangeFromUrl = (
   urlStateStorage: IKbnUrlStateStorage
-): AlertTimelineTimeRange | undefined => {
-  const raw =
-    urlStateStorage.get<AppStateRecord>(APP_STATE_STORAGE_KEY)?.[ACTIVITY_TIME_RANGE_APP_STATE_KEY];
-  return decodeActivityTimeRange(raw);
-};
+): AlertTimelineTimeRange | undefined =>
+  decodeActivityTimeRange(
+    urlStateStorage.get<AppStateRecord>(APP_STATE_STORAGE_KEY)?.[ACTIVITY_TIME_RANGE_APP_STATE_KEY]
+  );
 
 export const writeActivityTimeRangeToUrl = async (
   urlStateStorage: IKbnUrlStateStorage,
-  range: AlertTimelineTimeRange
+  range: AlertTimelineTimeRange,
+  { replace = false }: { replace?: boolean } = {}
 ): Promise<void> => {
   const appState = urlStateStorage.get<AppStateRecord>(APP_STATE_STORAGE_KEY) ?? {};
-  const {
-    [ACTIVITY_TIME_RANGE_APP_STATE_KEY]: _ignoredActivityTimeRange,
-    ...appStateWithoutActivityTimeRange
-  } = appState;
-
-  const nextAppState: AppStateRecord = isDefaultActivityTimeRange(range)
-    ? appStateWithoutActivityTimeRange
-    : { ...appStateWithoutActivityTimeRange, [ACTIVITY_TIME_RANGE_APP_STATE_KEY]: range };
-
-  await urlStateStorage.set(APP_STATE_STORAGE_KEY, nextAppState, { replace: true });
+  await urlStateStorage.set(
+    APP_STATE_STORAGE_KEY,
+    { ...appState, [ACTIVITY_TIME_RANGE_APP_STATE_KEY]: range },
+    { replace }
+  );
 };

@@ -124,17 +124,20 @@ describe('activity_time_range_state', () => {
       );
     });
 
-    it('writes a non-default range at the expected key', () => {
+    it('writes the range at the expected key', () => {
       const storage = createMockStorage();
       writeActivityTimeRangeToStorage(storage, CUSTOM_RANGE);
       expect(storage.set).toHaveBeenCalledWith(ACTIVITY_TIME_RANGE_STORAGE_KEY, CUSTOM_RANGE);
     });
 
-    it('removes the storage key when the range equals the default', () => {
+    it('persists an explicitly selected default rather than clearing', () => {
       const storage = createMockStorage();
       writeActivityTimeRangeToStorage(storage, DEFAULT_ACTIVITY_TIME_RANGE);
-      expect(storage.set).not.toHaveBeenCalled();
-      expect(storage.remove).toHaveBeenCalledWith(ACTIVITY_TIME_RANGE_STORAGE_KEY);
+      expect(storage.set).toHaveBeenCalledWith(
+        ACTIVITY_TIME_RANGE_STORAGE_KEY,
+        DEFAULT_ACTIVITY_TIME_RANGE
+      );
+      expect(storage.remove).not.toHaveBeenCalled();
     });
 
     it('ignores invalid storage values', () => {
@@ -153,10 +156,12 @@ describe('activity_time_range_state', () => {
       expect(readActivityTimeRangeFromUrl(urlStorage)).toEqual(CUSTOM_RANGE);
     });
 
-    it('omits activityTimeRange when the range equals the default', async () => {
+    it('writes an explicitly selected default to _a.activityTimeRange', async () => {
       const urlStorage = await createKbnTestUrlStorage(CUSTOM_RANGE);
       await writeActivityTimeRangeToUrl(urlStorage, DEFAULT_ACTIVITY_TIME_RANGE);
-      expect(urlStorage.get('_a')).toEqual({});
+      expect(urlStorage.get('_a')).toEqual({
+        [ACTIVITY_TIME_RANGE_APP_STATE_KEY]: DEFAULT_ACTIVITY_TIME_RANGE,
+      });
     });
 
     it('writes a non-default range to _a.activityTimeRange', async () => {

@@ -63,31 +63,36 @@ describe('useAlertTimelineUrlState', () => {
     expect(history.location.search).toBe('');
   });
 
-  it('seeds state from localStorage without writing the URL', () => {
+  it('seeds state from localStorage and mirrors it into the URL without a history entry', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     const mockStorage = createMockStorage(CUSTOM_RANGE);
 
     const { result } = renderHook(() => useAlertTimelineUrlState(mockStorage), {
       wrapper: createWrapper(history),
     });
+    await act(async () => {});
 
     expect(result.current[0]).toEqual(CUSTOM_RANGE);
     expect(mockStorage.get).toHaveBeenCalledWith(ACTIVITY_TIME_RANGE_STORAGE_KEY);
-    expect(history.location.search).toBe('');
+    expect(history.location.search).toContain('_a=');
+    expect(history.index).toBe(0);
   });
 
-  it('restores from localStorage across a remount with an empty query', () => {
-    const history = createMemoryHistory({ initialEntries: ['/'] });
+  it('restores from localStorage on a fresh page load with an empty query', async () => {
     const mockStorage = createStatefulStorage(CUSTOM_RANGE);
-    const wrapper = createWrapper(history);
 
-    const first = renderHook(() => useAlertTimelineUrlState(mockStorage), { wrapper });
+    const first = renderHook(() => useAlertTimelineUrlState(mockStorage), {
+      wrapper: createWrapper(createMemoryHistory({ initialEntries: ['/'] })),
+    });
+    await act(async () => {});
     expect(first.result.current[0]).toEqual(CUSTOM_RANGE);
     first.unmount();
 
-    const second = renderHook(() => useAlertTimelineUrlState(mockStorage), { wrapper });
+    const second = renderHook(() => useAlertTimelineUrlState(mockStorage), {
+      wrapper: createWrapper(createMemoryHistory({ initialEntries: ['/'] })),
+    });
+    await act(async () => {});
     expect(second.result.current[0]).toEqual(CUSTOM_RANGE);
-    expect(history.location.search).toBe('');
   });
 
   it('lets the URL win over localStorage on mount', async () => {
@@ -156,7 +161,7 @@ describe('useAlertTimelineUrlState', () => {
     expect(history.location.search).toContain('_a=');
   });
 
-  it('setTimeRange to the default clears both stores', async () => {
+  it('setTimeRange persists an explicitly selected default like any other range', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     const mockStorage = createStatefulStorage(CUSTOM_RANGE);
 
@@ -171,8 +176,11 @@ describe('useAlertTimelineUrlState', () => {
     });
 
     expect(result.current[0]).toEqual(DEFAULT_ACTIVITY_TIME_RANGE);
-    expect(mockStorage.remove).toHaveBeenCalledWith(ACTIVITY_TIME_RANGE_STORAGE_KEY);
-    expect(history.location.search).not.toContain('activityTimeRange');
+    expect(mockStorage.set).toHaveBeenCalledWith(
+      ACTIVITY_TIME_RANGE_STORAGE_KEY,
+      DEFAULT_ACTIVITY_TIME_RANGE
+    );
+    expect(history.location.search).toContain('activityTimeRange');
   });
 
   it('re-syncs from the URL on browser Back/Forward', async () => {
@@ -210,6 +218,72 @@ describe('useAlertTimelineUrlState', () => {
       history.goBack();
     });
 
+    expect(result.current[0]).toEqual(CUSTOM_RANGE);
+  });
+
+  it('creates a history entry per user change so Back/Forward steps through ranges', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const mockStorage = createStatefulStorage(null);
+    const secondRange = { from: 'now-1h', to: 'now' };
+
+    const { result } = renderHook(() => useAlertTimelineUrlState(mockStorage), {
+      wrapper: createWrapper(history),
+    });
+    expect(result.current[0]).toEqual(DEFAULT_ACTIVITY_TIME_RANGE);
+    expect(history.index).toBe(0);
+
+    await act(async () => {
+      result.current[1](CUSTOM_RANGE);
+    });
+    await act(async () => {
+      result.current[1](secondRange);
+    });
+    expect(result.current[0]).toEqual(secondRange);
+    expect(history.index).toBe(2);
+
+    await act(async () => {
+      history.goBack();
+    });
+    expect(result.current[0]).toEqual(CUSTOM_RANGE);
+
+    /* Back past the first change restores the default in the view, but navigation
+     * is not an explicit choice so localStorage keeps the last picked range. */
+    const storageWritesBeforeNavigation = (mockStorage.set as jest.Mock).mock.calls.length;
+    await act(async () => {
+      history.goBack();
+    });
+    expect(result.current[0]).toEqual(DEFAULT_ACTIVITY_TIME_RANGE);
+    expect((mockStorage.set as jest.Mock).mock.calls).toHaveLength(storageWritesBeforeNavigation);
+    expect(mockStorage.get(ACTIVITY_TIME_RANGE_STORAGE_KEY)).toEqual(secondRange);
+
+    await act(async () => {
+      history.goForward();
+    });
+    expect(result.current[0]).toEqual(CUSTOM_RANGE);
+  });
+
+  it('Back restores a storage-seeded range, not the default', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const mockStorage = createStatefulStorage(CUSTOM_RANGE);
+
+    const { result } = renderHook(() => useAlertTimelineUrlState(mockStorage), {
+      wrapper: createWrapper(history),
+    });
+    await act(async () => {});
+    expect(result.current[0]).toEqual(CUSTOM_RANGE);
+    expect(history.index).toBe(0);
+
+    await act(async () => {
+      result.current[1]({ from: 'now-1h', to: 'now' });
+    });
+    expect(result.current[0]).toEqual({ from: 'now-1h', to: 'now' });
+    expect(history.index).toBe(1);
+
+    /* The initial entry was seeded with the stored range on mount, so Back
+     * returns to what the user was looking at, not the default. */
+    await act(async () => {
+      history.goBack();
+    });
     expect(result.current[0]).toEqual(CUSTOM_RANGE);
   });
 });
