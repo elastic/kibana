@@ -3259,7 +3259,6 @@ module.exports.overrides.push({
     'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/graph/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',

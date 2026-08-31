@@ -56,10 +56,6 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'inline_stats',
   },
-  insist: {
-    type: 'command',
-    name: 'insist',
-  },
   ip_location: {
     type: 'command',
     name: 'ip_location',
@@ -773,7 +769,6 @@ export enum EsqlCommandNames {
   GROK = 'grok',
   HIGHLIGHT = 'highlight',
   INLINE_STATS = 'inline_stats',
-  INSIST = 'insist',
   IP_LOCATION = 'ip_location',
   KEEP = 'keep',
   LIMIT = 'limit',
