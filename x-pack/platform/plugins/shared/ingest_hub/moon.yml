@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/shared-ux-utility'
   - '@kbn/shared-ux-router'
+  - '@kbn/core-spaces-common'
   - '@kbn/spaces-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/deeplinks-observability'

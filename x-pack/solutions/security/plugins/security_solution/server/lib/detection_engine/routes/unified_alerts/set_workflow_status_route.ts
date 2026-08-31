@@ -11,6 +11,7 @@ import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import type { Logger } from '@kbn/core/server';
 
 import { SetUnifiedAlertsWorkflowStatusRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -20,10 +21,23 @@ import { validateClosingReason } from '../common/validators/validate_closing_rea
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import { buildSiemResponse } from '../utils';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import {
+  prefetchAllPreviousStatusesByIds,
+  collectStatusTransitions,
+} from '../common/operations/prefetch_previous_statuses';
+import type { PreviousStatus } from '../../../../events/types';
+import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
+import {
+  emitAttackStatusChangedWithCap,
+  emitAlertStatusChangedWithCap,
+} from '../../../../workflows/triggers/emit_status_changed';
 
 export const setUnifiedAlertsWorkflowStatusRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient: IRuleDataClient | null
+  ruleDataClient: IRuleDataClient | null,
+  logger: Logger,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -61,9 +75,64 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-        return withSiemErrorHandling(response, () =>
-          updateAlertsWorkflowStatus({ context, index, ids, status, reason: closingReason.reason })
-        );
+        let alertIds: string[] = [];
+        let attackIds: string[] = [];
+        let alertPreviousStatuses: PreviousStatus[] = [];
+        let attackPreviousStatuses: PreviousStatus[] = [];
+        let prefetchSucceeded = false;
+
+        if (eventBus) {
+          try {
+            const esClient = core.elasticsearch.client.asCurrentUser;
+            // The helper reserves one hit per index family in `index` (detection alerts
+            // plus the scheduled and adhoc attack-discovery indices), so a given _id that
+            // exists in several of them is fully retrieved.
+            const { hits } = await prefetchAllPreviousStatusesByIds(esClient, index, ids);
+            // Split by (index, id) rather than id alone: ES only guarantees _id uniqueness
+            // within an index, so the same _id can be a detection alert and an attack.
+            ({ ids: attackIds, previousStatuses: attackPreviousStatuses } =
+              collectStatusTransitions(
+                hits.filter((hit) => isAttackDiscoveryIndex(hit.index)),
+                status
+              ));
+            ({ ids: alertIds, previousStatuses: alertPreviousStatuses } = collectStatusTransitions(
+              hits.filter((hit) => !isAttackDiscoveryIndex(hit.index)),
+              status
+            ));
+            prefetchSucceeded = true;
+          } catch (err) {
+            logger.warn(`Failed to pre-fetch previous alert statuses for workflow trigger: ${err}`);
+          }
+        }
+
+        return withSiemErrorHandling(response, async () => {
+          const result = await updateAlertsWorkflowStatus({
+            context,
+            index,
+            ids,
+            status,
+            reason: closingReason.reason,
+          });
+          if (prefetchSucceeded && eventBus) {
+            emitAttackStatusChangedWithCap(
+              eventBus,
+              request,
+              status,
+              attackIds,
+              attackPreviousStatuses,
+              logger
+            );
+            emitAlertStatusChangedWithCap(
+              eventBus,
+              request,
+              status,
+              alertIds,
+              alertPreviousStatuses,
+              logger
+            );
+          }
+          return result;
+        });
       }
     );
 };

@@ -76,8 +76,8 @@ export function buildDeployGroups(
   for (const inst of resolved) {
     const service = servicesMap.get(inst.serviceId);
     if (!service) continue;
-    // TODO(follow-up): non-agentless duplicates are silently dropped here.
-    // ECF and agent-based duplicate deploy support are tracked in separate follow-up issues.
+    // TODO(agent-based): agent-based duplicate deploy support tracked in #9079.
+    // ECF duplicates are no longer possible — Duplicate action is hidden for ECF-only services.
     if (
       !service.deploymentMethods.some((dm) => dm.method === 'managed_integration' && dm.preferred)
     ) {

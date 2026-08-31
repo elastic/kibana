@@ -9,12 +9,45 @@ import { gammaln, mean, tTest } from 'simple-statistics';
 import type { EvaluationScoreDocument } from './schemas/common_attributes.gen';
 import type { PairedTTestResult } from './schemas/experiments/compare_experiments_route.gen';
 
+export type Direction = 'maximize' | 'minimize' | 'neutral';
+
 export interface PairedScore {
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
   scoreA: number;
   scoreB: number;
+  direction?: Direction;
+}
+
+/**
+ * Legacy name→polarity heuristic used before `evaluator.direction` was persisted.
+ * Kept only as a fallback for historical score docs that omit the field.
+ */
+const LOWER_IS_BETTER_NAME_PATTERN = /\b(tokens?|latency|costs?|duration|time|errors?)\b/i;
+
+function resolveDirectionFromEvaluatorName(evaluatorName: string): Direction {
+  return LOWER_IS_BETTER_NAME_PATTERN.test(evaluatorName) ? 'minimize' : 'maximize';
+}
+
+/**
+ * Resolve metric polarity for a paired baseline/target comparison of the same evaluator.
+ * - Both missing: legacy name-based heuristic (backward compatible with pre-metadata scores)
+ * - Only one side defined: use that side
+ * - Both defined: prefer target
+ */
+export function resolveDirection(
+  targetDirection: Direction | undefined,
+  baselineDirection: Direction | undefined,
+  evaluatorName: string
+): Direction {
+  if (targetDirection !== undefined) {
+    return targetDirection;
+  }
+  if (baselineDirection !== undefined) {
+    return baselineDirection;
+  }
+  return resolveDirectionFromEvaluatorName(evaluatorName);
 }
 
 const MAX_BETA_ITERATIONS = 100;
@@ -76,12 +109,20 @@ export function pairScores(
 
     referenceMap.delete(key);
 
+    // A is target after pairScores(target, baseline) unification.
+    const direction = resolveDirection(
+      scoreA.evaluator.direction,
+      match.evaluator.direction,
+      scoreA.evaluator.name
+    );
+
     pairs.push({
       datasetId: scoreA.example.dataset.id,
       datasetName: scoreA.example.dataset.name,
       evaluatorName: scoreA.evaluator.name,
       scoreA: scoreA.evaluator.score!,
       scoreB: match.evaluator.score!,
+      direction,
     });
   }
 
@@ -149,6 +190,10 @@ export function computePairedTTestResults(
       pValue = tStatisticToPValue(tStatistic, differences.length - 1);
     }
 
+    const direction =
+      group.find((pair) => pair.direction !== undefined)?.direction ??
+      resolveDirection(undefined, undefined, group[0].evaluatorName);
+
     results.push({
       datasetId: group[0].datasetId,
       datasetName: group[0].datasetName,
@@ -157,6 +202,7 @@ export function computePairedTTestResults(
       meanA: mean(scoresAArr),
       meanB: mean(scoresBArr),
       pValue,
+      direction,
     });
   }
 
