@@ -40,6 +40,7 @@ import {
   getLineClampStyles,
   shouldShowInstallationStatus,
 } from './installation_status';
+import { buildPackageCardNavigateState } from './package_card_navigate_state';
 import { wrapTitleWithDeprecated } from './utils';
 import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
 
@@ -206,7 +207,11 @@ export function PackageCard({
     if (url.startsWith(integrationsBase)) {
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
         path: url.slice(integrationsBase.length),
-        state: { fromIntegrations, ...(fromCollection ? { fromCollection } : {}) },
+        state: buildPackageCardNavigateState({
+          search: typeof window !== 'undefined' ? window.location.search : '',
+          fromIntegrations,
+          fromCollection,
+        }),
       });
     } else if (url.startsWith('http') || url.startsWith('https')) {
       window.open(url, '_blank');

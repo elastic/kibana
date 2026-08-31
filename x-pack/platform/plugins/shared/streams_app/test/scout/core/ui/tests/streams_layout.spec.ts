@@ -60,9 +60,13 @@ test.describe(
 
       await streams.clickStreamsLayoutTab('pipelines');
       await expect(streams.streamsLayoutPipelinesPlaceholder).toBeVisible();
+    });
 
-      await streams.clickStreamsLayoutTab('destinations');
-      await expect(streams.streamsLayoutDestinationsPlaceholder).toBeVisible();
+    test('renders the destinations table', async ({ pageObjects: { streams } }) => {
+      await streams.gotoStreamsLayoutTab('destinations');
+
+      await expect(streams.streamsDestinationsTable).toBeVisible();
+      await expect(streams.streamsDestinationsSearch).toBeVisible();
     });
   }
 );
