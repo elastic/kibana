@@ -70,7 +70,7 @@ export async function enableStreams({
   } catch (error: unknown) {
     const code =
       (error as NodeJS.ErrnoException).code ??
-      ((error as { cause?: NodeJS.ErrnoException }).cause)?.code;
+      (error as { cause?: NodeJS.ErrnoException }).cause?.code;
     if (code === 'ECONNREFUSED' || code === 'UND_ERR_SOCKET') {
       log.warning(
         `Could not connect to Kibana at ${kibanaUrl}. Make sure Kibana is running before starting the OTel Demo.`
