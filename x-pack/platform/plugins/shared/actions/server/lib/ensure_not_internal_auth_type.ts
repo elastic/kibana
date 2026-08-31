@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { isInternalAuthType } from '@kbn/connector-specs';
+import { isInternalAuthTypeId } from '@kbn/connector-specs';
 
 interface EnsureNotInternalAuthTypeParams {
   actionTypeId: string;
@@ -16,9 +16,9 @@ interface EnsureNotInternalAuthTypeParams {
 }
 
 /**
- * Rejects a create/update asking for an auth type the spec marks internal. Belongs on the mutation
- * path only — secrets validation also runs on execute, which would break the in-memory connectors
- * Kibana provisions itself.
+ * Rejects a create/update asking for an auth type Kibana owns, whatever the connector type.
+ * Belongs on the mutation path only — secrets validation also runs on execute, which would break
+ * the in-memory connectors Kibana provisions itself.
  */
 export const ensureNotInternalAuthType = ({
   actionTypeId,
@@ -29,7 +29,7 @@ export const ensureNotInternalAuthType = ({
     (secrets as { authType?: string } | undefined)?.authType ??
     (config as { authType?: string } | undefined)?.authType;
 
-  if (!isInternalAuthType(actionTypeId, authTypeId)) {
+  if (!authTypeId || !isInternalAuthTypeId(authTypeId)) {
     return;
   }
 

@@ -8,7 +8,12 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { RelayRequestError, type RelayClientContract } from '@kbn/actions-plugin/server';
+import {
+  RelayRequestError,
+  type InMemoryConnector,
+  type RelayClientContract,
+} from '@kbn/actions-plugin/server';
+import { RELAY_AUTH_ID } from '@kbn/connector-specs';
 import type {
   SlackAppBindingsResponse,
   SlackAppConnectResponse,
@@ -24,12 +29,32 @@ import {
 } from './saved_object';
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
-import {
-  ELASTIC_APPS_SLACK_CONNECTOR_ID,
-  getRegisteredTenantKey,
-  registerElasticAppsSlackConnector,
-  unregisterElasticAppsSlackConnector,
-} from './connector';
+
+/**
+ * One instance per deployment, under a stable id: rules and workflows reference it directly, so it
+ * must survive restarts and reconnects unchanged.
+ */
+export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
+
+/** The Elastic Slack app is not its own connector type — it is the `relay` auth method on this one. */
+const ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID = '.slack2';
+
+const ELASTIC_APPS_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
+
+const buildConnector = (tenantKey: string): InMemoryConnector => ({
+  id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+  actionTypeId: ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID,
+  name: ELASTIC_APPS_SLACK_CONNECTOR_NAME,
+  // The Relay holds the Slack credentials, so naming the workspace is all this needs. `config`
+  // mirrors the auth type in plaintext, as `ensureConfigAuthType` does for saved connectors.
+  config: { authType: RELAY_AUTH_ID },
+  secrets: { authType: RELAY_AUTH_ID, tenantKey },
+  isMissingSecrets: false,
+  isPreconfigured: true,
+  isDeprecated: false,
+  isSystemAction: false,
+  isConnectorTypeDeprecated: false,
+});
 
 /** Pagination options for a single page of connected channels. */
 export interface ListBindingsOptions {
@@ -74,14 +99,19 @@ export class SlackAppService {
     });
   }
 
+  /**
+   * Unregisters first because `registerDynamicConnector` is a no-op when the id is taken, so a
+   * reconnect to a different workspace would otherwise keep serving the previous tenant key.
+   *
+   * When the id is held by a connector this app does not own (a preconfigured `elastic-apps-slack`
+   * in `kibana.yml`) the unregister leaves it in place and the register is refused, so the call must
+   * not be treated as having taken effect.
+   */
   private publishConnector(tenantKey: string): void {
-    const registered = registerElasticAppsSlackConnector({
-      actions: this.server.actions,
-      logger: this.logger,
-      tenantKey,
-    });
+    this.server.actions.unregisterDynamicConnector(ELASTIC_APPS_SLACK_CONNECTOR_ID);
 
-    if (registered) {
+    if (this.server.actions.registerDynamicConnector(buildConnector(tenantKey))) {
+      this.logger.debug(`Registered the ${ELASTIC_APPS_SLACK_CONNECTOR_ID} connector`);
       this.idTakenWarned = false;
       return;
     }
@@ -95,7 +125,22 @@ export class SlackAppService {
   }
 
   private withdrawConnector(): void {
-    unregisterElasticAppsSlackConnector({ actions: this.server.actions, logger: this.logger });
+    if (this.server.actions.unregisterDynamicConnector(ELASTIC_APPS_SLACK_CONNECTOR_ID)) {
+      this.logger.debug(`Unregistered the ${ELASTIC_APPS_SLACK_CONNECTOR_ID} connector`);
+    }
+  }
+
+  /**
+   * Lets a reconcile tell "already correct" from "registered for the wrong workspace". Matches on
+   * `isDynamic` as well as the id, because only dynamic connectors are ones this app registered and
+   * can unregister: a foreign connector squatting the id must never read as already correct.
+   */
+  private getRegisteredTenantKey(): string | undefined {
+    const connector = this.server.actions.inMemoryConnectors.find(
+      ({ id, isDynamic }) => id === ELASTIC_APPS_SLACK_CONNECTOR_ID && isDynamic === true
+    );
+    const tenantKey = (connector?.secrets as { tenantKey?: unknown } | undefined)?.tenantKey;
+    return typeof tenantKey === 'string' ? tenantKey : undefined;
   }
 
   /**
@@ -112,7 +157,7 @@ export class SlackAppService {
         ? connection.tenantKey ?? undefined
         : undefined;
 
-    if (desiredTenantKey === getRegisteredTenantKey(this.server.actions)) {
+    if (desiredTenantKey === this.getRegisteredTenantKey()) {
       return;
     }
     if (!desiredTenantKey) {

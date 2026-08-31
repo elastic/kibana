@@ -369,6 +369,22 @@ describe('create()', () => {
       );
     });
 
+    test('throws for a connector type whose spec does not offer the internal auth type', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.notion',
+            config: {},
+            secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+          },
+        })
+      ).rejects.toThrow(
+        'Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .notion.'
+      );
+    });
+
     test('allows a user-facing auth type on the same connector type', async () => {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',

@@ -10,10 +10,9 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
-import { SlackAppService } from './service';
+import { ELASTIC_APPS_SLACK_CONNECTOR_ID, SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
 import { RELAY_APP_CONNECTION_SO_ID, RELAY_APP_CONNECTION_SO_TYPE } from './saved_object';
-import { ELASTIC_APPS_SLACK_CONNECTOR_ID, ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID } from './connector';
 
 const request = {} as unknown as KibanaRequest;
 
@@ -789,8 +788,8 @@ describe('SlackAppService', () => {
   describe('elastic slack connector registration', () => {
     const connectorFor = (tenantKey: string) =>
       expect.objectContaining({
-        id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
-        actionTypeId: ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID,
+        id: 'elastic-apps-slack',
+        actionTypeId: '.slack2',
         config: { authType: 'relay' },
         secrets: { authType: 'relay', tenantKey },
       });
