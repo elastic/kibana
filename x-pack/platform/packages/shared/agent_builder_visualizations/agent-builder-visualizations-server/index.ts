@@ -6,7 +6,19 @@
  */
 
 export { buildLensConfig } from './lens/build_lens_config';
-export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
+export {
+  getChartTypeReviewPromptContent,
+  getChartTypeSelectionPromptContent,
+} from './lens/chart_type_guidance';
+export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt';
+export {
+  ESQL_REVIEW_TOPIC,
+  lintVisualizationEsql,
+} from './shared/esql_review_lint';
+export type {
+  VisualizationEsqlLintKind,
+  VisualizationEsqlLintProblem,
+} from './shared/esql_review_lint';
 export { getEsqlDataSourceCarriers } from './lens/graph_lens';
 export type { VisualizationConfig } from './lens/types';
 export { selectDefaultTimeRange } from './time_range/select_default_time_range';

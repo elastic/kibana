@@ -6,10 +6,13 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import {
+  getChartTypeSelectionPromptContent,
+  seriesStatisticsAgentGuidance,
+} from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
-import { dashboardDesignGuidancePrompt } from './design';
+import { getDashboardAuthoringPromptContent } from './dashboard_guidance';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
 
@@ -71,36 +74,18 @@ Reach for custom content only when nothing above fits:
 
 For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
+Before \`add_panels\`, pick 1–2 primary time-series XY (the overview trend that matches the title or intent).
+On a new dashboard, phrase at least one and at most two of those primary time-series XY queries as "<measure> over time, show avg/min/max in the legend" (e.g. "log volume over time, show avg/min/max in the legend"). Skip categorical bar charts and queries whose measure is already AVG/MIN/MAX of a field.
+
+${seriesStatisticsAgentGuidance}
+
 ${chartTypeSelectionGuidance}
 
-${dashboardDesignGuidancePrompt}
+${getDashboardAuthoringPromptContent()}
 
 ## ES|QL
 
 Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
-
-## Controls
-
-Controls are interactive filters pinned above the dashboard that let users explore data without editing queries. Add them with \`add_controls\` and remove them by id with \`remove_controls\`.
-
-**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs).
-
-Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.).
-
-**Control types:**
-- \`options_list_control\` — dropdown for categorical / keyword fields. The most common type (95% of cases).
-- \`range_slider_control\` — numeric range slider. Add sparingly, only when filtering by a numeric threshold is useful across multiple panels (e.g. \`latency\`, \`bytes\`, \`duration\`).
-- \`time_slider_control\` — global time sub-range picker. Add at most one per dashboard, only when time-range narrowing within the global window is useful.
-
-**Required fields per control:**
-- \`type\`: one of the three above.
-- \`field_name\` (not for \`time_slider_control\`): exact field name as it appears in the panel queries (e.g. \`"service.name"\`).
-- \`index\` (not for \`time_slider_control\`): same index as the dashboard panels (e.g. \`"logs-*"\`).
-- \`title\` (optional, \`options_list_control\` and \`range_slider_control\` only): human-readable label shown above the control (e.g. \`"Service"\`).
-
-**Defaults applied by the server:** \`width: "medium"\`, \`grow: true\` (fills available horizontal space). Override only if the user asks.
-
-**Removing controls:** use \`remove_controls\` with the \`id\` values from the \`controls[]\` list in the tool result.
 
 ## Generation Edge Cases
 
@@ -114,12 +99,15 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 /**
  * Environment-agnostic dashboard *generation* guidance.
  *
- * The `guidance` describes how to build a dashboard, including the detailed design guidance
- * (composition + panel layout) inlined directly. It deliberately says nothing about how the
- * current dashboard is referenced or how the result is returned/surfaced. Those are
- * environment-specific and avoided here so the block can be reused across environments. Pair it with
- * an environment-specific rendering guidance block (e.g. the Kibana one) that explains how the
- * generated dashboard is surfaced.
+ * The `guidance` describes how to build a dashboard. Chart-type selection
+ * and dashboard authoring rules (composition, grid, controls, sections) are
+ * inlined so they arrive with `load_skill`. Review should compile
+ * `getDashboardReviewPromptContent` instead of appending this block again.
+ * It deliberately says nothing about how the current dashboard
+ * is referenced or how the result is returned/surfaced. Those are
+ * environment-specific and avoided here so the block can be reused across
+ * environments. Pair it with an environment-specific rendering guidance block
+ * (e.g. the Kibana one) that explains how the generated dashboard is surfaced.
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,

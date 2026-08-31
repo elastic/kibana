@@ -135,12 +135,11 @@ export const createVisualizationGraph = async (
 
     let action: GenerateEsqlAction;
     try {
+      const existingQueries = getExistingEsqlQueries(state.parsedExistingConfig);
       const generated = await generateVisualizationEsql({
         nlQuery: state.nlQuery,
-        // On edit, seed generation with the existing per-layer queries so a
-        // query-changing edit can modify them instead of being stuck with the
-        // original columns.
-        existingQueries: getExistingEsqlQueries(state.parsedExistingConfig),
+        existingQueries,
+        candidateQuery: state.esqlQuery || existingQueries[0],
         index: state.index,
         modelProvider,
         events,
@@ -386,19 +385,6 @@ export const createVisualizationGraph = async (
     return GENERATE_CONFIG_NODE;
   };
 
-  // Router: Use an explicit ES|QL query when provided, otherwise generate one.
-  // Existing config is still valuable because generateESQLNode includes the
-  // prior query as context when regenerating edits.
-  const shouldGenerateESQLRouter = (state: VisualizationState): string => {
-    if (state.esqlQuery) {
-      logger.debug('Using provided ES|QL query');
-      return GENERATE_CONFIG_NODE;
-    }
-
-    logger.debug('No ES|QL query provided, generating ES|QL query');
-    return GENERATE_ESQL_NODE;
-  };
-
   // Build and compile the graph
   const graph = new StateGraph(VisualizationStateAnnotation)
     // Add nodes
@@ -406,11 +392,9 @@ export const createVisualizationGraph = async (
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
     .addNode('finalize', finalizeNode)
-    // Add edges
-    .addConditionalEdges('__start__', shouldGenerateESQLRouter, {
-      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
-      [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
-    })
+    // Always resolve ES|QL through the generate node so a current query can be
+    // judged against the request before generateEsql runs.
+    .addEdge('__start__', GENERATE_ESQL_NODE)
     .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       finalize: 'finalize',

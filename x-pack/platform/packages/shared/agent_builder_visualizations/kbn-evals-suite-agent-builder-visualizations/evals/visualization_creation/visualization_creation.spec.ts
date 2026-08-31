@@ -190,6 +190,33 @@ evaluate.describe(
             {
               input: {
                 question:
+                  'Create a line chart of log volume over time in kibana_sample_data_logs, show avg/min/max in the legend.',
+              },
+              output: {
+                query: `FROM kibana_sample_data_logs
+| STATS \`Request Count\` = COUNT(*) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+                chartType: 'xy',
+                renderer: 'lens',
+                legendStatistics: ['avg', 'min', 'max'],
+                goldenToolPath: GOLDEN_TOOL_PATH,
+              },
+            },
+            {
+              input: {
+                question:
+                  'Show average bytes over time as a line chart in kibana_sample_data_logs.',
+              },
+              output: {
+                query: `FROM kibana_sample_data_logs
+| STATS \`Average Bytes\` = AVG(bytes) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+                chartType: 'xy',
+                esqlAggregations: ['AVG'],
+                goldenToolPath: GOLDEN_TOOL_PATH,
+              },
+            },
+            {
+              input: {
+                question:
                   'Create a line chart of request count and average bytes over time in kibana_sample_data_logs as two series.',
               },
               output: {

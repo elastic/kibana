@@ -10,6 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { buildEsqlEditContext, generateVisualizationEsql } from './generate_visualization_esql';
+import { judgeVisualizationEsql } from './judge_visualization_esql';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
@@ -19,7 +20,12 @@ jest.mock('./esql_instructions', () => ({
   buildEsqlAdditionalInstructions: () => 'esql-instructions',
 }));
 
+jest.mock('./judge_visualization_esql', () => ({
+  judgeVisualizationEsql: jest.fn(),
+}));
+
 const mockedGenerateEsql = jest.mocked(generateEsql);
+const mockedJudgeVisualizationEsql = jest.mocked(judgeVisualizationEsql);
 
 const logger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
 const events = {} as ToolEventEmitter;
@@ -41,7 +47,90 @@ const params = {
 describe('generateVisualizationEsql', () => {
   beforeEach(() => {
     mockedGenerateEsql.mockReset();
+    mockedJudgeVisualizationEsql.mockReset();
+    mockedJudgeVisualizationEsql.mockResolvedValue(false);
     getDefaultModel.mockReset().mockResolvedValue(defaultModel);
+  });
+
+  it('keeps a candidate query when the judge says it already matches intent and guidance', async () => {
+    mockedJudgeVisualizationEsql.mockResolvedValue(true);
+    const candidate = 'FROM logs-* | STATS c = COUNT()';
+
+    const result = await generateVisualizationEsql({
+      ...params,
+      candidateQuery: candidate,
+      extraInstructions: 'vega-specific-rules',
+    });
+
+    expect(result).toEqual({ query: candidate });
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(mockedJudgeVisualizationEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: candidate,
+        nlQuery: 'count logs by status',
+        instructions: 'esql-instructions\nvega-specific-rules',
+      })
+    );
+  });
+
+  it('keeps an existing query when the judge says it already matches', async () => {
+    mockedJudgeVisualizationEsql.mockResolvedValue(true);
+    const existing = 'FROM logs-* | STATS c = COUNT()';
+
+    const result = await generateVisualizationEsql({
+      ...params,
+      existingQueries: [existing],
+    });
+
+    expect(result).toEqual({ query: existing });
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+  });
+
+  it('generates when the judge throws', async () => {
+    mockedJudgeVisualizationEsql.mockRejectedValue(new Error('judge unavailable'));
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM logs-* | STATS c = COUNT()',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const result = await generateVisualizationEsql({
+      ...params,
+      candidateQuery: 'FROM logs-* | STATS c = COUNT()',
+    });
+
+    expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      query: 'FROM logs-* | STATS c = COUNT()',
+      columns: undefined,
+    });
+  });
+
+  it('generates when the judge says the candidate should be rewritten', async () => {
+    mockedJudgeVisualizationEsql.mockResolvedValue(false);
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM logs-* | STATS c = COUNT() BY status',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const result = await generateVisualizationEsql({
+      ...params,
+      candidateQuery: 'FROM logs-* | STATS c = COUNT()',
+    });
+
+    expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      query: 'FROM logs-* | STATS c = COUNT() BY status',
+      columns: undefined,
+    });
+  });
+
+  it('does not judge when there is no current query', async () => {
+    mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
+      ReturnType<typeof generateEsql>
+    >);
+
+    await generateVisualizationEsql(params);
+
+    expect(mockedJudgeVisualizationEsql).not.toHaveBeenCalled();
+    expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
   });
 
   it('returns the query and result columns when generation succeeds with rows', async () => {
