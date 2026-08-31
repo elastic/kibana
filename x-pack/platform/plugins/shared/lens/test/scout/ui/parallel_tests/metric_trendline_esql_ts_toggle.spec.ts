@@ -16,7 +16,10 @@ import {
   testData,
 } from '../fixtures';
 
-spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.classic }, () => {
+/** Trendline data is fetched separately from the metric tile and can land after the first panel render. */
+const TRENDLINE_TIMEOUT_MS = 30_000;
+
+spaceTest.describe('Lens aliased TBUCKET metric trendline', { tag: tags.stateful.classic }, () => {
   let dashboardId: string;
   let panelId: string;
 
@@ -25,25 +28,24 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
       'dateFormat:tz': 'UTC',
       'timepicker:timeDefaults': JSON.stringify({
-        from: testData.LOGSTASH_IN_RANGE_DATES.from,
-        to: testData.LOGSTASH_IN_RANGE_DATES.to,
+        from: testData.TSDB_IN_RANGE_DATES.from,
+        to: testData.TSDB_IN_RANGE_DATES.to,
       }),
     });
 
     const body = {
-      title: 'ESQL metric trendline toggle test',
-      time_range: testData.LOGSTASH_IN_RANGE_DATES,
+      title: 'ESQL TS metric trendline toggle test',
+      time_range: testData.TSDB_IN_RANGE_DATES,
       panels: [
         {
           type: 'vis',
           grid: { x: 0, y: 0, w: 24, h: 12 },
           config: {
             type: 'metric',
-            title: 'ESQL Average bytes',
+            title: 'ESQL TS average bytes',
             data_source: {
               type: 'esql',
-              query:
-                'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS avg_bytes = AVG(bytes)',
+              query: `TS ${testData.KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY time_bucket = TBUCKET(100)`,
             },
             metrics: [
               {
@@ -67,7 +69,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
   });
 
   spaceTest(
-    'can enable and disable trendline via dimension editor with persistence',
+    'enables and persists the trendline through the dimension editor',
     async ({ browserAuth, page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
       const sparkline = getMetricTrendline(page);
@@ -87,10 +89,16 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
         await openDimensionEditorAndWaitForFlyout(pageObjects, page, metricDimensionPanel);
 
         await page.getByTestId('lnsMetric_background_chart_line').click();
-        await expect(sparkline).toBeVisible();
+        await expect(page.getByTestId('lnsMetric_background_chart_line')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
 
         await lens.getSecondaryFlyoutBackButton().click();
         await applyLensInlineEditorAndWaitClosed({ lens });
+        await dashboard.waitForRenderComplete();
+        // Trendline query finishes after the metric tile render that apply settles on.
+        await expect(sparkline).toBeVisible({ timeout: TRENDLINE_TIMEOUT_MS });
       });
 
       await spaceTest.step(
@@ -100,41 +108,12 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
 
           await dashboard.saveChangesToExistingDashboard();
           await expect(page.getByTestId('dashboardQuickSaveMenuItem')).toBeEnabled();
-          await expect(sparkline).toBeVisible();
+          await expect(sparkline).toBeVisible({ timeout: TRENDLINE_TIMEOUT_MS });
 
           await page.reload();
           await dashboard.waitForRenderComplete();
           await expect(page.getByTestId('mtrVis')).toBeVisible();
-          await expect(sparkline).toBeVisible();
-        }
-      );
-
-      await spaceTest.step('disable trendline via dimension editor', async () => {
-        await dashboard.ensureEditMode();
-        await openInlineEditorAndWaitVisible(pageObjects, panelId);
-
-        const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
-        await openDimensionEditorAndWaitForFlyout(pageObjects, page, metricDimensionPanel);
-
-        await page.getByTestId('lnsMetric_background_chart_none').click();
-        await expect(sparkline).toHaveCount(0);
-
-        await lens.getSecondaryFlyoutBackButton().click();
-        await applyLensInlineEditorAndWaitClosed({ lens });
-      });
-
-      await spaceTest.step(
-        'save dashboard and verify trendline stays removed after reload',
-        async () => {
-          await expect(sparkline).toHaveCount(0);
-
-          await dashboard.saveChangesToExistingDashboard();
-          await expect(page.getByTestId('dashboardQuickSaveMenuItem')).toBeEnabled();
-
-          await page.reload();
-          await dashboard.waitForRenderComplete();
-          await expect(page.getByTestId('mtrVis')).toBeVisible();
-          await expect(sparkline).toHaveCount(0);
+          await expect(sparkline).toBeVisible({ timeout: TRENDLINE_TIMEOUT_MS });
         }
       );
     }

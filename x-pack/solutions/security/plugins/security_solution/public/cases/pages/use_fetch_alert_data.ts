@@ -15,13 +15,21 @@ import type { SignalHit } from '../../common/utils/alerts';
 import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/alerts';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
-export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
+// The third element (refetch) is null before the first fetch completes — AlertEvent relies
+// on this to show a spinner instead of "Unknown rule" on the initial render. See use_query.tsx.
+export const useFetchAlertData = (
+  alertIds: string[]
+): [boolean, Record<string, unknown>, (() => void) | null] => {
   const { hasAlertsRead } = useAlertsPrivileges();
   const selectedPatterns = useSelectedPatterns(PageScope.alerts);
 
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 
-  const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>({
+  const {
+    loading: isLoadingAlerts,
+    data: alertsData,
+    refetch,
+  } = useQueryAlerts<SignalHit, unknown>({
     query: alertsQuery,
     indexName: selectedPatterns[0],
     queryName: ALERTS_QUERY_NAMES.CASES,
@@ -45,5 +53,5 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
     [alertsData?.hits.hits]
   );
 
-  return [isLoadingAlerts, alerts];
+  return [isLoadingAlerts, alerts, refetch ?? null];
 };
