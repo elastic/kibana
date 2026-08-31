@@ -110,25 +110,6 @@ describe('GET /internal/evals/experiments/{experimentId}/runs', () => {
     expect(evaluationScoreService.search).toHaveBeenCalledTimes(1);
   });
 
-  it('names the execution_id in the 404 message when execution_id filter matches nothing', async () => {
-    const { handler, context, evaluationScoreService } = setup();
-    evaluationScoreService.search.mockResolvedValueOnce({
-      hits: { hits: [] },
-      aggregations: { runs: { buckets: [] } },
-    } as any);
-
-    const response = await handler(
-      context,
-      makeRequest({ execution_id: 'missing-exec' }),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(404);
-    expect(response.payload).toEqual({
-      message: 'Experiment not found for execution: missing-exec',
-    });
-  });
-
   it('returns runs grouping every evaluator result under its example x repetition', async () => {
     const { handler, context, evaluationScoreService } = setup();
     evaluationScoreService.search
@@ -387,19 +368,6 @@ describe('GET /internal/evals/experiments/{experimentId}/runs', () => {
         },
       },
     ]);
-  });
-
-  it('filters by metadata.execution_id when execution_id is provided', async () => {
-    const { handler, context, evaluationScoreService } = setup();
-    evaluationScoreService.search.mockResolvedValueOnce({
-      hits: { hits: [] },
-      aggregations: { runs: { buckets: [] } },
-    } as any);
-
-    await handler(context, makeRequest({ execution_id: 'exec-1' }), kibanaResponseFactory);
-
-    const { query } = evaluationScoreService.search.mock.calls[0][0];
-    expect(query.bool.must[0]).toEqual({ term: { 'metadata.execution_id': 'exec-1' } });
   });
 
   it('returns 500 when ES throws', async () => {

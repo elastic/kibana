@@ -137,22 +137,13 @@ export const registerGetExperimentRunsRoute = ({
       async (context, request, response) => {
         try {
           const { experimentId } = request.params;
-          const {
-            suite_id: suiteId,
-            model_id: modelId,
-            execution_id: executionId,
-            page,
-            per_page: perPage,
-          } = request.query;
+          const { suite_id: suiteId, model_id: modelId, page, per_page: perPage } = request.query;
           const evalsContext = await context.evals;
           const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
-          const filterId = executionId ?? experimentId;
-          const filterField = executionId ? 'metadata.execution_id' : 'experiment_id';
-          const query = buildExperimentFilterQuery(filterId, {
+          const query = buildExperimentFilterQuery(experimentId, {
             suiteId,
             modelId,
-            filterField,
             spaceId,
           });
 
@@ -168,10 +159,8 @@ export const registerGetExperimentRunsRoute = ({
           );
 
           if (total === 0) {
-            const notFoundId = executionId ?? experimentId;
-            const notFoundLabel = executionId ? 'execution' : 'experiment';
             return response.notFound({
-              body: { message: `Experiment not found for ${notFoundLabel}: ${notFoundId}` },
+              body: { message: `Experiment not found for experiment: ${experimentId}` },
             });
           }
 

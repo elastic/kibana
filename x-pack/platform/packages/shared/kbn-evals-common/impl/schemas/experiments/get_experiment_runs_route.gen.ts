@@ -40,10 +40,6 @@ export const GetEvaluationExperimentRunsRequestQuery = lazySchema(() =>
      * Filter by task model ID
      */
     model_id: z.string().max(256).optional(),
-    /**
-     * When provided, returns the runs of all experiments in this execution instead of the single experiment from the path param
-     */
-    execution_id: z.string().max(1024).optional(),
     page: z.coerce.number().int().min(1).optional().default(1),
     /**
      * Runs per page. Bounded because each run carries its full task output and example input.

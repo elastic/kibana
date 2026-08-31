@@ -38,15 +38,6 @@ paths:
             type: string
             maxLength: 256
           description: Filter by task model ID
-        - name: execution_id
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 1024
-          description: >-
-            When provided, returns the runs of all experiments in this
-            execution instead of the single experiment from the path param
         - name: page
           in: query
           required: false
