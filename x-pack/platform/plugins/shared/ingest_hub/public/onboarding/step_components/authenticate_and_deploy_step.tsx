@@ -46,7 +46,7 @@ interface AuthenticateAndDeployStepProps {
 export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { servicesStep, awsServicesMap } = useOnboardingFlow();
-  const { selectedServiceIds } = servicesStep;
+  const { selectedServiceIds, dataFormat } = servicesStep;
 
   const [deploymentMethod, setDeploymentMethod] =
     useState<DeploymentMethod>('managed_integrations');
@@ -121,6 +121,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     serviceVars,
     globalRegion,
     otlpEndpoint,
+    dataFormat,
   });
 
   // ── Next button gating ────────────────────────────────────────────────────────

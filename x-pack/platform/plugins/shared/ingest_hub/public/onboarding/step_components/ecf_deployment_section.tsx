@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
+import type { DataFormat } from '../aws_service_matrix';
 import {
   getEcfServiceConfigs,
   buildEcfUnifiedCloudFormationUrl,
@@ -50,6 +51,7 @@ interface UseEcfDeploymentOpts {
   serviceVars: Record<string, ServiceVars>;
   globalRegion: string;
   otlpEndpoint: string | undefined;
+  dataFormat: DataFormat;
 }
 
 interface UseEcfDeploymentResult {
@@ -69,6 +71,7 @@ export const useEcfDeployment = ({
   serviceVars,
   globalRegion,
   otlpEndpoint,
+  dataFormat,
 }: UseEcfDeploymentOpts): UseEcfDeploymentResult => {
   const [persistedLaunchStep, setPersistedLaunchStep] = useSessionStorage<PersistedEcfLaunchStep>(
     getOnboardingSessionKey('aws', 'ecfLaunchStep'),
@@ -176,6 +179,7 @@ export const useEcfDeployment = ({
       globalRegion,
       launchedFamilies,
       onLaunch,
+      dataFormat,
     },
   };
 };
@@ -278,6 +282,7 @@ interface EcfDeploymentSectionProps {
   globalRegion: string;
   launchedFamilies: EcfTemplateFamily[];
   onLaunch: (family: EcfTemplateFamily) => void;
+  dataFormat: DataFormat;
 }
 
 /** Collapsible accordion for all Elastic Cloud Forwarder template families in Step 3. */
@@ -291,6 +296,7 @@ export const EcfDeploymentSection = ({
   globalRegion,
   launchedFamilies,
   onLaunch,
+  dataFormat,
 }: EcfDeploymentSectionProps) => {
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'ecfContent' });
@@ -380,10 +386,17 @@ export const EcfDeploymentSection = ({
           {hasEcfUnified && (
             <EcfFamilyPanel
               description={
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description"
-                  defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. The trigger source (S3 or CloudWatch) is configured per service in Service settings."
-                />
+                dataFormat === 'otel' ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description.otel"
+                    defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the OTel-native template, per the data format chosen in Step 1. The trigger source (S3 or CloudWatch) is configured per service in Service settings."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description.ecs"
+                    defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the ECS-compatible template, per the data format chosen in Step 1. The trigger source (S3 or CloudWatch) is configured per service in Service settings."
+                  />
+                )
               }
               launchUrl={unifiedLaunchUrl}
               isLaunched={launchedFamilies.includes('unified')}

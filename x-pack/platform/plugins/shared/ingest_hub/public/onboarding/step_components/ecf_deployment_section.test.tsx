@@ -79,6 +79,7 @@ function renderSection(props: Partial<React.ComponentProps<typeof EcfDeploymentS
     globalRegion: 'us-east-1',
     launchedFamilies: [],
     onLaunch: jest.fn(),
+    dataFormat: 'ecs',
     ...props,
   };
   return render(
@@ -105,6 +106,7 @@ describe('useEcfDeployment', () => {
           serviceVars: {},
           globalRegion: 'us-east-1',
           otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
         })
       );
       expect(result.current.hasAnyEcf).toBe(false);
@@ -118,6 +120,7 @@ describe('useEcfDeployment', () => {
           serviceVars: {},
           globalRegion: 'us-east-1',
           otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
         })
       );
       expect(result.current.hasAnyEcf).toBe(true);
@@ -131,6 +134,7 @@ describe('useEcfDeployment', () => {
           serviceVars: {},
           globalRegion: 'us-east-1',
           otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
         })
       );
       expect(result.current.hasAnyEcf).toBe(true);
@@ -145,6 +149,7 @@ describe('useEcfDeployment', () => {
           serviceVars: {},
           globalRegion: 'us-east-1',
           otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
         })
       );
       expect(result.current.isDone).toBe(true);
@@ -159,6 +164,7 @@ describe('useEcfDeployment', () => {
           serviceVars: {},
           globalRegion: 'us-east-1',
           otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
         })
       );
       expect(result.current.isDone).toBe(false);
@@ -173,6 +179,7 @@ describe('useEcfDeployment', () => {
           serviceVars: {},
           globalRegion: 'us-east-1',
           otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
         })
       );
       expect(result.current.isDone).toBe(true);
@@ -190,6 +197,7 @@ describe('useEcfDeployment', () => {
           serviceVars: {},
           globalRegion: 'us-east-1',
           otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
         })
       );
       expect(result.current.isDone).toBe(false);
@@ -206,6 +214,7 @@ describe('useEcfDeployment', () => {
           serviceVars: {},
           globalRegion: 'us-east-1',
           otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
         })
       );
       act(() => {
@@ -223,6 +232,7 @@ describe('useEcfDeployment', () => {
           serviceVars: {},
           globalRegion: 'us-east-1',
           otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
         })
       );
       act(() => {
@@ -274,6 +284,7 @@ describe('EcfDeploymentSection', () => {
             globalRegion="us-east-1"
             launchedFamilies={['unified']}
             onLaunch={jest.fn()}
+            dataFormat="ecs"
           />
         </I18nProvider>
       );
