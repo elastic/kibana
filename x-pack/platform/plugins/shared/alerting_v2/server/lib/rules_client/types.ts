@@ -55,6 +55,7 @@ export interface FindRulesArgs {
   search?: string;
   sortField?: FindRulesSortField;
   sortOrder?: 'asc' | 'desc';
+  hasReference?: { type: string; id: string };
 }
 
 export interface UpdateRuleParams {

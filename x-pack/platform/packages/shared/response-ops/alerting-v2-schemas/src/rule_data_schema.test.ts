@@ -26,6 +26,7 @@ import {
   MAX_ARTIFACT_DATA_FIELDS,
   MAX_BULK_ITEMS,
   MAX_FIELD_NAME_LENGTH,
+  MAX_SOURCE_DATA_FIELDS,
 } from './constants';
 
 const validCreateData = {
@@ -986,6 +987,128 @@ describe('createRuleDataSchema', () => {
     });
   });
 
+  describe('metadata.source', () => {
+    it('accepts a rule with a valid source', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: {
+          name: 'test rule',
+          source: { type: 'prebuilt_rule', data: { rule_id: 'abc', version: 1 } },
+        },
+      });
+
+      expect(result.metadata.source).toEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc', version: 1 },
+      });
+    });
+
+    it('accepts a rule without source (optional)', () => {
+      const result = createRuleDataSchema.parse(validCreateData);
+      expect(result.metadata.source).toBeUndefined();
+    });
+
+    it('rejects source with an empty type', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', source: { type: '', data: {} } },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects source with a type exceeding 128 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', source: { type: 'a'.repeat(129), data: {} } },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects source with unknown keys (strict)', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: {
+          name: 'test rule',
+          source: { type: 'prebuilt_rule', data: {}, extra: true },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it(`accepts source data carrying ${MAX_SOURCE_DATA_FIELDS} fields`, () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: {
+          name: 'test rule',
+          source: {
+            type: 'prebuilt_rule',
+            data: Object.fromEntries(
+              Array.from({ length: MAX_SOURCE_DATA_FIELDS }, (_, i) => [`field-${i}`, 'a'])
+            ),
+          },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects source data carrying more fields than the limit', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: {
+          name: 'test rule',
+          source: {
+            type: 'prebuilt_rule',
+            data: Object.fromEntries(
+              Array.from({ length: MAX_SOURCE_DATA_FIELDS + 1 }, (_, i) => [`field-${i}`, 'a'])
+            ),
+          },
+        },
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              path: ['metadata', 'source', 'data'],
+              message: `Source data must have at most ${MAX_SOURCE_DATA_FIELDS} fields.`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it('rejects a source data field exceeding the per-field string limit', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: {
+          name: 'test rule',
+          source: {
+            type: 'prebuilt_rule',
+            data: { rule_id: 'a'.repeat(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT + 1) },
+          },
+        },
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              path: ['metadata', 'source', 'data', 'rule_id'],
+            }),
+          ])
+        );
+      }
+    });
+
+    it('accepts an empty source data record', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', source: { type: 'prebuilt_rule', data: {} } },
+      });
+      expect(result.success).toBe(true);
+    });
+  });
+
   describe('required fields', () => {
     it.each(['kind', 'metadata', 'schedule', 'query'] as const)(
       'rejects when required field "%s" is missing',
@@ -1183,6 +1306,35 @@ describe('updateRuleDataSchema', () => {
       const result = updateRuleDataSchema.safeParse({ artifacts: null });
 
       expect(result.success).toBe(true);
+    });
+  });
+
+  describe('metadata.source', () => {
+    it('accepts source in update payload', () => {
+      const result = updateRuleDataSchema.parse({
+        metadata: { source: { type: 'prebuilt_rule', data: { rule_id: 'abc', version: 2 } } },
+      });
+      expect(result.metadata?.source).toEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc', version: 2 },
+      });
+    });
+
+    it('clears source with an explicit null', () => {
+      const result = updateRuleDataSchema.parse({ metadata: { source: null } });
+      expect(result.metadata?.source).toBeNull();
+    });
+
+    it('omits source when not provided (preserves existing)', () => {
+      const result = updateRuleDataSchema.parse({ metadata: { name: 'updated' } });
+      expect(result.metadata?.source).toBeUndefined();
+    });
+
+    it('rejects source with an empty type in update', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { source: { type: '', data: {} } },
+      });
+      expect(result.success).toBe(false);
     });
   });
 

@@ -7,6 +7,7 @@
 
 import { useMutation } from '@kbn/react-query';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
+import { createRuleDataFromTemplate } from '../../common/create_rule_data_from_template';
 import { useCreateRule } from './use_create_rule';
 
 export const useInstallRuleTemplate = () => {
@@ -14,6 +15,6 @@ export const useInstallRuleTemplate = () => {
 
   return useMutation({
     mutationFn: (template: RuleTemplateResponse) =>
-      mutateAsync({ payload: template.rule, enabled: false }),
+      mutateAsync({ payload: createRuleDataFromTemplate(template), enabled: false }),
   });
 };
