@@ -11,9 +11,6 @@ import {
   ReactFlowProvider,
   Background,
   Controls,
-  MarkerType,
-  type Node,
-  type Edge,
   type NodeTypes,
   type ColorMode,
 } from '@xyflow/react';
@@ -21,6 +18,10 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import '@xyflow/react/dist/style.css';
 import type { ServiceMapAttachmentData } from '../../../common/agent_builder/attachments';
+import {
+  getEdgeMetrics,
+  transformTopologyToServiceMap,
+} from '../../../common/agent_builder/attachments/service_map_transform';
 import { ServiceNode } from '../../components/shared/service_map/service_node';
 import { DependencyNode } from '../../components/shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../components/shared/service_map/grouped_resources_node';
@@ -35,34 +36,6 @@ const nodeTypes: NodeTypes = {
 export interface AgentServiceMapProps {
   connections: ServiceMapAttachmentData['connections'];
   nodeMetadata?: ServiceMapAttachmentData['nodeMetadata'];
-}
-
-type TopologyNode =
-  | { 'service.name': string; 'agent.name'?: string }
-  | {
-      'span.destination.service.resource': string;
-      'span.type'?: string;
-      'span.subtype'?: string;
-    };
-
-function isServiceNode(
-  node: TopologyNode
-): node is { 'service.name': string; 'agent.name'?: string } {
-  return 'service.name' in node;
-}
-
-function getNodeId(node: TopologyNode): string {
-  if (isServiceNode(node)) {
-    return node['service.name'];
-  }
-  return `>${node['span.destination.service.resource']}`;
-}
-
-function getNodeLabel(node: TopologyNode): string {
-  if (isServiceNode(node)) {
-    return node['service.name'];
-  }
-  return node['span.destination.service.resource'];
 }
 
 export function formatEdgeLabel(
@@ -86,76 +59,20 @@ export function formatEdgeLabel(
   return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
-function transformConnections(
-  connections: ServiceMapAttachmentData['connections'],
-  nodeMetadata?: ServiceMapAttachmentData['nodeMetadata']
-): {
-  nodes: Node[];
-  edges: Edge[];
-} {
-  const nodesMap = new Map<string, Node>();
-  const edges: Edge[] = [];
-
-  for (const connection of connections) {
-    for (const node of [connection.source, connection.target]) {
-      const id = getNodeId(node);
-      if (!nodesMap.has(id)) {
-        if (isServiceNode(node)) {
-          const meta = nodeMetadata?.[node['service.name']];
-          nodesMap.set(id, {
-            id,
-            type: 'service',
-            position: { x: 0, y: 0 },
-            data: {
-              id,
-              label: getNodeLabel(node),
-              isService: true,
-              agentName: node['agent.name'],
-              alertsCount: meta?.alertsCount,
-              sloStatus: meta?.sloStatus,
-              sloCount: meta?.sloCount,
-            },
-          });
-        } else {
-          nodesMap.set(id, {
-            id,
-            type: 'dependency',
-            position: { x: 0, y: 0 },
-            data: {
-              id,
-              label: getNodeLabel(node),
-              isService: false,
-              spanType: node['span.type'],
-              spanSubtype: node['span.subtype'],
-            },
-          });
-        }
-      }
-    }
-
-    const sourceId = getNodeId(connection.source);
-    const targetId = getNodeId(connection.target);
-
-    edges.push({
-      id: `${sourceId}~${targetId}`,
-      source: sourceId,
-      target: targetId,
-      markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12 },
-      label: formatEdgeLabel(connection.metrics),
-      style: { strokeWidth: 1 },
-    });
-  }
-
-  return { nodes: [...nodesMap.values()], edges };
-}
-
 export function AgentServiceMap({ connections, nodeMetadata }: AgentServiceMapProps) {
   const { euiTheme, colorMode } = useEuiTheme();
 
   const { nodes, edges } = useMemo(() => {
-    const { nodes: rawNodes, edges: rawEdges } = transformConnections(connections, nodeMetadata);
-    const layoutedNodes = applyDagreLayout(rawNodes, rawEdges);
-    return { nodes: layoutedNodes, edges: rawEdges };
+    const { nodes: rawNodes, edges: rawEdges } = transformTopologyToServiceMap({
+      connections,
+      nodeMetadata,
+    });
+    // The static map has no popovers, so RED metrics render as edge labels.
+    const labeledEdges = rawEdges.map((edge) => ({
+      ...edge,
+      label: formatEdgeLabel(getEdgeMetrics(edge)),
+    }));
+    return { nodes: applyDagreLayout(rawNodes, labeledEdges), edges: labeledEdges };
   }, [connections, nodeMetadata]);
 
   return (
