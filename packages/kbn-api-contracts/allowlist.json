@@ -228,6 +228,86 @@
       "approvedBy": "@elastic/workchat-eng",
       "oasdiffId": "request-property-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/287255"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "delete",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "get",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "patch",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "patch",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "post",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "post",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "put",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "put",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules/_bulk_action",
+      "method": "post",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules/_find",
+      "method": "get",
+      "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
     }
   ]
 }
