@@ -73,6 +73,10 @@ const meta: Meta<typeof ContextualAttachmentStory> = {
   ],
   parameters: {
     layout: 'centered',
+    // The contextual graph reads URL params (alerts-tab href factory, popover
+    // links); the real renderer gets this route from ApmEmbeddableContext's
+    // memory history.
+    routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
   },
 };
 

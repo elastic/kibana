@@ -125,7 +125,8 @@ If `connections` is non-empty, create the attachment — do NOT render yet:
     "connections": "<connections — verbatim>",
     "nodeMetadata": "<nodeMetadata — verbatim>",
     "serviceName": "<service name>",
-    "title": "Service Map — <serviceName>"
+    "title": "Service Map — <serviceName>",
+    "timeRange": { "start": "<start used in the topology call>", "end": "<end used in the topology call>" }
   }
 }
 ```
@@ -338,7 +339,8 @@ If `connections` is non-empty, create the attachment — do NOT render yet:
     "connections": "<connections — verbatim>",
     "nodeMetadata": "<nodeMetadata — verbatim>",
     "serviceName": "<service name>",
-    "title": "Service Map — <serviceName>"
+    "title": "Service Map — <serviceName>",
+    "timeRange": { "start": "<start used in the topology call>", "end": "<end used in the topology call>" }
   }
 }
 ```
