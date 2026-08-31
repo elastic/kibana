@@ -79,7 +79,13 @@ FROM ${indexPattern}
 `.trim();
 };
 
-const buildSpanProbeQuery = (conversationIds: string[]): string => {
+const buildSpanProbeQuery = ({
+  conversationIds,
+  indexPattern,
+}: {
+  conversationIds: string[];
+  indexPattern: string;
+}): string => {
   const conversationClause =
     conversationIds.length === 1
       ? `attributes.gen_ai.conversation.id == "${assertSafeEsqlString(conversationIds[0])}"`
@@ -88,7 +94,7 @@ const buildSpanProbeQuery = (conversationIds: string[]): string => {
           .join(', ')})`;
 
   return `
-FROM traces-*
+FROM ${indexPattern}
 | WHERE ${conversationClause}
 | STATS span_count = COUNT(*)
 `.trim();
@@ -206,7 +212,7 @@ export const readAgentToolCallsFromTraces = async ({
         const probe = await traceEsClient.transport.request<EsqlResponse>({
           method: 'POST',
           path: '/_query',
-          body: { query: buildSpanProbeQuery(ids) },
+          body: { query: buildSpanProbeQuery({ conversationIds: ids, indexPattern }) },
         });
         const spanCount = (probe.values[0]?.[0] as number | undefined) ?? 0;
         if (spanCount === 0) {

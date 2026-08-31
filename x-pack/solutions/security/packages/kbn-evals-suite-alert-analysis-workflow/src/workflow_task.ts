@@ -176,11 +176,10 @@ export const runAlertAnalysisWorkflow = async ({
     log,
   });
 
-  if (toolCallIds && toolCallIds.length > 0) {
+  if (unavailable) {
     log.warning(
-      `Workflow agent called unexpected tools: ${toolCallIds.join(
-        ', '
-      )} (execution ${workflowExecutionId})`
+      `Agent tool calls unavailable for execution ${workflowExecutionId} ` +
+        `(conversation ids: ${conversationIds.length > 0 ? conversationIds.join(', ') : 'none'})`
     );
   }
 

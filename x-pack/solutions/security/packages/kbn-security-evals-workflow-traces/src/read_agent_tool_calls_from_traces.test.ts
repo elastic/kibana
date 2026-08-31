@@ -146,4 +146,64 @@ describe('readAgentToolCallsFromTraces', () => {
       .query;
     expect(query).toContain('| LIMIT 10000');
   });
+
+  it('probes the same index pattern when no tool spans match, and accepts empty when spans exist', async () => {
+    const request = jest.fn(async ({ body }: { body: { query: string } }) =>
+      body.query.includes('STATS')
+        ? { columns: [{ name: 'span_count' }], values: [[3]] }
+        : { columns: [{ name: 'tool_id' }], values: [] }
+    );
+    const client = { transport: { request } } as unknown as EsClient;
+
+    const result = await readAgentToolCallsFromTraces({
+      traceEsClient: client,
+      conversationIds: 'conv-1',
+      log: silentLog,
+      indexPattern: 'traces-apm.custom-*',
+    });
+
+    expect(result).toEqual({ toolCallIds: [], unavailable: false });
+    expect(request).toHaveBeenCalledTimes(2); // no retry: spans exist, agent called no tools
+    const probeQuery = request.mock.calls[1][0].body.query;
+    expect(probeQuery).toContain('FROM traces-apm.custom-*');
+    expect(probeQuery).toContain('STATS span_count = COUNT(*)');
+  });
+
+  it('retries while the probe finds no spans, then reports unavailable', async () => {
+    const request = jest.fn(async ({ body }: { body: { query: string } }) =>
+      body.query.includes('STATS')
+        ? { columns: [{ name: 'span_count' }], values: [[0]] }
+        : { columns: [{ name: 'tool_id' }], values: [] }
+    );
+    const client = { transport: { request } } as unknown as EsClient;
+
+    const result = await readAgentToolCallsFromTraces({
+      traceEsClient: client,
+      conversationIds: 'conv-1',
+      log: silentLog,
+    });
+
+    expect(result).toEqual({ toolCallIds: [], unavailable: true });
+    // 1 initial attempt + 5 retries, each a tool query + a probe.
+    expect(request).toHaveBeenCalledTimes(12);
+  }, 20000); // backoff across 5 retries is ~15s of wall clock
+
+  it('dedupes repeated conversation ids before building the join', async () => {
+    const client = mockClient([
+      {
+        columns: [{ name: 'tool_id' }],
+        values: [['platform.core.search']],
+      },
+    ]);
+
+    await readAgentToolCallsFromTraces({
+      traceEsClient: client,
+      conversationIds: ['conv-1', 'conv-1', 'conv-2'],
+      log: silentLog,
+    });
+
+    const query = (client.transport.request.mock.calls[0][0] as { body: { query: string } }).body
+      .query;
+    expect(query).toContain('attributes.gen_ai.conversation.id IN ("conv-1", "conv-2")');
+  });
 });
