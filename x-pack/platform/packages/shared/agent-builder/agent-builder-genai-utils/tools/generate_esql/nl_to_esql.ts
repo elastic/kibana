@@ -14,6 +14,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
+import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph, requestDocumentationSchema } from './graph';
 import { indexExplorer } from '../index_explorer';
@@ -136,6 +137,7 @@ export const generateEsql = async ({
   modelProvider,
   esClient,
   logger,
+  sessionId,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const model = modelProvider
     ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
@@ -152,6 +154,7 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
+    sessionId,
   });
 
   return withActiveInferenceSpan(
@@ -171,11 +174,14 @@ export const generateEsql = async ({
 
         // Doc selection needs only the NL query, so it starts immediately —
         // concurrently with index discovery when needed, or alone when index is known.
+        const requestDocCallConfig: Partial<InferenceChatModelCallOptions> = {
+          sessionId: sessionId ? `${sessionId}:request-doc` : undefined,
+        };
         const requestDocModel = model.chatModel
           .withStructuredOutput(requestDocumentationSchema, {
             name: 'request_documentation',
           })
-          .withConfig({ sessionId: cacheSessionId, cacheControl });
+          .withConfig(requestDocCallConfig);
         const docPromise = requestDocModel
           .invoke(createRequestDocumentationPromptNoResource({ nlQuery, documentation }))
           .then(({ commands = [], functions = [] }) => {
