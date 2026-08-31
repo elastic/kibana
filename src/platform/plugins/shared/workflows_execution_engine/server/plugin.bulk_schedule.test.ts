@@ -9,6 +9,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
@@ -117,6 +118,7 @@ describe('bulkScheduleWorkflow', () => {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     });
 
     const coreStart = coreMock.createStart();

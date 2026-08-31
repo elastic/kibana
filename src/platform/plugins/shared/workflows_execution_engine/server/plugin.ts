@@ -42,6 +42,7 @@ import {
   runWorkflow,
 } from './execution_functions';
 import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
+import { registerWorkflowExecutionIdentitySavedObject } from './execution_identity/saved_object';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
@@ -147,6 +148,7 @@ export class WorkflowsExecutionEnginePlugin
     WorkflowsExecutionEnginePluginStart
   >;
   private meteringService?: WorkflowsMeteringService;
+  private canEncrypt = false;
 
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
@@ -175,6 +177,15 @@ export class WorkflowsExecutionEnginePlugin
     plugins: WorkflowsExecutionEnginePluginSetupDeps
   ) {
     this.logger.debug('Workflows execution engine setup');
+
+    this.canEncrypt = plugins.encryptedSavedObjects.canEncrypt;
+    registerWorkflowExecutionIdentitySavedObject({
+      savedObjects: core.savedObjects,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+    });
+    this.logger.debug(
+      `Workflow execution identity encryption is ${this.canEncrypt ? 'available' : 'unavailable'}`
+    );
 
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);

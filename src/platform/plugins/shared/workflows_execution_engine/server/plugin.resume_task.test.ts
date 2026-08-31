@@ -9,6 +9,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
@@ -102,6 +103,7 @@ describe('workflow:resume task runner event fields', () => {
       taskManager: taskManagerSetup,
       cloud: {} as never,
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as never,
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     });
   };
 

@@ -14,7 +14,8 @@
       "taskManager",
       "actions",
       "workflowsExtensions",
-      "licensing"
+      "licensing",
+      "encryptedSavedObjects"
     ],
     "optionalPlugins": [
       "usageApi",

@@ -8,6 +8,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
@@ -49,6 +50,7 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     });
 
     expect(mockDataClientBundleInitSetup).toHaveBeenCalledTimes(1);
@@ -61,6 +63,7 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     });
 
     const startContract = plugin.start(coreMock.createStart(), {
