@@ -453,14 +453,6 @@ export class Plugin
                   //
                   // See https://github.com/elastic/kibana/issues/103325.
                   const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
-                  const alertsLinks: NavigationEntry[] = otherLinks
-                    .filter((link) => link.id === 'alerts')
-                    .map((link) => ({
-                      app: observabilityAppId,
-                      label: link.title,
-                      path: link.path ?? '',
-                    }));
-
                   const casesLink: NavigationEntry[] = otherLinks
                     .filter((link) => link.id === 'cases' && pluginsStart.cases)
                     .map((link) => ({
@@ -475,10 +467,74 @@ export class Plugin
                       sortKey: 100,
                       entries: [
                         ...overviewLink,
-                        ...alertsLinks,
                         ...sloLink,
                         ...casesLink,
                         ...aiAssistantLink,
+                      ],
+                    },
+                    {
+                      label: i18n.translate(
+                        'xpack.observability.alertsSectionTitle',
+                        { defaultMessage: 'Alerts' }
+                      ),
+                      sortKey: 150,
+                      entries: [
+                        {
+                          app: 'alertingV2',
+                          label: i18n.translate(
+                            'xpack.observability.alertsInboxLinkTitle',
+                            { defaultMessage: 'Inbox' }
+                          ),
+                          path: '/episodes',
+                        },
+                        {
+                          app: 'management',
+                          label: i18n.translate(
+                            'xpack.observability.alertsRulesV1LinkTitle',
+                            { defaultMessage: 'Rules V1' }
+                          ),
+                          path: '/insightsAndAlerting/triggersActions',
+                        },
+                        {
+                          app: 'alertingV2',
+                          label: i18n.translate(
+                            'xpack.observability.alertsRulesV2LinkTitle',
+                            { defaultMessage: 'Rules V2' }
+                          ),
+                          path: '/rules',
+                        },
+                        {
+                          app: 'alertingV2',
+                          label: i18n.translate(
+                            'xpack.observability.alertsRuleLibraryLinkTitle',
+                            { defaultMessage: 'Rule library' }
+                          ),
+                          path: '/rule-library',
+                        },
+                        {
+                          app: 'alertingV2',
+                          label: i18n.translate(
+                            'xpack.observability.alertsActionPoliciesLinkTitle',
+                            { defaultMessage: 'Action policies' }
+                          ),
+                          path: '/action-policies',
+                        },
+                        {
+                          app: 'alertingV2',
+                          label: i18n.translate(
+                            'xpack.observability.alertsExecutionHistoryLinkTitle',
+                            { defaultMessage: 'Execution history' }
+                          ),
+                          path: '/execution-history',
+                        },
+                        {
+                          app: 'management',
+                          label: i18n.translate(
+                            'xpack.observability.alertsMaintenanceWindowsLinkTitle',
+                            { defaultMessage: 'Maintenance windows' }
+                          ),
+                          path: '/insightsAndAlerting/maintenanceWindows',
+                        },
                       ],
                     },
                   ];

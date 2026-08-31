@@ -22,7 +22,7 @@ describe('getAlertingV2AlertsNavPanel', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
   });
 
-  it('returns a panel opener with rules, rule library, and action policies when alerting v2 is enabled', () => {
+  it('returns a panel opener with inbox, alerts v1, alerts v2, rules, rule library, action policies, maintenance windows, and execution history when alerting v2 is enabled', () => {
     const result = getAlertingV2AlertsNavPanel(core, alertsNode);
 
     expect(result).toHaveLength(1);
@@ -34,23 +34,33 @@ describe('getAlertingV2AlertsNavPanel', () => {
         renderAs: 'panelOpener',
         children: [
           {
+            title: 'Alerts',
             breadcrumbStatus: 'hidden',
             children: [
-              {
-                link: 'observability-overview:alerts',
-                title: 'Alerts',
-              },
+              { link: 'alertingV2:episodes', title: 'Inbox' },
             ],
           },
           {
             title: 'Rule Management',
             breadcrumbStatus: 'hidden',
-            children: [{ link: 'management:rules' }, { link: 'management:rule_library' }],
+            children: [
+              { link: 'management:triggersActions', title: 'Rules V1' },
+              { link: 'alertingV2:rules', title: 'Rules V2' },
+              { link: 'alertingV2:rule_library' },
+            ],
           },
           {
             title: 'Notifications and Suppressions',
             breadcrumbStatus: 'hidden',
-            children: [{ link: 'management:action_policies' }],
+            children: [
+              { link: 'alertingV2:action_policies', title: 'Action policies' },
+              { link: 'management:maintenanceWindows' },
+            ],
+          },
+          {
+            title: 'Operations',
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'alertingV2:execution_history' }],
           },
         ],
       })
@@ -63,7 +73,7 @@ describe('getAlertingV2AlertsNavPanel', () => {
     expect(getAlertingV2AlertsNavPanel(core, alertsNode)).toEqual([alertsNode]);
   });
 
-  it('moves a custom getIsActive onto the classic Alerts flyout child', () => {
+  it('renders the Alerts section with only Inbox when getIsActive is provided', () => {
     const getIsActive = ({
       pathNameSerialized,
       prepend,
@@ -74,14 +84,12 @@ describe('getAlertingV2AlertsNavPanel', () => {
 
     const [panel] = getAlertingV2AlertsNavPanel(core, { ...alertsNode, getIsActive });
 
-    expect(panel.children?.[0]).toEqual({
+    const alertsSection = panel.children?.[0];
+    expect(alertsSection).toEqual({
+      title: 'Alerts',
       breadcrumbStatus: 'hidden',
       children: [
-        {
-          link: 'observability-overview:alerts',
-          title: 'Alerts',
-          getIsActive,
-        },
+        { link: 'alertingV2:episodes', title: 'Inbox' },
       ],
     });
   });

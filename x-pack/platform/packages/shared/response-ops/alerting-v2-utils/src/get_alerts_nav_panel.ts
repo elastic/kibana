@@ -17,8 +17,9 @@ const PANEL_ID = 'alerting';
  *
  * When `alerting:v2:enabled` is false, returns `alertsNode` unchanged (a
  * direct link). When true, returns a panel opener whose flyout contains the
- * original Alerts page as a flyout link, Rule Management (Rules, Rule library),
- * and Notifications and Suppressions (Action Policies).
+ * original Alerts page as a flyout link, Rule Management (Rules V2, Rules V1,
+ * Rule library), Notifications and Suppressions (Action policies,
+ * Maintenance Windows), and Operations (Execution History).
  *
  * Spread into a navigation tree `body`:
  *
@@ -45,30 +46,39 @@ export const getAlertingV2AlertsNavPanel = (
       icon: alertsNode.icon,
       renderAs: 'panelOpener',
       children: [
-        ...(alertsNode.link
-          ? [
-              {
-                breadcrumbStatus: 'hidden' as const,
-                children: [
-                  {
-                    link: alertsNode.link,
-                    title: i18n.translate('xpack.alertingV2.nav.alerts', {
-                      defaultMessage: 'Alerts',
-                    }),
-                    ...(alertsNode.getIsActive ? { getIsActive: alertsNode.getIsActive } : {}),
-                  },
-                ],
-              },
-            ]
-          : []),
+        {
+          title: i18n.translate('xpack.alertingV2.nav.alertsSection', {
+            defaultMessage: 'Alerts',
+          }),
+          breadcrumbStatus: 'hidden' as const,
+          children: [
+            {
+              link: 'alertingV2:episodes' as const,
+              title: i18n.translate('xpack.alertingV2.nav.inbox', {
+                defaultMessage: 'Inbox',
+              }),
+            },
+          ],
+        },
         {
           title: i18n.translate('xpack.alertingV2.nav.ruleManagement', {
             defaultMessage: 'Rule Management',
           }),
           breadcrumbStatus: 'hidden' as const,
           children: [
-            { link: 'management:rules' as const },
-            { link: 'management:rule_library' as const },
+            {
+              link: 'management:triggersActions' as const,
+              title: i18n.translate('xpack.alertingV2.nav.rulesV1', {
+                defaultMessage: 'Rules V1',
+              }),
+            },
+            {
+              link: 'alertingV2:rules' as const,
+              title: i18n.translate('xpack.alertingV2.nav.rulesV2', {
+                defaultMessage: 'Rules V2',
+              }),
+            },
+            { link: 'alertingV2:rule_library' as const },
           ],
         },
         {
@@ -76,7 +86,22 @@ export const getAlertingV2AlertsNavPanel = (
             defaultMessage: 'Notifications and Suppressions',
           }),
           breadcrumbStatus: 'hidden' as const,
-          children: [{ link: 'management:action_policies' as const }],
+          children: [
+            {
+              link: 'alertingV2:action_policies' as const,
+              title: i18n.translate('xpack.alertingV2.nav.actionPolicies', {
+                defaultMessage: 'Action policies',
+              }),
+            },
+            { link: 'management:maintenanceWindows' as const },
+          ],
+        },
+        {
+          title: i18n.translate('xpack.alertingV2.nav.operations', {
+            defaultMessage: 'Operations',
+          }),
+          breadcrumbStatus: 'hidden' as const,
+          children: [{ link: 'alertingV2:execution_history' as const }],
         },
       ],
     },

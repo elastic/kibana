@@ -15,6 +15,7 @@ import type {
   MANAGEMENT_APP_ID,
   CLOUD_CONNECT_NAV_ID,
   RULES_APP_ID,
+  ALERTING_V2_APP_ID,
 } from './constants';
 
 // Monitoring
@@ -92,12 +93,28 @@ export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${Manag
 
 export type CloudConnectDeepLinkId = typeof CLOUD_CONNECT_NAV_ID;
 
+// Alerting V2
+export type AlertingV2AppId = typeof ALERTING_V2_APP_ID;
+export type AlertingV2Id =
+  | 'rules'
+  | 'rule_library'
+  | 'episodes'
+  | 'action_policies'
+  | 'execution_history';
+export type AlertingV2DeepLinkId = AlertingV2AppId | `${AlertingV2AppId}:${AlertingV2Id}`;
+
 // Combined
-export type AppId = MonitoringAppId | IntegrationsAppId | ManagementAppId | RulesAppId;
+export type AppId =
+  | MonitoringAppId
+  | IntegrationsAppId
+  | ManagementAppId
+  | RulesAppId
+  | AlertingV2AppId;
 export type LinkId = ManagementId;
 export type DeepLinkId =
   | AppId
   | MonitoringDeepLinkId
   | IntegrationsDeepLinkId
   | CloudConnectDeepLinkId
-  | ManagementDeepLinkId;
+  | ManagementDeepLinkId
+  | AlertingV2DeepLinkId;

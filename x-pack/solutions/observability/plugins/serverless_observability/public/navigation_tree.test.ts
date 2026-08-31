@@ -165,7 +165,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('opens Alerts as a flyout with rules, rule library, and action policies when alerting v2 is enabled', () => {
+  it('opens Alerts as a flyout with inbox, alerts v1, alerts v2, rules, rule library, action policies, and execution history when alerting v2 is enabled', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
 
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
@@ -181,23 +181,33 @@ describe('Navigation Tree', () => {
         renderAs: 'panelOpener',
         children: [
           {
+            title: 'Alerts',
             breadcrumbStatus: 'hidden',
             children: [
-              expect.objectContaining({
-                link: 'observability-overview:alerts',
-                title: 'Alerts',
-              }),
+              { link: 'alertingV2:episodes', title: 'Inbox' },
             ],
           },
           {
             title: 'Rule Management',
             breadcrumbStatus: 'hidden',
-            children: [{ link: 'management:rules' }, { link: 'management:rule_library' }],
+            children: [
+              { link: 'management:triggersActions', title: 'Rules V1' },
+              { link: 'alertingV2:rules', title: 'Rules V2' },
+              { link: 'alertingV2:rule_library' },
+            ],
           },
           {
             title: 'Notifications and Suppressions',
             breadcrumbStatus: 'hidden',
-            children: [{ link: 'management:action_policies' }],
+            children: [
+              { link: 'alertingV2:action_policies', title: 'Action policies' },
+              { link: 'management:maintenanceWindows' },
+            ],
+          },
+          {
+            title: 'Operations',
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'alertingV2:execution_history' }],
           },
         ],
       })
