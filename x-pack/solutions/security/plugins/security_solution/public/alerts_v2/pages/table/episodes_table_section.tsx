@@ -46,6 +46,7 @@ import { useQueryClient } from '@kbn/react-query';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { SECURITY_EPISODE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import { APP_ID, DEFAULT_ALERT_TAGS_KEY } from '../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
@@ -56,6 +57,7 @@ import { NetworkIpCell } from './network_ip_cell';
 import { useInvestigateEpisodeInTimeline } from './use_investigate_episode_in_timeline';
 import { useEpisodeAssignees } from './use_episode_assignees';
 import { EpisodeActionsMenu } from './episode_actions_menu';
+import { EpisodeWorkflowsPanel } from './episode_workflows_panel';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useEsqlAvailability } from '../../../common/hooks/esql/use_esql_availability';
 
@@ -278,6 +280,12 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   // Add to case: attach an episode as a `security.episode` case attachment (comment + Episodes
   // table). We store display fields inline in `metadata` — the episode is an ES|QL projection with
   // no queryable doc — using the resolved rule name for the title.
+  // Run workflow: gated on the workflows UI setting + execute capability. The nested selector panel
+  // is built per-row (from the source event the episode wraps).
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const workflowUIEnabled = useWorkflowsUIEnabledSetting();
+  const canRunWorkflow = workflowUIEnabled && canExecuteWorkflow;
+
   const casesUi = services.cases;
   const userCasesPermissions = casesUi.helpers.canUseCases([APP_ID]);
   // The unified attachment framework (and thus the `security.episode` type) is gated behind
@@ -424,6 +432,13 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
             record={record}
             actions={episodeActions}
             onSuccess={refetchAll}
+            renderRunWorkflowPanel={
+              canRunWorkflow
+                ? (closePopover) => (
+                    <EpisodeWorkflowsPanel record={record} onClose={closePopover} />
+                  )
+                : undefined
+            }
           />
         ),
       },
@@ -500,6 +515,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   }, [
     episodeActions,
     refetchAll,
+    canRunWorkflow,
     openDocumentFlyoutFromHit,
     openAnalyzer,
     openSessionView,

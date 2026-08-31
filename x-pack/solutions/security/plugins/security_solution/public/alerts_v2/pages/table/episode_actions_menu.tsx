@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord, RowControlComponent } from '@kbn/discover-utils';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
@@ -16,31 +17,50 @@ const MORE_ACTIONS_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.episodesTable.moreActions',
   { defaultMessage: 'More actions' }
 );
+const RUN_WORKFLOW_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.runWorkflow',
+  { defaultMessage: 'Run workflow' }
+);
+const SELECT_WORKFLOW_TITLE = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.selectWorkflow',
+  { defaultMessage: 'Select workflow' }
+);
+
+const MAIN_PANEL_ID = 0;
+const RUN_WORKFLOW_PANEL_ID = 1;
+const RUN_WORKFLOW_PANEL_WIDTH = 400;
 
 export interface EpisodeActionsMenuProps {
   /** The grid's row-control button component, used as the popover anchor. */
   Control: RowControlComponent;
   /** The episode row; its `flattened` is the `AlertEpisode` the action factories consume. */
   record: DataTableRecord;
-  /** The mutation actions (status ack/unack/resolve/unresolve, tags, …), already built with deps. */
+  /** The mutation actions (status ack/unack/resolve/unresolve, tags, assignees, add-to-case, …). */
   actions: EpisodeAction[];
   /** Called after an action succeeds, to refresh the table (the view is eventually consistent). */
   onSuccess: () => void;
+  /**
+   * When provided, adds a "Run workflow" item that opens a nested panel rendering the workflow
+   * selector (built from the row). Omitted when workflows aren't available.
+   */
+  renderRunWorkflowPanel?: (closePopover: () => void) => React.ReactNode;
 }
 
 /**
- * Row "…" menu that lists the mutation actions compatible with the given episode — mirroring the
- * v1 alerts table's per-row "take action" menu. Each item is an RnA `EpisodeAction`: `isCompatible`
- * decides which apply to the episode's current state, and `execute` posts the change to
- * `.alert-actions` (or opens its own editor, e.g. the tags flyout) and toasts.
+ * Row "…" menu listing the mutation actions compatible with the episode — mirroring the v1 alerts
+ * table's per-row "take action" menu. Each item is an RnA `EpisodeAction`: `isCompatible` decides
+ * which apply, and `execute` posts the change (or opens its own editor). "Run workflow" is a nested
+ * panel (the workflow selector), matching how v1 nests it in the take-action menu.
  */
 export const EpisodeActionsMenu = ({
   Control,
   record,
   actions,
   onSuccess,
+  renderRunWorkflowPanel,
 }: EpisodeActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const closePopover = useCallback(() => setIsOpen(false), []);
 
   const episode = record.flattened as unknown as AlertEpisode;
   const compatibleActions = useMemo(
@@ -51,13 +71,53 @@ export const EpisodeActionsMenu = ({
     [actions, episode]
   );
 
+  const workflowContent = renderRunWorkflowPanel ? renderRunWorkflowPanel(closePopover) : null;
+
+  const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
+    const items = compatibleActions.map((action) => ({
+      name: action.displayName,
+      icon: action.iconType,
+      'data-test-subj': `alertsV2Action-${action.id}`,
+      onClick: () => {
+        setIsOpen(false);
+        void action.execute({ episodes: [episode], onSuccess });
+      },
+    }));
+
+    if (workflowContent) {
+      items.push({
+        name: RUN_WORKFLOW_LABEL,
+        icon: 'play',
+        'data-test-subj': 'alertsV2RunWorkflow',
+        // Navigating to the nested selector panel — no immediate onClick action.
+        panel: RUN_WORKFLOW_PANEL_ID,
+      } as (typeof items)[number]);
+    }
+
+    return [
+      { id: MAIN_PANEL_ID, items },
+      ...(workflowContent
+        ? [
+            {
+              id: RUN_WORKFLOW_PANEL_ID,
+              title: SELECT_WORKFLOW_TITLE,
+              width: RUN_WORKFLOW_PANEL_WIDTH,
+              content: workflowContent,
+            },
+          ]
+        : []),
+    ];
+  }, [compatibleActions, episode, onSuccess, workflowContent]);
+
+  const isEmpty = compatibleActions.length === 0 && !workflowContent;
+
   const button = (
     <Control
       data-test-subj="alertsV2ActionsMenuButton"
       iconType="boxesVertical"
       label={MORE_ACTIONS_LABEL}
       tooltipContent={MORE_ACTIONS_LABEL}
-      disabled={compatibleActions.length === 0}
+      disabled={isEmpty}
       onClick={() => setIsOpen((open) => !open)}
     />
   );
@@ -66,26 +126,11 @@ export const EpisodeActionsMenu = ({
     <EuiPopover
       button={button}
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       anchorPosition="downCenter"
       panelPaddingSize="none"
     >
-      <EuiContextMenuPanel
-        size="s"
-        items={compatibleActions.map((action) => (
-          <EuiContextMenuItem
-            key={action.id}
-            icon={action.iconType}
-            data-test-subj={`alertsV2Action-${action.id}`}
-            onClick={() => {
-              setIsOpen(false);
-              void action.execute({ episodes: [episode], onSuccess });
-            }}
-          >
-            {action.displayName}
-          </EuiContextMenuItem>
-        ))}
-      />
+      <EuiContextMenu initialPanelId={MAIN_PANEL_ID} panels={panels} />
     </EuiPopover>
   );
 };

@@ -35,6 +35,21 @@ export const registerWorkflowSteps = (
     import('./set_alert_tags_step/set_alert_tags_step').then((m) => m.setAlertTagsStepDefinition)
   );
 
+  // v2 alert episode steps.
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_episode_status_step/set_episode_status_step').then(
+      (m) => m.setEpisodeStatusStepDefinition
+    )
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_episode_tags_step/set_episode_tags_step').then(
+      (m) => m.setEpisodeTagsStepDefinition
+    )
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./assign_episode_step/assign_episode_step').then((m) => m.assignEpisodeStepDefinition)
+  );
+
   workflowsExtensions.registerStepDefinition(() =>
     import('./assign_attack_step/assign_attack_step').then((m) => m.assignAttackStepDefinition)
   );

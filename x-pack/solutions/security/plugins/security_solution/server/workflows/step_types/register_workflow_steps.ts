@@ -10,6 +10,9 @@ import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_ste
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
 import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags_step';
+import { setEpisodeStatusStepDefinition } from './set_episode_status_step/set_episode_status_step';
+import { setEpisodeTagsStepDefinition } from './set_episode_tags_step/set_episode_tags_step';
+import { assignEpisodeStepDefinition } from './assign_episode_step/assign_episode_step';
 import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
 import { assignAlertStepDefinition } from './assign_alert_step/assign_alert_step';
 import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
@@ -35,6 +38,9 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertStatusStepDefinition);
   workflowsExtensions.registerStepDefinition(setAlertTagsStepDefinition);
+  workflowsExtensions.registerStepDefinition(setEpisodeStatusStepDefinition);
+  workflowsExtensions.registerStepDefinition(setEpisodeTagsStepDefinition);
+  workflowsExtensions.registerStepDefinition(assignEpisodeStepDefinition);
   workflowsExtensions.registerStepDefinition(assignAlertStepDefinition);
   workflowsExtensions.registerStepDefinition(assignAttackStepDefinition);
   workflowsExtensions.registerStepDefinition(setAttackStatusStepDefinition);
