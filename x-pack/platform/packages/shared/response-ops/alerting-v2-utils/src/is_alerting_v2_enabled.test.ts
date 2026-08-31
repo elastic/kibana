@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import {
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
+  shouldShowClassicObservabilityAlertsTable,
 } from './is_alerting_v2_enabled';
 
 describe('isAlertingV2Enabled', () => {
@@ -85,5 +86,39 @@ describe('shouldShowAlertingV2CreateRuleFlyout', () => {
     core.settings.globalClient.get = <T>(_key: string) => false as T;
 
     expect(shouldShowAlertingV2CreateRuleFlyout(core)).toBe(false);
+  });
+});
+
+describe('shouldShowClassicObservabilityAlertsTable', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+    core.settings.globalClient.get = <T>(_key: string) => false as T;
+    core.settings.client.get = <T>(_key: string) => false as T;
+  });
+
+  it('returns true when alerting v2 is disabled', () => {
+    expect(shouldShowClassicObservabilityAlertsTable(core)).toBe(true);
+  });
+
+  it('returns false when alerting v2 is enabled and the space setting is off', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    expect(shouldShowClassicObservabilityAlertsTable(core)).toBe(false);
+  });
+
+  it('returns true when alerting v2 is enabled and the space setting is on', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.settings.client.get = <T>(_key: string) => true as T;
+
+    expect(shouldShowClassicObservabilityAlertsTable(core)).toBe(true);
+  });
+
+  it('returns false when alerting v2 is enabled and the space setting is unset', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.settings.client.get = <T>(_key: string) => undefined as T;
+
+    expect(shouldShowClassicObservabilityAlertsTable(core)).toBe(false);
   });
 });

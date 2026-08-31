@@ -8,7 +8,10 @@
 import type { RootNodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { i18n } from '@kbn/i18n';
-import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
+import {
+  isAlertingV2Enabled,
+  shouldShowClassicObservabilityAlertsTable,
+} from '@kbn/alerting-v2-utils';
 
 const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
@@ -49,12 +52,16 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
                 defaultMessage: 'Inbox',
               }),
             },
-            {
-              link: ALERTS_LINK,
-              title: i18n.translate('xpack.observability.nav.alertsV1', {
-                defaultMessage: 'Alerts V1',
-              }),
-            },
+            ...(shouldShowClassicObservabilityAlertsTable(core)
+              ? [
+                  {
+                    link: ALERTS_LINK,
+                    title: i18n.translate('xpack.observability.nav.alertsV1', {
+                      defaultMessage: 'Alerts V1',
+                    }),
+                  },
+                ]
+              : []),
           ],
         },
         {

@@ -7,6 +7,13 @@
 
 export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
 
+/**
+ * Space-scoped. When Alerting v2 is enabled, controls whether the classic
+ * Observability alerts table remains in solution navigation.
+ */
+export const ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID =
+  'alerting:v2:showClassicAlertsTable';
+
 export interface AlertingAdvancedSettingValueMap {
   [ALERTING_V2_ENABLED_SETTING_ID]: boolean;
 }
