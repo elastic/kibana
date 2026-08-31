@@ -44,6 +44,8 @@ export function taskInstanceToAlertTaskInstance<Params extends RuleTypeParams>(
     params: {
       // Keep the full persisted params bag; decode only validates required fields.
       ...taskInstance.params,
+      // Re-assert validated fields so the return type isn't just the index signature.
+      alertId: decoded.alertId,
       // `spaceId` is optional in the persisted params (legacy tasks predate it).
       // Default to the built-in space and brand it here, at this trusted
       // deserialization boundary, so the branded SpaceId flows downstream.

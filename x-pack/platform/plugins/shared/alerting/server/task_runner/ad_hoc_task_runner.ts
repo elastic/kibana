@@ -206,9 +206,11 @@ export class AdHocTaskRunner implements CancellableTask {
     // The shared alerts client / action scheduler read `params.spaceId` as a
     // branded SpaceId, so carry the branded value on the task instance passed to
     // them (ad-hoc params otherwise only carry an unbranded, optional spaceId).
+    // `alertId` is not on ad-hoc task params; use the rule id so the shared
+    // RuleTaskInstance shape stays consistent with scheduled rule runs.
     const taskInstance: RuleTaskInstance = {
       ...this.taskInstance,
-      params: { ...this.taskInstance.params, spaceId },
+      params: { ...this.taskInstance.params, alertId: rule.id, spaceId },
     };
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
