@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import moment from 'moment';
 import type { CoreStart } from '@kbn/core/public';
 import { registerNewsfeedHandler } from './register_newsfeed_handler';
 import type { NewsfeedApi } from './lib/api';
+import type { NewsfeedSidebarController } from './sidebar/controller';
 import type { FetchResult } from './types';
 
 const createFetchResult = (): FetchResult => ({
@@ -36,22 +37,20 @@ describe('registerNewsfeedHandler', () => {
   it('registers a chrome newsfeed handler and returns its cleanup callback', () => {
     const unregister = jest.fn();
     const registerNewsfeedHandlerMock = jest.fn().mockReturnValue(unregister);
-    const openSystemFlyout = jest.fn().mockReturnValue({ close: jest.fn() });
     const fetchResults$ = new BehaviorSubject<FetchResult | null | void>(createFetchResult());
-    const markAsRead = jest.fn();
-    const api: NewsfeedApi = { fetchResults$, markAsRead };
+    const api: NewsfeedApi = { fetchResults$, markAsRead: jest.fn() };
+
+    const sidebarController: NewsfeedSidebarController = {
+      isOpen$: of(false),
+      open: jest.fn(),
+      toggle: jest.fn(),
+    };
+
     const core = {
-      chrome: {
-        next: {
-          registerNewsfeedHandler: registerNewsfeedHandlerMock,
-        },
-      },
-      overlays: {
-        openSystemFlyout,
-      },
+      chrome: { next: { registerNewsfeedHandler: registerNewsfeedHandlerMock } },
     } as unknown as CoreStart;
 
-    const cleanup = registerNewsfeedHandler({ core, api, isServerless: false });
+    const cleanup = registerNewsfeedHandler({ core, api, sidebarController });
 
     expect(cleanup).toBe(unregister);
     expect(registerNewsfeedHandlerMock).toHaveBeenCalledTimes(1);
@@ -63,9 +62,7 @@ describe('registerNewsfeedHandler', () => {
     expect(hasNewValues).toEqual([true]);
 
     open();
-
-    expect(markAsRead).toHaveBeenCalledWith(['test-hash-1']);
-    expect(openSystemFlyout).toHaveBeenCalledWith(expect.anything(), { size: 's' });
+    expect(sidebarController.open).toHaveBeenCalledTimes(1);
 
     subscription.unsubscribe();
   });

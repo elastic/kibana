@@ -39,6 +39,7 @@ import {
   OAuthClientsService,
   PluginsService,
   EventsService,
+  SpaceSettingsService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicEmbeddableChatAccess } from './services/access';
@@ -56,6 +57,7 @@ import type {
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
+  OpenConversationDetailsOptions,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type {
@@ -93,6 +95,7 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
@@ -169,6 +172,7 @@ export class AgentBuilderPlugin
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const oauthClientsService = new OAuthClientsService({ http });
+    const spaceSettingsService = new SpaceSettingsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -224,6 +228,22 @@ export class AgentBuilderPlugin
       return { chatRef: sidebarRef };
     };
 
+    const openConversationDetails = async ({
+      conversationId,
+      onClose,
+    }: OpenConversationDetailsOptions): Promise<() => void> => {
+      const { openConversationDetailsFlyout } = await import(
+        './flyout/open_conversation_details_flyout'
+      );
+      return openConversationDetailsFlyout({
+        core,
+        conversationsService,
+        conversationTemplatesService,
+        conversationId,
+        onClose,
+      });
+    };
+
     const internalServices: AgentBuilderInternalService = {
       agentService,
       attachmentsService,
@@ -238,6 +258,7 @@ export class AgentBuilderPlugin
       smlService,
       pluginsService,
       oauthClientsService,
+      spaceSettingsService,
       startDependencies,
       usageCollection,
       accessChecker,
@@ -329,6 +350,11 @@ export class AgentBuilderPlugin
           this.sidebarCallbacks.addAttachment(attachment);
         }
       },
+      removeAttachment: (attachmentId: string) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.removeAttachmentById(attachmentId);
+        }
+      },
       setChatConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;
@@ -366,6 +392,7 @@ export class AgentBuilderPlugin
       },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
+      openConversationDetails,
     };
 
     if (hasAgentBuilder) {

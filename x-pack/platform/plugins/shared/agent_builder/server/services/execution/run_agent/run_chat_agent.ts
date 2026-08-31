@@ -49,7 +49,6 @@ import {
   buildRecentContext,
   type RelevantSkillSelection,
 } from './utils/relevant_skills/select_relevant_skills';
-import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildPendingRoundActions } from './utils/build_pending_round_actions';
@@ -61,9 +60,12 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
+import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
+import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
 import { conversationIndexName } from '../../conversation/client/storage';
+import { roundsForContext } from '../../conversation';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -92,7 +94,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     origin,
     author,
     agentConfiguration,
-    capabilities,
     runId = uuidv4(),
     agentId,
     abortSignal,
@@ -122,6 +123,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
     todoStateManager,
     renderers,
+    conversationClient,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
@@ -144,8 +146,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     initialState: conversation?.state?.background_executions,
   });
 
+  const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
+
   const model = await modelProvider.getDefaultModel();
-  const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
@@ -178,10 +181,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
+  const previousRounds = conversation ? roundsForContext(conversation) : [];
+
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
-    previousRounds: conversation?.rounds ?? [],
+    previousRounds,
+    nextInputAuthor: pendingRound?.author ?? author,
     context,
     action,
     metadata: conversation?.metadata,
@@ -264,13 +270,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
     agentId,
     executionId,
-    capabilities,
     abortSignal,
     backgroundExecutionService,
     updateConversationMetadata,
     conversationTemplate,
     filteredSkills,
     relevantSkillsEnabled,
+    parentConversationId: conversation?.id,
+    subagentTracker,
+    conversationExists: (id: string) => conversationClient.exists(id),
   });
 
   // Then add dynamic tools
@@ -325,6 +333,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     metadata: conversation?.metadata,
     template_id: conversation?.template_id,
   };
+  processedConversation.subagentRosterFallback = subagentTracker.snapshot();
 
   let relevantSkillsSelection: RelevantSkillSelection | undefined;
   if (relevantSkillsEnabled) {
@@ -336,9 +345,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }
   }
 
+  const imageResolver = createImageResolver({
+    attachmentStateManager: context.attachmentStateManager,
+    attachments,
+    request,
+    spaceId: context.spaceId,
+    logger,
+  });
+
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
-    capabilities: resolvedCapabilities,
+    spaceId: context.spaceId,
     skills: filteredSkills,
     processedConversation,
     toolManager,
@@ -349,6 +366,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
+    imageResolver,
     conversationTemplates: context.conversationTemplates,
   });
 
@@ -358,12 +376,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     chatModel: model.chatModel,
     toolManager,
     configuration: resolvedConfiguration,
-    capabilities: resolvedCapabilities,
     structuredOutput,
     outputSchema,
     processedConversation,
     promptFactory,
     backgroundExecutionService,
+    subagentTracker,
     roundId,
     sessionId: conversation?.id ?? executionId,
     cacheControl: { type: 'ephemeral', ttl: '5m' },
@@ -432,6 +450,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           compactionSummary: compactionResult.summary,
           backgroundExecutionService,
           todoStateManager,
+          subagents: subagentTracker.snapshot(),
         }),
       pendingRound,
       startTime,
@@ -476,12 +495,14 @@ const getConversationState = ({
   backgroundExecutionService,
   compactionSummary,
   todoStateManager,
+  subagents,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
   todoStateManager: TodoStateManager;
+  subagents?: Record<string, string>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   const todos = todoStateManager.get();
@@ -491,6 +512,7 @@ const getConversationState = ({
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
     ...(todos !== undefined ? { todos } : {}),
+    ...(subagents && Object.keys(subagents).length > 0 ? { subagents } : {}),
   };
 };
 

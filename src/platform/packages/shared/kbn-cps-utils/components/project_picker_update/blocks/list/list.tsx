@@ -180,7 +180,7 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
             const isSelected = selectedProjectIdsSet.has(project._id);
 
             return (
-              <EuiFlexItem key={project._id} css={styles.listItemContainer}>
+              <EuiFlexItem key={project._id} grow={false} css={styles.listItemContainer}>
                 <ProjectPickerListItem
                   isSelected={isSelected}
                   isToggleDisabled={isSelected && includedVisibleProjectIds.length === 1}

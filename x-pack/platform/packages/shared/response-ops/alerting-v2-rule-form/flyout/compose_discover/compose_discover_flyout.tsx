@@ -133,6 +133,24 @@ const SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP = i18n.translate(
   { defaultMessage: 'Close the query editor to switch views' }
 );
 
+const BUILDER_VIEW_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.builderView',
+  { defaultMessage: 'Builder view' }
+);
+
+const ESQL_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.builderMode.esqlView', {
+  defaultMessage: 'ES|QL view',
+});
+
+const BUILDER_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.builderMode.legend', {
+  defaultMessage: 'Edit mode selection',
+});
+
+const BUILDER_MODE_OPTIONS = [
+  { id: 'builder', label: BUILDER_VIEW_LABEL, iconType: 'table' },
+  { id: 'esql', label: ESQL_VIEW_LABEL, iconType: 'kqlFunction' },
+];
+
 const EDIT_MODE_OPTIONS = [
   { id: 'form', label: FORM_VIEW_LABEL, iconType: 'table' },
   { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'code' },
@@ -205,6 +223,8 @@ export interface ComposeDiscoverFlyoutProps {
   initialQuery?: string;
   /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
   esqlVariables?: ESQLControlVariable[];
+  /** Callback to switch from builder mode to ES|QL mode. */
+  onSwitchToEsql?: () => void;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -263,6 +283,7 @@ export function ComposeDiscoverFlyout({
   initialBuilderState,
   initialQuery,
   esqlVariables,
+  onSwitchToEsql,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -274,8 +295,7 @@ export function ComposeDiscoverFlyout({
    */
   const baseServices = services;
 
-  const initialMapped =
-    (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
+  const initialMapped = rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
@@ -299,12 +319,15 @@ export function ComposeDiscoverFlyout({
   const isDiscoverQueryPopulated = Boolean(
     discoverComposedQuery && getBreachQuery(discoverComposedQuery).trim()
   );
+  const isRuleQueryPopulated = Boolean(
+    initialMapped?.query && getBreachQuery(initialMapped.query).trim()
+  );
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType,
-    isQueryPrePopulated: isDiscoverQueryPopulated,
+    isQueryPrePopulated: isDiscoverQueryPopulated || (mode === 'create' && isRuleQueryPopulated),
     forceYamlMode,
   });
 
@@ -872,7 +895,7 @@ export function ComposeDiscoverFlyout({
     }
     /*
      * Manual split with an empty alert condition stays composed + empty segment —
-     * the schema rejects that at save; do not coerce to standalone.
+     * the request mapper omits the breach block at save; do not coerce to standalone.
      */
     setSandboxQuery(queryToCommit);
 
@@ -1035,7 +1058,6 @@ export function ComposeDiscoverFlyout({
       return getSandboxTabs(isAlert, {
         step: uiState.step,
         recoveryType: uiState.recoveryType,
-        mode: uiState.mode,
         manualSplitEnabled: uiState.manualSplitEnabled,
       });
     }
@@ -1050,7 +1072,6 @@ export function ComposeDiscoverFlyout({
     uiState.yamlMode,
     uiState.recoveryType,
     uiState.step,
-    uiState.mode,
     uiState.manualSplitEnabled,
     sandboxQuery.format,
     isAlert,
@@ -1191,7 +1212,9 @@ export function ComposeDiscoverFlyout({
             historyKey={historyKey}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
-            size={480}
+            size={540}
+            minWidth={480}
+            resizable
           >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
@@ -1219,6 +1242,21 @@ export function ComposeDiscoverFlyout({
                           status: getStepStatus(uiState.step, i),
                         })
                       )}
+                    />
+                  </EuiFlexItem>
+                )}
+                {isBuilderMode && isEditing && onSwitchToEsql && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonGroup
+                      legend={BUILDER_MODE_LEGEND}
+                      options={BUILDER_MODE_OPTIONS}
+                      idSelected="builder"
+                      onChange={(id) => {
+                        if (id === 'esql') onSwitchToEsql();
+                      }}
+                      isIconOnly
+                      buttonSize="compressed"
+                      data-test-subj="composeDiscoverSwitchToEsql"
                     />
                   </EuiFlexItem>
                 )}

@@ -9,10 +9,12 @@ import { z } from '@kbn/zod/v4';
 import { severitySchema } from './common_schemas';
 import { significantEventStatusSchema } from './events';
 import {
+  MAX_ID_LENGTH,
   MAX_MEDIUM_STRING_LENGTH,
   MAX_SHORT_STRING_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TIMESTAMP_LENGTH,
+  MAX_TITLE_LENGTH,
 } from './constants';
 
 /**
@@ -29,6 +31,8 @@ export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const
  * the step execution with this `stepId` — keep it in sync with the step name in the YAML.
  */
 export const INVESTIGATE_STEP_ID = 'investigate' as const;
+
+export type InvestigationRunStatus = 'pending' | 'complete' | 'failed' | 'unavailable';
 
 /**
  * A source file the agent read, recorded as parts rather than a URL so that consumers — not the
@@ -90,6 +94,31 @@ const investigationEvidenceSchema = z.object({
   code: investigationEvidenceCodeSchema.optional(),
 });
 export type InvestigationEvidence = z.infer<typeof investigationEvidenceSchema>;
+
+/** Max entity entries in the impact block. Keep in sync with the YAML maxItems. */
+export const MAX_IMPACT_ENTITIES = 10;
+
+export const investigationImpactEntitySchema = z.object({
+  /** Human-readable name — service name, host, or component. Prefer service names. */
+  name: z.string().max(MAX_TITLE_LENGTH),
+  /** Entity category. Prefer "service"; use "host", "database", etc. only when no service applies. */
+  type: z.string().max(MAX_ID_LENGTH).optional(),
+  /** KI feature_id when this entity is backed by a Knowledge Indicator. */
+  feature_id: z.string().max(MAX_ID_LENGTH).optional(),
+  stream_name: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * One evidence artifact linking this entity to the investigation — the query that shows
+   * the failure signal. Same shape as hypothesis evidence; prefer esql_query + time_range
+   * so the UI can render a chart.
+   */
+  evidence: investigationEvidenceSchema.optional(),
+});
+export type InvestigationImpactEntity = z.infer<typeof investigationImpactEntitySchema>;
+
+export const investigationImpactSchema = z.object({
+  entities: z.array(investigationImpactEntitySchema).max(MAX_IMPACT_ENTITIES),
+});
+export type InvestigationImpact = z.infer<typeof investigationImpactSchema>;
 
 /** Max evidence entries per hypothesis. Keep in sync with the YAML maxItems. */
 export const MAX_HYPOTHESIS_EVIDENCE = 3;
@@ -222,10 +251,12 @@ export const investigationStateSchema = z.object({
   recommendations: z.array(investigationRecommendationSchema).max(MAX_RECOMMENDATIONS).optional(),
   /**
    * Actionable knowledge gaps discovered during the investigation. Replaces the free-text
-   * `gaps_found` string array; investigations persisted before this field existed are read back
-   * without any blind spots, since this schema strips the keys it no longer declares. That loss is
-   * accepted rather than migrated — the gaps are also folded into the memory `_gaps/overview` page
-   * by the workflow's `merge_investigation_gaps` step, so they survive outside this payload.
+   * `gaps_found` string array. Investigations persisted before this field existed still carry
+   * `gaps_found`, which this schema strips as a key it no longer declares — so recovering them
+   * means rewriting the raw payload before it reaches this schema, as
+   * `normalizeLegacyInvestigationState` in `@kbn/investigation-output` does. Those gaps are also
+   * folded into the memory `_gaps/overview` page by the workflow's `merge_investigation_gaps`
+   * step, so they survive outside this payload either way.
    */
   blind_spots: z.array(investigationBlindSpotSchema).max(MAX_BLIND_SPOTS).optional(),
   /**
@@ -240,5 +271,11 @@ export const investigationStateSchema = z.object({
     .array(significantEventUpdateSchema)
     .max(MAX_SIGNIFICANT_EVENT_UPDATES)
     .optional(),
+  /**
+   * Structured account of which services or components were impacted. Optional so existing
+   * persisted investigations remain valid. Seeded from alert grouping or sig event causal
+   * features; finalized after hypotheses settle. At most 10 entries; service-level preferred.
+   */
+  impact: investigationImpactSchema.optional(),
 });
 export type InvestigationState = z.infer<typeof investigationStateSchema>;
