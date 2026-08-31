@@ -51,7 +51,6 @@ export const useDashboardMenuItems = ({
   const appId = useObservable(coreServices.application.currentAppId$);
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
-  const [isRedoUndoInProgress, setIsRedoUndoInProgress] = useState(false);
 
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
@@ -234,19 +233,15 @@ export const useDashboardMenuItems = ({
   const historyConfig = useMemo(() => {
     return {
       undo: {
-        disabled: disableTopNav || disableUndoRedo || !isRedoUndoInProgress || !canUndo,
-        onClick: async () => {
-          setIsRedoUndoInProgress(true);
-          await dashboardInternalApi.undo();
-          setIsRedoUndoInProgress(false);
+        disabled: disableTopNav || disableUndoRedo || !canUndo,
+        onClick: () => {
+          dashboardInternalApi.undo();
         },
       },
       redo: {
-        disabled: disableTopNav || disableUndoRedo || !isRedoUndoInProgress || !canRedo,
+        disabled: disableTopNav || disableUndoRedo || !canRedo,
         onClick: async () => {
-          setIsRedoUndoInProgress(true);
-          await dashboardInternalApi.redo();
-          setIsRedoUndoInProgress(false);
+          dashboardInternalApi.redo();
         },
       },
     };

@@ -10,7 +10,8 @@
 import * as jsondiffpatch from 'jsondiffpatch';
 import { cloneDeep } from 'lodash';
 
-import { BehaviorSubject, filter, Observable, pairwise } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, filter, pairwise } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   onStateChange$,
@@ -57,35 +58,35 @@ export function startTrackingHistory<T extends object = {}>({
 
   const canUndo$ = new BehaviorSubject(false);
   const canRedo$ = new BehaviorSubject(false);
-  const pointerSubscription = pointer$.subscribe(
-    (pointer) => {
-      const bottomOfStack = pointer <= -1;
-      const topOfStack = pointer + 1 >= history.length;
-      canUndo$.next(!bottomOfStack);
-      canRedo$.next(!topOfStack);
-    }
-  );
+  const pointerSubscription = pointer$.subscribe((pointer) => {
+    const bottomOfStack = pointer <= -1;
+    const topOfStack = pointer + 1 >= history.length;
+    canUndo$.next(!bottomOfStack);
+    canRedo$.next(!topOfStack);
+  });
 
   const undoPatch = async () => {
     const pointer = pointer$.getValue();
-    if (pointer <= -1) return false; // cannot undo - already at the bottom of the stack
+    if (pointer <= -1) return; // cannot undo - already at the bottom of the stack
 
+    canRedo$.next(false);
+    canUndo$.next(false);
     const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
     undoOrRedoAction = true;
     await setState(jsondiffpatch.patch(cloneDeep(getLatestState()), reversedPatch) as T);
     pointer$.next(pointer - 1);
-    return true;
   };
 
   const redoPatch = async () => {
     const pointer = pointer$.getValue();
-    if (pointer + 1 >= history.length) return false; // cannot redo - already at the top of the stack
+    if (pointer + 1 >= history.length) return; // cannot redo - already at the top of the stack
 
+    canRedo$.next(false);
+    canUndo$.next(false);
     const patch = history[pointer + 1]; // must apply the **next** patch
     undoOrRedoAction = true;
     await setState(jsondiffpatch.patch(cloneDeep(getLatestState()), patch) as T);
     pointer$.next(pointer + 1);
-    return true;
   };
 
   const keyDownHandler = (event: KeyboardEvent) => {
