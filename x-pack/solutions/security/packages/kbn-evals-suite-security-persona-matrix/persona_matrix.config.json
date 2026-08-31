@@ -275,11 +275,11 @@
       "label": "Kill-Chain Discovery",
       "group": "Attack Discovery",
       "suites": [
-        "attack-discovery"
+        "attack-discovery-agent-builder"
       ],
       "evaluators": [
         "AttackDiscoveryBasic",
-        "AttackDiscoveryRubric",
+        "Rubric",
         "Criteria"
       ],
       "weight": 1

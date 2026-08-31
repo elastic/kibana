@@ -52,7 +52,10 @@ describe('persona_matrix.config.json column wiring', () => {
   it('covers attack discovery and automatic migrations alongside the persona prompts', () => {
     const suitesByColumn = new Map(config.columns.map((column) => [column.id, column.suites]));
 
-    expect(suitesByColumn.get('attack-discovery')).toEqual(['attack-discovery']);
+    // The live suite is attack-discovery-agent-builder: the legacy attack-discovery
+    // id still has docs but only ~2 per evaluator, which published a near-zero
+    // score for models that actually pass it 1.0 on the real suite.
+    expect(suitesByColumn.get('attack-discovery')).toEqual(['attack-discovery-agent-builder']);
     expect(suitesByColumn.get('migrations-rules')).toEqual(['security-automatic-migrations']);
     expect(suitesByColumn.get('migrations-dashboards')).toEqual(['security-automatic-migrations']);
   });
