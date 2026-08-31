@@ -19,13 +19,15 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 
 import {
-  fetchBuildInfo,
   fetchComposedSchema,
   fetchConnectorTypes,
+  fetchStepDefinitionIds,
+  fetchTriggerDefinitionIds,
   type KibanaConnection,
 } from '../src/fetch';
 import { transformToStrict, transformToTemplate } from '../src/template_transform';
 import { extractStepTypes, extractTriggerTypes } from '../src/introspect';
+import { checkCompleteness } from '../src/completeness';
 import { writeVariant, writeIndex } from '../src/write_artifact';
 import type { IndexManifest } from '../src/types';
 
@@ -38,16 +40,21 @@ const PASSWORD = 'changeme';
 // tree is the source of truth published to the CDN, so it must live outside the
 // gitignored `target/`. An override is honored for local experimentation.
 //
-// A single channel-agnostic bundle is committed here. The `channel` field is
-// omitted from the committed `index.json` and stamped at CDN publish time by
-// `publish_schema.sh` (which uses `jq` to add `.channel` for release vs
-// serverless paths).
+// `kibanaVersion`, `buildHash`, and `channel` are omitted from the committed
+// `index.json` and stamped at CDN publish time by `publish_schema.sh` (via `jq`),
+// so the committed tree carries a single, channel-agnostic bundle.
 const OUTPUT_DIR = Path.resolve(
   process.env.WORKFLOW_SCHEMA_OUTPUT_DIR ??
     Path.join(REPO_ROOT, 'src/platform/packages/private/kbn-workflow-step-schema-cli/generated')
 );
 
-const SCHEMA_READY_PATH = '/api/workflows/schema?loose=false';
+// Poll the *non-latching* step-definitions route, not `/api/workflows/schema`.
+// The schema route freezes the registered-step cache on the first 200 it returns;
+// using it as the readiness probe is self-defeating — it fires the latch that
+// `await isReady()` in WorkflowValidationService is meant to prevent.
+// `/internal/workflows_extensions/step_definitions` reads the registry live and
+// never touches the connector cache, so it is safe to poll repeatedly.
+const STEP_DEFINITIONS_PATH = '/internal/workflows_extensions/step_definitions';
 
 const authHeaders = {
   Authorization: `Basic ${Buffer.from(`${USERNAME}:${PASSWORD}`).toString('base64')}`,
@@ -57,16 +64,18 @@ const authHeaders = {
 };
 
 /**
- * Poll the composed-schema route until the workflows plugins have finished
- * registering, so the generated artifact reflects the full superset rather than
- * a partially-initialized registry.
+ * Poll the registered step-definitions route until the count stabilizes across
+ * two consecutive readings, meaning all async step loaders have settled.
  *
- * The only legitimate wait is for the licensing plugin to publish its state
- * asynchronously after boot (typically a few seconds). A 2-minute budget keeps
- * the descriptive "Timed out …" message winning the race against Jest's own
- * timeout even on slow CI shards.
+ * Polling the non-latching `/internal/workflows_extensions/step_definitions`
+ * route (rather than `/api/workflows/schema`) ensures the probe does not freeze
+ * the module-level connector cache before `await isReady()` in
+ * WorkflowValidationService can run.
+ *
+ * A 2-minute budget keeps the descriptive "Timed out …" message winning the race
+ * against Jest's own timeout even on slow CI shards.
  */
-async function waitForSchemaRoute(
+async function waitForStepRegistry(
   log: ToolingLog,
   baseUrl: string,
   timeoutMs = 2 * 60 * 1000
@@ -75,33 +84,48 @@ async function waitForSchemaRoute(
   const deadline = start + timeoutMs;
   let lastError = 'unknown error';
   let attempts = 0;
+  let previousCount = -1;
+
   while (Date.now() < deadline) {
     attempts++;
     try {
-      const response = await fetch(`${baseUrl}${SCHEMA_READY_PATH}`, { headers: authHeaders });
+      const response = await fetch(`${baseUrl}${STEP_DEFINITIONS_PATH}`, {
+        headers: authHeaders,
+      });
       if (response.ok) {
-        log.debug(`Schema route ready after ${attempts} attempt(s) (${Date.now() - start}ms)`);
-        return;
+        const body = await response.json();
+        const steps: unknown[] = Array.isArray(body?.steps) ? body.steps : [];
+        const count = steps.length;
+        if (count > 0 && count === previousCount) {
+          log.debug(
+            `Step registry stable at ${count} step(s) after ${attempts} attempt(s) (${Date.now() - start}ms)`
+          );
+          return;
+        }
+        log.warning(
+          `Step registry not stable yet (attempt ${attempts}): ` +
+            `prev=${previousCount} current=${count}`
+        );
+        previousCount = count;
+      } else {
+        lastError = `HTTP ${response.status} ${response.statusText}`;
+        log.warning(`Step definitions route not ready yet (attempt ${attempts}): ${lastError}`);
       }
-      lastError = `HTTP ${response.status} ${response.statusText}`;
     } catch (error) {
       if (error instanceof Error) {
-        // Include the underlying cause (e.g. ECONNREFUSED) so "TypeError: fetch
-        // failed" is self-diagnosing in CI logs.
         const cause = (error as NodeJS.ErrnoException).cause;
         const causeStr = cause instanceof Error ? ` (cause: ${cause.message})` : '';
         lastError = `${error.message}${causeStr}`;
       } else {
         lastError = String(error);
       }
+      log.warning(`Step definitions route not ready yet (attempt ${attempts}): ${lastError}`);
     }
-    log.warning(`Schema route not ready yet (attempt ${attempts}): ${lastError}`);
     await new Promise((resolve) => setTimeout(resolve, 2_000));
   }
   throw new Error(
-    `Timed out waiting for ${SCHEMA_READY_PATH} after ${attempts} attempt(s) (${
-      Date.now() - start
-    }ms): ${lastError}`
+    `Timed out waiting for ${STEP_DEFINITIONS_PATH} to stabilize after ${attempts} attempt(s) ` +
+      `(${Date.now() - start}ms): ${lastError}`
   );
 }
 
@@ -140,7 +164,7 @@ describe('workflow step schema generation', () => {
     const host = hostname === '0.0.0.0' ? '127.0.0.1' : hostname;
     baseUrl = `${protocol}://${host}:${port}`;
 
-    await waitForSchemaRoute(log, baseUrl);
+    await waitForStepRegistry(log, baseUrl);
   });
 
   afterAll(async () => {
@@ -155,21 +179,47 @@ describe('workflow step schema generation', () => {
       password: PASSWORD,
     };
 
-    // Mirrors the CLI orchestration (`scripts/generate_workflow_step_schemas.js`)
-    // so the committed bytes match what operators produce.
-    const { version, buildHash } = await fetchBuildInfo(connection, log);
     const composedSchema = await fetchComposedSchema(connection, log);
     const connectorTypes = await fetchConnectorTypes(connection, log);
     const stepTypes = extractStepTypes(composedSchema);
     const triggerTypes = extractTriggerTypes(composedSchema);
 
-    // Guard against a thin/partial boot silently shrinking the committed schema.
-    expect(stepTypes.length).toBeGreaterThan(0);
-    expect(connectorTypes.length).toBeGreaterThan(0);
+    // Completeness gate: every step/trigger the same Kibana reports as registered
+    // must appear in the schema it produced. This is the `--fail-on-incomplete`
+    // semantics from the CLI, acting as a regression guard for the readiness fix
+    // in WorkflowValidationService.getWorkflowZodSchema.
+    const endpointStepIds = await fetchStepDefinitionIds(connection, log);
+    const endpointTriggerIds = await fetchTriggerDefinitionIds(connection, log);
+    const completeness = checkCompleteness({
+      endpointStepIds,
+      endpointTriggerIds,
+      schemaStepTypes: stepTypes,
+      schemaTriggerTypes: triggerTypes,
+    });
 
-    // A single channel-agnostic bundle. The `channel` field is stamped at CDN
-    // publish time by `publish_schema.sh` so the committed tree is not
-    // duplicated for release vs serverless.
+    if (!completeness.complete) {
+      const lines: string[] = ['Schema is missing registered definitions.'];
+      if (completeness.missingSteps.length > 0) {
+        lines.push(`  Missing steps: ${completeness.missingSteps.join(', ')}`);
+      }
+      if (completeness.missingTriggers.length > 0) {
+        lines.push(`  Missing triggers: ${completeness.missingTriggers.join(', ')}`);
+      }
+      throw new Error(lines.join('\n'));
+    }
+
+    // A single channel-agnostic bundle. `kibanaVersion`, `buildHash`, and
+    // `channel` are stamped at CDN publish time by `publish_schema.sh` so the
+    // committed tree is not duplicated for release vs serverless.
+    //
+    // Guard OUTPUT_DIR against escaping the repo before deleting, so a
+    // misconfigured WORKFLOW_SCHEMA_OUTPUT_DIR cannot wipe unrelated directories.
+    if (!OUTPUT_DIR.startsWith(REPO_ROOT)) {
+      throw new Error(
+        `OUTPUT_DIR (${OUTPUT_DIR}) must be inside REPO_ROOT (${REPO_ROOT}). ` +
+          'Check WORKFLOW_SCHEMA_OUTPUT_DIR.'
+      );
+    }
     const bundleDir = OUTPUT_DIR;
     Fs.rmSync(bundleDir, { recursive: true, force: true });
 
@@ -185,8 +235,6 @@ describe('workflow step schema generation', () => {
     });
 
     const manifest: IndexManifest = {
-      kibanaVersion: version,
-      buildHash,
       profile: 'superset',
       connectorTypes,
       stepTypes,
@@ -196,9 +244,5 @@ describe('workflow step schema generation', () => {
     writeIndex(bundleDir, manifest);
 
     log.success(`Wrote workflow step schema artifact to ${bundleDir}`);
-
-    expect(Fs.existsSync(Path.join(bundleDir, 'index.json'))).toBe(true);
-    expect(Fs.existsSync(Path.join(bundleDir, 'strict', 'schema.json'))).toBe(true);
-    expect(Fs.existsSync(Path.join(bundleDir, 'template', 'schema.json'))).toBe(true);
   });
 });

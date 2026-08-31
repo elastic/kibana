@@ -145,10 +145,22 @@ to a single channel-agnostic bundle:
 generated/{index.json,strict/schema.json,template/schema.json}
 ```
 
-The `channel` field is omitted from the committed `index.json` and stamped at CDN
-publish time by `publish_schema.sh`. The output is otherwise deterministic
-(placeholder `buildHash` on a source Kibana, key-sorted and timestamp-free), so
-re-generation is a no-op unless the schema actually changed.
+The `kibanaVersion`, `buildHash`, and `channel` fields are omitted from the
+committed `index.json` and stamped at CDN publish time by `publish_schema.sh`.
+The output is otherwise deterministic and timestamp-free, so re-generation is a
+no-op unless the schema actually changed. Determinism is achieved through two
+layers:
+
+1. **Pre-composition ordering.** Connector and trigger arrays are sorted by their
+   `type` discriminator before `z.toJSONSchema()` runs, pinning the
+   `__schemaN` reference-definition numbering that Zod v4 assigns in traversal
+   order. This ensures re-ordering of async step-loader resolution never
+   produces a whole-file diff.
+2. **Post-serialization canonicalization.** The writer sorts members of
+   `anyOf`, `oneOf`, and `required` arrays by stable-stringified content before
+   hashing, as a belt-and-braces guard. `enum` and `allOf` are intentionally
+   excluded: `enum` order is curated (e.g. severity levels), and `allOf` has no
+   ordering benefit here.
 
 The config runs exclusively via
 `.buildkite/scripts/steps/code_generation/workflow_step_schema_codegen.sh`,
@@ -169,18 +181,20 @@ schema/v1/<version>/release/{index.json,strict/schema.json,template/schema.json}
 schema/v1/serverless/{index.json,strict/schema.json,template/schema.json}
 ```
 
-- **Release** (`.buildkite/scripts/steps/artifacts/publish.sh`, gated on
-  `RELEASE_BUILD=true`): version cut, every RC, and GA overwrite
-  `schema/v1/<version>/release`. Nightly snapshots are not published.
+- **Release** (`.buildkite/scripts/steps/artifacts/upload_dra_pipeline.sh`, gated on
+  `RELEASE_BUILD=true`, `depends_on: dra-prep`): version cut, every RC, and GA
+  overwrite `schema/v1/<version>/release`. Nightly snapshots are not published.
 - **Serverless** (`.buildkite/scripts/steps/artifacts/docker_image.sh`, on the
   main-branch image promotion): rolling overwrite of `schema/v1/serverless`.
 
 Both call the shared `.buildkite/scripts/steps/workflow_step_schema/publish_schema.sh`,
-which reads the GCS service-account key from Vault
-(`kv/ci-shared/workflows-cdn/gcs-publish`, field `credentials`), stamps the real
-`kibanaVersion`, `buildHash`, and `channel` onto the published `index.json` (the
-committed copy omits `channel` and uses a placeholder `buildHash`), and
-`gcloud storage rsync`s the bytes with `cache-control: public, max-age=300`.
+which reads the GCS service-account key from `GCS_SA_CDN_KEY` (exported by
+`setup_job_env.sh`), stamps the real `kibanaVersion`, `buildHash`, and `channel` onto the
+published `index.json` (the committed copy omits all three), and `gcloud storage rsync`s
+the bytes with `cache-control: public, max-age=300`.
+
+The CDN publish is `soft_fail` on both paths; a Buildkite warning annotation is emitted
+on failure so the CDN staleness is visible without trawling job logs.
 
 ## Limitations (accepted)
 
