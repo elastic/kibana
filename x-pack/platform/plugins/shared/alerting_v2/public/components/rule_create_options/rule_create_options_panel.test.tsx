@@ -8,11 +8,30 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { RuleBuilderCreateOptionItem } from '@kbn/alerting-v2-rule-form';
 import { RuleCreateOptionsPanel, getCreateWithAgentTooltipText } from './rule_create_options_panel';
 
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onCreateThresholdRule = jest.fn();
+const onCreateBuilderRule = jest.fn();
+
+/** Two builders, so the panel is exercised as a list rather than a single card. */
+const builderOptions: RuleBuilderCreateOptionItem[] = [
+  {
+    type: 'threshold',
+    title: 'Threshold rule',
+    description: 'Monitor metrics against thresholds.',
+    iconType: 'chartThreshold',
+    order: 10,
+  },
+  {
+    type: 'anomaly',
+    title: 'Anomaly rule',
+    description: 'Detect anomalies in a metric.',
+    iconType: 'machineLearningApp',
+    order: 20,
+  },
+];
 
 const renderPanel = () =>
   render(
@@ -20,7 +39,8 @@ const renderPanel = () =>
       <RuleCreateOptionsPanel
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onCreateThresholdRule={onCreateThresholdRule}
+        builderOptions={builderOptions}
+        onCreateBuilderRule={onCreateBuilderRule}
       />
     </I18nProvider>
   );
@@ -61,18 +81,42 @@ describe('RuleCreateOptionsPanel', () => {
     expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
-  it('renders the "Threshold rule" card', () => {
+  it('renders a card for every registered builder', () => {
     renderPanel();
 
     expect(screen.getByText('Threshold rule')).toBeInTheDocument();
+    expect(screen.getByText('Anomaly rule')).toBeInTheDocument();
   });
 
-  it('calls onCreateThresholdRule when the "Threshold rule" card is clicked', () => {
+  it('reports which builder was chosen, so a new builder needs no changes here', () => {
     renderPanel();
 
-    fireEvent.click(screen.getByTestId('createThresholdRuleCard'));
+    fireEvent.click(screen.getByTestId('createAnomalyRuleCard'));
 
-    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
+    expect(onCreateBuilderRule).toHaveBeenCalledWith('anomaly');
+  });
+
+  // Asserted explicitly because the Scout page object locates this card by subject.
+  it('keeps the threshold card on its established test subject', () => {
+    renderPanel();
+
+    expect(screen.getByTestId('createThresholdRuleCard')).toBeInTheDocument();
+  });
+
+  it('omits the builder section entirely when no builders are registered', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          builderOptions={[]}
+          onCreateBuilderRule={onCreateBuilderRule}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('or start from a builder')).not.toBeInTheDocument();
+    expect(screen.queryByText('Threshold rule')).not.toBeInTheDocument();
   });
 
   it('renders the agent card disabled and does not fire onCreateWithAgent when createWithAgentDisabled is set', () => {
@@ -83,7 +127,8 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
-          onCreateThresholdRule={onCreateThresholdRule}
+          builderOptions={builderOptions}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );
@@ -104,7 +149,8 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
-          onCreateThresholdRule={onCreateThresholdRule}
+          builderOptions={builderOptions}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );
@@ -123,7 +169,8 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
-          onCreateThresholdRule={onCreateThresholdRule}
+          builderOptions={builderOptions}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );
@@ -145,7 +192,8 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled
-          onCreateThresholdRule={onCreateThresholdRule}
+          builderOptions={builderOptions}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );
@@ -164,7 +212,8 @@ describe('RuleCreateOptionsPanel', () => {
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentTooltipText="Extra context"
-          onCreateThresholdRule={onCreateThresholdRule}
+          builderOptions={builderOptions}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );

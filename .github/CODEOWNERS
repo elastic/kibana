@@ -968,6 +968,7 @@ src/platform/test/server_integration/plugins/status_plugin_b @elastic/kibana-cor
 src/platform/test/user_storage/plugins/user_storage_test @elastic/appex-sharedux
 src/setup_node_env @elastic/kibana-operations
 x-pack/examples/alerting_example @elastic/response-ops
+x-pack/examples/alerting_v2_rule_builder_example @elastic/rna-project-team
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/examples/exploratory_view_example @elastic/obs-signals-logs-team
 x-pack/examples/gen_ai_streaming_response_example @elastic/response-ops

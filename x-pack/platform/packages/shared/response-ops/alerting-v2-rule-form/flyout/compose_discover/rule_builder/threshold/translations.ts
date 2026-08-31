@@ -104,6 +104,16 @@ export const THRESHOLD_STEP_TITLE = i18n.translate(
   { defaultMessage: 'Alert Condition' }
 );
 
+export const THRESHOLD_CREATE_OPTION_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleBuilder.threshold.createOptionTitle',
+  { defaultMessage: 'Threshold rule' }
+);
+
+export const THRESHOLD_CREATE_OPTION_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleBuilder.threshold.createOptionDescription',
+  { defaultMessage: 'Monitor metrics against one or more threshold conditions.' }
+);
+
 export const STAT_LABEL_REQUIRED_ERROR = i18n.translate(
   'xpack.alertingV2.ruleBuilder.stats.labelRequiredError',
   { defaultMessage: 'Label is required.' }

@@ -4403,6 +4403,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-rule-builder-example-plugin@link:x-pack/examples/alerting_v2_rule_builder_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-rule-builders@link:x-pack/platform/packages/shared/response-ops/alerting-v2-rule-builders":
   version "0.0.0"
   uid ""

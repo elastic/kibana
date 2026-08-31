@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { RULE_BUILDER_REGISTRY } from './registry';
+import { RULE_BUILDER_REGISTRY, registerRuleBuilder } from './registry';
+import { getRuleBuilderCreateOptions } from './create_options';
+import type { RuleBuilderDefinition } from './types';
 import {
   Aggregation,
   Comparator,
@@ -64,5 +66,47 @@ describe('threshold builder validate', () => {
     });
 
     expect(validate!(STATE, values)).toBe(false);
+  });
+});
+
+describe('registerRuleBuilder', () => {
+  const contributedBuilder: RuleBuilderDefinition<{ metric: string }> = {
+    type: 'contributed',
+    createOption: {
+      title: 'Contributed builder',
+      description: 'Registered by another plugin.',
+      iconType: 'machineLearningApp',
+      order: 20,
+    },
+    stepTitle: 'Configure',
+    createDefaultState: () => ({ metric: '' }),
+    renderStep: () => null,
+  };
+
+  afterEach(() => {
+    delete RULE_BUILDER_REGISTRY[contributedBuilder.type];
+  });
+
+  it('makes the builder resolvable by type', () => {
+    registerRuleBuilder(contributedBuilder);
+
+    expect(RULE_BUILDER_REGISTRY[contributedBuilder.type]).toBe(contributedBuilder);
+  });
+
+  it('adds the builder to the create options without any UI change', () => {
+    registerRuleBuilder(contributedBuilder);
+
+    expect(getRuleBuilderCreateOptions()).toEqual([
+      expect.objectContaining({ type: 'threshold' }),
+      expect.objectContaining({ type: 'contributed', title: 'Contributed builder' }),
+    ]);
+  });
+
+  it('rejects a type that is already registered', () => {
+    registerRuleBuilder(contributedBuilder);
+
+    expect(() => registerRuleBuilder(contributedBuilder)).toThrow(
+      'Rule builder "contributed" is already registered'
+    );
   });
 });

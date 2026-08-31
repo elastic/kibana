@@ -257,6 +257,54 @@ describe it are refused:
 Requests that touch neither the query nor the builder are never blocked, so a rule whose builder
 plugin has since been disabled can still be renamed, retagged, rescheduled, enabled and disabled.
 
+## Contributing the builder UI (client)
+
+Server registration is enough to author rules of your type over the API. To let users create and
+edit them in Kibana, register a `RuleBuilderDefinition` on the browser setup contract:
+
+```typescript
+public setup(core: CoreSetup, { alertingVTwo }: SetupDeps) {
+  alertingVTwo.registerRuleBuilder(myRuleBuilder);
+}
+```
+
+The definition carries the create-options card, the form, and the form's validation:
+
+```typescript
+export const myRuleBuilder: RuleBuilderDefinition<MyFormValues> = {
+  // Must equal the type registered on the server, which generates the query.
+  type: 'my_anomaly_detector',
+  createOption: {
+    title: 'Anomaly rule',
+    description: 'Alert when a metric deviates from its baseline.',
+    iconType: 'machineLearningApp',
+    // Lower sorts earlier; builders without an order sort last, then by title.
+    order: 20,
+  },
+  stepTitle: 'Anomaly condition',
+  createDefaultState: () => ({ indexPattern: '', metric: '', conditions: [] }),
+  renderStep: (props) => <MyAnomalyStep {...props} />,
+  validate: (_state, values) => (values ? myBuilderFieldsSchema.safeParse(values).success : false),
+};
+```
+
+What this buys, and what to watch for:
+
+- Registering is all it takes to appear in the rule creation options — no shared component
+  enumerates builders — and to render the fields of a saved rule of that type.
+- Your step owns its state through `useBuilderState<MyFormValues>()`, and writes the query it
+  previews into the rule form with react-hook-form's `setValue`. That query is only what the
+  flyout previews and what ES|QL mode would open with; the stored one is generated server-side.
+- Setup runs on every page load, so keep the form components out of that bundle by loading them
+  lazily from `renderStep` (`React.lazy`).
+- A UI is optional and may lag the server: a rule whose builder type has no UI registered simply
+  opens in ES|QL mode.
+- Validating the form with the same schema the server registers keeps "the form looks complete"
+  and "the server accepts it" from diverging.
+
+A runnable end-to-end example — shared schema and generator, server registration, and builder UI —
+lives in `x-pack/examples/alerting_v2_rule_builder_example` (run Kibana with `--run-examples`).
+
 ## Reopening a rule in the builder (client)
 
 The builder's form state and its persisted `builder_fields` are related but not identical: a form
@@ -341,3 +389,5 @@ covered by the alerting v2 plugin's own tests in `server/lib/builder_types` and
 - [ ] Wrap both in `defineBuilderType<YourFields>()`
 - [ ] Register during `setup()` via `alertingV2.registerBuilderType()`
 - [ ] Unit-test the schema and the generator in your own package
+- [ ] For a UI, register a `RuleBuilderDefinition` via `alertingV2.registerRuleBuilder()` on the
+      browser setup contract, loading the form lazily

@@ -81,6 +81,14 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
       Compose Discover flyout
     </button>
   ),
+  getRuleBuilderCreateOptions: () => [
+    {
+      type: 'threshold',
+      title: 'Threshold rule',
+      description: 'Monitor metrics against thresholds.',
+      iconType: 'chartThreshold',
+    },
+  ],
 }));
 
 jest.mock('./rules_data_source', () => ({

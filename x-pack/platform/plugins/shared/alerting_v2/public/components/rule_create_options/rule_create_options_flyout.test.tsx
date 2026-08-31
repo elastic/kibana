@@ -9,12 +9,22 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { RuleBuilderCreateOptionItem } from '@kbn/alerting-v2-rule-form';
 import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onCreateThresholdRule = jest.fn();
+const onCreateBuilderRule = jest.fn();
+
+const builderOptions: RuleBuilderCreateOptionItem[] = [
+  {
+    type: 'threshold',
+    title: 'Threshold rule',
+    description: 'Monitor metrics against thresholds.',
+    iconType: 'chartThreshold',
+  },
+];
 
 const renderFlyout = () =>
   render(
@@ -23,7 +33,8 @@ const renderFlyout = () =>
         onClose={onClose}
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onCreateThresholdRule={onCreateThresholdRule}
+        builderOptions={builderOptions}
+        onCreateBuilderRule={onCreateBuilderRule}
       />
     </I18nProvider>
   );
@@ -75,12 +86,12 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
-  it('calls onCreateThresholdRule when the Threshold rule option is selected', () => {
+  it('reports the chosen builder type when a builder option is selected', () => {
     renderFlyout();
 
     fireEvent.click(screen.getByRole('button', { name: /threshold rule/i }));
 
-    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
+    expect(onCreateBuilderRule).toHaveBeenCalledWith('threshold');
   });
 
   it('renders the AI Agent option disabled and does not fire onCreateWithAgent when createWithAgentDisabled is set', () => {
@@ -92,7 +103,8 @@ describe('RuleCreateOptionsFlyout', () => {
           onCreateWithAgent={onCreateWithAgent}
           createWithAgentDisabled
           createWithAgentTooltipText="Missing privileges"
-          onCreateThresholdRule={onCreateThresholdRule}
+          builderOptions={builderOptions}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );
