@@ -59,6 +59,14 @@ const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
   return () => (cached ??= fn());
 };
 
+const memoizeAsyncByKey = <K, T>(fn: (key: K) => Promise<T>): ((key: K) => Promise<T>) => {
+  const cache = new Map<K, Promise<T>>();
+  return (key: K) => {
+    if (!cache.has(key)) cache.set(key, fn(key));
+    return cache.get(key)!;
+  };
+};
+
 /**
  * Utility function to creates a {@link ModelProviderFactoryFn}
  */
@@ -115,11 +123,22 @@ export const createModelProvider = ({
       connectorId = recommendedEndpoint[0].connectorId;
     }
 
+    const defaultConnectorId = await getDefaultConnectorId();
     if (!connectorId) {
-      connectorId = await getDefaultConnectorId();
+      connectorId = defaultConnectorId;
+      logger.info(
+        `[model_provider] No dedicated fast inference endpoint found for feature "${AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID}" — falling back to default connector: ${connectorId}. Fast model and default model are the SAME.`
+      );
+    } else {
+      const isSame = connectorId === defaultConnectorId;
+      logger.info(
+        `[model_provider] Fast connector: ${connectorId}, default connector: ${defaultConnectorId}. ${
+          isSame
+            ? 'Fast model and default model are the SAME.'
+            : 'Fast model is a DISTINCT connector — latency gains expected.'
+        }`
+      );
     }
-
-    logger.debug(`[getFastModelConnectorId] Using connectorId: ${connectorId}`);
 
     return connectorId;
   });
@@ -141,7 +160,7 @@ export const createModelProvider = ({
     };
   };
 
-  const getModelById = async (connectorId: string): Promise<ScopedModel> => {
+  const getModelById = memoizeAsyncByKey(async (connectorId: string): Promise<ScopedModel> => {
     const completionCallback: InferenceCompleteCallbackHandler = (event) => {
       // Prefer model from provider response, fallback to connector-based model
       let modelName: string | undefined = event.model;
@@ -198,7 +217,7 @@ export const createModelProvider = ({
       chatModel,
       inferenceClient,
     };
-  };
+  });
 
   const hasFastModel = memoizeAsync(async () => {
     const [fastConnectorId, resolvedDefaultConnectorId] = await Promise.all([

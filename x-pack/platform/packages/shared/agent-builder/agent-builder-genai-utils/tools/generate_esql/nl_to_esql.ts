@@ -15,9 +15,10 @@ import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
-import { createNlToEsqlGraph } from './graph';
+import { createNlToEsqlGraph, requestDocumentationSchema } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
+import { createRequestDocumentationPromptNoResource } from './prompts';
 
 export class GenerateEsqlNoDataError extends Error {
   readonly code = 'NO_DATA' as const;
@@ -136,7 +137,6 @@ export const generateEsql = async ({
   esClient,
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
-  // Resolve a single ScopedModel once. When a modelProvider is given, use the low-effort model
   const model = modelProvider
     ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
     : inputModel!;
@@ -163,25 +163,47 @@ export const generateEsql = async ({
     },
     async () => {
       try {
-        // Discover index if not provided (`indexExplorer` takes one string; append `additionalContext`
-        // when set so resource selection can use editor notes or any other hints, not only `nlQuery`.)
         const nlQueryWithContext = additionalContext?.trim()
           ? `${nlQuery.trim()}\n\n${additionalContext.trim()}`
           : nlQuery.trim();
 
         let selectedTarget = index;
-        if (!selectedTarget) {
-          logger?.debug('No index provided, discovering target index using indexExplorer');
-          const {
-            resources: [selectedResource],
-          } = await indexExplorer({
-            nlQuery: nlQueryWithContext,
-            esClient,
-            limit: 1,
-            includeDatasets,
-            model,
-            logger,
+
+        // Doc selection needs only the NL query, so it starts immediately —
+        // concurrently with index discovery when needed, or alone when index is known.
+        const requestDocModel = model.chatModel.withStructuredOutput(requestDocumentationSchema, {
+          name: 'request_documentation',
+        });
+        const docPromise = requestDocModel
+          .invoke(createRequestDocumentationPromptNoResource({ nlQuery, documentation }))
+          .then(({ commands = [], functions = [] }) => {
+            const requestedKeywords = [...commands, ...functions];
+            return {
+              type: 'request_documentation' as const,
+              requestedKeywords,
+              fetchedDoc: docBase.getDocumentation(requestedKeywords),
+            };
           });
+
+        let precomputedDocAction;
+
+        if (!selectedTarget) {
+          const [
+            {
+              resources: [selectedResource],
+            },
+            docAction,
+          ] = await Promise.all([
+            indexExplorer({
+              nlQuery: nlQueryWithContext,
+              esClient,
+              limit: 1,
+              includeDatasets,
+              model,
+              logger,
+            }),
+            docPromise,
+          ]);
           if (!selectedResource) {
             throw new GenerateEsqlNoDataError(
               'Could not discover a suitable index for the query. Please specify an index explicitly.'
@@ -189,6 +211,9 @@ export const generateEsql = async ({
           }
           selectedTarget = selectedResource.name;
           logger?.debug(`Discovered target index: ${selectedTarget}`);
+          precomputedDocAction = docAction;
+        } else {
+          precomputedDocAction = await docPromise;
         }
 
         const outState = await graph.invoke(
@@ -202,6 +227,7 @@ export const generateEsql = async ({
             rowLimit,
             disableNamedParams,
             timeRange,
+            actions: [precomputedDocAction],
           },
           {
             recursionLimit: 25,
