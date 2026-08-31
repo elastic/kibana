@@ -15,7 +15,7 @@ export const dashboardManagementSkill = defineSkillType({
   name: 'dashboard-management',
   basePath: 'skills/platform/dashboard',
   description:
-    'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
+    'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing. On prettify, ask once which categories to fix, then call generate_dashboard at most twice.',
   content: `## When to Use This Skill
 
 Use this skill when:

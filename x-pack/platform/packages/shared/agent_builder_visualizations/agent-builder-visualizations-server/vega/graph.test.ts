@@ -11,10 +11,15 @@ import type { Logger } from '@kbn/logging';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
 import { createVegaGraph } from './graph';
+import { judgeVisualizationEsql } from '../shared/judge_visualization_esql';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
+}));
+
+jest.mock('../shared/judge_visualization_esql', () => ({
+  judgeVisualizationEsql: jest.fn(),
 }));
 
 jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
@@ -31,6 +36,7 @@ jest.mock('../shared/esql_instructions', () => ({
 
 const mockedGenerateEsql = jest.mocked(generateEsql);
 const mockedExecuteEsql = jest.mocked(executeEsql);
+const mockedJudgeVisualizationEsql = jest.mocked(judgeVisualizationEsql);
 
 const createMockLogger = (): Logger =>
   ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
@@ -75,6 +81,7 @@ describe('createVegaGraph', () => {
     mockedExecuteEsql.mockResolvedValue({ columns: [], values: [] } as Awaited<
       ReturnType<typeof executeEsql>
     >);
+    mockedJudgeVisualizationEsql.mockResolvedValue(true);
   });
 
   const run = async (
@@ -197,6 +204,7 @@ describe('createVegaGraph', () => {
   });
 
   it('seeds ES|QL generation with the existing query as context when editing', async () => {
+    mockedJudgeVisualizationEsql.mockResolvedValue(false);
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
 
     // An edit with no trusted query: the recovered query must be handed to the
@@ -279,35 +287,26 @@ describe('createVegaGraph', () => {
     expect(JSON.parse(state.spec!).mark).toBe('arc');
   });
 
-  it('regenerates a corrected query when the provided ES|QL fails to execute', async () => {
+  it('regenerates a corrected query when the judge rejects the current ES|QL', async () => {
+    mockedJudgeVisualizationEsql.mockResolvedValue(false);
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
-    // The provided query throws (an invalid, agent-invented query); the
-    // regenerated query then executes cleanly.
-    mockedExecuteEsql
-      .mockRejectedValueOnce(
-        new Error('verification_exception: second argument of [half_ms * 1ms] must be [numeric]')
-      )
-      .mockResolvedValue({ columns: [], values: [] } as Awaited<ReturnType<typeof executeEsql>>);
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
-    // A bad provided query is routed through the self-correcting generator
-    // instead of aborting, so we still produce a working chart.
     expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).data.url.query).toBe(GENERATED_ESQL);
   });
 
-  it('aborts only after both the provided query and regeneration fail to execute', async () => {
-    mockedExecuteEsql.mockRejectedValue(
-      new Error('verification_exception: second argument of [half_ms * 1ms] must be [numeric]')
-    );
+  it('aborts when the judge rejects the current query and regeneration fails', async () => {
+    mockedJudgeVisualizationEsql.mockResolvedValue(false);
+    mockedGenerateEsql.mockResolvedValue({
+      error: 'verification_exception: second argument of [half_ms * 1ms] must be [numeric]',
+    } as Awaited<ReturnType<typeof generateEsql>>);
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
-    // The provided query is discarded and regeneration is attempted; when that
-    // also cannot execute, we abort instead of authoring around a broken query.
-    expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
+    expect(mockedGenerateEsql).toHaveBeenCalledTimes(2);
     expect(invoke).not.toHaveBeenCalled();
     expect(state.spec).toBeNull();
     expect(state.error).toContain('Could not resolve a valid ES|QL query');

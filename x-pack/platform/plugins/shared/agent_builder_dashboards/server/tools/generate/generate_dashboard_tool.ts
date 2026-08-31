@@ -11,11 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  isSection,
-  type DashboardAttachmentData,
-} from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
@@ -28,6 +24,8 @@ import {
   dashboardOperationSchema,
 } from './core';
 import { applyDefaultDashboardTimeRange } from './time_range';
+import { reviewDashboard } from './review_dashboard';
+import { summarizeDashboard } from './summarize_dashboard';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
@@ -44,58 +42,15 @@ const generateDashboardSchema = z.object({
 });
 
 /**
- * Compact projection of a dashboard payload, returned in the tool result.
- *
- * The full dashboard payload lives in the dashboard attachment (referenced by
- * id); the LLM only ever sees this slim summary, so it never has to re-emit the
- * heavy payload into a follow-up tool call.
- *
- * `authoringNotesByPanelId` holds the one-sentence note describing every chart
- * authored in this run, keyed by panel id. Panels that were not authored now
- * (or whose engine returned no note) simply have no `authoring_note`.
- */
-const summarizeDashboard = (
-  dashboardData: DashboardAttachmentData,
-  authoringNotesByPanelId: Map<string, string>
-) => ({
-  title: dashboardData.title,
-  description: dashboardData.description,
-  panels: dashboardData.panels.map((widget) => {
-    if (isSection(widget)) {
-      return {
-        id: widget.id,
-        title: widget.title,
-        collapsed: widget.collapsed,
-        grid: widget.grid,
-        panels: widget.panels.map((panel) => ({
-          type: panel.type,
-          id: panel.id,
-          grid: panel.grid,
-          authoring_note: authoringNotesByPanelId.get(panel.id),
-        })),
-      };
-    }
-    return {
-      type: widget.type,
-      id: widget.id,
-      grid: widget.grid,
-      authoring_note: authoringNotesByPanelId.get(widget.id),
-    };
-  }),
-  controls: (dashboardData.pinned_panels ?? []).map((control) => {
-    const c = control as { id?: string; type?: string; config?: { title?: string } };
-    return { id: c.id, type: c.type, title: c.config?.title };
-  }),
-});
-
-/**
  * Kibana dashboard generation tool.
  *
  * Wraps the environment-agnostic {@link executeDashboardOperations} core with
  * Kibana attachment persistence so the LLM works against a lightweight reference:
  * - the prior payload is read server-side from `dashboardAttachmentId`,
  * - the generated payload is persisted as a `dashboard` attachment,
- * - the result returns only the attachment id, version, and a compact dashboard summary.
+ * - the result returns the attachment id, version, and a compact dashboard summary.
+ *   Create and update both get an experimental review of the full attachment
+ *   (problems only; generate still succeeds if the judge fails).
  *
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
@@ -109,6 +64,8 @@ export const generateDashboardTool = (): BuiltinSkillBoundedTool<
     description: `Generate or update a dashboard from ordered operations.
 
 Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
+
+After a prettify/polish HITL answer, call this at most twice this round (initial apply + one review retry). Do not call a third time to chase leftover review.problems — those leftovers are informational. Review runs on every call; leftover problems do not authorize another generate.
 
 Use operations[] to:
 1. set metadata
@@ -178,6 +135,16 @@ Use operations[] to:
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
 
+        const dashboard = summarizeDashboard(
+          finalDashboardData,
+          new Map(panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote]))
+        );
+        const review = await reviewDashboard({
+          dashboard: finalDashboardData,
+          modelProvider,
+          logger,
+        });
+
         return {
           results: [
             {
@@ -186,15 +153,8 @@ Use operations[] to:
               data: {
                 attachment_id: attachment.id,
                 version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(
-                  finalDashboardData,
-                  new Map(
-                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
-                      panelId,
-                      authoringNote,
-                    ])
-                  )
-                ),
+                dashboard,
+                ...(review ? { review } : {}),
                 failures: failures.length > 0 ? failures : undefined,
               },
             },

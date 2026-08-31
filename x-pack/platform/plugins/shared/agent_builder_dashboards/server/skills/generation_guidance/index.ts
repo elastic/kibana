@@ -6,3 +6,10 @@
  */
 
 export { dashboardGeneration } from './generation_guidance';
+export { dashboardPrettify } from './prettify_guidance';
+export {
+  getDashboardAuthoringPromptContent,
+  getDashboardReviewPromptContent,
+} from './dashboard_guidance';
+export { dashboardRuleRegistry, dashboardRuleTopics } from './dashboard_rule_registry';
+export type { DashboardRuleEntry, DashboardRuleTopic } from './dashboard_rule_registry';

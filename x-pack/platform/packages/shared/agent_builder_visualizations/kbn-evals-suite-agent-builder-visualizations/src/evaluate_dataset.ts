@@ -18,6 +18,7 @@ import {
   type ExperimentTask,
 } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { XYLegendStatistic } from '@kbn/lens-embeddable-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   extractVisualizationEsql,
@@ -30,6 +31,7 @@ import { createChartTypeVsIntentEvaluator } from './evaluators/chart_type_vs_int
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 import { createRendererVsIntentEvaluator } from './evaluators/renderer_vs_intent';
+import { createSeriesStatisticsVsIntentEvaluator } from './evaluators/series_statistics_vs_intent';
 import { createVisualizationConfigValidityEvaluator } from './evaluators/visualization_config_validity';
 
 export type VisualizationDatasetExample = Example<
@@ -48,6 +50,16 @@ export type VisualizationDatasetExample = Example<
     chartType?: string | string[];
     /** Expected renderer when the example intentionally forces Lens or Vega. */
     renderer?: 'lens' | 'vega';
+    /**
+     * Legend statistics that must appear on the Lens XY config and must not
+     * be computed as extra ES|QL columns. Values must be official
+     * `legend.statistics` options (avg, min, max, median, last_value, …).
+     */
+    legendStatistics?: XYLegendStatistic[];
+    /**
+     * ES|QL aggregations a measure-over-time request must use (e.g. `['AVG']`).
+     */
+    esqlAggregations?: string[];
   },
   {
     agentId?: string;
@@ -160,6 +172,15 @@ export function createEvaluateDataset({
     visualizationExtractor,
   });
 
+  const seriesStatisticsVsIntentEvaluator = createSeriesStatisticsVsIntentEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    visualizationExtractor,
+    expectedLegendStatisticsExtractor: (expected) => expected?.legendStatistics,
+    expectedEsqlAggregationsExtractor: (expected) => expected?.esqlAggregations,
+  });
+
   const chartCompatibleResultEvaluator = createChartCompatibleResultEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
@@ -208,6 +229,7 @@ export function createEvaluateDataset({
       chartTypeVsIntentEvaluator,
       rendererVsIntentEvaluator,
       visualizationConfigValidityEvaluator,
+      seriesStatisticsVsIntentEvaluator,
       chartCompatibleResultEvaluator,
       trajectoryEvaluator,
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
