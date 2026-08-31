@@ -72,7 +72,7 @@ export class DeferredDataClientBundle implements DataClientBundle {
   private createDataClientBundle(): DataClientBundle {
     const { deps } = this;
     switch (deps.source) {
-      case 'system_index':
+      case 'plain_index':
         return new PlainIndexDataClientBundle(deps);
       case 'data_stream':
         return new DataStreamDataClientBundle(deps);

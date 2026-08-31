@@ -188,7 +188,7 @@ export class WorkflowsExecutionEnginePlugin
     initializeTriggerEventsDataStream(core.dataStreams);
 
     this.dataClientBundle = createDataClientBundle({
-      source: 'data_stream',
+      source: this.config.storage.source,
       logger: this.logger,
     });
     void this.dataClientBundle.initSetup(core);

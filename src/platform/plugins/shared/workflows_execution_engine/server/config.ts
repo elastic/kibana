@@ -31,6 +31,12 @@ const EventTriggersConfigSchema = schema.object({
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  storage: schema.object({
+    source: schema.oneOf(
+      [schema.literal('plain_index'), schema.literal('data_stream')],
+      { defaultValue: 'plain_index' }
+    ),
+  }),
   eventDriven: EventTriggersConfigSchema,
   /**
    * Maximum depth of nested workflow execution (workflow calling workflow via workflow.execute step).

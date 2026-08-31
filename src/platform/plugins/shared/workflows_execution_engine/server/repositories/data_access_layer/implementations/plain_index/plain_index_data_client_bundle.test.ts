@@ -31,7 +31,7 @@ describe('PlainIndexDataClientBundle', () => {
     });
 
     const logger = loggerMock.create();
-    const bundle = new PlainIndexDataClientBundle({ source: 'system_index', logger });
+    const bundle = new PlainIndexDataClientBundle({ source: 'plain_index', logger });
 
     await expect(bundle.initSetup(coreSetup)).resolves.toBeUndefined();
     await expect(bundle.initStart(coreStart)).resolves.toBeUndefined();
