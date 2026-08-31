@@ -273,13 +273,13 @@ describe('openAIAdapter', () => {
             {
               type: 'image_url',
               image_url: {
-                url: 'aaaaaa',
+                url: 'data:image/png;base64,aaaaaa',
               },
             },
             {
               type: 'image_url',
               image_url: {
-                url: 'bbbbbb',
+                url: 'data:image/png;base64,bbbbbb',
               },
             },
           ],

@@ -367,38 +367,22 @@ streams_app/
 │   │   │       ├── stream_detail_lifecycle/    # Retention, downsampling, failure store
 │   │   │       ├── stream_detail_canvas/
 │   │   │       └── shared/                     # Condition editor, condition display
-│   │   ├── significant_events_app_redirect/ # Bookmark shim → significant_events_app
 │   │   └── query_streams/                  # Query stream creation
 │   └── telemetry/
 ├── server/                    # Minimal server plugin
 └── test/scout/                # Scout UI tests (Playwright)
 ```
 
-Significant Events UI lives in `significant_events_app` (`/app/significant_events`).
-`streams_app` keeps `/_discovery` routes as a bookmark shim that redirects into that app.
-
-Streams gates Significant Events UI (list button, overview Knowledge Indicators panel,
-redirect shim) via two optional plugins:
-
-- `significantEventsApp` — start contract `getKnowledgeIndicatorsPanel()` / navigation
-- `significant_events` — `significantEventsRepositoryClient.fetch('GET /internal/significant_events/availability')`
-
-When either is absent, or the availability probe returns unavailable, SE UI stays hidden.
-Streams gates on that server probe directly; SEA does not expose an availability observable.
-
 ### UI Routes
 
 | Path | Component | Description |
 |------|-----------|-------------|
 | `/` | `StreamListView` | Stream list with tree table |
-| `/_discovery/{tab}` | `SignificantEventsAppRedirect` | Shim → `/app/significant_events/{tab}` |
 | `/{key}/management/{tab}` | `StreamDetailManagement` | Tabbed management (differs by stream type) |
 
 Management tabs for **wired streams**: overview, partitioning, processing, schema, lifecycle, data quality, attachments, canvas.
 
 Management tabs for **classic streams**: overview, lifecycle, partitioning, processing, data quality, schema, attachments, canvas.
-
-There is no per-stream significant events tab. Old `/_discovery` bookmarks redirect into `significant_events_app`.
 
 ### Key UI Patterns
 
