@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '.';
 import type { ArtifactTabCase } from './artifact_tabs_test_data';
-import { getArtifactNoneRole, getArtifactReadRole } from './roles';
+import { getArtifactRole } from './roles';
 
 export const ARTIFACT_TAB_POLICY_DETAILS_TAGS = [
   ...tags.stateful.classic,
@@ -48,16 +48,12 @@ export const describeArtifactTabPolicyDetails = (
         await apiServices.endpointArtifacts.deleteList(artifact.listId);
       });
 
-      spaceTest.afterAll(async ({ apiServices }) => {
-        await apiServices.endpointArtifacts.deleteList(artifact.listId);
-      });
-
       spaceTest(
         `${artifact.title} tab is hidden when the user has no artifact privilege`,
         async ({ browserAuth, pageObjects, endpointPolicy, config }) => {
           spaceTest.skip(Boolean(config.serverless), STATEFUL_ONLY_REASON);
 
-          await browserAuth.loginWithCustomRole(getArtifactNoneRole(artifact.privilegePrefix));
+          await browserAuth.loginWithCustomRole(getArtifactRole(artifact.privilegePrefix, 'none'));
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
 
           await expect(pageObjects.policyDetailsPage.artifactTab(artifact.tabTestSubj)).toHaveCount(
@@ -73,8 +69,7 @@ export const describeArtifactTabPolicyDetails = (
           // One login plus two policy-details reloads; default 60s is tight.
           spaceTest.setTimeout(90_000);
 
-          await apiServices.endpointArtifacts.deleteList(artifact.listId);
-          await browserAuth.loginWithCustomRole(getArtifactReadRole(artifact.privilegePrefix));
+          await browserAuth.loginWithCustomRole(getArtifactRole(artifact.privilegePrefix, 'read'));
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
 
           const openTab = async () => {
@@ -141,8 +136,7 @@ export const describeArtifactTabPolicyDetails = (
 
       spaceTest(
         `${artifact.title} ALL user can add an artifact from an empty tab`,
-        async ({ browserAuth, pageObjects, apiServices, endpointPolicy }) => {
-          await apiServices.endpointArtifacts.deleteList(artifact.listId);
+        async ({ browserAuth, pageObjects, endpointPolicy }) => {
           await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
           await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);

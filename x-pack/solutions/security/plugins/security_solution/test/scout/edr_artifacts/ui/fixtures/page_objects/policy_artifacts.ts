@@ -6,8 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
-
-const TRUSTED_APP_HASH = 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476';
+import { TRUSTED_APP_HASH } from '../artifact_tabs_test_data';
 
 export type PolicyArtifactKind =
   | 'trustedApps'

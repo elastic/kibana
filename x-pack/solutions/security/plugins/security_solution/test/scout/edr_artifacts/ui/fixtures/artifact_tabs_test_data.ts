@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum, type EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PolicyArtifactKind } from './page_objects';
 
+/** Displayed lowercase; keep in sync with Cypress `artifacts_page.ts` criteria strings. */
+export const TRUSTED_APP_HASH = 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476';
+
+/**
+ * Policy-details tab cases for Scout. Cypress `getArtifactsListTestsData()` in
+ * `public/management/cypress/fixtures/artifacts_page.ts` is a live fork used
+ * by `artifacts.cy.ts`. If you change a criteriaConditions string here, update
+ * the other.
+ */
 export interface ArtifactTabCase {
   kind: PolicyArtifactKind;
   title: string;
@@ -21,7 +30,7 @@ export interface ArtifactTabCase {
   listId: string;
   listType: string;
   osTypes: string[];
-  entries: object[];
+  entries: EntriesArray;
   createCriteria: {
     selector: string;
     value: string;
@@ -71,8 +80,7 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
     ],
     createCriteria: {
       selector: 'trustedAppsListPage-card-criteriaConditions',
-      value:
-        ' OSIS WindowsAND process.hash.*IS a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+      value: ` OSIS WindowsAND process.hash.*IS ${TRUSTED_APP_HASH}`,
     },
   },
   {
@@ -115,15 +123,14 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
     entries: [
       {
         field: 'file.hash.sha256',
-        value: ['a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476'],
+        value: [TRUSTED_APP_HASH],
         type: 'match_any',
         operator: 'included',
       },
     ],
     createCriteria: {
       selector: 'blocklistPage-card-criteriaConditions',
-      value:
-        ' OSIS WindowsAND file.hash.*is one of a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+      value: ` OSIS WindowsAND file.hash.*is one of ${TRUSTED_APP_HASH}`,
     },
   },
   {

@@ -36,9 +36,13 @@ const withNoRequestRetries = (kbnClient: KbnClient): KbnClient => {
 
 /**
  * FTR space tests build a KbnClient whose URL already includes `/s/{spaceId}`.
- * Path-prefixing `request()` on the default-space client is not equivalent:
- * `resolveUrl` and non-request helpers stay on `/`, and Fleet can 404 the
- * follow-up package-policy create.
+ * Prefixing `options.path` on the original default-space client is not
+ * equivalent: `resolveUrl` and non-request helpers stay on `/`, and Fleet
+ * 404s the follow-up package-policy create.
+ *
+ * Rebuilding `new KbnClient({ log, url })` drops `certificateAuthorities`
+ * (http2/TLS) and can mis-order a Kibana server basePath. Keep this only
+ * because path-prefixing is the option that actually failed here.
  *
  * Do not send EPM getInfo through this client. Fleet/EPM setup runs in
  * `default`; `GET /s/{space}/api/fleet/epm/packages/endpoint` 404s, and the

@@ -26,13 +26,11 @@ const toKibanaRole = (role: ReturnType<typeof getEndpointSecurityPolicyManager>)
   })),
 });
 
-const siemFeatureId = (role: ReturnType<typeof getEndpointSecurityPolicyManager>): string =>
-  Object.keys(role.kibana[0].feature).find((feature) => feature.startsWith('siem')) ??
-  SECURITY_FEATURE_ID;
-
-export const getArtifactReadRole = (privilegePrefix: string): KibanaRole => {
+export const getArtifactRole = (privilegePrefix: string, access: 'read' | 'none'): KibanaRole => {
   const baseRole = getEndpointSecurityPolicyManager();
-  const featureId = siemFeatureId(baseRole);
+  const featureId =
+    Object.keys(baseRole.kibana[0].feature).find((feature) => feature.startsWith('siem')) ??
+    SECURITY_FEATURE_ID;
   const siemPrivileges = baseRole.kibana[0].feature[featureId].filter(
     (privilege) => privilege !== `${privilegePrefix}all`
   );
@@ -44,28 +42,8 @@ export const getArtifactReadRole = (privilegePrefix: string): KibanaRole => {
         ...baseRole.kibana[0],
         feature: {
           ...baseRole.kibana[0].feature,
-          [featureId]: [...siemPrivileges, `${privilegePrefix}read`],
-        },
-      },
-    ],
-  });
-};
-
-export const getArtifactNoneRole = (privilegePrefix: string): KibanaRole => {
-  const baseRole = getEndpointSecurityPolicyManager();
-  const featureId = siemFeatureId(baseRole);
-  const siemPrivileges = baseRole.kibana[0].feature[featureId].filter(
-    (privilege) => privilege !== `${privilegePrefix}all`
-  );
-
-  return toKibanaRole({
-    ...baseRole,
-    kibana: [
-      {
-        ...baseRole.kibana[0],
-        feature: {
-          ...baseRole.kibana[0].feature,
-          [featureId]: siemPrivileges,
+          [featureId]:
+            access === 'read' ? [...siemPrivileges, `${privilegePrefix}read`] : siemPrivileges,
         },
       },
     ],

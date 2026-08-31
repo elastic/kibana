@@ -6,26 +6,14 @@
  */
 
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
-import { globalTeardownHook } from '@kbn/scout-security';
-
-const EXCEPTION_LIST_URL = '/api/exception_lists';
+import { getEndpointArtifactsApiService, globalTeardownHook } from '@kbn/scout-security';
 
 globalTeardownHook(
   'Delete leftover agnostic endpoint artifact lists',
   async ({ kbnClient, log }) => {
     log.debug('[teardown] deleting endpoint artifact exception lists');
-    for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: EXCEPTION_LIST_URL,
-        query: { list_id: listId, namespace_type: 'agnostic' },
-        headers: {
-          'elastic-api-version': '2023-10-31',
-          'x-elastic-internal-origin': 'kibana',
-        },
-        ignoreErrors: [404],
-        retries: 0,
-      });
-    }
+    await getEndpointArtifactsApiService({ kbnClient, log }).deleteAll([
+      ...ENDPOINT_ARTIFACT_LIST_IDS,
+    ]);
   }
 );
