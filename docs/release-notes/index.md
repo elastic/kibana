@@ -774,8 +774,8 @@ For the {{elastic-sec}} 9.4.6 release information, refer to [{{elastic-sec}} Sol
 * Fix by-reference Lens panels being removed from dashboards when their saved object references are missing [#285476]({{kib-pull}}285476).
 
 **Data ingestion and {{fleet}}**:
-* Fix {{fleet}} secrets being stored inline instead of as encrypted references when package policies are created in bulk [#282213]({{kib-pull}}282213).
-* Remove the proxy configuration option from Kafka outputs, which are not proxy-compatible [#282313]({{kib-pull}}282313).
+* Fix {{fleet}} secrets being stored inline instead of in the secrets index when package policies are created in bulk [#282213]({{kib-pull}}282213).
+* Remove the proxy configuration option from Kafka outputs, which don't support it [#282313]({{kib-pull}}282313).
 
 **Developer tools**:
 % !!DEFERRED!! #286703 not yet confirmed in build candidate 9.4.6-31343951 (backport merged after BC cutoff).
@@ -835,8 +835,6 @@ For the {{elastic-sec}} 9.4.6 release information, refer to [{{elastic-sec}} Sol
 
 **Data ingestion and Fleet**:
 * Fix Fleet output edits failing with a validation error when more than 10 hosts were configured, by raising the host limit from 10 to 100 for Elasticsearch, remote Elasticsearch, Logstash, and Kafka outputs [#282397]({{kib-pull}}282397).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.4.5-c191ddff (backport merged after BC cutoff).
-% * Fix Kafka outputs showing and accepting a proxy configuration, which Kafka outputs don't support [#282313]({{kib-pull}}282313).
 * Fix the `expiration` parameter on `POST /enrollment_api_keys` being silently dropped, and add an **Expiration** field to the **Create enrollment token** form in Fleet [#281324]({{kib-pull}}281324).
 * Fix OpenTelemetry integration metrics not defaulting to the `time_series` index mode [#281295]({{kib-pull}}281295).
 * Fix the agent policy filter on the **Agents** list returning no agents for version-specific policies [#281195]({{kib-pull}}281195).
