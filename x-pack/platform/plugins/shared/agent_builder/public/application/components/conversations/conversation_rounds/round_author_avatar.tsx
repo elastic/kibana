@@ -12,7 +12,7 @@ import type { ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { useRoundAuthorDetails } from '../../../hooks/use_round_author_details';
 import { AgentAvatar } from '../../common/agent_avatar';
-import type { RoundAuthor } from './round_author';
+import type { RoundAuthor } from './round_author_helpers';
 
 interface RoundAuthorAvatarProps {
   agent?: AgentDefinition;

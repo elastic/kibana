@@ -28,7 +28,7 @@ import { RoundError } from './round_error/round_error';
 import { AuthorizationPrompt, ConfirmationPrompt, AskUserQuestionPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './todos_step_display';
-import { isPendingCurrentRound } from './round_author';
+import { isPendingCurrentRound } from './round_author_helpers';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useAgentId, useConversationReadOnly } from '../../../hooks/use_conversation';
 

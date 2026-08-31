@@ -13,7 +13,7 @@ import {
   isCurrentUserAuthor,
   isPendingCurrentRound,
   isUserProfileAuthor,
-} from './round_author';
+} from './round_author_helpers';
 
 const currentUser = {
   uid: 'current-user',

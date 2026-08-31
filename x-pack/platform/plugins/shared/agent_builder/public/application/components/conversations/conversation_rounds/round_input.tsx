@@ -29,7 +29,7 @@ import { RoundAttachmentReferences } from './round_attachment_references';
 import { CommandBadgeText } from './command_badge_text';
 import { RoundAuthorAvatar } from './round_author_avatar';
 import { RoundAuthorHeader } from './round_author_header';
-import { getInputAuthor, isCurrentUserAuthor, type RoundAuthor } from './round_author';
+import { getInputAuthor, isCurrentUserAuthor, type RoundAuthor } from './round_author_helpers';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {

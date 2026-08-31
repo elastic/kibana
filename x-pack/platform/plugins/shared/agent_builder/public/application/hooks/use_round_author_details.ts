@@ -12,7 +12,7 @@ import {
   getRoundAuthorHeaderName,
   isUserProfileAuthor,
   type RoundAuthor,
-} from '../components/conversations/conversation_rounds/round_author';
+} from '../components/conversations/conversation_rounds/round_author_helpers';
 import { useUserProfiles } from './use_user_profiles';
 
 interface UseRoundAuthorDetailsArgs {

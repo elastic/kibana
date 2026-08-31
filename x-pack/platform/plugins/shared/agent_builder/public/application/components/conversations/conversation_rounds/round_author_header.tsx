@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { ConversationOriginType, type ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { useRoundAuthorDetails } from '../../../hooks/use_round_author_details';
-import type { RoundAuthor } from './round_author';
+import type { RoundAuthor } from './round_author_helpers';
 
 const labels = {
   agentBadge: i18n.translate('xpack.agentBuilder.roundAuthor.agentBadge', {
