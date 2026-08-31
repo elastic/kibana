@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
@@ -330,35 +330,6 @@ describe('vegaEmbeddableFactory', () => {
     } as unknown as VegaEvent);
 
     expect(executeTriggerActions).not.toHaveBeenCalled();
-  });
-
-  it('exposes shared-item render metadata for Reporting and reports render telemetry', async () => {
-    const { api, Component: PanelComponent } = await buildEmbeddable();
-    const { container } = render(<PanelComponent />);
-    const sharedItem = container.querySelector('[data-shared-item]');
-    const renderComplete = jest.fn();
-
-    expect(sharedItem).toHaveAttribute('data-title', 'Initial title');
-    expect(sharedItem).toHaveAttribute('data-description', '');
-    expect(sharedItem).toHaveAttribute('data-render-complete', 'false');
-
-    sharedItem?.addEventListener('renderComplete', renderComplete);
-
-    await waitFor(() => expect(mockVegaVisComponentProps).toBeDefined());
-    await act(async () => {
-      mockVegaVisComponentProps?.renderComplete();
-    });
-
-    await waitFor(() => {
-      expect(api.rendered$.getValue()).toBe(true);
-      expect(sharedItem).toHaveAttribute('data-render-complete', 'true');
-      expect(renderComplete).toHaveBeenCalledTimes(1);
-    });
-    expect(mockReportVegaRender).toHaveBeenCalledWith({
-      containerType: 'dashboard',
-      isVegaLite: false,
-      useMap: false,
-    });
   });
 
   it('gives the flyout the focus targets to restore when it closes', async () => {

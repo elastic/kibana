@@ -26,6 +26,7 @@
     "@kbn/react-query",
     "@kbn/fleet-plugin",
     "@kbn/i18n-react",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/react-kibana-context-styled"
   ]
 }
