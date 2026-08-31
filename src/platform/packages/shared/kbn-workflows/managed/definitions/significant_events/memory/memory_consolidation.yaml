@@ -29,7 +29,8 @@ steps:
   - name: consolidate_memory
     type: ai.agent
     # connector-id-by-feature: shared memory connector (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
-    # plugin-id: step-specific cost attribution; aggregate-by: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID.
+    # plugin-id: SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID;
+    # aggregate-by: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID.
     connector-id-by-feature: "significant_events_memory"
     plugin-id: "significant_events_memory_consolidation"
     aggregate-by: "significant_events"

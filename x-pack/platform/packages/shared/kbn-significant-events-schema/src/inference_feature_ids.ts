@@ -32,3 +32,26 @@ export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
  * background curation tasks over the same memory wiki.
  */
 export const SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID = 'significant_events_memory' as const;
+
+/** Memory synthesis workflow cost attribution. */
+export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID =
+  'significant_events_memory_synthesis' as const;
+
+/** Conversation scraper workflow cost attribution. */
+export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID =
+  'significant_events_memory_conversation_scraper' as const;
+
+/** Memory gap detection workflow cost attribution. */
+export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_INFERENCE_FEATURE_ID =
+  'significant_events_memory_gap_detection' as const;
+
+/** Memory consolidation workflow cost attribution. */
+export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID =
+  'significant_events_memory_consolidation' as const;
+
+/** Investigation gap reconciliation cost attribution. */
+export const SIGNIFICANT_EVENTS_MEMORY_INVESTIGATION_GAPS_INFERENCE_FEATURE_ID =
+  'significant_events_memory_investigation_gaps' as const;
+
+/** Legacy discovery attribution retained for historical cost reporting. */
+export const SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID = 'significant_events_triage' as const;

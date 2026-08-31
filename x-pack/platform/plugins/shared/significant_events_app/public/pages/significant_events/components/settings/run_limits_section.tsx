@@ -60,6 +60,7 @@ import {
   type RunLimitDraft,
   type RunLimitDraftState,
 } from './run_limit_draft';
+import { CostEstimate } from './cost_estimate';
 
 export const RUN_BUDGET_GROUP_LABELS: Record<RunBudgetGroupId, string> = {
   detection: i18n.translate('xpack.significantEventsApp.settings.runLimits.discoveryRowTitle', {
@@ -566,6 +567,13 @@ export const RunLimitsSection = () => {
               })}
             </p>
           </EuiText>
+          {!status.isLoading && !status.isError && (
+            <>
+              <EuiSpacer />
+              <CostEstimate canManage={canManageLimits} groupLabels={RUN_BUDGET_GROUP_LABELS} />
+              <EuiSpacer />
+            </>
+          )}
           {isLoading && <EuiLoadingSpinner size="m" />}
           {isError && (
             <EuiCallOut

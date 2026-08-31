@@ -26,6 +26,8 @@ import {
   getRunQuotaSavedObjectTypes,
   registerRunQuotaHousekeepingTask,
 } from './lib/run_quotas';
+import { getCostTrackingAuditSavedObjectType } from './lib/cost/tracking_audit';
+import { SignificantEventsCostService } from './lib/cost/service';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -129,6 +131,7 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
     getRunQuotaSavedObjectTypes().forEach((type) => core.savedObjects.registerType(type));
+    core.savedObjects.registerType(getCostTrackingAuditSavedObjectType());
     registerRunQuotaHousekeepingTask({
       taskManager: plugins.taskManager,
       core,
@@ -144,6 +147,10 @@ export class SignificantEventsPlugin
     );
 
     const significantEventsServices = createSignificantEventsServices();
+    const costService = new SignificantEventsCostService({
+      logger: this.logger.get('cost'),
+      cloudBaseUrl: plugins.cloud?.baseUrl,
+    });
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
     const { streams: streamsSetup } = plugins;
 
@@ -369,6 +376,7 @@ export class SignificantEventsPlugin
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
+        costService,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

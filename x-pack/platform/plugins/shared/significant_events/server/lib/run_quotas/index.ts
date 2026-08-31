@@ -7,6 +7,10 @@
 
 export { consumeRunQuota } from './consume';
 export { countRunQuotaWorkflowExecutions, RUN_QUOTA_WORKFLOW_IDS_BY_GROUP } from './counting';
+export {
+  INFERENCE_FEATURE_BUDGET_GROUPS,
+  SIGNIFICANT_EVENTS_INFERENCE_FEATURE_IDS,
+} from './budget_groups';
 export { waitForInvestigationEvidence } from './investigation_evidence';
 export {
   ensureRunQuotaHousekeepingScheduled,
@@ -23,7 +27,12 @@ export {
   validateInvestigationProvenance,
   validateWorkerProvenance,
 } from './provenance';
-export { assertCanManageRunQuotas, canManageRunQuotas } from './privileges';
+export {
+  assertCanManageRunQuotas,
+  assertCanManageSignificantEventsGlobally,
+  canManageRunQuotas,
+  canManageSignificantEventsGlobally,
+} from './privileges';
 export type {
   RunQuotaExecutionReader,
   RunQuotaWorkflowExecution,
@@ -81,7 +90,7 @@ export type {
   RunQuotaSkippedRow,
   RunQuotaWorkerDecisionAttributes,
 } from './saved_objects';
-export { dayKey, resolveDailyWindow } from './window';
+export { dayKey, resolveDailyWindow, resolveMonthStart } from './window';
 export {
   finalizeWorkerDecision,
   getOrCreatePendingWorkerDecision,

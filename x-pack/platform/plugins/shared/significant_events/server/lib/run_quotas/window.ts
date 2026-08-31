@@ -20,3 +20,6 @@ export const resolveDailyWindow = (now: Date = new Date()): RunQuotaWindow => {
 };
 
 export const dayKey = (window: RunQuotaWindow): string => window.start.slice(0, 10);
+
+export const resolveMonthStart = (now: Date = new Date()): string =>
+  new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();

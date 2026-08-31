@@ -115,3 +115,18 @@ export type {
   RunQuotasResponse,
   WorkerRunBudgetGroupId,
 } from './run_quotas';
+
+export type {
+  CostCoverageState,
+  CostFigureResponse,
+  CostPeriodResponse,
+  CostSpaceTrackingCoverageResponse,
+  CostTokenCounts,
+  GroupWorkflowAttributionResponse,
+  SetTokenUsageTrackingResponse,
+  SignificantEventsCostResponse,
+  TokenIndexCostResponse,
+  WorkflowAttributionResponse,
+  WorkflowAttributionResultResponse,
+  WorkflowStepAttributionResponse,
+} from './cost';

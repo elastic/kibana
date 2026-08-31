@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SignificantEventsServer } from '../../types';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 
-export const canManageRunQuotas = async ({
+export const canManageSignificantEventsGlobally = async ({
   request,
   server,
 }: {
@@ -28,6 +28,22 @@ export const canManageRunQuotas = async ({
   return result.hasAllRequested;
 };
 
+export const canManageRunQuotas = canManageSignificantEventsGlobally;
+
+export const assertCanManageSignificantEventsGlobally = async ({
+  request,
+  server,
+  message,
+}: {
+  request: KibanaRequest;
+  server: SignificantEventsServer;
+  message: string;
+}): Promise<void> => {
+  if (!(await canManageSignificantEventsGlobally({ request, server }))) {
+    throw Boom.forbidden(message);
+  }
+};
+
 export const assertCanManageRunQuotas = async ({
   request,
   server,
@@ -35,7 +51,9 @@ export const assertCanManageRunQuotas = async ({
   request: KibanaRequest;
   server: SignificantEventsServer;
 }): Promise<void> => {
-  if (!(await canManageRunQuotas({ request, server }))) {
-    throw Boom.forbidden('Managing run limits requires Streams manage in all spaces');
-  }
+  await assertCanManageSignificantEventsGlobally({
+    request,
+    server,
+    message: 'Managing run limits requires Streams manage in all spaces',
+  });
 };

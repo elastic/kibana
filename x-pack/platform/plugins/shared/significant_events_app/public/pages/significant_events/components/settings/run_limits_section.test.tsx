@@ -23,6 +23,7 @@ import {
 import { RunLimitsSection } from './run_limits_section';
 
 jest.mock('../../../../hooks/use_significant_events_run_quotas');
+jest.mock('./cost_estimate', () => ({ CostEstimate: () => null }));
 jest.mock('../../../../hooks/use_significant_events_app_router', () => ({
   useSignificantEventsAppRouter: () => ({ link: jest.fn().mockReturnValue('#event') }),
 }));

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dayKey, resolveDailyWindow } from './window';
+import { dayKey, resolveDailyWindow, resolveMonthStart } from './window';
 
 describe('resolveDailyWindow', () => {
   it('uses UTC day boundaries', () => {
@@ -22,5 +22,13 @@ describe('dayKey', () => {
     const window = resolveDailyWindow(new Date('2026-01-02T03:04:05.000Z'));
 
     expect(dayKey(window)).toBe('2026-01-02');
+  });
+});
+
+describe('resolveMonthStart', () => {
+  it('uses the first UTC instant of the current month', () => {
+    expect(resolveMonthStart(new Date('2026-08-31T23:59:59.999Z'))).toBe(
+      '2026-08-01T00:00:00.000Z'
+    );
   });
 });
