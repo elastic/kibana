@@ -31,8 +31,8 @@ const FLOW3_LIST_ADVANCED_FIELDS_BY_FORMAT: Record<
   csv: ['partition_path', 'error_mode', 'null_value'],
   tsv: ['partition_path', 'error_mode', 'null_value'],
   ndjson: ['partition_path', 'segment_size'],
-  parquet: ['partition_path', 'hive_partitioning'],
-  orc: ['partition_path', 'hive_partitioning'],
+  parquet: ['partition_path'],
+  orc: ['partition_path'],
 };
 
 const FLOW3_FORMATS_WITH_ERROR_MODE_IN_COMMON: Exclude<DatasetFormatFormValue, ''>[] = [
@@ -48,7 +48,6 @@ const FLOW3_ADVANCED_FIELD_ORDER: readonly DatasetSettingsFieldId[] = [
   'partition_path',
   'schema_sample_size',
   'schema_resolution',
-  'hive_partitioning',
   'mode',
   'quote',
   'escape',

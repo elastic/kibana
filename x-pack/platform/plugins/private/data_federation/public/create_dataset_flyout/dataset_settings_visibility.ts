@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { DatasetErrorModeFormValue, DatasetFormatFormValue } from './create_dataset_flyout_form_state';
+import type {
+  DatasetErrorModeFormValue,
+  DatasetFormatFormValue,
+} from './create_dataset_flyout_form_state';
 
 export type DatasetSettingsAccordionId =
   | 'structure'
@@ -19,7 +22,6 @@ export type DatasetSettingsFieldId =
   | 'partition_path'
   | 'schema_sample_size'
   | 'schema_resolution'
-  | 'hive_partitioning'
   | 'delimiter'
   | 'mode'
   | 'quote'
@@ -44,7 +46,6 @@ const CSV_TSV: DatasetSettingsFieldId[] = [
   'partition_path',
   'schema_sample_size',
   'schema_resolution',
-  'hive_partitioning',
   'delimiter',
   'mode',
   'quote',
@@ -66,7 +67,6 @@ const FIELD_VISIBILITY: Record<DatasetSettingsFieldId, Exclude<DatasetFormatForm
   partition_detection: ['csv', 'tsv', 'ndjson', 'parquet', 'orc'],
   partition_path: ['csv', 'tsv', 'ndjson', 'parquet', 'orc'],
   schema_resolution: ['csv', 'tsv', 'ndjson', 'parquet', 'orc'],
-  hive_partitioning: ['csv', 'tsv', 'ndjson', 'parquet', 'orc'],
   schema_sample_size: ['csv', 'tsv', 'ndjson'],
   delimiter: ['csv', 'tsv'],
   mode: ['csv', 'tsv'],
@@ -89,13 +89,7 @@ const FIELD_VISIBILITY: Record<DatasetSettingsFieldId, Exclude<DatasetFormatForm
 };
 
 const ACCORDION_FIELDS: Record<DatasetSettingsAccordionId, DatasetSettingsFieldId[]> = {
-  structure: [
-    'partition_detection',
-    'partition_path',
-    'schema_sample_size',
-    'schema_resolution',
-    'hive_partitioning',
-  ],
+  structure: ['partition_detection', 'partition_path', 'schema_sample_size', 'schema_resolution'],
   textParsing: ['mode', 'quote', 'escape', 'comment', 'encoding'],
   columns: ['header_row', 'column_prefix', 'null_value', 'multi_value_syntax'],
   errorHandling: ['error_mode', 'max_errors', 'max_error_ratio'],
@@ -139,6 +133,4 @@ export const getVisibleFieldsForAccordion = (
 
 export const CSV_TSV_FIELD_IDS = CSV_TSV;
 
-export const DATASET_SETTINGS_FIELD_IDS = Object.keys(
-  FIELD_VISIBILITY
-) as DatasetSettingsFieldId[];
+export const DATASET_SETTINGS_FIELD_IDS = Object.keys(FIELD_VISIBILITY) as DatasetSettingsFieldId[];

@@ -25,7 +25,6 @@ describe('dataset_flyout_initial_values', () => {
     expect(values.settings.partition_detection).toBe('');
     expect(values.settings.schema_resolution).toBe('');
     expect(values.settings.partition_path).toBe('');
-    expect(values.settings.hive_partitioning).toBe('');
     expect(values.settings.schema_sample_size).toBe('');
     expect(values.settings.delimiter).toBe('');
     expect(values.settings.header_row).toBe('');
@@ -62,13 +61,35 @@ describe('dataset_flyout_initial_values', () => {
       resource: 'r',
       settings: {
         header_row: false,
-        hive_partitioning: true,
       },
     };
 
     const result = dataSetToFlyoutFormValues(data);
     expect(result.settings.header_row).toBe('false');
-    expect(result.settings.hive_partitioning).toBe('true');
+  });
+
+  it('reads a legacy hive_partitioning toggle as a partition detection mode', () => {
+    const base = { name: 'id', data_source: 'source', resource: 'r' };
+
+    expect(
+      dataSetToFlyoutFormValues({ ...base, settings: { hive_partitioning: true } }).settings
+        .partition_detection
+    ).toBe('hive');
+    expect(
+      dataSetToFlyoutFormValues({ ...base, settings: { hive_partitioning: false } }).settings
+        .partition_detection
+    ).toBe('none');
+  });
+
+  it('prefers a stored partition_detection over the legacy toggle', () => {
+    const result = dataSetToFlyoutFormValues({
+      name: 'id',
+      data_source: 'source',
+      resource: 'r',
+      settings: { partition_detection: 'auto', hive_partitioning: true },
+    });
+
+    expect(result.settings.partition_detection).toBe('auto');
   });
 
   it('maps numeric settings to strings', () => {
@@ -98,15 +119,15 @@ describe('dataset_flyout_initial_values', () => {
       resource: 'r',
       settings: {
         schema_resolution: 'union_by_name',
+        partition_detection: 'template',
         partition_path: '/year={year}/',
-        hive_partitioning: false,
       },
     };
 
     const result = dataSetToFlyoutFormValues(data);
     expect(result.settings.schema_resolution).toBe('union_by_name');
+    expect(result.settings.partition_detection).toBe('template');
     expect(result.settings.partition_path).toBe('/year={year}/');
-    expect(result.settings.hive_partitioning).toBe('false');
   });
 
   it('maps API empty string null_value to the internal preset', () => {

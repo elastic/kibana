@@ -211,9 +211,8 @@ describe('AdditionalSettingsStep', () => {
           datetime_format: 'ISO-8601',
           multi_value_syntax: 'none',
           max_field_size: '10485760',
-          partition_detection: 'auto',
+          partition_detection: 'none',
           schema_resolution: 'union_by_name',
-          hive_partitioning: 'false',
           error_mode: 'fail_fast',
           max_error_ratio: '0.0',
         });
@@ -266,9 +265,8 @@ describe('AdditionalSettingsStep', () => {
           datetime_format: 'ISO-8601',
           multi_value_syntax: 'none',
           max_field_size: '10485760',
-          partition_detection: 'auto',
+          partition_detection: 'none',
           schema_resolution: 'union_by_name',
-          hive_partitioning: 'false',
           error_mode: 'fail_fast',
           max_error_ratio: '0.0',
         });
@@ -365,9 +363,8 @@ describe('AdditionalSettingsStep', () => {
         const settings = JSON.parse(getByTestId('settingsSnapshot').textContent ?? '{}');
         expect(settings).toMatchObject({
           format: 'orc',
-          partition_detection: 'auto',
+          partition_detection: 'hive',
           schema_resolution: 'union_by_name',
-          hive_partitioning: 'true',
           error_mode: 'fail_fast',
           max_error_ratio: '0.0',
           partition_path: '',
@@ -411,9 +408,8 @@ describe('AdditionalSettingsStep', () => {
           format: 'ndjson',
           schema_sample_size: '20000',
           datetime_format: 'ISO-8601',
-          partition_detection: 'auto',
+          partition_detection: 'none',
           schema_resolution: 'union_by_name',
-          hive_partitioning: 'false',
           error_mode: 'fail_fast',
           max_error_ratio: '0.0',
           segment_size: '4mb',

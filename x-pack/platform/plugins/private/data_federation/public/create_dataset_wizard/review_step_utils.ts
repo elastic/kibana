@@ -24,7 +24,6 @@ import {
   ERROR_MODE_SUPER_SELECT_OPTIONS,
   FORMAT_SUPER_SELECT_OPTIONS,
   HEADER_ROW_SUPER_SELECT_OPTIONS,
-  HIVE_PARTITIONING_SUPER_SELECT_OPTIONS,
   MODE_SUPER_SELECT_OPTIONS,
   MULTI_VALUE_SYNTAX_SUPER_SELECT_OPTIONS,
   NULL_VALUE_PRESETS,
@@ -118,8 +117,6 @@ export const getDatasetSettingsFieldLabel = (fieldId: DatasetSettingsFieldId): s
       return createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel();
     case 'schema_resolution':
       return createDatasetFlyoutStrings.settingsSchemaResolutionLabel();
-    case 'hive_partitioning':
-      return createDatasetFlyoutStrings.settingsHivePartitioningLabel();
     case 'delimiter':
       return createDatasetFlyoutStrings.settingsDelimiterLabel();
     case 'mode':
@@ -178,16 +175,13 @@ export const formatSettingsFieldDisplayValue = (
       return lookupOptionLabel(value, PARTITION_DETECTION_SUPER_SELECT_OPTIONS()) ?? value;
     case 'schema_resolution':
       return lookupOptionLabel(value, SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS()) ?? value;
-    case 'hive_partitioning':
     case 'header_row':
     case 'optimized_reader':
     case 'late_materialization':
       return (
         lookupOptionLabel(
           value,
-          fieldId === 'hive_partitioning'
-            ? HIVE_PARTITIONING_SUPER_SELECT_OPTIONS()
-            : fieldId === 'header_row'
+          fieldId === 'header_row'
             ? HEADER_ROW_SUPER_SELECT_OPTIONS()
             : OPTIMIZED_READER_SUPER_SELECT_OPTIONS()
         ) ?? value

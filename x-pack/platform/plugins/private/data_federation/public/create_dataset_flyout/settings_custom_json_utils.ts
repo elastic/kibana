@@ -13,7 +13,6 @@ export const DATASET_SETTINGS_CUSTOM_JSON_API_KEYS = [
   'partition_detection',
   'schema_resolution',
   'partition_path',
-  'hive_partitioning',
   'schema_sample_size',
   'delimiter',
   'mode',

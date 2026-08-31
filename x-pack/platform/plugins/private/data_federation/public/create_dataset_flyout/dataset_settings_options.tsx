@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
@@ -52,6 +51,11 @@ export const PARTITION_DETECTION_SUPER_SELECT_OPTIONS = () => [
     value: 'hive' as const,
     label: createDatasetFlyoutStrings.settingsPartitionDetectionHive(),
     description: createDatasetFlyoutStrings.settingsPartitionDetectionHiveDescription(),
+  },
+  {
+    value: 'template' as const,
+    label: createDatasetFlyoutStrings.settingsPartitionDetectionTemplate(),
+    description: createDatasetFlyoutStrings.settingsPartitionDetectionTemplateDescription(),
   },
   {
     value: 'none' as const,
@@ -117,11 +121,6 @@ export const MODE_SUPER_SELECT_OPTIONS = () => [
 export const HEADER_ROW_SUPER_SELECT_OPTIONS = () => [
   { value: 'true' as const, label: createDatasetFlyoutStrings.settingsHeaderRowTrue() },
   { value: 'false' as const, label: createDatasetFlyoutStrings.settingsHeaderRowFalse() },
-];
-
-export const HIVE_PARTITIONING_SUPER_SELECT_OPTIONS = () => [
-  { value: 'true' as const, label: createDatasetFlyoutStrings.settingsHivePartitioningEnabled() },
-  { value: 'false' as const, label: createDatasetFlyoutStrings.settingsHivePartitioningDisabled() },
 ];
 
 export const MULTI_VALUE_SYNTAX_SUPER_SELECT_OPTIONS = () => [

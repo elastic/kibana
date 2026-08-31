@@ -51,7 +51,6 @@ describe('dataset_settings_flow3_layout', () => {
         'partition_path',
         'schema_sample_size',
         'schema_resolution',
-        'hive_partitioning',
         'quote',
         'escape',
         'comment',
@@ -66,7 +65,6 @@ describe('dataset_settings_flow3_layout', () => {
     it('moves error limit fields out of advanced for parquet when promoted to common', () => {
       expect(getFlow3AdvancedFields('parquet', 'skip_row')).toEqual([
         'partition_path',
-        'hive_partitioning',
         'optimized_reader',
         'late_materialization',
       ]);
@@ -78,7 +76,6 @@ describe('dataset_settings_flow3_layout', () => {
         'partition_path',
         'schema_sample_size',
         'schema_resolution',
-        'hive_partitioning',
         'quote',
         'escape',
         'comment',

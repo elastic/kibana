@@ -14,7 +14,7 @@ export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' |
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
 export type DatasetModeFormValue = '' | 'quoted' | 'escaped' | 'plain';
 export type DatasetMultiValueSyntaxFormValue = '' | 'none' | 'brackets';
-export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'none';
+export type DatasetPartitionDetectionFormValue = '' | 'auto' | 'hive' | 'template' | 'none';
 export type DatasetSchemaResolutionFormValue = '' | 'first_file_wins' | 'strict' | 'union_by_name';
 export type DatasetBooleanFormValue = '' | 'true' | 'false';
 
@@ -24,7 +24,6 @@ export interface CreateDatasetSettingsFormValues {
   partition_detection: DatasetPartitionDetectionFormValue;
   schema_resolution: DatasetSchemaResolutionFormValue;
   partition_path: string;
-  hive_partitioning: DatasetBooleanFormValue;
   // CSV/TSV + NDJSON
   schema_sample_size: string;
   // CSV/TSV core
@@ -64,7 +63,6 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   partition_detection: '',
   schema_resolution: '',
   partition_path: '',
-  hive_partitioning: '',
   schema_sample_size: '',
   delimiter: '',
   mode: '',
@@ -138,6 +136,27 @@ export const validateMaxErrorRatio = (value: string): true | string => {
   return true;
 };
 
+/**
+ * Elasticsearch only reads a path template under 'template' detection, and
+ * rejects the request when the two disagree in either direction.
+ */
+export const validatePartitionPath = (
+  value: string,
+  partitionDetection: DatasetPartitionDetectionFormValue
+): true | string => {
+  const hasPath = Boolean(value?.trim());
+
+  if (partitionDetection === 'template' && !hasPath) {
+    return createDatasetFlyoutStrings.settingsPartitionPathRequiredForTemplate();
+  }
+
+  if (partitionDetection !== 'template' && hasPath) {
+    return createDatasetFlyoutStrings.settingsPartitionPathUnusedWithoutTemplate();
+  }
+
+  return true;
+};
+
 export const validateMaxFieldSize = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseNonNegativeInteger(value);
@@ -162,9 +181,10 @@ export const buildDatasetSettingsFromFormValues = (
   // Universal — applies under every format
   if (settings.partition_detection) applied.partition_detection = settings.partition_detection;
   if (settings.schema_resolution) applied.schema_resolution = settings.schema_resolution;
-  if (settings.partition_path) applied.partition_path = settings.partition_path;
-  const hivePartitioning = parseBooleanFormValue(settings.hive_partitioning);
-  if (hivePartitioning !== undefined) applied.hive_partitioning = hivePartitioning;
+  // Any other detection mode rejects a path template rather than ignoring it.
+  if (settings.partition_path && settings.partition_detection === 'template') {
+    applied.partition_path = settings.partition_path;
+  }
 
   const { format } = settings;
   const isCsvTsv = format === 'csv' || format === 'tsv';

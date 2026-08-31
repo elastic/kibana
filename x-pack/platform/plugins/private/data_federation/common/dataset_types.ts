@@ -24,9 +24,11 @@ export interface DatasetSettingsFile {
   format?: 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 
   // Universal
-  partition_detection?: 'auto' | 'hive' | 'none';
+  partition_detection?: 'auto' | 'hive' | 'template' | 'none';
   schema_resolution?: 'first_file_wins' | 'strict' | 'union_by_name';
+  /** Path template, only read when partition_detection is 'template'. */
   partition_path?: string;
+  /** Legacy toggle superseded by partition_detection; still accepted on read. */
   hive_partitioning?: boolean;
 
   // CSV/TSV + NDJSON

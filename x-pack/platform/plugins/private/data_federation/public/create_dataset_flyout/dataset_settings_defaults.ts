@@ -10,16 +10,12 @@ import type {
   DatasetFormatFormValue,
 } from './create_dataset_flyout_form_state';
 import { emptyCreateDatasetSettingsFormValues } from './create_dataset_flyout_form_state';
-import {
-  DATASET_SETTINGS_FIELD_IDS,
-  isFieldVisibleForFormat,
-} from './dataset_settings_visibility';
+import { DATASET_SETTINGS_FIELD_IDS, isFieldVisibleForFormat } from './dataset_settings_visibility';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
 const UNIVERSAL_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
-  partition_detection: 'auto',
+  partition_detection: 'none',
   schema_resolution: 'union_by_name',
-  hive_partitioning: 'false',
 };
 
 const CSV_TSV_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
@@ -53,7 +49,7 @@ const FORMAT_DEFAULTS: Partial<
   },
   parquet: {
     ...UNIVERSAL_DEFAULTS,
-    hive_partitioning: 'true',
+    partition_detection: 'hive',
     error_mode: 'fail_fast',
     max_error_ratio: '0.0',
     optimized_reader: 'true',
@@ -61,7 +57,7 @@ const FORMAT_DEFAULTS: Partial<
   },
   orc: {
     ...UNIVERSAL_DEFAULTS,
-    hive_partitioning: 'true',
+    partition_detection: 'hive',
     error_mode: 'fail_fast',
     max_error_ratio: '0.0',
   },
@@ -71,8 +67,9 @@ export const getDefaultSettingsForFormat = (
   format: Exclude<DatasetFormatFormValue, ''>
 ): Partial<CreateDatasetSettingsFormValues> => FORMAT_DEFAULTS[format] ?? {};
 
-const isKnownFormat = (format: DatasetFormatFormValue): format is Exclude<DatasetFormatFormValue, ''> =>
-  format !== '';
+const isKnownFormat = (
+  format: DatasetFormatFormValue
+): format is Exclude<DatasetFormatFormValue, ''> => format !== '';
 
 const isCsvTsvFormat = (format: Exclude<DatasetFormatFormValue, ''>): boolean =>
   format === 'csv' || format === 'tsv';

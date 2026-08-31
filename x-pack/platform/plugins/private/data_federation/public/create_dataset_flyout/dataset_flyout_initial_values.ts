@@ -44,6 +44,23 @@ const boolToFormValue = (value: boolean | undefined): DatasetBooleanFormValue =>
   return '';
 };
 
+/**
+ * Datasets stored before partition_detection replaced hive_partitioning carry
+ * only the old toggle, so read it as the equivalent detection mode.
+ */
+const partitionDetectionFromSettings = (
+  settings: DatasetSettingsFile
+): DatasetPartitionDetectionFormValue => {
+  if (settings.partition_detection) {
+    return settings.partition_detection;
+  }
+
+  if (settings.hive_partitioning === true) return 'hive';
+  if (settings.hive_partitioning === false) return 'none';
+
+  return '';
+};
+
 const settingsToFlyoutFormValues = (
   settings: DatasetSettings | undefined
 ): CreateDatasetSettingsFormValues => {
@@ -58,10 +75,9 @@ const settingsToFlyoutFormValues = (
     ...defaults,
     format: (s.format ?? '') as DatasetFormatFormValue,
     // Universal
-    partition_detection: (s.partition_detection ?? '') as DatasetPartitionDetectionFormValue,
+    partition_detection: partitionDetectionFromSettings(s),
     schema_resolution: (s.schema_resolution ?? '') as DatasetSchemaResolutionFormValue,
     partition_path: s.partition_path ?? '',
-    hive_partitioning: boolToFormValue(s.hive_partitioning),
     // CSV/TSV + NDJSON
     schema_sample_size: s.schema_sample_size !== undefined ? String(s.schema_sample_size) : '',
     // CSV/TSV core

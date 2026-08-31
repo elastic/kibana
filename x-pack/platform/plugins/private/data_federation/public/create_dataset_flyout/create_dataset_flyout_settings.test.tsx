@@ -83,12 +83,12 @@ describe('CreateDatasetFlyoutSettings', () => {
     expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
   });
 
-  it('shows schema_resolution and hive_partitioning in the advanced section', () => {
+  it('shows schema_resolution and partition_path in the advanced section', () => {
     const { getByTestId } = renderSettings();
     openAdvanced(getByTestId);
 
     expect(getByTestId('createDatasetFlyoutSettingsSchemaResolution')).toBeVisible();
-    expect(getByTestId('createDatasetFlyoutSettingsHivePartitioning')).toBeVisible();
+    expect(getByTestId('createDatasetFlyoutSettingsPartitionPath')).toBeVisible();
   });
 
   it('shows no format-specific fields when no format is selected', () => {

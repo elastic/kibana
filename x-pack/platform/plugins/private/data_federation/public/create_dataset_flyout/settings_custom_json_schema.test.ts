@@ -80,9 +80,8 @@ describe('settings_custom_json_schema', () => {
       const parsed = JSON.parse(json) as Record<string, unknown>;
 
       expect(parsed).toMatchObject({
-        partition_detection: 'auto',
+        partition_detection: 'none',
         schema_resolution: 'union_by_name',
-        hive_partitioning: false,
         delimiter: ',',
         mode: 'quoted',
         header_row: true,

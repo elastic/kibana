@@ -229,6 +229,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Hive',
     }),
 
+  settingsPartitionDetectionTemplate: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionTemplate', {
+      defaultMessage: 'Template',
+    }),
+
   settingsPartitionDetectionNone: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionNone', {
       defaultMessage: 'None',
@@ -275,22 +280,29 @@ export const createDatasetFlyoutStrings = {
   settingsPartitionPathHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathHelp', {
       defaultMessage:
-        'Explicit path template for partition detection. If your partition path is not available, create a custom one.',
+        'Only used when partition detection is Template. If your partition path is not available, create a custom one.',
     }),
+
+  settingsPartitionPathRequiredForTemplate: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsPartitionPathRequiredForTemplate',
+      {
+        defaultMessage: 'Template detection needs a partition path, such as year/month.',
+      }
+    ),
+
+  settingsPartitionPathUnusedWithoutTemplate: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsPartitionPathUnusedWithoutTemplate',
+      {
+        defaultMessage:
+          'A partition path is only read when partition detection is Template. Clear it or switch detection to Template.',
+      }
+    ),
 
   settingsPartitionPathPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathPlaceholder', {
       defaultMessage: 'Select partition path',
-    }),
-
-  settingsHivePartitioningLabel: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningLabel', {
-      defaultMessage: 'Hive partitioning',
-    }),
-
-  settingsHivePartitioningPlaceholder: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningPlaceholder', {
-      defaultMessage: 'Select hive partitioning',
     }),
 
   settingsHivePartitioningEnabled: () =>
@@ -632,6 +644,14 @@ export const createDatasetFlyoutStrings = {
       }
     ),
 
+  settingsPartitionDetectionTemplateDescription: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionTemplateDescription',
+      {
+        defaultMessage: 'Read partition values from the path template you provide.',
+      }
+    ),
+
   settingsPartitionDetectionNoneDescription: () =>
     i18n.translate(
       'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionNoneDescription',
@@ -665,9 +685,12 @@ export const createDatasetFlyoutStrings = {
     ),
 
   settingsErrorModeFailFastDescription: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsErrorModeFailFastDescription', {
-      defaultMessage: 'Stop reading as soon as an error is encountered.',
-    }),
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsErrorModeFailFastDescription',
+      {
+        defaultMessage: 'Stop reading as soon as an error is encountered.',
+      }
+    ),
 
   settingsErrorModeSkipRowDescription: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsErrorModeSkipRowDescription', {
@@ -675,9 +698,12 @@ export const createDatasetFlyoutStrings = {
     }),
 
   settingsErrorModeNullFieldDescription: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsErrorModeNullFieldDescription', {
-      defaultMessage: 'Set invalid fields to null and continue reading.',
-    }),
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsErrorModeNullFieldDescription',
+      {
+        defaultMessage: 'Set invalid fields to null and continue reading.',
+      }
+    ),
 
   settingsModeQuotedDescription: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModeQuotedDescription', {

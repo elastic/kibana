@@ -46,9 +46,8 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.parquet',
       settings: {
         format: 'parquet',
-        partition_detection: 'auto',
+        partition_detection: 'hive',
         schema_resolution: 'union_by_name',
-        hive_partitioning: true,
         error_mode: 'fail_fast',
         optimized_reader: true,
         late_materialization: true,
@@ -86,9 +85,8 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.parquet',
       settings: {
         format: 'csv',
-        partition_detection: 'auto',
+        partition_detection: 'none',
         schema_resolution: 'union_by_name',
-        hive_partitioning: false,
         delimiter: ',',
         mode: 'quoted',
         header_row: true,
@@ -120,9 +118,8 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.tsv',
       settings: {
         format: 'tsv',
-        partition_detection: 'auto',
+        partition_detection: 'none',
         schema_resolution: 'union_by_name',
-        hive_partitioning: false,
         delimiter: '\t',
         mode: 'plain',
         header_row: true,
@@ -154,9 +151,8 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.ndjson',
       settings: {
         format: 'ndjson',
-        partition_detection: 'auto',
+        partition_detection: 'none',
         schema_resolution: 'union_by_name',
-        hive_partitioning: false,
         schema_sample_size: 20000,
         datetime_format: 'ISO-8601',
         error_mode: 'fail_fast',
@@ -179,9 +175,8 @@ describe('review_step_utils', () => {
       resource: 's3://obs-logs-prod/**/*.orc',
       settings: {
         format: 'orc',
-        partition_detection: 'auto',
+        partition_detection: 'hive',
         schema_resolution: 'union_by_name',
-        hive_partitioning: true,
         error_mode: 'fail_fast',
       },
     });
@@ -265,13 +260,13 @@ describe('review_step_utils', () => {
     const rows = getReviewSettingsRows(
       settings,
       's3://obs-logs-prod/**/*.parquet',
-      '{ "partition_detection": "hive" }'
+      '{ "partition_detection": "auto" }'
     );
     const partitionDetectionRow = rows.find((row) => row.label === 'Partition detection');
 
     expect(partitionDetectionRow).toEqual(
       expect.objectContaining({
-        displayValue: 'Hive',
+        displayValue: 'Auto',
         badge: 'modified',
       })
     );

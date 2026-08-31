@@ -19,7 +19,6 @@ import {
   ENCODING_PRESETS,
   ERROR_MODE_SUPER_SELECT_OPTIONS,
   HEADER_ROW_SUPER_SELECT_OPTIONS,
-  HIVE_PARTITIONING_SUPER_SELECT_OPTIONS,
   MODE_SUPER_SELECT_OPTIONS,
   MULTI_VALUE_SYNTAX_SUPER_SELECT_OPTIONS,
   NULL_VALUE_PRESETS,
@@ -34,6 +33,7 @@ import { SettingsPresetComboBox } from './settings_preset_combo_box';
 import {
   validateMaxErrorRatio,
   validateMaxErrors,
+  validatePartitionPath,
   validateSchemaSampleSize,
 } from './create_dataset_flyout_form_state';
 import { MaxFieldSizeField } from './max_field_size_field';
@@ -70,6 +70,10 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           helpText={createDatasetFlyoutStrings.settingsPartitionPathHelp()}
           placeholder={createDatasetFlyoutStrings.settingsPartitionPathPlaceholder()}
           presets={PARTITION_PATH_PRESETS()}
+          rules={{
+            validate: (value, formValues) =>
+              validatePartitionPath(String(value ?? ''), formValues.settings.partition_detection),
+          }}
           data-test-subj={`${testSubjPrefix}SettingsPartitionPath`}
         />
       );
@@ -85,17 +89,6 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsSchemaResolutionPlaceholder()}
           options={SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsSchemaResolution`}
-        />
-      );
-    case 'hive_partitioning':
-      return (
-        <SettingsEnumSuperSelect
-          control={control}
-          name="settings.hive_partitioning"
-          label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()}
-          placeholder={createDatasetFlyoutStrings.settingsHivePartitioningPlaceholder()}
-          options={HIVE_PARTITIONING_SUPER_SELECT_OPTIONS()}
-          data-test-subj={`${testSubjPrefix}SettingsHivePartitioning`}
         />
       );
     case 'delimiter':

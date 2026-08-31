@@ -213,9 +213,9 @@ describe('ReviewStep flow 3', () => {
             ...defaultValues,
             settings: {
               ...applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
-              hive_partitioning: 'true',
+              partition_detection: 'hive',
             },
-            settings_custom_json: '{ "hive_partitioning": true }',
+            settings_custom_json: '{ "partition_detection": "hive" }',
           }}
           dataSources={[s3DataSource]}
           flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
@@ -226,7 +226,7 @@ describe('ReviewStep flow 3', () => {
     expect(screen.queryByTestId('datasetWizardReviewCustomSettingsJson')).toBeNull();
     expect(screen.queryByText('Custom settings (JSON)')).toBeNull();
     expect(screen.getByTestId('datasetWizardReviewSettingsTwoColumn')).toHaveTextContent(
-      'Hive partitioning'
+      'Partition detection'
     );
   });
 
@@ -237,7 +237,7 @@ describe('ReviewStep flow 3', () => {
           values={{
             ...defaultValues,
             settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
-            settings_custom_json: '{ "partition_detection": "hive" }',
+            settings_custom_json: '{ "partition_detection": "auto" }',
           }}
           dataSources={[s3DataSource]}
           flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
@@ -245,8 +245,8 @@ describe('ReviewStep flow 3', () => {
       </EuiProvider>
     );
 
-    expect(screen.getByTestId('datasetWizardReviewSettings')).toHaveTextContent('Hive');
-    expect(screen.getByTestId('datasetWizardReviewSettings')).not.toHaveTextContent('Auto');
+    expect(screen.getByTestId('datasetWizardReviewSettings')).toHaveTextContent('Auto');
+    expect(screen.getByTestId('datasetWizardReviewSettings')).not.toHaveTextContent('Hive');
   });
 
   it('does not show the Preview results tab', () => {

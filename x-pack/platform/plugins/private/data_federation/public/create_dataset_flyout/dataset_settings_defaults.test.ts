@@ -15,9 +15,8 @@ import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 describe('getDefaultSettingsForFormat', () => {
   it('returns orc defaults', () => {
     expect(getDefaultSettingsForFormat('orc')).toEqual({
-      partition_detection: 'auto',
+      partition_detection: 'hive',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'true',
       error_mode: 'fail_fast',
       max_error_ratio: '0.0',
     });
@@ -29,9 +28,8 @@ describe('applySettingsForFormat', () => {
     expect(applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv')).toEqual({
       ...emptyCreateDatasetSettingsFormValues(),
       format: 'csv',
-      partition_detection: 'auto',
+      partition_detection: 'none',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'false',
       delimiter: ',',
       mode: 'quoted',
       header_row: 'true',
@@ -54,9 +52,8 @@ describe('applySettingsForFormat', () => {
     expect(applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'tsv')).toEqual({
       ...emptyCreateDatasetSettingsFormValues(),
       format: 'tsv',
-      partition_detection: 'auto',
+      partition_detection: 'none',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'false',
       delimiter: '\t',
       mode: 'plain',
       header_row: 'true',
@@ -79,9 +76,8 @@ describe('applySettingsForFormat', () => {
     expect(applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'ndjson')).toEqual({
       ...emptyCreateDatasetSettingsFormValues(),
       format: 'ndjson',
-      partition_detection: 'auto',
+      partition_detection: 'none',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'false',
       error_mode: 'fail_fast',
       max_error_ratio: '0.0',
       schema_sample_size: '20000',
@@ -94,9 +90,8 @@ describe('applySettingsForFormat', () => {
     expect(applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet')).toEqual({
       ...emptyCreateDatasetSettingsFormValues(),
       format: 'parquet',
-      partition_detection: 'auto',
+      partition_detection: 'hive',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'true',
       error_mode: 'fail_fast',
       max_error_ratio: '0.0',
       optimized_reader: 'true',
@@ -108,9 +103,8 @@ describe('applySettingsForFormat', () => {
     expect(applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'orc')).toEqual({
       ...emptyCreateDatasetSettingsFormValues(),
       format: 'orc',
-      partition_detection: 'auto',
+      partition_detection: 'hive',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'true',
       error_mode: 'fail_fast',
       max_error_ratio: '0.0',
     });
@@ -122,9 +116,8 @@ describe('applySettingsForFormat', () => {
     expect(applySettingsForFormat(csvSettings, 'tsv')).toEqual({
       ...emptyCreateDatasetSettingsFormValues(),
       format: 'tsv',
-      partition_detection: 'auto',
+      partition_detection: 'none',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'false',
       delimiter: '\t',
       mode: 'plain',
       header_row: 'true',
@@ -165,9 +158,8 @@ describe('applySettingsForFormat', () => {
     expect(applySettingsForFormat(csvSettings, 'parquet')).toEqual({
       ...emptyCreateDatasetSettingsFormValues(),
       format: 'parquet',
-      partition_detection: 'auto',
+      partition_detection: 'hive',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'true',
       error_mode: 'fail_fast',
       max_error_ratio: '0.0',
       optimized_reader: 'true',

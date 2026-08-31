@@ -24,6 +24,7 @@ import {
   emptyCreateDatasetSettingsFormValues,
   validateMaxErrorRatio,
   validateMaxErrors,
+  validatePartitionPath,
   validateSchemaSampleSize,
   type CreateDatasetFormValues,
   type DatasetBooleanFormValue,
@@ -65,6 +66,7 @@ const PARTITION_DETECTION_OPTIONS = () => [
   { value: '', text: createDatasetFlyoutStrings.settingsPartitionDetectionPlaceholder() },
   { value: 'auto', text: createDatasetFlyoutStrings.settingsPartitionDetectionAuto() },
   { value: 'hive', text: createDatasetFlyoutStrings.settingsPartitionDetectionHive() },
+  { value: 'template', text: createDatasetFlyoutStrings.settingsPartitionDetectionTemplate() },
   { value: 'none', text: createDatasetFlyoutStrings.settingsPartitionDetectionNone() },
 ];
 
@@ -92,12 +94,6 @@ const MULTI_VALUE_SYNTAX_OPTIONS = () => [
   { value: '', text: createDatasetFlyoutStrings.settingsMultiValueSyntaxPlaceholder() },
   { value: 'none', text: createDatasetFlyoutStrings.settingsMultiValueSyntaxNone() },
   { value: 'brackets', text: createDatasetFlyoutStrings.settingsMultiValueSyntaxBrackets() },
-];
-
-const BOOLEAN_OPTIONS = (placeholder: string, enabled: string, disabled: string) => [
-  { value: '', text: placeholder },
-  { value: 'true', text: enabled },
-  { value: 'false', text: disabled },
 ];
 
 // ---------------------------------------------------------------------------
@@ -220,13 +216,13 @@ function UniversalAdvancedSettings({ control }: { control: Control<CreateDataset
     name: 'settings.partition_detection',
     control,
   });
-  const { field: partitionPathField } = useController({
+  const { field: partitionPathField, fieldState: partitionPathFieldState } = useController({
     name: 'settings.partition_path',
     control,
-  });
-  const { field: hivePartitioningField } = useController({
-    name: 'settings.hive_partitioning',
-    control,
+    rules: {
+      validate: (value, formValues) =>
+        validatePartitionPath(String(value ?? ''), formValues.settings.partition_detection),
+    },
   });
 
   return (
@@ -265,32 +261,17 @@ function UniversalAdvancedSettings({ control }: { control: Control<CreateDataset
         label={createDatasetFlyoutStrings.settingsPartitionPathLabel()}
         helpText={createDatasetFlyoutStrings.settingsPartitionPathHelp()}
         fullWidth
+        isInvalid={Boolean(partitionPathFieldState.error)}
+        error={partitionPathFieldState.error?.message}
       >
         <EuiFieldText
           data-test-subj="createDatasetFlyoutSettingsPartitionPath"
           fullWidth
+          isInvalid={Boolean(partitionPathFieldState.error)}
           value={partitionPathField.value}
           onChange={(e) => partitionPathField.onChange(e.target.value)}
           name={partitionPathField.name}
           inputRef={partitionPathField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()} fullWidth>
-        <EuiSelect
-          options={BOOLEAN_OPTIONS(
-            createDatasetFlyoutStrings.settingsHivePartitioningPlaceholder(),
-            createDatasetFlyoutStrings.settingsHivePartitioningEnabled(),
-            createDatasetFlyoutStrings.settingsHivePartitioningDisabled()
-          )}
-          data-test-subj="createDatasetFlyoutSettingsHivePartitioning"
-          fullWidth
-          aria-label={createDatasetFlyoutStrings.settingsHivePartitioningLabel()}
-          value={hivePartitioningField.value}
-          onChange={(e) =>
-            hivePartitioningField.onChange(e.target.value as DatasetBooleanFormValue)
-          }
-          name={hivePartitioningField.name}
-          inputRef={hivePartitioningField.ref}
         />
       </EuiFormRow>
     </>

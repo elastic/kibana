@@ -24,18 +24,16 @@ import {
   type DatasetSettingsCustomJsonApiKey,
 } from './settings_custom_json_utils';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
-import {
-  isFieldVisibleForErrorMode,
-  isFieldVisibleForFormat,
-} from './dataset_settings_visibility';
+import { isFieldVisibleForErrorMode, isFieldVisibleForFormat } from './dataset_settings_visibility';
 
 export const DATASET_SETTINGS_CUSTOM_JSON_SCHEMA_URI =
   'kibana://data-federation/dataset-settings-custom-json';
 
 const CUSTOM_JSON_API_ONLY_KEYS = new Set<DatasetSettingsCustomJsonApiKey>(['target_split_size']);
 
-const isDatasetSettingsFieldId = (key: DatasetSettingsCustomJsonApiKey): key is DatasetSettingsFieldId =>
-  !CUSTOM_JSON_API_ONLY_KEYS.has(key);
+const isDatasetSettingsFieldId = (
+  key: DatasetSettingsCustomJsonApiKey
+): key is DatasetSettingsFieldId => !CUSTOM_JSON_API_ONLY_KEYS.has(key);
 
 const getCustomJsonPropertyLabel = (fieldId: DatasetSettingsCustomJsonApiKey): string => {
   switch (fieldId) {
@@ -45,8 +43,6 @@ const getCustomJsonPropertyLabel = (fieldId: DatasetSettingsCustomJsonApiKey): s
       return createDatasetFlyoutStrings.settingsSchemaResolutionLabel();
     case 'partition_path':
       return createDatasetFlyoutStrings.settingsPartitionPathLabel();
-    case 'hive_partitioning':
-      return createDatasetFlyoutStrings.settingsHivePartitioningLabel();
     case 'schema_sample_size':
       return createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel();
     case 'delimiter':
@@ -90,93 +86,88 @@ const getCustomJsonPropertyLabel = (fieldId: DatasetSettingsCustomJsonApiKey): s
   }
 };
 
-const CUSTOM_JSON_PROPERTY_SCHEMAS: Record<
-  DatasetSettingsCustomJsonApiKey,
-  JSONSchema7Definition
-> = {
-  partition_detection: {
-    type: 'string',
-    enum: ['auto', 'hive', 'none'],
-  },
-  schema_resolution: {
-    type: 'string',
-    enum: ['first_file_wins', 'strict', 'union_by_name'],
-  },
-  partition_path: {
-    type: 'string',
-  },
-  hive_partitioning: {
-    type: 'boolean',
-  },
-  schema_sample_size: {
-    type: 'integer',
-    minimum: 1,
-  },
-  delimiter: {
-    type: 'string',
-  },
-  mode: {
-    type: 'string',
-    enum: ['quoted', 'escaped', 'plain'],
-  },
-  header_row: {
-    type: 'boolean',
-  },
-  null_value: {
-    type: 'string',
-  },
-  encoding: {
-    type: 'string',
-  },
-  error_mode: {
-    type: 'string',
-    enum: ['fail_fast', 'skip_row', 'null_field'],
-  },
-  max_errors: {
-    type: 'integer',
-    minimum: 0,
-  },
-  max_error_ratio: {
-    type: 'number',
-    minimum: 0,
-    maximum: 1,
-  },
-  quote: {
-    type: 'string',
-  },
-  escape: {
-    type: 'string',
-  },
-  comment: {
-    type: 'string',
-  },
-  column_prefix: {
-    type: 'string',
-  },
-  datetime_format: {
-    type: 'string',
-  },
-  multi_value_syntax: {
-    type: 'string',
-    enum: ['none', 'brackets'],
-  },
-  max_field_size: {
-    type: 'integer',
-    minimum: 0,
-  },
-  segment_size: {
-    type: 'string',
-  },
-  optimized_reader: {
-    type: 'boolean',
-  },
-  late_materialization: {
-    type: 'boolean',
-  },
-  target_split_size: {
-    type: 'string',
-  },
-};
+const CUSTOM_JSON_PROPERTY_SCHEMAS: Record<DatasetSettingsCustomJsonApiKey, JSONSchema7Definition> =
+  {
+    partition_detection: {
+      type: 'string',
+      enum: ['auto', 'hive', 'template', 'none'],
+    },
+    schema_resolution: {
+      type: 'string',
+      enum: ['first_file_wins', 'strict', 'union_by_name'],
+    },
+    partition_path: {
+      type: 'string',
+    },
+    schema_sample_size: {
+      type: 'integer',
+      minimum: 1,
+    },
+    delimiter: {
+      type: 'string',
+    },
+    mode: {
+      type: 'string',
+      enum: ['quoted', 'escaped', 'plain'],
+    },
+    header_row: {
+      type: 'boolean',
+    },
+    null_value: {
+      type: 'string',
+    },
+    encoding: {
+      type: 'string',
+    },
+    error_mode: {
+      type: 'string',
+      enum: ['fail_fast', 'skip_row', 'null_field'],
+    },
+    max_errors: {
+      type: 'integer',
+      minimum: 0,
+    },
+    max_error_ratio: {
+      type: 'number',
+      minimum: 0,
+      maximum: 1,
+    },
+    quote: {
+      type: 'string',
+    },
+    escape: {
+      type: 'string',
+    },
+    comment: {
+      type: 'string',
+    },
+    column_prefix: {
+      type: 'string',
+    },
+    datetime_format: {
+      type: 'string',
+    },
+    multi_value_syntax: {
+      type: 'string',
+      enum: ['none', 'brackets'],
+    },
+    max_field_size: {
+      type: 'integer',
+      minimum: 0,
+    },
+    segment_size: {
+      type: 'string',
+    },
+    optimized_reader: {
+      type: 'boolean',
+    },
+    late_materialization: {
+      type: 'boolean',
+    },
+    target_split_size: {
+      type: 'string',
+    },
+  };
 
 export const getVisibleCustomJsonApiKeys = (
   format: Exclude<DatasetFormatFormValue, ''>,
@@ -191,9 +182,7 @@ export const getVisibleCustomJsonApiKeys = (
       return false;
     }
 
-    return (
-      isFieldVisibleForFormat(key, format) && isFieldVisibleForErrorMode(key, errorMode)
-    );
+    return isFieldVisibleForFormat(key, format) && isFieldVisibleForErrorMode(key, errorMode);
   });
 
 export const getDatasetSettingsCustomJsonSchema = (

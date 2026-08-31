@@ -8,6 +8,7 @@
 import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
+  validatePartitionPath,
 } from './create_dataset_flyout_form_state';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
@@ -21,7 +22,6 @@ describe('create_dataset_flyout_form_state', () => {
         partition_detection: '',
         schema_resolution: '',
         partition_path: '',
-        hive_partitioning: '',
         schema_sample_size: '',
         delimiter: '',
         mode: '',
@@ -62,22 +62,24 @@ describe('create_dataset_flyout_form_state', () => {
       ).toEqual({ schema_resolution: 'union_by_name' });
     });
 
-    it('maps partition_path under any format', () => {
+    it('maps partition_path when partition detection is template', () => {
       expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), partition_path: '/year={year}/' })
-      ).toEqual({ partition_path: '/year={year}/' });
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          partition_detection: 'template',
+          partition_path: '/year={year}/',
+        })
+      ).toEqual({ partition_detection: 'template', partition_path: '/year={year}/' });
     });
 
-    it('converts hive_partitioning boolean form values correctly', () => {
+    it('omits partition_path when partition detection is not template', () => {
       expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'false' })
-      ).toEqual({ hive_partitioning: false });
-      expect(buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: 'true' })).toEqual(
-        { hive_partitioning: true }
-      );
-      expect(
-        buildDatasetSettingsFromFormValues({ ...empty(), hive_partitioning: '' })
-      ).toBeUndefined();
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          partition_detection: 'auto',
+          partition_path: '/year={year}/',
+        })
+      ).toEqual({ partition_detection: 'auto' });
     });
 
     it('ignores format-specific fields when no format is selected', () => {
@@ -243,6 +245,27 @@ describe('create_dataset_flyout_form_state', () => {
         schema_sample_size: '50',
       });
       expect(result).toEqual({ format: 'ndjson', schema_sample_size: 50 });
+    });
+  });
+
+  describe('validatePartitionPath', () => {
+    it('requires a path when partition detection is template', () => {
+      expect(validatePartitionPath('', 'template')).toEqual(expect.any(String));
+      expect(validatePartitionPath('  ', 'template')).toEqual(expect.any(String));
+      expect(validatePartitionPath('{year}/{month}', 'template')).toBe(true);
+    });
+
+    it('rejects a path when partition detection is not template', () => {
+      expect(validatePartitionPath('{year}/{month}', 'auto')).toEqual(expect.any(String));
+      expect(validatePartitionPath('{year}/{month}', 'hive')).toEqual(expect.any(String));
+      expect(validatePartitionPath('{year}/{month}', 'none')).toEqual(expect.any(String));
+    });
+
+    it('accepts an empty path for the other detection modes', () => {
+      expect(validatePartitionPath('', '')).toBe(true);
+      expect(validatePartitionPath('', 'auto')).toBe(true);
+      expect(validatePartitionPath('', 'hive')).toBe(true);
+      expect(validatePartitionPath('', 'none')).toBe(true);
     });
   });
 });
