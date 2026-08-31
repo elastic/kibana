@@ -136,6 +136,16 @@ evaluate.describe(
         createdRuleName = result.rule?.name;
 
         if (!result.pendingApproval) {
+          // A declined draft never reaches the gate. Say so explicitly: WORKFLOW_INPUT is a
+          // winnable gap, so a skip here means the quality gate is over-refusing, not that
+          // the approval plumbing broke.
+          if (result.skipped) {
+            throw new Error(
+              `The quality gate declined a winnable gap (${
+                result.skipReason ?? 'no reason given'
+              }) so the workflow never reached the approval gate — the gate is over-refusing.`
+            );
+          }
           throw new Error(
             `Execution did not pause at the approval gate (pendingApproval=${result.pendingApproval}) — cannot test the approve path`
           );
@@ -180,6 +190,16 @@ evaluate.describe(
         createdRuleName = result.rule?.name;
 
         if (!result.pendingApproval) {
+          // A declined draft never reaches the gate. Say so explicitly: WORKFLOW_INPUT is a
+          // winnable gap, so a skip here means the quality gate is over-refusing, not that
+          // the approval plumbing broke.
+          if (result.skipped) {
+            throw new Error(
+              `The quality gate declined a winnable gap (${
+                result.skipReason ?? 'no reason given'
+              }) so the workflow never reached the approval gate — the gate is over-refusing.`
+            );
+          }
           throw new Error(
             `Execution did not pause at the approval gate (pendingApproval=${result.pendingApproval}) — cannot test the reject path`
           );
