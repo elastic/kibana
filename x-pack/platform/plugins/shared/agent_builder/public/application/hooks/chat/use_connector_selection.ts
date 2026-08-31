@@ -6,8 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { EMPTY } from 'rxjs';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -15,6 +14,32 @@ import {
 } from '@kbn/management-settings-ids';
 import { useKibana } from '../use_kibana';
 import { storageKeys } from '../../storage_keys';
+
+const readStoredConnectorId = (): string | undefined => {
+  const raw = localStorage.getItem(storageKeys.lastUsedConnector);
+  if (!raw) return undefined;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return typeof parsed === 'string' ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const connectorId$ = new BehaviorSubject<string | undefined>(readStoredConnectorId());
+
+const writeStoredConnectorId = (connectorId: string): void => {
+  try {
+    localStorage.setItem(storageKeys.lastUsedConnector, JSON.stringify(connectorId));
+  } catch {
+    // quota exceeded — keep the in-memory value, drop persistence
+  }
+  connectorId$.next(connectorId);
+};
+
+export const _resetConnectorSelectionStore = (): void => {
+  connectorId$.next(readStoredConnectorId());
+};
 
 export interface UseConnectorSelectionResult {
   selectedConnector?: string;
@@ -28,9 +53,7 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     services: { settings },
   } = useKibana();
 
-  const [selectedConnector, setSelectedConnector] = useLocalStorage<string>(
-    storageKeys.lastUsedConnector
-  );
+  const selectedConnector = useObservable(connectorId$, connectorId$.getValue());
 
   const defaultConnector$ = useMemo(
     () => settings?.client.get$<string | undefined>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) ?? EMPTY,
@@ -45,12 +68,9 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
   );
   const defaultConnectorOnly = useObservable(defaultConnectorOnly$, false) ?? false;
 
-  const selectConnector = useCallback(
-    (connectorId: string) => {
-      setSelectedConnector(connectorId);
-    },
-    [setSelectedConnector]
-  );
+  const selectConnector = useCallback((connectorId: string) => {
+    writeStoredConnectorId(connectorId);
+  }, []);
 
   return {
     selectedConnector,
