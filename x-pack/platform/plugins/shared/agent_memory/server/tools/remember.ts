@@ -60,7 +60,8 @@ Returns { id, revision, action } where action is 'created' or 'updated'.
               'xpack.agentMemory.agentBuilder.tools.remember.confirmationDescriptionSpace',
               {
                 defaultMessage:
-                  'Save this for everyone with Memory access in this space?\n\n{content}',
+                  'Save to team memory for this space?\n\n' +
+                  'Others in this space who use Agent Memory will recall it.\n\n{content}',
                 values: { content: toolParams.description },
               }
             )
@@ -71,10 +72,16 @@ Returns { id, revision, action } where action is 'created' or 'updated'.
                 values: { content: toolParams.description },
               }
             ),
-      confirm_text: i18n.translate(
-        'xpack.agentMemory.agentBuilder.tools.remember.confirmationButtonLabel',
-        { defaultMessage: 'Remember' }
-      ),
+      confirm_text:
+        toolParams.scope === 'space'
+          ? i18n.translate(
+              'xpack.agentMemory.agentBuilder.tools.remember.confirmationButtonLabelSpace',
+              { defaultMessage: 'Share with team' }
+            )
+          : i18n.translate(
+              'xpack.agentMemory.agentBuilder.tools.remember.confirmationButtonLabel',
+              { defaultMessage: 'Remember' }
+            ),
       color: 'primary' as const,
     }),
   },

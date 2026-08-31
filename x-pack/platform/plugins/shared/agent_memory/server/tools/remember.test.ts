@@ -77,6 +77,24 @@ describe('createRememberTool', () => {
       color: 'primary',
     });
 
+    const spaceConfirmation = await tool.confirmation?.getConfirmation?.({
+      toolParams: {
+        title: 'duration_ms is a keyword field',
+        description: 'Use TO_DOUBLE(duration_ms) in ES|QL.',
+        category: 'procedures',
+        scope: 'space',
+      },
+      context: mockContext,
+    });
+
+    expect(spaceConfirmation).toEqual({
+      title: 'Remember "duration_ms is a keyword field"',
+      message:
+        'Save to team memory for this space?\n\nOthers in this space who use Agent Memory will recall it.\n\nUse TO_DOUBLE(duration_ms) in ES|QL.',
+      confirm_text: 'Share with team',
+      color: 'primary',
+    });
+
     const result = await tool.handler(
       {
         title: "User's name is Susah",
