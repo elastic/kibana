@@ -9,13 +9,21 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
+import {
+  CONVERSATION_ID_MAX_LENGTH,
+  ConversationMetadataUpdatedTriggerId,
+} from '@kbn/agent-builder-common';
 
 export const UpdateConversationMetadataStepTypeId = 'ai.conversation.metadata.patch';
 
 const InputSchema = z.object({
-  conversation_id: z.string().meta({
-    description: 'The unique identifier of the conversation to update.',
-  }),
+  conversation_id: z
+    .string()
+    .meta({
+      description: 'The unique identifier of the conversation to update.',
+    })
+    .min(1)
+    .max(CONVERSATION_ID_MAX_LENGTH),
   updates: z
     .record(z.string(), z.unknown())
     .refine((val) => Object.keys(val).length > 0, {
@@ -63,8 +71,7 @@ export const updateConversationMetadataStepCommonDefinition: CommonStepDefinitio
     details: i18n.translate(
       'xpack.agentBuilder.workflowSteps.updateConversationMetadata.documentation.details',
       {
-        defaultMessage:
-          'Merges the provided key/value pairs into the conversation metadata. The conversation must have a template applied; only fields defined by the template are accepted. A successful write publishes a `agentBuilder.conversation.metadataUpdated` trigger event when at least one field value changes.',
+        defaultMessage: `Merges the provided key/value pairs into the conversation metadata. The conversation must have a template applied; only fields defined by the template are accepted. A successful write publishes a "${ConversationMetadataUpdatedTriggerId}" trigger event when at least one field value changes.`,
       }
     ),
     examples: [

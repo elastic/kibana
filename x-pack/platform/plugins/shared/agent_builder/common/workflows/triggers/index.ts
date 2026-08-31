@@ -14,18 +14,40 @@ export { ConversationMetadataUpdatedTriggerId };
 
 const conversationMetadataUpdatedEventSchema = z.object({
   conversationId: z.string().meta({
-    description: 'The ID of the conversation whose metadata was updated.',
+    description: i18n.translate(
+      'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.conversationId',
+      { defaultMessage: 'The ID of the conversation whose metadata was updated.' }
+    ),
   }),
-  templateId: z.string().optional().meta({
-    description: 'The template that defines the metadata schema for this conversation.',
-  }),
-  parentId: z.string().optional().meta({
-    description:
-      'The ID of the parent conversation, when this conversation is a child (e.g. a sub-agent).',
-  }),
+  templateId: z
+    .string()
+    .optional()
+    .meta({
+      description: i18n.translate(
+        'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.templateId',
+        { defaultMessage: 'The template that defines the metadata schema for this conversation.' }
+      ),
+    }),
+  parentId: z
+    .string()
+    .optional()
+    .meta({
+      description: i18n.translate(
+        'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.parentId',
+        {
+          defaultMessage:
+            'The ID of the parent conversation, when this conversation is a child (e.g. a sub-agent).',
+        }
+      ),
+    }),
   changedFields: z.array(z.string()).meta({
-    description:
-      'Names of the metadata fields that changed in this write. Use this to subscribe only to specific fields such as `status`, `decision`, or `severity`.',
+    description: i18n.translate(
+      'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.changedFields',
+      {
+        defaultMessage:
+          'Names of the metadata fields that changed in this write. Use this to subscribe only to specific fields such as `status`, `decision`, or `severity`.',
+      }
+    ),
   }),
 });
 
@@ -54,15 +76,12 @@ export const conversationMetadataUpdatedTriggerCommonDefinition: CommonTriggerDe
       }
     ),
     examples: [
-      i18n.translate(
-        'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.documentation.exampleDecision',
-        {
-          defaultMessage: `## Resume workflow when a proposal decision is recorded
+      `## Resume workflow when a proposal decision is recorded
 \`\`\`yaml
 version: '1'
 name: Handle proposal decision
 triggers:
-  - type: {triggerId}
+  - type: ${ConversationMetadataUpdatedTriggerId}
     on:
       condition: 'event.changedFields: "decision"'
 steps:
@@ -71,20 +90,12 @@ steps:
     with:
       message: Decision recorded
 \`\`\``,
-          values: {
-            triggerId: ConversationMetadataUpdatedTriggerId,
-          },
-        }
-      ),
-      i18n.translate(
-        'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.documentation.exampleSeverity',
-        {
-          defaultMessage: `## React to severity changes on a specific template
+      `## React to severity changes on a specific template
 \`\`\`yaml
 version: '1'
 name: React to severity change
 triggers:
-  - type: {triggerId}
+  - type: ${ConversationMetadataUpdatedTriggerId}
     on:
       condition: 'event.templateId: "investigation" and event.changedFields: "severity"'
 steps:
@@ -93,11 +104,6 @@ steps:
     with:
       message: Severity changed
 \`\`\``,
-          values: {
-            triggerId: ConversationMetadataUpdatedTriggerId,
-          },
-        }
-      ),
     ],
   },
 };
