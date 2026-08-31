@@ -35,6 +35,7 @@ import {
   validateObservableValue,
 } from '../validators';
 import { processObservables } from './utils';
+import { emitObservablesAddedEvent } from './observables_trigger_utils';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -123,6 +124,15 @@ export const applyObservablesToCase = async (
     },
   });
 
+  // Emit the observables-added event for the newly-persisted slice only.
+  // Diff by id: processObservables preserves existing ids and mints new v4 ids
+  // for incoming ObservablePost entries, so this is safe even under truncation.
+  const existingIds = new Set(currentObservables.map(({ id }) => id));
+  const newlyAddedObservables = finalObservables.filter(({ id }) => !existingIds.has(id));
+  if (newlyAddedObservables.length > 0) {
+    emitObservablesAddedEvent(clientArgs, retrievedCase, newlyAddedObservables);
+  }
+
   return {
     ...retrievedCase,
     ...patchedCase,
@@ -171,15 +181,14 @@ export const addObservable = async (
       throw Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`);
     }
 
-    const updatedObservables = [
-      ...currentObservables,
-      {
-        ...paramArgs.observable,
-        id: v4(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
+    const newObservable = {
+      ...paramArgs.observable,
+      id: v4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updatedObservables = [...currentObservables, newObservable];
 
     validateDuplicatedObservablesInRequest({
       requestFields: updatedObservables,
@@ -205,6 +214,8 @@ export const addObservable = async (
         },
       },
     });
+
+    emitObservablesAddedEvent(clientArgs, retrievedCase, [newObservable]);
 
     const res = flattenCaseSavedObject({
       savedObject: {

@@ -19,6 +19,7 @@ import {
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION,
   EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION,
+  OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLES_DESCRIPTION,
 } from '../translations';
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
@@ -330,4 +331,97 @@ triggers:
     ],
   },
   snippets: { condition: 'event.changedFields: "priority_as_keyword"' },
+};
+
+export const ObservablesAddedTriggerId = 'cases.observablesAdded' as const;
+
+const observableItemSchema = z.object({
+  id: z.string().meta({ description: 'The ID of the observable.' }),
+  typeKey: z
+    .string()
+    .meta({ description: 'The type key of the observable (e.g. "ip", "hash.md5").' }),
+  value: z.string().meta({ description: 'The value of the observable (e.g. "1.2.3.4").' }),
+  description: z
+    .string()
+    .nullable()
+    .meta({ description: 'An optional description for the observable.' }),
+});
+
+const observablesAddedEventSchema = baseCaseEventSchema.extend({
+  observables: z
+    .array(observableItemSchema)
+    .meta({ description: OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLES_DESCRIPTION }),
+});
+
+export type ObservablesAddedPayload = z.infer<typeof observablesAddedEventSchema>;
+
+export const observablesAddedTriggerCommonDefinition: CommonTriggerDefinition = {
+  id: ObservablesAddedTriggerId,
+  stability: 'tech_preview',
+  eventSchema: observablesAddedEventSchema,
+  title: i18n.translate('xpack.cases.workflowTriggers.observablesAdded.title', {
+    defaultMessage: 'Cases - Observables added',
+  }),
+  description: i18n.translate('xpack.cases.workflowTriggers.observablesAdded.description', {
+    defaultMessage: 'Emitted when one or more observables are added to a case.',
+  }),
+  documentation: {
+    details: i18n.translate('xpack.cases.workflowTriggers.observablesAdded.documentation.details', {
+      defaultMessage: `Emitted after observables are added to a case. Covers three paths: manual add (UI or API), auto-extraction from alert/event attachments (when the case setting extractObservables is enabled), and the cases.addObservables workflow step. The payload includes event.caseId, event.owner, and event.observables — an array of the newly-persisted observables with their id, typeKey, value, and description.
+
+Only newly-persisted observables are included. Nothing is emitted when every submitted observable already exists on the case.
+
+When an alert or event attachment is added to a case with extractObservables enabled, both cases.attachmentsAdded and cases.observablesAdded are emitted for the same request.
+
+**Loop prevention**
+A workflow that uses the cases.addObservables step will re-emit this trigger. Omitting on.workflowEvents defaults to avoid-loop (cycle guard). To skip workflow-attributed emits entirely, set on.workflowEvents: ignore. The chain depth is bounded by workflowsExecutionEngine.eventDriven.maxChainDepth (default 10).`,
+    }),
+    examples: [
+      i18n.translate(
+        'xpack.cases.workflowTriggers.observablesAdded.documentation.exampleOwnerFilter',
+        {
+          defaultMessage: `## Run only for Security cases
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.owner: "securitySolution"'
+\`\`\``,
+          values: {
+            triggerId: ObservablesAddedTriggerId,
+          },
+        }
+      ),
+      i18n.translate(
+        'xpack.cases.workflowTriggers.observablesAdded.documentation.exampleEnrichment',
+        {
+          defaultMessage: `## Log newly-added observables (with loop guard)
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.owner: "securitySolution"'
+      # Prevent re-triggering if this workflow later calls cases.addObservables.
+      workflowEvents: ignore
+steps:
+  - name: log-event-summary
+    type: console
+    with:
+      message: |
+        cases.observablesAdded fired
+        Case ID : {liqCaseId}
+        Owner   : {liqOwner}
+        Count   : {liqCount} observable(s) added
+\`\`\``,
+          values: {
+            triggerId: ObservablesAddedTriggerId,
+            liqCaseId: '{{ event.caseId }}',
+            liqOwner: '{{ event.owner }}',
+            liqCount: '{{ event.observables | size }}',
+          },
+        }
+      ),
+    ],
+  },
+  snippets: { condition: 'event.owner: "securitySolution"' },
 };

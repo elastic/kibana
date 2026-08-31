@@ -25,6 +25,28 @@ describe('CasesEventBus', () => {
     });
   });
 
+  it('emits observables added events', () => {
+    const eventBus = new CasesEventBus();
+    const listener = jest.fn();
+
+    eventBus.onObservablesAdded(listener);
+    eventBus.emitObservablesAdded(request, {
+      caseId: 'case-1',
+      owner: 'securitySolution',
+      observables: [{ id: 'obs-1', typeKey: 'ip', value: '1.2.3.4', description: null }],
+    });
+
+    expect(listener).toHaveBeenCalledWith({
+      type: 'observablesAdded',
+      request,
+      payload: {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        observables: [{ id: 'obs-1', typeKey: 'ip', value: '1.2.3.4', description: null }],
+      },
+    });
+  });
+
   it('emits case updated events with updated fields', () => {
     const eventBus = new CasesEventBus();
     const listener = jest.fn();

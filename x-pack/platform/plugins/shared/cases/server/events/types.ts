@@ -47,6 +47,24 @@ export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
 }
 
 /**
+ * A single observable contained in an ObservablesAdded event.
+ */
+export interface ObservablesAddedEventObservable {
+  readonly id: string;
+  readonly typeKey: string;
+  readonly value: string;
+  readonly description: string | null;
+}
+
+/**
+ * Event: observables added
+ */
+export interface ObservablesAddedEventPayload extends BaseCaseEventPayload {
+  readonly caseId: string;
+  readonly observables: ObservablesAddedEventObservable[];
+}
+
+/**
  * Event: alert status changed (emitted by Cases when it updates alert workflow statuses)
  */
 export interface AlertStatusChangedEventPayload {
@@ -67,6 +85,7 @@ interface CasesDomainEventPayloadByType {
   readonly caseUpdated: CaseUpdatedEventPayload;
   readonly caseStatusChanged: CaseStatusChangedEventPayload;
   readonly attachmentsAdded: AttachmentsAddedEventPayload;
+  readonly observablesAdded: ObservablesAddedEventPayload;
   readonly alertStatusChanged: AlertStatusChangedEventPayload;
 }
 

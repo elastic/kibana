@@ -127,6 +127,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'cfb4b84727e79d6826fa8a786b7591ea1a86661c7fff2bb2fa768abbc3aaf37c',
   },
   {
+    id: 'cases.observablesAdded',
+    schemaHash: '1c1afd4b9c8bb1efa014e2e6490dad3d1585a79492380949ea2a298190f76921',
+  },
+  {
     id: 'entityStore.entityAssetCriticalityUpdated',
     schemaHash: 'ef5a71ccf64832ea19fda336a36fbf0b8200a1bd4f703d78417075deedb77c3f',
   },

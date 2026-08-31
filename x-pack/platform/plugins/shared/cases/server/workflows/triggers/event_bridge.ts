@@ -18,6 +18,7 @@ import {
   CommentsAddedTriggerId,
   CaseStatusUpdatedTriggerId,
   ExtendedFieldsUpdatedTriggerId,
+  ObservablesAddedTriggerId,
 } from '../../../common/workflows/triggers';
 import { buildExtendedFieldsUpdatedPayload } from './extended_fields_updated_payload';
 
@@ -71,6 +72,10 @@ export function registerCasesWorkflowEventBridge(
         void forward(ExtendedFieldsUpdatedTriggerId, extendedFieldsPayload, event.request);
       }
     }
+  });
+
+  casesEventBus.onObservablesAdded((event) => {
+    void forward(ObservablesAddedTriggerId, event.payload, event.request);
   });
 
   casesEventBus.onAttachmentsAdded((event) => {

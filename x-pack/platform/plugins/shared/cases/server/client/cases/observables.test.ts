@@ -173,6 +173,51 @@ describe('addObservable', () => {
       },
     });
   });
+
+  it('emits the observablesAdded event with the new observable', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    await addObservable(
+      caseSO.id,
+      { observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '127.0.0.1', description: '' } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledWith(
+      mockClientArgs.request,
+      expect.objectContaining({
+        caseId: caseSO.id,
+        owner: 'securitySolution',
+        observables: expect.arrayContaining([
+          expect.objectContaining({ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '127.0.0.1' }),
+        ]),
+      })
+    );
+  });
+
+  it('does not emit the observablesAdded event when a duplicate is submitted', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+
+    // Duplicate — same typeKey + value as the existing observable
+    await expect(
+      addObservable(
+        caseSO.id,
+        {
+          observable: {
+            typeKey: OBSERVABLE_TYPE_IPV4.key,
+            value: '127.0.0.1',
+            description: '',
+          },
+        },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow();
+
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
+  });
 });
 
 describe('updateObservable', () => {
@@ -558,5 +603,57 @@ describe('applyObservablesToCase', () => {
         }),
       })
     );
+  });
+
+  it('emits the observablesAdded event with only the newly-added observables', async () => {
+    mockCaseService.getCase.mockResolvedValue({
+      ...caseSO,
+      attributes: { ...caseSO.attributes, observables: [mockObservable] },
+    });
+
+    const newObservable: ObservablePost = {
+      value: '10.0.0.1',
+      typeKey: OBSERVABLE_TYPE_IPV4.key,
+      description: null,
+    };
+
+    await applyObservablesToCase(
+      caseSO.id,
+      [mockObservablePost, newObservable], // mockObservablePost is a duplicate
+      mockClientArgs
+    );
+
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledWith(
+      mockClientArgs.request,
+      expect.objectContaining({
+        caseId: caseSO.id,
+        observables: expect.arrayContaining([
+          expect.objectContaining({ value: newObservable.value }),
+        ]),
+      })
+    );
+    // The already-existing observable must NOT appear in the payload.
+    const callArg = (mockClientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock
+      .calls[0][1];
+    expect(callArg.observables).toHaveLength(1);
+  });
+
+  it('does not emit the observablesAdded event when all observables are duplicates', async () => {
+    mockCaseService.getCase.mockResolvedValue({
+      ...caseSO,
+      attributes: { ...caseSO.attributes, observables: [mockObservable] },
+    });
+
+    // All duplicates — applyObservablesToCase returns early before the patch
+    await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
+
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
+  });
+
+  it('does not emit the observablesAdded event when the input is empty', async () => {
+    await applyObservablesToCase(caseSO.id, [], mockClientArgs);
+
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
   });
 });
