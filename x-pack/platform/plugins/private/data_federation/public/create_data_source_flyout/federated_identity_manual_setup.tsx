@@ -12,6 +12,7 @@ import {
   EuiCodeBlock,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -69,14 +70,14 @@ function FederatedIdentityManualSetupStepAccordion({
       <EuiAccordion
         id={accordionId}
         buttonContent={
-          <EuiText size="s">
-            <strong>
+          <EuiTitle size="xs">
+            <h4>
               {i18n.translate('xpack.dataFederation.createFlyout.federated.manual.stepTitle', {
                 defaultMessage: 'Step {stepNumber}: {title}',
                 values: { stepNumber: step.stepNumber, title: step.title },
               })}
-            </strong>
-          </EuiText>
+            </h4>
+          </EuiTitle>
         }
         initialIsOpen={step.initialIsOpen ?? step.stepNumber === 1}
         paddingSize="m"

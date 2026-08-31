@@ -244,6 +244,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const connectionTestCallout = connectionTestResult ? (
     <EuiCallOut
+      announceOnMount
       title={
         connectionTestResult === 'success'
           ? createDataSourceFlyoutStrings.testConnectionSuccessTitle()
@@ -298,7 +299,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               <EuiSpacer size="m" />
             </>
           ) : null}
-          <EuiTitle size="xs">
+          <EuiTitle size="s">
             <h3>{createDataSourceFlyoutStrings.detailsTitle()}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />

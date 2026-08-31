@@ -7,12 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFieldPassword,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
@@ -200,14 +195,8 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
     };
   }, [unregister]);
 
-  const setupValues = useMemo(
-    () => resolveFederatedIdentitySetupValues(cloudInfo),
-    [cloudInfo]
-  );
-  const manualSteps = useMemo(
-    () => getS3FederatedIdentityManualSteps(setupValues),
-    [setupValues]
-  );
+  const setupValues = useMemo(() => resolveFederatedIdentitySetupValues(cloudInfo), [cloudInfo]);
+  const manualSteps = useMemo(() => getS3FederatedIdentityManualSteps(setupValues), [setupValues]);
   const deployConfig = useMemo(() => getS3FederatedIdentityDeployConfig(), []);
 
   return (
@@ -217,7 +206,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
         oneClickLabel={i18n.translate(
           'xpack.dataFederation.createFlyout.s3.federated.setupMethod.cloudFormation',
           {
-            defaultMessage: 'Cloud formation',
+            defaultMessage: 'CloudFormation',
           }
         )}
         oneClickIcon={deployConfig.cloudProviderIcon}

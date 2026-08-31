@@ -22,7 +22,7 @@ const AZURE_DEPLOY_LAUNCH_URL =
 export const getAzureFederatedIdentityDescription = () =>
   i18n.translate('xpack.dataFederation.createFlyout.azure.federated.description', {
     defaultMessage:
-      'No credentials are stored. Azure trusts your Elastic deployment identity through federated credentials.',
+      'No credentials are stored. Azure trusts the identity Elastic issues for your project or deployment through federated credentials.',
   });
 
 export const getAzureFederatedIdentityManualIntro = () =>
@@ -98,10 +98,13 @@ export const getAzureFederatedIdentityDeployConfig = () => ({
   title: i18n.translate('xpack.dataFederation.createFlyout.azure.federated.deploy.title', {
     defaultMessage: 'Deploy with Azure Resource Manager',
   }),
-  description: i18n.translate('xpack.dataFederation.createFlyout.azure.federated.deploy.description', {
-    defaultMessage:
-      'The template creates an app registration, federated credential, and storage blob data reader role assignment.',
-  }),
+  description: i18n.translate(
+    'xpack.dataFederation.createFlyout.azure.federated.deploy.description',
+    {
+      defaultMessage:
+        'The template creates an app registration, federated credential, and storage blob data reader role assignment.',
+    }
+  ),
   launchUrl: AZURE_DEPLOY_LAUNCH_URL,
   launchButtonLabel: i18n.translate(
     'xpack.dataFederation.createFlyout.azure.federated.deploy.launchButton',
@@ -109,9 +112,12 @@ export const getAzureFederatedIdentityDeployConfig = () => ({
       defaultMessage: 'Launch ARM template',
     }
   ),
-  launchHint: i18n.translate('xpack.dataFederation.createFlyout.azure.federated.deploy.launchHint', {
-    defaultMessage: 'Opens in Azure Portal → Custom deployment',
-  }),
+  launchHint: i18n.translate(
+    'xpack.dataFederation.createFlyout.azure.federated.deploy.launchHint',
+    {
+      defaultMessage: 'Opens in Azure Portal → Custom deployment',
+    }
+  ),
   createsTitle: i18n.translate(
     'xpack.dataFederation.createFlyout.azure.federated.deploy.createsTitle',
     {

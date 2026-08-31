@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -75,6 +76,7 @@ function FederatedIdentitySetupMethodCard({
   onMethodChange: (method: FederatedIdentitySetupMethod) => void;
 }) {
   const cardId = useGeneratedHtmlId({ prefix: `federatedIdentitySetupMethod-${option.id}` });
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiCheckableCard
@@ -89,7 +91,9 @@ function FederatedIdentitySetupMethodCard({
           <EuiFlexItem grow={false}>
             <EuiIcon type={option.icon} size="m" aria-hidden={true} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ fontWeight: euiTheme.font.weight.medium }}>
+            {option.label}
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
     />

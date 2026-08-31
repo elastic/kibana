@@ -21,7 +21,8 @@ const GCP_DEPLOY_LAUNCH_URL = 'https://console.cloud.google.com/iam-admin/worklo
 
 export const getGcsFederatedIdentityDescription = () =>
   i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.description', {
-    defaultMessage: 'No credentials are stored. Google Cloud trusts your Elastic deployment identity.',
+    defaultMessage:
+      'No credentials are stored. Google Cloud trusts the identity Elastic issues for your project or deployment.',
   });
 
 export const getGcsFederatedIdentityManualIntro = () =>
@@ -104,10 +105,13 @@ export const getGcsFederatedIdentityDeployConfig = () => ({
   title: i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.deploy.title', {
     defaultMessage: 'Deploy with Google Cloud',
   }),
-  description: i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.deploy.description', {
-    defaultMessage:
-      'The deployment creates a workload identity pool, OIDC provider, and service account binding for GCS read access.',
-  }),
+  description: i18n.translate(
+    'xpack.dataFederation.createFlyout.gcs.federated.deploy.description',
+    {
+      defaultMessage:
+        'The deployment creates a workload identity pool, OIDC provider, and service account binding for GCS read access.',
+    }
+  ),
   launchUrl: GCP_DEPLOY_LAUNCH_URL,
   launchButtonLabel: i18n.translate(
     'xpack.dataFederation.createFlyout.gcs.federated.deploy.launchButton',
@@ -118,9 +122,12 @@ export const getGcsFederatedIdentityDeployConfig = () => ({
   launchHint: i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.deploy.launchHint', {
     defaultMessage: 'Opens in Google Cloud Console → IAM → Workload Identity Federation',
   }),
-  createsTitle: i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.deploy.createsTitle', {
-    defaultMessage: 'What the deployment creates',
-  }),
+  createsTitle: i18n.translate(
+    'xpack.dataFederation.createFlyout.gcs.federated.deploy.createsTitle',
+    {
+      defaultMessage: 'What the deployment creates',
+    }
+  ),
   createsItems: [
     i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.deploy.creates.pool', {
       defaultMessage: 'Workload identity pool for Elastic-issued tokens.',
@@ -132,8 +139,7 @@ export const getGcsFederatedIdentityDeployConfig = () => ({
       defaultMessage: 'Service account binding with storage.objectViewer on your bucket.',
     }),
     i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.deploy.creates.output', {
-      defaultMessage:
-        'Provider resource name — use this value as the STS audience in Elastic.',
+      defaultMessage: 'Provider resource name — use this value as the STS audience in Elastic.',
     }),
   ],
 });

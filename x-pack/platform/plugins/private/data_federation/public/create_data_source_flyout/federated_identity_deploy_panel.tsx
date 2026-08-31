@@ -81,13 +81,13 @@ export function FederatedIdentityDeployPanel({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiAccordion
         id={createsAccordionId}
         buttonContent={
-          <EuiText size="s">
-            <strong>{createsTitle}</strong>
-          </EuiText>
+          <EuiTitle size="xs">
+            <h4>{createsTitle}</h4>
+          </EuiTitle>
         }
         initialIsOpen={false}
         paddingSize="m"

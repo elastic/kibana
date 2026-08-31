@@ -20,13 +20,14 @@ const AWS_CLOUDFORMATION_LAUNCH_URL =
 
 export const getS3FederatedIdentityDescription = () =>
   i18n.translate('xpack.dataFederation.createFlyout.s3.federated.description', {
-    defaultMessage: 'No credentials are stored. AWS trusts your Elastic deployment identity.',
+    defaultMessage:
+      'No credentials are stored. AWS trusts the identity Elastic issues for your project or deployment.',
   });
 
 export const getS3FederatedIdentityManualIntro = () =>
   i18n.translate('xpack.dataFederation.createFlyout.s3.federated.manual.intro', {
     defaultMessage:
-      'Run the commands below in order in an AWS shell with IAM permissions — for example AWS CloudShell. Copy each step, paste it into the shell, wait for it to finish, then open the next step.',
+      'Run the commands below in order in AWS CloudShell, or any shell with the AWS CLI configured and permissions to create IAM resources. Copy each step, paste it into the shell, wait for it to finish, then open the next step.',
   });
 
 export const getS3FederatedIdentityManualSteps = (
@@ -36,12 +37,15 @@ export const getS3FederatedIdentityManualSteps = (
     id: 'create-idp',
     stepNumber: 1,
     title: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.manual.step1.title', {
-      defaultMessage: 'Create the identity provider',
+      defaultMessage: 'Create the OpenID Connect identity provider',
     }),
-    description: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.manual.step1.description', {
-      defaultMessage:
-        'Skip this step if you already have an AWS identity provider configured for Elastic. Set IDP_ARN to that provider ARN and ISSUER_HOST to the issuer host without the https:// prefix.',
-    }),
+    description: i18n.translate(
+      'xpack.dataFederation.createFlyout.s3.federated.manual.step1.description',
+      {
+        defaultMessage:
+          'Creates an IAM provider that trusts the tokens Elastic issues, with sts.amazonaws.com as the token audience. Skip this step if you already have an AWS identity provider configured for Elastic. Set IDP_ARN to that provider ARN and ISSUER_HOST to the issuer host without the https:// prefix.',
+      }
+    ),
     initialIsOpen: true,
     command: `export JWT_ISSUER="${values.jwtIssuer}"
 export SUBJECT="${values.subject}"
@@ -60,8 +64,15 @@ ISSUER_HOST="\${JWT_ISSUER#https://}"`,
     id: 'create-policy',
     stepNumber: 2,
     title: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.manual.step2.title', {
-      defaultMessage: 'Create a default policy to autodetect bucket location',
+      defaultMessage: 'Create the read policy',
     }),
+    description: i18n.translate(
+      'xpack.dataFederation.createFlyout.s3.federated.manual.step2.description',
+      {
+        defaultMessage:
+          'Grants s3:GetObject to read your objects, plus s3:ListBucket and s3:GetBucketLocation so prefix and glob queries resolve. The policy covers the whole bucket — narrow the object resource to a prefix for a tighter scope.',
+      }
+    ),
     command: `export BUCKET_NAME="<your-bucket-name>"
 
 POLICY_ARN=$(aws iam create-policy \\
@@ -93,8 +104,15 @@ EOF
     id: 'create-role',
     stepNumber: 3,
     title: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.manual.step3.title', {
-      defaultMessage: 'Create the role and attach the policy',
+      defaultMessage: 'Create the IAM role and attach the policy',
     }),
+    description: i18n.translate(
+      'xpack.dataFederation.createFlyout.s3.federated.manual.step3.description',
+      {
+        defaultMessage:
+          'The trust policy lets only your identity provider assume the role, and only when the token audience and subject match your values. The command prints the role ARN you need below.',
+      }
+    ),
     command: `export ROLE_NAME="elastic-data-federation"
 
 ROLE_ARN=$(aws iam create-role \\
@@ -135,7 +153,7 @@ export const getS3FederatedIdentityDeployConfig = () => ({
   }),
   description: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.description', {
     defaultMessage:
-      'The template automatically creates an OIDC identity provider, IAM role, and S3 read policy. Deployment takes about 60 seconds.',
+      'The template creates an OIDC identity provider, IAM role, and S3 read policy in your AWS account.',
   }),
   launchUrl: AWS_CLOUDFORMATION_LAUNCH_URL,
   launchButtonLabel: i18n.translate(
@@ -147,12 +165,16 @@ export const getS3FederatedIdentityDeployConfig = () => ({
   launchHint: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.launchHint', {
     defaultMessage: 'Opens in AWS Console → CloudFormation',
   }),
-  createsTitle: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.createsTitle', {
-    defaultMessage: 'What the template creates',
-  }),
+  createsTitle: i18n.translate(
+    'xpack.dataFederation.createFlyout.s3.federated.deploy.createsTitle',
+    {
+      defaultMessage: 'What the template creates',
+    }
+  ),
   createsItems: [
     i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.idp', {
-      defaultMessage: 'IAM OIDC identity provider — trusts your Elastic deployment JWT issuer.',
+      defaultMessage:
+        'IAM OIDC identity provider — trusts the JWT issuer for your Elastic project or deployment.',
     }),
     i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.role', {
       defaultMessage:
@@ -172,8 +194,7 @@ export const getS3FederatedIdentityDeployConfig = () => ({
 export const getS3FederatedIdentityRoleArnHelp = (fromDeploy: boolean) =>
   fromDeploy
     ? i18n.translate('xpack.dataFederation.createFlyout.s3.federated.roleArnHelp.deploy', {
-        defaultMessage:
-          'CloudFormation → Stacks → elastic-data-federation → Outputs → RoleArn',
+        defaultMessage: 'CloudFormation → Stacks → your stack → Outputs → RoleArn',
       })
     : i18n.translate('xpack.dataFederation.createFlyout.s3.federated.roleArnHelp.manual', {
         defaultMessage: 'Paste the ARN returned by step 3 above.',
