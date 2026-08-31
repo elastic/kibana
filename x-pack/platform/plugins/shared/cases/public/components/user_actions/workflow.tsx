@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
@@ -74,11 +74,16 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
           ];
           const found = allObservableTypes.find((t) => t.key === origin.typeKey);
           const typeLabel = found?.label ?? origin.typeKey;
+          const observableNode = (
+            <EuiBadge color="hollow" data-test-subj="workflow-observable-badge">
+              {typeLabel}: {origin.value}
+            </EuiBadge>
+          );
           return (
             <FormattedMessage
               id="xpack.cases.caseView.userActions.ranWorkflowOnObservableDetailsLabel"
-              defaultMessage="ran {name} on observable {typeLabel}: {value}"
-              values={{ name: workflowNameNode, typeLabel, value: origin.value }}
+              defaultMessage="ran {name} on observable {observable}"
+              values={{ name: workflowNameNode, observable: observableNode }}
             />
           );
         }
