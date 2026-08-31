@@ -372,7 +372,9 @@ export const buildOtelEsExporterConfig = (output: Output): Record<string, unknow
       queue_size: queueSize,
       batch: {
         flush_timeout: settings.queueFlushTimeout,
-        max_size: settings.bulkMaxSize,
+        // Beats bulk_max_size: 0 means "don't split" (unbounded); clamp to 1 since the OTel
+        // exporter requires a positive value and min_size is already floored at 1.
+        max_size: Math.max(1, settings.bulkMaxSize),
         min_size: batchMinSize,
         sizer: 'items',
       },
@@ -387,7 +389,10 @@ export const buildOtelEsExporterConfig = (output: Output): Record<string, unknow
         ? { enabled: false }
         : {
             enabled: true,
-            max_retries: settings.maxRetries,
+            // Beats max_retries: -1 means "retry forever"; negative values are not valid for
+            // the OTel exporter, so we omit the field and let the exporter use its own default
+            // (which is also effectively unbounded).
+            ...(settings.maxRetries > 0 ? { max_retries: settings.maxRetries } : {}),
             initial_interval: settings.backoffInit,
             max_interval: settings.backoffMax,
             retry_on_status: [...DEFAULT_RETRY_ON_STATUS],

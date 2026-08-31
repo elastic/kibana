@@ -3774,6 +3774,25 @@ describe('generateOtelcolConfig', () => {
       });
     });
 
+    it('should omit max_retries when set to -1 (Beats retry-forever sentinel)', () => {
+      // Beats max_retries: -1 means retry indefinitely; the OTel exporter does not accept
+      // negative values so we omit the field, letting the exporter use its own default.
+      const retry = getExporter({ ...defaultOutput, config_yaml: 'max_retries: -1' })
+        .retry as Record<string, unknown>;
+      expect(retry.enabled).toBe(true);
+      expect(retry).not.toHaveProperty('max_retries');
+    });
+
+    it('should clamp batch max_size to 1 when bulk_max_size is 0 (Beats unbounded-batch sentinel)', () => {
+      // Beats bulk_max_size: 0 means send everything in one request; the OTel exporter
+      // requires a positive value, so we clamp to 1.
+      expect(
+        getExporter({ ...defaultOutput, preset: 'custom', config_yaml: 'bulk_max_size: 0' })
+      ).toMatchObject({
+        sending_queue: { batch: { max_size: 1, min_size: 1 } },
+      });
+    });
+
     it('should append the unit to unit-less durations from config_yaml', () => {
       // Beats accepts a bare number as seconds; the OTel exporterhelper does not.
       const exporter = getExporter({
