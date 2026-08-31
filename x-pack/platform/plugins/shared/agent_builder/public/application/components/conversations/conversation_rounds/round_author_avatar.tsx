@@ -24,7 +24,7 @@ export const RoundAuthorAvatar: React.FC<RoundAuthorAvatarProps> = ({ agent, aut
   const { authorProfile, name } = useRoundAuthorDetails({ agent, author, origin });
 
   if (agent) {
-    return <AgentAvatar agent={agent} size="s" iconPaddingSize="none" />;
+    return <AgentAvatar agent={agent} size="s" iconSize="l" iconPaddingSize="none" />;
   }
 
   if (authorProfile) {

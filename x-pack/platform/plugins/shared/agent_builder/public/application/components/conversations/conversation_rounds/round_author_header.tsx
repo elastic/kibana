@@ -130,6 +130,9 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
     <EuiText
       size="xs"
       css={css`
+        min-block-size: ${euiTheme.size.l};
+        display: flex;
+        align-items: center;
         line-height: ${euiTheme.size.base};
       `}
     >

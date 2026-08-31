@@ -72,6 +72,7 @@ describe('RoundAuthorAvatar', () => {
       expect.objectContaining({
         agent,
         size: 's',
+        iconSize: 'l',
         iconPaddingSize: 'none',
       }),
       expect.anything()

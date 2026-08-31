@@ -13,6 +13,27 @@ import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-bui
 import { css } from '@emotion/react';
 import { roundedBorderRadiusStyles } from '../../../common.styles';
 
+const getAvatarSize = ({
+  euiTheme,
+  size,
+}: {
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'];
+  size: EuiAvatarProps['size'];
+}) => {
+  switch (size) {
+    case 's':
+      return euiTheme.size.l;
+    case 'm':
+      return euiTheme.size.xl;
+    case 'l':
+      return euiTheme.size.xxl;
+    case 'xl':
+      return euiTheme.size.xxxxl;
+    default:
+      return undefined;
+  }
+};
+
 // Icon size should be one size larger than the avatar size
 const getIconSize = ({ size }: { size: 's' | 'm' | 'l' | 'xl' | undefined }) => {
   switch (size) {
@@ -101,12 +122,24 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
   if (shouldUseIcon) {
     const iconType = icon ?? 'logoElastic';
     const iconSize = iconSizeProp || getIconSize({ size });
+    const avatarSize = getAvatarSize({ euiTheme, size });
     const panelStyles = css`
       ${hasBackground ? `background-color: ${color};` : ''}
       ${borderAndShapeStyles}
+      ${avatarSize ? `inline-size: ${avatarSize}; block-size: ${avatarSize};` : ''}
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     `;
     return (
-      <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize={iconPaddingSize}>
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        css={panelStyles}
+        paddingSize={iconPaddingSize}
+        data-test-subj="agentBuilderAgentIconAvatar"
+      >
         <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
       </EuiPanel>
     );
