@@ -25,6 +25,8 @@ export default function ({ getService, getPageObjects }) {
         }
       );
 
+      // wait for the overview to settle so the alerts modal is dismissed on a stable page, not mid /no-data redirect
+      await clusterOverview.isOnClusterOverview();
       await clusterOverview.closeAlertsModal();
 
       // go to kibana overview
