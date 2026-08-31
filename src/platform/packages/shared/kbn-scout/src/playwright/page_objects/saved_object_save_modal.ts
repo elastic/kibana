@@ -25,7 +25,6 @@ export class SavedObjectSaveModal {
   private readonly dashboardPicker;
   private readonly newDashboardRadio;
   private readonly addToLibraryCheckbox;
-  private readonly saveAsNewCheckbox;
   private readonly tagSelector;
   private readonly tagForm;
   private readonly tagColorInput;
@@ -39,7 +38,6 @@ export class SavedObjectSaveModal {
     this.dashboardPicker = this.page.testSubj.locator('open-dashboard-picker');
     this.newDashboardRadio = this.page.locator('input#new-dashboard-option');
     this.addToLibraryCheckbox = this.page.locator('input#add-to-library-checkbox');
-    this.saveAsNewCheckbox = this.page.testSubj.locator('saveAsNewCheckbox');
     this.tagSelector = this.page.testSubj.locator('savedObjectTagSelector');
     this.tagForm = this.page.testSubj.locator('tagModalForm');
     this.tagColorInput = this.page.testSubj.locator('~createModalField-color');
@@ -105,10 +103,6 @@ export class SavedObjectSaveModal {
 
   async selectNoDashboard() {
     await this.page.locator('label[for="add-to-library-option"]').click();
-  }
-
-  async setSaveAsNew(saveAsNew: boolean) {
-    await this.saveAsNewCheckbox.setChecked(saveAsNew);
   }
 
   async confirm() {
