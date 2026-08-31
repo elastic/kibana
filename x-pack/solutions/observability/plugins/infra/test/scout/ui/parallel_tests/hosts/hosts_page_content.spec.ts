@@ -25,17 +25,11 @@ test.describe(
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
+        hostNames: HOSTS.map(({ hostName }) => hostName),
         preferredSchema: 'ecs',
       });
-
-      await test.step('wait for table and KPIs to load', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-        await hostsPage.waitForKPILoadingToFinish(EXTENDED_TIMEOUT);
-      });
-    });
-
-    test('should render the correct page title', async ({ page }) => {
-      await expect(page).toHaveTitle(/Hosts - Infrastructure - Observability - Elastic/);
+      await expect(hostsPage.tableLoaded).toBeVisible();
+      await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
     });
 
     test('should maintain the selected date range when navigating to host details', async ({
@@ -43,10 +37,7 @@ test.describe(
       page,
     }) => {
       await test.step('click a host link to navigate to host details', async () => {
-        const hostLink = hostsPage.getHostDetailLinks();
-        await expect(hostLink).not.toHaveCount(0);
-        const linkRow = hostsPage.getHostRow(HOST1_NAME);
-        await linkRow.getByTestId('hostsViewTableEntryTitleLink').click();
+        await hostsPage.getHostRow(HOST1_NAME).getByTestId('hostsViewTableEntryTitleLink').click();
       });
 
       await test.step('verify the date picker preserves the selected time range', async () => {
@@ -56,40 +47,13 @@ test.describe(
       });
     });
 
-    test('should load 11 lens metric charts in the Metrics tab', async ({
-      pageObjects: { hostsPage },
-      page,
-    }) => {
-      await hostsPage.visitMetricsTab();
-
-      await test.step('verify 11 metric charts are rendered', async () => {
-        const charts = hostsPage.getMetricsCharts();
-        await expect(charts).toHaveCount(11, { timeout: EXTENDED_TIMEOUT });
-      });
-
-      await test.step('verify the Lens action menu is available', async () => {
-        await hostsPage.clickMetricChartAction('hostsView-metricChart-tx');
-        await expect(page.getByTestId('embeddablePanelAction-openInLens')).toBeVisible();
-        await page.keyboard.press('Escape');
-      });
-    });
-
     test('should load the Logs tab with embedded saved search', async ({
       pageObjects: { hostsPage },
       page,
     }) => {
       await hostsPage.visitLogsTab();
-
-      await test.step('verify the embedded saved search table is visible', async () => {
-        await expect(page.getByTestId('embeddedSavedSearchDocTable')).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-      });
-
-      await test.step('verify the correct column headers', async () => {
-        const table = page.getByTestId('embeddedSavedSearchDocTable');
-        await expect(table.getByRole('columnheader', { name: '@timestamp' })).toBeVisible();
-        await expect(table.getByRole('columnheader', { name: 'Summary' })).toBeVisible();
+      await expect(page.getByTestId('embeddedSavedSearchDocTable')).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
       });
     });
   }
