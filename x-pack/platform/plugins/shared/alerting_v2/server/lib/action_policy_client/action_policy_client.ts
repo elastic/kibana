@@ -392,16 +392,11 @@ export class ActionPolicyClient {
     for (const actionPolicy of allPolicies.items) {
       const { matcher } = actionPolicy;
 
-      // A catch-all matcher (absent, or with neither a tag clause nor an expression) applies to
-      // every rule; it is surfaced under the "global" category. Reuses the dispatcher's canonical
-      // catch-all definition so both stay in sync.
       if (PolicyMatcher.of(matcher).isCatchAll()) {
-        items.push({ actionPolicy, category: 'global' });
+        items.push({ actionPolicy, category: 'catch-all' });
         continue;
       }
 
-      // Expression clauses depend on episode data unavailable here, so a policy can only match
-      // through its tag clause intersecting the rule's tags.
       const matcherTags = matcher?.tags ?? [];
       if (matcherTags.some((tag) => ruleTagSet.has(tag))) {
         items.push({ actionPolicy, category: 'tags' });

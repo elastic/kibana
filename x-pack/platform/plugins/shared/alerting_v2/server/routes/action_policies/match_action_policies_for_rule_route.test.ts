@@ -56,7 +56,7 @@ describe('MatchActionPoliciesForRuleRoute', () => {
   it('returns client result in the response body', async () => {
     const mocks = createMocks();
     const clientResult = {
-      items: [{ actionPolicy: { id: 'ap-1', name: 'AP 1' }, category: 'global' }],
+      items: [{ actionPolicy: { id: 'ap-1', name: 'AP 1' }, category: 'catch-all' }],
     };
     mocks.actionPolicyClient.matchActionPoliciesForRule.mockResolvedValue(clientResult as any);
 

@@ -3102,7 +3102,7 @@ describe('ActionPolicyClient', () => {
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
-    it('returns global APs for policies with no matcher, along with the space-scoped total', async () => {
+    it('returns catch-all APs for policies with no matcher, along with the space-scoped total', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse(
           [{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }],
@@ -3113,12 +3113,12 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('global');
+      expect(result.items[0].category).toBe('catch-all');
       expect(result.items[0].actionPolicy.id).toBe('ap-catchall');
       expect(result.total).toBe(150);
     });
 
-    it('returns global APs for policies whose matcher has neither tags nor an expression', async () => {
+    it('returns catch-all APs for policies whose matcher has neither tags nor an expression', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
         matcher: { tags: [], expression: '  ' },
@@ -3131,11 +3131,11 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('global');
+      expect(result.items[0].category).toBe('catch-all');
       expect(result.items[0].actionPolicy.id).toBe('ap-empty-matcher');
     });
 
-    it('returns global APs even when the rule has no tags', async () => {
+    it('returns catch-all APs even when the rule has no tags', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse([{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }])
       );
@@ -3143,7 +3143,7 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPoliciesForRule({});
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('global');
+      expect(result.items[0].category).toBe('catch-all');
     });
 
     it('returns tags APs when the rule tags intersect the matcher tag clause', async () => {

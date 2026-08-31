@@ -69,12 +69,12 @@ describe('useLinkedActionPolicies', () => {
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({ http: mockHttp, tags: RULE_TAGS });
   });
 
-  it('counts items with category "global" as catch-all and "tags" as matching criteria', () => {
+  it('counts items with category "catch-all" as catch-all and "tags" as matching criteria', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
       items: [
-        buildItem('global', { id: 'catch-all-1' }),
+        buildItem('catch-all', { id: 'catch-all-1' }),
         buildItem('tags', { id: 'filtered-1' }),
         buildItem('tags', { id: 'filtered-2' }),
       ],

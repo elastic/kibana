@@ -73,7 +73,7 @@ describe('useMatchedActionPolicies', () => {
         items: [{ actionPolicy: { id: 'ap-1' }, category: 'tags' }],
       } as any)
       .mockResolvedValueOnce({
-        items: [{ actionPolicy: { id: 'ap-2' }, category: 'global' }],
+        items: [{ actionPolicy: { id: 'ap-2' }, category: 'catch-all' }],
       } as any);
 
     const { result, rerender } = renderHook(
@@ -92,7 +92,7 @@ describe('useMatchedActionPolicies', () => {
   it('fires a request with an empty rule body when no tags are provided', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
-      items: [{ actionPolicy: { id: 'ap-global', name: 'Global Policy' }, category: 'global' }],
+      items: [{ actionPolicy: { id: 'ap-global', name: 'Global Policy' }, category: 'catch-all' }],
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
 
