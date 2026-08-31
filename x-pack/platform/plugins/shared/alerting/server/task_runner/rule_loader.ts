@@ -26,7 +26,11 @@ import { MONITORING_HISTORY_LIMIT } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getAlertFromRaw } from '../rules_client/lib';
 import { UIAM_LOGS_USAGE_TAGS } from '../constants';
-import { alertingUiamTelemetry } from '../otel/uiam_telemetry';
+import {
+  alertingUiamTelemetry,
+  type CredentialReason,
+  type CredentialType,
+} from '../otel/uiam_telemetry';
 
 interface RuleData {
   rawRule: RawRule;
@@ -193,6 +197,8 @@ export function getFakeKibanaRequest(
   const { uiamApiKey, uiamApiKeyExternal, apiKeyCreatedByUser, apiKeyOwner, ruleId } = options;
   const requestHeaders: Headers = {};
   let effectiveApiKey: string | null = null;
+  let credentialType: CredentialType = 'none';
+  let credentialReason: CredentialReason = 'not_set';
   // Whether the credential the run ends up presenting is a user-created (external) Cloud API key.
   // `uiamApiKeyExternal` is UIAM's own verdict (`AuthenticatedUser.api_key.internal === false`),
   // captured when the rule was created or updated; absent means internal treatment (fail closed).
@@ -206,8 +212,12 @@ export function getFakeKibanaRequest(
       if (apiKey) {
         requestHeaders.authorization = `ApiKey ${apiKey}`;
         effectiveApiKey = apiKey;
+        credentialType = 'es_api_key';
+        // Refined to a more specific reason in the branches below.
+        credentialReason = 'fallback_unexpected';
       }
       if (apiKeyCreatedByUser && apiKey) {
+        credentialReason = 'user_created_key';
         alertingUiamTelemetry.recordUiamApiKeyFallback('user_created_key');
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
@@ -217,6 +227,9 @@ export function getFakeKibanaRequest(
           }
         );
       } else if (isLikelyNonCloudUserApiKeyOwner(apiKeyOwner)) {
+        if (apiKey) {
+          credentialReason = 'fallback_likely_non_cloud_user';
+        }
         alertingUiamTelemetry.recordUiamApiKeyFallback('likely_non_cloud_user');
         context.logger.debug(
           'UIAM API key is not provided because the Elasticsearch API key creator is likely a non-Cloud user, falling back to regular API key.',
@@ -244,11 +257,15 @@ export function getFakeKibanaRequest(
       const uiamApiKeyValue = getUiamApiKeySecret(uiamApiKey);
       requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
       effectiveApiKey = uiamApiKeyValue;
+      credentialType = 'uiam_api_key';
+      credentialReason = apiKeyCreatedByUser ? 'user_created_key' : 'provisioned';
       isExternalCredential = uiamApiKeyExternal === true;
     }
   } else if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
     effectiveApiKey = apiKey;
+    credentialType = 'es_api_key';
+    credentialReason = 'config';
   } else if (uiamApiKey) {
     // Rules created with a user-supplied Cloud (UIAM) API key — and UIAM-cloned rules —
     // persist only a UIAM credential. Fall back to it when the strategy would otherwise
@@ -264,8 +281,12 @@ export function getFakeKibanaRequest(
     const uiamApiKeyValue = getUiamApiKeySecret(uiamApiKey);
     requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
     effectiveApiKey = uiamApiKeyValue;
+    credentialType = 'uiam_api_key';
+    credentialReason = apiKeyCreatedByUser ? 'user_created_key' : 'provisioned';
     isExternalCredential = uiamApiKeyExternal === true;
   }
+
+  alertingUiamTelemetry.recordRuleRun(credentialType, credentialReason);
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
