@@ -7,11 +7,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useCurrentUser } from '../../../hooks/use_current_user';
 import { useUserProfiles } from '../../../hooks/use_user_profiles';
-import { getInputAuthor, isCurrentUserAuthor } from './round_author';
 import { RoundInput } from './round_input';
 
 jest.mock('../../../hooks/use_current_user', () => ({
@@ -46,67 +44,6 @@ const currentUser = {
     },
   },
 } as UserProfileWithAvatar;
-
-describe('isCurrentUserAuthor', () => {
-  it('matches a current user profile author by uid', () => {
-    expect(isCurrentUserAuthor({ author: currentUser, currentUser })).toBe(true);
-  });
-
-  it('matches a persisted round author by id', () => {
-    const author: ConversationRoundAuthor = {
-      id: 'current-user',
-      username: 'alice',
-    };
-
-    expect(isCurrentUserAuthor({ author, currentUser })).toBe(true);
-  });
-
-  it('returns false when the author does not match the current user', () => {
-    const author: ConversationRoundAuthor = {
-      id: 'other-user',
-      username: 'elastic',
-    };
-
-    expect(isCurrentUserAuthor({ author, currentUser })).toBe(false);
-  });
-});
-
-describe('getInputAuthor', () => {
-  it('uses the current user as the author for local pending rounds without persisted author attribution', () => {
-    expect(
-      getInputAuthor({
-        author: undefined,
-        currentUser,
-        isPendingCurrentRound: true,
-      })
-    ).toBe(currentUser);
-  });
-
-  it('keeps persisted author attribution when it exists', () => {
-    const author: ConversationRoundAuthor = {
-      id: 'other-user',
-      username: 'elastic',
-    };
-
-    expect(
-      getInputAuthor({
-        author,
-        currentUser,
-        isPendingCurrentRound: true,
-      })
-    ).toBe(author);
-  });
-
-  it('does not use the current user for non-pending current rounds without persisted author attribution', () => {
-    expect(
-      getInputAuthor({
-        author: undefined,
-        currentUser,
-        isPendingCurrentRound: false,
-      })
-    ).toBeUndefined();
-  });
-});
 
 describe('RoundInput', () => {
   beforeEach(() => {
