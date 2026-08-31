@@ -6,7 +6,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE, OBSERVABILITY_OWNER } from '../../common/constants';
+import {
+  CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE,
+  OBSERVABILITY_OWNER,
+} from '../../common/constants';
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
@@ -20,6 +23,7 @@ import { useGetCaseConfiguration } from '../containers/configure/use_get_case_co
 import {
   useWorkflowRunTriggeredEBT,
   getWorkflowRunOriginType,
+  UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE,
 } from './use_workflow_run_ebt';
 
 jest.mock('../common/lib/kibana', () => ({
@@ -73,12 +77,16 @@ describe('useWorkflowRunTriggeredEBT', () => {
     const { result } = renderHook(() => useWorkflowRunTriggeredEBT());
 
     act(() => {
-      result.current({ originType: 'bulk', caseCount: 5 });
+      result.current({ originType: UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE, caseCount: 5 });
     });
 
     expect(reportEvent).toHaveBeenCalledWith(
       CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE,
-      expect.objectContaining({ tag_filter_active: true, case_count: 5, origin_type: 'bulk' })
+      expect.objectContaining({
+        tag_filter_active: true,
+        case_count: 5,
+        origin_type: UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE,
+      })
     );
   });
 
@@ -103,7 +111,7 @@ describe('useWorkflowRunTriggeredEBT', () => {
     OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
     ALERT_WORKFLOW_ORIGIN_TYPE,
     ALERTS_WORKFLOW_ORIGIN_TYPE,
-    'bulk' as const,
+    UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE,
   ])('accepts origin_type: %s', (originType) => {
     const { result } = renderHook(() => useWorkflowRunTriggeredEBT());
 
@@ -120,12 +128,12 @@ describe('useWorkflowRunTriggeredEBT', () => {
 
 describe('getWorkflowRunOriginType', () => {
   it('returns the origin type when origin is present', () => {
-    expect(
-      getWorkflowRunOriginType({ type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'c1' })
-    ).toBe(CASE_WORKFLOW_ORIGIN_TYPE);
+    expect(getWorkflowRunOriginType({ type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'c1' })).toBe(
+      CASE_WORKFLOW_ORIGIN_TYPE
+    );
   });
 
-  it('returns "bulk" when origin is undefined', () => {
-    expect(getWorkflowRunOriginType(undefined)).toBe('bulk');
+  it('returns "unattributed" when origin is undefined', () => {
+    expect(getWorkflowRunOriginType(undefined)).toBe(UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE);
   });
 });
