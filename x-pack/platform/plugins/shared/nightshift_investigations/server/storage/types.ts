@@ -6,13 +6,6 @@
  */
 
 import type {
-  InvestigationBlindSpot,
-  InvestigationHypothesis,
-  InvestigationImpact,
-  InvestigationRecommendation,
-  SignificantEventUpdate,
-} from '@kbn/significant-events-schema';
-import type {
   InvestigationStatus,
   InvestigationStructuredOutput,
   InvestigationSubjectType,
@@ -20,7 +13,7 @@ import type {
   PaginatedResponse,
 } from '../../common';
 
-export interface InvestigationAttributes {
+export interface InvestigationAttributes extends InvestigationStructuredOutput {
   investigation_id: string;
   status: InvestigationStatus;
   subject_type: InvestigationSubjectType;
@@ -32,14 +25,7 @@ export interface InvestigationAttributes {
   completed_at?: string;
   executed_by?: string;
   error?: string;
-  summary?: string;
-  conclusion?: string;
-  hypotheses?: InvestigationHypothesis[];
-  recommendations?: InvestigationRecommendation[];
-  blind_spots?: InvestigationBlindSpot[];
-  significant_event_updates?: SignificantEventUpdate[];
   conversation_id?: string;
-  impact?: InvestigationImpact;
 }
 
 export interface InvestigationRecord extends InvestigationAttributes {

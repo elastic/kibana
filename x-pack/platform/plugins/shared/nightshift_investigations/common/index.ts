@@ -115,7 +115,7 @@ export interface UpdateInvestigationRequest extends InvestigationStructuredOutpu
   conversation_id?: string;
 }
 
-export interface GetInvestigationResponse {
+export interface GetInvestigationResponse extends InvestigationStructuredOutput {
   investigation_id: string;
   /** Undefined for runs initiated without a subject (e.g. a bare manual workflow run). */
   subject?: InvestigationSubject;
@@ -126,14 +126,7 @@ export interface GetInvestigationResponse {
   concurrency_key?: string;
   executed_by?: string;
   error?: string;
-  summary?: string;
-  conclusion?: string;
-  hypotheses?: InvestigationHypothesis[];
-  recommendations?: InvestigationRecommendation[];
-  blind_spots?: InvestigationBlindSpot[];
-  significant_event_updates?: SignificantEventUpdate[];
   conversation_id?: string;
-  impact?: InvestigationImpact;
 }
 
 export interface InvestigationStatusEvent {
