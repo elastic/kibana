@@ -996,6 +996,44 @@ describe('createRuleDataSchema', () => {
       }
     );
   });
+
+  describe('builder metadata', () => {
+    const { query: _query, ...withoutQuery } = validCreateData;
+    const builderMetadata = {
+      name: 'test rule',
+      builder_type: 'threshold',
+      builder_fields: { indexPattern: 'logs-*' },
+    };
+
+    it('accepts builder_type with builder_fields and no query', () => {
+      const result = createRuleDataSchema.parse({
+        ...withoutQuery,
+        metadata: builderMetadata,
+      });
+
+      expect(result.metadata).toEqual(builderMetadata);
+      expect(result.query).toBeUndefined();
+    });
+
+    it('rejects query sent alongside builder_fields', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: builderMetadata,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path.join('.'))).toContain('query');
+    });
+
+    it('accepts builder_type with a query and no builder_fields', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', builder_type: 'threshold' },
+      });
+
+      expect(result.success).toBe(true);
+    });
+  });
 });
 
 describe('updateRuleDataSchema', () => {

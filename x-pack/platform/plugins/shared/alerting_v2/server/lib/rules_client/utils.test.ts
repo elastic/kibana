@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
-import type { RotationCandidate } from './types';
+import type { ResolvedCreateRuleData, RotationCandidate } from './types';
 import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
@@ -35,7 +35,7 @@ const serverFields = {
   version: 1,
 };
 
-const baseCreateData: CreateRuleData = {
+const baseCreateData: ResolvedCreateRuleData = {
   kind: 'alert',
   metadata: { name: 'test-rule' },
   time_field: '@timestamp',
@@ -54,7 +54,7 @@ const createRuleSoAttributesWithArtifacts = () =>
 describe('utils', () => {
   describe('transformCreateRuleBodyToRuleSoAttributes', () => {
     it('maps description into saved object attributes', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'rule-with-desc', description: 'My rule description' },
       };
@@ -71,7 +71,7 @@ describe('utils', () => {
     });
 
     it('passes metadata.builder_type through to SO attributes', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       };
@@ -88,7 +88,7 @@ describe('utils', () => {
     });
 
     it('persists an omitted composed breach block as an empty segment', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         query: { format: 'composed', base: 'FROM metrics-*' },
       };
@@ -103,7 +103,7 @@ describe('utils', () => {
     });
 
     it('leaves a populated composed breach segment untouched', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         query: {
           format: 'composed',
@@ -221,30 +221,19 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('rejects query change on a builder rule without explicit builder_type clear', () => {
+    it('clears metadata.builder_type and metadata.builder_fields when they are nulled', () => {
+      // Whether a query write is allowed to reach this point is decided by
+      // builder resolution; here the nulls only have to be applied.
       const existing = createRuleSoAttributes({
-        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        metadata: {
+          name: 'test-rule',
+          builder_type: 'threshold',
+          builder_fields: { indexPattern: 'logs-*' },
+        },
       });
       const updateData: UpdateRuleData = {
         query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
-      };
-
-      expect(() =>
-        buildUpdateRuleAttributes(existing, updateData, {
-          updatedBy: 'user-2',
-          updatedAt: '2025-01-02T00:00:00.000Z',
-          version: 2,
-        })
-      ).toThrow(/Cannot update the query on a builder rule/);
-    });
-
-    it('clears builder_type when query changes and explicit builder_type: null is sent', () => {
-      const existing = createRuleSoAttributes({
-        metadata: { name: 'test-rule', builder_type: 'threshold' },
-      });
-      const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
-        metadata: { builder_type: null },
+        metadata: { builder_type: null, builder_fields: null },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -254,6 +243,7 @@ describe('utils', () => {
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
+      expect(result.metadata.builder_fields).toBeUndefined();
     });
 
     it('allows query change on a non-builder rule without explicit builder_type', () => {
@@ -469,7 +459,7 @@ describe('utils', () => {
     });
 
     it('round-trips description through create → transform', () => {
-      const createData: CreateRuleData = {
+      const createData: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'round-trip-rule', description: 'Round-trip desc' },
       };
@@ -510,7 +500,7 @@ describe('utils', () => {
     });
 
     it('round-trips a conditionless composed query through create → transform', () => {
-      const createData: CreateRuleData = {
+      const createData: ResolvedCreateRuleData = {
         ...baseCreateData,
         query: { format: 'composed', base: 'FROM metrics-*' },
       };
