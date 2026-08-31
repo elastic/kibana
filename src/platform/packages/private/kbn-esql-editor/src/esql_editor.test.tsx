@@ -191,10 +191,9 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-run-query-button')).not.toBeInTheDocument();
   });
 
-  it('should render the visor in non-inline mode always visible', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(getByTestId('ESQLEditor-quick-search-visor')).toBeInTheDocument();
-    expect(getByTestId('ESQLEditor-quick-search-visor')).not.toHaveAttribute('inert');
+  it('should not render the visor in non-inline mode (handled by the parent)', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
   });
 
   it('should render the visor in inline mode by default', async () => {
