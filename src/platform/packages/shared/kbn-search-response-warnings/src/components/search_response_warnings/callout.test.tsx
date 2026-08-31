@@ -16,50 +16,44 @@ const warnings = [searchResponseIncompleteWarningLocalCluster];
 
 describe('SearchResponseWarningsCallout', () => {
   it('renders the callout when warnings are present', () => {
-    render(<SearchResponseWarningsCallout warnings={warnings} />);
+    render(
+      <SearchResponseWarningsCallout
+        warnings={warnings}
+        isDismissed={false}
+        onDismiss={jest.fn()}
+      />
+    );
 
     expect(screen.getByTestId('searchResponseWarningsCallout')).toBeInTheDocument();
   });
 
   it('renders nothing when there are no warnings', () => {
-    const { container } = render(<SearchResponseWarningsCallout warnings={[]} />);
+    const { container } = render(
+      <SearchResponseWarningsCallout warnings={[]} isDismissed={false} onDismiss={jest.fn()} />
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('hides the callout after dismiss and keeps it hidden while warnings remain', () => {
-    const { rerender } = render(<SearchResponseWarningsCallout warnings={warnings} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /dismiss/i }));
-
-    expect(screen.queryByTestId('searchResponseWarningsCallout')).not.toBeInTheDocument();
-
-    rerender(<SearchResponseWarningsCallout warnings={warnings} />);
+  it('hides the callout when isDismissed is true', () => {
+    render(
+      <SearchResponseWarningsCallout warnings={warnings} isDismissed={true} onDismiss={jest.fn()} />
+    );
 
     expect(screen.queryByTestId('searchResponseWarningsCallout')).not.toBeInTheDocument();
   });
 
-  it('shows the callout again after warnings are cleared by a new fetch', () => {
-    const { rerender } = render(<SearchResponseWarningsCallout warnings={warnings} />);
+  it('calls onDismiss when the callout is dismissed', () => {
+    const onDismiss = jest.fn();
+    render(
+      <SearchResponseWarningsCallout
+        warnings={warnings}
+        isDismissed={false}
+        onDismiss={onDismiss}
+      />
+    );
 
     fireEvent.click(screen.getByRole('button', { name: /dismiss/i }));
-    expect(screen.queryByTestId('searchResponseWarningsCallout')).not.toBeInTheDocument();
-
-    rerender(<SearchResponseWarningsCallout warnings={[]} />);
-    rerender(<SearchResponseWarningsCallout warnings={warnings} />);
-
-    expect(screen.getByTestId('searchResponseWarningsCallout')).toBeInTheDocument();
-  });
-
-  it('does not persist dismiss across remounts', () => {
-    const { unmount } = render(<SearchResponseWarningsCallout warnings={warnings} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /dismiss/i }));
-    expect(screen.queryByTestId('searchResponseWarningsCallout')).not.toBeInTheDocument();
-
-    unmount();
-    render(<SearchResponseWarningsCallout warnings={warnings} />);
-
-    expect(screen.getByTestId('searchResponseWarningsCallout')).toBeInTheDocument();
+    expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 });

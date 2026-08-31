@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useViewDetailsActionProps } from './view_details_popover';
 import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
@@ -15,23 +15,14 @@ import type { SearchResponseWarning } from '../../types';
 
 interface Props {
   warnings: SearchResponseWarning[];
+  isDismissed: boolean;
+  onDismiss: () => void;
 }
 
 export const SearchResponseWarningsCallout = (props: Props) => {
   const viewDetailsActionProps = useViewDetailsActionProps(props.warnings);
-  const [isDismissed, setIsDismissed] = useState(false);
 
-  useEffect(() => {
-    if (!props.warnings.length) {
-      setIsDismissed(false);
-    }
-  }, [props.warnings.length]);
-
-  const handleDismiss = useCallback(() => {
-    setIsDismissed(true);
-  }, []);
-
-  if (!props.warnings.length || isDismissed) {
+  if (!props.warnings.length || props.isDismissed) {
     return null;
   }
 
@@ -42,7 +33,7 @@ export const SearchResponseWarningsCallout = (props: Props) => {
       size="s"
       actionProps={{ primary: viewDetailsActionProps }}
       data-test-subj="searchResponseWarningsCallout"
-      onDismiss={handleDismiss}
+      onDismiss={props.onDismiss}
     />
   );
 };
