@@ -470,7 +470,6 @@ describe('TaskPoller', () => {
       expect(work).toHaveBeenCalledTimes(1);
       await new Promise((resolve) => setImmediate(resolve));
 
-      // well before the next scheduled poll
       clock.tick(pollInterval / 4);
       expect(work).toHaveBeenCalledTimes(1);
 
@@ -511,7 +510,6 @@ describe('TaskPoller', () => {
       clock.tick(0);
       await new Promise((resolve) => setImmediate(resolve));
 
-      // a cycle is in-flight; the nudge should be coalesced, not trigger a second call
       claimNudge$.next();
       await new Promise((resolve) => setImmediate(resolve));
       expect(work).toHaveBeenCalledTimes(1);
@@ -519,8 +517,7 @@ describe('TaskPoller', () => {
       resolveWorker(true);
       await new Promise((resolve) => setImmediate(resolve));
 
-      // the coalesced nudge causes the next cycle to be scheduled with 0 delay, rather than
-      // pollInterval; fire that zero-delay timer.
+      // the coalesced nudge schedules the next cycle with 0 delay, not pollInterval
       clock.tick(0);
       await new Promise((resolve) => setImmediate(resolve));
 
@@ -541,6 +538,9 @@ describe('TaskPoller', () => {
         work,
       });
       poller.start();
+      // `start()` defers subscribing with a (faked) `setTimeout`, so without this the nudge below
+      // would be emitted to zero subscribers and the assertion would hold for the wrong reason.
+      clock.tick(0);
       await new Promise((resolve) => setImmediate(resolve));
       expect(work).toHaveBeenCalledTimes(1);
 

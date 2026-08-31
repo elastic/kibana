@@ -16,10 +16,16 @@ export const COMMON_HEADERS = {
 // after running, which is how the tests detect that a run happened.
 export const TEST_TASK_TYPE = 'task_manager:invalidate_api_keys';
 
-// A nudged claim lands in the low hundreds of milliseconds on a healthy machine. This budget is
-// generous enough to absorb CI jitter while staying far below the 60s `poll_interval` configured by
-// the `task_manager_claim_nudge` Scout config set, so it can only be met if the nudge (rather than
-// the next regular poll cycle) triggered the claim.
-export const NUDGE_BUDGET_MS = 5_000;
+// Absorbs CI jitter while staying far below the 60s `poll_interval` in the
+// `task_manager_claim_nudge` Scout config, so only a nudge can meet it.
+export const NUDGE_CLAIM_BUDGET_MS = 5_000;
+
+// How long the negative control waits to show nothing claims the task on its own. Separate from the
+// budget above so tuning one for CI jitter cannot silently weaken the other.
+export const NO_CLAIM_OBSERVATION_MS = 5_000;
+
+// How far past `runSoon` the task's `runAt` must move before it counts as evidence that the task
+// actually ran and rescheduled itself, rather than merely having been reset to now by `runSoon`.
+export const RESCHEDULE_EVIDENCE_MS = 5_000;
 
 export const ONE_HOUR_MS = 60 * 60 * 1000;

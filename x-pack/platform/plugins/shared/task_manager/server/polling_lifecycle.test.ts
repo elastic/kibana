@@ -872,7 +872,6 @@ describe('TaskPollingLifecycle', () => {
         'Ignoring claim nudge because task manager is backing off after Elasticsearch errors; the next regular poll cycle will claim the task'
       );
 
-      // an error-free window clears the backoff and nudges resume
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
       await flushPromises();
 

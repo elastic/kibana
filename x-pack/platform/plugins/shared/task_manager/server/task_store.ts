@@ -59,13 +59,6 @@ import type {
   ApiKeyOptions,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
-
-/**
- * `TaskStore.schedule()` options: `ApiKeyOptions` plus an internal `refresh` flag that makes
- * the write immediately visible to searches (used by `requestImmediateClaim`).
- */
-export type ScheduleTaskOptions = ApiKeyOptions & { refresh?: boolean };
-
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
@@ -77,6 +70,12 @@ import { TASK_SO_NAME, INVALIDATE_API_KEY_SO_NAME } from './saved_objects';
 import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './api_key_strategy';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
+
+/**
+ * `TaskStore.schedule()` options: `ApiKeyOptions` plus an internal `refresh` flag that makes
+ * the write immediately visible to searches (used by `requestImmediateClaim`).
+ */
+export type ScheduleTaskOptions = ApiKeyOptions & { refresh?: boolean };
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;

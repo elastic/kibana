@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '../../default/stateful/base.config';
+import { servers as defaultConfig } from '../../default/stateful/classic.stateful.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 // Task Manager polls every 500ms by default, which is too fast to tell a claim nudge apart from the

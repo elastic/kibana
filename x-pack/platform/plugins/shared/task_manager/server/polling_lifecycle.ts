@@ -117,6 +117,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private stopped = false;
   private readonly executionControlService: TaskExecutionControlService;
   private executionControlSubscription?: Subscription;
+  private errorBackoffSubscription?: Subscription;
 
   public pool: TaskPool;
 
@@ -192,11 +193,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       this.currentPollInterval = newPollInterval;
     });
 
-    // Ignore claim nudges while the last error-count window saw Elasticsearch errors (the
-    // same signal that reduces capacity and widens the poll interval above), so nudges never
-    // add claim queries during a backoff. The regular poll picks up nudged tasks instead.
+    // Ignore claim nudges while the last error-count window saw Elasticsearch errors (the same
+    // signal that reduces capacity and widens the poll interval above). `errorCheck$` only emits
+    // on its flush interval, so this trails reality by up to that window in both directions; it is
+    // a coarse brake, not a guarantee. The regular poll picks up nudged tasks either way.
     let inErrorBackoff = false;
-    errorCheck$.subscribe(({ count, isBlockException }) => {
+    this.errorBackoffSubscription = errorCheck$.subscribe(({ count, isBlockException }) => {
       inErrorBackoff = count > 0 || isBlockException;
     });
     const claimNudge$ = claimNudgeService?.claimNudge$.pipe(
@@ -348,6 +350,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   public stop() {
     this.stopped = true;
     this.executionControlSubscription?.unsubscribe();
+    // `countErrors()` is cold, so this subscription owns its own flush interval timer.
+    this.errorBackoffSubscription?.unsubscribe();
     this.poller.stop();
   }
 

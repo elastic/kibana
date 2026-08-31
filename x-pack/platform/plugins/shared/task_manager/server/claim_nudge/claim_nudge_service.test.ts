@@ -15,8 +15,7 @@ import {
 } from './claim_nudge_service';
 
 // `lodash.random` binds `Math.random` at load time, so spying on the global doesn't work.
-// Mock it directly; defaults to returning its input so backoff tests land exactly on the
-// ceiling, but `mockRandom` can be overridden per-test (e.g. to hit the guaranteed floor).
+// Returning `max` by default makes the backoff tests land exactly on the ceiling.
 const mockRandom = jest.fn((max: number) => max);
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -46,8 +45,7 @@ function createService({
 }
 
 /**
- * Defaults to an index that already exists, which is the steady state on every Kibana boot after
- * the first. Tests covering a freshly created index let `indices.create` succeed instead.
+ * Defaults to an already-existing index, the steady state on every Kibana boot after the first.
  */
 function createEsClientMock() {
   return {
@@ -284,8 +282,40 @@ describe('TaskManagerClaimNudgeService', () => {
           wait_for_index: true,
           checkpoints: [],
         }),
-        expect.objectContaining({ retryOnTimeout: false })
+        expect.objectContaining({ retryOnTimeout: false, maxRetries: 0 })
       );
+    });
+
+    it('feeds each response’s checkpoints into the next request, including after a timeout', async () => {
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+
+      let calls = 0;
+      (esClient.fleet.globalCheckpoints as jest.Mock).mockImplementation(async () => {
+        calls += 1;
+        if (calls === 1) {
+          return { global_checkpoints: [1], timed_out: false };
+        }
+        if (calls === 2) {
+          // A timeout still reports where the checkpoint currently is, so it must be adopted too;
+          // otherwise a recreated index would leave the watcher waiting on a checkpoint that no
+          // longer exists.
+          return { global_checkpoints: [7], timed_out: true };
+        }
+
+        service.stop();
+        return { global_checkpoints: [9], timed_out: false };
+      });
+
+      service.start();
+      await flushPromises();
+
+      const requests = (esClient.fleet.globalCheckpoints as jest.Mock).mock.calls;
+      // Without this the request would always send `[]`, `wait_for_advance` would return
+      // immediately every time, and the watch loop would spin against Elasticsearch.
+      expect(requests[0][0].checkpoints).toEqual([]);
+      expect(requests[1][0].checkpoints).toEqual([1]);
+      expect(requests[2][0].checkpoints).toEqual([7]);
     });
 
     it('does not create the signal index; wait_for_index lets it watch one that does not exist yet', async () => {
@@ -364,8 +394,7 @@ describe('TaskManagerClaimNudgeService', () => {
       (esClient.fleet.globalCheckpoints as jest.Mock).mockImplementation(async () => {
         calls += 1;
         if (calls === 1) {
-          // A transport failure that happens to mention "aborted" but wasn't caused by stop() —
-          // must not be mistaken for one, which would silently end the loop while `started` stays true.
+          // Must not be mistaken for a stop(): that would end the loop while `started` stays true.
           throw new Error('socket hang up: request aborted');
         }
         service.stop();
@@ -403,7 +432,6 @@ describe('TaskManagerClaimNudgeService', () => {
       await jest.advanceTimersByTimeAsync(0);
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
 
-      // Ceiling after each consecutive failure: 1s, 2s, 4s, 8s, 16s, 32s, then capped at 60s.
       const expectedCeilingsMs = [1_000, 2_000, 4_000, 8_000, 16_000, 32_000, 60_000, 60_000];
       for (const [index, ceilingMs] of expectedCeilingsMs.entries()) {
         const callsBefore = index + 1;
@@ -417,7 +445,7 @@ describe('TaskManagerClaimNudgeService', () => {
 
     it('never retries sooner than half the ceiling, even when the jitter rolls its minimum', async () => {
       jest.useFakeTimers();
-      mockRandom.mockImplementation(() => 0); // the jittered half rolls its minimum
+      mockRandom.mockImplementation(() => 0);
 
       const esClient = createEsClientMock();
       const { service } = createService({ esClient });
@@ -479,8 +507,7 @@ describe('TaskManagerClaimNudgeService', () => {
       await jest.advanceTimersByTimeAsync(1_000); // ceiling after the 1st failure
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(2); // 2nd failure
 
-      // This also resolves the success that follows (no backoff) and the failure after that,
-      // all within the same microtask-flushing advance.
+      // Also resolves the success that follows (no backoff) and the failure after it.
       await jest.advanceTimersByTimeAsync(2_000); // ceiling after the 2nd failure
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(4); // success, then 1st failure since reset
 
@@ -534,7 +561,6 @@ describe('TaskManagerClaimNudgeService', () => {
       await jest.advanceTimersByTimeAsync(0);
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
 
-      // Restart while the first loop is still waiting out its backoff.
       service.stop();
       service.start();
       await jest.advanceTimersByTimeAsync(0);

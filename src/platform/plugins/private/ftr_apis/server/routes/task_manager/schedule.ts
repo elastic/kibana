@@ -31,7 +31,13 @@ const scheduleBodySchema = schema.object({
      * ISO date string. Lets tests create a task that regular polling will not claim for a known
      * amount of time, which is otherwise impossible without writing to the task index directly.
      */
-    runAt: schema.maybe(schema.string({ maxLength: 100 })),
+    runAt: schema.maybe(
+      schema.string({
+        maxLength: 100,
+        validate: (value) =>
+          Number.isNaN(Date.parse(value)) ? 'must be an ISO 8601 date string' : undefined,
+      })
+    ),
     schedule: schema.maybe(
       schema.oneOf([
         schema.object({

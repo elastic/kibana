@@ -27,8 +27,9 @@ const CLAIM_NUDGE_MAPPINGS: estypes.MappingTypeMapping = {
     },
   },
 };
-// Mirrors Core's saved-object index settings: one shard keeps the checkpoint array to one entry;
-// auto-expanding replicas keeps single-node clusters green. Serverless rejects these settings.
+// One shard because every nudge writes the same document, so there is never a second shard whose
+// checkpoint could lag behind it. Auto-expanding replicas keeps single-node clusters green.
+// Serverless manages both itself and rejects them, so it gets the platform defaults instead.
 const CLAIM_NUDGE_SETTINGS: estypes.IndicesIndexSettings = {
   number_of_shards: 1,
   auto_expand_replicas: '0-1',
@@ -38,21 +39,17 @@ const CLAIM_NUDGE_SETTINGS: estypes.IndicesIndexSettings = {
 const CHECKPOINT_WAIT_TIMEOUT = '50s';
 // Headroom above CHECKPOINT_WAIT_TIMEOUT so the client doesn't time out before the server does.
 const REQUEST_TIMEOUT_MS = 65_000;
-// Base and cap for the exponential backoff computed in calculateRetryDelayMs(); the failure
-// count resets on any resolved response, including a timeout.
 const ERROR_RETRY_BASE_DELAY_MS = 1_000;
 export const ERROR_RETRY_MAX_DELAY_MS = 60_000;
-// Avoid flooding the logs with a warning on every failed long-poll iteration.
 const ERROR_LOG_THROTTLE_MS = 60_000;
 // `runSoon` awaits the nudge, so both requests below get one bounded attempt rather than the
 // client's default 30s and three retries. Aborting doesn't cancel the work — Elasticsearch still
-// applies it — so a longer wait would only delay the caller, not land more nudges.
+// applies it — so waiting longer only delays the caller.
 //
-// Matches the default poll_interval: past that the regular poll has already claimed the task, so
-// there is nothing left for a slower write to win.
+// Matched to the default poll_interval: past that the regular poll has already claimed the task.
 export const NUDGE_WRITE_TIMEOUT_MS = MGET_DEFAULT_POLL_INTERVAL;
-// More generous, because a timeout here drops every nudge coalesced onto the in-flight create, and
-// it is paid at most once per process. Large clusters can take seconds to publish the new index.
+// More generous: a timeout here drops every nudge coalesced onto the in-flight create, and it is
+// paid at most once per process.
 export const NUDGE_CREATE_TIMEOUT_MS = 3_000;
 
 /**
@@ -117,7 +114,15 @@ export class TaskManagerClaimNudgeService {
     this.started = true;
     this.baselineSet = false;
     this.runController = new AbortController();
-    void this.watchCheckpoints(this.runController.signal);
+    // The loop retries internally, so reaching here means it can no longer recover on its own.
+    // Log loudly rather than surfacing an unhandled rejection, which would take Kibana down.
+    void this.watchCheckpoints(this.runController.signal).catch((err) => {
+      this.started = false;
+      this.logger.error(
+        `Task Manager claim nudge watch loop for index ${this.index} stopped unexpectedly; ` +
+          `falling back to regular polling until Kibana restarts: ${this.getErrorMessage(err)}`
+      );
+    });
   }
 
   /**
@@ -159,9 +164,8 @@ export class TaskManagerClaimNudgeService {
   }
 
   /**
-   * Creates the signal index if needed (nothing else does, unlike saved-object indices). Only
-   * `notify()` calls this — the watch loop relies on `wait_for_index: true` instead. Memoized
-   * so a healthy node only pays for it once.
+   * Creates the signal index if needed; nothing else does. Only `notify()` calls this — the watch
+   * loop relies on `wait_for_index: true` instead. Memoized so a healthy node pays for it once.
    *
    * A failure aborts the nudge rather than falling through to the write, which would let
    * Elasticsearch auto-create the index without the mappings and settings above.
@@ -210,7 +214,6 @@ export class TaskManagerClaimNudgeService {
       this.requestController = requestController;
 
       try {
-        // wait_for_index lets this watch an index that doesn't exist yet (see ensureIndexExists).
         const { global_checkpoints: nextCheckpoints, timed_out: timedOut } =
           await this.esClient.fleet.globalCheckpoints(
             {
@@ -224,6 +227,9 @@ export class TaskManagerClaimNudgeService {
               signal: requestController.signal,
               requestTimeout: REQUEST_TIMEOUT_MS,
               retryOnTimeout: false,
+              // The backoff below is the only retry; transport retries would bypass its jitter
+              // and hide failures from `consecutiveErrors`.
+              maxRetries: 0,
             }
           );
 

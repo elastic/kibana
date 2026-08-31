@@ -16,6 +16,7 @@ import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './polling_lifecycle';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
+import { TASK_MANAGER_CLAIM_NUDGE_INDEX } from './constants';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
 jest.mock('./polling_lifecycle', () => {
@@ -26,8 +27,7 @@ jest.mock('./polling_lifecycle', () => {
   };
 });
 
-// The real service issues a real (long-polling) ES request in `start()`; mock it out so plugin
-// tests don't exercise that against a mocked ES client, which never resolves the way ES would.
+// `start()` issues a long-polling ES request, which never resolves against a mocked ES client.
 const mockClaimNudgeService = {
   start: jest.fn(),
   stop: jest.fn(),
@@ -229,6 +229,12 @@ describe('TaskManagerPlugin', () => {
       });
 
       expect(TaskManagerClaimNudgeService as jest.Mock).toHaveBeenCalledTimes(1);
+      expect(TaskManagerClaimNudgeService as jest.Mock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: TASK_MANAGER_CLAIM_NUDGE_INDEX,
+          isServerless: false,
+        })
+      );
       expect(mockClaimNudgeService.start).toHaveBeenCalledTimes(1);
 
       const pollingLifecycleOpts = (TaskPollingLifecycle as jest.Mock).mock.calls[0][0];
@@ -247,8 +253,7 @@ describe('TaskManagerPlugin', () => {
         licensing: licensingMock.createStart(),
       });
 
-      // the service is still constructed (so `notify()` works from non-background nodes),
-      // but the long-poll loop is never started on a node that doesn't run background tasks
+      // still constructed, so `notify()` works from non-background nodes
       expect(mockClaimNudgeService.start).not.toHaveBeenCalled();
     });
 

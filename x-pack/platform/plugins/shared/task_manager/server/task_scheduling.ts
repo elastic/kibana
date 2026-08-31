@@ -36,7 +36,7 @@ import {
   type ClaimNudgeSource,
 } from './otel/claim_nudge_telemetry';
 
-const scheduleOptionsToStoreApiKeyOptions = (
+const scheduleOptionsToStoreOptions = (
   options: ScheduleOptions | undefined,
   claimNudgeEnabled: boolean
 ): ScheduleTaskOptions | undefined => {
@@ -180,7 +180,7 @@ export class TaskScheduling {
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      scheduleOptionsToStoreApiKeyOptions(options, this.claimNudgeEnabled)
+      scheduleOptionsToStoreOptions(options, this.claimNudgeEnabled)
     );
 
     if (options?.requestImmediateClaim === true) {
@@ -232,7 +232,7 @@ export class TaskScheduling {
     return await this.store.bulkSchedule(
       modifiedTasks,
       // no nudge follows a bulk schedule, so never force a refresh
-      scheduleOptionsToStoreApiKeyOptions(options, false)
+      scheduleOptionsToStoreOptions(options, false)
     );
   }
 

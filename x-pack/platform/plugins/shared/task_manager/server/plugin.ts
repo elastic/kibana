@@ -476,7 +476,6 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
-      // watch for claim nudges (e.g. `runSoon` on any node) to run immediate claim cycles here
       this.claimNudgeService?.start();
 
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({

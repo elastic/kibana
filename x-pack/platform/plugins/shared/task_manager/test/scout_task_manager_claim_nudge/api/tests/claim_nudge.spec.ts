@@ -12,18 +12,17 @@ import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 import {
   COMMON_HEADERS,
-  NUDGE_BUDGET_MS,
+  NO_CLAIM_OBSERVATION_MS,
+  NUDGE_CLAIM_BUDGET_MS,
   ONE_HOUR_MS,
+  RESCHEDULE_EVIDENCE_MS,
   TEST_TASK_TYPE,
 } from '../fixtures/constants';
 
 apiTest.describe('Task Manager claim nudge', { tag: tags.stateful.classic }, () => {
   const taskIdsToCleanup: string[] = [];
 
-  /**
-   * Creates a task that regular polling will not claim for an hour, so the only thing that can
-   * make it run during the test is a claim nudge.
-   */
+  /** An hour out, so the only thing that can make it run during the test is a claim nudge. */
   const scheduleTaskDueInAnHour = async (
     apiClient: ApiClientFixture,
     cookieHeader: CookieHeader
@@ -58,18 +57,34 @@ apiTest.describe('Task Manager claim nudge', { tag: tags.stateful.classic }, () 
     });
 
   /**
-   * Whether a claim cycle has picked the task up since `runSoon` reset its `runAt` to now. Claiming
-   * is what the nudge is responsible for, so the assertion deliberately stops there rather than
-   * waiting for the run to finish, which would fold the task's own duration into the budget.
-   *
-   * A claimed task is no longer `idle`; by the time it is polled it may already have finished, in
-   * which case Task Manager has either deleted it or pushed `runAt` minutes into the future.
+   * The FTR route reports `runSoon` failures as `{ id, error }` with a 200, so only the body proves
+   * the call worked: asserting `forced` is what rules an error response out.
+   */
+  const runSoon = async (
+    apiClient: ApiClientFixture,
+    cookieHeader: CookieHeader,
+    taskId: string
+  ) => {
+    const response = await apiClient.post(`internal/ftr/task_manager/${taskId}/run_soon`, {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    });
+    expect(response).toHaveStatusCode(200);
+    expect(response.body).toMatchObject({ id: taskId, forced: false });
+  };
+
+  /**
+   * Whether a claim cycle has picked the task up since `runSoon` reset `runAt` to now. Stops at
+   * claiming rather than waiting for the run to finish, which would fold the task's own duration
+   * into the budget. A claimed task is no longer `idle`, but may already have finished, in which
+   * case it has been deleted or had `runAt` pushed minutes out. `originalRunAt` rules out a
+   * `runSoon` that silently did nothing.
    */
   const wasClaimedSince = async (
     apiClient: ApiClientFixture,
     cookieHeader: CookieHeader,
     taskId: string,
-    runSoonAt: number
+    { originalRunAt, runSoonAt }: { originalRunAt: string; runSoonAt: number }
   ) => {
     const response = await getTask(apiClient, cookieHeader, taskId);
 
@@ -83,8 +98,23 @@ apiTest.describe('Task Manager claim nudge', { tag: tags.stateful.classic }, () 
     }
 
     const { status, runAt } = response.body as { status: string; runAt: string };
-    return status !== 'idle' || new Date(runAt).getTime() > runSoonAt + NUDGE_BUDGET_MS;
+    if (runAt === originalRunAt) {
+      return false;
+    }
+
+    return status !== 'idle' || new Date(runAt).getTime() > runSoonAt + RESCHEDULE_EVIDENCE_MS;
   };
+
+  /**
+   * The first nudge of the Kibana process also creates the signal index, which on a cold cluster
+   * can take most of the claim budget on its own. Pay that cost here instead of inside a timed
+   * assertion.
+   */
+  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+    const { taskId } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
+    await runSoon(apiClient, cookieHeader, taskId);
+  });
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -101,20 +131,22 @@ apiTest.describe('Task Manager claim nudge', { tag: tags.stateful.classic }, () 
     'runSoon gets a task claimed well before the next poll cycle would',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      const { taskId } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
+      const { taskId, runAt: originalRunAt } = await scheduleTaskDueInAnHour(
+        apiClient,
+        cookieHeader
+      );
 
       const runSoonAt = Date.now();
-      const runSoonResponse = await apiClient.post(`internal/ftr/task_manager/${taskId}/run_soon`, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-      expect(runSoonResponse).toHaveStatusCode(200);
+      await runSoon(apiClient, cookieHeader, taskId);
 
       await expect
-        .poll(() => wasClaimedSince(apiClient, cookieHeader, taskId, runSoonAt), {
-          timeout: NUDGE_BUDGET_MS,
-          intervals: [100],
-        })
+        .poll(
+          () => wasClaimedSince(apiClient, cookieHeader, taskId, { originalRunAt, runSoonAt }),
+          {
+            timeout: NUDGE_CLAIM_BUDGET_MS,
+            intervals: [100],
+          }
+        )
         .toBe(true);
     }
   );
@@ -125,9 +157,9 @@ apiTest.describe('Task Manager claim nudge', { tag: tags.stateful.classic }, () 
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const { taskId, runAt } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
 
-      // The negative control for the test above: nothing claims the task inside the same budget,
-      // so meeting that budget there can only be the nudge and not a regular poll cycle.
-      await new Promise((resolve) => setTimeout(resolve, NUDGE_BUDGET_MS));
+      // The negative control for the test above: nothing claims the task within the same window,
+      // so meeting the nudge budget there can only be the nudge and not a regular poll cycle.
+      await new Promise((resolve) => setTimeout(resolve, NO_CLAIM_OBSERVATION_MS));
 
       const response = await getTask(apiClient, cookieHeader, taskId);
       expect(response).toHaveStatusCode(200);

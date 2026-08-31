@@ -87,7 +87,6 @@ export function createTaskPoller<T, H>({
     }
 
     if (running) {
-      // A claim nudge that arrived mid-cycle triggers the next cycle immediately
       const nextDelay = nudgeRequestedDuringCycle
         ? 0
         : Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0);
@@ -149,8 +148,14 @@ export function createTaskPoller<T, H>({
     });
     if (claimNudge$) {
       claimNudge$.subscribe(() => {
-        logger.debug('Task poller received a claim nudge, running a claim cycle immediately');
-        runCycleNow();
+        // RxJS reports a throw here through `reportUnhandledError`, which defers it into a
+        // macrotask and crashes Kibana. A missed nudge must never cost more than a poll interval.
+        try {
+          logger.debug('Task poller received a claim nudge, running a claim cycle immediately');
+          runCycleNow();
+        } catch (err) {
+          logger.error(`Failed to run a claim cycle for a claim nudge: ${err}`);
+        }
       });
     }
     hasSubscribed = true;
@@ -177,6 +182,9 @@ export function createTaskPoller<T, H>({
         timeoutId = null;
       }
       running = false;
+      // Otherwise a nudge from the previous run makes the first cycle after `start()` schedule a
+      // redundant immediate follow-up.
+      nudgeRequestedDuringCycle = false;
     },
   };
 }

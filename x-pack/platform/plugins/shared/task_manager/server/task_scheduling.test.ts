@@ -1562,6 +1562,18 @@ describe('TaskScheduling', () => {
       );
     });
 
+    test('ignores requestImmediateClaim: it neither nudges nor forces a refresh', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkSchedule([{ taskType: 'foo', params: {}, state: {} }], {
+        requestImmediateClaim: true,
+      });
+
+      expect(mockTaskStore.bulkSchedule).toHaveBeenCalledWith(expect.anything(), undefined);
+      expect(claimNudgeService.notify).not.toHaveBeenCalled();
+      expect(recordClaimNudgeSpy).not.toHaveBeenCalled();
+    });
+
     test('allows scheduling tasks that are disabled', async () => {
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       const task1 = {

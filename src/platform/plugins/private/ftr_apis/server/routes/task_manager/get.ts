@@ -47,7 +47,12 @@ export const registerTaskManagerGetRoute = (
       const { taskId } = req.params as { taskId: string };
 
       try {
-        return res.ok({ body: await startContract.get(taskId) });
+        const { id, taskType, status, runAt, scheduledAt, attempts } = await startContract.get(
+          taskId
+        );
+        // Projected rather than returned whole: the task document also carries `apiKey`,
+        // `uiamApiKey`, and `userScope`, which no test needs.
+        return res.ok({ body: { id, taskType, status, runAt, scheduledAt, attempts } });
       } catch (err) {
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
           return res.notFound({ body: { message: `Task ${taskId} not found` } });

@@ -14,14 +14,16 @@ import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
 import { injectTask, setupTestServers, retry } from './lib';
 import { setupKibanaServer } from './lib/setup_test_servers';
 
-// Long enough that a "nudged" claim (near-immediate) is clearly distinguishable from a claim
-// that had to wait for the next regular poll cycle, even accounting for scheduling jitter on a
-// busy CI/dev machine running a full multi-plugin Kibana boot.
+// Long enough that a nudged claim is clearly distinguishable from one that waited for the next
+// poll cycle, even with CI jitter.
 const POLLING_INTERVAL = 20000;
-// Generous, but still well under half of POLLING_INTERVAL: a claim nudge should land in low
-// hundreds of ms in a healthy environment; this only needs to rule out "had to wait for the
-// next regular poll cycle".
-const NUDGE_RETRY_OPTS = { times: 100, intervalMs: 100 };
+// Derived from POLLING_INTERVAL so the retry budget stays inside the `elapsedMs` assertion below
+// (half the poll interval) if that interval is ever retuned.
+const NUDGE_RETRY_INTERVAL_MS = 100;
+const NUDGE_RETRY_OPTS = {
+  times: POLLING_INTERVAL / 4 / NUDGE_RETRY_INTERVAL_MS,
+  intervalMs: NUDGE_RETRY_INTERVAL_MS,
+};
 
 const mockTaskTypeRunFn = jest.fn();
 const mockCreateTaskRunner = jest.fn();
@@ -65,8 +67,7 @@ function injectFutureTask(esClient: Parameters<typeof injectTask>[0], id: string
     params: {},
     state: { foo: 'test' },
     stateVersion: 1,
-    // far enough in the future that regular polling would never claim it on its own; only a
-    // `runSoon` (which sets `runAt` back to "now") should make it eligible to be claimed.
+    // an hour out so regular polling can never claim it; only a `runSoon` can make it eligible
     runAt: new Date(Date.now() + 60 * 60 * 1000),
     enabled: true,
     scheduledAt: new Date(),
@@ -83,9 +84,8 @@ function latestStartContract(): TaskManagerStartContract {
   return lastResult.value as TaskManagerStartContract;
 }
 
-// One-off tasks self-clean once they successfully run, but if an assertion in this test throws
-// before that happens, remove the task doc anyway so it can't leak into (and get claimed by) the
-// next scenario, which reuses the same underlying ES cluster.
+// One-off tasks self-clean when they run, but a failing assertion can leave the doc behind where
+// the next scenario (same ES cluster) would claim it.
 async function cleanupTask(taskManagerPlugin: TaskManagerStartContract, id: string) {
   try {
     await taskManagerPlugin.removeIfExists(id);
@@ -94,9 +94,8 @@ async function cleanupTask(taskManagerPlugin: TaskManagerStartContract, id: stri
   }
 }
 
-// A single ES server is shared across all scenarios (re-created Kibana instances point at it,
-// mirroring the pattern used in `task_manager_switch_task_claimers.test.ts`) so this suite only
-// pays the (slow) ES startup cost once, while still exercising fresh plugin configs per scenario.
+// One ES server is shared across all scenarios (as in `task_manager_switch_task_claimers.test.ts`)
+// so the suite pays the slow ES startup cost once while still using fresh plugin configs.
 describe('claim nudge', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
@@ -104,6 +103,25 @@ describe('claim nudge', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  /**
+   * Whichever scenario runs first brings up ES too, so the suite stays runnable with `-t` rather
+   * than only in declaration order.
+   */
+  async function startKibanaWith(taskManager: Record<string, unknown>) {
+    const settings = { xpack: { task_manager: taskManager } };
+
+    if (kibanaServer) {
+      await kibanaServer.stop();
+      ({ kibanaServer } = await setupKibanaServer(settings));
+    } else {
+      ({ esServer, kibanaServer } = await setupTestServers(settings));
+    }
+
+    // `beforeEach` clears the spy, so this counts only the Kibana root created above.
+    expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
+    return latestStartContract();
+  }
 
   afterAll(async () => {
     if (kibanaServer) {
@@ -115,22 +133,13 @@ describe('claim nudge', () => {
   });
 
   it('claims a runSoon task almost immediately instead of waiting for the next poll interval', async () => {
-    const setupResult = await setupTestServers({
-      xpack: {
-        task_manager: {
-          claim_strategy: 'mget',
-          poll_interval: POLLING_INTERVAL,
-          unsafe: {
-            exclude_task_types: ['[A-Za-z]*'],
-          },
-        },
+    const taskManagerPlugin = await startKibanaWith({
+      claim_strategy: 'mget',
+      poll_interval: POLLING_INTERVAL,
+      unsafe: {
+        exclude_task_types: ['[A-Za-z]*'],
       },
     });
-    esServer = setupResult.esServer;
-    kibanaServer = setupResult.kibanaServer;
-
-    expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
-    const taskManagerPlugin = latestStartContract();
 
     mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
 
@@ -141,14 +150,9 @@ describe('claim nudge', () => {
     await taskManagerPlugin.runSoon(id);
 
     try {
-      await retry(
-        async () => {
-          expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(1);
-        },
-        // much tighter than POLLING_INTERVAL: only passes if the claim nudge (rather than the
-        // regular poll cycle) triggered the claim
-        NUDGE_RETRY_OPTS
-      );
+      await retry(async () => {
+        expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(1);
+      }, NUDGE_RETRY_OPTS);
       const elapsedMs = Date.now() - before;
 
       expect(elapsedMs).toBeLessThan(POLLING_INTERVAL / 2);
@@ -158,24 +162,13 @@ describe('claim nudge', () => {
   });
 
   it('claims a scheduled task almost immediately when requestImmediateClaim is set', async () => {
-    await kibanaServer.stop();
-    const setupResult = await setupKibanaServer({
-      xpack: {
-        task_manager: {
-          claim_strategy: 'mget',
-          poll_interval: POLLING_INTERVAL,
-          unsafe: {
-            exclude_task_types: ['[A-Za-z]*'],
-          },
-        },
+    const taskManagerPlugin = await startKibanaWith({
+      claim_strategy: 'mget',
+      poll_interval: POLLING_INTERVAL,
+      unsafe: {
+        exclude_task_types: ['[A-Za-z]*'],
       },
     });
-    kibanaServer = setupResult.kibanaServer;
-
-    // `beforeEach` clears the spy's call history, so within this test `start()` has only
-    // been called once (for the freshly re-created Kibana root above).
-    expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
-    const taskManagerPlugin = latestStartContract();
 
     mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
 
@@ -204,22 +197,13 @@ describe('claim nudge', () => {
   });
 
   it('a schedule() call without requestImmediateClaim relies on regular polling (no nudge)', async () => {
-    await kibanaServer.stop();
-    const setupResult = await setupKibanaServer({
-      xpack: {
-        task_manager: {
-          claim_strategy: 'mget',
-          poll_interval: 1000,
-          unsafe: {
-            exclude_task_types: ['[A-Za-z]*'],
-          },
-        },
+    const taskManagerPlugin = await startKibanaWith({
+      claim_strategy: 'mget',
+      poll_interval: 1000,
+      unsafe: {
+        exclude_task_types: ['[A-Za-z]*'],
       },
     });
-    kibanaServer = setupResult.kibanaServer;
-
-    expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
-    const taskManagerPlugin = latestStartContract();
 
     mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
 
@@ -241,25 +225,16 @@ describe('claim nudge', () => {
   });
 
   it('still claims a runSoon task (via regular polling) when claim_nudge.enabled is false', async () => {
-    await kibanaServer.stop();
-    const setupResult = await setupKibanaServer({
-      xpack: {
-        task_manager: {
-          claim_strategy: 'mget',
-          poll_interval: 1000,
-          claim_nudge: {
-            enabled: false,
-          },
-          unsafe: {
-            exclude_task_types: ['[A-Za-z]*'],
-          },
-        },
+    const taskManagerPlugin = await startKibanaWith({
+      claim_strategy: 'mget',
+      poll_interval: 1000,
+      claim_nudge: {
+        enabled: false,
+      },
+      unsafe: {
+        exclude_task_types: ['[A-Za-z]*'],
       },
     });
-    kibanaServer = setupResult.kibanaServer;
-
-    expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
-    const taskManagerPlugin = latestStartContract();
 
     mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
 
