@@ -162,4 +162,45 @@ describe('reviewDashboard', () => {
       })
     ).resolves.toEqual({ problems: [] });
   });
+
+  it('keeps deterministic ES|QL misses when the judge fails', async () => {
+    const modelProvider = {
+      hasFastModel: jest.fn().mockResolvedValue(false),
+      selectModel: jest.fn(),
+      getDefaultModel: jest.fn().mockRejectedValue(new Error('no model')),
+    } as unknown as ModelProvider;
+
+    const review = await reviewDashboard({
+      dashboard: {
+        title: 'Logs',
+        panels: [
+          {
+            type: 'lens',
+            id: 'x1',
+            grid: { x: 0, y: 0, w: 48, h: 10 },
+            config: {
+              type: 'xy',
+              data_source: {
+                type: 'esql',
+                query:
+                  'FROM logs | STATS count = COUNT() BY bucket = DATE_TRUNC(1 hour, event.ingested)',
+              },
+            },
+          },
+        ],
+      },
+      modelProvider,
+      logger: loggerMock.create(),
+    });
+
+    expect(review.problems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          topic: 'esql',
+          severity: 'miss',
+          panel_id: 'x1',
+        }),
+      ])
+    );
+  });
 });

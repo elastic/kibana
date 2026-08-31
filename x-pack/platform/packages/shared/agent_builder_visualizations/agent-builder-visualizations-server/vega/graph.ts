@@ -147,77 +147,40 @@ export const createVegaGraph = async (
     let action: GenerateEsqlAction;
 
     try {
-      let query = state.esqlQuery;
-      let columns: EsqlEsqlColumnInfo[] | undefined;
-
-      // A provided query is only trustworthy if it actually runs: the caller may
-      // pass an LLM-invented query whose error (e.g. a type mismatch) AST
-      // validation never catches. Execute it; if it throws, discard it and fall
-      // through to self-correcting generation rather than author a spec around a
-      // query that can never render.
-      if (query) {
-        try {
-          logger.debug('Validating provided ES|QL query for Vega visualization');
-          ({ columns } = await executeEsql({
-            query,
-            params: timeRangeParams,
-            esClient: esClient.asCurrentUser,
-          }));
-        } catch (providedError) {
-          const message =
-            providedError instanceof Error ? providedError.message : String(providedError);
-          logger.warn(
-            `Provided ES|QL query failed to execute (${message}); regenerating a corrected query`
-          );
-          query = '';
-        }
+      const candidate = state.esqlQuery || state.existingEsql;
+      const generated = await generateVisualizationEsql({
+        nlQuery: state.nlQuery,
+        existingQueries: state.existingEsql ? [state.existingEsql] : undefined,
+        candidateQuery: candidate,
+        index: state.index,
+        modelProvider,
+        events,
+        logger,
+        esClient,
+        timeRange: DEFAULT_VALIDATION_TIME_RANGE,
+        extraInstructions: vegaEsqlAdditionalInstructions,
+      });
+      if (!generated.query) {
+        return {
+          esqlQuery: state.esqlQuery,
+          actions: [
+            {
+              type: 'generate_esql',
+              success: false,
+              error: generated.error ?? 'No queries generated',
+            },
+          ],
+        };
       }
 
-      // Generate a query when none was provided, or the provided one failed.
-      // generateVisualizationEsql self-corrects in a bounded retry loop, so it
-      // yields only a query that actually runs (or an error once the budget is
-      // spent) — this keeps invalid ES|QL out of a stored spec.
-      if (!query) {
-        logger.debug('Generating ES|QL query for Vega visualization');
-        const generated = await generateVisualizationEsql({
-          nlQuery: state.nlQuery,
-          // On edit, seed generation with the query recovered from the existing
-          // spec so a data-shape edit (e.g. a new breakdown) can modify it
-          // instead of being stuck with the original columns.
-          existingQueries: state.existingEsql ? [state.existingEsql] : undefined,
-          index: state.index,
-          modelProvider,
-          events,
-          logger,
-          esClient,
-          timeRange: DEFAULT_VALIDATION_TIME_RANGE,
-          // Vega must filter rows on the raw source time field itself (Kibana
-          // does not do it for us as with Lens); see vegaEsqlAdditionalInstructions.
-          extraInstructions: vegaEsqlAdditionalInstructions,
-        });
-        if (!generated.query) {
-          return {
-            esqlQuery: state.esqlQuery,
-            actions: [
-              {
-                type: 'generate_esql',
-                success: false,
-                error: generated.error ?? 'No queries generated',
-              },
-            ],
-          };
-        }
-        query = generated.query;
-        // Reuse the columns from the validation run; execute only if the query
-        // was validated without returning rows, since spec authoring needs them.
-        columns = generated.columns;
-        if (!columns) {
-          ({ columns } = await executeEsql({
-            query,
-            params: timeRangeParams,
-            esClient: esClient.asCurrentUser,
-          }));
-        }
+      const query = generated.query;
+      let columns = generated.columns;
+      if (!columns) {
+        ({ columns } = await executeEsql({
+          query,
+          params: timeRangeParams,
+          esClient: esClient.asCurrentUser,
+        }));
       }
 
       action = { type: 'generate_esql', success: true, query, columns };

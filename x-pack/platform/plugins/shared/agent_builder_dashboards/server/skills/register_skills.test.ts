@@ -43,6 +43,8 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('**Layout**');
     expect(skill.content).toContain('**Chart styling**');
     expect(skill.content).toContain('**Structure**');
+    expect(skill.content).toContain('topic `esql`');
+    expect(skill.content).toContain("pass the panel's existing `esql`");
     expect(skill.description).toContain('at most twice');
     expect(skill.content).toContain('once at the start of this conversation round');
     expect(skill.content).toContain('at most twice');

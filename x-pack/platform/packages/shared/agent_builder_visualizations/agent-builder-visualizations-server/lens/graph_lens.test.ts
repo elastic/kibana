@@ -11,10 +11,15 @@ import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createVisualizationGraph } from './graph_lens';
+import { judgeVisualizationEsql } from '../shared/judge_visualization_esql';
 import type { VisualizationConfig } from './types';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
+}));
+
+jest.mock('../shared/judge_visualization_esql', () => ({
+  judgeVisualizationEsql: jest.fn(),
 }));
 
 jest.mock('./chart_type_registry', () => ({
@@ -34,6 +39,7 @@ jest.mock('./chart_type_registry', () => ({
 }));
 
 const mockedGenerateEsql = jest.mocked(generateEsql);
+const mockedJudgeVisualizationEsql = jest.mocked(judgeVisualizationEsql);
 
 const createMockLogger = (): Logger =>
   ({
@@ -74,6 +80,8 @@ describe('createVisualizationGraph', () => {
 
   beforeEach(() => {
     mockedGenerateEsql.mockReset();
+    mockedJudgeVisualizationEsql.mockReset();
+    mockedJudgeVisualizationEsql.mockResolvedValue(true);
   });
 
   it('uses the provided esql query without generating a new one', async () => {
@@ -172,6 +180,7 @@ describe('createVisualizationGraph', () => {
   });
 
   it('regenerates esql for edits and includes the existing query as context', async () => {
+    mockedJudgeVisualizationEsql.mockResolvedValue(false);
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)',
     } as Awaited<ReturnType<typeof generateEsql>>);

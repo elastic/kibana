@@ -10,7 +10,11 @@ import type { Logger } from '@kbn/logging';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getChartTypeReviewPromptContent } from '@kbn/agent-builder-visualizations-server';
+import {
+  ESQL_REVIEW_TOPIC,
+  getChartTypeReviewPromptContent,
+} from '@kbn/agent-builder-visualizations-server';
+import { lintDashboardVisualizationEsql } from './review_dashboard_esql';
 import {
   dashboardRuleTopics,
   getDashboardReviewPromptContent,
@@ -26,9 +30,13 @@ const dashboardRuleTopicValues = [
 
 const chartTypeTopicValues = Object.values(SupportedChartType);
 
-export type DashboardReviewTopic = DashboardRuleTopic | SupportedChartType;
+export type DashboardReviewTopic =
+  | DashboardRuleTopic
+  | SupportedChartType
+  | typeof ESQL_REVIEW_TOPIC;
 
 const isReviewTopic = (value: string): value is DashboardReviewTopic =>
+  value === ESQL_REVIEW_TOPIC ||
   (dashboardRuleTopicValues as readonly string[]).includes(value) ||
   (chartTypeTopicValues as readonly string[]).includes(value);
 
@@ -103,6 +111,8 @@ export const reviewDashboard = async ({
   modelProvider: ModelProvider;
   logger: Logger;
 }): Promise<DashboardReview> => {
+  const esqlProblems = lintDashboardVisualizationEsql(dashboard);
+
   try {
     const scopedModel = (await modelProvider.hasFastModel())
       ? await modelProvider.selectModel({ effortLevel: 'low' })
@@ -118,7 +128,7 @@ export const reviewDashboard = async ({
         `You judge a generated Kibana dashboard against the review rules.
 
 List only problems that match those rules. Do not propose operations, do not regenerate the dashboard, and do not invent panels that are not in the attachment.
-Do not validate field names, ES|QL, index mappings, ECS naming, or whether a field exists. You have no schema.
+Do not validate field names, ES|QL, index mappings, ECS naming, or whether a field exists. You have no schema. Visualization ES|QL contract issues are linted separately.
 Use severity "miss" for required painted/layout violations and "consideration" for weaker "when it makes sense" items.
 topic must be composition, grid, controls, sections, or the panel chart type (metric, xy, pie, …). Omit panel_id when the problem is not about a single panel.
 If nothing is wrong, return an empty problems array.`,
@@ -129,17 +139,22 @@ If nothing is wrong, return an empty problems array.`,
 
 ${getChartTypeReviewPromptContent()}
 
-Judge only the listed misses and considerations, including chart-internal painted issues. Field names and index schema are out of scope.
+Judge only the listed misses and considerations, including chart-internal painted issues. Field names, index schema, and ES|QL query text are out of scope.
 
 DASHBOARD ATTACHMENT:
 ${JSON.stringify(dashboard, undefined, 2)}`,
       ],
     ]);
 
-    return normalizeDashboardReview(dashboardReviewLlmSchema.parse(result));
+    return {
+      problems: [
+        ...esqlProblems,
+        ...normalizeDashboardReview(dashboardReviewLlmSchema.parse(result)).problems,
+      ],
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     logger.warn(`Dashboard review failed; returning no problems: ${message}`);
-    return emptyReview;
+    return esqlProblems.length > 0 ? { problems: esqlProblems } : emptyReview;
   }
 };

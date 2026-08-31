@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { buildEsqlAdditionalInstructions } from './esql_instructions';
+import { judgeVisualizationEsql } from './judge_visualization_esql';
 import { validateQueryTarget } from './validate_query_target';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */
@@ -37,6 +38,11 @@ export interface GenerateVisualizationEsqlParams {
    * them when the edit needs different data and keeps them otherwise.
    */
   existingQueries?: readonly string[];
+  /**
+   * Current query to keep when the judge says it already matches the request
+   * and visualization guidance. When kept, `generateEsql` is not called.
+   */
+  candidateQuery?: string;
   modelProvider: ModelProvider;
   events: ToolEventEmitter;
   logger: Logger;
@@ -102,8 +108,10 @@ const findTargetError = (query: string | undefined, index: string | undefined) =
  * `generateEsql` validates and executes candidate queries in a bounded retry
  * loop, so a returned `query` is one that actually runs. A query is treated as
  * failed when none was produced or the loop still reported an execution error,
- * ensuring an unrunnable query never reaches config/spec authoring. On edits,
- * `existingQueries` seed the request so a query-changing edit is not blocked.
+ * ensuring an unrunnable query never reaches config/spec authoring. A candidate
+ * query is judged against the request and visualization guidance first; if it
+ * can be kept, generation is skipped. On edits, `existingQueries` seed
+ * generation when the judge asks for a rewrite.
  *
  * Generation runs on the low-effort model first (two attempts). When it
  * soft-fails (no usable query), one fallback attempt uses the default model,
@@ -114,6 +122,7 @@ export const generateVisualizationEsql = async ({
   nlQuery,
   index,
   existingQueries,
+  candidateQuery,
   modelProvider,
   events,
   logger,
@@ -122,15 +131,36 @@ export const generateVisualizationEsql = async ({
   extraInstructions,
 }: GenerateVisualizationEsqlParams): Promise<GeneratedVisualizationEsql> => {
   const instructions = buildEsqlAdditionalInstructions(index);
+  const extra = extraInstructions ? `${instructions}\n${extraInstructions}` : instructions;
+  const candidate = candidateQuery?.trim() || existingQueries?.[0]?.trim();
+  if (candidate) {
+    try {
+      const keep = await judgeVisualizationEsql({
+        query: candidate,
+        nlQuery,
+        instructions: extra,
+        modelProvider,
+        logger,
+      });
+      if (keep) {
+        return { query: candidate };
+      }
+    } catch (error) {
+      logger.warn(
+        `Visualization ES|QL judge failed (${
+          error instanceof Error ? error.message : String(error)
+        }); generating a query`
+      );
+    }
+  }
+
   const requestParams = {
     nlQuery: buildEsqlEditContext(nlQuery, existingQueries),
     index,
     events,
     logger,
     esClient: esClient.asCurrentUser,
-    additionalInstructions: extraInstructions
-      ? `${instructions}\n${extraInstructions}`
-      : instructions,
+    additionalInstructions: extra,
     ...(timeRange ? { timeRange } : {}),
   };
 

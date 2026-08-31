@@ -267,6 +267,7 @@ describe('dashboard guidance', () => {
       1. **Layout** — grid, sizing, gaps, alignment (topic \`grid\`).
       2. **Chart styling** — painted chart internals: titles, legends, fills, invented colors (chart-type topics such as \`metric\`, \`xy\`, \`pie\`).
       3. **Structure** — sections, controls, and composition (topics \`sections\`, \`controls\`, \`composition\`).
+      Query-contract misses (topic \`esql\`: DATE_TRUNC, hardcoded bucket intervals, time series missing \`?_tstart\`/\`?_tend\`) are separate. Only regenerate a panel's ES|QL when the review lists that panel under \`esql\`. For Layout and Chart styling, pass the panel's existing \`esql\` on \`edit_panels\` so the query is kept.
 
       Call \`ask_user_question\` **once** this round (never in parallel with other tools) with one \`multi_select\` question asking which of these to fix. One option per non-empty category; put a short summary of that category's issues in the option description. The user can pick any combination or type a custom description of what they want.
 
