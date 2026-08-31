@@ -105,7 +105,7 @@ export function RumHome() {
       }}
     >
       <div> FOOOOOOOOO</div>
-      <AppHeader title={DASHBOARD_LABEL} menu={appMenu} spacing="largeBleed" />
+      <AppHeader title={DASHBOARD_LABEL} menu={appMenu} spacing="standard" />
       
       <EuiPageSection paddingSize="m" restrictWidth={false}>
         <DashboardToolbar />
