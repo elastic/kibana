@@ -39,15 +39,21 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50];
 const SCOPE_ORDER: ActionScope[] = ['read', 'write', 'destroy'];
 
 const SCOPE_LABELS: Record<ActionScope, string> = {
-  read: 'read',
-  write: 'write',
-  destroy: 'destroy',
+  read: i18n.translate('alertsUIShared.connectorActionSelector.scopeRead', {
+    defaultMessage: 'read',
+  }),
+  write: i18n.translate('alertsUIShared.connectorActionSelector.scopeWrite', {
+    defaultMessage: 'write',
+  }),
+  destroy: i18n.translate('alertsUIShared.connectorActionSelector.scopeDestroy', {
+    defaultMessage: 'destroy',
+  }),
 };
 
 const SCOPE_BADGE_COLORS: Record<ActionScope, string> = {
-  read: 'success',
-  write: 'warning',
-  destroy: 'danger',
+  read: '#d4edda',
+  write: '#fff3cd',
+  destroy: '#fce4e4',
 };
 
 const MODE_ALL = 'all';
@@ -334,14 +340,6 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
               })}
             </strong>
           </EuiText>
-          {!isAll && (
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('alertsUIShared.connectorActionSelector.actionCount', {
-                defaultMessage: '{selected} of {total} actions',
-                values: { selected: selectedCount, total: actions.length },
-              })}
-            </EuiText>
-          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
@@ -427,9 +425,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
                           }}
                           data-test-subj={`connectorActionScopeFilter-${scope}`}
                         >
-                          <EuiBadge color={SCOPE_BADGE_COLORS[scope]}>
-                            {SCOPE_LABELS[scope]}
-                          </EuiBadge>
+                          {SCOPE_LABELS[scope]}
                         </EuiFilterSelectItem>
                       ))}
                     </EuiPopover>
