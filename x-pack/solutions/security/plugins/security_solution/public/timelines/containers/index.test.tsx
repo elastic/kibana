@@ -162,6 +162,8 @@ describe('useTimelineEventsHandler', () => {
         totalCount: -1,
         refreshedAt: 0,
         isPartial: false,
+        shardFailures: [],
+        timedOut: false,
       },
     ]);
   });
@@ -196,6 +198,8 @@ describe('useTimelineEventsHandler', () => {
           totalCount: 32,
           refreshedAt: result.current[1].refreshedAt,
           isPartial: false,
+          shardFailures: [],
+          timedOut: false,
         },
       ]);
     });
@@ -242,6 +246,8 @@ describe('useTimelineEventsHandler', () => {
         totalCount: 32,
         refreshedAt: result.current[1].refreshedAt,
         isPartial: false,
+        shardFailures: [],
+        timedOut: false,
       },
     ]);
   });
@@ -423,6 +429,128 @@ describe('useTimelineEventsHandler', () => {
       });
 
       expect(result.current[1].isPartial).toEqual(true);
+    });
+
+    it('returns shardFailures from the completed EQL response', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: { securitySolutionTimeline: { crud: true } },
+          },
+          data: {
+            search: {
+              search: () => ({
+                subscribe: jest.fn().mockImplementation(({ next }) => {
+                  const requestTimeout = setTimeout(() => {
+                    next({
+                      isRunning: false,
+                      isPartial: false,
+                      inspect: { dsl: [], response: [] },
+                      edges: [],
+                      pageInfo: { activePage: 0, querySize: 25 },
+                      rawResponse: {
+                        is_partial: false,
+                        is_running: false,
+                        timed_out: false,
+                        shard_failures: [
+                          {
+                            shard: 0,
+                            index: 'logs-test',
+                            reason: { type: 'script_exception', reason: 'boom' },
+                          },
+                        ],
+                      },
+                      totalCount: 1,
+                    });
+                  }, 50);
+                  return {
+                    unsubscribe: () => {
+                      clearTimeout(requestTimeout);
+                    },
+                  };
+                }),
+              }),
+              showError: jest.fn(),
+            },
+          },
+        },
+      });
+
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
+      });
+
+      expect(result.current[1].shardFailures).toEqual([
+        {
+          shard: 0,
+          index: 'logs-test',
+          reason: { type: 'script_exception', reason: 'boom' },
+        },
+      ]);
+    });
+
+    it('returns timedOut true when the completed EQL response timed out', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: { securitySolutionTimeline: { crud: true } },
+          },
+          data: {
+            search: {
+              search: () => ({
+                subscribe: jest.fn().mockImplementation(({ next }) => {
+                  const requestTimeout = setTimeout(() => {
+                    next({
+                      isRunning: false,
+                      isPartial: false,
+                      inspect: { dsl: [], response: [] },
+                      edges: [],
+                      pageInfo: { activePage: 0, querySize: 25 },
+                      rawResponse: {
+                        is_partial: false,
+                        is_running: false,
+                        timed_out: true,
+                        shard_failures: [],
+                      },
+                      totalCount: 1,
+                    });
+                  }, 50);
+                  return {
+                    unsubscribe: () => {
+                      clearTimeout(requestTimeout);
+                    },
+                  };
+                }),
+              }),
+              showError: jest.fn(),
+            },
+          },
+        },
+      });
+
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
+      });
+
+      expect(result.current[1].timedOut).toEqual(true);
     });
   });
 

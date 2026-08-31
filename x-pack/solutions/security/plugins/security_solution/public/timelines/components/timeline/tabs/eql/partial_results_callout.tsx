@@ -6,10 +6,36 @@
  */
 
 import React, { memo } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiCallOut, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
+import type { EqlShardFailure } from '../../../../containers';
 import * as i18n from './translations';
 
-const PartialResultsCalloutComponent: React.FC = () => {
+interface PartialResultsCalloutProps {
+  shardFailures: EqlShardFailure[];
+  timedOut: boolean;
+}
+
+const formatFailureReason = (failure: EqlShardFailure): string => {
+  const type = failure.reason?.type;
+  const reason = failure.reason?.reason;
+  if (type != null && reason != null) {
+    return `${type}: ${reason}`;
+  }
+  if (type != null) {
+    return type;
+  }
+  if (reason != null) {
+    return reason;
+  }
+  return '';
+};
+
+const PartialResultsCalloutComponent: React.FC<PartialResultsCalloutProps> = ({
+  shardFailures,
+  timedOut,
+}) => {
+  const hasDetails = shardFailures.length > 0 || timedOut;
+
   return (
     <>
       <EuiCallOut
@@ -19,6 +45,64 @@ const PartialResultsCalloutComponent: React.FC = () => {
         data-test-subj="eql-partial-results-warning"
       >
         <p>{i18n.PARTIAL_RESULTS_WARNING_BODY}</p>
+        {hasDetails ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiAccordion
+              id="eql-partial-results-warning-details"
+              buttonContent={i18n.PARTIAL_RESULTS_WARNING_DETAILS}
+              data-test-subj="eql-partial-results-warning-details"
+            >
+              <EuiSpacer size="s" />
+              {timedOut ? (
+                <>
+                  <EuiText size="s">{i18n.PARTIAL_RESULTS_WARNING_TIMED_OUT}</EuiText>
+                  <EuiSpacer size="s" />
+                </>
+              ) : null}
+              {shardFailures.map((failure, index) => {
+                const reason = formatFailureReason(failure);
+                return (
+                  <React.Fragment key={`${failure.index ?? 'unknown'}-${failure.shard ?? index}`}>
+                    <EuiText size="s">
+                      <strong>
+                        {i18n.PARTIAL_RESULTS_WARNING_INDEX}
+                        {': '}
+                      </strong>
+                      {failure.index ?? '\u2014'}
+                      {' \u00b7 '}
+                      <strong>
+                        {i18n.PARTIAL_RESULTS_WARNING_SHARD}
+                        {': '}
+                      </strong>
+                      {failure.shard ?? '\u2014'}
+                    </EuiText>
+                    {reason !== '' ? (
+                      <>
+                        <EuiSpacer size="xs" />
+                        <EuiText size="s">
+                          <strong>
+                            {i18n.PARTIAL_RESULTS_WARNING_REASON}
+                            {':'}
+                          </strong>
+                        </EuiText>
+                        <EuiCodeBlock
+                          language="text"
+                          fontSize="s"
+                          paddingSize="s"
+                          isCopyable={false}
+                        >
+                          {reason}
+                        </EuiCodeBlock>
+                      </>
+                    ) : null}
+                    <EuiSpacer size="s" />
+                  </React.Fragment>
+                );
+              })}
+            </EuiAccordion>
+          </>
+        ) : null}
       </EuiCallOut>
       <EuiSpacer size="s" />
     </>

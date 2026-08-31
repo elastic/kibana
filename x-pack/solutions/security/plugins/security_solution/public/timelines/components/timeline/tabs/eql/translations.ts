@@ -21,3 +21,38 @@ export const PARTIAL_RESULTS_WARNING_BODY = i18n.translate(
       'Some shards timed out or failed. Events may be missing from this hunt. Narrow the time range or query and run it again.',
   }
 );
+
+export const PARTIAL_RESULTS_WARNING_DETAILS = i18n.translate(
+  'xpack.securitySolution.timeline.eql.partialResultsWarning.details',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+export const PARTIAL_RESULTS_WARNING_TIMED_OUT = i18n.translate(
+  'xpack.securitySolution.timeline.eql.partialResultsWarning.timedOut',
+  {
+    defaultMessage: 'The search timed out before all shards finished.',
+  }
+);
+
+export const PARTIAL_RESULTS_WARNING_INDEX = i18n.translate(
+  'xpack.securitySolution.timeline.eql.partialResultsWarning.index',
+  {
+    defaultMessage: 'Index',
+  }
+);
+
+export const PARTIAL_RESULTS_WARNING_SHARD = i18n.translate(
+  'xpack.securitySolution.timeline.eql.partialResultsWarning.shard',
+  {
+    defaultMessage: 'Shard',
+  }
+);
+
+export const PARTIAL_RESULTS_WARNING_REASON = i18n.translate(
+  'xpack.securitySolution.timeline.eql.partialResultsWarning.reason',
+  {
+    defaultMessage: 'Reason',
+  }
+);

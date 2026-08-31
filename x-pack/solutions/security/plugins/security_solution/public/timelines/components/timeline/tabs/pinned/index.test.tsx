@@ -117,6 +117,8 @@ describe('PinnedTabContent', () => {
           totalPages: 1,
         },
         isPartial: false,
+        shardFailures: [],
+        timedOut: false,
       },
     ]);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
@@ -189,6 +191,8 @@ describe('PinnedTabContent', () => {
             totalPages: 1,
           },
           isPartial: false,
+          shardFailures: [],
+          timedOut: false,
         },
       ]);
 

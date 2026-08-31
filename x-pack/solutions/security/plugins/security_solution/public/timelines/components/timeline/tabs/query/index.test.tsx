@@ -1143,6 +1143,8 @@ describe.skip('query tab with unified timeline', () => {
             inspect: { dsl: [], response: [] },
             totalCount: 1,
             isPartial: false,
+            shardFailures: [],
+            timedOut: false,
             loadNextBatch: jest.fn(),
             refreshedAt: 0,
             refetch: jest.fn(),

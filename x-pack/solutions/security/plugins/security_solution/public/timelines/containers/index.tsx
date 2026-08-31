@@ -69,6 +69,22 @@ export interface TimelineArgs {
   totalCount: number;
   refreshedAt: number;
   isPartial: boolean;
+  shardFailures: EqlShardFailure[];
+  timedOut: boolean;
+}
+
+/**
+ * Subset of an Elasticsearch shard failure carried to the Correlation tab so
+ * the incomplete-results callout can surface index / shard / reason detail.
+ */
+export interface EqlShardFailure {
+  index?: string;
+  shard?: number;
+  node?: string;
+  reason?: {
+    type?: string;
+    reason?: string;
+  };
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
@@ -101,26 +117,31 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 interface PartialResultsRawResponse {
   timed_out?: boolean;
   _shards?: { failed?: number };
-  shard_failures?: unknown[];
+  shard_failures?: EqlShardFailure[];
 }
 
-const isPartialResult = (
+interface PartialResultsState {
+  isPartial: boolean;
+  shardFailures: EqlShardFailure[];
+  timedOut: boolean;
+}
+
+const getPartialResults = (
   isPartial: boolean | undefined,
   rawResponse: PartialResultsRawResponse | undefined
-): boolean => {
-  if (isPartial === true) {
-    return true;
-  }
-  if (rawResponse == null) {
-    return false;
-  }
-  if (rawResponse.timed_out === true) {
-    return true;
-  }
-  if (Array.isArray(rawResponse.shard_failures) && rawResponse.shard_failures.length > 0) {
-    return true;
-  }
-  return typeof rawResponse._shards?.failed === 'number' && rawResponse._shards.failed > 0;
+): PartialResultsState => {
+  const shardFailures = Array.isArray(rawResponse?.shard_failures)
+    ? rawResponse.shard_failures
+    : [];
+  const timedOut = rawResponse?.timed_out === true;
+  const hasFailedShards =
+    typeof rawResponse?._shards?.failed === 'number' && rawResponse._shards.failed > 0;
+
+  return {
+    isPartial: isPartial === true || timedOut || shardFailures.length > 0 || hasFailedShards,
+    shardFailures,
+    timedOut,
+  };
 };
 
 export interface UseTimelineEventsProps {
@@ -272,6 +293,8 @@ export const useTimelineEventsHandler = ({
       loadNextBatch,
       refreshedAt: 0,
       isPartial: false,
+      shardFailures: [],
+      timedOut: false,
     }),
     [id, loadNextBatch]
   );
@@ -324,7 +347,7 @@ export const useTimelineEventsHandler = ({
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
                     refreshedAt: Date.now(),
-                    isPartial: isPartialResult(
+                    ...getPartialResults(
                       response.isPartial,
                       response.rawResponse as PartialResultsRawResponse | undefined
                     ),

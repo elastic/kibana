@@ -128,6 +128,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       refreshedAt,
       refetch,
       isPartial = false,
+      shardFailures = [],
+      timedOut = false,
     },
   ] = useTimelineEvents({
     dataViewId,
@@ -253,7 +255,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const unifiedHeader = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s" direction="column">
-        {isPartial && !isBlankTimeline ? <PartialResultsCallout /> : null}
+        {isPartial && !isBlankTimeline ? (
+          <PartialResultsCallout shardFailures={shardFailures} timedOut={timedOut} />
+        ) : null}
         <EqlTabHeader
           activeTab={activeTab}
           setTimelineFullScreen={setTimelineFullScreen}
@@ -262,7 +266,16 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         />
       </EuiFlexGroup>
     ),
-    [activeTab, isBlankTimeline, isPartial, setTimelineFullScreen, timelineFullScreen, timelineId]
+    [
+      activeTab,
+      isBlankTimeline,
+      isPartial,
+      setTimelineFullScreen,
+      shardFailures,
+      timedOut,
+      timelineFullScreen,
+      timelineId,
+    ]
   );
 
   return (
