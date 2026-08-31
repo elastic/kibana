@@ -141,6 +141,7 @@ const createStartContractMock = () => {
       setBreadcrumbs: jest.fn(),
       getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       getNavigation$: jest.fn().mockReturnValue(new BehaviorSubject({} as any)),
+      getCurrentUrl$: jest.fn().mockReturnValue(new BehaviorSubject('')),
       getProjectHome$: jest.fn().mockReturnValue(of('/')),
       setNavigationCustomization: jest.fn(),
       getCustomizeNavigationHandler$: jest.fn().mockReturnValue(new BehaviorSubject(null)),

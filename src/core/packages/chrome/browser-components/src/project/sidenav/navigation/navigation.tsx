@@ -71,6 +71,7 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
     const panelStateManager = new PanelStateManager(basePath.get());
     const navigation$ = chrome.project.getNavigation$();
     const registeredContent$ = chrome.project.getRegisteredNavigationContent$();
+    const currentUrl$ = chrome.project.getCurrentUrl$();
 
     const tree$ = navigation$.pipe(
       map(({ navigationTree }) => navigationTree),
@@ -93,7 +94,7 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
 
     const panelElements = new Map<string, ReactNode>();
 
-    return combineLatest([navigation$, resolvedContent$]).pipe(
+    const structure$ = combineLatest([navigation$, resolvedContent$]).pipe(
       map(([nav, resolved]) => {
         const items = attachPanelContent(
           attachPopoverSections(
@@ -108,16 +109,20 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
           resolved.panels,
           panelElements
         );
-        const popoverActiveId = findActivePopoverItemId(
-          resolved.links,
-          `${window.location.pathname}${window.location.hash}`
-        );
         return {
-          ...items,
-          activeItemId: popoverActiveId ?? items.activeItemId,
+          items,
+          links: resolved.links,
           solutionId: nav.solutionId,
         };
       })
+    );
+
+    return combineLatest([structure$, currentUrl$]).pipe(
+      map(([{ items, links, solutionId }, currentUrl]) => ({
+        ...items,
+        activeItemId: findActivePopoverItemId(links, currentUrl) ?? items.activeItemId,
+        solutionId,
+      }))
     );
   }, [chrome, basePath]);
 

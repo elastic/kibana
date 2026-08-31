@@ -71,6 +71,7 @@ export function createChromeApi({
       projectNavigation.initNavigation(id, navigationTree$);
     },
     getNavigation$: () => projectNavigation.getNavigation$(),
+    getCurrentUrl$: () => projectNavigation.getCurrentUrl$(),
     setBreadcrumbs: (breadcrumbs, params) =>
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),

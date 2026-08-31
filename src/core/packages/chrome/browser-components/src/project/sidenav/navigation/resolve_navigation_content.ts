@@ -16,6 +16,7 @@ import type {
   ProjectNavigationLinkItem,
   ProjectNavigationLinkListContent,
 } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import type { MenuItem, SecondaryMenuItem } from '@kbn/ui-side-navigation/types';
 import { catchError, combineLatest, map, of, startWith, type Observable } from 'rxjs';
 import type { NavigationItems } from './to_navigation_items';
@@ -38,6 +39,14 @@ const toSecondaryMenuItem = (item: ProjectNavigationLinkItem): SecondaryMenuItem
   label: item.label,
   badgeType: item.badgeType,
   isExternal: item.isExternal,
+});
+
+const toViewAllItem = (sectionId: string, href: string): SecondaryMenuItem => ({
+  id: `${sectionId}-viewAll`,
+  href,
+  label: i18n.translate('core.ui.chrome.sideNavigation.viewAllLinkText', {
+    defaultMessage: 'View all',
+  }),
 });
 
 const walkNodes = (
@@ -147,15 +156,22 @@ export const attachPopoverSections = (
     if (!section || (item.sections?.length ?? 0) > 0) {
       return item;
     }
+    const recentsSection = {
+      id: section.id,
+      label: section.title,
+      items: section.items,
+    };
+    const viewAllSection = item.href
+      ? [
+          {
+            id: `${section.id}-viewAll`,
+            items: [toViewAllItem(section.id, item.href)],
+          },
+        ]
+      : [];
     return {
       ...item,
-      popoverSections: [
-        {
-          id: section.id,
-          label: section.title,
-          items: section.items,
-        },
-      ],
+      popoverSections: [recentsSection, ...viewAllSection],
     };
   };
 
@@ -163,7 +179,7 @@ export const attachPopoverSections = (
     ...navigationItems,
     navItems: {
       primaryItems: navigationItems.navItems.primaryItems.map(attach),
-      overflowItems: navigationItems.navItems.overflowItems,
+      overflowItems: navigationItems.navItems.overflowItems?.map(attach),
       footerItems: navigationItems.navItems.footerItems.map(attach),
     },
   };

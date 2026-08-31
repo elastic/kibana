@@ -124,6 +124,12 @@ export class ProjectNavigationService {
       shareReplay(1)
     );
 
+    const currentUrl$ = location$.pipe(
+      map((location) => stripQueryParams(`${prependBasePath(location.pathname)}${location.hash}`)),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+
     const navigation$ = combineLatest([parsedNavigation$, location$]).pipe(
       filter((args): args is [ParsedNavigation, Location] => args[0] !== null),
       map(([parsed, location]) => {
@@ -199,6 +205,7 @@ export class ProjectNavigationService {
         });
       },
       getNavigation$: () => navigation$,
+      getCurrentUrl$: () => currentUrl$,
       setProjectBreadcrumbs: (
         breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
         params?: Partial<ChromeSetProjectBreadcrumbsParams>

@@ -102,6 +102,9 @@ export interface InternalChromeStart extends ChromeStart {
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
+    /** Current path+hash with base path, query stripped. Emits on in-app location changes. */
+    getCurrentUrl$(): Observable<string>;
+
     getNavigation$(): Observable<{
       solutionId: SolutionId;
       navigationTree: NavigationTreeDefinitionUI;
