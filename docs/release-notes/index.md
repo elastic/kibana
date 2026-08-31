@@ -734,6 +734,87 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix slow workflow template rendering for workflows with large step outputs [#265027]({{kib-pull}}265027).
 * Fix connector and step icons in the workflows list showing the generic plugs fallback [#263880]({{kib-pull}}263880).
 
+## 9.4.6 [kibana-9.4.6-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.4.6-features-enhancements]
+
+**Alerting**:
+* Add `[Elastic Cloud Trial]` prefix to email subjects sent through the built-in {{ecloud}} email service on trial deployments [#276705]({{kib-pull}}276705).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.4.6 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.4.6 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Workflows**:
+* Add step-level skip conditions (`if`) to all workflow step types [#279210]({{kib-pull}}279210).
+
+
+### Fixes [kibana-9.4.6-fixes]
+
+**Agent Builder**:
+* Fix Agent Builder entering an infinite retry loop and hitting a recursion error when the plain-text answering path receives an empty model response [#285823]({{kib-pull}}285823).
+* Fix Anthropic {{infer}} endpoint stream parsing and Agent Builder silent retry loops on empty model responses [#281616]({{kib-pull}}281616).
+* Fix Agent Builder queries failing with a security exception on {{es}} 9.4 when {{ccs}} index patterns are configured without the remote cluster client role [#281609]({{kib-pull}}281609).
+* Fix Anthropic {{infer}} endpoint requests sending `temperature: 0` when no temperature was configured, causing unexpected model behavior in Agent Builder [#281179]({{kib-pull}}281179).
+
+**Alerting**:
+% !!DEFERRED!! #287643 not yet confirmed in build candidate 9.4.6-31343951 (backport merged after BC cutoff).
+% * Fix alerts-as-data resource installation concurrency deadlock that caused excessive peak heap usage [#287643]({{kib-pull}}287643).
+* Fix alert suppression creating duplicate alerts when stored alerts use nested `_source` fields instead of flat dot-notation keys [#282192]({{kib-pull}}282192).
+
+**Dashboards and Visualizations**:
+% !!DEFERRED!! #287441 not yet confirmed in build candidate 9.4.6-31343951 (backport merged after BC cutoff).
+% * Fix the timeslider close button responding only when clicked on the top quarter of the button area [#287441]({{kib-pull}}287441).
+* Fix by-reference Lens panels being removed from dashboards when their saved object references are missing [#285476]({{kib-pull}}285476).
+
+**Data ingestion and {{fleet}}**:
+* Fix {{fleet}} secrets being stored inline instead of as encrypted references when package policies are created in bulk [#282213]({{kib-pull}}282213).
+* Remove the proxy configuration option from Kafka outputs, which are not proxy-compatible [#282313]({{kib-pull}}282313).
+
+**Developer tools**:
+% !!DEFERRED!! #286703 not yet confirmed in build candidate 9.4.6-31343951 (backport merged after BC cutoff).
+% * Fix Dev Tools Console autocomplete not prioritizing explicit field rules when a same-name global rule also exists [#286703]({{kib-pull}}286703).
+* Fix duplicate Cut, Copy, and Paste entries appearing in the Dev Tools Console context menu [#286704]({{kib-pull}}286704).
+* Fix Dev Tools Console autocomplete inserting boolean and numeric values as quoted strings instead of JSON primitives [#286699]({{kib-pull}}286699).
+* Fix Dev Tools Console body autocomplete failing after closed triple-quoted string values [#286695]({{kib-pull}}286695).
+* Fix Dev Tools Console autocomplete not triggering at request body positions, and correct template expansion and text corruption bugs when accepting suggestions [#284530]({{kib-pull}}284530).
+* Fix Dev Tools Console incorrectly showing autocomplete suggestions inside non-query triple-quoted strings [#282424]({{kib-pull}}282424).
+
+**Discover**:
+* Fix numeric field formats adding a sign prefix to values that round to zero [#282919]({{kib-pull}}282919).
+* Fix the percent field format displaying NaN when `fractional` is set to `false` [#282915]({{kib-pull}}282915).
+* Fix server-side date field formatting not reflecting timezone or pattern changes until {{kib}} is restarted [#282501]({{kib-pull}}282501).
+* Fix the Base64 Decode field format transform on the server side and for UTF-8 encoded data [#281366]({{kib-pull}}281366).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.4.6 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.4.6 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+% !!DEFERRED!! #285344 not yet confirmed in build candidate 9.4.6-31343951 (backport merged after BC cutoff).
+% * Fix {{kib}} using the wrong socket for HTTP/2 requests, causing audit log records to omit the client IP address [#285344]({{kib-pull}}285344).
+* Fix PKI authentication sessions being unexpectedly invalidated when in-flight HTTP/2 requests are cancelled, logging users out on TLS-enabled deployments [#285153]({{kib-pull}}285153).
+* Fix the **Roles** management page allowing navigation without warning when there are unsaved changes [#283525]({{kib-pull}}283525).
+* Fix {{kib}} failing to start when the audit log file location is misconfigured, and instead report a degraded state [#282347]({{kib-pull}}282347).
+
+**Machine learning and {{infer}}**:
+* Fix the **Data Frame Analytics** results explorer not updating when switching to a different job of the same type [#284964]({{kib-pull}}284964).
+* Restrict the trained model pipeline test endpoint to admin-level capabilities to prevent unauthorized data access [#282002]({{kib-pull}}282002).
+
+**Reporting**:
+* Fix CSV exports generated by internal users (such as {{fleet}} agent exports) failing with a `parsing_exception` error when `xpack.reporting.csv.scroll.strategy: scroll` is configured [#286119]({{kib-pull}}286119).
+
+**Workflows**:
+* Fix the workflow editor blocking the **Enabled** toggle with an error when a `foreach` loop collection type cannot be statically proved — now downgraded to a warning [#283360]({{kib-pull}}283360).
+
 ## 9.4.5 [kibana-9.4.5-release-notes]
 
 ### Fixes [kibana-9.4.5-fixes]
