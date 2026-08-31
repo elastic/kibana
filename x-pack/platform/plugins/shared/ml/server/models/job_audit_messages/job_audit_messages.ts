@@ -413,9 +413,6 @@ export function jobAuditMessagesProvider(
       },
     };
 
-    // The update_by_query and index APIs do not accept `project_routing`. The ES client forwards
-    // unrecognised parameters into the request body, so passing it here makes update_by_query fail
-    // with a parsing_exception and adds a stray field to the indexed notification document.
     const promises: Array<Promise<unknown>> = [
       asInternalUser.updateByQuery(
         {
