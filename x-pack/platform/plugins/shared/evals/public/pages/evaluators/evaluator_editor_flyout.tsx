@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiCheckboxGroup,
   EuiComboBox,
   EuiFieldText,
@@ -33,6 +32,7 @@ import {
   type EuiComboBoxOptionOption,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import {
   UserDefinedEvaluatorDraft,
   type JudgeEvidence,
@@ -320,6 +320,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
 
   const isSaving = createEvaluator.isLoading || updateEvaluator.isLoading;
   const isTesting = testEvaluator.isLoading || resolveInstrumentation.isLoading;
+  const TestResultCallout = testResult?.status === 'ok' ? KbnSuccessCallout : KbnDangerCallout;
 
   return (
     <EuiFlyout ownFocus onClose={onClose} size="l" aria-labelledby={titleId}>
@@ -411,7 +412,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="s"
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => {
                     setScores((current) => [...current, { ...EMPTY_SCORE, id: nextScoreId }]);
                     setNextScoreId((current) => current + 1);
@@ -543,23 +544,26 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
             {testResult && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut
+                <TestResultCallout
                   announceOnMount
                   title={
                     testResult.status === 'ok' ? i18n.TEST_SUCCEEDED_TITLE : i18n.TEST_FAILED_TITLE
                   }
-                  color={testResult.status === 'ok' ? 'success' : 'danger'}
-                  iconType={testResult.status === 'ok' ? 'check' : 'warning'}
                   data-test-subj="evalsEvaluatorTestResult"
-                >
-                  {testResult.error ? <p>{testResult.error.message}</p> : null}
-                  {(testResult.scores ?? []).map((score) => (
-                    <p key={score.name}>
-                      <strong>{i18n.SCORE_RESULT(score.name, resultValue(score))}</strong>
-                      {score.explanation ? ` ${i18n.SCORE_EXPLANATION(score.explanation)}` : null}
-                    </p>
-                  ))}
-                </EuiCallOut>
+                  text={
+                    <>
+                      {testResult.error ? <p>{testResult.error.message}</p> : null}
+                      {(testResult.scores ?? []).map((score) => (
+                        <p key={score.name}>
+                          <strong>{i18n.SCORE_RESULT(score.name, resultValue(score))}</strong>
+                          {score.explanation
+                            ? ` ${i18n.SCORE_EXPLANATION(score.explanation)}`
+                            : null}
+                        </p>
+                      ))}
+                    </>
+                  }
+                />
               </>
             )}
           </EuiForm>
