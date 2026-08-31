@@ -3379,7 +3379,9 @@ describe('update', () => {
             {
               id: mockCases[0].id,
               version: mockCases[0].version ?? '',
-              customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'high' }],
+              customFields: [
+                { key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'high' },
+              ],
             },
           ],
         },
