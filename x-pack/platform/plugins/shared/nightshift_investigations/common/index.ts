@@ -10,9 +10,17 @@ import type {
   InvestigationHypothesis,
   InvestigationImpact,
   InvestigationRecommendation,
-  SignificantEventUpdate,
+  Severity,
+  TriggerFeedback,
 } from '@kbn/significant-events-schema';
 import type { InvestigationTriggerType } from './workflows/triggers';
+
+/**
+ * Re-exported so consumers of these responses do not need their own dependency on
+ * `@kbn/significant-events-schema`. Investigations rate themselves on the same severity tier scale
+ * significant events use, so a tier added there widens these responses too.
+ */
+export type { Severity } from '@kbn/significant-events-schema';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,
@@ -101,10 +109,16 @@ export type UpdatableInvestigationStatus = (typeof UPDATABLE_INVESTIGATION_STATU
 export interface InvestigationStructuredOutput {
   summary?: string;
   conclusion?: string;
+  /**
+   * The investigation's own severity verdict for the situation it investigated. Absent for runs
+   * that are still going, failed, predate the field, or completed without the agent rating one —
+   * an absent severity means unrated, never low.
+   */
+  severity?: Severity;
   hypotheses?: InvestigationHypothesis[];
   recommendations?: InvestigationRecommendation[];
   blind_spots?: InvestigationBlindSpot[];
-  significant_event_updates?: SignificantEventUpdate[];
+  trigger_feedback?: TriggerFeedback[];
   impact?: InvestigationImpact;
 }
 
@@ -161,6 +175,7 @@ export type ListInvestigationItem = Pick<
   | 'error'
   | 'executed_by'
   | 'investigation_id'
+  | 'severity'
   | 'started_at'
   | 'status'
   | 'subject'

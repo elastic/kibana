@@ -90,7 +90,7 @@ const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): Investigat
   hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
   recommendations: [{ title: 'Keep monitoring' }],
   blind_spots: [{ title: 'Blind spot', description: 'desc' }],
-  significant_event_updates: [],
+  trigger_feedback: [],
   ...overrides,
 });
 
@@ -149,10 +149,11 @@ describe('NightshiftInvestigationsClient.get()', () => {
       error: undefined,
       summary: 'All clear.',
       conclusion: 'No issues found.',
+      severity: undefined,
       hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
       recommendations: [{ title: 'Keep monitoring' }],
       blind_spots: [{ title: 'Blind spot', description: 'desc' }],
-      significant_event_updates: [],
+      trigger_feedback: [],
       conversation_id: 'conv-1',
       impact: { entities: [{ name: 'checkout-service' }] },
     });
@@ -191,6 +192,18 @@ describe('NightshiftInvestigationsClient.get()', () => {
     expect(result.status).toBe('running');
     expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
     expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('returns the stored severity', async () => {
+    repository.get.mockResolvedValue(makeRecord({ severity: '60-high' }));
+    const result = await makeClient().get('inv-1');
+    expect(result.severity).toBe('60-high');
+  });
+
+  it('leaves severity unset when the record has none', async () => {
+    repository.get.mockResolvedValue(makeRecord());
+    const result = await makeClient().get('inv-1');
+    expect(result.severity).toBeUndefined();
   });
 });
 
@@ -238,6 +251,7 @@ describe('NightshiftInvestigationsClient.list()', () => {
       executed_by: 'test-user',
       error: undefined,
       summary: 'All clear.',
+      severity: undefined,
     });
     expect(result.results[0]).not.toHaveProperty('conclusion');
     expect(result.results[0]).not.toHaveProperty('hypotheses');
@@ -280,10 +294,21 @@ describe('NightshiftInvestigationsClient.list()', () => {
       })
     );
     const { fields } = repository.find.mock.calls[0][0];
+    expect(fields).toContain('severity');
     expect(fields).not.toContain('hypotheses');
     expect(fields).not.toContain('conclusion');
     expect(fields).not.toContain('impact');
     expect(fields).not.toContain('conversation_id');
+    expect(fields).not.toContain('trigger_feedback');
+  });
+
+  it('returns severity on list items when stored', async () => {
+    repository.find.mockResolvedValue(
+      findResult([makeRecord({ severity: '80-critical' }, { id: 'inv-42' })])
+    );
+
+    const result = await makeClient().list({});
+    expect(result.results[0].severity).toBe('80-critical');
   });
 });
 
@@ -758,6 +783,40 @@ describe('NightshiftInvestigationsClient.update()', () => {
         status: 'completed',
         conversation_id: 'conv-1',
         impact: { entities: [{ name: 'checkout-service' }] },
+      }),
+      { version: '1' }
+    );
+  });
+
+  it('persists severity and trigger_feedback', async () => {
+    await makeClient().update('inv-1', {
+      status: 'completed',
+      severity: '40-medium',
+      trigger_feedback: [
+        {
+          field: 'severity',
+          from: '80-critical',
+          to: '40-medium',
+          reason: 'Impact is limited to one service.',
+          evidence: [{ description: 'Error rate recovered.' }],
+        },
+      ],
+    });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'inv-1',
+      expect.objectContaining({
+        status: 'completed',
+        severity: '40-medium',
+        trigger_feedback: [
+          {
+            field: 'severity',
+            from: '80-critical',
+            to: '40-medium',
+            reason: 'Impact is limited to one service.',
+            evidence: [{ description: 'Error rate recovered.' }],
+          },
+        ],
       }),
       { version: '1' }
     );

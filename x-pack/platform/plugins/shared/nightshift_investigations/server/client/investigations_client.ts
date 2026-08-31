@@ -59,6 +59,7 @@ const LIST_RECORD_FIELDS = [
   'created_at',
   'error',
   'executed_by',
+  'severity',
   'status',
   'subject_id',
   'subject_summary',
@@ -103,6 +104,7 @@ function toListInvestigationItem(record: InvestigationRecord): ListInvestigation
     executed_by: record.executed_by,
     error: record.error,
     summary: record.summary,
+    severity: record.severity,
   };
 }
 
@@ -113,7 +115,7 @@ function toInvestigationResponse(record: InvestigationRecord): GetInvestigationR
     hypotheses: record.hypotheses,
     recommendations: record.recommendations,
     blind_spots: record.blind_spots,
-    significant_event_updates: record.significant_event_updates,
+    trigger_feedback: record.trigger_feedback,
     conversation_id: record.conversation_id,
     impact: record.impact,
   };
