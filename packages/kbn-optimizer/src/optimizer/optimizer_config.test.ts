@@ -123,6 +123,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -151,6 +152,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -179,6 +181,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": true,
           "parentDirs": undefined,
           "paths": undefined,
@@ -206,6 +209,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -234,6 +238,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -262,6 +267,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -290,6 +296,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -319,6 +326,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -348,6 +356,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
