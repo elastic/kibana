@@ -36,6 +36,13 @@ export interface ScopedPaginationSlice {
    */
   readonly isFlyoutDocumentLoading: boolean;
   /**
+   * `true` when the cross-page query resolving the document at `flyoutDocumentIndex`
+   * has errored. `flyoutDocumentId`/`flyoutDocumentIndexName` are left pointing at
+   * whatever was previously displayed in this case, so consumers must check this
+   * flag and render an error rather than the stale document.
+   */
+  readonly hasFlyoutQueryError: boolean;
+  /**
    * Elasticsearch `_id` of the document at `flyoutDocumentIndex`, or `null`
    * while no document is expanded. Only the document's identity is kept here:
    * the flyout body resolves the document itself (see `DocumentFlyoutWrapper`)
@@ -70,6 +77,7 @@ export const absentSlice: ScopedPaginationSlice = {
   pageSize: 0,
   totalDocumentCount: 0,
   isFlyoutDocumentLoading: false,
+  hasFlyoutQueryError: false,
   flyoutDocumentId: null,
   flyoutDocumentIndexName: null,
   openDocumentFlyoutImpl: null,

@@ -463,12 +463,16 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     pageSize: reduxItemsPerPage,
   });
 
-  // Drive the loading state shown by the right panel. We are loading whenever
-  // the user has navigated the flyout to a page that isn't the table's page
-  // and the parallel query hasn't resolved that alert yet.
+  // Drive the loading and error state shown by the right panel. We are loading
+  // whenever the user has navigated the flyout to a page that isn't the
+  // table's page and the parallel query hasn't resolved that alert yet. If
+  // that parallel query errors, `flyoutDocumentId`/`flyoutDocumentIndexName`
+  // are left pointing at the previously displayed alert (the resolution
+  // effect below never fires without a resolved alert), so `hasFlyoutQueryError`
+  // is surfaced separately and consumers must check it before rendering.
   useEffect(() => {
     if (flyoutDocumentIndex == null || flyoutPageIndex === tablePageIndex) {
-      setState({ isFlyoutDocumentLoading: false });
+      setState({ isFlyoutDocumentLoading: false, hasFlyoutQueryError: false });
       return;
     }
     const offset = flyoutDocumentIndex - flyoutPageIndex * reduxItemsPerPage;
@@ -476,6 +480,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     setState({
       isFlyoutDocumentLoading:
         !isFlyoutQueryError && (!alertOnRequestedPage || isFetchingFlyoutAlerts),
+      hasFlyoutQueryError: isFlyoutQueryError,
     });
   }, [
     flyoutDocumentIndex,
