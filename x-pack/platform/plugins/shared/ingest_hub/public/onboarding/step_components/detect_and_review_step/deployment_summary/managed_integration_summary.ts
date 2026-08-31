@@ -6,6 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 
 export interface SummaryField {
   labelId: string;
@@ -24,7 +25,10 @@ export function getManagedIntegrationSummaryFields({
     {
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.deploymentMethod',
       defaultMessage: 'Deployment method',
-      value: 'Elastic Managed Integration',
+      value: i18n.translate(
+        'xpack.ingestHub.detectAndReviewStep.deploymentSummary.value.managedIntegration',
+        { defaultMessage: 'Elastic Managed Integration' }
+      ),
     },
     {
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.region',

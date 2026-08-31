@@ -9,6 +9,8 @@
 // enrollment tokens, and agent counts. Fields are typed and tested so the
 // branch is covered before it is reachable via DeploymentMethodCard.
 
+import { i18n } from '@kbn/i18n';
+
 import type { SummaryField } from './managed_integration_summary';
 
 export function getAgentBasedSummaryFields(): SummaryField[] {
@@ -16,7 +18,10 @@ export function getAgentBasedSummaryFields(): SummaryField[] {
     {
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.deploymentMethod',
       defaultMessage: 'Deployment method',
-      value: 'Agent-based',
+      value: i18n.translate(
+        'xpack.ingestHub.detectAndReviewStep.deploymentSummary.value.agentBased',
+        { defaultMessage: 'Agent-based' }
+      ),
     },
     {
       // Agent policy name — blocked on #9079
