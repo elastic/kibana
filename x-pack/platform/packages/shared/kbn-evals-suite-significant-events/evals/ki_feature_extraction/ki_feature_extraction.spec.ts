@@ -108,10 +108,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
             log,
           });
           const sampleDocuments = sampledHits.flatMap((hit) => {
-            const document = formatRawDocument({
-              hit,
-              shouldNotTruncate: (key) => key.includes('tags'),
-            });
+            const document = formatRawDocument({ hit });
             return document ? [document] : [];
           });
           if (sampleDocuments.length === 0) {

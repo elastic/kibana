@@ -12,7 +12,6 @@ import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 import {
-  MAX_INFERENCE_DOCUMENT_BYTES,
   MAX_INFERENCE_DOCUMENTS_BYTES,
   prepareInferredSampling,
 } from './prepare_inferred_sampling';
@@ -127,7 +126,7 @@ describe('prepareInferredSampling', () => {
     });
   });
 
-  it('bounds individual documents and the aggregate serialized payload', async () => {
+  it('drops documents that would exceed the aggregate serialized payload cap', async () => {
     const kiClient = {
       getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
     } as unknown as KnowledgeIndicatorClient;
@@ -135,10 +134,7 @@ describe('prepareInferredSampling', () => {
       documents: Array.from({ length: 100 }, (_, index) => ({
         _index: 'logs.test-default',
         _id: `doc-${index}`,
-        _source: {
-          message: 'x'.repeat(40_000),
-          nested: { value: 'y'.repeat(40_000) },
-        },
+        _source: { message: 'x'.repeat(40_000) },
       })),
       totalFilters: 0,
       filtersCapped: false,
@@ -151,12 +147,5 @@ describe('prepareInferredSampling', () => {
     expect(Buffer.byteLength(JSON.stringify(result.documents), 'utf8')).toBeLessThanOrEqual(
       MAX_INFERENCE_DOCUMENTS_BYTES
     );
-    expect(
-      result.documents.every(
-        (document) =>
-          Buffer.byteLength(JSON.stringify(document), 'utf8') <= MAX_INFERENCE_DOCUMENT_BYTES
-      )
-    ).toBe(true);
-    expect(result.documents[0]?.fields.message).toBe(`${'x'.repeat(8 * 1024)}…`);
   });
 });

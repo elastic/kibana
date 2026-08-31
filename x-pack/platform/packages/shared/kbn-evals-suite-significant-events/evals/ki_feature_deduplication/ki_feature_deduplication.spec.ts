@@ -314,10 +314,7 @@ evaluate.describe(
                       log,
                     });
                     const sampleDocuments = sampledHits.flatMap((hit) => {
-                      const document = formatRawDocument({
-                        hit,
-                        shouldNotTruncate: (key) => key.includes('tags'),
-                      });
+                      const document = formatRawDocument({ hit });
                       return document ? [document] : [];
                     });
 

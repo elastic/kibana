@@ -9,20 +9,41 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { isComputedFeature, isFeatureWithFilter } from '@kbn/significant-events-schema';
-import { formatRawDocument, type InferenceDocument } from '@kbn/streams-ai';
+import {
+  DEFAULT_INFERENCE_DOCUMENT_LIMITS,
+  formatRawDocument,
+  type InferenceDocument,
+} from '@kbn/streams-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
-// Workflow step persistence stores this payload in both prepare output and identify input.
+// Aggregate cap, bounded separately from the per-document limits because the workflow
+// persists this payload in both the prepare output and the identify input.
 export const MAX_INFERENCE_DOCUMENTS_BYTES = 768 * 1024;
-export const MAX_INFERENCE_DOCUMENT_BYTES = 32 * 1024;
-export const MAX_INFERENCE_DOCUMENT_FIELDS = 100;
-export const MAX_INFERENCE_FIELD_NAME_LENGTH = 1024;
-const MAX_INFERENCE_STRING_LENGTH = 8 * 1024;
-const MAX_NESTED_OBJECT_ENTRIES = 100;
-const MAX_NESTED_DEPTH = 5;
-const MAX_ARRAY_ITEMS = 3;
-const MAX_TAG_ITEMS = 100;
+// Re-exported so the receiving route validates against the same contract the producer enforces.
+export const MAX_INFERENCE_DOCUMENT_BYTES = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxDocumentBytes;
+export const MAX_INFERENCE_DOCUMENT_FIELDS = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxFields;
+export const MAX_INFERENCE_FIELD_NAME_LENGTH = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxFieldNameLength;
+
+// Highest-signal fields, kept first so a large low-value field can't evict the log body from
+// the per-document byte budget. Each concept lists its ECS and OTel form; the formatter strips
+// `resource.attributes.` / `attributes.` prefixes, so `service.name` also matches
+// `resource.attributes.service.name`.
+const INFERENCE_PRIORITY_FIELDS: readonly string[] = [
+  'message', // ECS
+  'body.text', // OTel
+  'error.message', // ECS
+  'exception.message', // OTel
+  'error.stack_trace', // ECS
+  'exception.stacktrace', // OTel
+  'error.type', // ECS
+  'exception.type', // OTel
+  'log.level', // ECS
+  'severity_text', // OTel
+  'severity_number', // OTel
+  'service.name', // ECS + OTel (resource.attributes.service.name)
+  '@timestamp',
+];
 
 export interface PrepareInferredSamplingResult {
   hasDocuments: boolean;
@@ -34,72 +55,12 @@ export interface PrepareInferredSamplingResult {
   hasFilteredDocuments: boolean;
 }
 
-const truncateValue = (value: unknown, key: string, depth = 0): unknown => {
-  if (typeof value === 'string') {
-    return value.length > MAX_INFERENCE_STRING_LENGTH
-      ? `${value.slice(0, MAX_INFERENCE_STRING_LENGTH)}…`
-      : value;
-  }
-
-  if (Array.isArray(value)) {
-    const maxItems = key.includes('tags') ? MAX_TAG_ITEMS : MAX_ARRAY_ITEMS;
-    return value.slice(0, maxItems).map((item) => truncateValue(item, key, depth + 1));
-  }
-
-  if (value && typeof value === 'object') {
-    if (depth >= MAX_NESTED_DEPTH) {
-      return '[nested value omitted]';
-    }
-    return Object.fromEntries(
-      Object.entries(value)
-        .slice(0, MAX_NESTED_OBJECT_ENTRIES)
-        .map(([nestedKey, nestedValue]) => [
-          nestedKey,
-          truncateValue(nestedValue, nestedKey, depth + 1),
-        ])
-    );
-  }
-
-  return value;
-};
-
-const compactDocument = (
-  hit: SearchHit<Record<string, unknown>>
-): InferenceDocument | undefined => {
-  const formatted = formatRawDocument({
-    hit,
-    shouldNotTruncate: (key) => key.includes('tags'),
-  });
-  if (!formatted) {
-    return undefined;
-  }
-
-  const compacted: InferenceDocument = { _id: formatted._id, fields: {} };
-  for (const [key, value] of Object.entries(formatted.fields).slice(
-    0,
-    MAX_INFERENCE_DOCUMENT_FIELDS
-  )) {
-    if (key.length > MAX_INFERENCE_FIELD_NAME_LENGTH) {
-      continue;
-    }
-    const fields = { ...compacted.fields, [key]: truncateValue(value, key) };
-    if (
-      Buffer.byteLength(JSON.stringify({ ...compacted, fields }), 'utf8') <=
-      MAX_INFERENCE_DOCUMENT_BYTES
-    ) {
-      compacted.fields = fields;
-    }
-  }
-
-  return Object.keys(compacted.fields).length > 0 ? compacted : undefined;
-};
-
 const compactDocuments = (hits: Array<SearchHit<Record<string, unknown>>>): InferenceDocument[] => {
   const documents: InferenceDocument[] = [];
   let serializedBytes = 2;
 
   for (const hit of hits) {
-    const document = compactDocument(hit);
+    const document = formatRawDocument({ hit, priorityFields: INFERENCE_PRIORITY_FIELDS });
     if (!document) {
       continue;
     }
