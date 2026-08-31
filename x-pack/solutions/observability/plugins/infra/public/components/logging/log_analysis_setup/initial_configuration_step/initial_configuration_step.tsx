@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiForm, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiSpacer } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import type { ProjectRouting } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { QualityWarning, SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import type { LoadedProjectScopeProjects } from './analysis_setup_project_scope';
@@ -29,6 +30,13 @@ import {
   validationIndicesErrorRT,
 } from './validation';
 
+interface ProjectScopeProps {
+  isCpsEnabled: boolean;
+  isCpsManagerReady: boolean;
+  projectRouting: ProjectRouting;
+  onOpenProjectScope: (projects: LoadedProjectScopeProjects) => void;
+}
+
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
   setEndTime: (endTime: number | undefined) => void;
@@ -38,12 +46,9 @@ interface InitialConfigurationStepProps {
   validatedIndices: AvailableIndex[];
   setupStatus: SetupStatus;
   setValidatedIndices: (selectedIndices: AvailableIndex[]) => void;
+  projectScope: ProjectScopeProps;
   validationErrors?: ValidationUIError[];
   previousQualityWarnings?: QualityWarning[];
-  isCpsEnabled?: boolean;
-  isCpsManagerReady?: boolean;
-  projectRouting?: ProjectRouting;
-  onOpenProjectScope?: (projects: LoadedProjectScopeProjects) => void;
 }
 
 export const createInitialConfigurationStep = (
@@ -64,10 +69,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setValidatedIndices,
   validationErrors = [],
   previousQualityWarnings = [],
-  isCpsEnabled = false,
-  isCpsManagerReady = false,
-  projectRouting,
-  onOpenProjectScope,
+  projectScope,
 }: InitialConfigurationStepProps) => {
   const disabled = useMemo(() => !editableFormStatus.includes(setupStatus.type), [setupStatus]);
 
@@ -80,15 +82,12 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
 
   return (
     <EuiForm>
-      {isCpsEnabled && onOpenProjectScope ? (
+      {projectScope.isCpsEnabled ? (
         <>
           <AnalysisSetupProjectScopeForm
             disabled={disabled}
-            isCpsEnabled={isCpsEnabled}
-            isCpsManagerReady={isCpsManagerReady}
-            projectRouting={projectRouting}
-            onOpenProjectScope={onOpenProjectScope}
             validationErrors={projectRoutingValidationErrors}
+            {...projectScope}
           />
           <EuiSpacer size="xl" />
         </>
@@ -139,13 +138,13 @@ const ValidationErrors: React.FC<{ errors: ValidationUIError[] }> = ({ errors })
 
   return (
     <>
-      <EuiCallOut color="danger" iconType="warning" title={errorCalloutTitle}>
+      <KbnDangerCallout title={errorCalloutTitle}>
         <ul>
           {errors.map((error, i) => (
             <li key={i}>{formatValidationError(error)}</li>
           ))}
         </ul>
-      </EuiCallOut>
+      </KbnDangerCallout>
       <EuiSpacer />
     </>
   );

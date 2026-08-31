@@ -61,10 +61,12 @@ export const LogEntryCategoriesSetupView: React.FC<{
         setValidatedIndices,
         validationErrors,
         previousQualityWarnings: categoryQualityWarnings,
-        isCpsEnabled,
-        isCpsManagerReady,
-        projectRouting,
-        onOpenProjectScope,
+        projectScope: {
+          isCpsEnabled,
+          isCpsManagerReady,
+          projectRouting,
+          onOpenProjectScope,
+        },
       }),
       createProcessStep({
         cleanUpAndSetUp,

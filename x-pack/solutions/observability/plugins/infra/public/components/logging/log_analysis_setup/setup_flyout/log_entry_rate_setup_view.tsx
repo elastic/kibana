@@ -53,10 +53,12 @@ export const LogEntryRateSetupView: React.FC<{
         setupStatus,
         setValidatedIndices,
         validationErrors,
-        isCpsEnabled,
-        isCpsManagerReady,
-        projectRouting,
-        onOpenProjectScope,
+        projectScope: {
+          isCpsEnabled,
+          isCpsManagerReady,
+          projectRouting,
+          onOpenProjectScope,
+        },
       }),
       createProcessStep({
         cleanUpAndSetUp,
