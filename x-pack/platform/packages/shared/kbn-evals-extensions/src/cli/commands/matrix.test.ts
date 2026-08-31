@@ -42,7 +42,7 @@ describe('matrixScoreQuery', () => {
       ],
     });
 
-    expect(options.examplePrefixes).toEqual(['dup', 'other']);
+    expect(options.prefixesBySuite).toEqual({ s: ['dup', 'other'] });
   });
 
   // Suite histories are not co-located: the migrations suite publishes on a

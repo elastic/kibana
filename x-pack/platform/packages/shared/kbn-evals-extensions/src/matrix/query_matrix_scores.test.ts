@@ -230,7 +230,7 @@ describe('queryMatrixScores', () => {
       suiteIds: ['suite-a'],
       modelIds: ['m1'],
       branch: 'main',
-      examplePrefixes: ['entity-analytics'],
+      prefixesBySuite: { 'suite-a': ['entity-analytics'] },
       scoring: { excludeSelfJudged: true },
     });
 
@@ -435,7 +435,7 @@ describe('queryMatrixScores with examplePrefixes', () => {
     const result = await queryMatrixScores(client, log, {
       suiteIds: ['suite-a'],
       modelIds: ['m1'],
-      examplePrefixes: ['alert-analysis'],
+      prefixesBySuite: { 'suite-a': ['alert-analysis'] },
     });
 
     expect(getExperimentScores).toHaveBeenCalledWith('e1', expect.anything());
@@ -472,7 +472,7 @@ describe('queryMatrixScores with examplePrefixes', () => {
     const result = await queryMatrixScores(client, log, {
       suiteIds: ['suite-a'],
       modelIds: ['m1'],
-      examplePrefixes: ['alert-analysis'],
+      prefixesBySuite: { 'suite-a': ['alert-analysis'] },
     });
 
     expect(result[0].suites[0].datasets.map((d) => d.datasetId)).toEqual(['d1']);

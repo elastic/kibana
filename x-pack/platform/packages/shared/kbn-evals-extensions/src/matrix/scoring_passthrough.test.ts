@@ -64,7 +64,7 @@ describe('queryMatrixScores — scoring policy passthrough', () => {
     const [model] = await queryMatrixScores(clientFor(), log, {
       suiteIds: ['suite-a'],
       modelIds: ['model-a'],
-      examplePrefixes: ['alert-analysis'],
+      prefixesBySuite: { 'suite-a': ['alert-analysis'] },
       scoring,
     });
 
@@ -94,7 +94,7 @@ describe('queryMatrixScores — scoring policy passthrough', () => {
       const [model] = await queryMatrixScores(clientFor(supported), log, {
         suiteIds: ['suite-a'],
         modelIds: ['model-a'],
-        examplePrefixes: ['alert-analysis'],
+        prefixesBySuite: { 'suite-a': ['alert-analysis'] },
         scoring,
       });
       return model?.suites[0]?.datasets

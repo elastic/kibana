@@ -46,17 +46,40 @@ export const matrixScoreQuery = (
     modelIds,
     branch,
     lookbackDays,
-  }: Omit<QueryMatrixScoresOptions, 'examplePrefixes' | 'scoring' | 'branchBySuite'>
+  }: Omit<QueryMatrixScoresOptions, 'prefixesBySuite' | 'scoring' | 'branchBySuite'>
 ): QueryMatrixScoresOptions => ({
   suiteIds,
   modelIds,
   branch,
   branchBySuite: branchBySuiteFromColumns(config),
   lookbackDays,
-  examplePrefixes: [...new Set(config.columns.flatMap((column) => column.examplePrefixes ?? []))],
+  prefixesBySuite: prefixesBySuiteFromColumns(config),
   scoring: config.scoring,
 });
 
+/**
+ * Collapses per-column `examplePrefixes` into a suite-keyed map.
+ *
+ * A single global union made the per-prefix fetch run for every suite, so a
+ * suite whose column declares no prefixes still paid the extra query and
+ * then reported every score as an unmapped verdict. attack-discovery writes
+ * a constant example id and produced 63 such rejections per model while its
+ * column scored correctly from aggregate stats.
+ */
+export const prefixesBySuiteFromColumns = (config: MatrixConfig): Record<string, string[]> => {
+  const bySuite: Record<string, string[]> = {};
+
+  for (const column of config.columns) {
+    if (!column.examplePrefixes?.length) {
+      continue;
+    }
+    for (const suiteId of column.suites) {
+      bySuite[suiteId] = [...new Set([...(bySuite[suiteId] ?? []), ...column.examplePrefixes])];
+    }
+  }
+
+  return bySuite;
+};
 /**
  * Collapses per-column `branch` overrides into the suite-keyed map the query
  * layer consumes.

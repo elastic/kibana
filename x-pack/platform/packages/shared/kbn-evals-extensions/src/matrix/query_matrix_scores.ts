@@ -137,7 +137,7 @@ export interface QueryMatrixScoresOptions {
    * and bucketed into synthetic per-prefix datasets alongside the dataset-level
    * stats, so columns can slice a single dataset by example category.
    */
-  examplePrefixes?: string[];
+  prefixesBySuite?: Record<string, string[]>;
   /**
    * Judged-evaluator scoring policy. Forwarded to `scoresByPrefixToDatasets`
    * for the per-prefix datasets. Omitted means the historical behaviour:
@@ -329,7 +329,7 @@ export const queryMatrixScores = async (
     branch,
     branchBySuite,
     lookbackDays,
-    examplePrefixes = [],
+    prefixesBySuite = {},
     scoring,
   }: QueryMatrixScoresOptions
 ): Promise<AggregatedModelScores[]> => {
@@ -391,6 +391,7 @@ export const queryMatrixScores = async (
       const datasets = experimentStatsToDatasets(stats);
       // Per-prefix synthetic datasets: one extra stripped-scores fetch per
       // (suite, model). Cheap — unbounded fields are excluded server-side.
+      const examplePrefixes = prefixesBySuite[suiteId] ?? [];
       if (examplePrefixes.length > 0) {
         try {
           const scores = await evalsClient.getExperimentScores(latest.experiment_id, {
