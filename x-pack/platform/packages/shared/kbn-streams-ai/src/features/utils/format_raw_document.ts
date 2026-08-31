@@ -9,6 +9,11 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 import { isEmpty } from 'lodash';
 
+export interface InferenceDocument {
+  _id?: string;
+  fields: Record<string, unknown>;
+}
+
 export function formatRawDocument({
   hit,
   maxArrayItems = 3,
@@ -17,7 +22,7 @@ export function formatRawDocument({
   hit: SearchHit<Record<string, unknown>>;
   maxArrayItems?: number;
   shouldNotTruncate?: (key: string) => boolean;
-}): { _id?: string; fields: Record<string, unknown> } | undefined {
+}): InferenceDocument | undefined {
   const fields = {
     ...(hit.fields ?? {}),
     ...getFlattenedObject(hit._source ?? {}),

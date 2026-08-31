@@ -50,6 +50,10 @@ export {
   type SimilarFeatureHit,
 } from './src/features/identify_features';
 export {
+  formatRawDocument,
+  type InferenceDocument,
+} from './src/features/utils/format_raw_document';
+export {
   generateAllComputedFeatures,
   DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS,
   type ComputedFeatureGenerationResult,
