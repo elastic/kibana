@@ -8,39 +8,31 @@
  */
 
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
 import type { LayoutState } from './layout.types';
+
+const cssProp = css`
+  height: 100vh;
+  width: 100vw;
+  min-height: 100%;
+  min-width: 100%;
+
+  @media screen {
+    // do not restrict height when printing
+    overflow: hidden;
+  }
+
+  display: grid;
+
+  grid-template-areas:
+    'banner banner banner'
+    'header header header'
+    'navigation application sidebar'
+    'footer footer footer';
+`;
 
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = (layoutState: LayoutState) => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === 'DARK';
   const { navigationWidth, sidebarWidth, bannerHeight, headerHeight, footerHeight } = layoutState;
-
-  const cssProp = css`
-    height: 100vh;
-    width: 100vw;
-    min-height: 100%;
-    min-width: 100%;
-
-    @media screen {
-      // do not restrict height when printing
-      overflow: hidden;
-    }
-
-    display: grid;
-
-    grid-template-areas:
-      'banner banner banner'
-      'header header header'
-      'navigation application sidebar'
-      'footer footer footer';
-
-    ${isDarkMode &&
-    css`
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
-    `}
-  `;
 
   const style = {
     gridTemplateColumns: `

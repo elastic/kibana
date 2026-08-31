@@ -12,7 +12,6 @@ import { createDefaultSpace } from './create_default_space';
 
 interface MockServerSettings {
   defaultExists?: boolean;
-  existingSolution?: string;
   simulateGetErrorCondition?: boolean;
   simulateCreateErrorCondition?: boolean;
   simulateConflict?: boolean;
@@ -21,7 +20,6 @@ interface MockServerSettings {
 const createMockDeps = (settings: MockServerSettings = {}) => {
   const {
     defaultExists = false,
-    existingSolution,
     simulateGetErrorCondition = false,
     simulateConflict = false,
     simulateCreateErrorCondition = false,
@@ -33,17 +31,10 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
     }
 
     if (defaultExists) {
-      return {
-        id,
-        type,
-        references: [],
-        attributes: { ...(existingSolution ? { solution: existingSolution } : {}) },
-      };
+      return;
     }
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   });
-
-  const mockUpdate = jest.fn().mockResolvedValue(undefined);
 
   const mockCreate = jest.fn().mockImplementation(() => {
     if (simulateConflict) {
@@ -65,7 +56,6 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
           return {
             get: mockGet,
             create: mockCreate,
-            update: mockUpdate,
           };
         }),
       }),
@@ -133,49 +123,6 @@ test(`it does not attempt to recreate the default space if it already exists`, a
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(0);
-});
-
-test(`in dev, it backfills the solution of an existing default space that has no solution`, async () => {
-  const deps = createMockDeps({ defaultExists: true });
-
-  await createDefaultSpace({ ...deps, solution: 'oblt', dev: true });
-
-  const repository = (await deps.getSavedObjects()).createInternalRepository();
-
-  expect(repository.create).toHaveBeenCalledTimes(0);
-  expect(repository.update).toHaveBeenCalledTimes(1);
-  expect(repository.update).toHaveBeenCalledWith('space', 'default', { solution: 'oblt' });
-});
-
-test(`in dev, it backfills the solution of an existing default space set to classic`, async () => {
-  const deps = createMockDeps({ defaultExists: true, existingSolution: 'classic' });
-
-  await createDefaultSpace({ ...deps, solution: 'oblt', dev: true });
-
-  const repository = (await deps.getSavedObjects()).createInternalRepository();
-
-  expect(repository.update).toHaveBeenCalledTimes(1);
-  expect(repository.update).toHaveBeenCalledWith('space', 'default', { solution: 'oblt' });
-});
-
-test(`in dev, it does not override an existing non-classic solution`, async () => {
-  const deps = createMockDeps({ defaultExists: true, existingSolution: 'security' });
-
-  await createDefaultSpace({ ...deps, solution: 'oblt', dev: true });
-
-  const repository = (await deps.getSavedObjects()).createInternalRepository();
-
-  expect(repository.update).toHaveBeenCalledTimes(0);
-});
-
-test(`outside of dev, it never updates an existing default space's solution`, async () => {
-  const deps = createMockDeps({ defaultExists: true });
-
-  await createDefaultSpace({ ...deps, solution: 'oblt' });
-
-  const repository = (await deps.getSavedObjects()).createInternalRepository();
-
-  expect(repository.update).toHaveBeenCalledTimes(0);
 });
 
 test(`it throws all other errors from the saved objects client when checking for the default space`, async () => {

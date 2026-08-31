@@ -56,48 +56,20 @@ export const LoginPage = ({ config }: { config: ConfigType }) => {
   });
 
   const formikRef = useRef(formik);
-  const hasAutoLoggedInRef = useRef(false);
 
   useEffect(() => {
     formikRef.current = formik;
   }, [formik]);
 
   useEffect(() => {
-    let cancelled = false;
-
     const fetchData = async () => {
       const response = await services.http.get<{ roles: string[] }>('/mock_idp/supported_roles');
-      if (cancelled) {
-        return;
-      }
       setRoles(response.roles);
-
-      // Skip the manual "Test User" selection and sign straight in as an admin.
-      // Fall back to the first supported role when an explicit `admin` role isn't
-      // available (e.g. on some serverless project types).
-      const defaultRole = response.roles.includes('admin') ? 'admin' : response.roles[0];
-      formikRef.current.setFieldValue('role', defaultRole);
-
-      if (!defaultRole || hasAutoLoggedInRef.current) {
-        return;
-      }
-      hasAutoLoggedInRef.current = true;
-
-      await switchCurrentUser({
-        username: config.uiam?.enabled ? '12345' : sanitizeUsername('admin'),
-        full_name: 'Admin',
-        email: sanitizeEmail('admin'),
-        roles: [defaultRole],
-        url: window.location.href,
-      });
+      formikRef.current.setFieldValue('role', response.roles[0]);
     };
 
     fetchData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [services, switchCurrentUser, config.uiam?.enabled]);
+  }, [services]);
 
   return (
     <FormikProvider value={formik}>

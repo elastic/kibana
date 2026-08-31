@@ -100,9 +100,7 @@ export class CloudLinksPlugin
   public start(core: CoreStart, plugins: CloudLinksDepsStart) {
     const { cloud, security, share } = plugins;
 
-    const isAnonymous = core.http.anonymousPaths.isAnonymous(window.location.pathname);
-
-    if (cloud?.isCloudEnabled && !isAnonymous) {
+    if (cloud?.isCloudEnabled && !core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
       if (security) {
         maybeAddCloudLinks({
           core,

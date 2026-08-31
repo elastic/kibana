@@ -15,37 +15,19 @@ interface Deps {
   getSavedObjects: () => Promise<Pick<SavedObjectsServiceStart, 'createInternalRepository'>>;
   logger: Logger;
   solution?: SolutionId;
-  /**
-   * When running in development mode, align the (existing) default space's
-   * solution view with the configured default solution. This makes a freshly
-   * loaded dev environment land on the intended solution (e.g. Observability)
-   * even when the default space was created by an earlier run. Deliberate,
-   * non-classic solution choices are left untouched.
-   */
-  dev?: boolean;
 }
 
-export async function createDefaultSpace({ getSavedObjects, logger, solution, dev }: Deps) {
+export async function createDefaultSpace({ getSavedObjects, logger, solution }: Deps) {
   const { createInternalRepository } = await getSavedObjects();
 
   const savedObjectsRepository = createInternalRepository(['space']);
 
   logger.debug('Checking for existing default space');
 
-  const existingDefaultSpace = await getDefaultSpace(savedObjectsRepository);
+  const defaultSpaceExists = await doesDefaultSpaceExist(savedObjectsRepository);
 
-  if (existingDefaultSpace) {
+  if (defaultSpaceExists) {
     logger.debug('Default space already exists');
-
-    if (dev && solution) {
-      const currentSolution = existingDefaultSpace.attributes?.solution;
-      const canBackfill = !currentSolution || currentSolution === 'classic';
-      if (canBackfill && currentSolution !== solution) {
-        logger.debug(`Defaulting existing default space solution view to "${solution}" (dev)`);
-        await savedObjectsRepository.update('space', DEFAULT_SPACE_ID, { solution });
-      }
-    }
-
     return;
   }
 
@@ -84,12 +66,13 @@ export async function createDefaultSpace({ getSavedObjects, logger, solution, de
   logger.debug('Default space created');
 }
 
-async function getDefaultSpace(savedObjectsRepository: Pick<SavedObjectsRepository, 'get'>) {
+async function doesDefaultSpaceExist(savedObjectsRepository: Pick<SavedObjectsRepository, 'get'>) {
   try {
-    return await savedObjectsRepository.get<{ solution?: SolutionId }>('space', DEFAULT_SPACE_ID);
+    await savedObjectsRepository.get('space', DEFAULT_SPACE_ID);
+    return true;
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-      return null;
+      return false;
     }
     throw e;
   }

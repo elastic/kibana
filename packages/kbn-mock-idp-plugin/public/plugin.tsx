@@ -19,6 +19,7 @@ import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import type { ConfigType } from './config';
+import { RoleSwitcher } from './role_switcher';
 
 export interface PluginSetupDependencies {
   cloud?: CloudSetup;
@@ -35,6 +36,8 @@ export const plugin: PluginInitializer<
   PluginSetupDependencies,
   PluginStartDependencies
 > = (initializerContext: PluginInitializerContext<ConfigType>) => {
+  let unregisterRoleSwitcher: (() => void) | undefined;
+
   return {
     setup(coreSetup, plugins) {
       // Register Mock IDP login page
@@ -67,9 +70,22 @@ export const plugin: PluginInitializer<
       });
     },
     start(coreStart, plugins) {
-      // The role switcher header control is intentionally not registered: this environment always
-      // signs in as admin, so switching roles from the header isn't needed.
+      if (!plugins.developerToolbar) {
+        return;
+      }
+
+      unregisterRoleSwitcher = plugins.developerToolbar.registerItem({
+        id: 'Role Switcher',
+        priority: 1,
+        children: (
+          <KibanaContextProvider services={coreStart}>
+            <RoleSwitcher />
+          </KibanaContextProvider>
+        ),
+      });
     },
-    stop() {},
+    stop() {
+      unregisterRoleSwitcher?.();
+    },
   };
 };
