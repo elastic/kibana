@@ -13,7 +13,6 @@ import {
 
 export interface MetricsHeaderMenuVisibility {
   showAnomalyDetection: boolean;
-  hideAnomalyJobTypeAndGroup: boolean;
   showHostsOnboarding: boolean;
 }
 
@@ -21,14 +20,11 @@ export interface MetricsHeaderMenuVisibility {
  * Path-gated Metrics header actions shared by the Chrome portal and later AppHeader menus.
  */
 export function getMetricsHeaderMenuVisibility(pathname: string): MetricsHeaderMenuVisibility {
-  const showAnomalyDetection =
-    isMetricsInventoryPath(pathname) ||
-    isMetricsHostsPath(pathname) ||
-    isMetricsHostDetailPath(pathname);
-
   return {
-    showAnomalyDetection,
-    hideAnomalyJobTypeAndGroup: !isMetricsInventoryPath(pathname) && showAnomalyDetection,
+    showAnomalyDetection:
+      isMetricsInventoryPath(pathname) ||
+      isMetricsHostsPath(pathname) ||
+      isMetricsHostDetailPath(pathname),
     showHostsOnboarding: isMetricsHostsPath(pathname) || isMetricsHostDetailPath(pathname),
   };
 }
