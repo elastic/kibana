@@ -55,9 +55,6 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
       onDocumentsChange={(json: string) => onChange(isEmpty(json) ? null : json)}
       isOptionalField={isOptionalField}
       readOnly={readOnly}
-      // Additional fields can contain mustache templates, which are not valid JSON
-      // until they are rendered at execution time
-      showValidationDecorations={false}
     />
   );
 };

@@ -94,18 +94,14 @@ describe('JsonEditorWithMessageVariables', () => {
     );
   });
 
-  test('does not render the validation decorations when showValidationDecorations is false', () => {
+  test('does not render the validation decorations when the value contains a mustache template', () => {
     render(
-      <JsonEditorWithMessageVariables
-        {...props}
-        inputTargetValue={'{"foo": "test"}'}
-        showValidationDecorations={false}
-      />
+      <JsonEditorWithMessageVariables {...props} inputTargetValue={'{"foo": {{context.value}}}'} />
     );
 
-    expect(mockCodeEditor).not.toHaveBeenCalledWith(
+    expect(mockCodeEditor).toHaveBeenCalledWith(
       expect.objectContaining({
-        options: expect.objectContaining({ renderValidationDecorations: 'on' }),
+        options: expect.objectContaining({ renderValidationDecorations: 'off' }),
       })
     );
   });
@@ -113,9 +109,9 @@ describe('JsonEditorWithMessageVariables', () => {
   test('does not render the validation decorations when the value is empty', () => {
     render(<JsonEditorWithMessageVariables {...props} />);
 
-    expect(mockCodeEditor).not.toHaveBeenCalledWith(
+    expect(mockCodeEditor).toHaveBeenCalledWith(
       expect.objectContaining({
-        options: expect.objectContaining({ renderValidationDecorations: 'on' }),
+        options: expect.objectContaining({ renderValidationDecorations: 'off' }),
       })
     );
   });

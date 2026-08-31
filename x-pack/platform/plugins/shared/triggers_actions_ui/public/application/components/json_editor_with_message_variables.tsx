@@ -16,6 +16,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 
 import type { ActionVariable } from '@kbn/alerting-plugin/common';
+import { hasMustacheTemplate } from '@kbn/actions-plugin/common';
 import { AddMessageVariablesOptional } from './add_message_variables_optional';
 import { templateActionVariable } from '../lib';
 
@@ -49,11 +50,6 @@ interface Props {
   euiCodeEditorProps?: { [key: string]: any };
   isOptionalField?: boolean;
   readOnly?: boolean;
-  /**
-   * Set to false when the content is not strictly JSON, i.e. when it can contain
-   * mustache templates, to avoid showing misleading syntax errors.
-   */
-  showValidationDecorations?: boolean;
 }
 
 const { useXJsonMode } = XJson;
@@ -79,7 +75,6 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   euiCodeEditorProps = {},
   isOptionalField = false,
   readOnly = false,
-  showValidationDecorations = true,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
@@ -193,8 +188,8 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
         <CodeEditor
           languageId={XJsonLang.ID}
           options={{
-            // Disable the error underline when empty or when the content can contain templates
-            renderValidationDecorations: xJson && showValidationDecorations ? 'on' : 'off',
+            // Disable the error underline when empty or when the content contains templates
+            renderValidationDecorations: xJson && !hasMustacheTemplate(xJson) ? 'on' : 'off',
             lineNumbers: 'on',
             fontSize: 14,
             minimap: {
