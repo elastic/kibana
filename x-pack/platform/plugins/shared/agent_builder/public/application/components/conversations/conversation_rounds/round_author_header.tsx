@@ -176,15 +176,6 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   const resolvedAuthorProfile = hasUserProfileAuthor ? author : resolvedAuthorProfiles[0];
   const name = getRoundAuthorHeaderName({ agent, author, resolvedAuthorProfile });
 
-  const showAuthorName = Boolean(name);
-  const showAgentBadge = isAgent;
-  const showOrigin = Boolean(origin);
-  const showTime = Boolean(time);
-
-  const hasContentBeforeAgentBadge = showAuthorName;
-  const hasContentBeforeOrigin = hasContentBeforeAgentBadge || showAgentBadge;
-  const hasContentBeforeTime = hasContentBeforeOrigin || showOrigin;
-
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -211,22 +202,21 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
               flex-wrap: wrap;
             `}
           >
-            {showAuthorName && <RoundAuthorName name={name} />}
-            {showAgentBadge && (
+            {name && <RoundAuthorName name={name} />}
+            {isAgent && (
               <>
-                {hasContentBeforeAgentBadge && <RoundAuthorSeparator />}
                 <RoundAgentBadge />
               </>
             )}
-            {showOrigin && origin && (
+            {origin && (
               <>
-                {hasContentBeforeOrigin && <RoundAuthorSeparator />}
+                <RoundAuthorSeparator />
                 <RoundOrigin origin={origin} />
               </>
             )}
-            {showTime && (
+            {time && (
               <>
-                {hasContentBeforeTime && <RoundAuthorSeparator />}
+                <RoundAuthorSeparator />
                 <RoundTime time={time} />
               </>
             )}
