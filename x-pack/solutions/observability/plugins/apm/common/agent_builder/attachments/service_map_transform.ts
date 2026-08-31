@@ -21,6 +21,7 @@ import type {
   ExternalConnectionNode,
   ServiceConnectionNode,
   ServiceMapEdge,
+  ServiceMapEdgeData,
   ServiceMapNode,
 } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/apm-types';
@@ -33,8 +34,9 @@ import {
   SPAN_TYPE,
 } from '../../es_fields/apm';
 import { DEFAULT_EDGE_STYLE } from '../../service_map/constants';
+import { getConnectionNodeLabel } from '../../service_map/get_service_map_nodes';
 import { groupResourceNodes } from '../../service_map/group_resource_nodes';
-import { createEdgeMarker } from '../../service_map/utils';
+import { createEdgeMarker, getEdgeId, getExitSpanNodeId } from '../../service_map/utils';
 import type { ServiceMapAttachmentData } from './service_map';
 
 type TopologyConnection = ServiceMapAttachmentData['connections'][number];
@@ -46,19 +48,9 @@ function isTopologyServiceNode(node: TopologyNode): node is TopologyServiceNode 
   return SERVICE_NAME in node;
 }
 
-/**
- * Node id conventions match the APM service map: services are keyed by
- * `service.name`, external dependencies by `>` + destination resource.
- */
-export function getTopologyNodeId(node: TopologyNode): string {
-  return isTopologyServiceNode(node)
-    ? node[SERVICE_NAME]
-    : `>${node[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
-}
-
 function toServiceConnectionNode(node: TopologyServiceNode): ServiceConnectionNode {
   return {
-    id: getTopologyNodeId(node),
+    id: node[SERVICE_NAME],
     [SERVICE_NAME]: node[SERVICE_NAME],
     // Required by `ServicesResponse`; empty values degrade gracefully in the
     // popover/flyout the same way an unknown agent does on the full map.
@@ -68,12 +60,14 @@ function toServiceConnectionNode(node: TopologyServiceNode): ServiceConnectionNo
 }
 
 function toExternalConnectionNode(node: TopologyExternalNode): ExternalConnectionNode {
-  return {
-    id: getTopologyNodeId(node),
+  const connectionNode: ExternalConnectionNode = {
+    id: '',
     [SPAN_DESTINATION_SERVICE_RESOURCE]: node[SPAN_DESTINATION_SERVICE_RESOURCE],
     [SPAN_TYPE]: node[SPAN_TYPE] ?? '',
     [SPAN_SUBTYPE]: node[SPAN_SUBTYPE] ?? '',
   };
+  connectionNode.id = getExitSpanNodeId(connectionNode);
+  return connectionNode;
 }
 
 function toConnectionNode(node: TopologyNode): ConnectionNode {
@@ -82,11 +76,21 @@ function toConnectionNode(node: TopologyNode): ConnectionNode {
     : toExternalConnectionNode(node);
 }
 
+/**
+ * Node id conventions match the APM service map: services are keyed by
+ * `service.name`, external dependencies by `>` + destination resource
+ * (see `getExitSpanNodeId`).
+ */
+export function getTopologyNodeId(node: TopologyNode): string {
+  return toConnectionNode(node).id;
+}
+
 function toReactFlowNode(
+  connectionNode: ConnectionNode,
   node: TopologyNode,
   nodeMetadata: ServiceMapAttachmentData['nodeMetadata']
 ): ServiceMapNode {
-  const id = getTopologyNodeId(node);
+  const { id } = connectionNode;
 
   if (isTopologyServiceNode(node)) {
     const metadata = nodeMetadata?.[node[SERVICE_NAME]];
@@ -98,6 +102,7 @@ function toReactFlowNode(
         id,
         label: node[SERVICE_NAME],
         isService: true,
+        // Unknown agent names degrade to the default icon in ServiceNode.
         agentName: node[AGENT_NAME] as AgentName | undefined,
         alertsCount: metadata?.alertsCount,
         sloStatus: metadata?.sloStatus,
@@ -126,57 +131,82 @@ export interface TopologyServiceMap {
 }
 
 /**
+ * Reads back the tool metrics stashed on `edge.data` by
+ * {@link transformTopologyToServiceMap}. `ServiceMapEdgeData` is an open
+ * record, so this is the single place the stored shape is asserted.
+ */
+export function getEdgeMetrics(edge: ServiceMapEdge): TopologyConnection['metrics'] {
+  return edge.data?.metrics as TopologyConnection['metrics'];
+}
+
+type EdgeWithData = ServiceMapEdge & { data: ServiceMapEdgeData };
+
+/**
  * Builds service map nodes/edges from attachment connections, merging
  * per-service badge metadata, collapsing A→B/B→A pairs into a single
  * bidirectional edge, and grouping external resource nodes the same way the
- * full service map does.
+ * full service map does. Edge `data` mirrors `transformToReactFlow` output
+ * (`sourceData`/`targetData`/`resources`/labels) so the edge popover can
+ * fetch dependency stats (`GET /internal/apm/service-map/dependency`).
  */
 export function transformTopologyToServiceMap({
   connections,
   nodeMetadata,
 }: Pick<ServiceMapAttachmentData, 'connections' | 'nodeMetadata'>): TopologyServiceMap {
   const nodesById = new Map<string, ServiceMapNode>();
-  const edgesById = new Map<string, ServiceMapEdge>();
+  const edgesById = new Map<string, EdgeWithData>();
 
   for (const connection of connections) {
-    for (const topologyNode of [connection.source, connection.target]) {
-      const id = getTopologyNodeId(topologyNode);
-      if (!nodesById.has(id)) {
-        nodesById.set(id, toReactFlowNode(topologyNode, nodeMetadata));
+    const sourceData = toConnectionNode(connection.source);
+    const targetData = toConnectionNode(connection.target);
+
+    for (const [connectionNode, topologyNode] of [
+      [sourceData, connection.source],
+      [targetData, connection.target],
+    ] as const) {
+      if (!nodesById.has(connectionNode.id)) {
+        nodesById.set(
+          connectionNode.id,
+          toReactFlowNode(connectionNode, topologyNode, nodeMetadata)
+        );
       }
     }
 
-    const sourceId = getTopologyNodeId(connection.source);
-    const targetId = getTopologyNodeId(connection.target);
-    if (sourceId === targetId) {
+    if (sourceData.id === targetData.id) {
       continue;
     }
 
-    const edgeId = `${sourceId}~${targetId}`;
+    const edgeId = getEdgeId(sourceData.id, targetData.id);
     if (edgesById.has(edgeId)) {
       continue;
     }
 
-    const inverse = edgesById.get(`${targetId}~${sourceId}`);
+    const inverse = edgesById.get(getEdgeId(targetData.id, sourceData.id));
     if (inverse) {
       inverse.markerStart = createEdgeMarker();
-      inverse.data!.isBidirectional = true;
+      inverse.data.isBidirectional = true;
       continue;
     }
 
     edgesById.set(edgeId, {
       id: edgeId,
-      source: sourceId,
-      target: targetId,
+      source: sourceData.id,
+      target: targetData.id,
       type: 'default' as const,
       style: DEFAULT_EDGE_STYLE,
       markerEnd: createEdgeMarker(),
       data: {
         isBidirectional: false,
-        // Populated so the edge popover can fetch dependency stats
-        // (`GET /internal/apm/service-map/dependency`).
-        sourceData: toConnectionNode(connection.source),
-        targetData: toConnectionNode(connection.target),
+        sourceData,
+        targetData,
+        sourceLabel: getConnectionNodeLabel(sourceData),
+        targetLabel: getConnectionNodeLabel(targetData),
+        // The edge popover only fetches dependency stats for exit-span
+        // targets (mirrors `mapEdges` in the full service map).
+        resources:
+          SPAN_DESTINATION_SERVICE_RESOURCE in targetData
+            ? [targetData[SPAN_DESTINATION_SERVICE_RESOURCE]]
+            : [],
         // Not rendered by the edge component today; kept for a future
         // edge-label follow-up so the tool's RED metrics aren't lost.
         metrics: connection.metrics,
