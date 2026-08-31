@@ -221,9 +221,44 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('auto-clears metadata.builder_type when query is changed without explicit builder_type', () => {
+    it('rejects query change on a builder rule without explicit builder_type clear', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+      };
+
+      expect(() =>
+        buildUpdateRuleAttributes(existing, updateData, {
+          updatedBy: 'user-2',
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        })
+      ).toThrow(/Cannot update the query on a builder rule/);
+    });
+
+    it('clears builder_type when query changes and explicit builder_type: null is sent', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        metadata: { builder_type: null },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBeUndefined();
+    });
+
+    it('allows query change on a non-builder rule without explicit builder_type', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule' },
       });
       const updateData: UpdateRuleData = {
         query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
@@ -236,6 +271,24 @@ describe('utils', () => {
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
+    });
+
+    it('allows strategy change on a builder rule without clearing builder_type', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        recovery_strategy: 'no_breach',
+      });
+      const updateData: UpdateRuleData = {
+        recovery_strategy: 'none',
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
     });
 
     it('keeps metadata.builder_type when query is changed with explicit builder_type', () => {
