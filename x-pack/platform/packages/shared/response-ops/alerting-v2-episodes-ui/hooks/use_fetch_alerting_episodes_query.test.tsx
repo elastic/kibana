@@ -10,20 +10,21 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
-import { fetchV1AlertsAsEpisodes } from '../apis/classic_alerts_api';
 import { useFetchAlertingEpisodesQuery } from './use_fetch_alerting_episodes_query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AlertEpisode } from '../queries/episodes_query';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
+import type { EpisodeDataSource } from '../types/episode_data_source';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 
 jest.mock('../apis/fetch_alerting_episodes');
-jest.mock('../apis/classic_alerts_api');
 
 const fetchAlertingEpisodesMock = jest.mocked(fetchAlertingEpisodes);
-const fetchV1AlertsAsEpisodesMock = jest.mocked(fetchV1AlertsAsEpisodes);
-fetchV1AlertsAsEpisodesMock.mockResolvedValue([]);
+
+const sourceWithEpisodes = (fetchEpisodes: EpisodeDataSource['fetchEpisodes']) =>
+  createTestEpisodeSource({ fetchEpisodes });
 
 jest.mock('./use_alerting_episodes_data_view');
 const mockDataView = {
@@ -70,7 +71,6 @@ const wrapper = createQueryClientWrapper(queryClient);
 describe('useFetchAlertingEpisodesQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    fetchV1AlertsAsEpisodesMock.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -204,16 +204,16 @@ describe('useFetchAlertingEpisodesQuery', () => {
     expect(result.current.data).toBe(firstData);
   });
 
-  it('merges classic (v1) episodes with v2 episodes sorted by timestamp', async () => {
+  it('merges source episodes with v2 episodes sorted by timestamp', async () => {
     const pageSize = 10;
 
-    const v1Episodes: AlertEpisode[] = [
+    const sourceEpisodes: AlertEpisode[] = [
       {
         '@timestamp': '2024-03-01T11:00:00Z',
-        'episode.id': 'v1-episode-1',
+        'episode.id': 'source-episode-1',
         'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-        'rule.id': 'v1-rule-1',
-        group_hash: 'v1-gh-1',
+        'rule.id': 'source-rule-1',
+        group_hash: 'source-gh-1',
         first_timestamp: '2024-03-01T11:00:00Z',
         last_timestamp: '2024-03-01T11:00:00Z',
         duration: 0,
@@ -223,13 +223,15 @@ describe('useFetchAlertingEpisodesQuery', () => {
     ];
 
     fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
-    fetchV1AlertsAsEpisodesMock.mockResolvedValue(v1Episodes);
 
     const { result } = renderHook(
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
           services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+          additionalEpisodesDataSource: sourceWithEpisodes(
+            jest.fn().mockResolvedValue(sourceEpisodes)
+          ),
         }),
       { wrapper }
     );
@@ -237,21 +239,24 @@ describe('useFetchAlertingEpisodesQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toHaveLength(3);
-    expect(result.current.data![0]['episode.id']).toBe('v1-episode-1');
+    expect(result.current.data![0]['episode.id']).toBe('source-episode-1');
     expect(result.current.data![0].supports_actions).toBe(false);
+    expect(result.current.sourceErrors).toEqual([]);
   });
 
-  it('returns v2-only episodes when v1 fetch fails gracefully', async () => {
+  it('returns v2-only episodes and reports the error when a source fetch fails', async () => {
     const pageSize = 10;
 
     fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
-    fetchV1AlertsAsEpisodesMock.mockRejectedValue(new Error('v1 failure'));
 
     const { result } = renderHook(
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
           services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+          additionalEpisodesDataSource: sourceWithEpisodes(
+            jest.fn().mockRejectedValue(new Error('source failure'))
+          ),
         }),
       { wrapper }
     );
@@ -262,5 +267,8 @@ describe('useFetchAlertingEpisodesQuery', () => {
     expect(result.current.data?.map((ep) => ep['episode.id'])).toEqual(
       mockEpisodesData.map((ep) => ep['episode.id'])
     );
+    expect(result.current.sourceErrors).toEqual([
+      { sourceId: 'test-source', error: new Error('source failure') },
+    ]);
   });
 });

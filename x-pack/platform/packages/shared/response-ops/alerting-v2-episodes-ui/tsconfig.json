@@ -55,6 +55,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/rule-registry-plugin"
+    "@kbn/rule-registry-plugin",
+    "@kbn/unified-histogram"
   ]
 }

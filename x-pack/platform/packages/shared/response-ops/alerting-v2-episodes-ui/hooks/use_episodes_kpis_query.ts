@@ -16,7 +16,9 @@ import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
 import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchV1AlertsKpis } from '../apis/classic_alerts_api';
+import type { EpisodeDataSource } from '../types/episode_data_source';
+import { fetchFromSources } from '../utils/fetch_from_sources';
+import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
 
 export interface EpisodesKpisData {
@@ -46,6 +48,7 @@ export interface UseEpisodesKpisQueryOptions {
   };
   filterState?: EpisodesFilterState;
   timeRange?: TimeRange;
+  additionalEpisodesDataSource?: EpisodeDataSource;
 }
 
 export interface UseEpisodesKpisQueryResult {
@@ -58,6 +61,7 @@ export const useEpisodesKpisQuery = ({
   services,
   filterState,
   timeRange,
+  additionalEpisodesDataSource,
 }: UseEpisodesKpisQueryOptions): UseEpisodesKpisQueryResult => {
   const spaceId = useSpaceId(services.spaces);
 
@@ -75,9 +79,15 @@ export const useEpisodesKpisQuery = ({
     isLoading: isKpisLoading,
     error,
   } = useQuery<EpisodesKpisRow[], Error, EpisodesKpisData | undefined>({
-    queryKey: queryKeys.kpis(spaceId, filterState, timeRange, currentUserUid),
+    queryKey: queryKeys.kpis(
+      spaceId,
+      filterState,
+      timeRange,
+      currentUserUid,
+      additionalEpisodesDataSource?.id
+    ),
     queryFn: async ({ signal }) => {
-      const [v2Rows, v1] = await Promise.all([
+      const [v2Rows, sourceKpis] = await Promise.all([
         executeEsqlQuery<EpisodesKpisRow>({
           expressions: services.expressions,
           query: buildEpisodesKpisQuery(spaceId, currentUserUid, filterState),
@@ -88,32 +98,15 @@ export const useEpisodesKpisQuery = ({
           },
           abortSignal: signal,
         }),
-        fetchV1AlertsKpis({
-          services,
-          filterState,
-          timeRange,
-          abortSignal: signal,
-        }).catch(() => undefined),
+        fetchFromSources(
+          additionalEpisodesDataSource ? [additionalEpisodesDataSource] : [],
+          (source) => source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal })
+        ),
       ]);
 
-      const v2 = v2Rows[0];
+      const merged = mergeKpis([v2Rows[0], ...sourceKpis.results]);
 
-      if (!v2 && !v1) {
-        return [];
-      }
-
-      const v1AlertsCount = v1?.alerts_count ?? 0;
-
-      const merged: EpisodesKpisRow = {
-        alerts_count: (v2?.alerts_count ?? 0) + v1AlertsCount,
-        firing_rules: (v2?.firing_rules ?? 0) + (v1?.firing_rules ?? 0),
-        assigned_to_me: v2?.assigned_to_me ?? 0,
-        unassigned: (v2?.unassigned ?? 0) + v1AlertsCount,
-        acknowledged: (v2?.acknowledged ?? 0) + (v1?.acknowledged ?? 0),
-        snoozed: (v2?.snoozed ?? 0) + (v1?.snoozed ?? 0),
-      };
-
-      return [merged];
+      return merged ? [merged] : [];
     },
     select: (rows) => {
       const row = rows[0];

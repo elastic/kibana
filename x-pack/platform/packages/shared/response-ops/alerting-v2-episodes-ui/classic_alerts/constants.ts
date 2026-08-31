@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import {
-  OBSERVABILITY_RULE_TYPE_IDS,
-  STACK_RULE_TYPE_IDS,
-  ALERT_MUTED,
-  ALERT_SNOOZED,
-} from '@kbn/rule-data-utils';
-
-export const CLASSIC_ALERT_RULE_TYPE_IDS = Array.from(
-  new Set([...OBSERVABILITY_RULE_TYPE_IDS, ...STACK_RULE_TYPE_IDS])
-);
+import { ALERT_MUTED, ALERT_SNOOZED } from '@kbn/rule-data-utils';
 
 export { ALERT_MUTED as CLASSIC_ALERT_MUTED_FIELD, ALERT_SNOOZED as CLASSIC_ALERT_SNOOZED_FIELD };
 

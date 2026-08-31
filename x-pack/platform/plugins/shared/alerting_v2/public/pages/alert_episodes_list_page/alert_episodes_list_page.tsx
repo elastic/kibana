@@ -50,6 +50,7 @@ import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hoo
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
+import { useFetchEpisodeTagOptions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -59,26 +60,27 @@ import {
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
-import { experimentalBadge } from '../../components/experimental_badge';
-import { paths } from '../../constants';
-import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
-import { V1AlertDetailsFlyout } from './components/v1_alert_details_flyout';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
+import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
+import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
+import { experimentalBadge } from '../../components/experimental_badge';
+import { paths } from '../../constants';
+import { CLASSIC_EPISODES_DATA_SOURCE } from '../../episode_sources';
+import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import * as i18n from './translations';
+import { V1AlertDetailsFlyout } from './components/v1_alert_details_flyout';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
   EPISODE_ACTIONS_PRIVILEGE,
 } from '../../utils/filter_episode_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
-import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
-import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 
 const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {
@@ -142,7 +144,7 @@ export const AlertEpisodesListPage = () => {
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
     : EPISODE_ACTIONS_PRIVILEGE.read;
-  const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
+  const invalidateEpisodeQueries = useInvalidateEpisodeQueries(CLASSIC_EPISODES_DATA_SOURCE);
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
 
@@ -189,9 +191,21 @@ export const AlertEpisodesListPage = () => {
     filterState,
     sortState,
     timeRange,
+    additionalEpisodesDataSource: CLASSIC_EPISODES_DATA_SOURCE,
   });
 
-  const { data: kpis } = useEpisodesKpisQuery({ services, filterState, timeRange });
+  const { data: kpis } = useEpisodesKpisQuery({
+    services,
+    filterState,
+    timeRange,
+    additionalEpisodesDataSource: CLASSIC_EPISODES_DATA_SOURCE,
+  });
+
+  const { data: tagOptions = [], isLoading: isLoadingTagOptions } = useFetchEpisodeTagOptions({
+    services,
+    timeRange,
+    additionalEpisodesDataSource: CLASSIC_EPISODES_DATA_SOURCE,
+  });
 
   const alertEpisodesCount = kpis?.alertsCount ?? 0;
 
@@ -230,6 +244,7 @@ export const AlertEpisodesListPage = () => {
   const { rulesCache, loading: isLoadingRules } = useAlertingRulesCache({
     ruleIds,
     services,
+    additionalEpisodesDataSource: CLASSIC_EPISODES_DATA_SOURCE,
   });
 
   const sourceDataViewsByRule = useAlertingRuleSourceDataViews({
@@ -470,6 +485,8 @@ export const AlertEpisodesListPage = () => {
             timeRange={timeRange}
             onTimeChange={handleTimeChange}
             ruleOptions={ruleOptions}
+            tagOptions={tagOptions}
+            isTagOptionsLoading={isLoadingTagOptions}
             assigneeUids={assigneeUids}
             onRefresh={invalidateEpisodeQueries}
             isLoading={isLoading}
@@ -477,7 +494,12 @@ export const AlertEpisodesListPage = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
+          <EpisodesKpis
+            services={services}
+            filterState={filterState}
+            timeRange={timeRange}
+            additionalEpisodesDataSource={CLASSIC_EPISODES_DATA_SOURCE}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EpisodesHistogram
@@ -488,6 +510,7 @@ export const AlertEpisodesListPage = () => {
             onTimeRangeChange={handleTimeChange}
             breakdownField={histogramBreakdownField}
             onBreakdownFieldChange={setHistogramBreakdownField}
+            additionalEpisodesDataSource={CLASSIC_EPISODES_DATA_SOURCE}
           />
         </EuiFlexItem>
         <EuiFlexItem

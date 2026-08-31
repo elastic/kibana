@@ -13,20 +13,21 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useEpisodesHistogramQuery } from './use_episodes_histogram_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchV1AlertsHistogram } from '../apis/classic_alerts_api';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
+import type { EpisodeSourceHistogram } from '../types/episode_data_source';
 import { useSpaceId } from './use_space_id';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 
 jest.mock('../utils/execute_esql_query');
-jest.mock('../apis/classic_alerts_api');
 jest.mock('./use_space_id');
 
 const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
-const mockFetchV1AlertsHistogram = jest.mocked(fetchV1AlertsHistogram);
 const mockUseSpaceId = jest.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
-mockFetchV1AlertsHistogram.mockResolvedValue([] as HistogramEpisodeRow[]);
+
+const sourceWithHistogram = (fetchHistogram: () => Promise<EpisodeSourceHistogram>) =>
+  createTestEpisodeSource({ fetchHistogram });
 
 const mockServices = {
   expressions: {} as ExpressionsStart,
@@ -50,7 +51,6 @@ const wrapper = () => {
 afterEach(() => {
   jest.clearAllMocks();
   mockUseSpaceId.mockReturnValue('default'); // restore after clearAllMocks
-  mockFetchV1AlertsHistogram.mockResolvedValue([] as HistogramEpisodeRow[]);
 });
 
 describe('useEpisodesHistogramQuery', () => {
@@ -206,19 +206,18 @@ describe('useEpisodesHistogramQuery', () => {
     expect(inputArg.timeRange).toEqual(mockTimeRange);
   });
 
-  it('concatenates classic (v1) histogram rows with v2 rows', async () => {
+  it('concatenates source histogram rows with v2 rows', async () => {
     const v2Row: HistogramEpisodeRow = {
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T00:30:00.000Z',
       'episode.status': 'inactive',
     };
-    const v1Row: HistogramEpisodeRow = {
+    const sourceRow: HistogramEpisodeRow = {
       first_timestamp: '2024-01-01T01:00:00.000Z',
       last_timestamp: '2024-01-01T01:30:00.000Z',
       'episode.status': 'active',
     };
     mockExecuteEsqlQuery.mockResolvedValue([v2Row]);
-    mockFetchV1AlertsHistogram.mockResolvedValue([v1Row]);
 
     const { result } = renderHook(
       () =>
@@ -227,6 +226,9 @@ describe('useEpisodesHistogramQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
           bucketInterval: '1h',
+          additionalEpisodesDataSource: sourceWithHistogram(
+            jest.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false })
+          ),
         }),
       { wrapper: wrapper() }
     );
@@ -245,14 +247,13 @@ describe('useEpisodesHistogramQuery', () => {
       last_timestamp: '2024-01-01T01:00:00.000Z',
       'episode.status': 'inactive' as const,
     }));
-    const v1Rows: HistogramEpisodeRow[] = Array.from({ length: half + 1 }, () => ({
+    const sourceRows: HistogramEpisodeRow[] = Array.from({ length: half + 1 }, () => ({
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T01:00:00.000Z',
       'episode.status': 'active',
     }));
 
     mockExecuteEsqlQuery.mockResolvedValue(v2Rows);
-    mockFetchV1AlertsHistogram.mockResolvedValue(v1Rows);
 
     const { result } = renderHook(
       () =>
@@ -261,6 +262,9 @@ describe('useEpisodesHistogramQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
           bucketInterval: '1h',
+          additionalEpisodesDataSource: sourceWithHistogram(
+            jest.fn().mockResolvedValue({ rows: sourceRows, isCapHit: false })
+          ),
         }),
       { wrapper: wrapper() }
     );
@@ -270,15 +274,8 @@ describe('useEpisodesHistogramQuery', () => {
     expect(result.current.isCapHit).toBe(false);
   });
 
-  it('returns v2-only rows when the v1 fetch fails gracefully', async () => {
-    mockExecuteEsqlQuery.mockResolvedValue([
-      {
-        first_timestamp: '2024-01-01T00:00:00.000Z',
-        last_timestamp: '2024-01-01T00:30:00.000Z',
-        'episode.status': 'inactive',
-      },
-    ]);
-    mockFetchV1AlertsHistogram.mockRejectedValue(new Error('v1 fetch failed'));
+  it('sets isCapHit when a source reports hitting its own cap', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue([]);
 
     const { result } = renderHook(
       () =>
@@ -287,6 +284,37 @@ describe('useEpisodesHistogramQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
           bucketInterval: '1h',
+          additionalEpisodesDataSource: sourceWithHistogram(
+            jest.fn().mockResolvedValue({ rows: [], isCapHit: true })
+          ),
+        }),
+      { wrapper: wrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.isCapHit).toBe(true);
+  });
+
+  it('returns v2-only rows when a source fetch fails', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue([
+      {
+        first_timestamp: '2024-01-01T00:00:00.000Z',
+        last_timestamp: '2024-01-01T00:30:00.000Z',
+        'episode.status': 'inactive',
+      },
+    ]);
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesHistogramQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+          bucketInterval: '1h',
+          additionalEpisodesDataSource: sourceWithHistogram(
+            jest.fn().mockRejectedValue(new Error('source fetch failed'))
+          ),
         }),
       { wrapper: wrapper() }
     );

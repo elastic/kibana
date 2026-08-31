@@ -330,17 +330,17 @@ describe('AlertEpisodesListPage', () => {
     expect(node).toBeTruthy();
   });
 
-  it('renderDocumentView returns the V1AlertDetailsFlyout for v1-sourced rows', () => {
+  it('renderDocumentView returns the V1AlertDetailsFlyout for classic-sourced rows', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const renderDocumentView = lastCall?.renderDocumentView as (hit: {
       flattened: Record<string, unknown>;
     }) => React.ReactElement;
     const node = renderDocumentView({
-      flattened: { 'episode.id': 'v1-alert-id', supports_timeline: false },
+      flattened: { 'episode.id': 'classic-alert-id', supports_timeline: false },
     });
     expect(node).toBeTruthy();
     expect(node.type).toBeDefined();
-    expect(node.props.alertId).toBe('v1-alert-id');
+    expect(node.props.alertId).toBe('classic-alert-id');
   });
 
   it('passes a renderCustomToolbar to UnifiedDataTable', () => {

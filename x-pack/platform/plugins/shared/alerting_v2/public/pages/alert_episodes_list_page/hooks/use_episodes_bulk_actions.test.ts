@@ -80,13 +80,13 @@ describe('useEpisodesBulkActions', () => {
 
   it('excludes rows with supports_actions=false from bulk action episode resolution', () => {
     const v2Episode = stubEpisode({ 'episode.id': 'v2-ep' });
-    const v1Episode = stubEpisode({ 'episode.id': 'v1-ep', supports_actions: false });
+    const classicEpisode = stubEpisode({ 'episode.id': 'classic-ep', supports_actions: false });
     const action = stubAction();
 
     const { result } = renderHook(() =>
       useEpisodesBulkActions({
         actions: [action],
-        episodesData: [v2Episode, v1Episode] as any,
+        episodesData: [v2Episode, classicEpisode] as any,
         onSuccess: jest.fn(),
       })
     );
@@ -94,19 +94,19 @@ describe('useEpisodesBulkActions', () => {
     result.current[0].isAvailable!({ selectedDocIds: ['0', '1'] } as any);
     const compatibleCall = (action.isCompatible as jest.Mock).mock.calls[0][0];
     const resolvedIds = compatibleCall.episodes.map((ep: any) => ep['episode.id']);
-    expect(resolvedIds).not.toContain('v1-ep');
+    expect(resolvedIds).not.toContain('classic-ep');
   });
 
   it('onClick passes only actionable episodes when mixed rows are selected', () => {
     const v2Episode = stubEpisode({ 'episode.id': 'v2-ep' });
-    const v1Episode = stubEpisode({ 'episode.id': 'v1-ep', supports_actions: false });
+    const classicEpisode = stubEpisode({ 'episode.id': 'classic-ep', supports_actions: false });
     const onSuccess = jest.fn();
     const action = stubAction();
 
     const { result } = renderHook(() =>
       useEpisodesBulkActions({
         actions: [action],
-        episodesData: [v2Episode, v1Episode] as any,
+        episodesData: [v2Episode, classicEpisode] as any,
         onSuccess,
       })
     );
@@ -114,6 +114,6 @@ describe('useEpisodesBulkActions', () => {
     result.current[0].onClick!({ selectedDocIds: ['0', '1'] } as any);
     const executeCall = (action.execute as jest.Mock).mock.calls[0][0];
     const resolvedIds = executeCall.episodes.map((ep: any) => ep['episode.id']);
-    expect(resolvedIds).not.toContain('v1-ep');
+    expect(resolvedIds).not.toContain('classic-ep');
   });
 });

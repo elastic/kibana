@@ -50,7 +50,8 @@ import {
   fetchV1AlertById,
   type V1AlertFields,
 } from '@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api';
-import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
+import { classicAlertQueryKeys } from '@kbn/alerting-v2-episodes-ui/classic_alerts/query_keys';
+import { CLASSIC_ALERT_RULE_TYPE_IDS } from '../../../episode_sources';
 import * as i18n from '../translations';
 
 /**
@@ -138,8 +139,14 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
     isLoading,
     isError,
   } = useQuery<V1AlertFields, Error>({
-    queryKey: queryKeys.classicAlert(alertId),
-    queryFn: ({ signal }) => fetchV1AlertById({ id: alertId, services, abortSignal: signal }),
+    queryKey: classicAlertQueryKeys.alert(alertId),
+    queryFn: ({ signal }) =>
+      fetchV1AlertById({
+        ruleTypeIds: CLASSIC_ALERT_RULE_TYPE_IDS,
+        id: alertId,
+        services,
+        abortSignal: signal,
+      }),
     enabled: Boolean(alertId),
   });
 

@@ -30,10 +30,6 @@ const getSeverityRank = (severity: AlertEpisode['severity']): number => {
   return EPISODE_SEVERITY_CHART_VALUE[normalizeEpisodeSeverity(severity) as EpisodeSeverity];
 };
 
-/**
- * Coerce ES|QL epoch-ms numbers and ISO strings to millis so v1/v2 rows compare
- * chronologically. Invalid / missing values sort as lowest.
- */
 const toMillis = (value: unknown): number => {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value;
@@ -69,20 +65,15 @@ const compareEpisodes = (a: AlertEpisode, b: AlertEpisode, sortField: string): n
   return compareValues(a[sortField as keyof AlertEpisode], b[sortField as keyof AlertEpisode]);
 };
 
-/**
- * Merges v2 and classic (v1)-sourced episode rows into a single, consistently
- * sorted and paginated list. Because each source is fetched and limited
- * independently, cross-source pagination is approximate.
- */
 export const mergeEpisodes = (
-  v2Episodes: AlertEpisode[],
-  v1Episodes: AlertEpisode[],
+  episodeLists: AlertEpisode[][],
   sortState: EpisodesSortState,
   pageSize: number
 ): AlertEpisode[] => {
   const direction = sortState.sortDirection === 'asc' ? 1 : -1;
 
-  return [...v2Episodes, ...v1Episodes]
+  return episodeLists
+    .flat()
     .sort((a, b) => direction * compareEpisodes(a, b, sortState.sortField))
     .slice(0, pageSize);
 };

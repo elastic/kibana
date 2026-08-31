@@ -31,7 +31,6 @@ import {
   CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS,
 } from '../classic_alerts/map_alert';
 import {
-  CLASSIC_ALERT_RULE_TYPE_IDS,
   CLASSIC_ALERTS_HISTOGRAM_LIMIT,
   CLASSIC_ALERTS_LIST_PAGE_SIZE,
   CLASSIC_ALERTS_TAGS_LIMIT,
@@ -111,7 +110,12 @@ const findClassicAlerts = <TAggs = undefined>(
     signal: abortSignal,
   });
 
-export interface FetchV1AlertsAsEpisodesOptions {
+/** Rule type IDs the caller considers classic, used to resolve the alert indices to read. */
+interface ClassicRuleTypeIdsOption {
+  ruleTypeIds: string[];
+}
+
+export interface FetchV1AlertsAsEpisodesOptions extends ClassicRuleTypeIdsOption {
   pageSize: number;
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
@@ -126,6 +130,7 @@ export interface FetchV1AlertsAsEpisodesOptions {
  * the v2 alerting (episodes) table.
  */
 export const fetchV1AlertsAsEpisodes = async ({
+  ruleTypeIds,
   pageSize,
   timeRange,
   filterState,
@@ -136,7 +141,7 @@ export const fetchV1AlertsAsEpisodes = async ({
   const response = await findClassicAlerts(
     http,
     {
-      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
+      rule_type_ids: ruleTypeIds,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
       sort: buildClassicAlertsSort(sortState),
       size: Math.min(pageSize, CLASSIC_ALERTS_LIST_PAGE_SIZE),
@@ -151,7 +156,7 @@ export const fetchV1AlertsAsEpisodes = async ({
   );
 };
 
-export interface FetchV1AlertsKpisOptions {
+export interface FetchV1AlertsKpisOptions extends ClassicRuleTypeIdsOption {
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
   abortSignal?: AbortSignal;
@@ -160,6 +165,7 @@ export interface FetchV1AlertsKpisOptions {
 
 /** Computes the classic (v1) alert KPI counts (RBAC enforced by the RAC alerts API). */
 export const fetchV1AlertsKpis = async ({
+  ruleTypeIds,
   timeRange,
   filterState,
   abortSignal,
@@ -168,7 +174,7 @@ export const fetchV1AlertsKpis = async ({
   const response = await findClassicAlerts<ClassicKpiAggregations>(
     http,
     {
-      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
+      rule_type_ids: ruleTypeIds,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
       aggs: buildClassicAlertsKpiAggs(),
       size: 0,
@@ -188,7 +194,7 @@ export const fetchV1AlertsKpis = async ({
   };
 };
 
-export interface FetchV1AlertsHistogramOptions {
+export interface FetchV1AlertsHistogramOptions extends ClassicRuleTypeIdsOption {
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
   breakdownField?: string;
@@ -198,6 +204,7 @@ export interface FetchV1AlertsHistogramOptions {
 
 /** Returns classic (v1) alert histogram rows (RBAC enforced by the RAC alerts API). */
 export const fetchV1AlertsHistogram = async ({
+  ruleTypeIds,
   timeRange,
   filterState,
   breakdownField,
@@ -207,7 +214,7 @@ export const fetchV1AlertsHistogram = async ({
   const response = await findClassicAlerts(
     http,
     {
-      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
+      rule_type_ids: ruleTypeIds,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
       size: CLASSIC_ALERTS_HISTOGRAM_LIMIT,
       track_total_hits: false,
@@ -228,7 +235,7 @@ export const fetchV1AlertsHistogram = async ({
   );
 };
 
-export interface FetchV1AlertsTagsOptions {
+export interface FetchV1AlertsTagsOptions extends ClassicRuleTypeIdsOption {
   timeRange?: TimeRange | null;
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
@@ -236,6 +243,7 @@ export interface FetchV1AlertsTagsOptions {
 
 /** Returns distinct classic (v1) alert rule tags (RBAC enforced by the RAC alerts API). */
 export const fetchV1AlertsTags = async ({
+  ruleTypeIds,
   timeRange,
   abortSignal,
   services: { http },
@@ -243,7 +251,7 @@ export const fetchV1AlertsTags = async ({
   const response = await findClassicAlerts<ClassicTagsAggregations>(
     http,
     {
-      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
+      rule_type_ids: ruleTypeIds,
       query: buildClassicAlertsQuery(undefined, toTimeRangeParam(timeRange)),
       aggs: buildClassicAlertsTagsAggs(CLASSIC_ALERTS_TAGS_LIMIT),
       size: 0,
@@ -263,7 +271,7 @@ export const fetchV1AlertsTags = async ({
     .filter((key): key is string => typeof key === 'string');
 };
 
-export interface FetchV1AlertByIdOptions {
+export interface FetchV1AlertByIdOptions extends ClassicRuleTypeIdsOption {
   id: string;
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
@@ -276,6 +284,7 @@ export interface FetchV1AlertByIdOptions {
  * to decide whether an observability details-page deep link applies).
  */
 export const fetchV1AlertById = async ({
+  ruleTypeIds,
   id,
   abortSignal,
   services: { http },
@@ -283,7 +292,7 @@ export const fetchV1AlertById = async ({
   const response = await findClassicAlerts(
     http,
     {
-      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
+      rule_type_ids: ruleTypeIds,
       query: { bool: { filter: [{ term: { [ALERT_UUID]: id } }] } },
       size: 1,
       track_total_hits: false,

@@ -7,21 +7,23 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode } from '../queries/episodes_query';
+import type { EpisodeDataSource } from '../types/episode_data_source';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
-import { fetchV1AlertsAsEpisodes } from '../apis/classic_alerts_api';
 import { mergeEpisodes } from '../utils/merge_episodes';
+import { fetchFromSources, type EpisodeSourceError } from '../utils/fetch_from_sources';
 
 interface CombinedEpisodesResult {
   episodes: AlertEpisode[];
-  v1FetchError: Error | null;
+  sourceErrors: EpisodeSourceError[];
 }
 
 export interface UseFetchAlertingEpisodesQueryOptions {
@@ -29,23 +31,22 @@ export interface UseFetchAlertingEpisodesQueryOptions {
   filterState?: EpisodesFilterState;
   sortState?: EpisodesSortState;
   timeRange?: TimeRange | null;
+  additionalEpisodesDataSource?: EpisodeDataSource;
   services: UseAlertingEpisodesDataViewOptions['services'] & {
     expressions: ExpressionsStart;
+    http: HttpStart;
   };
 }
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
 
-/**
- * Hook to fetch alerting episodes data with filters and sort.
- * Returns an ad-hoc data view too, constructed from the query columns.
- */
 export const useFetchAlertingEpisodesQuery = ({
   pageSize,
   services,
   filterState,
   sortState = DEFAULT_SORT,
   timeRange,
+  additionalEpisodesDataSource,
 }: UseFetchAlertingEpisodesQueryOptions) => {
   const spaceId = useSpaceId(services.spaces);
   const dataView = useAlertingEpisodesDataView({ services });
@@ -55,15 +56,15 @@ export const useFetchAlertingEpisodesQuery = ({
     pageSize,
     filterState,
     sortState,
-    timeRange ?? undefined
+    timeRange ?? undefined,
+    additionalEpisodesDataSource?.id
   );
 
   const query = useQuery<CombinedEpisodesResult>({
     enabled: dataView != null,
     queryKey,
     queryFn: async ({ signal: abortSignal }) => {
-      let v1FetchError: Error | null = null;
-      const [v2Rows, v1Episodes] = await Promise.all([
+      const [v2Rows, sourceEpisodes] = await Promise.all([
         fetchAlertingEpisodes({
           spaceId,
           abortSignal,
@@ -73,17 +74,18 @@ export const useFetchAlertingEpisodesQuery = ({
           sortState,
           timeRange,
         }),
-        fetchV1AlertsAsEpisodes({
-          abortSignal,
-          pageSize,
-          services,
-          filterState,
-          sortState,
-          timeRange,
-        }).catch((err: unknown) => {
-          v1FetchError = err instanceof Error ? err : new Error(String(err));
-          return [] as AlertEpisode[];
-        }),
+        fetchFromSources(
+          additionalEpisodesDataSource ? [additionalEpisodesDataSource] : [],
+          (source) =>
+            source.fetchEpisodes({
+              services,
+              abortSignal,
+              pageSize,
+              filterState,
+              sortState,
+              timeRange,
+            })
+        ),
       ]);
 
       const v2Episodes: AlertEpisode[] = v2Rows.map((ep) => ({
@@ -91,7 +93,10 @@ export const useFetchAlertingEpisodesQuery = ({
         last_tags: normalizeTags(ep.last_tags),
       }));
 
-      return { episodes: mergeEpisodes(v2Episodes, v1Episodes, sortState, pageSize), v1FetchError };
+      return {
+        episodes: mergeEpisodes([v2Episodes, ...sourceEpisodes.results], sortState, pageSize),
+        sourceErrors: sourceEpisodes.errors,
+      };
     },
     keepPreviousData: true,
   });
@@ -99,7 +104,7 @@ export const useFetchAlertingEpisodesQuery = ({
   return {
     ...query,
     data: query.data?.episodes,
-    v1FetchError: query.data?.v1FetchError ?? null,
+    sourceErrors: query.data?.sourceErrors ?? [],
     dataView,
   };
 };

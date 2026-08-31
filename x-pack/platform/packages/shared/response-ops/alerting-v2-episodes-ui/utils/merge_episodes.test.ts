@@ -28,23 +28,31 @@ const makeEpisode = (overrides: Partial<AlertEpisode>): AlertEpisode => ({
 describe('mergeEpisodes', () => {
   const defaultSort: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
 
-  it('merges v2 and v1 episodes into one sorted list', () => {
+  it('merges v2 and classic episodes into one sorted list', () => {
     const v2 = [makeEpisode({ '@timestamp': '2024-01-01T03:00:00.000Z', 'episode.id': 'v2-1' })];
-    const v1 = [makeEpisode({ '@timestamp': '2024-01-01T04:00:00.000Z', 'episode.id': 'v1-1' })];
+    const classic = [
+      makeEpisode({ '@timestamp': '2024-01-01T04:00:00.000Z', 'episode.id': 'classic-1' }),
+    ];
 
-    const result = mergeEpisodes(v2, v1, defaultSort, 10);
+    const result = mergeEpisodes([v2, classic], defaultSort, 10);
 
-    expect(result[0]['episode.id']).toBe('v1-1');
+    expect(result[0]['episode.id']).toBe('classic-1');
     expect(result[1]['episode.id']).toBe('v2-1');
   });
 
   it('sorts ascending when sortDirection is asc', () => {
     const v2 = [makeEpisode({ '@timestamp': '2024-01-01T03:00:00.000Z', 'episode.id': 'v2-1' })];
-    const v1 = [makeEpisode({ '@timestamp': '2024-01-01T01:00:00.000Z', 'episode.id': 'v1-1' })];
+    const classic = [
+      makeEpisode({ '@timestamp': '2024-01-01T01:00:00.000Z', 'episode.id': 'classic-1' }),
+    ];
 
-    const result = mergeEpisodes(v2, v1, { sortField: '@timestamp', sortDirection: 'asc' }, 10);
+    const result = mergeEpisodes(
+      [v2, classic],
+      { sortField: '@timestamp', sortDirection: 'asc' },
+      10
+    );
 
-    expect(result[0]['episode.id']).toBe('v1-1');
+    expect(result[0]['episode.id']).toBe('classic-1');
     expect(result[1]['episode.id']).toBe('v2-1');
   });
 
@@ -52,35 +60,42 @@ describe('mergeEpisodes', () => {
     const v2 = Array.from({ length: 5 }, (_, i) =>
       makeEpisode({ '@timestamp': `2024-01-01T0${i}:00:00.000Z`, 'episode.id': `v2-${i}` })
     );
-    const v1 = Array.from({ length: 5 }, (_, i) =>
-      makeEpisode({ '@timestamp': `2024-01-02T0${i}:00:00.000Z`, 'episode.id': `v1-${i}` })
+    const classic = Array.from({ length: 5 }, (_, i) =>
+      makeEpisode({
+        '@timestamp': `2024-01-02T0${i}:00:00.000Z`,
+        'episode.id': `classic-${i}`,
+      })
     );
 
-    const result = mergeEpisodes(v2, v1, defaultSort, 3);
+    const result = mergeEpisodes([v2, classic], defaultSort, 3);
     expect(result).toHaveLength(3);
   });
 
-  it('handles empty v1 array', () => {
+  it('handles empty classic array', () => {
     const v2 = [makeEpisode({ 'episode.id': 'v2-only' })];
-    const result = mergeEpisodes(v2, [], defaultSort, 10);
+    const result = mergeEpisodes([v2, []], defaultSort, 10);
 
     expect(result).toHaveLength(1);
     expect(result[0]['episode.id']).toBe('v2-only');
   });
 
   it('handles empty v2 array', () => {
-    const v1 = [makeEpisode({ 'episode.id': 'v1-only', supports_actions: false })];
-    const result = mergeEpisodes([], v1, defaultSort, 10);
+    const classic = [makeEpisode({ 'episode.id': 'classic-only', supports_actions: false })];
+    const result = mergeEpisodes([[], classic], defaultSort, 10);
 
     expect(result).toHaveLength(1);
-    expect(result[0]['episode.id']).toBe('v1-only');
+    expect(result[0]['episode.id']).toBe('classic-only');
   });
 
   it('sorts by severity correctly', () => {
     const v2 = [makeEpisode({ 'episode.id': 'low', severity: 'low' })];
-    const v1 = [makeEpisode({ 'episode.id': 'critical', severity: 'critical' })];
+    const classic = [makeEpisode({ 'episode.id': 'critical', severity: 'critical' })];
 
-    const result = mergeEpisodes(v2, v1, { sortField: 'severity', sortDirection: 'desc' }, 10);
+    const result = mergeEpisodes(
+      [v2, classic],
+      { sortField: 'severity', sortDirection: 'desc' },
+      10
+    );
 
     expect(result[0]['episode.id']).toBe('critical');
     expect(result[1]['episode.id']).toBe('low');
@@ -88,15 +103,19 @@ describe('mergeEpisodes', () => {
 
   it('sorts by duration numerically', () => {
     const v2 = [makeEpisode({ 'episode.id': 'short', duration: 100 })];
-    const v1 = [makeEpisode({ 'episode.id': 'long', duration: 9999 })];
+    const classic = [makeEpisode({ 'episode.id': 'long', duration: 9999 })];
 
-    const result = mergeEpisodes(v2, v1, { sortField: 'duration', sortDirection: 'desc' }, 10);
+    const result = mergeEpisodes(
+      [v2, classic],
+      { sortField: 'duration', sortDirection: 'desc' },
+      10
+    );
 
     expect(result[0]['episode.id']).toBe('long');
     expect(result[1]['episode.id']).toBe('short');
   });
 
-  it('sorts chronologically when v2 timestamps are epoch ms and v1 are ISO strings', () => {
+  it('sorts chronologically when v2 timestamps are epoch ms and classic are ISO strings', () => {
     const v2Newer = makeEpisode({
       'episode.id': 'v2-newer',
       '@timestamp': Date.parse('2024-07-03T10:03:20.000Z') as unknown as string,
@@ -105,23 +124,30 @@ describe('mergeEpisodes', () => {
       'episode.id': 'v2-older',
       '@timestamp': Date.parse('2024-07-03T09:46:40.000Z') as unknown as string,
     });
-    const v1Newer = makeEpisode({
-      'episode.id': 'v1-newer',
+    const classicNewer = makeEpisode({
+      'episode.id': 'classic-newer',
       '@timestamp': '2024-07-03T12:00:00.000Z',
       supports_actions: false,
     });
-    const v1Older = makeEpisode({
-      'episode.id': 'v1-older',
+    const classicOlder = makeEpisode({
+      'episode.id': 'classic-older',
       '@timestamp': '2024-07-03T10:00:00.000Z',
       supports_actions: false,
     });
 
-    const result = mergeEpisodes([v2Newer, v2Older], [v1Newer, v1Older], defaultSort, 10);
+    const result = mergeEpisodes(
+      [
+        [v2Newer, v2Older],
+        [classicNewer, classicOlder],
+      ],
+      defaultSort,
+      10
+    );
 
     expect(result.map((ep) => ep['episode.id'])).toEqual([
-      'v1-newer',
+      'classic-newer',
       'v2-newer',
-      'v1-older',
+      'classic-older',
       'v2-older',
     ]);
   });

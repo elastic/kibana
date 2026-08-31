@@ -8,9 +8,13 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiCallOut, EuiTitle } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
-import type { AlertEpisodesKibanaServices } from '../../../../episodes_kibana_services';
+import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
+import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import {
   EPISODES_KPIS_ACKNOWLEDGED,
   EPISODES_KPIS_ALERTS_COUNT,
@@ -24,14 +28,32 @@ import {
   EPISODES_KPIS_UNASSIGNED_ALERTS,
 } from '../../translations';
 
-export interface EpisodesKpisProps {
-  services: AlertEpisodesKibanaServices;
-  filterState: EpisodesFilterState;
-  timeRange: TimeRange;
+interface EpisodesKpisServices {
+  expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
+  userProfile: CoreStart['userProfile'];
+  http: HttpStart;
 }
 
-export const EpisodesKpis = ({ services, filterState, timeRange }: EpisodesKpisProps) => {
-  const { data, isLoading, isError } = useEpisodesKpisQuery({ services, filterState, timeRange });
+export interface EpisodesKpisProps {
+  services: EpisodesKpisServices;
+  filterState: EpisodesFilterState;
+  timeRange: TimeRange;
+  additionalEpisodesDataSource?: EpisodeDataSource;
+}
+
+export const EpisodesKpis = ({
+  services,
+  filterState,
+  timeRange,
+  additionalEpisodesDataSource,
+}: EpisodesKpisProps) => {
+  const { data, isLoading, isError } = useEpisodesKpisQuery({
+    services,
+    filterState,
+    timeRange,
+    additionalEpisodesDataSource,
+  });
 
   if (isError) {
     return (

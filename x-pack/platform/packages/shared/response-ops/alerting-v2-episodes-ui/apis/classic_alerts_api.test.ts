@@ -15,9 +15,10 @@ import {
 } from './classic_alerts_api';
 import { CLASSIC_ALERT_EPISODE_SOURCE_FIELDS } from '../classic_alerts/map_alert';
 import { CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS } from '../classic_alerts/map_alert';
-import { CLASSIC_ALERT_RULE_TYPE_IDS } from '../classic_alerts/constants';
 
 const mockHttp = httpServiceMock.createStartContract();
+
+const TEST_RULE_TYPE_IDS = ['observability.rules.custom_threshold', '.es-query'];
 
 const makeHit = (source: Record<string, unknown>) => ({
   _id: 'hit-1',
@@ -48,12 +49,13 @@ describe('classic_alerts_api', () => {
 
       const episodes = await fetchV1AlertsAsEpisodes({
         pageSize: 100,
+        ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
       });
 
       const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
       const body = JSON.parse(callOptions.body);
-      expect(body.rule_type_ids).toEqual(CLASSIC_ALERT_RULE_TYPE_IDS);
+      expect(body.rule_type_ids).toEqual(TEST_RULE_TYPE_IDS);
       expect(body._source).toEqual([...CLASSIC_ALERT_EPISODE_SOURCE_FIELDS]);
       expect(episodes).toHaveLength(1);
       expect(episodes[0].supports_actions).toBe(false);
@@ -67,6 +69,7 @@ describe('classic_alerts_api', () => {
 
       const episodes = await fetchV1AlertsAsEpisodes({
         pageSize: 100,
+        ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
       });
 
@@ -86,7 +89,10 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const kpis = await fetchV1AlertsKpis({ services: { http: mockHttp } });
+      const kpis = await fetchV1AlertsKpis({
+        ruleTypeIds: TEST_RULE_TYPE_IDS,
+        services: { http: mockHttp },
+      });
 
       expect(kpis.alerts_count).toBe(42);
       expect(kpis.firing_rules).toBe(3);
@@ -99,7 +105,10 @@ describe('classic_alerts_api', () => {
         hits: { total: 0, hits: [] },
       });
 
-      const kpis = await fetchV1AlertsKpis({ services: { http: mockHttp } });
+      const kpis = await fetchV1AlertsKpis({
+        ruleTypeIds: TEST_RULE_TYPE_IDS,
+        services: { http: mockHttp },
+      });
 
       expect(kpis.alerts_count).toBe(0);
       expect(kpis.firing_rules).toBe(0);
@@ -124,11 +133,14 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const rows = await fetchV1AlertsHistogram({ services: { http: mockHttp } });
+      const rows = await fetchV1AlertsHistogram({
+        ruleTypeIds: TEST_RULE_TYPE_IDS,
+        services: { http: mockHttp },
+      });
 
       const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
       const body = JSON.parse(callOptions.body);
-      expect(body.rule_type_ids).toEqual(CLASSIC_ALERT_RULE_TYPE_IDS);
+      expect(body.rule_type_ids).toEqual(TEST_RULE_TYPE_IDS);
       expect(body._source).toEqual([...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS]);
       expect(rows).toHaveLength(1);
       expect(rows[0]).toMatchObject({
@@ -153,6 +165,7 @@ describe('classic_alerts_api', () => {
       });
 
       const rows = await fetchV1AlertsHistogram({
+        ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
         breakdownField: 'rule.id',
       });
@@ -175,7 +188,10 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const tags = await fetchV1AlertsTags({ services: { http: mockHttp } });
+      const tags = await fetchV1AlertsTags({
+        ruleTypeIds: TEST_RULE_TYPE_IDS,
+        services: { http: mockHttp },
+      });
 
       expect(tags).toEqual(['production', 'staging']);
     });
@@ -186,7 +202,10 @@ describe('classic_alerts_api', () => {
         aggregations: { tags: { buckets: [] } },
       });
 
-      const tags = await fetchV1AlertsTags({ services: { http: mockHttp } });
+      const tags = await fetchV1AlertsTags({
+        ruleTypeIds: TEST_RULE_TYPE_IDS,
+        services: { http: mockHttp },
+      });
       expect(tags).toEqual([]);
     });
   });
@@ -205,7 +224,11 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const result = await fetchV1AlertById({ id: 'target-uuid', services: { http: mockHttp } });
+      const result = await fetchV1AlertById({
+        id: 'target-uuid',
+        ruleTypeIds: TEST_RULE_TYPE_IDS,
+        services: { http: mockHttp },
+      });
 
       expect(result['kibana.alert.uuid']).toBe('target-uuid');
       expect(result._index).toBe('.alerts-observability.metrics');
@@ -216,7 +239,11 @@ describe('classic_alerts_api', () => {
       mockHttp.post.mockResolvedValue({ hits: { hits: [] } });
 
       await expect(
-        fetchV1AlertById({ id: 'missing', services: { http: mockHttp } })
+        fetchV1AlertById({
+          id: 'missing',
+          ruleTypeIds: TEST_RULE_TYPE_IDS,
+          services: { http: mockHttp },
+        })
       ).rejects.toThrow('Classic alert not found: missing');
     });
   });

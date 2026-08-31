@@ -21,11 +21,6 @@ import {
 } from '@elastic/eui';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
-import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
-import { AlertEpisodesSeverityFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/severity_filter';
-import { AlertEpisodesRuleFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/rule_filter';
-import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
-import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type {
@@ -39,6 +34,11 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
 import useDebounce from 'react-use/lib/useDebounce';
 import { css } from '@emotion/react';
+import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
+import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
+import { AlertEpisodesRuleFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/rule_filter';
+import { AlertEpisodesSeverityFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/severity_filter';
+import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
 import * as i18n from '../translations';
 
 export interface EpisodesFilterBarProps {
@@ -47,6 +47,8 @@ export interface EpisodesFilterBarProps {
   timeRange: TimeRange;
   onTimeChange: (range: TimeRange) => void;
   ruleOptions: Array<{ label: string; value: string }>;
+  tagOptions: string[];
+  isTagOptionsLoading?: boolean;
   assigneeUids: string[];
   onRefresh?: () => void;
   isLoading?: boolean;
@@ -68,6 +70,8 @@ export const EpisodesFilterBar = ({
   timeRange,
   onTimeChange,
   ruleOptions,
+  tagOptions,
+  isTagOptionsLoading = false,
   assigneeUids,
   onRefresh,
   isLoading = false,
@@ -188,8 +192,8 @@ export const EpisodesFilterBar = ({
               <AlertEpisodesTagFilter
                 selectedTags={filterState.tags}
                 onTagsChange={onTagsChange}
-                services={services}
-                timeRange={timeRange}
+                tagOptions={tagOptions}
+                isLoading={isTagOptionsLoading}
                 data-test-subj="episodesFilterBar-tags"
               />
 

@@ -18,7 +18,8 @@ import { useSpaceId } from './use_space_id';
 import { queryKeys } from '../query_keys';
 import { buildEpisodesHistogramQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchV1AlertsHistogram } from '../apis/classic_alerts_api';
+import type { EpisodeDataSource } from '../types/episode_data_source';
+import { fetchFromSources } from '../utils/fetch_from_sources';
 import {
   generateTimeBuckets,
   computeOverlapCounts,
@@ -26,7 +27,6 @@ import {
   type HistogramEpisodeRow,
 } from '../utils/histogram_utils';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
-import { CLASSIC_ALERTS_HISTOGRAM_LIMIT } from '../classic_alerts/constants';
 
 interface HistogramQueryData {
   rows: HistogramEpisodeRow[];
@@ -43,6 +43,7 @@ export interface UseEpisodesHistogramQueryOptions {
   timeRange?: TimeRange;
   bucketInterval: string;
   breakdownField?: string;
+  additionalEpisodesDataSource?: EpisodeDataSource;
 }
 
 export interface UseEpisodesHistogramQueryResult {
@@ -59,6 +60,7 @@ export const useEpisodesHistogramQuery = ({
   timeRange,
   bucketInterval,
   breakdownField,
+  additionalEpisodesDataSource,
 }: UseEpisodesHistogramQueryOptions): UseEpisodesHistogramQueryResult => {
   const spaceId = useSpaceId(services.spaces);
 
@@ -69,9 +71,15 @@ export const useEpisodesHistogramQuery = ({
     refetch,
   } = useQuery<HistogramQueryData, Error>({
     // bucketInterval is used for client-side bucketing only — omitted from queryKey intentionally
-    queryKey: queryKeys.histogram(spaceId, filterState, timeRange, breakdownField),
+    queryKey: queryKeys.histogram(
+      spaceId,
+      filterState,
+      timeRange,
+      breakdownField,
+      additionalEpisodesDataSource?.id
+    ),
     queryFn: async ({ signal }) => {
-      const [v2Rows, v1Rows] = await Promise.all([
+      const [v2Rows, sourceHistograms] = await Promise.all([
         executeEsqlQuery<HistogramEpisodeRow>({
           expressions: services.expressions,
           query: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print('basic'),
@@ -82,20 +90,24 @@ export const useEpisodesHistogramQuery = ({
           },
           abortSignal: signal,
         }),
-        fetchV1AlertsHistogram({
-          services,
-          filterState,
-          timeRange,
-          breakdownField,
-          abortSignal: signal,
-        }).catch(() => [] as HistogramEpisodeRow[]),
+        fetchFromSources(
+          additionalEpisodesDataSource ? [additionalEpisodesDataSource] : [],
+          (source) =>
+            source.fetchHistogram?.({
+              services,
+              filterState,
+              timeRange,
+              breakdownField,
+              abortSignal: signal,
+            })
+        ),
       ]);
 
       return {
-        rows: [...v2Rows, ...v1Rows],
+        rows: [...v2Rows, ...sourceHistograms.results.flatMap(({ rows }) => rows)],
         isCapHit:
           v2Rows.length >= HISTOGRAM_EPISODE_LIMIT ||
-          v1Rows.length >= CLASSIC_ALERTS_HISTOGRAM_LIMIT,
+          sourceHistograms.results.some(({ isCapHit }) => isCapHit),
       };
     },
   });

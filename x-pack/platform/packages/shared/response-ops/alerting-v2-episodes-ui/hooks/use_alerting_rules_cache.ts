@@ -10,22 +10,24 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import useAsync from 'react-use/lib/useAsync';
 import { fetchRulesByIds } from '../apis/fetch_rules_by_ids';
+import type { EpisodeDataSource } from '../types/episode_data_source';
+import { fetchFromSources } from '../utils/fetch_from_sources';
 
 export interface UseAlertingRulesCacheOptions {
   ruleIds: string[];
   services: {
     http: HttpStart;
   };
+  additionalEpisodesDataSource?: EpisodeDataSource;
 }
 
 type Rule = FindRulesResponse['items'][number];
 
-/**
- * Provides a rules cache by id, fetching uncached rules
- * with the minimum number of find requests possible.
- * Returns rulesCache as state so consumers re-render when rules are loaded.
- */
-export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCacheOptions) => {
+export const useAlertingRulesCache = ({
+  ruleIds,
+  services,
+  additionalEpisodesDataSource,
+}: UseAlertingRulesCacheOptions) => {
   const [rulesCache, setRulesCache] = useState<Record<string, Rule>>({});
   const [missingRuleIds, setMissingRuleIds] = useState<ReadonlySet<string>>(new Set());
 
@@ -36,7 +38,18 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
       return;
     }
 
-    const rules = await fetchRulesByIds({ http: services.http, ids: uncachedIds });
+    const v2Rules = await fetchRulesByIds({ http: services.http, ids: uncachedIds });
+    const resolvedByV2 = new Set(v2Rules.map((rule) => rule.id));
+    const unresolvedIds = uncachedIds.filter((id) => !resolvedByV2.has(id));
+
+    const { results: sourceRules } = unresolvedIds.length
+      ? await fetchFromSources(
+          additionalEpisodesDataSource ? [additionalEpisodesDataSource] : [],
+          (source) => source.resolveRules?.({ services, ids: unresolvedIds })
+        )
+      : { results: [] };
+
+    const rules = [...v2Rules, ...sourceRules.flat()];
     const returnedRuleIds = new Set(rules.map((rule) => rule.id));
 
     setRulesCache((prev) => {
@@ -56,7 +69,7 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
       });
       return next;
     });
-  }, [ruleIds, services.http]);
+  }, [ruleIds, services.http, additionalEpisodesDataSource]);
 
   return {
     rulesCache,

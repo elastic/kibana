@@ -57,50 +57,13 @@ describe('fetchRulesByIds', () => {
     });
   });
 
-  it('falls back to v1 rules API for IDs not found in v2', async () => {
+  it('returns the rules the v2 API resolved, leaving unresolved ids to the sources', async () => {
     const v2Rule = { id: 'v2-rule', metadata: { name: 'V2 Rule' } };
     mockHttp.get.mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 });
-    mockHttp.post.mockResolvedValueOnce({
-      data: [{ id: 'v1-rule', name: 'V1 Rule' }],
-    });
 
-    const result = await fetchRulesByIds({
-      http: mockHttp,
-      ids: ['v2-rule', 'v1-rule'],
-    });
-
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
-    expect(mockHttp.post).toHaveBeenCalledWith(
-      '/internal/alerting/rules/_find',
-      expect.objectContaining({
-        body: expect.stringContaining('alert.id: \\"alert:v1-rule\\"'),
-      })
-    );
-    expect(result).toHaveLength(2);
-    expect(result[0]).toEqual(v2Rule);
-    expect(result[1]).toMatchObject({ id: 'v1-rule', metadata: { name: 'V1 Rule' } });
-  });
-
-  it('skips v1 fallback when all IDs are resolved by v2', async () => {
-    const v2Rule = { id: 'r1', metadata: { name: 'Rule' } };
-    mockHttp.get.mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 });
-
-    const result = await fetchRulesByIds({ http: mockHttp, ids: ['r1'] });
-
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
-    expect(result).toEqual([v2Rule]);
-  });
-
-  it('returns v2 rules only when v1 fallback fails', async () => {
-    const v2Rule = { id: 'v2-rule', metadata: { name: 'V2 Rule' } };
-    mockHttp.get.mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 });
-    mockHttp.post.mockRejectedValueOnce(new Error('v1 unavailable'));
-
-    const result = await fetchRulesByIds({
-      http: mockHttp,
-      ids: ['v2-rule', 'v1-rule'],
-    });
+    const result = await fetchRulesByIds({ http: mockHttp, ids: ['v2-rule', 'unknown-rule'] });
 
     expect(result).toEqual([v2Rule]);
+    expect(mockHttp.post).not.toHaveBeenCalled();
   });
 });
