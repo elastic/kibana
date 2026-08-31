@@ -177,6 +177,11 @@ describe('LoggerService', () => {
       ['a string', 'boom', 'boom'],
       ['a number', 42, '42'],
       ['an object', { reason: 'boom' }, '[object Object]'],
+      [
+        'a saved object error',
+        { statusCode: 500, error: 'Internal Server Error', message: 'Decryption failed' },
+        'Decryption failed',
+      ],
     ])('should normalize %s thrown value', (_, thrown, expectedMessage) => {
       loggerService.error({
         error: thrown,

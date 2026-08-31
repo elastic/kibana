@@ -300,12 +300,14 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   return (
     <EuiFlyout
       size="l"
+      maxWidth={1600}
       aria-labelledby={headerId}
       onClose={onClose}
       data-test-subj="streamsCanvasFlyout"
       paddingSize="none"
       flyoutMenuProps={{
         customActions,
+        titleId: headerId,
       }}
     >
       <EuiFlyoutHeader hasBorder>
@@ -322,6 +324,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
                 min-height: 32px;
               `}
               gutterSize="s"
+              wrap
             >
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s" data-test-subj="streamsCanvasFlyoutTitle">
@@ -329,7 +332,9 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFlexGroup gutterSize="xs">{badges}</EuiFlexGroup>
+                <EuiFlexGroup responsive wrap gutterSize="xs">
+                  {badges}
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

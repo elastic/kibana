@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { RegistryVarGroup, RegistryVarGroupOption } from '../types';
+import type {
+  PackagePolicyConfigRecord,
+  PackagePolicyConfigRecordEntry,
+  RegistryVarGroup,
+  RegistryVarGroupOption,
+} from '../types';
 
 /**
  * Mapping of var_group names to selected option names
@@ -125,4 +130,83 @@ export const isVarInSelectedVarGroupOption = (
 
   // If controlled and shouldShowVar returns true, it means it's in a selected option
   return shouldShowVar(varName, varGroups, varGroupSelections);
+};
+
+/**
+ * Whether a var entry holds a value that counts as evidence of user configuration.
+ *
+ * `false` is excluded on purpose: boolean vars migrated from a package version that did
+ * not declare them are sanitized from null to false, so a `false` value is
+ * indistinguishable from a migration default and must not vote for an option.
+ */
+const hasConfiguredVarValue = (entry: PackagePolicyConfigRecordEntry | undefined): boolean => {
+  const value = entry?.value;
+  if (value === undefined || value === null || value === '' || value === false) {
+    return false;
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+  return true;
+};
+
+/**
+ * Infers var_group selections for a package policy that has none stored, based on which
+ * option's vars are actually populated in the policy's package-level vars.
+ *
+ * Policies created before a package introduced var_groups have no stored
+ * `var_group_selections`, so the UI would otherwise fall back to the first visible option —
+ * which may not match the policy's real configuration (e.g. a Direct Access Keys policy
+ * being presented as Identity Federation after an upgrade).
+ *
+ * For each var_group the options are scored by how many of their declared vars hold a
+ * configured value; ties are broken by completeness (populated / declared), which matters
+ * when one option's vars are a subset of another's (e.g. direct access keys vs temporary
+ * access keys). A group with no evidence, or with an unresolvable tie, is left unselected.
+ *
+ * @param varGroups - The var_groups from package info
+ * @param vars - The policy's package-level vars to read evidence from
+ * @returns Inferred selections, or undefined when nothing could be inferred
+ */
+export const inferVarGroupSelections = (
+  varGroups: RegistryVarGroup[] | undefined,
+  vars: PackagePolicyConfigRecord | undefined
+): VarGroupSelection | undefined => {
+  if (!varGroups || varGroups.length === 0 || !vars) {
+    return undefined;
+  }
+
+  const inferred: VarGroupSelection = {};
+
+  for (const varGroup of varGroups) {
+    let bestOption: RegistryVarGroupOption | undefined;
+    let bestScore = 0;
+    let bestRatio = 0;
+    let tied = false;
+
+    for (const option of varGroup.options) {
+      if (option.vars.length === 0) {
+        continue;
+      }
+      const score = option.vars.filter((name) => hasConfiguredVarValue(vars[name])).length;
+      if (score === 0) {
+        continue;
+      }
+      const ratio = score / option.vars.length;
+      if (score > bestScore || (score === bestScore && ratio > bestRatio)) {
+        bestOption = option;
+        bestScore = score;
+        bestRatio = ratio;
+        tied = false;
+      } else if (score === bestScore && ratio === bestRatio) {
+        tied = true;
+      }
+    }
+
+    if (bestOption && !tied) {
+      inferred[varGroup.name] = bestOption.name;
+    }
+  }
+
+  return Object.keys(inferred).length > 0 ? inferred : undefined;
 };

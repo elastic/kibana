@@ -289,6 +289,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('set_grouping');
       expect(doc).toContain('set_state_transition');
       expect(doc).toContain('set_dashboards');
+      expect(doc).toContain('set_runbook');
       expect(doc).toContain('validate');
     });
 
@@ -317,6 +318,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('Use `set_grouping`');
       expect(doc).toContain('Use `set_state_transition`');
       expect(doc).toContain('Use `set_dashboards`');
+      expect(doc).toContain('Use `set_runbook`');
       expect(doc).toContain('Use `validate`');
     });
   });
@@ -406,7 +408,7 @@ describe('schema_to_skill_docs', () => {
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only. (max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'

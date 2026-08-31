@@ -29,7 +29,7 @@ export interface IdGenerator {
   next: () => string;
 }
 
-const createIdGenerator = (): IdGenerator => {
+export const createIdGenerator = (): IdGenerator => {
   let id = uuidv4();
   return {
     get current() {
@@ -58,6 +58,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   data,
   dashboardPlugin,
   canWriteDashboards,
+  draftAttachmentId,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
@@ -66,9 +67,9 @@ export const registerDashboardAttachmentUiDefinition = ({
   data: DataPublicPluginStart;
   dashboardPlugin: DashboardStart;
   canWriteDashboards: boolean;
+  draftAttachmentId: IdGenerator;
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
-  const draftAttachmentId = createIdGenerator();
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
   const checkSavedDashboardExist = async (dashboardId: string) => {
     const findDashboardsService = await findDashboardsServicePromise;
