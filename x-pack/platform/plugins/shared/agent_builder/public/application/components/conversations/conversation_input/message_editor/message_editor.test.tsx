@@ -20,6 +20,13 @@ import type {
   CommandMenuHandle,
   CommandBadgeData,
 } from './command_menu';
+import {
+  COMMAND_BADGE_ATTRIBUTE,
+  COMMAND_ID_ATTRIBUTE,
+  createCommandBadgeElement,
+} from './command_badge';
+import { COMMAND_METADATA_ATTRIBUTE } from './command_badge/attributes';
+import { serializeEditorContent } from './serialize';
 
 jest.mock('./command_menu/cursor_rect', () => ({
   getRectAtOffset: () => ({
@@ -371,6 +378,94 @@ describe('MessageEditor', () => {
     expect(editor.querySelectorAll('br').length).toBe(5);
     expect(editor.textContent).toContain('Create ES|QL SIEM detection rule');
     expect(editor.textContent).toContain('==== YOUR DESCRIPTION HERE====');
+  });
+
+  it('preserves a valid command badge when pasting HTML', () => {
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    window.getSelection()?.removeAllRanges();
+    window.getSelection()?.addRange(range);
+
+    const badge = createCommandBadgeElement(mockBadgeData);
+    badge.setAttribute('contenteditable', 'false');
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: (type: string) =>
+          type === 'text/html' ? badge.outerHTML : '[/Summarize](skill://skill-1)',
+        items: [],
+      },
+    });
+
+    const pastedBadge = editor.querySelector(`[${COMMAND_BADGE_ATTRIBUTE}]`);
+    expect(pastedBadge).toHaveAttribute(COMMAND_ID_ATTRIBUTE, CommandId.Skill);
+    expect(JSON.parse(pastedBadge?.getAttribute(COMMAND_METADATA_ATTRIBUTE) ?? '')).toEqual({
+      id: 'skill-1',
+    });
+    expect(pastedBadge).toHaveAttribute('contenteditable', 'false');
+    expect(serializeEditorContent(editor)).toBe('[/Summarize](skill://skill-1)');
+  });
+
+  it('removes executable content from pasted command badge HTML', () => {
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    window.getSelection()?.removeAllRanges();
+    window.getSelection()?.addRange(range);
+
+    const maliciousHtml = `
+      <span
+        data-command-badge="true"
+        data-command-id="skill"
+        data-command-metadata='{"id":"skill-1"}'
+        contenteditable="false"
+        class="malicious"
+        style="background-image: url(javascript:alert(1))"
+        data-untrusted="true"
+        onmouseover="alert(1)"
+      >
+        <span data-command-badge-label="true">/Summarize</span>
+        <img src="invalid" onerror="alert(1)">
+        <script>alert(1)</script>
+        <svg onload="alert(1)"></svg>
+        <a href="javascript:alert(1)">link</a>
+      </span>
+    `;
+
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: (type: string) => (type === 'text/html' ? maliciousHtml : '/Summarize'),
+        items: [],
+      },
+    });
+
+    const pastedBadge = editor.querySelector(`[${COMMAND_BADGE_ATTRIBUTE}]`);
+    expect(pastedBadge).not.toBeNull();
+    expect(pastedBadge).not.toHaveAttribute('class');
+    expect(pastedBadge).not.toHaveAttribute('style');
+    expect(pastedBadge).not.toHaveAttribute('data-untrusted');
+    expect(pastedBadge).not.toHaveAttribute('onmouseover');
+    expect(pastedBadge?.querySelector('img, script, svg, a')).toBeNull();
   });
 
   it('calls onPasteFile and inserts a placeholder chip when pasting an image', () => {

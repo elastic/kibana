@@ -6,29 +6,49 @@
  */
 
 import type { RefObject } from 'react';
-import { COMMAND_BADGE_ATTRIBUTE, isElementCommandBadge } from './command_badge';
+import DOMPurify from 'dompurify';
+import {
+  COMMAND_BADGE_ATTRIBUTE,
+  COMMAND_BADGE_LABEL_ATTRIBUTE,
+  COMMAND_ID_ATTRIBUTE,
+  isElementCommandBadge,
+} from './command_badge';
+import { COMMAND_METADATA_ATTRIBUTE } from './command_badge/attributes';
 import { insertImagePlaceholderChip } from './image_placeholder';
 import { createTextFragment, ensureCaretTargetBeforeFirstBadge, insertNodeAtCursor } from './utils';
 
 const stringContainsBadge = (html: string): boolean => html.includes(COMMAND_BADGE_ATTRIBUTE);
 
 /**
- * Sanitizes pasted HTML to only allow badge spans.
- * Uses DOMParser to safely parse HTML, then walks its children,
- * keeping only badge spans, <br> elements, and text nodes.
+ * Removes all pasted markup except the elements and attributes used by command badges.
  */
-const sanitizeHtmlIncludeOnlyTextAndBadges = (html: string): DocumentFragment => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
+const sanitizePastedHtml = (html: string): DocumentFragment => {
+  return DOMPurify.sanitize(html, {
+    RETURN_DOM_FRAGMENT: true,
+    ALLOWED_TAGS: ['span', 'br'],
+    ALLOWED_ATTR: [
+      COMMAND_BADGE_ATTRIBUTE,
+      COMMAND_BADGE_LABEL_ATTRIBUTE,
+      COMMAND_ID_ATTRIBUTE,
+      COMMAND_METADATA_ATTRIBUTE,
+      'contenteditable',
+      'aria-label',
+      'title',
+    ],
+    ALLOW_ARIA_ATTR: false,
+    ALLOW_DATA_ATTR: false,
+  });
+};
+
+const createTextAndBadgeFragment = (sanitizedHtml: DocumentFragment): DocumentFragment => {
   const fragment = document.createDocumentFragment();
 
-  for (const node of Array.from(doc.body.childNodes)) {
+  for (const node of Array.from(sanitizedHtml.childNodes)) {
     if (node.nodeType === Node.TEXT_NODE) {
       fragment.appendChild(document.createTextNode(node.textContent ?? ''));
     } else if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as HTMLElement;
       if (isElementCommandBadge(element)) {
-        // Clone the badge span
         fragment.appendChild(element.cloneNode(true));
       } else if (element.tagName === 'BR') {
         fragment.appendChild(document.createElement('br'));
@@ -83,7 +103,7 @@ const handleTextOrBadgePaste = (event: ClipboardEvent, opts: HandleEditorPasteOp
 
   const hasBadgeHtml = htmlData && stringContainsBadge(htmlData);
   const node = hasBadgeHtml
-    ? sanitizeHtmlIncludeOnlyTextAndBadges(htmlData)
+    ? createTextAndBadgeFragment(sanitizePastedHtml(htmlData))
     : createTextFragment(textData);
 
   insertNodeAtCursor(node);
