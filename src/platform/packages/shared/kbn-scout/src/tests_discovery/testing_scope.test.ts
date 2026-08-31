@@ -35,10 +35,10 @@ describe('isScoutTestsOnlyDiff', () => {
     expect(isScoutTestsOnlyDiff(['README.md', 'docs/CHANGELOG.md'])).toBe(false);
   });
 
-  it('returns true when every non-noise file is in a Scout test scope', () => {
+  it('returns true when every non-noise file is a scope-local Scout file', () => {
     const files = [
       'pkg/test/scout/ui/tests/a.spec.ts',
-      'pkg/test/scout/ui/helpers/foo.ts',
+      'pkg/test/scout/ui/parallel_tests/b.spec.ts',
       'pkg/README.md', // noise — ignored
     ];
     expect(isScoutTestsOnlyDiff(files)).toBe(true);
@@ -73,11 +73,38 @@ describe('isScoutTestsOnlyDiff', () => {
     );
   });
 
-  it('keeps non-fixtures scope files (helpers, configs) on the tests-only fast path', () => {
+  it('returns false when shared scope files (helpers, constants) are in the diff', () => {
+    // Shared scope files can be imported or referenced by path from other
+    // scopes, so they must fall through to dependency-tree mode.
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/ui/helpers/foo.ts'])).toBe(false);
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/ui/constants.ts'])).toBe(false);
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/ui/lib/utils.ts'])).toBe(false);
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/ui/services/api.ts'])).toBe(false);
+  });
+
+  it('returns false when test data or es archives are in the diff (cross-scope path references)', () => {
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/ui/es_archiver/data.json'])).toBe(false);
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/ui/common/es_archives/logs/mappings.json'])).toBe(
+      false
+    );
+    // a data move mixed with moved specs must not stay on the fast path
     expect(
       isScoutTestsOnlyDiff([
-        'pkg/test/scout/ui/helpers/foo.ts',
-        'pkg/test/scout/ui/constants.ts',
+        'pkg/test/scout/new_area/ui/tests/a.spec.ts',
+        'pkg/test/scout/new_area/ui/es_archiver/exploratory_view/data.json',
+      ])
+    ).toBe(false);
+  });
+
+  it('returns false for a global setup file in the diff', () => {
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/ui/global.setup.ts'])).toBe(false);
+  });
+
+  it('keeps spec files and the scope-local Playwright configs on the tests-only fast path', () => {
+    expect(
+      isScoutTestsOnlyDiff([
+        'pkg/test/scout/ui/tests/a.spec.ts',
+        'pkg/test/scout/ui/parallel_tests/b.spec.ts',
         'pkg/test/scout/ui/playwright.config.ts',
         'pkg/test/scout/ui/parallel.playwright.config.ts',
       ])
@@ -133,6 +160,24 @@ describe('criticalScoutFilesTouched', () => {
     expect(
       criticalScoutFilesTouched(['.buildkite/scripts/steps/test/scout/test_run_builder.sh'])
     ).toBe(true);
+  });
+
+  it('returns true for Scout es archive changes (cross-plugin string-path references)', () => {
+    expect(
+      criticalScoutFilesTouched([
+        'x-pack/solutions/observability/plugins/synthetics/test/scout/common/ui/es_archiver/browser/data.json.gz',
+      ])
+    ).toBe(true);
+    expect(criticalScoutFilesTouched(['pkg/test/scout/ui/es_archives/logs/mappings.json'])).toBe(
+      true
+    );
+    expect(criticalScoutFilesTouched(['pkg/test/scout_custom/api/es_archiver/data.json'])).toBe(
+      true
+    );
+    // es archives outside a Scout tree are not Scout-critical
+    expect(
+      criticalScoutFilesTouched(['x-pack/platform/test/functional/es_archives/logs/data.json'])
+    ).toBe(false);
   });
 
   it('returns false for changes outside the critical list', () => {
@@ -452,6 +497,45 @@ describe('resolveScoutTestingScope', () => {
       expect([...scope.affectedConfigPaths]).toEqual(['pkg/test/scout/ui/playwright.config.ts']);
     }
     expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('tests-only fast path'));
+  });
+
+  it('returns full/critical-files when a Scout-tree diff includes es archives (regression: moved es archives)', () => {
+    // Regression for the "Ingest Exploratory View test data" escape: a Scout
+    // namespace split moved es-archive data consumed by another *plugin's*
+    // global.setup.ts via string path — invisible to any dependency graph.
+    // Archive changes are rare, so they force a full Scout run.
+    touch('pkg/test/scout/new_area/ui/playwright.config.ts');
+    const scope = resolveScoutTestingScope(
+      codeChanges(
+        [
+          'pkg/test/scout/new_area/ui/tests/foo.spec.ts',
+          'pkg/test/scout/new_area/ui/es_archiver/exploratory_view/data.json',
+        ],
+        ['@kbn/some-plugin']
+      ),
+      true,
+      log,
+      tmpRoot
+    );
+    expect(scope).toEqual({ kind: 'full', reason: 'critical-files' });
+  });
+
+  it('returns dependency-tree when a Scout-tree diff includes shared scope files (helpers, global setup)', () => {
+    // Shared scope files can be imported by other scopes in the same module,
+    // so the diff must run every config of the affected module.
+    const scope = resolveScoutTestingScope(
+      codeChanges(
+        ['pkg/test/scout/ui/tests/foo.spec.ts', 'pkg/test/scout/ui/global.setup.ts'],
+        ['@kbn/some-plugin']
+      ),
+      true,
+      log,
+      tmpRoot
+    );
+    expect(scope.kind).toBe('dependency-tree');
+    if (scope.kind === 'dependency-tree') {
+      expect([...scope.affectedModuleIds]).toEqual(['@kbn/some-plugin']);
+    }
   });
 
   it('returns dependency-tree when the diff mixes Scout tests and source files', () => {

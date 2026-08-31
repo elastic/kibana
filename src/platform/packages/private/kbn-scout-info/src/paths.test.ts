@@ -22,6 +22,7 @@ import {
   SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
   SCOUT_TESTS_ONLY_SCOPE_GLOBS,
   SCOUT_TESTS_ONLY_EXCLUDE_GLOBS,
+  SCOUT_TESTS_ONLY_SAFE_GLOBS,
 } from './paths';
 
 describe('Scout path globs', () => {
@@ -137,7 +138,8 @@ describe('Scout path globs', () => {
     ];
 
     const shouldNotMatch = [
-      // non-fixtures files inside a scope stay on the tests-only fast path
+      // non-fixtures files inside a scope are not excluded by this list (the
+      // Scout fast path itself uses SCOUT_TESTS_ONLY_SAFE_GLOBS instead)
       'src/platform/plugins/shared/my_plugin/test/scout/ui/tests/a.spec.ts',
       'src/platform/plugins/shared/my_plugin/test/scout/ui/parallel_tests/b.spec.ts',
       'src/platform/plugins/shared/my_plugin/test/scout/ui/helpers/foo.ts',
@@ -155,6 +157,54 @@ describe('Scout path globs', () => {
 
     it.each(shouldNotMatch)('does not match: %s', (testPath) => {
       expect(picomatch.isMatch(testPath, [...SCOUT_TESTS_ONLY_EXCLUDE_GLOBS], { dot: true })).toBe(
+        false
+      );
+    });
+  });
+
+  describe('SCOUT_TESTS_ONLY_SAFE_GLOBS', () => {
+    const shouldMatch = [
+      // spec files
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/tests/a.spec.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/parallel_tests/b.spec.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/api/tests/nested/dir/c.spec.ts',
+      // namespaced spec files
+      'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/d.spec.ts',
+      // custom scout_<server> scope
+      'src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/tests/e.spec.ts',
+      // the scope's own Playwright configs
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/playwright.config.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/parallel.playwright.config.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/my_area/api/playwright.config.ts',
+      // generated manifests
+      'src/platform/plugins/shared/my_plugin/test/scout/.meta/ui/standard.json',
+      'src/platform/plugins/shared/my_plugin/test/scout/my_area/.meta/api/parallel.json',
+    ];
+
+    const shouldNotMatch = [
+      // shared in-scope content: importable or referenced by path from other scopes
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/fixtures/page_objects/foo.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/helpers/foo.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/lib/utils.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/services/api.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/constants.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/global.setup.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/es_archiver/data.json',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/common/es_archives/logs/mappings.json',
+      // other config-like files are not the Playwright configs
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/tsconfig.json',
+      // outside any scout scope
+      'src/platform/plugins/shared/my_plugin/public/tests/foo.test.ts',
+    ];
+
+    it.each(shouldMatch)('matches: %s', (testPath) => {
+      expect(picomatch.isMatch(testPath, [...SCOUT_TESTS_ONLY_SAFE_GLOBS], { dot: true })).toBe(
+        true
+      );
+    });
+
+    it.each(shouldNotMatch)('does not match: %s', (testPath) => {
+      expect(picomatch.isMatch(testPath, [...SCOUT_TESTS_ONLY_SAFE_GLOBS], { dot: true })).toBe(
         false
       );
     });

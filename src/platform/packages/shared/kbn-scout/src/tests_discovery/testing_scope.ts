@@ -15,9 +15,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   CRITICAL_FILES_SCOUT,
-  SCOUT_TESTS_ONLY_EXCLUDE_GLOBS,
   SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
-  SCOUT_TESTS_ONLY_SCOPE_GLOBS,
+  SCOUT_TESTS_ONLY_SAFE_GLOBS,
   SCOUT_TEST_SCOPE_PATTERN,
 } from '@kbn/scout-info';
 import type { CodeChanges } from './code_changes';
@@ -33,8 +32,7 @@ const compileMatchers = (patterns: readonly string[]): readonly Minimatch[] =>
 
 const CRITICAL_FILES_MATCHERS = compileMatchers(CRITICAL_FILES_SCOUT);
 const IGNORE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_IGNORE_PATTERNS);
-const SCOPE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
-const EXCLUDE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_EXCLUDE_GLOBS);
+const SAFE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_SAFE_GLOBS);
 
 const matchesAny = (file: string, matchers: readonly Minimatch[]): boolean =>
   matchers.some((m) => m.match(file));
@@ -61,19 +59,24 @@ export const criticalScoutFilesTouched = (changedFiles: readonly string[]): bool
 
 /**
  * Returns true when, after dropping noise files (READMEs, markdown, changelogs),
- * every remaining changed file lives inside a Scout test scope. Empty diffs
- * (or noise-only diffs) return false — there is nothing to fast-path.
+ * every remaining changed file is a scope-local Scout file: a spec under
+ * `tests/`/`parallel_tests/`, a scope's own Playwright config, or a generated
+ * `.meta/` manifest. Empty diffs (or noise-only diffs) return false — there is
+ * nothing to fast-path.
  *
- * Changes under a Scout `fixtures/` directory are excluded: page objects there
- * can be imported by other plugins, so they fall through to dependency-tree mode.
+ * Everything else — files outside Scout scopes, but also shared in-scope
+ * content such as fixtures, helpers, services, es archives and test data —
+ * disqualifies the fast path: those files can be consumed by *other* scopes
+ * (via imports or by string path, e.g. a `global.setup.ts` loading another
+ * scope's archive), so the diff must fall through to dependency-tree mode,
+ * which runs every config of the affected module.
  */
 export const isScoutTestsOnlyDiff = (changedFiles: readonly string[]): boolean => {
   let sawMeaningful = false;
   for (const file of changedFiles) {
     if (matchesAny(file, IGNORE_MATCHERS)) continue;
     sawMeaningful = true;
-    if (matchesAny(file, EXCLUDE_MATCHERS)) return false;
-    if (!matchesAny(file, SCOPE_MATCHERS)) return false;
+    if (!matchesAny(file, SAFE_MATCHERS)) return false;
   }
   return sawMeaningful;
 };
