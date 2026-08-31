@@ -123,9 +123,6 @@ export function RumHome() {
 }
 
 function DashboardToolbar() {
-  const sizes = useBreakpoints();
-
-  const datePickerStyle = sizes.isMedium ? {} : { maxWidth: '70%' };
 
   return (
     <div style={{ width: '100%' }}>
