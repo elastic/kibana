@@ -242,6 +242,7 @@ export async function initializeSources(
     initialContext,
     adHocDataViews,
     http,
+    projectRouting,
   }: {
     dataViews: DataViewsContract;
     eventAnnotationService: EventAnnotationServiceType;
@@ -255,6 +256,7 @@ export async function initializeSources(
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
     http?: HttpStart;
+    projectRouting?: string;
   },
   options?: InitializationOptions
 ) {
@@ -272,6 +274,7 @@ export async function initializeSources(
     textBasedState,
     dataViewsService: dataViews,
     http,
+    projectRouting,
   });
 
   const { indexPatternRefs, indexPatterns } = await initializeDataViews(
@@ -398,6 +401,7 @@ export async function persistedStateToExpression(
     eventAnnotationService: EventAnnotationServiceType;
     forceDSL?: boolean;
     http?: HttpStart;
+    projectRouting?: string;
   }
 ): Promise<DocumentToExpressionReturnType> {
   const {
@@ -445,6 +449,7 @@ export async function persistedStateToExpression(
     textBasedState,
     dataViewsService: services.dataViews,
     http: services.http,
+    projectRouting: services.projectRouting,
   });
 
   const { indexPatterns, indexPatternRefs } = await initializeDataViews(

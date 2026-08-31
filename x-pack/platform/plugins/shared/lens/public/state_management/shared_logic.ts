@@ -12,6 +12,7 @@ import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import {
+  getChartScopedFilterQuery,
   type VisualizationState,
   type DatasourceStates,
   type DatasourceMap,
@@ -29,7 +30,7 @@ export function mergeToNewDoc(
   persistedDoc: LensDocument | undefined,
   visualization: VisualizationState,
   datasourceStates: DatasourceStates,
-  query: AggregateQuery | Query,
+  query: AggregateQuery | Query | undefined,
   filters: Filter[],
   activeDatasourceId: string | null,
   adHocDataViews: Record<string, DataViewSpec>,
@@ -133,7 +134,10 @@ export function mergeToNewDoc(
     references,
     state: {
       visualization: persistibleVisualizationState,
-      query,
+      // Chart-scoped KQL/Lucene filter only. ES|QL queries live exclusively
+      // on the text-based datasource layers (`datasourceStates.textBased`);
+      // an aggregate editor query is never persisted into this slot.
+      query: getChartScopedFilterQuery(query),
       filters: [...persistableFilters, ...adHocFilters],
       datasourceStates: persistibleDatasourceStates,
       internalReferences,
