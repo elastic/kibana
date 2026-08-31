@@ -152,6 +152,33 @@ describe('useHasRumData', () => {
     expect(result.current.hasData).toBe(false);
   });
 
+  it('keeps the fallback enabled when the tier restricted query is re-issued', () => {
+    // The tier restricted query can be re-issued while the fallback is still in flight. If that
+    // disables the fallback, the stale empty tiered result becomes the answer and the onboarding
+    // screen is shown to a user who does have data, just on a colder tier.
+    responses[TIERED] = { data: hits(0), loading: false };
+    responses[UNBOUNDED] = { data: undefined, loading: true };
+
+    const { result, rerender } = renderHook(() => useHasRumData());
+    expect(callFor(UNBOUNDED)?.params.index).toBe(DATA_VIEW_TITLE);
+
+    // the tier restricted query starts over
+    responses[TIERED] = { data: hits(0), loading: true };
+    rerender();
+
+    expect(callFor(UNBOUNDED)?.params.index).toBe(DATA_VIEW_TITLE);
+    expect(result.current.hasData).toBe(false);
+    expect(result.current.loading).toBe(true);
+
+    // ...and the fallback finally answers
+    responses[TIERED] = { data: hits(0), loading: false };
+    responses[UNBOUNDED] = { data: hits(20), loading: false };
+    rerender();
+
+    expect(result.current.hasData).toBe(true);
+    expect(result.current.loading).toBe(false);
+  });
+
   it('reports no data when neither query finds any', () => {
     responses[TIERED] = { data: hits(0), loading: false };
     responses[UNBOUNDED] = { data: hits(0), loading: false };

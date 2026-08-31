@@ -7,7 +7,7 @@
 
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   formatHasRumResult,
   hasRumDataQuery,
@@ -33,7 +33,18 @@ export function useHasRumData() {
     }
   );
 
-  const needsFallback = !loading && tiered !== undefined && tiered.hits.total.value === 0;
+  const tieredIsEmpty = !loading && tiered !== undefined && tiered.hits.total.value === 0;
+
+  // Latch the decision for as long as we are looking at the same data view. `tieredIsEmpty` drops
+  // back to false whenever the tier restricted query is re-issued, and it gates the fallback's
+  // `index`, so without the latch a re-issue disables the fallback mid-flight and the stale empty
+  // tiered result briefly becomes the answer — which renders the onboarding screen at a user who
+  // does have data.
+  const latchedFor = useRef<string | undefined>(undefined);
+  if (tieredIsEmpty) {
+    latchedFor.current = dataViewTitle;
+  }
+  const needsFallback = tieredIsEmpty || latchedFor.current === dataViewTitle;
 
   const { data: fallback, error: fallbackError } = useEsSearch(
     {
@@ -46,7 +57,10 @@ export function useHasRumData() {
     }
   );
 
-  const response = needsFallback ? fallback : tiered;
+  // A latched fallback must not mask a later tier restricted hit, e.g. a deployment that starts
+  // ingesting again while the page is open.
+  const tieredHasData = tiered !== undefined && tiered.hits.total.value > 0;
+  const response = tieredHasData || !needsFallback ? tiered : fallback;
 
   const fallbackHasResult = fallback !== undefined || fallbackError !== undefined;
 
