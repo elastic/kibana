@@ -14,6 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/workflows"
   ]
 }

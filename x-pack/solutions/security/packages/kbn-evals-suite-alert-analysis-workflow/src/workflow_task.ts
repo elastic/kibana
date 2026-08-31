@@ -8,9 +8,11 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { readAgentToolCallsFromTraces } from '@kbn/security-evals-workflow-traces';
 import {
   extractAgentConversationIds,
+  readAgentToolCallsFromTraces,
+} from '@kbn/security-evals-workflow-traces';
+import {
   TerminalExecutionStatuses,
   type ExecutionStatus,
   type WorkflowExecutionDto,

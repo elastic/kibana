@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-security-evals-workflow-traces
 dependsOn:
   - '@kbn/tooling-log'
+  - '@kbn/workflows'
 tags:
   - shared-common
   - package

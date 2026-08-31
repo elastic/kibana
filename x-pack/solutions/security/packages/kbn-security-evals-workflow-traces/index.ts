@@ -10,3 +10,9 @@ export {
   type ReadAgentToolCallsFromTracesParams,
   type ReadAgentToolCallsFromTracesResult,
 } from './src/read_agent_tool_calls_from_traces';
+
+export {
+  extractAgentConversationIds,
+  extractFirstAgentConversationId,
+  type AgentConversationId,
+} from './src/agent_conversation_ids';

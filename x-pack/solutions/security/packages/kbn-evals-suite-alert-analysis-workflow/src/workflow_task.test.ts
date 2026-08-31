@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { extractAgentConversationIds } from '@kbn/workflows';
+import { extractAgentConversationIds } from '@kbn/security-evals-workflow-traces';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 
 const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
