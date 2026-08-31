@@ -57,6 +57,7 @@ export const RUN_QUOTA_HOUSEKEEPING_INTERVAL_MS = 5 * 60_000;
 
 const RETENTION_DAYS = 7;
 const SPACE_PAGE_SIZE = 1000;
+const SPACE_SAVED_OBJECT_TYPE = 'space';
 
 export interface ReachabilityTargetsResult<T> {
   targets: T;
@@ -144,7 +145,7 @@ const listSpaceIds = async (
   let page = 1;
   while (!signal.aborted) {
     const response = await internalRepository.find({
-      type: 'space',
+      type: SPACE_SAVED_OBJECT_TYPE,
       page,
       perPage: SPACE_PAGE_SIZE,
     });
@@ -160,7 +161,7 @@ const listSpaceIds = async (
 const toIsoString = (value: Date | string | undefined): string | undefined =>
   value instanceof Date ? value.toISOString() : value;
 
-const createProductionDependencies = async ({
+export const createRunQuotaHousekeepingProductionDependencies = async ({
   coreStart,
   server,
   logger,
@@ -172,7 +173,9 @@ const createProductionDependencies = async ({
   signal: AbortSignal;
 }): Promise<RunQuotaHousekeepingDependencies> => {
   const internalRepository = createRunQuotaInternalRepository(server);
-  const uiSettingsRepository = coreStart.savedObjects.getUnsafeInternalClient();
+  const uiSettingsRepository = coreStart.savedObjects.getUnsafeInternalClient({
+    includedHiddenTypes: [SPACE_SAVED_OBJECT_TYPE],
+  });
   const managementApi = server.workflowsManagement?.management;
 
   return {
@@ -312,7 +315,7 @@ export const registerRunQuotaHousekeepingTask = ({
               return { state: {} };
             }
             const [coreStart] = await core.getStartServices();
-            const dependencies = await createProductionDependencies({
+            const dependencies = await createRunQuotaHousekeepingProductionDependencies({
               coreStart,
               server,
               logger,

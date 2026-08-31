@@ -68,4 +68,30 @@ describe('RunLimitsBanner', () => {
     );
     expect(screen.getByText('Review run limits')).toBeInTheDocument();
   });
+
+  it('stays absent after a raised limit reopens admission despite earlier denials', () => {
+    mockUseRunQuotaStatus.mockReturnValue({
+      data: { enabled: true, canManageLimits: true },
+    } as unknown as ReturnType<typeof useRunQuotaStatus>);
+    mockUseRunQuotas.mockReturnValue({
+      data: {
+        groups: [
+          {
+            group: 'investigation',
+            limit: { enabled: true, max: 60 },
+            counted: 31,
+            totalSkipped: 23,
+          },
+        ],
+      },
+    } as unknown as ReturnType<typeof useRunQuotas>);
+
+    render(
+      <I18nProvider>
+        <RunLimitsBanner />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('significantEventsRunLimitsBanner')).not.toBeInTheDocument();
+  });
 });

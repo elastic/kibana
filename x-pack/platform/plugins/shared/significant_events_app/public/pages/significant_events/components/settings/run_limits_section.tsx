@@ -640,9 +640,9 @@ export const RunLimitsSection = () => {
                 if (!usage) {
                   return null;
                 }
-                const reached =
-                  usage.limit.enabled &&
-                  (usage.counted >= usage.limit.max || usage.totalSkipped > 0);
+                const reached = usage.limit.enabled && usage.counted >= usage.limit.max;
+                const hasEarlierInvestigationDenials =
+                  group === 'investigation' && usage.totalSkipped > 0 && !reached;
                 return (
                   <React.Fragment key={group}>
                     {index > 0 && <EuiHorizontalRule margin="l" />}
@@ -720,6 +720,28 @@ export const RunLimitsSection = () => {
                                   )}
                                 </EuiLink>
                               )}
+                            </p>
+                          </EuiText>
+                        )}
+                        {hasEarlierInvestigationDenials && (
+                          <EuiText size="xs" color="subdued">
+                            <p>
+                              {i18n.translate(
+                                'xpack.significantEventsApp.settings.runLimits.earlierInvestigationDenialsDescription',
+                                {
+                                  defaultMessage:
+                                    'Earlier today, the gate denied {count, plural, one {# investigation request} other {# investigation requests}}.',
+                                  values: { count: usage.totalSkipped },
+                                }
+                              )}{' '}
+                              <EuiLink onClick={() => setShowReview(true)}>
+                                {i18n.translate(
+                                  'xpack.significantEventsApp.settings.runLimits.reviewLinkText',
+                                  {
+                                    defaultMessage: 'Review',
+                                  }
+                                )}
+                              </EuiLink>
                             </p>
                           </EuiText>
                         )}

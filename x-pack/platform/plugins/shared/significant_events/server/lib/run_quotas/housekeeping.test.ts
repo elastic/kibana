@@ -7,6 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
+} from '@kbn/management-settings-ids';
+import {
+  createRunQuotaHousekeepingProductionDependencies,
   ensureRunQuotaHousekeepingScheduled,
   registerRunQuotaHousekeepingTask,
   RUN_QUOTA_HOUSEKEEPING_INTERVAL,
@@ -120,6 +125,79 @@ describe('run quota housekeeping', () => {
     const settings = await readRunQuotaSettings(repository.client);
     expect(settings.driverHealth?.detection.status).toBe('unknown');
     expect(settings.lastHousekeepingAt).toBeUndefined();
+  });
+
+  it('includes hidden spaces when collecting detection reachability targets', async () => {
+    const find = jest.fn().mockResolvedValue({
+      saved_objects: [{ id: 'space-a' }],
+      total: 1,
+    });
+    const asScopedToNamespace = jest.fn((spaceId: string) => ({ spaceId }));
+    const getUnsafeInternalClient = jest.fn().mockReturnValue({
+      find,
+      asScopedToNamespace,
+    });
+    const get = jest.fn((settingId: string) => {
+      if (settingId === OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED) {
+        return Promise.resolve(true);
+      }
+      if (
+        settingId ===
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES
+      ) {
+        return Promise.resolve(15);
+      }
+      throw new Error(`Unexpected setting ${settingId}`);
+    });
+    const asScopedToClient = jest.fn().mockReturnValue({ get });
+    const getWorkflow = jest.fn().mockResolvedValue({
+      lastUpdatedAt: '2026-08-31T10:00:00.000Z',
+    });
+
+    const dependencies = await createRunQuotaHousekeepingProductionDependencies({
+      coreStart: {
+        savedObjects: { getUnsafeInternalClient },
+        uiSettings: { asScopedToClient },
+      } as never,
+      server: {
+        core: {
+          savedObjects: {
+            createInternalRepository: jest.fn().mockReturnValue({}),
+          },
+        },
+        workflowsManagement: { management: { getWorkflow } },
+      } as never,
+      logger: loggingSystemMock.createLogger(),
+      signal: new AbortController().signal,
+    });
+
+    await expect(dependencies.getDetectionTargets()).resolves.toEqual({
+      targets: [
+        {
+          spaceId: 'default',
+          enabled: true,
+          reviewIntervalMinutes: 15,
+          driverUpdatedAt: '2026-08-31T10:00:00.000Z',
+        },
+        {
+          spaceId: 'space-a',
+          enabled: true,
+          reviewIntervalMinutes: 15,
+          driverUpdatedAt: '2026-08-31T10:00:00.000Z',
+        },
+      ],
+      unavailable: false,
+    });
+    expect(getUnsafeInternalClient).toHaveBeenCalledWith({
+      includedHiddenTypes: ['space'],
+    });
+    expect(find).toHaveBeenCalledWith({
+      type: 'space',
+      page: 1,
+      perPage: 1000,
+    });
+    expect(asScopedToNamespace).toHaveBeenCalledWith('default');
+    expect(asScopedToNamespace).toHaveBeenCalledWith('space-a');
   });
 
   it('registers an explicitly bounded, single-attempt task with versioned state', () => {

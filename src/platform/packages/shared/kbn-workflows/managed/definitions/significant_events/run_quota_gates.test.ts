@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import { parse } from 'yaml';
 import CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/continuous_onboarding.yaml';
 import ONBOARDING_YAML from './knowledge_indicators/onboarding.yaml';
@@ -27,6 +18,7 @@ interface WorkflowStep {
   type: string;
   if?: string;
   condition?: string;
+  status?: string;
   timeout?: string;
   with?: {
     path?: string;
@@ -160,18 +152,23 @@ describe('Significant Events run quota workflow invariants', () => {
         ],
       })
     );
-    expect(findStep(definitions.onboarding, 'output_budget_denied').with).toEqual({
-      streamName: '${{ inputs.streamName }}',
-      featuresSkipped: true,
-      featuresConnectorUsed: '',
-      discoveredFeatures: [],
-      featuresTokensUsed: { prompt: 0, completion: 0, total: 0 },
-      queriesSkipped: true,
-      queriesConnectorUsed: '',
-      persistedQueries: [],
-      queriesTokensUsed: { prompt: 0, completion: 0, total: 0 },
-      keepAliveRefreshed: 0,
-    });
+    expect(findStep(definitions.onboarding, 'output_budget_denied')).toEqual(
+      expect.objectContaining({
+        status: 'cancelled',
+        with: {
+          streamName: '${{ inputs.streamName }}',
+          featuresSkipped: true,
+          featuresConnectorUsed: '',
+          discoveredFeatures: [],
+          featuresTokensUsed: { prompt: 0, completion: 0, total: 0 },
+          queriesSkipped: true,
+          queriesConnectorUsed: '',
+          persistedQueries: [],
+          queriesTokensUsed: { prompt: 0, completion: 0, total: 0 },
+          keepAliveRefreshed: 0,
+        },
+      })
+    );
   });
 
   it('fails open only after the per-event reservation gate', () => {

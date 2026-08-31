@@ -108,6 +108,7 @@ steps:
     steps:
       - name: output_budget_denied
         type: workflow.output
+        status: cancelled
         with:
           streamName: '${{ inputs.streamName }}'
           featuresSkipped: true

@@ -174,6 +174,29 @@ describe('RunLimitsSection', () => {
     expect(screen.queryByTestId('significantEventsRunLimitInput-memory')).not.toBeInTheDocument();
   });
 
+  it('shows earlier denials without claiming a raised limit is still reached', () => {
+    setup({
+      response: quotas({
+        groups: [
+          group('detection', { limit: { enabled: true, max: 100 } }),
+          group('investigation', {
+            counted: 31,
+            totalSkipped: 23,
+            limit: { enabled: true, max: 60 },
+          }),
+          group('ki_extraction', { limit: { enabled: true, max: 20 } }),
+          group('memory', { limit: { enabled: false, max: 0 } }),
+        ],
+      }),
+    });
+
+    expect(screen.queryByText(/Limit reached/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Earlier today, the gate denied 23 investigation requests.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Review')).toBeInTheDocument();
+  });
+
   it('saves only the dirty group as a patch and models zero as unlimited', async () => {
     setup();
     fireEvent.change(screen.getByTestId('significantEventsRunLimitInput-detection'), {

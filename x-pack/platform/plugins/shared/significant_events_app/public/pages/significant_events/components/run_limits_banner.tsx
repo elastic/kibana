@@ -22,8 +22,7 @@ export const RunLimitsBanner = () => {
   }
 
   const reachedGroups = quotas.data.groups.filter(
-    ({ limit, counted, totalSkipped }) =>
-      limit.enabled && (counted >= limit.max || totalSkipped > 0)
+    ({ limit, counted }) => limit.enabled && counted >= limit.max
   );
   if (reachedGroups.length === 0) {
     return null;
