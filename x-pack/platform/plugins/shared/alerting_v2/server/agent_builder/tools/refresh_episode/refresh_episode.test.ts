@@ -16,6 +16,7 @@ import {
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import type { EpisodesClient } from '../../../lib/episodes_client';
+import type { RulesClient } from '../../../lib/rules_client';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import { refreshEpisodeTool, refreshEpisodeToolId } from './refresh_episode';
 
@@ -36,6 +37,7 @@ describe('refreshEpisodeTool', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let get: jest.Mock;
+  let getRule: jest.Mock;
   let canRead: jest.Mock;
 
   const createPrivilegeCheckerMock = (canReadResult: boolean = true) => {
@@ -49,6 +51,7 @@ describe('refreshEpisodeTool', () => {
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
     get = jest.fn();
+    getRule = jest.fn();
   });
 
   const createTool = (canReadResult: boolean = true) =>
@@ -57,6 +60,7 @@ describe('refreshEpisodeTool', () => {
       episodeId: 'ep-1',
       logger: loggerService,
       getEpisodesClient: () => ({ get } as unknown as EpisodesClient),
+      getRulesClient: () => ({ getRule } as unknown as RulesClient),
       getPrivilegeChecker: () => createPrivilegeCheckerMock(canReadResult),
     });
 
@@ -105,13 +109,91 @@ describe('refreshEpisodeTool', () => {
       });
     });
 
-    it('normalizes null nullable fields', async () => {
-      const episodeWithNulls: AlertEpisode = {
+    it('includes the episode label when the rule can be loaded', async () => {
+      get.mockResolvedValueOnce(baseEpisodeData);
+      getRule.mockResolvedValueOnce({ metadata: { name: 'Host CPU high' } });
+
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
+
+      expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: expect.objectContaining({ 'episode.label': 'Host CPU high alert' }),
+          },
+        ],
+      });
+    });
+
+    it('includes the rule name and group when both are available', async () => {
+      get.mockResolvedValueOnce({
         ...baseEpisodeData,
+        episode_data: JSON.stringify({ host: { name: 'web-01' } }),
+      });
+      getRule.mockResolvedValueOnce({
+        metadata: { name: 'Host CPU high' },
+        grouping: { fields: ['host.name'] },
+      });
+
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: expect.objectContaining({ 'episode.label': 'Host CPU high alert for web-01' }),
+          },
+        ],
+      });
+    });
+
+    it('falls back to rule ID label when the rule cannot be loaded and there is no group name', async () => {
+      get.mockResolvedValueOnce(baseEpisodeData);
+      getRule.mockRejectedValueOnce(new Error('not found'));
+
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' }),
+          },
+        ],
+      });
+    });
+
+    it('falls back to rule ID label when the rule cannot be loaded and grouping fields are unknown', async () => {
+      get.mockResolvedValueOnce({
+        ...baseEpisodeData,
+        episode_data: JSON.stringify({ host: { name: 'web-01' } }),
+      });
+      getRule.mockRejectedValueOnce(new Error('not found'));
+
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' }),
+          },
+        ],
+      });
+    });
+
+    it('normalizes null optional fields', async () => {
+      const episodeWithNulls = {
+        ...baseEpisodeData,
+        last_ack_action: null,
         last_assignee_uid: null,
+        last_snooze_action: null,
+        snooze_expiry: null,
+        last_tags: null,
         episode_data: null,
         severity: null,
-      };
+      } as AlertEpisode;
       get.mockResolvedValueOnce(episodeWithNulls);
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
@@ -122,7 +204,11 @@ describe('refreshEpisodeTool', () => {
             type: ToolResultType.other,
             data: expect.objectContaining({
               'episode.id': 'ep-1',
+              last_ack_action: undefined,
               last_assignee_uid: undefined,
+              last_snooze_action: undefined,
+              snooze_expiry: undefined,
+              last_tags: undefined,
               episode_data: undefined,
               severity: undefined,
             }),

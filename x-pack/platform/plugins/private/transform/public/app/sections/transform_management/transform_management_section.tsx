@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiPageTemplate,
-  EuiSkeletonText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageTemplate, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   usePageUrlState,
@@ -26,7 +21,6 @@ import {
   type PageUrlState,
 } from '@kbn/ml-url-state';
 
-import { useAppDependencies } from '../../app_dependencies';
 import type { TransformListRow } from '../../common';
 import type { TransformFunction } from '../../../../common/constants';
 import { isTransformStats } from '../../../../common/types/transform_stats';
@@ -55,8 +49,6 @@ import {
 } from '../../../alerting/transform_alerting_flyout';
 import { DanglingTasksWarning } from './components/dangling_task_warning/dangling_task_warning';
 
-const CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY = 'transform.cpsUnsupportedCalloutDismissed';
-
 const getDefaultTransformListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
@@ -72,7 +64,7 @@ const ErrorMessageCallout: FC<{
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut
+      <KbnDangerCallout
         size="s"
         title={
           <>
@@ -82,8 +74,6 @@ const ErrorMessageCallout: FC<{
             )}
           </>
         }
-        color="danger"
-        iconType="error"
       />
     </>
   );
@@ -92,22 +82,11 @@ const ErrorMessageCallout: FC<{
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
-  const { cps, storage } = useAppDependencies();
   const history = useHistory();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
     getDefaultTransformListState()
   );
-
-  const isCpsEnabled = Boolean(cps?.cpsManager);
-  const [isCpsUnsupportedCalloutDismissed, setIsCpsUnsupportedCalloutDismissed] = useState(() => {
-    return isCpsEnabled ? storage.get(CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY) === true : false;
-  });
-
-  const onDismissCpsUnsupportedCallout = useCallback(() => {
-    setIsCpsUnsupportedCalloutDismissed(true);
-    storage.set(CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY, true);
-  }, [storage]);
 
   const {
     isInitialLoading: transformNodesInitialLoading,
@@ -184,9 +163,7 @@ export const TransformManagement: FC = () => {
         );
     return (
       <>
-        <EuiCallOut
-          iconType="warning"
-          color="warning"
+        <KbnWarningCallout
           data-test-subj="transformPageReauthorizeCallout"
           title={`${insufficientPermissionsMsg} ${actionMsg}`}
         />
@@ -286,30 +263,6 @@ export const TransformManagement: FC = () => {
               />
             ) : null}
             <EuiSpacer size="s" />
-
-            {isCpsEnabled && !isCpsUnsupportedCalloutDismissed && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCallOut
-                  title={i18n.translate('xpack.transform.cpsUnsupportedCallout.title', {
-                    defaultMessage: 'Cross-project search for transforms coming soon',
-                  })}
-                  iconType="info"
-                  onDismiss={onDismissCpsUnsupportedCallout}
-                  dismissButtonProps={{ 'data-test-subj': 'transformCpsUnsupportedCalloutDismiss' }}
-                  data-test-subj="transformCpsUnsupportedCallout"
-                  announceOnMount
-                >
-                  <p>
-                    <FormattedMessage
-                      id="xpack.transform.cpsUnsupportedCallout.description"
-                      defaultMessage="While we're working on this feature, all transform search scope will be limited to the current project."
-                    />
-                  </p>
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            )}
 
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />

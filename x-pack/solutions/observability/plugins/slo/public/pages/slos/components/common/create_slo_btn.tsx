@@ -54,7 +54,7 @@ export function CreateSloBtn() {
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="createFromTemplate"
-        icon="document"
+        icon="pagesSelect"
         onClick={handleClickCreateFromTemplate}
         data-test-subj="slosPageCreateFromTemplateButton"
       >

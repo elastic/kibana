@@ -23,7 +23,7 @@ const ruleCreatedEvent: RuleCreatedEvent = {
 };
 
 // Workflows only ever see the projected rule reference, never the full payload.
-const projectedWorkflowPayload = { rule: { ruleId: 'rule-1', spaceId: 'my-space' } };
+const projectedWorkflowPayload = { rule: { ruleId: 'rule-1', spaceId: 'my-space', tags: [] } };
 
 describe('RuleWorkflowSubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;

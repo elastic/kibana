@@ -30,7 +30,6 @@
     "optionalPlugins": [
       "agentBuilder",
       "agentBuilderSml",
-      "alertingVTwo",
       "cloud",
       "esql",
       "serverless",

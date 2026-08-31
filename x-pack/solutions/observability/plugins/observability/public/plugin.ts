@@ -257,7 +257,7 @@ export class Plugin
           },
         })
       );
-      pluginsSetup.cases.attachmentFramework.registerUnified(getObservabilityAlertType());
+      pluginsSetup.cases.attachmentFramework.registerAttachment(getObservabilityAlertType());
     }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';

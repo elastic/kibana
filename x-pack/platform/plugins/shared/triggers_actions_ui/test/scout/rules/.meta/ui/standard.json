@@ -1,13 +1,12 @@
 {
-  "sha1": "",
+  "sha1": "1daeef4ecbb0a7f4baaa0b099f37dfe6087aebc7",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "9f547028a12316e-5cf2b67759c1f24",
-      "title": "Edit Rule Flow Edit from rules list: navigates to edit page when clicking edit button",
+      "id": "9f547028a12316e-09381f597be5a4a",
+      "title": "Edit Rule Flow Edit from rules list: navigate, cancel, and save",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -20,22 +19,8 @@
       }
     },
     {
-      "id": "9f547028a12316e-68403d033f047ab",
-      "title": "Edit Rule Flow Edit from rules list: returns to rules list after saving",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/edit_rule_flow.spec.ts",
-        "line": 43,
-        "column": 9
-      }
-    },
-    {
-      "id": "9f547028a12316e-582a0268d0dc636",
-      "title": "Edit Rule Flow Edit from rules list: returns to rules list after clicking cancel",
+      "id": "9f547028a12316e-445383c24546a8b",
+      "title": "Edit Rule Flow Edit from rule details page: navigate, cancel, and save",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -44,49 +29,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/edit_rule_flow.spec.ts",
         "line": 69,
-        "column": 24
-      }
-    },
-    {
-      "id": "9f547028a12316e-288010b987965cf",
-      "title": "Edit Rule Flow Edit from rule details page: navigates to edit page when clicking edit button",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/edit_rule_flow.spec.ts",
-        "line": 80,
-        "column": 11
-      }
-    },
-    {
-      "id": "9f547028a12316e-17f40b5cc1905d3",
-      "title": "Edit Rule Flow Edit from rule details page: returns to rule details page after saving",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/edit_rule_flow.spec.ts",
-        "line": 87,
-        "column": 80
-      }
-    },
-    {
-      "id": "9f547028a12316e-723a97edec75f6f",
-      "title": "Edit Rule Flow Edit from rule details page: returns to rule details page after clicking cancel",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/edit_rule_flow.spec.ts",
-        "line": 111,
-        "column": 11
+        "column": 13
       }
     },
     {
@@ -99,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rule_action_alerts_filter.spec.ts",
-        "line": 150,
+        "line": 151,
         "column": 86
       }
     },
@@ -169,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 47,
-        "column": 24
+        "line": 19,
+        "column": 45
       }
     },
     {
@@ -183,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 78,
-        "column": 5
+        "line": 52,
+        "column": 13
       }
     },
     {
@@ -197,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 117,
-        "column": 5
+        "line": 89,
+        "column": 85
       }
     },
     {
@@ -211,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 149,
-        "column": 65
+        "line": 124,
+        "column": 24
       }
     },
     {
@@ -225,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 189,
-        "column": 11
+        "line": 164,
+        "column": 24
       }
     },
     {
@@ -239,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 217,
-        "column": 24
+        "line": 193,
+        "column": 5
       }
     },
     {
@@ -253,13 +196,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_flow.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 26
       }
     },
     {
-      "id": "0c4f47adf651dc1-d46876d1517f6f9",
-      "title": "Rules create flow creates a rule and displays it in the rules list",
+      "id": "0c4f47adf651dc1-c2973d4795705a5",
+      "title": "Rules create flow creates a rule, redirects to details, and shows it in the list",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -267,22 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_flow.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 11
-      }
-    },
-    {
-      "id": "0c4f47adf651dc1-941895179452f96",
-      "title": "Rules create flow redirects to the rule details page after saving a new rule",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_flow.spec.ts",
-        "line": 82,
-        "column": 24
       }
     },
     {
@@ -295,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 66,
+        "line": 65,
         "column": 5
       }
     },
@@ -309,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 69,
+        "line": 68,
         "column": 23
       }
     },
@@ -323,13 +252,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 76,
+        "line": 75,
         "column": 16
       }
     },
     {
-      "id": "19312e1cea88533-352b2eaa6e31174",
-      "title": "Rules home page renders the rules list with a newly-created rule visible",
+      "id": "19312e1cea88533-ef8cea9df03567e",
+      "title": "Rules home page renders a newly-created rule and opens its details",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -337,27 +266,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 83,
+        "line": 82,
         "column": 20
       }
     },
     {
-      "id": "19312e1cea88533-cf41b97453bbbad",
-      "title": "Rules home page navigates to the rule details page when clicking a rule in the list",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_home_page.spec.ts",
-        "line": 101,
-        "column": 16
-      }
-    },
-    {
-      "id": "03978358df368fa-b1be38b2d4b56e5",
-      "title": "Rules page navigation and loading redirects to Stack Management rules page",
+      "id": "03978358df368fa-3e48a64dc4d9cf8",
+      "title": "Rules page navigation and loading loads the Stack Management rules page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -365,41 +280,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_navigation.spec.ts",
-        "line": 26,
-        "column": 24
-      }
-    },
-    {
-      "id": "03978358df368fa-1211e89e04348b2",
-      "title": "Rules page navigation and loading loads with the correct page title",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_navigation.spec.ts",
-        "line": 30,
+        "line": 24,
         "column": 8
       }
     },
     {
-      "id": "03978358df368fa-b39978856446ad2",
-      "title": "Rules page navigation and loading displays the rules list",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_navigation.spec.ts",
-        "line": 31,
-        "column": 24
-      }
-    },
-    {
-      "id": "c7ce1e38cc7f5ad-57791701106b473",
-      "title": "Rules page tab functionality selects the Rules tab by default on load",
+      "id": "c7ce1e38cc7f5ad-e228a5356e5c28a",
+      "title": "Rules page tab functionality navigate to the Rules and Logs tabs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -407,69 +294,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs.spec.ts",
-        "line": 31,
-        "column": 24
+        "line": 29,
+        "column": 8
       }
     },
     {
-      "id": "c7ce1e38cc7f5ad-baebad54642ecd3",
-      "title": "Rules page tab functionality shows the Logs tab when the user has permission",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs.spec.ts",
-        "line": 35,
-        "column": 44
-      }
-    },
-    {
-      "id": "c7ce1e38cc7f5ad-375bbd42989e239",
-      "title": "Rules page tab functionality navigates to rules logs tab when clicking the Logs tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs.spec.ts",
-        "line": 38,
-        "column": 5
-      }
-    },
-    {
-      "id": "c7ce1e38cc7f5ad-7f5a1d7fce883be",
-      "title": "Rules page tab functionality navigates back to rules list when clicking the Rules tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs.spec.ts",
-        "line": 42,
-        "column": 12
-      }
-    },
-    {
-      "id": "c7ce1e38cc7f5ad-9ae519159ac0aa4",
-      "title": "Rules page tab functionality updates the URL correctly when switching back and forth between tabs",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs.spec.ts",
-        "line": 49,
-        "column": 5
-      }
-    },
-    {
-      "id": "62e8d809df42e39-5089e2cd39a0734",
-      "title": "Rules settings flyout the rules settings link is enabled",
+      "id": "62e8d809df42e39-70e582e72ffdc19",
+      "title": "Rules settings flyout opens, shows configured values, and persists changes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -477,36 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_settings.spec.ts",
-        "line": 81,
-        "column": 7
-      }
-    },
-    {
-      "id": "62e8d809df42e39-6fa8ceddad3b668",
-      "title": "Rules settings flyout opens the rules settings flyout with the configured values",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_settings.spec.ts",
-        "line": 85,
-        "column": 30
-      }
-    },
-    {
-      "id": "62e8d809df42e39-904f40306eb4327",
-      "title": "Rules settings flyout modifies the rules settings and persists them",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_settings.spec.ts",
-        "line": 93,
-        "column": 11
+        "line": 36,
+        "column": 65
       }
     }
   ]

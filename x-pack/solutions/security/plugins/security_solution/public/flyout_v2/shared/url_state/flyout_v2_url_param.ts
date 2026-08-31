@@ -239,6 +239,7 @@ export interface EntityRiskInputsDescriptor {
   entityType: string;
   entityName: string;
   entityId?: string;
+  subTab?: string;
 }
 
 export interface EntityAnomalyInsightsDescriptor {

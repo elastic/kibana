@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -182,6 +182,19 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editSubActionProperty]
   );
 
+  /**
+   * EuiComboBox marks itself as invalid when the typed text does not resolve to a selected option,
+   * so the same condition drives the error message shown to the user.
+   */
+  const [groupingByInvalidSearch, setGroupingByInvalidSearch] = useState(false);
+
+  const onGroupingBySearchChange = useCallback(
+    (searchValue: string, hasMatchingOptions = false) => {
+      setGroupingByInvalidSearch(searchValue.length > 0 && !hasMatchingOptions);
+    },
+    []
+  );
+
   const onChangeMaxCasesToOpend: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
       editSubActionProperty('maximumCasesToOpen', Number(event.target.value));
@@ -284,7 +297,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <EuiFormRow fullWidth label={i18n.GROUP_BY_ALERT} labelAppend={OptionalFieldLabel}>
+          <EuiFormRow
+            fullWidth
+            label={i18n.GROUP_BY_ALERT}
+            labelAppend={OptionalFieldLabel}
+            isInvalid={groupingByInvalidSearch}
+            error={groupingByInvalidSearch ? [i18n.GROUP_BY_ALERT_INVALID_FIELD_ERROR] : []}
+          >
             <EuiComboBox
               fullWidth
               isClearable={true}
@@ -292,8 +311,10 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
               data-test-subj="group-by-alert-field-combobox"
               isLoading={loadingAlertDataViews}
               isDisabled={loadingAlertDataViews}
+              isInvalid={groupingByInvalidSearch}
               options={options}
               onChange={onChangeComboBox}
+              onSearchChange={onGroupingBySearchChange}
               selectedOptions={selectedOptions}
             />
           </EuiFormRow>

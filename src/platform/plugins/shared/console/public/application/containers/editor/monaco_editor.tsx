@@ -279,6 +279,12 @@ export const MonacoEditor = ({
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
+          // Only let Enter accept an auto-triggered suggestion when accepting it would actually
+          // change the text. Without this, a fully typed term (e.g. `?pretty`) keeps the widget
+          // open and Enter gets consumed by a no-op acceptance instead of inserting a new line.
+          // Snippets (e.g. conditional templates) always count as a text edit, so they are
+          // still accepted with Enter.
+          acceptSuggestionOnEnter: 'smart',
           // Force the hover views to always render below the cursor to avoid clipping
           // when the cursor is near the top of the editor.
           hover: {

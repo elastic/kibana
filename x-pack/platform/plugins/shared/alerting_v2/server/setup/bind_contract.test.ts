@@ -8,16 +8,18 @@
 import { Container, ContainerModule } from 'inversify';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ServiceToken } from '@kbn/core-di';
-import { Start } from '@kbn/core-di';
+import { Setup, Start } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import { RulesClient } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
+import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
-import type { AlertingServerStart } from '../types';
+import type { AlertingServerSetup, AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
 
 const AlertingStartToken = Start as ServiceToken<AlertingServerStart>;
+const AlertingSetupToken = Setup as ServiceToken<AlertingServerSetup>;
 
 describe('bindContract', () => {
   let container: Container;
@@ -42,8 +44,16 @@ describe('bindContract', () => {
       fork,
       getContainer: jest.fn(() => container),
     } as never);
+    container.bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
 
     container.load(new ContainerModule((options) => bindContract(options)));
+  });
+
+  it('exposes registerArtifactType on the setup contract', () => {
+    const setup = container.get(AlertingSetupToken);
+    expect(setup).toEqual({
+      registerArtifactType: expect.any(Function),
+    });
   });
 
   it('exposes all client factories on the start contract', () => {

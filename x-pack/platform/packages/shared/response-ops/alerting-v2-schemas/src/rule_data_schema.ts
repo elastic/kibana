@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
-import { ARTIFACT_DATA_SCHEMAS } from './artifact_data_schemas';
+import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
 import { durationSchema, tagsResponseSchema, tagsSchema } from './common';
 import {
@@ -42,10 +41,19 @@ export const esqlQuerySchema = z
 /** Kind */
 
 export const ruleKindSchema = z
-  .enum(['alert', 'signal'])
-  .describe(
-    'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
-  );
+  .union([
+    z
+      .literal('alert')
+      .describe(
+        'Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.'
+      ),
+    z
+      .literal('signal')
+      .describe(
+        'Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.'
+      ),
+  ])
+  .describe('The kind of the rule.');
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
@@ -77,7 +85,8 @@ export const metadataSchema = z
       ),
   })
   .strict()
-  .describe('Rule metadata.');
+  .describe('Rule metadata.')
+  .meta({ id: 'alerting_rule_metadata' });
 
 /** Schedule (required) */
 
@@ -97,7 +106,8 @@ export const scheduleSchema = z
       .describe('Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.'),
   })
   .strict()
-  .describe('Execution schedule configuration.');
+  .describe('Execution schedule configuration.')
+  .meta({ id: 'alerting_rule_schedule' });
 
 /** Query (required) */
 
@@ -106,8 +116,16 @@ export const queryFormat = queryFormatSchema.enum;
 export type QueryFormat = z.infer<typeof queryFormatSchema>;
 
 /** Recovery strategy. */
-export const recoveryStrategySchema = z.enum(['no_breach', 'query', 'none']);
-export const recoveryStrategy = recoveryStrategySchema.enum;
+export const recoveryStrategySchema = z.union([
+  z.literal('no_breach').describe('recovers groups that stop breaching (default).'),
+  z.literal('query').describe('uses a custom recovery query to detect recovery.'),
+  z.literal('none').describe('disables recovery entirely.'),
+]);
+export const recoveryStrategy = {
+  no_breach: 'no_breach',
+  query: 'query',
+  none: 'none',
+} as const;
 export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
 
 /**
@@ -116,8 +134,24 @@ export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
  * Note: `'emit'` is a valid stored/engine value but is temporarily rejected as
  * write-API input (create/update).
  */
-export const noDataStrategySchema = z.enum(['last_known_status', 'emit', 'recover', 'none']);
-export const noDataStrategy = noDataStrategySchema.enum;
+export const noDataStrategySchema = z.union([
+  z
+    .literal('last_known_status')
+    .describe('Holds the last known episode status when no data is present.'),
+  z
+    .literal('emit')
+    .describe(
+      'Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.'
+    ),
+  z.literal('recover').describe('Resolves the alert episode to inactive on the first no-data run.'),
+  z.literal('none').describe('No-data situations are ignored (default).'),
+]);
+export const noDataStrategy = {
+  last_known_status: 'last_known_status',
+  emit: 'emit',
+  recover: 'recover',
+  none: 'none',
+} as const;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
 /**
@@ -138,7 +172,7 @@ export const esqlQuerySegmentSchema = z
 const composedBreachSchema = z
   .object({
     segment: esqlQuerySegmentSchema.describe(
-      'Appendable ES|QL segment for breach detection (required).'
+      "A clause appended to the end of the rule's ES|QL query. Required in breach blocks."
     ),
   })
   .strict();
@@ -178,23 +212,27 @@ export const composedQuerySchema = z
     base: esqlQuerySchema.describe(
       'Base ES|QL query. Time filters are applied automatically via the lookback window.'
     ),
-    breach: composedBreachSchema.describe('Breach detection configuration (required).'),
+    breach: composedBreachSchema
+      .optional()
+      .describe('Breach detection configuration. Omit to treat every base row as a breach.'),
     recovery: composedRecoverySchema
       .optional()
       .describe('Recovery query segment. Required when recovery_strategy is "query".'),
   })
   .strict()
   .check((ctx) => {
-    const breachError = validateEsqlQuery(
-      composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
-    );
-    if (breachError) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['breach', 'segment'],
-        message: breachError,
-        input: ctx.value.breach.segment,
-      });
+    if (ctx.value.breach) {
+      const breachError = validateEsqlQuery(
+        composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
+      );
+      if (breachError) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['breach', 'segment'],
+          message: breachError,
+          input: ctx.value.breach.segment,
+        });
+      }
     }
     if (ctx.value.recovery) {
       const recoveryError = validateEsqlQuery(
@@ -210,7 +248,8 @@ export const composedQuerySchema = z
       }
     }
   })
-  .describe('Composed query: a shared base with appendable breach and recovery segments.');
+  .describe('Composed query: a shared base with appendable breach and recovery segments.')
+  .meta({ id: 'alerting_composed_rule_query' });
 
 export const standaloneQuerySchema = z
   .object({
@@ -224,23 +263,33 @@ export const standaloneQuerySchema = z
       .describe('No-data detection query. Required when no_data_strategy is not "none".'),
   })
   .strict()
-  .describe('Standalone queries: independent full queries for breach, recovery, and no_data.');
+  .describe('Standalone queries: independent full queries for breach, recovery, and no_data.')
+  .meta({ id: 'alerting_standalone_rule_query' });
 
 export const querySchema = z
   .discriminatedUnion('format', [composedQuerySchema, standaloneQuerySchema])
-  .describe('Detection query configuration.');
+  .describe('Detection query configuration.')
+  .meta({ id: 'alerting_rule_query' });
 
 export type Query = z.infer<typeof querySchema>;
 
 /**
  * Returns the effective breach ES|QL query — what the executor actually runs
  * to detect breaches. For composed queries this is `base` concatenated with
- * `breach.segment`; for standalone it's `breach.query` verbatim.
+ * `breach.segment`, or just `base` when there is no segment to append. For
+ * standalone it's `breach.query` verbatim.
+ *
+ * A blank segment is treated the same as an omitted `breach` block: storage
+ * persists conditionless composed rules as an empty segment, so both shapes
+ * reach this function and must produce `base` without a trailing pipe.
  */
-export const getBreachEsqlQuery = (query: Query): string =>
-  query.format === 'composed'
-    ? composeEsqlQuery(query.base, query.breach.segment)
-    : query.breach.query;
+export const getBreachEsqlQuery = (query: Query): string => {
+  if (query.format === 'standalone') {
+    return query.breach.query;
+  }
+  const segment = query.breach?.segment;
+  return segment?.trim() ? composeEsqlQuery(query.base, segment) : query.base;
+};
 
 /**
  * Returns the recovery ES|QL query when `recoveryStrategy` is `'query'`,
@@ -334,7 +383,8 @@ export const groupingSchema = z
       ),
   })
   .strict()
-  .describe('Grouping configuration.');
+  .describe('Grouping configuration.')
+  .meta({ id: 'alerting_rule_grouping' });
 
 /** Artifacts (optional) */
 
@@ -348,9 +398,12 @@ const artifactSchema = z
   })
   .strict()
   .check((ctx) => {
-    const fields = Object.entries(ctx.value.data);
-
-    if (fields.length > MAX_ARTIFACT_DATA_FIELDS) {
+    // Only type-agnostic structure belongs here. How large a `data` value may be
+    // depends on the artifact type, which this schema deliberately does not know:
+    // registered types are bounded by their own `dataSchema` (applied server-side,
+    // where the artifact-type registry is available) and unregistered types pass
+    // through verbatim so a disabled or rolled-back plugin cannot fail writes.
+    if (Object.keys(ctx.value.data).length > MAX_ARTIFACT_DATA_FIELDS) {
       ctx.issues.push({
         code: 'custom',
         path: ['data'],
@@ -358,62 +411,29 @@ const artifactSchema = z
         input: ctx.value.data,
       });
     }
-
-    const typeSchema = ARTIFACT_DATA_SCHEMAS[ctx.value.type];
-    const declared = typeSchema ? new Set(Object.keys(typeSchema.shape)) : undefined;
-    const typeResult = typeSchema?.safeParse(ctx.value.data);
-
-    if (typeResult && !typeResult.success) {
-      for (const issue of typeResult.error.issues) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['data', ...issue.path],
-          message: issue.message,
-          input: issue.input,
-        });
-      }
-    }
-
-    // Fields declared by the type schema use that schema's own limits (e.g.
-    // runbook content at 50k). Everything else gets the generic default so
-    // unregistered types stay bounded without a framework change.
-    for (const [field, value] of fields) {
-      if (declared?.has(field)) {
-        continue;
-      }
-
-      const limit = DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
-
-      if (typeof value === 'string') {
-        if (value.length > limit) {
-          ctx.issues.push({
-            code: 'custom',
-            path: ['data', field],
-            message: `Artifact data field "${field}" must be at most ${limit} characters for type "${ctx.value.type}".`,
-            input: value,
-          });
-        }
-        continue;
-      }
-
-      // Structured values are measured serialized, so nesting a payload in an
-      // object or an array cannot buy more room than a plain string field gets.
-      if ((JSON.stringify(value) ?? '').length > limit) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['data', field],
-          message: `Artifact data field "${field}" must serialize to at most ${limit} characters for type "${ctx.value.type}".`,
-          input: value,
-        });
-      }
-    }
-  });
+  })
+  .meta({ id: 'alerting_rule_artifact' });
 
 const artifactsSchema = z
   .array(artifactSchema)
   .max(100)
+  .check((ctx) => {
+    const seen = new Set<string>();
+    for (let index = 0; index < ctx.value.length; index++) {
+      const id = ctx.value[index].id;
+      if (seen.has(id)) {
+        ctx.issues.push({
+          code: 'custom',
+          path: [index, 'id'],
+          message: `Artifact id "${id}" must be unique within the rule.`,
+          input: id,
+        });
+      }
+      seen.add(id);
+    }
+  })
   .describe(
-    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.'
   );
 
 /** Create rule API schema */
@@ -556,7 +576,8 @@ export const createRuleDataSchema = createRuleDataBaseSchema
       'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
     path: ['query', 'no_data'],
   })
-  .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
+  .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy)
+  .meta({ id: 'alerting_new_rule' });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
@@ -613,24 +634,22 @@ export const updateRuleDataSchema = z
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 
 /** Update rule API body schema — adds OCC version on top of update data. */
-export const updateRuleBodySchema = updateRuleDataSchema.extend({
-  version: z
-    .string()
-    .min(1)
-    .max(VERSION_MAX_LENGTH)
-    .optional()
-    .describe('The current version of the rule, used for optimistic concurrency control.'),
-});
+export const updateRuleBodySchema = updateRuleDataSchema
+  .extend({
+    version: z
+      .string()
+      .min(1)
+      .max(VERSION_MAX_LENGTH)
+      .optional()
+      .describe('The current version of the rule, used for optimistic concurrency control.'),
+  })
+  .meta({ id: 'alerting_update_rule' });
 
 export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
 
-/**
- * Schema for rule response data returned from the API.
- * Extends the base rule schema with server-generated fields.
- */
-export const ruleResponseSchema = createRuleDataBaseSchema.extend({
-  id: z.string().describe('Unique rule identifier.'),
-  metadata: metadataSchema.extend({
+/** Rule response metadata — write-path fields plus server-managed `version`. */
+export const ruleResponseMetadataSchema = metadataSchema
+  .extend({
     version: z
       .number()
       .int()
@@ -638,19 +657,30 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
       .describe(
         'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
       ),
-  }),
-  enabled: z.boolean().describe('Whether the rule is enabled.'),
-  created_by: z.string().nullable().describe('User who created the rule.'),
-  created_at: z.string().describe('ISO timestamp when the rule was created.'),
-  updated_by: z.string().nullable().describe('User who last updated the rule.'),
-  updated_at: z.string().describe('ISO timestamp when the rule was last updated.'),
-  version: z
-    .string()
-    .optional()
-    .describe(
-      'The saved object version token of the rule, used for optimistic concurrency control.'
-    ),
-});
+  })
+  .meta({ id: 'alerting_rule_response_metadata' });
+
+/**
+ * Schema for rule response data returned from the API.
+ * Extends the base rule schema with server-generated fields.
+ */
+export const ruleResponseSchema = createRuleDataBaseSchema
+  .extend({
+    id: z.string().describe('Unique rule identifier.'),
+    metadata: ruleResponseMetadataSchema,
+    enabled: z.boolean().describe('Whether the rule is enabled.'),
+    created_by: z.string().nullable().describe('User who created the rule.'),
+    created_at: z.string().describe('ISO timestamp when the rule was created.'),
+    updated_by: z.string().nullable().describe('User who last updated the rule.'),
+    updated_at: z.string().describe('ISO timestamp when the rule was last updated.'),
+    version: z
+      .string()
+      .optional()
+      .describe(
+        'The saved object version token of the rule, used for optimistic concurrency control.'
+      ),
+  })
+  .meta({ id: 'alerting_rule_response' });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
@@ -689,7 +719,8 @@ export const findRulesResponseSchema = z
     page: z.number().describe('The current page number.'),
     per_page: z.number().describe('The number of rules per page.'),
   })
-  .describe('Paginated list of rules.');
+  .describe('Paginated list of rules.')
+  .meta({ id: 'alerting_rule_list_response' });
 
 export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
 
@@ -708,7 +739,9 @@ export const ruleTagsParamsSchema = z
 export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
 
 /** Rule tags response schema. */
-export const ruleTagsResponseSchema = tagsResponseSchema.describe('All unique tags across rules.');
+export const ruleTagsResponseSchema = tagsResponseSchema
+  .describe('All unique tags across rules.')
+  .meta({ id: 'alerting_rule_tags_response' });
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
@@ -730,17 +763,20 @@ export const bulkGetRulesParamsSchema = z
       .max(MAX_BULK_ITEMS)
       .describe('Rule identifiers to retrieve. The response preserved this order.'),
   })
-  .strict();
+  .strict()
+  .meta({ id: 'alerting_bulk_get_rules_request' });
 
 export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
  */
-export const bulkGetRulesResponseSchema = z.object({
-  rules: z
-    .array(ruleResponseSchema)
-    .describe('The requested rules, in the same order as the requested ids.'),
-});
+export const bulkGetRulesResponseSchema = z
+  .object({
+    rules: z
+      .array(ruleResponseSchema)
+      .describe('The requested rules, in the same order as the requested ids.'),
+  })
+  .meta({ id: 'alerting_bulk_get_rules_response' });
 
 export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;

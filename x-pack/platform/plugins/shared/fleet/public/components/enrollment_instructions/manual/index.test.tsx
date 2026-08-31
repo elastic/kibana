@@ -18,9 +18,9 @@ describe('ManualInstructions', () => {
     it('should return instructions for linux_aarch64', async () => {
       expect(result.linux_aarch64.split('\n')).toEqual([
         'curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-linux-arm64.tar.gz ',
-        '  tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
-        '  cd elastic-agent-9.0.0-linux-arm64',
-        '  sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY',
+        'tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
+        'cd elastic-agent-9.0.0-linux-arm64',
+        'sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY',
       ]);
     });
 
@@ -131,9 +131,9 @@ describe('ManualInstructions', () => {
     it('should return instructions for linux_aarch64', async () => {
       expect(result.linux_aarch64.split('\n')).toEqual([
         'curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-linux-arm64.tar.gz ',
-        '  tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
-        '  cd elastic-agent-9.0.0-linux-arm64',
-        '  sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY --install-servers',
+        'tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
+        'cd elastic-agent-9.0.0-linux-arm64',
+        'sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY --install-servers',
       ]);
     });
 
@@ -253,9 +253,9 @@ describe('ManualInstructions', () => {
     it('should return instructions for linux_aarch64', async () => {
       expect(result.linux_aarch64.split('\n')).toEqual([
         'curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-linux-arm64.tar.gz ',
-        '  tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
-        '  cd elastic-agent-9.0.0-linux-arm64',
-        '  sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY --proxy-url=http://test-proxy --proxy-header "test1=header"',
+        'tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
+        'cd elastic-agent-9.0.0-linux-arm64',
+        'sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY --proxy-url=http://test-proxy --proxy-header "test1=header"',
       ]);
     });
 
@@ -381,9 +381,9 @@ describe('ManualInstructions', () => {
     it('should return instructions for linux_aarch64', async () => {
       expect(result.linux_aarch64.split('\n')).toEqual([
         'curl -L -O http://localregistry.co/beats/elastic-agent/elastic-agent-9.0.0-linux-arm64.tar.gz --proxy http://ds-proxy',
-        '  tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
-        '  cd elastic-agent-9.0.0-linux-arm64',
-        '  sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY',
+        'tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
+        'cd elastic-agent-9.0.0-linux-arm64',
+        'sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY',
       ]);
     });
 
@@ -555,9 +555,9 @@ describe('ManualInstructions', () => {
     it('should return instructions for linux_aarch64', async () => {
       expect(result.linux_aarch64.split('\n')).toEqual([
         'curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-linux-arm64.tar.gz ',
-        '  tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
-        '  cd elastic-agent-9.0.0-linux-arm64',
-        '  sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY --certificate-authorities=ca.crt --elastic-agent-cert=agent.crt --elastic-agent-cert-key=PATH_TO_ELASTIC_AGENT_CERT_KEY',
+        'tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
+        'cd elastic-agent-9.0.0-linux-arm64',
+        'sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY --certificate-authorities=ca.crt --elastic-agent-cert=agent.crt --elastic-agent-cert-key=PATH_TO_ELASTIC_AGENT_CERT_KEY',
       ]);
     });
   });

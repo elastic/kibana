@@ -9,8 +9,8 @@ import { EuiIconTip, EuiFormRow, EuiSelect, EuiFlexItem, EuiFlexGroup } from '@e
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { GenericIndexPatternColumn, TimeScaleUnit, FormBasedLayer } from '@kbn/lens-common';
-import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
-import { unitSuffixesLong } from '../../../../common/suffix_formatter';
+import { adjustTimeScaleLabelSuffix, unitSuffixesLong } from '@kbn/lens-common';
+import { operationDefinitionMap } from '../operations';
 
 export function setTimeScaling(
   columnId: string,

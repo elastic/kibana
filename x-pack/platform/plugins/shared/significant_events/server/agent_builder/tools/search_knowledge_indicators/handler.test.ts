@@ -207,6 +207,57 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(kiClient.getFeatures).not.toHaveBeenCalled();
   });
 
+  it('loads topology candidates in one feature search', async () => {
+    streamsClient.listStreams = jest
+      .fn()
+      .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
+    kiClient.getFeatures = jest
+      .fn()
+      .mockImplementation(
+        async (_stream: string, options: { type?: string[]; featureIds?: string[] }) => {
+          if (options.type?.includes('dependency') && !options.featureIds) {
+            return {
+              hits: [
+                makeFeature({
+                  id: 'orders-api-storage',
+                  type: 'dependency',
+                  properties: {
+                    source: 'orders-api',
+                    target: 'storage',
+                    protocol: 'tcp',
+                  },
+                }),
+              ],
+              total: 1,
+            };
+          }
+          return { hits: [], total: 0 };
+        }
+      );
+
+    const result = await searchKnowledgeIndicatorsToolHandler({
+      streamsClient,
+      kiClient,
+      logger,
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency'],
+        feature_ids: ['orders-api'],
+      },
+      view: 'compact',
+    });
+
+    expect(result.knowledge_indicators).toEqual([
+      expect.objectContaining({
+        kind: 'feature',
+        feature: expect.objectContaining({ id: 'orders-api-storage' }),
+      }),
+    ]);
+    expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
+      type: ['dependency'],
+    });
+  });
+
   it('filters requested streamNames against accessible streams', async () => {
     streamsClient.listStreams = jest
       .fn()
@@ -257,7 +308,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
     expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
       type: ['dependency', 'entity'],
-      featureIds: ['service-a'],
     });
     expect(kiClient.getQueryLinks).toHaveBeenCalledWith(['logs.test'], {
       ruleUnbacked: 'exclude',

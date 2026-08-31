@@ -70,6 +70,7 @@ import {
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
 import { DatasetTagsFields, DatasetTagsSummary } from '../../components/dataset_tags';
+import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import {
   DatasetSharedNotice,
   DatasetSpacesBadge,
@@ -183,7 +184,7 @@ export const DatasetDetailPage: React.FC = () => {
     data: exampleScoresData,
     isLoading: isExampleScoresLoading,
     error: exampleScoresError,
-  } = useExampleScores(selectedExample?.id ?? '');
+  } = useExampleScores(selectedExample?.id ?? '', datasetId);
 
   const openMetadataModal = () => {
     setMetadataDescription(dataset?.description ?? '');
@@ -526,9 +527,11 @@ export const DatasetDetailPage: React.FC = () => {
         render: (timestamp: string) => formatDate(timestamp),
       },
       {
-        field: 'evaluator_model',
+        field: 'evaluator_models',
         name: i18n.COLUMN_RUN_EVALUATOR_MODEL,
-        render: (value: EvaluationExperimentSummary['evaluator_model']) => value?.id ?? '-',
+        render: (models: EvaluationExperimentSummary['evaluator_models']) => (
+          <EvaluatorModelsBadge models={models} />
+        ),
       },
       {
         field: 'git_branch',
