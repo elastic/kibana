@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Direction } from '@kbn/evals-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
@@ -47,6 +48,7 @@ export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   kind: 'llm' | 'code';
   origin: EvaluatorOrigin;
   description: string;
+  direction: Direction;
   referenceDataSchema?: z.ZodType<ReferenceData>;
   evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
