@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n-react';
 import { NewsfeedNavButton } from './newsfeed_header_nav_button';
@@ -41,18 +41,16 @@ const renderComponent = (fetchResult: FetchResult | null = createFetchResult()) 
   const fetchResults$ = new BehaviorSubject<FetchResult | void | null>(fetchResult);
   const markAsRead = jest.fn();
   const newsfeedApi: NewsfeedApi = { fetchResults$, markAsRead };
+  const isOpen$ = new BehaviorSubject<boolean>(false);
+  const onToggle = jest.fn();
 
   const result = render(
     <I18nProvider>
-      <NewsfeedNavButton
-        newsfeedApi={newsfeedApi}
-        hasCustomBranding$={of(false)}
-        isServerless={false}
-      />
+      <NewsfeedNavButton newsfeedApi={newsfeedApi} isOpen$={isOpen$} onToggle={onToggle} />
     </I18nProvider>
   );
 
-  return { ...result, newsfeedApi, fetchResults$, markAsRead };
+  return { ...result, newsfeedApi, fetchResults$, markAsRead, isOpen$, onToggle };
 };
 
 describe('NewsfeedNavButton', () => {
@@ -68,32 +66,20 @@ describe('NewsfeedNavButton', () => {
     expect(screen.getByTestId('newsfeedAllRead')).toBeInTheDocument();
   });
 
-  test('opens the flyout when clicked', async () => {
-    renderComponent();
+  test('toggles when clicked', async () => {
+    const { onToggle } = renderComponent();
     await user.click(screen.getByTestId('newsfeedHasUnread'));
-    expect(screen.getByTestId('NewsfeedFlyout')).toBeInTheDocument();
+    expect(onToggle).toHaveBeenCalledTimes(1);
   });
 
-  test('calls markAsRead with item hashes when opened', async () => {
-    const { markAsRead } = renderComponent();
-    await user.click(screen.getByTestId('newsfeedHasUnread'));
-    expect(markAsRead).toHaveBeenCalledWith(['test-hash-1', 'test-hash-2']);
-  });
+  test('reflects the open state on aria-expanded', () => {
+    const { isOpen$ } = renderComponent();
+    expect(screen.getByTestId('newsfeedHasUnread')).toHaveAttribute('aria-expanded', 'false');
 
-  test('shows news items in the flyout', async () => {
-    renderComponent();
-    await user.click(screen.getByTestId('newsfeedHasUnread'));
-    expect(screen.getAllByTestId('newsHeadAlert')).toHaveLength(2);
-  });
-
-  test('closes the flyout when clicked again', async () => {
-    renderComponent();
-    const button = screen.getByTestId('newsfeedHasUnread');
-    await user.click(button);
-    expect(screen.getByTestId('NewsfeedFlyout')).toBeInTheDocument();
-
-    await user.click(button);
-    expect(screen.queryByTestId('NewsfeedFlyout')).not.toBeInTheDocument();
+    act(() => {
+      isOpen$.next(true);
+    });
+    expect(screen.getByTestId('newsfeedHasUnread')).toHaveAttribute('aria-expanded', 'true');
   });
 
   test('updates unread state when fetch results change', () => {
