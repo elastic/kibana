@@ -25,8 +25,6 @@ const UPDATE_RULE_STEP_ID = 'update_rule';
 const RULE_SIGNATURE_ID = `scout-update-rule-step-test`;
 const UPDATED_QUERY = 'host.name: * and not user.name: svc_backup';
 
-// `type` is deliberately omitted: the PATCH endpoint resolves it from the existing rule,
-// which is how automated workflows (e.g. the rule tuning worker) call this step.
 const updateRuleWorkflowYaml = `
 name: security.updateRule step test - valid update
 enabled: true
@@ -36,7 +34,7 @@ steps:
   - name: ${UPDATE_RULE_STEP_ID}
     type: security.updateRule
     with:
-      rule:
+      update:
         rule_id: "${RULE_SIGNATURE_ID}"
         query: "${UPDATED_QUERY}"
         severity: medium
@@ -51,7 +49,7 @@ steps:
   - name: ${UPDATE_RULE_STEP_ID}
     type: security.updateRule
     with:
-      rule:
+      update:
         rule_id: does-not-exist
         severity: medium
 `;
@@ -91,11 +89,13 @@ apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.c
   });
 
   apiTest.afterAll(async ({ apiClient }) => {
+    // Delete workflows
     await Promise.all([
       deleteWorkflow(apiClient, editorHeaders, updateWorkflowId),
       deleteWorkflow(apiClient, editorHeaders, missingRuleWorkflowId),
     ]);
 
+    // Delete created rule
     if (createdRuleId) {
       await apiClient.post(DETECTION_ENGINE_BULK_ACTION_URL, {
         headers: editorHeaders,
@@ -111,9 +111,11 @@ apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.c
 
     expect(execution.status).toBe(ExecutionStatus.COMPLETED);
 
+    // Make sure that the `security.updateRule` step actually ran
     const step = execution.stepExecutions.find((s) => s.stepId === UPDATE_RULE_STEP_ID);
     expect(step).toBeDefined();
 
+    // Check the rule after the update
     const output = step?.output as
       | { id?: string; query?: string; severity?: string; name?: string }
       | undefined;

@@ -21,7 +21,7 @@ export const updateRuleStepDefinition = createServerStepDefinition({
       const { body } = await context.contextManager.callKibanaApi<UpdateRuleOutput>({
         method: 'PATCH',
         path: DETECTION_ENGINE_RULES_URL,
-        body: context.input.rule,
+        body: context.input.update,
       });
       return { output: body };
     } catch (error) {

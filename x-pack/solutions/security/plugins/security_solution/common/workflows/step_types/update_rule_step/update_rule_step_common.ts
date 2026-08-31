@@ -26,7 +26,7 @@ export const UpdateRuleStepId = 'security.updateRule' as const;
 // "type" property is optional, but if you provide it in the editor,
 // it'll narrow the editor completion and validation to that rule type's fields.
 export const updateRuleInputSchema = z.object({
-  rule: z.union([
+  update: z.union([
     EqlRulePatchProps.extend({ type: z.literal('eql').optional() }),
     QueryRulePatchProps.extend({ type: z.literal('query').optional() }),
     SavedQueryRulePatchProps.extend({ type: z.literal('saved_query').optional() }),
@@ -60,7 +60,7 @@ export const updateRuleStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.updateRule.documentation.details',
       {
         defaultMessage:
-          'Partially updates a detection rule in current space via the Patch Rule API endpoint. The rule object is passed under the "rule" property and matches the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-patchrule for the fields of each rule type.',
+          'Partially updates a detection rule in current space via the Patch Rule API endpoint. The fields to update are passed under the "update" property and match the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-patchrule for the fields of each rule type.',
       }
     ),
     examples: [
@@ -69,7 +69,7 @@ export const updateRuleStepCommonDefinition: BaseStepDefinition<
 - name: update_rule
   type: security.updateRule
   with:
-    rule:
+    update:
       rule_id: my-threshold-rule
       type: threshold
       threshold:

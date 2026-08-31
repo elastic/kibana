@@ -13,7 +13,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import type { updateRuleInputSchema } from '../../../../common/workflows/step_types/update_rule_step/update_rule_step_common';
 
 type Context = StepHandlerContext<typeof updateRuleInputSchema>;
-type InputRule = Context['input']['rule'];
+type InputRule = Context['input']['update'];
 
 const RULE_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -22,7 +22,7 @@ describe('updateRuleStepDefinition', () => {
 
   const buildContext = (rule: InputRule): Context =>
     ({
-      input: { rule },
+      input: { update: rule },
       contextManager: mockContextManager,
     } as unknown as Context);
 
