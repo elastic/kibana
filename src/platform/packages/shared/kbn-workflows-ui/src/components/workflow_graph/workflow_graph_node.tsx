@@ -139,7 +139,7 @@ export function resolveNodeColors(
   // Step palette tokens
   const stepOuterBorder = colors.backgroundLightPrimary;
   const stepIconAreaBg = colors.backgroundLightPrimary;
-  const stepInnerBoxBorder = colors.borderBaseSubdued;
+  const stepInnerBoxBorder = colors.borderBasePlain;
   const stepIconColor = colors.primary;
   const stepSelectedBorder = colors.primary;
 
