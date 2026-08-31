@@ -10,7 +10,6 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../../common/ui/fixtures';
 
-const COPY_SESSION_TITLE = 'Checkbox copy session';
 const EXISTING_DASHBOARD_TITLE = 'Existing target dashboard for standalone session';
 const LIBRARY_ONLY_SESSION_TITLE = 'Library only session';
 const NEW_DASHBOARD_SESSION_TITLE = 'Session for new dashboard';
@@ -102,29 +101,6 @@ spaceTest.describe(
         await expect
           .poll(async () => new Set(await dashboard.getSavedSearchRowCounts()).size)
           .toBe(2);
-      }
-    );
-
-    spaceTest(
-      'can save a copy to a new dashboard with the save-as-new toggle',
-      async ({ page, pageObjects }) => {
-        const { dashboard, discover } = pageObjects;
-
-        await discover.writeAndSubmitKqlQuery('test');
-        await discover.saveSearch('Session for checkbox copy');
-        await discover.openSaveSearchModal();
-        await expect(page.testSubj.locator('add-to-dashboard-options')).toBeHidden();
-
-        await discover.saveModal.setSaveAsNew(true);
-        await expect(page.testSubj.locator('add-to-dashboard-options')).toBeVisible();
-        await discover.saveModal.saveToNewDashboard(COPY_SESSION_TITLE);
-        await page.waitForURL(/\/app\/dashboards/);
-        await dashboard.waitForRenderComplete();
-
-        await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
-        await expect(page.testSubj.locator('embeddedSavedSearchDocTable')).toHaveCount(1);
-        await expect(dashboard.getPanelTitlesLocator()).toHaveText([COPY_SESSION_TITLE]);
-        await expect.poll(() => dashboard.getSavedSearchRowCount()).toBeGreaterThan(0);
       }
     );
   }

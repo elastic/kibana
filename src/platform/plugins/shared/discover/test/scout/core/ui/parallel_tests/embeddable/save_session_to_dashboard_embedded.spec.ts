@@ -49,7 +49,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'can edit an existing session and return to the dashboard',
+      'can edit an existing session and save a copy without changing the original',
       async ({ page, pageObjects }) => {
         const { dashboard, discover } = pageObjects;
 
