@@ -29,29 +29,38 @@ jest.mock('@kbn/shared-ux-utility', () => ({
   dynamic: jest.fn(() => () => null),
 }));
 
-jest.mock('./services', () => ({
-  AgentService: jest.fn(),
-  AttachmentsService: jest.fn(() => ({ addAttachmentType: jest.fn() })),
-  RenderersService: jest.fn(() => ({ register: jest.fn() })),
-  ChatService: jest.fn(),
-  ConversationsService: jest.fn(),
-  ConversationTemplatesService: jest.fn(() => ({
-    registerTab: jest.fn(),
-    getTab: jest.fn(),
-    registerTemplateUIDefinition: jest.fn(),
-    getTemplateUIDefinition: jest.fn(),
-  })),
-  DocLinksService: jest.fn(),
-  NavigationService: jest.fn(),
-  ToolsService: jest.fn(),
-  SkillsService: jest.fn(),
-  SmlService: jest.fn(),
-  OAuthClientsService: jest.fn(),
-  PluginsService: jest.fn(),
-  EventsService: jest.fn(),
-  SpaceSettingsService: jest.fn(),
-  AgentBuilderAccessChecker: jest.fn(),
-}));
+jest.mock('./services', () => {
+  const { BehaviorSubject } = jest.requireActual('rxjs');
+  return {
+    AgentService: jest.fn(),
+    AttachmentsService: jest.fn(() => ({ addAttachmentType: jest.fn() })),
+    RenderersService: jest.fn(() => ({ register: jest.fn() })),
+    ChatService: jest.fn(),
+    ConversationsService: jest.fn(() => ({
+      list: jest.fn(() => Promise.resolve([])),
+    })),
+    ConversationTemplatesService: jest.fn(() => ({
+      registerTab: jest.fn(),
+      getTab: jest.fn(),
+      registerTemplateUIDefinition: jest.fn(),
+      getTemplateUIDefinition: jest.fn(),
+    })),
+    DocLinksService: jest.fn(),
+    NavigationService: jest.fn(),
+    ToolsService: jest.fn(),
+    SkillsService: jest.fn(),
+    SmlService: jest.fn(),
+    OAuthClientsService: jest.fn(),
+    PluginsService: jest.fn(),
+    EventsService: jest.fn(() => ({
+      activeConversation$: new BehaviorSubject(null),
+      setActiveConversation: jest.fn(),
+      clearActiveConversation: jest.fn(),
+    })),
+    SpaceSettingsService: jest.fn(),
+    AgentBuilderAccessChecker: jest.fn(),
+  };
+});
 
 jest.mock('./services/attachments', () => ({
   createPublicAttachmentContract: jest.fn(() => ({})),
@@ -134,6 +143,7 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
         catalogue: {},
         agentBuilder: { show: false },
       },
+      getUrlForApp: jest.fn(() => '/app/agent_builder'),
     },
     chrome: {
       sidebar: { getApp: jest.fn(() => sidebarApp) },

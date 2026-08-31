@@ -14,8 +14,16 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  from,
+  map,
+  switchMap,
+  type Subscription,
+} from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -71,6 +79,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { storageKeys } from './application/storage_keys';
+import { appPaths } from './application/utils/app_paths';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
 export class AgentBuilderPlugin
@@ -164,6 +173,34 @@ export class AgentBuilderPlugin
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+    startDependencies.navigation.registerNavigationContent({
+      kind: 'linkList',
+      id: 'agentBuilderRecentlyViewed',
+      target: 'agent_builder',
+      title: i18n.translate('xpack.agentBuilder.navigation.recentlyViewedTitle', {
+        defaultMessage: 'Recently viewed',
+      }),
+      items$: eventsService.activeConversation$.pipe(
+        map((active) => active?.id),
+        distinctUntilChanged(),
+        switchMap(() => from(conversationsService.list({}))),
+        map((conversations) =>
+          [...conversations]
+            .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))
+            .slice(0, 5)
+            .map((c) => ({
+              id: c.id,
+              label: c.title || c.id,
+              href: core.application.getUrlForApp(AGENTBUILDER_APP_ID, {
+                path: appPaths.agent.conversations.byId({
+                  agentId: c.agent_id,
+                  conversationId: c.id,
+                }),
+              }),
+            }))
+        )
+      ),
+    });
     const conversationTemplatesService = new ConversationTemplatesService();
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
