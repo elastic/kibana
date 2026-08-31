@@ -12,7 +12,6 @@ import {
   EuiI18nNumber,
   EuiLoadingChart,
   EuiIcon,
-  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -27,7 +26,6 @@ import {
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
@@ -41,14 +39,11 @@ export function DocumentsColumn({
   histogramQueryFetch,
   timeState,
   numDataPoints,
-  layout = 'inline',
 }: {
   indexPattern: string;
   histogramQueryFetch: Promise<UnparsedEsqlResponse>;
   timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
-  /** `stacked` sits the count under the histogram, the way the destinations table shows it. */
-  layout?: 'inline' | 'stacked';
 }) {
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
@@ -102,72 +97,6 @@ export function DocumentsColumn({
         values: { indexPattern },
       });
 
-  const histogram = hasData ? (
-    <Chart size={{ width: '100%', height: euiTheme.size.l }}>
-      <Settings
-        locale={i18n.getLocale()}
-        baseTheme={chartBaseTheme}
-        theme={{ background: { color: 'transparent' } }}
-        xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
-        noResults={<div />}
-      />
-      <Tooltip stickTo={TooltipStickTo.Middle} headerFormatter={({ value }) => xFormatter(value)} />
-      {allTimeseries.map((serie) => (
-        <BarSeries
-          key={serie.id}
-          id={serie.id}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['doc_count']}
-          data={serie.data}
-          enableHistogramMode
-        />
-      ))}
-    </Chart>
-  ) : (
-    noHistogramData
-  );
-
-  const documentCount = hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData;
-
-  const labelledDocumentCount = hasData ? (
-    <FormattedMessage
-      id="xpack.streams.documentsColumn.labelledDocCount"
-      defaultMessage="{count} {docCount, plural, one {doc} other {docs}}"
-      values={{ count: documentCount, docCount }}
-    />
-  ) : (
-    noDocCountData
-  );
-
-  if (layout === 'stacked') {
-    return (
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="xs"
-        className={css`
-          white-space: nowrap;
-        `}
-        role="group"
-        aria-label={cellAriaLabel}
-      >
-        <EuiFlexItem grow={false} aria-hidden="true">
-          {histogramQueryResult.loading ? <EuiLoadingChart size="m" /> : histogram}
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          aria-hidden="true"
-          data-test-subj={`streamsDocCount-${indexPattern}`}
-        >
-          <EuiText size="xs" color="subdued">
-            {histogramQueryResult.loading ? noDocCountData : labelledDocumentCount}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -192,7 +121,7 @@ export function DocumentsColumn({
             `}
             data-test-subj={`streamsDocCount-${indexPattern}`}
           >
-            {documentCount}
+            {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
           </EuiFlexItem>
           <EuiFlexItem
             grow={3}
@@ -204,7 +133,35 @@ export function DocumentsColumn({
               align-items: center;
             `}
           >
-            {histogram}
+            {hasData ? (
+              <Chart size={{ width: '100%', height: euiTheme.size.l }}>
+                <Settings
+                  locale={i18n.getLocale()}
+                  baseTheme={chartBaseTheme}
+                  theme={{ background: { color: 'transparent' } }}
+                  xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
+                  noResults={<div />}
+                />
+                <Tooltip
+                  stickTo={TooltipStickTo.Middle}
+                  headerFormatter={({ value }) => xFormatter(value)}
+                />
+                {allTimeseries.map((serie) => (
+                  <BarSeries
+                    key={serie.id}
+                    id={serie.id}
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="x"
+                    yAccessors={['doc_count']}
+                    data={serie.data}
+                    enableHistogramMode
+                  />
+                ))}
+              </Chart>
+            ) : (
+              noHistogramData
+            )}
           </EuiFlexItem>
         </>
       )}

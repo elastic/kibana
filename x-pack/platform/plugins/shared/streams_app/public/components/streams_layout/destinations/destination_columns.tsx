@@ -240,7 +240,6 @@ export const createDestinationCellRenderer = ({
             histogramQueryFetch={getStreamHistogram(row.name)}
             timeState={timeState}
             numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
-            layout="stacked"
           />
         ) : null;
 
