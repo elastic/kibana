@@ -134,11 +134,8 @@ steps:
             x-elastic-internal-origin: "kibana"
           body:
             connectorId: "${{ inputs.connectorId }}"
-            start: "${{ inputs.start }}"
-            end: "${{ inputs.end }}"
             runId: "${{ execution.id }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
-            featureTtlDays: "${{ inputs.featureTtlDays }}"
             documents: "${{ steps.prepare.output.documents }}"
             totalFilters: "${{ steps.prepare.output.totalFilters }}"
             filtersCapped: "${{ steps.prepare.output.filtersCapped }}"

@@ -13,9 +13,11 @@ import { formatRawDocument, type InferenceDocument } from '@kbn/streams-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
+// Workflow step persistence stores this payload in both prepare output and identify input.
 export const MAX_INFERENCE_DOCUMENTS_BYTES = 768 * 1024;
 export const MAX_INFERENCE_DOCUMENT_BYTES = 32 * 1024;
-const MAX_INFERENCE_DOCUMENT_FIELDS = 100;
+export const MAX_INFERENCE_DOCUMENT_FIELDS = 100;
+export const MAX_INFERENCE_FIELD_NAME_LENGTH = 1024;
 const MAX_INFERENCE_STRING_LENGTH = 8 * 1024;
 const MAX_NESTED_OBJECT_ENTRIES = 100;
 const MAX_NESTED_DEPTH = 5;
@@ -77,6 +79,9 @@ const compactDocument = (
     0,
     MAX_INFERENCE_DOCUMENT_FIELDS
   )) {
+    if (key.length > MAX_INFERENCE_FIELD_NAME_LENGTH) {
+      continue;
+    }
     const fields = { ...compacted.fields, [key]: truncateValue(value, key) };
     if (
       Buffer.byteLength(JSON.stringify({ ...compacted, fields }), 'utf8') <=

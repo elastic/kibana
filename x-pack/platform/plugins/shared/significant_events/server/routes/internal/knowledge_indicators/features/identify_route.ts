@@ -26,6 +26,10 @@ import {
   buildTelemetry,
   identifyInferredFeatures,
   identifyComputedFeatures,
+  MAX_INFERENCE_DOCUMENTS_BYTES,
+  MAX_INFERENCE_DOCUMENT_BYTES,
+  MAX_INFERENCE_DOCUMENT_FIELDS,
+  MAX_INFERENCE_FIELD_NAME_LENGTH,
   prepareInferredSampling,
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
@@ -34,10 +38,29 @@ import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflo
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
 
-const inferenceDocumentSchema: z.ZodType<InferenceDocument> = z.object({
-  _id: z.string().max(MAX_ID_LENGTH).optional(),
-  fields: z.record(z.string(), z.unknown()),
-});
+const getSerializedByteLength = (value: unknown) =>
+  Buffer.byteLength(JSON.stringify(value), 'utf8');
+
+const inferenceDocumentSchema: z.ZodType<InferenceDocument> = z
+  .object({
+    _id: z.string().max(MAX_ID_LENGTH).optional(),
+    fields: z
+      .record(z.string().max(MAX_INFERENCE_FIELD_NAME_LENGTH), z.unknown())
+      .refine((fields) => Object.keys(fields).length <= MAX_INFERENCE_DOCUMENT_FIELDS, {
+        message: `Documents cannot contain more than ${MAX_INFERENCE_DOCUMENT_FIELDS} fields`,
+      }),
+  })
+  .refine((document) => getSerializedByteLength(document) <= MAX_INFERENCE_DOCUMENT_BYTES, {
+    message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENT_BYTES} serialized bytes`,
+  });
+
+const inferenceDocumentsSchema = z
+  .array(inferenceDocumentSchema)
+  .min(1)
+  .max(100)
+  .refine((documents) => getSerializedByteLength(documents) <= MAX_INFERENCE_DOCUMENTS_BYTES, {
+    message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENTS_BYTES} serialized bytes in aggregate`,
+  });
 
 // Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow,
 // which runs under a request whose API key can schedule the workflow trigger.
@@ -167,11 +190,9 @@ const identifyInferredFeaturesRoute = createServerRoute({
     path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
     body: z.object({
       connectorId: z.string().max(MAX_ID_LENGTH).optional(),
-      start: z.number().optional(),
-      end: z.number().optional(),
       runId: z.string().max(MAX_ID_LENGTH).optional(),
       iteration: z.number().optional(),
-      documents: z.array(inferenceDocumentSchema).max(100),
+      documents: inferenceDocumentsSchema,
       totalFilters: z.number().int().min(0),
       filtersCapped: z.boolean(),
       hasFilteredDocuments: z.boolean(),
