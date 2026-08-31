@@ -30,6 +30,7 @@ const SOFT_RESET: Partial<ScopedPaginationSlice> = {
   flyoutDocumentId: null,
   flyoutDocumentIndexName: null,
   isFlyoutDocumentLoading: false,
+  hasFlyoutQueryError: false,
 };
 
 /**
