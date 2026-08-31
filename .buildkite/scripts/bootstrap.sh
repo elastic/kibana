@@ -55,8 +55,8 @@ fi
 # Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
 if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
   echo "--- Clearing cache leftovers"
-  echo 'Removing ~/.kibana' && rm -rf ~/.kibana # We no longer use this cache, what we need should be copied
-  echo 'Removing ./.yarn-local-mirror' && rm -rf ./.yarn-local-mirror
-  echo "Available disk space after clearing yarn cache:"
-  df -h . || echo "Failed to get disk space"
+  # We no longer use this cache
+  (echo 'Removing ~/.kibana and ./.yarn-local-mirror' && \
+    rm -rf ~/.kibana ./.yarn-local-mirror \
+    df -h .) &
 fi
