@@ -39,6 +39,7 @@ const buildSmlContext = (logger = loggingSystemMock.createLogger()) => ({
   esClient: {} as ElasticsearchClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
   logger,
+  spaces: [] as string[],
 });
 
 const buildToAttachmentContext = () => ({
