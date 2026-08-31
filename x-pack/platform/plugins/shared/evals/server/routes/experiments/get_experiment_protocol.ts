@@ -20,7 +20,6 @@ import type {
   ExperimentDatasetInfo,
   ExperimentEvaluatorInfo,
   ExperimentExecutionRecord,
-  ExperimentProtocolDataset,
   GetEvaluationExperimentProtocolResponse,
   Model,
 } from '@kbn/evals-common';
@@ -29,16 +28,16 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import type { DatasetClient } from '../../storage/datasets/dataset_client';
 import type { ExperimentRecordDocument } from '../../storage/experiments/experiment_record_client';
 import type { ExperimentRecordService } from '../../storage/experiments/experiment_record_service';
+import { isTerminalStatus } from '../../storage/experiments/experiments_storage';
 import type { RouteDependencies } from '../register_routes';
 import type { EvalsWorkflowsManagementSetup } from '../../types';
 import type { EvalDocSource } from './types';
 import { isEvalsExperimentExecution } from './experiment_executions';
 
-type DerivedStatus = ExperimentExecutionRecord['status'];
 type StatusResolution = Pick<ExperimentExecutionRecord, 'status' | 'status_source'>;
+type DerivedStatus = ExperimentExecutionRecord['status'];
 
 const WORKFLOW_STATUS_TO_DERIVED_STATUS: Record<WorkflowExecutionDto['status'], DerivedStatus> = {
   pending: 'pending',
@@ -53,9 +52,6 @@ const WORKFLOW_STATUS_TO_DERIVED_STATUS: Record<WorkflowExecutionDto['status'], 
   cancelled: 'cancelled',
   skipped: 'failed',
 };
-
-const isTerminalRecordStatus = (status: ExperimentRecordDocument['status']): boolean =>
-  status === 'completed' || status === 'failed';
 
 /**
  * Reads the stored experiment record, treating a failed lookup as "no record"
@@ -97,7 +93,7 @@ const resolveExecutionStatus = async ({
   spaceId: string;
   logger: Logger;
 }): Promise<StatusResolution> => {
-  if (record && isTerminalRecordStatus(record.status)) {
+  if (record && isTerminalStatus(record.status)) {
     return { status: record.status, status_source: 'record' };
   }
 
@@ -133,61 +129,45 @@ const resolveExecutionStatus = async ({
   return { status: 'completed', status_source: 'scores' };
 };
 
-const enrichDatasets = async (
-  datasets: ExperimentProtocolDataset[],
-  datasetClient: DatasetClient
-): Promise<ExperimentDatasetInfo[]> =>
-  Promise.all(
-    datasets.map(async (dataset) => {
-      const stored = await datasetClient.getMetadata(dataset.id);
-      if (!stored) {
-        return { ...dataset, exists: false };
-      }
-      return {
-        ...dataset,
-        exists: true,
-        description: stored.description,
-        example_count: stored.examples_count,
-      };
-    })
-  );
-
 /**
- * Ensures the dataset snapshotted on the record shows up even before any of
- * its scores exist.
+ * Builds the dataset list from score-derived aggregates, overlaying the
+ * record's protocol snapshot when one exists. No live dataset lookup is
+ * performed: the snapshot is the source of truth for how the experiment ran,
+ * and `evaluated_example_count` is always derived from score documents.
  */
-const includeRecordDataset = (
-  derived: ExperimentProtocolDataset[],
-  record: ExperimentRecordDocument | undefined
-): ExperimentProtocolDataset[] => {
-  const snapshot = record?.protocol.dataset;
-  if (!snapshot || derived.some((dataset) => dataset.id === snapshot.id)) {
-    return derived;
-  }
-  return [
-    ...derived,
-    { id: snapshot.id, name: snapshot.name ?? snapshot.id, evaluated_example_count: 0 },
-  ];
-};
-
-const applyDatasetSnapshot = (
-  datasets: ExperimentDatasetInfo[],
+const buildDatasets = (
+  aggregates: { datasets: Array<{ id: string; name: string; evaluated_example_count: number }> },
   record: ExperimentRecordDocument | undefined
 ): ExperimentDatasetInfo[] => {
   const snapshot = record?.protocol.dataset;
-  if (!snapshot) {
-    return datasets;
-  }
-  return datasets.map((dataset) => {
-    if (dataset.id !== snapshot.id || dataset.exists) {
-      return dataset;
-    }
+
+  const derived: ExperimentDatasetInfo[] = aggregates.datasets.map((dataset) => {
+    const isSnapshot = snapshot?.id === dataset.id;
     return {
-      ...dataset,
-      ...(snapshot.description !== undefined && { description: snapshot.description }),
-      ...(snapshot.examples_count !== undefined && { example_count: snapshot.examples_count }),
+      id: dataset.id,
+      name: isSnapshot ? snapshot!.name ?? dataset.name : dataset.name,
+      evaluated_example_count: dataset.evaluated_example_count,
+      exists: true,
+      ...(isSnapshot && snapshot!.description ? { description: snapshot!.description } : {}),
+      ...(isSnapshot && snapshot!.examples_count !== undefined
+        ? { example_count: snapshot!.examples_count }
+        : {}),
     };
   });
+
+  // Include the record's dataset even before any scores land
+  if (snapshot && !derived.some((d) => d.id === snapshot.id)) {
+    derived.push({
+      id: snapshot.id,
+      name: snapshot.name ?? snapshot.id,
+      evaluated_example_count: 0,
+      exists: true,
+      ...(snapshot.description ? { description: snapshot.description } : {}),
+      ...(snapshot.examples_count !== undefined ? { example_count: snapshot.examples_count } : {}),
+    });
+  }
+
+  return derived;
 };
 
 const toResponseModel = (model: Model): Model => ({
@@ -327,26 +307,22 @@ export const registerGetExperimentProtocolRoute = ({
           const totalHits = searchResponse.hits?.total;
           const receivedScores = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
 
-          const [datasets, { status, status_source: statusSource }] = await Promise.all([
-            enrichDatasets(
-              includeRecordDataset(aggregates.datasets, record),
-              evalsContext.datasetService.getClient({ spaceId })
-            ),
-            resolveExecutionStatus({
-              record,
-              workflowExecutionId,
-              workflowsManagement,
-              spaceId,
-              logger,
-            }),
-          ]);
+          const datasets = buildDatasets(aggregates, record);
+          const { status, status_source: statusSource } = await resolveExecutionStatus({
+            record,
+            workflowExecutionId,
+            workflowsManagement,
+            spaceId,
+            logger,
+          });
 
           const taskModel = record?.protocol.task?.model ?? firstDoc?.task?.model;
-          // Completeness stays purely score-derived even when a record exists:
-          // it reports what the scores show, while task_counters carries the
-          // record's own accounting.
+          // Use the record's declared repetition count when available so
+          // expected_scores and protocol.total_repetitions stay consistent.
+          const totalRepetitions =
+            record?.protocol.total_repetitions ?? aggregates.total_repetitions;
           const expectedScores =
-            aggregates.example_count * aggregates.total_repetitions * aggregates.evaluators.length;
+            aggregates.example_count * totalRepetitions * aggregates.evaluators.length;
 
           const provenance = record?.provenance;
 
@@ -361,8 +337,8 @@ export const registerGetExperimentProtocolRoute = ({
                   provider: taskModel.provider,
                 },
               }),
-              total_repetitions: record?.protocol.total_repetitions ?? aggregates.total_repetitions,
-              datasets: applyDatasetSnapshot(datasets, record),
+              total_repetitions: totalRepetitions,
+              datasets,
               evaluators: mergeEvaluators(aggregates.evaluators, record),
             },
             execution: {
@@ -383,7 +359,7 @@ export const registerGetExperimentProtocolRoute = ({
               completeness: {
                 example_count: aggregates.example_count,
                 evaluator_count: aggregates.evaluators.length,
-                total_repetitions: aggregates.total_repetitions,
+                total_repetitions: totalRepetitions,
                 expected_scores: expectedScores,
                 received_scores: receivedScores,
                 complete: expectedScores > 0 && receivedScores >= expectedScores,

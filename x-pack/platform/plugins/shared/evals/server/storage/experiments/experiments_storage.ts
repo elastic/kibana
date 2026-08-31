@@ -39,6 +39,9 @@ export const experimentsStorageSettings = {
 
 export type ExperimentRecordStatus = 'pending' | 'running' | 'completed' | 'failed';
 
+export const isTerminalStatus = (status: ExperimentRecordStatus): boolean =>
+  status === 'completed' || status === 'failed';
+
 /**
  * The dataset as it was when the experiment ran. The live dataset may be
  * edited or deleted afterwards, so the record keeps what the run actually saw.

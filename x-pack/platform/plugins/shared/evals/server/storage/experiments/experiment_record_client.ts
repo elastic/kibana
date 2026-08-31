@@ -21,6 +21,7 @@ import type {
   ExperimentRecordStorageProperties,
   experimentsStorageSettings,
 } from './experiments_storage';
+import { isTerminalStatus } from './experiments_storage';
 
 type ExperimentRecordStorageDocument = ExperimentRecordStorageProperties & { _id?: string };
 
@@ -52,9 +53,6 @@ export interface UpdateExperimentRecordInput {
   startedAt?: string;
   completedAt?: string;
 }
-
-const isTerminal = (status: ExperimentRecordStatus): boolean =>
-  status === 'completed' || status === 'failed';
 
 export class ExperimentRecordClient {
   private readonly storage: InternalIStorageClient<ExperimentRecordStorageDocument>;
@@ -228,8 +226,8 @@ const applyUpdate = (
   const startedAt =
     patch.startedAt ??
     current.started_at ??
-    (current.status === 'pending' && status === 'running' ? timestamp : undefined);
-  const completedAt = isTerminal(status)
+    (current.status === 'pending' && status !== 'pending' ? timestamp : undefined);
+  const completedAt = isTerminalStatus(status)
     ? patch.completedAt ?? current.completed_at ?? timestamp
     : current.completed_at;
 

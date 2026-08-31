@@ -37,8 +37,8 @@ const isScoreDocument = (source: unknown): source is EvaluationScoreDocument => 
   const maybeScore = source as { example?: { id?: unknown }; task?: unknown; evaluator?: unknown };
   return (
     typeof maybeScore.example?.id === 'string' &&
-    maybeScore.task !== undefined &&
-    maybeScore.evaluator !== undefined
+    maybeScore.task != null &&
+    maybeScore.evaluator != null
   );
 };
 
