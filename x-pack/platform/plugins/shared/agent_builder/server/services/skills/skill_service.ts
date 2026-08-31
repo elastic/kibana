@@ -72,6 +72,7 @@ export const createSkillService = (): SkillService => {
 class SkillServiceImpl implements SkillService {
   private readonly skills: Map<string, SkillDefinition> = new Map();
   private readonly skillFullPaths: Set<string> = new Set();
+  private readonly availabilityCache = new AvailabilityCache();
 
   /**
    * Promise chain used to serialize dynamic registration so that the async
@@ -115,7 +116,6 @@ class SkillServiceImpl implements SkillService {
     const validated = Promise.all(
       [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
     );
-    const availabilityCache = new AvailabilityCache();
 
     return {
       getRegistry: async ({ request }) => {
@@ -124,7 +124,7 @@ class SkillServiceImpl implements SkillService {
         const space = getCurrentSpaceId({ request, spaces });
         const builtinProvider = createBuiltinSkillProvider(
           [...this.skills.values()],
-          availabilityCache
+          this.availabilityCache
         );
         const persistedProvider = createPersistedSkillProvider({
           space,
