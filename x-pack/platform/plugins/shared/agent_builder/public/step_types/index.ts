@@ -21,21 +21,21 @@ export function registerWorkflowSteps(
     import('./rerank_step').then((m) => m.createRerankStepDefinition(core))
   );
 
-  const ifExperimental = async <T>(value: T): Promise<T | undefined> => {
+  const ifExperimental = async <T>(valueFn: () => Promise<T>): Promise<T | undefined> => {
     const [coreStart] = await core.getStartServices();
     return coreStart.uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-      ? value
+      ? valueFn()
       : undefined;
   };
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./conversation_metadata').then((m) =>
-      ifExperimental(m.getConversationMetadataStepDefinition)
+    ifExperimental(() =>
+      import('./conversation_metadata').then((m) => m.getConversationMetadataStepDefinition)
     )
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./conversation_metadata').then((m) =>
-      ifExperimental(m.updateConversationMetadataStepDefinition)
+    ifExperimental(() =>
+      import('./conversation_metadata').then((m) => m.updateConversationMetadataStepDefinition)
     )
   );
 
