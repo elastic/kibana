@@ -129,7 +129,24 @@ function DashboardToolbar() {
 
   return (
     <div style={{ width: '100%' }}>
+   <EuiFlexGroup wrap alignItems="flexEnd" gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <RumDatePicker />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <WebApplicationSelect />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UserPercentile />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UxEnvironmentFilter />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
         <EuiFlexItem style={{ alignItems: 'flex-end', ...datePickerStyle }}>
           <RumDatePicker />
         </EuiFlexItem>
