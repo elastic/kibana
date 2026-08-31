@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContainerModule } from 'inversify';
+import { KibanaContainerModule } from '@kbn/core-di';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
@@ -34,7 +34,7 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
   },
 };
 
-const pluginModule = new ContainerModule((options) => {
+const pluginModule = new KibanaContainerModule((options) => {
   bindOnSetup(options);
   bindArtifactTypes(options);
   bindAgentBuilder(options);

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Container, ContainerModule } from 'inversify';
+import type { Container } from 'inversify';
 import { inject, injectable } from 'inversify';
-import { OnSetup } from '@kbn/core-di';
-import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { KibanaContainerModule } from '@kbn/core-di';
+import { injectionServiceMock, setup, start } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Application, ApplicationParameters } from '@kbn/core-di-browser';
 import type { App, AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
 import type { CoreSetup as TCoreSetup } from '@kbn/core-lifecycle-browser';
@@ -36,16 +36,12 @@ describe('application', () => {
   let container: Container;
   let application: jest.Mocked<TCoreSetup['application']>;
 
-  function setup() {
-    container.get(OnSetup)(container);
-  }
-
   beforeEach(() => {
     injection = injectionServiceMock.createStartContract();
     application = { register: jest.fn() } as unknown as typeof application;
     container = injection.getContainer();
 
-    container.load(new ContainerModule(loadApplication));
+    container.load(new KibanaContainerModule(loadApplication));
     container.bind(CoreSetup('application')).toConstantValue(application);
     container.bind(CoreStart('injection')).toConstantValue(injection);
     container.bind(Application).toConstantValue(TestApplication);
@@ -53,7 +49,7 @@ describe('application', () => {
 
   describe('OnSetup', () => {
     it('should register an application', () => {
-      setup();
+      setup(container);
 
       expect(application.register).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -68,7 +64,7 @@ describe('application', () => {
     it('should not register an application if there are no corresponding bindings', () => {
       container.unbind(Application);
 
-      expect(setup).not.toThrow();
+      expect(() => setup(container)).not.toThrow();
       expect(application.register).not.toHaveBeenCalled();
     });
   });
@@ -89,7 +85,8 @@ describe('application', () => {
       unmountSpy = jest.spyOn(TestApplication.prototype, 'unmount');
       unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
 
-      setup();
+      setup(container);
+      start(container);
       [{ mount }] = application.register.mock.lastCall!;
     });
 
@@ -98,8 +95,7 @@ describe('application', () => {
     });
 
     it('should mount an application', async () => {
-      const unmount = mount(params);
-      expect(unmount).toBeInstanceOf(Function);
+      await expect(mount(params)).resolves.toBeInstanceOf(Function);
       expect(mountSpy).toHaveBeenCalled();
 
       const [testApplication] = mountSpy.mock.contexts as TestApplication[];
@@ -108,16 +104,16 @@ describe('application', () => {
       expect(unbindAllSpy).not.toHaveBeenCalled();
     });
 
-    it('should unmount an application', () => {
-      const unmount = mount(params);
+    it('should unmount an application', async () => {
+      const unmount = await mount(params);
       (unmount as Function)();
 
       expect(unmountSpy).toHaveBeenCalled();
       expect(unbindAllSpy).toHaveBeenCalled();
     });
 
-    it('should unbind all dependencies when unmount throws', () => {
-      const unmount = mount(params);
+    it('should unbind all dependencies when unmount throws', async () => {
+      const unmount = await mount(params);
       unmountSpy.mockImplementation(() => {
         throw new Error('Unmount error');
       });
@@ -134,6 +130,7 @@ describe('application', () => {
         });
       });
       const unmount = mount(params);
+      await new Promise(process.nextTick);
 
       expect(unbindAllSpy).not.toHaveBeenCalled();
       resolveHandle!();
