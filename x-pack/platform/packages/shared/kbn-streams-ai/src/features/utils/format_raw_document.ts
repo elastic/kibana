@@ -20,7 +20,6 @@ export interface InferenceDocumentLimits {
   maxFieldNameLength: number;
   maxStringLength: number;
   maxArrayItems: number;
-  // Tag-like fields (keys containing "tags") get their own, larger array budget.
   maxTagItems: number;
   maxNestedObjectEntries: number;
   maxNestedDepth: number;
@@ -84,8 +83,6 @@ const truncateValue = (
   return value;
 };
 
-// Matches against the OTel-normalized key so an ECS name like `service.name` also ranks
-// `resource.attributes.service.name`.
 const orderFieldsByPriority = (
   entries: Array<[string, unknown]>,
   priorityFields: readonly string[]
@@ -140,8 +137,6 @@ export function formatRawDocument({
     if (key.length > limits.maxFieldNameLength) {
       continue;
     }
-    // ES returns scalar values wrapped in single-element arrays; unwrap them so
-    // the model sees `"a"` instead of `["a"]`.
     const unwrapped = Array.isArray(rawValue) && rawValue.length === 1 ? rawValue[0] : rawValue;
     const candidateFields = {
       ...document.fields,

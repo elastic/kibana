@@ -17,18 +17,14 @@ import {
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
-// Aggregate cap, bounded separately from the per-document limits because the workflow
-// persists this payload in both the prepare output and the identify input.
+// Bounded separately from the per-document limits: the workflow persists this payload across steps.
 export const MAX_INFERENCE_DOCUMENTS_BYTES = 768 * 1024;
-// Re-exported so the receiving route validates against the same contract the producer enforces.
 export const MAX_INFERENCE_DOCUMENT_BYTES = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxDocumentBytes;
 export const MAX_INFERENCE_DOCUMENT_FIELDS = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxFields;
 export const MAX_INFERENCE_FIELD_NAME_LENGTH = DEFAULT_INFERENCE_DOCUMENT_LIMITS.maxFieldNameLength;
 
-// Highest-signal fields, kept first so a large low-value field can't evict the log body from
-// the per-document byte budget. Each concept lists its ECS and OTel form; the formatter strips
-// `resource.attributes.` / `attributes.` prefixes, so `service.name` also matches
-// `resource.attributes.service.name`.
+// Each concept in ECS and OTel form; the formatter strips `resource.attributes.` / `attributes.`
+// prefixes when matching, so `service.name` also matches `resource.attributes.service.name`.
 const INFERENCE_PRIORITY_FIELDS: readonly string[] = [
   'message', // ECS
   'body.text', // OTel
